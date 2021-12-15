@@ -1,0 +1,73 @@
+@*
+ * Copyright 2021 HM Revenue & Customs
+ *
+ *@
+
+@import config.AppConfig
+@import messages.Messages._
+@import messages.TimeoutMessages._
+@import play.api.i18n.Messages
+@import _root_.requests.RequestSupport.{isLoggedIn, language}
+@import uk.gov.hmrc.govukfrontend.views.Aliases.{Button, Text}
+@import uk.gov.hmrc.govukfrontend.views.Aliases.FooterItem
+@import uk.gov.hmrc.hmrcfrontend.views.Aliases.Header
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.LanguageSelect
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.language.{Cy, En}
+
+@this(
+    govukLayout: uk.gov.hmrc.govukfrontend.views.html.layouts.govukLayout,
+    hmrcHeader: uk.gov.hmrc.hmrcfrontend.views.html.components.hmrcHeader,
+    button: uk.gov.hmrc.govukfrontend.views.html.components.govukButton,
+    languageSelect: uk.gov.hmrc.hmrcfrontend.views.html.components.hmrcLanguageSelect,
+    reportTechnicalIssues: uk.gov.hmrc.hmrcfrontend.views.html.components.hmrcReportTechnicalIssue,
+    appConfig: AppConfig
+)
+
+@()(implicit request: play.api.mvc.Request[_], messages: Messages)
+
+@head = {
+    <link href='@controllers.routes.Assets.versioned("stylesheets/application.css")' media="all" rel="stylesheet" type="text/css" />
+}
+
+@beforeContentBlock = {
+    <div class="language-toggle-position">
+        @languageSelect(LanguageSelect(
+            if (messages.lang.code == "cy") Cy else En,
+            En -> langswitch.routes.LanguageSwitchController.switchToLanguage(langswitch.Languages.English).url,
+            Cy -> langswitch.routes.LanguageSwitchController.switchToLanguage(langswitch.Languages.Welsh).url
+        ))
+    </div>
+}
+
+
+@mainContent = {
+    <h1 class="govuk-heading-l">@timeoutPage_heading.show</h1>
+
+    @button(Button(
+        content = Text(timeoutPage_button.show),
+        href = Some(appConfig.Urls.landingPage)
+    ))
+}
+
+@govukLayout(
+    pageTitle = Some(timeoutPage_title.show),
+    headBlock = Some(head),
+    headerBlock = Some(hmrcHeader(Header(
+        homepageUrl = "https://www.gov.uk",
+        serviceName = Some(generic_service_name.show),
+        serviceUrl = controllers.routes.IndexController.onPageLoad.url,
+        signOutHref = if (isLoggedIn) Some(appConfig.Urls.signOutUrl) else None
+    ))),
+    scriptsBlock = None,
+    beforeContentBlock = Some(beforeContentBlock),
+    footerItems = Seq(
+        FooterItem(
+            text = Some(footer_cookies.show),
+            href = Some(appConfig.Urls.cookiesUrl)
+        ),
+        FooterItem(
+            text = Some(footer_helpUsingGovUk.show),
+            href = Some(appConfig.Urls.helpUsingGovUkUrl)
+        )
+    ),
+    bodyEndBlock = None)(mainContent)

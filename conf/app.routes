@@ -4,8 +4,6 @@
 ->          /hmrc-frontend                               hmrcfrontend.Routes
 
 GET         /                                            controllers.IndexController.onPageLoad
-GET         /demo                                        controllers.DemoController.onPageLoad
-GET         /demo-backend                                controllers.DemoController.backend
 
 GET         /assets/*file                                controllers.Assets.versioned(path="/public", file: Asset)
 
