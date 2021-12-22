@@ -77,8 +77,7 @@
   ))
   @{
     backLocation map { back =>
-      val url = if (back.url === routes.HelloWorldController.helloWorld().url) appConfig.Urls.firstPageBackUrl else back.url
-      govukBackLink(BackLink(href = url, attributes = Map("id" -> "back")))
+      govukBackLink(BackLink(href = back.url, attributes = Map("id" -> "back")))
     }
   }
   @{if(appConfig.welshLanguageSupportEnabled) Some(hmrcLanguageSelectHelper()) else None}

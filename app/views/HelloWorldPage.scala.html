@@ -16,12 +16,19 @@
 
 @import play.api.i18n.Messages
 @import play.api.mvc.Request
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import controllers.routes
 
-@this(layout: templates.Layout)
+@this(layout: templates.Layout, govukButton: GovukButton, formWithCSRF: FormWithCSRF)
 
 @()(implicit request: Request[_], messages: Messages)
+@title = @{messages("helloWorld.title")}
 
-@layout(pageTitle = Some("essttp-frontend")) {
-  <h1 class="govuk-heading-xl">essttp-frontend</h1>
+@layout(pageTitle = Some(title)) {
+  <h1 class="govuk-heading-xl">@title</h1>
   <p class="govuk-body">@{messages("service.text")}</p>
+ @formWithCSRF(action = routes.HelloWorldController.helloWorldSubmit()) {
+  @govukButton(Button(content = Text(messages("button.continue"))))
+ }
+
 }
