@@ -14,11 +14,22 @@
  * limitations under the License.
  */
 
-package models.requests
+package controllers
 
-import play.api.mvc.{ Request, WrappedRequest }
-import models.UserAnswers
+import com.google.inject.{ Inject, Singleton }
+import play.api.i18n.I18nSupport
+import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import util.Logging
 
-case class OptionalDataRequest[A](request: Request[A], userId: String, userAnswers: Option[UserAnswers]) extends WrappedRequest[A](request)
+@Singleton
+class SignOutController @Inject() (
+  mcc: MessagesControllerComponents,
+  timedOutPage: views.html.TimedOut) extends FrontendController(mcc)
+  with I18nSupport
+  with Logging {
 
-case class DataRequest[A](request: Request[A], userId: String, userAnswers: UserAnswers) extends WrappedRequest[A](request)
+  def signOutFromTimeout: Action[AnyContent] = Action { implicit request =>
+    Ok(timedOutPage()).withNewSession
+  }
+}

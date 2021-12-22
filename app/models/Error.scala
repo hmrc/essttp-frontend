@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-package queries
+package models
 
-import models.UserAnswers
-import play.api.libs.json.JsPath
+final case class Error(value: Either[String, Throwable]) extends AnyVal
 
-import scala.util.{ Success, Try }
+object Error {
 
-sealed trait Query {
+  def apply(message: String): Error = Error(Left(message))
 
-  def path: JsPath
-}
+  def apply(error: Throwable): Error = Error(Right(error))
 
-trait Gettable[A] extends Query
-
-trait Settable[A] extends Query {
-
-  def cleanup(value: Option[A], userAnswers: UserAnswers): Try[UserAnswers] =
-    Success(userAnswers)
+  implicit class ErrorOps(e: Error) {
+    def doThrow(message: String): Nothing =
+      e.value.fold(info => sys.error(s"$message::$info"), ex => throw new RuntimeException(message, ex))
+  }
 }

@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,22 +12,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package controllers
+@import play.api.i18n.Messages
+@import play.api.mvc.Request
 
-import com.google.inject.Inject
-import config.AppConfig
-import play.api.i18n.Lang
-import play.api.mvc._
-import uk.gov.hmrc.play.language.{ LanguageController, LanguageUtils }
+@this(layout: templates.Layout)
 
-class LanguageSwitchController @Inject() (
-  appConfig: AppConfig,
-  languageUtils: LanguageUtils,
-  cc: ControllerComponents) extends LanguageController(languageUtils, cc) {
+@()(implicit request: Request[_], messages: Messages)
 
-  override def fallbackURL: String = routes.IndexController.onPageLoad.url
-
-  override def languageMap: Map[String, Lang] = appConfig.languageMap
+@layout(pageTitle = Some("essttp-frontend")) {
+  <h1 class="govuk-heading-xl">essttp-frontend</h1>
+  <p class="govuk-body">@{messages("service.text")}</p>
 }

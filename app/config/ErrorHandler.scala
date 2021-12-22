@@ -14,8 +14,20 @@
  * limitations under the License.
  */
 
-package pages
+package config
 
-import queries.{ Gettable, Settable }
+import javax.inject.{ Inject, Singleton }
 
-trait QuestionPage[A] extends Page with Gettable[A] with Settable[A]
+import play.api.i18n.MessagesApi
+import play.api.mvc.Request
+import play.twirl.api.Html
+import uk.gov.hmrc.play.bootstrap.frontend.http.FrontendErrorHandler
+import views.html.ErrorTemplate
+
+@Singleton
+class ErrorHandler @Inject() (errorTemplate: ErrorTemplate, val messagesApi: MessagesApi) extends FrontendErrorHandler {
+
+  override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: Request[_]): Html =
+    errorTemplate(pageTitle, heading, message)
+
+}

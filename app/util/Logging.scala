@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-package moveittocor.corcommon.internal.jsonext
+package util
 
-import play.api.libs.json._
+import play.api.Logger
+import models.Error
 
-object JsObjectFormat {
+trait Logging {
 
-  implicit val jsObjectFormat: OFormat[JsObject] = new OFormat[JsObject] {
-    override def reads(json: JsValue): JsResult[JsObject] = json match {
-      case jsObject: JsObject => JsSuccess(jsObject)
-      case _ => JsError()
-    }
-    override def writes(o: JsObject): JsObject = o
+  val logger: Logger = Logger(this.getClass)
+
+}
+
+object Logging {
+
+  implicit class LoggerOps(private val l: Logger) extends AnyVal {
+    def warn(msg: => String, e: => Error): Unit =
+      e.value.fold(e => l.warn(s"$msg: $e"), e => l.warn(msg, e))
+
   }
+
 }

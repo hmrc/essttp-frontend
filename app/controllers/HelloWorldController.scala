@@ -16,27 +16,27 @@
 
 package controllers
 
-import controllers.action.{ DataRetrievalAction, IdentifierAction }
+import controllers.actions.AuthAction
+import play.api.i18n.I18nSupport
+import views.html.HelloWorldPage
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
-import repositories.SessionRepository
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import util.Logging
 
-import javax.inject.Inject
+import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }
 
-class KeepAliveController @Inject() (
-  val controllerComponents: MessagesControllerComponents,
-  identify: IdentifierAction,
-  getData: DataRetrievalAction,
-  sessionRepository: SessionRepository)(implicit ec: ExecutionContext) extends FrontendBaseController {
+@Singleton
+class HelloWorldController @Inject() (
+  authAction: AuthAction,
+  mcc: MessagesControllerComponents,
+  helloWorldPage: HelloWorldPage)(implicit ec: ExecutionContext)
+  extends FrontendController(mcc)
+  with I18nSupport
+  with Logging {
 
-  def keepAlive: Action[AnyContent] = (identify andThen getData).async {
-    implicit request =>
-      request.userAnswers
-        .map {
-          answers =>
-            sessionRepository.keepAlive(answers.id).map(_ => Ok)
-        }
-        .getOrElse(Future.successful(Ok))
+  val helloWorld: Action[AnyContent] = authAction.async { implicit request =>
+    Future.successful(Ok(helloWorldPage()))
   }
+
 }
