@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,16 +12,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import uk.gov.hmrc.govukfrontend.views.html.components._
-@import play.api.i18n.Messages
-@import play.api.mvc.Request
+package models
 
-@this(layout: templates.Layout)
+final case class Error(value: Either[String, Throwable]) extends AnyVal
 
-@(pageTitle: String, heading: String, message: String)(implicit request: Request[_], messages: Messages)
-@layout(pageTitle = Some(pageTitle)) {
-  <h1 class="govuk-heading-xl">@{Text(heading).asHtml}</h1>
-  <p class="govuk-body">@{Text(message).asHtml}</p>
+object Error {
+
+  def apply(message: String): Error = Error(Left(message))
+
+  def apply(error: Throwable): Error = Error(Right(error))
+
+  implicit class ErrorOps(e: Error) {
+    def doThrow(message: String): Nothing =
+      e.value.fold(info => sys.error(s"$message::$info"), ex => throw new RuntimeException(message, ex))
+  }
 }

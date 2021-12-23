@@ -1,17 +1,13 @@
 import sbt._
+import play.core.PlayVersion
 
 object AppDependencies {
-  import play.core.PlayVersion
-
   val compile = Seq(
-    play.sbt.PlayImport.ws,
-    "uk.gov.hmrc"       %% "bootstrap-frontend-play-28"     % "5.7.0",
-    "uk.gov.hmrc"       %% "play-frontend-hmrc"             % "0.83.0-play-28",
-//    "uk.gov.hmrc"       %% "play-conditional-form-mapping"  % "1.6.0-play-28",
-    "uk.gov.hmrc"       %% "play-language"                  % "5.1.0-play-28",
+    "uk.gov.hmrc"       %% "bootstrap-frontend-play-28"     % "5.17.0",
+    "uk.gov.hmrc"       %% "play-frontend-hmrc"             % "1.31.0-play-28",
     "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-28"             % "0.58.0",
-    "com.beachape"            %% "enumeratum-play"            % "1.5.13"
-
+    "com.beachape"            %% "enumeratum-play"            % "1.7.0",
+    "org.typelevel"              %% "cats-core"                  % "2.7.0"
   )
 
   val test = Seq(
@@ -26,7 +22,5 @@ object AppDependencies {
     "org.scalacheck"          %% "scalacheck"              % "1.15.3",
     "uk.gov.hmrc.mongo"       %% "hmrc-mongo-test-play-28" % "0.58.0",
     "com.vladsch.flexmark"    %  "flexmark-all"            % "0.35.10" // Required to stay at this version - see https://github.com/scalatest/scalatest/issues/1736
-  ).map(_ % "test")
-
-  def dependencies: Seq[ModuleID] = compile ++ test
+  )
 }

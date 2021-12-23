@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,16 +12,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import uk.gov.hmrc.govukfrontend.views.html.components._
-@import play.api.i18n.Messages
-@import play.api.mvc.Request
+package controllers
 
-@this(layout: templates.Layout)
+import com.google.inject.{ Inject, Singleton }
+import play.api.i18n.I18nSupport
+import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import util.Logging
 
-@(pageTitle: String, heading: String, message: String)(implicit request: Request[_], messages: Messages)
-@layout(pageTitle = Some(pageTitle)) {
-  <h1 class="govuk-heading-xl">@{Text(heading).asHtml}</h1>
-  <p class="govuk-body">@{Text(message).asHtml}</p>
+@Singleton
+class SignOutController @Inject() (
+  mcc: MessagesControllerComponents,
+  timedOutPage: views.html.TimedOut) extends FrontendController(mcc)
+  with I18nSupport
+  with Logging {
+
+  def signOutFromTimeout: Action[AnyContent] = Action { implicit request =>
+    Ok(timedOutPage()).withNewSession
+  }
 }

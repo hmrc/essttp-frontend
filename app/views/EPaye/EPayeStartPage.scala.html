@@ -14,14 +14,23 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.govukfrontend.views.html.components._
 @import play.api.i18n.Messages
 @import play.api.mvc.Request
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import controllers.routes
+@import views.html.templates.Layout
 
-@this(layout: templates.Layout)
+@this(layout: Layout, govukButton: GovukButton, formWithCSRF: FormWithCSRF)
 
-@(pageTitle: String, heading: String, message: String)(implicit request: Request[_], messages: Messages)
-@layout(pageTitle = Some(pageTitle)) {
-  <h1 class="govuk-heading-xl">@{Text(heading).asHtml}</h1>
-  <p class="govuk-body">@{Text(message).asHtml}</p>
+@(outstandingAmount: BigDecimal)(implicit request: Request[_], messages: Messages)
+@key = @{"ePayeStart"}
+@title = @{messages(s"$key.title", outstandingAmount)}
+
+@layout(pageTitle = Some(title)) {
+  <h1 class="govuk-heading-xl">@title</h1>
+  <p class="govuk-body">@{messages("service.text")}</p>
+ @formWithCSRF(action = routes.EPayeStartController.ePayeStartSubmit()) {
+  @govukButton(Button(content = Text(messages("button.continue"))))
+ }
+
 }

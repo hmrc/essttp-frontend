@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,16 +12,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import uk.gov.hmrc.govukfrontend.views.html.components._
-@import play.api.i18n.Messages
-@import play.api.mvc.Request
+package util
 
-@this(layout: templates.Layout)
+import play.api.Logger
+import models.Error
 
-@(pageTitle: String, heading: String, message: String)(implicit request: Request[_], messages: Messages)
-@layout(pageTitle = Some(pageTitle)) {
-  <h1 class="govuk-heading-xl">@{Text(heading).asHtml}</h1>
-  <p class="govuk-body">@{Text(message).asHtml}</p>
+trait Logging {
+
+  val logger: Logger = Logger(this.getClass)
+
+}
+
+object Logging {
+
+  implicit class LoggerOps(private val l: Logger) extends AnyVal {
+    def warn(msg: => String, e: => Error): Unit =
+      e.value.fold(e => l.warn(s"$msg: $e"), e => l.warn(msg, e))
+
+  }
+
 }

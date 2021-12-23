@@ -16,17 +16,22 @@
 
 package config
 
-import com.google.inject.{ Inject, Singleton }
+import javax.inject.{ Inject, Singleton }
 import play.api.Configuration
-import play.api.i18n.Lang
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.play.bootstrap.binders.SafeRedirectUrl
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+
+import scala.concurrent.duration.FiniteDuration
 
 @Singleton
-class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
+class AppConfig @Inject() (config: Configuration) {
 
   val appName: String = config.get[String]("appName")
+  val welshLanguageSupportEnabled: Boolean =
+    config.getOptional[Boolean]("features.welsh-language-support").getOrElse(false)
+  val authTimeoutSeconds: Int = config.get[FiniteDuration]("timeout-dialog.timeout").toSeconds.toInt
+  val authTimeoutCountdownSeconds: Int =
+    config.get[FiniteDuration]("timeout-dialog.countdown").toSeconds.toInt
 
   object BaseUrl {
     val essttpFrontend: String = config.get[String]("baseUrl.essttp-frontend")
@@ -38,30 +43,14 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
 
   object Urls {
     val loginUrl: String = BaseUrl.gg
-    val signOutUrl = BaseUrl.caFrontend + "/gg/sign-out"
-    val landingPage = BaseUrl.essttpFrontend + controllers.routes.IndexController.onPageLoad.path()
-    val reportAProblemPartialUrl: String = s"${BaseUrl.contactFrontend}/contact/problem_reports_ajax?service=$appName"
-    val reportAProblemNonJSUrl: String = s"${BaseUrl.contactFrontend}/contact/problem_reports_nonjs?service=$appName"
+    val signOutUrl: String = config.get[String]("baseUrl.sign-out")
+
     def betaFeedbackUrl(implicit request: RequestHeader): String =
       s"${BaseUrl.contactFrontend}/contact/beta-feedback?" +
         s"service=$appName&" +
         s"backUrl=${SafeRedirectUrl(BaseUrl.essttpFrontend + request.uri).encodedUrl}"
+
     val exitSurveyUrl: String = s"${BaseUrl.feedbackFrontend}/feedback/$appName"
-
-    val cookiesUrl: String = config.get[String]("govUkUrls.cookiesUrl")
-    val termsAndConditionsUrl: String = config.get[String]("govUkUrls.termsAndConditionsUrl")
-    val helpUsingGovUkUrl: String = config.get[String]("govUkUrls.helpUsingGovUkUrl")
+    val firstPageBackUrl: String = "https://gov.uk"
   }
-
-  def languageMap: Map[String, Lang] = Map(
-    "en" -> Lang("en"),
-    "cy" -> Lang("cy"))
-
-  val timeout: Int = config.get[Int]("timeout-dialog.timeout")
-  val countdown: Int = config.get[Int]("timeout-dialog.countdown")
-  val cacheTtl: Int = config.get[Int]("mongodb.timeToLiveInSeconds")
-
-  val analyticsToken: String = config.get[String](s"google-analytics.token")
-  val analyticsHost: String = config.get[String](s"google-analytics.host")
-
 }
