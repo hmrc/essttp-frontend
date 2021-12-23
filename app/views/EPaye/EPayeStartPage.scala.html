@@ -18,18 +18,19 @@
 @import play.api.mvc.Request
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import controllers.routes
+@import views.html.templates.Layout
 
-@this(layout: templates.Layout, govukButton: GovukButton, formWithCSRF: FormWithCSRF)
+@this(layout: Layout, govukButton: GovukButton, formWithCSRF: FormWithCSRF)
 
-@()(implicit request: Request[_], messages: Messages)
-@key = @{"helloWorld"}
-@title = @{messages(s"$key.title")}
+@(outstandingAmount: BigDecimal)(implicit request: Request[_], messages: Messages)
+@key = @{"ePayeStart"}
+@title = @{messages(s"$key.title", outstandingAmount)}
 
 @layout(pageTitle = Some(title)) {
   <h1 class="govuk-heading-xl">@title</h1>
-  <p class="govuk-body">@{messages(s"$key.p1")}</p>
-  <ul class="govuk-list govuk-list--bullet">
-   <li><a href="@{routes.EPayeStartController.ePayeStart().url}">@messages(s"$key.list1")</a></li>
-  </ul>
+  <p class="govuk-body">@{messages("service.text")}</p>
+ @formWithCSRF(action = routes.EPayeStartController.ePayeStartSubmit()) {
+  @govukButton(Button(content = Text(messages("button.continue"))))
+ }
 
 }

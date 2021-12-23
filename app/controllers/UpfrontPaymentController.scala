@@ -18,25 +18,29 @@ package controllers
 
 import controllers.actions.AuthAction
 import play.api.i18n.I18nSupport
-import views.html.HelloWorldPage
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
+import views.html.UpfrontPayment
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
-class HelloWorldController @Inject() (
+class UpfrontPaymentController @Inject() (
   authAction: AuthAction,
   mcc: MessagesControllerComponents,
-  helloWorldPage: HelloWorldPage)(implicit ec: ExecutionContext)
+  upfrontPaymentPage: UpfrontPayment)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with I18nSupport
   with Logging {
 
-  val helloWorld: Action[AnyContent] = authAction.async { implicit request =>
-    Future.successful(Ok(helloWorldPage()))
+  val upfrontPayment: Action[AnyContent] = authAction.async { implicit request =>
+    Future.successful(Ok(upfrontPaymentPage()))
+  }
+
+  val upfrontPaymentSubmit: Action[AnyContent] = authAction { implicit request =>
+    Redirect(routes.UpfrontPaymentController.upfrontPayment())
   }
 
 }

@@ -2,7 +2,10 @@ service.name = Set up a payment plan
 service.phase = beta
 phaseBanner.text = This is a new service – your <a class="govuk-link" href="{0}">feedback</a> will help us to improve it.
 
-helloWorld.title = Your PAYE bill is {0}
+helloWorld.title = Set up a payment plan
+helloWorld.p1 = Payment plans can be set up for:
+helloWorld.list1 = ePaye
+ePayeStart.title = Your PAYE bill is £{0}
 
 # Buttons
 button.continue=Continue
