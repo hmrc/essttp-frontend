@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,17 @@
  * limitations under the License.
  *@
 
-@import cats.syntax.eq._
-@import cats.instances.string._
 @import config.AppConfig
 @import controllers.routes
 @import views.html.helper.CSPNonce
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
 
-@import play.api.i18n.Messages
-@import play.api.mvc.{Call, Request}
+@import play.api.mvc.{Call, RequestHeader}
 @import play.twirl.api.Html
+
+@import requests.RequestSupport
+@import messages.Messages
 
 @this(
         appConfig: AppConfig,
@@ -37,7 +37,8 @@
         hmrcScripts: HmrcScripts,
         hmrcLanguageSelectHelper: HmrcLanguageSelectHelper,
         hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
-        hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper
+        hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper,
+        requestSupport: RequestSupport
 )
 @(pageTitle: Option[String] = None,
         headBlock: Option[Html] = None,
@@ -45,55 +46,56 @@
         backLocation: Option[Call] = None,
         hasErrors: Boolean = false,
         showSignOutLink: Boolean = true
-)(contentBlock: Html)(implicit request: Request[_], messages: Messages)
+)(contentBlock: Html)(implicit request: RequestHeader)
 
+@import requestSupport._
 
   @head = {
-  @headBlock.getOrElse(Html(""))
-  @if(showSignOutLink) {
-    @hmrcTimeoutDialogHelper(
-      title = Some(messages("timeout.title")),
-      signOutUrl = appConfig.Urls.signOutUrl,
-      timeoutUrl = Some(routes.SignOutController.signOutFromTimeout().url),
-      countdown = Some(appConfig.authTimeoutCountdownSeconds),
-      timeout = Some(appConfig.authTimeoutSeconds)
-    )
-  }
-
-  @Html(s"""<link rel="stylesheet" media="all" href="${controllers.routes.Assets.versioned("stylesheets/application.css")}" ${CSPNonce.attr}>""")
-  }
-
-  @scripts = {
-    @scriptsBlock.getOrElse(Html(""))
-    @Html(s"""<script src="${controllers.routes.Assets.versioned("javascripts/application.js")}" ${CSPNonce.attr}></script>""")
-  }
-
-  @beforeContentBlock = {
-  @govukPhaseBanner(PhaseBanner(
-    tag = Some(Tag(
-      content = Text(messages("service.phase"))
-    )),
-    content = HtmlContent(messages("phaseBanner.text", appConfig.Urls.betaFeedbackUrl(request)))
-  ))
-  @{
-    backLocation map { back =>
-      govukBackLink(BackLink(href = back.url, attributes = Map("id" -> "back")))
+    @headBlock.getOrElse(Html(""))
+    @if(showSignOutLink) {
+      @hmrcTimeoutDialogHelper(
+        title = Some(Messages.TimeOut.`You’re about to be signed out`.show),
+        signOutUrl = appConfig.Urls.signOutUrl,
+        timeoutUrl = Some(routes.SignOutController.signOutFromTimeout().url),
+        countdown = Some(appConfig.authTimeoutCountdownSeconds),
+        timeout = Some(appConfig.authTimeoutSeconds)
+      )
     }
-  }
-  @{if(appConfig.welshLanguageSupportEnabled) Some(hmrcLanguageSelectHelper()) else None}
+
+    @Html(s"""<link rel="stylesheet" media="all" href="${controllers.routes.Assets.versioned("stylesheets/application.css")}" ${CSPNonce.attr}>""")
+    }
+
+    @scripts = {
+      @scriptsBlock.getOrElse(Html(""))
+      @Html(s"""<script src="${controllers.routes.Assets.versioned("javascripts/application.js")}" ${CSPNonce.attr}></script>""")
+    }
+
+    @beforeContentBlock = {
+    @govukPhaseBanner(PhaseBanner(
+      tag = Some(Tag(
+        content = Text(Messages.ServicePhase.beta.show)
+      )),
+      content = HtmlContent(Messages.ServicePhase.bannerText(appConfig.Urls.betaFeedbackUrl(request)).show)
+    ))
+    @{
+      backLocation map { back =>
+        govukBackLink(BackLink(href = back.url, attributes = Map("id" -> "back")))
+      }
+    }
+    @{if(appConfig.welshLanguageSupportEnabled) Some(hmrcLanguageSelectHelper()) else None}
+    }
+
+    @content = {
+      <div class="govuk-!-margin-bottom-6">
+      @contentBlock
+      </div>
+
+    @hmrcReportTechnicalIssueHelper()
   }
 
-  @content = {
-    <div class="govuk-!-margin-bottom-6">
-    @contentBlock
-    </div>
-
-  @hmrcReportTechnicalIssueHelper()
-  }
-
-  @serviceNameAndHeading = @{pageTitle.fold(messages("service.name"))(t => s"""$t - ${messages("service.name")}""")}
-  @govTitle = @{serviceNameAndHeading + " - " + messages("gov.uk")}
-  @documentTitle = @{if(hasErrors) { messages("generic.errorPrefix") + " " + govTitle } else { govTitle }}
+  @serviceNameAndHeading = @{pageTitle.fold(Messages.ServicePhase.`Set up a payment plan`.show)(t => s"""$t - ${Messages.ServicePhase.`Set up a payment plan`}""")}
+  @govTitle = @{serviceNameAndHeading + " - GOV.UK"}
+  @documentTitle = @{if(hasErrors) { Messages.ErrorMessages.`Error`.show + " " + govTitle } else { govTitle }}
 
   @govukLayout(
     pageTitle = Some(documentTitle),

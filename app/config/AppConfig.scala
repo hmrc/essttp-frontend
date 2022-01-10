@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,20 +21,21 @@ import play.api.Configuration
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.play.bootstrap.binders.SafeRedirectUrl
 
+import java.net.URL
 import scala.concurrent.duration.FiniteDuration
 
 @Singleton
 class AppConfig @Inject() (config: Configuration) {
 
   val appName: String = config.get[String]("appName")
-  val welshLanguageSupportEnabled: Boolean =
-    config.getOptional[Boolean]("features.welsh-language-support").getOrElse(false)
+  val welshLanguageSupportEnabled: Boolean = config.getOptional[Boolean]("features.welsh-language-support").getOrElse(false)
   val authTimeoutSeconds: Int = config.get[FiniteDuration]("timeout-dialog.timeout").toSeconds.toInt
-  val authTimeoutCountdownSeconds: Int =
-    config.get[FiniteDuration]("timeout-dialog.countdown").toSeconds.toInt
+  val authTimeoutCountdownSeconds: Int = config.get[FiniteDuration]("timeout-dialog.countdown").toSeconds.toInt
+  val mongoTimeToLiveInSeconds: Int = config.get[Int]("mongodb.timeToLiveInSeconds")
 
   object BaseUrl {
     val essttpFrontend: String = config.get[String]("baseUrl.essttp-frontend")
+    val essttpFrontendHost: String = new URL(essttpFrontend).getHost
     val contactFrontend = config.get[String]("baseUrl.contact-frontend")
     val feedbackFrontend: String = config.get[String]("baseUrl.feedback-frontend")
     val caFrontend: String = config.get[String]("baseUrl.ca-frontend")

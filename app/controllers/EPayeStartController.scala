@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 package controllers
 
-import controllers.actions.AuthAction
+import _root_.actions.Actions
+import moveittocor.corcommon.model.AmountInPence
 import play.api.i18n.I18nSupport
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents, Request }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.EPaye.EPayeStartPage
@@ -28,18 +29,19 @@ import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
 class EPayeStartController @Inject() (
-  authAction: AuthAction,
+  as: Actions,
   mcc: MessagesControllerComponents,
   ePayeStartPage: EPayeStartPage)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
-  with I18nSupport
   with Logging {
 
-  val ePayeStart: Action[AnyContent] = authAction.async { implicit request =>
-    Future.successful(Ok(ePayeStartPage(1750.50)))
+  val ePayeStart: Action[AnyContent] = as.default { implicit request =>
+
+    val amountInPence = AmountInPence(175050)
+    Ok(ePayeStartPage(amountInPence))
   }
 
-  val ePayeStartSubmit: Action[AnyContent] = authAction { implicit request =>
+  val ePayeStartSubmit: Action[AnyContent] = as.default { implicit request =>
     Redirect(routes.UpfrontPaymentController.upfrontPayment())
   }
 

@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,35 @@
  * limitations under the License.
  *@
 
-@import play.api.i18n.Messages
 @import play.api.mvc.Request
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import controllers.routes
 @import views.html.templates.Layout
+@import messages.Messages
+@import moveittocor.corcommon.model.AmountInPence
+@import requests.RequestSupport
 
-@this(layout: Layout, govukButton: GovukButton, formWithCSRF: FormWithCSRF)
+@this(
+  layout: Layout,
+  govukButton: GovukButton,
+  formWithCSRF: FormWithCSRF,
+  requestSupport: RequestSupport
+)
 
-@(outstandingAmount: BigDecimal)(implicit request: Request[_], messages: Messages)
-@key = @{"ePayeStart"}
-@title = @{messages(s"$key.title", outstandingAmount)}
+@(
+  outstandingAmount: AmountInPence)(implicit
+  request: Request[_]
+)
+
+@import requestSupport._
+
+
+@title= @{Messages.your_bill_is(outstandingAmount).show}
 
 @layout(pageTitle = Some(title)) {
   <h1 class="govuk-heading-xl">@title</h1>
-  <p class="govuk-body">@{messages("service.text")}</p>
- @formWithCSRF(action = routes.EPayeStartController.ePayeStartSubmit()) {
-  @govukButton(Button(content = Text(messages("button.continue"))))
+  <p class="govuk-body">@{Messages.example_content_in_english.show}</p>
+  @formWithCSRF(action = routes.EPayeStartController.ePayeStartSubmit()) {
+  @govukButton(Button(content = Text(Messages.continue.show)))
  }
-
 }

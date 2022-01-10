@@ -2,7 +2,7 @@
 
 ->          /hmrc-frontend                               hmrcfrontend.Routes
 
-GET        /                                             controllers.HelloWorldController.helloWorld
+GET        /                                             controllers.LandingController.landingPage
 
 GET        /epaye/                                       controllers.EPayeStartController.ePayeStart
 POST       /epaye/                                       controllers.EPayeStartController.ePayeStartSubmit

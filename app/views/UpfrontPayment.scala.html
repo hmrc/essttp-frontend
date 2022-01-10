@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,27 @@
  * limitations under the License.
  *@
 
-@import play.api.i18n.Messages
-@import play.api.mvc.Request
+@import messages.Messages
+@import requests.RequestSupport
+@import play.api.mvc.RequestHeader
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import controllers.routes
 
-@this(layout: templates.Layout, govukButton: GovukButton, govukRadios: GovukRadios, formWithCSRF: FormWithCSRF)
+@this(
+  layout: templates.Layout,
+  govukButton: GovukButton,
+  govukRadios: GovukRadios,
+  formWithCSRF: FormWithCSRF,
+  requestSupport: RequestSupport
+)
 
-@()(implicit request: Request[_], messages: Messages)
-@key = @{"upfrontPayment"}
-@title = @{messages(s"$key.title")}
+@()(implicit
+  request: RequestHeader
+)
+
+@import requestSupport._
+
+@title = @{Messages.UpfrontPayment.`Can you make an upfront payment?`.show}
 
 @layout(pageTitle = Some(title), backLocation = Some(routes.EPayeStartController.ePayeStart)) {
  @formWithCSRF(action = routes.UpfrontPaymentController.upfrontPaymentSubmit()) {
@@ -36,23 +47,23 @@
     ))
    )),
    hint = Some(Hint(
-    content = Text(messages(s"$key.hint"))
+    content = Text(Messages.UpfrontPayment.`Your monthly payments will be lower if you ...`.show)
     )),
-    idPrefix = Some(key),
-    name = key,
+    idPrefix = Some("UpfrontPayment"),
+    name = "UpfrontPayment",
     items = Seq(
      RadioItem(
-      content = Text(messages(s"$key.yes")),
+      content = Text(Messages.UpfrontPayment.`Yes`.show),
       value = Some("yes")
      ),
      RadioItem(
-      content = Text(messages(s"$key.no")),
+      content = Text(Messages.UpfrontPayment.`No`.show),
       value = Some("no")
      )
     ),
     classes = "govuk-radios--inline"
    ))
-  @govukButton(Button(content = Text(messages("button.continue"))))
+  @govukButton(Button(content = Text(Messages.continue.show)))
  }
 
 }

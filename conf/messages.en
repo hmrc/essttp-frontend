@@ -1,6 +1,6 @@
-service.name = Set up a payment plan
+service.name =
 service.phase = beta
-phaseBanner.text = This is a new service – your <a class="govuk-link" href="{0}">feedback</a> will help us to improve it.
+phaseBanner.text = xxxx
 
 helloWorld.title = Set up a payment plan
 helloWorld.p1 = Payment plans can be set up for:
@@ -54,7 +54,3 @@ unauthorised.heading = You can’t access this service with this account
 demo.amountToPay = Demo Amount To Pay
 demo.submitPayment = Submit
 
-upfrontPayment.title = Can you make an upfront payment?
-upfrontPayment.hint = Your monthly payments will be lower if you can make an upfront payment. This payment will be taken from your bank account within 7 working days.
-upfrontPayment.yes = Yes
-upfrontPayment.no = No

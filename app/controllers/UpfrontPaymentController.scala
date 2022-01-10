@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,28 @@
 
 package controllers
 
-import controllers.actions.AuthAction
-import play.api.i18n.I18nSupport
+import _root_.actions.Actions
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.UpfrontPayment
 
 import javax.inject.{ Inject, Singleton }
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class UpfrontPaymentController @Inject() (
-  authAction: AuthAction,
+  as: Actions,
   mcc: MessagesControllerComponents,
   upfrontPaymentPage: UpfrontPayment)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
-  with I18nSupport
   with Logging {
 
-  val upfrontPayment: Action[AnyContent] = authAction.async { implicit request =>
-    Future.successful(Ok(upfrontPaymentPage()))
+  val upfrontPayment: Action[AnyContent] = as.default { implicit request =>
+    Ok(upfrontPaymentPage())
   }
 
-  val upfrontPaymentSubmit: Action[AnyContent] = authAction { implicit request =>
+  val upfrontPaymentSubmit: Action[AnyContent] = as.default { implicit request =>
     Redirect(routes.UpfrontPaymentController.upfrontPayment())
   }
-
 }
