@@ -18,7 +18,7 @@ lazy val root = (project in file("."))
   .settings(
     scalaVersion := "2.12.13",
     name := appName,
-    PlayKeys.playDefaultPort := 9001,
+    PlayKeys.playDefaultPort := 9215,
     ScoverageKeys.coverageExcludedFiles := "<empty>;Reverse.*;.*components.*;" +
       ".*Routes.*;",
     ScoverageKeys.coverageMinimum := 78,

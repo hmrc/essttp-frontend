@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,29 +15,32 @@
  *@
 
 @import config.AppConfig
-@import play.api.i18n.Messages
-@import play.api.mvc.Request
+@import requests.RequestSupport
+@import messages.Messages
+@import play.api.mvc.RequestHeader
 
-@this(layout: templates.Layout, appConfig: AppConfig)
+@this(
+  layout: templates.Layout,
+  appConfig: AppConfig,
+  requestSupport: RequestSupport
+)
+
+@()(implicit request: RequestHeader)
+
+@import requestSupport._
 
 
-@()(implicit request: Request[_], messages: Messages)
-@key = @{"timedOut"}
-@title = @{messages(s"$key.title")}
+@title = @{Messages.TimeOut.`You’re about to be signed out`.show}
 
 @layout(pageTitle = Some(title), showSignOutLink = false) {
 
-    <h1 class="govuk-heading-xl">
-      @title
-    </h1>
+  <h1 class="govuk-heading-xl">
+    @title
+  </h1>
 
-    <p class="govuk-body">
-      @messages(s"$key.p1")
-    </p>
-
-    <p class="govuk-body">
-      <a href="@{appConfig.Urls.loginUrl}" class="govuk-button govuk-!-margin-bottom-0">
-        @messages(s"$key.signIn")
-      </a>
-    </p>
+  <p class="govuk-body">
+    <a href="@{appConfig.Urls.loginUrl}" class="govuk-button govuk-!-margin-bottom-0">
+    @{Messages.`Sign in`.show}
+    </a>
+  </p>
 }

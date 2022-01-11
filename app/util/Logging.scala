@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,7 @@
 package util
 
 import play.api.Logger
-import models.Error
 
 trait Logging {
-
   val logger: Logger = Logger(this.getClass)
-
-}
-
-object Logging {
-
-  implicit class LoggerOps(private val l: Logger) extends AnyVal {
-    def warn(msg: => String, e: => Error): Unit =
-      e.value.fold(e => l.warn(s"$msg: $e"), e => l.warn(msg, e))
-
-  }
-
 }
