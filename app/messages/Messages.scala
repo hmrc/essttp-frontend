@@ -45,6 +45,9 @@ object Messages {
     english = "Error: ",
     welsh = "Gwall: ")
 
+  val `There is a problem` = Message(
+    "There is a problem")
+
   def your_bill_is(amount: AmountInPence): Message = Message(
     s"Your PAYE bill is ${amount.formatInPounds}")
 
@@ -52,6 +55,9 @@ object Messages {
     s"Example content in english")
 
   object TimeOut {
+    val `For your security, we signed you out` = Message(
+      english = "For your security, we signed you out")
+
     val `You’re about to be signed out` = Message(
       english = "You’re about to be signed out")
 
@@ -83,6 +89,19 @@ object Messages {
     val `No` = Message(
       "No")
 
+    def getError(key: String): Message = key match {
+      case "error.required" => Message(english = "Select yes if you can make an upfront payment")
+    }
+
+  }
+
+  object UpfrontPaymentAmount {
+    val `How much can you pay upfront?` = Message(
+      "How much can you pay upfront?")
+
+    def getError(key: String): Message = key match {
+      case "error.required" => Message(english = "Enter how much you can pay upfront")
+    }
   }
 }
 

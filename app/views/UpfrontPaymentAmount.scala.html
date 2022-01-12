@@ -24,7 +24,7 @@
 @this(
   layout: templates.Layout,
   govukButton: GovukButton,
-  govukRadios: GovukRadios,
+  govukInput: GovukInput,
   formWithCSRF: FormWithCSRF,
   govukErrorSummary: GovukErrorSummary,
   requestSupport: RequestSupport
@@ -35,49 +35,37 @@
 )
 
 @import requestSupport._
+@key = @{"UpfrontPaymentAmount"}
+@title = @{Messages.UpfrontPaymentAmount.`How much can you pay upfront?`.show}
 
-@key = @{"UpfrontPayment"}
-@title = @{Messages.UpfrontPayment.`Can you make an upfront payment?`.show}
-
-@layout(pageTitle = Some(title), backLocation = Some(routes.EPayeStartController.ePayeStart)) {
+@layout(pageTitle = Some(title), backLocation = Some(routes.UpfrontPaymentController.upfrontPayment())) {
  @if(form.errors.nonEmpty) {
   @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
    ErrorLink(
     href = Some(s"#${e.key}"),
-    content = Text(Messages.UpfrontPayment.getError(e.message).show)
+    content = Text(Messages.UpfrontPaymentAmount.getError(e.message).show)
    )
   ),
    title = Text(Messages.`There is a problem`.show)))
  }
- @formWithCSRF(action = routes.UpfrontPaymentController.upfrontPaymentSubmit()) {
-  @govukRadios(Radios(
-   fieldset = Some(Fieldset(
-    legend = Some(Legend(
-     content = Text(title),
-     classes = "govuk-fieldset__legend--xl",
-     isPageHeading = true
-    ))
+ @formWithCSRF(action = routes.UpfrontPaymentController.upfrontPaymentAmountSubmit()) {
+  @govukInput(Input(
+   id = key,
+   name = key,
+   label = Label(
+    isPageHeading = true,
+    classes = "govuk-label--xl",
+    content = Text(title)
+   ),
+   classes = "govuk-input--width-5",
+   spellcheck = Some(false),
+   prefix = Some(PrefixOrSuffix(
+    content = Text("£")
    )),
-   hint = Some(Hint(
-    content = Text(Messages.UpfrontPayment.`Your monthly payments will be lower if you ...`.show)
-    )),
-    idPrefix = Some(key),
-    name = key,
-    items = Seq(
-     RadioItem(
-      content = Text(Messages.UpfrontPayment.`Yes`.show),
-      value = Some("Yes"),
-      checked = form.data.values.toList.contains("Yes")
-     ),
-     RadioItem(
-      content = Text(Messages.UpfrontPayment.`No`.show),
-      value = Some("No"),
-      checked = form.data.values.toList.contains("No")
-     )
-    ),
-    classes = "govuk-radios--inline",
-    errorMessage = form.error(key).map(e => ErrorMessage(content = Text(Messages.UpfrontPayment.getError(e.message).show)))
+   errorMessage = form.error(key).map(e => ErrorMessage(
+    content = Text(Messages.UpfrontPaymentAmount.getError(e.message).show)
    ))
+  ))
   @govukButton(Button(content = Text(Messages.continue.show)))
  }
 

@@ -17,27 +17,72 @@
 package controllers
 
 import _root_.actions.Actions
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import controllers.UpfrontPaymentController.{ upfrontPaymentAmountForm, upfrontPaymentForm }
+import moveittocor.corcommon.model.AmountInPence
+import play.api.data.Form
+import play.api.data.Forms.{ mapping, nonEmptyText }
+import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents, Result }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
-import views.html.UpfrontPayment
+import views.html.{ UpfrontPayment, UpfrontPaymentAmount }
 
+import java.util.Locale
 import javax.inject.{ Inject, Singleton }
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
 class UpfrontPaymentController @Inject() (
   as: Actions,
   mcc: MessagesControllerComponents,
-  upfrontPaymentPage: UpfrontPayment)(implicit ec: ExecutionContext)
+  upfrontPaymentPage: UpfrontPayment,
+  upfrontPaymentAmountPage: UpfrontPaymentAmount)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 
   val upfrontPayment: Action[AnyContent] = as.default { implicit request =>
-    Ok(upfrontPaymentPage())
+    Ok(upfrontPaymentPage(upfrontPaymentForm()))
   }
 
   val upfrontPaymentSubmit: Action[AnyContent] = as.default { implicit request =>
-    Redirect(routes.UpfrontPaymentController.upfrontPayment())
+    // this is an example to test using play forms and errors
+    // normally answers would be uplifted to session storage instead of just
+    // redirecting to next page..
+    upfrontPaymentForm()
+      .bindFromRequest()
+      .fold(
+        formWithErrors =>
+          Ok(
+            upfrontPaymentPage(
+              formWithErrors)),
+        {
+          case "Yes" => Redirect(routes.UpfrontPaymentController.upfrontPaymentAmount())
+          case _ => Redirect(routes.UpfrontPaymentController.upfrontPayment())
+        })
+
   }
+
+  val upfrontPaymentAmount: Action[AnyContent] = as.default { implicit request =>
+    Ok(upfrontPaymentAmountPage(upfrontPaymentAmountForm()))
+  }
+
+  val upfrontPaymentAmountSubmit: Action[AnyContent] = as.default { implicit request =>
+    upfrontPaymentAmountForm()
+      .bindFromRequest()
+      .fold(
+        formWithErrors =>
+          Ok(upfrontPaymentAmountPage(formWithErrors)),
+        _ => Redirect(routes.UpfrontPaymentController.upfrontPayment()))
+  }
+}
+
+object UpfrontPaymentController {
+  def upfrontPaymentForm(): Form[String] = Form(
+    mapping(
+      "UpfrontPayment" -> nonEmptyText)(identity)(Some(_)))
+
+  // this should be AmountInPence and validate using business rules about
+  // min and max amount
+  def upfrontPaymentAmountForm(): Form[String] = Form(
+    mapping(
+      "UpfrontPaymentAmount" -> nonEmptyText)(identity)(Some(_)))
 }
