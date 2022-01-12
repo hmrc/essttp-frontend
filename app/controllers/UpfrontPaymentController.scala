@@ -18,17 +18,15 @@ package controllers
 
 import _root_.actions.Actions
 import controllers.UpfrontPaymentController.{ upfrontPaymentAmountForm, upfrontPaymentForm }
-import moveittocor.corcommon.model.AmountInPence
 import play.api.data.Form
 import play.api.data.Forms.{ mapping, nonEmptyText }
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents, Result }
+import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.{ UpfrontPayment, UpfrontPaymentAmount }
 
-import java.util.Locale
 import javax.inject.{ Inject, Singleton }
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class UpfrontPaymentController @Inject() (
@@ -56,7 +54,7 @@ class UpfrontPaymentController @Inject() (
               formWithErrors)),
         {
           case "Yes" => Redirect(routes.UpfrontPaymentController.upfrontPaymentAmount())
-          case _ => Redirect(routes.UpfrontPaymentController.upfrontPayment())
+          case _ => Redirect(routes.MonthlyPaymentAmountController.monthlyPaymentAmount())
         })
 
   }
@@ -71,7 +69,7 @@ class UpfrontPaymentController @Inject() (
       .fold(
         formWithErrors =>
           Ok(upfrontPaymentAmountPage(formWithErrors)),
-        _ => Redirect(routes.UpfrontPaymentController.upfrontPayment()))
+        _ => Redirect(routes.MonthlyPaymentAmountController.monthlyPaymentAmount()))
   }
 }
 

@@ -103,5 +103,29 @@ object Messages {
       case "error.required" => Message(english = "Enter how much you can pay upfront")
     }
   }
+
+  object MonthlyPaymentAmount {
+    val `How much can you afford to pay each month?` = Message(
+      "How much can you afford to pay each month?")
+
+    def getHint(max: AmountInPence, min: AmountInPence): Message = Message(
+      s"Enter an amount between ${min.formatInPounds} and ${max.formatInPounds}")
+
+    def getError(key: String, max: AmountInPence, min: AmountInPence): Message = key match {
+      case "error.required" => Message(english = "Enter how much you can afford to pay each month")
+      case "error.pattern" => Message(english = "How much you can afford to pay each month must be an amount of money")
+      case "error.tooSmall" => Message(english = s"How much you can afford to pay each month must be ${min.formatInPounds} or more")
+      case "error.tooLarge" => Message(english = s"How much you can afford to pay each month must be ${max.formatInPounds} or less")
+    }
+
+    val `I can’t afford the minimum payment`: Message = Message(
+      "I can’t afford the minimum payment")
+
+    val `You may still be able to set up a payment plan...`: Message = Message(
+      "You may still be able to set up a payment plan over the phone, but you are not eligible for an online payment plan.")
+
+    val `We recommend you speak to an adviser...`: Message = Message(
+      "We recommend you speak to an adviser on <strong>0300 200 3835</strong> at the Payment Support Service to talk about your payment options.")
+  }
 }
 
