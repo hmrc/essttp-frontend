@@ -20,7 +20,7 @@ import _root_.actions.Actions
 import controllers.MonthlyPaymentAmountController._
 import moveittocor.corcommon.model.AmountInPence
 import play.api.data.{ Form, FormError, Forms }
-import play.api.data.Forms.mapping
+import play.api.data.Forms.{ mapping, nonEmptyText }
 import play.api.data.format.Formatter
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -56,7 +56,7 @@ class MonthlyPaymentAmountController @Inject() (
           Ok(
             monthlyPaymentAmountPage(
               formWithErrors, maximumPaymentAmount, minimumPaymentAmount)),
-        _ => Redirect(routes.UpfrontPaymentController.upfrontPaymentAmount()))
+        _ => Redirect(routes.PaymentDayController.paymentDay()))
   }
 }
 
@@ -66,6 +66,7 @@ object MonthlyPaymentAmountController {
   val maximumPaymentAmount: AmountInPence = AmountInPence(originalDebt)
   val minimumPaymentAmount: AmountInPence = AmountInPence(originalDebt / 6)
   val key: String = "MonthlyPaymentAmount"
+  // these methods just to test error messages in templates...
   private def cleanupAmountOfMoneyString(s: String): String = {
     s.trim().filter(c => c =!= ',' && c =!= '£')
   }
@@ -106,6 +107,5 @@ object MonthlyPaymentAmountController {
 
   def monthlyPaymentAmountForm(): Form[BigDecimal] = Form(
     mapping(
-      key -> Forms.of(monthlyPaymentAmountFormatter(minimumPaymentAmount.inPounds > _, maximumPaymentAmount.inPounds < _))
-    )(identity)(Some(_)))
+      key -> Forms.of(monthlyPaymentAmountFormatter(minimumPaymentAmount.inPounds > _, maximumPaymentAmount.inPounds < _)))(identity)(Some(_)))
 }

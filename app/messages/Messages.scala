@@ -127,5 +127,17 @@ object Messages {
     val `We recommend you speak to an adviser...`: Message = Message(
       "We recommend you speak to an adviser on <strong>0300 200 3835</strong> at the Payment Support Service to talk about your payment options.")
   }
+
+  object PaymentDay {
+    val `Which day do you want to pay each month?`: Message = Message(
+      "Which day do you want to pay each month?")
+    val `28th or next working day`: Message = Message(
+      "28th or next working day")
+    val `A different day`: Message = Message(
+      "A different day")
+    def getError(key: String): Message = key match {
+      case "error.required" => Message(english = "Select which day of the month you want to pay on")
+    }
+  }
 }
 

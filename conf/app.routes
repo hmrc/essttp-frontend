@@ -12,6 +12,8 @@ GET        /upfront-payment-amount                       controllers.UpfrontPaym
 POST       /upfront-payment-amount                       controllers.UpfrontPaymentController.upfrontPaymentAmountSubmit
 GET        /monthly-payment-amount                       controllers.MonthlyPaymentAmountController.monthlyPaymentAmount
 POST       /monthly-payment-amount                       controllers.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit
+GET        /payment-day                                  controllers.PaymentDayController.paymentDay()
+POST       /payment-day                                  controllers.PaymentDayController.paymentDaySubmit()
 
 GET         /assets/*file                                controllers.Assets.versioned(path="/public", file: Asset)
 
