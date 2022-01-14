@@ -17,17 +17,21 @@
 package controllers
 
 import _root_.actions.Actions
-import controllers.MonthlyPaymentAmountController.monthlyPaymentAmountForm
+import controllers.MonthlyPaymentAmountController._
 import moveittocor.corcommon.model.AmountInPence
-import play.api.data.Form
-import play.api.data.Forms.{ mapping, nonEmptyText }
+import play.api.data.{ Form, FormError, Forms }
+import play.api.data.Forms.mapping
+import play.api.data.format.Formatter
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.MonthlyPaymentAmount
+import cats.syntax.either._
+import cats.syntax.eq._
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
+import scala.util.Try
 
 @Singleton
 class MonthlyPaymentAmountController @Inject() (
@@ -36,11 +40,6 @@ class MonthlyPaymentAmountController @Inject() (
   monthlyPaymentAmountPage: MonthlyPaymentAmount)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
-
-  // this value to come from session data/api data from ETMP...
-  val originalDebt: Long = 175050L
-  val maximumPaymentAmount: AmountInPence = AmountInPence(originalDebt)
-  val minimumPaymentAmount: AmountInPence = AmountInPence(originalDebt / 6)
 
   val monthlyPaymentAmount: Action[AnyContent] = as.default { implicit request =>
     Ok(monthlyPaymentAmountPage(monthlyPaymentAmountForm(), maximumPaymentAmount, minimumPaymentAmount))
@@ -57,16 +56,56 @@ class MonthlyPaymentAmountController @Inject() (
           Ok(
             monthlyPaymentAmountPage(
               formWithErrors, maximumPaymentAmount, minimumPaymentAmount)),
-        {
-          case "Yes" => Redirect(routes.UpfrontPaymentController.upfrontPaymentAmount())
-          case _ => Redirect(routes.UpfrontPaymentController.upfrontPayment())
-        })
-
+        _ => Redirect(routes.UpfrontPaymentController.upfrontPaymentAmount()))
   }
 }
 
 object MonthlyPaymentAmountController {
-  def monthlyPaymentAmountForm(): Form[String] = Form(
+  // this value to come from session data/api data from ETMP...
+  val originalDebt: Long = 175050L
+  val maximumPaymentAmount: AmountInPence = AmountInPence(originalDebt)
+  val minimumPaymentAmount: AmountInPence = AmountInPence(originalDebt / 6)
+  val key: String = "MonthlyPaymentAmount"
+  private def cleanupAmountOfMoneyString(s: String): String = {
+    s.trim().filter(c => c =!= ',' && c =!= '£')
+  }
+  def formatAmountOfMoneyWithoutPoundSign(d: BigDecimal): String =
+    d.toString().replaceAllLiterally("£", "")
+  def monthlyPaymentAmountFormatter(
+    isTooSmall: BigDecimal => Boolean,
+    isTooLarge: BigDecimal => Boolean): Formatter[BigDecimal] =
+    new Formatter[BigDecimal] {
+      override def bind(
+        key: String,
+        data: Map[String, String]): Either[Seq[FormError], BigDecimal] =
+        validateAmountOfMoney(
+          key,
+          isTooSmall,
+          isTooLarge)(data(key)).leftMap(Seq(_))
+
+      def validateAmountOfMoney(
+        key: String,
+        isTooSmall: BigDecimal => Boolean,
+        isTooLarge: BigDecimal => Boolean)(
+        s: String): Either[FormError, BigDecimal] =
+        Try(BigDecimal(cleanupAmountOfMoneyString(s))).toEither
+          .leftMap(_ => FormError(key, "error.pattern"))
+          .flatMap { d: BigDecimal =>
+            if (isTooSmall(d)) {
+              Left(FormError(key, "error.tooSmall"))
+            } else if (isTooLarge(d)) {
+              Left(FormError(key, "error.tooLarge"))
+            } else {
+              Right(d)
+            }
+          }
+
+      override def unbind(key: String, value: BigDecimal): Map[String, String] =
+        Map(key -> formatAmountOfMoneyWithoutPoundSign(value))
+    }
+
+  def monthlyPaymentAmountForm(): Form[BigDecimal] = Form(
     mapping(
-      "MonthlyPaymentAmount" -> nonEmptyText)(identity)(Some(_)))
+      key -> Forms.of(monthlyPaymentAmountFormatter(minimumPaymentAmount.inPounds > _, maximumPaymentAmount.inPounds < _))
+    )(identity)(Some(_)))
 }
