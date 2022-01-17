@@ -45,9 +45,6 @@ class UpfrontPaymentController @Inject() (
   }
 
   val upfrontPaymentSubmit: Action[AnyContent] = as.default { implicit request =>
-    // this is an example to test using play forms and errors
-    // normally answers would be uplifted to session storage instead of just
-    // redirecting to next page..
     upfrontPaymentForm()
       .bindFromRequest()
       .fold(
@@ -115,8 +112,6 @@ object UpfrontPaymentController {
     mapping(
       "UpfrontPayment" -> nonEmptyText)(identity)(Some(_)))
 
-  // this should be AmountInPence and validate using business rules about
-  // min and max amount
   def upfrontPaymentAmountForm(): Form[BigDecimal] = Form(
     mapping(
       key -> Forms.of(amountOfMoneyFormatter(minimumPaymentAmount.inPounds > _, maximumPaymentAmount.inPounds < _)))(identity)(Some(_)))

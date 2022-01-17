@@ -102,8 +102,11 @@ object Messages {
     val `How much can you pay upfront?`: Message = Message(
       "How much can you pay upfront?")
 
-    def getError(key: String): Message = key match {
+    def getError(key: String, max: AmountInPence, min: AmountInPence): Message = key match {
       case "error.required" => Message(english = "Enter how much you can pay upfront")
+      case "error.pattern" => Message(english = "How much you can pay upfront must be an amount of money")
+      case "error.tooSmall" => Message(english = s"How much you can pay upfront must be ${min.formatInPounds} or more")
+      case "error.tooLarge" => Message(english = s"How much you can pay upfront must be ${max.formatInPounds} or less")
     }
   }
 

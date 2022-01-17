@@ -46,7 +46,7 @@
   @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
    ErrorLink(
     href = Some(s"#${e.key}"),
-    content = Text(Messages.UpfrontPaymentAmount.getError(e.message).show)
+    content = Text(Messages.UpfrontPaymentAmount.getError(e.message, maximumPayment, minimumPayment).show)
    )
   ),
    title = Text(Messages.`There is a problem`.show)))
@@ -66,8 +66,9 @@
     content = Text("£")
    )),
    errorMessage = form.error(key).map(e => ErrorMessage(
-    content = Text(Messages.UpfrontPaymentAmount.getError(e.message).show)
-   ))
+    content = Text(Messages.UpfrontPaymentAmount.getError(e.message, maximumPayment, minimumPayment).show)
+   )),
+   value = form.data.get(key)
   ))
   @govukButton(Button(content = Text(Messages.continue.show)))
  }
