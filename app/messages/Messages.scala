@@ -112,13 +112,16 @@ object Messages {
       "Payment summary")
 
     val `Upfront payment`: Message = Message(
-      "Upfront payment")
+      "Upfront payment<br><span class=\"govuk-body-s\">Taken within 7 working days</span>")
 
     val `Taken within 7 working days`: Message = Message(
       "Taken within 7 working days")
 
     val `Remaining amount to pay`: Message = Message(
       "Remaining amount to pay")
+
+    val `(interest will be added to this amount)`: Message = Message(
+      "(interest will be added to this amount)")
   }
 
   object MonthlyPaymentAmount {

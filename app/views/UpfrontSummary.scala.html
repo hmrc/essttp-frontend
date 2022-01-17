@@ -18,6 +18,7 @@
 @import requests.RequestSupport
 @import messages.Messages
 @import play.api.mvc.RequestHeader
+@import play.twirl.api.Html
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import controllers.UpfrontPaymentController.FakeSession
 @import moveittocor.corcommon.model.AmountInPence
@@ -50,7 +51,7 @@
       rows = Seq(
         SummaryListRow(
           key = Key(
-            content = Text(Messages.UpfrontPaymentSummary.`Upfront payment`.show),
+            content = HtmlContent(Html(Messages.UpfrontPaymentSummary.`Upfront payment`.show)),
             classes = "govuk-!-width-one-half"
           ),
           value = Value(
@@ -71,7 +72,7 @@
             content = Text(Messages.UpfrontPaymentSummary.`Remaining amount to pay`.show)
           ),
           value = Value(
-            content = Text(remaining.formatInPounds)
+            content = HtmlContent(s"""${remaining.formatInPounds} <span class="govuk-body-s">${Messages.UpfrontPaymentSummary.`(interest will be added to this amount)`.show}</span>""")
           )
         )
       )
