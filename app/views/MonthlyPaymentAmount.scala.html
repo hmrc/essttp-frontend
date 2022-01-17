@@ -45,7 +45,7 @@
   <p class="govuk-body">@{Html(Messages.MonthlyPaymentAmount.`We recommend you speak to an adviser...`.show)}</p>
  }
 
-@layout(pageTitle = Some(title), backLocation = Some(routes.UpfrontPaymentController.upfrontPayment())) {
+@layout(pageTitle = Some(title), backLocation = Some(routes.UpfrontPaymentController.upfrontPayment()), hasErrors = form.hasErrors) {
  @if(form.errors.nonEmpty) {
   @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
    ErrorLink(

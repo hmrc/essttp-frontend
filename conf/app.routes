@@ -10,6 +10,7 @@ GET        /upfront-payment                              controllers.UpfrontPaym
 POST       /upfront-payment                              controllers.UpfrontPaymentController.upfrontPaymentSubmit
 GET        /upfront-payment-amount                       controllers.UpfrontPaymentController.upfrontPaymentAmount
 POST       /upfront-payment-amount                       controllers.UpfrontPaymentController.upfrontPaymentAmountSubmit
+GET        /upfront-payment-summary                      controllers.UpfrontPaymentController.upfrontSummary()
 GET        /monthly-payment-amount                       controllers.MonthlyPaymentAmountController.monthlyPaymentAmount
 POST       /monthly-payment-amount                       controllers.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit
 GET        /payment-day                                  controllers.PaymentDayController.paymentDay()

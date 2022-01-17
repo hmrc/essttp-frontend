@@ -20,6 +20,7 @@
 @import play.api.data.Form
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import controllers.routes
+@import moveittocor.corcommon.model.AmountInPence
 
 @this(
   layout: templates.Layout,
@@ -30,15 +31,17 @@
   requestSupport: RequestSupport
 )
 
-@(form: Form[String])(implicit
+
+@(form: Form[BigDecimal], maximumPayment: AmountInPence, minimumPayment: AmountInPence)(implicit
   request: RequestHeader
 )
 
 @import requestSupport._
+
 @key = @{"UpfrontPaymentAmount"}
 @title = @{Messages.UpfrontPaymentAmount.`How much can you pay upfront?`.show}
 
-@layout(pageTitle = Some(title), backLocation = Some(routes.UpfrontPaymentController.upfrontPayment())) {
+@layout(pageTitle = Some(title), backLocation = Some(routes.UpfrontPaymentController.upfrontPayment()), hasErrors = form.hasErrors) {
  @if(form.errors.nonEmpty) {
   @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
    ErrorLink(

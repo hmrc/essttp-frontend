@@ -45,31 +45,34 @@ object Messages {
     english = "Error: ",
     welsh = "Gwall: ")
 
-  val `There is a problem` = Message(
+  val change: Message = Message(
+    "Change")
+
+  val `There is a problem`: Message = Message(
     "There is a problem")
 
-  def your_bill_is(amount: AmountInPence): Message = Message(
+  def yourBillIs(amount: AmountInPence): Message = Message(
     s"Your PAYE bill is ${amount.formatInPounds}")
 
   val example_content_in_english: Message = Message(
     s"Example content in english")
 
   object TimeOut {
-    val `For your security, we signed you out` = Message(
+    val `For your security, we signed you out`: Message = Message(
       english = "For your security, we signed you out")
 
-    val `You’re about to be signed out` = Message(
+    val `You’re about to be signed out`: Message = Message(
       english = "You’re about to be signed out")
 
-    val `For security reasons, you will be signed out of this service in` = Message(
+    val `For security reasons, you will be signed out of this service in`: Message = Message(
       "For security reasons, you will be signed out of this service in")
-    val `Stay signed in` = Message(
+    val `Stay signed in`: Message = Message(
       "Stay signed in")
 
   }
 
   object ServicePhase {
-    val `Set up a payment plan` = Message(
+    val `Set up a payment plan`: Message = Message(
       "Set up a payment plan")
 
     val beta: Message = Message(
@@ -80,13 +83,13 @@ object Messages {
   }
 
   object UpfrontPayment {
-    val `Can you make an upfront payment?` = Message(
+    val `Can you make an upfront payment?`: Message = Message(
       "Can you make an upfront payment?")
-    val `Your monthly payments will be lower if you ...` = Message(
+    val `Your monthly payments will be lower if you ...`: Message = Message(
       "Your monthly payments will be lower if you can make an upfront payment. This payment will be taken from your bank account within 7 working days.")
-    val `Yes` = Message(
+    val `Yes`: Message = Message(
       "Yes")
-    val `No` = Message(
+    val `No`: Message = Message(
       "No")
 
     def getError(key: String): Message = key match {
@@ -96,7 +99,7 @@ object Messages {
   }
 
   object UpfrontPaymentAmount {
-    val `How much can you pay upfront?` = Message(
+    val `How much can you pay upfront?`: Message = Message(
       "How much can you pay upfront?")
 
     def getError(key: String): Message = key match {
@@ -104,8 +107,22 @@ object Messages {
     }
   }
 
+  object UpfrontPaymentSummary {
+    val `Payment summary`: Message = Message(
+      "Payment summary")
+
+    val `Upfront payment`: Message = Message(
+      "Upfront payment")
+
+    val `Taken within 7 working days`: Message = Message(
+      "Taken within 7 working days")
+
+    val `Remaining amount to pay`: Message = Message(
+      "Remaining amount to pay")
+  }
+
   object MonthlyPaymentAmount {
-    val `How much can you afford to pay each month?` = Message(
+    val `How much can you afford to pay each month?`: Message = Message(
       "How much can you afford to pay each month?")
 
     def getHint(max: AmountInPence, min: AmountInPence): Message = Message(

@@ -39,7 +39,7 @@
 @key = @{"PaymentDay"}
 @title = @{Messages.PaymentDay.`Which day do you want to pay each month?`.show}
 
-@layout(pageTitle = Some(title), backLocation = Some(routes.MonthlyPaymentAmountController.monthlyPaymentAmount())) {
+@layout(pageTitle = Some(title), backLocation = Some(routes.MonthlyPaymentAmountController.monthlyPaymentAmount()), hasErrors = form.hasErrors) {
  @if(form.errors.nonEmpty) {
   @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
    ErrorLink(

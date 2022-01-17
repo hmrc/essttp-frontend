@@ -18,21 +18,18 @@ package controllers
 
 import _root_.actions.Actions
 import controllers.MonthlyPaymentAmountController._
+import controllers.UpfrontPaymentController.getRemainingBalance
+import models.MoneyUtil._
 import moveittocor.corcommon.model.AmountInPence
-import play.api.data.{ Form, FormError, Forms }
-import play.api.data.Forms.{ mapping, nonEmptyText }
-import play.api.data.format.Formatter
+import play.api.data.{ Form, Forms }
+import play.api.data.Forms.mapping
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.MonthlyPaymentAmount
-import cats.syntax.either._
-import cats.syntax.eq._
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
-import scala.util.Try
-
 @Singleton
 class MonthlyPaymentAmountController @Inject() (
   as: Actions,
@@ -42,7 +39,7 @@ class MonthlyPaymentAmountController @Inject() (
   with Logging {
 
   val monthlyPaymentAmount: Action[AnyContent] = as.default { implicit request =>
-    Ok(monthlyPaymentAmountPage(monthlyPaymentAmountForm(), maximumPaymentAmount, minimumPaymentAmount))
+    Ok(monthlyPaymentAmountPage(monthlyPaymentAmountForm(), maximumMonthlyPaymentAmount, minimumMonthlyPaymentAmount))
   }
 
   val monthlyPaymentAmountSubmit: Action[AnyContent] = as.default { implicit request =>
@@ -55,57 +52,19 @@ class MonthlyPaymentAmountController @Inject() (
         formWithErrors =>
           Ok(
             monthlyPaymentAmountPage(
-              formWithErrors, maximumPaymentAmount, minimumPaymentAmount)),
+              formWithErrors, maximumMonthlyPaymentAmount, minimumMonthlyPaymentAmount)),
         _ => Redirect(routes.PaymentDayController.paymentDay()))
   }
 }
 
 object MonthlyPaymentAmountController {
   // this value to come from session data/api data from ETMP...
-  val originalDebt: Long = 175050L
-  val maximumPaymentAmount: AmountInPence = AmountInPence(originalDebt)
-  val minimumPaymentAmount: AmountInPence = AmountInPence(originalDebt / 6)
+  val remaining: AmountInPence = getRemainingBalance
+  val maximumMonthlyPaymentAmount: AmountInPence = remaining
+  val minimumMonthlyPaymentAmount: AmountInPence = AmountInPence(remaining.value / 6)
   val key: String = "MonthlyPaymentAmount"
-  // these methods just to test error messages in templates...
-  private def cleanupAmountOfMoneyString(s: String): String = {
-    s.trim().filter(c => c =!= ',' && c =!= '£')
-  }
-  def formatAmountOfMoneyWithoutPoundSign(d: BigDecimal): String =
-    d.toString().replaceAllLiterally("£", "")
-  def monthlyPaymentAmountFormatter(
-    isTooSmall: BigDecimal => Boolean,
-    isTooLarge: BigDecimal => Boolean): Formatter[BigDecimal] =
-    new Formatter[BigDecimal] {
-      override def bind(
-        key: String,
-        data: Map[String, String]): Either[Seq[FormError], BigDecimal] =
-        validateAmountOfMoney(
-          key,
-          isTooSmall,
-          isTooLarge)(data(key)).leftMap(Seq(_))
-
-      def validateAmountOfMoney(
-        key: String,
-        isTooSmall: BigDecimal => Boolean,
-        isTooLarge: BigDecimal => Boolean)(
-        s: String): Either[FormError, BigDecimal] =
-        Try(BigDecimal(cleanupAmountOfMoneyString(s))).toEither
-          .leftMap(_ => FormError(key, "error.pattern"))
-          .flatMap { d: BigDecimal =>
-            if (isTooSmall(d)) {
-              Left(FormError(key, "error.tooSmall"))
-            } else if (isTooLarge(d)) {
-              Left(FormError(key, "error.tooLarge"))
-            } else {
-              Right(d)
-            }
-          }
-
-      override def unbind(key: String, value: BigDecimal): Map[String, String] =
-        Map(key -> formatAmountOfMoneyWithoutPoundSign(value))
-    }
 
   def monthlyPaymentAmountForm(): Form[BigDecimal] = Form(
     mapping(
-      key -> Forms.of(monthlyPaymentAmountFormatter(minimumPaymentAmount.inPounds > _, maximumPaymentAmount.inPounds < _)))(identity)(Some(_)))
+      key -> Forms.of(amountOfMoneyFormatter(minimumMonthlyPaymentAmount.inPounds > _, maximumMonthlyPaymentAmount.inPounds < _)))(identity)(Some(_)))
 }
