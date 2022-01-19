@@ -36,20 +36,20 @@
 
 @import requestSupport._
 
-@key = @{"UpfrontPayment"}
-@title = @{Messages.UpfrontPayment.`Can you make an upfront payment?`.show}
+@key = @{"PaymentDay"}
+@title = @{Messages.PaymentDay.`Which day do you want to pay each month?`.show}
 
-@layout(pageTitle = Some(title), backLocation = Some(routes.EPayeStartController.ePayeStart), hasErrors = form.hasErrors) {
+@layout(pageTitle = Some(title), backLocation = Some(routes.MonthlyPaymentAmountController.monthlyPaymentAmount()), hasErrors = form.hasErrors) {
  @if(form.errors.nonEmpty) {
   @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
    ErrorLink(
     href = Some(s"#${e.key}"),
-    content = Text(Messages.UpfrontPayment.getError(e.message).show)
+    content = Text(Messages.PaymentDay.getError(e.message).show)
    )
   ),
    title = Text(Messages.`There is a problem`.show)))
  }
- @formWithCSRF(action = routes.UpfrontPaymentController.upfrontPaymentSubmit()) {
+ @formWithCSRF(action = routes.PaymentDayController.paymentDaySubmit()) {
   @govukRadios(Radios(
    fieldset = Some(Fieldset(
     legend = Some(Legend(
@@ -58,25 +58,21 @@
      isPageHeading = true
     ))
    )),
-   hint = Some(Hint(
-    content = Text(Messages.UpfrontPayment.`Your monthly payments will be lower if you ...`.show)
-    )),
     idPrefix = Some(key),
     name = key,
     items = Seq(
      RadioItem(
-      content = Text(Messages.UpfrontPayment.`Yes`.show),
-      value = Some("Yes"),
+      content = Text(Messages.PaymentDay.`28th or next working day`.show),
+      value = Some("28"),
       checked = form.data.values.toList.contains("Yes")
      ),
      RadioItem(
-      content = Text(Messages.UpfrontPayment.`No`.show),
-      value = Some("No"),
-      checked = form.data.values.toList.contains("No")
+      content = Text(Messages.PaymentDay.`A different day`.show),
+      value = Some("other"),
+      checked = form.data.values.toList.contains("other")
      )
     ),
-    classes = "govuk-radios--inline",
-    errorMessage = form.error(key).map(e => ErrorMessage(content = Text(Messages.UpfrontPayment.getError(e.message).show)))
+    errorMessage = form.error(key).map(e => ErrorMessage(content = Text(Messages.PaymentDay.getError(e.message).show)))
    ))
   @govukButton(Button(content = Text(Messages.continue.show)))
  }

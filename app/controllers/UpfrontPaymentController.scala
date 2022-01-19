@@ -17,10 +17,15 @@
 package controllers
 
 import _root_.actions.Actions
+import controllers.UpfrontPaymentController._
+import models.MoneyUtil.amountOfMoneyFormatter
+import moveittocor.corcommon.model.AmountInPence
+import play.api.data.{ Form, Forms }
+import play.api.data.Forms.{ mapping, nonEmptyText }
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
-import views.html.UpfrontPayment
+import views.html.{ UpfrontPayment, UpfrontPaymentAmount, UpfrontSummary }
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
@@ -29,15 +34,85 @@ import scala.concurrent.ExecutionContext
 class UpfrontPaymentController @Inject() (
   as: Actions,
   mcc: MessagesControllerComponents,
-  upfrontPaymentPage: UpfrontPayment)(implicit ec: ExecutionContext)
+  upfrontPaymentPage: UpfrontPayment,
+  upfrontPaymentAmountPage: UpfrontPaymentAmount,
+  upfrontSummaryPage: UpfrontSummary)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 
   val upfrontPayment: Action[AnyContent] = as.default { implicit request =>
-    Ok(upfrontPaymentPage())
+    Ok(upfrontPaymentPage(upfrontPaymentForm()))
   }
 
   val upfrontPaymentSubmit: Action[AnyContent] = as.default { implicit request =>
-    Redirect(routes.UpfrontPaymentController.upfrontPayment())
+    upfrontPaymentForm()
+      .bindFromRequest()
+      .fold(
+        formWithErrors =>
+          Ok(
+            upfrontPaymentPage(
+              formWithErrors)),
+        {
+          case "Yes" => Redirect(routes.UpfrontPaymentController.upfrontPaymentAmount())
+          case _ => Redirect(routes.MonthlyPaymentAmountController.monthlyPaymentAmount())
+        })
+
   }
+
+  val upfrontPaymentAmount: Action[AnyContent] = as.default { implicit request =>
+    val form: Form[BigDecimal] = answers.upfrontAmount match {
+      case Some(a: AmountInPence) => upfrontPaymentAmountForm().fill(a.inPounds)
+      case None => upfrontPaymentAmountForm()
+    }
+    Ok(upfrontPaymentAmountPage(form, maximumPaymentAmount, minimumPaymentAmount))
+  }
+
+  val upfrontPaymentAmountSubmit: Action[AnyContent] = as.default { implicit request =>
+    upfrontPaymentAmountForm()
+      .bindFromRequest()
+      .fold(
+        formWithErrors =>
+          Ok(upfrontPaymentAmountPage(formWithErrors, maximumPaymentAmount, minimumPaymentAmount)),
+        (s: BigDecimal) => {
+          answers = FakeSession(
+            originalDebt = AmountInPence(originalDebt),
+            upfrontAmount = Some(AmountInPence((s * 100).longValue())))
+          Redirect(routes.UpfrontPaymentController.upfrontSummary())
+        })
+  }
+
+  val upfrontSummary: Action[AnyContent] = as.default { implicit request =>
+    val remaining: AmountInPence = getRemainingBalance
+    Ok(upfrontSummaryPage(answers, remaining))
+  }
+}
+
+object UpfrontPaymentController {
+  // this value to come from session data/api data from ETMP...
+  val originalDebt: Long = 175050L
+  val maximumPaymentAmount: AmountInPence = AmountInPence(originalDebt)
+  val minimumPaymentAmount: AmountInPence = AmountInPence(100)
+  val key: String = "UpfrontPaymentAmount"
+
+  // temp fake session that should not live in here!
+  var answers: FakeSession = FakeSession(originalDebt = AmountInPence(originalDebt), upfrontAmount = None)
+
+  case class FakeSession(
+    originalDebt: AmountInPence,
+    upfrontAmount: Option[AmountInPence])
+
+  def getRemainingBalance: AmountInPence = {
+    answers.upfrontAmount match {
+      case Some(s: AmountInPence) => AmountInPence(originalDebt - s.value)
+      case _ => AmountInPence(originalDebt)
+    }
+  }
+
+  def upfrontPaymentForm(): Form[String] = Form(
+    mapping(
+      "UpfrontPayment" -> nonEmptyText)(identity)(Some(_)))
+
+  def upfrontPaymentAmountForm(): Form[BigDecimal] = Form(
+    mapping(
+      key -> Forms.of(amountOfMoneyFormatter(minimumPaymentAmount.inPounds > _, maximumPaymentAmount.inPounds < _)))(identity)(Some(_)))
 }

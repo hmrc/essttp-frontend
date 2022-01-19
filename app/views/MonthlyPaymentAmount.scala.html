@@ -1,0 +1,90 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import messages.Messages
+@import requests.RequestSupport
+@import play.api.mvc.RequestHeader
+@import play.api.data.Form
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import controllers.routes
+@import moveittocor.corcommon.model.AmountInPence
+@import play.twirl.api.Html
+
+@this(
+  layout: templates.Layout,
+  govukButton: GovukButton,
+  govukInput: GovukInput,
+  formWithCSRF: FormWithCSRF,
+  govukErrorSummary: GovukErrorSummary,
+  govukDetails : GovukDetails,
+  requestSupport: RequestSupport
+)
+
+@(form: Form[BigDecimal], maximumPayment: AmountInPence, minimumPayment: AmountInPence)(implicit
+  request: RequestHeader
+)
+
+@import requestSupport._
+@key = @{"MonthlyPaymentAmount"}
+@title = @{Messages.MonthlyPaymentAmount.`How much can you afford to pay each month?`.show}
+ @detailsContent = {
+  <p class="govuk-body">@{Messages.MonthlyPaymentAmount.`You may still be able to set up a payment plan...`.show}</p>
+  <p class="govuk-body">@{Html(Messages.MonthlyPaymentAmount.`We recommend you speak to an adviser...`.show)}</p>
+ }
+
+@layout(pageTitle = Some(title), backLocation = Some(routes.UpfrontPaymentController.upfrontPayment()), hasErrors = form.hasErrors) {
+ @if(form.errors.nonEmpty) {
+  @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
+   ErrorLink(
+    href = Some(s"#${e.key}"),
+    content = Text(Messages.MonthlyPaymentAmount.getError(e.message, maximumPayment, minimumPayment).show)
+   )
+  ),
+   title = Text(Messages.`There is a problem`.show)))
+ }
+ @formWithCSRF(action = routes.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit()) {
+
+  @govukInput(Input(
+   id = key,
+   name = key,
+   label = Label(
+    isPageHeading = true,
+    classes = "govuk-label--xl",
+    content = Text(title)
+   ),
+   hint = Some(Hint(
+    content = Text(Messages.MonthlyPaymentAmount.getHint(maximumPayment, minimumPayment).show)
+   )),
+   classes = "govuk-input--width-5",
+   spellcheck = Some(false),
+   prefix = Some(PrefixOrSuffix(
+    content = Text("£")
+   )),
+   errorMessage = form.error(key).map(e => ErrorMessage(
+    content = Text(Messages.MonthlyPaymentAmount.getError(e.message, maximumPayment, minimumPayment).show)
+   )),
+   value = form.data.get(key)
+  ))
+
+  @govukDetails(Details(
+   summary = Text(Messages.MonthlyPaymentAmount.`I can’t afford the minimum payment`.show),
+   content = HtmlContent(detailsContent)
+  ))
+
+  @govukButton(Button(content = Text(Messages.continue.show)))
+ }
+
+}
