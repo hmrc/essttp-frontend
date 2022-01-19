@@ -20,31 +20,50 @@
 @import play.api.data.Form
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import controllers.routes
+@import controllers.PaymentDayController.PaymentDayForm
 
 @this(
   layout: templates.Layout,
   govukButton: GovukButton,
   govukRadios: GovukRadios,
+  govukInput: GovukInput,
   formWithCSRF: FormWithCSRF,
   govukErrorSummary: GovukErrorSummary,
   requestSupport: RequestSupport
 )
 
-@(form: Form[String])(implicit
+@(form: Form[PaymentDayForm])(implicit
   request: RequestHeader
 )
 
 @import requestSupport._
 
 @key = @{"PaymentDay"}
+@differentDayKey = @{"DifferentDay"}
 @title = @{Messages.PaymentDay.`Which day do you want to pay each month?`.show}
+@conditionalHtml = @{
+ govukInput(Input(
+  id = differentDayKey,
+  name = differentDayKey,
+  inputType = "text",
+  classes = "govuk-input--width-2",
+  label = Label(
+   content = Text(Messages.PaymentDay.`Enter a day between 1 and 28`.show)
+  ),
+  spellcheck = Some(false),
+  errorMessage = form.error(differentDayKey).map(e => ErrorMessage(
+   content = Text(Messages.PaymentDay.getError(s"${e.key}.${e.message}").show)
+  )),
+  value = form(differentDayKey).value
+ ))
+}
 
 @layout(pageTitle = Some(title), backLocation = Some(routes.MonthlyPaymentAmountController.monthlyPaymentAmount()), hasErrors = form.hasErrors) {
  @if(form.errors.nonEmpty) {
   @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
    ErrorLink(
     href = Some(s"#${e.key}"),
-    content = Text(Messages.PaymentDay.getError(e.message).show)
+    content = Text(Messages.PaymentDay.getError(s"${e.key}.${e.message}").show)
    )
   ),
    title = Text(Messages.`There is a problem`.show)))
@@ -69,10 +88,11 @@
      RadioItem(
       content = Text(Messages.PaymentDay.`A different day`.show),
       value = Some("other"),
-      checked = form.data.values.toList.contains("other")
+      checked = form.data.values.toList.contains("other"),
+      conditionalHtml = Some(conditionalHtml)
      )
     ),
-    errorMessage = form.error(key).map(e => ErrorMessage(content = Text(Messages.PaymentDay.getError(e.message).show)))
+    errorMessage = form.error(key).map(e => ErrorMessage(content = Text(Messages.PaymentDay.getError(s"${e.key}.${e.message}").show)))
    ))
   @govukButton(Button(content = Text(Messages.continue.show)))
  }

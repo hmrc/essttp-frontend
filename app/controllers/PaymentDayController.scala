@@ -18,8 +18,9 @@ package controllers
 
 import _root_.actions.Actions
 import controllers.PaymentDayController.paymentDayForm
-import play.api.data.Form
+
 import play.api.data.Forms.{ mapping, nonEmptyText }
+
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
@@ -50,7 +51,28 @@ class PaymentDayController @Inject() (
 }
 
 object PaymentDayController {
-  def paymentDayForm(): Form[String] = Form(
+  import play.api.data.{ Form, Mapping }
+  import play.api.data.validation.{ Constraint, Invalid, Valid }
+  import uk.gov.voa.play.form.ConditionalMappings.mandatoryIfEqual
+
+  case class PaymentDayForm(
+    paymentDay: String,
+    differentDay: Option[Int])
+
+  def paymentDayForm(): Form[PaymentDayForm] = Form(
     mapping(
-      "PaymentDay" -> nonEmptyText)(identity)(Some(_)))
+      "PaymentDay" -> nonEmptyText,
+      "DifferentDay" -> mandatoryIfEqual("PaymentDay", "other", differentDayMapping))(PaymentDayForm.apply)(PaymentDayForm.unapply))
+
+  val differentDayMapping: Mapping[Int] = nonEmptyText
+    .transform[Int](
+      day => day.toInt,
+      _.toString)
+    .verifying(
+      Constraint[Int]((day: Int) =>
+        if (day < 1 || day > 28) {
+          Invalid("error.outOfRange")
+        } else {
+          Valid
+        }))
 }
