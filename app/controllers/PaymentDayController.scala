@@ -18,9 +18,9 @@ package controllers
 
 import _root_.actions.Actions
 import controllers.PaymentDayController.paymentDayForm
-
-import play.api.data.Forms.{ mapping, nonEmptyText }
-
+import play.api.data.{ FormError, Forms }
+import play.api.data.Forms.{ mapping, nonEmptyText, number }
+import play.api.data.format.Formatter
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
@@ -28,6 +28,8 @@ import util.Logging
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
 import views.html.PaymentDay
+
+import scala.util.Try
 
 @Singleton
 class PaymentDayController @Inject() (
@@ -51,9 +53,9 @@ class PaymentDayController @Inject() (
 }
 
 object PaymentDayController {
-  import play.api.data.{ Form, Mapping }
-  import play.api.data.validation.{ Constraint, Invalid, Valid }
+  import play.api.data.Form
   import uk.gov.voa.play.form.ConditionalMappings.mandatoryIfEqual
+  import cats.syntax.either._
 
   case class PaymentDayForm(
     paymentDay: String,
@@ -62,17 +64,39 @@ object PaymentDayController {
   def paymentDayForm(): Form[PaymentDayForm] = Form(
     mapping(
       "PaymentDay" -> nonEmptyText,
-      "DifferentDay" -> mandatoryIfEqual("PaymentDay", "other", differentDayMapping))(PaymentDayForm.apply)(PaymentDayForm.unapply))
+      "DifferentDay" -> mandatoryIfEqual("PaymentDay", "other", Forms.of(dayOfMonthFormatter)))(PaymentDayForm.apply)(PaymentDayForm.unapply))
 
-  val differentDayMapping: Mapping[Int] = nonEmptyText
-    .transform[Int](
-      day => day.toInt,
-      _.toString)
-    .verifying(
-      Constraint[Int]((day: Int) =>
-        if (day < 1 || day > 28) {
-          Invalid("error.outOfRange")
-        } else {
-          Valid
-        }))
+  def readValue[T](
+    key: String,
+    data: Map[String, String],
+    f: String => T): Either[FormError, T] =
+    data
+      .get(key)
+      .map(_.trim())
+      .filter(_.nonEmpty)
+      .fold[Either[FormError, T]](Left(FormError(key, "error.required"))) { stringValue =>
+        Either
+          .fromTry(Try(f(stringValue)))
+          .leftMap(_ => FormError(key, "error.invalid"))
+      }
+
+  val dayOfMonthFormatter: Formatter[Int] = {
+    val key = "DifferentDay"
+    def validateDayOfMonth(day: Int): Either[FormError, Int] =
+      if (day < 1 || day > 28) Left(FormError(key, "error.outOfRange"))
+      else Right(day)
+
+    new Formatter[Int] {
+      override def bind(
+        key: String,
+        data: Map[String, String]): Either[Seq[FormError], Int] = {
+        val result =
+          readValue(key, data, _.toInt)
+            .flatMap(validateDayOfMonth)
+        result.leftMap(Seq(_))
+      }
+      override def unbind(key: String, value: Int): Map[String, String] =
+        Map(key -> value.toString)
+    }
+  }
 }
