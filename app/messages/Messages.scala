@@ -159,8 +159,13 @@ object Messages {
     val `A different day`: Message = Message(
       "A different day")
     def getError(key: String): Message = key match {
-      case "error.required" => Message(english = "Select which day of the month you want to pay on")
+      case "PaymentDay.error.required" => Message(english = "Select which day of the month you want to pay on")
+      case "DifferentDay.error.required" => Message(english = "Enter the day you want to pay each month")
+      case "DifferentDay.error.outOfRange" => Message(english = "The day you enter must be between 1 and 28")
+      case "DifferentDay.error.invalid" => Message(english = "The day you enter must be a number")
     }
+    val `Enter a day between 1 and 28`: Message = Message(
+      "Enter a day between 1 and 28")
   }
 }
 
