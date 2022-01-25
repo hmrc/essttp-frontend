@@ -16,15 +16,15 @@
 
 package services
 
-import models.{ Journey, JourneyIdGenerator, JourneyStatuses }
-import moveittocor.corcommon.model.JourneyId
+import models.JourneyIdGenerator
+import moveittocor.corcommon.model.{Journey, JourneyId, JourneyStatuses}
 import play.api.mvc.Request
 import repository.JourneyRepo
 import repository.RepoResultChecker.WriteResultChecker
 
-import java.time.{ Clock, Instant }
-import javax.inject.{ Inject, Singleton }
-import scala.concurrent.{ ExecutionContext, Future }
+import java.time.{Clock, Instant}
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class JourneyService @Inject() (

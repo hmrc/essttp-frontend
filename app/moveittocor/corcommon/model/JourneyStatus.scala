@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
-package models
+package moveittocor.corcommon.model
 
-import moveittocor.corcommon.model.JourneyId
-import play.api.libs.json.{ Json, OFormat }
+import enumeratum.{Enum, _}
+import moveittocor.corcommon.internal.jsonext.EnumFormat
+import play.api.libs.json.Format
 
-import java.time.Instant
+import scala.collection.immutable
 
-final case class Journey(
-  _id: JourneyId,
-  createdDate: Instant,
-  lastUpdated: Instant = Instant.now,
-  status: JourneyStatus) {
-  def id: JourneyId = _id
+sealed trait JourneyStatus extends EnumEntry
+
+object JourneyStatus {
+  implicit val format: Format[JourneyStatus] = EnumFormat(JourneyStatuses)
 }
 
-object Journey {
-  implicit val format: OFormat[Journey] = Json.format[Journey]
+object JourneyStatuses extends Enum[JourneyStatus] {
+  case object Created extends JourneyStatus
+  case object InProgress extends JourneyStatus
+  case object Finished extends JourneyStatus
+
+  override def values: immutable.IndexedSeq[JourneyStatus] = findValues
 }

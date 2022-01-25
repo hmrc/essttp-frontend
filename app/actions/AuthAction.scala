@@ -14,29 +14,27 @@
  * limitations under the License.
  */
 
-package controllers.actions
+package actions
 
-import com.google.inject.{ Inject, Singleton }
+import com.google.inject.{Inject, Singleton}
 import config.AppConfig
 import error.ErrorResponses
 import login.LoginSupport
 import play.api.Environment
 import play.api.mvc.Results.Redirect
 import play.api.mvc._
+import requests.RequestSupport._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.{ AuthorisationException, AuthorisedFunctions, Enrolments, NoActiveSession }
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.http.HeaderCarrierConverter
+import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions, Enrolments, NoActiveSession}
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 import util.Logging
 
-import scala.concurrent.{ ExecutionContext, Future }
-import requests.RequestSupport._
-import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
+import scala.concurrent.{ExecutionContext, Future}
 
 final case class AuthenticatedRequest[A](
   request: MessagesRequest[A]) extends WrappedRequest[A](request)
 
-import play.api.mvc.{ Request, WrappedRequest }
+import play.api.mvc.{Request, WrappedRequest}
 
 class EnrollmentsRequest[A](
   val request: Request[A],

@@ -34,5 +34,5 @@ final case class Message(
 
 object Message {
   def apply(english: String, welsh: String): Message = Message(english, Option(welsh))
-  def apply(english: String): Message = Message(english, None)
+  //def apply(english: String): Message = Message(english, None)
 }

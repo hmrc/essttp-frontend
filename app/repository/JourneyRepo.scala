@@ -17,13 +17,12 @@
 package repository
 
 import config.AppConfig
-import models.Journey
-import moveittocor.corcommon.model.JourneyId
+import moveittocor.corcommon.model.{Journey, JourneyId}
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes._
 import reactivemongo.bson.BSONDocument
 
-import javax.inject.{ Inject, Singleton }
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
