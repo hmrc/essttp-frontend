@@ -16,6 +16,8 @@
 
 package messages
 
+import java.time.LocalDate
+
 object DateMessages {
 
   //the same as dd MMMM yy
@@ -66,5 +68,37 @@ object DateMessages {
   def december(day: Int, year: String): Message = Message(
     english = s"$day December $year",
     welsh = s"$day Rhagfyr $year")
+
+  def getMonthName(month: Int): Message = month match {
+    case 1 => Message("January")
+    case 2 => Message("February")
+    case 3 => Message("March")
+    case 4 => Message("April")
+    case 5 => Message("May")
+    case 6 => Message("June")
+    case 7 => Message("July")
+    case 8 => Message("August")
+    case 9 => Message("September")
+    case 10 => Message("October")
+    case 11 => Message("November")
+    case 12 => Message("December")
+    case _ => Message("Invalid")
+  }
+
+  def getShortMonthName(month: Int): Message = month match {
+    case 1 => Message("Jan")
+    case 2 => Message("Feb")
+    case 3 => Message("Mar")
+    case 4 => Message("Apr")
+    case 5 => Message("May")
+    case 6 => Message("Jun")
+    case 7 => Message("Jul")
+    case 8 => Message("Aug")
+    case 9 => Message("Sep")
+    case 10 => Message("Oct")
+    case 11 => Message("Nov")
+    case 12 => Message("Dec")
+    case _ => Message("Invalid")
+  }
 
 }

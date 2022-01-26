@@ -18,30 +18,34 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import controllers.routes
 @import views.html.templates.Layout
+@import views.html.EPaye.components.OverduePaymentRow
 @import messages.Messages
-@import moveittocor.corcommon.model.AmountInPence
 @import requests.RequestSupport
+@import controllers.EPayeStartController.OverduePayments
 
 @this(
   layout: Layout,
   govukButton: GovukButton,
   formWithCSRF: FormWithCSRF,
-  requestSupport: RequestSupport
+  requestSupport: RequestSupport,
+  overduePaymentRow: OverduePaymentRow
 )
 
 @(
-  outstandingAmount: AmountInPence)(implicit
+  overduePayments: OverduePayments)(implicit
   request: Request[_]
 )
 
 @import requestSupport._
 
 
-@title= @{Messages.yourBillIs(outstandingAmount).show}
+@title= @{Messages.yourBillIs(overduePayments.total).show}
 
 @layout(pageTitle = Some(title)) {
   <h1 class="govuk-heading-xl">@title</h1>
-  <p class="govuk-body">@{Messages.example_content_in_english.show}</p>
+  <dl class="govuk-summary-list">
+    @overduePayments.payments.map(payment => overduePaymentRow(payment))
+  </dl>
   @formWithCSRF(action = routes.EPayeStartController.ePayeStartSubmit()) {
   @govukButton(Button(content = Text(Messages.continue.show)))
  }
