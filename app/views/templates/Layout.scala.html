@@ -68,12 +68,9 @@
 
     @scripts = {
       @scriptsBlock.getOrElse(Html(""))
-      @Html(s"""<script src="${controllers.routes.Assets.versioned("javascripts/application.js")}" ${CSPNonce.attr}></script>""")
     }
 
     @beforeContentBlock = {
-
-    @languageSelection()
 
     @govukPhaseBanner(PhaseBanner(
       tag = Some(Tag(
@@ -81,12 +78,14 @@
       )),
       content = HtmlContent(Messages.ServicePhase.bannerText(appConfig.Urls.betaFeedbackUrl(request)).show)
     ))
+    @languageSelection()
     @{
       backLocation map { back =>
         govukBackLink(BackLink(href = back.url, attributes = Map("id" -> "back")))
       }
     }
-    @{if(appConfig.welshLanguageSupportEnabled) Some(hmrcLanguageSelectHelper()) else None}
+
+
     }
 
     @content = {

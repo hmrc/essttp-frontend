@@ -39,21 +39,27 @@ supporting typesafe `language.Language`
 
 @import requestSupport._
 
-<p id="language-selection" class="print-hide lang-toggle">
+<nav class="hmrc-language-select" aria-label="Language switcher">
+<ul class="hmrc-language-select__list">
 
   @Languages.availableLanguages.map { language: Language =>
     @if(requestSupport.lang(request).code != language.code) {
+      <li class="hmrc-language-select__list-item">
       @Link.toInternalPage(
         id = Some(s"${language.code}-switch"),
         url = s"${langswitch.routes.LanguageSwitchController.switchToLanguage(language)}",
         value = Some(language.label),
         dataAttributes = appName.map(name => Map("journey-click" -> s"$name:language: ${language.code}"))
       ).toHtml
+      </li>
     } else {
-      @language.label
-    }
-    @if(language != Languages.availableLanguages.lastOption.getOrElse(throw new RuntimeException("At least two languages are required when using this twirl template"))) {
-      @Html(" | ")
+      <li class="hmrc-language-select__list-item">
+        <span aria-current="true">
+          @language.label
+        </span>
+      </li>
     }
   }
-</p>
+
+</ul>
+</nav>
