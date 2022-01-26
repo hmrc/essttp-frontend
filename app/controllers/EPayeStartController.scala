@@ -18,17 +18,15 @@ package controllers
 
 import _root_.actions.Actions
 import moveittocor.corcommon.model.AmountInPence
-import play.api.i18n.I18nSupport
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents, Request }
+import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.EPaye.EPayeStartPage
 
 import java.time.LocalDate
 import javax.inject.{ Inject, Singleton }
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.ExecutionContext
 import controllers.EPayeStartController._
-import messages.{ DateMessages, Messages }
 
 @Singleton
 class EPayeStartController @Inject() (
