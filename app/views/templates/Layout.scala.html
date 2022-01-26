@@ -38,7 +38,8 @@
         hmrcLanguageSelectHelper: HmrcLanguageSelectHelper,
         hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
         hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper,
-        requestSupport: RequestSupport
+        requestSupport: RequestSupport,
+        languageSelection: views.html.partials.language_selection
 )
 @(pageTitle: Option[String] = None,
         headBlock: Option[Html] = None,
@@ -71,6 +72,9 @@
     }
 
     @beforeContentBlock = {
+
+    @languageSelection()
+
     @govukPhaseBanner(PhaseBanner(
       tag = Some(Tag(
         content = Text(Messages.ServicePhase.beta.show)
@@ -86,9 +90,13 @@
     }
 
     @content = {
+
+
+
       <div class="govuk-!-margin-bottom-6">
       @contentBlock
       </div>
+
 
     @hmrcReportTechnicalIssueHelper()
   }

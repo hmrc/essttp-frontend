@@ -48,7 +48,7 @@ object Language {
 
 object Languages extends Enum[Language] {
 
-  val availableLanguages = List(English, Welsh)
+  val availableLanguages: List[Language] = List(English, Welsh)
 
   override def values: immutable.IndexedSeq[Language] = findValues
 
