@@ -60,9 +60,6 @@ object Messages {
   def yourBillIs(amount: AmountInPence): Message = Message(
     s"Your PAYE bill is ${amount.formatInPounds}")
 
-  val example_content_in_english: Message = Message(
-    s"Example content in english")
-
   object TimeOut {
     val `For your security, we signed you out`: Message = Message(
       english = "For your security, we signed you out")
