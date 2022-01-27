@@ -1,0 +1,46 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import messages.{ Messages, DateMessages }
+@import controllers.EPayeStartController.OverduePayment
+@import play.api.mvc.Request
+@import requests.RequestSupport
+@import java.time.LocalDate
+
+@this(requestSupport: RequestSupport)
+
+@(payment: OverduePayment)(implicit request: Request[_])
+
+@import requestSupport._
+
+@invoicePeriodDate(date: LocalDate) = @{s"${date.getDayOfMonth} ${DateMessages.shortMonthName(date.getMonthValue).show}"}
+@invoicePeriodString = @{s"${invoicePeriodDate(payment.invoicePeriod.start)} ${Messages.to.show} ${invoicePeriodDate(payment.invoicePeriod.end)} (${Messages.month.show} ${payment.invoicePeriod.monthNumber.toString})"}
+@govDateFormat(date: LocalDate) = @{s"${date.getDayOfMonth} ${DateMessages.monthName(date.getMonthValue).show} ${date.getYear.toString}"}
+
+<div class="govuk-summary-list__row">
+  <dt class="govuk-summary-list__key govuk-!-width-two-thirds">
+    @invoicePeriodString<br>
+    <span class="govuk-!-font-weight-regular govuk-!-font-size-16">
+      @{Messages.`Bill due`.show} @{govDateFormat(payment.invoicePeriod.dueDate)}
+    </span>
+  </dt>
+  <dd class="govuk-summary-list__value">
+    @{payment.amount.formatInPounds}<br>
+    <span class="govuk-!-font-size-16">
+      @{Messages.`(includes interest added to date)`.show}
+    </span>
+  </dd>
+</div>

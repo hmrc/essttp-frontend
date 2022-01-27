@@ -67,4 +67,32 @@ object DateMessages {
     english = s"$day December $year",
     welsh = s"$day Rhagfyr $year")
 
+  val monthName: Map[Int, Message] = Map(
+    1 -> Message("January"),
+    2 -> Message("February"),
+    3 -> Message("March"),
+    4 -> Message("April"),
+    5 -> Message("May"),
+    6 -> Message("June"),
+    7 -> Message("July"),
+    8 -> Message("August"),
+    9 -> Message("September"),
+    10 -> Message("October"),
+    11 -> Message("November"),
+    12 -> Message("December"))
+
+  val shortMonthName: Map[Int, Message] = Map(
+    1 -> Message("Jan"),
+    2 -> Message("Feb"),
+    3 -> Message("Mar"),
+    4 -> Message("Apr"),
+    5 -> Message("May"),
+    6 -> Message("Jun"),
+    7 -> Message("Jul"),
+    8 -> Message("Aug"),
+    9 -> Message("Sep"),
+    10 -> Message("Oct"),
+    11 -> Message("Nov"),
+    12 -> Message("Dec"))
+
 }

@@ -51,11 +51,14 @@ object Messages {
   val `There is a problem`: Message = Message(
     "There is a problem")
 
+  val to: Message = Message("to")
+  val month: Message = Message("month")
+  val `Bill due`: Message = Message("Bill due")
+  val `(includes interest added to date)`: Message = Message(
+    "(includes interest added to date)")
+
   def yourBillIs(amount: AmountInPence): Message = Message(
     s"Your PAYE bill is ${amount.formatInPounds}")
-
-  val example_content_in_english: Message = Message(
-    s"Example content in english")
 
   object TimeOut {
     val `For your security, we signed you out`: Message = Message(

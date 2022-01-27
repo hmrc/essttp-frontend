@@ -18,14 +18,15 @@ package controllers
 
 import _root_.actions.Actions
 import moveittocor.corcommon.model.AmountInPence
-import play.api.i18n.I18nSupport
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents, Request }
+import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.EPaye.EPayeStartPage
 
+import java.time.LocalDate
 import javax.inject.{ Inject, Singleton }
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.ExecutionContext
+import controllers.EPayeStartController._
 
 @Singleton
 class EPayeStartController @Inject() (
@@ -36,13 +37,43 @@ class EPayeStartController @Inject() (
   with Logging {
 
   val ePayeStart: Action[AnyContent] = as.default { implicit request =>
-
-    val amountInPence = AmountInPence(175050)
-    Ok(ePayeStartPage(amountInPence))
+    val overduePayments = OverduePayments(
+      total = AmountInPence(175050),
+      payments = List(
+        OverduePayment(
+          InvoicePeriod(
+            monthNumber = 7,
+            dueDate = LocalDate.of(2022, 1, 22),
+            start = LocalDate.of(2021, 11, 6),
+            end = LocalDate.of(2021, 12, 5)),
+          amount = AmountInPence(75021)),
+        OverduePayment(
+          InvoicePeriod(
+            monthNumber = 8,
+            dueDate = LocalDate.of(2021, 12, 22),
+            start = LocalDate.of(2021, 10, 6),
+            end = LocalDate.of(2021, 11, 5)),
+          amount = AmountInPence(100029))))
+    Ok(ePayeStartPage(overduePayments))
   }
 
   val ePayeStartSubmit: Action[AnyContent] = as.default { implicit request =>
     Redirect(routes.UpfrontPaymentController.upfrontPayment())
   }
+
+}
+
+object EPayeStartController {
+  case class OverduePayments(
+    total: AmountInPence,
+    payments: List[OverduePayment])
+  case class OverduePayment(
+    invoicePeriod: InvoicePeriod,
+    amount: AmountInPence)
+  case class InvoicePeriod(
+    monthNumber: Int,
+    start: LocalDate,
+    end: LocalDate,
+    dueDate: LocalDate)
 
 }
