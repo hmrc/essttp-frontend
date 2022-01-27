@@ -26,9 +26,9 @@
 
 @import requestSupport._
 
-@invoicePeriodDate(date: LocalDate) = @{s"${date.getDayOfMonth} ${DateMessages.getShortMonthName(date.getMonthValue).show}"}
+@invoicePeriodDate(date: LocalDate) = @{s"${date.getDayOfMonth} ${DateMessages.shortMonthName(date.getMonthValue).show}"}
 @invoicePeriodString = @{s"${invoicePeriodDate(payment.invoicePeriod.start)} ${Messages.to.show} ${invoicePeriodDate(payment.invoicePeriod.end)} (${Messages.month.show} ${payment.invoicePeriod.monthNumber.toString})"}
-@govDisplayFormat(date: LocalDate) = @{s"${date.getDayOfMonth} ${DateMessages.getMonthName(date.getMonthValue).show} ${date.getYear.toString}"}
+@govDisplayFormat(date: LocalDate) = @{s"${date.getDayOfMonth} ${DateMessages.monthName(date.getMonthValue).show} ${date.getYear.toString}"}
 
 <div class="govuk-summary-list__row">
   <dt class="govuk-summary-list__key govuk-!-width-two-thirds">

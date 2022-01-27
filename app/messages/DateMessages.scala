@@ -69,36 +69,32 @@ object DateMessages {
     english = s"$day December $year",
     welsh = s"$day Rhagfyr $year")
 
-  def getMonthName(month: Int): Message = month match {
-    case 1 => Message("January")
-    case 2 => Message("February")
-    case 3 => Message("March")
-    case 4 => Message("April")
-    case 5 => Message("May")
-    case 6 => Message("June")
-    case 7 => Message("July")
-    case 8 => Message("August")
-    case 9 => Message("September")
-    case 10 => Message("October")
-    case 11 => Message("November")
-    case 12 => Message("December")
-    case _ => Message("Invalid")
-  }
+  val monthName: Map[Int, Message] = Map(
+    1 -> Message("January"),
+    2 -> Message("February"),
+    3 -> Message("March"),
+    4 -> Message("April"),
+    5 -> Message("May"),
+    6 -> Message("June"),
+    7 -> Message("July"),
+    8 -> Message("August"),
+    9 -> Message("September"),
+    10 -> Message("October"),
+    11 -> Message("November"),
+    12 -> Message("December"))
 
-  def getShortMonthName(month: Int): Message = month match {
-    case 1 => Message("Jan")
-    case 2 => Message("Feb")
-    case 3 => Message("Mar")
-    case 4 => Message("Apr")
-    case 5 => Message("May")
-    case 6 => Message("Jun")
-    case 7 => Message("Jul")
-    case 8 => Message("Aug")
-    case 9 => Message("Sep")
-    case 10 => Message("Oct")
-    case 11 => Message("Nov")
-    case 12 => Message("Dec")
-    case _ => Message("Invalid")
-  }
+  val shortMonthName: Map[Int, Message] = Map(
+    1 -> Message("Jan"),
+    2 -> Message("Feb"),
+    3 -> Message("Mar"),
+    4 -> Message("Apr"),
+    5 -> Message("May"),
+    6 -> Message("Jun"),
+    7 -> Message("Jul"),
+    8 -> Message("Aug"),
+    9 -> Message("Sep"),
+    10 -> Message("Oct"),
+    11 -> Message("Nov"),
+    12 -> Message("Dec"))
 
 }
