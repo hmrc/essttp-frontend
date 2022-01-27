@@ -28,13 +28,13 @@
 
 @invoicePeriodDate(date: LocalDate) = @{s"${date.getDayOfMonth} ${DateMessages.shortMonthName(date.getMonthValue).show}"}
 @invoicePeriodString = @{s"${invoicePeriodDate(payment.invoicePeriod.start)} ${Messages.to.show} ${invoicePeriodDate(payment.invoicePeriod.end)} (${Messages.month.show} ${payment.invoicePeriod.monthNumber.toString})"}
-@govDisplayFormat(date: LocalDate) = @{s"${date.getDayOfMonth} ${DateMessages.monthName(date.getMonthValue).show} ${date.getYear.toString}"}
+@govDateFormat(date: LocalDate) = @{s"${date.getDayOfMonth} ${DateMessages.monthName(date.getMonthValue).show} ${date.getYear.toString}"}
 
 <div class="govuk-summary-list__row">
   <dt class="govuk-summary-list__key govuk-!-width-two-thirds">
     @invoicePeriodString<br>
     <span class="govuk-!-font-weight-regular govuk-!-font-size-16">
-      @{Messages.`Bill due`.show} @{govDisplayFormat(payment.invoicePeriod.dueDate)}
+      @{Messages.`Bill due`.show} @{govDateFormat(payment.invoicePeriod.dueDate)}
     </span>
   </dt>
   <dd class="govuk-summary-list__value">
