@@ -58,6 +58,8 @@ class EPayeStartController @Inject() (
   }
 
   val ePayeStartSubmit: Action[AnyContent] = as.default { implicit request =>
+    // this is where we start journey - use JourneyService.newJourney() and upsert but how to do that here?
+
     Redirect(routes.UpfrontPaymentController.upfrontPayment())
   }
 

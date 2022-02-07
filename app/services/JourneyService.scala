@@ -16,8 +16,8 @@
 
 package services
 
-import models.{ Journey, JourneyIdGenerator, JourneyStatuses }
-import moveittocor.corcommon.model.JourneyId
+import models.{ Journey, JourneyIdGenerator, JourneyStatuses, UserAnswers }
+import moveittocor.corcommon.model.{ AmountInPence, JourneyId }
 import play.api.mvc.Request
 import repository.JourneyRepo
 import repository.RepoResultChecker.WriteResultChecker
@@ -55,10 +55,12 @@ class JourneyService @Inject() (
       .upsert(journey._id, journey)
       .checkResult
 
-  def newJourney(): Journey = Journey(
+  def newJourney(qualifyingDebt: AmountInPence): Journey = Journey(
     _id = journeyIdGenerator.nextJourneyId(),
     createdDate = Instant.now(clock),
     lastUpdated = Instant.now(clock),
-    status = JourneyStatuses.Created)
+    status = JourneyStatuses.Created,
+    qualifyingDebt = qualifyingDebt,
+    userAnswers = UserAnswers.empty)
 
 }
