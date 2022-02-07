@@ -38,7 +38,8 @@
         hmrcLanguageSelectHelper: HmrcLanguageSelectHelper,
         hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
         hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper,
-        requestSupport: RequestSupport
+        requestSupport: RequestSupport,
+        languageSelection: views.html.partials.language_selection
 )
 @(pageTitle: Option[String] = None,
         headBlock: Option[Html] = None,
@@ -67,28 +68,34 @@
 
     @scripts = {
       @scriptsBlock.getOrElse(Html(""))
-      @Html(s"""<script src="${controllers.routes.Assets.versioned("javascripts/application.js")}" ${CSPNonce.attr}></script>""")
     }
 
     @beforeContentBlock = {
+
     @govukPhaseBanner(PhaseBanner(
       tag = Some(Tag(
         content = Text(Messages.ServicePhase.beta.show)
       )),
       content = HtmlContent(Messages.ServicePhase.bannerText(appConfig.Urls.betaFeedbackUrl(request)).show)
     ))
+    @languageSelection()
     @{
       backLocation map { back =>
         govukBackLink(BackLink(href = back.url, attributes = Map("id" -> "back")))
       }
     }
-    @{if(appConfig.welshLanguageSupportEnabled) Some(hmrcLanguageSelectHelper()) else None}
+
+
     }
 
     @content = {
+
+
+
       <div class="govuk-!-margin-bottom-6">
       @contentBlock
       </div>
+
 
     @hmrcReportTechnicalIssueHelper()
   }
