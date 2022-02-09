@@ -17,7 +17,7 @@
 @import config.AppConfig
 @import requests.RequestSupport
 @import messages.Messages
-@import play.api.mvc.RequestHeader
+@import play.api.mvc.Request
 
 @this(
   layout: templates.Layout,
@@ -25,7 +25,7 @@
   requestSupport: RequestSupport
 )
 
-@()(implicit request: RequestHeader)
+@()(implicit request: Request[_])
 
 @import requestSupport._
 

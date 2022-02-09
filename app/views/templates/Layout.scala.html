@@ -20,7 +20,7 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
 
-@import play.api.mvc.{Call, RequestHeader}
+@import play.api.mvc.{Call, Request}
 @import play.twirl.api.Html
 
 @import requests.RequestSupport
@@ -47,7 +47,7 @@
         backLocation: Option[Call] = None,
         hasErrors: Boolean = false,
         showSignOutLink: Boolean = true
-)(contentBlock: Html)(implicit request: RequestHeader)
+)(contentBlock: Html)(implicit request: Request[_])
 
 @import requestSupport._
 
@@ -72,18 +72,18 @@
 
     @beforeContentBlock = {
 
-    @govukPhaseBanner(PhaseBanner(
-      tag = Some(Tag(
-        content = Text(Messages.ServicePhase.beta.show)
-      )),
-      content = HtmlContent(Messages.ServicePhase.bannerText(appConfig.Urls.betaFeedbackUrl(request)).show)
-    ))
-    @languageSelection()
-    @{
-      backLocation map { back =>
-        govukBackLink(BackLink(href = back.url, attributes = Map("id" -> "back")))
+      @govukPhaseBanner(PhaseBanner(
+        tag = Some(Tag(
+          content = Text(Messages.ServicePhase.beta.show)
+        )),
+        content = HtmlContent(Messages.ServicePhase.bannerText(appConfig.Urls.betaFeedbackUrl(request)).show)
+      ))
+      @languageSelection()
+      @{
+        backLocation map { back =>
+          govukBackLink(BackLink(href = back.url, attributes = Map("id" -> "back")))
+        }
       }
-    }
 
 
     }
@@ -107,7 +107,7 @@
   @govukLayout(
     pageTitle = Some(documentTitle),
     headBlock = Some(hmrcHead(headBlock = Some(head), nonce = CSPNonce.get)),
-    headerBlock = Some(hmrcStandardHeader(signOutUrl = if(showSignOutLink) Some(appConfig.Urls.signOutUrl) else None)),
+    headerBlock = Some(hmrcStandardHeader(serviceName = Some(Messages.ServicePhase.`Set up a payment plan`.show), signOutUrl = if(showSignOutLink) Some(appConfig.Urls.signOutUrl) else None)),
     scriptsBlock = Some(hmrcScripts(scriptsBlock = Some(scripts), nonce = CSPNonce.get)),
     beforeContentBlock = Some(beforeContentBlock),
     footerBlock = Some(hmrcStandardFooter())

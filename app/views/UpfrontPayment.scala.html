@@ -16,7 +16,7 @@
 
 @import messages.Messages
 @import requests.RequestSupport
-@import play.api.mvc.RequestHeader
+@import play.api.mvc.Request
 @import play.api.data.Form
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import controllers.routes
@@ -31,7 +31,7 @@
 )
 
 @(form: Form[String])(implicit
-  request: RequestHeader
+  request: Request[_]
 )
 
 @import requestSupport._
