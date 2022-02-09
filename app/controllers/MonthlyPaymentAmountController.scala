@@ -60,7 +60,13 @@ class MonthlyPaymentAmountController @Inject() (
               Future.successful(Ok(
                 monthlyPaymentAmountPage(
                   formWithErrors, j.remainingToPay, AmountInPence(j.remainingToPay.value / 6)))),
-            _ => Future(Redirect(routes.PaymentDayController.paymentDay())))
+            (s: BigDecimal) => {
+              journeyService.upsert(
+                j.copy(
+                  userAnswers = j.userAnswers.copy(
+                    affordableAmount = Some(AmountInPence((s * 100).longValue())))))
+              Future(Redirect(routes.PaymentDayController.paymentDay()))
+            })
       case _ => sys.error("no journey to update")
     }
   }

@@ -170,5 +170,21 @@ object Messages {
     val `Enter a day between 1 and 28`: Message = Message(
       "Enter a day between 1 and 28")
   }
+
+  object Instalments {
+    val `How many months do you want to pay over?`: Message = Message(
+      "How many months do you want to pay over?")
+    def getInstalmentOption(numberOfMonths: Int, amount: AmountInPence): Message = Message(
+      s"$numberOfMonths month${if (numberOfMonths > 1) "s" else ""} at ${amount.formatInPounds}")
+    val `Estimated total interest:`: Message = Message(
+      "Estimated total interest:")
+    val `Base rate + 2.5%`: Message = Message(
+      "Base rate + 2.5%")
+    val `added to the final payment`: Message = Message(
+      "added to the final payment")
+    def getError(key: String): Message = key match {
+      case "error.required" => Message(english = "Select how many months you want to pay over")
+    }
+  }
 }
 

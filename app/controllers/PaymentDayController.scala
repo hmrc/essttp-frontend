@@ -19,7 +19,7 @@ package controllers
 import _root_.actions.Actions
 import controllers.PaymentDayController.paymentDayForm
 import play.api.data.{ FormError, Forms }
-import play.api.data.Forms.{ mapping, nonEmptyText, number }
+import play.api.data.Forms.{ mapping, nonEmptyText }
 import play.api.data.format.Formatter
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -48,7 +48,7 @@ class PaymentDayController @Inject() (
       .bindFromRequest()
       .fold(
         formWithErrors => Ok(paymentDayPage(formWithErrors)),
-        _ => Ok("this is as far as we go for now..."))
+        _ => Redirect(routes.InstalmentsController.instalmentOptions()))
   }
 }
 

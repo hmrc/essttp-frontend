@@ -22,7 +22,9 @@ import play.api.libs.json.{ Format, Json }
 case class UserAnswers(
   hasUpfrontPayment: Option[Boolean],
   upfrontAmount: Option[AmountInPence],
-  affordableAmount: Option[AmountInPence])
+  affordableAmount: Option[AmountInPence]) {
+  def getAffordableAmount: AmountInPence = affordableAmount.getOrElse(sys.error("trying to get non-exisent affordable amount"))
+}
 object UserAnswers {
 
   val empty: UserAnswers = UserAnswers(None, None, None)
