@@ -17,28 +17,35 @@
 package controllers
 
 import _root_.actions.Actions
-import controllers.UpfrontPaymentController._
+import controllers.UpfrontPaymentController.{ upfrontPaymentAmountForm, upfrontPaymentForm }
+import models.Journey
 import models.MoneyUtil.amountOfMoneyFormatter
 import moveittocor.corcommon.model.AmountInPence
 import play.api.data.{ Form, Forms }
 import play.api.data.Forms.{ mapping, nonEmptyText }
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents, Request }
+import requests.{ JourneyRequest, RequestSupport }
+import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.{ UpfrontPayment, UpfrontPaymentAmount, UpfrontSummary }
 
 import javax.inject.{ Inject, Singleton }
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
 class UpfrontPaymentController @Inject() (
   as: Actions,
   mcc: MessagesControllerComponents,
+  journeyService: JourneyService,
+  requestSupport: RequestSupport,
   upfrontPaymentPage: UpfrontPayment,
   upfrontPaymentAmountPage: UpfrontPaymentAmount,
   upfrontSummaryPage: UpfrontSummary)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
+
+  import requestSupport._
 
   val upfrontPayment: Action[AnyContent] = as.default { implicit request =>
     Ok(upfrontPaymentPage(upfrontPaymentForm()))
@@ -53,66 +60,66 @@ class UpfrontPaymentController @Inject() (
             upfrontPaymentPage(
               formWithErrors)),
         {
-          case "Yes" => Redirect(routes.UpfrontPaymentController.upfrontPaymentAmount())
+          case "Yes" =>
+            Redirect(routes.UpfrontPaymentController.upfrontPaymentAmount())
           case _ => Redirect(routes.MonthlyPaymentAmountController.monthlyPaymentAmount())
         })
 
   }
 
-  val upfrontPaymentAmount: Action[AnyContent] = as.default { implicit request =>
-    val form: Form[BigDecimal] = answers.upfrontAmount match {
-      case Some(a: AmountInPence) => upfrontPaymentAmountForm().fill(a.inPounds)
-      case None => upfrontPaymentAmountForm()
+  val upfrontPaymentAmount: Action[AnyContent] = as.default.async { implicit request =>
+    val journey: Future[Journey] = journeyService.get()
+    journey.flatMap {
+      case j: Journey =>
+        val form: Form[BigDecimal] = j.userAnswers.upfrontAmount match {
+          case Some(a: AmountInPence) => upfrontPaymentAmountForm(j).fill(a.inPounds)
+          case None => upfrontPaymentAmountForm(j)
+        }
+        Future.successful(Ok(upfrontPaymentAmountPage(form, j.qualifyingDebt, AmountInPence(100L))))
+      case _ => sys.error("no journey found to use")
     }
-    Ok(upfrontPaymentAmountPage(form, maximumPaymentAmount, minimumPaymentAmount))
   }
 
-  val upfrontPaymentAmountSubmit: Action[AnyContent] = as.default { implicit request =>
-    upfrontPaymentAmountForm()
-      .bindFromRequest()
-      .fold(
-        formWithErrors =>
-          Ok(upfrontPaymentAmountPage(formWithErrors, maximumPaymentAmount, minimumPaymentAmount)),
-        (s: BigDecimal) => {
-          answers = FakeSession(
-            originalDebt = AmountInPence(originalDebt),
-            upfrontAmount = Some(AmountInPence((s * 100).longValue())))
-          Redirect(routes.UpfrontPaymentController.upfrontSummary())
-        })
+  val upfrontPaymentAmountSubmit: Action[AnyContent] = as.getJourney.async { implicit request =>
+    val journey: Future[Journey] = journeyService.get()
+    journey.flatMap {
+      case j: Journey =>
+        upfrontPaymentAmountForm(j)
+          .bindFromRequest()
+          .fold(
+            formWithErrors =>
+              Future.successful(Ok(upfrontPaymentAmountPage(formWithErrors, j.qualifyingDebt, AmountInPence(100L)))),
+            (s: BigDecimal) => {
+              journeyService.upsert(
+                j.copy(
+                  remainingToPay = AmountInPence(j.qualifyingDebt.value - (s.longValue() * 100)),
+                  userAnswers = j.userAnswers.copy(
+                    upfrontAmount = Some(AmountInPence((s * 100).longValue())))))
+              Future(Redirect(routes.UpfrontPaymentController.upfrontSummary()))
+            })
+      case _ => sys.error("no journey found to update")
+    }
+
   }
 
-  val upfrontSummary: Action[AnyContent] = as.default { implicit request =>
-    val remaining: AmountInPence = getRemainingBalance
-    Ok(upfrontSummaryPage(answers, remaining))
+  val upfrontSummary: Action[AnyContent] = as.getJourney.async { implicit request =>
+    val journey: Future[Journey] = journeyService.get()
+    journey.flatMap {
+      case j: Journey =>
+        Future.successful(Ok(upfrontSummaryPage(j.userAnswers, j.remainingToPay)))
+      case _ => sys.error("no journey to update")
+    }
   }
 }
 
 object UpfrontPaymentController {
-  // this value to come from session data/api data from ETMP...
-  val originalDebt: Long = 175050L
-  val maximumPaymentAmount: AmountInPence = AmountInPence(originalDebt)
-  val minimumPaymentAmount: AmountInPence = AmountInPence(100)
   val key: String = "UpfrontPaymentAmount"
-
-  // temp fake session that should not live in here!
-  var answers: FakeSession = FakeSession(originalDebt = AmountInPence(originalDebt), upfrontAmount = None)
-
-  case class FakeSession(
-    originalDebt: AmountInPence,
-    upfrontAmount: Option[AmountInPence])
-
-  def getRemainingBalance: AmountInPence = {
-    answers.upfrontAmount match {
-      case Some(s: AmountInPence) => AmountInPence(originalDebt - s.value)
-      case _ => AmountInPence(originalDebt)
-    }
-  }
 
   def upfrontPaymentForm(): Form[String] = Form(
     mapping(
       "UpfrontPayment" -> nonEmptyText)(identity)(Some(_)))
 
-  def upfrontPaymentAmountForm(): Form[BigDecimal] = Form(
+  def upfrontPaymentAmountForm(journey: Journey): Form[BigDecimal] = Form(
     mapping(
-      key -> Forms.of(amountOfMoneyFormatter(minimumPaymentAmount.inPounds > _, maximumPaymentAmount.inPounds < _)))(identity)(Some(_)))
+      key -> Forms.of(amountOfMoneyFormatter(AmountInPence(100L).inPounds > _, journey.qualifyingDebt.inPounds < _)))(identity)(Some(_)))
 }

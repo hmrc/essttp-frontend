@@ -27,6 +27,7 @@ final case class Journey(
   lastUpdated: Instant = Instant.now,
   status: JourneyStatus,
   qualifyingDebt: AmountInPence,
+  remainingToPay: AmountInPence,
   userAnswers: UserAnswers) {
   def id: JourneyId = _id
 }

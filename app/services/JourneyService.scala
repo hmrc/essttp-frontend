@@ -61,6 +61,7 @@ class JourneyService @Inject() (
     lastUpdated = Instant.now(clock),
     status = JourneyStatuses.Created,
     qualifyingDebt = qualifyingDebt,
+    remainingToPay = qualifyingDebt,
     userAnswers = UserAnswers.empty)
 
 }

@@ -18,53 +18,58 @@ package controllers
 
 import _root_.actions.Actions
 import controllers.MonthlyPaymentAmountController._
-import controllers.UpfrontPaymentController.getRemainingBalance
+import models.Journey
 import models.MoneyUtil._
 import moveittocor.corcommon.model.AmountInPence
 import play.api.data.{ Form, Forms }
 import play.api.data.Forms.mapping
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.MonthlyPaymentAmount
 
 import javax.inject.{ Inject, Singleton }
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ ExecutionContext, Future }
 @Singleton
 class MonthlyPaymentAmountController @Inject() (
   as: Actions,
   mcc: MessagesControllerComponents,
+  journeyService: JourneyService,
   monthlyPaymentAmountPage: MonthlyPaymentAmount)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 
-  val monthlyPaymentAmount: Action[AnyContent] = as.default { implicit request =>
-    Ok(monthlyPaymentAmountPage(monthlyPaymentAmountForm(), maximumMonthlyPaymentAmount, minimumMonthlyPaymentAmount))
+  val monthlyPaymentAmount: Action[AnyContent] = as.getJourney.async { implicit request =>
+    val journey: Future[Journey] = journeyService.get()
+    journey.flatMap {
+      case j: Journey =>
+        Future.successful(Ok(monthlyPaymentAmountPage(monthlyPaymentAmountForm(j), j.remainingToPay, AmountInPence(j.remainingToPay.value / 6))))
+      case _ => sys.error("no journey to update")
+    }
   }
 
-  val monthlyPaymentAmountSubmit: Action[AnyContent] = as.default { implicit request =>
-    // this is an example to test using play forms and errors
-    // normally answers would be uplifted to session storage instead of just
-    // redirecting to next page..
-    monthlyPaymentAmountForm()
-      .bindFromRequest()
-      .fold(
-        formWithErrors =>
-          Ok(
-            monthlyPaymentAmountPage(
-              formWithErrors, maximumMonthlyPaymentAmount, minimumMonthlyPaymentAmount)),
-        _ => Redirect(routes.PaymentDayController.paymentDay()))
+  val monthlyPaymentAmountSubmit: Action[AnyContent] = as.getJourney.async { implicit request =>
+    val journey: Future[Journey] = journeyService.get()
+    journey.flatMap {
+      case j: Journey =>
+        monthlyPaymentAmountForm(j)
+          .bindFromRequest()
+          .fold(
+            formWithErrors =>
+              Future.successful(Ok(
+                monthlyPaymentAmountPage(
+                  formWithErrors, j.remainingToPay, AmountInPence(j.remainingToPay.value / 6)))),
+            _ => Future(Redirect(routes.PaymentDayController.paymentDay())))
+      case _ => sys.error("no journey to update")
+    }
   }
 }
 
 object MonthlyPaymentAmountController {
-  // this value to come from session data/api data from ETMP...
-  val remaining: AmountInPence = getRemainingBalance
-  val maximumMonthlyPaymentAmount: AmountInPence = remaining
-  val minimumMonthlyPaymentAmount: AmountInPence = AmountInPence(remaining.value / 6)
   val key: String = "MonthlyPaymentAmount"
 
-  def monthlyPaymentAmountForm(): Form[BigDecimal] = Form(
+  def monthlyPaymentAmountForm(journey: Journey): Form[BigDecimal] = Form(
     mapping(
-      key -> Forms.of(amountOfMoneyFormatter(minimumMonthlyPaymentAmount.inPounds > _, maximumMonthlyPaymentAmount.inPounds < _)))(identity)(Some(_)))
+      key -> Forms.of(amountOfMoneyFormatter(AmountInPence(journey.remainingToPay.value / 6).inPounds > _, journey.remainingToPay.inPounds < _)))(identity)(Some(_)))
 }
