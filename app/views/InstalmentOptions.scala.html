@@ -20,8 +20,9 @@
 @import play.api.data.Form
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import controllers.routes
-@import controllers.InstalmentsController.InstalmentOption
+@import models.InstalmentOption
 @import views.html.components.InstalmentInterest
+@import config.AppConfig
 
 @this(
   layout: templates.Layout,
@@ -32,19 +33,21 @@
   requestSupport: RequestSupport,
   instalmentInterest: InstalmentInterest
 )
+
 @(form: Form[String], options: List[InstalmentOption])(implicit
-  request: Request[_]
+  request: Request[_],
+  appConfig: AppConfig
 )
 
 @import requestSupport._
 
 @key = @{"Instalments"}
 @title = @{Messages.Instalments.`How many months do you want to pay over?`.show}
-@radioOptions = @{options.map{ option => RadioItem(
+@radioOptions = @{options.zipWithIndex.map { case (option, index) => RadioItem(
  content = Text(Messages.Instalments.getInstalmentOption(option.numberOfMonths, option.amountToPayEachMonth).show),
- value = Some(option.numberOfMonths.toString),
+ value = Some(index.toString),
  hint = None,
- checked = form.data.values.toList.contains(option.numberOfMonths.toString),
+ checked = form.data.values.toList.contains(index.toString),
  conditionalHtml = Some(instalmentInterest(option.interestPayment))
 )}.toSeq}
 

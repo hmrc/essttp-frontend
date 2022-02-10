@@ -19,10 +19,11 @@
 @import moveittocor.corcommon.model.AmountInPence
 @import play.api.mvc.Request
 @import requests.RequestSupport
+@import config.AppConfig
 
 @this(requestSupport: RequestSupport)
 
-@(interestAmount: AmountInPence)(implicit request: Request[_])
+@(interestAmount: AmountInPence)(implicit request: Request[_], appConfig: AppConfig)
 
 @import requestSupport._
 
@@ -31,7 +32,7 @@
     <dt class="govuk-summary-list__key govuk-!-width-two-thirds">
       @{Messages.Instalments.`Estimated total interest:`.show}<br>
       <span class="govuk-!-font-weight-regular govuk-!-font-size-16">
-      @{Messages.Instalments.`Base rate + 2.5%`.show}
+      @{Messages.Instalments.getInterestDescription(appConfig.InterestRates.hmrcRate).show}
       </span>
     </dt>
     <dd class="govuk-summary-list__value">

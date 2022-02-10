@@ -19,7 +19,7 @@ package controllers
 import _root_.actions.Actions
 import config.AppConfig
 import controllers.InstalmentsController.{ calculateOptions, instalmentsForm }
-import models.Journey
+import models.{ InstalmentOption, Journey }
 import moveittocor.corcommon.model.AmountInPence
 import play.api.data.Forms.{ mapping, nonEmptyText }
 import play.api.data.Form
@@ -61,7 +61,12 @@ class InstalmentsController @Inject() (
               Future.successful(Ok(
                 instalmentOptionsPage(
                   formWithErrors, calculateOptions(j)))),
-            _ => Future.successful(Ok("this is as fas as we go for now...")))
+            (option: String) => {
+              val options: List[InstalmentOption] = calculateOptions(j)
+              journeyService.upsert(j.copy(userAnswers = j.userAnswers.copy(
+                monthsToPay = Some(options(option.toInt)))))
+              Future.successful(Redirect(routes.PaymentScheduleController.checkPaymentSchedule()))
+            })
       case _ => sys.error("no journey to update")
     }
 
@@ -70,11 +75,6 @@ class InstalmentsController @Inject() (
 }
 
 object InstalmentsController {
-  case class InstalmentOption(
-    numberOfMonths: Int,
-    amountToPayEachMonth: AmountInPence,
-    interestPayment: AmountInPence)
-
   def calculateOptions(journey: Journey)(implicit appConfig: AppConfig): List[InstalmentOption] = {
     val monthlyInterest: BigDecimal = (appConfig.InterestRates.hmrcRate + appConfig.InterestRates.baseRate) / 12
     val interestPerMonth: BigDecimal = journey.remainingToPay.inPounds * monthlyInterest

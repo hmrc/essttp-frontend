@@ -178,6 +178,8 @@ object Messages {
       s"$numberOfMonths month${if (numberOfMonths > 1) "s" else ""} at ${amount.formatInPounds}")
     val `Estimated total interest:`: Message = Message(
       "Estimated total interest:")
+    def getInterestDescription(hmrcRate: BigDecimal): Message = Message(
+      s"Base rate + ${hmrcRate.toString()}%")
     val `Base rate + 2.5%`: Message = Message(
       "Base rate + 2.5%")
     val `added to the final payment`: Message = Message(
@@ -185,6 +187,26 @@ object Messages {
     def getError(key: String): Message = key match {
       case "error.required" => Message(english = "Select how many months you want to pay over")
     }
+  }
+
+  object PaymentSchedule {
+    val `Check your payment plan`: Message = Message(
+      "Check your payment plan")
+
+    val `Upfront payment`: Message = Message(
+      "Upfront payment")
+    val `Taken within 7 working days`: Message = Message(
+      "Taken within 7 working days")
+    val `Monthly payments`: Message = Message(
+      "Monthly payments")
+    val `Payments collected on`: Message = Message(
+      "Payments collected on")
+    val `or next working day`: Message = Message(
+      "or next working day")
+    val `(includes interest)`: Message = Message(
+      "(includes interest)")
+    val `Total to pay`: Message = Message(
+      "Total to pay")
   }
 }
 

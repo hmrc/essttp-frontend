@@ -16,23 +16,13 @@
 
 package models
 
-import models.InstalmentOption
 import moveittocor.corcommon.model.AmountInPence
 import play.api.libs.json.{ Format, Json }
 
-case class UserAnswers(
-  hasUpfrontPayment: Option[Boolean],
-  upfrontAmount: Option[AmountInPence],
-  affordableAmount: Option[AmountInPence],
-  paymentDay: Option[Int],
-  monthsToPay: Option[InstalmentOption]) {
-  def getAffordableAmount: AmountInPence = affordableAmount.getOrElse(sys.error("trying to get non-existent affordable amount"))
-  def getMonthsToPay: InstalmentOption = monthsToPay.getOrElse(sys.error("trying to get non-existent months to pay"))
-}
-object UserAnswers {
-
-  val empty: UserAnswers = UserAnswers(None, None, None, None, None)
-
-  implicit val format: Format[UserAnswers] = Json.format
-
+case class InstalmentOption(
+  numberOfMonths: Int,
+  amountToPayEachMonth: AmountInPence,
+  interestPayment: AmountInPence)
+object InstalmentOption {
+  implicit val format: Format[InstalmentOption] = Json.format
 }
