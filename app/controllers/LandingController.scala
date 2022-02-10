@@ -20,7 +20,6 @@ import _root_.actions.Actions
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
-import views.html.HelloWorldPage
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }

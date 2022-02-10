@@ -48,7 +48,7 @@
  conditionalHtml = Some(instalmentInterest(option.interestPayment))
 )}.toSeq}
 
-@layout(pageTitle = Some(title), backLocation = Some(routes.EPayeStartController.ePayeStart), hasErrors = form.hasErrors) {
+@layout(pageTitle = Some(title), backLocation = Some(routes.PaymentDayController.paymentDay()), hasErrors = form.hasErrors) {
  @if(form.errors.nonEmpty) {
   @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
    ErrorLink(

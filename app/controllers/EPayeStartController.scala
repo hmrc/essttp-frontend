@@ -18,14 +18,14 @@ package controllers
 
 import _root_.actions.Actions
 import moveittocor.corcommon.model.AmountInPence
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents, Result, Session }
+import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.EPaye.EPayeStartPage
 
 import java.time.LocalDate
 import javax.inject.{ Inject, Singleton }
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ ExecutionContext, Future }
 import controllers.EPayeStartController._
 import models.Journey
 import services.JourneyService
@@ -41,9 +41,6 @@ class EPayeStartController @Inject() (
 
   val ePayeStart: Action[AnyContent] = as.default { implicit request =>
     val qualifyingDebt: AmountInPence = AmountInPence(175050)
-    val journey: Journey = journeyService.newJourney(qualifyingDebt)
-    journeyService.upsert(journey)
-
     val overduePayments = OverduePayments(
       total = AmountInPence(175050),
       payments = List(
@@ -61,7 +58,13 @@ class EPayeStartController @Inject() (
             start = LocalDate.of(2021, 10, 6),
             end = LocalDate.of(2021, 11, 5)),
           amount = AmountInPence(100029))))
-    Ok(ePayeStartPage(overduePayments)).withSession("JourneyId" -> journey._id.value)
+    request.session.data.get("JourneyId") match {
+      case Some(_: String) => Ok(ePayeStartPage(overduePayments))
+      case _ =>
+        val journey: Journey = journeyService.newJourney(qualifyingDebt)
+        journeyService.upsert(journey)
+        Ok(ePayeStartPage(overduePayments)).withSession("JourneyId" -> journey._id.value)
+    }
   }
 
   val ePayeStartSubmit: Action[AnyContent] = as.default { implicit request =>
