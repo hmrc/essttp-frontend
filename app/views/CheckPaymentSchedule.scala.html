@@ -25,6 +25,7 @@
 @import models.UserAnswers
 @import controllers.PaymentScheduleController.MonthlyPayment
 @import messages.DateMessages
+@import cats.syntax.eq._
 
 @this(
   layout: templates.Layout,
@@ -41,8 +42,9 @@
 @paymentDay = @{ answers.paymentDay.getOrElse(28) }
 @monthsToPay = @{answers.getMonthsToPay}
 @monthRows = @{
-  plan.map(p =>
+  plan.zipWithIndex.map { case (p, index) =>
     SummaryListRow(
+      classes = s"grouped-row ${if(p.isLastMonth) { "last-grouped-row" } else { "" }}",
       key = Key(
         content = Text(s"${DateMessages.monthName(p.month).show} ${p.year}"),
         classes = "govuk-!-width-one-half"
@@ -50,9 +52,18 @@
       value = Value(
         content = Text(s"${p.amount.formatInPounds} ${if(p.isLastMonth) { Messages.PaymentSchedule.`(includes interest)`.show } else { "" }}")
       ),
-      actions = None
+      actions = Some(Actions(
+        items = Seq(
+          ActionItem(
+            href = routes.InstalmentsController.instalmentOptions().url,
+            classes = s"${if(index === 0) "" else "grouped-change"}",
+            content = Text(Messages.change.show),
+            visuallyHiddenText = Some(Messages.PaymentDay.`Which day do you want to pay each month?`.show)
+          )
+        )
+      ))
     )
-  )
+  }
 }
 
 @paymentDayRow = @{
