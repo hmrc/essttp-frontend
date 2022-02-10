@@ -17,6 +17,7 @@
 package controllers
 
 import _root_.actions.Actions
+import config.AppConfig
 import controllers.InstalmentsController.{ calculateOptions, instalmentsForm }
 import models.Journey
 import moveittocor.corcommon.model.AmountInPence
@@ -36,7 +37,7 @@ class InstalmentsController @Inject() (
   as: Actions,
   mcc: MessagesControllerComponents,
   journeyService: JourneyService,
-  instalmentOptionsPage: InstalmentOptions)(implicit ec: ExecutionContext)
+  instalmentOptionsPage: InstalmentOptions)(implicit ec: ExecutionContext, appConfig: AppConfig)
   extends FrontendController(mcc)
   with Logging {
 
@@ -74,10 +75,8 @@ object InstalmentsController {
     amountToPayEachMonth: AmountInPence,
     interestPayment: AmountInPence)
 
-  def calculateOptions(journey: Journey): List[InstalmentOption] = {
-    val hmrcInterestRate: BigDecimal = 2.5
-    val baseInterestRate: BigDecimal = 0.25
-    val monthlyInterest: BigDecimal = (hmrcInterestRate + baseInterestRate) / 12
+  def calculateOptions(journey: Journey)(implicit appConfig: AppConfig): List[InstalmentOption] = {
+    val monthlyInterest: BigDecimal = (appConfig.InterestRates.hmrcRate + appConfig.InterestRates.baseRate) / 12
     val interestPerMonth: BigDecimal = journey.remainingToPay.inPounds * monthlyInterest
     val offerMonths: Int = (journey.remainingToPay.value / journey.userAnswers.getAffordableAmount.value).intValue()
     val month1 = if (offerMonths > 1) offerMonths - 1 else offerMonths
