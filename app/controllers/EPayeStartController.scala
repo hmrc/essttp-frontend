@@ -25,7 +25,7 @@ import views.html.EPaye.EPayeStartPage
 
 import java.time.LocalDate
 import javax.inject.{ Inject, Singleton }
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ ExecutionContext }
 import controllers.EPayeStartController._
 import models.Journey
 import services.JourneyService
@@ -40,9 +40,9 @@ class EPayeStartController @Inject() (
   with Logging {
 
   val ePayeStart: Action[AnyContent] = as.default { implicit request =>
-    val qualifyingDebt: AmountInPence = AmountInPence(175050)
+    val qualifyingDebt: AmountInPence = AmountInPence(296345)
     val overduePayments = OverduePayments(
-      total = AmountInPence(175050),
+      total = qualifyingDebt,
       payments = List(
         OverduePayment(
           InvoicePeriod(
@@ -50,14 +50,14 @@ class EPayeStartController @Inject() (
             dueDate = LocalDate.of(2022, 1, 22),
             start = LocalDate.of(2021, 11, 6),
             end = LocalDate.of(2021, 12, 5)),
-          amount = AmountInPence(75021)),
+          amount = AmountInPence((qualifyingDebt.value * 0.4).longValue())),
         OverduePayment(
           InvoicePeriod(
             monthNumber = 8,
             dueDate = LocalDate.of(2021, 12, 22),
             start = LocalDate.of(2021, 10, 6),
             end = LocalDate.of(2021, 11, 5)),
-          amount = AmountInPence(100029))))
+          amount = AmountInPence((qualifyingDebt.value * 0.6).longValue()))))
     request.session.data.get("JourneyId") match {
       case Some(_: String) => Ok(ePayeStartPage(overduePayments))
       case _ =>
