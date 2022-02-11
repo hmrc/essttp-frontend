@@ -25,13 +25,14 @@ case class UserAnswers(
   upfrontAmount: Option[AmountInPence],
   affordableAmount: Option[AmountInPence],
   paymentDay: Option[Int],
-  monthsToPay: Option[InstalmentOption]) {
+  monthsToPay: Option[InstalmentOption],
+  bankDetails: Option[BankDetails]) {
   def getAffordableAmount: AmountInPence = affordableAmount.getOrElse(sys.error("trying to get non-existent affordable amount"))
   def getMonthsToPay: InstalmentOption = monthsToPay.getOrElse(sys.error("trying to get non-existent months to pay"))
 }
 object UserAnswers {
 
-  val empty: UserAnswers = UserAnswers(None, None, None, None, None)
+  val empty: UserAnswers = UserAnswers(None, None, None, None, None, None)
 
   implicit val format: Format[UserAnswers] = Json.format
 

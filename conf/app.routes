@@ -20,6 +20,8 @@ POST       /instalment-options                           controllers.Instalments
 GET        /check-payment-schedule                       controllers.PaymentScheduleController.checkPaymentSchedule()
 GET        /setup-bank-details                           controllers.BankDetailsController.setUpBankDetails()
 POST       /setup-bank-details                           controllers.BankDetailsController.setUpBankDetailsSubmit()
+GET        /check-bank-details                           controllers.BankDetailsController.checkBankDetails()
+GET        /terms-and-conditions                         controllers.BankDetailsController.termsAndConditions()
 
 GET         /assets/*file                                controllers.Assets.versioned(path="/public", file: Asset)
 

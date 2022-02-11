@@ -1,0 +1,54 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import requests.RequestSupport
+@import messages.Messages
+@import play.api.mvc.Request
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import controllers.routes
+
+@this(
+        layout: templates.Layout,
+        govukButton: GovukButton,
+        formWithCSRF: FormWithCSRF,
+        requestSupport: RequestSupport)
+
+@()(implicit request: Request[_])
+
+@import requestSupport._
+
+@title = @{Messages.BankDetails.`Terms and conditions`.show}
+
+@layout(pageTitle = Some(title), backLocation = Some(routes.BankDetailsController.checkBankDetails())) {
+  <h1 class="govuk-heading-xl">@title</h1>
+  <p class="govuk-body">@{Messages.BankDetails.`We can cancel this agreement if you:`.show}</p>
+  <ul class="govuk-list govuk-list--bullet">
+   <li>@{Messages.BankDetails.`pay late or miss a payment`.show}</li>
+   <li>@{Messages.BankDetails.`pay another tax bill late`.show}</li>
+   <li>@{Messages.BankDetails.`do not submit your future tax returns on time`.show}</li>
+  </ul>
+  <p class="govuk-body">@{Messages.BankDetails.`If we cancel this agreement...`.show}</p>
+  <p class="govuk-body">@{Messages.BankDetails.`We can use any refunds you might get to pay off your tax charges.`.show}</p>
+  <p class="govuk-body">@{Messages.BankDetails.`If your circumstances change...`.show}</p>
+  <h2 class="govuk-heading-m">@{Messages.BankDetails.`Declaration`.show}</h2>
+  <p class="govuk-body">@{Messages.BankDetails.`I agree to the terms and conditions...`.show}</p>
+  <p class="govuk-body">
+    <a href="#" class="govuk-button" data-module="govuk-button">
+      @{Messages.BankDetails.`Agree and continue`.show}
+    </a>
+  </p>
+
+}

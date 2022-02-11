@@ -235,6 +235,52 @@ object Messages {
       "accountNumber.error.required" -> Message("Enter account number"),
       "accountNumber.error.nonNumeric" -> Message("Account number must be numbers only"),
       "accountNumber.error.invalid" -> Message("Account number must be between 6 and 8 numbers"))
+
+    val `Check your Direct Debit details`: Message = Message(
+      "Check your Direct Debit details")
+
+    val `You are covered by the Direct Debit Guarantee`: Message = Message(
+      "You are covered by the Direct Debit Guarantee")
+
+    val `The Direct Debit Guarantee`: Message = Message(
+      "The Direct Debit Guarantee")
+
+    val `This Guarantee is offered...`: Message = Message(
+      "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits.")
+
+    val `If there are any changes to the amount...`: Message = Message(
+      "If there are any changes to the amount, date or frequency of your Direct Debit HMRC NDDS will notify you 10 working days in advance of your account being debited or as otherwise agreed. If you request HMRC NDDS to collect a payment, application-complete of the amount and date will be given to you at the time of the request.")
+
+    val `If an error is made in the payment...`: Message = Message(
+      "If an error is made in the payment of your Direct Debit by HMRC NDDS or your bank or building society you are entitled to a full and immediate refund of the amount paid from your bank or building society. If you receive a refund you are not entitled to, you must pay it back when HMRC NDDS asks you to.")
+
+    val `You can cancel a Direct Debit...`: Message = Message(
+      "You can cancel a Direct Debit at any time by simply contacting your bank or building society. Written application-complete may be required. Please also notify us.")
+
+    val `Terms and conditions`: Message = Message(
+      "Terms and conditions")
+
+    val `We can cancel this agreement if you:`: Message = Message(
+      "We can cancel this agreement if you:")
+
+    val `pay late or miss a payment`: Message = Message(
+      "pay late or miss a payment")
+    val `pay another tax bill late`: Message = Message(
+      "pay another tax bill late")
+    val `do not submit your future tax returns on time`: Message = Message(
+      "do not submit your future tax returns on time")
+    val `If we cancel this agreement...`: Message = Message(
+      "If we cancel this agreement, you will need to pay the total amount you owe straight away.")
+    val `We can use any refunds you might get to pay off your tax charges.`: Message = Message(
+      "We can use any refunds you might get to pay off your tax charges.")
+    val `If your circumstances change...`: Message = Message(
+      "If your circumstances change and you can pay more or you can pay in full, you need to let us know.")
+    val `Declaration`: Message = Message(
+      "Declaration")
+    val `I agree to the terms and conditions...`: Message = Message(
+      "I agree to the terms and conditions of this payment plan. I confirm that this is the earliest I am able to settle this debt.")
+    val `Agree and continue`: Message = Message(
+      "Agree and continue")
   }
 }
 

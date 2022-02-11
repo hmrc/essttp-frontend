@@ -25,7 +25,7 @@ import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
-import views.html.SetUpBankDetails
+import views.html.{ BankDetailsSummary, SetUpBankDetails, TermsAndConditions }
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }
@@ -34,6 +34,8 @@ import scala.concurrent.{ ExecutionContext, Future }
 class BankDetailsController @Inject() (
   as: Actions,
   bankDetailsPage: SetUpBankDetails,
+  checkBankDetailsPage: BankDetailsSummary,
+  termsPage: TermsAndConditions,
   journeyService: JourneyService,
   mcc: MessagesControllerComponents)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
@@ -51,11 +53,26 @@ class BankDetailsController @Inject() (
           .bindFromRequest()
           .fold(
             formWithErrors => Future.successful(Ok(bankDetailsPage(formWithErrors))),
-            _ => {
-              Future.successful(Ok("this is as far as we go for now..."))
+            (bankDetails: BankDetails) => {
+              journeyService.upsert(j.copy(userAnswers = j.userAnswers.copy(
+                bankDetails = Some(bankDetails))))
+              Future.successful(Redirect(routes.BankDetailsController.checkBankDetails()))
             })
       case _ => sys.error("journey not found to update")
     }
+  }
+
+  val checkBankDetails: Action[AnyContent] = as.getJourney.async { implicit request =>
+    val journey: Future[Journey] = journeyService.get()
+    journey.flatMap {
+      case j: Journey =>
+        Future.successful(Ok(checkBankDetailsPage(j.userAnswers)))
+      case _ => sys.error("journey not found to update")
+    }
+  }
+
+  val termsAndConditions: Action[AnyContent] = as.default { implicit request =>
+    Ok(termsPage())
   }
 }
 
