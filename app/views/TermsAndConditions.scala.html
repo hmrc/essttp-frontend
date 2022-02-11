@@ -46,7 +46,7 @@
   <h2 class="govuk-heading-m">@{Messages.BankDetails.`Declaration`.show}</h2>
   <p class="govuk-body">@{Messages.BankDetails.`I agree to the terms and conditions...`.show}</p>
   <p class="govuk-body">
-    <a href="#" class="govuk-button" data-module="govuk-button">
+    <a href="@{routes.ConfirmationController.confirmation().url}" class="govuk-button" data-module="govuk-button">
       @{Messages.BankDetails.`Agree and continue`.show}
     </a>
   </p>

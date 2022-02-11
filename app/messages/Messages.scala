@@ -282,5 +282,26 @@ object Messages {
     val `Agree and continue`: Message = Message(
       "Agree and continue")
   }
+
+  object Confirmation {
+    val `Your payment plan is set up`: Message = Message(
+      "Your payment plan is set up")
+    val `Your payment reference is`: Message = Message(
+      "Your payment reference is")
+    val `What happens next`: Message = Message(
+      "What happens next")
+    val `HMRC will send you a letter within 5 days with your payment dates.`: Message = Message(
+      "HMRC will send you a letter within 5 days with your payment dates.")
+    def paymentInfo(hasUpfrontPayment: Boolean, paymentDate: String): Message = Message(
+      s"${if (hasUpfrontPayment) "Your upfront payment will be taken within 7 working days. " else ""}Your next payment will be taken on ${paymentDate} or the next working day.")
+    val `Print your plan or save it as a PDF`: Message = Message(
+      "Print your plan or save it as a PDF")
+    val `If you need to change your payment plan`: Message = Message(
+      "If you need to change your payment plan")
+    val `Call the HMRC Helpline on 0300 200 3700.`: Message = Message(
+      "Call the HMRC Helpline on 0300 200 3700.")
+    val `Return to tax account`: Message = Message(
+      "Return to tax account")
+  }
 }
 

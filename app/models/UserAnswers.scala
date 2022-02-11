@@ -29,6 +29,7 @@ case class UserAnswers(
   bankDetails: Option[BankDetails]) {
   def getAffordableAmount: AmountInPence = affordableAmount.getOrElse(sys.error("trying to get non-existent affordable amount"))
   def getMonthsToPay: InstalmentOption = monthsToPay.getOrElse(sys.error("trying to get non-existent months to pay"))
+  def getPaymentDay: Int = paymentDay.getOrElse(sys.error("trying to get non-existent payment day"))
 }
 object UserAnswers {
 
