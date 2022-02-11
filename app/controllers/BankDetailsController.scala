@@ -18,8 +18,9 @@ package controllers
 
 import _root_.actions.Actions
 import controllers.BankDetailsController.bankDetailsForm
-import models.Journey
+import models.{ AccountNumber, BankDetails, Journey, SortCode }
 import play.api.data.Forms.{ mapping, nonEmptyText }
+import play.api.data.validation.{ Constraint, Invalid, Valid }
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -61,14 +62,38 @@ class BankDetailsController @Inject() (
 object BankDetailsController {
   import play.api.data.Form
 
-  case class BankDetailsForm(
-    name: String,
-    sortCode: String,
-    accountNumber: String)
-
-  def bankDetailsForm(): Form[BankDetailsForm] = Form(
+  def bankDetailsForm(): Form[BankDetails] = Form(
     mapping(
-      "name" -> nonEmptyText,
-      "sortCode" -> nonEmptyText,
-      "accountNumber" -> nonEmptyText)(BankDetailsForm.apply)(BankDetailsForm.unapply))
+      "name" -> nonEmptyText(maxLength = 100),
+      "sortCode" -> sortCodeMapping,
+      "accountNumber" -> accountNumberMapping)(BankDetails.apply)(BankDetails.unapply))
+
+  private val sortCodeRegex = "^[0-9]{6}$"
+
+  private val sortCodeContstraint: Constraint[SortCode] =
+    Constraint(sortCode =>
+      if (!sortCode.value.forall(_.isDigit)) Invalid("error.nonNumeric")
+      else if (sortCode.value.matches(sortCodeRegex)) Valid
+      else Invalid("error.invalid"))
+
+  private val sortCodeMapping = nonEmptyText
+    .transform[SortCode](
+      s => SortCode(s.replaceAllLiterally("-", "").replaceAll("\\s", "")),
+      _.value)
+    .verifying(sortCodeContstraint)
+
+  private val accountNumberRegex = "^[0-9]{6,8}$"
+
+  private val accountNumberConstraint: Constraint[AccountNumber] =
+    Constraint(accountNumber =>
+      if (!accountNumber.value.forall(_.isDigit)) Invalid("error.nonNumeric")
+      else if (accountNumber.value.matches(accountNumberRegex)) Valid
+      else Invalid("error.invalid"))
+
+  private val accountNumberMapping = nonEmptyText
+    .transform[AccountNumber](
+      s => AccountNumber(s.replaceAll("\\s", "")),
+      _.value)
+    .verifying(accountNumberConstraint)
+
 }

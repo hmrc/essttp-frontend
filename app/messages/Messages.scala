@@ -180,8 +180,6 @@ object Messages {
       "Estimated total interest:")
     def getInterestDescription(hmrcRate: BigDecimal): Message = Message(
       s"Base rate + ${hmrcRate.toString()}%")
-    val `Base rate + 2.5%`: Message = Message(
-      "Base rate + 2.5%")
     val `added to the final payment`: Message = Message(
       "added to the final payment")
     def getError(key: String): Message = key match {
@@ -232,7 +230,11 @@ object Messages {
       "name.error.required" -> Message("Enter the name on the account"),
       "name.error.pattern" -> Message("Name on the account must only include letters, apostrophes, spaces and hyphens"),
       "sortCode.error.required" -> Message("Enter sort code"),
-      "accountNumber.error.required" -> Message("Enter account number"))
+      "sortCode.error.nonNumeric" -> Message("Sort code must be numbers only"),
+      "sortCode.error.invalid" -> Message("Sort code must be 6 numbers only"),
+      "accountNumber.error.required" -> Message("Enter account number"),
+      "accountNumber.error.nonNumeric" -> Message("Account number must be numbers only"),
+      "accountNumber.error.invalid" -> Message("Account number must be between 6 and 8 numbers"))
   }
 }
 
