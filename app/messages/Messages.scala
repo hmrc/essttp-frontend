@@ -208,5 +208,31 @@ object Messages {
     val `Total to pay`: Message = Message(
       "Total to pay")
   }
+
+  object BankDetails {
+    val `Enter account details to set up a Direct Debit`: Message = Message(
+      "Enter account details to set up a Direct Debit")
+    val `To continue you must be:`: Message = Message(
+      "To continue you must be:")
+    val `a named account holder for this account`: Message = Message(
+      "a named account holder for this account")
+    val `the only person who needs to authorise this Direct Debit`: Message = Message(
+      "the only person who needs to authorise this Direct Debit")
+    val `Name on the account`: Message = Message(
+      "Name on the account")
+    val `Sort code`: Message = Message(
+      "Sort code")
+    val `Must be 6 digits long`: Message = Message(
+      "Must be 6 digits long")
+    val `Account number`: Message = Message(
+      "Account number")
+    val `Must be between 6 and 8 digits long`: Message = Message(
+      "Must be between 6 and 8 digits long")
+    val errors: Map[String, Message] = Map(
+      "name.error.required" -> Message("Enter the name on the account"),
+      "name.error.pattern" -> Message("Name on the account must only include letters, apostrophes, spaces and hyphens"),
+      "sortCode.error.required" -> Message("Enter sort code"),
+      "accountNumber.error.required" -> Message("Enter account number"))
+  }
 }
 
