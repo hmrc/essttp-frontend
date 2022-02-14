@@ -87,7 +87,7 @@
 
 @monthlyPaymentRows = @{List(paymentDayRow) ++ monthRows :+ totalRow }
 
-@layout(pageTitle = Some(title), showSignOutLink = false) {
+@layout(pageTitle = Some(title), showSignOutLink = false, backLocation = Some(routes.ConfirmationController.confirmation())) {
 
   <h1 class="govuk-heading-xl">
     @title
