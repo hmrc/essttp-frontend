@@ -23,6 +23,7 @@ POST       /setup-bank-details                           controllers.BankDetails
 GET        /check-bank-details                           controllers.BankDetailsController.checkBankDetails()
 GET        /terms-and-conditions                         controllers.BankDetailsController.termsAndConditions()
 GET        /confirmation                                 controllers.ConfirmationController.confirmation()
+GET        /print-summary                                controllers.ConfirmationController.printSummary()
 
 GET         /assets/*file                                controllers.Assets.versioned(path="/public", file: Asset)
 

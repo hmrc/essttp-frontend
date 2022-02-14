@@ -1,0 +1,150 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.AppConfig
+@import requests.RequestSupport
+@import messages.Messages
+@import play.api.mvc.Request
+@import play.twirl.api.Html
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import moveittocor.corcommon.model.AmountInPence
+@import controllers.routes
+@import models.UserAnswers
+@import controllers.PaymentScheduleController.MonthlyPayment
+@import messages.DateMessages
+@import cats.syntax.eq._
+
+@this(
+  layout: templates.Layout,
+  appConfig: AppConfig,
+  requestSupport: RequestSupport,
+  govukSummaryList : GovukSummaryList
+)
+
+@(answers: UserAnswers, plan: List[MonthlyPayment], paymentReference: String)(implicit request: Request[_])
+
+@import requestSupport._
+
+@title = @{Messages.PrintSummary.`Your payment plan`.show}
+@paymentDay = @{ answers.paymentDay.getOrElse(28) }
+@monthsToPay = @{answers.getMonthsToPay}
+@monthRows = @{
+  plan.zipWithIndex.map { case (p, index) =>
+    SummaryListRow(
+      classes = s"grouped-row ${if(p.isLastMonth) { "last-grouped-row" } else { "" }}",
+      key = Key(
+        content = Text(s"${DateMessages.monthName(p.month).show} ${p.year}"),
+        classes = "govuk-!-width-one-half"
+      ),
+      value = Value(
+        content = HtmlContent(Html(s"""${p.amount.formatInPounds} ${if(p.isLastMonth) { s"""<span class="govuk-body-s">${Messages.PaymentSchedule.`(includes interest)`.show}</span>""" } else { "" }}"""))
+      ),
+      actions = None
+    )
+  }
+}
+
+@paymentDayRow = @{
+  SummaryListRow(
+    key = Key(
+      content = HtmlContent(Html(Messages.PaymentSchedule.`Payments collected on`.show)),
+      classes = "govuk-!-width-one-half"
+    ),
+    value = Value(
+      content = Text(s"${paymentDay.toString}${DateMessages.getSuffix(paymentDay).show} ${Messages.PaymentSchedule.`or next working day`.show}")
+    ),
+    actions = None
+  )
+}
+
+@totalRow = @{
+  SummaryListRow(
+    key = Key(
+      content = Text(Messages.PaymentSchedule.`Total to pay`.show),
+      classes = "govuk-!-width-one-half"
+    ),
+    value = Value(
+      content = Text(
+        AmountInPence((monthsToPay.amountToPayEachMonth.value * monthsToPay.numberOfMonths) + monthsToPay.interestPayment.value).formatInPounds
+      )
+    ),
+    actions = None
+  )
+}
+
+@monthlyPaymentRows = @{List(paymentDayRow) ++ monthRows :+ totalRow }
+
+@layout(pageTitle = Some(title), showSignOutLink = false) {
+
+  <h1 class="govuk-heading-xl">
+    @title
+  </h1>
+
+  @govukSummaryList(SummaryList(
+    rows = Seq(
+      SummaryListRow(
+        key = Key(
+          content = Text(Messages.PrintSummary.`Payment reference`.show),
+          classes = "govuk-!-width-one-half"
+        ),
+        value = Value(
+          content = Text(paymentReference)
+        ),
+        actions = None
+      )
+    )
+  ))
+
+  @answers.upfrontAmount.map { upfrontAmount =>
+
+    <h2 class="govuk-heading-l">
+      @{Messages.PaymentSchedule.`Upfront payment`.show}
+    </h2>
+
+    @govukSummaryList(SummaryList(
+      rows = Seq(
+        SummaryListRow(
+          key = Key(
+            content = HtmlContent(Html(Messages.PaymentSchedule.`Taken within 7 working days`.show)),
+            classes = "govuk-!-width-one-half"
+          ),
+          value = Value(
+            content = Text(upfrontAmount.formatInPounds)
+          ),
+          actions = None
+        )
+
+      )
+    ))
+  }
+
+  @answers.monthsToPay.map { months =>
+
+    <h2 class="govuk-heading-l">
+      @{Messages.PaymentSchedule.`Monthly payments`.show}
+    </h2>
+
+    @govukSummaryList(SummaryList(
+      rows = monthlyPaymentRows
+    ))
+
+  }
+  <p class="govuk-body">
+    <a href="#print-dialogue" class="govuk-link">
+    @{Messages.Confirmation.`Print your plan or save it as a PDF`.show}
+    </a>
+  </p>
+}

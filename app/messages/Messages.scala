@@ -303,5 +303,12 @@ object Messages {
     val `Return to tax account`: Message = Message(
       "Return to tax account")
   }
+
+  object PrintSummary {
+    val `Your payment plan`: Message = Message(
+      "Your payment plan")
+    val `Payment reference`: Message = Message(
+      "Payment reference")
+  }
 }
 

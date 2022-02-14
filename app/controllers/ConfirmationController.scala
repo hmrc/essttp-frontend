@@ -23,7 +23,7 @@ import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
-import views.html.Confirmation
+import views.html.{ Confirmation, PrintSummary }
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }
@@ -33,7 +33,8 @@ class ConfirmationController @Inject() (
   as: Actions,
   mcc: MessagesControllerComponents,
   journeyService: JourneyService,
-  confirmationPage: Confirmation)(implicit ec: ExecutionContext)
+  confirmationPage: Confirmation,
+  printSummaryPage: PrintSummary)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 
@@ -42,6 +43,15 @@ class ConfirmationController @Inject() (
     journey.flatMap {
       case j: Journey =>
         Future.successful(Ok(confirmationPage(j.userAnswers, computeMonths(j.userAnswers.getMonthsToPay), "222PX00222222")))
+      case _ => sys.error("no journey found to update")
+    }
+  }
+
+  val printSummary: Action[AnyContent] = as.default.async { implicit request =>
+    val journey: Future[Journey] = journeyService.get()
+    journey.flatMap {
+      case j: Journey =>
+        Future.successful(Ok(printSummaryPage(j.userAnswers, computeMonths(j.userAnswers.getMonthsToPay), "222PX00222222")))
       case _ => sys.error("no journey found to update")
     }
   }
