@@ -24,6 +24,7 @@ import moveittocor.corcommon.model.AmountInPence
 import play.api.data.Forms.{ mapping, nonEmptyText }
 import play.api.data.Form
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import requests.RequestSupport
 import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
@@ -37,39 +38,32 @@ class InstalmentsController @Inject() (
   as: Actions,
   mcc: MessagesControllerComponents,
   journeyService: JourneyService,
+  requestSupport: RequestSupport,
   instalmentOptionsPage: InstalmentOptions)(implicit ec: ExecutionContext, appConfig: AppConfig)
   extends FrontendController(mcc)
   with Logging {
 
+  import requestSupport._
+
   val instalmentOptions: Action[AnyContent] = as.getJourney.async { implicit request =>
-    val journey: Future[Journey] = journeyService.get()
-    journey.flatMap {
-      case j: Journey =>
-        Future.successful(Ok(instalmentOptionsPage(instalmentsForm(), calculateOptions(j))))
-      case _ => sys.error("no journey to update")
-    }
+    Future.successful(Ok(instalmentOptionsPage(instalmentsForm(), calculateOptions(request.journey))))
   }
 
   val instalmentOptionsSubmit: Action[AnyContent] = as.getJourney.async { implicit request =>
-    val journey: Future[Journey] = journeyService.get()
-    journey.flatMap {
-      case j: Journey =>
-        instalmentsForm()
-          .bindFromRequest()
-          .fold(
-            formWithErrors =>
-              Future.successful(Ok(
-                instalmentOptionsPage(
-                  formWithErrors, calculateOptions(j)))),
-            (option: String) => {
-              val options: List[InstalmentOption] = calculateOptions(j)
-              journeyService.upsert(j.copy(userAnswers = j.userAnswers.copy(
-                monthsToPay = Some(options(option.toInt)))))
-              Future.successful(Redirect(routes.PaymentScheduleController.checkPaymentSchedule()))
-            })
-      case _ => sys.error("no journey to update")
-    }
-
+    val j: Journey = request.journey
+    instalmentsForm()
+      .bindFromRequest()
+      .fold(
+        formWithErrors =>
+          Future.successful(Ok(
+            instalmentOptionsPage(
+              formWithErrors, calculateOptions(j)))),
+        (option: String) => {
+          val options: List[InstalmentOption] = calculateOptions(j)
+          journeyService.upsert(j.copy(userAnswers = j.userAnswers.copy(
+            monthsToPay = Some(options(option.toInt)))))
+          Future.successful(Redirect(routes.PaymentScheduleController.checkPaymentSchedule()))
+        })
   }
 
 }

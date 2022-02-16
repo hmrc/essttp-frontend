@@ -17,6 +17,7 @@
 package actions
 
 import play.api.mvc.{ ActionBuilder, AnyContent, DefaultActionBuilder, Request }
+import requests.JourneyRequest
 
 import javax.inject.{ Inject, Singleton }
 
@@ -27,5 +28,5 @@ class Actions @Inject() (
 
   val default: ActionBuilder[Request, AnyContent] = actionBuilder
 
-  val getJourney: ActionBuilder[Request, AnyContent] = actionBuilder andThen getJourneyActionRefiner
+  val getJourney: ActionBuilder[JourneyRequest, AnyContent] = actionBuilder andThen getJourneyActionRefiner
 }

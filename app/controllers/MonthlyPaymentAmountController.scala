@@ -24,6 +24,7 @@ import moveittocor.corcommon.model.AmountInPence
 import play.api.data.{ Form, Forms }
 import play.api.data.Forms.mapping
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import requests.RequestSupport
 import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
@@ -36,39 +37,35 @@ class MonthlyPaymentAmountController @Inject() (
   as: Actions,
   mcc: MessagesControllerComponents,
   journeyService: JourneyService,
+  requestSupport: RequestSupport,
   monthlyPaymentAmountPage: MonthlyPaymentAmount)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 
+  import requestSupport._
+
   val monthlyPaymentAmount: Action[AnyContent] = as.getJourney.async { implicit request =>
-    val journey: Future[Journey] = journeyService.get()
-    journey.flatMap {
-      case j: Journey =>
-        Future.successful(Ok(monthlyPaymentAmountPage(monthlyPaymentAmountForm(j), j.remainingToPay, AmountInPence(j.remainingToPay.value / 6))))
-      case _ => sys.error("no journey to update")
-    }
+    Future.successful(Ok(monthlyPaymentAmountPage(
+      monthlyPaymentAmountForm(request.journey),
+      request.journey.remainingToPay,
+      AmountInPence(request.journey.remainingToPay.value / 6))))
   }
 
   val monthlyPaymentAmountSubmit: Action[AnyContent] = as.getJourney.async { implicit request =>
-    val journey: Future[Journey] = journeyService.get()
-    journey.flatMap {
-      case j: Journey =>
-        monthlyPaymentAmountForm(j)
-          .bindFromRequest()
-          .fold(
-            formWithErrors =>
-              Future.successful(Ok(
-                monthlyPaymentAmountPage(
-                  formWithErrors, j.remainingToPay, AmountInPence(j.remainingToPay.value / 6)))),
-            (s: BigDecimal) => {
-              journeyService.upsert(
-                j.copy(
-                  userAnswers = j.userAnswers.copy(
-                    affordableAmount = Some(AmountInPence((s * 100).longValue())))))
-              Future(Redirect(routes.PaymentDayController.paymentDay()))
-            })
-      case _ => sys.error("no journey to update")
-    }
+    monthlyPaymentAmountForm(request.journey)
+      .bindFromRequest()
+      .fold(
+        formWithErrors =>
+          Future.successful(Ok(
+            monthlyPaymentAmountPage(
+              formWithErrors, request.journey.remainingToPay, AmountInPence(request.journey.remainingToPay.value / 6)))),
+        (s: BigDecimal) => {
+          journeyService.upsert(
+            request.journey.copy(
+              userAnswers = request.journey.userAnswers.copy(
+                affordableAmount = Some(AmountInPence((s * 100).longValue())))))
+          Future(Redirect(routes.PaymentDayController.paymentDay()))
+        })
   }
 }
 

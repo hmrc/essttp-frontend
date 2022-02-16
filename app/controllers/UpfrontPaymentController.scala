@@ -16,6 +16,7 @@
 
 package controllers
 
+import cats.syntax.eq._
 import _root_.actions.Actions
 import controllers.UpfrontPaymentController.{ upfrontPaymentAmountForm, upfrontPaymentForm }
 import models.Journey
@@ -51,64 +52,52 @@ class UpfrontPaymentController @Inject() (
     Ok(upfrontPaymentPage(upfrontPaymentForm()))
   }
 
-  val upfrontPaymentSubmit: Action[AnyContent] = as.default { implicit request =>
+  val upfrontPaymentSubmit: Action[AnyContent] = as.getJourney.async { implicit request =>
     upfrontPaymentForm()
       .bindFromRequest()
       .fold(
         formWithErrors =>
-          Ok(
-            upfrontPaymentPage(
-              formWithErrors)),
-        {
-          case "Yes" =>
-            Redirect(routes.UpfrontPaymentController.upfrontPaymentAmount())
-          case _ => Redirect(routes.MonthlyPaymentAmountController.monthlyPaymentAmount())
+          Future.successful(Ok(upfrontPaymentPage(formWithErrors))),
+        (answer: String) => {
+          journeyService.upsert(
+            request.journey.copy(
+              userAnswers = request.journey.userAnswers.copy(
+                hasUpfrontPayment = Some(answer === "Yes"))))
+          answer match {
+            case "Yes" =>
+              Future.successful(Redirect(routes.UpfrontPaymentController.upfrontPaymentAmount()))
+            case _ => Future.successful(Redirect(routes.MonthlyPaymentAmountController.monthlyPaymentAmount()))
+          }
         })
 
   }
 
-  val upfrontPaymentAmount: Action[AnyContent] = as.default.async { implicit request =>
-    val journey: Future[Journey] = journeyService.get()
-    journey.flatMap {
-      case j: Journey =>
-        val form: Form[BigDecimal] = j.userAnswers.upfrontAmount match {
-          case Some(a: AmountInPence) => upfrontPaymentAmountForm(j).fill(a.inPounds)
-          case None => upfrontPaymentAmountForm(j)
-        }
-        Future.successful(Ok(upfrontPaymentAmountPage(form, j.qualifyingDebt, AmountInPence(100L))))
-      case _ => sys.error("no journey found to use")
+  val upfrontPaymentAmount: Action[AnyContent] = as.getJourney.async { implicit request =>
+    val form: Form[BigDecimal] = request.journey.userAnswers.upfrontAmount match {
+      case Some(a: AmountInPence) => upfrontPaymentAmountForm(request.journey).fill(a.inPounds)
+      case None => upfrontPaymentAmountForm(request.journey)
     }
+    Future.successful(Ok(upfrontPaymentAmountPage(form, request.journey.qualifyingDebt, AmountInPence(100L))))
   }
 
   val upfrontPaymentAmountSubmit: Action[AnyContent] = as.getJourney.async { implicit request =>
-    val journey: Future[Journey] = journeyService.get()
-    journey.flatMap {
-      case j: Journey =>
-        upfrontPaymentAmountForm(j)
-          .bindFromRequest()
-          .fold(
-            formWithErrors =>
-              Future.successful(Ok(upfrontPaymentAmountPage(formWithErrors, j.qualifyingDebt, AmountInPence(100L)))),
-            (s: BigDecimal) => {
-              journeyService.upsert(
-                j.copy(
-                  remainingToPay = AmountInPence(j.qualifyingDebt.value - (s.longValue() * 100)),
-                  userAnswers = j.userAnswers.copy(
-                    upfrontAmount = Some(AmountInPence((s * 100).longValue())))))
-              Future(Redirect(routes.UpfrontPaymentController.upfrontSummary()))
-            })
-      case _ => sys.error("no journey found to update")
-    }
-
+    upfrontPaymentAmountForm(request.journey)
+      .bindFromRequest()
+      .fold(
+        formWithErrors =>
+          Future.successful(Ok(upfrontPaymentAmountPage(formWithErrors, request.journey.qualifyingDebt, AmountInPence(100L)))),
+        (s: BigDecimal) => {
+          journeyService.upsert(
+            request.journey.copy(
+              remainingToPay = AmountInPence(request.journey.qualifyingDebt.value - (s.longValue() * 100)),
+              userAnswers = request.journey.userAnswers.copy(
+                upfrontAmount = Some(AmountInPence((s * 100).longValue())))))
+          Future(Redirect(routes.UpfrontPaymentController.upfrontSummary()))
+        })
   }
 
   val upfrontSummary: Action[AnyContent] = as.getJourney.async { implicit request =>
-    val journey: Future[Journey] = journeyService.get()
-    journey.flatMap {
-      case j: Journey =>
-        Future.successful(Ok(upfrontSummaryPage(j.userAnswers, j.remainingToPay)))
-      case _ => sys.error("no journey to update")
-    }
+    Future.successful(Ok(upfrontSummaryPage(request.journey.userAnswers, request.journey.remainingToPay)))
   }
 }
 

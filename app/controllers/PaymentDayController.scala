@@ -23,6 +23,7 @@ import play.api.data.{ FormError, Forms }
 import play.api.data.Forms.{ mapping, nonEmptyText }
 import play.api.data.format.Formatter
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import requests.RequestSupport
 import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
@@ -38,29 +39,29 @@ class PaymentDayController @Inject() (
   as: Actions,
   paymentDayPage: PaymentDay,
   journeyService: JourneyService,
+  requestSupport: RequestSupport,
   mcc: MessagesControllerComponents)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
+
+  import requestSupport._
 
   val paymentDay: Action[AnyContent] = as.default { implicit request =>
     Ok(paymentDayPage(paymentDayForm()))
   }
 
   val paymentDaySubmit: Action[AnyContent] = as.getJourney.async { implicit request =>
-    val journey: Future[Journey] = journeyService.get()
-    journey.flatMap {
-      case j: Journey =>
-        paymentDayForm()
-          .bindFromRequest()
-          .fold(
-            formWithErrors => Future.successful(Ok(paymentDayPage(formWithErrors))),
-            (p: PaymentDayForm) => {
-              journeyService.upsert(j.copy(userAnswers = j.userAnswers.copy(
-                paymentDay = Some(p.differentDay.getOrElse(28).toString.toInt))))
-              Future.successful(Redirect(routes.InstalmentsController.instalmentOptions()))
-            })
-      case _ => sys.error("journey not found to update")
-    }
+    val j: Journey = request.journey
+    paymentDayForm()
+      .bindFromRequest()
+      .fold(
+        formWithErrors => Future.successful(Ok(paymentDayPage(formWithErrors))),
+        (p: PaymentDayForm) => {
+          journeyService.upsert(j.copy(userAnswers = j.userAnswers.copy(
+            paymentDay = Some(p.differentDay.getOrElse(28).toString.toInt))))
+          Future.successful(Redirect(routes.InstalmentsController.instalmentOptions()))
+        })
+
   }
 }
 

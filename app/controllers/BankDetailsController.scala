@@ -46,29 +46,21 @@ class BankDetailsController @Inject() (
   }
 
   val setUpBankDetailsSubmit: Action[AnyContent] = as.getJourney.async { implicit request =>
-    val journey: Future[Journey] = journeyService.get()
-    journey.flatMap {
-      case j: Journey =>
-        bankDetailsForm()
-          .bindFromRequest()
-          .fold(
-            formWithErrors => Future.successful(Ok(bankDetailsPage(formWithErrors))),
-            (bankDetails: BankDetails) => {
-              journeyService.upsert(j.copy(userAnswers = j.userAnswers.copy(
-                bankDetails = Some(bankDetails))))
-              Future.successful(Redirect(routes.BankDetailsController.checkBankDetails()))
-            })
-      case _ => sys.error("journey not found to update")
-    }
+    val j: Journey = request.journey
+    bankDetailsForm()
+      .bindFromRequest()
+      .fold(
+        formWithErrors => Future.successful(Ok(bankDetailsPage(formWithErrors))),
+        (bankDetails: BankDetails) => {
+          journeyService.upsert(j.copy(userAnswers = j.userAnswers.copy(
+            bankDetails = Some(bankDetails))))
+          Future.successful(Redirect(routes.BankDetailsController.checkBankDetails()))
+        })
   }
 
   val checkBankDetails: Action[AnyContent] = as.getJourney.async { implicit request =>
-    val journey: Future[Journey] = journeyService.get()
-    journey.flatMap {
-      case j: Journey =>
-        Future.successful(Ok(checkBankDetailsPage(j.userAnswers)))
-      case _ => sys.error("journey not found to update")
-    }
+    val j: Journey = request.journey
+    Future.successful(Ok(checkBankDetailsPage(j.userAnswers)))
   }
 
   val termsAndConditions: Action[AnyContent] = as.default { implicit request =>

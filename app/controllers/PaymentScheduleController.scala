@@ -43,13 +43,11 @@ class PaymentScheduleController @Inject() (
   extends FrontendController(mcc)
   with Logging {
 
-  val checkPaymentSchedule: Action[AnyContent] = as.default.async { implicit request =>
-    val journey: Future[Journey] = journeyService.get()
-    journey.flatMap {
-      case j: Journey =>
-        Future.successful(Ok(paymentSchedulePage(j.userAnswers, computeMonths(j.userAnswers.getMonthsToPay))))
-      case _ => sys.error("no journey found to update")
-    }
+  import requestSupport._
+
+  val checkPaymentSchedule: Action[AnyContent] = as.getJourney.async { implicit request =>
+    val j: Journey = request.journey
+    Future.successful(Ok(paymentSchedulePage(j.userAnswers, computeMonths(j.userAnswers.getMonthsToPay))))
   }
 }
 
