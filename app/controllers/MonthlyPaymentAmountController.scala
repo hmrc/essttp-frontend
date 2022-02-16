@@ -24,7 +24,6 @@ import moveittocor.corcommon.model.AmountInPence
 import play.api.data.{ Form, Forms }
 import play.api.data.Forms.mapping
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
-import requests.RequestSupport
 import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
@@ -37,12 +36,9 @@ class MonthlyPaymentAmountController @Inject() (
   as: Actions,
   mcc: MessagesControllerComponents,
   journeyService: JourneyService,
-  requestSupport: RequestSupport,
   monthlyPaymentAmountPage: MonthlyPaymentAmount)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
-
-  import requestSupport._
 
   val monthlyPaymentAmount: Action[AnyContent] = as.getJourney.async { implicit request =>
     Future.successful(Ok(monthlyPaymentAmountPage(

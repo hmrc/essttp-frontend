@@ -33,14 +33,10 @@ import scala.concurrent.{ ExecutionContext, Future }
 class ConfirmationController @Inject() (
   as: Actions,
   mcc: MessagesControllerComponents,
-  journeyService: JourneyService,
-  requestSupport: RequestSupport,
   confirmationPage: Confirmation,
   printSummaryPage: PrintSummary)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
-
-  import requestSupport._
 
   val confirmation: Action[AnyContent] = as.getJourney.async { implicit request =>
     val j: Journey = request.journey

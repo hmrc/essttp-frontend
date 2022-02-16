@@ -24,7 +24,6 @@ import models.{ InstalmentOption, Journey }
 import moveittocor.corcommon.model.AmountInPence
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import requests.RequestSupport
-import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.CheckPaymentSchedule
@@ -37,13 +36,10 @@ import scala.concurrent.{ ExecutionContext, Future }
 class PaymentScheduleController @Inject() (
   as: Actions,
   mcc: MessagesControllerComponents,
-  journeyService: JourneyService,
   requestSupport: RequestSupport,
   paymentSchedulePage: CheckPaymentSchedule)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
-
-  import requestSupport._
 
   val checkPaymentSchedule: Action[AnyContent] = as.getJourney.async { implicit request =>
     val j: Journey = request.journey
