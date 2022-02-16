@@ -1,1 +1,31 @@
 @import "lib/govuk-frontend/govuk/base";
+
+.grouped-row {
+  > dd, > dt {
+    border-bottom-style: none;
+    padding-top: 2px;
+    padding-bottom: 0;
+    .grouped-change {
+      display: inline-block;
+      @include govuk-media-query($from: tablet) {
+        display: none;
+      }
+    }
+  }
+  &.last-grouped-row {
+    > dd, > dt {
+      @include govuk-media-query($from: tablet) {
+        border-bottom-style: solid;
+        padding-bottom: 10px;
+      }
+    }
+  }
+}
+
+.dd-logo {
+  text-align: right;
+  img {
+    width: 100px;
+    height: 120px;
+  }
+}

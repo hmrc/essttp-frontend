@@ -17,22 +17,34 @@
 package controllers
 
 import _root_.actions.Actions
+import controllers.PaymentScheduleController.computeMonths
+import models.Journey
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import requests.RequestSupport
+import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
+import views.html.{ Confirmation, PrintSummary }
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
-class LandingController @Inject() (
+class ConfirmationController @Inject() (
   as: Actions,
-  mcc: MessagesControllerComponents)(implicit ec: ExecutionContext)
+  mcc: MessagesControllerComponents,
+  confirmationPage: Confirmation,
+  printSummaryPage: PrintSummary)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 
-  val landingPage: Action[AnyContent] = as.default.async { implicit request =>
-    Future.successful(Redirect(routes.EPayeStartController.ePayeStart()))
+  val confirmation: Action[AnyContent] = as.getJourney.async { implicit request =>
+    val j: Journey = request.journey
+    Future.successful(Ok(confirmationPage(j.userAnswers, computeMonths(j.userAnswers.getMonthsToPay), "222PX00222222")))
   }
 
+  val printSummary: Action[AnyContent] = as.getJourney.async { implicit request =>
+    val j: Journey = request.journey
+    Future.successful(Ok(printSummaryPage(j.userAnswers, computeMonths(j.userAnswers.getMonthsToPay), "222PX00222222")))
+  }
 }

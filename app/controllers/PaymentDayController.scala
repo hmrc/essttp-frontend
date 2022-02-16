@@ -17,16 +17,18 @@
 package controllers
 
 import _root_.actions.Actions
-import controllers.PaymentDayController.paymentDayForm
+import controllers.PaymentDayController.{ PaymentDayForm, paymentDayForm }
+import models.Journey
 import play.api.data.{ FormError, Forms }
-import play.api.data.Forms.{ mapping, nonEmptyText, number }
+import play.api.data.Forms.{ mapping, nonEmptyText }
 import play.api.data.format.Formatter
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 
 import javax.inject.{ Inject, Singleton }
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ ExecutionContext, Future }
 import views.html.PaymentDay
 
 import scala.util.Try
@@ -35,6 +37,7 @@ import scala.util.Try
 class PaymentDayController @Inject() (
   as: Actions,
   paymentDayPage: PaymentDay,
+  journeyService: JourneyService,
   mcc: MessagesControllerComponents)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
@@ -43,12 +46,18 @@ class PaymentDayController @Inject() (
     Ok(paymentDayPage(paymentDayForm()))
   }
 
-  val paymentDaySubmit: Action[AnyContent] = as.default { implicit request =>
+  val paymentDaySubmit: Action[AnyContent] = as.getJourney.async { implicit request =>
+    val j: Journey = request.journey
     paymentDayForm()
       .bindFromRequest()
       .fold(
-        formWithErrors => Ok(paymentDayPage(formWithErrors)),
-        _ => Ok("this is as far as we go for now..."))
+        formWithErrors => Future.successful(Ok(paymentDayPage(formWithErrors))),
+        (p: PaymentDayForm) => {
+          journeyService.upsert(j.copy(userAnswers = j.userAnswers.copy(
+            paymentDay = Some(p.differentDay.getOrElse(28).toString.toInt))))
+          Future.successful(Redirect(routes.InstalmentsController.instalmentOptions()))
+        })
+
   }
 }
 

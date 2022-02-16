@@ -16,22 +16,10 @@
 
 package models
 
-import moveittocor.corcommon.model.{ AmountInPence, JourneyId }
 import play.api.libs.json.{ Json, OFormat }
 
-import java.time.Instant
+final case class BankDetails(name: String, sortCode: SortCode, accountNumber: AccountNumber)
 
-final case class Journey(
-  _id: JourneyId,
-  createdDate: Instant,
-  lastUpdated: Instant = Instant.now,
-  status: JourneyStatus,
-  qualifyingDebt: AmountInPence,
-  remainingToPay: AmountInPence,
-  userAnswers: UserAnswers) {
-  def id: JourneyId = _id
-}
-
-object Journey {
-  implicit val format: OFormat[Journey] = Json.format[Journey]
+object BankDetails {
+  implicit val format: OFormat[BankDetails] = Json.format[BankDetails]
 }

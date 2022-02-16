@@ -1,0 +1,46 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import messages.Messages
+
+@import moveittocor.corcommon.model.AmountInPence
+@import play.api.mvc.Request
+@import requests.RequestSupport
+@import config.AppConfig
+
+@this(requestSupport: RequestSupport)
+
+@(interestAmount: AmountInPence)(implicit request: Request[_], appConfig: AppConfig)
+
+@import requestSupport._
+
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key govuk-!-width-two-thirds">
+      @{Messages.Instalments.`Estimated total interest:`.show}<br>
+      <span class="govuk-!-font-weight-regular govuk-!-font-size-16">
+      @{Messages.Instalments.getInterestDescription(appConfig.InterestRates.hmrcRate).show}
+      </span>
+    </dt>
+    <dd class="govuk-summary-list__value">
+      @{interestAmount.formatInPounds}<br>
+      <span class="govuk-!-font-size-16">
+      @{Messages.Instalments.`added to the final payment`.show}
+      </span>
+    </dd>
+  </div>
+</dl>
+

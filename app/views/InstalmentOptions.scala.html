@@ -20,6 +20,9 @@
 @import play.api.data.Form
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import controllers.routes
+@import models.InstalmentOption
+@import views.html.components.InstalmentInterest
+@import config.AppConfig
 
 @this(
   layout: templates.Layout,
@@ -27,29 +30,38 @@
   govukRadios: GovukRadios,
   formWithCSRF: FormWithCSRF,
   govukErrorSummary: GovukErrorSummary,
-  requestSupport: RequestSupport
+  requestSupport: RequestSupport,
+  instalmentInterest: InstalmentInterest
 )
 
-@(form: Form[String])(implicit
-  request: Request[_]
+@(form: Form[String], options: List[InstalmentOption])(implicit
+  request: Request[_],
+  appConfig: AppConfig
 )
 
 @import requestSupport._
 
-@key = @{"UpfrontPayment"}
-@title = @{Messages.UpfrontPayment.`Can you make an upfront payment?`.show}
+@key = @{"Instalments"}
+@title = @{Messages.Instalments.`How many months do you want to pay over?`.show}
+@radioOptions = @{options.zipWithIndex.map { case (option, index) => RadioItem(
+ content = Text(Messages.Instalments.getInstalmentOption(option.numberOfMonths, option.amountToPayEachMonth).show),
+ value = Some(index.toString),
+ hint = None,
+ checked = form.data.values.toList.contains(index.toString),
+ conditionalHtml = Some(instalmentInterest(option.interestPayment))
+)}.toSeq}
 
-@layout(pageTitle = Some(title), backLocation = Some(routes.EPayeStartController.ePayeStart), hasErrors = form.hasErrors) {
+@layout(pageTitle = Some(title), backLocation = Some(routes.PaymentDayController.paymentDay()), hasErrors = form.hasErrors) {
  @if(form.errors.nonEmpty) {
   @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
    ErrorLink(
     href = Some(s"#${e.key}"),
-    content = Text(Messages.UpfrontPayment.getError(e.message).show)
+    content = Text(Messages.Instalments.getError(e.message).show)
    )
   ),
    title = Text(Messages.`There is a problem`.show)))
  }
- @formWithCSRF(action = routes.UpfrontPaymentController.upfrontPaymentSubmit()) {
+ @formWithCSRF(action = routes.InstalmentsController.instalmentOptionsSubmit()) {
   @govukRadios(Radios(
    fieldset = Some(Fieldset(
     legend = Some(Legend(
@@ -58,26 +70,14 @@
      isPageHeading = true
     ))
    )),
-   hint = Some(Hint(
-    content = Text(Messages.UpfrontPayment.`Your monthly payments will be lower if you ...`.show)
-    )),
-    idPrefix = Some(key),
-    name = key,
-    items = Seq(
-     RadioItem(
-      content = Text(Messages.UpfrontPayment.`Yes`.show),
-      value = Some("Yes"),
-      checked = form.data.values.toList.contains("Yes")
-     ),
-     RadioItem(
-      content = Text(Messages.UpfrontPayment.`No`.show),
-      value = Some("No"),
-      checked = form.data.values.toList.contains("No")
-     )
-    ),
-    classes = "govuk-radios--inline",
-    errorMessage = form.error(key).map(e => ErrorMessage(content = Text(Messages.UpfrontPayment.getError(e.message).show)))
+   idPrefix = Some(key),
+   name = key,
+   items = radioOptions,
+   errorMessage = form.error(key).map(e => ErrorMessage(
+    content = Text(Messages.Instalments.getError(e.message).show)
    ))
+  ))
+
   @govukButton(Button(content = Text(Messages.continue.show)))
  }
 

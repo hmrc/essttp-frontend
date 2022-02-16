@@ -15,6 +15,15 @@ GET        /monthly-payment-amount                       controllers.MonthlyPaym
 POST       /monthly-payment-amount                       controllers.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit
 GET        /payment-day                                  controllers.PaymentDayController.paymentDay()
 POST       /payment-day                                  controllers.PaymentDayController.paymentDaySubmit()
+GET        /instalment-options                           controllers.InstalmentsController.instalmentOptions()
+POST       /instalment-options                           controllers.InstalmentsController.instalmentOptionsSubmit()
+GET        /check-payment-schedule                       controllers.PaymentScheduleController.checkPaymentSchedule()
+GET        /setup-bank-details                           controllers.BankDetailsController.setUpBankDetails()
+POST       /setup-bank-details                           controllers.BankDetailsController.setUpBankDetailsSubmit()
+GET        /check-bank-details                           controllers.BankDetailsController.checkBankDetails()
+GET        /terms-and-conditions                         controllers.BankDetailsController.termsAndConditions()
+GET        /confirmation                                 controllers.ConfirmationController.confirmation()
+GET        /print-summary                                controllers.ConfirmationController.printSummary()
 
 GET         /assets/*file                                controllers.Assets.versioned(path="/public", file: Asset)
 

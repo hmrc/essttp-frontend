@@ -54,4 +54,9 @@ class AppConfig @Inject() (config: Configuration) {
     val exitSurveyUrl: String = s"${BaseUrl.feedbackFrontend}/feedback/$appName"
     val firstPageBackUrl: String = "https://gov.uk"
   }
+
+  object InterestRates {
+    val baseRate: BigDecimal = 0.25
+    val hmrcRate: BigDecimal = 2.5
+  }
 }

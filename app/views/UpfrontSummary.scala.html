@@ -17,12 +17,12 @@
 @import config.AppConfig
 @import requests.RequestSupport
 @import messages.Messages
-@import play.api.mvc.RequestHeader
+@import play.api.mvc.Request
 @import play.twirl.api.Html
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-@import controllers.UpfrontPaymentController.FakeSession
 @import moveittocor.corcommon.model.AmountInPence
 @import controllers.routes
+@import models.UserAnswers
 
 @this(
   layout: templates.Layout,
@@ -31,8 +31,7 @@
   govukSummaryList : GovukSummaryList
 )
 
-
-@(answers: FakeSession, remaining: AmountInPence)(implicit request: RequestHeader)
+@(answers: UserAnswers, remaining: AmountInPence)(implicit request: Request[_])
 
 @import requestSupport._
 
