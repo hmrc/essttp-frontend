@@ -46,7 +46,6 @@
   <h2 class="govuk-heading-m">
     @{Messages.Confirmation.`What happens next`.show}
   </h2>
-  <p class="govuk-body">@{Messages.BankDetails.`We can cancel this agreement if you:`.show}</p>
   <p class="govuk-body">@{Messages.Confirmation.`HMRC will send you a letter within 5 days with your payment dates.`.show}</p>
   <p class="govuk-body">@{Messages.Confirmation.paymentInfo(answers.hasUpfrontPayment.getOrElse(false), nextPayment).show}</p>
   <p class="govuk-body"><a href="@{routes.ConfirmationController.printSummary().url}" class="govuk-link">@{Messages.Confirmation.`Print your plan or save it as a PDF`.show}</a></p>
