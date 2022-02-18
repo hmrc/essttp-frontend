@@ -32,7 +32,7 @@ class LandingController @Inject() (
   with Logging {
 
   val landingPage: Action[AnyContent] = as.default.async { implicit request =>
-    Future.successful(Redirect(routes.EPayeStartController.ePayeStart()))
+    Future.successful(Redirect(routes.EPayeStartController.ePayeLanding()))
   }
 
 }

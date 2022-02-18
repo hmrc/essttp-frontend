@@ -21,7 +21,7 @@ import moveittocor.corcommon.model.AmountInPence
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
-import views.html.EPaye.EPayeStartPage
+import views.html.EPaye.{ EPayeStartPage, EPayeLandingPage }
 
 import java.time.LocalDate
 import javax.inject.{ Inject, Singleton }
@@ -34,10 +34,22 @@ import services.JourneyService
 class EPayeStartController @Inject() (
   as: Actions,
   mcc: MessagesControllerComponents,
+<<<<<<< Updated upstream
   journeyService: JourneyService,
+=======
+>>>>>>> Stashed changes
+  ePayeLandingPage: EPayeLandingPage,
   ePayeStartPage: EPayeStartPage)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
+
+  val ePayeLanding: Action[AnyContent] = as.default { implicit request =>
+    Ok(ePayeLandingPage())
+  }
+
+  val ePayeLandingSubmit: Action[AnyContent] = as.default { implicit request =>
+    Redirect(routes.EPayeStartController.ePayeStart())
+  }
 
   val ePayeStart: Action[AnyContent] = as.default { implicit request =>
     val qualifyingDebt: AmountInPence = AmountInPence(296345)

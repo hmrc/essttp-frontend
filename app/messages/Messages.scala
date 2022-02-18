@@ -101,6 +101,46 @@ object Messages {
 
   }
 
+  object Epaye {
+    val `Set up a PAYE for Employers payment plan`: Message = Message(
+      "Set up a PAYE for Employers payment plan")
+    val `You can use this service to pay overdue payments...`: Message = Message(
+      "You can use this service to pay overdue payments in instalments over a period of up to 6 months. The payments you make will incur interest.")
+    val `You are eligible to set up an online payment plan if:`: Message = Message(
+      "You are eligible to set up an online payment plan if:")
+    val `you owe £15,000 or less`: Message = Message(
+      "you owe £15,000 or less")
+    val `you do not have any other payment plans or debts with HMRC`: Message = Message(
+      "you do not have any other payment plans or debts with HMRC")
+    val `your tax returns are up to date`: Message = Message(
+      "your tax returns are up to date")
+    val `you have no outstanding penalties`: Message = Message(
+      "you have no outstanding penalties")
+    val `you are a UK resident`: Message = Message(
+      "you are a UK resident")
+    val `You can use this service within 35 days of the overdue payment deadline.`: Message = Message(
+      "You can use this service within 35 days of the overdue payment deadline.")
+    val `You can choose to pay:`: Message = Message(
+      "You can choose to pay:")
+    val `part of the payment upfront and part in monthly instalments`: Message = Message(
+      "part of the payment upfront and part in monthly instalments")
+    val `monthly instalments only`: Message = Message(
+      "monthly instalments only")
+    val `Before you start`: Message = Message(
+      "Before you start")
+    val `You must be:`: Message = Message(
+      "You must be:")
+    val `a named account holder for the UK bank account you intend to use`: Message = Message(
+      "a named account holder for the UK bank account you intend to use")
+    val `able to authorise a Direct Debit`: Message = Message(
+      "able to authorise a Direct Debit")
+    val `Start now`: Message = Message(
+      "Start now")
+    val `HMRC intend this as a one-off payment plan...`: Message = Message(
+      "HMRC intend this as a one-off payment plan to give you extra support. You must keep up to date with your payments. If you do not, HMRC may ask you to pay the total outstanding amount.")
+
+  }
+
   object UpfrontPaymentAmount {
     val `How much can you pay upfront?`: Message = Message(
       "How much can you pay upfront?")
