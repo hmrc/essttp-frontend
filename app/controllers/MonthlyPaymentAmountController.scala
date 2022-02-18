@@ -41,8 +41,12 @@ class MonthlyPaymentAmountController @Inject() (
   with Logging {
 
   val monthlyPaymentAmount: Action[AnyContent] = as.getJourney.async { implicit request =>
+    val form: Form[BigDecimal] = request.journey.userAnswers.affordableAmount match {
+      case Some(a: AmountInPence) => monthlyPaymentAmountForm(request.journey).fill(a.inPounds)
+      case _ => monthlyPaymentAmountForm(request.journey)
+    }
     Future.successful(Ok(monthlyPaymentAmountPage(
-      monthlyPaymentAmountForm(request.journey),
+      form,
       request.journey.remainingToPay,
       AmountInPence(request.journey.remainingToPay.value / 6))))
   }

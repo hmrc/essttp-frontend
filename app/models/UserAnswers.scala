@@ -16,7 +16,7 @@
 
 package models
 
-import models.InstalmentOption
+import cats.implicits.catsSyntaxEq
 import moveittocor.corcommon.model.AmountInPence
 import play.api.libs.json.{ Format, Json }
 
@@ -24,16 +24,20 @@ case class UserAnswers(
   hasUpfrontPayment: Option[Boolean],
   upfrontAmount: Option[AmountInPence],
   affordableAmount: Option[AmountInPence],
-  paymentDay: Option[Int],
+  paymentDay: Option[String],
+  differentDay: Option[Int],
   monthsToPay: Option[InstalmentOption],
   bankDetails: Option[BankDetails]) {
   def getAffordableAmount: AmountInPence = affordableAmount.getOrElse(sys.error("trying to get non-existent affordable amount"))
   def getMonthsToPay: InstalmentOption = monthsToPay.getOrElse(sys.error("trying to get non-existent months to pay"))
-  def getPaymentDay: Int = paymentDay.getOrElse(sys.error("trying to get non-existent payment day"))
+  def getPaymentDay: Int = paymentDay match {
+    case Some(s: String) => if (s === "Yes") 28 else differentDay.getOrElse(sys.error("trying to get non-existent payment day"))
+    case None => sys.error("trying to get non-existent payment day")
+  }
 }
 object UserAnswers {
 
-  val empty: UserAnswers = UserAnswers(None, None, None, None, None, None)
+  val empty: UserAnswers = UserAnswers(None, None, None, None, None, None, None)
 
   implicit val format: Format[UserAnswers] = Json.format
 

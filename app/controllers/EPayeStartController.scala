@@ -34,10 +34,7 @@ import services.JourneyService
 class EPayeStartController @Inject() (
   as: Actions,
   mcc: MessagesControllerComponents,
-<<<<<<< Updated upstream
   journeyService: JourneyService,
-=======
->>>>>>> Stashed changes
   ePayeLandingPage: EPayeLandingPage,
   ePayeStartPage: EPayeStartPage)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)

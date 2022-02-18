@@ -39,7 +39,7 @@
 @import requestSupport._
 
 @title = @{Messages.PaymentSchedule.`Check your payment plan`.show}
-@paymentDay = @{ answers.paymentDay.getOrElse(28) }
+@paymentDay = @{ answers.getPaymentDay }
 @monthsToPay = @{answers.getMonthsToPay}
 @monthRows = @{
   plan.zipWithIndex.map { case (p, index) =>

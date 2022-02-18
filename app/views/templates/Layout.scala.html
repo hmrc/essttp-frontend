@@ -48,15 +48,9 @@
         hasErrors: Boolean = false,
         showSignOutLink: Boolean = true
 )(contentBlock: Html)(implicit request: Request[_])
-<<<<<<< Updated upstream
 
   @import requestSupport._
-  @showSignOut = @{showSignOutLink || RequestSupport.isLoggedIn}
-
-=======
-  @import requestSupport._
-  @showSignOut = @{showSignOutLink || RequestSupport.isLoggedIn}
->>>>>>> Stashed changes
+  @showSignOut = @{RequestSupport.isLoggedIn}
 
   @head = {
     @headBlock.getOrElse(Html(""))

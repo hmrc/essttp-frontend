@@ -19,7 +19,7 @@ package controllers
 import _root_.actions.Actions
 import controllers.PaymentDayController.{ PaymentDayForm, paymentDayForm }
 import models.Journey
-import play.api.data.{ FormError, Forms }
+import play.api.data.{ Form, FormError, Forms }
 import play.api.data.Forms.{ mapping, nonEmptyText }
 import play.api.data.format.Formatter
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
@@ -42,8 +42,12 @@ class PaymentDayController @Inject() (
   extends FrontendController(mcc)
   with Logging {
 
-  val paymentDay: Action[AnyContent] = as.default { implicit request =>
-    Ok(paymentDayPage(paymentDayForm()))
+  val paymentDay: Action[AnyContent] = as.getJourney.async { implicit request =>
+    val form: Form[PaymentDayForm] = request.journey.userAnswers.paymentDay match {
+      case Some(a: String) => paymentDayForm().fill(PaymentDayForm(a, request.journey.userAnswers.differentDay))
+      case _ => paymentDayForm()
+    }
+    Future.successful(Ok(paymentDayPage(form)))
   }
 
   val paymentDaySubmit: Action[AnyContent] = as.getJourney.async { implicit request =>
@@ -54,7 +58,8 @@ class PaymentDayController @Inject() (
         formWithErrors => Future.successful(Ok(paymentDayPage(formWithErrors))),
         (p: PaymentDayForm) => {
           journeyService.upsert(j.copy(userAnswers = j.userAnswers.copy(
-            paymentDay = Some(p.differentDay.getOrElse(28).toString.toInt))))
+            differentDay = p.differentDay,
+            paymentDay = Some(p.paymentDay))))
           Future.successful(Redirect(routes.InstalmentsController.instalmentOptions()))
         })
 
