@@ -4,8 +4,10 @@
 
 GET        /                                             controllers.LandingController.landingPage
 
-GET        /epaye/                                       controllers.EPayeStartController.ePayeStart
-POST       /epaye/                                       controllers.EPayeStartController.ePayeStartSubmit
+GET        /epaye/                                       controllers.EPayeStartController.ePayeLanding
+POST       /epaye/                                       controllers.EPayeStartController.ePayeLandingSubmit
+GET        /epaye/start                                  controllers.EPayeStartController.ePayeStart
+POST       /epaye/start                                  controllers.EPayeStartController.ePayeStartSubmit
 GET        /upfront-payment                              controllers.UpfrontPaymentController.upfrontPayment
 POST       /upfront-payment                              controllers.UpfrontPaymentController.upfrontPaymentSubmit
 GET        /upfront-payment-amount                       controllers.UpfrontPaymentController.upfrontPaymentAmount

@@ -1,0 +1,71 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import play.api.mvc.Request
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import controllers.routes
+@import views.html.templates.Layout
+@import views.html.EPaye.components.OverduePaymentRow
+@import messages.Messages
+@import requests.RequestSupport
+@import controllers.EPayeStartController.OverduePayments
+
+@this(
+  layout: Layout,
+  govukButton: GovukButton,
+  formWithCSRF: FormWithCSRF,
+  requestSupport: RequestSupport,
+  overduePaymentRow: OverduePaymentRow
+)
+
+@()(implicit
+  request: Request[_]
+)
+
+@import requestSupport._
+
+
+@title= @{Messages.Epaye.`Set up a PAYE for Employers payment plan`.show}
+
+@layout(pageTitle = Some(title), showSignOutLink = false) {
+  <h1 class="govuk-heading-xl">@title</h1>
+  <p class="govuk-body">@{Messages.Epaye.`You can use this service to pay overdue payments...`.show}</p>
+  <p class="govuk-body">@{Messages.Epaye.`You are eligible to set up an online payment plan if:`.show}</p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>@{Messages.Epaye.`you owe £15,000 or less`.show}</li>
+    <li>@{Messages.Epaye.`you do not have any other payment plans or debts with HMRC`.show}</li>
+    <li>@{Messages.Epaye.`your tax returns are up to date`.show}</li>
+    <li>@{Messages.Epaye.`you have no outstanding penalties`.show}</li>
+    <li>@{Messages.Epaye.`you are a UK resident`.show}</li>
+  </ul>
+  <p class="govuk-body">@{Messages.Epaye.`You can use this service within 35 days of the overdue payment deadline.`.show}</p>
+  <p class="govuk-body">@{Messages.Epaye.`You can choose to pay:`.show}</p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>@{Messages.Epaye.`part of the payment upfront and part in monthly instalments`.show}</li>
+    <li>@{Messages.Epaye.`monthly instalments only`.show}</li>
+  </ul>
+  <h2 class="govuk-heading-m">@{Messages.Epaye.`Before you start`.show}</h2>
+  <p class="govuk-body">@{Messages.Epaye.`You must be:`.show}</p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>@{Messages.Epaye.`a named account holder for the UK bank account you intend to use`.show}</li>
+    <li>@{Messages.Epaye.`able to authorise a Direct Debit`.show}</li>
+  </ul>
+
+  @formWithCSRF(action = routes.EPayeStartController.ePayeLandingSubmit()) {
+    @govukButton(Button(content = Text(Messages.Epaye.`Start now`.show)))
+  }
+  <p class="govuk-body">@{Messages.Epaye.`HMRC intend this as a one-off payment plan...`.show}</p>
+}

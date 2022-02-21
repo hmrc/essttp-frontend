@@ -49,7 +49,8 @@ supporting typesafe `language.Language`
         id = Some(s"${language.code}-switch"),
         url = s"${langswitch.routes.LanguageSwitchController.switchToLanguage(language)}",
         value = Some(language.label),
-        dataAttributes = appName.map(name => Map("journey-click" -> s"$name:language: ${language.code}"))
+        dataAttributes = appName.map(name => Map("journey-click" -> s"$name:language: ${language.code}")),
+        cssClasses = Some("govuk-link")
       ).toHtml
       </li>
     } else {

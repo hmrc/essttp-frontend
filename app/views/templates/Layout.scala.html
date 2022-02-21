@@ -49,11 +49,12 @@
         showSignOutLink: Boolean = true
 )(contentBlock: Html)(implicit request: Request[_])
 
-@import requestSupport._
+  @import requestSupport._
+  @showSignOut = @{RequestSupport.isLoggedIn}
 
   @head = {
     @headBlock.getOrElse(Html(""))
-    @if(showSignOutLink) {
+    @if(showSignOut) {
       @hmrcTimeoutDialogHelper(
         title = Some(Messages.TimeOut.`You’re about to be signed out`.show),
         signOutUrl = appConfig.Urls.signOutUrl,
@@ -107,7 +108,7 @@
   @govukLayout(
     pageTitle = Some(documentTitle),
     headBlock = Some(hmrcHead(headBlock = Some(head), nonce = CSPNonce.get)),
-    headerBlock = Some(hmrcStandardHeader(serviceName = Some(Messages.ServicePhase.`Set up a payment plan`.show), signOutUrl = if(showSignOutLink) Some(appConfig.Urls.signOutUrl) else None)),
+    headerBlock = Some(hmrcStandardHeader(serviceName = Some(Messages.ServicePhase.`Set up a payment plan`.show), signOutUrl = if(showSignOut) Some(appConfig.Urls.signOutUrl) else None)),
     scriptsBlock = Some(hmrcScripts(scriptsBlock = Some(scripts), nonce = CSPNonce.get)),
     beforeContentBlock = Some(beforeContentBlock),
     footerBlock = Some(hmrcStandardFooter())
