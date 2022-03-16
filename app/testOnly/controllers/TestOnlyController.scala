@@ -17,12 +17,19 @@
 package testOnly.controllers
 
 import _root_.actions.Actions
+import controllers.PaymentDayController.readValue
+import play.api.data.{ Form, FormError, Forms }
+import play.api.data.Forms.{ mapping, nonEmptyText, text }
+import play.api.data.format.Formatter
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import testOnly.controllers.TestOnlyController.{ TestOnlyForm, testOnlyForm }
+import testOnly.models.Enrolment
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import testOnly.views.html.TestOnlyStart
+
 import javax.inject.{ Inject, Singleton }
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
 class TestOnlyController @Inject() (
@@ -33,11 +40,41 @@ class TestOnlyController @Inject() (
   with Logging {
 
   val testOnlyStartPage: Action[AnyContent] = as.default { implicit request =>
-    Ok(testOnlyPage())
+    val form: Form[TestOnlyForm] = testOnlyForm()
+    Ok(testOnlyPage(form))
   }
 
   val testOnlyStartPageSubmit: Action[AnyContent] = as.default { implicit request =>
-    Redirect("/essttp/")
+    // TODO: pattern match the combination of values posted by the form to map to BE endpoints
+    /* BE endpoints:
+      POST       /epaye/bta/journey/start
+      POST       /epaye/gov-uk/journey/start
+      POST       /epaye/detached-url/journey/start
+     */
+    testOnlyForm()
+      .bindFromRequest()
+      .fold(
+        formWithErrors => Ok(testOnlyPage(formWithErrors)),
+        (p: TestOnlyForm) => {
+          p.origin
+          Redirect("/essttp/")
+        })
   }
+
+}
+
+object TestOnlyController {
+  import play.api.data.Form
+
+  case class TestOnlyForm(
+    auth: String,
+    enrolments: Seq[String],
+    origin: String)
+
+  def testOnlyForm(): Form[TestOnlyForm] = Form(
+    mapping(
+      "auth" -> nonEmptyText,
+      "enrolments" -> Forms.seq(text),
+      "origin" -> nonEmptyText)(TestOnlyForm.apply)(TestOnlyForm.unapply))
 
 }

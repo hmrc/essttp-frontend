@@ -17,7 +17,9 @@
 @import play.api.mvc.Request
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import testOnly.controllers.{routes => testOnlyRoutes}
+@import testOnly.controllers.TestOnlyController.TestOnlyForm
 @import controllers.routes
+@import play.api.data.Form
 @import requests.RequestSupport
 @import views.html.templates.Layout
 
@@ -28,10 +30,11 @@
         govukRadios: GovukRadios,
         requestSupport: RequestSupport,
         govukTabs: GovukTabs,
-        govukCheckboxes : GovukCheckboxes
+        govukCheckboxes : GovukCheckboxes,
+        govukErrorSummary: GovukErrorSummary
 )
 
-@()(implicit
+@(form: Form[TestOnlyForm])(implicit
         request: Request[_]
 )
 
@@ -121,7 +124,49 @@
   ))
  }
 
+@vatContent = {
+@govukRadios(Radios(
+ fieldset = Some(Fieldset(
+  legend = Some(Legend(
+   content = Text("Entry origins"),
+   classes = "govuk-fieldset__legend--m",
+   isPageHeading = false
+  ))
+ )),
+ idPrefix = Some("origin"),
+ name = "origin",
+ items = Seq(
+  RadioItem(
+   content = Text("GOV.UK"),
+   value = Some("vat_govuk"),
+   hint = Some(Hint(content = Text("If you cannot pay your tax bill on time")))
+  ),
+  RadioItem(
+   content = Text("Business Tax Account"),
+   value = Some("vat_bta"),
+   hint = Some(Hint(content = Text("Set up a payment plan if you cannot pay in full")))
+  ),
+  RadioItem(
+   content = Text("No origin (direct access)"),
+   value = Some("vat_none")
+  )
+ ),
+ classes = "govuk-radios--small"
+))
+}
+
 @layout(pageTitle = Some(title)) {
+ @if(form.errors.nonEmpty) {
+  @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
+   ErrorLink(
+     href = Some(s"#${e.key}"),
+     content = Text(s"${e.key}.${e.message}")
+    )
+   ),
+   title = Text("There is a problem")))
+ }
+
+
   <h1 class="govuk-heading-xl">@title</h1>
   <p class="govuk-body">Set up journeys and emulate entry point behaviours.</p>
   @formWithCSRF(action = testOnlyRoutes.TestOnlyController.testOnlyStartPageSubmit()) {
@@ -139,7 +184,7 @@
       id = Some("vat"),
       label = "VAT",
       panel = TabPanel(
-       content = HtmlContent(payeContent)
+       content = HtmlContent(vatContent)
       )
      )
     )
