@@ -17,7 +17,6 @@
 @import play.api.mvc.Request
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import controllers.routes
-@import testOnly.messages.Messages
 @import requests.RequestSupport
 @import views.html.templates.Layout
 
@@ -25,7 +24,8 @@
         layout: Layout,
         govukButton: GovukButton,
         formWithCSRF: FormWithCSRF,
-        requestSupport: RequestSupport
+        requestSupport: RequestSupport,
+        govukTabs: GovukTabs
 )
 
 @()(implicit
@@ -33,14 +33,29 @@
 )
 
 @import requestSupport._
-@title = @{Messages.title.show}
-
-@layout(pageTitle = Some(title)) {
-  <h1 class="govuk-heading-xl">@title</h1>
-  <p class="govuk-body">@{Messages.intro.show}</p>
-  <h2 class="govuk-heading-m">Entry point emulation</h2>
+@title = @{"Test only starter page"}
+@payeContent = {
+  <h2 class="govuk-heading-m">Entry origin emulation</h2>
   <ul class="govuk-list govuk-list--bullet">
    <li><a href="#" class="govuk-link">GOV.UK</a></li>
    <li><a href="#" class="govuk-link">Business Tax Account (Set up a payment plan for PAYE)</a></li>
+   <li><a href="@{routes.EPayeStartController.ePayeLanding.url}" class="govuk-link">Direct access (no origin)</a></li>
   </ul>
+ }
+
+@layout(pageTitle = Some(title)) {
+  <h1 class="govuk-heading-xl">@title</h1>
+  <p class="govuk-body">Set up journeys and emulate entry point behaviours.</p>
+
+ @govukTabs(Tabs(
+  items = Seq(
+   TabItem(
+    id = Some("paye"),
+    label = "PAYE",
+    panel = TabPanel(
+     content = HtmlContent(payeContent)
+    )
+   )
+  )
+ ))
 }
