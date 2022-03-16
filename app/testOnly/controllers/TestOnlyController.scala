@@ -37,7 +37,7 @@ class TestOnlyController @Inject() (
   }
 
   val testOnlyStartPageSubmit: Action[AnyContent] = as.default { implicit request =>
-    Redirect("/")
+    Redirect("/essttp/")
   }
 
 }

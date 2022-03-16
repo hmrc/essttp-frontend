@@ -16,6 +16,7 @@
 
 @import play.api.mvc.Request
 @import uk.gov.hmrc.govukfrontend.views.html.components._
+@import testOnly.controllers.{routes => testOnlyRoutes}
 @import controllers.routes
 @import requests.RequestSupport
 @import views.html.templates.Layout
@@ -24,8 +25,10 @@
         layout: Layout,
         govukButton: GovukButton,
         formWithCSRF: FormWithCSRF,
+        govukRadios: GovukRadios,
         requestSupport: RequestSupport,
-        govukTabs: GovukTabs
+        govukTabs: GovukTabs,
+        govukCheckboxes : GovukCheckboxes
 )
 
 @()(implicit
@@ -34,28 +37,114 @@
 
 @import requestSupport._
 @title = @{"Test only starter page"}
+@orgOptions = @{
+ govukCheckboxes(Checkboxes(
+  fieldset = Some(Fieldset(
+   legend = Some(Legend(
+    content = Text("Enrolments"),
+    classes = "govuk-fieldset__legend--s",
+    isPageHeading = false
+   ))
+  )),
+  idPrefix = Some("enrolments"),
+  name = "enrolments",
+  items = Seq(
+   CheckboxItem(
+    content = Text("PAYE for Employers"),
+    value = "PAYE"
+   ),
+   CheckboxItem(
+    content = Text("VAT"),
+    value = "vat"
+   )
+  ),
+  classes = "govuk-checkboxes--small"
+ ))
+}
+@authContent = {
+ @govukRadios(Radios(
+  fieldset = Some(Fieldset(
+   legend = Some(Legend(
+    content = Text("Signed in"),
+    classes = "govuk-fieldset__legend--m",
+    isPageHeading = false
+   ))
+  )),
+  idPrefix = Some("auth"),
+  name = "auth",
+  items = Seq(
+   RadioItem(
+    content = Text("As an Organisation"),
+    value = Some("Organisation"),
+    conditionalHtml = Some(orgOptions)
+   ),
+   RadioItem(
+    content = Text("As an Individual"),
+    value = Some("Individual")
+   ),
+   RadioItem(
+    content = Text("Not signed in"),
+    value = Some("none")
+   )
+  ),
+  classes = "govuk-radios--small"
+ ))
+}
 @payeContent = {
-  <h2 class="govuk-heading-m">Entry origin emulation</h2>
-  <ul class="govuk-list govuk-list--bullet">
-   <li><a href="#" class="govuk-link">GOV.UK</a></li>
-   <li><a href="#" class="govuk-link">Business Tax Account (Set up a payment plan for PAYE)</a></li>
-   <li><a href="@{routes.EPayeStartController.ePayeLanding.url}" class="govuk-link">Direct access (no origin)</a></li>
-  </ul>
+  @govukRadios(Radios(
+   fieldset = Some(Fieldset(
+    legend = Some(Legend(
+     content = Text("Entry origins"),
+     classes = "govuk-fieldset__legend--m",
+     isPageHeading = false
+    ))
+   )),
+   idPrefix = Some("origin"),
+   name = "origin",
+   items = Seq(
+    RadioItem(
+     content = Text("GOV.UK"),
+     value = Some("paye_govuk"),
+     hint = Some(Hint(content = Text("If you cannot pay your tax bill on time")))
+    ),
+    RadioItem(
+     content = Text("Business Tax Account"),
+     value = Some("paye_bta"),
+     hint = Some(Hint(content = Text("Set up a payment plan if you cannot pay in full")))
+    ),
+    RadioItem(
+     content = Text("No origin (direct access)"),
+     value = Some("paye_none")
+    )
+   ),
+   classes = "govuk-radios--small"
+  ))
  }
 
 @layout(pageTitle = Some(title)) {
   <h1 class="govuk-heading-xl">@title</h1>
   <p class="govuk-body">Set up journeys and emulate entry point behaviours.</p>
-
- @govukTabs(Tabs(
-  items = Seq(
-   TabItem(
-    id = Some("paye"),
-    label = "PAYE",
-    panel = TabPanel(
-     content = HtmlContent(payeContent)
+  @formWithCSRF(action = testOnlyRoutes.TestOnlyController.testOnlyStartPageSubmit()) {
+   @authContent
+   @govukTabs(Tabs(
+    items = Seq(
+     TabItem(
+      id = Some("paye"),
+      label = "PAYE",
+      panel = TabPanel(
+       content = HtmlContent(payeContent)
+      )
+     ),
+     TabItem(
+      id = Some("vat"),
+      label = "VAT",
+      panel = TabPanel(
+       content = HtmlContent(payeContent)
+      )
+     )
     )
-   )
-  )
- ))
+   ))
+   @govukButton(Button(content = Text("Start now")))
+  }
+
 }
