@@ -79,7 +79,9 @@
         )),
         content = HtmlContent(Messages.ServicePhase.bannerText(appConfig.Urls.betaFeedbackUrl(request)).show)
       ))
-      @languageSelection()
+      @if(appConfig.welshLanguageSupportEnabled) {
+        @languageSelection()
+      }
       @{
         backLocation map { back =>
           govukBackLink(BackLink(href = back.url, attributes = Map("id" -> "back")))
