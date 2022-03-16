@@ -31,7 +31,7 @@ case class UserAnswers(
   def getAffordableAmount: AmountInPence = affordableAmount.getOrElse(sys.error("trying to get non-existent affordable amount"))
   def getMonthsToPay: InstalmentOption = monthsToPay.getOrElse(sys.error("trying to get non-existent months to pay"))
   def getPaymentDay: Int = paymentDay match {
-    case Some(s: String) => if (s === "Yes") 28 else differentDay.getOrElse(sys.error("trying to get non-existent payment day"))
+    case Some(s: String) => if (s === "28") 28 else differentDay.getOrElse(sys.error("trying to get non-existent payment day"))
     case None => sys.error("trying to get non-existent payment day")
   }
 }
