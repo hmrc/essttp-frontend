@@ -17,19 +17,19 @@
 package testOnly.controllers
 
 import _root_.actions.Actions
-import controllers.PaymentDayController.readValue
-import play.api.data.{ Form, FormError, Forms }
+import play.api.data.{ Form, Forms }
 import play.api.data.Forms.{ mapping, nonEmptyText, text }
-import play.api.data.format.Formatter
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
-import testOnly.controllers.TestOnlyController.{ TestOnlyForm, testOnlyForm }
-import testOnly.models.Enrolment
+import testOnly.controllers.TestOnlyController.{ TestOnlyForm, TestOnlyRequest, testOnlyForm }
+import testOnly.models.Enrolment.{ EPAYE, VAT }
+import testOnly.models.{ Enrolment, TestOnlyJourney }
+import testOnly.models.TestOnlyJourney.{ EpayeFromBTA, EpayeFromGovUk, EpayeNoOrigin, VATFromBTA, VATFromGovUk, VATNoOrigin }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import testOnly.views.html.TestOnlyStart
 
 import javax.inject.{ Inject, Singleton }
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class TestOnlyController @Inject() (
@@ -56,8 +56,20 @@ class TestOnlyController @Inject() (
       .fold(
         formWithErrors => Ok(testOnlyPage(formWithErrors)),
         (p: TestOnlyForm) => {
-          p.origin
-          Redirect("/essttp/")
+          val StartJourney: TestOnlyJourney = p.origin match {
+            case "paye_govuk" => EpayeFromGovUk
+            case "paye_bta" => EpayeFromBTA
+            case "paye_none" => EpayeNoOrigin
+            case "vat_govuk" => VATFromGovUk
+            case "vat_bta" => VATFromBTA
+            case "vat_none" => VATNoOrigin
+            case _ => EpayeFromGovUk
+          }
+          val enrolmentMap: Map[String, Enrolment] = Map(
+            "EPAYE" -> EPAYE,
+            "VAT" -> VAT)
+          val testOnlyRequest = TestOnlyRequest(auth = p.auth, enrolments = p.enrolments.map(enrolmentMap).toList, journey = StartJourney)
+          Ok(s"${testOnlyRequest}")
         })
   }
 
@@ -70,6 +82,11 @@ object TestOnlyController {
     auth: String,
     enrolments: Seq[String],
     origin: String)
+
+  case class TestOnlyRequest(
+    auth: String,
+    enrolments: List[Enrolment],
+    journey: TestOnlyJourney)
 
   def testOnlyForm(): Form[TestOnlyForm] = Form(
     mapping(

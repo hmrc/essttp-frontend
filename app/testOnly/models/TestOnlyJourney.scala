@@ -18,10 +18,14 @@ package testOnly.models
 
 import cats.Eq
 
-sealed trait Enrolment extends Product with Serializable
+sealed trait TestOnlyJourney extends Product with Serializable
 
-object Enrolment {
-  case object EPAYE extends Enrolment
-  case object VAT extends Enrolment
-  implicit val eq: Eq[Enrolment] = Eq.fromUniversalEquals
+object TestOnlyJourney {
+  case object EpayeFromGovUk extends TestOnlyJourney
+  case object EpayeFromBTA extends TestOnlyJourney
+  case object EpayeNoOrigin extends TestOnlyJourney
+  case object VATFromGovUk extends TestOnlyJourney
+  case object VATFromBTA extends TestOnlyJourney
+  case object VATNoOrigin extends TestOnlyJourney
+  implicit val eq: Eq[TestOnlyJourney] = Eq.fromUniversalEquals
 }
