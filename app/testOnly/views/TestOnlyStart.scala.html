@@ -18,10 +18,10 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import testOnly.controllers.{routes => testOnlyRoutes}
 @import testOnly.controllers.TestOnlyController.TestOnlyForm
-@import controllers.routes
 @import play.api.data.Form
 @import requests.RequestSupport
 @import views.html.templates.Layout
+@import testOnly.messages.Messages
 
 @this(
         layout: Layout,
@@ -75,6 +75,9 @@
   )),
   idPrefix = Some("auth"),
   name = "auth",
+  errorMessage = form.error("auth").map(e => ErrorMessage(
+   content = Text(Messages.getError(s"auth.${e.message}").show)
+  )),
   items = Seq(
    RadioItem(
     content = Text("As an Organisation"),
@@ -104,6 +107,9 @@
    )),
    idPrefix = Some("origin"),
    name = "origin",
+   errorMessage = form.error("origin").map(e => ErrorMessage(
+    content = Text(Messages.getError(s"origin.${e.message}").show)
+   )),
    items = Seq(
     RadioItem(
      content = Text("GOV.UK"),
@@ -133,6 +139,9 @@
    isPageHeading = false
   ))
  )),
+ errorMessage = form.error("origin").map(e => ErrorMessage(
+  content = Text(Messages.getError(s"origin.${e.message}").show)
+ )),
  idPrefix = Some("origin"),
  name = "origin",
  items = Seq(
@@ -160,7 +169,7 @@
   @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
    ErrorLink(
      href = Some(s"#${e.key}"),
-     content = Text(s"${e.key}.${e.message}")
+     content = Text(Messages.getError(s"${e.key}.${e.message}").show)
     )
    ),
    title = Text("There is a problem")))

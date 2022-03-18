@@ -45,7 +45,7 @@ class TestOnlyController @Inject() (
   }
 
   val testOnlyStartPageSubmit: Action[AnyContent] = as.default { implicit request =>
-    // TODO: pattern match the combination of values posted by the form to map to BE endpoints
+    // TODO: build a service to call BE with payload
     /* BE endpoints:
       POST       /epaye/bta/journey/start
       POST       /epaye/gov-uk/journey/start
@@ -63,7 +63,7 @@ class TestOnlyController @Inject() (
             case "vat_govuk" => VATFromGovUk
             case "vat_bta" => VATFromBTA
             case "vat_none" => VATNoOrigin
-            case _ => EpayeFromGovUk
+            case _ => sys.error("unable to start a journey without an origin")
           }
           val enrolmentMap: Map[String, Enrolment] = Map(
             "EPAYE" -> EPAYE,
