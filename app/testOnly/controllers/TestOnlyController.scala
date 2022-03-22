@@ -17,6 +17,7 @@
 package testOnly.controllers
 
 import _root_.actions.Actions
+import config.AppConfig
 import play.api.data.{ Form, Forms }
 import play.api.data.Forms.{ mapping, nonEmptyText, text }
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
@@ -34,17 +35,23 @@ import scala.concurrent.ExecutionContext
 @Singleton
 class TestOnlyController @Inject() (
   as: Actions,
+  appConfig: AppConfig,
   mcc: MessagesControllerComponents,
   testOnlyPage: TestOnlyStart)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 
-  val testOnlyStartPage: Action[AnyContent] = as.default { implicit request =>
+  val login = as.default { implicit request =>
+    val loginUrl = appConfig.authLoginStubUrl
+    Redirect(loginUrl)
+  }
+
+  val testOnlyStartPage: Action[AnyContent] = as.auth { implicit request =>
     val form: Form[TestOnlyForm] = testOnlyForm()
     Ok(testOnlyPage(form))
   }
 
-  val testOnlyStartPageSubmit: Action[AnyContent] = as.default { implicit request =>
+  val testOnlyStartPageSubmit: Action[AnyContent] = as.auth { implicit request =>
     // TODO: build a service to call BE with payload
     /* BE endpoints:
       POST       /epaye/bta/journey/start
@@ -69,7 +76,7 @@ class TestOnlyController @Inject() (
             "EPAYE" -> EPAYE,
             "VAT" -> VAT)
           val testOnlyRequest = TestOnlyRequest(auth = p.auth, enrolments = p.enrolments.map(enrolmentMap).toList, journey = StartJourney)
-          Ok(s"${testOnlyRequest}")
+          Redirect(controllers.routes.LandingController.landingPage())
         })
   }
 

@@ -24,9 +24,12 @@ import javax.inject.{ Inject, Singleton }
 @Singleton
 class Actions @Inject() (
   actionBuilder: DefaultActionBuilder,
+  authenticatedAction: AuthenticatedAction,
   getJourneyActionRefiner: GetJourneyActionRefiner) {
 
   val default: ActionBuilder[Request, AnyContent] = actionBuilder
+
+  val auth = actionBuilder andThen authenticatedAction
 
   val getJourney: ActionBuilder[JourneyRequest, AnyContent] = actionBuilder andThen getJourneyActionRefiner
 }
