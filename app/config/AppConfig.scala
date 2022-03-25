@@ -37,11 +37,11 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val authLoginStubPath: String = servicesConfig.getConfString("auth-login-stub.path", "")
   val authLoginStubUrl: String = servicesConfig.baseUrl("auth-login-stub") +
     authLoginStubPath + "?continue=" +
-    "http://localhost:9215" + testOnly.controllers.routes.TestOnlyController.testOnlyStartPage()
+    servicesConfig.baseUrl("essttp-frontend") + testOnly.controllers.routes.TestOnlyController.testOnlyStartPage()
 
   def loginUrl: String = servicesConfig.baseUrl("auth-login-stub") + authLoginStubPath
 
-  def frontendBaseUrl: String = "blahblah"
+  val frontendBaseUrl: String = servicesConfig.baseUrl("essttp-frontend")
 
   object BaseUrl {
     val essttpFrontend: String = config.get[String]("baseUrl.essttp-frontend")

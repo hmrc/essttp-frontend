@@ -17,14 +17,14 @@
 package actions
 
 import com.google.inject.Inject
-import config.{ AppConfig }
+import config.AppConfig
 import play.api.Logger
-import play.api.mvc.Results.Redirect
+import play.api.mvc.Results.{ BadRequest, Ok, Redirect }
 import play.api.mvc.{ ActionRefiner, MessagesControllerComponents, Request, Result, WrappedRequest }
 import uk.gov.hmrc.auth.core.{ AuthorisationException, AuthorisedFunctions, Enrolments, NoActiveSession }
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.{ Credentials, ~ }
-import play.api.mvc.Results.Ok
+
 import scala.concurrent.{ ExecutionContext, Future }
 
 final class AuthenticatedRequest[A](
@@ -54,6 +54,13 @@ class AuthenticatedAction @Inject() (
         case enrolments ~ credentials =>
           Future.successful(
             Right(new AuthenticatedRequest[A](request, enrolments, credentials)))
+      }.recover {
+        case _: NoActiveSession =>
+          //TODO: what is a proper value to origin
+          Left(Redirect(appConfig.loginUrl, Map("continue" -> Seq(appConfig.frontendBaseUrl + request.uri), "origin" -> Seq("pay-online"))))
+        case e: AuthorisationException =>
+          logger.debug(s"Unauthorised because of ${e.reason}, $e")
+          Left(BadRequest("bad"))
       }
   }
 
