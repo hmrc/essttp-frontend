@@ -21,6 +21,7 @@ import essttp.rootmodel.{ BackUrl, ReturnUrl }
 import play.api.libs.json.JsValue
 import play.api.mvc.{ Action, MessagesControllerComponents }
 import testOnly.controllers.TestOnlyController.AuthRequest
+import uk.gov.hmrc.auth.core.{ AuthConnector, AuthorisedFunctions }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.EPaye.EPayeLandingPage2
@@ -29,21 +30,23 @@ import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton()
-class BTAController @Inject() (mcc: MessagesControllerComponents, epayeLandingPage: EPayeLandingPage2, jc: JourneyConnector)(implicit ec: ExecutionContext)
-  extends FrontendController(mcc) with Logging {
+class BTAController @Inject() (mcc: MessagesControllerComponents, epayeLandingPage: EPayeLandingPage2,
+  jc: JourneyConnector, val authConnector: AuthConnector)(implicit ec: ExecutionContext)
+  extends FrontendController(mcc) with Logging with AuthorisedFunctions {
 
   def payeLandingPage = Action { implicit request =>
-    val session = request.session
     Ok(epayeLandingPage(controllers.routes.BTAController.startPaye))
   }
 
   def startPaye = Action.async { implicit request =>
-    val result = for {
-      response <- jc.Epaye.startJourneyBta(
-        essttp.journey.model.SjRequest.Epaye.Simple(ReturnUrl("http://localhost:9125/return"), BackUrl("http://localhost:9125/back")))
-    } yield Redirect(routes.EPayeStartController.ePayeStart()).withSession("JourneyId" -> response.journeyId.value)
+    authorised() {
+      val result = for {
+        response <- jc.Epaye.startJourneyBta(
+          essttp.journey.model.SjRequest.Epaye.Simple(ReturnUrl("http://localhost:9125/return"), BackUrl("http://localhost:9125/back")))
+      } yield Redirect(routes.EPayeStartController.ePayeStart())
+      result
+    }
 
-    result
   }
 
   def vatLandingPage = Action { implicit request =>

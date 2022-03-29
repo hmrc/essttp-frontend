@@ -12,6 +12,12 @@ GET       /bta/vat                                       controllers.BTAControll
 
 GET       /govuk/epaye                                    controllers.GovUkController.payeLandingPage
 
+GET       /govuk/epaye/start                              controllers.GovUkController.startPaye
+
+GET       /nosource/epaye                                    controllers.NoSourceController.payeLandingPage
+
+GET       /nosource/epaye/start                              controllers.NoSourceController.startPaye
+
 GET       /govuk/vat                                       controllers.GovUkController.vatLandingPage
 
 GET        /epaye/                                       controllers.EPayeStartController.ePayeLanding

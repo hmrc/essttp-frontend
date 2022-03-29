@@ -16,29 +16,40 @@
 
 package controllers
 
+import essttp.journey.JourneyConnector
+import essttp.rootmodel.{ BackUrl, ReturnUrl }
 import play.api.libs.json.JsValue
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import testOnly.controllers.TestOnlyController.AuthRequest
 import testOnly.models.Enrolment
+import uk.gov.hmrc.auth.core.{ AuthConnector, AuthorisedFunctions }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
+import views.html.EPaye.EPayeLandingPage2
 
 import javax.inject.{ Inject, Singleton }
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton()
-class GovUkController @Inject() (mcc: MessagesControllerComponents) extends FrontendController(mcc) with Logging {
+class GovUkController @Inject() (
+  mcc: MessagesControllerComponents,
+  epayeLandingPage: EPayeLandingPage2, jc: JourneyConnector, val authConnector: AuthConnector)(implicit ec: ExecutionContext) extends FrontendController(mcc) with Logging with AuthorisedFunctions {
 
   def payeLandingPage = Action { implicit request =>
-    Ok("gov uk paye landing page")
+    Ok(epayeLandingPage(controllers.routes.GovUkController.startPaye))
   }
 
-  def beginPaye: Action[JsValue] = Action.async(parse.json) { implicit request =>
-    withJsonBody[AuthRequest] { auth =>
-      Future.successful(Redirect(controllers.routes.EPayeStartController.ePayeStart()))
+  def startPaye = Action.async { implicit request =>
+    authorised() {
+      val result = for {
+        response <- jc.Epaye.startJourneyGovUk(
+          essttp.journey.model.SjRequest.Epaye.Empty())
+      } yield Redirect(routes.EPayeStartController.ePayeStart())
+
+      result
     }
-  }
 
+  }
   def vatLandingPage = Action { implicit request =>
     Ok("gov uk vat landing page")
   }

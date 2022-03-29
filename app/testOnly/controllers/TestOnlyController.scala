@@ -17,35 +17,26 @@
 package testOnly.controllers
 
 import _root_.actions.Actions
-import akka.stream.Materializer
 import config.AppConfig
-import controllers.{ BTAController, GovUkController, NoSourceController }
 import play.api.data.Forms.{ mapping, nonEmptyText, text }
 import play.api.data.{ Form, Forms }
-import play.api.libs.json.{ Format, JsValue, Json }
-import play.api.mvc.{ Action, AnyContent, AnyContentAsJson, MessagesControllerComponents, Request, Result }
-import play.api.test.Helpers.{ call, writeableOf_AnyContentAsJson }
+import play.api.libs.json.{ Format, Json }
+import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents, Result }
 import play.api.test.{ FakeRequest, Helpers }
-import testOnly.controllers.TestOnlyController.{ AuthRequest, TestOnlyForm, affinityGroup, asEnrolments, testOnlyForm }
+import services.AuthLoginStubService
+import testOnly.controllers.TestOnlyController._
 import testOnly.models.Enrolment.{ EPAYE, VAT }
 import testOnly.models.TestOnlyJourney.{ EpayeFromBTA, EpayeFromGovUk, EpayeNoOrigin, VATFromBTA, VATFromGovUk, VATNoOrigin }
 import testOnly.models.{ Enrolment, TestOnlyJourney }
 import testOnly.views.html.TestOnlyStart
-import Helpers.{ call, contentType, status, writeableOf_AnyContentAsFormUrlEncoded }
-import connectors.AuthLoginStubConnector
-import play.api.libs.ws.WSClient
-import services.AuthLoginStubService
-import services.AuthLoginStubService.{ GGCredId, LoginData }
-import uk.gov.hmrc.auth.core.{ AffinityGroup, ConfidenceLevel }
+import uk.gov.hmrc.auth.core.{ AffinityGroup, Enrolment => CEnrolment }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import util.Logging
 import util.ImplicitConversions.toFutureResult
-import uk.gov.hmrc.auth.core.{ Enrolment => CEnrolment }
+import util.Logging
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.Failure
 
 @Singleton
 class TestOnlyController @Inject() (
@@ -118,20 +109,40 @@ class TestOnlyController @Inject() (
   }
 
   def govUkEpayeLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] = {
-    Redirect(controllers.routes.GovUkController.payeLandingPage)
+    implicit val hc = HeaderCarrier()
+    if (auth == "none") {
+      Future.successful(Redirect(controllers.routes.GovUkController.payeLandingPage).withNewSession)
+    } else {
+      val result = for {
+        session <- loginService.login(affinityGroup(auth), asEnrolments(enrolments))
+      } yield Redirect(controllers.routes.GovUkController.payeLandingPage).withSession(session)
+
+      result.getOrElse(throw new IllegalArgumentException("govuk epaye failed"))
+    }
+  }
+
+  def noOriginEpayeLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] = {
+    implicit val hc = HeaderCarrier()
+    if (auth == "none") {
+      Future.successful(Redirect(controllers.routes.NoSourceController.payeLandingPage).withNewSession)
+    } else {
+      val result = for {
+        session <- loginService.login(affinityGroup(auth), asEnrolments(enrolments))
+      } yield Redirect(controllers.routes.GovUkController.payeLandingPage).withSession(session)
+
+      result.getOrElse(throw new IllegalArgumentException("govuk epaye failed"))
+    }
   }
 
   def govUkVatLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] = {
     Redirect(controllers.routes.GovUkController.vatLandingPage)
   }
 
-  //def callEndpoint(request: Request[AnyContentAsJson], action: Action[JsValue]): Future[Result] = call(action, request, request.body)
-
   def startJourney(auth: String, enrolments: List[Enrolment], jt: TestOnlyJourney)(implicit hc: HeaderCarrier): Future[Result] = {
     jt match {
       case EpayeFromGovUk => govUkEpayeLandingPage(auth, enrolments)
       case EpayeFromBTA => btaEpayeLandingPage(auth, enrolments)
-      //  case EpayeNoOrigin => callEndpoint(enrolmentRequest(auth, enrolments), noSourceController.beginPaye)
+      case EpayeNoOrigin => noOriginEpayeLandingPage(auth, enrolments)
       case VATFromGovUk => govUkVatLandingPage(auth, enrolments)
       case VATFromBTA => btaVatLandingPage(auth, enrolments)
     }
@@ -169,8 +180,6 @@ object TestOnlyController {
     case "Organisation" => AffinityGroup.Organisation
     case "Individual" => AffinityGroup.Individual
   }
-
-  // val enrolment: CEnrolment = CEnrolment("key", Nil, "active")
 
   def asEnrolments(l: List[Enrolment]): List[CEnrolment] = {
     l.map(e => CEnrolment(e.name, Nil, "Active"))

@@ -19,13 +19,13 @@ package services
 import cats.Eq
 import cats.data.EitherT
 import cats.syntax.either._
-import com.google.inject.{ ImplementedBy, Inject, Singleton }
+import com.google.inject.Inject
 import connectors.AuthLoginStubConnector
 import connectors.AuthLoginStubConnector.StubException
-import play.api.libs.json.{ Format, Json, Writes }
+import play.api.libs.json.{ Format, Json }
 import play.api.libs.ws.WSResponse
 import play.api.mvc.{ Cookie, Session, SessionCookieBaker }
-import services.AuthLoginStubService.{ AuthError, LSR, LoginData, liftError, loginDataOf }
+import services.AuthLoginStubService.{ AuthError, LSR, liftError, loginDataOf }
 import uk.gov.hmrc.auth.core.{ AffinityGroup, ConfidenceLevel, Enrolment }
 import uk.gov.hmrc.crypto.Crypted
 import uk.gov.hmrc.http.HeaderCarrier
@@ -40,9 +40,6 @@ trait AuthLoginStubService {
   def login(group: AffinityGroup, enrolments: List[Enrolment])(implicit hc: HeaderCarrier): LSR[Session]
 
 }
-
-//val enrolment: CEnrolment = CEnrolment("key", Nil, "active")
-//
 
 class AuthLoginStubServiceImpl @Inject() (
   connector: AuthLoginStubConnector,
