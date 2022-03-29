@@ -17,29 +17,40 @@
 package testOnly.controllers
 
 import _root_.actions.Actions
+import akka.stream.Materializer
 import config.AppConfig
-import connectors.SsttpConnector
-import connectors.SsttpConnector.Eligibility
-import play.api.data.{Form, Forms}
-import play.api.data.Forms.{mapping, nonEmptyText, text}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import testOnly.controllers.TestOnlyController.{TestOnlyForm, TestOnlyRequest, testOnlyForm}
-import testOnly.models.Enrolment.{EPAYE, VAT}
-import testOnly.models.{Enrolment, TestOnlyJourney}
-import testOnly.models.TestOnlyJourney.{EpayeFromBTA, EpayeFromGovUk, EpayeNoOrigin, VATFromBTA, VATFromGovUk, VATNoOrigin}
+import controllers.{ BTAController, GovUkController, NoSourceController }
+import play.api.data.Forms.{ mapping, nonEmptyText, text }
+import play.api.data.{ Form, Forms }
+import play.api.libs.json.{ Format, JsValue, Json }
+import play.api.mvc.{ Action, AnyContent, AnyContentAsJson, MessagesControllerComponents, Request, Result }
+import play.api.test.Helpers.{ call, writeableOf_AnyContentAsJson }
+import play.api.test.{ FakeRequest, Helpers }
+import testOnly.controllers.TestOnlyController.{ AuthRequest, TestOnlyForm, testOnlyForm }
+import testOnly.models.Enrolment.{ EPAYE, VAT }
+import testOnly.models.TestOnlyJourney.{ EpayeFromBTA, EpayeFromGovUk, EpayeNoOrigin, VATFromBTA, VATFromGovUk, VATNoOrigin }
+import testOnly.models.{ Enrolment, TestOnlyJourney }
+import testOnly.views.html.TestOnlyStart
+import Helpers.{ call, contentType, status, writeableOf_AnyContentAsFormUrlEncoded }
+import connectors.AuthLoginStubConnector
+import play.api.libs.ws.WSClient
+import services.AuthLoginStubService
+import services.AuthLoginStubService.{ GGCredId, LoginData }
+import uk.gov.hmrc.auth.core.{ AffinityGroup, ConfidenceLevel }
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
-import testOnly.views.html.TestOnlyStart
-import uk.gov.hmrc.http.HeaderCarrier
-
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
+import util.ImplicitConversions.toFutureResult
+import uk.gov.hmrc.auth.core.{ Enrolment => CEnrolment }
+import javax.inject.{ Inject, Singleton }
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.Failure
 
 @Singleton
 class TestOnlyController @Inject() (
   as: Actions,
   appConfig: AppConfig,
-  stub: SsttpConnector,
+  loginService: AuthLoginStubService,
   mcc: MessagesControllerComponents,
   testOnlyPage: TestOnlyStart)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
@@ -65,7 +76,7 @@ class TestOnlyController @Inject() (
     testOnlyForm()
       .bindFromRequest()
       .fold(
-        formWithErrors => Ok(testOnlyPage(formWithErrors)),
+        formWithErrors => Future.successful(Ok(testOnlyPage(formWithErrors))),
         (p: TestOnlyForm) => {
           val journey: TestOnlyJourney = p.origin match {
             case "paye_govuk" => EpayeFromGovUk
@@ -80,41 +91,46 @@ class TestOnlyController @Inject() (
             "EPAYE" -> EPAYE,
             "VAT" -> VAT)
 
-          setupEligibility(p.auth, p.enrolments.map(enrolmentMap).toList, journey)
+          startJourney(p.auth, p.enrolments.map(enrolmentMap).toList, journey)
         })
   }
 
-  def createEligibility() = {
-    implicit val hc = HeaderCarrier()
-    val result = for {
-      _ <- stub.makeEligibility(Eligibility.Empty)
-    } yield Redirect(controllers.routes.LandingController.landingPage)
+  def enrolmentRequest(auth: String, enrolments: List[Enrolment]) =
+    FakeRequest(Helpers.POST, "").withJsonBody(Json.toJson(AuthRequest(auth, enrolments)))
 
-    result.getOrElse(throw new IllegalStateException("bad"))
+  def btaEpayeLandingPage(auth: String, enrolments: List[Enrolment])(implicit hc: HeaderCarrier): Future[Result] = {
+    val enrolment: CEnrolment = CEnrolment("key", Nil, "active")
+    val data = LoginData(GGCredId("ggcredit"), "http://localhost:9999/nowhere", ConfidenceLevel.L50, AffinityGroup.Individual, None, None, Option(enrolment))
+    val result = for {
+      session <- loginService.login(data)
+    } yield Redirect(controllers.routes.BTAController.payeLandingPage).withSession(session)
+
+    result.getOrElse(throw new IllegalArgumentException("bta epaye failed"))
   }
 
-  def epayeFromGovUK(auth: String, enrolments: List[Enrolment]) = createEligibility()
+  def btaVatLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] = {
+    Redirect(controllers.routes.BTAController.vatLandingPage)
+  }
 
-  def epayeFromBTA(auth: String, enrolments: List[Enrolment]) = createEligibility()
+  def govUkEpayeLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] = {
+    Redirect(controllers.routes.GovUkController.payeLandingPage)
+  }
 
-  def epayeNoOrigin(auth: String, enrolments: List[Enrolment]) = createEligibility()
+  def govUkVatLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] = {
+    Redirect(controllers.routes.GovUkController.vatLandingPage)
+  }
 
-  def vatFromGovUk(auth: String, enrolments: List[Enrolment]) = createEligibility()
+  //def callEndpoint(request: Request[AnyContentAsJson], action: Action[JsValue]): Future[Result] = call(action, request, request.body)
 
-  def vatFromBTA(auth: String, enrolments: List[Enrolment]) = createEligibility()
-
-  def vatNoOrigin(auth: String, enrolments: List[Enrolment]) = createEligibility()
-
-  def setupEligibility(auth: String, enrolments: List[Enrolment], jt: TestOnlyJourney) = {
+  def startJourney(auth: String, enrolments: List[Enrolment], jt: TestOnlyJourney)(implicit hc: HeaderCarrier): Future[Result] = {
     jt match {
-      case EpayeFromGovUk => epayeFromGovUK(auth, enrolments)
-      case EpayeFromBTA => epayeFromBTA(auth, enrolments)
-      case EpayeNoOrigin => epayeNoOrigin(auth, enrolments)
-      case VATFromGovUk => vatFromGovUk(auth, enrolments)
-      case VATFromBTA => vatFromBTA(auth, enrolments)
-      case VATNoOrigin => vatNoOrigin(auth, enrolments)
+      case EpayeFromGovUk => govUkEpayeLandingPage(auth, enrolments)
+      case EpayeFromBTA => btaEpayeLandingPage(auth, enrolments)
+      //  case EpayeNoOrigin => callEndpoint(enrolmentRequest(auth, enrolments), noSourceController.beginPaye)
+      case VATFromGovUk => govUkVatLandingPage(auth, enrolments)
+      case VATFromBTA => btaVatLandingPage(auth, enrolments)
     }
-    //Redirect(controllers.routes.LandingController.landingPage())
+    //  case VATNoOrigin => callEndpoint(enrolmentRequest(auth, enrolments), noSourceController.beginVat)
   }
 
 }
@@ -137,5 +153,11 @@ object TestOnlyController {
       "auth" -> nonEmptyText,
       "enrolments" -> Forms.seq(text),
       "origin" -> nonEmptyText)(TestOnlyForm.apply)(TestOnlyForm.unapply))
+
+  case class AuthRequest(auth: String, enrolments: List[Enrolment])
+
+  object AuthRequest {
+    implicit val fmt: Format[AuthRequest] = Json.format[AuthRequest]
+  }
 
 }

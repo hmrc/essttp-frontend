@@ -26,6 +26,7 @@ lazy val root = (project in file("."))
     ScoverageKeys.coverageHighlighting := true,
     scalacOptions ++= Seq("-feature"),
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
+    libraryDependencies += ws,
     retrieveManaged := false,
     update / evictionWarningOptions :=
       EvictionWarningOptions.default.withWarnScalaVersionEviction(false),

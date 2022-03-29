@@ -14,26 +14,18 @@
  * limitations under the License.
  */
 
-package testOnly.models
+package util
 
-import cats.Eq
-import play.api.libs.json.{ Format, Json }
+import java.net.URLEncoder
 
-case class Enrolment private (ordinal: Int, name: String)
+object StringUtils {
 
-object Enrolment {
-  val EPAYE = Enrolment(0, "EPAYE")
-  val VAT = Enrolment(1, "VAT")
-  implicit val eq: Eq[Enrolment] = Eq.fromUniversalEquals
+  implicit class StringOps(private val s: String) extends AnyVal {
 
-  def valueOf(name: String) = name match {
-    case "EPAYE" => EPAYE
-    case "VAT" => VAT
-    case s => throw new IllegalArgumentException(s"$s is not a valid Enrolment")
+    def removeWhitespace: String = s.replaceAll("\\s", "")
+
+    def urlEncode: String = URLEncoder.encode(s, "UTF-8")
+
   }
-
-  def values = List(EPAYE, VAT)
-
-  implicit val fmt: Format[Enrolment] = Json.format[Enrolment]
 
 }

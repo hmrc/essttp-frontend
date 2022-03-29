@@ -32,6 +32,18 @@ class SsttpConnector @Inject() (client: HttpClient, config: AppConfig)(implicit 
     case UpstreamErrorResponse(msg, code, _, _) => StubResponseError(msg, code): SsttpConnector.Error
   }
 
+  def startJourneyEpayeFromBta(implicit ec: ExecutionContext): CR[String] = {
+    val body: String = ???
+    // val response = client.POST[String, Either[UpstreamErrorResponse, Unit]](url = "the uurl", body = "")
+
+    // EitherT(response).leftMap(handleUpstreamError)
+    ???
+  }
+
+  def startJourneyEpayeFromGovUk(implicit ec: ExecutionContext): CR[String] = ???
+
+  def startJourneyEpayeFromDetachedUrl(implicit hc: HeaderCarrier, ec: ExecutionContext): CR[String] = ???
+
   def makeEligibility(eligibility: Eligibility)(implicit hc: HeaderCarrier, ec: ExecutionContext): CR[Unit] = {
     val response = client.POST[Eligibility, Either[UpstreamErrorResponse, Unit]](
       url = "the uurl",
