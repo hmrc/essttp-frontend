@@ -17,7 +17,6 @@
 package controllers
 
 import essttp.journey.JourneyConnector
-import essttp.journey.model.SjRequest.Epaye.Simple
 import essttp.rootmodel.{ BackUrl, ReturnUrl }
 import play.api.libs.json.JsValue
 import play.api.mvc.{ Action, MessagesControllerComponents }
@@ -34,14 +33,17 @@ class BTAController @Inject() (mcc: MessagesControllerComponents, epayeLandingPa
   extends FrontendController(mcc) with Logging {
 
   def payeLandingPage = Action { implicit request =>
+    val session = request.session
     Ok(epayeLandingPage(controllers.routes.BTAController.startPaye))
   }
 
   def startPaye = Action.async { implicit request =>
-    for {
-      response <- jc.Epaye.startJourneyBta(essttp.journey.model.SjRequest.Epaye.Simple(ReturnUrl("http://localhost:9125/return"), BackUrl("http://localhost:9125/back")))
+    val result = for {
+      response <- jc.Epaye.startJourneyBta(
+        essttp.journey.model.SjRequest.Epaye.Simple(ReturnUrl("http://localhost:9125/return"), BackUrl("http://localhost:9125/back")))
     } yield Redirect(routes.EPayeStartController.ePayeStart()).withSession("JourneyId" -> response.journeyId.value)
 
+    result
   }
 
   def vatLandingPage = Action { implicit request =>

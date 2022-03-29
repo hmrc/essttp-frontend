@@ -25,20 +25,24 @@ import connectors.AuthLoginStubConnector.StubException
 import play.api.libs.json.{ Format, Json, Writes }
 import play.api.libs.ws.WSResponse
 import play.api.mvc.{ Cookie, Session, SessionCookieBaker }
-import services.AuthLoginStubService.{ AuthError, LSR, LoginData, liftError }
+import services.AuthLoginStubService.{ AuthError, LSR, LoginData, liftError, loginDataOf }
 import uk.gov.hmrc.auth.core.{ AffinityGroup, ConfidenceLevel, Enrolment }
 import uk.gov.hmrc.crypto.Crypted
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.filters.crypto.SessionCookieCrypto
 
 import java.time.{ LocalDate, ZonedDateTime }
+import java.util.UUID
 import scala.concurrent.{ ExecutionContext, Future }
 
 trait AuthLoginStubService {
 
-  def login(loginData: LoginData)(implicit hc: HeaderCarrier): LSR[Session]
+  def login(group: AffinityGroup, enrolments: List[Enrolment])(implicit hc: HeaderCarrier): LSR[Session]
 
 }
+
+//val enrolment: CEnrolment = CEnrolment("key", Nil, "active")
+//
 
 class AuthLoginStubServiceImpl @Inject() (
   connector: AuthLoginStubConnector,
@@ -54,12 +58,14 @@ class AuthLoginStubServiceImpl @Inject() (
     }
   }
 
-  override def login(loginData: LoginData)(implicit hc: HeaderCarrier): LSR[Session] =
-    connector.login(loginData).leftMap(liftError).subflatMap(createSession)
+  override def login(group: AffinityGroup, enrolments: List[Enrolment])(implicit hc: HeaderCarrier): LSR[Session] =
+    connector.login(loginDataOf(group, enrolments)).leftMap(liftError).subflatMap(createSession)
 
 }
 
 object AuthLoginStubService {
+
+  trait AffinityGrou
 
   type LSR[A] = EitherT[Future, AuthError, A]
 
@@ -171,6 +177,11 @@ object AuthLoginStubService {
   object DateOfBirth {
 
     implicit val format: Format[DateOfBirth] = Json.valueFormat
+  }
+
+  def loginDataOf(group: AffinityGroup, enrolments: List[Enrolment]): _root_.services.AuthLoginStubService.LoginData = {
+    LoginData(GGCredId(UUID.randomUUID().toString), "http://localhost:9999/nowhere",
+      ConfidenceLevel.L50, AffinityGroup.Individual, None, None, enrolments.headOption)
   }
 
 }

@@ -26,7 +26,7 @@ import play.api.libs.json.{ Format, JsValue, Json }
 import play.api.mvc.{ Action, AnyContent, AnyContentAsJson, MessagesControllerComponents, Request, Result }
 import play.api.test.Helpers.{ call, writeableOf_AnyContentAsJson }
 import play.api.test.{ FakeRequest, Helpers }
-import testOnly.controllers.TestOnlyController.{ AuthRequest, TestOnlyForm, testOnlyForm }
+import testOnly.controllers.TestOnlyController.{ AuthRequest, TestOnlyForm, affinityGroup, asEnrolments, testOnlyForm }
 import testOnly.models.Enrolment.{ EPAYE, VAT }
 import testOnly.models.TestOnlyJourney.{ EpayeFromBTA, EpayeFromGovUk, EpayeNoOrigin, VATFromBTA, VATFromGovUk, VATNoOrigin }
 import testOnly.models.{ Enrolment, TestOnlyJourney }
@@ -42,6 +42,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import util.ImplicitConversions.toFutureResult
 import uk.gov.hmrc.auth.core.{ Enrolment => CEnrolment }
+
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.Failure
@@ -98,14 +99,18 @@ class TestOnlyController @Inject() (
   def enrolmentRequest(auth: String, enrolments: List[Enrolment]) =
     FakeRequest(Helpers.POST, "").withJsonBody(Json.toJson(AuthRequest(auth, enrolments)))
 
-  def btaEpayeLandingPage(auth: String, enrolments: List[Enrolment])(implicit hc: HeaderCarrier): Future[Result] = {
-    val enrolment: CEnrolment = CEnrolment("key", Nil, "active")
-    val data = LoginData(GGCredId("ggcredit"), "http://localhost:9999/nowhere", ConfidenceLevel.L50, AffinityGroup.Individual, None, None, Option(enrolment))
-    val result = for {
-      session <- loginService.login(data)
-    } yield Redirect(controllers.routes.BTAController.payeLandingPage).withSession(session)
+  def btaEpayeLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] = {
+    implicit val hc = HeaderCarrier()
+    if (auth == "none") {
+      Future.successful(Redirect(controllers.routes.BTAController.payeLandingPage).withNewSession)
+    } else {
+      val result = for {
+        session <- loginService.login(affinityGroup(auth), asEnrolments(enrolments))
+      } yield Redirect(controllers.routes.BTAController.payeLandingPage).withSession(session)
 
-    result.getOrElse(throw new IllegalArgumentException("bta epaye failed"))
+      result.getOrElse(throw new IllegalArgumentException("bta epaye failed"))
+    }
+
   }
 
   def btaVatLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] = {
@@ -158,6 +163,17 @@ object TestOnlyController {
 
   object AuthRequest {
     implicit val fmt: Format[AuthRequest] = Json.format[AuthRequest]
+  }
+
+  def affinityGroup(auth: String): AffinityGroup = auth match {
+    case "Organisation" => AffinityGroup.Organisation
+    case "Individual" => AffinityGroup.Individual
+  }
+
+  // val enrolment: CEnrolment = CEnrolment("key", Nil, "active")
+
+  def asEnrolments(l: List[Enrolment]): List[CEnrolment] = {
+    l.map(e => CEnrolment(e.name, Nil, "Active"))
   }
 
 }
