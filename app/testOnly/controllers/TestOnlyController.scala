@@ -125,7 +125,7 @@ class TestOnlyController @Inject() (
     } else {
       val result = for {
         session <- loginService.login(affinityGroup(auth), asEnrolments(enrolments))
-      } yield Redirect(controllers.routes.NoSourceController.startPaye).withSession(session)
+      } yield Redirect(controllers.routes.NoSourceController.payeLandingPage()).withSession(session)
 
       result.getOrElse(throw new IllegalArgumentException("govuk epaye failed"))
     }
