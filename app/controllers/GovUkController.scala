@@ -43,8 +43,7 @@ class GovUkController @Inject() (
     for {
       response <- jc.Epaye.startJourneyGovUk(
         essttp.journey.model.SjRequest.Epaye.Empty())
-    } yield Ok("eligibility page goes here")
-    // Redirect(routes.EPayeStartController.ePayeStart()).withSession("JourneyId" -> response.journeyId.value)
+    } yield Redirect(routes.EPayeStartController.ePayeStart()).withSession("JourneyId" -> response.journeyId.value)
 
   }
   def vatLandingPage = Action { implicit request =>

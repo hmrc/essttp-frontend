@@ -40,8 +40,7 @@ class NoSourceController @Inject() (mcc: MessagesControllerComponents, epayeLand
     for {
       response <- jc.Epaye.startJourneyDetachedUrl(
         essttp.journey.model.SjRequest.Epaye.Empty())
-    } yield Ok("eligibility page goes here")
-    //Redirect(routes.EPayeStartController.ePayeStart()).withSession("JourneyId" -> response.journeyId.value)
+    } yield Redirect(routes.EPayeStartController.ePayeStart()).withSession("JourneyId" -> response.journeyId.value)
 
   }
 
