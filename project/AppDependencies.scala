@@ -9,7 +9,8 @@ object AppDependencies {
     "uk.gov.hmrc"              %% "simple-reactivemongo"        % "8.0.0-play-28",
     "uk.gov.hmrc"                %% "play-conditional-form-mapping" % "1.10.0-play-28",
     "com.beachape"            %% "enumeratum-play"            % "1.7.0",
-    "org.typelevel"              %% "cats-core"                  % "2.7.0"
+    "org.typelevel"              %% "cats-core"                  % "2.7.0",
+    "uk.gov.hmrc"          %% "essttp-backend-cor-journey"  %   "[0.5.0,)"
   )
 
   val test = Seq(

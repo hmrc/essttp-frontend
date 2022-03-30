@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-package actions
+package util
 
-import play.api.mvc.{ ActionBuilder, AnyContent, DefaultActionBuilder, Request }
-import requests.JourneyRequest
+import java.net.URLEncoder
 
-import javax.inject.{ Inject, Singleton }
+object StringUtils {
 
-@Singleton
-class Actions @Inject() (
-  actionBuilder: DefaultActionBuilder,
-  authenticatedAction: AuthenticatedAction,
-  getJourneyActionRefiner: GetJourneyActionRefiner) {
+  implicit class StringOps(private val s: String) extends AnyVal {
 
-  val default: ActionBuilder[Request, AnyContent] = actionBuilder
+    def removeWhitespace: String = s.replaceAll("\\s", "")
 
-  val auth = actionBuilder andThen authenticatedAction
+    def urlEncode: String = URLEncoder.encode(s, "UTF-8")
 
-  val getJourney: ActionBuilder[JourneyRequest, AnyContent] = actionBuilder andThen getJourneyActionRefiner
+  }
+
 }

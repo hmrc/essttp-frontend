@@ -14,22 +14,13 @@
  * limitations under the License.
  */
 
-package actions
+package testOnly.messages
 
-import play.api.mvc.{ ActionBuilder, AnyContent, DefaultActionBuilder, Request }
-import requests.JourneyRequest
+import messages.Message
 
-import javax.inject.{ Inject, Singleton }
-
-@Singleton
-class Actions @Inject() (
-  actionBuilder: DefaultActionBuilder,
-  authenticatedAction: AuthenticatedAction,
-  getJourneyActionRefiner: GetJourneyActionRefiner) {
-
-  val default: ActionBuilder[Request, AnyContent] = actionBuilder
-
-  val auth = actionBuilder andThen authenticatedAction
-
-  val getJourney: ActionBuilder[JourneyRequest, AnyContent] = actionBuilder andThen getJourneyActionRefiner
+object Messages {
+  def getError(key: String): Message = key match {
+    case "auth.error.required" => Message(english = "Select how to be signed in")
+    case "origin.error.required" => Message(english = "Select which origin the journey should start from")
+  }
 }

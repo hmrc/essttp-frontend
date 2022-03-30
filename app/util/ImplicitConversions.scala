@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-package actions
+package util
 
-import play.api.mvc.{ ActionBuilder, AnyContent, DefaultActionBuilder, Request }
-import requests.JourneyRequest
+import play.api.mvc.Result
+import scala.concurrent.Future
 
-import javax.inject.{ Inject, Singleton }
+object ImplicitConversions {
 
-@Singleton
-class Actions @Inject() (
-  actionBuilder: DefaultActionBuilder,
-  authenticatedAction: AuthenticatedAction,
-  getJourneyActionRefiner: GetJourneyActionRefiner) {
+  implicit def toFutureResult(result: Result): Future[Result] = Future.successful(result)
 
-  val default: ActionBuilder[Request, AnyContent] = actionBuilder
-
-  val auth = actionBuilder andThen authenticatedAction
-
-  val getJourney: ActionBuilder[JourneyRequest, AnyContent] = actionBuilder andThen getJourneyActionRefiner
 }
+

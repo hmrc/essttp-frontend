@@ -18,17 +18,14 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import controllers.routes
 @import views.html.templates.Layout
-@import views.html.EPaye.components.OverduePaymentRow
 @import messages.Messages
 @import requests.RequestSupport
-@import controllers.EPayeStartController.OverduePayments
 
 @this(
   layout: Layout,
   govukButton: GovukButton,
   formWithCSRF: FormWithCSRF,
-  requestSupport: RequestSupport,
-  overduePaymentRow: OverduePaymentRow
+  requestSupport: RequestSupport
 )
 
 @()(implicit
@@ -36,7 +33,6 @@
 )
 
 @import requestSupport._
-
 
 @title= @{Messages.Epaye.`Set up a PAYE for Employers payment plan`.show}
 

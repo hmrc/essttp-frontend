@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-package actions
+package testOnly.models
 
-import play.api.mvc.{ ActionBuilder, AnyContent, DefaultActionBuilder, Request }
-import requests.JourneyRequest
+import cats.Eq
 
-import javax.inject.{ Inject, Singleton }
+sealed trait TestOnlyJourney extends Product with Serializable
 
-@Singleton
-class Actions @Inject() (
-  actionBuilder: DefaultActionBuilder,
-  authenticatedAction: AuthenticatedAction,
-  getJourneyActionRefiner: GetJourneyActionRefiner) {
-
-  val default: ActionBuilder[Request, AnyContent] = actionBuilder
-
-  val auth = actionBuilder andThen authenticatedAction
-
-  val getJourney: ActionBuilder[JourneyRequest, AnyContent] = actionBuilder andThen getJourneyActionRefiner
+object TestOnlyJourney {
+  case object EpayeFromGovUk extends TestOnlyJourney
+  case object EpayeFromBTA extends TestOnlyJourney
+  case object EpayeNoOrigin extends TestOnlyJourney
+  case object VATFromGovUk extends TestOnlyJourney
+  case object VATFromBTA extends TestOnlyJourney
+  case object VATNoOrigin extends TestOnlyJourney
+  implicit val eq: Eq[TestOnlyJourney] = Eq.fromUniversalEquals
 }

@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
-package actions
+package testOnly.models
 
-import play.api.mvc.{ ActionBuilder, AnyContent, DefaultActionBuilder, Request }
-import requests.JourneyRequest
+import cats.Eq
+import play.api.libs.json.{ Format, Json }
 
-import javax.inject.{ Inject, Singleton }
+case class Enrolment private (ordinal: Int, name: String)
 
-@Singleton
-class Actions @Inject() (
-  actionBuilder: DefaultActionBuilder,
-  authenticatedAction: AuthenticatedAction,
-  getJourneyActionRefiner: GetJourneyActionRefiner) {
+object Enrolment {
+  val EPAYE = Enrolment(0, "EPAYE")
+  val VAT = Enrolment(1, "VAT")
+  implicit val eq: Eq[Enrolment] = Eq.fromUniversalEquals
 
-  val default: ActionBuilder[Request, AnyContent] = actionBuilder
+  def valueOf(name: String) = name match {
+    case "EPAYE" => EPAYE
+    case "VAT" => VAT
+    case s => throw new IllegalArgumentException(s"$s is not a valid Enrolment")
+  }
 
-  val auth = actionBuilder andThen authenticatedAction
+  def values = List(EPAYE, VAT)
 
-  val getJourney: ActionBuilder[JourneyRequest, AnyContent] = actionBuilder andThen getJourneyActionRefiner
+  implicit val fmt: Format[Enrolment] = Json.format[Enrolment]
+
 }

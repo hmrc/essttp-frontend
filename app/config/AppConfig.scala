@@ -20,18 +20,28 @@ import javax.inject.{ Inject, Singleton }
 import play.api.Configuration
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.play.bootstrap.binders.SafeRedirectUrl
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.net.URL
 import scala.concurrent.duration.FiniteDuration
 
 @Singleton
-class AppConfig @Inject() (config: Configuration) {
+class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
 
   val appName: String = config.get[String]("appName")
   val welshLanguageSupportEnabled: Boolean = config.getOptional[Boolean]("features.welsh-language-support").getOrElse(false)
   val authTimeoutSeconds: Int = config.get[FiniteDuration]("timeout-dialog.timeout").toSeconds.toInt
   val authTimeoutCountdownSeconds: Int = config.get[FiniteDuration]("timeout-dialog.countdown").toSeconds.toInt
   val mongoTimeToLiveInSeconds: Int = config.get[Int]("mongodb.timeToLiveInSeconds")
+
+  val authLoginStubPath: String = servicesConfig.getConfString("auth-login-stub.path", "")
+  val authLoginStubUrl: String = servicesConfig.baseUrl("auth-login-stub") +
+    authLoginStubPath + "?continue=" +
+    servicesConfig.baseUrl("essttp-frontend") + testOnly.controllers.routes.TestOnlyController.testOnlyStartPage()
+
+  def loginUrl: String = servicesConfig.baseUrl("auth-login-stub") + authLoginStubPath
+
+  val frontendBaseUrl: String = servicesConfig.baseUrl("essttp-frontend")
 
   object BaseUrl {
     val essttpFrontend: String = config.get[String]("baseUrl.essttp-frontend")

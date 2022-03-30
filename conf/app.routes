@@ -4,6 +4,22 @@
 
 GET        /                                             controllers.LandingController.landingPage
 
+GET       /bta/epaye                                    controllers.BTAController.payeLandingPage
+
+GET       /bta/epaye/start                              controllers.BTAController.startPaye
+
+GET       /bta/vat                                       controllers.BTAController.vatLandingPage
+
+GET       /govuk/epaye                                    controllers.GovUkController.payeLandingPage
+
+GET       /govuk/epaye/start                              controllers.GovUkController.startPaye
+
+GET       /nosource/epaye                                    controllers.NoSourceController.payeLandingPage
+
+GET       /nosource/epaye/start                              controllers.NoSourceController.startPaye
+
+GET       /govuk/vat                                       controllers.GovUkController.vatLandingPage
+
 GET        /epaye/                                       controllers.EPayeStartController.ePayeLanding
 POST       /epaye/                                       controllers.EPayeStartController.ePayeLandingSubmit
 GET        /epaye/start                                  controllers.EPayeStartController.ePayeStart

@@ -11,3 +11,5 @@
 
 # Add all the application routes to the prod.routes file
 ->         /                          prod.Routes
+GET  /essttp/test-only/start-journey   testOnly.controllers.TestOnlyController.testOnlyStartPage
+POST /essttp/test-only/start-journey   testOnly.controllers.TestOnlyController.testOnlyStartPageSubmit

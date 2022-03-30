@@ -1,0 +1,5 @@
+GET http://localhost:9215/essttp/test-only/start-journey
+Accept: application/json
+
+###
+
