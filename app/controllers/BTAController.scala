@@ -43,7 +43,7 @@ class BTAController @Inject() (mcc: MessagesControllerComponents, epayeLandingPa
       val result = for {
         response <- jc.Epaye.startJourneyBta(
           essttp.journey.model.SjRequest.Epaye.Simple(ReturnUrl("http://localhost:9125/return"), BackUrl("http://localhost:9125/back")))
-      } yield Redirect(routes.EPayeStartController.ePayeStart())
+      } yield Redirect(routes.EPayeStartController.ePayeStart()).withSession("JourneyId" -> response.journeyId.value)
       result
     }
 

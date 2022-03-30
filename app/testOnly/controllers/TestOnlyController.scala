@@ -87,9 +87,6 @@ class TestOnlyController @Inject() (
         })
   }
 
-  def enrolmentRequest(auth: String, enrolments: List[Enrolment]) =
-    FakeRequest(Helpers.POST, "").withJsonBody(Json.toJson(AuthRequest(auth, enrolments)))
-
   def btaEpayeLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] = {
     implicit val hc = HeaderCarrier()
     if (auth == "none") {
@@ -146,7 +143,6 @@ class TestOnlyController @Inject() (
       case VATFromGovUk => govUkVatLandingPage(auth, enrolments)
       case VATFromBTA => btaVatLandingPage(auth, enrolments)
     }
-    //  case VATNoOrigin => callEndpoint(enrolmentRequest(auth, enrolments), noSourceController.beginVat)
   }
 
 }

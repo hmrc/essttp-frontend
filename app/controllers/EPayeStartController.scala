@@ -69,10 +69,7 @@ class EPayeStartController @Inject() (
           amount = AmountInPence((qualifyingDebt.value * 0.6).longValue()))))
     request.session.data.get("JourneyId") match {
       case Some(_: String) => Ok(ePayeStartPage(overduePayments))
-      case _ =>
-        val journey: Journey = journeyService.newJourney(qualifyingDebt)
-        journeyService.upsert(journey)
-        Ok(ePayeStartPage(overduePayments)).withSession("JourneyId" -> journey._id.value)
+      case _ => throw new IllegalStateException("missing journey")
     }
   }
 
