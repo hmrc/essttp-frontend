@@ -121,7 +121,7 @@ class TestOnlyController @Inject() (
   def noOriginEpayeLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] = {
     implicit val hc = HeaderCarrier()
     if (auth == "none") {
-      Future.successful(Redirect(controllers.routes.NoSourceController.startPaye).withNewSession)
+      Future.successful(Redirect(controllers.routes.NoSourceController.payeLandingPage()).withNewSession)
     } else {
       val result = for {
         session <- loginService.login(affinityGroup(auth), asEnrolments(enrolments))
