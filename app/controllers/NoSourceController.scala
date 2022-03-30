@@ -37,14 +37,10 @@ class NoSourceController @Inject() (mcc: MessagesControllerComponents, epayeLand
   }
 
   def startPaye = Action.async { implicit request =>
-    authorised() {
-      val result = for {
-        response <- jc.Epaye.startJourneyDetachedUrl(
-          essttp.journey.model.SjRequest.Epaye.Empty())
-      } yield Redirect(routes.EPayeStartController.ePayeStart()).withSession("JourneyId" -> response.journeyId.value)
-
-      result
-    }
+    for {
+      response <- jc.Epaye.startJourneyDetachedUrl(
+        essttp.journey.model.SjRequest.Epaye.Empty())
+    } yield Redirect(routes.EPayeStartController.ePayeStart()).withSession("JourneyId" -> response.journeyId.value)
 
   }
 
