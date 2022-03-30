@@ -112,7 +112,7 @@ class TestOnlyController @Inject() (
     } else {
       val result = for {
         session <- loginService.login(affinityGroup(auth), asEnrolments(enrolments))
-      } yield Redirect(controllers.routes.GovUkController.payeLandingPage).withSession(session)
+      } yield Redirect(controllers.routes.GovUkController.startPaye).withSession(session)
 
       result.getOrElse(throw new IllegalArgumentException("govuk epaye failed"))
     }
@@ -121,7 +121,7 @@ class TestOnlyController @Inject() (
   def noOriginEpayeLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] = {
     implicit val hc = HeaderCarrier()
     if (auth == "none") {
-      Future.successful(Redirect(controllers.routes.NoSourceController.payeLandingPage).withNewSession)
+      Future.successful(Redirect(controllers.routes.NoSourceController.startPaye).withNewSession)
     } else {
       val result = for {
         session <- loginService.login(affinityGroup(auth), asEnrolments(enrolments))
