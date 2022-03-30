@@ -35,9 +35,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val mongoTimeToLiveInSeconds: Int = config.get[Int]("mongodb.timeToLiveInSeconds")
 
   val authLoginStubPath: String = servicesConfig.getConfString("auth-login-stub.path", "")
-  val authLoginStubUrl: String = servicesConfig.baseUrl("auth-login-stub") +
-    authLoginStubPath + "?continue=" +
-    servicesConfig.baseUrl("essttp-frontend") + testOnly.controllers.routes.TestOnlyController.testOnlyStartPage()
+  val authLoginStubUrl: String = servicesConfig.baseUrl("auth-login-stub") + authLoginStubPath + "?continue="
 
   def loginUrl: String = servicesConfig.baseUrl("auth-login-stub") + authLoginStubPath
 
