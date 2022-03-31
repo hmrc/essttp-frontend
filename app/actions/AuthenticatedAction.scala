@@ -52,14 +52,11 @@ class AuthenticatedAction @Inject() (
 
     af.authorised.retrieve(
       Retrievals.allEnrolments and Retrievals.credentials).apply {
-        case enrolments ~ credentials if enrolments.getEnrolment("IR-PAYE").isDefined =>
+        case enrolments ~ credentials =>
           Future.successful(
             Right(new AuthenticatedRequest[A](request, enrolments, credentials)))
-        case _ =>
-          Future.failed(new IllegalStateException("not enrolled"))
       }.recover {
         case _: NoActiveSession => loginPage
-        case _: IllegalStateException => notEnroledPage
         case e: AuthorisationException =>
           logger.debug(s"Unauthorised because of ${e.reason}, $e")
           Left(BadRequest("not authorised"))
@@ -69,8 +66,6 @@ class AuthenticatedAction @Inject() (
   def loginPage(implicit request: Request[_]) = Left(Redirect(
     appConfig.loginUrl,
     Map("continue" -> Seq(appConfig.frontendBaseUrl + request.uri), "origin" -> Seq("supp"))))
-
-  def notEnroledPage(implicit request: Request[_]) = Left(Redirect(controllers.routes.EnrolmentsController.show))
 
   override protected def executionContext: ExecutionContext = cc.executionContext
 

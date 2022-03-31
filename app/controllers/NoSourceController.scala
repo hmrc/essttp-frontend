@@ -35,7 +35,7 @@ class NoSourceController @Inject() (mcc: MessagesControllerComponents, epayeLand
     Ok(epayeLandingPage(controllers.routes.NoSourceController.startPaye))
   }
 
-  def startPaye = as.auth.async { implicit request =>
+  def startPaye = as.authPaye.async { implicit request =>
     for {
       response <- jc.Epaye.startJourneyDetachedUrl(
         essttp.journey.model.SjRequest.Epaye.Empty())

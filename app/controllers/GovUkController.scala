@@ -34,7 +34,7 @@ class GovUkController @Inject() (
     Ok(epayeLandingPage(controllers.routes.GovUkController.startPaye))
   }
 
-  def startPaye = as.auth.async { implicit request =>
+  def startPaye = as.authPaye.async { implicit request =>
     for {
       response <- jc.Epaye.startJourneyGovUk(
         essttp.journey.model.SjRequest.Epaye.Empty())

@@ -23,6 +23,7 @@ import javax.inject.{ Inject, Singleton }
 
 @Singleton
 class Actions @Inject() (
+  payeRoleFilter: PayeRegimeEnrolmentFilter,
   actionBuilder: DefaultActionBuilder,
   authenticatedAction: AuthenticatedAction,
   getJourneyActionRefiner: GetJourneyActionRefiner) {
@@ -30,6 +31,8 @@ class Actions @Inject() (
   val default: ActionBuilder[Request, AnyContent] = actionBuilder
 
   val auth = actionBuilder andThen authenticatedAction
+
+  val authPaye = actionBuilder andThen authenticatedAction andThen payeRoleFilter
 
   val getJourney: ActionBuilder[JourneyRequest, AnyContent] = actionBuilder andThen getJourneyActionRefiner
 }
