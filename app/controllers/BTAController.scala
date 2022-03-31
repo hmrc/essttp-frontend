@@ -28,17 +28,18 @@ import views.html.EPaye.EPayeLandingPage2
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }
+import _root_.actions.Actions
 
 @Singleton()
 class BTAController @Inject() (mcc: MessagesControllerComponents, epayeLandingPage: EPayeLandingPage2,
-  jc: JourneyConnector, val authConnector: AuthConnector)(implicit ec: ExecutionContext)
-  extends FrontendController(mcc) with Logging with AuthorisedFunctions {
+  jc: JourneyConnector, as: Actions)(implicit ec: ExecutionContext)
+  extends FrontendController(mcc) with Logging {
 
   def payeLandingPage = Action { implicit request =>
     Ok(epayeLandingPage(controllers.routes.BTAController.startPaye))
   }
 
-  def startPaye = Action.async { implicit request =>
+  def startPaye = as.auth.async { implicit request =>
     for {
       response <- jc.Epaye.startJourneyBta(
         essttp.journey.model.SjRequest.Epaye.Simple(ReturnUrl("http://localhost:9125/return"), BackUrl("http://localhost:9125/back")))

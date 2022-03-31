@@ -19,24 +19,23 @@ package controllers
 import essttp.journey.JourneyConnector
 import play.api.mvc.MessagesControllerComponents
 import testOnly.controllers.TestOnlyController.AuthRequest
-import uk.gov.hmrc.auth.core.{ AuthConnector, AuthorisedFunctions }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.EPaye.EPayeLandingPage2
-
+import _root_.actions.Actions
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton()
 class NoSourceController @Inject() (mcc: MessagesControllerComponents, epayeLandingPage: EPayeLandingPage2,
-  jc: JourneyConnector, val authConnector: AuthConnector)(implicit ec: ExecutionContext)
-  extends FrontendController(mcc) with Logging with AuthorisedFunctions {
+  jc: JourneyConnector, as: Actions)(implicit ec: ExecutionContext)
+  extends FrontendController(mcc) with Logging {
 
   def payeLandingPage = Action { implicit request =>
     Ok(epayeLandingPage(controllers.routes.NoSourceController.startPaye))
   }
 
-  def startPaye = Action.async { implicit request =>
+  def startPaye = as.auth.async { implicit request =>
     for {
       response <- jc.Epaye.startJourneyDetachedUrl(
         essttp.journey.model.SjRequest.Epaye.Empty())
