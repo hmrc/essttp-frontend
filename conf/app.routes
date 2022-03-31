@@ -20,6 +20,8 @@ GET       /nosource/epaye/start                              controllers.NoSourc
 
 GET       /govuk/vat                                       controllers.GovUkController.vatLandingPage
 
+GET       /enrolments                                      controllers.EnrolmentsController.show
+
 GET        /epaye/                                       controllers.EPayeStartController.ePayeLanding
 POST       /epaye/                                       controllers.EPayeStartController.ePayeLandingSubmit
 GET        /epaye/start                                  controllers.EPayeStartController.ePayeStart

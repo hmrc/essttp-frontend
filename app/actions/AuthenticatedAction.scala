@@ -58,7 +58,8 @@ class AuthenticatedAction @Inject() (
         case _ =>
           Future.failed(new IllegalStateException("not enrolled"))
       }.recover {
-        case _: NoActiveSession | _: IllegalStateException => loginPage
+        case _: NoActiveSession => loginPage
+        case _: IllegalStateException => notEnroledPage
         case e: AuthorisationException =>
           logger.debug(s"Unauthorised because of ${e.reason}, $e")
           Left(BadRequest("not authorised"))
@@ -68,6 +69,8 @@ class AuthenticatedAction @Inject() (
   def loginPage(implicit request: Request[_]) = Left(Redirect(
     appConfig.loginUrl,
     Map("continue" -> Seq(appConfig.frontendBaseUrl + request.uri), "origin" -> Seq("supp"))))
+
+  def notEnroledPage(implicit request: Request[_]) = Left(Redirect(controllers.routes.EnrolmentsController.show))
 
   override protected def executionContext: ExecutionContext = cc.executionContext
 
