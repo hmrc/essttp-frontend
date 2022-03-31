@@ -62,8 +62,6 @@ class AuthLoginStubServiceImpl @Inject() (
 
 object AuthLoginStubService {
 
-  trait AffinityGrou
-
   type LSR[A] = EitherT[Future, AuthError, A]
 
   def liftError(error: StubException): AuthError = AuthError(error.e)
@@ -78,7 +76,6 @@ object AuthLoginStubService {
     email: Option[EmailAddress],
     nino: Option[NINO],
     enrolment: Option[Enrolment])
-  //  existingTaxChecks: List[SaveTaxCheckRequest])
 
   final case class GGCredId(value: String) extends AnyVal
 
@@ -178,7 +175,7 @@ object AuthLoginStubService {
 
   def loginDataOf(group: AffinityGroup, enrolments: List[Enrolment]): _root_.services.AuthLoginStubService.LoginData = {
     LoginData(GGCredId(UUID.randomUUID().toString), "http://localhost:9999/nowhere",
-      ConfidenceLevel.L50, AffinityGroup.Individual, None, None, enrolments.headOption)
+      ConfidenceLevel.L50, group, None, None, enrolments.headOption)
   }
 
 }

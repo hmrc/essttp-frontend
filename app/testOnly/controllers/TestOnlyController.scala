@@ -21,7 +21,7 @@ import config.AppConfig
 import play.api.data.Forms.{ mapping, nonEmptyText, text }
 import play.api.data.{ Form, Forms }
 import play.api.libs.json.{ Format, Json }
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents, Result }
+import play.api.mvc.{ Action, AnyContent, Call, MessagesControllerComponents, Result }
 import play.api.test.{ FakeRequest, Helpers }
 import services.AuthLoginStubService
 import testOnly.controllers.TestOnlyController._
@@ -29,7 +29,7 @@ import testOnly.models.Enrolment.{ EPAYE, VAT }
 import testOnly.models.TestOnlyJourney.{ EpayeFromBTA, EpayeFromGovUk, EpayeNoOrigin, VATFromBTA, VATFromGovUk, VATNoOrigin }
 import testOnly.models.{ Enrolment, TestOnlyJourney }
 import testOnly.views.html.TestOnlyStart
-import uk.gov.hmrc.auth.core.{ AffinityGroup, Enrolment => CEnrolment }
+import uk.gov.hmrc.auth.core.{ AffinityGroup, EnrolmentIdentifier, Enrolment => CEnrolment }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.ImplicitConversions.toFutureResult
@@ -87,49 +87,34 @@ class TestOnlyController @Inject() (
         })
   }
 
-  def btaEpayeLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] = {
-    implicit val hc = HeaderCarrier()
+  def routeCall(auth: String, enrolments: List[Enrolment], call: Call): Future[Result] = {
     if (auth == "none") {
-      Future.successful(Redirect(controllers.routes.BTAController.payeLandingPage).withNewSession)
+      Future.successful(Redirect(call).withNewSession)
     } else {
+      implicit val hc = HeaderCarrier()
       val result = for {
         session <- loginService.login(affinityGroup(auth), asEnrolments(enrolments))
-      } yield Redirect(controllers.routes.BTAController.payeLandingPage).withSession(session)
+      } yield {
+        Redirect(call).withSession(session)
+      }
 
       result.getOrElse(throw new IllegalArgumentException("bta epaye failed"))
     }
 
   }
 
+  def btaEpayeLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] =
+    routeCall(auth, enrolments, controllers.routes.BTAController.payeLandingPage)
+
   def btaVatLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] = {
     Redirect(controllers.routes.BTAController.vatLandingPage)
   }
 
-  def govUkEpayeLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] = {
-    implicit val hc = HeaderCarrier()
-    if (auth == "none") {
-      Future.successful(Redirect(controllers.routes.GovUkController.startPaye).withNewSession)
-    } else {
-      val result = for {
-        session <- loginService.login(affinityGroup(auth), asEnrolments(enrolments))
-      } yield Redirect(controllers.routes.GovUkController.startPaye).withSession(session)
+  def govUkEpayeLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] =
+    routeCall(auth, enrolments, controllers.routes.GovUkController.startPaye)
 
-      result.getOrElse(throw new IllegalArgumentException("govuk epaye failed"))
-    }
-  }
-
-  def noOriginEpayeLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] = {
-    implicit val hc = HeaderCarrier()
-    if (auth == "none") {
-      Future.successful(Redirect(controllers.routes.NoSourceController.payeLandingPage()).withNewSession)
-    } else {
-      val result = for {
-        session <- loginService.login(affinityGroup(auth), asEnrolments(enrolments))
-      } yield Redirect(controllers.routes.NoSourceController.payeLandingPage()).withSession(session)
-
-      result.getOrElse(throw new IllegalArgumentException("govuk epaye failed"))
-    }
-  }
+  def noOriginEpayeLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] =
+    routeCall(auth, enrolments, controllers.routes.NoSourceController.payeLandingPage())
 
   def govUkVatLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] = {
     Redirect(controllers.routes.GovUkController.vatLandingPage)
@@ -178,7 +163,7 @@ object TestOnlyController {
   }
 
   def asEnrolments(l: List[Enrolment]): List[CEnrolment] = {
-    l.map(e => CEnrolment(e.name, Nil, "Active"))
+    l.map(e => CEnrolment("IR-PAYE", Seq(EnrolmentIdentifier("TaxOfficeReference", "123AAAABBB")), "Activated"))
   }
 
 }
