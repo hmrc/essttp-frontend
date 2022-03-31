@@ -94,11 +94,9 @@ class TestOnlyController @Inject() (
       implicit val hc = HeaderCarrier()
       val result = for {
         session <- loginService.login(affinityGroup(auth), asEnrolments(enrolments))
-      } yield {
-        Redirect(call).withSession(session)
-      }
+      } yield Redirect(call).withSession(session)
 
-      result.getOrElse(throw new IllegalArgumentException("bta epaye failed"))
+      result.getOrElse(throw new IllegalArgumentException(s"failed to route call $call"))
     }
 
   }
@@ -120,6 +118,9 @@ class TestOnlyController @Inject() (
     Redirect(controllers.routes.GovUkController.vatLandingPage)
   }
 
+  def noOriginVatLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] =
+    routeCall(auth, enrolments, controllers.routes.NoSourceController.payeLandingPage())
+
   def startJourney(auth: String, enrolments: List[Enrolment], jt: TestOnlyJourney)(implicit hc: HeaderCarrier): Future[Result] = {
     jt match {
       case EpayeFromGovUk => govUkEpayeLandingPage(auth, enrolments)
@@ -127,6 +128,7 @@ class TestOnlyController @Inject() (
       case EpayeNoOrigin => noOriginEpayeLandingPage(auth, enrolments)
       case VATFromGovUk => govUkVatLandingPage(auth, enrolments)
       case VATFromBTA => btaVatLandingPage(auth, enrolments)
+      case VATNoOrigin => noOriginVatLandingPage(auth, enrolments)
     }
   }
 
@@ -163,7 +165,10 @@ object TestOnlyController {
   }
 
   def asEnrolments(l: List[Enrolment]): List[CEnrolment] = {
-    l.map(e => CEnrolment("IR-PAYE", Seq(EnrolmentIdentifier("TaxOfficeReference", "123AAAABBB")), "Activated"))
+    l.map {
+      case EPAYE => CEnrolment("IR-PAYE", Seq(EnrolmentIdentifier("TaxOfficeReference", "123AAAABBB")), "Activated")
+      case VAT => CEnrolment("IR-VAT", Seq(EnrolmentIdentifier("TaxOfficeReference", "123AAAABBB")), "Activated")
+    }
   }
 
 }

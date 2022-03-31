@@ -16,19 +16,18 @@
 
 package controllers
 
+import _root_.actions.Actions
 import essttp.journey.JourneyConnector
 import essttp.rootmodel.{ BackUrl, ReturnUrl }
 import play.api.libs.json.JsValue
 import play.api.mvc.{ Action, MessagesControllerComponents }
 import testOnly.controllers.TestOnlyController.AuthRequest
-import uk.gov.hmrc.auth.core.{ AuthConnector, AuthorisedFunctions }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.EPaye.EPayeLandingPage2
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }
-import _root_.actions.Actions
 
 @Singleton()
 class BTAController @Inject() (mcc: MessagesControllerComponents, epayeLandingPage: EPayeLandingPage2,
