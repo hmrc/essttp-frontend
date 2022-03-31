@@ -16,23 +16,25 @@
 
 package actions
 
-import play.api.mvc.{ ActionBuilder, AnyContent, DefaultActionBuilder, Request }
+import models.TaxRegime
+import play.api.mvc.{ ActionBuilder, ActionFilter, AnyContent, DefaultActionBuilder, Request }
 import requests.JourneyRequest
 
 import javax.inject.{ Inject, Singleton }
 
 @Singleton
 class Actions @Inject() (
-  payeRoleFilter: PayeRegimeEnrolmentFilter,
   actionBuilder: DefaultActionBuilder,
   authenticatedAction: AuthenticatedAction,
+  factory: VerifyRegimeEnrolmentFilterFactory,
   getJourneyActionRefiner: GetJourneyActionRefiner) {
 
   val default: ActionBuilder[Request, AnyContent] = actionBuilder
 
-  val auth = actionBuilder andThen authenticatedAction
-
-  val authPaye = actionBuilder andThen authenticatedAction andThen payeRoleFilter
+  val auth: ActionBuilder[AuthenticatedRequest, AnyContent] = actionBuilder andThen authenticatedAction
 
   val getJourney: ActionBuilder[JourneyRequest, AnyContent] = actionBuilder andThen getJourneyActionRefiner
+
+  def verifyRole(regime: TaxRegime): ActionBuilder[AuthenticatedRequest, AnyContent] =
+    (actionBuilder andThen authenticatedAction) andThen factory.createFilter(regime)
 }

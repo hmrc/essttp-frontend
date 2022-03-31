@@ -23,6 +23,8 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.EPaye.EPayeLandingPage2
 import _root_.actions.Actions
+import models.TaxRegime
+
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }
 
@@ -35,7 +37,7 @@ class NoSourceController @Inject() (mcc: MessagesControllerComponents, epayeLand
     Ok(epayeLandingPage(controllers.routes.NoSourceController.startPaye))
   }
 
-  def startPaye = as.authPaye.async { implicit request =>
+  def startPaye = as.verifyRole(TaxRegime.EpayeRegime).async { implicit request =>
     for {
       response <- jc.Epaye.startJourneyDetachedUrl(
         essttp.journey.model.SjRequest.Epaye.Empty())

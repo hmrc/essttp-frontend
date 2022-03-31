@@ -20,18 +20,22 @@ import models.TaxRegime
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ ActionFilter, Result }
 
-import javax.inject.Inject
+import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }
 
-class PayeRegimeEnrolmentFilter @Inject() (implicit ec: ExecutionContext) extends ActionFilter[AuthenticatedRequest] {
+@Singleton()
+class VerifyRegimeEnrolmentFilterFactory @Inject() (ec: ExecutionContext) {
 
-  override protected def executionContext: ExecutionContext = ec
-
-  override protected def filter[A](request: AuthenticatedRequest[A]): Future[Option[Result]] = {
-    if (request.enrolments.enrolments.exists(TaxRegime.EpayeRegime.allowEnrolment(_))) {
-      Future.successful(Option.empty[Result])
-    } else {
-      Future.successful(Option(Redirect(controllers.routes.EnrolmentsController.show)))
+  def createFilter(regime: TaxRegime): ActionFilter[AuthenticatedRequest] = new ActionFilter[AuthenticatedRequest] {
+    override protected def filter[A](request: AuthenticatedRequest[A]): Future[Option[Result]] = {
+      if (request.enrolments.enrolments.exists(regime.allowEnrolment(_))) {
+        Future.successful(Option.empty[Result])
+      } else {
+        Future.successful(Option(Redirect(controllers.routes.EnrolmentsController.show)))
+      }
     }
+
+    override protected def executionContext: ExecutionContext = ec
   }
+
 }

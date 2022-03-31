@@ -19,6 +19,7 @@ package controllers
 import _root_.actions.Actions
 import essttp.journey.JourneyConnector
 import essttp.rootmodel.{ BackUrl, ReturnUrl }
+import models.TaxRegime
 import play.api.libs.json.JsValue
 import play.api.mvc.{ Action, MessagesControllerComponents }
 import testOnly.controllers.TestOnlyController.AuthRequest
@@ -38,7 +39,7 @@ class BTAController @Inject() (mcc: MessagesControllerComponents, epayeLandingPa
     Ok(epayeLandingPage(controllers.routes.BTAController.startPaye))
   }
 
-  def startPaye = as.authPaye.async { implicit request =>
+  def startPaye = as.verifyRole(TaxRegime.EpayeRegime).async { implicit request =>
     for {
       response <- jc.Epaye.startJourneyBta(
         essttp.journey.model.SjRequest.Epaye.Simple(ReturnUrl("http://localhost:9125/return"), BackUrl("http://localhost:9125/back")))
