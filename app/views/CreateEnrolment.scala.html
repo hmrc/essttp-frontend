@@ -18,9 +18,17 @@
 @import play.api.i18n.Messages
 @import play.api.mvc.Request
 
-@this(layout: templates.Layout)
+@this(layout: templates.Layout,form: FormWithCSRF,button: GovukButton)
 
 @()(implicit request: Request[_], messages: Messages)
 @layout(pageTitle = Some("create enrolment")) {
-    <h1 class="govuk-heading-xl">Create an enrolment here</h1>
+    <h1 class="govuk-heading-xl">You need to request access to setup a payment plan</h1>
+   <p class="govuk-body">You have not yet requested access to setup a payment plan online. you need to do this before you can continue to setup your payment plan</p>
+ @form(action=controllers.routes.BTAController.startPaye()) {
+  @button(Button(
+   inputType = Some("submit"),
+   content = Text("Request Access to Setup a Payment Plan"),
+   classes = "govuk-!-display-none-print"
+  ))
+ }
 }
