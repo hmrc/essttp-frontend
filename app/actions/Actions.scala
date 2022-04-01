@@ -37,11 +37,11 @@ class Actions @Inject() (
   val getJourney: ActionBuilder[JourneyRequest, AnyContent] = actionBuilder andThen getJourneyActionRefiner
 
   def verifyRole(regime: TaxRegime): ActionBuilder[AuthenticatedRequest, AnyContent] =
-    actionBuilder andThen authenticatedAction andThen createFilter(regime)
+    actionBuilder andThen authenticatedAction andThen filterEnrolment(regime)
 
-  def createFilter(regime: TaxRegime): ActionFilter[AuthenticatedRequest] = new ActionFilter[AuthenticatedRequest] {
+  def filterEnrolment(regime: TaxRegime): ActionFilter[AuthenticatedRequest] = new ActionFilter[AuthenticatedRequest] {
     override protected def filter[A](request: AuthenticatedRequest[A]): Future[Option[Result]] = {
-      if (request.enrolments.enrolments.exists(regime.allowEnrolment(_))) {
+      if (request.enrolments.enrolments.exists(regime.allowEnrolment)) {
         Future.successful(Option.empty[Result])
       } else {
         Future.successful(Option(Redirect(controllers.routes.EnrolmentsController.show)))
