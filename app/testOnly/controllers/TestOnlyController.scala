@@ -102,24 +102,28 @@ class TestOnlyController @Inject() (
   }
 
   def btaEpayeLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] =
-    routeCall(auth, enrolments, controllers.routes.BTAController.payeLandingPage)
+    routeCall(auth, enrolments, controllers.routes.EpayeBTAController.landingPage)
 
   def btaVatLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] = {
-    Redirect(controllers.routes.BTAController.vatLandingPage)
+    //Redirect(controllers.routes.BTAController.vatLandingPage)
+    ???
   }
 
   def govUkEpayeLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] =
-    routeCall(auth, enrolments, controllers.routes.GovUkController.startPaye)
+    routeCall(auth, enrolments, controllers.routes.EpayeGovUkController.start)
 
   def noOriginEpayeLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] =
-    routeCall(auth, enrolments, controllers.routes.NoSourceController.payeLandingPage())
+    routeCall(auth, enrolments, controllers.routes.EpayeNoSourceController.landingPage())
 
   def govUkVatLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] = {
-    Redirect(controllers.routes.GovUkController.vatLandingPage)
+    //Redirect(controllers.routes.GovUkController.vatLandingPage)
+    ???
   }
 
-  def noOriginVatLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] =
-    routeCall(auth, enrolments, controllers.routes.NoSourceController.payeLandingPage())
+  def noOriginVatLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] = {
+    //routeCall(auth, enrolments, controllers.routes.NoSourceController.payeLandingPage())
+    ???
+  }
 
   def startJourney(auth: String, enrolments: List[Enrolment], jt: TestOnlyJourney)(implicit hc: HeaderCarrier): Future[Result] = {
     jt match {

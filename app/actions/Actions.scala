@@ -16,7 +16,7 @@
 
 package actions
 
-import models.TaxRegime
+import models.{ TaxOrigin, TaxRegime }
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ ActionBuilder, ActionFilter, AnyContent, DefaultActionBuilder, Request, Result }
 import requests.JourneyRequest
@@ -36,12 +36,12 @@ class Actions @Inject() (
 
   val getJourney: ActionBuilder[JourneyRequest, AnyContent] = actionBuilder andThen getJourneyActionRefiner
 
-  def verifyRole(regime: TaxRegime): ActionBuilder[AuthenticatedRequest, AnyContent] =
-    actionBuilder andThen authenticatedAction andThen filterEnrolment(regime)
+  def verifyRole(origin: TaxOrigin): ActionBuilder[AuthenticatedRequest, AnyContent] =
+    actionBuilder andThen authenticatedAction andThen filterEnrolment(origin)
 
-  def filterEnrolment(regime: TaxRegime): ActionFilter[AuthenticatedRequest] = new ActionFilter[AuthenticatedRequest] {
+  def filterEnrolment(origin: TaxOrigin): ActionFilter[AuthenticatedRequest] = new ActionFilter[AuthenticatedRequest] {
     override protected def filter[A](request: AuthenticatedRequest[A]): Future[Option[Result]] = {
-      if (request.enrolments.enrolments.exists(regime.allowEnrolment)) {
+      if (request.enrolments.enrolments.exists(origin.allowEnrolment)) {
         Future.successful(Option.empty[Result])
       } else {
         Future.successful(Option(Redirect(controllers.routes.EnrolmentsController.show)))

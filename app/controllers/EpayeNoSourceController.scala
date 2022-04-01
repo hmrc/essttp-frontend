@@ -17,43 +17,28 @@
 package controllers
 
 import essttp.journey.JourneyConnector
-import play.api.mvc.MessagesControllerComponents
+import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import testOnly.controllers.TestOnlyController.AuthRequest
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.EPaye.EPayeLandingPage2
 import _root_.actions.Actions
+import models.TaxOrigin.{ EpayeBTA, EpayeNoOrigin }
 import models.TaxRegime
+import models.TaxRegime.EpayeRegime
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton()
-class NoSourceController @Inject() (mcc: MessagesControllerComponents, epayeLandingPage: EPayeLandingPage2,
+class EpayeNoSourceController @Inject() (cc: MessagesControllerComponents, epayeLandingPage: EPayeLandingPage2,
   jc: JourneyConnector, as: Actions)(implicit ec: ExecutionContext)
-  extends FrontendController(mcc) with Logging {
+  extends TaxOriginController[EpayeRegime.type](cc, jc, as) {
 
-  def payeLandingPage = Action { implicit request =>
-    Ok(epayeLandingPage(controllers.routes.NoSourceController.startPaye))
-  }
+  val originator = EpayeNoOrigin
 
-  def startPaye = as.verifyRole(TaxRegime.EpayeRegime).async { implicit request =>
-    for {
-      response <- jc.Epaye.startJourneyDetachedUrl(
-        essttp.journey.model.SjRequest.Epaye.Empty())
-    } yield Redirect(routes.EPayeStartController.ePayeStart()).withSession("JourneyId" -> response.journeyId.value)
-
-  }
-
-  def vatLandingPage = Action { implicit request =>
-    Ok("no source vat landing page")
-  }
-
-  def beginVat = Action.async(parse.json) { implicit request =>
-    withJsonBody[AuthRequest] { auth =>
-      Future.successful(Redirect(controllers.routes.LandingController.landingPage()))
-    }
-
+  override def landingPage: Action[AnyContent] = Action { implicit request =>
+    Ok(epayeLandingPage(controllers.routes.EpayeBTAController.start))
   }
 
 }
