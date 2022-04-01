@@ -36,10 +36,10 @@ class Actions @Inject() (
 
   val getJourney: ActionBuilder[JourneyRequest, AnyContent] = actionBuilder andThen getJourneyActionRefiner
 
-  def verifyRole(origin: TaxOrigin): ActionBuilder[AuthenticatedRequest, AnyContent] =
+  def verifyRole[A <: TaxRegime](origin: TaxOrigin[A]): ActionBuilder[AuthenticatedRequest, AnyContent] =
     actionBuilder andThen authenticatedAction andThen filterEnrolment(origin)
 
-  def filterEnrolment(origin: TaxOrigin): ActionFilter[AuthenticatedRequest] = new ActionFilter[AuthenticatedRequest] {
+  def filterEnrolment[R <: TaxRegime](origin: TaxOrigin[R]): ActionFilter[AuthenticatedRequest] = new ActionFilter[AuthenticatedRequest] {
     override protected def filter[A](request: AuthenticatedRequest[A]): Future[Option[Result]] = {
       if (request.enrolments.enrolments.exists(origin.allowEnrolment)) {
         Future.successful(Option.empty[Result])

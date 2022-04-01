@@ -26,8 +26,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-trait TaxOrigin {
-  type R <: TaxRegime
+trait TaxOrigin[R <: TaxRegime] {
 
   def regime: R
 
@@ -39,8 +38,7 @@ trait TaxOrigin {
 
 }
 
-trait EpayeTaxOrigin extends TaxOrigin {
-  override type R = EpayeRegime.type
+trait EpayeTaxOrigin extends TaxOrigin[EpayeRegime.type] {
 
   override def regime = EpayeRegime
 }

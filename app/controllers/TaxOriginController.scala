@@ -28,20 +28,20 @@ import util.Logging
 import javax.inject.Inject
 import scala.concurrent.{ ExecutionContext, Future }
 
-abstract class TaxOriginController[T <: TaxRegime] @Inject() (
+abstract class TaxOriginController[R <: TaxRegime] @Inject() (
   mcc: MessagesControllerComponents,
   jc: JourneyConnector, as: Actions)(implicit ec: ExecutionContext)
   extends FrontendController(mcc) with Logging {
 
-  def originator: TaxOrigin { type R = T }
+  def originator: TaxOrigin[R]
 
-  def createJourney(connector: JourneyConnector)(implicit hc: HeaderCarrier, request: Request[_]): Future[SjResponse] = originator.createJourney(connector)
+  def createJourney(implicit hc: HeaderCarrier, request: Request[_]): Future[SjResponse] = originator.createJourney(jc)
 
   def landingPage: Action[AnyContent]
 
-  def start: Action[AnyContent] = as.verifyRole(originator).async { implicit request =>
+  lazy val start: Action[AnyContent] = as.verifyRole(originator).async { implicit request =>
     for {
-      response <- createJourney(jc)
+      response <- createJourney
     } yield Redirect(originator.journeyEntryPoint).withSession("JourneyId" -> response.journeyId.value)
   }
 
