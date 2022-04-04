@@ -16,20 +16,38 @@
 
 package actions
 
-import play.api.mvc.{ ActionBuilder, AnyContent, DefaultActionBuilder, Request }
+import models.{ TaxOrigin, TaxRegime }
+import play.api.mvc.Results.Redirect
+import play.api.mvc.{ ActionBuilder, ActionFilter, AnyContent, DefaultActionBuilder, Request, Result }
 import requests.JourneyRequest
 
 import javax.inject.{ Inject, Singleton }
+import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
 class Actions @Inject() (
   actionBuilder: DefaultActionBuilder,
   authenticatedAction: AuthenticatedAction,
-  getJourneyActionRefiner: GetJourneyActionRefiner) {
+  getJourneyActionRefiner: GetJourneyActionRefiner)(implicit ec: ExecutionContext) {
 
   val default: ActionBuilder[Request, AnyContent] = actionBuilder
 
-  val auth = actionBuilder andThen authenticatedAction
+  val auth: ActionBuilder[AuthenticatedRequest, AnyContent] = actionBuilder andThen authenticatedAction
 
   val getJourney: ActionBuilder[JourneyRequest, AnyContent] = actionBuilder andThen getJourneyActionRefiner
+
+  def verifyRole[A <: TaxRegime](origin: TaxOrigin[A]): ActionBuilder[AuthenticatedRequest, AnyContent] =
+    actionBuilder andThen authenticatedAction andThen filterEnrolment(origin)
+
+  def filterEnrolment[R <: TaxRegime](origin: TaxOrigin[R]): ActionFilter[AuthenticatedRequest] = new ActionFilter[AuthenticatedRequest] {
+    override protected def filter[A](request: AuthenticatedRequest[A]): Future[Option[Result]] = {
+      if (request.enrolments.enrolments.exists(origin.allowEnrolment)) {
+        Future.successful(Option.empty[Result])
+      } else {
+        Future.successful(Option(Redirect(controllers.routes.EnrolmentsController.show)))
+      }
+    }
+
+    override protected def executionContext: ExecutionContext = ec
+  }
 }

@@ -21,6 +21,7 @@ import config.AppConfig
 import play.api.Logger
 import play.api.mvc.Results.{ BadRequest, Ok, Redirect }
 import play.api.mvc.{ ActionRefiner, MessagesControllerComponents, Request, Result, WrappedRequest }
+import uk.gov.hmrc.auth.core.AffinityGroup.Individual
 import uk.gov.hmrc.auth.core.{ AuthorisationException, AuthorisedFunctions, Enrolments, NoActiveSession }
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.{ Credentials, ~ }
@@ -55,14 +56,16 @@ class AuthenticatedAction @Inject() (
           Future.successful(
             Right(new AuthenticatedRequest[A](request, enrolments, credentials)))
       }.recover {
-        case _: NoActiveSession =>
-          //TODO: what is a proper value to origin
-          Left(Redirect(appConfig.loginUrl, Map("continue" -> Seq(appConfig.frontendBaseUrl + request.uri), "origin" -> Seq("pay-online"))))
+        case _: NoActiveSession => loginPage
         case e: AuthorisationException =>
           logger.debug(s"Unauthorised because of ${e.reason}, $e")
-          Left(BadRequest("bad"))
+          Left(BadRequest("not authorised"))
       }
   }
+
+  def loginPage(implicit request: Request[_]) = Left(Redirect(
+    appConfig.loginUrl,
+    Map("continue" -> Seq(appConfig.frontendBaseUrl + request.uri), "origin" -> Seq("supp"))))
 
   override protected def executionContext: ExecutionContext = cc.executionContext
 
