@@ -68,7 +68,7 @@ class EPayeStartController @Inject() (
             end = LocalDate.of(2021, 11, 5)),
           amount = AmountInPence((qualifyingDebt.value * 0.6).longValue()))))
     request.session.data.get("JourneyId") match {
-      case Some(_: String) => Ok(ePayeStartPage(overduePayments))
+      case Some(_: String) => Ok(ePayeStartPage(overduePayments, Option(controllers.routes.JourneyCompletionController.abort)))
       case _ => throw new IllegalStateException("missing journey")
     }
   }

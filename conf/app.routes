@@ -18,6 +18,8 @@ GET       /nosource/epaye/start                              controllers.EpayeNo
 
 GET       /enrolments                                      controllers.EnrolmentsController.show
 
+GET       /completion/abort                              controllers.JourneyCompletionController.abort
+
 GET        /epaye/                                       controllers.EPayeStartController.ePayeLanding
 POST       /epaye/                                       controllers.EPayeStartController.ePayeLandingSubmit
 GET        /epaye/start                                  controllers.EPayeStartController.ePayeStart
