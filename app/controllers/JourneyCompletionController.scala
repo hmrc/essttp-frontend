@@ -16,25 +16,19 @@
 
 package controllers
 
-import _root_.actions.Actions
-import essttp.journey.JourneyConnector
-import models.TaxOrigin.EpayeBTA
 import models.TaxRegime.EpayeRegime
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
-import views.html.EPaye.EPayeLandingPage2
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import util.Logging
 
-import javax.inject.{ Inject, Singleton }
-import scala.concurrent.ExecutionContext
+import javax.inject.Inject
 
-@Singleton()
-class EpayeBTAController @Inject() (cc: MessagesControllerComponents, epayeLandingPage: EPayeLandingPage2,
-  jc: JourneyConnector, as: Actions)(implicit ec: ExecutionContext)
-  extends TaxOriginController[EpayeRegime.type](cc, jc, as) {
+class JourneyCompletionController @Inject() (cc: MessagesControllerComponents) extends FrontendController(cc) with Logging {
 
-  val originator = EpayeBTA
-
-  override def landingPage: Action[AnyContent] = Action { implicit request =>
-    Ok(epayeLandingPage(controllers.routes.EpayeBTAController.start, Option(abortCall)))
+  // just return to the test page for now.
+  // abort will do the right thing depending on the origin when implemented
+  def abort: Action[AnyContent] = Action {
+    Redirect(testOnly.controllers.routes.TestOnlyController.testOnlyStartPage)
   }
 
 }

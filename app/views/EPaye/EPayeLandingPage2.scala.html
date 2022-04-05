@@ -29,7 +29,7 @@
         requestSupport: RequestSupport
 )
 
-@(next: Call)(implicit
+@(next: Call, backCall: Option[Call] = None)(implicit
         request: Request[_]
 )
 
@@ -37,7 +37,7 @@
 
 @title= @{Messages.Epaye.`Set up a PAYE for Employers payment plan`.show}
 
-@layout(pageTitle = Some(title), showSignOutLink = false) {
+@layout(pageTitle = Some(title), showSignOutLink = false, backLocation = backCall) {
     <h1 class="govuk-heading-xl">@title</h1>
     <p class="govuk-body">@{Messages.Epaye.`You can use this service to pay overdue payments...`.show}</p>
     <p class="govuk-body">@{Messages.Epaye.`You are eligible to set up an online payment plan if:`.show}</p>

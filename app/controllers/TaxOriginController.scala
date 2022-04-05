@@ -39,6 +39,8 @@ abstract class TaxOriginController[R <: TaxRegime] @Inject() (
 
   def landingPage: Action[AnyContent]
 
+  def abortCall = controllers.routes.JourneyCompletionController.abort
+
   lazy val start: Action[AnyContent] = as.verifyRole(originator).async { implicit request =>
     for {
       response <- createJourney
