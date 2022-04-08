@@ -21,7 +21,7 @@
 @import views.html.EPaye.components.OverduePaymentRow
 @import messages.Messages
 @import requests.RequestSupport
-@import controllers.EPayeStartController.OverduePayments
+@import models.{ OverDuePayments, InvoicePeriod, OverduePayment }
 @import play.api.mvc.Call
 
 @this(
@@ -33,7 +33,7 @@
 )
 
 @(
-  overduePayments: OverduePayments, backCall: Option[Call] = None)(implicit
+  overduePayments: OverDuePayments, backCall: Option[Call] = None)(implicit
   request: Request[_]
 )
 

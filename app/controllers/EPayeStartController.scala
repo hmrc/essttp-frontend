@@ -22,12 +22,11 @@ import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.EPaye.{ EPayeStartPage, EPayeLandingPage }
+import models.{ OverDuePayments, InvoicePeriod, OverduePayment }
 
 import java.time.LocalDate
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext }
-import controllers.EPayeStartController._
-import models.Journey
 import services.JourneyService
 
 @Singleton
@@ -50,7 +49,7 @@ class EPayeStartController @Inject() (
 
   val ePayeStart: Action[AnyContent] = as.default { implicit request =>
     val qualifyingDebt: AmountInPence = AmountInPence(296345)
-    val overduePayments = OverduePayments(
+    val overduePayments = OverDuePayments(
       total = qualifyingDebt,
       payments = List(
         OverduePayment(
@@ -76,20 +75,5 @@ class EPayeStartController @Inject() (
   val ePayeStartSubmit: Action[AnyContent] = as.default { implicit request =>
     Redirect(routes.UpfrontPaymentController.upfrontPayment())
   }
-
-}
-
-object EPayeStartController {
-  case class OverduePayments(
-    total: AmountInPence,
-    payments: List[OverduePayment])
-  case class OverduePayment(
-    invoicePeriod: InvoicePeriod,
-    amount: AmountInPence)
-  case class InvoicePeriod(
-    monthNumber: Int,
-    start: LocalDate,
-    end: LocalDate,
-    dueDate: LocalDate)
 
 }
