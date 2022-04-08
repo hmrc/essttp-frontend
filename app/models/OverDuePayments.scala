@@ -16,12 +16,12 @@
 
 package models
 import moveittocor.corcommon.model.AmountInPence
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{ Format, Json }
 
 final case class OverDuePayments(
-   total: AmountInPence,
-   payments: List[OverduePayment])
+  total: AmountInPence,
+  payments: List[OverduePayment])
 
 object OverDuePayments {
-  implicit val format: Format[OverduePayments] = Json.valueFormat
+  implicit val format: Format[OverDuePayments] = Json.format[OverDuePayments]
 }
