@@ -19,7 +19,7 @@ package controllers
 import _root_.actions.Actions
 import essttp.journey.JourneyConnector
 import models.TaxOrigin.EpayeBTA
-import models.TaxRegime.EpayeRegime
+import models.TaxRegimeFE.EpayeRegime
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import views.html.EPaye.EPayeLandingPage2
 

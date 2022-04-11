@@ -16,7 +16,7 @@
 
 package controllers
 
-import models.TaxRegime.EpayeRegime
+import models.TaxRegimeFE.EpayeRegime
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging

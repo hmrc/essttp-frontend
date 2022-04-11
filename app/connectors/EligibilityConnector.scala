@@ -18,7 +18,8 @@ package connectors
 
 import config.AppConfig
 import connectors.EligibilityConnector.EligibilityRequest
-import essttp.rootmodel.{ Aor, TaxId, TaxRegime, Vrn }
+import essttp.rootmodel.{ Aor, TaxId, Vrn }
+import models.{ TaxRegimeFE => TaxRegimeFE }
 import models.ttp.TtpEligibilityData
 import play.api.libs.json.{ Format, Json }
 import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient }
@@ -29,8 +30,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 @Singleton
 class EligibilityStubConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig) {
 
-  def eligibilityData(idType: String, regime: TaxRegime, id: TaxId, showFinancials: Boolean)
-                       (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[TtpEligibilityData] = {
+  def eligibilityData(idType: String, regime: TaxRegimeFE, id: TaxId, showFinancials: Boolean)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[TtpEligibilityData] = {
 
     httpClient
       .POST[EligibilityRequest, TtpEligibilityData](

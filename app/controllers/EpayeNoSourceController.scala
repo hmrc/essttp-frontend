@@ -24,8 +24,8 @@ import util.Logging
 import views.html.EPaye.EPayeLandingPage2
 import _root_.actions.Actions
 import models.TaxOrigin.{ EpayeBTA, EpayeNoOrigin }
-import models.TaxRegime
-import models.TaxRegime.EpayeRegime
+import models.TaxRegimeFE
+import models.TaxRegimeFE.EpayeRegime
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }

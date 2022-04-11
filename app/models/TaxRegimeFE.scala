@@ -16,50 +16,53 @@
 
 package models
 
+import enumeratum.{ Enum, EnumEntry }
 import play.api.mvc.PathBindable
 import uk.gov.hmrc.auth.core.Enrolment
 
-trait TaxRegime {
+import scala.collection.immutable
 
-  def name: String
+sealed trait TaxRegimeFE extends EnumEntry {
 
   def allowEnrolment(enrolment: Enrolment): Boolean
 
 }
 
-object TaxRegime {
+object TaxRegimeFE extends Enum[TaxRegimeFE] {
 
-  implicit def pathBinder(implicit stringBinder: PathBindable[String]): PathBindable[TaxRegime] = new PathBindable[TaxRegime] {
-    override def bind(key: String, value: String): Either[String, TaxRegime] = {
+  implicit def pathBinder(implicit stringBinder: PathBindable[String]): PathBindable[TaxRegimeFE] = new PathBindable[TaxRegimeFE] {
+    override def bind(key: String, value: String): Either[String, TaxRegimeFE] = {
       for {
         regime <- stringBinder.bind(key, value).right
       } yield regimeOf(regime)
     }
-    override def unbind(key: String, regime: TaxRegime): String = {
-      regime.name
+    override def unbind(key: String, regime: TaxRegimeFE): String = {
+      regime.entryName
     }
   }
 
-  object EpayeRegime extends TaxRegime {
+  object EpayeRegime extends TaxRegimeFE {
 
-    val name = "epaye"
+    override val entryName = "paye"
 
     override def allowEnrolment(enrolment: Enrolment): Boolean = enrolment.key == "IR-PAYE"
 
   }
 
-  object VatRegime extends TaxRegime {
+  object VatRegime extends TaxRegimeFE {
 
-    val name = "vat"
+    override val entryName = "vat"
 
     override def allowEnrolment(enrolment: Enrolment): Boolean = enrolment.key == "IR-VAT"
   }
 
-  def regimeOf(name: String): TaxRegime = name match {
-    case "epaye" => EpayeRegime
+  def regimeOf(name: String): TaxRegimeFE = name match {
+    case "paye" => EpayeRegime
     case "vat" => VatRegime
     case n => throw new IllegalArgumentException(s"$n is not the name of a tax regime")
   }
+
+  override val values: immutable.IndexedSeq[TaxRegimeFE] = findValues
 
 }
 

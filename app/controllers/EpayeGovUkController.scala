@@ -23,8 +23,8 @@ import util.Logging
 import views.html.EPaye.EPayeLandingPage2
 import _root_.actions.Actions
 import essttp.journey.model.Origin.Epaye.GovUk
-import models.TaxRegime.EpayeRegime
-import models.{ TaxOrigin, TaxRegime }
+import models.TaxRegimeFE.EpayeRegime
+import models.{ TaxOrigin, TaxRegimeFE }
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext

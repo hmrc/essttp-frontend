@@ -19,7 +19,7 @@ package controllers
 import _root_.actions.Actions
 import essttp.journey.JourneyConnector
 import essttp.journey.model.SjResponse
-import models.{ TaxOrigin, TaxRegime }
+import models.{ TaxOrigin, TaxRegimeFE }
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents, Request }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -28,7 +28,7 @@ import util.Logging
 import javax.inject.Inject
 import scala.concurrent.{ ExecutionContext, Future }
 
-abstract class TaxOriginController[R <: TaxRegime] @Inject() (
+abstract class TaxOriginController[R <: TaxRegimeFE] @Inject() (
   mcc: MessagesControllerComponents,
   jc: JourneyConnector, as: Actions)(implicit ec: ExecutionContext)
   extends FrontendController(mcc) with Logging {

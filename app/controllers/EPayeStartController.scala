@@ -17,17 +17,16 @@
 package controllers
 
 import _root_.actions.Actions
-import moveittocor.corcommon.model.AmountInPence
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import essttp.rootmodel.Aor
+import models.TaxRegimeFE
+import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import services.{ EligibilityDataService, JourneyService }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
-import views.html.EPaye.{EPayeLandingPage, EPayeStartPage}
-import models.{InvoicePeriod, OverDuePayments, OverduePayment}
+import views.html.EPaye.{ EPayeLandingPage, EPayeStartPage }
 
-import java.time.LocalDate
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
-import services.{EligibilityDataService, JourneyService}
 
 @Singleton
 class EPayeStartController @Inject() (
@@ -50,8 +49,8 @@ class EPayeStartController @Inject() (
 
   val ePayeStart: Action[AnyContent] = as.default.async { implicit request =>
     request.session.data.get("JourneyId") match {
-      case Some(_: String) => for{
-        data <- eligibilityDataService.data(null, null, null, null)
+      case Some(_: String) => for {
+        data <- eligibilityDataService.data("AOR", TaxRegimeFE.EpayeRegime, Aor("123AAAABBBBCC"), false)
       } yield Ok(ePayeStartPage(data, Option(controllers.routes.JourneyCompletionController.abort)))
       case _ => throw new IllegalStateException("missing journey")
     }

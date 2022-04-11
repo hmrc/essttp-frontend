@@ -19,14 +19,14 @@ package models
 import essttp.journey.JourneyConnector
 import essttp.journey.model.SjResponse
 import essttp.rootmodel.{ BackUrl, ReturnUrl }
-import models.TaxRegime.EpayeRegime
+import models.TaxRegimeFE.EpayeRegime
 import play.api.mvc.{ Call, Request }
 import uk.gov.hmrc.auth.core.Enrolment
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-trait TaxOrigin[R <: TaxRegime] {
+trait TaxOrigin[R <: TaxRegimeFE] {
 
   def regime: R
 
