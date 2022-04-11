@@ -18,22 +18,23 @@ package controllers
 
 import _root_.actions.Actions
 import moveittocor.corcommon.model.AmountInPence
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
-import views.html.EPaye.{ EPayeStartPage, EPayeLandingPage }
-import models.{ OverDuePayments, InvoicePeriod, OverduePayment }
+import views.html.EPaye.{EPayeLandingPage, EPayeStartPage}
+import models.{InvoicePeriod, OverDuePayments, OverduePayment}
 
 import java.time.LocalDate
-import javax.inject.{ Inject, Singleton }
-import scala.concurrent.{ ExecutionContext }
-import services.JourneyService
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.ExecutionContext
+import services.{EligibilityDataService, JourneyService}
 
 @Singleton
 class EPayeStartController @Inject() (
   as: Actions,
   mcc: MessagesControllerComponents,
   journeyService: JourneyService,
+  eligibilityDataService: EligibilityDataService,
   ePayeLandingPage: EPayeLandingPage,
   ePayeStartPage: EPayeStartPage)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
@@ -47,27 +48,11 @@ class EPayeStartController @Inject() (
     Redirect(routes.EPayeStartController.ePayeStart())
   }
 
-  val ePayeStart: Action[AnyContent] = as.default { implicit request =>
-    val qualifyingDebt: AmountInPence = AmountInPence(296345)
-    val overduePayments = OverDuePayments(
-      total = qualifyingDebt,
-      payments = List(
-        OverduePayment(
-          InvoicePeriod(
-            monthNumber = 7,
-            dueDate = LocalDate.of(2022, 1, 22),
-            start = LocalDate.of(2021, 11, 6),
-            end = LocalDate.of(2021, 12, 5)),
-          amount = AmountInPence((qualifyingDebt.value * 0.4).longValue())),
-        OverduePayment(
-          InvoicePeriod(
-            monthNumber = 8,
-            dueDate = LocalDate.of(2021, 12, 22),
-            start = LocalDate.of(2021, 10, 6),
-            end = LocalDate.of(2021, 11, 5)),
-          amount = AmountInPence((qualifyingDebt.value * 0.6).longValue()))))
+  val ePayeStart: Action[AnyContent] = as.default.async { implicit request =>
     request.session.data.get("JourneyId") match {
-      case Some(_: String) => Ok(ePayeStartPage(overduePayments, Option(controllers.routes.JourneyCompletionController.abort)))
+      case Some(_: String) => for{
+        data <- eligibilityDataService.data(null, null, null, null)
+      } yield Ok(ePayeStartPage(data, Option(controllers.routes.JourneyCompletionController.abort)))
       case _ => throw new IllegalStateException("missing journey")
     }
   }
