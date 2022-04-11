@@ -18,13 +18,13 @@ package services
 
 import connectors.EligibilityStubConnector
 import essttp.rootmodel.TaxId
-import models.ttp.{ ChargeTypeAssessment, TtpEligibilityData }
+import models.ttp.{ ChargeTypeAssessment, TaxPeriodCharges, TtpEligibilityData }
 import models.{ InvoicePeriod, OverDuePayments, OverduePayment, TaxRegimeFE }
 import moveittocor.corcommon.model.AmountInPence
 import services.EligibilityDataService.overDuePayments
 import uk.gov.hmrc.http.HeaderCarrier
 
-import java.time.{ LocalDate }
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }
@@ -41,12 +41,17 @@ class EligibilityDataService @Inject() (connector: EligibilityStubConnector) {
 
 object EligibilityDataService {
 
+  def chargeDueDate(charges: List[TaxPeriodCharges]): LocalDate = {
+    charges.headOption.map(c => parseLocalDate(c.interestStartDate)).getOrElse(throw new IllegalArgumentException("missing charge list"))
+  }
+
+  def monthNumber(date: LocalDate): Int = (date.getMonth.getValue - 4) % 12
+
   def invoicePeriod(ass: ChargeTypeAssessment): InvoicePeriod = {
-    val monthNumber: Int = 0
-    val dueDate: LocalDate = parseLocalDate(ass.taxPeriodFrom)
+    val dueDate: LocalDate = chargeDueDate(ass.taxPeriodCharges)
     val startDate: LocalDate = parseLocalDate(ass.taxPeriodFrom)
     val endDate: LocalDate = parseLocalDate(ass.taxPeriodTo)
-    InvoicePeriod(0, dueDate, startDate, endDate)
+    InvoicePeriod(monthNumber(startDate), startDate, endDate, dueDate)
   }
 
   def overDuePaymentOf(ass: ChargeTypeAssessment): OverduePayment =
@@ -54,26 +59,8 @@ object EligibilityDataService {
 
   def overDuePayments(ttp: TtpEligibilityData): OverDuePayments = {
     val qualifyingDebt: AmountInPence = AmountInPence(ttp.chargeTypeAssessment.map(_.debtTotalAmount).sum)
-    val op = ttp.chargeTypeAssessment.map(overDuePaymentOf).toList
-    OverDuePayments(qualifyingDebt, op)
-    //    val qualifyingDebt: AmountInPence = AmountInPence(296345)
-    //    OverDuePayments(
-    //      total = qualifyingDebt,
-    //      payments = List(
-    //        OverduePayment(
-    //          InvoicePeriod(
-    //            monthNumber = 7,
-    //            dueDate = LocalDate.of(2022, 1, 22),
-    //            start = LocalDate.of(2021, 11, 6),
-    //            end = LocalDate.of(2021, 12, 5)),
-    //          amount = AmountInPence((qualifyingDebt.value * 0.4).longValue())),
-    //        OverduePayment(
-    //          InvoicePeriod(
-    //            monthNumber = 8,
-    //            dueDate = LocalDate.of(2021, 12, 22),
-    //            start = LocalDate.of(2021, 10, 6),
-    //            end = LocalDate.of(2021, 11, 5)),
-    //          amount = AmountInPence((qualifyingDebt.value * 0.6).longValue()))))
+    val payments = ttp.chargeTypeAssessment.map(overDuePaymentOf)
+    OverDuePayments(qualifyingDebt, payments)
   }
 
   val LocalDateTimeFmt = DateTimeFormatter.ofPattern("yyyy-MM-dd")
