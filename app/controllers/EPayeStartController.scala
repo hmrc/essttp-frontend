@@ -17,8 +17,7 @@
 package controllers
 
 import _root_.actions.Actions
-import essttp.rootmodel.Aor
-import models.TaxRegimeFE
+import essttp.rootmodel.{ Aor, TaxRegime }
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import services.{ EligibilityDataService, JourneyService }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -50,7 +49,7 @@ class EPayeStartController @Inject() (
   val ePayeStart: Action[AnyContent] = as.default.async { implicit request =>
     request.session.data.get("JourneyId") match {
       case Some(_: String) => for {
-        data <- eligibilityDataService.data("AOR", TaxRegimeFE.EpayeRegime, Aor("123AAAABBBBCC"), false)
+        data <- eligibilityDataService.data("AOR", TaxRegime.Epaye, Aor("123AAAABBBBCC"), false)
       } yield Ok(ePayeStartPage(data, Option(controllers.routes.JourneyCompletionController.abort)))
       case _ => throw new IllegalStateException("missing journey")
     }

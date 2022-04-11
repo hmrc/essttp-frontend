@@ -16,9 +16,10 @@
 
 package actions
 
-import models.{ TaxOrigin, TaxRegimeFE }
+import essttp.rootmodel.TaxRegime
+import models.TaxOrigin
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{ ActionBuilder, ActionFilter, AnyContent, DefaultActionBuilder, Request, Result }
+import play.api.mvc._
 import requests.JourneyRequest
 
 import javax.inject.{ Inject, Singleton }
@@ -36,10 +37,10 @@ class Actions @Inject() (
 
   val getJourney: ActionBuilder[JourneyRequest, AnyContent] = actionBuilder andThen getJourneyActionRefiner
 
-  def verifyRole[A <: TaxRegimeFE](origin: TaxOrigin[A]): ActionBuilder[AuthenticatedRequest, AnyContent] =
+  def verifyRole[A <: TaxRegime](origin: TaxOrigin[A]): ActionBuilder[AuthenticatedRequest, AnyContent] =
     actionBuilder andThen authenticatedAction andThen filterEnrolment(origin)
 
-  def filterEnrolment[R <: TaxRegimeFE](origin: TaxOrigin[R]): ActionFilter[AuthenticatedRequest] = new ActionFilter[AuthenticatedRequest] {
+  def filterEnrolment[R <: TaxRegime](origin: TaxOrigin[R]): ActionFilter[AuthenticatedRequest] = new ActionFilter[AuthenticatedRequest] {
     override protected def filter[A](request: AuthenticatedRequest[A]): Future[Option[Result]] = {
       if (request.enrolments.enrolments.exists(origin.allowEnrolment)) {
         Future.successful(Option.empty[Result])

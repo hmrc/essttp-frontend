@@ -18,8 +18,8 @@ package controllers
 
 import _root_.actions.Actions
 import essttp.journey.JourneyConnector
+import essttp.rootmodel.TaxRegime
 import models.TaxOrigin.EpayeBTA
-import models.TaxRegimeFE.EpayeRegime
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import views.html.EPaye.EPayeLandingPage2
 
@@ -29,7 +29,7 @@ import scala.concurrent.ExecutionContext
 @Singleton()
 class EpayeBTAController @Inject() (cc: MessagesControllerComponents, epayeLandingPage: EPayeLandingPage2,
   jc: JourneyConnector, as: Actions)(implicit ec: ExecutionContext)
-  extends TaxOriginController[EpayeRegime.type](cc, jc, as) {
+  extends TaxOriginController[TaxRegime.Epaye.type](cc, jc, as) {
 
   val originator = EpayeBTA
 

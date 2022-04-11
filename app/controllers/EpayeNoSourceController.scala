@@ -16,24 +16,20 @@
 
 package controllers
 
-import essttp.journey.JourneyConnector
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
-import testOnly.controllers.TestOnlyController.AuthRequest
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import util.Logging
-import views.html.EPaye.EPayeLandingPage2
 import _root_.actions.Actions
-import models.TaxOrigin.{ EpayeBTA, EpayeNoOrigin }
-import models.TaxRegimeFE
-import models.TaxRegimeFE.EpayeRegime
+import essttp.journey.JourneyConnector
+import essttp.rootmodel.TaxRegime
+import models.TaxOrigin.EpayeNoOrigin
+import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import views.html.EPaye.EPayeLandingPage2
 
 import javax.inject.{ Inject, Singleton }
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.ExecutionContext
 
 @Singleton()
 class EpayeNoSourceController @Inject() (cc: MessagesControllerComponents, epayeLandingPage: EPayeLandingPage2,
   jc: JourneyConnector, as: Actions)(implicit ec: ExecutionContext)
-  extends TaxOriginController[EpayeRegime.type](cc, jc, as) {
+  extends TaxOriginController[TaxRegime.Epaye.type](cc, jc, as) {
 
   val originator = EpayeNoOrigin
 

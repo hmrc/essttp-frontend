@@ -17,9 +17,9 @@
 package services
 
 import connectors.EligibilityStubConnector
-import essttp.rootmodel.TaxId
+import essttp.rootmodel.{ TaxId, TaxRegime }
 import models.ttp.{ ChargeTypeAssessment, TaxPeriodCharges, TtpEligibilityData }
-import models.{ InvoicePeriod, OverDuePayments, OverduePayment, TaxRegimeFE }
+import models.{ InvoicePeriod, OverDuePayments, OverduePayment }
 import moveittocor.corcommon.model.AmountInPence
 import services.EligibilityDataService.overDuePayments
 import uk.gov.hmrc.http.HeaderCarrier
@@ -32,7 +32,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 @Singleton
 class EligibilityDataService @Inject() (connector: EligibilityStubConnector) {
 
-  def data(idType: String, regime: TaxRegimeFE, id: TaxId, showFinancials: Boolean)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[OverDuePayments] =
+  def data(idType: String, regime: TaxRegime, id: TaxId, showFinancials: Boolean)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[OverDuePayments] =
     for {
       items <- connector.eligibilityData(idType, regime, id, showFinancials)
     } yield (overDuePayments(items))

@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package controllers
+package util
 
-import _root_.actions.Actions
-import essttp.journey.JourneyConnector
 import essttp.rootmodel.TaxRegime
-import models.TaxOrigin
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import uk.gov.hmrc.auth.core.Enrolment
 
-import javax.inject.{ Inject, Singleton }
-import scala.concurrent.ExecutionContext
+object RegimeUtils {
 
-@Singleton()
-class EpayeGovUkController @Inject() (
-  cc: MessagesControllerComponents,
-  jc: JourneyConnector, as: Actions)(implicit ec: ExecutionContext) extends TaxOriginController[TaxRegime.Epaye.type](cc, jc, as) {
+  implicit class RegimeOps(regime: TaxRegime) {
+    def name: String = regime match {
+      case TaxRegime.Epaye => "paye"
+      case TaxRegime.Vat => "vat"
+    }
 
-  val originator = TaxOrigin.EpayeGovUk
+    def allowEnrolment(enrolment: Enrolment): Boolean = regime match {
+      case TaxRegime.Epaye => enrolment.key == "IR-PAYE"
+      case TaxRegime.Vat => enrolment.key == "IR-VAT"
+    }
+  }
 
-  override def landingPage: Action[AnyContent] = start
 }
