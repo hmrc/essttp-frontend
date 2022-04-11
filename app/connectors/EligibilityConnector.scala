@@ -30,7 +30,8 @@ import scala.concurrent.{ ExecutionContext, Future }
 @Singleton
 class EligibilityStubConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig) {
 
-  def eligibilityData(idType: String, regime: TaxRegimeFE, id: TaxId, showFinancials: Boolean)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[TtpEligibilityData] = {
+  def eligibilityData(idType: String, regime: TaxRegimeFE, id: TaxId, showFinancials: Boolean)
+                     (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[TtpEligibilityData] = {
 
     httpClient
       .POST[EligibilityRequest, TtpEligibilityData](
@@ -39,7 +40,7 @@ class EligibilityStubConnector @Inject() (httpClient: HttpClient, appConfig: App
 
   }
 
-  def ttpUrl = s"${appConfig.ttpBaseUrl}/time-to-pay/self-serve/eligibility"
+  val ttpUrl = s"${appConfig.ttpBaseUrl}/time-to-pay/self-serve/eligibility"
 
 }
 
