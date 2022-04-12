@@ -83,11 +83,11 @@ class TestOnlyController @Inject() (
             "EPAYE" -> EPAYE,
             "VAT" -> VAT)
 
-          startJourney(p.auth, p.enrolments.map(enrolmentMap).toList, journey)
+          startJourney(p.auth, p.enrolments.map(enrolmentMap).toList, p.eligibilityErrors.map(EligibilityError.withName).toList, journey)
         })
   }
 
-  def routeCall(auth: String, enrolments: List[Enrolment], call: Call): Future[Result] = {
+  def routeCall(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError], call: Call): Future[Result] = {
     if (auth == "none") {
       Future.successful(Redirect(call).withNewSession)
     } else {
@@ -101,38 +101,38 @@ class TestOnlyController @Inject() (
 
   }
 
-  def btaEpayeLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] =
-    routeCall(auth, enrolments, controllers.routes.EpayeBTAController.landingPage)
+  def btaEpayeLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError]): Future[Result] =
+    routeCall(auth, enrolments, eligibilityErrors, controllers.routes.EpayeBTAController.landingPage)
 
-  def btaVatLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] = {
+  def btaVatLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError]): Future[Result] = {
     //Redirect(controllers.routes.BTAController.vatLandingPage)
     ???
   }
 
-  def govUkEpayeLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] =
-    routeCall(auth, enrolments, controllers.routes.EpayeGovUkController.start)
+  def govUkEpayeLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError]): Future[Result] =
+    routeCall(auth, enrolments, eligibilityErrors, controllers.routes.EpayeGovUkController.start)
 
-  def noOriginEpayeLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] =
-    routeCall(auth, enrolments, controllers.routes.EpayeNoSourceController.landingPage())
+  def noOriginEpayeLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError]): Future[Result] =
+    routeCall(auth, enrolments, eligibilityErrors, controllers.routes.EpayeNoSourceController.landingPage())
 
-  def govUkVatLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] = {
+  def govUkVatLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError]): Future[Result] = {
     //Redirect(controllers.routes.GovUkController.vatLandingPage)
     ???
   }
 
-  def noOriginVatLandingPage(auth: String, enrolments: List[Enrolment]): Future[Result] = {
+  def noOriginVatLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError]): Future[Result] = {
     //routeCall(auth, enrolments, controllers.routes.NoSourceController.payeLandingPage())
     ???
   }
 
-  def startJourney(auth: String, enrolments: List[Enrolment], jt: TestOnlyJourney)(implicit hc: HeaderCarrier): Future[Result] = {
+  def startJourney(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError], jt: TestOnlyJourney)(implicit hc: HeaderCarrier): Future[Result] = {
     jt match {
-      case EpayeFromGovUk => govUkEpayeLandingPage(auth, enrolments)
-      case EpayeFromBTA => btaEpayeLandingPage(auth, enrolments)
-      case EpayeNoOrigin => noOriginEpayeLandingPage(auth, enrolments)
-      case VATFromGovUk => govUkVatLandingPage(auth, enrolments)
-      case VATFromBTA => btaVatLandingPage(auth, enrolments)
-      case VATNoOrigin => noOriginVatLandingPage(auth, enrolments)
+      case EpayeFromGovUk => govUkEpayeLandingPage(auth, enrolments, eligibilityErrors)
+      case EpayeFromBTA => btaEpayeLandingPage(auth, enrolments, eligibilityErrors)
+      case EpayeNoOrigin => noOriginEpayeLandingPage(auth, enrolments, eligibilityErrors)
+      case VATFromGovUk => govUkVatLandingPage(auth, enrolments, eligibilityErrors)
+      case VATFromBTA => btaVatLandingPage(auth, enrolments, eligibilityErrors)
+      case VATNoOrigin => noOriginVatLandingPage(auth, enrolments, eligibilityErrors)
     }
   }
 
