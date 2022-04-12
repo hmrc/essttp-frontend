@@ -27,7 +27,7 @@ import services.AuthLoginStubService
 import testOnly.controllers.TestOnlyController._
 import testOnly.models.Enrolment.{ EPAYE, VAT }
 import testOnly.models.TestOnlyJourney.{ EpayeFromBTA, EpayeFromGovUk, EpayeNoOrigin, VATFromBTA, VATFromGovUk, VATNoOrigin }
-import testOnly.models.{ Enrolment, TestOnlyJourney }
+import testOnly.models.{ EligibilityError, Enrolment, TestOnlyJourney }
 import testOnly.views.html.TestOnlyStart
 import uk.gov.hmrc.auth.core.{ AffinityGroup, EnrolmentIdentifier, Enrolment => CEnrolment }
 import uk.gov.hmrc.http.HeaderCarrier
@@ -144,7 +144,8 @@ object TestOnlyController {
   case class TestOnlyForm(
     auth: String,
     enrolments: Seq[String],
-    origin: String)
+    origin: String,
+    eligibilityErrors: Seq[String])
 
   case class TestOnlyRequest(
     auth: String,
@@ -155,7 +156,8 @@ object TestOnlyController {
     mapping(
       "auth" -> nonEmptyText,
       "enrolments" -> Forms.seq(text),
-      "origin" -> nonEmptyText)(TestOnlyForm.apply)(TestOnlyForm.unapply))
+      "origin" -> nonEmptyText,
+      "eligibilityErrors" -> Forms.seq(text))(TestOnlyForm.apply)(TestOnlyForm.unapply))
 
   case class AuthRequest(auth: String, enrolments: List[Enrolment])
 
