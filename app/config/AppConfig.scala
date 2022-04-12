@@ -41,6 +41,8 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
 
   val frontendBaseUrl: String = servicesConfig.baseUrl("essttp-frontend")
 
+  val ttpBaseUrl: String = s"${servicesConfig.baseUrl("ttp")}"
+
   object BaseUrl {
     val essttpFrontend: String = config.get[String]("baseUrl.essttp-frontend")
     val essttpFrontendHost: String = new URL(essttpFrontend).getHost

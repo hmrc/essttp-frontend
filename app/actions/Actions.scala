@@ -16,9 +16,10 @@
 
 package actions
 
-import models.{ TaxOrigin, TaxRegime }
+import essttp.rootmodel.TaxRegime
+import models.TaxOrigin
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{ ActionBuilder, ActionFilter, AnyContent, DefaultActionBuilder, Request, Result }
+import play.api.mvc._
 import requests.JourneyRequest
 
 import javax.inject.{ Inject, Singleton }

@@ -19,7 +19,8 @@ package controllers
 import _root_.actions.Actions
 import essttp.journey.JourneyConnector
 import essttp.journey.model.SjResponse
-import models.{ TaxOrigin, TaxRegime }
+import essttp.rootmodel.TaxRegime
+import models.TaxOrigin
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents, Request }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController

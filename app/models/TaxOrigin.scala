@@ -18,12 +18,11 @@ package models
 
 import essttp.journey.JourneyConnector
 import essttp.journey.model.SjResponse
-import essttp.rootmodel.{ BackUrl, ReturnUrl }
-import models.TaxRegime.EpayeRegime
+import essttp.rootmodel.{ BackUrl, ReturnUrl, TaxRegime }
 import play.api.mvc.{ Call, Request }
 import uk.gov.hmrc.auth.core.Enrolment
 import uk.gov.hmrc.http.HeaderCarrier
-
+import util.RegimeUtils._
 import scala.concurrent.Future
 
 trait TaxOrigin[R <: TaxRegime] {
@@ -38,9 +37,9 @@ trait TaxOrigin[R <: TaxRegime] {
 
 }
 
-trait EpayeTaxOrigin extends TaxOrigin[EpayeRegime.type] {
+trait EpayeTaxOrigin extends TaxOrigin[TaxRegime.Epaye.type] {
 
-  override def regime = EpayeRegime
+  override def regime = TaxRegime.Epaye
 }
 
 object TaxOrigin {
