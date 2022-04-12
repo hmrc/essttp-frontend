@@ -103,7 +103,7 @@
     @hmrcReportTechnicalIssueHelper()
   }
 
-  @serviceNameAndHeading = @{pageTitle.fold(Messages.ServicePhase.`Set up a payment plan`.show)(t => s"""$t - ${Messages.ServicePhase.`Set up a payment plan`}""")}
+  @serviceNameAndHeading = @{pageTitle.fold(Messages.ServicePhase.`Set up a payment plan`.show)(t => s"""$t - ${Messages.ServicePhase.`Set up a payment plan`.show}""")}
   @govTitle = @{serviceNameAndHeading + " - GOV.UK"}
   @documentTitle = @{if(hasErrors) { Messages.ErrorMessages.`Error`.show + " " + govTitle } else { govTitle }}
 
