@@ -104,8 +104,20 @@ class TestOnlyController @Inject() (
 
   }
 
-  def btaEpayeLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError]): Future[Result] =
-    routeCall(auth, enrolments, eligibilityErrors, controllers.routes.EpayeBTAController.landingPage)
+  def btaEpayeLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError])(implicit hc: HeaderCarrier): Future[Result] = {
+    if (eligibilityErrors.isEmpty) {
+      for {
+        _ <- stub.insertEligibilityData(TaxRegime.Epaye, ttp.DefaultTaxId, DefaultTTP)
+        c <- routeCall(auth, enrolments, eligibilityErrors, controllers.routes.EpayeBTAController.landingPage())
+      } yield c
+
+    } else {
+      for {
+        _ <- stub.errors(TaxRegime.Epaye, ttp.DefaultTaxId, eligibilityErrors)
+        c <- routeCall(auth, enrolments, eligibilityErrors, controllers.routes.EpayeBTAController.landingPage())
+      } yield c
+    }
+  }
 
   def btaVatLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError]): Future[Result] = {
     //Redirect(controllers.routes.BTAController.vatLandingPage)
@@ -127,8 +139,20 @@ class TestOnlyController @Inject() (
     }
   }
 
-  def noOriginEpayeLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError]): Future[Result] =
-    routeCall(auth, enrolments, eligibilityErrors, controllers.routes.EpayeNoSourceController.landingPage())
+  def noOriginEpayeLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError])(implicit hc: HeaderCarrier): Future[Result] = {
+    if (eligibilityErrors.isEmpty) {
+      for {
+        _ <- stub.insertEligibilityData(TaxRegime.Epaye, ttp.DefaultTaxId, DefaultTTP)
+        c <- routeCall(auth, enrolments, eligibilityErrors, controllers.routes.EpayeNoSourceController.landingPage())
+      } yield c
+
+    } else {
+      for {
+        _ <- stub.errors(TaxRegime.Epaye, ttp.DefaultTaxId, eligibilityErrors)
+        c <- routeCall(auth, enrolments, eligibilityErrors, controllers.routes.EpayeNoSourceController.landingPage())
+      } yield c
+    }
+  }
 
   def govUkVatLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError]): Future[Result] = {
     //Redirect(controllers.routes.GovUkController.vatLandingPage)
