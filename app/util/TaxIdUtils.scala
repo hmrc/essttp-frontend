@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-package models
-import moveittocor.corcommon.model.AmountInPence
-import play.api.libs.json.{ Format, Json }
-import testOnly.models.EligibilityError
+package util
 
-final case class OverDuePayments(
-  total: AmountInPence,
-  payments: List[OverduePayment])
+import essttp.rootmodel.{ Aor, TaxId, Vrn }
 
-object OverDuePayments {
-  implicit val format: Format[OverDuePayments] = Json.format[OverDuePayments]
-}
+object TaxIdUtils {
 
-case class EligibilityData(rejections: List[EligibilityError], overduePayments: OverDuePayments) {
-  def hasRejections = !rejections.isEmpty
-}
+  implicit class TaxIdOps(taxId: TaxId) {
+    def value: String = taxId match {
+      case Aor(value) => value
+      case Vrn(value) => value
+    }
+  }
 
-object EligibilityData {
-  implicit val format: Format[EligibilityData] = Json.format[EligibilityData]
 }

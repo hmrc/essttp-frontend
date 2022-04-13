@@ -15,22 +15,12 @@
  */
 
 package models
-import moveittocor.corcommon.model.AmountInPence
-import play.api.libs.json.{ Format, Json }
-import testOnly.models.EligibilityError
 
-final case class OverDuePayments(
-  total: AmountInPence,
-  payments: List[OverduePayment])
+import essttp.rootmodel.{ TaxId, TaxRegime }
+import util.RegimeUtils.RegimeOps
 
-object OverDuePayments {
-  implicit val format: Format[OverDuePayments] = Json.format[OverDuePayments]
-}
+package object ttp {
 
-case class EligibilityData(rejections: List[EligibilityError], overduePayments: OverDuePayments) {
-  def hasRejections = !rejections.isEmpty
-}
+  val DefaultTaxId: TaxId = TaxRegime.Epaye.taxIdOf("default-office-reference")
 
-object EligibilityData {
-  implicit val format: Format[EligibilityData] = Json.format[EligibilityData]
 }

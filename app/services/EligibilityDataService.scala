@@ -18,24 +18,49 @@ package services
 
 import connectors.EligibilityStubConnector
 import essttp.rootmodel.{ TaxId, TaxRegime }
-import models.ttp.{ ChargeTypeAssessment, TaxPeriodCharges, TtpEligibilityData }
-import models.{ InvoicePeriod, OverDuePayments, OverduePayment }
+import models.ttp.{ ChargeTypeAssessment, EligibilityRules, TaxPeriodCharges, TtpEligibilityData }
+import models.{ EligibilityData, InvoicePeriod, OverDuePayments, OverduePayment }
 import moveittocor.corcommon.model.AmountInPence
-import services.EligibilityDataService.overDuePayments
+import services.EligibilityDataService._
+import testOnly.models.EligibilityError
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.{ Inject, Singleton }
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ ExecutionContext }
 
 @Singleton
 class EligibilityDataService @Inject() (connector: EligibilityStubConnector) {
 
-  def data(idType: String, regime: TaxRegime, id: TaxId, showFinancials: Boolean)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[OverDuePayments] =
+  def data(idType: String, regime: TaxRegime, id: TaxId, showFinancials: Boolean)(implicit hc: HeaderCarrier, ec: ExecutionContext) =
     for {
       items <- connector.eligibilityData(idType, regime, id, showFinancials)
-    } yield (overDuePayments(items))
+    } yield EligibilityData(rejections(items.eligibilityRules), overDuePayments(items))
+
+  def rejections(rules: EligibilityRules): List[EligibilityError] = {
+    def checkRlsOnAddress(list: List[EligibilityError]): List[EligibilityError] = if (rules.rlsOnAddress) EligibilityError.RLSFlagIsSet :: list else list
+    def checkMarkedAsInsolvent(list: List[EligibilityError]): List[EligibilityError] = if (rules.markedAsInsolvent) EligibilityError.PayeIsInsolvent :: list else list
+    def checkMinimumDebtAllowance(list: List[EligibilityError]): List[EligibilityError] = list
+
+    def checkMaxDebtAllowance(list: List[EligibilityError]): List[EligibilityError] = if (rules.maxDebtAllowance) EligibilityError.DebtIsTooLarge :: list else list
+    def checkDisallowedChargeLock(list: List[EligibilityError]): List[EligibilityError] = list
+    def checkExistingTTP(list: List[EligibilityError]): List[EligibilityError] = if (rules.existingTTP) EligibilityError.YouAlreadyHaveAPaymentPlan :: list else list
+
+    def checkMaxDebtAge(list: List[EligibilityError]): List[EligibilityError] = if (rules.maxDebtAge) EligibilityError.DebtIsTooOld :: list else list
+    def checkEligibleChargeType(list: List[EligibilityError]): List[EligibilityError] = if (rules.eligibleChargeType) EligibilityError.PayeHasDisallowedCharges :: list else list
+    def checkReturnsFiled(list: List[EligibilityError]): List[EligibilityError] = if (rules.returnsFiled) EligibilityError.ReturnsAreNotUpToDate :: list else list
+
+    val check1 = checkRlsOnAddress _ andThen checkMarkedAsInsolvent _ andThen checkMinimumDebtAllowance _
+
+    val check2 = checkMaxDebtAllowance _ andThen checkDisallowedChargeLock _
+
+    val check3 = checkExistingTTP _ andThen checkMaxDebtAge _ andThen checkEligibleChargeType _ andThen checkReturnsFiled _
+
+    val check = check1 andThen check2 andThen check3
+
+    check(List.empty[EligibilityError])
+  }
 
 }
 
