@@ -49,7 +49,7 @@ class EPayeStartController @Inject() (
   val ePayeStart: Action[AnyContent] = as.default.async { implicit request =>
     request.session.data.get("JourneyId") match {
       case Some(_: String) => for {
-        data <- eligibilityDataService.data("AOR", TaxRegime.Epaye, Aor("123AAAABBBBCC"), false)
+        data <- eligibilityDataService.data("AOR", TaxRegime.Epaye, Aor("123AAAABBBBCC"), true)
       } yield Ok(ePayeStartPage(data, Option(controllers.routes.JourneyCompletionController.abort)))
       case _ => throw new IllegalStateException("missing journey")
     }
