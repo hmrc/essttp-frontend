@@ -90,7 +90,7 @@ class TestOnlyController @Inject() (
         })
   }
 
-  def routeCall(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError], call: Call): Future[Result] = {
+  def routeCall(auth: String, enrolments: List[Enrolment], call: Call): Future[Result] = {
     if (auth == "none") {
       Future.successful(Redirect(call).withNewSession)
     } else {
@@ -105,18 +105,7 @@ class TestOnlyController @Inject() (
   }
 
   def btaEpayeLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError])(implicit hc: HeaderCarrier): Future[Result] = {
-    if (eligibilityErrors.isEmpty) {
-      for {
-        _ <- stub.insertEligibilityData(TaxRegime.Epaye, ttp.DefaultTaxId, DefaultTTP)
-        c <- routeCall(auth, enrolments, eligibilityErrors, controllers.routes.EpayeBTAController.landingPage())
-      } yield c
-
-    } else {
-      for {
-        _ <- stub.errors(TaxRegime.Epaye, ttp.DefaultTaxId, eligibilityErrors)
-        c <- routeCall(auth, enrolments, eligibilityErrors, controllers.routes.EpayeBTAController.landingPage())
-      } yield c
-    }
+    next(auth, enrolments, eligibilityErrors, controllers.routes.EpayeBTAController.landingPage())
   }
 
   def btaVatLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError]): Future[Result] = {
@@ -124,34 +113,14 @@ class TestOnlyController @Inject() (
     ???
   }
 
-  def govUkEpayeLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError])(implicit hc: HeaderCarrier): Future[Result] = {
-    if (eligibilityErrors.isEmpty) {
-      for {
-        _ <- stub.insertEligibilityData(TaxRegime.Epaye, ttp.DefaultTaxId, DefaultTTP)
-        c <- routeCall(auth, enrolments, eligibilityErrors, controllers.routes.EpayeGovUkController.start)
-      } yield c
-
-    } else {
-      for {
-        _ <- stub.errors(TaxRegime.Epaye, ttp.DefaultTaxId, eligibilityErrors)
-        c <- routeCall(auth, enrolments, eligibilityErrors, controllers.routes.EpayeGovUkController.start)
-      } yield c
-    }
+  def govUkEpayeLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError])
+                           (implicit hc: HeaderCarrier): Future[Result] = {
+    next(auth, enrolments, eligibilityErrors, controllers.routes.EpayeGovUkController.landingPage())
   }
 
-  def noOriginEpayeLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError])(implicit hc: HeaderCarrier): Future[Result] = {
-    if (eligibilityErrors.isEmpty) {
-      for {
-        _ <- stub.insertEligibilityData(TaxRegime.Epaye, ttp.DefaultTaxId, DefaultTTP)
-        c <- routeCall(auth, enrolments, eligibilityErrors, controllers.routes.EpayeNoSourceController.landingPage())
-      } yield c
-
-    } else {
-      for {
-        _ <- stub.errors(TaxRegime.Epaye, ttp.DefaultTaxId, eligibilityErrors)
-        c <- routeCall(auth, enrolments, eligibilityErrors, controllers.routes.EpayeNoSourceController.landingPage())
-      } yield c
-    }
+  def noOriginEpayeLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError])
+                              (implicit hc: HeaderCarrier): Future[Result] = {
+    next(auth, enrolments, eligibilityErrors, controllers.routes.EpayeNoSourceController.landingPage())
   }
 
   def govUkVatLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError]): Future[Result] = {
@@ -164,7 +133,22 @@ class TestOnlyController @Inject() (
     ???
   }
 
-  def startJourney(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError], jt: TestOnlyJourney)(implicit hc: HeaderCarrier): Future[Result] = {
+  def next(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError], call: Call)(implicit hc: HeaderCarrier): Future[Result] =
+    if (eligibilityErrors.isEmpty) {
+      for {
+        _ <- stub.insertEligibilityData(TaxRegime.Epaye, ttp.DefaultTaxId, DefaultTTP)
+        c <- routeCall(auth, enrolments, call)
+      } yield c
+
+    } else {
+      for {
+        _ <- stub.errors(TaxRegime.Epaye, ttp.DefaultTaxId, eligibilityErrors)
+        c <- routeCall(auth, enrolments, call)
+      } yield c
+    }
+
+  def startJourney(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError], jt: TestOnlyJourney)
+                  (implicit hc: HeaderCarrier): Future[Result] = {
     jt match {
       case EpayeFromGovUk => govUkEpayeLandingPage(auth, enrolments, eligibilityErrors)
       case EpayeFromBTA => btaEpayeLandingPage(auth, enrolments, eligibilityErrors)
