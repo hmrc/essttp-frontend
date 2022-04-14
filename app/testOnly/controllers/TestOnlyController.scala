@@ -113,13 +113,11 @@ class TestOnlyController @Inject() (
     ???
   }
 
-  def govUkEpayeLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError])
-                           (implicit hc: HeaderCarrier): Future[Result] = {
+  def govUkEpayeLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError])(implicit hc: HeaderCarrier): Future[Result] = {
     next(auth, enrolments, eligibilityErrors, controllers.routes.EpayeGovUkController.landingPage())
   }
 
-  def noOriginEpayeLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError])
-                              (implicit hc: HeaderCarrier): Future[Result] = {
+  def noOriginEpayeLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError])(implicit hc: HeaderCarrier): Future[Result] = {
     next(auth, enrolments, eligibilityErrors, controllers.routes.EpayeNoSourceController.landingPage())
   }
 
@@ -147,8 +145,7 @@ class TestOnlyController @Inject() (
       } yield c
     }
 
-  def startJourney(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError], jt: TestOnlyJourney)
-                  (implicit hc: HeaderCarrier): Future[Result] = {
+  def startJourney(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError], jt: TestOnlyJourney)(implicit hc: HeaderCarrier): Future[Result] = {
     jt match {
       case EpayeFromGovUk => govUkEpayeLandingPage(auth, enrolments, eligibilityErrors)
       case EpayeFromBTA => btaEpayeLandingPage(auth, enrolments, eligibilityErrors)

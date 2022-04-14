@@ -52,14 +52,13 @@ object EligibilityDataService {
   def rejections(rules: EligibilityRules): Either[NonEmptyList[EligibilityError], Unit] = {
     val validAddress: ValidatedResult[Unit] = if (rules.rlsOnAddress) RLSFlagIsSet.invalidNel else unitResult
     val markedAsInsolvent: ValidatedResult[Unit] = if (rules.markedAsInsolvent) PayeIsInsolvent.invalidNel else unitResult
-    val minimumDebtAllowance: ValidatedResult[Unit] = unitResult
     val maxDebtAllowance: ValidatedResult[Unit] = if (rules.maxDebtAllowance) DebtIsTooLarge.invalidNel else unitResult
-    val disallowedChargeLock: ValidatedResult[Unit] = unitResult
+    val disallowedChargeLock: ValidatedResult[Unit] = if (rules.disallowedChargeLock) PayeHasDisallowedCharges.invalidNel else unitResult
     val existingTTP: ValidatedResult[Unit] = if (rules.existingTTP) YouAlreadyHaveAPaymentPlan.invalidNel else unitResult
     val maxDebtAge: ValidatedResult[Unit] = if (rules.maxDebtAge) DebtIsTooOld.invalidNel else unitResult
     val eligibleChargeType: ValidatedResult[Unit] = if (rules.eligibleChargeType) PayeHasDisallowedCharges.invalidNel else unitResult
     val returnsFiled: ValidatedResult[Unit] = if (rules.returnsFiled) ReturnsAreNotUpToDate.invalidNel else unitResult
-    (validAddress, markedAsInsolvent, minimumDebtAllowance, maxDebtAllowance, disallowedChargeLock,
+    (validAddress, markedAsInsolvent, maxDebtAllowance, disallowedChargeLock,
       existingTTP, maxDebtAge, eligibleChargeType, returnsFiled).tupled.void.toEither
   }
 
