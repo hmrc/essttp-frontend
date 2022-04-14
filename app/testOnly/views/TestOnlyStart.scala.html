@@ -22,6 +22,7 @@
 @import requests.RequestSupport
 @import views.html.templates.Layout
 @import testOnly.messages.Messages
+@import testOnly.models.EligibilityError
 
 @this(
         layout: Layout,
@@ -40,6 +41,14 @@
 
 @import requestSupport._
 @title = @{"Test only starter page"}
+@eligibilityErrorCheckboxes = @{
+   EligibilityError.values.map { error =>
+     CheckboxItem(
+      content = Text(error.entryName),
+      value = error.entryName
+     )
+   }.toSeq
+ }
 @orgOptions = @{
  govukCheckboxes(Checkboxes(
   fieldset = Some(Fieldset(
@@ -97,6 +106,19 @@
  ))
 }
 @payeContent = {
+  @govukCheckboxes(Checkboxes(
+   fieldset = Some(Fieldset(
+    legend = Some(Legend(
+     content = Text("Eligibility failures"),
+     classes = "govuk-fieldset__legend--s",
+     isPageHeading = false
+    ))
+   )),
+   idPrefix = Some("eligibilityErrors"),
+   name = "eligibilityErrors[]",
+   items = eligibilityErrorCheckboxes,
+   classes = "govuk-checkboxes--small"
+  ))
   @govukRadios(Radios(
    fieldset = Some(Fieldset(
     legend = Some(Legend(

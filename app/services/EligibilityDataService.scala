@@ -16,30 +16,56 @@
 
 package services
 
+import cats.implicits.{ catsSyntaxValidatedId, toFunctorOps }
+import cats.syntax.apply._
+import cats.data.{ NonEmptyList, ValidatedNel }
 import connectors.EligibilityStubConnector
 import essttp.rootmodel.{ TaxId, TaxRegime }
-import models.ttp.{ ChargeTypeAssessment, TaxPeriodCharges, TtpEligibilityData }
-import models.{ InvoicePeriod, OverDuePayments, OverduePayment }
+import models.ttp.{ ChargeTypeAssessment, EligibilityRules, TaxPeriodCharges, TtpEligibilityData }
+import models.{ EligibilityData, InvoicePeriod, OverDuePayments, OverduePayment }
 import moveittocor.corcommon.model.AmountInPence
-import services.EligibilityDataService.overDuePayments
+import services.EligibilityDataService._
+import testOnly.models.EligibilityError
+import testOnly.models.EligibilityError._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.{ Inject, Singleton }
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class EligibilityDataService @Inject() (connector: EligibilityStubConnector) {
 
-  def data(idType: String, regime: TaxRegime, id: TaxId, showFinancials: Boolean)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[OverDuePayments] =
+  def data(idType: String, regime: TaxRegime, id: TaxId, showFinancials: Boolean)(implicit hc: HeaderCarrier, ec: ExecutionContext) =
     for {
       items <- connector.eligibilityData(idType, regime, id, showFinancials)
-    } yield (overDuePayments(items))
-
+    } yield EligibilityData(rejectionsOf(items.eligibilityRules), overDuePayments(items))
 }
 
 object EligibilityDataService {
+
+  type ValidatedResult[A] = ValidatedNel[EligibilityError, A]
+
+  val unitResult = ().validNel
+
+  def rejections(rules: EligibilityRules): Either[NonEmptyList[EligibilityError], Unit] = {
+    val validAddress: ValidatedResult[Unit] = if (rules.rlsOnAddress) RLSFlagIsSet.invalidNel else unitResult
+    val markedAsInsolvent: ValidatedResult[Unit] = if (rules.markedAsInsolvent) PayeIsInsolvent.invalidNel else unitResult
+    val minimumDebtAllowance: ValidatedResult[Unit] = unitResult
+    val maxDebtAllowance: ValidatedResult[Unit] = if (rules.maxDebtAllowance) DebtIsTooLarge.invalidNel else unitResult
+    val disallowedChargeLock: ValidatedResult[Unit] = unitResult
+    val existingTTP: ValidatedResult[Unit] = if (rules.existingTTP) YouAlreadyHaveAPaymentPlan.invalidNel else unitResult
+    val maxDebtAge: ValidatedResult[Unit] = if (rules.maxDebtAge) DebtIsTooOld.invalidNel else unitResult
+    val eligibleChargeType: ValidatedResult[Unit] = if (rules.eligibleChargeType) PayeHasDisallowedCharges.invalidNel else unitResult
+    val returnsFiled: ValidatedResult[Unit] = if (rules.returnsFiled) ReturnsAreNotUpToDate.invalidNel else unitResult
+    (validAddress, markedAsInsolvent, minimumDebtAllowance, maxDebtAllowance, disallowedChargeLock,
+      existingTTP, maxDebtAge, eligibleChargeType, returnsFiled).tupled.void.toEither
+  }
+
+  def rejectionsOf(rules: EligibilityRules): List[EligibilityError] = {
+    rejections(rules).fold(_.toList, _ => List.empty)
+  }
 
   def chargeDueDate(charges: List[TaxPeriodCharges]): LocalDate = {
     charges.headOption.map(c => parseLocalDate(c.interestStartDate)).getOrElse(throw new IllegalArgumentException("missing charge list"))

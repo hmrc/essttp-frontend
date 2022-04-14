@@ -17,12 +17,15 @@
 package controllers
 
 import _root_.actions.Actions
-import essttp.rootmodel.{ Aor, TaxRegime }
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import essttp.rootmodel.TaxRegime
+import models.{ EligibilityData, ttp }
+import play.api.i18n.{ I18nSupport, Messages }
+import play.api.mvc._
 import services.{ EligibilityDataService, JourneyService }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.EPaye.{ EPayeLandingPage, EPayeStartPage }
+import views.html.ErrorTemplate
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
@@ -33,10 +36,11 @@ class EPayeStartController @Inject() (
   mcc: MessagesControllerComponents,
   journeyService: JourneyService,
   eligibilityDataService: EligibilityDataService,
+  errorTemplate: ErrorTemplate,
   ePayeLandingPage: EPayeLandingPage,
   ePayeStartPage: EPayeStartPage)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
-  with Logging {
+  with Logging with I18nSupport {
 
   val ePayeLanding: Action[AnyContent] = as.default { implicit request =>
     Ok(ePayeLandingPage())
@@ -49,14 +53,24 @@ class EPayeStartController @Inject() (
   val ePayeStart: Action[AnyContent] = as.default.async { implicit request =>
     request.session.data.get("JourneyId") match {
       case Some(_: String) => for {
-        data <- eligibilityDataService.data("AOR", TaxRegime.Epaye, Aor("123AAAABBBBCC"), true)
-      } yield Ok(ePayeStartPage(data, Option(controllers.routes.JourneyCompletionController.abort)))
+        data <- eligibilityDataService.data("AOR", TaxRegime.Epaye, ttp.DefaultTaxId, true)
+      } yield routeResponse(data)
       case _ => throw new IllegalStateException("missing journey")
     }
   }
 
   val ePayeStartSubmit: Action[AnyContent] = as.default { implicit request =>
     Redirect(routes.UpfrontPaymentController.upfrontPayment())
+  }
+
+  def routeResponse(data: EligibilityData)(implicit R: Request[_]): Result = {
+    if (data.hasRejections) {
+      val errorMessage = data.rejections.map(_.entryName).mkString(", ")
+      Ok(errorTemplate("Error Page", "TTP Rejections", errorMessage)(implicitly[Request[_]], R.messages))
+    } else {
+      Ok(ePayeStartPage(data.overduePayments, Option(controllers.routes.JourneyCompletionController.abort)))
+    }
+
   }
 
 }
