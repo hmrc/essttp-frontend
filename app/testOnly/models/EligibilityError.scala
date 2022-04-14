@@ -37,6 +37,9 @@ object EligibilityError extends Enum[EligibilityError] {
   object YouAlreadyHaveAPaymentPlan extends EligibilityError {
     override val entryName = "you already have a payment plan"
   }
+  object OutstandingPenalty extends EligibilityError {
+    override val entryName = "Outstanding penalty"
+  }
   object PayeIsInsolvent extends EligibilityError {
     override val entryName = "Paye is insolvent"
   }
