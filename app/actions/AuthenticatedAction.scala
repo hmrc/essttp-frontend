@@ -65,7 +65,7 @@ class AuthenticatedAction @Inject() (
 
   def loginPage(implicit request: Request[_]) = Left(Redirect(
     appConfig.loginUrl,
-    Map("continue" -> Seq(appConfig.frontendBaseUrl + request.uri), "origin" -> Seq("supp"))))
+    Map("continue" -> Seq(appConfig.BaseUrl.essttpFrontend + request.uri), "origin" -> Seq("supp"))))
 
   override protected def executionContext: ExecutionContext = cc.executionContext
 

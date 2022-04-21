@@ -34,12 +34,8 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val authTimeoutCountdownSeconds: Int = config.get[FiniteDuration]("timeout-dialog.countdown").toSeconds.toInt
   val mongoTimeToLiveInSeconds: Int = config.get[Int]("mongodb.timeToLiveInSeconds")
 
-  val authLoginStubPath: String = servicesConfig.getConfString("auth-login-stub.path", "")
-  val authLoginStubUrl: String = servicesConfig.baseUrl("auth-login-stub") + authLoginStubPath + "?continue="
-
-  def loginUrl: String = servicesConfig.baseUrl("auth-login-stub") + authLoginStubPath
-
-  val frontendBaseUrl: String = servicesConfig.baseUrl("essttp-frontend")
+  //SUPP-276 BTW, there is already a login url
+  def loginUrl: String = BaseUrl.authLoginStub
 
   val ttpBaseUrl: String = s"${servicesConfig.baseUrl("ttp")}"
 
@@ -50,6 +46,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     val feedbackFrontend: String = config.get[String]("baseUrl.feedback-frontend")
     val caFrontend: String = config.get[String]("baseUrl.ca-frontend")
     val gg: String = config.get[String]("baseUrl.gg")
+    val authLoginStub: String = config.get[String]("baseUrl.auth-login-stub") + "/auth-login-stub/gg-sign-in?continue="
   }
 
   object Urls {
