@@ -43,7 +43,14 @@ lazy val root = (project in file("."))
     libraryDependencies ++= Seq(
       compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
       "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
-    )
+    ),
+    commands += Command.command("runTestOnly") { state =>
+      state.globalLogging.full.info("running play using 'testOnlyDoNotUseInAppConf' routes...")
+      s"""set javaOptions += "-Dplay.http.router=testOnlyDoNotUseInAppConf.Routes"""" ::
+        "run" ::
+        s"""set javaOptions -= "-Dplay.http.router=testOnlyDoNotUseInAppConf.Routes"""" ::
+        state
+    }
   )
   .settings(TwirlKeys.templateImports := Seq.empty)
 
