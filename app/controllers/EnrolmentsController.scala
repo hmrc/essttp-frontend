@@ -19,13 +19,13 @@ package controllers
 import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
-import views.html.CreateEnrolment
+import views.html.EPaye.NoEnrolment
 
 import javax.inject.{ Inject, Singleton }
 
 @Singleton()
 class EnrolmentsController @Inject() (
-  mcc: MessagesControllerComponents, enrolmentsPage: CreateEnrolment)
+  mcc: MessagesControllerComponents, enrolmentsPage: NoEnrolment)
   extends FrontendController(mcc)
   with Logging {
 

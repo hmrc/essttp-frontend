@@ -85,6 +85,20 @@ object Messages {
       s"""This is a new service – your <a class="govuk-link" href="$link">feedback</a> will help us to improve it.""".stripMargin)
   }
 
+  object NoEnrolmentPage {
+    val `You are not enrolled`: Message = Message(
+      "You are not enrolled"
+    )
+
+    val `You are not eligible for an online payment...`: Message = Message(
+      "You are not eligible for an online payment plan because you need to enrol for PAYE Online. "
+    )
+
+    val `Find out how to enrol`: Message = Message(
+      "Find out how to enrol"
+    )
+  }
+
   object UpfrontPayment {
     val `Can you make an upfront payment?`: Message = Message(
       "Can you make an upfront payment?")
