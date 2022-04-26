@@ -16,19 +16,23 @@
 
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import play.api.mvc.Request
+@import requests.RequestSupport
 @import messages.Messages
 @import config.AppConfig
 @import play.twirl.api.Html
 
 @this(
-        layout: templates.Layout,
+        layout: views.html.templates.Layout,
         form: FormWithCSRF,
         button: GovukButton,
         govukDetails: GovukDetails,
-        appConfig: AppConfig
+        appConfig: AppConfig,
+        requestSupport: RequestSupport
 )
 
 @()(implicit request: Request[_])
+
+@import requestSupport._
 
 @extraSupportHtml = {
   <p class="govuk-body">
@@ -47,11 +51,11 @@
    </h1>
    <p class="govuk-body">
     @{Messages.EnrolmentMissing.`You are not eligible for an online payment...`.show}
-    <a href="@{appConfig.Urls.enrolForPayeUrl}" class="govuk-link">Messages.NoEnrolmentPage.`Find out how to enrol`.show</a>
+    <a href="@{appConfig.Urls.enrolForPayeUrl}" class="govuk-link">@{Messages.EnrolmentMissing.`Find out how to enrol`.show}</a>
    </p>
   <div class="common-eligibility">
     <p class="govuk-body">
-      @{Messages.NotEligible.`If you need to speak to an adviser call us...`.show}
+      @{Html(Messages.NotEligible.`If you need to speak to an adviser call us...`.show)}
     </p>
     @govukDetails(Details(
       summary = Text(Messages.NotEligible.`If you cannot use speech recognition software`.show),
