@@ -61,6 +61,8 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     val exitSurveyUrl: String = s"${BaseUrl.feedbackFrontend}/feedback/$appName"
     val firstPageBackUrl: String = "https://gov.uk"
     val enrolForPayeUrl: String = config.get[String]("govUkUrls.enrolPayeUrl")
+    val extraSupportUrl: String = config.get[String]("govUkUrls.extraSupportUrl")
+    val relayUrl: String = config.get[String]("govUkUrls.relayUrl")
   }
 
   object InterestRates {

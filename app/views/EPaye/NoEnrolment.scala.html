@@ -15,34 +15,65 @@
  *@
 
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-@import uk.gov.hmrc.hmrcfrontend.views.html.components.HmrcNewTabLink
-@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.newtablink.NewTabLink
 @import play.api.mvc.Request
 @import messages.Messages
 @import config.AppConfig
+@import play.twirl.api.Html
 
 @this(
         layout: templates.Layout,
         form: FormWithCSRF,
         button: GovukButton,
-        hmrcNewTabLink: HmrcNewTabLink,
+        govukDetails: GovukDetails,
         appConfig: AppConfig
 )
 
 @()(implicit request: Request[_])
+
+@extraSupportHtml = {
+  <p class="govuk-body">
+    @{Html(Messages.NotEligible.extraSupportLink(appConfig.Urls.extraSupportUrl).show)}
+  </p>
+  <p class="govuk-body">
+    @{Html(Messages.NotEligible.relayLink(appConfig.Urls.relayUrl).show)}
+  </p>
+  <p class="govuk-body">
+    @{Html(Messages.NotEligible.`If you are outside the UK...`.show)}
+  </p>
+}
 @layout(pageTitle = Some("create enrolment")) {
    <h1 class="govuk-heading-xl">
-    @{Messages.NoEnrolmentPage.`You are not enrolled`.show}
+    @{Messages.EnrolmentMissing.`You are not enrolled`.show}
    </h1>
    <p class="govuk-body">
-    @{Messages.NoEnrolmentPage.`You are not eligible for an online payment...`.show}
+    @{Messages.EnrolmentMissing.`You are not eligible for an online payment...`.show}
     <a href="@{appConfig.Urls.enrolForPayeUrl}" class="govuk-link">Messages.NoEnrolmentPage.`Find out how to enrol`.show</a>
    </p>
-  @form(action=controllers.routes.EpayeBTAController.landingPage()) {
-   @button(Button(
-    inputType = Some("submit"),
-    content = Text("Request Access to Setup a Payment Plan"),
-    classes = "govuk-!-display-none-print"
-   ))
-  }
+  <div class="common-eligibility">
+    <p class="govuk-body">
+      @{Messages.NotEligible.`If you need to speak to an adviser call us...`.show}
+    </p>
+    @govukDetails(Details(
+      summary = Text(Messages.NotEligible.`If you cannot use speech recognition software`.show),
+      content = HtmlContent(extraSupportHtml)
+    ))
+    <p class="govuk-body govuk-!-font-weight-bold">
+      @{Messages.NotEligible.`Before you call, make sure you have:`.show}
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>@{Messages.NotEligible.`your Accounts Office reference...`.show}</li>
+      <li>@{Messages.NotEligible.`your bank details`.show}</li>
+    </ul>
+    <p class="govuk-body govuk-!-font-weight-bold">
+    @{Messages.NotEligible.`We're likely to ask:`.show}
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>@{Messages.NotEligible.`what you've done to try to pay the bill`.show}</li>
+      <li>@{Messages.NotEligible.`if you can pay some of the bill now`.show}</li>
+    </ul>
+
+    <p class="govuk-body">
+      @{Messages.NotEligible.`Our opening times are Monday to Friday: 8am to 6pm`.show}
+    </p>
+  </div>
 }
