@@ -85,6 +85,54 @@ object Messages {
       s"""This is a new service – your <a class="govuk-link" href="$link">feedback</a> will help us to improve it.""".stripMargin)
   }
 
+  object NotEligible {
+    val `If you need to speak to an adviser call us...`: Message = Message(
+      s"""If you need to speak to an adviser call us on <strong>0300 200 3835</strong> at the Business Support Service to talk about your payment options.""")
+
+    val `If you cannot use speech recognition software`: Message = Message(
+      "If you cannot use speech recognition software")
+
+    def extraSupportLink(link: String): Message = Message(
+      s"""Find out how to <a href="${link}" class="govuk-link">deal with HMRC if you need extra support</a>.""".stripMargin)
+    def relayLink(link: String): Message = Message(
+      s"""You can also use <a href="${link}" class="govuk-link">Relay UK</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>.""")
+
+    val `If you are outside the UK...`: Message = Message(
+      "If you are outside the UK: <strong>+44 2890 538 192</strong>")
+
+    val `Before you call, make sure you have:`: Message = Message(
+      "Before you call, make sure you have:")
+
+    val `your Accounts Office reference...`: Message = Message(
+      "your Accounts Office reference. This is 13 characters, for example, 123PX00123456")
+
+    val `your bank details`: Message = Message(
+      "your bank details")
+
+    val `We're likely to ask:`: Message = Message(
+      "We’re likely to ask:")
+
+    val `what you've done to try to pay the bill`: Message = Message(
+      "what you’ve done to try to pay the bill")
+
+    val `if you can pay some of the bill now`: Message = Message(
+      "if you can pay some of the bill now")
+
+    val `Our opening times are Monday to Friday: 8am to 6pm`: Message = Message(
+      "Our opening times are Monday to Friday: 8am to 6pm.")
+  }
+
+  object EnrolmentMissing {
+    val `You are not enrolled`: Message = Message(
+      "You are not enrolled")
+
+    val `You are not eligible for an online payment...`: Message = Message(
+      "You are not eligible for an online payment plan because you need to enrol for PAYE Online. ")
+
+    val `Find out how to enrol`: Message = Message(
+      "Find out how to enrol")
+  }
+
   object UpfrontPayment {
     val `Can you make an upfront payment?`: Message = Message(
       "Can you make an upfront payment?")
