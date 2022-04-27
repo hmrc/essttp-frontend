@@ -38,9 +38,9 @@ class LanguageSwitchController @Inject() (
         if (referrer.contains(appConfig.BaseUrl.essttpFrontend)) Redirect(referrer)
         else {
           logger.error(s"Suspicious behaviour during language swtiching. Referrer contains external URL [referrer:$referrer]")
-          Redirect(controllers.routes.LandingController.landingPage)
+          Redirect(controllers.routes.LandingController.landingPage())
         }
-      case None => Redirect(controllers.routes.LandingController.landingPage)
+      case None => Redirect(controllers.routes.LandingController.landingPage())
     }
     messagesApi.setLang(result, language.toPlayLang)
   }

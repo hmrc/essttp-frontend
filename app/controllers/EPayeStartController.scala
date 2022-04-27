@@ -18,14 +18,16 @@ package controllers
 
 import _root_.actions.Actions
 import essttp.rootmodel.TaxRegime
+import messages.{ Message, Messages }
 import models.{ EligibilityData, ttp }
-import play.api.i18n.{ I18nSupport, Messages }
+import play.api.i18n.I18nSupport
 import play.api.mvc._
 import services.{ EligibilityDataService, JourneyService }
+import testOnly.models.EligibilityError._
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
+import views.html.EPaye.ineligible.IneligibleTemplatePage
 import views.html.EPaye.{ EPayeLandingPage, EPayeStartPage }
-import views.html.ErrorTemplate
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
@@ -36,7 +38,7 @@ class EPayeStartController @Inject() (
   mcc: MessagesControllerComponents,
   journeyService: JourneyService,
   eligibilityDataService: EligibilityDataService,
-  errorTemplate: ErrorTemplate,
+  ineligibleTemplatePage: IneligibleTemplatePage,
   ePayeLandingPage: EPayeLandingPage,
   ePayeStartPage: EPayeStartPage)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
@@ -46,29 +48,38 @@ class EPayeStartController @Inject() (
     Ok(ePayeLandingPage())
   }
 
-  val ePayeLandingSubmit: Action[AnyContent] = as.default { implicit request =>
+  val ePayeLandingSubmit: Action[AnyContent] = as.default { _ =>
     Redirect(routes.EPayeStartController.ePayeStart())
   }
 
   val ePayeStart: Action[AnyContent] = as.default.async { implicit request =>
     request.session.data.get("JourneyId") match {
       case Some(_: String) => for {
-        data <- eligibilityDataService.data("AOR", TaxRegime.Epaye, ttp.DefaultTaxId, true)
+        data <- eligibilityDataService.data(
+          idType = "AOR",
+          regime = TaxRegime.Epaye,
+          id = ttp.DefaultTaxId,
+          showFinancials = true)
       } yield routeResponse(data)
       case _ => throw new IllegalStateException("missing journey")
     }
   }
 
-  val ePayeStartSubmit: Action[AnyContent] = as.default { implicit request =>
+  val ePayeStartSubmit: Action[AnyContent] = as.default { _ =>
     Redirect(routes.UpfrontPaymentController.upfrontPayment())
   }
 
   def routeResponse(data: EligibilityData)(implicit R: Request[_]): Result = {
     if (data.hasRejections) {
-      val errorMessage = data.rejections.map(_.entryName).mkString(", ")
-      Ok(errorTemplate("Error Page", "TTP Rejections", errorMessage)(implicitly[Request[_]], R.messages))
+      val leadingContentToShow: Seq[Message] = data.rejections.head match {
+        case DebtIsTooLarge => Seq(Messages.NotEligible.`You must owe £15,000 or less to be eligible for a payment plan online...`)
+        case DebtIsTooOld | ReturnsAreNotUpToDate | YouAlreadyHaveAPaymentPlan | OutstandingPenalty |
+          PayeIsInsolvent | PayeHasDisallowedCharges |
+          RLSFlagIsSet => Nil
+      }
+      Ok(ineligibleTemplatePage(leadingContentToShow)(implicitly[Request[_]]))
     } else {
-      Ok(ePayeStartPage(data.overduePayments, Option(controllers.routes.JourneyCompletionController.abort)))
+      Ok(ePayeStartPage(data.overduePayments, Option(controllers.routes.JourneyCompletionController.abort())))
     }
 
   }
