@@ -24,12 +24,13 @@ import play.api.i18n.I18nSupport
 import play.api.mvc._
 import play.twirl.api.Html
 import services.{ EligibilityDataService, JourneyService }
+import testOnly.models.EligibilityError
 import testOnly.models.EligibilityError._
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.EPaye.ineligible.IneligibleTemplatePage
 import views.html.EPaye.{ EPayeLandingPage, EPayeStartPage }
-import views.html.partials.{ DebtTooLargePartial, DebtTooOldPartial, ExistingPaymentPlanPartial }
+import views.html.partials.{ DebtTooLargePartial, DebtTooOldPartial, ExistingPaymentPlanPartial, GenericIneligiblePartial }
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
@@ -41,6 +42,7 @@ class EPayeStartController @Inject() (
   journeyService: JourneyService,
   eligibilityDataService: EligibilityDataService,
   ineligibleTemplatePage: IneligibleTemplatePage,
+  genericIneligiblePartial: GenericIneligiblePartial,
   debtTooLargePartial: DebtTooLargePartial,
   debtTooOldPartial: DebtTooOldPartial,
   existingPaymentPlanPartial: ExistingPaymentPlanPartial,
@@ -74,14 +76,24 @@ class EPayeStartController @Inject() (
     Redirect(routes.UpfrontPaymentController.upfrontPayment())
   }
 
+  private def genericIneligiblePageInfo(implicit r: Request[_]): (Message, Html) =
+    (Messages.NotEligible.`Call us`, genericIneligiblePartial())
+
   def routeResponse(data: EligibilityData)(implicit R: Request[_]): Result = {
     if (data.hasRejections) {
-      val (pageHeading, leadingContentToShow): (Message, Html) = data.rejections.head match {
-        case DebtIsTooLarge => (Messages.NotEligible.`Call us`, debtTooLargePartial())
-        case DebtIsTooOld => (Messages.NotEligible.`Call us`, debtTooOldPartial())
-        case YouAlreadyHaveAPaymentPlan => (Messages.NotEligible.`You already have a payment plan with HMRC`, existingPaymentPlanPartial())
-        case ReturnsAreNotUpToDate | OutstandingPenalty | PayeIsInsolvent | PayeHasDisallowedCharges |
-          RLSFlagIsSet => (Messages.NotEligible.`Call us`, Html(None))
+      val (pageHeading, leadingContentToShow): (Message, Html) = {
+        if (data.hasMultipleRejections) {
+          genericIneligiblePageInfo
+        } else {
+          data.rejections.head match {
+            case YouAlreadyHaveAPaymentPlan => (Messages.NotEligible.`You already have a payment plan with HMRC`, existingPaymentPlanPartial())
+            case DebtIsTooLarge => (Messages.NotEligible.`Call us`, debtTooLargePartial())
+            case DebtIsTooOld => (Messages.NotEligible.`Call us`, debtTooOldPartial())
+            case ReturnsAreNotUpToDate => (Messages.NotEligible.`Call us`, Html(None))
+            case OutstandingPenalty | PayeIsInsolvent | PayeHasDisallowedCharges |
+              RLSFlagIsSet => genericIneligiblePageInfo
+          }
+        }
       }
       Ok(ineligibleTemplatePage(pageh1 = pageHeading, leadingContent = leadingContentToShow)(implicitly[Request[_]]))
     } else {
