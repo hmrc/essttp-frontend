@@ -146,6 +146,12 @@ object Messages {
 
     val `For further support you can contact the Payment Support Service on 0300 200 3835 to speak to an advisor.` = Message(
       english = "For further support you can contact the Payment Support Service on <strong>0300 200 3835</strong> to speak to an advisor.")
+
+    val `You already have a payment plan with HMRC` = Message(
+      english = "You already have a payment plan with HMRC")
+
+    val `You can only have one payment plan at a time.` = Message(
+      english = "You can only have one payment plan at a time.")
   }
 
   object EnrolmentMissing {

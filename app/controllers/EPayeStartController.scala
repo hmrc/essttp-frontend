@@ -18,6 +18,7 @@ package controllers
 
 import _root_.actions.Actions
 import essttp.rootmodel.TaxRegime
+import messages.{ Message, Messages }
 import models.{ EligibilityData, ttp }
 import play.api.i18n.I18nSupport
 import play.api.mvc._
@@ -28,7 +29,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.EPaye.ineligible.IneligibleTemplatePage
 import views.html.EPaye.{ EPayeLandingPage, EPayeStartPage }
-import views.html.partials.{ DebtTooLargePartial, DebtTooOldPartial }
+import views.html.partials.{ DebtTooLargePartial, DebtTooOldPartial, ExistingPaymentPlanPartial }
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
@@ -42,6 +43,7 @@ class EPayeStartController @Inject() (
   ineligibleTemplatePage: IneligibleTemplatePage,
   debtTooLargePartial: DebtTooLargePartial,
   debtTooOldPartial: DebtTooOldPartial,
+  existingPaymentPlanPartial: ExistingPaymentPlanPartial,
   ePayeLandingPage: EPayeLandingPage,
   ePayeStartPage: EPayeStartPage)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
@@ -74,14 +76,14 @@ class EPayeStartController @Inject() (
 
   def routeResponse(data: EligibilityData)(implicit R: Request[_]): Result = {
     if (data.hasRejections) {
-      val leadingContentToShow: Html = data.rejections.head match {
-        case DebtIsTooLarge => debtTooLargePartial()
-        case DebtIsTooOld => debtTooOldPartial()
-        case ReturnsAreNotUpToDate | YouAlreadyHaveAPaymentPlan | OutstandingPenalty |
-          PayeIsInsolvent | PayeHasDisallowedCharges |
-          RLSFlagIsSet => Html(None)
+      val (pageHeading, leadingContentToShow): (Message, Html) = data.rejections.head match {
+        case DebtIsTooLarge => (Messages.NotEligible.`Call us`, debtTooLargePartial())
+        case DebtIsTooOld => (Messages.NotEligible.`Call us`, debtTooOldPartial())
+        case YouAlreadyHaveAPaymentPlan => (Messages.NotEligible.`You already have a payment plan with HMRC`, existingPaymentPlanPartial())
+        case ReturnsAreNotUpToDate | OutstandingPenalty | PayeIsInsolvent | PayeHasDisallowedCharges |
+          RLSFlagIsSet => (Messages.NotEligible.`Call us`, Html(None))
       }
-      Ok(ineligibleTemplatePage(leadingContentToShow)(implicitly[Request[_]]))
+      Ok(ineligibleTemplatePage(pageh1 = pageHeading, leadingContent = leadingContentToShow)(implicitly[Request[_]]))
     } else {
       Ok(ePayeStartPage(data.overduePayments, Option(controllers.routes.JourneyCompletionController.abort())))
     }

@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,26 +12,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package models
+@import play.api.mvc.Request
+@import requests.RequestSupport
+@import messages.Messages
+@import play.twirl.api.Html
 
-import moveittocor.corcommon.model.{ AmountInPence, JourneyId }
-import play.api.libs.json.{ Json, OFormat }
+@this(
+        requestSupport: RequestSupport
+)
 
-import java.time.Instant
+@()(implicit request: Request[_])
 
-final case class Journey(
-  _id: JourneyId,
-  createdDate: Instant,
-  lastUpdated: Instant = Instant.now,
-  status: JourneyStatus,
-  qualifyingDebt: AmountInPence,
-  remainingToPay: AmountInPence,
-  userAnswers: UserAnswers) {
-  def id: JourneyId = _id
+@import requestSupport._
+
+<p class="govuk-body">
+@{
+    Html(Messages.NotEligible.`You can only have one payment plan at a time.`.show)
 }
-
-object Journey {
-  implicit val format: OFormat[Journey] = Json.format[Journey]
-}
+</p>
