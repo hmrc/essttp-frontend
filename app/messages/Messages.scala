@@ -141,6 +141,9 @@ object Messages {
     val `You must owe £15,000 or less to be eligible for a payment plan online...` = Message(
       english = "You must owe £15,000 or less to be eligible for a payment plan online. You may still be able to set up a plan over the phone.")
 
+    val `Your overdue amount must have a due date that is less than 35 days ago ...` = Message(
+      english = "Your overdue amount must have a due date that is less than 35 days ago for you to be eligible for a payment plan online. You may still be able to set up a plan over the phone. ")
+
     val `For further support you can contact the Payment Support Service on 0300 200 3835 to speak to an advisor.` = Message(
       english = "For further support you can contact the Payment Support Service on <strong>0300 200 3835</strong> to speak to an advisor.")
   }
