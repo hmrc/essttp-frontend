@@ -18,16 +18,17 @@ package controllers
 
 import _root_.actions.Actions
 import essttp.rootmodel.TaxRegime
-import messages.{ Message, Messages }
 import models.{ EligibilityData, ttp }
 import play.api.i18n.I18nSupport
 import play.api.mvc._
+import play.twirl.api.Html
 import services.{ EligibilityDataService, JourneyService }
 import testOnly.models.EligibilityError._
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.EPaye.ineligible.IneligibleTemplatePage
 import views.html.EPaye.{ EPayeLandingPage, EPayeStartPage }
+import views.html.partials.{ DebtTooLargePartial, DebtTooOldPartial }
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
@@ -39,6 +40,8 @@ class EPayeStartController @Inject() (
   journeyService: JourneyService,
   eligibilityDataService: EligibilityDataService,
   ineligibleTemplatePage: IneligibleTemplatePage,
+  debtTooLargePartial: DebtTooLargePartial,
+  debtTooOldPartial: DebtTooOldPartial,
   ePayeLandingPage: EPayeLandingPage,
   ePayeStartPage: EPayeStartPage)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
@@ -71,11 +74,12 @@ class EPayeStartController @Inject() (
 
   def routeResponse(data: EligibilityData)(implicit R: Request[_]): Result = {
     if (data.hasRejections) {
-      val leadingContentToShow: Seq[Message] = data.rejections.head match {
-        case DebtIsTooLarge => Seq(Messages.NotEligible.`You must owe £15,000 or less to be eligible for a payment plan online...`)
-        case DebtIsTooOld | ReturnsAreNotUpToDate | YouAlreadyHaveAPaymentPlan | OutstandingPenalty |
+      val leadingContentToShow: Html = data.rejections.head match {
+        case DebtIsTooLarge => debtTooLargePartial()
+        case DebtIsTooOld => debtTooOldPartial()
+        case ReturnsAreNotUpToDate | YouAlreadyHaveAPaymentPlan | OutstandingPenalty |
           PayeIsInsolvent | PayeHasDisallowedCharges |
-          RLSFlagIsSet => Nil
+          RLSFlagIsSet => Html(None)
       }
       Ok(ineligibleTemplatePage(leadingContentToShow)(implicitly[Request[_]]))
     } else {

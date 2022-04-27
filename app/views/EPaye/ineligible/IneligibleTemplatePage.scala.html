@@ -20,7 +20,6 @@
 @import messages.Messages
 @import config.AppConfig
 @import play.twirl.api.Html
-@import messages.Message
 
 @this(
         layout: views.html.templates.Layout,
@@ -31,19 +30,9 @@
         requestSupport: RequestSupport
 )
 
-@(leadingContent: Seq[Message])(implicit request: Request[_])
+@(leadingContent: Html)(implicit request: Request[_])
 
 @import requestSupport._
-
-@leadingParagraphsAsHtml = {
-@leadingContent.map { paragraph =>
-    <p class="govuk-body">
-        @{
-            paragraph.show
-        }
-    </p>
-}
-}
 
 @extraSupportHtml = {
     <p class="govuk-body">
@@ -69,11 +58,11 @@
         Messages.NotEligible.`Call us`.show
     }
     </h1>
-    @leadingParagraphsAsHtml
+    @leadingContent
     <div class="common-eligibility">
         <p class="govuk-body">
         @{
-            Html(Messages.NotEligible.`If you need to speak to an adviser call us...`.show)
+            Html(Messages.NotEligible.`For further support you can contact the Payment Support Service on 0300 200 3835 to speak to an advisor.`show)
         }
         </p>
         @govukDetails(Details(
