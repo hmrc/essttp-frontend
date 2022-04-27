@@ -6,10 +6,10 @@ object AppDependencies {
     "uk.gov.hmrc"       %% "bootstrap-frontend-play-28"     % "5.17.0",
     "uk.gov.hmrc"       %% "play-frontend-hmrc"             % "1.31.0-play-28",
     /*TODO remove*/ "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-28"             % "0.58.0",
-    "uk.gov.hmrc"              %% "simple-reactivemongo"        % "8.0.0-play-28",
-    "uk.gov.hmrc"                %% "play-conditional-form-mapping" % "1.10.0-play-28",
-    "com.beachape"            %% "enumeratum-play"            % "1.7.0",
-    "org.typelevel"              %% "cats-core"                  % "2.7.0",
+    "uk.gov.hmrc"       %% "simple-reactivemongo"           % "8.0.0-play-28",
+    "uk.gov.hmrc"       %% "play-conditional-form-mapping" % "1.10.0-play-28",
+    "com.beachape"      %% "enumeratum-play"            % "1.7.0",
+    "org.typelevel"     %% "cats-core"                  % "2.7.0",
     "uk.gov.hmrc"          %% "essttp-backend-cor-journey"  %   "[1.1.0,)"
   )
 

@@ -1,8 +1,9 @@
+import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import sbt.Def
 import scoverage.ScoverageKeys
 import uk.gov.hmrc.DefaultBuildSettings
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
-
+import scalariform.formatter.preferences._
 
 lazy val appName: String = "essttp-frontend"
 val silencerVersion = "1.7.3"
@@ -53,6 +54,7 @@ lazy val root = (project in file("."))
     }
   )
   .settings(TwirlKeys.templateImports := Seq.empty)
+  .settings(scalariformSettings: _*)
 
 lazy val testSettings: Seq[Def.Setting[_]] = Seq(
   fork        := true,
@@ -60,3 +62,35 @@ lazy val testSettings: Seq[Def.Setting[_]] = Seq(
     "-Dconfig.resource=test.application.conf"
   )
 )
+
+lazy val scalariformSettings: Def.SettingsDefinition = {
+  // description of options found here -> https://github.com/scala-ide/scalariform
+  ScalariformKeys.preferences := ScalariformKeys.preferences.value
+    .setPreference(AlignArguments, true)
+    .setPreference(AlignParameters, true)
+    .setPreference(AlignSingleLineCaseStatements, true)
+    .setPreference(AllowParamGroupsOnNewlines, true)
+    .setPreference(CompactControlReadability, false)
+    .setPreference(CompactStringConcatenation, false)
+    .setPreference(DanglingCloseParenthesis, Force)
+    .setPreference(DoubleIndentConstructorArguments, true)
+    .setPreference(DoubleIndentMethodDeclaration, true)
+    .setPreference(FirstArgumentOnNewline, Force)
+    .setPreference(FirstParameterOnNewline, Force)
+    .setPreference(FormatXml, true)
+    .setPreference(IndentLocalDefs, true)
+    .setPreference(IndentPackageBlocks, true)
+    .setPreference(IndentSpaces, 2)
+    .setPreference(IndentWithTabs, false)
+    .setPreference(MultilineScaladocCommentsStartOnFirstLine, false)
+    .setPreference(NewlineAtEndOfFile, true)
+    .setPreference(PlaceScaladocAsterisksBeneathSecondAsterisk, false)
+    .setPreference(PreserveSpaceBeforeArguments, true)
+    .setPreference(RewriteArrowSymbols, false)
+    .setPreference(SpaceBeforeColon, false)
+    .setPreference(SpaceBeforeContextColon, false)
+    .setPreference(SpaceInsideBrackets, false)
+    .setPreference(SpaceInsideParentheses, false)
+    .setPreference(SpacesAroundMultiImports, false)
+    .setPreference(SpacesWithinPatternBinders, true)
+}
