@@ -27,8 +27,8 @@ object OverDuePayments {
   implicit val format: Format[OverDuePayments] = Json.format[OverDuePayments]
 }
 
-case class EligibilityData(rejections: List[EligibilityError], overduePayments: OverDuePayments) {
-  def hasRejections = !rejections.isEmpty
+final case class EligibilityData(rejections: List[EligibilityError], overduePayments: OverDuePayments) {
+  def hasRejections: Boolean = rejections.nonEmpty
 }
 
 object EligibilityData {

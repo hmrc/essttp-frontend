@@ -45,7 +45,7 @@ class Actions @Inject() (
       if (request.enrolments.enrolments.exists(origin.allowEnrolment)) {
         Future.successful(Option.empty[Result])
       } else {
-        Future.successful(Option(Redirect(controllers.routes.EnrolmentsController.show)))
+        Future.successful(Option(Redirect(controllers.routes.EnrolmentsController.show())))
       }
     }
 
