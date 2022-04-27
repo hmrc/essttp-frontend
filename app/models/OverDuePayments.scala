@@ -29,6 +29,7 @@ object OverDuePayments {
 
 final case class EligibilityData(rejections: List[EligibilityError], overduePayments: OverDuePayments) {
   def hasRejections: Boolean = rejections.nonEmpty
+  def hasMultipleRejections: Boolean = rejections.size > 1
 }
 
 object EligibilityData {

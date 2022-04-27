@@ -152,6 +152,9 @@ object Messages {
 
     val `You can only have one payment plan at a time.` = Message(
       english = "You can only have one payment plan at a time.")
+
+    val `Generic ineligible message`: Message = Message(
+      english = "You are not eligible for an online payment plan. You may still be able to set up a payment plan over the phone.")
   }
 
   object EnrolmentMissing {
