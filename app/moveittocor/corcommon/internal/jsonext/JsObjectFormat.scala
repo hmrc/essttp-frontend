@@ -23,7 +23,7 @@ object JsObjectFormat {
   implicit val jsObjectFormat: OFormat[JsObject] = new OFormat[JsObject] {
     override def reads(json: JsValue): JsResult[JsObject] = json match {
       case jsObject: JsObject => JsSuccess(jsObject)
-      case _ => JsError()
+      case _                  => JsError()
     }
     override def writes(o: JsObject): JsObject = o
   }

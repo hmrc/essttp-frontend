@@ -22,7 +22,7 @@ import play.twirl.api.Html
 import uk.gov.hmrc.play.bootstrap.frontend.http.FrontendErrorHandler
 import views.html.ErrorTemplate
 
-import javax.inject.{ Inject, Singleton }
+import javax.inject.{Inject, Singleton}
 
 @Singleton
 class ErrorHandler @Inject() (errorTemplate: ErrorTemplate, val messagesApi: MessagesApi) extends FrontendErrorHandler {

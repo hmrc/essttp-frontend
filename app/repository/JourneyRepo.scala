@@ -23,18 +23,21 @@ import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes._
 import reactivemongo.bson.BSONDocument
 
-import javax.inject.{ Inject, Singleton }
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
 final class JourneyRepo @Inject() (
-  reactiveMongoComponent: ReactiveMongoComponent,
-  config: AppConfig)(implicit ec: ExecutionContext)
+    reactiveMongoComponent: ReactiveMongoComponent,
+    config:                 AppConfig
+)(implicit ec: ExecutionContext)
   extends Repo[Journey, JourneyId]("journey", reactiveMongoComponent) {
 
   override def indexes: Seq[Index] = Seq(
     Index(
-      key = Seq("lastUpdated" -> IndexType.Ascending),
-      name = Some("lastUpdatedIdx"),
-      options = BSONDocument("expireAfterSeconds" -> config.mongoTimeToLiveInSeconds)))
+      key     = Seq("lastUpdated" -> IndexType.Ascending),
+      name    = Some("lastUpdatedIdx"),
+      options = BSONDocument("expireAfterSeconds" -> config.mongoTimeToLiveInSeconds)
+    )
+  )
 }

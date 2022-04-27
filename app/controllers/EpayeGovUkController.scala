@@ -20,15 +20,16 @@ import _root_.actions.Actions
 import essttp.journey.JourneyConnector
 import essttp.rootmodel.TaxRegime
 import models.TaxOrigin
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 
-import javax.inject.{ Inject, Singleton }
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton()
 class EpayeGovUkController @Inject() (
-  cc: MessagesControllerComponents,
-  jc: JourneyConnector, as: Actions)(implicit ec: ExecutionContext) extends TaxOriginController[TaxRegime.Epaye.type](cc, jc, as) {
+    cc: MessagesControllerComponents,
+    jc: JourneyConnector, as: Actions
+)(implicit ec: ExecutionContext) extends TaxOriginController[TaxRegime.Epaye.type](cc, jc, as) {
 
   val originator = TaxOrigin.EpayeGovUk
 

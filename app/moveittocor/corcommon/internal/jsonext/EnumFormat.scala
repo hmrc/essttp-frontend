@@ -16,7 +16,7 @@
 
 package moveittocor.corcommon.internal.jsonext
 
-import enumeratum.{ Enum, EnumEntry }
+import enumeratum.{Enum, EnumEntry}
 import play.api.libs.json._
 
 object EnumFormat {
@@ -27,5 +27,6 @@ object EnumFormat {
         .getOrElse(JsError(JsonValidationError(s"Unknown ${e.getClass.getSimpleName} value: $value", s"error.invalid.${e.getClass.getSimpleName.toLowerCase.replaceAllLiterally("$", "")}")))
       case _ => JsError("Can only parse String")
     },
-    Writes(v => JsString(v.entryName)))
+    Writes(v => JsString(v.entryName))
+  )
 }

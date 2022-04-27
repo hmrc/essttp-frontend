@@ -20,7 +20,7 @@ import messages.Message
 
 object Messages {
   def getError(key: String): Message = key match {
-    case "auth.error.required" => Message(english = "Select how to be signed in")
+    case "auth.error.required"   => Message(english = "Select how to be signed in")
     case "origin.error.required" => Message(english = "Select which origin the journey should start from")
   }
 }

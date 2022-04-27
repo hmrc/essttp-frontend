@@ -16,18 +16,20 @@
 
 package actions
 
-import play.api.mvc.{ ActionRefiner, Request, Result }
+import play.api.mvc.{ActionRefiner, Request, Result}
 import requests.JourneyRequest
 import services.JourneyService
 
-import javax.inject.{ Inject, Singleton }
-import scala.concurrent.{ ExecutionContext, Future }
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class GetJourneyActionRefiner @Inject() (
-  journeyService: JourneyService)(
-  implicit
-  ec: ExecutionContext) extends ActionRefiner[Request, JourneyRequest] {
+    journeyService: JourneyService
+)(
+    implicit
+    ec: ExecutionContext
+) extends ActionRefiner[Request, JourneyRequest] {
 
   override protected def refine[A](request: Request[A]): Future[Either[Result, JourneyRequest[A]]] = {
     implicit val r: Request[A] = request

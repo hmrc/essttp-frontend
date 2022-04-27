@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import com.google.inject.{ AbstractModule, Provides, Singleton }
+import com.google.inject.{AbstractModule, Provides, Singleton}
 import config.AppConfig
-import connectors.{ AuthLoginStubConnector, AuthLoginStubConnectorImpl }
-import play.api.i18n.{ I18nSupport, MessagesApi }
+import connectors.{AuthLoginStubConnector, AuthLoginStubConnectorImpl}
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.ws.WSClient
-import play.api.mvc.{ Session, SessionCookieBaker }
-import services.{ AuthLoginStubService, AuthLoginStubServiceImpl }
+import play.api.mvc.{Session, SessionCookieBaker}
+import services.{AuthLoginStubService, AuthLoginStubServiceImpl}
 import services.AuthLoginStubService.LSR
-import uk.gov.hmrc.auth.core.{ AuthConnector, AuthorisedFunctions }
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.filters.crypto.SessionCookieCrypto
 
-import java.time.{ Clock, ZoneOffset }
+import java.time.{Clock, ZoneOffset}
 import scala.concurrent.ExecutionContext
 
 class Module extends AbstractModule {
@@ -42,10 +42,11 @@ class Module extends AbstractModule {
   @Provides
   @Singleton
   def authLoginStubService(
-    connector: AuthLoginStubConnector,
-    sessionCookieCrypto: SessionCookieCrypto,
-    sessionCookieBaker: SessionCookieBaker,
-    ec: ExecutionContext): AuthLoginStubService =
+      connector:           AuthLoginStubConnector,
+      sessionCookieCrypto: SessionCookieCrypto,
+      sessionCookieBaker:  SessionCookieBaker,
+      ec:                  ExecutionContext
+  ): AuthLoginStubService =
     new AuthLoginStubServiceImpl(connector, sessionCookieCrypto, sessionCookieBaker)(ec)
 
   @Provides

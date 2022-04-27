@@ -46,10 +46,11 @@ object AmountInPence {
   implicit val format: Format[AmountInPence] = Format(
     Reads {
       case JsNumber(n) if n.isWhole() => JsSuccess(AmountInPence(n.toLong))
-      case JsNumber(_) => JsError("Expected positive integer but got non-integral number")
-      case other => JsError(s"Expected positive integer but got type ${other.getClass.getSimpleName}")
+      case JsNumber(_)                => JsError("Expected positive integer but got non-integral number")
+      case other                      => JsError(s"Expected positive integer but got type ${other.getClass.getSimpleName}")
     },
-    Writes(a => JsNumber(BigDecimal(a.value))))
+    Writes(a => JsNumber(BigDecimal(a.value)))
+  )
 
   private def toPounds(amountInPence: AmountInPence): BigDecimal = {
     val pd = BigDecimal(amountInPence.value) / 100

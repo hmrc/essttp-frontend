@@ -16,9 +16,9 @@
 
 package moveittocor.corcommon.internal
 
-import java.time.{ LocalDate, LocalDateTime }
+import java.time.{LocalDate, LocalDateTime}
 
-import play.api.libs.json.{ JsError, _ }
+import play.api.libs.json.{JsError, _}
 
 package object jsonext {
 
@@ -38,10 +38,12 @@ package object jsonext {
 
   implicit val isoLocalDateTimeFormat: Format[LocalDateTime] = Format(
     Reads.DefaultLocalDateTimeReads,
-    Writes.DefaultLocalDateTimeWrites)
+    Writes.DefaultLocalDateTimeWrites
+  )
 
   implicit val isoLocalDateFormat: Format[LocalDate] = Format(
     Reads.DefaultLocalDateReads,
-    Writes.DefaultLocalDateWrites)
+    Writes.DefaultLocalDateWrites
+  )
 
 }

@@ -16,7 +16,7 @@
 
 package models
 
-import essttp.rootmodel.{ TaxId, TaxRegime }
+import essttp.rootmodel.{TaxId, TaxRegime}
 import util.RegimeUtils.RegimeOps
 
 package object ttp {

@@ -19,19 +19,19 @@ package moveittocor.corcommon.internal
 import java.time.LocalDateTime
 
 import play.api.libs.json._
-import play.api.mvc.{ PathBindable, QueryStringBindable }
+import play.api.mvc.{PathBindable, QueryStringBindable}
 
-import scala.reflect.runtime.universe.{ TypeTag, typeOf }
+import scala.reflect.runtime.universe.{TypeTag, typeOf}
 
 object ValueClassBinder {
 
   def valueClassBinder[A: Reads](fromAtoString: A => String)(implicit stringBinder: PathBindable[String]): PathBindable[A] = {
 
-    def parseString(str: String) =
-      JsString(str).validate[A] match {
-        case JsSuccess(a, _) => Right(a)
-        case JsError(error) => Left(s"No valid value in path: $str. Error: $error")
-      }
+      def parseString(str: String) =
+        JsString(str).validate[A] match {
+          case JsSuccess(a, _) => Right(a)
+          case JsError(error)  => Left(s"No valid value in path: $str. Error: $error")
+        }
 
     new PathBindable[A] {
       override def bind(key: String, value: String): Either[String, A] =
@@ -47,8 +47,9 @@ object ValueClassBinder {
     fromAtoString,
     {
       case (key: String, e: JsResultException) => s"Cannot parse param $key as ${typeOf[A].typeSymbol.name.toString}. ${e.errors.headOption.flatMap(_._2.headOption.map(_.message)).getOrElse("")}"
-      case (key: String, e) => s"Cannot parse param $key as ${typeOf[A].typeSymbol.name.toString}. ${e.toString}"
-    })
+      case (key: String, e)                    => s"Cannot parse param $key as ${typeOf[A].typeSymbol.name.toString}. ${e.toString}"
+    }
+  )
 
   implicit val localDateTimeBinder: QueryStringBindable[LocalDateTime] = bindableA[LocalDateTime](_.toString)
 }
