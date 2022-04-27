@@ -19,22 +19,23 @@ package controllers
 import _root_.actions.Actions
 import controllers.PaymentScheduleController.computeMonths
 import models.Journey
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import requests.RequestSupport
 import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
-import views.html.{ Confirmation, PrintSummary }
+import views.html.{Confirmation, PrintSummary}
 
-import javax.inject.{ Inject, Singleton }
-import scala.concurrent.{ ExecutionContext, Future }
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ConfirmationController @Inject() (
-  as: Actions,
-  mcc: MessagesControllerComponents,
-  confirmationPage: Confirmation,
-  printSummaryPage: PrintSummary)(implicit ec: ExecutionContext)
+    as:               Actions,
+    mcc:              MessagesControllerComponents,
+    confirmationPage: Confirmation,
+    printSummaryPage: PrintSummary
+)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 

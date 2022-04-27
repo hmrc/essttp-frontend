@@ -28,8 +28,9 @@ trait BackLinkFluency {
 
     def apply(href: String)(implicit messages: Messages): BackLink =
       BackLink(
-        href = href,
-        content = Text(messages("site.back")))
+        href    = href,
+        content = Text(messages("site.back"))
+      )
   }
 
   implicit class FluentBackLink(backLink: BackLink) {

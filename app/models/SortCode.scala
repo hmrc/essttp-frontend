@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.libs.json.{ Format, Json }
+import play.api.libs.json.{Format, Json}
 
 final case class SortCode(value: String) extends AnyVal
 

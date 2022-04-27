@@ -18,7 +18,7 @@ package repository
 
 import reactivemongo.api.commands.WriteResult
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 object RepoResultChecker {
   implicit class WriteResultChecker(future: Future[WriteResult]) {

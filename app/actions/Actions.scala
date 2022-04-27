@@ -22,14 +22,15 @@ import play.api.mvc.Results.Redirect
 import play.api.mvc._
 import requests.JourneyRequest
 
-import javax.inject.{ Inject, Singleton }
-import scala.concurrent.{ ExecutionContext, Future }
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class Actions @Inject() (
-  actionBuilder: DefaultActionBuilder,
-  authenticatedAction: AuthenticatedAction,
-  getJourneyActionRefiner: GetJourneyActionRefiner)(implicit ec: ExecutionContext) {
+    actionBuilder:           DefaultActionBuilder,
+    authenticatedAction:     AuthenticatedAction,
+    getJourneyActionRefiner: GetJourneyActionRefiner
+)(implicit ec: ExecutionContext) {
 
   val default: ActionBuilder[Request, AnyContent] = actionBuilder
 

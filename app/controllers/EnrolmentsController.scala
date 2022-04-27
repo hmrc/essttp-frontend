@@ -16,17 +16,18 @@
 
 package controllers
 
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.EPaye.ineligible.NoEnrolment
 
-import javax.inject.{ Inject, Singleton }
+import javax.inject.{Inject, Singleton}
 
 @Singleton()
 class EnrolmentsController @Inject() (
-  mcc: MessagesControllerComponents,
-  enrolmentsPage: NoEnrolment) extends FrontendController(mcc) with Logging {
+    mcc:            MessagesControllerComponents,
+    enrolmentsPage: NoEnrolment
+) extends FrontendController(mcc) with Logging {
 
   def show: Action[AnyContent] = Action { implicit request =>
     Ok(enrolmentsPage())

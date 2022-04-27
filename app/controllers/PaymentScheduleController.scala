@@ -20,24 +20,25 @@ import cats.syntax.eq._
 import _root_.actions.Actions
 import controllers.PaymentScheduleController.computeMonths
 import messages.DateMessages
-import models.{ InstalmentOption, Journey }
+import models.{InstalmentOption, Journey}
 import moveittocor.corcommon.model.AmountInPence
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import requests.RequestSupport
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.CheckPaymentSchedule
 
 import java.time.LocalDate
-import javax.inject.{ Inject, Singleton }
-import scala.concurrent.{ ExecutionContext, Future }
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class PaymentScheduleController @Inject() (
-  as: Actions,
-  mcc: MessagesControllerComponents,
-  requestSupport: RequestSupport,
-  paymentSchedulePage: CheckPaymentSchedule)(implicit ec: ExecutionContext)
+    as:                  Actions,
+    mcc:                 MessagesControllerComponents,
+    requestSupport:      RequestSupport,
+    paymentSchedulePage: CheckPaymentSchedule
+)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 
@@ -49,10 +50,11 @@ class PaymentScheduleController @Inject() (
 
 object PaymentScheduleController {
   case class MonthlyPayment(
-    month: Int,
-    year: Int,
-    amount: AmountInPence,
-    isLastMonth: Boolean)
+      month:       Int,
+      year:        Int,
+      amount:      AmountInPence,
+      isLastMonth: Boolean
+  )
 
   def computeMonths(monthsToPay: InstalmentOption): List[MonthlyPayment] = {
     val today = LocalDate.now()
@@ -60,14 +62,15 @@ object PaymentScheduleController {
       val paymentDate: LocalDate = today.plusMonths(i)
       val lastMonth: Boolean = i === monthsToPay.numberOfMonths
       MonthlyPayment(
-        month = paymentDate.getMonthValue,
-        year = paymentDate.getYear,
-        amount = if (lastMonth) {
+        month       = paymentDate.getMonthValue,
+        year        = paymentDate.getYear,
+        amount      = if (lastMonth) {
           AmountInPence(monthsToPay.amountToPayEachMonth.value + monthsToPay.interestPayment.value)
         } else {
           monthsToPay.amountToPayEachMonth
         },
-        isLastMonth = lastMonth)
+        isLastMonth = lastMonth
+      )
     }
   }.toList
 }

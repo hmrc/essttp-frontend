@@ -22,18 +22,18 @@ import cats.syntax.either._
 import com.google.inject.Inject
 import connectors.AuthLoginStubConnector
 import connectors.AuthLoginStubConnector.StubException
-import play.api.libs.json.{ Format, Json }
+import play.api.libs.json.{Format, Json}
 import play.api.libs.ws.WSResponse
-import play.api.mvc.{ Cookie, Session, SessionCookieBaker }
-import services.AuthLoginStubService.{ AuthError, LSR, liftError, loginDataOf }
-import uk.gov.hmrc.auth.core.{ AffinityGroup, ConfidenceLevel, Enrolment }
+import play.api.mvc.{Cookie, Session, SessionCookieBaker}
+import services.AuthLoginStubService.{AuthError, LSR, liftError, loginDataOf}
+import uk.gov.hmrc.auth.core.{AffinityGroup, ConfidenceLevel, Enrolment}
 import uk.gov.hmrc.crypto.Crypted
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.filters.crypto.SessionCookieCrypto
 
-import java.time.{ LocalDate, ZonedDateTime }
+import java.time.{LocalDate, ZonedDateTime}
 import java.util.UUID
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 trait AuthLoginStubService {
 
@@ -42,15 +42,16 @@ trait AuthLoginStubService {
 }
 
 class AuthLoginStubServiceImpl @Inject() (
-  connector: AuthLoginStubConnector,
-  sessionCookieCrypto: SessionCookieCrypto,
-  sessionCookieBaker: SessionCookieBaker)(implicit ec: ExecutionContext) extends AuthLoginStubService {
+    connector:           AuthLoginStubConnector,
+    sessionCookieCrypto: SessionCookieCrypto,
+    sessionCookieBaker:  SessionCookieBaker
+)(implicit ec: ExecutionContext) extends AuthLoginStubService {
 
   def createSession(response: WSResponse): Either[AuthError, Session] = {
     for {
       c <- Either.fromOption(response.cookie("mdtp"), AuthError(new IllegalStateException("missing cookie")))
     } yield {
-      val decrypted = Cookie(name = "mdtp", value = sessionCookieCrypto.crypto.decrypt(Crypted(c.value)).value)
+      val decrypted = Cookie(name  = "mdtp", value = sessionCookieCrypto.crypto.decrypt(Crypted(c.value)).value)
       sessionCookieBaker.decodeFromCookie(Some(decrypted))
     }
   }
@@ -69,13 +70,14 @@ object AuthLoginStubService {
   final case class AuthError(t: Throwable)
 
   final case class LoginData(
-    ggCredId: GGCredId,
-    redirectUrl: String,
-    confidenceLevel: ConfidenceLevel,
-    affinityGroup: AffinityGroup,
-    email: Option[EmailAddress],
-    nino: Option[NINO],
-    enrolment: Option[Enrolment])
+      ggCredId:        GGCredId,
+      redirectUrl:     String,
+      confidenceLevel: ConfidenceLevel,
+      affinityGroup:   AffinityGroup,
+      email:           Option[EmailAddress],
+      nino:            Option[NINO],
+      enrolment:       Option[Enrolment]
+  )
 
   final case class GGCredId(value: String) extends AnyVal
 
@@ -95,15 +97,16 @@ object AuthLoginStubService {
   }
 
   final case class SaveTaxCheckRequest(
-    taxCheckCode: HECTaxCheckCode,
-    ggCredId: GGCredId,
-    licenceType: LicenceType,
-    verifier: Either[CRN, DateOfBirth],
-    expiresAfter: LocalDate,
-    createDate: ZonedDateTime,
-    taxCheckStartDateTime: ZonedDateTime,
-    isExtracted: Boolean,
-    source: HECTaxCheckSource)
+      taxCheckCode:          HECTaxCheckCode,
+      ggCredId:              GGCredId,
+      licenceType:           LicenceType,
+      verifier:              Either[CRN, DateOfBirth],
+      expiresAfter:          LocalDate,
+      createDate:            ZonedDateTime,
+      taxCheckStartDateTime: ZonedDateTime,
+      isExtracted:           Boolean,
+      source:                HECTaxCheckSource
+  )
 
   object SaveTaxCheckRequest {
 
@@ -175,7 +178,7 @@ object AuthLoginStubService {
 
   def loginDataOf(group: AffinityGroup, enrolments: List[Enrolment]): _root_.services.AuthLoginStubService.LoginData = {
     LoginData(GGCredId(UUID.randomUUID().toString), "http://localhost:9999/nowhere",
-      ConfidenceLevel.L50, group, None, None, enrolments.headOption)
+              ConfidenceLevel.L50, group, None, None, enrolments.headOption)
   }
 
 }

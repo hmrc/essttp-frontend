@@ -16,20 +16,22 @@
 
 package messages
 
-import langswitch.{ Language, Languages }
+import langswitch.{Language, Languages}
 
 final case class Message(
-  english: String,
-  welsh: Option[String]) {
+    english: String,
+    welsh:   Option[String]
+) {
 
   def show(implicit language: Language): String = language match {
     case Languages.English => english
-    case Languages.Welsh => welsh.getOrElse(english)
+    case Languages.Welsh   => welsh.getOrElse(english)
   }
 
   def ++(other: Message): Message = Message(
     english = s"$english${other.english}",
-    welsh = for { thisWelsh <- welsh; thatWelsh <- other.welsh } yield s"$thisWelsh$thatWelsh")
+    welsh   = for { thisWelsh <- welsh; thatWelsh <- other.welsh } yield s"$thisWelsh$thatWelsh"
+  )
 }
 
 object Message {

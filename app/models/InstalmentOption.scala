@@ -17,12 +17,13 @@
 package models
 
 import moveittocor.corcommon.model.AmountInPence
-import play.api.libs.json.{ Format, Json }
+import play.api.libs.json.{Format, Json}
 
 case class InstalmentOption(
-  numberOfMonths: Int,
-  amountToPayEachMonth: AmountInPence,
-  interestPayment: AmountInPence)
+    numberOfMonths:       Int,
+    amountToPayEachMonth: AmountInPence,
+    interestPayment:      AmountInPence
+)
 object InstalmentOption {
   implicit val format: Format[InstalmentOption] = Json.format
 }

@@ -21,17 +21,18 @@ import essttp.journey.JourneyConnector
 import essttp.journey.model.SjResponse
 import essttp.rootmodel.TaxRegime
 import models.TaxOrigin
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents, Request }
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 
 import javax.inject.Inject
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 abstract class TaxOriginController[R <: TaxRegime] @Inject() (
-  mcc: MessagesControllerComponents,
-  jc: JourneyConnector, as: Actions)(implicit ec: ExecutionContext)
+    mcc: MessagesControllerComponents,
+    jc:  JourneyConnector, as: Actions
+)(implicit ec: ExecutionContext)
   extends FrontendController(mcc) with Logging {
 
   def originator: TaxOrigin[R]

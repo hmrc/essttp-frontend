@@ -16,22 +16,22 @@
 
 package services
 
-import cats.implicits.{ catsSyntaxValidatedId, toFunctorOps }
+import cats.implicits.{catsSyntaxValidatedId, toFunctorOps}
 import cats.syntax.apply._
-import cats.data.{ NonEmptyList, ValidatedNel }
+import cats.data.{NonEmptyList, ValidatedNel}
 import connectors.EligibilityStubConnector
-import essttp.rootmodel.{ TaxId, TaxRegime }
-import models.ttp.{ ChargeTypeAssessment, EligibilityRules, TaxPeriodCharges, TtpEligibilityData }
-import models.{ EligibilityData, InvoicePeriod, OverDuePayments, OverduePayment }
+import essttp.rootmodel.{TaxId, TaxRegime}
+import models.ttp.{ChargeTypeAssessment, EligibilityRules, TaxPeriodCharges, TtpEligibilityData}
+import models.{EligibilityData, InvoicePeriod, OverDuePayments, OverduePayment}
 import moveittocor.corcommon.model.AmountInPence
 import services.EligibilityDataService._
 import testOnly.models.EligibilityError
-import testOnly.models.EligibilityError.{ PayeHasDisallowedCharges, _ }
+import testOnly.models.EligibilityError.{PayeHasDisallowedCharges, _}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import javax.inject.{ Inject, Singleton }
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton

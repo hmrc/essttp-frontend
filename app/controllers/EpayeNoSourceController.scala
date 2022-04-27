@@ -20,15 +20,15 @@ import _root_.actions.Actions
 import essttp.journey.JourneyConnector
 import essttp.rootmodel.TaxRegime
 import models.TaxOrigin.EpayeNoOrigin
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import views.html.EPaye.EPayeLandingPage2
 
-import javax.inject.{ Inject, Singleton }
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton()
 class EpayeNoSourceController @Inject() (cc: MessagesControllerComponents, epayeLandingPage: EPayeLandingPage2,
-  jc: JourneyConnector, as: Actions)(implicit ec: ExecutionContext)
+                                         jc: JourneyConnector, as: Actions)(implicit ec: ExecutionContext)
   extends TaxOriginController[TaxRegime.Epaye.type](cc, jc, as) {
 
   val originator = EpayeNoOrigin
