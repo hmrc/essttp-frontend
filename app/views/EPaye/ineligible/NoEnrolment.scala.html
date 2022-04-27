@@ -45,13 +45,13 @@
     @{Html(Messages.NotEligible.`If you are outside the UK...`.show)}
   </p>
 }
-@layout(pageTitle = Some("create enrolment")) {
+@layout(pageTitle = Some(Messages.EnrolmentMissing.`You are not enrolled`.show)) {
    <h1 class="govuk-heading-xl">
     @{Messages.EnrolmentMissing.`You are not enrolled`.show}
    </h1>
    <p class="govuk-body">
     @{Messages.EnrolmentMissing.`You are not eligible for an online payment...`.show}
-    <a href="@{appConfig.Urls.enrolForPayeUrl}" class="govuk-link">@{Messages.EnrolmentMissing.`Find out how to enrol`.show}</a>
+    <a href="@{appConfig.Urls.enrolForPayeUrl}" class="govuk-link">@{Messages.EnrolmentMissing.`Find out how to enrol`.show}</a>@{Messages.`full stop`.show}
    </p>
   <div class="common-eligibility">
     <p class="govuk-body">

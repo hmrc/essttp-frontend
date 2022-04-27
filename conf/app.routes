@@ -1,22 +1,22 @@
 # microservice specific routes
 
-->          /hmrc-frontend                               hmrcfrontend.Routes
+->        /hmrc-frontend                                 hmrcfrontend.Routes
 
-GET        /                                             controllers.LandingController.landingPage
+GET       /                                              controllers.LandingController.landingPage
 
-GET       /bta/epaye                                    controllers.EpayeBTAController.landingPage
+GET       /bta/epaye                                     controllers.EpayeBTAController.landingPage
 
-GET       /bta/epaye/start                              controllers.EpayeBTAController.start
+GET       /bta/epaye/start                               controllers.EpayeBTAController.start
 
-GET       /govuk/epaye                                    controllers.EpayeGovUkController.landingPage
+GET       /govuk/epaye                                   controllers.EpayeGovUkController.landingPage
 
-GET       /govuk/epaye/start                              controllers.EpayeGovUkController.start
+GET       /govuk/epaye/start                             controllers.EpayeGovUkController.start
 
-GET       /nosource/epaye                                    controllers.EpayeNoSourceController.landingPage
+GET       /nosource/epaye                                controllers.EpayeNoSourceController.landingPage
 
-GET       /nosource/epaye/start                              controllers.EpayeNoSourceController.start
+GET       /nosource/epaye/start                          controllers.EpayeNoSourceController.start
 
-GET       /enrolments                                      controllers.EnrolmentsController.show
+GET       /enrolments                                    controllers.EnrolmentsController.show
 
 GET       /completion/abort                              controllers.JourneyCompletionController.abort
 
@@ -43,7 +43,7 @@ GET        /terms-and-conditions                         controllers.BankDetails
 GET        /confirmation                                 controllers.ConfirmationController.confirmation()
 GET        /print-summary                                controllers.ConfirmationController.printSummary()
 
-GET         /assets/*file                                controllers.Assets.versioned(path="/public", file: Asset)
+GET        /assets/*file                                controllers.Assets.versioned(path="/public", file: Asset)
 
 GET        /timed-out                                    controllers.SignOutController.signOutFromTimeout
 

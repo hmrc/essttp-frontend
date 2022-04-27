@@ -34,7 +34,7 @@ class EpayeNoSourceController @Inject() (cc: MessagesControllerComponents, epaye
   val originator = EpayeNoOrigin
 
   override def landingPage: Action[AnyContent] = Action { implicit request =>
-    Ok(epayeLandingPage(controllers.routes.EpayeNoSourceController.start))
+    Ok(epayeLandingPage(controllers.routes.EpayeNoSourceController.start()))
   }
 
 }
