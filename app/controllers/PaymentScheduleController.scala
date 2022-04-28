@@ -44,7 +44,9 @@ class PaymentScheduleController @Inject() (
 
   val checkPaymentSchedule: Action[AnyContent] = as.getJourney.async { implicit request =>
     val j: Journey = request.journey
-    Future.successful(Ok(paymentSchedulePage(j.userAnswers, computeMonths(j.userAnswers.getMonthsToPay))))
+    Future.successful(Ok(
+      paymentSchedulePage(j.userAnswers, computeMonths(j.userAnswers.getMonthsToPay))
+    ))
   }
 }
 

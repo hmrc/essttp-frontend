@@ -16,20 +16,20 @@
 
 package testsupport
 
-import com.google.inject.{ AbstractModule, Provides }
+import com.google.inject.{AbstractModule, Provides}
 import org.openqa.selenium.htmlunit.HtmlUnitDriver
 import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.time.{ Millis, Seconds, Span }
+import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-import play.api.inject.guice.{ GuiceApplicationBuilder, GuiceableModule }
-import play.api.test.{ DefaultTestServerFactory, RunningServer }
-import play.api.{ Application, Mode }
+import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
+import play.api.test.{DefaultTestServerFactory, RunningServer}
+import play.api.{Application, Mode}
 import play.core.server.ServerConfig
 import times.ClockProvider
 import uk.gov.hmrc.http.HttpReadsInstances
 
 import java.time.ZoneOffset.UTC
-import java.time.{ Clock, LocalDateTime, ZoneId }
+import java.time.{Clock, LocalDateTime, ZoneId}
 import javax.inject.Singleton
 
 class ItSpec
@@ -43,7 +43,7 @@ class ItSpec
   val baseUrl: BaseUrl = BaseUrl(s"http://localhost:$testPort")
 
   implicit override val patienceConfig: PatienceConfig =
-    PatienceConfig(timeout = scaled(Span(300, Millis)), interval = scaled(Span(2, Seconds)))
+    PatienceConfig(timeout  = scaled(Span(300, Millis)), interval = scaled(Span(2, Seconds)))
 
   protected lazy val configMap: Map[String, Any] = Map(
     "microservice.services.direct-debit.port" -> WireMockSupport.port,
@@ -59,7 +59,8 @@ class ItSpec
     "microservice.services.identity-verification-frontend.uplift-url" -> s"http://localhost:${WireMockSupport.port}/mdtp/uplift",
     "microservice.services.identity-verification-frontend.callback.base-url" -> s"http://localhost:${testPort}",
     "microservice.services.identity-verification-frontend.callback.complete-path" -> "/pay-what-you-owe-in-instalments/arrangement/determine-eligibility",
-    "microservice.services.identity-verification-frontend.callback.reject-path" -> "/pay-what-you-owe-in-instalments/eligibility/not-enrolled")
+    "microservice.services.identity-verification-frontend.callback.reject-path" -> "/pay-what-you-owe-in-instalments/eligibility/not-enrolled"
+  )
 
   //in tests use `app`
   override def fakeApplication(): Application = new GuiceApplicationBuilder()
@@ -99,7 +100,7 @@ class ItSpec
 
   object TestServerFactory extends DefaultTestServerFactory {
     override protected def serverConfig(app: Application): ServerConfig = {
-      val sc = ServerConfig(port = Some(testPort), sslPort = Some(0), mode = Mode.Test, rootDir = app.path)
+      val sc = ServerConfig(port    = Some(testPort), sslPort = Some(0), mode = Mode.Test, rootDir = app.path)
       sc.copy(configuration = sc.configuration.withFallback(overrideServerConfiguration(app)))
     }
   }

@@ -17,7 +17,7 @@
 package testsupport
 
 import org.scalatest.Assertion
-import play.api.libs.json.{ Format, JsSuccess, Json }
+import play.api.libs.json.{Format, JsSuccess, Json}
 
 trait SerialisationSpec { this: UnitSpec =>
 
