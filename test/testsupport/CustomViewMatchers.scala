@@ -20,9 +20,9 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.scalatest.Assertions
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.matchers.{ MatchResult, Matcher }
+import org.scalatest.matchers.{MatchResult, Matcher}
 import play.api.i18n.Messages
-import play.twirl.api.{ Html, HtmlFormat }
+import play.twirl.api.{Html, HtmlFormat}
 
 trait CustomViewMatchers extends Matchers {
   type MessagesProvider = Messages
@@ -45,14 +45,16 @@ trait CustomViewMatchers extends Matchers {
         MatchResult(
           msgsMissing.isEmpty,
           s"Content is missing in the html for message keys: ${msgsMissing.mkString(", ")}",
-          s"Content is present in the html for message keys: ${msgsPresent.mkString(", ")}")
+          s"Content is present in the html for message keys: ${msgsPresent.mkString(", ")}"
+        )
       }
     }
 
   def containElement(
-    withId: String,
-    withTag: String,
-    withAttrs: Map[String, String]): Matcher[Html] =
+      withId:    String,
+      withTag:   String,
+      withAttrs: Map[String, String]
+  ): Matcher[Html] =
     new Matcher[Html] {
       override def apply(html: Html): MatchResult = {
         val doc = Jsoup.parse(html.toString)
@@ -68,22 +70,25 @@ trait CustomViewMatchers extends Matchers {
         MatchResult(
           isAsExpected,
           s"""Html does not contain a "$withTag" element with id of "$withId" with matching attributes $withAttrs""",
-          s"""Html contains a "$withTag" element with id of "$withId" with matching attributes $withAttrs""")
+          s"""Html contains a "$withTag" element with id of "$withId" with matching attributes $withAttrs"""
+        )
       }
     }
 
   def containElementWithMessage(
-    withTag: String,
-    withMessageKey: String,
-    withMessageParams: String*)(expectHtmlEscaped: Boolean = true)(implicit messagesProvider: MessagesProvider): Matcher[Html] = {
+      withTag:           String,
+      withMessageKey:    String,
+      withMessageParams: String*
+  )(expectHtmlEscaped: Boolean = true)(implicit messagesProvider: MessagesProvider): Matcher[Html] = {
     containElementWithMessage(withTag, withAttrs = Map.empty, withMessageKey, withMessageParams: _*)
   }
 
   def containElementWithMessage(
-    withTag: String,
-    withAttrs: Map[String, String],
-    withMessageKey: String,
-    withMessageParams: String*)(implicit messagesProvider: MessagesProvider): Matcher[Html] =
+      withTag:           String,
+      withAttrs:         Map[String, String],
+      withMessageKey:    String,
+      withMessageParams: String*
+  )(implicit messagesProvider: MessagesProvider): Matcher[Html] =
     new Matcher[Html] {
       override def apply(html: Html): MatchResult = {
         checkMessageIsDefined(withMessageKey)
@@ -92,9 +97,10 @@ trait CustomViewMatchers extends Matchers {
     }
 
   def containElementWithContent(
-    withTag: String,
-    withContent: String,
-    withAttrs: Map[String, String] = Map.empty): Matcher[Html] =
+      withTag:     String,
+      withContent: String,
+      withAttrs:   Map[String, String] = Map.empty
+  ): Matcher[Html] =
     new Matcher[Html] {
       override def apply(html: Html): MatchResult = {
         val doc = Jsoup.parse(html.toString)
@@ -108,13 +114,15 @@ trait CustomViewMatchers extends Matchers {
         MatchResult(
           hasMatchingElement,
           s"""Html does not contain a "$withTag" element with content "$withContent" and with attributes "$withAttrs"""",
-          s"""Html contains a "$withTag" element with content "$withContent" and with attributes "$withAttrs"""")
+          s"""Html contains a "$withTag" element with content "$withContent" and with attributes "$withAttrs""""
+        )
       }
     }
 
   def containForm(
-    withAction: String,
-    withMethod: String = "POST"): Matcher[Html] =
+      withAction: String,
+      withMethod: String = "POST"
+  ): Matcher[Html] =
     new Matcher[Html] {
       override def apply(html: Html): MatchResult = {
         val doc = Jsoup.parse(html.toString)
@@ -128,15 +136,17 @@ trait CustomViewMatchers extends Matchers {
         MatchResult(
           hasMatchingForm,
           s"""Html does not contain a $withMethod form element with action of "$withAction"""",
-          s"""Html contains a $withMethod element with action of "$withAction"""")
+          s"""Html contains a $withMethod element with action of "$withAction""""
+        )
       }
     }
 
   def containSubmitButton(
-    withMessageKey: String,
-    withId: String,
-    withTagName: String = "button",
-    withType: String = "submit")(implicit messagesProvider: MessagesProvider): Matcher[Html] =
+      withMessageKey: String,
+      withId:         String,
+      withTagName:    String = "button",
+      withType:       String = "submit"
+  )(implicit messagesProvider: MessagesProvider): Matcher[Html] =
     new Matcher[Html] {
       override def apply(html: Html): MatchResult = {
         val doc = Jsoup.parse(html.toString)
@@ -154,18 +164,21 @@ trait CustomViewMatchers extends Matchers {
         MatchResult(
           isAsExpected,
           s"""Html does not contain a submit button with id "$withId" and type "$withType" with content for message key "$withMessageKey" """,
-          s"""Html contains a submit button with id "$withId" and type "$withType" with content for message key "$withMessageKey" """)
+          s"""Html contains a submit button with id "$withId" and type "$withType" with content for message key "$withMessageKey" """
+        )
       }
     }
 
   def containLink(
-    withMessageKey: String,
-    withHref: String,
-    withClasses: Set[String] = Set.empty,
-    withMessageParams: Seq[String] = Seq.empty,
-    withHiddenHintMsgKey: Option[String] = None)(
-    implicit
-    messagesProvider: MessagesProvider): Matcher[Html] =
+      withMessageKey:       String,
+      withHref:             String,
+      withClasses:          Set[String]    = Set.empty,
+      withMessageParams:    Seq[String]    = Seq.empty,
+      withHiddenHintMsgKey: Option[String] = None
+  )(
+      implicit
+      messagesProvider: MessagesProvider
+  ): Matcher[Html] =
     new Matcher[Html] {
       override def apply(html: Html): MatchResult = {
         val doc = Jsoup.parse(html.toString)
@@ -194,13 +207,15 @@ trait CustomViewMatchers extends Matchers {
           s"""Html contains a link to "$withHref" with content for message key "$withMessageKey" and with classes: "${
             withClasses
               .mkString(", ")
-          } """)
+          } """
+        )
       }
     }
 
   def containLink(withHref: String)(
-    implicit
-    messagesProvider: MessagesProvider): Matcher[Html] =
+      implicit
+      messagesProvider: MessagesProvider
+  ): Matcher[Html] =
     new Matcher[Html] {
       override def apply(html: Html): MatchResult = {
         val doc = Jsoup.parse(html.toString)
@@ -213,7 +228,8 @@ trait CustomViewMatchers extends Matchers {
         MatchResult(
           wasFound,
           s"""Html does not contain a link to "$withHref" """,
-          s"""Html contains a link to "$withHref" """)
+          s"""Html contains a link to "$withHref" """
+        )
       }
     }
 
