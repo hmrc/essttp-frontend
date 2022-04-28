@@ -53,7 +53,7 @@ class TestOnlyController @Inject() (
   with Logging {
 
   val login = as.default { implicit request =>
-    val loginUrl = appConfig.BaseUrl.authLoginStub
+    val loginUrl = appConfig.BaseUrl.gg
     Redirect(loginUrl)
   }
 

@@ -69,7 +69,7 @@ class AuthenticatedAction @Inject() (
   }
 
   def loginPage(implicit request: Request[_]) = Left(Redirect(
-    appConfig.loginUrl,
+    appConfig.BaseUrl.gg,
     Map("continue" -> Seq(appConfig.BaseUrl.essttpFrontend + request.uri), "origin" -> Seq("supp"))
   ))
 
