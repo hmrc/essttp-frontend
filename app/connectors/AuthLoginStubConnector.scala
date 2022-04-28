@@ -18,14 +18,14 @@ package connectors
 import cats.data.EitherT
 import com.google.inject.Inject
 import config.AppConfig
-import connectors.AuthLoginStubConnector.{ ACR, StubException, wrapException, wrapResponse }
+import connectors.AuthLoginStubConnector.{ACR, StubException, wrapException, wrapResponse}
 import play.api.Configuration
-import play.api.libs.ws.{ WSClient, WSResponse }
+import play.api.libs.ws.{WSClient, WSResponse}
 import services.AuthLoginStubService.LoginData
 import uk.gov.hmrc.http.HeaderCarrier
 import util.StringUtils.StringOps
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 trait AuthLoginStubConnector {
@@ -55,7 +55,8 @@ class AuthLoginStubConnectorImpl @Inject() (config: AppConfig, ws: WSClient)(imp
       "enrolment[0].name" -> loginData.enrolment.map(_.key),
       "enrolment[0].taxIdentifier[0].name" -> enrolmentIdentifier.map(_.key),
       "enrolment[0].taxIdentifier[0].value" -> enrolmentIdentifier.map(_.value),
-      "enrolment[0].state" -> loginData.enrolment.map(_.state)).collect { case (k, Some(v)) => k -> v }.toMap
+      "enrolment[0].state" -> loginData.enrolment.map(_.state)
+    ).collect { case (k, Some(v)) => k -> v }.toMap
   }
 
   override def login(loginData: LoginData)(implicit hc: HeaderCarrier): ACR[WSResponse] = {
@@ -98,7 +99,8 @@ object AuthLoginStubConnector {
       "enrolment[0].name" -> loginData.enrolment.map(_.key),
       "enrolment[0].taxIdentifier[0].name" -> enrolmentIdentifier.map(_.key),
       "enrolment[0].taxIdentifier[0].value" -> enrolmentIdentifier.map(_.value),
-      "enrolment[0].state" -> loginData.enrolment.map(_.state)).collect { case (k, Some(v)) => k -> v }.toMap
+      "enrolment[0].state" -> loginData.enrolment.map(_.state)
+    ).collect { case (k, Some(v)) => k -> v }.toMap
   }
 
 }

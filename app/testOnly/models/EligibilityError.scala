@@ -16,7 +16,7 @@
 
 package testOnly.models
 
-import enumeratum.{ Enum, EnumEntry }
+import enumeratum.{Enum, EnumEntry}
 import play.api.libs.json.Format
 import play.api.libs.functional.syntax._
 

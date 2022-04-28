@@ -18,8 +18,8 @@ package error
 
 import com.google.inject.Inject
 import messages.ErrorMessages
-import play.api.mvc.Results.{ NotFound, Unauthorized }
-import play.api.mvc.{ Request, Result, Results }
+import play.api.mvc.Results.{NotFound, Unauthorized}
+import play.api.mvc.{Request, Result, Results}
 import requests.RequestSupport
 
 class ErrorResponses @Inject() (errorHandler: ErrorHandler, requestSupport: RequestSupport) {
@@ -30,18 +30,24 @@ class ErrorResponses @Inject() (errorHandler: ErrorHandler, requestSupport: Requ
     errorHandler.standardErrorTemplate(
       ErrorMessages.NotFound.title.show,
       ErrorMessages.NotFound.heading.show,
-      ErrorMessages.NotFound.message.show))
+      ErrorMessages.NotFound.message.show
+    )
+  )
 
   def unauthorised()(implicit request: Request[_]): Result = Unauthorized(
     errorHandler.standardErrorTemplate(
       ErrorMessages.Unahthorised.`You do not have access to this service`.show,
       ErrorMessages.Unahthorised.`You do not have access to this service`.show,
-      ErrorMessages.Unahthorised.`You do not have access to this service`.show))
+      ErrorMessages.Unahthorised.`You do not have access to this service`.show
+    )
+  )
 
   def gone()(implicit request: Request[_]): Result = Results.Gone(
     errorHandler.standardErrorTemplate(
       ErrorMessages.Gone.`The page you are referring does not exist anymore`.show,
       ErrorMessages.Gone.`The page you are referring does not exist anymore`.show,
-      ErrorMessages.Gone.`The page you are referring does not exist anymore`.show))
+      ErrorMessages.Gone.`The page you are referring does not exist anymore`.show
+    )
+  )
 
 }

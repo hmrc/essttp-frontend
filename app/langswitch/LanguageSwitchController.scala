@@ -27,9 +27,10 @@ import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class LanguageSwitchController @Inject() (
-  cc: ControllerComponents,
-  as: Actions,
-  appConfig: AppConfig)(implicit ec: ExecutionContext) extends AbstractController(cc) with Logging {
+    cc:        ControllerComponents,
+    as:        Actions,
+    appConfig: AppConfig
+)(implicit ec: ExecutionContext) extends AbstractController(cc) with Logging {
 
   def switchToLanguage(language: Language): Action[AnyContent] = cc.actionBuilder { implicit request =>
 

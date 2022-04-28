@@ -17,7 +17,7 @@
 package testOnly.models
 
 import cats.Eq
-import play.api.libs.json.{ Format, Json }
+import play.api.libs.json.{Format, Json}
 
 case class Enrolment private (ordinal: Int, name: String)
 
@@ -28,8 +28,8 @@ object Enrolment {
 
   def valueOf(name: String) = name match {
     case "EPAYE" => EPAYE
-    case "VAT" => VAT
-    case s => throw new IllegalArgumentException(s"$s is not a valid Enrolment")
+    case "VAT"   => VAT
+    case s       => throw new IllegalArgumentException(s"$s is not a valid Enrolment")
   }
 
   def values = List(EPAYE, VAT)

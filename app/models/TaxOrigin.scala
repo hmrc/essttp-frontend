@@ -18,8 +18,8 @@ package models
 
 import essttp.journey.JourneyConnector
 import essttp.journey.model.SjResponse
-import essttp.rootmodel.{ BackUrl, ReturnUrl, TaxRegime }
-import play.api.mvc.{ Call, Request }
+import essttp.rootmodel.{BackUrl, ReturnUrl, TaxRegime}
+import play.api.mvc.{Call, Request}
 import uk.gov.hmrc.auth.core.Enrolment
 import uk.gov.hmrc.http.HeaderCarrier
 import util.RegimeUtils._
@@ -46,7 +46,8 @@ object TaxOrigin {
   object EpayeBTA extends EpayeTaxOrigin {
 
     override def createJourney(jc: JourneyConnector)(implicit hc: HeaderCarrier, request: Request[_]): Future[SjResponse] = jc.Epaye.startJourneyBta(
-      essttp.journey.model.SjRequest.Epaye.Simple(ReturnUrl("return here"), BackUrl("back to here")))
+      essttp.journey.model.SjRequest.Epaye.Simple(ReturnUrl("return here"), BackUrl("back to here"))
+    )
 
     override def journeyEntryPoint: Call = controllers.routes.EPayeStartController.ePayeStart()
   }
@@ -54,7 +55,8 @@ object TaxOrigin {
   object EpayeGovUk extends EpayeTaxOrigin {
 
     override def createJourney(jc: JourneyConnector)(implicit hc: HeaderCarrier, request: Request[_]): Future[SjResponse] = jc.Epaye.startJourneyGovUk(
-      essttp.journey.model.SjRequest.Epaye.Empty())
+      essttp.journey.model.SjRequest.Epaye.Empty()
+    )
 
     override def journeyEntryPoint: Call = controllers.routes.EPayeStartController.ePayeStart()
 
@@ -63,7 +65,8 @@ object TaxOrigin {
   object EpayeNoOrigin extends EpayeTaxOrigin {
 
     override def createJourney(jc: JourneyConnector)(implicit hc: HeaderCarrier, request: Request[_]): Future[SjResponse] = jc.Epaye.startJourneyDetachedUrl(
-      essttp.journey.model.SjRequest.Epaye.Empty())
+      essttp.journey.model.SjRequest.Epaye.Empty()
+    )
 
     override def journeyEntryPoint: Call = controllers.routes.EPayeStartController.ePayeStart()
 

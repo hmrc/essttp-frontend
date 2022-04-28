@@ -16,21 +16,22 @@
 
 package services
 
-import models.{ Journey, JourneyIdGenerator, JourneyStatuses, UserAnswers }
-import moveittocor.corcommon.model.{ AmountInPence, JourneyId }
+import models.{Journey, JourneyIdGenerator, JourneyStatuses, UserAnswers}
+import moveittocor.corcommon.model.{AmountInPence, JourneyId}
 import play.api.mvc.Request
 import repository.JourneyRepo
 import repository.RepoResultChecker.WriteResultChecker
 
-import java.time.{ Clock, Instant }
-import javax.inject.{ Inject, Singleton }
-import scala.concurrent.{ ExecutionContext, Future }
+import java.time.{Clock, Instant}
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class JourneyService @Inject() (
-  journeyRepo: JourneyRepo,
-  journeyIdGenerator: JourneyIdGenerator,
-  clock: Clock)(implicit ec: ExecutionContext) {
+    journeyRepo:        JourneyRepo,
+    journeyIdGenerator: JourneyIdGenerator,
+    clock:              Clock
+)(implicit ec: ExecutionContext) {
 
   def get()(implicit request: Request[_]): Future[Journey] = {
     find().map { maybeJourney =>
@@ -56,12 +57,13 @@ class JourneyService @Inject() (
       .checkResult
 
   def newJourney(qualifyingDebt: AmountInPence): Journey = Journey(
-    _id = journeyIdGenerator.nextJourneyId(),
-    createdDate = Instant.now(clock),
-    lastUpdated = Instant.now(clock),
-    status = JourneyStatuses.Created,
+    _id            = journeyIdGenerator.nextJourneyId(),
+    createdDate    = Instant.now(clock),
+    lastUpdated    = Instant.now(clock),
+    status         = JourneyStatuses.Created,
     qualifyingDebt = qualifyingDebt,
     remainingToPay = qualifyingDebt,
-    userAnswers = UserAnswers.empty)
+    userAnswers    = UserAnswers.empty
+  )
 
 }

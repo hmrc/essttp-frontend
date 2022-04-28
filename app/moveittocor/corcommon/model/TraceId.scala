@@ -19,7 +19,7 @@ package moveittocor.corcommon.model
 import moveittocor.corcommon.internal.ValueClassBinder._
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Format
-import play.api.mvc.{ PathBindable, QueryStringBindable }
+import play.api.mvc.{PathBindable, QueryStringBindable}
 
 final case class TraceId(value: String)
 

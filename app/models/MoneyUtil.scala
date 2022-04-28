@@ -30,22 +30,27 @@ object MoneyUtil {
   def formatAmountOfMoneyWithoutPoundSign(d: BigDecimal): String =
     d.toString().replaceAllLiterally("£", "")
   def amountOfMoneyFormatter(
-    isTooSmall: BigDecimal => Boolean,
-    isTooLarge: BigDecimal => Boolean): Formatter[BigDecimal] =
+      isTooSmall: BigDecimal => Boolean,
+      isTooLarge: BigDecimal => Boolean
+  ): Formatter[BigDecimal] =
     new Formatter[BigDecimal] {
       override def bind(
-        key: String,
-        data: Map[String, String]): Either[Seq[FormError], BigDecimal] =
+          key:  String,
+          data: Map[String, String]
+      ): Either[Seq[FormError], BigDecimal] =
         validateAmountOfMoney(
           key,
           isTooSmall,
-          isTooLarge)(data(key)).leftMap(Seq(_))
+          isTooLarge
+        )(data(key)).leftMap(Seq(_))
 
       def validateAmountOfMoney(
-        key: String,
-        isTooSmall: BigDecimal => Boolean,
-        isTooLarge: BigDecimal => Boolean)(
-        s: String): Either[FormError, BigDecimal] =
+          key:        String,
+          isTooSmall: BigDecimal => Boolean,
+          isTooLarge: BigDecimal => Boolean
+      )(
+          s: String
+      ): Either[FormError, BigDecimal] =
         Try(BigDecimal(cleanupAmountOfMoneyString(s))).toEither
           .leftMap(_ => FormError(key, "error.pattern"))
           .flatMap { d: BigDecimal =>

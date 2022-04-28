@@ -38,7 +38,8 @@ object LoginSupport {
   def getLoginUrlStr(returnUrl: RedirectUrl)(implicit vc: AppConfig, env: Environment): String = {
     loginUrl(returnUrl).fold(
       errorMsg => throw new IllegalArgumentException(errorMsg),
-      goodUrl => goodUrl.toString)
+      goodUrl => goodUrl.toString
+    )
   }
 
   def loginUrl(returnUrl: RedirectUrl)(implicit vc: AppConfig, env: Environment): Either[String, URL] = {

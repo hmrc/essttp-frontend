@@ -17,35 +17,36 @@
 package controllers
 
 import _root_.actions.Actions
-import controllers.PaymentDayController.{ PaymentDayForm, paymentDayForm }
+import controllers.PaymentDayController.{PaymentDayForm, paymentDayForm}
 import models.Journey
-import play.api.data.{ Form, FormError, Forms }
-import play.api.data.Forms.{ mapping, nonEmptyText }
+import play.api.data.{Form, FormError, Forms}
+import play.api.data.Forms.{mapping, nonEmptyText}
 import play.api.data.format.Formatter
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 
-import javax.inject.{ Inject, Singleton }
-import scala.concurrent.{ ExecutionContext, Future }
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 import views.html.PaymentDay
 
 import scala.util.Try
 
 @Singleton
 class PaymentDayController @Inject() (
-  as: Actions,
-  paymentDayPage: PaymentDay,
-  journeyService: JourneyService,
-  mcc: MessagesControllerComponents)(implicit ec: ExecutionContext)
+    as:             Actions,
+    paymentDayPage: PaymentDay,
+    journeyService: JourneyService,
+    mcc:            MessagesControllerComponents
+)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 
   val paymentDay: Action[AnyContent] = as.getJourney.async { implicit request =>
     val form: Form[PaymentDayForm] = request.journey.userAnswers.paymentDay match {
       case Some(a: String) => paymentDayForm().fill(PaymentDayForm(a, request.journey.userAnswers.differentDay))
-      case _ => paymentDayForm()
+      case _               => paymentDayForm()
     }
     Future.successful(Ok(paymentDayPage(form)))
   }
@@ -59,9 +60,11 @@ class PaymentDayController @Inject() (
         (p: PaymentDayForm) => {
           journeyService.upsert(j.copy(userAnswers = j.userAnswers.copy(
             differentDay = p.differentDay,
-            paymentDay = Some(p.paymentDay))))
+            paymentDay   = Some(p.paymentDay)
+          )))
           Future.successful(Redirect(routes.InstalmentsController.instalmentOptions()))
-        })
+        }
+      )
 
   }
 }
@@ -72,18 +75,22 @@ object PaymentDayController {
   import cats.syntax.either._
 
   case class PaymentDayForm(
-    paymentDay: String,
-    differentDay: Option[Int])
+      paymentDay:   String,
+      differentDay: Option[Int]
+  )
 
   def paymentDayForm(): Form[PaymentDayForm] = Form(
     mapping(
       "PaymentDay" -> nonEmptyText,
-      "DifferentDay" -> mandatoryIfEqual("PaymentDay", "other", Forms.of(dayOfMonthFormatter)))(PaymentDayForm.apply)(PaymentDayForm.unapply))
+      "DifferentDay" -> mandatoryIfEqual("PaymentDay", "other", Forms.of(dayOfMonthFormatter))
+    )(PaymentDayForm.apply)(PaymentDayForm.unapply)
+  )
 
   def readValue[T](
-    key: String,
-    data: Map[String, String],
-    f: String => T): Either[FormError, T] =
+      key:  String,
+      data: Map[String, String],
+      f:    String => T
+  ): Either[FormError, T] =
     data
       .get(key)
       .map(_.trim())
@@ -96,14 +103,15 @@ object PaymentDayController {
 
   val dayOfMonthFormatter: Formatter[Int] = {
     val key = "DifferentDay"
-    def validateDayOfMonth(day: Int): Either[FormError, Int] =
-      if (day < 1 || day > 28) Left(FormError(key, "error.outOfRange"))
-      else Right(day)
+      def validateDayOfMonth(day: Int): Either[FormError, Int] =
+        if (day < 1 || day > 28) Left(FormError(key, "error.outOfRange"))
+        else Right(day)
 
     new Formatter[Int] {
       override def bind(
-        key: String,
-        data: Map[String, String]): Either[Seq[FormError], Int] = {
+          key:  String,
+          data: Map[String, String]
+      ): Either[Seq[FormError], Int] = {
         val result =
           readValue(key, data, _.toInt)
             .flatMap(validateDayOfMonth)

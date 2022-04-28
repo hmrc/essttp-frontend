@@ -17,11 +17,11 @@
 package controllers.support
 
 import langswitch.Language
-import play.api.i18n.{ I18nSupport, Lang, Messages, MessagesApi }
+import play.api.i18n.{I18nSupport, Lang, Messages, MessagesApi}
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendHeaderCarrierProvider
-import javax.inject.{ Singleton, Inject }
+import javax.inject.{Singleton, Inject}
 
 @Singleton()
 class RequestSupport @Inject() (override val messagesApi: MessagesApi) extends I18nSupport {

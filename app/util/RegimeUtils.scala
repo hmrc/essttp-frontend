@@ -16,7 +16,7 @@
 
 package util
 
-import essttp.rootmodel.{ Aor, TaxId, TaxRegime, Vrn }
+import essttp.rootmodel.{Aor, TaxId, TaxRegime, Vrn}
 import uk.gov.hmrc.auth.core.Enrolment
 
 object RegimeUtils {
@@ -24,17 +24,17 @@ object RegimeUtils {
   implicit class RegimeOps(regime: TaxRegime) {
     def name: String = regime match {
       case TaxRegime.Epaye => "epaye"
-      case TaxRegime.Vat => "vat"
+      case TaxRegime.Vat   => "vat"
     }
 
     def allowEnrolment(enrolment: Enrolment): Boolean = regime match {
       case TaxRegime.Epaye => enrolment.key == "IR-PAYE"
-      case TaxRegime.Vat => enrolment.key == "IR-VAT"
+      case TaxRegime.Vat   => enrolment.key == "IR-VAT"
     }
 
     def taxIdOf(value: String): TaxId = regime match {
       case TaxRegime.Epaye => Aor(value)
-      case TaxRegime.Vat => Vrn(value)
+      case TaxRegime.Vat   => Vrn(value)
     }
   }
 

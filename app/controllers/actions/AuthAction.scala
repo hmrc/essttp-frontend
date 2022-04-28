@@ -16,7 +16,7 @@
 
 package controllers.actions
 
-import com.google.inject.{ Inject, Singleton }
+import com.google.inject.{Inject, Singleton}
 import config.AppConfig
 import error.ErrorResponses
 import login.LoginSupport
@@ -24,30 +24,33 @@ import play.api.Environment
 import play.api.mvc.Results.Redirect
 import play.api.mvc._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.{ AuthorisationException, AuthorisedFunctions, Enrolments, NoActiveSession }
+import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions, Enrolments, NoActiveSession}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import util.Logging
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 import requests.RequestSupport._
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 
 final case class AuthenticatedRequest[A](
-  request: MessagesRequest[A]) extends WrappedRequest[A](request)
+    request: MessagesRequest[A]
+) extends WrappedRequest[A](request)
 
-import play.api.mvc.{ Request, WrappedRequest }
+import play.api.mvc.{Request, WrappedRequest}
 
 class EnrollmentsRequest[A](
-  val request: Request[A],
-  val enrolments: Enrolments) extends WrappedRequest[A](request) {
+    val request:    Request[A],
+    val enrolments: Enrolments
+) extends WrappedRequest[A](request) {
 }
 
 class AuthActionRefiner @Inject() (
-  af: AuthorisedFunctions,
-  appConfig: AppConfig,
-  env: Environment,
-  errorResponses: ErrorResponses)(implicit ec: ExecutionContext)
+    af:             AuthorisedFunctions,
+    appConfig:      AppConfig,
+    env:            Environment,
+    errorResponses: ErrorResponses
+)(implicit ec: ExecutionContext)
   extends ActionRefiner[Request, EnrollmentsRequest]
   with Logging {
 
@@ -55,7 +58,8 @@ class AuthActionRefiner @Inject() (
     implicit val implicitRequest: Request[A] = request
     af.authorised.retrieve(Retrievals.allEnrolments) { enrolments: Enrolments =>
       Future.successful(Right(
-        new EnrollmentsRequest[A](request, enrolments)))
+        new EnrollmentsRequest[A](request, enrolments)
+      ))
     }.recover {
       case _: NoActiveSession =>
         val loginUrl = LoginSupport.getLoginUrlStr(RedirectUrl(appConfig.BaseUrl.essttpFrontend + request.uri))(appConfig, env)
@@ -70,17 +74,19 @@ class AuthActionRefiner @Inject() (
 
 @Singleton
 class AuthAction @Inject() (
-  af: AuthorisedFunctions,
-  mcc: MessagesControllerComponents,
-  appConfig: AppConfig,
-  errorResponses: ErrorResponses)(implicit val executionContext: ExecutionContext)
+    af:             AuthorisedFunctions,
+    mcc:            MessagesControllerComponents,
+    appConfig:      AppConfig,
+    errorResponses: ErrorResponses
+)(implicit val executionContext: ExecutionContext)
   extends ActionFunction[MessagesRequest, AuthenticatedRequest]
   with ActionBuilder[AuthenticatedRequest, AnyContent]
   with Logging {
 
   override def invokeBlock[A](
-    request: Request[A],
-    block: AuthenticatedRequest[A] => Future[Result]): Future[Result] = {
+      request: Request[A],
+      block:   AuthenticatedRequest[A] => Future[Result]
+  ): Future[Result] = {
     implicit val implicitRequest = request
 
     af.authorised()(block(AuthenticatedRequest(new MessagesRequest(request, mcc.messagesApi))))

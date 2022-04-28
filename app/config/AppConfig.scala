@@ -16,7 +16,7 @@
 
 package config
 
-import javax.inject.{ Inject, Singleton }
+import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.play.bootstrap.binders.SafeRedirectUrl
@@ -42,11 +42,12 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   object BaseUrl {
     val essttpFrontend: String = config.get[String]("baseUrl.essttp-frontend")
     val essttpFrontendHost: String = new URL(essttpFrontend).getHost
-    val contactFrontend = config.get[String]("baseUrl.contact-frontend")
+    val contactFrontend: String = config.get[String]("baseUrl.contact-frontend")
     val feedbackFrontend: String = config.get[String]("baseUrl.feedback-frontend")
     val caFrontend: String = config.get[String]("baseUrl.ca-frontend")
     val gg: String = config.get[String]("baseUrl.gg")
     val authLoginStub: String = config.get[String]("baseUrl.auth-login-stub") + "/auth-login-stub/gg-sign-in?continue="
+    val businessTaxAccountFrontend: String = config.get[String]("baseUrl.business-tax-account-frontend")
   }
 
   object Urls {

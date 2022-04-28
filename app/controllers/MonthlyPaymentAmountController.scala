@@ -21,34 +21,36 @@ import controllers.MonthlyPaymentAmountController._
 import models.Journey
 import models.MoneyUtil._
 import moveittocor.corcommon.model.AmountInPence
-import play.api.data.{ Form, Forms }
+import play.api.data.{Form, Forms}
 import play.api.data.Forms.mapping
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.MonthlyPaymentAmount
 
-import javax.inject.{ Inject, Singleton }
-import scala.concurrent.{ ExecutionContext, Future }
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class MonthlyPaymentAmountController @Inject() (
-  as: Actions,
-  mcc: MessagesControllerComponents,
-  journeyService: JourneyService,
-  monthlyPaymentAmountPage: MonthlyPaymentAmount)(implicit ec: ExecutionContext)
+    as:                       Actions,
+    mcc:                      MessagesControllerComponents,
+    journeyService:           JourneyService,
+    monthlyPaymentAmountPage: MonthlyPaymentAmount
+)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 
   val monthlyPaymentAmount: Action[AnyContent] = as.getJourney.async { implicit request =>
     val form: Form[BigDecimal] = request.journey.userAnswers.affordableAmount match {
       case Some(a: AmountInPence) => monthlyPaymentAmountForm(request.journey).fill(a.inPounds)
-      case _ => monthlyPaymentAmountForm(request.journey)
+      case _                      => monthlyPaymentAmountForm(request.journey)
     }
     Future.successful(Ok(monthlyPaymentAmountPage(
       form,
       request.journey.remainingToPay,
-      AmountInPence(request.journey.remainingToPay.value / 6))))
+      AmountInPence(request.journey.remainingToPay.value / 6)
+    )))
   }
 
   val monthlyPaymentAmountSubmit: Action[AnyContent] = as.getJourney.async { implicit request =>
@@ -58,14 +60,20 @@ class MonthlyPaymentAmountController @Inject() (
         formWithErrors =>
           Future.successful(Ok(
             monthlyPaymentAmountPage(
-              formWithErrors, request.journey.remainingToPay, AmountInPence(request.journey.remainingToPay.value / 6)))),
+              formWithErrors, request.journey.remainingToPay, AmountInPence(request.journey.remainingToPay.value / 6)
+            )
+          )),
         (s: BigDecimal) => {
           journeyService.upsert(
             request.journey.copy(
               userAnswers = request.journey.userAnswers.copy(
-                affordableAmount = Some(AmountInPence((s * 100).longValue())))))
+                affordableAmount = Some(AmountInPence((s * 100).longValue()))
+              )
+            )
+          )
           Future(Redirect(routes.PaymentDayController.paymentDay()))
-        })
+        }
+      )
   }
 }
 
@@ -74,5 +82,7 @@ object MonthlyPaymentAmountController {
 
   def monthlyPaymentAmountForm(journey: Journey): Form[BigDecimal] = Form(
     mapping(
-      key -> Forms.of(amountOfMoneyFormatter(AmountInPence(journey.remainingToPay.value / 6).inPounds > _, journey.remainingToPay.inPounds < _)))(identity)(Some(_)))
+      key -> Forms.of(amountOfMoneyFormatter(AmountInPence(journey.remainingToPay.value / 6).inPounds > _, journey.remainingToPay.inPounds < _))
+    )(identity)(Some(_))
+  )
 }

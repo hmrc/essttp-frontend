@@ -16,105 +16,114 @@
 
 package models.ttp
 
-import play.api.libs.json.{ Format, Json }
+import play.api.libs.json.{Format, Json}
 
 case class TtpEligibilityData(
-  idType: String,
-  idNumber: String,
-  regimeType: String,
-  processingDate: String,
-  customerDetails: CustomerDetails,
-  eligibilityStatus: EligibilityStatus,
-  eligibilityRules: EligibilityRules,
-  financialLimitBreached: FinancialLimitBreached,
-  chargeTypeAssessment: List[ChargeTypeAssessment])
+    idType:                 String,
+    idNumber:               String,
+    regimeType:             String,
+    processingDate:         String,
+    customerDetails:        CustomerDetails,
+    eligibilityStatus:      EligibilityStatus,
+    eligibilityRules:       EligibilityRules,
+    financialLimitBreached: FinancialLimitBreached,
+    chargeTypeAssessment:   List[ChargeTypeAssessment]
+)
 
 object TtpEligibilityData {
   implicit val fmt: Format[TtpEligibilityData] = Json.format[TtpEligibilityData]
 }
 
 case class CustomerDetails(
-  country: String,
-  postCode: String)
+    country:  String,
+    postCode: String
+)
 
 object CustomerDetails {
   implicit val fmt: Format[CustomerDetails] = Json.format[CustomerDetails]
 }
 
 case class EligibilityStatus(
-  overallEligibilityStatus: Boolean,
-  minPlanLengthMonths: Int,
-  maxPlanLengthMonths: Int)
+    overallEligibilityStatus: Boolean,
+    minPlanLengthMonths:      Int,
+    maxPlanLengthMonths:      Int
+)
 object EligibilityStatus {
   implicit val fmt: Format[EligibilityStatus] = Json.format[EligibilityStatus]
 }
 
 case class EligibilityRules(
-  rlsOnAddress: Boolean,
-  rlsReason: String,
-  markedAsInsolvent: Boolean,
-  minimumDebtAllowance: Boolean,
-  maxDebtAllowance: Boolean,
-  disallowedChargeLock: Boolean,
-  existingTTP: Boolean,
-  minInstalmentAmount: Int,
-  maxInstalmentAmount: Int,
-  maxDebtAge: Boolean,
-  eligibleChargeType: Boolean,
-  returnsFiled: Boolean)
+    rlsOnAddress:         Boolean,
+    rlsReason:            String,
+    markedAsInsolvent:    Boolean,
+    minimumDebtAllowance: Boolean,
+    maxDebtAllowance:     Boolean,
+    disallowedChargeLock: Boolean,
+    existingTTP:          Boolean,
+    minInstalmentAmount:  Int,
+    maxInstalmentAmount:  Int,
+    maxDebtAge:           Boolean,
+    eligibleChargeType:   Boolean,
+    returnsFiled:         Boolean
+)
 
 object EligibilityRules {
   implicit val fmt: Format[EligibilityRules] = Json.format[EligibilityRules]
 }
 
 case class FinancialLimitBreached(
-  status: Boolean,
-  calculatedAmount: Int)
+    status:           Boolean,
+    calculatedAmount: Int
+)
 
 object FinancialLimitBreached {
   implicit val fmt: Format[FinancialLimitBreached] = Json.format[FinancialLimitBreached]
 }
 
 case class ChargeTypeAssessment(
-  taxPeriodFrom: String,
-  taxPeriodTo: String,
-  debtTotalAmount: Int,
-  taxPeriodCharges: List[TaxPeriodCharges])
+    taxPeriodFrom:    String,
+    taxPeriodTo:      String,
+    debtTotalAmount:  Int,
+    taxPeriodCharges: List[TaxPeriodCharges]
+)
 
 object ChargeTypeAssessment {
   implicit val fmt: Format[ChargeTypeAssessment] = Json.format[ChargeTypeAssessment]
 }
 
 case class TaxPeriodCharges(
-  chargeId: String,
-  mainTrans: String,
-  mainTransDesc: String,
-  subTrans: String,
-  subTransDesc: String,
-  outstandingDebtAmount: Int,
-  interestStartDate: String,
-  accruedInterestToDate: Double,
-  disallowedCharge: Boolean,
-  chargeLocks: ChargeLocks)
+    chargeId:              String,
+    mainTrans:             String,
+    mainTransDesc:         String,
+    subTrans:              String,
+    subTransDesc:          String,
+    outstandingDebtAmount: Int,
+    interestStartDate:     String,
+    accruedInterestToDate: Double,
+    disallowedCharge:      Boolean,
+    chargeLocks:           ChargeLocks
+)
 
 object TaxPeriodCharges {
   implicit val fmt: Format[TaxPeriodCharges] = Json.format[TaxPeriodCharges]
 }
 
 case class PaymentLock(
-  status: Boolean,
-  reason: String)
+    status: Boolean,
+    reason: String
+)
 
 object PaymentLock {
   implicit val fmt: Format[PaymentLock] = Json.format[PaymentLock]
 }
 
 case class ChargeLocks(
-  paymentLock: PaymentLock,
-  clearingLock: PaymentLock,
-  interestLock: PaymentLock,
-  dunningLock: PaymentLock,
-  disallowedLock: PaymentLock)
+    paymentLock:    PaymentLock,
+    clearingLock:   PaymentLock,
+    interestLock:   PaymentLock,
+    dunningLock:    PaymentLock,
+    disallowedLock: PaymentLock
+)
 
 object ChargeLocks {
   implicit val fmt: Format[ChargeLocks] = Json.format[ChargeLocks]
