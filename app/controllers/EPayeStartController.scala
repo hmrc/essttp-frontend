@@ -91,7 +91,7 @@ class EPayeStartController @Inject() (
             case YouAlreadyHaveAPaymentPlan => (Messages.NotEligible.`You already have a payment plan with HMRC`, existingPaymentPlanPartial())
             case DebtIsTooLarge             => (Messages.NotEligible.`Call us`, debtTooLargePartial())
             case DebtIsTooOld               => (Messages.NotEligible.`Call us`, debtTooOldPartial())
-            case ReturnsAreNotUpToDate      => (Messages.NotEligible.`File your return`, returnsNotUpToDatePartial())
+            case ReturnsAreNotUpToDate      => (Messages.NotEligible.`File your return to use this service`, returnsNotUpToDatePartial())
             case OutstandingPenalty | PayeIsInsolvent | PayeHasDisallowedCharges |
               RLSFlagIsSet => genericIneligiblePageInfo
           }
