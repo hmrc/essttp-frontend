@@ -18,7 +18,7 @@ lazy val root = (project in file("."))
   .settings(majorVersion := 0)
   .settings(ThisBuild / useSuperShell:= false)
   .settings(
-    scalaVersion := "2.12.13",
+    scalaVersion := "2.12.12",
     name := appName,
     PlayKeys.playDefaultPort := 9215,
     ScoverageKeys.coverageExcludedFiles := "<empty>;Reverse.*;.*components.*;" +
@@ -49,6 +49,8 @@ lazy val root = (project in file("."))
   .settings(wartRemoverSettings: _*)
   .settings(
     wartremoverExcluded ++= (Compile / routes).value,
+    Compile / doc / wartremoverErrors := Seq(),
+    Compile / doc / scalacOptions := Seq() //this will allow to have warnings in `doc` task
   )
 //Hint: Uncomment below lines if you want to work on both projects in tandem from intellj
 //  .dependsOn(cor)
