@@ -50,7 +50,7 @@ lazy val root = (project in file("."))
   .settings(
     wartremoverExcluded ++= (Compile / routes).value,
   )
-//Hitn: Uncomment below lines if you want to work on both projects in tandem from intellj
+//Hint: Uncomment below lines if you want to work on both projects in tandem from intellj
 //  .dependsOn(cor)
 //  .aggregate(cor)
 //lazy val cor = RootProject(file("../essttp-backend"))
