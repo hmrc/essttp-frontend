@@ -28,9 +28,15 @@
         govukButton: GovukButton,
         govukPanel: GovukPanel,
         formWithCSRF: FormWithCSRF,
-        requestSupport: RequestSupport)
+        requestSupport: RequestSupport
+)
 
-@(answers: UserAnswers, payments: List[MonthlyPayment], paymentReference: String)(implicit request: Request[_])
+@(
+        answers: UserAnswers,
+        payments: List[MonthlyPayment],
+        paymentReference: String)(implicit
+        request: Request[_]
+)
 
 @import requestSupport._
 
