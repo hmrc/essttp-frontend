@@ -95,7 +95,7 @@ class TestOnlyController @Inject() (
 
   def routeCall(auth: String, enrolments: List[Enrolment], call: Call): Future[Result] = {
     if (auth == "none") {
-      Future.successful(Redirect(call).withNewSession)
+      Future.successful(Redirect(appConfig.BaseUrl.essttpFrontend + call).withNewSession)
     } else {
       implicit val hc = HeaderCarrier()
       val result = for {
