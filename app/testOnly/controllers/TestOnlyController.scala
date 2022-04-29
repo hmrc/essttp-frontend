@@ -102,7 +102,7 @@ class TestOnlyController @Inject() (
         session <- loginService.login(affinityGroup(auth), asEnrolments(enrolments))
       } yield Redirect(appConfig.BaseUrl.essttpFrontend + call.url).withSession(session)
 
-      result.getOrElse(throw new IllegalArgumentException(s"failed to route call $call"))
+      result.foldF(e => Future.failed(e.t), Future.successful(_))
     }
 
   }
