@@ -100,7 +100,7 @@ class TestOnlyController @Inject() (
       implicit val hc = HeaderCarrier()
       val result = for {
         session <- loginService.login(affinityGroup(auth), asEnrolments(enrolments))
-      } yield Redirect(call).withSession(session)
+      } yield Redirect(appConfig.BaseUrl.essttpFrontend + call.url).withSession(session)
 
       result.getOrElse(throw new IllegalArgumentException(s"failed to route call $call"))
     }
