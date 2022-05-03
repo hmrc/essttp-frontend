@@ -18,8 +18,8 @@ package controllers
 
 import _root_.actions.Actions
 import config.AppConfig
-import controllers.InstalmentsController.{ calculateOptions, instalmentsForm }
-import models.{ InstalmentOption, Journey }
+import controllers.InstalmentsController.{ instalmentsForm, mockApi }
+import models.{ InstalmentOption, MockJourney, UserAnswers }
 import moveittocor.corcommon.model.AmountInPence
 import play.api.data.Forms.{ mapping, nonEmptyText }
 import play.api.data.Form
@@ -41,23 +41,21 @@ class InstalmentsController @Inject() (
   extends FrontendController(mcc)
   with Logging {
 
-  val instalmentOptions: Action[AnyContent] = as.getJourney.async { implicit request =>
-    Future.successful(Ok(instalmentOptionsPage(instalmentsForm(), calculateOptions(request.journey))))
+  val instalmentOptions: Action[AnyContent] = as.default.async { implicit request =>
+    val mockJourney = MockJourney(userAnswers = UserAnswers.empty.copy(affordableAmount = Some(AmountInPence(50000L))))
+    Future.successful(Ok(instalmentOptionsPage(instalmentsForm(), mockApi(mockJourney))))
   }
 
-  val instalmentOptionsSubmit: Action[AnyContent] = as.getJourney.async { implicit request =>
-    val j: Journey = request.journey
+  val instalmentOptionsSubmit: Action[AnyContent] = as.default.async { implicit request =>
+    val j: MockJourney = MockJourney()
     instalmentsForm()
       .bindFromRequest()
       .fold(
         formWithErrors =>
           Future.successful(Ok(
             instalmentOptionsPage(
-              formWithErrors, calculateOptions(j)))),
+              formWithErrors, mockApi(j)))),
         (option: String) => {
-          val options: List[InstalmentOption] = calculateOptions(j)
-          journeyService.upsert(j.copy(userAnswers = j.userAnswers.copy(
-            monthsToPay = Some(options(option.toInt)))))
           Future.successful(Redirect(routes.PaymentScheduleController.checkPaymentSchedule()))
         })
   }
@@ -65,7 +63,7 @@ class InstalmentsController @Inject() (
 }
 
 object InstalmentsController {
-  def calculateOptions(journey: Journey)(implicit appConfig: AppConfig): List[InstalmentOption] = {
+  def mockApi(journey: MockJourney)(implicit appConfig: AppConfig): List[InstalmentOption] = {
     val monthlyInterest: BigDecimal = (appConfig.InterestRates.hmrcRate + appConfig.InterestRates.baseRate) / 12
     val interestPerMonth: BigDecimal = journey.remainingToPay.inPounds * monthlyInterest
     val offerMonths: Int = (journey.remainingToPay.value / journey.userAnswers.getAffordableAmount.value).intValue()

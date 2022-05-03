@@ -16,10 +16,9 @@
 
 package controllers
 
-import cats.syntax.eq._
 import _root_.actions.Actions
 import controllers.UpfrontPaymentController.{ upfrontPaymentAmountForm, upfrontPaymentForm }
-import models.Journey
+import models.{ MockJourney, UserAnswers }
 import models.MoneyUtil.amountOfMoneyFormatter
 import moveittocor.corcommon.model.AmountInPence
 import play.api.data.{ Form, Forms }
@@ -44,56 +43,49 @@ class UpfrontPaymentController @Inject() (
   extends FrontendController(mcc)
   with Logging {
 
-  val upfrontPayment: Action[AnyContent] = as.default { implicit request =>
-    Ok(upfrontPaymentPage(upfrontPaymentForm()))
+  val upfrontPayment: Action[AnyContent] = as.default.async { implicit request =>
+    Future.successful(Ok(upfrontPaymentPage(upfrontPaymentForm())))
   }
 
-  val upfrontPaymentSubmit: Action[AnyContent] = as.getJourney.async { implicit request =>
+  val upfrontPaymentSubmit: Action[AnyContent] = as.default.async { implicit request =>
     upfrontPaymentForm()
       .bindFromRequest()
       .fold(
         formWithErrors =>
           Future.successful(Ok(upfrontPaymentPage(formWithErrors))),
-        (answer: String) => {
-          journeyService.upsert(
-            request.journey.copy(
-              userAnswers = request.journey.userAnswers.copy(
-                hasUpfrontPayment = Some(answer === "Yes"))))
-          answer match {
-            case "Yes" =>
-              Future.successful(Redirect(routes.UpfrontPaymentController.upfrontPaymentAmount()))
-            case _ => Future.successful(Redirect(routes.MonthlyPaymentAmountController.monthlyPaymentAmount()))
-          }
+        {
+          case "Yes" =>
+            Future.successful(Redirect(routes.UpfrontPaymentController.upfrontPaymentAmount()))
+          case _ => Future.successful(Redirect(routes.MonthlyPaymentAmountController.monthlyPaymentAmount()))
         })
 
   }
 
-  val upfrontPaymentAmount: Action[AnyContent] = as.getJourney.async { implicit request =>
-    val form: Form[BigDecimal] = request.journey.userAnswers.upfrontAmount match {
-      case Some(a: AmountInPence) => upfrontPaymentAmountForm(request.journey).fill(a.inPounds)
-      case None => upfrontPaymentAmountForm(request.journey)
-    }
-    Future.successful(Ok(upfrontPaymentAmountPage(form, request.journey.qualifyingDebt, AmountInPence(100L))))
+  val upfrontPaymentAmount: Action[AnyContent] = as.default.async { implicit request =>
+    val mockJourney = MockJourney(userAnswers = UserAnswers.empty.copy(hasUpfrontPayment = Some(true)))
+    Future.successful(Ok(upfrontPaymentAmountPage(upfrontPaymentAmountForm(mockJourney), mockJourney.qualifyingDebt, AmountInPence(100L))))
   }
 
-  val upfrontPaymentAmountSubmit: Action[AnyContent] = as.getJourney.async { implicit request =>
-    upfrontPaymentAmountForm(request.journey)
+  val upfrontPaymentAmountSubmit: Action[AnyContent] = as.default.async { implicit request =>
+    val mockJourney = MockJourney(userAnswers = UserAnswers.empty)
+    upfrontPaymentAmountForm(mockJourney)
       .bindFromRequest()
       .fold(
         formWithErrors =>
-          Future.successful(Ok(upfrontPaymentAmountPage(formWithErrors, request.journey.qualifyingDebt, AmountInPence(100L)))),
+          Future.successful(Ok(upfrontPaymentAmountPage(formWithErrors, mockJourney.qualifyingDebt, AmountInPence(100L)))),
         (s: BigDecimal) => {
-          journeyService.upsert(
-            request.journey.copy(
-              remainingToPay = AmountInPence(request.journey.qualifyingDebt.value - (s.longValue() * 100)),
-              userAnswers = request.journey.userAnswers.copy(
-                upfrontAmount = Some(AmountInPence((s * 100).longValue())))))
+          /* TODO: compute what is remaining to pay by subtracting "s" from the initial qualifying debt amount
+             and write to session store
+           */
           Future(Redirect(routes.UpfrontPaymentController.upfrontSummary()))
         })
   }
 
-  val upfrontSummary: Action[AnyContent] = as.getJourney.async { implicit request =>
-    Future.successful(Ok(upfrontSummaryPage(request.journey.userAnswers, request.journey.remainingToPay)))
+  val upfrontSummary: Action[AnyContent] = as.default.async { implicit request =>
+    val mockUserAnswers = UserAnswers.empty.copy(
+      hasUpfrontPayment = Some(true),
+      upfrontAmount = Some(AmountInPence(10000L)))
+    Future.successful(Ok(upfrontSummaryPage(mockUserAnswers, AmountInPence(200000L))))
   }
 }
 
@@ -104,7 +96,8 @@ object UpfrontPaymentController {
     mapping(
       "UpfrontPayment" -> nonEmptyText)(identity)(Some(_)))
 
-  def upfrontPaymentAmountForm(journey: Journey): Form[BigDecimal] = Form(
+  def upfrontPaymentAmountForm(journey: MockJourney): Form[BigDecimal] = Form(
     mapping(
       key -> Forms.of(amountOfMoneyFormatter(AmountInPence(100L).inPounds > _, journey.qualifyingDebt.inPounds < _)))(identity)(Some(_)))
+
 }

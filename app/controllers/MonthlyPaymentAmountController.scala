@@ -18,7 +18,7 @@ package controllers
 
 import _root_.actions.Actions
 import controllers.MonthlyPaymentAmountController._
-import models.Journey
+import models.{ MockJourney }
 import models.MoneyUtil._
 import moveittocor.corcommon.model.AmountInPence
 import play.api.data.{ Form, Forms }
@@ -40,30 +40,24 @@ class MonthlyPaymentAmountController @Inject() (
   extends FrontendController(mcc)
   with Logging {
 
-  val monthlyPaymentAmount: Action[AnyContent] = as.getJourney.async { implicit request =>
-    val form: Form[BigDecimal] = request.journey.userAnswers.affordableAmount match {
-      case Some(a: AmountInPence) => monthlyPaymentAmountForm(request.journey).fill(a.inPounds)
-      case _ => monthlyPaymentAmountForm(request.journey)
-    }
+  val monthlyPaymentAmount: Action[AnyContent] = as.default.async { implicit request =>
+    val mockJourney = MockJourney()
     Future.successful(Ok(monthlyPaymentAmountPage(
-      form,
-      request.journey.remainingToPay,
-      AmountInPence(request.journey.remainingToPay.value / 6))))
+      monthlyPaymentAmountForm(mockJourney),
+      mockJourney.remainingToPay,
+      AmountInPence(mockJourney.remainingToPay.value / 6))))
   }
 
-  val monthlyPaymentAmountSubmit: Action[AnyContent] = as.getJourney.async { implicit request =>
-    monthlyPaymentAmountForm(request.journey)
+  val monthlyPaymentAmountSubmit: Action[AnyContent] = as.default.async { implicit request =>
+    val mockJourney = MockJourney()
+    monthlyPaymentAmountForm(MockJourney())
       .bindFromRequest()
       .fold(
         formWithErrors =>
           Future.successful(Ok(
             monthlyPaymentAmountPage(
-              formWithErrors, request.journey.remainingToPay, AmountInPence(request.journey.remainingToPay.value / 6)))),
+              formWithErrors, mockJourney.remainingToPay, AmountInPence(mockJourney.remainingToPay.value / 6)))),
         (s: BigDecimal) => {
-          journeyService.upsert(
-            request.journey.copy(
-              userAnswers = request.journey.userAnswers.copy(
-                affordableAmount = Some(AmountInPence((s * 100).longValue())))))
           Future(Redirect(routes.PaymentDayController.paymentDay()))
         })
   }
@@ -72,7 +66,7 @@ class MonthlyPaymentAmountController @Inject() (
 object MonthlyPaymentAmountController {
   val key: String = "MonthlyPaymentAmount"
 
-  def monthlyPaymentAmountForm(journey: Journey): Form[BigDecimal] = Form(
+  def monthlyPaymentAmountForm(journey: MockJourney): Form[BigDecimal] = Form(
     mapping(
       key -> Forms.of(amountOfMoneyFormatter(AmountInPence(journey.remainingToPay.value / 6).inPounds > _, journey.remainingToPay.inPounds < _)))(identity)(Some(_)))
 }
