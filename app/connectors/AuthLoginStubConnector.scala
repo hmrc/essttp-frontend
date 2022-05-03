@@ -18,14 +18,14 @@ package connectors
 import cats.data.EitherT
 import com.google.inject.Inject
 import config.AppConfig
-import connectors.AuthLoginStubConnector.{ ACR, StubException, wrapException, wrapResponse }
+import connectors.AuthLoginStubConnector.{ACR, StubException, wrapException, wrapResponse}
 import play.api.Configuration
-import play.api.libs.ws.{ WSClient, WSResponse }
+import play.api.libs.ws.{WSClient, WSResponse}
 import services.AuthLoginStubService.LoginData
 import uk.gov.hmrc.http.HeaderCarrier
 import util.StringUtils.StringOps
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 trait AuthLoginStubConnector {
@@ -36,9 +36,7 @@ trait AuthLoginStubConnector {
 
 class AuthLoginStubConnectorImpl @Inject() (config: AppConfig, ws: WSClient)(implicit ec: ExecutionContext) extends AuthLoginStubConnector {
 
-  private val authLoginStubUrl: String = {
-    config.loginUrl
-  }
+  private val authLoginUrl = config.BaseUrl.gg
 
   private def requestFormBody(loginData: LoginData): Map[String, String] = {
     val enrolmentIdentifier = loginData.enrolment.flatMap(_.identifiers.headOption)
@@ -55,13 +53,14 @@ class AuthLoginStubConnectorImpl @Inject() (config: AppConfig, ws: WSClient)(imp
       "enrolment[0].name" -> loginData.enrolment.map(_.key),
       "enrolment[0].taxIdentifier[0].name" -> enrolmentIdentifier.map(_.key),
       "enrolment[0].taxIdentifier[0].value" -> enrolmentIdentifier.map(_.value),
-      "enrolment[0].state" -> loginData.enrolment.map(_.state)).collect { case (k, Some(v)) => k -> v }.toMap
+      "enrolment[0].state" -> loginData.enrolment.map(_.state)
+    ).collect { case (k, Some(v)) => k -> v }.toMap
   }
 
   override def login(loginData: LoginData)(implicit hc: HeaderCarrier): ACR[WSResponse] = {
     val formData =
       requestFormBody(loginData).map { case (k, v) => s"${k.urlEncode}=${v.urlEncode}" }.mkString("&")
-    val result: Future[Either[StubException, WSResponse]] = ws.url(authLoginStubUrl)
+    val result: Future[Either[StubException, WSResponse]] = ws.url(authLoginUrl)
       .withFollowRedirects(false)
       .withHttpHeaders("Content-Type" -> "application/x-www-form-urlencoded")
       .post(formData)
@@ -98,7 +97,8 @@ object AuthLoginStubConnector {
       "enrolment[0].name" -> loginData.enrolment.map(_.key),
       "enrolment[0].taxIdentifier[0].name" -> enrolmentIdentifier.map(_.key),
       "enrolment[0].taxIdentifier[0].value" -> enrolmentIdentifier.map(_.value),
-      "enrolment[0].state" -> loginData.enrolment.map(_.state)).collect { case (k, Some(v)) => k -> v }.toMap
+      "enrolment[0].state" -> loginData.enrolment.map(_.state)
+    ).collect { case (k, Some(v)) => k -> v }.toMap
   }
 
 }

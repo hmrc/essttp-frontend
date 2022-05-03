@@ -16,7 +16,7 @@
 
 package controllers
 
-import play.api.mvc.{ AnyContentAsEmpty, Result }
+import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import testsupport.ItSpec
 import play.api.test.Helpers._

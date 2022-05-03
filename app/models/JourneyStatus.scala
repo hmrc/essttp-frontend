@@ -16,7 +16,7 @@
 
 package models
 
-import enumeratum.{ Enum, _ }
+import enumeratum.{Enum, _}
 import moveittocor.corcommon.internal.jsonext.EnumFormat
 import play.api.libs.json.Format
 

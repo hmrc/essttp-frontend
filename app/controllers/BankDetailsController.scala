@@ -25,19 +25,20 @@ import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
-import views.html.{ BankDetailsSummary, SetUpBankDetails, TermsAndConditions }
+import views.html.{BankDetailsSummary, SetUpBankDetails, TermsAndConditions}
 
-import javax.inject.{ Inject, Singleton }
-import scala.concurrent.{ ExecutionContext, Future }
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class BankDetailsController @Inject() (
-  as: Actions,
-  bankDetailsPage: SetUpBankDetails,
-  checkBankDetailsPage: BankDetailsSummary,
-  termsPage: TermsAndConditions,
-  journeyService: JourneyService,
-  mcc: MessagesControllerComponents)(implicit ec: ExecutionContext)
+    as:                   Actions,
+    bankDetailsPage:      SetUpBankDetails,
+    checkBankDetailsPage: BankDetailsSummary,
+    termsPage:            TermsAndConditions,
+    journeyService:       JourneyService,
+    mcc:                  MessagesControllerComponents
+)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 
@@ -53,7 +54,8 @@ class BankDetailsController @Inject() (
         formWithErrors => Future.successful(Ok(bankDetailsPage(formWithErrors))),
         (bankDetails: BankDetails) => {
           Future.successful(Redirect(routes.BankDetailsController.checkBankDetails()))
-        })
+        }
+      )
   }
 
   val checkBankDetails: Action[AnyContent] = as.default.async { implicit request =>
@@ -73,7 +75,9 @@ object BankDetailsController {
     mapping(
       "name" -> nonEmptyText(maxLength = 100),
       "sortCode" -> sortCodeMapping,
-      "accountNumber" -> accountNumberMapping)(BankDetails.apply)(BankDetails.unapply))
+      "accountNumber" -> accountNumberMapping
+    )(BankDetails.apply)(BankDetails.unapply)
+  )
 
   private val sortCodeRegex = "^[0-9]{6}$"
 
@@ -86,7 +90,8 @@ object BankDetailsController {
   private val sortCodeMapping = nonEmptyText
     .transform[SortCode](
       s => SortCode(s.replaceAllLiterally("-", "").replaceAll("\\s", "")),
-      _.value)
+      _.value
+    )
     .verifying(sortCodeContstraint)
 
   private val accountNumberRegex = "^[0-9]{6,8}$"
@@ -100,7 +105,8 @@ object BankDetailsController {
   private val accountNumberMapping = nonEmptyText
     .transform[AccountNumber](
       s => AccountNumber(s.replaceAll("\\s", "")),
-      _.value)
+      _.value
+    )
     .verifying(accountNumberConstraint)
 
 }

@@ -22,37 +22,38 @@ import connectors.EligibilityStubConnector
 import essttp.rootmodel.TaxRegime
 import models.ttp
 import models.ttp._
-import play.api.data.Forms.{ mapping, nonEmptyText, text }
-import play.api.data.{ Form, Forms }
-import play.api.libs.json.{ Format, Json }
+import play.api.data.Forms.{mapping, nonEmptyText, text}
+import play.api.data.{Form, Forms}
+import play.api.libs.json.{Format, Json}
 import play.api.mvc._
 import services.AuthLoginStubService
 import testOnly.controllers.TestOnlyController._
-import testOnly.models.Enrolment.{ EPAYE, VAT }
-import testOnly.models.TestOnlyJourney.{ EpayeFromBTA, EpayeFromGovUk, EpayeNoOrigin, VATFromBTA, VATFromGovUk, VATNoOrigin }
-import testOnly.models.{ EligibilityError, Enrolment, TestOnlyJourney }
+import testOnly.models.Enrolment.{EPAYE, VAT}
+import testOnly.models.TestOnlyJourney.{EpayeFromBTA, EpayeFromGovUk, EpayeNoOrigin, VATFromBTA, VATFromGovUk, VATNoOrigin}
+import testOnly.models.{EligibilityError, Enrolment, TestOnlyJourney}
 import testOnly.views.html.TestOnlyStart
-import uk.gov.hmrc.auth.core.{ AffinityGroup, EnrolmentIdentifier, Enrolment => CEnrolment }
+import uk.gov.hmrc.auth.core.{AffinityGroup, EnrolmentIdentifier, Enrolment => CEnrolment}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 
-import javax.inject.{ Inject, Singleton }
-import scala.concurrent.{ ExecutionContext, Future }
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class TestOnlyController @Inject() (
-  as: Actions,
-  appConfig: AppConfig,
-  loginService: AuthLoginStubService,
-  stub: EligibilityStubConnector,
-  mcc: MessagesControllerComponents,
-  testOnlyPage: TestOnlyStart)(implicit ec: ExecutionContext)
+    as:           Actions,
+    appConfig:    AppConfig,
+    loginService: AuthLoginStubService,
+    stub:         EligibilityStubConnector,
+    mcc:          MessagesControllerComponents,
+    testOnlyPage: TestOnlyStart
+)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 
   val login = as.default { implicit request =>
-    val loginUrl = appConfig.BaseUrl.authLoginStub
+    val loginUrl = appConfig.BaseUrl.gg
     Redirect(loginUrl)
   }
 
@@ -75,31 +76,33 @@ class TestOnlyController @Inject() (
         (p: TestOnlyForm) => {
           val journey: TestOnlyJourney = p.origin match {
             case "paye_govuk" => EpayeFromGovUk
-            case "paye_bta" => EpayeFromBTA
-            case "paye_none" => EpayeNoOrigin
-            case "vat_govuk" => VATFromGovUk
-            case "vat_bta" => VATFromBTA
-            case "vat_none" => VATNoOrigin
-            case _ => sys.error("unable to start a journey without an origin")
+            case "paye_bta"   => EpayeFromBTA
+            case "paye_none"  => EpayeNoOrigin
+            case "vat_govuk"  => VATFromGovUk
+            case "vat_bta"    => VATFromBTA
+            case "vat_none"   => VATNoOrigin
+            case _            => sys.error("unable to start a journey without an origin")
           }
           val enrolmentMap: Map[String, Enrolment] = Map(
             "EPAYE" -> EPAYE,
-            "VAT" -> VAT)
+            "VAT" -> VAT
+          )
 
           startJourney(p.auth, p.enrolments.map(enrolmentMap).toList, p.eligibilityErrors.map(EligibilityError.withName).toList, journey)
-        })
+        }
+      )
   }
 
   def routeCall(auth: String, enrolments: List[Enrolment], call: Call): Future[Result] = {
     if (auth == "none") {
-      Future.successful(Redirect(call).withNewSession)
+      Future.successful(Redirect(appConfig.BaseUrl.essttpFrontend + call).withNewSession)
     } else {
       implicit val hc = HeaderCarrier()
       val result = for {
         session <- loginService.login(affinityGroup(auth), asEnrolments(enrolments))
-      } yield Redirect(call).withSession(session)
+      } yield Redirect(appConfig.BaseUrl.essttpFrontend + call.url).withSession(session)
 
-      result.getOrElse(throw new IllegalArgumentException(s"failed to route call $call"))
+      result.foldF(e => Future.failed(e.t), Future.successful(_))
     }
 
   }
@@ -148,11 +151,11 @@ class TestOnlyController @Inject() (
   def startJourney(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError], jt: TestOnlyJourney)(implicit hc: HeaderCarrier): Future[Result] = {
     jt match {
       case EpayeFromGovUk => govUkEpayeLandingPage(auth, enrolments, eligibilityErrors)
-      case EpayeFromBTA => btaEpayeLandingPage(auth, enrolments, eligibilityErrors)
-      case EpayeNoOrigin => noOriginEpayeLandingPage(auth, enrolments, eligibilityErrors)
-      case VATFromGovUk => govUkVatLandingPage(auth, enrolments, eligibilityErrors)
-      case VATFromBTA => btaVatLandingPage(auth, enrolments, eligibilityErrors)
-      case VATNoOrigin => noOriginVatLandingPage(auth, enrolments, eligibilityErrors)
+      case EpayeFromBTA   => btaEpayeLandingPage(auth, enrolments, eligibilityErrors)
+      case EpayeNoOrigin  => noOriginEpayeLandingPage(auth, enrolments, eligibilityErrors)
+      case VATFromGovUk   => govUkVatLandingPage(auth, enrolments, eligibilityErrors)
+      case VATFromBTA     => btaVatLandingPage(auth, enrolments, eligibilityErrors)
+      case VATNoOrigin    => noOriginVatLandingPage(auth, enrolments, eligibilityErrors)
     }
   }
 
@@ -162,22 +165,26 @@ object TestOnlyController {
   import play.api.data.Form
 
   case class TestOnlyForm(
-    auth: String,
-    enrolments: Seq[String],
-    origin: String,
-    eligibilityErrors: Seq[String])
+      auth:              String,
+      enrolments:        Seq[String],
+      origin:            String,
+      eligibilityErrors: Seq[String]
+  )
 
   case class TestOnlyRequest(
-    auth: String,
-    enrolments: List[Enrolment],
-    journey: TestOnlyJourney)
+      auth:       String,
+      enrolments: List[Enrolment],
+      journey:    TestOnlyJourney
+  )
 
   def testOnlyForm(): Form[TestOnlyForm] = Form(
     mapping(
       "auth" -> nonEmptyText,
       "enrolments" -> Forms.seq(text),
       "origin" -> nonEmptyText,
-      "eligibilityErrors" -> Forms.seq(text))(TestOnlyForm.apply)(TestOnlyForm.unapply))
+      "eligibilityErrors" -> Forms.seq(text)
+    )(TestOnlyForm.apply)(TestOnlyForm.unapply)
+  )
 
   case class AuthRequest(auth: String, enrolments: List[Enrolment])
 
@@ -187,13 +194,13 @@ object TestOnlyController {
 
   def affinityGroup(auth: String): AffinityGroup = auth match {
     case "Organisation" => AffinityGroup.Organisation
-    case "Individual" => AffinityGroup.Individual
+    case "Individual"   => AffinityGroup.Individual
   }
 
   def asEnrolments(l: List[Enrolment]): List[CEnrolment] = {
     l.map {
       case EPAYE => CEnrolment("IR-PAYE", Seq(EnrolmentIdentifier("TaxOfficeReference", "123AAAABBB")), "Activated")
-      case VAT => CEnrolment("IR-VAT", Seq(EnrolmentIdentifier("TaxOfficeReference", "123AAAABBB")), "Activated")
+      case VAT   => CEnrolment("IR-VAT", Seq(EnrolmentIdentifier("TaxOfficeReference", "123AAAABBB")), "Activated")
     }
   }
 
@@ -213,10 +220,13 @@ object TestOnlyController {
         PaymentLock(false, ""),
         PaymentLock(false, ""),
         PaymentLock(false, ""),
-        PaymentLock(false, "")))
+        PaymentLock(false, "")
+      )
+    )
 
     val chargeTypeAssessments: List[ChargeTypeAssessment] = List(
-      ChargeTypeAssessment("2020-08-13", "2020-08-14", 300000, List(taxPeriodCharges)))
+      ChargeTypeAssessment("2020-08-13", "2020-08-14", 300000, List(taxPeriodCharges))
+    )
 
     TtpEligibilityData(
       "SSTTP",
@@ -227,7 +237,8 @@ object TestOnlyController {
       EligibilityStatus(false, 1, 6),
       EligibilityRules(false, "Receiver is not known", false, false, false, false, false, 300, 600, false, false, false),
       FinancialLimitBreached(true, 16000),
-      chargeTypeAssessments)
+      chargeTypeAssessments
+    )
   }
 
 }

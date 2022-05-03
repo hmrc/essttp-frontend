@@ -19,29 +19,32 @@ package actions
 import com.google.inject.Inject
 import config.AppConfig
 import play.api.Logger
-import play.api.mvc.Results.{ BadRequest, Ok, Redirect }
-import play.api.mvc.{ ActionRefiner, MessagesControllerComponents, Request, Result, WrappedRequest }
+import play.api.mvc.Results.{BadRequest, Ok, Redirect}
+import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Request, Result, WrappedRequest}
 import uk.gov.hmrc.auth.core.AffinityGroup.Individual
-import uk.gov.hmrc.auth.core.{ AuthorisationException, AuthorisedFunctions, Enrolments, NoActiveSession }
+import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions, Enrolments, NoActiveSession}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.retrieve.{ Credentials, ~ }
+import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 final class AuthenticatedRequest[A](
-  val request: Request[A],
-  val enrolments: Enrolments,
-  val credentials: Option[Credentials]) extends WrappedRequest[A](request) {
+    val request:     Request[A],
+    val enrolments:  Enrolments,
+    val credentials: Option[Credentials]
+) extends WrappedRequest[A](request) {
 
   lazy val hasActiveSaEnrolment: Boolean = enrolments.enrolments.exists(e => e.key == "IR-SA" && e.isActivated)
 }
 
 class AuthenticatedAction @Inject() (
-  af: AuthorisedFunctions,
-  appConfig: AppConfig,
-  cc: MessagesControllerComponents)(
-  implicit
-  ec: ExecutionContext) extends ActionRefiner[Request, AuthenticatedRequest] {
+    af:        AuthorisedFunctions,
+    appConfig: AppConfig,
+    cc:        MessagesControllerComponents
+)(
+    implicit
+    ec: ExecutionContext
+) extends ActionRefiner[Request, AuthenticatedRequest] {
 
   private val logger = Logger(getClass)
 
@@ -51,10 +54,12 @@ class AuthenticatedAction @Inject() (
     implicit val r: Request[A] = request
 
     af.authorised.retrieve(
-      Retrievals.allEnrolments and Retrievals.credentials).apply {
+      Retrievals.allEnrolments and Retrievals.credentials
+    ).apply {
         case enrolments ~ credentials =>
           Future.successful(
-            Right(new AuthenticatedRequest[A](request, enrolments, credentials)))
+            Right(new AuthenticatedRequest[A](request, enrolments, credentials))
+          )
       }.recover {
         case _: NoActiveSession => loginPage
         case e: AuthorisationException =>
@@ -64,8 +69,9 @@ class AuthenticatedAction @Inject() (
   }
 
   def loginPage(implicit request: Request[_]) = Left(Redirect(
-    appConfig.loginUrl,
-    Map("continue" -> Seq(appConfig.BaseUrl.essttpFrontend + request.uri), "origin" -> Seq("supp"))))
+    appConfig.BaseUrl.gg,
+    Map("continue" -> Seq(appConfig.BaseUrl.essttpFrontend + request.uri), "origin" -> Seq("supp"))
+  ))
 
   override protected def executionContext: ExecutionContext = cc.executionContext
 

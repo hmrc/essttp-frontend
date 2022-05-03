@@ -21,23 +21,24 @@ import config.AppConfig
 import controllers.InstalmentsController.{ instalmentsForm, mockApi }
 import models.{ InstalmentOption, MockJourney, UserAnswers }
 import moveittocor.corcommon.model.AmountInPence
-import play.api.data.Forms.{ mapping, nonEmptyText }
+import play.api.data.Forms.{mapping, nonEmptyText}
 import play.api.data.Form
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.InstalmentOptions
 
-import javax.inject.{ Inject, Singleton }
-import scala.concurrent.{ ExecutionContext, Future }
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class InstalmentsController @Inject() (
-  as: Actions,
-  mcc: MessagesControllerComponents,
-  journeyService: JourneyService,
-  instalmentOptionsPage: InstalmentOptions)(implicit ec: ExecutionContext, appConfig: AppConfig)
+    as:                    Actions,
+    mcc:                   MessagesControllerComponents,
+    journeyService:        JourneyService,
+    instalmentOptionsPage: InstalmentOptions
+)(implicit ec: ExecutionContext, appConfig: AppConfig)
   extends FrontendController(mcc)
   with Logging {
 
@@ -57,7 +58,8 @@ class InstalmentsController @Inject() (
               formWithErrors, mockApi(j)))),
         (option: String) => {
           Future.successful(Redirect(routes.PaymentScheduleController.checkPaymentSchedule()))
-        })
+        }
+      )
   }
 
 }
@@ -72,23 +74,29 @@ object InstalmentsController {
     val month3 = if (offerMonths > 1) offerMonths + 1 else offerMonths + 2
     List(
       InstalmentOption(
-        numberOfMonths = month1,
+        numberOfMonths       = month1,
         amountToPayEachMonth = AmountInPence(journey.remainingToPay.value / month1),
-        interestPayment = AmountInPence(interestPerMonth.longValue() * month1)),
+        interestPayment      = AmountInPence(interestPerMonth.longValue() * month1)
+      ),
       InstalmentOption(
-        numberOfMonths = month2,
+        numberOfMonths       = month2,
         amountToPayEachMonth = AmountInPence(journey.remainingToPay.value / month2),
-        interestPayment = AmountInPence(interestPerMonth.longValue() * month2)),
+        interestPayment      = AmountInPence(interestPerMonth.longValue() * month2)
+      ),
       InstalmentOption(
-        numberOfMonths = month3,
+        numberOfMonths       = month3,
         amountToPayEachMonth = AmountInPence(journey.remainingToPay.value / month3),
-        interestPayment = AmountInPence(interestPerMonth.longValue() * month3)))
+        interestPayment      = AmountInPence(interestPerMonth.longValue() * month3)
+      )
+    )
   }
 
   val key: String = "Instalments"
 
   def instalmentsForm(): Form[String] = Form(
     mapping(
-      key -> nonEmptyText)(identity)(Some(_)))
+      key -> nonEmptyText
+    )(identity)(Some(_))
+  )
 
 }

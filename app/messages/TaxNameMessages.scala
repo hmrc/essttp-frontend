@@ -19,65 +19,79 @@ package messages
 object TaxNameMessages {
   val self_assessment_tax_name: Message = Message(
     english = "Self Assessment",
-    welsh = "Hunanasesiad")
+    welsh   = "Hunanasesiad"
+  )
 
   val epaye_tax_name: Message = Message(
     english = "Employers’ PAYE and National Insurance",
-    welsh = "TWE ac Yswiriant Gwladol y Cyflogwr")
+    welsh   = "TWE ac Yswiriant Gwladol y Cyflogwr"
+  )
 
   val paye_penalty_tax_name: Message = Message(
     english = "PAYE late payment or filing penalty",
-    welsh = "Am dalu neu gyflwyno TWE yn hwyr")
+    welsh   = "Am dalu neu gyflwyno TWE yn hwyr"
+  )
 
   val paye_interest_tax_name: Message = Message(
     english = "Employers’ PAYE interest payment",
-    welsh = "Taliad llog TWE cyflogwr")
+    welsh   = "Taliad llog TWE cyflogwr"
+  )
 
   val paye_settlement_tax_name: Message = Message(
     english = "Employers’ PAYE Settlement Agreement",
-    welsh = "Cytundeb Setliad TWE y Cyflogwr")
+    welsh   = "Cytundeb Setliad TWE y Cyflogwr"
+  )
 
   val paye_late_cis_tax_name: Message = Message(
     english = "Construction Industry Scheme late filing penalty",
-    welsh = "Cynllun y Diwydiant Adeiladu (CIS) - cosb am dalu'n hwyr")
+    welsh   = "Cynllun y Diwydiant Adeiladu (CIS) - cosb am dalu'n hwyr"
+  )
 
   val class_1a_ni_tax_name: Message = Message(
     english = "Employers’ Class 1A National Insurance",
-    welsh = "Yswiriant Gwladol Dosbarth 1A y Cyflogwr")
+    welsh   = "Yswiriant Gwladol Dosbarth 1A y Cyflogwr"
+  )
 
   val vat_tax_name: Message = Message(
     english = "VAT",
-    welsh = "TAW")
+    welsh   = "TAW"
+  )
 
   val corporation_tax_tax_name: Message = Message(
     english = "Corporation Tax",
-    welsh = "Treth Gorfforaeth")
+    welsh   = "Treth Gorfforaeth"
+  )
 
   val cgt_tax_name: Message = Message(
     english = "Capital Gains Tax on UK property",
-    welsh = "Treth Enillion Cyfalaf ar eiddo yn y DU")
+    welsh   = "Treth Enillion Cyfalaf ar eiddo yn y DU"
+  )
 
   val simpleAssessment_tax_name: Message = Message(
     english = "Simple Assessment",
-    welsh = "Asesiad Syml")
+    welsh   = "Asesiad Syml"
+  )
 
   val ni_eu_vat_oss_tax_name: Message = Message(english = "VAT One Stop Shop Union Scheme")
 
   val bioFuels_tax_name: Message = Message(
     english = "Duty on biofuels or gas for road use",
-    welsh = "Toll ar fiodanwyddau neu ar nwy ar gyfer defnydd y ffordd" //This welsh translation might be wrong, I've requested Rachel get a fresh translation
+    welsh   = "Toll ar fiodanwyddau neu ar nwy ar gyfer defnydd y ffordd" //This welsh translation might be wrong, I've requested Rachel get a fresh translation
   )
 
   val sdlt_tax_name: Message = Message(
     english = "Stamp Duty Land Tax",
-    welsh = "Treth Dir y Tollau Stamp")
+    welsh   = "Treth Dir y Tollau Stamp"
+  )
 
   val gbPbRgDuty_name: Message = Message(
     english = "General Betting, Pool Betting or Remote Gaming Duty",
-    welsh = "Toll Betio Cyffredinol, Toll Cronfa Fetio neu Doll Hapchwarae o Bell")
+    welsh   = "Toll Betio Cyffredinol, Toll Cronfa Fetio neu Doll Hapchwarae o Bell"
+  )
 
   val machineGamesDuty_name: Message = Message(
     english = "Machine Games Duty",
-    welsh = "Toll Peiriannau Hapchwarae")
+    welsh   = "Toll Peiriannau Hapchwarae"
+  )
 
 }

@@ -16,7 +16,7 @@
 
 package util
 
-import essttp.rootmodel.{ Aor, TaxId, Vrn }
+import essttp.rootmodel.{Aor, TaxId, Vrn}
 
 object TaxIdUtils {
 

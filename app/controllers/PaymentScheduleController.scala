@@ -22,22 +22,23 @@ import controllers.PaymentScheduleController.mockQuotation
 import messages.DateMessages
 import models.{ InstalmentOption, Journey, MockJourney, UserAnswers }
 import moveittocor.corcommon.model.AmountInPence
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import requests.RequestSupport
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.CheckPaymentSchedule
 
 import java.time.LocalDate
-import javax.inject.{ Inject, Singleton }
-import scala.concurrent.{ ExecutionContext, Future }
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class PaymentScheduleController @Inject() (
-  as: Actions,
-  mcc: MessagesControllerComponents,
-  requestSupport: RequestSupport,
-  paymentSchedulePage: CheckPaymentSchedule)(implicit ec: ExecutionContext)
+    as:                  Actions,
+    mcc:                 MessagesControllerComponents,
+    requestSupport:      RequestSupport,
+    paymentSchedulePage: CheckPaymentSchedule
+)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 

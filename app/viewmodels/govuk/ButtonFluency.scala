@@ -28,7 +28,8 @@ trait ButtonFluency {
     def apply(content: Content): Button =
       Button(
         element = Some("button"),
-        content = content)
+        content = content
+      )
   }
 
   implicit class FluentButton(button: Button) {
@@ -36,12 +37,14 @@ trait ButtonFluency {
     def asLink(href: String): Button =
       button copy (
         element = Some("a"),
-        href = Some(href))
+        href = Some(href)
+      )
 
     def asInput(inputType: String): Button =
       button copy (
         element = Some("input"),
-        inputType = Some(inputType))
+        inputType = Some(inputType)
+      )
 
     def withName(name: String): Button =
       button copy (name = Some(name))

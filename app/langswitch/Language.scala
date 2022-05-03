@@ -16,8 +16,8 @@
 
 package langswitch
 
-import enumeratum.{ Enum, EnumEntry }
-import langswitch.Languages.{ English, Welsh }
+import enumeratum.{Enum, EnumEntry}
+import langswitch.Languages.{English, Welsh}
 import moveittocor.corcommon.internal.ValueClassBinder.valueClassBinder
 import moveittocor.corcommon.internal.jsonext.EnumFormat
 import play.api.i18n.Lang
@@ -42,7 +42,7 @@ object Language {
   def apply(lang: Lang): Language = lang.code match {
     case "en" => English
     case "cy" => Welsh
-    case _ => English //default language is English
+    case _    => English //default language is English
   }
 }
 

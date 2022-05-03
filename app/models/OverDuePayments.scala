@@ -16,12 +16,13 @@
 
 package models
 import moveittocor.corcommon.model.AmountInPence
-import play.api.libs.json.{ Format, Json }
+import play.api.libs.json.{Format, Json}
 import testOnly.models.EligibilityError
 
 final case class OverDuePayments(
-  total: AmountInPence,
-  payments: List[OverduePayment])
+    total:    AmountInPence,
+    payments: List[OverduePayment]
+)
 
 object OverDuePayments {
   implicit val format: Format[OverDuePayments] = Json.format[OverDuePayments]
@@ -29,6 +30,7 @@ object OverDuePayments {
 
 final case class EligibilityData(rejections: List[EligibilityError], overduePayments: OverDuePayments) {
   def hasRejections: Boolean = rejections.nonEmpty
+  def hasMultipleRejections: Boolean = rejections.size > 1
 }
 
 object EligibilityData {

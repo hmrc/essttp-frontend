@@ -22,51 +22,63 @@ object DateMessages {
   //the same as dd MMMM yy
   def january(day: Int, year: String): Message = Message(
     english = s"$day January $year",
-    welsh = s"$day Ionawr $year")
+    welsh   = s"$day Ionawr $year"
+  )
 
   def february(day: Int, year: String): Message = Message(
     english = s"$day February $year",
-    welsh = s"$day Chwefror $year")
+    welsh   = s"$day Chwefror $year"
+  )
 
   def march(day: Int, year: String): Message = Message(
     english = s"$day March $year",
-    welsh = s"$day Mawrth $year")
+    welsh   = s"$day Mawrth $year"
+  )
 
   def april(day: Int, year: String): Message = Message(
     english = s"$day April $year",
-    welsh = s"$day Ebrill $year")
+    welsh   = s"$day Ebrill $year"
+  )
 
   def may(day: Int, year: String): Message = Message(
     english = s"$day May $year",
-    welsh = s"$day Mai $year")
+    welsh   = s"$day Mai $year"
+  )
 
   def june(day: Int, year: String): Message = Message(
     english = s"$day June $year",
-    welsh = s"$day Mehefin $year")
+    welsh   = s"$day Mehefin $year"
+  )
 
   def july(day: Int, year: String): Message = Message(
     english = s"$day July $year",
-    welsh = s"$day Gorffenn $year")
+    welsh   = s"$day Gorffenn $year"
+  )
 
   def august(day: Int, year: String): Message = Message(
     english = s"$day August $year",
-    welsh = s"$day Awst $year")
+    welsh   = s"$day Awst $year"
+  )
 
   def september(day: Int, year: String): Message = Message(
     english = s"$day September $year",
-    welsh = s"$day Medi $year")
+    welsh   = s"$day Medi $year"
+  )
 
   def october(day: Int, year: String): Message = Message(
     english = s"$day October $year",
-    welsh = s"$day Hydref $year")
+    welsh   = s"$day Hydref $year"
+  )
 
   def november(day: Int, year: String): Message = Message(
     english = s"$day November $year",
-    welsh = s"$day Tachwedd $year")
+    welsh   = s"$day Tachwedd $year"
+  )
 
   def december(day: Int, year: String): Message = Message(
     english = s"$day December $year",
-    welsh = s"$day Rhagfyr $year")
+    welsh   = s"$day Rhagfyr $year"
+  )
 
   val monthName: Map[Int, Message] = Map(
     1 -> Message("January"),
@@ -80,7 +92,8 @@ object DateMessages {
     9 -> Message("September"),
     10 -> Message("October"),
     11 -> Message("November"),
-    12 -> Message("December"))
+    12 -> Message("December")
+  )
 
   val shortMonthName: Map[Int, Message] = Map(
     1 -> Message("Jan"),
@@ -94,7 +107,8 @@ object DateMessages {
     9 -> Message("Sep"),
     10 -> Message("Oct"),
     11 -> Message("Nov"),
-    12 -> Message("Dec"))
+    12 -> Message("Dec")
+  )
 
   def getSuffix(day: Int): Message = {
     val j = day % 10

@@ -21,25 +21,26 @@ import controllers.UpfrontPaymentController.{ upfrontPaymentAmountForm, upfrontP
 import models.{ MockJourney, UserAnswers }
 import models.MoneyUtil.amountOfMoneyFormatter
 import moveittocor.corcommon.model.AmountInPence
-import play.api.data.{ Form, Forms }
-import play.api.data.Forms.{ mapping, nonEmptyText }
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import play.api.data.{Form, Forms}
+import play.api.data.Forms.{mapping, nonEmptyText}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
-import views.html.{ UpfrontPayment, UpfrontPaymentAmount, UpfrontSummary }
+import views.html.{UpfrontPayment, UpfrontPaymentAmount, UpfrontSummary}
 
-import javax.inject.{ Inject, Singleton }
-import scala.concurrent.{ ExecutionContext, Future }
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class UpfrontPaymentController @Inject() (
-  as: Actions,
-  mcc: MessagesControllerComponents,
-  journeyService: JourneyService,
-  upfrontPaymentPage: UpfrontPayment,
-  upfrontPaymentAmountPage: UpfrontPaymentAmount,
-  upfrontSummaryPage: UpfrontSummary)(implicit ec: ExecutionContext)
+    as:                       Actions,
+    mcc:                      MessagesControllerComponents,
+    journeyService:           JourneyService,
+    upfrontPaymentPage:       UpfrontPayment,
+    upfrontPaymentAmountPage: UpfrontPaymentAmount,
+    upfrontSummaryPage:       UpfrontSummary
+)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 
@@ -78,7 +79,8 @@ class UpfrontPaymentController @Inject() (
              and write to session store
            */
           Future(Redirect(routes.UpfrontPaymentController.upfrontSummary()))
-        })
+        }
+      )
   }
 
   val upfrontSummary: Action[AnyContent] = as.default.async { implicit request =>
@@ -94,7 +96,9 @@ object UpfrontPaymentController {
 
   def upfrontPaymentForm(): Form[String] = Form(
     mapping(
-      "UpfrontPayment" -> nonEmptyText)(identity)(Some(_)))
+      "UpfrontPayment" -> nonEmptyText
+    )(identity)(Some(_))
+  )
 
   def upfrontPaymentAmountForm(journey: MockJourney): Form[BigDecimal] = Form(
     mapping(

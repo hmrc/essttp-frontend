@@ -22,41 +22,50 @@ object ErrorMessages {
   object NotFound {
     val title: Message = Message(
       english = "Page not found - 404",
-      welsh = "Heb ddod o hyd i’r dudalen – 404")
+      welsh   = "Heb ddod o hyd i’r dudalen – 404"
+    )
     val heading: Message = Message(
       english = "This page can’t be found",
-      welsh = "Ni ellir dod o hyd i’r dudalen hon")
+      welsh   = "Ni ellir dod o hyd i’r dudalen hon"
+    )
 
     val message: Message = Message(
       english = "Please check that you have entered the correct web address.",
-      welsh = "Gwiriwch eich bod wedi nodi’r cyfeiriad gwe cywir.")
+      welsh   = "Gwiriwch eich bod wedi nodi’r cyfeiriad gwe cywir."
+    )
   }
 
   object Unahthorised {
     val `You do not have access to this service`: Message = Message(
       english = "You do not have access to this service",
-      welsh = "Nid oes gennych fynediad at y gwasanaeth hwn")
+      welsh   = "Nid oes gennych fynediad at y gwasanaeth hwn"
+    )
   }
 
   object Gone {
     //TODO: run this message through content designer
     val `The page you are referring does not exist anymore`: Message = Message(
-      english = "The page you are referring does not exist anymore")
+      english = "The page you are referring does not exist anymore"
+    )
   }
 
   val `choose an option`: Message = Message(
     english = "Select whether to manage your accounts or track a VAT repayment",
-    welsh = "Dewiswch a ydych am reoli’ch cyfrifon neu olrhain ad-daliad TAW")
+    welsh   = "Dewiswch a ydych am reoli’ch cyfrifon neu olrhain ad-daliad TAW"
+  )
 
   val `general error title`: Message = Message(
     english = "Sorry, there is a problem with the service",
-    welsh = "Mae’n ddrwg gennym – mae problem gyda’r gwasanaeth")
+    welsh   = "Mae’n ddrwg gennym – mae problem gyda’r gwasanaeth"
+  )
 
   val `try again later`: Message = Message(
     english = "Try again later.",
-    welsh = "Rhowch gynnig arall arni yn nes ymlaen.")
+    welsh   = "Rhowch gynnig arall arni yn nes ymlaen."
+  )
 
   val `Error`: Message = Message(
-    english = "Error")
+    english = "Error"
+  )
 
 }

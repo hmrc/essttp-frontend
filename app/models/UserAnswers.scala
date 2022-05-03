@@ -18,21 +18,22 @@ package models
 
 import cats.implicits.catsSyntaxEq
 import moveittocor.corcommon.model.AmountInPence
-import play.api.libs.json.{ Format, Json }
+import play.api.libs.json.{Format, Json}
 
 case class UserAnswers(
-  hasUpfrontPayment: Option[Boolean],
-  upfrontAmount: Option[AmountInPence],
-  affordableAmount: Option[AmountInPence],
-  paymentDay: Option[String],
-  differentDay: Option[Int],
-  monthsToPay: Option[InstalmentOption],
-  bankDetails: Option[BankDetails]) {
+    hasUpfrontPayment: Option[Boolean],
+    upfrontAmount:     Option[AmountInPence],
+    affordableAmount:  Option[AmountInPence],
+    paymentDay:        Option[String],
+    differentDay:      Option[Int],
+    monthsToPay:       Option[InstalmentOption],
+    bankDetails:       Option[BankDetails]
+) {
   def getAffordableAmount: AmountInPence = affordableAmount.getOrElse(sys.error("trying to get non-existent affordable amount"))
   def getMonthsToPay: InstalmentOption = monthsToPay.getOrElse(sys.error("trying to get non-existent months to pay"))
   def getPaymentDay: Int = paymentDay match {
     case Some(s: String) => if (s === "28") 28 else differentDay.getOrElse(sys.error("trying to get non-existent payment day"))
-    case None => sys.error("trying to get non-existent payment day")
+    case None            => sys.error("trying to get non-existent payment day")
   }
   def getHasUpfrontPayment: String = hasUpfrontPayment match {
     case Some(b: Boolean) => if (b) "Yes" else "No"
