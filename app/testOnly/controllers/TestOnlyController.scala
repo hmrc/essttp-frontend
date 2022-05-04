@@ -95,12 +95,12 @@ class TestOnlyController @Inject() (
 
   def routeCall(auth: String, enrolments: List[Enrolment], call: Call): Future[Result] = {
     if (auth == "none") {
-      Future.successful(Redirect(appConfig.BaseUrl.essttpFrontend + call).withNewSession)
+      Future.successful(Redirect(call).withNewSession)
     } else {
       implicit val hc = HeaderCarrier()
       val result = for {
         session <- loginService.login(affinityGroup(auth), asEnrolments(enrolments))
-      } yield Redirect(appConfig.BaseUrl.essttpFrontend + call.url).withSession(session)
+      } yield Redirect(call).withSession(session)
 
       result.foldF(e => Future.failed(e.t), Future.successful(_))
     }

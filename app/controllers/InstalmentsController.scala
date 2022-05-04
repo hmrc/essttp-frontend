@@ -18,8 +18,8 @@ package controllers
 
 import _root_.actions.Actions
 import config.AppConfig
-import controllers.InstalmentsController.{ instalmentsForm, mockApi }
-import models.{ InstalmentOption, MockJourney, UserAnswers }
+import controllers.InstalmentsController.{instalmentsForm, mockApi}
+import models.{InstalmentOption, MockJourney, UserAnswers}
 import moveittocor.corcommon.model.AmountInPence
 import play.api.data.Forms.{mapping, nonEmptyText}
 import play.api.data.Form
@@ -55,7 +55,9 @@ class InstalmentsController @Inject() (
         formWithErrors =>
           Future.successful(Ok(
             instalmentOptionsPage(
-              formWithErrors, mockApi(j)))),
+              formWithErrors, mockApi(j)
+            )
+          )),
         (option: String) => {
           Future.successful(Redirect(routes.PaymentScheduleController.checkPaymentSchedule()))
         }
