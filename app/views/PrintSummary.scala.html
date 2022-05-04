@@ -44,13 +44,13 @@
 @monthRows = @{
   plan.zipWithIndex.map { case (p, index) =>
     SummaryListRow(
-      classes = s"grouped-row ${if(p.isLastMonth) { "last-grouped-row" } else { "" }}",
+      classes = s"grouped-row ${if(index > (plan.size - 2)) { "last-grouped-row" } else { "" }}",
       key = Key(
         content = Text(s"${DateMessages.monthName(p.month).show} ${p.year}"),
         classes = "govuk-!-width-one-half"
       ),
       value = Value(
-        content = HtmlContent(Html(s"""${p.amount.formatInPounds} ${if(p.isLastMonth) { s"""<span class="govuk-body-s">${Messages.PaymentSchedule.`(includes interest)`.show}</span>""" } else { "" }}"""))
+        content = Text(p.amount.formatInPounds)
       ),
       actions = None
     )

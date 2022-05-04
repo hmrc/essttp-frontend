@@ -18,10 +18,10 @@ package controllers
 
 import _root_.actions.Actions
 import controllers.BankDetailsController.bankDetailsForm
-import models.{AccountNumber, BankDetails, Journey, SortCode}
-import play.api.data.Forms.{mapping, nonEmptyText}
-import play.api.data.validation.{Constraint, Invalid, Valid}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import models.{ AccountNumber, BankDetails, Journey, MockJourney, SortCode, UserAnswers }
+import play.api.data.Forms.{ mapping, nonEmptyText }
+import play.api.data.validation.{ Constraint, Invalid, Valid }
+import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
 import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
@@ -46,23 +46,20 @@ class BankDetailsController @Inject() (
     Ok(bankDetailsPage(bankDetailsForm()))
   }
 
-  val setUpBankDetailsSubmit: Action[AnyContent] = as.getJourney.async { implicit request =>
-    val j: Journey = request.journey
+  val setUpBankDetailsSubmit: Action[AnyContent] = as.default.async { implicit request =>
+    val j: MockJourney = MockJourney()
     bankDetailsForm()
       .bindFromRequest()
       .fold(
         formWithErrors => Future.successful(Ok(bankDetailsPage(formWithErrors))),
         (bankDetails: BankDetails) => {
-          journeyService.upsert(j.copy(userAnswers = j.userAnswers.copy(
-            bankDetails = Some(bankDetails)
-          )))
           Future.successful(Redirect(routes.BankDetailsController.checkBankDetails()))
         }
       )
   }
 
-  val checkBankDetails: Action[AnyContent] = as.getJourney.async { implicit request =>
-    val j: Journey = request.journey
+  val checkBankDetails: Action[AnyContent] = as.default.async { implicit request =>
+    val j: MockJourney = MockJourney(userAnswers = UserAnswers.empty.copy(bankDetails = Some(BankDetails(name = "John Doe", sortCode = SortCode("202020"), accountNumber = AccountNumber("12345678")))))
     Future.successful(Ok(checkBankDetailsPage(j.userAnswers)))
   }
 

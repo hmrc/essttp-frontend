@@ -17,10 +17,10 @@
 package controllers
 
 import _root_.actions.Actions
-import controllers.PaymentDayController.{PaymentDayForm, paymentDayForm}
-import models.Journey
-import play.api.data.{Form, FormError, Forms}
-import play.api.data.Forms.{mapping, nonEmptyText}
+import controllers.PaymentDayController.{ PaymentDayForm, paymentDayForm }
+import models.{ Journey, MockJourney, UserAnswers }
+import play.api.data.{ Form, FormError, Forms }
+import play.api.data.Forms.{ mapping, nonEmptyText }
 import play.api.data.format.Formatter
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.JourneyService
@@ -43,25 +43,16 @@ class PaymentDayController @Inject() (
   extends FrontendController(mcc)
   with Logging {
 
-  val paymentDay: Action[AnyContent] = as.getJourney.async { implicit request =>
-    val form: Form[PaymentDayForm] = request.journey.userAnswers.paymentDay match {
-      case Some(a: String) => paymentDayForm().fill(PaymentDayForm(a, request.journey.userAnswers.differentDay))
-      case _               => paymentDayForm()
-    }
-    Future.successful(Ok(paymentDayPage(form)))
+  val paymentDay: Action[AnyContent] = as.default.async { implicit request =>
+    Future.successful(Ok(paymentDayPage(paymentDayForm())))
   }
 
-  val paymentDaySubmit: Action[AnyContent] = as.getJourney.async { implicit request =>
-    val j: Journey = request.journey
+  val paymentDaySubmit: Action[AnyContent] = as.default.async { implicit request =>
     paymentDayForm()
       .bindFromRequest()
       .fold(
         formWithErrors => Future.successful(Ok(paymentDayPage(formWithErrors))),
         (p: PaymentDayForm) => {
-          journeyService.upsert(j.copy(userAnswers = j.userAnswers.copy(
-            differentDay = p.differentDay,
-            paymentDay   = Some(p.paymentDay)
-          )))
           Future.successful(Redirect(routes.InstalmentsController.instalmentOptions()))
         }
       )

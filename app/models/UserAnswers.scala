@@ -35,6 +35,10 @@ case class UserAnswers(
     case Some(s: String) => if (s === "28") 28 else differentDay.getOrElse(sys.error("trying to get non-existent payment day"))
     case None            => sys.error("trying to get non-existent payment day")
   }
+  def getHasUpfrontPayment: String = hasUpfrontPayment match {
+    case Some(b: Boolean) => if (b) "Yes" else "No"
+    case None => sys.error("trying to get non-existent HasUpfrontPayment")
+  }
 }
 object UserAnswers {
 
