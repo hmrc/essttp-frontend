@@ -23,6 +23,7 @@
 @import views.html.templates.Layout
 @import testOnly.messages.Messages
 @import testOnly.models.EligibilityError
+@import essttp.journey.model.Origin
 
 @this(
         layout: Layout,
@@ -135,17 +136,17 @@
    items = Seq(
     RadioItem(
      content = Text("GOV.UK"),
-     value = Some("paye_govuk"),
+     value = Some(Origin.Epaye.GovUk.show),
      hint = Some(Hint(content = Text("If you cannot pay your tax bill on time")))
     ),
     RadioItem(
      content = Text("Business Tax Account"),
-     value = Some("paye_bta"),
+     value = Some(Origin.Epaye.Bta.show),
      hint = Some(Hint(content = Text("Set up a payment plan if you cannot pay in full")))
     ),
     RadioItem(
      content = Text("No origin (direct access)"),
-     value = Some("paye_none")
+     value = Some(Origin.Epaye.DetachedUrl.show)
     )
    ),
    classes = "govuk-radios--small"
@@ -169,17 +170,17 @@
  items = Seq(
   RadioItem(
    content = Text("GOV.UK"),
-   value = Some("vat_govuk"),
+   value = Some("vat_govuk"), // todo once other vat origins are added to backend, update this to Origin.Vat.GovUk.show
    hint = Some(Hint(content = Text("If you cannot pay your tax bill on time")))
   ),
   RadioItem(
    content = Text("Business Tax Account"),
-   value = Some("vat_bta"),
+   value = Some(Origin.Vat.Bta.show),
    hint = Some(Hint(content = Text("Set up a payment plan if you cannot pay in full")))
   ),
   RadioItem(
    content = Text("No origin (direct access)"),
-   value = Some("vat_none")
+   value = Some("vat_none") // todo once other vat origins are added to backend, update this to Origin.Vat.DetachedUrl.show
   )
  ),
  classes = "govuk-radios--small"

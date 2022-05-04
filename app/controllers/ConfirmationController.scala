@@ -18,17 +18,15 @@ package controllers
 
 import _root_.actions.Actions
 import controllers.PaymentScheduleController.mockQuotation
-import models.{ InstalmentOption, Journey, MockJourney, UserAnswers }
-import moveittocor.corcommon.model.AmountInPence
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
-import requests.RequestSupport
-import services.JourneyService
+import essttp.rootmodel.AmountInPence
+import models.{InstalmentOption, MockJourney, UserAnswers}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.{Confirmation, PrintSummary}
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 @Singleton
 class ConfirmationController @Inject() (
@@ -36,17 +34,16 @@ class ConfirmationController @Inject() (
     mcc:              MessagesControllerComponents,
     confirmationPage: Confirmation,
     printSummaryPage: PrintSummary
-)(implicit ec: ExecutionContext)
-  extends FrontendController(mcc)
+) extends FrontendController(mcc)
   with Logging {
 
   val confirmation: Action[AnyContent] = as.default.async { implicit request =>
-    val j: MockJourney = MockJourney(userAnswers = UserAnswers.empty.copy(paymentDay = Some("28"), monthsToPay = Some(InstalmentOption(numberOfMonths = 4, amountToPayEachMonth = AmountInPence(50000L), interestPayment = AmountInPence(3500L)))))
+    val j: MockJourney = MockJourney(userAnswers = UserAnswers.empty.copy(paymentDay  = Some("28"), monthsToPay = Some(InstalmentOption(numberOfMonths       = 4, amountToPayEachMonth = AmountInPence(50000L), interestPayment = AmountInPence(3500L)))))
     Future.successful(Ok(confirmationPage(j.userAnswers, mockQuotation(j.userAnswers.getMonthsToPay), "222PX00222222")))
   }
 
   val printSummary: Action[AnyContent] = as.default.async { implicit request =>
-    val j: MockJourney = MockJourney(userAnswers = UserAnswers.empty.copy(paymentDay = Some("28"), monthsToPay = Some(InstalmentOption(numberOfMonths = 4, amountToPayEachMonth = AmountInPence(50000L), interestPayment = AmountInPence(3500L)))))
+    val j: MockJourney = MockJourney(userAnswers = UserAnswers.empty.copy(paymentDay  = Some("28"), monthsToPay = Some(InstalmentOption(numberOfMonths       = 4, amountToPayEachMonth = AmountInPence(50000L), interestPayment = AmountInPence(3500L)))))
     Future.successful(Ok(printSummaryPage(j.userAnswers, mockQuotation(j.userAnswers.getMonthsToPay), "222PX00222222")))
   }
 }

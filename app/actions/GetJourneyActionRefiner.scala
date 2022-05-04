@@ -16,17 +16,17 @@
 
 package actions
 
+import controllers.support.RequestSupport.hc
+import essttp.journey.JourneyConnector
+import essttp.journey.model.Journey
 import play.api.mvc.{ActionRefiner, Request, Result}
 import requests.JourneyRequest
-import services.JourneyService
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class GetJourneyActionRefiner @Inject() (
-    journeyService: JourneyService
-)(
+class GetJourneyActionRefiner @Inject() (journeyConnector: JourneyConnector)(
     implicit
     ec: ExecutionContext
 ) extends ActionRefiner[Request, JourneyRequest] {
@@ -34,8 +34,11 @@ class GetJourneyActionRefiner @Inject() (
   override protected def refine[A](request: Request[A]): Future[Either[Result, JourneyRequest[A]]] = {
     implicit val r: Request[A] = request
     for {
-      journey <- journeyService.get()
-    } yield Right(new JourneyRequest(journey, request))
+      maybeJourney: Option[Journey] <- journeyConnector.findLatestJourneyBySessionId()
+    } yield maybeJourney match {
+      case Some(journey) => Right(new JourneyRequest(journey, request))
+      case None          => Left(???)
+    }
   }
 
   override protected def executionContext: ExecutionContext = ec

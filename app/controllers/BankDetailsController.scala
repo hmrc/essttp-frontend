@@ -18,17 +18,16 @@ package controllers
 
 import _root_.actions.Actions
 import controllers.BankDetailsController.bankDetailsForm
-import models.{ AccountNumber, BankDetails, Journey, MockJourney, SortCode, UserAnswers }
-import play.api.data.Forms.{ mapping, nonEmptyText }
-import play.api.data.validation.{ Constraint, Invalid, Valid }
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
-import services.JourneyService
+import models._
+import play.api.data.Forms.{mapping, nonEmptyText}
+import play.api.data.validation.{Constraint, Invalid, Valid}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.{BankDetailsSummary, SetUpBankDetails, TermsAndConditions}
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 @Singleton
 class BankDetailsController @Inject() (
@@ -36,10 +35,8 @@ class BankDetailsController @Inject() (
     bankDetailsPage:      SetUpBankDetails,
     checkBankDetailsPage: BankDetailsSummary,
     termsPage:            TermsAndConditions,
-    journeyService:       JourneyService,
     mcc:                  MessagesControllerComponents
-)(implicit ec: ExecutionContext)
-  extends FrontendController(mcc)
+) extends FrontendController(mcc)
   with Logging {
 
   val setUpBankDetails: Action[AnyContent] = as.default { implicit request =>
@@ -47,19 +44,18 @@ class BankDetailsController @Inject() (
   }
 
   val setUpBankDetailsSubmit: Action[AnyContent] = as.default.async { implicit request =>
-    val j: MockJourney = MockJourney()
     bankDetailsForm()
       .bindFromRequest()
       .fold(
         formWithErrors => Future.successful(Ok(bankDetailsPage(formWithErrors))),
-        (bankDetails: BankDetails) => {
+        (_: BankDetails) => {
           Future.successful(Redirect(routes.BankDetailsController.checkBankDetails()))
         }
       )
   }
 
   val checkBankDetails: Action[AnyContent] = as.default.async { implicit request =>
-    val j: MockJourney = MockJourney(userAnswers = UserAnswers.empty.copy(bankDetails = Some(BankDetails(name = "John Doe", sortCode = SortCode("202020"), accountNumber = AccountNumber("12345678")))))
+    val j: MockJourney = MockJourney(userAnswers = UserAnswers.empty.copy(bankDetails = Some(BankDetails(name          = "John Doe", sortCode = SortCode("202020"), accountNumber = AccountNumber("12345678")))))
     Future.successful(Ok(checkBankDetailsPage(j.userAnswers)))
   }
 

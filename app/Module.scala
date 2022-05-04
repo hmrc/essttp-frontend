@@ -19,11 +19,9 @@ import config.AppConfig
 import connectors.{AuthLoginStubConnector, AuthLoginStubConnectorImpl}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.ws.WSClient
-import play.api.mvc.{Session, SessionCookieBaker}
-import services.{AuthLoginStubService, AuthLoginStubServiceImpl}
-import services.AuthLoginStubService.LSR
+import play.api.mvc.SessionCookieBaker
+import services.{AuthLoginService, AuthLoginStubServiceImpl}
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.filters.crypto.SessionCookieCrypto
 
 import java.time.{Clock, ZoneOffset}
@@ -46,7 +44,7 @@ class Module extends AbstractModule {
       sessionCookieCrypto: SessionCookieCrypto,
       sessionCookieBaker:  SessionCookieBaker,
       ec:                  ExecutionContext
-  ): AuthLoginStubService =
+  ): AuthLoginService =
     new AuthLoginStubServiceImpl(connector, sessionCookieCrypto, sessionCookieBaker)(ec)
 
   @Provides

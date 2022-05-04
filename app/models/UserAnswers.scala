@@ -17,7 +17,7 @@
 package models
 
 import cats.implicits.catsSyntaxEq
-import moveittocor.corcommon.model.AmountInPence
+import essttp.rootmodel.AmountInPence
 import play.api.libs.json.{Format, Json}
 
 case class UserAnswers(
@@ -37,7 +37,7 @@ case class UserAnswers(
   }
   def getHasUpfrontPayment: String = hasUpfrontPayment match {
     case Some(b: Boolean) => if (b) "Yes" else "No"
-    case None => sys.error("trying to get non-existent HasUpfrontPayment")
+    case None             => sys.error("trying to get non-existent HasUpfrontPayment")
   }
 }
 object UserAnswers {

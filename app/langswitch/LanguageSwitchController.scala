@@ -19,18 +19,16 @@ package langswitch
 import actions.Actions
 import config.AppConfig
 import play.api.Logging
-import play.api.i18n.I18nSupport
 import play.api.mvc._
 import play.mvc.Http.HeaderNames
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
 
 class LanguageSwitchController @Inject() (
     cc:        ControllerComponents,
     as:        Actions,
     appConfig: AppConfig
-)(implicit ec: ExecutionContext) extends AbstractController(cc) with Logging {
+) extends AbstractController(cc) with Logging {
 
   def switchToLanguage(language: Language): Action[AnyContent] = cc.actionBuilder { implicit request =>
 

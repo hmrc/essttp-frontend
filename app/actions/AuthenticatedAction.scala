@@ -19,12 +19,11 @@ package actions
 import com.google.inject.Inject
 import config.AppConfig
 import play.api.Logger
-import play.api.mvc.Results.{BadRequest, Ok, Redirect}
-import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Request, Result, WrappedRequest}
-import uk.gov.hmrc.auth.core.AffinityGroup.Individual
-import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions, Enrolments, NoActiveSession}
+import play.api.mvc.Results.{BadRequest, Redirect}
+import play.api.mvc._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
+import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions, Enrolments, NoActiveSession}
 
 import scala.concurrent.{ExecutionContext, Future}
 

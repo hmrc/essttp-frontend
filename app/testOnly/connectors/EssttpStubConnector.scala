@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package connectors
+package testOnly.connectors
 
 import config.AppConfig
 import connectors.EligibilityConnector._
 import essttp.rootmodel.{TaxId, TaxRegime}
-import models.ttp.TtpEligibilityData
 import play.api.libs.json.{Format, Json}
 import testOnly.models.EligibilityError
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import util.RegimeUtils._
 import util.TaxIdUtils.TaxIdOps
+import models.ttp.TtpEligibilityData
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -42,14 +42,19 @@ class EligibilityStubConnector @Inject() (httpClient: HttpClient, appConfig: App
       )
   }
 
-  def eligibilityData(idType: String, regime: TaxRegime, id: TaxId, showFinancials: Boolean)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[TtpEligibilityData] = {
-
-    httpClient
-      .POST[EligibilityRequest, TtpEligibilityData](
-        url  = ttpUrl,
-        body = EligibilityRequest(idType, id.value, regime.name, showFinancials)
-      )
-
+  def eligibilityData(
+      idType:         String,
+      regime:         TaxRegime,
+      id:             TaxId,
+      showFinancials: Boolean
+  )(
+      implicit
+      hc: HeaderCarrier, ec: ExecutionContext
+  ): Future[TtpEligibilityData] = {
+    httpClient.POST[EligibilityRequest, TtpEligibilityData](
+      url  = ttpUrl,
+      body = EligibilityRequest(idType, id.value, regime.name, showFinancials)
+    )
   }
 
   def errors(regime: TaxRegime, id: TaxId, errors: List[EligibilityError])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] = {
@@ -74,9 +79,9 @@ class EligibilityStubConnector @Inject() (httpClient: HttpClient, appConfig: App
 
 object EligibilityConnector {
 
-  case class EligibilityRequest(idType: String, idNumber: String, regimeType: String, returnFinancials: Boolean)
+  final case class EligibilityRequest(idType: String, idNumber: String, regimeType: String, returnFinancials: Boolean)
 
-  case class ErrorData(errors: List[EligibilityError])
+  final case class ErrorData(errors: List[EligibilityError])
 
   object ErrorData {
     implicit val fmt: Format[ErrorData] = Json.format[ErrorData]
@@ -87,4 +92,3 @@ object EligibilityConnector {
   }
 
 }
-

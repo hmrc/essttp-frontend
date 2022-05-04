@@ -25,7 +25,7 @@ import connectors.AuthLoginStubConnector.StubException
 import play.api.libs.json.{Format, Json}
 import play.api.libs.ws.WSResponse
 import play.api.mvc.{Cookie, Session, SessionCookieBaker}
-import services.AuthLoginStubService.{AuthError, LSR, liftError, loginDataOf}
+import services.AuthLoginService.{AuthError, LSR, liftError, loginDataOf}
 import uk.gov.hmrc.auth.core.{AffinityGroup, ConfidenceLevel, Enrolment}
 import uk.gov.hmrc.crypto.Crypted
 import uk.gov.hmrc.http.HeaderCarrier
@@ -35,7 +35,7 @@ import java.time.{LocalDate, ZonedDateTime}
 import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
-trait AuthLoginStubService {
+trait AuthLoginService {
 
   def login(group: AffinityGroup, enrolments: List[Enrolment])(implicit hc: HeaderCarrier): LSR[Session]
 
@@ -45,7 +45,7 @@ class AuthLoginStubServiceImpl @Inject() (
     connector:           AuthLoginStubConnector,
     sessionCookieCrypto: SessionCookieCrypto,
     sessionCookieBaker:  SessionCookieBaker
-)(implicit ec: ExecutionContext) extends AuthLoginStubService {
+)(implicit ec: ExecutionContext) extends AuthLoginService {
 
   def createSession(response: WSResponse): Either[AuthError, Session] = {
     for {
@@ -61,7 +61,7 @@ class AuthLoginStubServiceImpl @Inject() (
 
 }
 
-object AuthLoginStubService {
+object AuthLoginService {
 
   type LSR[A] = EitherT[Future, AuthError, A]
 
@@ -176,7 +176,7 @@ object AuthLoginStubService {
     implicit val format: Format[DateOfBirth] = Json.valueFormat
   }
 
-  def loginDataOf(group: AffinityGroup, enrolments: List[Enrolment]): _root_.services.AuthLoginStubService.LoginData = {
+  def loginDataOf(group: AffinityGroup, enrolments: List[Enrolment]): _root_.services.AuthLoginService.LoginData = {
     LoginData(GGCredId(UUID.randomUUID().toString), "http://localhost:9999/nowhere",
               ConfidenceLevel.L50, group, None, None, enrolments.headOption)
   }

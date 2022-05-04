@@ -19,9 +19,8 @@ import cats.data.EitherT
 import com.google.inject.Inject
 import config.AppConfig
 import connectors.AuthLoginStubConnector.{ACR, StubException, wrapException, wrapResponse}
-import play.api.Configuration
 import play.api.libs.ws.{WSClient, WSResponse}
-import services.AuthLoginStubService.LoginData
+import services.AuthLoginService.LoginData
 import uk.gov.hmrc.http.HeaderCarrier
 import util.StringUtils.StringOps
 
@@ -64,7 +63,7 @@ class AuthLoginStubConnectorImpl @Inject() (config: AppConfig, ws: WSClient)(imp
       .withFollowRedirects(false)
       .withHttpHeaders("Content-Type" -> "application/x-www-form-urlencoded")
       .post(formData)
-      .map(wrapResponse(_))
+      .map(wrapResponse)
       .recover { case NonFatal(e) => wrapException(e) }
 
     EitherT(result)
@@ -82,23 +81,24 @@ object AuthLoginStubConnector {
 
   case class StubException(e: Throwable)
 
-  private def requestFormBody(loginData: LoginData): Map[String, String] = {
-    val enrolmentIdentifier = loginData.enrolment.flatMap(_.identifiers.headOption)
-
-    List(
-      "authorityId" -> Some(loginData.ggCredId.value),
-      "redirectionUrl" -> Some(loginData.redirectUrl),
-      "credentialStrength" -> Some("strong"),
-      "confidenceLevel" -> Some(loginData.confidenceLevel.level.toString),
-      "affinityGroup" -> Some(loginData.affinityGroup.toString),
-      "credentialRole" -> Some("User"),
-      "email" -> loginData.email.map(_.value),
-      "nino" -> loginData.nino.map(_.value),
-      "enrolment[0].name" -> loginData.enrolment.map(_.key),
-      "enrolment[0].taxIdentifier[0].name" -> enrolmentIdentifier.map(_.key),
-      "enrolment[0].taxIdentifier[0].value" -> enrolmentIdentifier.map(_.value),
-      "enrolment[0].state" -> loginData.enrolment.map(_.state)
-    ).collect { case (k, Some(v)) => k -> v }.toMap
-  }
+  //  todo I've commented out to remove the overload of warns, if this isn't used, delete it.
+  //  private def requestFormBody(loginData: LoginData): Map[String, String] = {
+  //    val enrolmentIdentifier = loginData.enrolment.flatMap(_.identifiers.headOption)
+  //
+  //    List(
+  //      "authorityId" -> Some(loginData.ggCredId.value),
+  //      "redirectionUrl" -> Some(loginData.redirectUrl),
+  //      "credentialStrength" -> Some("strong"),
+  //      "confidenceLevel" -> Some(loginData.confidenceLevel.level.toString),
+  //      "affinityGroup" -> Some(loginData.affinityGroup.toString),
+  //      "credentialRole" -> Some("User"),
+  //      "email" -> loginData.email.map(_.value),
+  //      "nino" -> loginData.nino.map(_.value),
+  //      "enrolment[0].name" -> loginData.enrolment.map(_.key),
+  //      "enrolment[0].taxIdentifier[0].name" -> enrolmentIdentifier.map(_.key),
+  //      "enrolment[0].taxIdentifier[0].value" -> enrolmentIdentifier.map(_.value),
+  //      "enrolment[0].state" -> loginData.enrolment.map(_.state)
+  //    ).collect { case (k, Some(v)) => k -> v }.toMap
+  //  }
 
 }

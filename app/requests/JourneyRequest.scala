@@ -16,8 +16,7 @@
 
 package requests
 
-import models.Journey
-import moveittocor.corcommon.model.JourneyId
+import essttp.journey.model.{Journey, JourneyId}
 import play.api.mvc.{Request, WrappedRequest}
 
 class JourneyRequest[A](

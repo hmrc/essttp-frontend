@@ -17,29 +17,25 @@
 package controllers
 
 import _root_.actions.Actions
-import controllers.PaymentDayController.{ PaymentDayForm, paymentDayForm }
-import models.{ Journey, MockJourney, UserAnswers }
-import play.api.data.{ Form, FormError, Forms }
-import play.api.data.Forms.{ mapping, nonEmptyText }
+import controllers.PaymentDayController.{PaymentDayForm, paymentDayForm}
+import play.api.data.Forms.{mapping, nonEmptyText}
 import play.api.data.format.Formatter
+import play.api.data.{FormError, Forms}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
-
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
 import views.html.PaymentDay
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future
 import scala.util.Try
 
 @Singleton
 class PaymentDayController @Inject() (
     as:             Actions,
     paymentDayPage: PaymentDay,
-    journeyService: JourneyService,
     mcc:            MessagesControllerComponents
-)(implicit ec: ExecutionContext)
+)
   extends FrontendController(mcc)
   with Logging {
 
@@ -61,9 +57,9 @@ class PaymentDayController @Inject() (
 }
 
 object PaymentDayController {
+  import cats.syntax.either._
   import play.api.data.Form
   import uk.gov.voa.play.form.ConditionalMappings.mandatoryIfEqual
-  import cats.syntax.either._
 
   case class PaymentDayForm(
       paymentDay:   String,

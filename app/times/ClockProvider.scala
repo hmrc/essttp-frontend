@@ -16,8 +16,6 @@
 
 package times
 
-import play.api.mvc.Request
-
 import java.time._
 
 class ClockProvider {
@@ -25,10 +23,10 @@ class ClockProvider {
   /**
    * Get's the clock instance, which can be overriden in session (for testing purposes)
    */
-  implicit def getClock(implicit request: Request[_]): Clock = defaultClock
+  implicit def getClock: Clock = defaultClock
 
-  def now()(implicit request: Request[_]): LocalDateTime = LocalDateTime.now(getClock)
-  def nowDate()(implicit request: Request[_]): LocalDate = LocalDate.now(getClock)
+  def now(): LocalDateTime = LocalDateTime.now(getClock)
+  def nowDate(): LocalDate = LocalDate.now(getClock)
 
   protected val defaultClock: Clock = Clock.systemDefaultZone.withZone(ZoneOffset.UTC)
 

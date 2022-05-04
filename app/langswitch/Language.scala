@@ -17,9 +17,9 @@
 package langswitch
 
 import enumeratum.{Enum, EnumEntry}
+import essttp.utils.EnumFormat
+import essttp.utils.ValueClassBinder.valueClassBinder
 import langswitch.Languages.{English, Welsh}
-import moveittocor.corcommon.internal.ValueClassBinder.valueClassBinder
-import moveittocor.corcommon.internal.jsonext.EnumFormat
 import play.api.i18n.Lang
 import play.api.libs.json.Format
 import play.api.mvc.PathBindable

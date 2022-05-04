@@ -18,27 +18,25 @@ package controllers
 
 import _root_.actions.Actions
 import config.AppConfig
-import controllers.InstalmentsController.{ instalmentsForm, mockApi }
-import models.{ InstalmentOption, MockJourney, UserAnswers }
-import moveittocor.corcommon.model.AmountInPence
-import play.api.data.Forms.{mapping, nonEmptyText}
+import controllers.InstalmentsController.{instalmentsForm, mockApi}
+import essttp.rootmodel.AmountInPence
+import models.{InstalmentOption, MockJourney, UserAnswers}
 import play.api.data.Form
+import play.api.data.Forms.{mapping, nonEmptyText}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.InstalmentOptions
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 @Singleton
 class InstalmentsController @Inject() (
     as:                    Actions,
     mcc:                   MessagesControllerComponents,
-    journeyService:        JourneyService,
     instalmentOptionsPage: InstalmentOptions
-)(implicit ec: ExecutionContext, appConfig: AppConfig)
+)(implicit appConfig: AppConfig)
   extends FrontendController(mcc)
   with Logging {
 
@@ -55,7 +53,9 @@ class InstalmentsController @Inject() (
         formWithErrors =>
           Future.successful(Ok(
             instalmentOptionsPage(
-              formWithErrors, mockApi(j)))),
+              formWithErrors, mockApi(j)
+            )
+          )),
         (option: String) => {
           Future.successful(Redirect(routes.PaymentScheduleController.checkPaymentSchedule()))
         }

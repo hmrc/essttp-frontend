@@ -15,7 +15,7 @@
  */
 
 package models
-import moveittocor.corcommon.model.AmountInPence
+import essttp.rootmodel.AmountInPence
 import play.api.libs.json.{Format, Json}
 import testOnly.models.EligibilityError
 

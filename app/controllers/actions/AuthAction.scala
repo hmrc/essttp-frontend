@@ -23,15 +23,13 @@ import login.LoginSupport
 import play.api.Environment
 import play.api.mvc.Results.Redirect
 import play.api.mvc._
+import requests.RequestSupport._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions, Enrolments, NoActiveSession}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.http.HeaderCarrierConverter
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 import util.Logging
 
 import scala.concurrent.{ExecutionContext, Future}
-import requests.RequestSupport._
-import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 
 final case class AuthenticatedRequest[A](
     request: MessagesRequest[A]

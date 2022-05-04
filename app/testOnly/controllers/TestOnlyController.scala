@@ -19,17 +19,18 @@ package testOnly.controllers
 import _root_.actions.Actions
 import config.AppConfig
 import connectors.EligibilityStubConnector
-import essttp.rootmodel.TaxRegime
+import essttp.journey.JourneyConnector
+import essttp.journey.model.{Origin, SjRequest}
+import essttp.rootmodel.{BackUrl, ReturnUrl, TaxRegime}
 import models.ttp
 import models.ttp._
 import play.api.data.Forms.{mapping, nonEmptyText, text}
 import play.api.data.{Form, Forms}
 import play.api.libs.json.{Format, Json}
 import play.api.mvc._
-import services.AuthLoginStubService
+import services.AuthLoginService
 import testOnly.controllers.TestOnlyController._
 import testOnly.models.Enrolment.{EPAYE, VAT}
-import testOnly.models.TestOnlyJourney.{EpayeFromBTA, EpayeFromGovUk, EpayeNoOrigin, VATFromBTA, VATFromGovUk, VATNoOrigin}
 import testOnly.models.{EligibilityError, Enrolment, TestOnlyJourney}
 import testOnly.views.html.TestOnlyStart
 import uk.gov.hmrc.auth.core.{AffinityGroup, EnrolmentIdentifier, Enrolment => CEnrolment}
@@ -42,17 +43,18 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class TestOnlyController @Inject() (
-    as:           Actions,
-    appConfig:    AppConfig,
-    loginService: AuthLoginStubService,
-    stub:         EligibilityStubConnector,
-    mcc:          MessagesControllerComponents,
-    testOnlyPage: TestOnlyStart
-)(implicit ec: ExecutionContext)
+    as:               Actions,
+    appConfig:        AppConfig,
+    authLoginService: AuthLoginService,
+    stub:             EligibilityStubConnector,
+    mcc:              MessagesControllerComponents,
+    testOnlyPage:     TestOnlyStart,
+    journeyConnector: JourneyConnector
+)(implicit ec: ExecutionContext, requestHeader: RequestHeader)
   extends FrontendController(mcc)
   with Logging {
 
-  val login = as.default { implicit request =>
+  val login: Action[AnyContent] = as.default { _ =>
     val loginUrl = appConfig.BaseUrl.gg
     Redirect(loginUrl)
   }
@@ -63,32 +65,24 @@ class TestOnlyController @Inject() (
   }
 
   val testOnlyStartPageSubmit: Action[AnyContent] = as.default.async { implicit request =>
-    // TODO: build a service to call BE with payload
-    /* BE endpoints:
-      POST       /epaye/bta/journey/start
-      POST       /epaye/gov-uk/journey/start
-      POST       /epaye/detached-url/journey/start
-     */
     testOnlyForm()
       .bindFromRequest()
       .fold(
         formWithErrors => Future.successful(Ok(testOnlyPage(formWithErrors))),
         (p: TestOnlyForm) => {
-          val journey: TestOnlyJourney = p.origin match {
-            case "paye_govuk" => EpayeFromGovUk
-            case "paye_bta"   => EpayeFromBTA
-            case "paye_none"  => EpayeNoOrigin
-            case "vat_govuk"  => VATFromGovUk
-            case "vat_bta"    => VATFromBTA
-            case "vat_none"   => VATNoOrigin
-            case _            => sys.error("unable to start a journey without an origin")
+          val origin = deriveOriginFromFormString(p.origin)
+          val request = origin match {
+            case Origin.Epaye.Bta         => journeyConnector.Epaye.startJourneyBta(epayeSimple)
+            case Origin.Epaye.GovUk       => journeyConnector.Epaye.startJourneyGovUk(epayeEmpty)
+            case Origin.Epaye.DetachedUrl => journeyConnector.Epaye.startJourneyGovUk(epayeEmpty)
+            case Origin.Vat.Bta           => notDevelopedYetException //journeyConnector.Vat.startJourneyBta(vatSimple)
           }
-          val enrolmentMap: Map[String, Enrolment] = Map(
-            "EPAYE" -> EPAYE,
-            "VAT" -> VAT
-          )
 
-          startJourney(p.auth, p.enrolments.map(enrolmentMap).toList, p.eligibilityErrors.map(EligibilityError.withName).toList, journey)
+          for {
+            response <- request
+            // make call to stubs too
+            _ <- stub.insertEligibilityData(TaxRegime.Epaye, ttp.DefaultTaxId, DefaultTTP)
+          } yield Redirect(response.nextUrl.nextUrl)
         }
       )
   }
@@ -99,39 +93,12 @@ class TestOnlyController @Inject() (
     } else {
       implicit val hc = HeaderCarrier()
       val result = for {
-        session <- loginService.login(affinityGroup(auth), asEnrolments(enrolments))
+        session <- authLoginService.login(affinityGroup(auth), asEnrolments(enrolments))
       } yield Redirect(appConfig.BaseUrl.essttpFrontend + call.url).withSession(session)
 
-      result.foldF(e => Future.failed(e.t), Future.successful(_))
+      result.foldF(e => Future.failed(e.t), Future.successful)
     }
 
-  }
-
-  def btaEpayeLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError])(implicit hc: HeaderCarrier): Future[Result] = {
-    next(auth, enrolments, eligibilityErrors, controllers.routes.EpayeBTAController.landingPage())
-  }
-
-  def btaVatLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError]): Future[Result] = {
-    //Redirect(controllers.routes.BTAController.vatLandingPage)
-    ???
-  }
-
-  def govUkEpayeLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError])(implicit hc: HeaderCarrier): Future[Result] = {
-    next(auth, enrolments, eligibilityErrors, controllers.routes.EpayeGovUkController.landingPage())
-  }
-
-  def noOriginEpayeLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError])(implicit hc: HeaderCarrier): Future[Result] = {
-    next(auth, enrolments, eligibilityErrors, controllers.routes.EpayeNoSourceController.landingPage())
-  }
-
-  def govUkVatLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError]): Future[Result] = {
-    //Redirect(controllers.routes.GovUkController.vatLandingPage)
-    ???
-  }
-
-  def noOriginVatLandingPage(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError]): Future[Result] = {
-    //routeCall(auth, enrolments, controllers.routes.NoSourceController.payeLandingPage())
-    ???
   }
 
   def next(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError], call: Call)(implicit hc: HeaderCarrier): Future[Result] =
@@ -148,20 +115,39 @@ class TestOnlyController @Inject() (
       } yield c
     }
 
-  def startJourney(auth: String, enrolments: List[Enrolment], eligibilityErrors: List[EligibilityError], jt: TestOnlyJourney)(implicit hc: HeaderCarrier): Future[Result] = {
-    jt match {
-      case EpayeFromGovUk => govUkEpayeLandingPage(auth, enrolments, eligibilityErrors)
-      case EpayeFromBTA   => btaEpayeLandingPage(auth, enrolments, eligibilityErrors)
-      case EpayeNoOrigin  => noOriginEpayeLandingPage(auth, enrolments, eligibilityErrors)
-      case VATFromGovUk   => govUkVatLandingPage(auth, enrolments, eligibilityErrors)
-      case VATFromBTA     => btaVatLandingPage(auth, enrolments, eligibilityErrors)
-      case VATNoOrigin    => noOriginVatLandingPage(auth, enrolments, eligibilityErrors)
-    }
-  }
-
 }
 
 object TestOnlyController {
+
+  /**
+   * todo change the def to a val in essttp.journey.model.Origin
+   * e.g. atm it's { def show = "Origin.Epaye.Bta" }
+   * when trying to pattern match on that value, it fails due to non stable identifier
+   */
+  object OriginAsString {
+    val epayeBta: String = Origin.Epaye.Bta.show
+    val epayeGovUk: String = Origin.Epaye.GovUk.show
+    val epayeDetached: String = Origin.Epaye.DetachedUrl.show
+    val vatBta: String = Origin.Vat.Bta.show
+  }
+
+  private def deriveOriginFromFormString(originAsString: String): Origin = originAsString match {
+    case OriginAsString.epayeBta      => Origin.Epaye.Bta
+    case OriginAsString.epayeGovUk    => Origin.Epaye.GovUk
+    case OriginAsString.epayeDetached => Origin.Epaye.DetachedUrl
+    case OriginAsString.vatBta        => notDevelopedYetException
+    // case Origin.Vat.GovUk.show         => notDevelopedYetException
+    // case Origin.Vat.DetachedUrl.show   => notDevelopedYetException
+  }
+
+  private def returnUrl(url: String = "test-return-url") = ReturnUrl(url)
+
+  private def backUrl(url: String = "test-back-url") = BackUrl(url)
+
+  private val epayeSimple = SjRequest.Epaye.Simple(returnUrl = returnUrl(), backUrl = backUrl())
+  private val epayeEmpty = SjRequest.Epaye.Empty()
+  //  private val vatSimple = SjRequest.Vat.Simple(returnUrl = returnUrl(), backUrl = backUrl())
+
   import play.api.data.Form
 
   case class TestOnlyForm(
@@ -240,5 +226,7 @@ object TestOnlyController {
       chargeTypeAssessments
     )
   }
+
+  private val notDevelopedYetException: Nothing = throw new NotImplementedError("this isn't built yet")
 
 }

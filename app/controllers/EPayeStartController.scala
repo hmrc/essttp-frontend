@@ -23,7 +23,7 @@ import models.{EligibilityData, ttp}
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import play.twirl.api.Html
-import services.{EligibilityDataService, JourneyService}
+import services.EligibilityDataService
 import testOnly.models.EligibilityError._
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
@@ -38,7 +38,6 @@ import scala.concurrent.ExecutionContext
 class EPayeStartController @Inject() (
     as:                         Actions,
     mcc:                        MessagesControllerComponents,
-    journeyService:             JourneyService,
     eligibilityDataService:     EligibilityDataService,
     ineligibleTemplatePage:     IneligibleTemplatePage,
     genericIneligiblePartial:   GenericIneligiblePartial,

@@ -17,7 +17,7 @@
 package models
 
 import enumeratum.{Enum, _}
-import moveittocor.corcommon.internal.jsonext.EnumFormat
+import essttp.utils.EnumFormat
 import play.api.libs.json.Format
 
 import scala.collection.immutable

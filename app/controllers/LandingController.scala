@@ -22,17 +22,16 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 @Singleton
 class LandingController @Inject() (
     as:  Actions,
     mcc: MessagesControllerComponents
-)(implicit ec: ExecutionContext)
-  extends FrontendController(mcc)
+) extends FrontendController(mcc)
   with Logging {
 
-  val landingPage: Action[AnyContent] = as.default.async { implicit request =>
+  val landingPage: Action[AnyContent] = as.default.async { _ =>
     Future.successful(Redirect(routes.EPayeStartController.ePayeLanding()))
   }
 

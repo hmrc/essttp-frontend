@@ -23,7 +23,7 @@ import connectors.EligibilityStubConnector
 import essttp.rootmodel.{TaxId, TaxRegime}
 import models.ttp.{ChargeTypeAssessment, EligibilityRules, TaxPeriodCharges, TtpEligibilityData}
 import models.{EligibilityData, InvoicePeriod, OverDuePayments, OverduePayment}
-import moveittocor.corcommon.model.AmountInPence
+import essttp.rootmodel.AmountInPence
 import services.EligibilityDataService._
 import testOnly.models.EligibilityError
 import testOnly.models.EligibilityError.{PayeHasDisallowedCharges, _}
