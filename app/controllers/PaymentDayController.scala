@@ -17,10 +17,10 @@
 package controllers
 
 import _root_.actions.Actions
-import controllers.PaymentDayController.{ PaymentDayForm, paymentDayForm }
-import models.{ Journey, MockJourney, UserAnswers }
-import play.api.data.{ Form, FormError, Forms }
-import play.api.data.Forms.{ mapping, nonEmptyText }
+import controllers.PaymentDayController.{PaymentDayForm, paymentDayForm}
+import models.{Journey, MockJourney, UserAnswers}
+import play.api.data.{Form, FormError, Forms}
+import play.api.data.Forms.{mapping, nonEmptyText}
 import play.api.data.format.Formatter
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.JourneyService

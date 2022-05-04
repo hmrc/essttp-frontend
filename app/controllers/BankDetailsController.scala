@@ -18,10 +18,10 @@ package controllers
 
 import _root_.actions.Actions
 import controllers.BankDetailsController.bankDetailsForm
-import models.{ AccountNumber, BankDetails, Journey, MockJourney, SortCode, UserAnswers }
-import play.api.data.Forms.{ mapping, nonEmptyText }
-import play.api.data.validation.{ Constraint, Invalid, Valid }
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import models.{AccountNumber, BankDetails, Journey, MockJourney, SortCode, UserAnswers}
+import play.api.data.Forms.{mapping, nonEmptyText}
+import play.api.data.validation.{Constraint, Invalid, Valid}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
@@ -59,7 +59,7 @@ class BankDetailsController @Inject() (
   }
 
   val checkBankDetails: Action[AnyContent] = as.default.async { implicit request =>
-    val j: MockJourney = MockJourney(userAnswers = UserAnswers.empty.copy(bankDetails = Some(BankDetails(name = "John Doe", sortCode = SortCode("202020"), accountNumber = AccountNumber("12345678")))))
+    val j: MockJourney = MockJourney(userAnswers = UserAnswers.empty.copy(bankDetails = Some(BankDetails(name          = "John Doe", sortCode = SortCode("202020"), accountNumber = AccountNumber("12345678")))))
     Future.successful(Ok(checkBankDetailsPage(j.userAnswers)))
   }
 

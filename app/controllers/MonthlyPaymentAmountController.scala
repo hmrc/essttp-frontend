@@ -18,7 +18,7 @@ package controllers
 
 import _root_.actions.Actions
 import controllers.MonthlyPaymentAmountController._
-import models.{ MockJourney }
+import models.{MockJourney}
 import models.MoneyUtil._
 import moveittocor.corcommon.model.AmountInPence
 import play.api.data.{Form, Forms}
@@ -46,7 +46,8 @@ class MonthlyPaymentAmountController @Inject() (
     Future.successful(Ok(monthlyPaymentAmountPage(
       monthlyPaymentAmountForm(mockJourney),
       mockJourney.remainingToPay,
-      AmountInPence(mockJourney.remainingToPay.value / 6))))
+      AmountInPence(mockJourney.remainingToPay.value / 6)
+    )))
   }
 
   val monthlyPaymentAmountSubmit: Action[AnyContent] = as.default.async { implicit request =>
@@ -57,7 +58,9 @@ class MonthlyPaymentAmountController @Inject() (
         formWithErrors =>
           Future.successful(Ok(
             monthlyPaymentAmountPage(
-              formWithErrors, mockJourney.remainingToPay, AmountInPence(mockJourney.remainingToPay.value / 6)))),
+              formWithErrors, mockJourney.remainingToPay, AmountInPence(mockJourney.remainingToPay.value / 6)
+            )
+          )),
         (s: BigDecimal) => {
           Future(Redirect(routes.PaymentDayController.paymentDay()))
         }

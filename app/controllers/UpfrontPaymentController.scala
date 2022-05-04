@@ -17,8 +17,8 @@
 package controllers
 
 import _root_.actions.Actions
-import controllers.UpfrontPaymentController.{ upfrontPaymentAmountForm, upfrontPaymentForm }
-import models.{ MockJourney, UserAnswers }
+import controllers.UpfrontPaymentController.{upfrontPaymentAmountForm, upfrontPaymentForm}
+import models.{MockJourney, UserAnswers}
 import models.MoneyUtil.amountOfMoneyFormatter
 import moveittocor.corcommon.model.AmountInPence
 import play.api.data.{Form, Forms}
@@ -58,7 +58,8 @@ class UpfrontPaymentController @Inject() (
           case "Yes" =>
             Future.successful(Redirect(routes.UpfrontPaymentController.upfrontPaymentAmount()))
           case _ => Future.successful(Redirect(routes.MonthlyPaymentAmountController.monthlyPaymentAmount()))
-        })
+        }
+      )
 
   }
 
@@ -86,7 +87,8 @@ class UpfrontPaymentController @Inject() (
   val upfrontSummary: Action[AnyContent] = as.default.async { implicit request =>
     val mockUserAnswers = UserAnswers.empty.copy(
       hasUpfrontPayment = Some(true),
-      upfrontAmount = Some(AmountInPence(10000L)))
+      upfrontAmount     = Some(AmountInPence(10000L))
+    )
     Future.successful(Ok(upfrontSummaryPage(mockUserAnswers, AmountInPence(200000L))))
   }
 }
@@ -102,6 +104,8 @@ object UpfrontPaymentController {
 
   def upfrontPaymentAmountForm(journey: MockJourney): Form[BigDecimal] = Form(
     mapping(
-      key -> Forms.of(amountOfMoneyFormatter(AmountInPence(100L).inPounds > _, journey.qualifyingDebt.inPounds < _)))(identity)(Some(_)))
+      key -> Forms.of(amountOfMoneyFormatter(AmountInPence(100L).inPounds > _, journey.qualifyingDebt.inPounds < _))
+    )(identity)(Some(_))
+  )
 
 }
