@@ -19,7 +19,8 @@ package actions
 import controllers.support.RequestSupport.hc
 import essttp.journey.JourneyConnector
 import essttp.journey.model.Journey
-import play.api.mvc.{ActionRefiner, Request, Result}
+import play.api.Logger
+import play.api.mvc.{ActionRefiner, Request, Result, Results}
 import requests.JourneyRequest
 
 import javax.inject.{Inject, Singleton}
@@ -31,13 +32,17 @@ class GetJourneyActionRefiner @Inject() (journeyConnector: JourneyConnector)(
     ec: ExecutionContext
 ) extends ActionRefiner[Request, JourneyRequest] {
 
+  private val logger = Logger(getClass)
+
   override protected def refine[A](request: Request[A]): Future[Either[Result, JourneyRequest[A]]] = {
     implicit val r: Request[A] = request
     for {
       maybeJourney: Option[Journey] <- journeyConnector.findLatestJourneyBySessionId()
     } yield maybeJourney match {
       case Some(journey) => Right(new JourneyRequest(journey, request))
-      case None          => Left(???)
+      case None          =>
+        logger.warn(s"No journey found for sessionId: [ ${hc.sessionId} ]")
+        Left(Results.ImATeapot) //todo what should this be, obviously not teapot error
     }
   }
 
