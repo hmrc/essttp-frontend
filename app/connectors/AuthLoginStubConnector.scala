@@ -23,6 +23,7 @@ import play.api.Configuration
 import play.api.libs.ws.{WSClient, WSResponse}
 import services.AuthLoginStubService.LoginData
 import uk.gov.hmrc.http.HeaderCarrier
+import util.Logging
 import util.StringUtils.StringOps
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -34,9 +35,11 @@ trait AuthLoginStubConnector {
 
 }
 
-class AuthLoginStubConnectorImpl @Inject() (config: AppConfig, ws: WSClient)(implicit ec: ExecutionContext) extends AuthLoginStubConnector {
+class AuthLoginStubConnectorImpl @Inject() (config: AppConfig, ws: WSClient)(implicit ec: ExecutionContext) extends AuthLoginStubConnector with Logging {
 
   private val authLoginUrl = config.BaseUrl.gg
+
+  logger.debug(s"authLoginUrl is $authLoginUrl")
 
   private def requestFormBody(loginData: LoginData): Map[String, String] = {
     val enrolmentIdentifier = loginData.enrolment.flatMap(_.identifiers.headOption)
@@ -58,14 +61,22 @@ class AuthLoginStubConnectorImpl @Inject() (config: AppConfig, ws: WSClient)(imp
   }
 
   override def login(loginData: LoginData)(implicit hc: HeaderCarrier): ACR[WSResponse] = {
+    logger.debug(s"logging in the user")
     val formData =
       requestFormBody(loginData).map { case (k, v) => s"${k.urlEncode}=${v.urlEncode}" }.mkString("&")
     val result: Future[Either[StubException, WSResponse]] = ws.url(authLoginUrl)
       .withFollowRedirects(false)
       .withHttpHeaders("Content-Type" -> "application/x-www-form-urlencoded")
       .post(formData)
-      .map(wrapResponse(_))
-      .recover { case NonFatal(e) => wrapException(e) }
+      .map{ r =>
+        logger.debug(s"mapping the login response $r")
+        wrapResponse(r)
+      }
+      .recover {
+        case NonFatal(e) =>
+          logger.debug(s"failed login $e")
+          wrapException(e)
+      }
 
     EitherT(result)
   }

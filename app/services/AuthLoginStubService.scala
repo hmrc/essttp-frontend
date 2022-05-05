@@ -30,6 +30,7 @@ import uk.gov.hmrc.auth.core.{AffinityGroup, ConfidenceLevel, Enrolment}
 import uk.gov.hmrc.crypto.Crypted
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.filters.crypto.SessionCookieCrypto
+import util.Logging
 
 import java.time.{LocalDate, ZonedDateTime}
 import java.util.UUID
@@ -45,7 +46,7 @@ class AuthLoginStubServiceImpl @Inject() (
     connector:           AuthLoginStubConnector,
     sessionCookieCrypto: SessionCookieCrypto,
     sessionCookieBaker:  SessionCookieBaker
-)(implicit ec: ExecutionContext) extends AuthLoginStubService {
+)(implicit ec: ExecutionContext) extends AuthLoginStubService with Logging {
 
   def createSession(response: WSResponse): Either[AuthError, Session] = {
     for {
@@ -57,7 +58,10 @@ class AuthLoginStubServiceImpl @Inject() (
   }
 
   override def login(group: AffinityGroup, enrolments: List[Enrolment])(implicit hc: HeaderCarrier): LSR[Session] =
-    connector.login(loginDataOf(group, enrolments)).leftMap(liftError).subflatMap(createSession)
+    connector.login(loginDataOf(group, enrolments)).leftMap(liftError).subflatMap{ r =>
+      logger.debug("creating a session from the login response")
+      createSession(r)
+    }
 
 }
 
