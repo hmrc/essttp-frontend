@@ -40,7 +40,7 @@ class GetJourneyActionRefiner @Inject() (journeyConnector: JourneyConnector)(
       maybeJourney: Option[Journey] <- journeyConnector.findLatestJourneyBySessionId()
     } yield maybeJourney match {
       case Some(journey) => Right(new JourneyRequest(journey, request))
-      case None          =>
+      case None =>
         logger.warn(s"No journey found for sessionId: [ ${hc.sessionId} ]")
         Left(Results.ImATeapot) //todo what should this be, obviously not teapot error
     }
@@ -49,4 +49,3 @@ class GetJourneyActionRefiner @Inject() (journeyConnector: JourneyConnector)(
   override protected def executionContext: ExecutionContext = ec
 
 }
-

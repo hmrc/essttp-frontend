@@ -16,12 +16,8 @@
 
 package testsupport
 
-import essttp.journey.JourneyConnector
-
 class DummyTest extends ItSpec {
 
-  "it should wire and start application" ignore {
-    val whatever = app.injector.instanceOf[JourneyConnector]
-  }
+  "it should wire and start application" ignore {}
 
 }
