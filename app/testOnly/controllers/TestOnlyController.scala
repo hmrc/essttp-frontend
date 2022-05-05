@@ -104,8 +104,8 @@ class TestOnlyController @Inject() (
       val result = for {
         session <- loginService.login(affinityGroup(auth), asEnrolments(enrolments))
       } yield {
-        logger.debug("login was successful")
-        logger.debug(s"redirecting to $call")
+        logger.info("login was successful")
+        logger.info(s"redirecting to $call")
         Redirect(call).withSession(session)
       }
 

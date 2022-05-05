@@ -39,7 +39,7 @@ class AuthLoginStubConnectorImpl @Inject() (config: AppConfig, ws: WSClient)(imp
 
   private val authLoginUrl = config.BaseUrl.gg
 
-  logger.debug(s"authLoginUrl is $authLoginUrl")
+  logger.info(s"authLoginUrl is $authLoginUrl")
 
   private def requestFormBody(loginData: LoginData): Map[String, String] = {
     val enrolmentIdentifier = loginData.enrolment.flatMap(_.identifiers.headOption)
@@ -61,7 +61,7 @@ class AuthLoginStubConnectorImpl @Inject() (config: AppConfig, ws: WSClient)(imp
   }
 
   override def login(loginData: LoginData)(implicit hc: HeaderCarrier): ACR[WSResponse] = {
-    logger.debug(s"logging in the user")
+    logger.info(s"logging in the user")
     val formData =
       requestFormBody(loginData).map { case (k, v) => s"${k.urlEncode}=${v.urlEncode}" }.mkString("&")
     val result: Future[Either[StubException, WSResponse]] = ws.url(authLoginUrl)
@@ -69,12 +69,12 @@ class AuthLoginStubConnectorImpl @Inject() (config: AppConfig, ws: WSClient)(imp
       .withHttpHeaders("Content-Type" -> "application/x-www-form-urlencoded")
       .post(formData)
       .map{ r =>
-        logger.debug(s"mapping the login response $r")
+        logger.info(s"mapping the login response $r")
         wrapResponse(r)
       }
       .recover {
         case NonFatal(e) =>
-          logger.debug(s"failed login $e")
+          logger.info(s"failed login $e")
           wrapException(e)
       }
 

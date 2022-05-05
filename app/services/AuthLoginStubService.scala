@@ -59,7 +59,7 @@ class AuthLoginStubServiceImpl @Inject() (
 
   override def login(group: AffinityGroup, enrolments: List[Enrolment])(implicit hc: HeaderCarrier): LSR[Session] =
     connector.login(loginDataOf(group, enrolments)).leftMap(liftError).subflatMap{ r =>
-      logger.debug("creating a session from the login response")
+      logger.info("creating a session from the login response")
       createSession(r)
     }
 
