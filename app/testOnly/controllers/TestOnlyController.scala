@@ -27,6 +27,7 @@ import play.api.data.{Form, Forms}
 import play.api.libs.json.{Format, Json}
 import play.api.mvc._
 import services.AuthLoginStubService
+import services.AuthLoginStubService.AuthError
 import testOnly.controllers.TestOnlyController._
 import testOnly.models.Enrolment.{EPAYE, VAT}
 import testOnly.models.TestOnlyJourney.{EpayeFromBTA, EpayeFromGovUk, EpayeNoOrigin, VATFromBTA, VATFromGovUk, VATNoOrigin}
@@ -94,15 +95,21 @@ class TestOnlyController @Inject() (
   }
 
   def routeCall(auth: String, enrolments: List[Enrolment], call: Call): Future[Result] = {
+      def onFailure(ae: AuthError): Future[Result] = Future.failed(ae.t)
+
     if (auth == "none") {
       Future.successful(Redirect(call).withNewSession)
     } else {
       implicit val hc = HeaderCarrier()
       val result = for {
         session <- loginService.login(affinityGroup(auth), asEnrolments(enrolments))
-      } yield Redirect(call).withSession(session)
+      } yield {
+        logger.debug("login was successful")
+        logger.debug(s"redirecting to $call")
+        Redirect(call).withSession(session)
+      }
 
-      result.foldF(e => Future.failed(e.t), Future.successful(_))
+      result.foldF(onFailure(_), Future.successful(_))
     }
 
   }
