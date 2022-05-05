@@ -19,14 +19,13 @@ package services
 import cats.implicits.{catsSyntaxValidatedId, toFunctorOps}
 import cats.syntax.apply._
 import cats.data.{NonEmptyList, ValidatedNel}
-import connectors.EligibilityStubConnector
 import essttp.rootmodel.{TaxId, TaxRegime}
 import models.ttp.{ChargeTypeAssessment, EligibilityRules, TaxPeriodCharges, TtpEligibilityData}
 import models.{EligibilityData, InvoicePeriod, OverDuePayments, OverduePayment}
 import essttp.rootmodel.AmountInPence
 import services.EligibilityDataService._
 import testOnly.models.EligibilityError
-import testOnly.models.EligibilityError.{PayeHasDisallowedCharges, _}
+import testOnly.models.EligibilityErrors._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
@@ -35,19 +34,19 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class EligibilityDataService @Inject() (connector: EligibilityStubConnector) {
+class EligibilityDataService @Inject() () {
 
-  def data(idType: String, regime: TaxRegime, id: TaxId, showFinancials: Boolean)(implicit hc: HeaderCarrier, ec: ExecutionContext) =
-    for {
-      items <- connector.eligibilityData(idType, regime, id, showFinancials)
-    } yield EligibilityData(rejectionsOf(items.eligibilityRules), overDuePayments(items))
+  def data(idType: String, regime: TaxRegime, id: TaxId, showFinancials: Boolean)(implicit hc: HeaderCarrier, ec: ExecutionContext) = ???
+  //    for {
+  //      items <- connector.eligibilityData(idType, regime, id, showFinancials)
+  //    } yield EligibilityData(rejectionsOf(items.eligibilityRules), overDuePayments(items))
 }
 
 object EligibilityDataService {
 
   type ValidatedResult[A] = ValidatedNel[EligibilityError, A]
 
-  val unitResult = ().validNel
+  val unitResult: ValidatedNel[Nothing, Unit] = ().validNel
 
   def rejections(rules: EligibilityRules): Either[NonEmptyList[EligibilityError], Unit] = {
     val validAddress: ValidatedResult[Unit] = if (rules.rlsOnAddress) RLSFlagIsSet.invalidNel else unitResult
@@ -88,7 +87,7 @@ object EligibilityDataService {
     OverDuePayments(qualifyingDebt, payments)
   }
 
-  val LocalDateTimeFmt = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+  val LocalDateTimeFmt: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
   def parseLocalDate(s: String): LocalDate = LocalDateTimeFmt.parse(s, LocalDate.from)
 

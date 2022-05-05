@@ -16,16 +16,4 @@
 
 package testOnly.models
 
-import cats.Eq
-
-sealed trait TestOnlyJourney extends Product with Serializable
-
-object TestOnlyJourney {
-  case object EpayeFromGovUk extends TestOnlyJourney
-  case object EpayeFromBTA extends TestOnlyJourney
-  case object EpayeNoOrigin extends TestOnlyJourney
-  case object VATFromGovUk extends TestOnlyJourney
-  case object VATFromBTA extends TestOnlyJourney
-  case object VATNoOrigin extends TestOnlyJourney
-  implicit val eq: Eq[TestOnlyJourney] = Eq.fromUniversalEquals
-}
+final case class AuthToken(value: String)

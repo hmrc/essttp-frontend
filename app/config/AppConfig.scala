@@ -32,7 +32,6 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val welshLanguageSupportEnabled: Boolean = config.getOptional[Boolean]("features.welsh-language-support").getOrElse(false)
   val authTimeoutSeconds: Int = config.get[FiniteDuration]("timeout-dialog.timeout").toSeconds.toInt
   val authTimeoutCountdownSeconds: Int = config.get[FiniteDuration]("timeout-dialog.countdown").toSeconds.toInt
-  val mongoTimeToLiveInSeconds: Int = config.get[Int]("mongodb.timeToLiveInSeconds")
 
   val ttpBaseUrl: String = s"${servicesConfig.baseUrl("ttp")}"
 

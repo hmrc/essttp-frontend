@@ -18,20 +18,42 @@ package controllers
 
 import _root_.actions.Actions
 import essttp.journey.JourneyConnector
-import essttp.rootmodel.TaxRegime
-import models.TaxOrigin
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import essttp.journey.model.{SjRequest, SjResponse}
+import play.api.Configuration
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
+import play.mvc.Http.HeaderNames
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton()
 class EpayeGovUkController @Inject() (
-    cc: MessagesControllerComponents,
-    jc: JourneyConnector, as: Actions
-)(implicit ec: ExecutionContext) extends TaxOriginController[TaxRegime.Epaye.type](cc, jc, as) {
+    cc:               MessagesControllerComponents,
+    journeyConnector: JourneyConnector,
+    as:               Actions,
+    config:           Configuration
+)(implicit ec: ExecutionContext) extends FrontendController(cc) {
 
-  val originator = TaxOrigin.EpayeGovUk
+  val refererForGovUk: String = config.get[String]("refererForGovUk")
 
-  override def landingPage: Action[AnyContent] = start
+  def startJourney: Action[AnyContent] = as.default.async { implicit request =>
+
+    val sjResponse: Future[SjResponse] = if (isComingFromGovUk(request)) {
+      journeyConnector.Epaye.startJourneyGovUk(SjRequest.Epaye.Empty())
+    } else {
+      journeyConnector.Epaye.startJourneyDetachedUrl(SjRequest.Epaye.Empty())
+    }
+
+    sjResponse.map(r => Redirect(r.nextUrl.value))
+  }
+
+  /**
+   * Based on the "Referrer" http header it determines
+   * if the incoming request originated on the gov-uk pages.
+   */
+  def isComingFromGovUk(request: Request[_]): Boolean = {
+
+    request.headers.get(HeaderNames.REFERER).exists(_.contains(refererForGovUk))
+  }
 }

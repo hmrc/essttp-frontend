@@ -14,30 +14,16 @@
  * limitations under the License.
  */
 
-package testOnly.models
+package models
+import play.api.libs.json.{Format, Json}
+import testOnly.models.EligibilityError
+import testOnly.models.EligibilityErrors.format
 
-import enumeratum._
-import scala.collection.immutable
-
-sealed trait Enrolment extends EnumEntry
-
-object Enrolments extends Enum[Enrolment] {
-  case object Epaye extends Enrolment
-
-  case object Vat extends Enrolment
-
-  override def values: immutable.IndexedSeq[Enrolment] = findValues
+final case class EligibilityData(rejections: Set[EligibilityError], overduePayments: OverDuePayments) {
+  def hasRejections: Boolean = rejections.nonEmpty
+  def hasMultipleRejections: Boolean = rejections.size > 1
 }
-
-sealed trait SignInAs extends EnumEntry
-
-object SignInAs extends Enum[SignInAs] {
-
-  case object Individual extends SignInAs
-
-  case object Organisation extends SignInAs
-
-  case object NoSignIn extends SignInAs
-
-  override def values: immutable.IndexedSeq[SignInAs] = findValues
-}
+// todo maybe add this in, but this is currently using the testonly eligibility errors.... wrong
+//object EligibilityData {
+//  implicit val format: Format[EligibilityData] = Json.format[EligibilityData]
+//}

@@ -17,7 +17,6 @@
 package models
 import essttp.rootmodel.AmountInPence
 import play.api.libs.json.{Format, Json}
-import testOnly.models.EligibilityError
 
 final case class OverDuePayments(
     total:    AmountInPence,
@@ -26,13 +25,4 @@ final case class OverDuePayments(
 
 object OverDuePayments {
   implicit val format: Format[OverDuePayments] = Json.format[OverDuePayments]
-}
-
-final case class EligibilityData(rejections: List[EligibilityError], overduePayments: OverDuePayments) {
-  def hasRejections: Boolean = rejections.nonEmpty
-  def hasMultipleRejections: Boolean = rejections.size > 1
-}
-
-object EligibilityData {
-  implicit val format: Format[EligibilityData] = Json.format[EligibilityData]
 }

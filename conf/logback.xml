@@ -47,7 +47,6 @@
 
     <logger name="uk.gov" level="INFO"/>
 
-    <logger name="uk.gov.hmrc.mongo.play.PlayMongoComponent" level="DEBUG"/>
 
     <logger name="application" level="DEBUG"/>
 
@@ -57,7 +56,6 @@
 
     <logger name="uk.gov" level="INFO"/>
 
-    <logger name="reactivemongo.core" level="INFO"/>
     <logger name="akka" level="INFO"/>
     <logger name="play" level="INFO"/>
     <logger name="org.jose4j" level="INFO"/>

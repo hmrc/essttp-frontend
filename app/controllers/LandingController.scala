@@ -35,4 +35,8 @@ class LandingController @Inject() (
     Future.successful(Redirect(routes.EPayeStartController.ePayeLanding()))
   }
 
+  val tempStartPage: Action[AnyContent] = as.getJourney.async { implicit request =>
+    Future.successful(Ok(s"Journey Started: [ ], \n landing page/routes is in progress: SUPP-304, https://jira.tools.tax.service.gov.uk/browse/SUPP-304"))
+  }
+
 }

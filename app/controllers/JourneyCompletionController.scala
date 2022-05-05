@@ -27,7 +27,7 @@ class JourneyCompletionController @Inject() (cc: MessagesControllerComponents) e
   // just return to the test page for now.
   // abort will do the right thing depending on the origin when implemented
   def abort: Action[AnyContent] = Action {
-    Redirect(testOnly.controllers.routes.TestOnlyController.testOnlyStartPage)
+    Redirect(testOnly.controllers.routes.TestOnlyController.startJourneyGet())
   }
 
 }

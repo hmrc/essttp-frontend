@@ -17,13 +17,13 @@
 @import play.api.mvc.Request
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import testOnly.controllers.{routes => testOnlyRoutes}
-@import testOnly.controllers.TestOnlyController.TestOnlyForm
+@import testOnly.forms.TestOnlyFireStarterForm
 @import play.api.data.Form
 @import requests.RequestSupport
 @import views.html.templates.Layout
 @import testOnly.messages.Messages
-@import testOnly.models.EligibilityError
-@import essttp.journey.model.Origin
+@import testOnly.models.EligibilityErrors
+@import essttp.journey.model.Origins
 
 @this(
         layout: Layout,
@@ -36,14 +36,14 @@
         govukErrorSummary: GovukErrorSummary
 )
 
-@(form: Form[TestOnlyForm])(implicit
+@(form: Form[TestOnlyFireStarterForm])(implicit
         request: Request[_]
 )
 
 @import requestSupport._
 @title = @{"Test only starter page"}
 @eligibilityErrorCheckboxes = @{
-   EligibilityError.values.map { error =>
+   EligibilityErrors.values.map { error =>
      CheckboxItem(
       content = Text(error.entryName),
       value = error.entryName
@@ -136,17 +136,17 @@
    items = Seq(
     RadioItem(
      content = Text("GOV.UK"),
-     value = Some(Origin.Epaye.GovUk.show),
+     value = Some(Origins.Epaye.GovUk.toString()),
      hint = Some(Hint(content = Text("If you cannot pay your tax bill on time")))
     ),
     RadioItem(
      content = Text("Business Tax Account"),
-     value = Some(Origin.Epaye.Bta.show),
+     value = Some(Origins.Epaye.Bta.toString()),
      hint = Some(Hint(content = Text("Set up a payment plan if you cannot pay in full")))
     ),
     RadioItem(
      content = Text("No origin (direct access)"),
-     value = Some(Origin.Epaye.DetachedUrl.show)
+     value = Some(Origins.Epaye.DetachedUrl.toString())
     )
    ),
    classes = "govuk-radios--small"
@@ -175,7 +175,7 @@
   ),
   RadioItem(
    content = Text("Business Tax Account"),
-   value = Some(Origin.Vat.Bta.show),
+   value = Some(Origins.Vat.Bta.toString()),
    hint = Some(Hint(content = Text("Set up a payment plan if you cannot pay in full")))
   ),
   RadioItem(
@@ -201,7 +201,7 @@
 
   <h1 class="govuk-heading-xl">@title</h1>
   <p class="govuk-body">Set up journeys and emulate entry point behaviours.</p>
-  @formWithCSRF(action = testOnlyRoutes.TestOnlyController.testOnlyStartPageSubmit()) {
+  @formWithCSRF(action = testOnlyRoutes.TestOnlyController.startJourneySubmit()) {
    @authContent
    @govukTabs(Tabs(
     items = Seq(
@@ -211,14 +211,14 @@
       panel = TabPanel(
        content = HtmlContent(payeContent)
       )
-     ),
-     TabItem(
-      id = Some("vat"),
-      label = "VAT",
-      panel = TabPanel(
-       content = HtmlContent(vatContent)
-      )
-     )
+     )//,
+//     TabItem(
+//      id = Some("vat"),
+//      label = "VAT",
+//      panel = TabPanel(
+//       content = HtmlContent(vatContent)
+//      )
+//     )
     )
    ))
    @govukButton(Button(content = Text("Start now")))

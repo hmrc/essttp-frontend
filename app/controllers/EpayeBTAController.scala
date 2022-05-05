@@ -34,7 +34,7 @@ class EpayeBTAController @Inject() (cc: MessagesControllerComponents, epayeLandi
   val originator = EpayeBTA
 
   override def landingPage: Action[AnyContent] = Action { implicit request =>
-    Ok(epayeLandingPage(controllers.routes.EpayeBTAController.start, Option(abortCall)))
+    Ok(epayeLandingPage(controllers.routes.LandingController.landingPage(), Option(abortCall)))
   }
 
 }

@@ -24,7 +24,7 @@ import scala.collection.immutable
 
 sealed trait EligibilityError extends EnumEntry
 
-object EligibilityError extends Enum[EligibilityError] {
+object EligibilityErrors extends Enum[EligibilityError] {
   object DebtIsTooLarge extends EligibilityError {
     override val entryName = "Debt is too large"
   }
@@ -52,6 +52,6 @@ object EligibilityError extends Enum[EligibilityError] {
 
   override val values: immutable.IndexedSeq[EligibilityError] = findValues
 
-  implicit val format: Format[EligibilityError] = implicitly[Format[String]].inmap(EligibilityError.withName, _.entryName)
+  implicit val format: Format[EligibilityError] = implicitly[Format[String]].inmap(EligibilityErrors.withName, _.entryName)
 
 }

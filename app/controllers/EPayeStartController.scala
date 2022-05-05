@@ -17,14 +17,13 @@
 package controllers
 
 import _root_.actions.Actions
-import essttp.rootmodel.TaxRegime
 import messages.{Message, Messages}
-import models.{EligibilityData, ttp}
+import models.{EligibilityData}
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import play.twirl.api.Html
 import services.EligibilityDataService
-import testOnly.models.EligibilityError._
+import testOnly.models.EligibilityErrors._
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.EPaye.ineligible.IneligibleTemplatePage
@@ -59,22 +58,26 @@ class EPayeStartController @Inject() (
     Redirect(routes.EPayeStartController.ePayeStart())
   }
 
-  val ePayeStart: Action[AnyContent] = as.default.async { implicit request =>
-    request.session.data.get("JourneyId") match {
-      case Some(_: String) => for {
-        data <- eligibilityDataService.data(
-          idType         = "AOR",
-          regime         = TaxRegime.Epaye,
-          id             = ttp.DefaultTaxId,
-          showFinancials = true
-        )
-      } yield routeResponse(data)
-      case _ => throw new IllegalStateException("missing journey")
-    }
+  val ePayeStart: Action[AnyContent] = as.default { implicit request =>
+    Ok("Not implemented yet, wip")
+    //todo delete this or make it work properly
+    //    journey
+    //        request.session.data.get("JourneyId") match {
+    //          case Some(_: String) => for {
+    //            data <- eligibilityDataService.data(
+    //              idType         = "AOR",
+    //              regime         = TaxRegime.Epaye,
+    //              id             = ttp.DefaultTaxId,
+    //              showFinancials = true
+    //            )
+    //          } yield routeResponse(data)
+    //          case _ => throw new IllegalStateException("missing journey")
+    //      }
   }
 
-  val ePayeStartSubmit: Action[AnyContent] = as.default { _ =>
-    Redirect(routes.UpfrontPaymentController.upfrontPayment())
+  val ePayeStartSubmit: Action[AnyContent] = as.default {
+    _ =>
+      Redirect(routes.UpfrontPaymentController.upfrontPayment())
   }
 
   private def genericIneligiblePageInfo(implicit r: Request[_]): (Message, Html) =

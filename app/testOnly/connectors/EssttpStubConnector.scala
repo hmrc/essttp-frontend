@@ -17,21 +17,22 @@
 package testOnly.connectors
 
 import config.AppConfig
-import connectors.EligibilityConnector._
 import essttp.rootmodel.{TaxId, TaxRegime}
 import play.api.libs.json.{Format, Json}
 import testOnly.models.EligibilityError
+import testOnly.models.EligibilityErrors.format
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import util.RegimeUtils._
 import util.TaxIdUtils.TaxIdOps
 import models.ttp.TtpEligibilityData
+import testOnly.connectors.EssttpStubConnector.{EligibilityRequest, ErrorData}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class EligibilityStubConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig) {
+class EssttpStubConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig) {
 
   def insertEligibilityData(regime: TaxRegime, taxId: TaxId, data: TtpEligibilityData)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] = {
     httpClient
@@ -57,7 +58,7 @@ class EligibilityStubConnector @Inject() (httpClient: HttpClient, appConfig: App
     )
   }
 
-  def errors(regime: TaxRegime, id: TaxId, errors: List[EligibilityError])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] = {
+  def errors(regime: TaxRegime, id: TaxId, errors: Seq[EligibilityError])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] = {
     httpClient
       .POST[ErrorData, Unit](
         url  = errorUrl(regime, id),
@@ -77,11 +78,11 @@ class EligibilityStubConnector @Inject() (httpClient: HttpClient, appConfig: App
 
 }
 
-object EligibilityConnector {
+object EssttpStubConnector {
 
   final case class EligibilityRequest(idType: String, idNumber: String, regimeType: String, returnFinancials: Boolean)
 
-  final case class ErrorData(errors: List[EligibilityError])
+  final case class ErrorData(errors: Seq[EligibilityError])
 
   object ErrorData {
     implicit val fmt: Format[ErrorData] = Json.format[ErrorData]
