@@ -10,6 +10,6 @@
 # Failing to follow this rule may result in test routes deployed in production.
 
 # Add all the application routes to the prod.routes file
-->         /                                         prod.Routes
-GET  /setup-a-payment-plan/test-only/start-journey   testOnly.controllers.StartJourneyController.startJourneyGet
-POST /setup-a-payment-plan/test-only/start-journey   testOnly.controllers.StartJourneyController.startJourneySubmit
+->   /                                                prod.Routes
+GET  /set-up-a-payment-plan/test-only/start-journey   testOnly.controllers.StartJourneyController.startJourneyGet
+POST /set-up-a-payment-plan/test-only/start-journey   testOnly.controllers.StartJourneyController.startJourneySubmit

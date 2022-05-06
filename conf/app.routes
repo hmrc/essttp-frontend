@@ -7,6 +7,7 @@ GET       /govuk/epaye/start                             controllers.EpayeGovUkC
 
 # langing page
 GET       /                                              controllers.LandingController.landingPage
+
 GET       /start                                         controllers.LandingController.tempStartPage
 
 GET       /bta/epaye                                     controllers.EpayeBTAController.landingPage
