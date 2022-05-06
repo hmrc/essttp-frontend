@@ -25,9 +25,11 @@ import models.ttp
 import models.ttp._
 import play.api.libs.json.{Format, Json}
 import play.api.mvc._
+import testOnly.AuthLoginApiService
 import testOnly.connectors.EssttpStubConnector
-import testOnly.controllers.TestOnlyController._
-import testOnly.forms.TestOnlyFireStarterForm
+import testOnly.controllers.StartJourneyController._
+import testOnly.formsmodel.StartJourneyForm
+import testOnly.testusermodel.TestUser
 import testOnly.views.html.TestOnlyStartPage
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -37,51 +39,52 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class TestOnlyController @Inject() (
+class StartJourneyController @Inject() (
     as:                  Actions,
     appConfig:           AppConfig,
     essttpStubConnector: EssttpStubConnector,
     mcc:                 MessagesControllerComponents,
     testOnlyStartPage:   TestOnlyStartPage,
-    journeyConnector:    JourneyConnector
-)(implicit ec: ExecutionContext, requestHeader: RequestHeader)
+    journeyConnector:    JourneyConnector,
+    loginService:        AuthLoginApiService
+)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 
   val startJourneyGet: Action[AnyContent] = as.default { implicit request =>
-    Ok(testOnlyStartPage(TestOnlyFireStarterForm.form))
+    Ok(testOnlyStartPage(StartJourneyForm.form))
   }
 
   val startJourneySubmit: Action[AnyContent] = as.default.async { implicit request =>
-    TestOnlyFireStarterForm.form.bindFromRequest()
+    StartJourneyForm.form.bindFromRequest()
       .fold(
         formWithErrors => Future.successful(Ok(testOnlyStartPage(formWithErrors))),
         startJourney
       )
   }
 
-  private def startJourney(testOnlyFireStarterForm: TestOnlyFireStarterForm)
-    (implicit hc: HeaderCarrier): Future[Result] = {
+  private def startJourney(startJourneyForm: StartJourneyForm)(implicit request: RequestHeader): Future[Result] = {
 
-    val origin: Origin = testOnlyFireStarterForm.origin
-    val sjResponseF: Future[SjResponse] = origin match {
+    //TODO: this is not a correct behaviour
+    val sjResponseF: Future[SjResponse] = startJourneyForm.origin match {
       case Origins.Epaye.Bta         => journeyConnector.Epaye.startJourneyBta(epayeSimple)
       case Origins.Epaye.GovUk       => journeyConnector.Epaye.startJourneyGovUk(epayeEmpty)
       case Origins.Epaye.DetachedUrl => journeyConnector.Epaye.startJourneyGovUk(epayeEmpty)
     }
+
     implicit val hc: HeaderCarrier = HeaderCarrier()
+
     for {
       response <- sjResponseF
-      //TODO login and inject auth token(bearer token) into play session
-      // make call to stubs too
       _ <- essttpStubConnector.insertEligibilityData(TaxRegime.Epaye, ttp.DefaultTaxId, DefaultTTP)
-    } yield Redirect(response.nextUrl.value)
+      maybeTestUser = TestUser.makeTestUser(startJourneyForm)
+      session <- maybeTestUser.map(testUser => loginService.logIn(testUser)).getOrElse(Future.successful(Session.emptyCookie))
 
+    } yield Redirect(response.nextUrl.value).withSession(session)
   }
-
 }
 
-object TestOnlyController {
+object StartJourneyController {
 
   private def returnUrl(url: String = "test-return-url") = ReturnUrl(url)
 

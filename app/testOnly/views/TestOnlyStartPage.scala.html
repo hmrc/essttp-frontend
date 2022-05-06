@@ -17,13 +17,15 @@
 @import play.api.mvc.Request
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import testOnly.controllers.{routes => testOnlyRoutes}
-@import testOnly.forms.TestOnlyFireStarterForm
+@import testOnly.formsmodel.StartJourneyForm
 @import play.api.data.Form
 @import requests.RequestSupport
 @import views.html.templates.Layout
 @import testOnly.messages.Messages
 @import testOnly.models.EligibilityErrors
 @import essttp.journey.model.Origins
+@import testOnly.formsmodel.Enrolments
+@import testOnly.formsmodel.SignInAs
 
 @this(
         layout: Layout,
@@ -36,7 +38,8 @@
         govukErrorSummary: GovukErrorSummary
 )
 
-@(form: Form[TestOnlyFireStarterForm])(implicit
+
+@(form: Form[StartJourneyForm])(implicit
         request: Request[_]
 )
 
@@ -50,57 +53,60 @@
      )
    }.toSeq
  }
-@orgOptions = @{
+
+@enrolmentsContent = @{
  govukCheckboxes(Checkboxes(
   fieldset = Some(Fieldset(
    legend = Some(Legend(
     content = Text("Enrolments"),
-    classes = "govuk-fieldset__legend--s",
-    isPageHeading = false
-   ))
-  )),
-  idPrefix = Some("enrolments"),
-  name = "enrolments[]",
-  items = Seq(
-   CheckboxItem(
-    content = Text("PAYE for Employers"),
-    value = "EPAYE"
-   ),
-   CheckboxItem(
-    content = Text("VAT"),
-    value = "VAT"
-   )
-  ),
-  classes = "govuk-checkboxes--small"
- ))
-}
-@authContent = {
- @govukRadios(Radios(
-  fieldset = Some(Fieldset(
-   legend = Some(Legend(
-    content = Text("Signed in"),
     classes = "govuk-fieldset__legend--m",
     isPageHeading = false
    ))
   )),
-  idPrefix = Some("auth"),
-  name = "auth",
-  errorMessage = form.error("auth").map(e => ErrorMessage(
-   content = Text(Messages.getError(s"auth.${e.message}").show)
+  idPrefix = Some("enrolments"),
+  name = "enrolments",
+  items = Seq(
+   CheckboxItem(
+    content = Text("PAYE for Employers"),
+    value = Enrolments.Epaye.entryName
+   )
+//TODO: add vat once we start supporting Vat
+//    ,
+//   CheckboxItem(
+//    content = Text("VAT"),
+//    value = Enrolments.Vat.entryName
+//   )
+  ),
+  classes = "govuk-checkboxes--small"
+ ))
+}
+
+@signInAsContent = {
+ @govukRadios(Radios(
+  fieldset = Some(Fieldset(
+   legend = Some(Legend(
+    content = Text("Signed in as"),
+    classes = "govuk-fieldset__legend--m",
+    isPageHeading = false
+   ))
+  )),
+  idPrefix = Some("signInAs"),
+  name = "signInAs",
+  errorMessage = form.error("signInAs").map(e => ErrorMessage(
+   content = Text(Messages.getError(s"signInAs.${e.message}").show)
   )),
   items = Seq(
    RadioItem(
     content = Text("As an Organisation"),
-    value = Some("Organisation"),
-    conditionalHtml = Some(orgOptions)
+    value = Some(SignInAs.Organisation.entryName)
    ),
    RadioItem(
     content = Text("As an Individual"),
-    value = Some("Individual")
+    value = Some(SignInAs.Individual.entryName)
    ),
    RadioItem(
     content = Text("Not signed in"),
-    value = Some("none")
+    value = Some(SignInAs.NoSignIn.entryName)
    )
   ),
   classes = "govuk-radios--small"
@@ -201,8 +207,11 @@
 
   <h1 class="govuk-heading-xl">@title</h1>
   <p class="govuk-body">Set up journeys and emulate entry point behaviours.</p>
-  @formWithCSRF(action = testOnlyRoutes.TestOnlyController.startJourneySubmit()) {
-   @authContent
+  @formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneySubmit()) {
+
+   @signInAsContent
+   @enrolmentsContent
+
    @govukTabs(Tabs(
     items = Seq(
      TabItem(
@@ -211,7 +220,8 @@
       panel = TabPanel(
        content = HtmlContent(payeContent)
       )
-     )//,
+     )
+//, TODO: add vat content once we start building vat service
 //     TabItem(
 //      id = Some("vat"),
 //      label = "VAT",

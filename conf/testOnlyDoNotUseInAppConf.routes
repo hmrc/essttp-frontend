@@ -11,5 +11,5 @@
 
 # Add all the application routes to the prod.routes file
 ->         /                                         prod.Routes
-GET  /setup-a-payment-plan/test-only/start-journey   testOnly.controllers.TestOnlyController.startJourneyGet
-POST /setup-a-payment-plan/test-only/start-journey   testOnly.controllers.TestOnlyController.startJourneySubmit
+GET  /setup-a-payment-plan/test-only/start-journey   testOnly.controllers.StartJourneyController.startJourneyGet
+POST /setup-a-payment-plan/test-only/start-journey   testOnly.controllers.StartJourneyController.startJourneySubmit

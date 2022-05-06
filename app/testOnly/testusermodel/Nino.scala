@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-package testsupport
+package testOnly.testusermodel
 
-class DummyTest extends ItSpec {
+final case class Nino(value: String)
 
-  "it should wire and start application" in {}
-
-}

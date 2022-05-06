@@ -17,24 +17,18 @@
 package testOnly
 
 import com.google.inject.{Inject, Singleton}
-import play.api.mvc.{Request, Session}
-import testOnly.models.AuthToken
 import uk.gov.hmrc.http.HttpClient
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
+/**
+ * AuthLoginApiConnector for testing purposes.
+ */
 @Singleton
-class LoginService @Inject() (httpClient: HttpClient)(implicit ec: ExecutionContext) {
-
-  //  def logIn(tu: TestUser)(implicit request: Request[_]): Future[Session] = for {
-  //    authToken <- callAuthLoginApi(tu)
-  //  } yield buildSession(at)
-  //
-  //  private def buildSession(authToken: AuthToken)(implicit request: Request[_]) =
-  //    Session(Map(
-  //      SessionKeys.sessionId -> s"session-$randomUUID",
-  //      SessionKeys.authToken -> authToken.v,
-  //      SessionKeys.lastRequestTimestamp -> clockProvider.getClock.millis().toString
-  //    ))
+class AuthLoginConnector @Inject() (
+    httpClient:     HttpClient,
+    servicesConfig: ServicesConfig
+)(implicit ec: ExecutionContext) {
 
 }

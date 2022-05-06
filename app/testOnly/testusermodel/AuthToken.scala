@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package testsupport
+package testOnly.testusermodel
 
-class DummyTest extends ItSpec {
-
-  "it should wire and start application" in {}
-
-}
+/**
+ * The same as bearer token
+ */
+final case class AuthToken(value: String)

@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
-package testOnly.models
+package testOnly.testusermodel
 
-final case class AuthToken(value: String)
+sealed trait EnrolmentStatus
+
+object EnrolmentStatus {
+  case object Activated extends EnrolmentStatus
+  case object NotYetActivated extends EnrolmentStatus
+  case object HandedToAgent extends EnrolmentStatus
+
+}

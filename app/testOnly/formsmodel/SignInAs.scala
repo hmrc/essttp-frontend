@@ -14,10 +14,21 @@
  * limitations under the License.
  */
 
-package testsupport
+package testOnly.formsmodel
 
-class DummyTest extends ItSpec {
+import enumeratum._
 
-  "it should wire and start application" in {}
+import scala.collection.immutable
 
+sealed trait SignInAs extends EnumEntry
+
+object SignInAs extends Enum[SignInAs] {
+
+  case object Individual extends SignInAs
+
+  case object Organisation extends SignInAs
+
+  case object NoSignIn extends SignInAs
+
+  override def values: immutable.IndexedSeq[SignInAs] = findValues
 }

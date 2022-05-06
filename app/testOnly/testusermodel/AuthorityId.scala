@@ -14,30 +14,13 @@
  * limitations under the License.
  */
 
-package testOnly.models
+package testOnly.testusermodel
 
-import enumeratum._
-import scala.collection.immutable
+/**
+ * The same as CredId
+ */
+final case class AuthorityId(value: String)
 
-sealed trait Enrolment extends EnumEntry
+object AuthorityId {
 
-object Enrolments extends Enum[Enrolment] {
-  case object Epaye extends Enrolment
-
-  case object Vat extends Enrolment
-
-  override def values: immutable.IndexedSeq[Enrolment] = findValues
-}
-
-sealed trait SignInAs extends EnumEntry
-
-object SignInAs extends Enum[SignInAs] {
-
-  case object Individual extends SignInAs
-
-  case object Organisation extends SignInAs
-
-  case object NoSignIn extends SignInAs
-
-  override def values: immutable.IndexedSeq[SignInAs] = findValues
 }

@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-package testOnly.forms
+package testOnly.formsmodel
 
 import essttp.journey.model.{Origin, Origins}
 import play.api.data.Form
 import play.api.data.Forms.{mapping, seq}
-import testOnly.models.{EligibilityError, EligibilityErrors, Enrolment, Enrolments, SignInAs}
+import testOnly.models.{EligibilityError, EligibilityErrors}
 
-final case class TestOnlyFireStarterForm(
-    signIn:            SignInAs,
+final case class StartJourneyForm(
+    signInAs:          SignInAs,
     enrolments:        Seq[Enrolment],
     origin:            Origin,
     eligibilityErrors: Seq[EligibilityError]
 )
 
-object TestOnlyFireStarterForm {
-  val form: Form[TestOnlyFireStarterForm] = Form(
+object StartJourneyForm {
+  val form: Form[StartJourneyForm] = Form(
     mapping(
-      "auth" -> enumeratum.Forms.enum(SignInAs),
+      "signInAs" -> enumeratum.Forms.enum(SignInAs),
       "enrolments" -> seq(enumeratum.Forms.enum(Enrolments)),
       "origin" -> enumeratum.Forms.enum(Origins),
       "eligibilityErrors" -> seq(enumeratum.Forms.enum(EligibilityErrors))
-    )(TestOnlyFireStarterForm.apply)(TestOnlyFireStarterForm.unapply)
+    )(StartJourneyForm.apply)(StartJourneyForm.unapply)
   )
 }

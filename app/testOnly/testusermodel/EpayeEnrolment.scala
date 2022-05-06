@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package testsupport
+package testOnly.testusermodel
 
-class DummyTest extends ItSpec {
+import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
 
-  "it should wire and start application" in {}
-
-}
+case class EpayeEnrolment(
+    taxOfficeNumber:    TaxOfficeNumber,
+    taxOfficeReference: TaxOfficeReference,
+    enrolmentStatus:    EnrolmentStatus
+)
