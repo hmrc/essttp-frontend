@@ -65,22 +65,21 @@ class StartJourneyController @Inject() (
 
   private def startJourney(startJourneyForm: StartJourneyForm)(implicit request: RequestHeader): Future[Result] = {
 
-    //TODO: this is not a correct behaviour
-    val sjResponseF: Future[SjResponse] = startJourneyForm.origin match {
-      case Origins.Epaye.Bta         => journeyConnector.Epaye.startJourneyBta(epayeSimple)
-      case Origins.Epaye.GovUk       => journeyConnector.Epaye.startJourneyGovUk(epayeEmpty)
-      case Origins.Epaye.DetachedUrl => journeyConnector.Epaye.startJourneyGovUk(epayeEmpty)
+    val redirectUrl: Future[String] = startJourneyForm.origin match {
+      case Origins.Epaye.Bta         => journeyConnector.Epaye.startJourneyBta(epayeSimple).map(_.nextUrl.value)
+      case Origins.Epaye.GovUk       => Future.successful(_root_.controllers.routes.EpayeGovUkController.startJourney().url) //TODO send to github pages and aks to click the link
+      case Origins.Epaye.DetachedUrl => Future.successful(_root_.controllers.routes.EpayeGovUkController.startJourney().url)
     }
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     for {
-      response <- sjResponseF
+      redirectUrl <- redirectUrl
       _ <- essttpStubConnector.insertEligibilityData(TaxRegime.Epaye, ttp.DefaultTaxId, DefaultTTP)
       maybeTestUser = TestUser.makeTestUser(startJourneyForm)
       session <- maybeTestUser.map(testUser => loginService.logIn(testUser)).getOrElse(Future.successful(Session.emptyCookie))
 
-    } yield Redirect(response.nextUrl.value).withSession(session)
+    } yield Redirect(redirectUrl).withSession(session)
   }
 }
 
