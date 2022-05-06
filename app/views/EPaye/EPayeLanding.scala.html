@@ -20,6 +20,8 @@
 @import views.html.templates.Layout
 @import messages.Messages
 @import requests.RequestSupport
+@import essttp.journey.model.Journey
+@import actionsmodel.JourneyRequest
 
 @this(
   layout: Layout,
@@ -29,14 +31,18 @@
 )
 
 @()(implicit
-  request: Request[_]
+  request: JourneyRequest[_]
 )
 
 @import requestSupport._
 
 @title= @{Messages.Epaye.`Set up a PAYE for Employers payment plan`.show}
 
-@layout(pageTitle = Some(title), showSignOutLink = false) {
+@layout(
+  pageTitle = Some(title),
+  showSignOutLink = false,
+  backUrl = request.journey.backUrl.map(_.value)
+) {
   <h1 class="govuk-heading-xl">@title</h1>
   <p class="govuk-body">@{Messages.Epaye.`You can use this service to pay overdue payments...`.show}</p>
   <p class="govuk-body">@{Messages.Epaye.`You are eligible to set up an online payment plan if:`.show}</p>
@@ -60,8 +66,10 @@
     <li>@{Messages.Epaye.`able to authorise a Direct Debit`.show}</li>
   </ul>
 
-  @formWithCSRF(action = routes.EPayeStartController.ePayeLandingSubmit()) {
-    @govukButton(Button(content = Text(Messages.Epaye.`Start now`.show)))
-  }
+  @govukButton(Button(
+    href = Some(routes.YourBillController.yourBill().url),
+    content = Text(Messages.Epaye.`Start now`.show)
+  ))
+
   <p class="govuk-body">@{Messages.Epaye.`HMRC intend this as a one-off payment plan...`.show}</p>
 }

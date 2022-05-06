@@ -16,25 +16,23 @@
 
 package controllers
 
-import _root_.actions.Actions
-import essttp.journey.JourneyConnector
-import essttp.rootmodel.TaxRegime
-import models.TaxOrigin.EpayeBTA
+import actions.Actions
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import views.html.EPaye.EPayeLandingPage2
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import util.Logging
+import views.Views
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
 
 @Singleton()
-class EpayeBTAController @Inject() (cc: MessagesControllerComponents, epayeLandingPage: EPayeLandingPage2,
-                                    jc: JourneyConnector, as: Actions)(implicit ec: ExecutionContext)
-  extends TaxOriginController[TaxRegime.Epaye.type](cc, jc, as) {
+class NotEnrolledController @Inject() (
+    mcc:   MessagesControllerComponents,
+    views: Views,
+    as:    Actions
+) extends FrontendController(mcc) with Logging {
 
-  val originator = EpayeBTA
-
-  override def landingPage: Action[AnyContent] = Action { implicit request =>
-    Ok(epayeLandingPage(controllers.routes.LandingController.landingPage(), Option(abortCall)))
+  def notEnrolled: Action[AnyContent] = as.journeyAction { implicit request =>
+    Ok(views.notEnrolled())
   }
-
 }
+

@@ -16,33 +16,34 @@
 
 package services
 
+import cats.data.{NonEmptyList, ValidatedNel}
 import cats.implicits.{catsSyntaxValidatedId, toFunctorOps}
 import cats.syntax.apply._
-import cats.data.{NonEmptyList, ValidatedNel}
-import essttp.rootmodel.{TaxId, TaxRegime}
-import models.ttp.{ChargeTypeAssessment, EligibilityRules, TaxPeriodCharges, TtpEligibilityData}
-import models.{EligibilityData, InvoicePeriod, OverDuePayments, OverduePayment}
-import essttp.rootmodel.AmountInPence
-import services.EligibilityDataService._
+import essttp.rootmodel.{AmountInPence, Aor}
+import models.ttp.{ChargeTypeAssessment, EligibilityResult, EligibilityRules, TaxPeriodCharges}
+import models.{InvoicePeriod, OverduePayment}
+import play.api.mvc.RequestHeader
 import testOnly.models.EligibilityError
 import testOnly.models.EligibilityErrors._
-import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
+/**
+ * Time To Pay (Ttp) Service.
+ */
 @Singleton
-class EligibilityDataService @Inject() () {
+class TtpService @Inject() (implicit ec: ExecutionContext) {
 
-  def data(idType: String, regime: TaxRegime, id: TaxId, showFinancials: Boolean)(implicit hc: HeaderCarrier, ec: ExecutionContext) = ???
+  def determineEligibility(aor: Aor)(implicit request: RequestHeader): Future[EligibilityResult] = ???
   //    for {
   //      items <- connector.eligibilityData(idType, regime, id, showFinancials)
   //    } yield EligibilityData(rejectionsOf(items.eligibilityRules), overDuePayments(items))
 }
 
-object EligibilityDataService {
+object TtpService {
 
   type ValidatedResult[A] = ValidatedNel[EligibilityError, A]
 
@@ -80,12 +81,6 @@ object EligibilityDataService {
 
   def overDuePaymentOf(ass: ChargeTypeAssessment): OverduePayment =
     OverduePayment(invoicePeriod(ass), AmountInPence(ass.debtTotalAmount))
-
-  def overDuePayments(ttp: TtpEligibilityData): OverDuePayments = {
-    val qualifyingDebt: AmountInPence = AmountInPence(ttp.chargeTypeAssessment.map(_.debtTotalAmount).sum)
-    val payments = ttp.chargeTypeAssessment.map(overDuePaymentOf)
-    OverDuePayments(qualifyingDebt, payments)
-  }
 
   val LocalDateTimeFmt: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 

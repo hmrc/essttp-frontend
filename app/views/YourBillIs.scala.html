@@ -33,21 +33,24 @@
 )
 
 @(
-  overduePayments: OverDuePayments, backCall: Option[Call] = None)(implicit
+  overduePayments: OverDuePayments,
+  backUrl: Option[String] = None)(implicit
   request: Request[_]
 )
 
 @import requestSupport._
 
-
 @title= @{Messages.yourBillIs(overduePayments.total).show}
 
-@layout(pageTitle = Some(title), backLocation = backCall) {
+@layout(
+  pageTitle = Some(title),
+  backUrl = backUrl
+) {
   <h1 class="govuk-heading-xl">@title</h1>
   <dl class="govuk-summary-list">
     @overduePayments.payments.map(payment => overduePaymentRow(payment))
   </dl>
-  @formWithCSRF(action = routes.EPayeStartController.ePayeStartSubmit()) {
+  @formWithCSRF(action = routes.YourBillController.yourBillSubmit()) {
   @govukButton(Button(content = Text(Messages.continue.show)))
  }
 }

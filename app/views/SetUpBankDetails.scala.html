@@ -42,7 +42,7 @@
 @accountNumberKey = @{"accountNumber"}
 @title = @{Messages.BankDetails.`Enter account details to set up a Direct Debit`.show}
 
-@layout(pageTitle = Some(title), backLocation = Some(routes.PaymentScheduleController.checkPaymentSchedule()), hasErrors = form.hasErrors) {
+@layout(pageTitle = Some(title), backUrl = Some(routes.PaymentScheduleController.checkPaymentSchedule().url), hasErrors = form.hasErrors) {
  @if(form.errors.nonEmpty) {
   @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
    ErrorLink(

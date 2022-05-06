@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-package controllers
+package services
 
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import util.Logging
-import views.html.EPaye.ineligible.NoEnrolment
+import essttp.rootmodel.Aor
+import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
 
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future
 
-@Singleton()
-class EnrolmentsController @Inject() (
-    mcc:            MessagesControllerComponents,
-    enrolmentsPage: NoEnrolment
-) extends FrontendController(mcc) with Logging {
+@Singleton
+class EpayeService @Inject() () {
 
-  def show: Action[AnyContent] = Action { implicit request =>
-    Ok(enrolmentsPage())
+  def retrieveAor(taxOfficeNumber: TaxOfficeNumber, taxOfficeReference: TaxOfficeReference): Future[Aor] = {
+    //TODO: SUPP-297 for now we meade up that value
+    Future.successful(Aor(taxOfficeNumber.value + taxOfficeReference + "madeup_AOR"))
   }
-}
 
+}

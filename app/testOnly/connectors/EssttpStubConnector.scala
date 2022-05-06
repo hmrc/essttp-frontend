@@ -25,7 +25,7 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import util.RegimeUtils._
 import util.TaxIdUtils.TaxIdOps
-import models.ttp.TtpEligibilityData
+import models.ttp.EligibilityResult
 import testOnly.connectors.EssttpStubConnector.{EligibilityRequest, ErrorData}
 
 import javax.inject.{Inject, Singleton}
@@ -34,9 +34,9 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class EssttpStubConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig) {
 
-  def insertEligibilityData(regime: TaxRegime, taxId: TaxId, data: TtpEligibilityData)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] = {
+  def insertEligibilityData(regime: TaxRegime, taxId: TaxId, data: EligibilityResult)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] = {
     httpClient
-      .POST[TtpEligibilityData, Unit](
+      .POST[EligibilityResult, Unit](
         url     = insertUrl(regime, taxId),
         body    = data,
         headers = Seq.empty
@@ -51,8 +51,8 @@ class EssttpStubConnector @Inject() (httpClient: HttpClient, appConfig: AppConfi
   )(
       implicit
       hc: HeaderCarrier, ec: ExecutionContext
-  ): Future[TtpEligibilityData] = {
-    httpClient.POST[EligibilityRequest, TtpEligibilityData](
+  ): Future[EligibilityResult] = {
+    httpClient.POST[EligibilityRequest, EligibilityResult](
       url  = ttpUrl,
       body = EligibilityRequest(idType, id.value, regime.name, showFinancials)
     )

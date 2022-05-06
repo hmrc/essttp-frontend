@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-package controllers
+package actionsmodel
 
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import util.Logging
+import essttp.journey.model.{Journey, JourneyId}
+import play.api.mvc.{Request, WrappedRequest}
 
-import javax.inject.Inject
+class JourneyRequest[A](
+    val journey: Journey,
+    val request: Request[A]
+) extends WrappedRequest[A](request) {
 
-class JourneyCompletionController @Inject() (cc: MessagesControllerComponents) extends FrontendController(cc) with Logging {
-
-  // just return to the test page for now.
-  // abort will do the right thing depending on the origin when implemented
-  def abort: Action[AnyContent] = Action {
-    Redirect(testOnly.controllers.routes.StartJourneyController.startJourneyGet())
-  }
-
+  val journeyId: JourneyId = journey._id
 }

@@ -16,12 +16,12 @@
 
 package actions
 
+import actionsmodel.JourneyRequest
 import controllers.support.RequestSupport.hc
 import essttp.journey.JourneyConnector
 import essttp.journey.model.Journey
 import play.api.Logger
 import play.api.mvc.{ActionRefiner, Request, Result, Results}
-import requests.JourneyRequest
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -41,8 +41,8 @@ class GetJourneyActionRefiner @Inject() (journeyConnector: JourneyConnector)(
     } yield maybeJourney match {
       case Some(journey) => Right(new JourneyRequest(journey, request))
       case None =>
-        logger.warn(s"No journey found for sessionId: [ ${hc.sessionId} ]")
-        Left(Results.ImATeapot) //todo what should this be, obviously not teapot error
+        logger.error(s"No journey found for sessionId: [ ${hc.sessionId} ]")
+        Left(Results.Redirect(controllers.routes.EpayeGovUkController.startJourney()))
     }
   }
 

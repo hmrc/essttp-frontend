@@ -16,60 +16,54 @@
 
 package actions
 
+import actionsmodel.{AuthenticatedJourneyRequest, JourneyRequest}
 import com.google.inject.Inject
 import config.AppConfig
 import play.api.Logger
 import play.api.mvc.Results.{BadRequest, Redirect}
-import play.api.mvc._
+import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
 import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions, Enrolments, NoActiveSession}
 
 import scala.concurrent.{ExecutionContext, Future}
+import requests.RequestSupport._
 
-final class AuthenticatedRequest[A](
-    val request:     Request[A],
-    val enrolments:  Enrolments,
-    val credentials: Option[Credentials]
-) extends WrappedRequest[A](request) {
-
-  lazy val hasActiveSaEnrolment: Boolean = enrolments.enrolments.exists(e => e.key == "IR-SA" && e.isActivated)
-}
-
-class AuthenticatedAction @Inject() (
+class AuthenticateActionRefiner @Inject() (
     af:        AuthorisedFunctions,
     appConfig: AppConfig,
     cc:        MessagesControllerComponents
 )(
     implicit
     ec: ExecutionContext
-) extends ActionRefiner[Request, AuthenticatedRequest] {
+) extends ActionRefiner[JourneyRequest, AuthenticatedJourneyRequest] {
 
   private val logger = Logger(getClass)
 
-  import requests.RequestSupport._
-
-  override protected def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
-    implicit val r: Request[A] = request
+  override protected def refine[A](request: JourneyRequest[A]): Future[Either[Result, AuthenticatedJourneyRequest[A]]] = {
+    implicit val r: JourneyRequest[A] = request
 
     af.authorised.retrieve(
-      Retrievals.allEnrolments and Retrievals.credentials
+      Retrievals.allEnrolments
     ).apply {
-        case enrolments ~ credentials =>
+        case enrolments =>
           Future.successful(
-            Right(new AuthenticatedRequest[A](request, enrolments, credentials))
+            Right(new AuthenticatedJourneyRequest[A](request.journey, enrolments, request))
           )
       }.recover {
-        case _: NoActiveSession => loginPage
+        case _: NoActiveSession => loginPageUrl
         case e: AuthorisationException =>
-          logger.debug(s"Unauthorised because of ${e.reason}, $e")
-          Left(BadRequest("not authorised"))
+          logger.error(s"Unauthorised because of ${e.reason}, $e")
+          Left(Redirect(controllers.routes.NotEnrolledController.notEnrolled()))
       }
   }
 
-  def loginPage(implicit request: Request[_]) = Left(Redirect(
+  private def hasRequiredEnrolments(enrolments: Enrolments): Boolean = {
+    true
+  }
+
+  private def loginPageUrl(implicit request: Request[_]) = Left(Redirect(
     appConfig.BaseUrl.gg,
-    Map("continue" -> Seq(appConfig.BaseUrl.essttpFrontend + request.uri), "origin" -> Seq("supp"))
+    Map("continue" -> Seq(appConfig.BaseUrl.essttpFrontend + request.uri), "origin" -> Seq("essttp-frontend"))
   ))
 
   override protected def executionContext: ExecutionContext = cc.executionContext

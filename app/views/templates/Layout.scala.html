@@ -41,13 +41,16 @@
         requestSupport: RequestSupport,
         languageSelection: views.html.partials.language_selection
 )
-@(pageTitle: Option[String] = None,
-        headBlock: Option[Html] = None,
-        scriptsBlock: Option[Html] = None,
-        backLocation: Option[Call] = None,
-        hasErrors: Boolean = false,
-        showSignOutLink: Boolean = true
-)(contentBlock: Html)(implicit request: Request[_])
+@(
+  pageTitle: Option[String] = None,
+  headBlock: Option[Html] = None,
+  scriptsBlock: Option[Html] = None,
+  backUrl: Option[String] = None,
+  hasErrors: Boolean = false,
+  showSignOutLink: Boolean = true)(
+  contentBlock: Html)(implicit
+  request: Request[_]
+)
 
   @import requestSupport._
   @showSignOut = @{RequestSupport.isLoggedIn}
@@ -83,8 +86,8 @@
         @languageSelection()
       }
       @{
-        backLocation map { back =>
-          govukBackLink(BackLink(href = back.url, attributes = Map("id" -> "back")))
+        backUrl map { url =>
+          govukBackLink(BackLink(href = url, attributes = Map("id" -> "back")))
         }
       }
 

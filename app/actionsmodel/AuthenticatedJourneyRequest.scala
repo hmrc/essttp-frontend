@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package requests
+package actionsmodel
 
-import essttp.journey.model.{Journey, JourneyId}
-import play.api.mvc.{Request, WrappedRequest}
+import essttp.journey.model.Journey
+import play.api.mvc._
+import uk.gov.hmrc.auth.core.Enrolments
 
-class JourneyRequest[A](
-    val journey: Journey,
-    val request: Request[A]
-) extends WrappedRequest[A](request) {
+final class AuthenticatedJourneyRequest[A](
+    override val journey: Journey,
+    val enrolments:       Enrolments,
+    override val request: Request[A]
+) extends JourneyRequest[A](journey, request)
 
-  val journeyId: JourneyId = journey._id
-}

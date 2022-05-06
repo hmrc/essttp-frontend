@@ -16,11 +16,10 @@
 
 package actions
 
+import actionsmodel.{AuthenticatedJourneyRequest, JourneyRequest}
 import essttp.rootmodel.TaxRegime
-import models.TaxOrigin
 import play.api.mvc.Results.Redirect
 import play.api.mvc._
-import requests.JourneyRequest
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -28,28 +27,35 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class Actions @Inject() (
     actionBuilder:           DefaultActionBuilder,
-    authenticatedAction:     AuthenticatedAction,
+    authenticatedAction:     AuthenticateActionRefiner,
     getJourneyActionRefiner: GetJourneyActionRefiner
 )(implicit ec: ExecutionContext) {
 
   val default: ActionBuilder[Request, AnyContent] = actionBuilder
 
-  val auth: ActionBuilder[AuthenticatedRequest, AnyContent] = actionBuilder andThen authenticatedAction
+  val landingPageAction: ActionBuilder[JourneyRequest, AnyContent] =
+    actionBuilder
+      .andThen(getJourneyActionRefiner)
 
-  val getJourney: ActionBuilder[JourneyRequest, AnyContent] = actionBuilder andThen getJourneyActionRefiner
+  val journeyAction: ActionBuilder[AuthenticatedJourneyRequest, AnyContent] =
+    actionBuilder
+      .andThen(getJourneyActionRefiner)
+      .andThen(authenticatedAction)
+      .andThen(filterForRequiredEnrolments)
 
-  def verifyRole[A <: TaxRegime](origin: TaxOrigin[A]): ActionBuilder[AuthenticatedRequest, AnyContent] =
-    actionBuilder andThen authenticatedAction andThen filterEnrolment(origin)
+  private def filterForRequiredEnrolments: ActionFilter[AuthenticatedJourneyRequest] = new ActionFilter[AuthenticatedJourneyRequest] {
+    override protected def filter[A](request: AuthenticatedJourneyRequest[A]): Future[Option[Result]] = {
+      val hasRequiredEnrolments: Boolean = request.journey.taxRegime match {
+        case TaxRegime.Epaye => EnrolmentDef.Epaye.hasRequiredEnrolments(request.enrolments)
+        case TaxRegime.Vat   => EnrolmentDef.Vat.hasRequiredEnrolments(request.enrolments)
+      }
 
-  def filterEnrolment[R <: TaxRegime](origin: TaxOrigin[R]): ActionFilter[AuthenticatedRequest] = new ActionFilter[AuthenticatedRequest] {
-    override protected def filter[A](request: AuthenticatedRequest[A]): Future[Option[Result]] = {
-      if (request.enrolments.enrolments.exists(origin.allowEnrolment)) {
-        Future.successful(Option.empty[Result])
+      if (hasRequiredEnrolments) {
+        Future.successful(None)
       } else {
-        Future.successful(Option(Redirect(controllers.routes.EnrolmentsController.show())))
+        Future.successful(Some(Redirect(controllers.routes.NotEnrolledController.notEnrolled())))
       }
     }
-
     override protected def executionContext: ExecutionContext = ec
   }
 }

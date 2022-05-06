@@ -121,7 +121,7 @@ object StartJourneyController {
       ChargeTypeAssessment("2020-08-13", "2020-08-14", 300000, List(taxPeriodCharges))
     )
 
-    TtpEligibilityData(
+    EligibilityResult(
       "SSTTP",
       "A00000000001",
       "PAYE",

@@ -31,7 +31,10 @@
         requestSupport: RequestSupport
 )
 
-@(pageh1: Message = Messages.NotEligible.`Call us`, leadingContent: Html)(implicit request: Request[_])
+@(
+  pageh1: Message = Messages.NotEligible.`Call us`,
+  leadingContent: Html)(implicit
+  request: Request[_])
 
 @import requestSupport._
 

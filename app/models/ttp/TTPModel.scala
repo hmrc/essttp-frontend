@@ -18,7 +18,11 @@ package models.ttp
 
 import play.api.libs.json.{Format, Json}
 
-case class TtpEligibilityData(
+/**
+ * This represents response from the Eligibylity API
+ * https://confluence.tools.tax.service.gov.uk/pages/viewpage.action?spaceKey=DTDT&title=Eligibility+API
+ */
+case class EligibilityResult(
     idType:                 String,
     idNumber:               String,
     regimeType:             String,
@@ -28,10 +32,13 @@ case class TtpEligibilityData(
     eligibilityRules:       EligibilityRules,
     financialLimitBreached: FinancialLimitBreached,
     chargeTypeAssessment:   List[ChargeTypeAssessment]
-)
+) {
 
-object TtpEligibilityData {
-  implicit val fmt: Format[TtpEligibilityData] = Json.format[TtpEligibilityData]
+  val isEligible: Boolean = eligibilityStatus.overallEligibilityStatus
+}
+
+object EligibilityResult {
+  implicit val fmt: Format[EligibilityResult] = Json.format[EligibilityResult]
 }
 
 case class CustomerDetails(

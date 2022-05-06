@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-package models
-import play.api.libs.json.{Format, Json}
-import testOnly.models.EligibilityError
-import testOnly.models.EligibilityErrors.format
+package views
 
-final case class EligibilityData(rejections: Set[EligibilityError], overduePayments: OverDuePayments) {
-  def hasRejections: Boolean = rejections.nonEmpty
-  def hasMultipleRejections: Boolean = rejections.size > 1
-}
-// todo maybe add this in, but this is currently using the testonly eligibility errors.... wrong
-//object EligibilityData {
-//  implicit val format: Format[EligibilityData] = Json.format[EligibilityData]
-//}
+import views.html.EPaye.EPayeLanding
+import views.html.EPaye.ineligible.NotEnrolled
+import views.html.EPaye.ineligible.Ineligible
+import views.html.YourBillIs
+
+import javax.inject.Inject
+
+class Views @Inject() (
+    val epayeLanding: EPayeLanding,
+    val yourBillIs:   YourBillIs,
+    val notEnrolled:  NotEnrolled,
+    val ineligible:   Ineligible
+
+)
