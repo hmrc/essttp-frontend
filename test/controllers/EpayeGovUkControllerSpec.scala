@@ -21,7 +21,6 @@ import testsupport.ItSpec
 
 class EpayeGovUkControllerSpec extends ItSpec {
 
-
   "isComingFromGovUk" in {
     val c = app.injector.instanceOf[EpayeGovUkController]
 
@@ -35,7 +34,7 @@ class EpayeGovUkControllerSpec extends ItSpec {
     c.isComingFromGovUk(requestWithoutReferer) shouldBe false
   }
 
-  override lazy val configMap: Map[String, Any] =  super.configMap ++ Map(
+  override protected lazy val configOverrides: Map[String, Any] = Map(
     "refererForGovUk" -> "https://www.gov.uk"
   )
 

@@ -45,6 +45,8 @@ class ItSpec
   implicit override val patienceConfig: PatienceConfig =
     PatienceConfig(timeout  = scaled(Span(300, Millis)), interval = scaled(Span(2, Seconds)))
 
+  protected lazy val configOverrides: Map[String, Any] = Map()
+
   protected lazy val configMap: Map[String, Any] = Map(
     "microservice.services.direct-debit.port" -> WireMockSupport.port,
     "microservice.services.time-to-pay-arrangement.port" -> WireMockSupport.port,
@@ -60,7 +62,7 @@ class ItSpec
     "microservice.services.identity-verification-frontend.callback.base-url" -> s"http://localhost:${testPort}",
     "microservice.services.identity-verification-frontend.callback.complete-path" -> "/pay-what-you-owe-in-instalments/arrangement/determine-eligibility",
     "microservice.services.identity-verification-frontend.callback.reject-path" -> "/pay-what-you-owe-in-instalments/eligibility/not-enrolled"
-  )
+  ) ++ configOverrides
 
   //in tests use `app`
   override def fakeApplication(): Application = new GuiceApplicationBuilder()
