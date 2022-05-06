@@ -17,6 +17,7 @@
 package controllers
 
 import _root_.actions.Actions
+import essttp.journey.model.Origins
 import essttp.rootmodel.AmountInPence
 import models.OverDuePayments
 import models.ttp.EligibilityResult
@@ -41,9 +42,16 @@ class YourBillController @Inject() (
   with Logging {
 
   val yourBill: Action[AnyContent] = as.journeyAction { implicit request =>
-    //TODO: this will be in journey
-    val eligibilityResult: EligibilityResult = sys.error("TODO")
-    Ok(views.yourBillIs(overDuePayments(eligibilityResult), None /*TODO*/ ))
+    val eligibilityResult: EligibilityResult = sys.error("TODO: get EligibilityResult from journey") //TODO
+
+    val backUrl = request.journey.origin match {
+      case Origins.Epaye.Bta         => Some(routes.LandingController.landingPage().url)
+      case Origins.Epaye.DetachedUrl => Some(routes.LandingController.landingPage().url)
+      case Origins.Epaye.GovUk       => request.journey.backUrl.map(_.value)
+      case Origins.Vat.Bta           => sys.error("TODO: implement when Vat comes in")
+    }
+
+    Ok(views.yourBillIs(overDuePayments(eligibilityResult), backUrl))
   }
 
   private def overDuePayments(eligibilityResult: EligibilityResult): OverDuePayments = {

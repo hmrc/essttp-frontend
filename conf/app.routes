@@ -7,12 +7,12 @@ GET       /govuk/epaye/start                             controllers.EpayeGovUkC
 
 GET        /                                             controllers.LandingController.landingPage
 
-GET       /determine-eligibility                        controllers.DetermineEligibilityController.determineEligibility
+GET       /determine-eligibility                         controllers.DetermineEligibilityController.determineEligibility
 
-GET        /your-paye-bill                               controllers.YourBillController.yourBill
-POST       /your-paye-bill                               controllers.YourBillController.yourBillSubmit
+GET       /not-enrolled                                  controllers.NotEnrolledController.notEnrolled
 
-GET       /not-enrolled                                    controllers.NotEnrolledController.notEnrolled
+GET       /your-paye-bill                                controllers.YourBillController.yourBill
+POST      /your-paye-bill                                controllers.YourBillController.yourBillSubmit
 
 GET        /upfront-payment                              controllers.UpfrontPaymentController.upfrontPayment
 POST       /upfront-payment                              controllers.UpfrontPaymentController.upfrontPaymentSubmit
