@@ -50,9 +50,9 @@ class AuthenticateActionRefiner @Inject() (
             Right(new AuthenticatedJourneyRequest[A](request.journey, enrolments, request))
           )
       }.recover {
-        case _: NoActiveSession => loginPageUrl
+        case _: NoActiveSession => Left(redirectToLoginPage)
         case e: AuthorisationException =>
-          logger.error(s"Unauthorised because of ${e.reason}, $e")
+          logger.error(s"Unauthorised because of ${e.reason}, please investigate why", e)
           Left(Redirect(controllers.routes.NotEnrolledController.notEnrolled()))
       }
   }
@@ -61,10 +61,10 @@ class AuthenticateActionRefiner @Inject() (
     true
   }
 
-  private def loginPageUrl(implicit request: Request[_]) = Left(Redirect(
+  private def redirectToLoginPage(implicit request: Request[_]): Result = Redirect(
     appConfig.BaseUrl.gg,
     Map("continue" -> Seq(appConfig.BaseUrl.essttpFrontend + request.uri), "origin" -> Seq("essttp-frontend"))
-  ))
+  )
 
   override protected def executionContext: ExecutionContext = cc.executionContext
 

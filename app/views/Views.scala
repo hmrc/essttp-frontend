@@ -28,5 +28,4 @@ class Views @Inject() (
     val yourBillIs:   YourBillIs,
     val notEnrolled:  NotEnrolled,
     val ineligible:   Ineligible
-
 )

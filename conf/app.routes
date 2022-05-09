@@ -5,14 +5,14 @@
 # start journey endpoint for gov-uk (this is the link on gov-uk pages pointint to our application)
 GET       /govuk/epaye/start                             controllers.EpayeGovUkController.startJourney
 
-GET        /                                             controllers.LandingController.landingPage
+GET       /                                              controllers.LandingController.landingPage
 
 GET       /determine-eligibility                         controllers.DetermineEligibilityController.determineEligibility
 
 GET       /not-enrolled                                  controllers.NotEnrolledController.notEnrolled
 
-GET       /your-paye-bill                                controllers.YourBillController.yourBill
-POST      /your-paye-bill                                controllers.YourBillController.yourBillSubmit
+GET       /your-bill                                     controllers.YourBillController.yourBill
+POST      /your-bill                                     controllers.YourBillController.yourBillSubmit
 
 GET        /upfront-payment                              controllers.UpfrontPaymentController.upfrontPayment
 POST       /upfront-payment                              controllers.UpfrontPaymentController.upfrontPaymentSubmit

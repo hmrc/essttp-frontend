@@ -24,9 +24,8 @@ import uk.gov.hmrc.auth.core.Enrolments
  * Enrolment Definition - defines the enrolment a user has to have
  */
 final case class EnrolmentDef(
-    enrolmentKey:         String,
-    identifierKey:        String,
-    identifierValueRegex: Option[String] = None
+    enrolmentKey:  String,
+    identifierKey: String
 )
 
 object EnrolmentDef {
@@ -105,7 +104,6 @@ object EnrolmentDef {
       if enrolment.key.equalsIgnoreCase(enrolmentDef.enrolmentKey)
       identifier <- enrolment.identifiers
       if identifier.key.equalsIgnoreCase(enrolmentDef.identifierKey)
-      if enrolmentDef.identifierValueRegex.forall(identifier.value.matches)
     } yield identifier.value
   }
 

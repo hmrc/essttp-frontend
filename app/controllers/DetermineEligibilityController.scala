@@ -56,28 +56,27 @@ class DetermineEligibilityController @Inject() (
   with Logging {
 
   val determineEligibility: Action[AnyContent] = as.journeyAction.async { implicit request =>
+    //TODO: doesn't support Vat yet
 
     val (taxOfficeNumber, taxOfficeReference) = EnrolmentDef
       .Epaye
       .findEnrolmentValues(request.enrolments)
-      .getOrElse(throw new RuntimeException("TaxOfficeNumber and TaxOfficeRefence not found"))
+      .getOrElse(throw new RuntimeException("TaxOfficeNumber and TaxOfficeReference not found"))
 
     for {
       aor <- epayeService.retrieveAor(taxOfficeNumber, taxOfficeReference)
       eligibilityResult <- ttpService.determineEligibility(aor)
-      //TODO: update journey with Aor, epaye enrolments and ElibibilityResult
-      result = nextUrl(eligibilityResult)
+      //TODO: update journey with Aor, epaye enrolments and EligibilityResult (PAWEL)
+      result = computeWhereToRoute(eligibilityResult)
     } yield result
   }
 
-  /**
-   * Send user to your-bill-is  or not-eligible url
-   */
-  private def nextUrl(eligibilityResult: EligibilityResult)(implicit request: RequestHeader): Result = {
+  private def computeWhereToRoute(eligibilityResult: EligibilityResult)(implicit request: RequestHeader): Result = {
     if (eligibilityResult.isEligible) {
       Redirect(routes.YourBillController.yourBill())
     } else {
       //TODO: figure out what should be the URL where to send user
+      //JAKE
       Ok(s"TODO: User ineligible:\n${Json.prettyPrint(Json.toJson(eligibilityResult.eligibilityRules))}")
     }
   }
