@@ -33,49 +33,64 @@
 package controllers
 
 import _root_.actions.{Actions, EnrolmentDef}
+import essttp.journey.JourneyConnector
+import essttp.journey.model.Journey
+import essttp.journey.model.Journey.HasEligibilityCheckResult
 import essttp.journey.model.ttp.EligibilityCheckResult
+import play.api.libs.json.Json
 import play.api.mvc._
 import services.{EpayeService, TtpService}
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import util.{JourneyLogger, Logging}
+import views.Views
+import essttp.utils.Errors
 import testOnly.models.EligibilityErrors
 import testOnly.models.EligibilityErrors._
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import util.Logging
-import views.Views
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class DetermineEligibilityController @Inject() (
-    as:           Actions,
-    mcc:          MessagesControllerComponents,
-    ttpService:   TtpService,
-    epayeService: EpayeService,
-    views:        Views
+    as:               Actions,
+    mcc:              MessagesControllerComponents,
+    ttpService:       TtpService,
+    epayeService:     EpayeService,
+    journeyConnector: JourneyConnector,
+    views:            Views
 )(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 
   val determineEligibility: Action[AnyContent] = as.journeyAction.async { implicit request =>
-    //TODO: doesn't support Vat yet
-
-    val (taxOfficeNumber, taxOfficeReference) = EnrolmentDef
-      .Epaye
-      .findEnrolmentValues(request.enrolments)
-      .getOrElse(throw new RuntimeException("TaxOfficeNumber and TaxOfficeReference not found"))
-
-    for {
-      aor <- epayeService.retrieveAor(taxOfficeNumber, taxOfficeReference)
-      eligibilityResult <- ttpService.determineEligibility(aor)
-      //TODO: update journey with Aor, epaye enrolments and EligibilityResult (PAWEL)
-      result = computeWhereToRoute(eligibilityResult)
-    } yield result
+    request.journey match {
+      case j: Journey.Stages.AfterStarted =>
+        Future.failed[Result](new RuntimeException(
+          "Journey in incorrect state during 'determineEligibility'. " +
+            "Please investigate why. " +
+            "Sending user back to the landing page."
+        ))
+      case j: Journey.Stages.AfterComputedTaxId =>
+        determineEligibilityAndUpdateJourney(j)
+      case j: HasEligibilityCheckResult =>
+        JourneyLogger.info("Eligibility already determined, skipping.")
+        Future.successful(route(j.eligibilityCheckResult))
+    }
   }
 
-  private def computeWhereToRoute(eligibilityResult: EligibilityCheckResult)(implicit request: RequestHeader): Result = {
+  def determineEligibilityAndUpdateJourney(journey: Journey.Stages.AfterComputedTaxId)(implicit request: Request[_]): Future[Result] = {
+    for {
+      eligibilityCheckResult <- journey match {
+        case journey: Journey.Epaye.AfterComputedTaxIds => ttpService.determineEligibility(journey)
+      }
+      _ <- journeyConnector.updateEligibilityCheckResult(journey.id, eligibilityCheckResult)
+    } yield route(eligibilityCheckResult)
+  }
+
+  private def route(eligibilityResult: EligibilityCheckResult)(implicit request: RequestHeader): Result = {
     if (eligibilityResult.isEligible) {
       Redirect(routes.YourBillController.yourBill())
-    } else {
+    } else
       EligibilityErrors.toEligibilityError(eligibilityResult.eligibilityRules) match {
         case MultipleReasons            => Redirect(routes.IneligibleController.genericIneligiblePage())
         case HasRlsOnAddress            => Redirect(routes.IneligibleController.genericIneligiblePage())
@@ -88,7 +103,6 @@ class DetermineEligibilityController @Inject() (
         case EligibleChargeType         => Redirect(routes.IneligibleController.genericIneligiblePage())
         case MissingFiledReturns        => Redirect(routes.IneligibleController.fileYourReturnPage())
       }
-    }
   }
 
 }

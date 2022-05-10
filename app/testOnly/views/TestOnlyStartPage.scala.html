@@ -179,11 +179,12 @@
    value = Some("vat_govuk"), // todo once other vat origins are added to backend, update this to Origin.Vat.GovUk.show
    hint = Some(Hint(content = Text("If you cannot pay your tax bill on time")))
   ),
-  RadioItem(
-   content = Text("Business Tax Account"),
-   value = Some("Origins.Vat.Bta"),
-   hint = Some(Hint(content = Text("Set up a payment plan if you cannot pay in full")))
-  ),
+//  Enable when Vat comes in
+//  RadioItem(
+//   content = Text("Business Tax Account"),
+//   value = Some(Origins.Vat.Bta.toString()),
+//   hint = Some(Hint(content = Text("Set up a payment plan if you cannot pay in full")))
+//  ),
   RadioItem(
    content = Text("No origin (direct access)"),
    value = Some("vat_none") // todo once other vat origins are added to backend, update this to Origin.Vat.DetachedUrl.show

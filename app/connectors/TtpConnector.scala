@@ -18,21 +18,25 @@ package connectors
 
 import actionsmodel.JourneyRequest
 import com.google.inject.{Inject, Singleton}
-import essttp.journey.model.ttp.{EligibilityCheckResult, EligibilityRequest}
+import essttp.journey.model.ttp.EligibilityCheckResult
+import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import requests.RequestSupport._
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class TtpConnector @Inject() (config: TtpConfig, httpClient: HttpClient)(implicit ec: ExecutionContext) {
 
-  def retrieveEligibilityData(eligibilityRequest: EligibilityRequest)
-    (implicit request: JourneyRequest[_], headerCarrier: HeaderCarrier): Future[EligibilityCheckResult] = {
+  /**
+   * Eligibility Api implemented by Ttp service.
+   * https://confluence.tools.tax.service.gov.uk/display/DTDT/Eligibility+API
+   */
+  def callEligibilityApi(eligibilityRequest: CallEligibilityApiRequest)(implicit request: RequestHeader): Future[EligibilityCheckResult] = {
     val url: String = config.baseUrl + "/time-to-pay/self-serve/eligibility"
-    httpClient.POST[EligibilityRequest, EligibilityCheckResult](url, eligibilityRequest)
+    httpClient.POST[CallEligibilityApiRequest, EligibilityCheckResult](url, eligibilityRequest)
   }
-
 }
 
 final case class TtpConfig(baseUrl: String) {

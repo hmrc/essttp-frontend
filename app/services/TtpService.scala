@@ -16,41 +16,35 @@
 
 package services
 
-import actionsmodel.JourneyRequest
-import connectors.TtpConnector
-import essttp.journey.model.ttp.{EligibilityCheckResult, EligibilityRequest}
-import essttp.rootmodel.{Aor, TaxRegime}
-import services.TtpService.deriveRegimeTypeFromRegime
-import uk.gov.hmrc.http.HeaderCarrier
+import connectors.{CallEligibilityApiRequest, TtpConnector}
+import essttp.journey.model.Journey
+import essttp.journey.model.Journey.HasTaxId
+import essttp.journey.model.ttp.EligibilityCheckResult
+import essttp.rootmodel.Aor
+import play.api.mvc.RequestHeader
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-
 /**
  * Time To Pay (Ttp) Service.
  */
 @Singleton
 class TtpService @Inject() (ttpConnector: TtpConnector)(implicit ec: ExecutionContext) {
 
-  //todo change this from epaye aor:Aor to common abstracted taxIdentifier or something
-  def determineEligibility(aor: Aor)(implicit request: JourneyRequest[_], headerCarrier: HeaderCarrier): Future[EligibilityCheckResult] = {
-    val eligibilityRequest: EligibilityRequest = EligibilityRequest(
-      idType           = "SSTTP", // is this always SSTTP?
-      idNumber         = aor.value,
-      regimeType       = deriveRegimeTypeFromRegime(request.journey.taxRegime),
-      returnFinancials = true // does this need to be true always?
-    )
-    for {
-      eligibilityResult: EligibilityCheckResult <- ttpConnector.retrieveEligibilityData(eligibilityRequest)
-    } yield eligibilityResult
+  def determineEligibility(journey: Journey with HasTaxId)(implicit request: RequestHeader): Future[EligibilityCheckResult] = {
+
+    val eligibilityRequest: CallEligibilityApiRequest = journey match {
+      case j: Journey.Epaye =>
+        CallEligibilityApiRequest(
+          idType           = "SSTTP", // Is this always SSTTP? - Yes
+          idNumber         = j.taxId match {
+            case aor: Aor => aor.value //Hmm, will it compile, theoretically it can't be Vrn ...
+          },
+          regimeType       = "PAYE",
+          returnFinancials = true // This is always SSTTP? - Yes
+        )
+    }
+    ttpConnector.callEligibilityApi(eligibilityRequest)
   }
 }
 
-object TtpService {
-
-  def deriveRegimeTypeFromRegime: TaxRegime => String = {
-    case essttp.rootmodel.TaxRegime.Epaye => "PAYE"
-    case essttp.rootmodel.TaxRegime.Vat   => "VAT"
-  }
-
-}

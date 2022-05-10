@@ -38,7 +38,7 @@ class LandingController @Inject() (
     request.journey.origin match {
       case Origins.Epaye.Bta         => Ok(views.epayeLanding())
       case Origins.Epaye.DetachedUrl => Ok(views.epayeLanding())
-      case Origins.Epaye.GovUk       => Redirect(routes.DetermineEligibilityController.determineEligibility())
+      case Origins.Epaye.GovUk       => Redirect(routes.DetermineTaxIdController.determineTaxId())
     }
   }
 
