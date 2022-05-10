@@ -33,10 +33,11 @@
 package controllers
 
 import _root_.actions.{Actions, EnrolmentDef}
-import models.ttp.EligibilityResult
-import play.api.libs.json.Json
+import essttp.journey.model.ttp.EligibilityCheckResult
 import play.api.mvc._
 import services.{EpayeService, TtpService}
+import testOnly.models.EligibilityErrors
+import testOnly.models.EligibilityErrors._
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.Views
@@ -71,13 +72,22 @@ class DetermineEligibilityController @Inject() (
     } yield result
   }
 
-  private def computeWhereToRoute(eligibilityResult: EligibilityResult)(implicit request: RequestHeader): Result = {
+  private def computeWhereToRoute(eligibilityResult: EligibilityCheckResult)(implicit request: RequestHeader): Result = {
     if (eligibilityResult.isEligible) {
       Redirect(routes.YourBillController.yourBill())
     } else {
-      //TODO: figure out what should be the URL where to send user
-      //JAKE
-      Ok(s"TODO: User ineligible:\n${Json.prettyPrint(Json.toJson(eligibilityResult.eligibilityRules))}")
+      EligibilityErrors.toEligibilityError(eligibilityResult.eligibilityRules) match {
+        case MultipleReasons            => Redirect(routes.IneligibleController.genericIneligiblePage())
+        case HasRlsOnAddress            => Redirect(routes.IneligibleController.genericIneligiblePage())
+        case MarkedAsInsolvent          => Redirect(routes.IneligibleController.genericIneligiblePage())
+        case IsLessThanMinDebtAllowance => Redirect(routes.IneligibleController.genericIneligiblePage())
+        case IsMoreThanMaxDebtAllowance => Redirect(routes.IneligibleController.debtTooLargePage())
+        case DisallowedChargeLocks      => Redirect(routes.IneligibleController.genericIneligiblePage())
+        case ExistingTTP                => Redirect(routes.IneligibleController.alreadyHaveAPaymentPlanPage())
+        case ExceedsMaxDebtAge          => Redirect(routes.IneligibleController.debtTooOldPage())
+        case EligibleChargeType         => Redirect(routes.IneligibleController.genericIneligiblePage())
+        case MissingFiledReturns        => Redirect(routes.IneligibleController.fileYourReturnPage())
+      }
     }
   }
 

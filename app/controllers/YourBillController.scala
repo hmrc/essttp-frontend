@@ -18,16 +18,17 @@ package controllers
 
 import _root_.actions.Actions
 import essttp.journey.model.Origins
+import essttp.journey.model.ttp.{ChargeTypeAssessment, DisallowedChargeLocks, EligibilityCheckResult}
 import essttp.rootmodel.AmountInPence
-import models.OverDuePayments
-import models.ttp.EligibilityResult
+import models.{InvoicePeriod, OverDuePayments, OverduePayment}
 import play.api.mvc._
 import services.TtpService
-import services.TtpService.overDuePaymentOf
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.Views
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
@@ -42,23 +43,50 @@ class YourBillController @Inject() (
   with Logging {
 
   val yourBill: Action[AnyContent] = as.journeyAction { implicit request =>
-    val eligibilityResult: EligibilityResult = sys.error("TODO: get EligibilityResult from journey") //TODO
+    val eligibilityResult: EligibilityCheckResult = sys.error("TODO: get EligibilityResult from journey") //TODO
 
     val backUrl = request.journey.origin match {
       case Origins.Epaye.Bta         => Some(routes.LandingController.landingPage().url)
       case Origins.Epaye.DetachedUrl => Some(routes.LandingController.landingPage().url)
       case Origins.Epaye.GovUk       => request.journey.backUrl.map(_.value)
-      case Origins.Vat.Bta           => sys.error("TODO: implement when Vat comes in")
     }
 
     Ok(views.yourBillIs(overDuePayments(eligibilityResult), backUrl))
   }
 
-  private def overDuePayments(eligibilityResult: EligibilityResult): OverDuePayments = {
-    val qualifyingDebt: AmountInPence = AmountInPence(eligibilityResult.chargeTypeAssessment.map(_.debtTotalAmount).sum)
+  //todo JAKE move this all somewhere else --->
+  def chargeDueDate(charges: List[ChargeTypeAssessment]): LocalDate = {
+    charges.headOption.map { (chargeTypeAssessment: ChargeTypeAssessment) =>
+      chargeTypeAssessment.disallowedChargeLocks.headOption.map { disallowedChargeLocks: DisallowedChargeLocks =>
+        parseLocalDate(disallowedChargeLocks.interestStartDate.value)
+      }
+    }.getOrElse(throw new IllegalArgumentException("missing charge list")).getOrElse(throw new IllegalArgumentException("missing charge list"))
+  }
+
+  val LocalDateTimeFmt: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+  def parseLocalDate(s: String): LocalDate = LocalDateTimeFmt.parse(s, LocalDate.from)
+
+  def formatLocalDateTime(d: LocalDate): String = LocalDateTimeFmt.format(d)
+
+  def invoicePeriod(ass: ChargeTypeAssessment): InvoicePeriod = {
+    val dueDate: LocalDate = chargeDueDate(List(ass))
+    val startDate: LocalDate = parseLocalDate(ass.taxPeriodFrom.value)
+    val endDate: LocalDate = parseLocalDate(ass.taxPeriodTo.value)
+    InvoicePeriod(monthNumber(startDate), startDate, endDate, dueDate)
+  }
+
+  def monthNumber(date: LocalDate): Int = (date.getMonth.getValue - 4) % 12
+
+  private def overDuePaymentOf(ass: ChargeTypeAssessment): OverduePayment =
+    OverduePayment(invoicePeriod(ass), AmountInPence(ass.debtTotalAmount.value))
+
+  private def overDuePayments(eligibilityResult: EligibilityCheckResult): OverDuePayments = {
+    val qualifyingDebt: AmountInPence = AmountInPence(eligibilityResult.chargeTypeAssessment.map(_.debtTotalAmount.value).sum)
     val payments = eligibilityResult.chargeTypeAssessment.map(overDuePaymentOf)
     OverDuePayments(qualifyingDebt, payments)
   }
+  //--->
 
   val yourBillSubmit: Action[AnyContent] = as.default { implicit request =>
     Redirect(routes.UpfrontPaymentController.upfrontPayment())

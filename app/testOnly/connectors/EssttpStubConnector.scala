@@ -17,16 +17,9 @@
 package testOnly.connectors
 
 import config.AppConfig
-import essttp.rootmodel.{TaxId, TaxRegime}
-import play.api.libs.json.{Format, Json}
-import testOnly.models.EligibilityError
-import testOnly.models.EligibilityErrors.format
+import essttp.journey.model.ttp.EligibilityCheckResult
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
-import util.RegimeUtils._
-import util.TaxIdUtils.TaxIdOps
-import models.ttp.EligibilityResult
-import testOnly.connectors.EssttpStubConnector.{EligibilityRequest, ErrorData}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -34,62 +27,9 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class EssttpStubConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig) {
 
-  def insertEligibilityData(regime: TaxRegime, taxId: TaxId, data: EligibilityResult)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] = {
-    httpClient
-      .POST[EligibilityResult, Unit](
-        url     = insertUrl(regime, taxId),
-        body    = data,
-        headers = Seq.empty
-      )
-  }
-
-  def eligibilityData(
-      idType:         String,
-      regime:         TaxRegime,
-      id:             TaxId,
-      showFinancials: Boolean
-  )(
-      implicit
-      hc: HeaderCarrier, ec: ExecutionContext
-  ): Future[EligibilityResult] = {
-    httpClient.POST[EligibilityRequest, EligibilityResult](
-      url  = ttpUrl,
-      body = EligibilityRequest(idType, id.value, regime.name, showFinancials)
-    )
-  }
-
-  def errors(regime: TaxRegime, id: TaxId, errors: Seq[EligibilityError])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] = {
-    httpClient
-      .POST[ErrorData, Unit](
-        url  = errorUrl(regime, id),
-        body = ErrorData(errors)
-      )
-  }
-
   val ttpUrl = s"${appConfig.ttpBaseUrl}/time-to-pay/self-serve/eligibility"
 
-  def errorUrl(regime: TaxRegime, taxId: TaxId): String = {
-    s"${appConfig.ttpBaseUrl}/time-to-pay/self-serve/eligibility/${regime.entryName}/${taxId.value}/errors"
-  }
-
-  def insertUrl(regime: TaxRegime, taxId: TaxId): String = {
-    s"${appConfig.ttpBaseUrl}/time-to-pay/self-serve/eligibility/${regime.entryName}/${taxId.value}"
-  }
-
-}
-
-object EssttpStubConnector {
-
-  final case class EligibilityRequest(idType: String, idNumber: String, regimeType: String, returnFinancials: Boolean)
-
-  final case class ErrorData(errors: Seq[EligibilityError])
-
-  object ErrorData {
-    implicit val fmt: Format[ErrorData] = Json.format[ErrorData]
-  }
-
-  object EligibilityRequest {
-    implicit val fmt: Format[EligibilityRequest] = Json.format[EligibilityRequest]
-  }
+  def insertEligibilityData(data: EligibilityCheckResult)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
+    httpClient.POST[EligibilityCheckResult, Unit](ttpUrl, data)
 
 }

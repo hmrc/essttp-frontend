@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-package models
+package views.partials
 
-import essttp.rootmodel.{TaxId, TaxRegime}
-import util.RegimeUtils.RegimeOps
+import views.html.EPaye.ineligible.Ineligible
+import views.html.partials._
 
-package object ttp {
+import javax.inject.Inject
 
-  val DefaultTaxId: TaxId = TaxRegime.Epaye.taxIdOf("default-office-reference")
-
-}
+class Partials @Inject() (
+    val ineligibleTemplatePage:     Ineligible,
+    val genericIneligiblePartial:   GenericIneligiblePartial,
+    val debtTooLargePartial:        DebtTooLargePartial,
+    val debtTooOldPartial:          DebtTooOldPartial,
+    val existingPaymentPlanPartial: ExistingPaymentPlanPartial,
+    val returnsNotUpToDatePartial:  ReturnsNotUpToDatePartial
+)

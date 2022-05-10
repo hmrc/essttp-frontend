@@ -17,9 +17,9 @@
 package views
 
 import views.html.EPaye.EPayeLanding
-import views.html.EPaye.ineligible.NotEnrolled
-import views.html.EPaye.ineligible.Ineligible
+import views.html.EPaye.ineligible.{Ineligible, NotEnrolled}
 import views.html.YourBillIs
+import views.partials.Partials
 
 import javax.inject.Inject
 
@@ -27,5 +27,6 @@ class Views @Inject() (
     val epayeLanding: EPayeLanding,
     val yourBillIs:   YourBillIs,
     val notEnrolled:  NotEnrolled,
-    val ineligible:   Ineligible
+    val ineligible:   Ineligible,
+    val partials:     Partials
 )

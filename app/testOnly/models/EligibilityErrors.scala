@@ -17,40 +17,50 @@
 package testOnly.models
 
 import enumeratum.{Enum, EnumEntry}
-import play.api.libs.json.Format
+import essttp.journey.model.ttp.EligibilityRules
 import play.api.libs.functional.syntax._
+import play.api.libs.json.Format
 
 import scala.collection.immutable
 
 sealed trait EligibilityError extends EnumEntry
 
 object EligibilityErrors extends Enum[EligibilityError] {
-  object DebtIsTooLarge extends EligibilityError {
-    override val entryName = "Debt is too large"
-  }
-  object DebtIsTooOld extends EligibilityError {
-    override val entryName = "Debt is too old"
-  }
-  object ReturnsAreNotUpToDate extends EligibilityError {
-    override val entryName = "Returns are not up to date"
-  }
-  object YouAlreadyHaveAPaymentPlan extends EligibilityError {
-    override val entryName = "you already have a payment plan"
-  }
-  object OutstandingPenalty extends EligibilityError {
-    override val entryName = "Outstanding penalty"
-  }
-  object PayeIsInsolvent extends EligibilityError {
-    override val entryName = "Paye is insolvent"
-  }
-  object PayeHasDisallowedCharges extends EligibilityError {
-    override val entryName = "Paye has disallowed charges"
-  }
-  object RLSFlagIsSet extends EligibilityError {
-    override val entryName = "RLS flag is set"
-  }
+
+  case object HasRlsOnAddress extends EligibilityError
+
+  case object MarkedAsInsolvent extends EligibilityError
+
+  case object IsLessThanMinDebtAllowance extends EligibilityError
+
+  case object IsMoreThanMaxDebtAllowance extends EligibilityError
+
+  case object DisallowedChargeLocks extends EligibilityError
+
+  case object ExistingTTP extends EligibilityError
+
+  case object ExceedsMaxDebtAge extends EligibilityError
+
+  case object EligibleChargeType extends EligibilityError
+
+  case object MissingFiledReturns extends EligibilityError
+
+  case object MultipleReasons extends EligibilityError
 
   override val values: immutable.IndexedSeq[EligibilityError] = findValues
+
+  def toEligibilityError(eligibilityRules: EligibilityRules): EligibilityError = eligibilityRules match {
+    case eligibilityRules if eligibilityRules.moreThanOneReasonForIneligibility         => MultipleReasons
+    case EligibilityRules(true, false, false, false, false, false, false, false, false) => HasRlsOnAddress
+    case EligibilityRules(false, true, false, false, false, false, false, false, false) => MarkedAsInsolvent
+    case EligibilityRules(false, false, true, false, false, false, false, false, false) => IsLessThanMinDebtAllowance
+    case EligibilityRules(false, false, false, true, false, false, false, false, false) => IsMoreThanMaxDebtAllowance
+    case EligibilityRules(false, false, false, false, true, false, false, false, false) => DisallowedChargeLocks
+    case EligibilityRules(false, false, false, false, false, true, false, false, false) => ExistingTTP
+    case EligibilityRules(false, false, false, false, false, false, true, false, false) => ExceedsMaxDebtAge
+    case EligibilityRules(false, false, false, false, false, false, false, true, false) => EligibleChargeType
+    case EligibilityRules(false, false, false, false, false, false, false, false, true) => MissingFiledReturns
+  }
 
   implicit val format: Format[EligibilityError] = implicitly[Format[String]].inmap(EligibilityErrors.withName, _.entryName)
 

@@ -19,16 +19,16 @@ package testOnly.controllers
 import _root_.actions.Actions
 import config.AppConfig
 import essttp.journey.JourneyConnector
-import essttp.journey.model.{Origin, Origins, SjRequest, SjResponse}
-import essttp.rootmodel.{BackUrl, ReturnUrl, TaxRegime}
-import models.ttp
-import models.ttp._
-import play.api.libs.json.{Format, Json}
+import essttp.journey.model.ttp._
+import essttp.journey.model.{Origins, SjRequest}
+import essttp.rootmodel.{BackUrl, ReturnUrl}
 import play.api.mvc._
 import testOnly.AuthLoginApiService
 import testOnly.connectors.EssttpStubConnector
 import testOnly.controllers.StartJourneyController._
 import testOnly.formsmodel.StartJourneyForm
+import testOnly.models.EligibilityError
+import testOnly.models.EligibilityErrors._
 import testOnly.testusermodel.TestUser
 import testOnly.views.html.TestOnlyStartPage
 import uk.gov.hmrc.http.HeaderCarrier
@@ -75,7 +75,7 @@ class StartJourneyController @Inject() (
 
     for {
       redirectUrl <- redirectUrl
-      _ <- essttpStubConnector.insertEligibilityData(TaxRegime.Epaye, ttp.DefaultTaxId, DefaultTTP)
+      _ <- essttpStubConnector.insertEligibilityData(defaultTTP(startJourneyForm))
       maybeTestUser = TestUser.makeTestUser(startJourneyForm)
       session <- maybeTestUser.map(testUser => loginService.logIn(testUser)).getOrElse(Future.successful(Session.emptyCookie))
 
@@ -97,40 +97,54 @@ object StartJourneyController {
     case "Individual"   => uk.gov.hmrc.auth.core.AffinityGroup.Individual
   }
 
-  val DefaultTTP = {
-    val taxPeriodCharges = TaxPeriodCharges(
-      "T5545454554",
-      "22000",
-      "",
-      "1000",
-      "",
-      100000,
-      "2017-03-07",
-      15.97,
-      true,
+  val defaultTTP: StartJourneyForm => EligibilityCheckResult = { form: StartJourneyForm =>
+    val disallowedChargeLocks = essttp.journey.model.ttp.DisallowedChargeLocks(
+      ChargeId("A00000000001"),
+      MainTrans("mainTrans"),
+      MainTransDesc("mainTransDesc"),
+      SubTrans("subTrans"),
+      SubTransDesc("subTransDesc"),
+      OutstandingDebtAmount(100000),
+      InterestStartDate("2017-03-07"),
+      AccruedInterestToDate(15.97),
       ChargeLocks(
-        PaymentLock(false, ""),
-        PaymentLock(false, ""),
-        PaymentLock(false, ""),
-        PaymentLock(false, ""),
-        PaymentLock(false, "")
+        PaymentLock(status = false, reason = ""),
+        PaymentLock(status = false, reason = ""),
+        PaymentLock(status = false, reason = ""),
+        PaymentLock(status = false, reason = "")
       )
     )
 
     val chargeTypeAssessments: List[ChargeTypeAssessment] = List(
-      ChargeTypeAssessment("2020-08-13", "2020-08-14", 300000, List(taxPeriodCharges))
+      ChargeTypeAssessment(TaxPeriodFrom("2020-08-13"), TaxPeriodTo("2020-08-14"), DebtTotalAmount(300000), List(disallowedChargeLocks))
     )
 
-    EligibilityResult(
-      "SSTTP",
-      "A00000000001",
-      "PAYE",
-      "2022-03-10",
-      CustomerDetails("NI", "B5 7LN"),
-      EligibilityStatus(false, 1, 6),
-      EligibilityRules(false, "Receiver is not known", false, false, false, false, false, 300, 600, false, false, false),
-      FinancialLimitBreached(true, 16000),
-      chargeTypeAssessments
+    val containsError: EligibilityError => Boolean = (ee: EligibilityError) => form.eligibilityErrors.contains(ee)
+    val eligibilityRulesFromForm: EligibilityRules = {
+      EligibilityRules(
+        hasRlsOnAddress            = containsError(HasRlsOnAddress),
+        markedAsInsolvent          = containsError(MarkedAsInsolvent),
+        isLessThanMinDebtAllowance = containsError(IsLessThanMinDebtAllowance),
+        isMoreThanMaxDebtAllowance = containsError(IsMoreThanMaxDebtAllowance),
+        disallowedChargeLocks      = containsError(testOnly.models.EligibilityErrors.DisallowedChargeLocks),
+        existingTTP                = containsError(ExistingTTP),
+        exceedsMaxDebtAge          = containsError(ExceedsMaxDebtAge),
+        eligibleChargeType         = containsError(EligibleChargeType),
+        missingFiledReturns        = containsError(MissingFiledReturns)
+      )
+    }
+
+    EligibilityCheckResult(
+      idType               = IdType(""),
+      idNumber             = IdNumber(""),
+      regimeType           = RegimeType(""),
+      processingDate       = ProcessingDate(""),
+      customerDetails      = CustomerDetails(Country("Narnia"), PostCode("AA11AA")),
+      minPlanLengthMonths  = MinPlanLengthMonths(1),
+      maxPlanLengthMonths  = MaxPlanLengthMonths(3),
+      eligibilityStatus    = EligibilityStatus(OverallEligibilityStatus(eligibilityRulesFromForm.moreThanOneReasonForIneligibility)),
+      eligibilityRules     = eligibilityRulesFromForm,
+      chargeTypeAssessment = chargeTypeAssessments
     )
   }
 

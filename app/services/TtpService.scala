@@ -16,18 +16,13 @@
 
 package services
 
-import cats.data.{NonEmptyList, ValidatedNel}
-import cats.implicits.{catsSyntaxValidatedId, toFunctorOps}
-import cats.syntax.apply._
-import essttp.rootmodel.{AmountInPence, Aor}
-import models.ttp.{ChargeTypeAssessment, EligibilityResult, EligibilityRules, TaxPeriodCharges}
-import models.{InvoicePeriod, OverduePayment}
-import play.api.mvc.RequestHeader
-import testOnly.models.EligibilityError
-import testOnly.models.EligibilityErrors._
+import actionsmodel.JourneyRequest
+import connectors.TtpConnector
+import essttp.journey.model.ttp.{EligibilityCheckResult, EligibilityRequest}
+import essttp.rootmodel.{Aor, TaxRegime}
+import services.TtpService.deriveRegimeTypeFromRegime
+import uk.gov.hmrc.http.HeaderCarrier
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -35,57 +30,27 @@ import scala.concurrent.{ExecutionContext, Future}
  * Time To Pay (Ttp) Service.
  */
 @Singleton
-class TtpService @Inject() (implicit ec: ExecutionContext) {
+class TtpService @Inject() (ttpConnector: TtpConnector)(implicit ec: ExecutionContext) {
 
-  def determineEligibility(aor: Aor)(implicit request: RequestHeader): Future[EligibilityResult] = ???
-  //    for {
-  //      items <- connector.eligibilityData(idType, regime, id, showFinancials)
-  //    } yield EligibilityData(rejectionsOf(items.eligibilityRules), overDuePayments(items))
+  //todo change this from epaye aor:Aor to common abstracted taxIdentifier or something
+  def determineEligibility(aor: Aor)(implicit request: JourneyRequest[_], headerCarrier: HeaderCarrier): Future[EligibilityCheckResult] = {
+    val eligibilityRequest: EligibilityRequest = EligibilityRequest(
+      idType           = "SSTTP", // is this always SSTTP?
+      idNumber         = aor.value,
+      regimeType       = deriveRegimeTypeFromRegime(request.journey.taxRegime),
+      returnFinancials = true // does this need to be true always?
+    )
+    for {
+      eligibilityResult: EligibilityCheckResult <- ttpConnector.retrieveEligibilityData(eligibilityRequest)
+    } yield eligibilityResult
+  }
 }
 
 object TtpService {
 
-  type ValidatedResult[A] = ValidatedNel[EligibilityError, A]
-
-  val unitResult: ValidatedNel[Nothing, Unit] = ().validNel
-
-  def rejections(rules: EligibilityRules): Either[NonEmptyList[EligibilityError], Unit] = {
-    val validAddress: ValidatedResult[Unit] = if (rules.rlsOnAddress) RLSFlagIsSet.invalidNel else unitResult
-    val markedAsInsolvent: ValidatedResult[Unit] = if (rules.markedAsInsolvent) PayeIsInsolvent.invalidNel else unitResult
-    val maxDebtAllowance: ValidatedResult[Unit] = if (rules.maxDebtAllowance) DebtIsTooLarge.invalidNel else unitResult
-    val disallowedChargeLock: ValidatedResult[Unit] = if (rules.disallowedChargeLock) PayeHasDisallowedCharges.invalidNel else unitResult
-    val existingTTP: ValidatedResult[Unit] = if (rules.existingTTP) YouAlreadyHaveAPaymentPlan.invalidNel else unitResult
-    val outstandingPenalty: ValidatedResult[Unit] = if (rules.eligibleChargeType) OutstandingPenalty.invalidNel else unitResult
-    val maxDebtAge: ValidatedResult[Unit] = if (rules.maxDebtAge) DebtIsTooOld.invalidNel else unitResult
-    val returnsFiled: ValidatedResult[Unit] = if (rules.returnsFiled) ReturnsAreNotUpToDate.invalidNel else unitResult
-    (validAddress, markedAsInsolvent, maxDebtAllowance, disallowedChargeLock,
-      existingTTP, outstandingPenalty, maxDebtAge, returnsFiled).tupled.void.toEither
+  def deriveRegimeTypeFromRegime: TaxRegime => String = {
+    case essttp.rootmodel.TaxRegime.Epaye => "PAYE"
+    case essttp.rootmodel.TaxRegime.Vat   => "VAT"
   }
-
-  def rejectionsOf(rules: EligibilityRules): List[EligibilityError] = {
-    rejections(rules).fold(_.toList, _ => List.empty)
-  }
-
-  def chargeDueDate(charges: List[TaxPeriodCharges]): LocalDate = {
-    charges.headOption.map(c => parseLocalDate(c.interestStartDate)).getOrElse(throw new IllegalArgumentException("missing charge list"))
-  }
-
-  def monthNumber(date: LocalDate): Int = (date.getMonth.getValue - 4) % 12
-
-  def invoicePeriod(ass: ChargeTypeAssessment): InvoicePeriod = {
-    val dueDate: LocalDate = chargeDueDate(ass.taxPeriodCharges)
-    val startDate: LocalDate = parseLocalDate(ass.taxPeriodFrom)
-    val endDate: LocalDate = parseLocalDate(ass.taxPeriodTo)
-    InvoicePeriod(monthNumber(startDate), startDate, endDate, dueDate)
-  }
-
-  def overDuePaymentOf(ass: ChargeTypeAssessment): OverduePayment =
-    OverduePayment(invoicePeriod(ass), AmountInPence(ass.debtTotalAmount))
-
-  val LocalDateTimeFmt: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-
-  def parseLocalDate(s: String): LocalDate = LocalDateTimeFmt.parse(s, LocalDate.from)
-
-  def formatLocalDateTime(d: LocalDate): String = LocalDateTimeFmt.format(d)
 
 }

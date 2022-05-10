@@ -10,6 +10,11 @@ GET       /                                              controllers.LandingCont
 GET       /determine-eligibility                         controllers.DetermineEligibilityController.determineEligibility
 
 GET       /not-enrolled                                  controllers.NotEnrolledController.notEnrolled
+GET       /not-eligible                                  controllers.IneligibleController.genericIneligiblePage
+GET       /debt-too-large                                controllers.IneligibleController.debtTooLargePage
+GET       /debt-too-old                                  controllers.IneligibleController.debtTooOldPage
+GET       /file-your-return                              controllers.IneligibleController.fileYourReturnPage
+GET       /already-have-a-payment-plan                   controllers.IneligibleController.alreadyHaveAPaymentPlanPage
 
 GET       /your-bill                                     controllers.YourBillController.yourBill
 POST      /your-bill                                     controllers.YourBillController.yourBillSubmit
