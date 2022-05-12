@@ -17,7 +17,8 @@
 package controllers
 
 import _root_.actions.Actions
-import essttp.journey.model.Origins
+import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
+import essttp.journey.model.{Journey, Origins}
 import essttp.journey.model.ttp.{ChargeTypeAssessment, DisallowedChargeLocks, EligibilityCheckResult}
 import essttp.rootmodel.AmountInPence
 import models.{InvoicePeriod, OverDuePayments, OverduePayment}
@@ -30,7 +31,7 @@ import views.Views
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class YourBillController @Inject() (
@@ -42,16 +43,21 @@ class YourBillController @Inject() (
   extends FrontendController(mcc)
   with Logging {
 
-  val yourBill: Action[AnyContent] = as.journeyAction { implicit request =>
-    val eligibilityResult: EligibilityCheckResult = sys.error("TODO: get EligibilityResult from journey") //TODO
+  val yourBill: Action[AnyContent] = as.journeyAction{ implicit request =>
+    request.journey match {
+      case j: Journey.Stages.AfterStarted       => logErrorAndRouteToDefaultPage(j)
+      case j: Journey.Stages.AfterComputedTaxId => logErrorAndRouteToDefaultPage(j)
+      case j: Journey.HasEligibilityCheckResult => displayPage(j)
+    }
+  }
 
-    val backUrl = request.journey.origin match {
+  def displayPage(journey: Journey.HasEligibilityCheckResult)(implicit request: Request[_]) = {
+    val backUrl = journey.origin match {
       case Origins.Epaye.Bta         => Some(routes.LandingController.landingPage().url)
       case Origins.Epaye.DetachedUrl => Some(routes.LandingController.landingPage().url)
-      case Origins.Epaye.GovUk       => request.journey.backUrl.map(_.value)
+      case Origins.Epaye.GovUk       => journey.backUrl.map(_.value)
     }
-
-    Ok(views.yourBillIs(overDuePayments(eligibilityResult), backUrl))
+    Ok(views.yourBillIs(overDuePayments(journey.eligibilityCheckResult), backUrl))
   }
 
   //todo JAKE move this all somewhere else --->

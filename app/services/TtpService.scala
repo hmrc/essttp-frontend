@@ -20,7 +20,7 @@ import connectors.{CallEligibilityApiRequest, TtpConnector}
 import essttp.journey.model.Journey
 import essttp.journey.model.Journey.HasTaxId
 import essttp.journey.model.ttp.EligibilityCheckResult
-import essttp.rootmodel.Aor
+import essttp.rootmodel.EmpRef
 import play.api.mvc.RequestHeader
 
 import javax.inject.{Inject, Singleton}
@@ -38,7 +38,7 @@ class TtpService @Inject() (ttpConnector: TtpConnector)(implicit ec: ExecutionCo
         CallEligibilityApiRequest(
           idType           = "SSTTP", // Is this always SSTTP? - Yes
           idNumber         = j.taxId match {
-            case aor: Aor => aor.value //Hmm, will it compile, theoretically it can't be Vrn ...
+            case empRef: EmpRef => empRef.value //Hmm, will it compile, theoretically it can't be Vrn ...
           },
           regimeType       = "PAYE",
           returnFinancials = true // This is always SSTTP? - Yes

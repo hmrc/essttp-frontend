@@ -57,10 +57,6 @@ class AuthenticateActionRefiner @Inject() (
       }
   }
 
-  private def hasRequiredEnrolments(enrolments: Enrolments): Boolean = {
-    true
-  }
-
   private def redirectToLoginPage(implicit request: Request[_]): Result = Redirect(
     appConfig.BaseUrl.gg,
     Map("continue" -> Seq(appConfig.BaseUrl.essttpFrontend + request.uri), "origin" -> Seq("essttp-frontend"))

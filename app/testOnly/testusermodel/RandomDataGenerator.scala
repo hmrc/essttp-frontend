@@ -16,16 +16,22 @@
 
 package testOnly.testusermodel
 
-import essttp.rootmodel.{Email, Vrn}
 import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
+import essttp.rootmodel.{Email, EmpRef, Vrn}
 
 import scala.annotation.tailrec
 import scala.util.Random
 
 object RandomDataGenerator {
 
-  def nextTaxOfficeNumber()(implicit random: Random): TaxOfficeNumber = TaxOfficeNumber(nextNumber(3))
-  def nextTaxOfficeReference()(implicit random: Random): TaxOfficeReference = TaxOfficeReference(s"GZ${nextNumber(5)}")
+  def nextEpayeRefs()(implicit random: Random): (TaxOfficeNumber, TaxOfficeReference, EmpRef) = {
+    val ton = nextTaxOfficeNumber()
+    val tor = nextTaxOfficeReference()
+    (ton, tor, EmpRef.makeEmpRef(ton, tor))
+  }
+
+  private def nextTaxOfficeNumber()(implicit random: Random): TaxOfficeNumber = TaxOfficeNumber(nextNumber(3))
+  private def nextTaxOfficeReference()(implicit random: Random): TaxOfficeReference = TaxOfficeReference(s"GZ${nextNumber(5)}")
 
   def nextNino()(implicit random: Random): Nino = {
     Nino(s"AA${nextNumber(6)}A")

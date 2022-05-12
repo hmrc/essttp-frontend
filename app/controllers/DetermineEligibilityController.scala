@@ -32,20 +32,18 @@
 
 package controllers
 
-import _root_.actions.{Actions, EnrolmentDef}
+import _root_.actions.Actions
 import essttp.journey.JourneyConnector
 import essttp.journey.model.Journey
 import essttp.journey.model.Journey.HasEligibilityCheckResult
 import essttp.journey.model.ttp.EligibilityCheckResult
-import play.api.libs.json.Json
 import play.api.mvc._
-import services.{EpayeService, TtpService}
+import services.TtpService
+import testOnly.models.EligibilityErrors
+import testOnly.models.EligibilityErrors._
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.{JourneyLogger, Logging}
 import views.Views
-import essttp.utils.Errors
-import testOnly.models.EligibilityErrors
-import testOnly.models.EligibilityErrors._
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -55,7 +53,6 @@ class DetermineEligibilityController @Inject() (
     as:               Actions,
     mcc:              MessagesControllerComponents,
     ttpService:       TtpService,
-    epayeService:     EpayeService,
     journeyConnector: JourneyConnector,
     views:            Views
 )(implicit ec: ExecutionContext)

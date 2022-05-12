@@ -20,13 +20,19 @@ import essttp.journey.model.{Origin, Origins}
 import play.api.data.Form
 import play.api.data.Forms.{mapping, seq}
 import testOnly.models.{EligibilityError, EligibilityErrors}
+import testOnly.testusermodel.RandomDataGenerator
+
+import scala.util.Random
 
 final case class StartJourneyForm(
     signInAs:          SignInAs,
     enrolments:        Seq[Enrolment],
     origin:            Origin,
     eligibilityErrors: Seq[EligibilityError]
-)
+) {
+  //TODO: move ton and tor to the form
+  val (ton, tor, empRef) = RandomDataGenerator.nextEpayeRefs()(Random)
+}
 
 object StartJourneyForm {
   val form: Form[StartJourneyForm] = Form(

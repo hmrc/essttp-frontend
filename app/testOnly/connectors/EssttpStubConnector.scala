@@ -29,7 +29,7 @@ class EssttpStubConnector @Inject() (httpClient: HttpClient, appConfig: AppConfi
 
   val ttpUrl = s"${appConfig.ttpBaseUrl}/time-to-pay/self-serve/eligibility"
 
-  def insertEligibilityData(data: EligibilityCheckResult)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
-    httpClient.POST[EligibilityCheckResult, Unit](s"$ttpUrl/insert", data)
+  def primeStubs(response: EligibilityCheckResult)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
+    httpClient.POST[EligibilityCheckResult, Unit](s"$ttpUrl/insert", response)
 
 }

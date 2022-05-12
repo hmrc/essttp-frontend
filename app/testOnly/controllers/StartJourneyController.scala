@@ -19,7 +19,7 @@ package testOnly.controllers
 import _root_.actions.Actions
 import config.AppConfig
 import essttp.journey.JourneyConnector
-import essttp.journey.model.ttp._
+import _root_.essttp.journey.model.ttp._
 import essttp.journey.model.{Origins, SjRequest}
 import essttp.rootmodel.{BackUrl, ReturnUrl}
 import play.api.mvc._
@@ -29,7 +29,7 @@ import testOnly.controllers.StartJourneyController._
 import testOnly.formsmodel.StartJourneyForm
 import testOnly.models.EligibilityError
 import testOnly.models.EligibilityErrors._
-import testOnly.testusermodel.TestUser
+import testOnly.testusermodel.{RandomDataGenerator, TestUser}
 import testOnly.views.html.TestOnlyStartPage
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -65,19 +65,20 @@ class StartJourneyController @Inject() (
 
   private def startJourney(startJourneyForm: StartJourneyForm)(implicit request: RequestHeader): Future[Result] = {
     logger.debug(s"Start journey payload: ${epayeSimple}")
-    val redirectUrl: Future[String] = startJourneyForm.origin match {
-      case Origins.Epaye.Bta         => journeyConnector.Epaye.startJourneyBta(epayeSimple).map(_.nextUrl.value)
-      case Origins.Epaye.GovUk       => Future.successful(_root_.controllers.routes.EpayeGovUkController.startJourney().url) //TODO send to github pages and aks to click the link
-      case Origins.Epaye.DetachedUrl => Future.successful(_root_.controllers.routes.EpayeGovUkController.startJourney().url)
-    }
+
+      def startJourneyAndGetNextUrl(): Future[String] = startJourneyForm.origin match {
+        case Origins.Epaye.Bta         => journeyConnector.Epaye.startJourneyBta(epayeSimple).map(_.nextUrl.value)
+        case Origins.Epaye.GovUk       => Future.successful("https://github.com/hmrc/essttp-frontend")
+        case Origins.Epaye.DetachedUrl => Future.successful(_root_.controllers.routes.EpayeGovUkController.startJourney().url)
+      }
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     for {
-      _ <- essttpStubConnector.insertEligibilityData(defaultTTP(startJourneyForm))
+      _ <- essttpStubConnector.primeStubs(makeEligibilityCheckResult(startJourneyForm))
       maybeTestUser = TestUser.makeTestUser(startJourneyForm)
       session <- maybeTestUser.map(testUser => loginService.logIn(testUser)).getOrElse(Future.successful(Session.emptyCookie))
-      redirectUrl <- redirectUrl
+      redirectUrl <- startJourneyAndGetNextUrl()
     } yield Redirect(redirectUrl).withSession(session)
   }
 }
@@ -89,14 +90,14 @@ object StartJourneyController {
   private def backUrl(url: String = "test-back-url") = BackUrl(url)
 
   private val epayeSimple = SjRequest.Epaye.Simple(returnUrl = returnUrl(), backUrl = backUrl())
-  private val epayeEmpty = SjRequest.Epaye.Empty()
 
   def affinityGroup(auth: String): uk.gov.hmrc.auth.core.AffinityGroup = auth match {
     case "Organisation" => uk.gov.hmrc.auth.core.AffinityGroup.Organisation
     case "Individual"   => uk.gov.hmrc.auth.core.AffinityGroup.Individual
   }
 
-  val defaultTTP: StartJourneyForm => EligibilityCheckResult = { form: StartJourneyForm =>
+  private def makeEligibilityCheckResult(form: StartJourneyForm): EligibilityCheckResult = {
+
     val disallowedChargeLocks = essttp.journey.model.ttp.DisallowedChargeLocks(
       ChargeId("A00000000001"),
       MainTrans("mainTrans"),
@@ -119,7 +120,7 @@ object StartJourneyController {
     )
 
     val containsError: EligibilityError => Boolean = (ee: EligibilityError) => form.eligibilityErrors.contains(ee)
-    val eligibilityRulesFromForm: EligibilityRules = {
+    val eligibilityRules: EligibilityRules = {
       EligibilityRules(
         hasRlsOnAddress            = containsError(HasRlsOnAddress),
         markedAsInsolvent          = containsError(MarkedAsInsolvent),
@@ -132,17 +133,18 @@ object StartJourneyController {
         missingFiledReturns        = containsError(MissingFiledReturns)
       )
     }
-
     EligibilityCheckResult(
       idType               = IdType("SSTTP"),
-      idNumber             = IdNumber("A00000000001"),
+      idNumber             = IdNumber(form.empRef.value),
       regimeType           = RegimeType("PAYE"),
       processingDate       = ProcessingDate(""),
       customerDetails      = CustomerDetails(Country("Narnia"), PostCode("AA11AA")),
       minPlanLengthMonths  = MinPlanLengthMonths(1),
       maxPlanLengthMonths  = MaxPlanLengthMonths(3),
-      eligibilityStatus    = EligibilityStatus(OverallEligibilityStatus(eligibilityRulesFromForm.moreThanOneReasonForIneligibility)),
-      eligibilityRules     = eligibilityRulesFromForm,
+      eligibilityStatus    = EligibilityStatus(OverallEligibilityStatus(
+        eligibilityRules.isEligible
+      )),
+      eligibilityRules     = eligibilityRules,
       chargeTypeAssessment = chargeTypeAssessments
     )
   }

@@ -56,9 +56,6 @@ object TestUser {
   private implicit val random: Random = Random
 
   def makeTestUser(form: StartJourneyForm): Option[TestUser] = {
-
-    println(s"I am the sign in form used in makeTestUser: ${form.toString}")
-
     val maybeAffinityGroup = form.signInAs match {
       case SignInAs.NoSignIn     => None
       case SignInAs.Individual   => Some(AffinityGroup.Individual)
@@ -69,8 +66,8 @@ object TestUser {
       TestUser(
         nino            = None, //TODO: read this from the form, populate if individual
         epayeEnrolment  = if (form.enrolments.contains(Enrolments.Epaye)) Some(EpayeEnrolment(
-          taxOfficeNumber    = RandomDataGenerator.nextTaxOfficeNumber(),
-          taxOfficeReference = RandomDataGenerator.nextTaxOfficeReference(),
+          taxOfficeNumber    = form.ton,
+          taxOfficeReference = form.tor,
           enrolmentStatus    = EnrolmentStatus.Activated //TODO: read this from the form
         ))
         else None,

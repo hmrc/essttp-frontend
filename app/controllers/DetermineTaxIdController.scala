@@ -35,9 +35,9 @@ package controllers
 import _root_.actions.{Actions, EnrolmentDef}
 import essttp.journey.JourneyConnector
 import essttp.journey.model.Journey
-import essttp.rootmodel.Aor
+import essttp.rootmodel.EmpRef
 import play.api.mvc._
-import services.{EpayeService, TtpService}
+import services.TtpService
 import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.{JourneyLogger, Logging}
@@ -51,7 +51,6 @@ class DetermineTaxIdController @Inject() (
     as:               Actions,
     mcc:              MessagesControllerComponents,
     ttpService:       TtpService,
-    epayeService:     EpayeService,
     journeyConnector: JourneyConnector,
     views:            Views
 )(implicit ec: ExecutionContext)
@@ -71,13 +70,17 @@ class DetermineTaxIdController @Inject() (
   }
 
   private def determineTaxId(journey: Journey.Stages.AfterStarted, enrolments: Enrolments)(implicit request: RequestHeader): Future[Unit] = {
-    logger.debug(s"calling update tax id")
-    val (taxOfficeNumber, taxOfficeReference) = EnrolmentDef
-      .Epaye
-      .findEnrolmentValues(enrolments)
-      .getOrElse(throw new RuntimeException("TaxOfficeNumber and TaxOfficeReference not found"))
+    val computeEmpRef: Future[EmpRef] = Future{
+      val (taxOfficeNumber, taxOfficeReference) = EnrolmentDef
+        .Epaye
+        .findEnrolmentValues(enrolments)
+        .getOrElse(throw new RuntimeException("TaxOfficeNumber and TaxOfficeReference not found"))
+      EmpRef.makeEmpRef(taxOfficeNumber, taxOfficeReference)
+    }
+
     for {
-      _ <- journeyConnector.updateTaxId(journey.id, Aor(taxOfficeReference.value))
+      empRef <- computeEmpRef
+      _ <- journeyConnector.updateTaxId(journey.id, empRef)
     } yield ()
   }
 }
