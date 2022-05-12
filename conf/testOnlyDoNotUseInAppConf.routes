@@ -16,5 +16,7 @@ GET  /set-up-a-payment-plan/test-only/start-journey   testOnly.controllers.Start
 POST /set-up-a-payment-plan/test-only/start-journey   testOnly.controllers.StartJourneyController.startJourneySubmit
 GET  /set-up-a-payment-plan/test-only/show-journey    testOnly.controllers.DebugJourneyController.showJourney
 
+GET  /set-up-a-payment-plan/test-only/bta-page        testOnly.controllers.StartJourneyController.showBtaPage
+
 #Pretends that that journey starts from Bta
 GET  /set-up-a-payment-plan/test-only/start-journey-epaye-bta   testOnly.controllers.StartJourneyController.startJourneyEpayeBta

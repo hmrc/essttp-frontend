@@ -18,6 +18,7 @@ package testOnly.controllers
 
 import _root_.actions.Actions
 import _root_.essttp.journey.model.ttp._
+import _root_.testOnly.views.html.IAmBtaPage
 import config.AppConfig
 import essttp.journey.JourneyConnector
 import essttp.journey.model.{Origins, SjRequest}
@@ -46,7 +47,8 @@ class StartJourneyController @Inject() (
     mcc:                 MessagesControllerComponents,
     testOnlyStartPage:   TestOnlyStartPage,
     journeyConnector:    JourneyConnector,
-    loginService:        AuthLoginApiService
+    loginService:        AuthLoginApiService,
+    iAmBtaPage:          IAmBtaPage
 )(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
@@ -70,11 +72,22 @@ class StartJourneyController @Inject() (
       maybeTestUser = TestUser.makeTestUser(startJourneyForm)
       session <- maybeTestUser.map(testUser => loginService.logIn(testUser)).getOrElse(Future.successful(Session.emptyCookie))
       redirect: Result = startJourneyForm.origin match {
-        case Origins.Epaye.Bta         => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.startJourneyEpayeBta())
+        case Origins.Epaye.Bta         => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.showBtaPage())
         case Origins.Epaye.GovUk       => Redirect("https://github.com/hmrc/essttp-frontend")
         case Origins.Epaye.DetachedUrl => Redirect(_root_.controllers.routes.EpayeGovUkController.startJourney().url)
       }
     } yield redirect.withSession(session)
+  }
+
+  /**
+   * Pretends being a Bta page
+   */
+  val showBtaPage: Action[AnyContent] = as.default { implicit request =>
+    if (hc.sessionId.isEmpty) {
+      Ok("Missing session id")
+    } else {
+      Ok(iAmBtaPage())
+    }
   }
 
   /**
@@ -84,18 +97,15 @@ class StartJourneyController @Inject() (
     if (hc.sessionId.isEmpty) {
       Future.successful(Ok("Missing session id"))
     } else {
-      journeyConnector.Epaye.startJourneyBta(epayeSimple).map(x => Redirect(x.nextUrl.value))
+      journeyConnector.Epaye.startJourneyBta(SjRequest.Epaye.Simple(
+        returnUrl = ReturnUrl(routes.StartJourneyController.showBtaPage().url + "?return-page"),
+        backUrl   = BackUrl(routes.StartJourneyController.showBtaPage().url + "?starting-page")
+      )).map(x => Redirect(x.nextUrl.value))
     }
   }
 }
 
 object StartJourneyController {
-
-  private def returnUrl(url: String = "test-return-url") = ReturnUrl(url)
-
-  private def backUrl(url: String = "test-back-url") = BackUrl(url)
-
-  private val epayeSimple = SjRequest.Epaye.Simple(returnUrl = returnUrl(), backUrl = backUrl())
 
   def affinityGroup(auth: String): uk.gov.hmrc.auth.core.AffinityGroup = auth match {
     case "Organisation" => uk.gov.hmrc.auth.core.AffinityGroup.Organisation
