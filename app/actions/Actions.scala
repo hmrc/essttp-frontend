@@ -16,10 +16,15 @@
 
 package actions
 
-import actionsmodel.{AuthenticatedJourneyRequest, JourneyRequest}
+import actionsmodel.{AuthenticatedJourneyRequest, EligibleJourneyRequest, JourneyRequest}
+import controllers.{EligibilityRouter, JourneyIncorrectStateRouter}
+import controllers.support.RequestSupport.hc
+import essttp.journey.model.Journey
 import essttp.rootmodel.TaxRegime
+import play.api.Logger
 import play.api.mvc.Results.Redirect
-import play.api.mvc._
+import play.api.mvc.{ActionRefiner, _}
+import util.JourneyLogger
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -42,11 +47,45 @@ class Actions @Inject() (
       .andThen(getJourneyActionRefiner)
       .andThen(authenticatedAction)
 
-  val journeyAction: ActionBuilder[AuthenticatedJourneyRequest, AnyContent] =
+  val authenticatedJourneyAction: ActionBuilder[AuthenticatedJourneyRequest, AnyContent] =
     actionBuilder
       .andThen(getJourneyActionRefiner)
       .andThen(authenticatedAction)
       .andThen(filterForRequiredEnrolments)
+
+  val eligibleJourneyAction: ActionBuilder[AuthenticatedJourneyRequest, AnyContent] =
+    actionBuilder
+      .andThen(getJourneyActionRefiner)
+      .andThen(authenticatedAction)
+      .andThen(filterForRequiredEnrolments)
+      .andThen(filterForEligibleJourney)
+
+  private def filterForEligibleJourney: ActionRefiner[AuthenticatedJourneyRequest, EligibleJourneyRequest] = new ActionRefiner[AuthenticatedJourneyRequest, EligibleJourneyRequest] {
+
+    private val logger = JourneyLogger
+
+    override protected def refine[A](request: AuthenticatedJourneyRequest[A]): Future[Either[Result, EligibleJourneyRequest[A]]] = {
+      implicit val r: Request[A] = request
+      val result: Either[Result, EligibleJourneyRequest[A]] = request.journey match {
+        case j: Journey.Stages.AfterStarted       => Left(JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j))
+        case j: Journey.Stages.AfterComputedTaxId => Left(JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j))
+        case j: Journey.HasEligibilityCheckResult =>
+          if (j.eligibilityCheckResult.isEligible) {
+            Right(new EligibleJourneyRequest[A](
+              journey    = j,
+              enrolments = request.enrolments,
+              request    = request
+            ))
+          } else {
+            Left(EligibilityRouter.nextPage(j.eligibilityCheckResult))
+          }
+      }
+      Future.successful(result)
+    }
+
+    override protected def executionContext: ExecutionContext = ec
+
+  }
 
   private def filterForRequiredEnrolments: ActionFilter[AuthenticatedJourneyRequest] = new ActionFilter[AuthenticatedJourneyRequest] {
     override protected def filter[A](request: AuthenticatedJourneyRequest[A]): Future[Option[Result]] = {
@@ -64,3 +103,4 @@ class Actions @Inject() (
     override protected def executionContext: ExecutionContext = ec
   }
 }
+

@@ -43,7 +43,7 @@ class YourBillController @Inject() (
   extends FrontendController(mcc)
   with Logging {
 
-  val yourBill: Action[AnyContent] = as.journeyAction{ implicit request =>
+  val yourBill: Action[AnyContent] = as.eligibleJourneyAction{ implicit request =>
     request.journey match {
       case j: Journey.Stages.AfterStarted       => logErrorAndRouteToDefaultPage(j)
       case j: Journey.Stages.AfterComputedTaxId => logErrorAndRouteToDefaultPage(j)

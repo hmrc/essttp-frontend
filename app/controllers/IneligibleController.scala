@@ -32,23 +32,23 @@ class IneligibleController @Inject() (
     as:    Actions
 ) extends FrontendController(mcc) with Logging {
 
-  val genericIneligiblePage: Action[AnyContent] = as.journeyAction { implicit request =>
+  val genericIneligiblePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     Ok(views.partials.ineligibleTemplatePage(Messages.NotEligible.`Call us`, views.partials.genericIneligiblePartial()))
   }
 
-  val debtTooLargePage: Action[AnyContent] = as.journeyAction { implicit request =>
+  val debtTooLargePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     Ok(views.partials.ineligibleTemplatePage(Messages.NotEligible.`Call us`, views.partials.debtTooLargePartial()))
   }
 
-  val debtTooOldPage: Action[AnyContent] = as.journeyAction { implicit request =>
+  val debtTooOldPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     Ok(views.partials.ineligibleTemplatePage(Messages.NotEligible.`Call us`, views.partials.debtTooOldPartial()))
   }
 
-  val fileYourReturnPage: Action[AnyContent] = as.journeyAction { implicit request =>
+  val fileYourReturnPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     Ok(views.partials.ineligibleTemplatePage(Messages.NotEligible.`File your return to use this service`, views.partials.returnsNotUpToDatePartial()))
   }
 
-  val alreadyHaveAPaymentPlanPage: Action[AnyContent] = as.journeyAction { implicit request =>
+  val alreadyHaveAPaymentPlanPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     Ok(views.partials.ineligibleTemplatePage(Messages.NotEligible.`You already have a payment plan with HMRC`, views.partials.existingPaymentPlanPartial()))
   }
 }

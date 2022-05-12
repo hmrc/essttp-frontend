@@ -20,9 +20,15 @@ import essttp.journey.model.Journey
 import play.api.mvc._
 import uk.gov.hmrc.auth.core.Enrolments
 
-final class AuthenticatedJourneyRequest[A](
+class AuthenticatedJourneyRequest[A](
     override val journey: Journey,
     val enrolments:       Enrolments,
     override val request: Request[A]
 ) extends JourneyRequest[A](journey, request)
+
+final class EligibleJourneyRequest[A](
+    override val journey:    Journey.HasEligibilityCheckResult,
+    override val enrolments: Enrolments,
+    override val request:    Request[A]
+) extends AuthenticatedJourneyRequest[A](journey, enrolments, request)
 

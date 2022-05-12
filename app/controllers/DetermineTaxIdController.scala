@@ -57,7 +57,7 @@ class DetermineTaxIdController @Inject() (
   extends FrontendController(mcc)
   with Logging {
 
-  def determineTaxId(): Action[AnyContent] = as.journeyAction.async { implicit request =>
+  def determineTaxId(): Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     val f = request.journey match {
       case j: Journey.Stages.AfterStarted => determineTaxId(j, request.enrolments)
       case j: Journey.HasTaxId =>

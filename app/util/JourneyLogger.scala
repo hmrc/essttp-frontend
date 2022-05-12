@@ -49,9 +49,11 @@ object JourneyLogger {
 
   def error(message: => String, ex: Throwable)(implicit request: RequestHeader): Unit = logMessage(message, ex, Error)
 
-  private def context(implicit request: RequestHeader) = s"[context: ${request.method} ${request.path}] $sessionId $referer $deviceId"
+  private def context(implicit request: RequestHeader) = s"[context: ${request.method} ${request.path}] $sessionId $requestId $referer $deviceId"
 
   private def sessionId(implicit request: RequestHeader) = s"[${hc.sessionId}]"
+
+  private def requestId(implicit request: RequestHeader) = s"[${hc.requestId}]"
 
   private def referer(implicit r: RequestHeader) = s"[Referer: ${r.headers.headers.find(_._1 == "Referer").map(_._2).getOrElse("")}]"
 
@@ -81,6 +83,7 @@ object JourneyLogger {
     request match {
       case r: JourneyRequest[_] =>
         implicit val req: JourneyRequest[_] = r
+        //Warn, don't log whole journey as it might contain sensitive data (PII)
         s"$message $taxRegime $origin $journeyName $stage $journeyId $context $traceId"
       case _ =>
         s"$message $context "

@@ -17,7 +17,11 @@
 package controllers
 
 import essttp.journey.model.Journey
-import play.api.mvc.{RequestHeader, Result}
+import essttp.journey.model.Stage.AfterEligibilityCheck.Ineligible
+import essttp.journey.model.ttp.EligibilityCheckResult
+import models.EligibilityErrors
+import models.EligibilityErrors.{DisallowedChargeLocks, EligibleChargeType, ExceedsMaxDebtAge, ExistingTtp, HasRlsOnAddress, IsLessThanMinDebtAllowance, IsMoreThanMaxDebtAllowance, MarkedAsInsolvent, MissingFiledReturns, MultipleReasons}
+import play.api.mvc.{Call, Request, RequestHeader, Result}
 import play.api.mvc.Results.Redirect
 import util.JourneyLogger
 
@@ -25,21 +29,21 @@ import scala.concurrent.Future
 
 object JourneyIncorrectStateRouter {
 
-  def logErrorAndRouteToDefaultPageF(journey: Journey)(implicit request: RequestHeader): Future[Result] = Future.successful(logErrorAndRouteToDefaultPage(journey))
+  def logErrorAndRouteToDefaultPageF(journey: Journey)(implicit request: Request[_]): Future[Result] = Future.successful(logErrorAndRouteToDefaultPage(journey))
 
-  def logErrorAndRouteToDefaultPage(journey: Journey)(implicit request: RequestHeader): Result = {
+  def logErrorAndRouteToDefaultPage(journey: Journey)(implicit request: Request[_]): Result = {
 
     val defaultEndpoint = journey match {
-      case j: Journey.Stages.AfterStarted          => routes.LandingController.landingPage()
-      case j: Journey.Stages.AfterComputedTaxId    => routes.DetermineEligibilityController.determineEligibility()
-      case j: Journey.Stages.AfterEligibilityCheck => routes.YourBillController.yourBill()
+      case j: Journey.Stages.AfterStarted          => Redirect(routes.LandingController.landingPage())
+      case j: Journey.Stages.AfterComputedTaxId    => Redirect(routes.DetermineEligibilityController.determineEligibility())
+      case j: Journey.Stages.AfterEligibilityCheck => EligibilityRouter.nextPage(j.eligibilityCheckResult)
     }
 
     JourneyLogger.error(
       "Journey in incorrect state. " +
         "Please investigate why. " +
-        s"Sending user to the first page which supports that journey state: [${defaultEndpoint.url}]"
+        s"Sending user to the first page which supports that journey state ${defaultEndpoint}"
     )
-    Redirect(defaultEndpoint)
+    defaultEndpoint
   }
 }
