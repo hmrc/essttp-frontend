@@ -16,7 +16,6 @@
 
 package testOnly
 
-import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
 import play.api.libs.json.{JsArray, JsNull, JsObject, Json}
 import testOnly.testusermodel.{EpayeEnrolment, TestUser}
 
@@ -26,7 +25,7 @@ object LoginRequestMaker {
     val credId: String = testUser.authorityId.value
     val maybeNino = testUser.nino.fold(Json.obj())(v => Json.obj("nino" -> v.value))
 
-    val affinityGroup = testUser.affinityGroup.toJson match {
+    val affinityGroup: JsObject = testUser.affinityGroup.toJson match {
       case o: JsObject => o
       case _           => Json.obj("affinityGroup" -> testUser.affinityGroup.toString)
     }

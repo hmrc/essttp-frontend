@@ -17,14 +17,13 @@
 package testOnly
 
 import com.google.inject.{Inject, Singleton}
-import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
 import play.api.http.HeaderNames
-import play.api.libs.json.{JsArray, JsNull, JsObject, Json}
-import play.api.mvc.{Request, Session}
+import play.api.libs.json.JsObject
+import play.api.mvc.Session
 import testOnly.testusermodel.{AuthToken, TestUser}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, SessionKeys}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-
+import uk.gov.hmrc.http.HttpReads.Implicits
 import java.time.Clock
 import java.util.UUID.randomUUID
 import scala.concurrent.{ExecutionContext, Future}

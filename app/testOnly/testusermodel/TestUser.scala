@@ -57,6 +57,8 @@ object TestUser {
 
   def makeTestUser(form: StartJourneyForm): Option[TestUser] = {
 
+    println(s"I am the sign in form used in makeTestUser: ${form.toString}")
+
     val maybeAffinityGroup = form.signInAs match {
       case SignInAs.NoSignIn     => None
       case SignInAs.Individual   => Some(AffinityGroup.Individual)

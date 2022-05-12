@@ -64,7 +64,7 @@ class StartJourneyController @Inject() (
   }
 
   private def startJourney(startJourneyForm: StartJourneyForm)(implicit request: RequestHeader): Future[Result] = {
-
+    logger.debug(s"Start journey payload: ${epayeSimple}")
     val redirectUrl: Future[String] = startJourneyForm.origin match {
       case Origins.Epaye.Bta         => journeyConnector.Epaye.startJourneyBta(epayeSimple).map(_.nextUrl.value)
       case Origins.Epaye.GovUk       => Future.successful(_root_.controllers.routes.EpayeGovUkController.startJourney().url) //TODO send to github pages and aks to click the link
@@ -74,11 +74,10 @@ class StartJourneyController @Inject() (
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     for {
-      redirectUrl <- redirectUrl
       _ <- essttpStubConnector.insertEligibilityData(defaultTTP(startJourneyForm))
       maybeTestUser = TestUser.makeTestUser(startJourneyForm)
       session <- maybeTestUser.map(testUser => loginService.logIn(testUser)).getOrElse(Future.successful(Session.emptyCookie))
-
+      redirectUrl <- redirectUrl
     } yield Redirect(redirectUrl).withSession(session)
   }
 }
@@ -135,9 +134,9 @@ object StartJourneyController {
     }
 
     EligibilityCheckResult(
-      idType               = IdType(""),
-      idNumber             = IdNumber(""),
-      regimeType           = RegimeType(""),
+      idType               = IdType("SSTTP"),
+      idNumber             = IdNumber("A00000000001"),
+      regimeType           = RegimeType("PAYE"),
       processingDate       = ProcessingDate(""),
       customerDetails      = CustomerDetails(Country("Narnia"), PostCode("AA11AA")),
       minPlanLengthMonths  = MinPlanLengthMonths(1),

@@ -16,13 +16,13 @@
 
 package connectors
 
-import actionsmodel.JourneyRequest
 import com.google.inject.{Inject, Singleton}
 import essttp.journey.model.ttp.EligibilityCheckResult
 import play.api.mvc.RequestHeader
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import requests.RequestSupport._
+import uk.gov.hmrc.http.HttpClient
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.http.HttpReads.Implicits
 
 import scala.concurrent.{ExecutionContext, Future}
 

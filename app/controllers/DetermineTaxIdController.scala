@@ -35,6 +35,7 @@ package controllers
 import _root_.actions.{Actions, EnrolmentDef}
 import essttp.journey.JourneyConnector
 import essttp.journey.model.Journey
+import essttp.rootmodel.Aor
 import play.api.mvc._
 import services.{EpayeService, TtpService}
 import uk.gov.hmrc.auth.core.Enrolments
@@ -58,7 +59,7 @@ class DetermineTaxIdController @Inject() (
   with Logging {
 
   def determineTaxId(): Action[AnyContent] = as.journeyAction.async { implicit request =>
-
+    logger.debug("inside determineTaxId")
     val f = request.journey match {
       case j: Journey.Stages.AfterStarted => determineTaxId(j, request.enrolments)
       case j =>
@@ -70,13 +71,13 @@ class DetermineTaxIdController @Inject() (
   }
 
   private def determineTaxId(journey: Journey.Stages.AfterStarted, enrolments: Enrolments)(implicit request: RequestHeader): Future[Unit] = {
+    logger.debug(s"calling update tax id")
     val (taxOfficeNumber, taxOfficeReference) = EnrolmentDef
       .Epaye
       .findEnrolmentValues(enrolments)
       .getOrElse(throw new RuntimeException("TaxOfficeNumber and TaxOfficeReference not found"))
     for {
-      aor <- epayeService.retrieveAor(taxOfficeNumber, taxOfficeReference)
-      _ <- journeyConnector.updateTaxId(journey.id, aor)
+      _ <- journeyConnector.updateTaxId(journey.id, Aor(taxOfficeReference.value))
     } yield ()
   }
 }
