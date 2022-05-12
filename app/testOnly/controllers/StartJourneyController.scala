@@ -17,19 +17,19 @@
 package testOnly.controllers
 
 import _root_.actions.Actions
+import _root_.essttp.journey.model.ttp._
 import config.AppConfig
 import essttp.journey.JourneyConnector
-import _root_.essttp.journey.model.ttp._
 import essttp.journey.model.{Origins, SjRequest}
 import essttp.rootmodel.{BackUrl, ReturnUrl}
+import models.EligibilityErrors._
 import models.{EligibilityError, EligibilityErrors}
 import play.api.mvc._
 import testOnly.AuthLoginApiService
 import testOnly.connectors.EssttpStubConnector
 import testOnly.controllers.StartJourneyController._
 import testOnly.formsmodel.StartJourneyForm
-import models.EligibilityErrors._
-import testOnly.testusermodel.{RandomDataGenerator, TestUser}
+import testOnly.testusermodel.TestUser
 import testOnly.views.html.TestOnlyStartPage
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -64,22 +64,28 @@ class StartJourneyController @Inject() (
   }
 
   private def startJourney(startJourneyForm: StartJourneyForm)(implicit request: RequestHeader): Future[Result] = {
-    logger.debug(s"Start journey payload: ${epayeSimple}")
-
-      def startJourneyAndGetNextUrl(): Future[String] = startJourneyForm.origin match {
-        case Origins.Epaye.Bta         => journeyConnector.Epaye.startJourneyBta(epayeSimple).map(_.nextUrl.value)
-        case Origins.Epaye.GovUk       => Future.successful("https://github.com/hmrc/essttp-frontend")
-        case Origins.Epaye.DetachedUrl => Future.successful(_root_.controllers.routes.EpayeGovUkController.startJourney().url)
-      }
-
     implicit val hc: HeaderCarrier = HeaderCarrier()
-
     for {
       _ <- essttpStubConnector.primeStubs(makeEligibilityCheckResult(startJourneyForm))
       maybeTestUser = TestUser.makeTestUser(startJourneyForm)
       session <- maybeTestUser.map(testUser => loginService.logIn(testUser)).getOrElse(Future.successful(Session.emptyCookie))
-      redirectUrl <- startJourneyAndGetNextUrl()
-    } yield Redirect(redirectUrl).withSession(session)
+      redirect: Result = startJourneyForm.origin match {
+        case Origins.Epaye.Bta         => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.startJourneyEpayeBta())
+        case Origins.Epaye.GovUk       => Redirect("https://github.com/hmrc/essttp-frontend")
+        case Origins.Epaye.DetachedUrl => Redirect(_root_.controllers.routes.EpayeGovUkController.startJourney().url)
+      }
+    } yield redirect.withSession(session)
+  }
+
+  /**
+   * Pretends for testing purposes that journey started from Bta
+   */
+  val startJourneyEpayeBta: Action[AnyContent] = as.default.async { implicit request =>
+    if (hc.sessionId.isEmpty) {
+      Future.successful(Ok("Missing session id"))
+    } else {
+      journeyConnector.Epaye.startJourneyBta(epayeSimple).map(x => Redirect(x.nextUrl.value))
+    }
   }
 }
 

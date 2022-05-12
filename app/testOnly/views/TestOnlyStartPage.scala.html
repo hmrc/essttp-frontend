@@ -22,7 +22,7 @@
 @import requests.RequestSupport
 @import views.html.templates.Layout
 @import testOnly.messages.Messages
-@import testOnly.models.EligibilityErrors
+@import models.EligibilityErrors
 @import essttp.journey.model.Origins
 @import testOnly.formsmodel.Enrolments
 @import testOnly.formsmodel.SignInAs
@@ -152,7 +152,7 @@
             hint = Some(Hint(content = Text("Set up a payment plan if you cannot pay in full")))
         ),
         RadioItem(
-            content = Text("No origin (direct access)"),
+            content = Text("Detached Url"),
             value = Some(Origins.Epaye.DetachedUrl.entryName)
         )
     ),

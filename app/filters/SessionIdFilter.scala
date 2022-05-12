@@ -34,7 +34,7 @@ import scala.concurrent.{ExecutionContext, Future}
  */
 class SessionIdFilter @Inject() (implicit val mat: Materializer, ex: ExecutionContext) extends Filter {
 
-  private def requiresSession(rh: RequestHeader): Boolean = PaySessionIdFilter.requiresSession(rh)
+  private def requiresSession(rh: RequestHeader): Boolean = SessionIdFilter.requiresSession(rh)
 
   override def apply(f: RequestHeader => Future[mvc.Result])(rh: RequestHeader): Future[mvc.Result] = {
 
@@ -50,12 +50,10 @@ class SessionIdFilter @Inject() (implicit val mat: Materializer, ex: ExecutionCo
   val logger: JourneyLogger.type = JourneyLogger
 }
 
-object PaySessionIdFilter {
+object SessionIdFilter {
   def requiresSession(rh: RequestHeader): Boolean = {
     val hasSessionId = rh.session.get(SessionKeys.sessionId).isDefined
     //we require sessionId...
-    !hasSessionId && //... if it's not there
-      rh.path.startsWith("/pay") && //... for every pay-frontend page
-      !rh.path.endsWith("/redirect-to-payment-status") //... except the IFrame redirect page
+    !hasSessionId
   }
 }

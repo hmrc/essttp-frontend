@@ -53,9 +53,14 @@ class DebugJourneyController @Inject() (
   with Logging {
 
   val showJourney: Action[AnyContent] = as.default.async { implicit request =>
-    journeyConnector.findLatestJourneyBySessionId().map {
-      case Some(j) => Ok(Json.prettyPrint(Json.toJson(j)))
-      case None    => NotFound("There is no journey with such sessionId")
+    if (hc.sessionId.isEmpty) {
+      Future.successful(Ok("Missing session id"))
+    } else {
+      journeyConnector.findLatestJourneyBySessionId().map {
+        case Some(j) => Ok(Json.prettyPrint(Json.toJson(j)))
+        case None    => NotFound(s"There is no journey with such sessionId ${hc.sessionId}")
+      }
     }
+
   }
 }
