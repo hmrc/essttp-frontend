@@ -38,10 +38,10 @@ import essttp.journey.JourneyConnector
 import essttp.journey.model.Journey
 import essttp.journey.model.Journey.HasEligibilityCheckResult
 import essttp.journey.model.ttp.EligibilityCheckResult
+import models.EligibilityErrors
 import play.api.mvc._
 import services.TtpService
-import testOnly.models.EligibilityErrors
-import testOnly.models.EligibilityErrors._
+import models.EligibilityErrors._
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.{JourneyLogger, Logging}
 import views.Views
@@ -66,7 +66,7 @@ class DetermineEligibilityController @Inject() (
       case j: Journey.Stages.AfterComputedTaxId => determineEligibilityAndUpdateJourney(j)
       case j: HasEligibilityCheckResult =>
         JourneyLogger.info("Eligibility already determined, skipping.")
-        Future.successful(routeToNextPage(j.eligibilityCheckResult))
+        Future.successful(nextPage(j.eligibilityCheckResult))
     }
   }
 
@@ -74,25 +74,28 @@ class DetermineEligibilityController @Inject() (
     for {
       eligibilityCheckResult <- ttpService.determineEligibility(journey)
       _ <- journeyConnector.updateEligibilityCheckResult(journey.id, eligibilityCheckResult)
-    } yield routeToNextPage(eligibilityCheckResult)
+    } yield nextPage(eligibilityCheckResult)
   }
 
-  private def routeToNextPage(eligibilityResult: EligibilityCheckResult)(implicit request: RequestHeader): Result = {
-    if (eligibilityResult.isEligible) {
-      Redirect(routes.YourBillController.yourBill())
-    } else
+  private def nextPage(eligibilityResult: EligibilityCheckResult)(implicit request: Request[_]): Result = {
+    val nextUrl: Call = if (eligibilityResult.isEligible) {
+      routes.YourBillController.yourBill()
+    } else {
       EligibilityErrors.toEligibilityError(eligibilityResult.eligibilityRules) match {
-        case MultipleReasons            => Redirect(routes.IneligibleController.genericIneligiblePage())
-        case HasRlsOnAddress            => Redirect(routes.IneligibleController.genericIneligiblePage())
-        case MarkedAsInsolvent          => Redirect(routes.IneligibleController.genericIneligiblePage())
-        case IsLessThanMinDebtAllowance => Redirect(routes.IneligibleController.genericIneligiblePage())
-        case IsMoreThanMaxDebtAllowance => Redirect(routes.IneligibleController.debtTooLargePage())
-        case DisallowedChargeLocks      => Redirect(routes.IneligibleController.genericIneligiblePage())
-        case ExistingTTP                => Redirect(routes.IneligibleController.alreadyHaveAPaymentPlanPage())
-        case ExceedsMaxDebtAge          => Redirect(routes.IneligibleController.debtTooOldPage())
-        case EligibleChargeType         => Redirect(routes.IneligibleController.genericIneligiblePage())
-        case MissingFiledReturns        => Redirect(routes.IneligibleController.fileYourReturnPage())
+        case Some(MultipleReasons)            => routes.IneligibleController.genericIneligiblePage()
+        case None                             => routes.IneligibleController.genericIneligiblePage()
+        case Some(HasRlsOnAddress)            => routes.IneligibleController.genericIneligiblePage()
+        case Some(MarkedAsInsolvent)          => routes.IneligibleController.genericIneligiblePage()
+        case Some(IsLessThanMinDebtAllowance) => routes.IneligibleController.genericIneligiblePage()
+        case Some(IsMoreThanMaxDebtAllowance) => routes.IneligibleController.debtTooLargePage()
+        case Some(DisallowedChargeLocks)      => routes.IneligibleController.genericIneligiblePage()
+        case Some(ExistingTtp)                => routes.IneligibleController.alreadyHaveAPaymentPlanPage()
+        case Some(ExceedsMaxDebtAge)          => routes.IneligibleController.debtTooOldPage()
+        case Some(EligibleChargeType)         => routes.IneligibleController.genericIneligiblePage()
+        case Some(MissingFiledReturns)        => routes.IneligibleController.fileYourReturnPage()
       }
+    }
+    Redirect(nextUrl)
   }
 
 }

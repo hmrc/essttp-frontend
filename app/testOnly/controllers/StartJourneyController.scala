@@ -22,13 +22,13 @@ import essttp.journey.JourneyConnector
 import _root_.essttp.journey.model.ttp._
 import essttp.journey.model.{Origins, SjRequest}
 import essttp.rootmodel.{BackUrl, ReturnUrl}
+import models.{EligibilityError, EligibilityErrors}
 import play.api.mvc._
 import testOnly.AuthLoginApiService
 import testOnly.connectors.EssttpStubConnector
 import testOnly.controllers.StartJourneyController._
 import testOnly.formsmodel.StartJourneyForm
-import testOnly.models.EligibilityError
-import testOnly.models.EligibilityErrors._
+import models.EligibilityErrors._
 import testOnly.testusermodel.{RandomDataGenerator, TestUser}
 import testOnly.views.html.TestOnlyStartPage
 import uk.gov.hmrc.http.HeaderCarrier
@@ -126,8 +126,8 @@ object StartJourneyController {
         markedAsInsolvent          = containsError(MarkedAsInsolvent),
         isLessThanMinDebtAllowance = containsError(IsLessThanMinDebtAllowance),
         isMoreThanMaxDebtAllowance = containsError(IsMoreThanMaxDebtAllowance),
-        disallowedChargeLocks      = containsError(testOnly.models.EligibilityErrors.DisallowedChargeLocks),
-        existingTTP                = containsError(ExistingTTP),
+        disallowedChargeLocks      = containsError(EligibilityErrors.DisallowedChargeLocks),
+        existingTTP                = containsError(ExistingTtp),
         exceedsMaxDebtAge          = containsError(ExceedsMaxDebtAge),
         eligibleChargeType         = containsError(EligibleChargeType),
         missingFiledReturns        = containsError(MissingFiledReturns)

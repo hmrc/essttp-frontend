@@ -17,9 +17,9 @@
 package testOnly.formsmodel
 
 import essttp.journey.model.{Origin, Origins}
+import models.{EligibilityError, EligibilityErrors}
 import play.api.data.Form
 import play.api.data.Forms.{mapping, seq}
-import testOnly.models.{EligibilityError, EligibilityErrors}
 import testOnly.testusermodel.RandomDataGenerator
 
 import scala.util.Random
