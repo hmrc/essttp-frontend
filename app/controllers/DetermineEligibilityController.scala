@@ -33,6 +33,7 @@
 package controllers
 
 import _root_.actions.Actions
+import controllers.JourneyIncorrectStateRouter.{logErrorAndRouteToDefaultPage, logErrorAndRouteToDefaultPageF}
 import essttp.journey.JourneyConnector
 import essttp.journey.model.Journey
 import essttp.journey.model.Journey.HasEligibilityCheckResult
@@ -61,30 +62,22 @@ class DetermineEligibilityController @Inject() (
 
   val determineEligibility: Action[AnyContent] = as.journeyAction.async { implicit request =>
     request.journey match {
-      case j: Journey.Stages.AfterStarted =>
-        Future.failed[Result](new RuntimeException(
-          "Journey in incorrect state during 'determineEligibility'. " +
-            "Please investigate why. " +
-            "Sending user back to the landing page."
-        ))
-      case j: Journey.Stages.AfterComputedTaxId =>
-        determineEligibilityAndUpdateJourney(j)
+      case j: Journey.Stages.AfterStarted       => logErrorAndRouteToDefaultPageF(j)
+      case j: Journey.Stages.AfterComputedTaxId => determineEligibilityAndUpdateJourney(j)
       case j: HasEligibilityCheckResult =>
         JourneyLogger.info("Eligibility already determined, skipping.")
-        Future.successful(route(j.eligibilityCheckResult))
+        Future.successful(routeToNextPage(j.eligibilityCheckResult))
     }
   }
 
   def determineEligibilityAndUpdateJourney(journey: Journey.Stages.AfterComputedTaxId)(implicit request: Request[_]): Future[Result] = {
     for {
-      eligibilityCheckResult <- journey match {
-        case journey: Journey.Epaye.AfterComputedTaxIds => ttpService.determineEligibility(journey)
-      }
+      eligibilityCheckResult <- ttpService.determineEligibility(journey)
       _ <- journeyConnector.updateEligibilityCheckResult(journey.id, eligibilityCheckResult)
-    } yield route(eligibilityCheckResult)
+    } yield routeToNextPage(eligibilityCheckResult)
   }
 
-  private def route(eligibilityResult: EligibilityCheckResult)(implicit request: RequestHeader): Result = {
+  private def routeToNextPage(eligibilityResult: EligibilityCheckResult)(implicit request: RequestHeader): Result = {
     if (eligibilityResult.isEligible) {
       Redirect(routes.YourBillController.yourBill())
     } else

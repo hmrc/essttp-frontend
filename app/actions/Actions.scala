@@ -37,6 +37,11 @@ class Actions @Inject() (
     actionBuilder
       .andThen(getJourneyActionRefiner)
 
+  val notEnrolledAction: ActionBuilder[JourneyRequest, AnyContent] =
+    actionBuilder
+      .andThen(getJourneyActionRefiner)
+      .andThen(authenticatedAction)
+
   val journeyAction: ActionBuilder[AuthenticatedJourneyRequest, AnyContent] =
     actionBuilder
       .andThen(getJourneyActionRefiner)

@@ -58,10 +58,9 @@ class DetermineTaxIdController @Inject() (
   with Logging {
 
   def determineTaxId(): Action[AnyContent] = as.journeyAction.async { implicit request =>
-    logger.debug("inside determineTaxId")
     val f = request.journey match {
       case j: Journey.Stages.AfterStarted => determineTaxId(j, request.enrolments)
-      case j =>
+      case j: Journey.HasTaxId =>
         JourneyLogger.info("TaxId already determined, skipping.")
         Future.successful(())
     }

@@ -21,7 +21,11 @@ import play.api.mvc.{RequestHeader, Result}
 import play.api.mvc.Results.Redirect
 import util.JourneyLogger
 
+import scala.concurrent.Future
+
 object JourneyIncorrectStateRouter {
+
+  def logErrorAndRouteToDefaultPageF(journey: Journey)(implicit request: RequestHeader): Future[Result] = Future.successful(logErrorAndRouteToDefaultPage(journey))
 
   def logErrorAndRouteToDefaultPage(journey: Journey)(implicit request: RequestHeader): Result = {
 
