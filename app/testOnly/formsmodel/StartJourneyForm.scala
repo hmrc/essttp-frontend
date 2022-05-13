@@ -17,12 +17,17 @@
 package testOnly.formsmodel
 
 import essttp.journey.model.{Origin, Origins}
+import langswitch.Language
 import models.{EligibilityError, EligibilityErrors}
-import play.api.data.Form
+import play.api.data.{Form, Forms, Mapping}
 import play.api.data.Forms.{mapping, seq}
+import play.api.mvc.Request
+import testOnly.messages.Messages
 import testOnly.testusermodel.RandomDataGenerator
+import util.EnumFormatter
 
 import scala.util.Random
+import requests.RequestSupport._
 
 final case class StartJourneyForm(
     signInAs:          SignInAs,
@@ -35,12 +40,33 @@ final case class StartJourneyForm(
 }
 
 object StartJourneyForm {
-  val form: Form[StartJourneyForm] = Form(
-    mapping(
-      "signInAs" -> enumeratum.Forms.enum(SignInAs),
-      "enrolments" -> seq(enumeratum.Forms.enum(Enrolments)),
-      "origin" -> enumeratum.Forms.enum(Origins),
-      "eligibilityErrors" -> seq(enumeratum.Forms.enum(EligibilityErrors))
-    )(StartJourneyForm.apply)(StartJourneyForm.unapply)
-  )
+
+  def form(implicit language: Language): Form[StartJourneyForm] = {
+
+    val legacySignInMapping: Mapping[SignInAs] = enumeratum.Forms.enum(SignInAs)
+    val signInMapping: Mapping[SignInAs] = Forms.of(EnumFormatter.format(
+      enum                    = SignInAs,
+      errorMessageIfMissing   = Messages.`Select how to be signed in`.show,
+      errorMessageIfEnumError = Messages.`Select how to be signed in`.show
+    ))
+
+    val enrolmentsMapping: Mapping[Seq[Enrolment]] = seq(
+      Forms.of(EnumFormatter.format(enum = Enrolments))
+    )
+
+    val originMapping = Forms.of(EnumFormatter.format(
+      enum                    = Origins,
+      errorMessageIfMissing   = Messages.`Select which origin the journey should start from`.show,
+      errorMessageIfEnumError = Messages.`Select which origin the journey should start from`.show
+    ))
+
+    Form(
+      mapping(
+        "signInAs" -> signInMapping,
+        "enrolments" -> enrolmentsMapping,
+        "origin" -> originMapping,
+        "eligibilityErrors" -> seq(enumeratum.Forms.enum(EligibilityErrors))
+      )(StartJourneyForm.apply)(StartJourneyForm.unapply)
+    )
+  }
 }
