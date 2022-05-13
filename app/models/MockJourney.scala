@@ -16,7 +16,8 @@
 
 package models
 
-import moveittocor.corcommon.model.{AmountInPence, JourneyId}
+import essttp.journey.model.JourneyId
+import essttp.rootmodel.AmountInPence
 import play.api.libs.json.{Json, OFormat}
 
 import java.time.Instant
@@ -28,5 +29,21 @@ final case class MockJourney(
 )
 
 object MockJourney {
+  implicit val format: OFormat[Journey] = Json.format[Journey]
+}
+//todo this whole file needs to be deleted, but this change is already massive... I've put this in just to make the rest compile where mockJourney is used...
+final case class Journey(
+    _id:            JourneyId,
+    createdDate:    Instant,
+    lastUpdated:    Instant       = Instant.now,
+    status:         JourneyStatus,
+    qualifyingDebt: AmountInPence,
+    remainingToPay: AmountInPence,
+    userAnswers:    UserAnswers
+) {
+  def id: JourneyId = _id
+}
+
+object Journey {
   implicit val format: OFormat[Journey] = Json.format[Journey]
 }

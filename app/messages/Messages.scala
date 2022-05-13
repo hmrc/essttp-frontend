@@ -16,7 +16,7 @@
 
 package messages
 
-import moveittocor.corcommon.model.AmountInPence
+import essttp.rootmodel.AmountInPence
 
 object Messages {
 

@@ -19,5 +19,5 @@ package util
 import play.api.Logger
 
 trait Logging {
-  val logger: Logger = Logger(this.getClass)
+  val logger: JourneyLogger.type = JourneyLogger
 }

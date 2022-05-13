@@ -17,23 +17,30 @@
 package controllers
 
 import _root_.actions.Actions
+import essttp.journey.model.Origins
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
+import views.Views
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 @Singleton
 class LandingController @Inject() (
-    as:  Actions,
-    mcc: MessagesControllerComponents
-)(implicit ec: ExecutionContext)
-  extends FrontendController(mcc)
+    as:    Actions,
+    mcc:   MessagesControllerComponents,
+    views: Views
+) extends FrontendController(mcc)
   with Logging {
 
-  val landingPage: Action[AnyContent] = as.default.async { implicit request =>
-    Future.successful(Redirect(routes.EPayeStartController.ePayeLanding()))
+  val landingPage: Action[AnyContent] = as.landingPageAction { implicit request =>
+    logger.debug(s"inside landing page with journey: ${request.journey.toString}")
+    request.journey.origin match {
+      case Origins.Epaye.Bta         => Ok(views.epayeLanding())
+      case Origins.Epaye.DetachedUrl => Ok(views.epayeLanding())
+      case Origins.Epaye.GovUk       => Redirect(routes.DetermineTaxIdController.determineTaxId())
+    }
   }
 
 }

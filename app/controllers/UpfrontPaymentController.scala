@@ -20,11 +20,10 @@ import _root_.actions.Actions
 import controllers.UpfrontPaymentController.{upfrontPaymentAmountForm, upfrontPaymentForm}
 import models.{MockJourney, UserAnswers}
 import models.MoneyUtil.amountOfMoneyFormatter
-import moveittocor.corcommon.model.AmountInPence
+import essttp.rootmodel.AmountInPence
 import play.api.data.{Form, Forms}
 import play.api.data.Forms.{mapping, nonEmptyText}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.{UpfrontPayment, UpfrontPaymentAmount, UpfrontSummary}
@@ -36,7 +35,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class UpfrontPaymentController @Inject() (
     as:                       Actions,
     mcc:                      MessagesControllerComponents,
-    journeyService:           JourneyService,
     upfrontPaymentPage:       UpfrontPayment,
     upfrontPaymentAmountPage: UpfrontPaymentAmount,
     upfrontSummaryPage:       UpfrontSummary

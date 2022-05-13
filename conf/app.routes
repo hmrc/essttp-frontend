@@ -2,26 +2,25 @@
 
 ->        /hmrc-frontend                                 hmrcfrontend.Routes
 
+# start journey endpoint for gov-uk (this is the link on gov-uk pages pointint to our application)
+GET       /govuk/epaye/start                             controllers.EpayeGovUkController.startJourney
+
 GET       /                                              controllers.LandingController.landingPage
 
-GET       /bta/epaye                                     controllers.EpayeBTAController.landingPage
+GET       /determine-taxId                               controllers.DetermineTaxIdController.determineTaxId
+GET       /determine-eligibility                         controllers.DetermineEligibilityController.determineEligibility
 
-GET       /bta/epaye/start                               controllers.EpayeBTAController.start
+GET       /not-enrolled                                  controllers.NotEnrolledController.notEnrolled
 
-GET       /govuk/epaye                                   controllers.EpayeGovUkController.landingPage
-GET       /govuk/epaye/start                             controllers.EpayeGovUkController.start
+GET       /not-eligible                                  controllers.IneligibleController.genericIneligiblePage
+GET       /debt-too-large                                controllers.IneligibleController.debtTooLargePage
+GET       /debt-too-old                                  controllers.IneligibleController.debtTooOldPage
+GET       /file-your-return                              controllers.IneligibleController.fileYourReturnPage
+GET       /already-have-a-payment-plan                   controllers.IneligibleController.alreadyHaveAPaymentPlanPage
 
-GET       /nosource/epaye                                controllers.EpayeNoSourceController.landingPage
-GET       /nosource/epaye/start                          controllers.EpayeNoSourceController.start
+GET       /your-bill                                     controllers.YourBillController.yourBill
+POST      /your-bill                                     controllers.YourBillController.yourBillSubmit
 
-GET       /enrolments                                    controllers.EnrolmentsController.show
-
-GET       /completion/abort                              controllers.JourneyCompletionController.abort
-
-GET        /epaye/                                       controllers.EPayeStartController.ePayeLanding
-POST       /epaye/                                       controllers.EPayeStartController.ePayeLandingSubmit
-GET        /epaye/start                                  controllers.EPayeStartController.ePayeStart
-POST       /epaye/start                                  controllers.EPayeStartController.ePayeStartSubmit
 GET        /upfront-payment                              controllers.UpfrontPaymentController.upfrontPayment
 POST       /upfront-payment                              controllers.UpfrontPaymentController.upfrontPaymentSubmit
 GET        /upfront-payment-amount                       controllers.UpfrontPaymentController.upfrontPaymentAmount

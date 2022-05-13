@@ -17,7 +17,7 @@
 package models
 
 import cats.implicits.catsSyntaxEq
-import moveittocor.corcommon.model.AmountInPence
+import essttp.rootmodel.AmountInPence
 import play.api.libs.json.{Format, Json}
 
 case class UserAnswers(

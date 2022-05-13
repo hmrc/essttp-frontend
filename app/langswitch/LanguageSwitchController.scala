@@ -19,29 +19,27 @@ package langswitch
 import actions.Actions
 import config.AppConfig
 import play.api.Logging
-import play.api.i18n.I18nSupport
 import play.api.mvc._
 import play.mvc.Http.HeaderNames
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
 
 class LanguageSwitchController @Inject() (
     cc:        ControllerComponents,
     as:        Actions,
     appConfig: AppConfig
-)(implicit ec: ExecutionContext) extends AbstractController(cc) with Logging {
+) extends AbstractController(cc) with Logging {
 
   def switchToLanguage(language: Language): Action[AnyContent] = cc.actionBuilder { implicit request =>
 
     val result: Result = request.headers.get(HeaderNames.REFERER) match {
-      case Some(referrer) =>
-        if (referrer.contains(appConfig.BaseUrl.essttpFrontend)) Redirect(referrer)
+      case Some(referer) =>
+        if (referer.contains(appConfig.BaseUrl.essttpFrontend)) Redirect(referer)
         else {
-          logger.error(s"Suspicious behaviour during language swtiching. Referrer contains external URL [referrer:$referrer]")
-          Redirect(controllers.routes.LandingController.landingPage())
+          logger.error(s"Suspicious behaviour during language switching. Referer contains external URL [referrer:$referer]")
+          Redirect(controllers.routes.EpayeGovUkController.startJourney)
         }
-      case None => Redirect(controllers.routes.LandingController.landingPage())
+      case None => Redirect(controllers.routes.EpayeGovUkController.startJourney)
     }
     messagesApi.setLang(result, language.toPlayLang)
   }

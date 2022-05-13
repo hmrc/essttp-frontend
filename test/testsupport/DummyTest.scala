@@ -16,12 +16,8 @@
 
 package testsupport
 
-import repository.JourneyRepo
-
 class DummyTest extends ItSpec {
 
-  "it should wire and start application" in {
-    val whatever = app.injector.instanceOf[JourneyRepo]
-  }
+  "it should wire and start application" in {}
 
 }

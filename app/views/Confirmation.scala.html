@@ -43,7 +43,7 @@
 @title = @{Messages.Confirmation.`Your payment plan is set up`.show}
 @nextPayment = @{s"${answers.getPaymentDay}${DateMessages.getSuffix(answers.getPaymentDay).show} ${DateMessages.monthName(payments.head.month).show} ${payments.head.year.toString}"}
 
-@layout(pageTitle = Some(title), backLocation = Some(routes.BankDetailsController.checkBankDetails())) {
+@layout(pageTitle = Some(title), backUrl = Some(routes.BankDetailsController.checkBankDetails().url)) {
   @govukPanel(Panel(
     title = Text(title),
     classes = "govuk-!-margin-bottom-7",

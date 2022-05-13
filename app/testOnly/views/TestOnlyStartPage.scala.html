@@ -1,0 +1,239 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import play.api.mvc.Request
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import testOnly.controllers.{routes => testOnlyRoutes}
+@import testOnly.formsmodel.StartJourneyForm
+@import play.api.data.Form
+@import requests.RequestSupport
+@import views.html.templates.Layout
+@import testOnly.messages.Messages
+@import models.EligibilityErrors
+@import essttp.journey.model.Origins
+@import testOnly.formsmodel.Enrolments
+@import testOnly.formsmodel.SignInAs
+
+@this(
+        layout: Layout,
+        govukButton: GovukButton,
+        formWithCSRF: FormWithCSRF,
+        govukRadios: GovukRadios,
+        requestSupport: RequestSupport,
+        govukTabs: GovukTabs,
+        govukCheckboxes: GovukCheckboxes,
+        govukErrorSummary: GovukErrorSummary
+)
+
+@(form: Form[StartJourneyForm])(implicit
+        request: Request[_]
+)
+
+@import requestSupport._
+@title = @{
+    "Test only starter page"
+}
+@eligibilityErrorCheckboxes = @{
+    EligibilityErrors.values.map { error =>
+        CheckboxItem(
+            content = Text(error.entryName),
+            value = error.entryName
+        )
+    }
+}
+
+@enrolmentsContent = @{
+    govukCheckboxes(Checkboxes(
+        fieldset = Some(Fieldset(
+            legend = Some(Legend(
+                content = Text("Enrolments"),
+                classes = "govuk-fieldset__legend--m",
+                isPageHeading = false
+            ))
+        )),
+        idPrefix = Some("enrolments"),
+        name = "enrolments[]",
+        items = Seq(
+            CheckboxItem(
+                content = Text("PAYE for Employers"),
+                value = Enrolments.Epaye.entryName
+            )
+            //TODO: add vat once we start supporting Vat
+            //    ,
+            //   CheckboxItem(
+            //    content = Text("VAT"),
+            //    value = Enrolments.Vat.entryName
+            //   )
+        ),
+        classes = "govuk-checkboxes--small"
+    ))
+}
+
+@signInAsContent = {
+@govukRadios(Radios(
+    fieldset = Some(Fieldset(
+        legend = Some(Legend(
+            content = Text("Signed in as"),
+            classes = "govuk-fieldset__legend--m",
+            isPageHeading = false
+        ))
+    )),
+    idPrefix = Some("signInAs"),
+    name = "signInAs",
+    errorMessage = form.error("signInAs").map(e => ErrorMessage(
+        content = Text(Messages.getError(s"signInAs.${e.message}").show)
+    )),
+    items = Seq(
+        RadioItem(
+            content = Text("As an Organisation"),
+            value = Some(SignInAs.Organisation.entryName)
+        ),
+        RadioItem(
+            content = Text("As an Individual"),
+            value = Some(SignInAs.Individual.entryName)
+        ),
+        RadioItem(
+            content = Text("Not signed in"),
+            value = Some(SignInAs.NoSignIn.entryName)
+        )
+    ),
+    classes = "govuk-radios--small"
+))
+}
+@payeContent = {
+@govukCheckboxes(Checkboxes(
+    fieldset = Some(Fieldset(
+        legend = Some(Legend(
+            content = Text("Eligibility failures"),
+            classes = "govuk-fieldset__legend--s",
+            isPageHeading = false
+        ))
+    )),
+    idPrefix = Some("eligibilityErrors"),
+    name = "eligibilityErrors[]",
+    items = eligibilityErrorCheckboxes,
+    classes = "govuk-checkboxes--small"
+))
+@govukRadios(Radios(
+    fieldset = Some(Fieldset(
+        legend = Some(Legend(
+            content = Text("Entry origins"),
+            classes = "govuk-fieldset__legend--m",
+            isPageHeading = false
+        ))
+    )),
+    idPrefix = Some("origin"),
+    name = "origin",
+    errorMessage = form.error("origin").map(e => ErrorMessage(
+        content = Text(Messages.getError(s"origin.${e.message}").show)
+    )),
+    items = Seq(
+        RadioItem(
+            content = Text("GOV.UK"),
+            value = Some(Origins.Epaye.GovUk.entryName),
+            hint = Some(Hint(content = Text("If you cannot pay your tax bill on time")))
+        ),
+        RadioItem(
+            content = Text("Business Tax Account"),
+            value = Some(Origins.Epaye.Bta.entryName),
+            hint = Some(Hint(content = Text("Set up a payment plan if you cannot pay in full")))
+        ),
+        RadioItem(
+            content = Text("Detached Url"),
+            value = Some(Origins.Epaye.DetachedUrl.entryName)
+        )
+    ),
+    classes = "govuk-radios--small"
+))
+}
+
+@vatContent = {
+@govukRadios(Radios(
+    fieldset = Some(Fieldset(
+        legend = Some(Legend(
+            content = Text("Entry origins"),
+            classes = "govuk-fieldset__legend--m",
+            isPageHeading = false
+        ))
+    )),
+    errorMessage = form.error("origin").map(e => ErrorMessage(
+        content = Text(Messages.getError(s"origin.${e.message}").show)
+    )),
+    idPrefix = Some("origin"),
+    name = "origin",
+    items = Seq(
+        RadioItem(
+            content = Text("GOV.UK"),
+            value = Some("vat_govuk"), // todo once other vat origins are added to backend, update this to Origin.Vat.GovUk.show
+            hint = Some(Hint(content = Text("If you cannot pay your tax bill on time")))
+        ),
+        //  Enable when Vat comes in
+        //  RadioItem(
+        //   content = Text("Business Tax Account"),
+        //   value = Some(Origins.Vat.Bta.toString()),
+        //   hint = Some(Hint(content = Text("Set up a payment plan if you cannot pay in full")))
+        //  ),
+        RadioItem(
+            content = Text("No origin (direct access)"),
+            value = Some("vat_none") // todo once other vat origins are added to backend, update this to Origin.Vat.DetachedUrl.show
+        )
+    ),
+    classes = "govuk-radios--small"
+))
+}
+
+@layout(pageTitle = Some(title)) {
+    @if(form.errors.nonEmpty) {
+        @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
+            ErrorLink(
+                href = Some(s"#${e.key}"),
+                content = Text(Messages.getError(s"${e.key}.${e.message}").show)
+            )
+        ),
+            title = Text("There is a problem")))
+    }
+
+
+    <h1 class="govuk-heading-xl">@title</h1>
+    <p class="govuk-body">Set up journeys and emulate entry point behaviours.</p>
+    @formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneySubmit()) {
+
+        @signInAsContent
+        @enrolmentsContent
+
+        @govukTabs(Tabs(
+            items = Seq(
+                TabItem(
+                    id = Some("paye"),
+                    label = "PAYE",
+                    panel = TabPanel(
+                        content = HtmlContent(payeContent)
+                    )
+                )
+                //, TODO: add vat content once we start building vat service
+                //     TabItem(
+                //      id = Some("vat"),
+                //      label = "VAT",
+                //      panel = TabPanel(
+                //       content = HtmlContent(vatContent)
+                //      )
+                //     )
+            )
+        ))
+        @govukButton(Button(content = Text("Start now")))
+    }
+
+}

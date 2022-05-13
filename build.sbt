@@ -9,6 +9,8 @@ import wartremover.WartRemover.autoImport.{wartremoverErrors, wartremoverExclude
 
 lazy val appName: String = "essttp-frontend"
 
+val silencerVersion = "1.7.1"
+
 lazy val root = (project in file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
@@ -51,6 +53,16 @@ lazy val root = (project in file("."))
     wartremoverExcluded ++= (Compile / routes).value,
     Compile / doc / wartremoverErrors := Seq(),
     Compile / doc / scalacOptions := Seq() //this will allow to have warnings in `doc` task
+  )
+  .settings(
+    // ***************
+    // Use the silencer plugin to suppress warnings (this is only here for play routes files, don't ignore other warnings...)
+    scalacOptions += "-P:silencer:pathFilters=routes",
+    libraryDependencies ++= Seq(
+      compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
+      "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
+    )
+    // ***************
   )
 //Hint: Uncomment below lines if you want to work on both projects in tandem from intellj
 //  .dependsOn(cor)

@@ -39,7 +39,7 @@
 @key = @{"UpfrontPayment"}
 @title = @{Messages.UpfrontPayment.`Can you make an upfront payment?`.show}
 
-@layout(pageTitle = Some(title), backLocation = Some(routes.EPayeStartController.ePayeStart), hasErrors = form.hasErrors) {
+@layout(pageTitle = Some(title), backUrl = Some(routes.YourBillController.yourBill().url), hasErrors = form.hasErrors) {
  @if(form.errors.nonEmpty) {
   @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
    ErrorLink(

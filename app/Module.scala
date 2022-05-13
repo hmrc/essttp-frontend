@@ -15,39 +15,16 @@
  */
 
 import com.google.inject.{AbstractModule, Provides, Singleton}
-import config.AppConfig
-import connectors.{AuthLoginStubConnector, AuthLoginStubConnectorImpl}
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.ws.WSClient
-import play.api.mvc.{Session, SessionCookieBaker}
-import services.{AuthLoginStubService, AuthLoginStubServiceImpl}
-import services.AuthLoginStubService.LSR
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.frontend.filters.crypto.SessionCookieCrypto
 
 import java.time.{Clock, ZoneOffset}
-import scala.concurrent.ExecutionContext
 
 class Module extends AbstractModule {
 
   override def configure(): Unit = {
     ()
   }
-
-  @Provides
-  @Singleton
-  def authLoginStubConnector(config: AppConfig, ws: WSClient, ec: ExecutionContext): AuthLoginStubConnector = new AuthLoginStubConnectorImpl(config, ws)(ec)
-
-  @Provides
-  @Singleton
-  def authLoginStubService(
-      connector:           AuthLoginStubConnector,
-      sessionCookieCrypto: SessionCookieCrypto,
-      sessionCookieBaker:  SessionCookieBaker,
-      ec:                  ExecutionContext
-  ): AuthLoginStubService =
-    new AuthLoginStubServiceImpl(connector, sessionCookieCrypto, sessionCookieBaker)(ec)
 
   @Provides
   @Singleton

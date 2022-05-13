@@ -18,17 +18,15 @@ package controllers
 
 import _root_.actions.Actions
 import controllers.PaymentScheduleController.mockQuotation
-import models.{InstalmentOption, Journey, MockJourney, UserAnswers}
-import moveittocor.corcommon.model.AmountInPence
+import essttp.rootmodel.AmountInPence
+import models.{InstalmentOption, MockJourney, UserAnswers}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import requests.RequestSupport
-import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.{Confirmation, PrintSummary}
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 @Singleton
 class ConfirmationController @Inject() (
@@ -36,8 +34,7 @@ class ConfirmationController @Inject() (
     mcc:              MessagesControllerComponents,
     confirmationPage: Confirmation,
     printSummaryPage: PrintSummary
-)(implicit ec: ExecutionContext)
-  extends FrontendController(mcc)
+) extends FrontendController(mcc)
   with Logging {
 
   val confirmation: Action[AnyContent] = as.default.async { implicit request =>

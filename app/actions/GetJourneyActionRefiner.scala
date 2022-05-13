@@ -16,29 +16,36 @@
 
 package actions
 
-import play.api.mvc.{ActionRefiner, Request, Result}
-import requests.JourneyRequest
-import services.JourneyService
+import actionsmodel.JourneyRequest
+import controllers.support.RequestSupport.hc
+import essttp.journey.JourneyConnector
+import essttp.journey.model.Journey
+import play.api.Logger
+import play.api.mvc.{ActionRefiner, Request, Result, Results}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class GetJourneyActionRefiner @Inject() (
-    journeyService: JourneyService
-)(
+class GetJourneyActionRefiner @Inject() (journeyConnector: JourneyConnector)(
     implicit
     ec: ExecutionContext
 ) extends ActionRefiner[Request, JourneyRequest] {
 
+  private val logger = Logger(getClass)
+
   override protected def refine[A](request: Request[A]): Future[Either[Result, JourneyRequest[A]]] = {
     implicit val r: Request[A] = request
     for {
-      journey <- journeyService.get()
-    } yield Right(new JourneyRequest(journey, request))
+      maybeJourney: Option[Journey] <- journeyConnector.findLatestJourneyBySessionId()
+    } yield maybeJourney match {
+      case Some(journey) => Right(new JourneyRequest(journey, request))
+      case None =>
+        logger.error(s"No journey found for sessionId: [ ${hc.sessionId} ]")
+        Left(Results.Redirect(controllers.routes.EpayeGovUkController.startJourney()))
+    }
   }
 
   override protected def executionContext: ExecutionContext = ec
 
 }
-

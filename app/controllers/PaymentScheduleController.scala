@@ -16,12 +16,10 @@
 
 package controllers
 
-import cats.syntax.eq._
 import _root_.actions.Actions
 import controllers.PaymentScheduleController.mockQuotation
-import messages.DateMessages
-import models.{InstalmentOption, Journey, MockJourney, UserAnswers}
-import moveittocor.corcommon.model.AmountInPence
+import essttp.rootmodel.AmountInPence
+import models.{InstalmentOption, MockJourney, UserAnswers}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import requests.RequestSupport
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -30,7 +28,7 @@ import views.html.CheckPaymentSchedule
 
 import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 @Singleton
 class PaymentScheduleController @Inject() (
@@ -38,8 +36,7 @@ class PaymentScheduleController @Inject() (
     mcc:                 MessagesControllerComponents,
     requestSupport:      RequestSupport,
     paymentSchedulePage: CheckPaymentSchedule
-)(implicit ec: ExecutionContext)
-  extends FrontendController(mcc)
+) extends FrontendController(mcc)
   with Logging {
 
   val checkPaymentSchedule: Action[AnyContent] = as.default.async { implicit request =>
