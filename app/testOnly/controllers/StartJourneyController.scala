@@ -26,6 +26,7 @@ import essttp.rootmodel.{BackUrl, ReturnUrl}
 import models.EligibilityErrors._
 import models.{EligibilityError, EligibilityErrors}
 import play.api.mvc._
+import requests.RequestSupport
 import testOnly.AuthLoginApiService
 import testOnly.connectors.EssttpStubConnector
 import testOnly.controllers.StartJourneyController._
@@ -48,10 +49,13 @@ class StartJourneyController @Inject() (
     testOnlyStartPage:   TestOnlyStartPage,
     journeyConnector:    JourneyConnector,
     loginService:        AuthLoginApiService,
-    iAmBtaPage:          IAmBtaPage
+    iAmBtaPage:          IAmBtaPage,
+    requestSupport:      RequestSupport
 )(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
+
+  import requestSupport._
 
   val startJourneyGet: Action[AnyContent] = as.default { implicit request =>
     Ok(testOnlyStartPage(StartJourneyForm.form))
@@ -73,7 +77,7 @@ class StartJourneyController @Inject() (
       session <- maybeTestUser.map(testUser => loginService.logIn(testUser)).getOrElse(Future.successful(Session.emptyCookie))
       redirect: Result = startJourneyForm.origin match {
         case Origins.Epaye.Bta         => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.showBtaPage())
-        case Origins.Epaye.GovUk       => Redirect("https://github.com/hmrc/essttp-frontend")
+        case Origins.Epaye.GovUk       => Redirect("https://github.com/hmrc/essttp-frontend#emulate-start-journey-from-gov-uk")
         case Origins.Epaye.DetachedUrl => Redirect(_root_.controllers.routes.EpayeGovUkController.startJourney().url)
       }
     } yield redirect.withSession(session)

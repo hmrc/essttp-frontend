@@ -94,7 +94,7 @@
     idPrefix = Some("signInAs"),
     name = "signInAs",
     errorMessage = form.error("signInAs").map(e => ErrorMessage(
-        content = Text(Messages.getError(s"signInAs.${e.message}").show)
+        content = Text(e.message)
     )),
     items = Seq(
         RadioItem(
@@ -138,7 +138,7 @@
     idPrefix = Some("origin"),
     name = "origin",
     errorMessage = form.error("origin").map(e => ErrorMessage(
-        content = Text(Messages.getError(s"origin.${e.message}").show)
+        content = Text(e.message)
     )),
     items = Seq(
         RadioItem(
@@ -170,7 +170,7 @@
         ))
     )),
     errorMessage = form.error("origin").map(e => ErrorMessage(
-        content = Text(Messages.getError(s"origin.${e.message}").show)
+        content = Text(e.message)
     )),
     idPrefix = Some("origin"),
     name = "origin",
@@ -200,7 +200,7 @@
         @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
             ErrorLink(
                 href = Some(s"#${e.key}"),
-                content = Text(Messages.getError(s"${e.key}.${e.message}").show)
+                content = Text(e.message)
             )
         ),
             title = Text("There is a problem")))
