@@ -105,24 +105,6 @@ object JourneyLogger {
 
   private case object Error extends LogLevel
 
-  private def logMessage(message: => String, ex: Throwable, level: LogLevel, journeyId: JourneyId)(implicit request: RequestHeader): Unit = {
-    level match {
-      case Debug => log.debug(makeRichMessage(message, journeyId), ex)
-      case Info  => log.info(makeRichMessage(message, journeyId), ex)
-      case Warn  => log.warn(makeRichMessage(message, journeyId), ex)
-      case Error => log.error(makeRichMessage(message, journeyId), ex)
-    }
-  }
-
-  private def logMessage(message: => String, level: LogLevel, journeyId: JourneyId)(implicit request: RequestHeader): Unit = {
-    level match {
-      case Debug => log.debug(makeRichMessage(message, journeyId))
-      case Info  => log.info(makeRichMessage(message, journeyId))
-      case Warn  => log.warn(makeRichMessage(message, journeyId))
-      case Error => log.error(makeRichMessage(message, journeyId))
-    }
-  }
-
   private def logMessage(message: => String, level: LogLevel)(implicit request: RequestHeader): Unit = {
     lazy val richMessage = makeRichMessage(message)
     level match {
