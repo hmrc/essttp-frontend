@@ -21,7 +21,6 @@
 @import play.api.data.Form
 @import requests.RequestSupport
 @import views.html.templates.Layout
-@import testOnly.messages.Messages
 @import models.EligibilityErrors
 @import essttp.journey.model.Origins
 @import testOnly.formsmodel.Enrolments
@@ -160,6 +159,7 @@
 ))
 }
 
+@*********************
 @vatContent = {
 @govukRadios(Radios(
     fieldset = Some(Fieldset(
@@ -194,6 +194,7 @@
     classes = "govuk-radios--small"
 ))
 }
+*********************@
 
 @layout(pageTitle = Some(title)) {
     @if(form.errors.nonEmpty) {

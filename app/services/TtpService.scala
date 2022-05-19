@@ -18,19 +18,18 @@ package services
 
 import connectors.{CallEligibilityApiRequest, TtpConnector}
 import essttp.journey.model.Journey
-import essttp.journey.model.Journey.HasTaxId
 import essttp.journey.model.Journey.Stages.AfterComputedTaxId
 import essttp.journey.model.ttp.EligibilityCheckResult
 import essttp.rootmodel.EmpRef
 import play.api.mvc.RequestHeader
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 /**
  * Time To Pay (Ttp) Service.
  */
 @Singleton
-class TtpService @Inject() (ttpConnector: TtpConnector)(implicit ec: ExecutionContext) {
+class TtpService @Inject() (ttpConnector: TtpConnector) {
 
   def determineEligibility(journey: AfterComputedTaxId)(implicit request: RequestHeader): Future[EligibilityCheckResult] = {
 
@@ -40,6 +39,7 @@ class TtpService @Inject() (ttpConnector: TtpConnector)(implicit ec: ExecutionCo
           idType           = "SSTTP",
           idNumber         = j.taxId match {
             case empRef: EmpRef => empRef.value //Hmm, will it compile, theoretically it can't be Vrn ...
+            case other          => sys.error(s"Expected EmpRef but found ${other.getClass.getSimpleName}")
           },
           regimeType       = "PAYE",
           returnFinancials = true

@@ -24,7 +24,6 @@ import util.Logging
 import views.Views
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future
 
 @Singleton
 class LandingController @Inject() (

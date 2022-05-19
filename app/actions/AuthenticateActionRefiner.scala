@@ -20,10 +20,10 @@ import actionsmodel.{AuthenticatedJourneyRequest, JourneyRequest}
 import com.google.inject.Inject
 import config.AppConfig
 import play.api.Logger
-import play.api.mvc.Results.{BadRequest, Redirect}
+import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions, Enrolments, NoActiveSession}
+import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions, NoActiveSession}
 
 import scala.concurrent.{ExecutionContext, Future}
 import requests.RequestSupport._

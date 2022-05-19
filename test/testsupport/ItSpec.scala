@@ -16,7 +16,7 @@
 
 package testsupport
 
-import com.google.inject.{AbstractModule, Provides}
+import com.google.inject.AbstractModule
 import org.openqa.selenium.htmlunit.HtmlUnitDriver
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.time.{Millis, Seconds, Span}
@@ -25,12 +25,7 @@ import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import play.api.test.{DefaultTestServerFactory, RunningServer}
 import play.api.{Application, Mode}
 import play.core.server.ServerConfig
-import times.ClockProvider
 import uk.gov.hmrc.http.HttpReadsInstances
-
-import java.time.ZoneOffset.UTC
-import java.time.{Clock, LocalDateTime, ZoneId}
-import javax.inject.Singleton
 
 class ItSpec
   extends AnyFreeSpec
@@ -75,15 +70,6 @@ class ItSpec
 
   lazy val module: AbstractModule = new AbstractModule {
     override def configure(): Unit = ()
-
-    @Provides
-    @Singleton
-    def clockProvider: ClockProvider = new ClockProvider {
-      override val defaultClock: Clock = {
-        val fixedInstant = LocalDateTime.parse(frozenTimeString).toInstant(UTC)
-        Clock.fixed(fixedInstant, ZoneId.systemDefault)
-      }
-    }
   }
 
   implicit lazy val webDriver: HtmlUnitDriver = {
