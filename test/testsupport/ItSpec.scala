@@ -48,20 +48,9 @@ class ItSpec
   protected lazy val configOverrides: Map[String, Any] = Map()
 
   protected lazy val configMap: Map[String, Any] = Map(
-    "microservice.services.direct-debit.port" -> WireMockSupport.port,
-    "microservice.services.time-to-pay-arrangement.port" -> WireMockSupport.port,
-    "microservice.services.time-to-pay-taxpayer.port" -> WireMockSupport.port,
-    "microservice.services.campaign-manager.port" -> WireMockSupport.port,
-    "microservice.services.ia.port" -> WireMockSupport.port,
     "microservice.services.auth.port" -> WireMockSupport.port,
-    "microservice.services.company-auth.url" -> s"http://localhost:${WireMockSupport.port}",
-    "microservice.services.auth.login-callback.base-url" -> s"http://localhost:${testPort}",
-    "microservice.services.add-taxes.port" -> WireMockSupport.port,
-    "microservice.services.bars.port" -> WireMockSupport.port,
-    "microservice.services.identity-verification-frontend.uplift-url" -> s"http://localhost:${WireMockSupport.port}/mdtp/uplift",
-    "microservice.services.identity-verification-frontend.callback.base-url" -> s"http://localhost:${testPort}",
-    "microservice.services.identity-verification-frontend.callback.complete-path" -> "/pay-what-you-owe-in-instalments/arrangement/determine-eligibility",
-    "microservice.services.identity-verification-frontend.callback.reject-path" -> "/pay-what-you-owe-in-instalments/eligibility/not-enrolled"
+    "microservice.services.essttp-backend.port" -> WireMockSupport.port,
+    "microservice.services.ttp.port" -> WireMockSupport.port
   ) ++ configOverrides
 
   //in tests use `app`

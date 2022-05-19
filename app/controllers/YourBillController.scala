@@ -43,7 +43,7 @@ class YourBillController @Inject() (
   extends FrontendController(mcc)
   with Logging {
 
-  val yourBill: Action[AnyContent] = as.eligibleJourneyAction{ implicit request =>
+  val yourBill: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
       case j: Journey.Stages.AfterStarted       => logErrorAndRouteToDefaultPage(j)
       case j: Journey.Stages.AfterComputedTaxId => logErrorAndRouteToDefaultPage(j)
@@ -51,16 +51,22 @@ class YourBillController @Inject() (
     }
   }
 
-  def displayPage(journey: Journey.HasEligibilityCheckResult)(implicit request: Request[_]) = {
+  def displayPage(journey: Journey.HasEligibilityCheckResult)(implicit request: Request[_]): Result = {
     val backUrl = journey.origin match {
       case Origins.Epaye.Bta         => Some(routes.LandingController.landingPage().url)
       case Origins.Epaye.DetachedUrl => Some(routes.LandingController.landingPage().url)
       case Origins.Epaye.GovUk       => journey.backUrl.map(_.value)
     }
-    Ok(views.yourBillIs(overDuePayments(journey.eligibilityCheckResult), backUrl))
+    Ok(views.yourBillIs(YourBillController.overDuePayments(journey.eligibilityCheckResult), backUrl))
   }
 
-  //todo JAKE move this all somewhere else --->
+  val yourBillSubmit: Action[AnyContent] = as.default { implicit request =>
+    Redirect(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment())
+  }
+
+}
+
+object YourBillController {
   def chargeDueDate(charges: List[ChargeTypeAssessment]): LocalDate = {
     charges.headOption.map { (chargeTypeAssessment: ChargeTypeAssessment) =>
       chargeTypeAssessment.disallowedChargeLocks.headOption.map { disallowedChargeLocks: DisallowedChargeLocks =>
@@ -92,10 +98,4 @@ class YourBillController @Inject() (
     val payments = eligibilityResult.chargeTypeAssessment.map(overDuePaymentOf)
     OverDuePayments(qualifyingDebt, payments)
   }
-  //--->
-
-  val yourBillSubmit: Action[AnyContent] = as.default { implicit request =>
-    Redirect(routes.UpfrontPaymentController.upfrontPayment())
-  }
-
 }

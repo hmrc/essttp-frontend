@@ -37,7 +37,7 @@ import essttp.journey.JourneyConnector
 import essttp.journey.model.Journey
 import essttp.rootmodel.EmpRef
 import play.api.mvc._
-import services.TtpService
+import services.{JourneyService, TtpService}
 import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.{JourneyLogger, Logging}
@@ -48,11 +48,11 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class DetermineTaxIdController @Inject() (
-    as:               Actions,
-    mcc:              MessagesControllerComponents,
-    ttpService:       TtpService,
-    journeyConnector: JourneyConnector,
-    views:            Views
+    as:             Actions,
+    mcc:            MessagesControllerComponents,
+    ttpService:     TtpService,
+    journeyService: JourneyService,
+    views:          Views
 )(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
@@ -69,6 +69,7 @@ class DetermineTaxIdController @Inject() (
   }
 
   private def determineTaxId(journey: Journey.Stages.AfterStarted, enrolments: Enrolments)(implicit request: RequestHeader): Future[Unit] = {
+    //todo move this to enrolment service or something
     val computeEmpRef: Future[EmpRef] = Future{
       val (taxOfficeNumber, taxOfficeReference) = EnrolmentDef
         .Epaye
@@ -79,7 +80,7 @@ class DetermineTaxIdController @Inject() (
 
     for {
       empRef <- computeEmpRef
-      _ <- journeyConnector.updateTaxId(journey.id, empRef)
+      _ <- journeyService.UpdateTaxRef.updatePayeTaxId(journey.id, empRef)
     } yield ()
   }
 }

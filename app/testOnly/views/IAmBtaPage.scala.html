@@ -15,17 +15,9 @@
  *@
 
 @import play.api.mvc.Request
-@import uk.gov.hmrc.govukfrontend.views.html.components._
-@import testOnly.controllers.{routes => testOnlyRoutes}
-@import testOnly.formsmodel.StartJourneyForm
-@import play.api.data.Form
 @import requests.RequestSupport
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 @import views.html.templates.Layout
-@import testOnly.messages.Messages
-@import models.EligibilityErrors
-@import essttp.journey.model.Origins
-@import testOnly.formsmodel.Enrolments
-@import testOnly.formsmodel.SignInAs
 
 @this(
         layout: Layout,
@@ -42,7 +34,7 @@
         request: Request[_]
 )
 
-@import requestSupport._
+
 @title = @{
     "I am BTA Page"
 }

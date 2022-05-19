@@ -17,10 +17,13 @@
 package controllers
 
 import play.api.http.Status
-import play.api.mvc.Result
+import play.api.mvc.{Headers, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
+import testsupport.TdRequest.FakeRequestOps
+import testsupport.stubs.{AuthStub, EssttpBackend}
+import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
 
@@ -28,15 +31,20 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
   private val controller: UpfrontPaymentController = app.injector.instanceOf[UpfrontPaymentController]
 
-  "GET /upfrontpayment or whatever - Pawel, shall we add tests like these or just stick with int?" - {
-    "return 200 and the upfront payment page" in {
-      val fakeRequest = FakeRequest("GET", "/upfront-payment")
-      val result: Future[Result] = controller.upfrontPayment(fakeRequest)
+  "GET /can-you-make-an-upfront-payment" - {
+    "return 200 and the can you make an upfront payment page" in {
+      AuthStub.authorise()
+      EssttpBackend.findJourneyAfterEligibilityCheck
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.canYouMakeAnUpfrontPayment(fakeRequest)
 
       status(result) shouldBe Status.OK
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
       contentAsString(result) should include("Can you make an upfront payment?")
+      contentAsString(result) should include("Your monthly payments will be lower if you can make an upfront payment. This payment will be taken from your bank account within 7 working days.")
+
     }
   }
 }

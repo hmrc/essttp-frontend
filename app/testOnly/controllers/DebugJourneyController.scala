@@ -17,22 +17,13 @@
 package testOnly.controllers
 
 import _root_.actions.Actions
-import _root_.essttp.journey.model.ttp._
 import config.AppConfig
 import essttp.journey.JourneyConnector
-import essttp.journey.model.{Origins, SjRequest}
-import essttp.rootmodel.{BackUrl, ReturnUrl}
-import models.EligibilityErrors._
-import models.{EligibilityError, EligibilityErrors}
 import play.api.libs.json.Json
 import play.api.mvc._
 import testOnly.AuthLoginApiService
 import testOnly.connectors.EssttpStubConnector
-import testOnly.controllers.StartJourneyController._
-import testOnly.formsmodel.StartJourneyForm
-import testOnly.testusermodel.TestUser
 import testOnly.views.html.TestOnlyStartPage
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 
