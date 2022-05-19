@@ -37,12 +37,12 @@ class ConfirmationController @Inject() (
 ) extends FrontendController(mcc)
   with Logging {
 
-  val confirmation: Action[AnyContent] = as.default.async { implicit request =>
+  val confirmation: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     val j: MockJourney = MockJourney(userAnswers = UserAnswers.empty.copy(paymentDay  = Some("28"), monthsToPay = Some(InstalmentOption(numberOfMonths       = 4, amountToPayEachMonth = AmountInPence(50000L), interestPayment = AmountInPence(3500L)))))
     Future.successful(Ok(confirmationPage(j.userAnswers, mockQuotation(j.userAnswers.getMonthsToPay), "222PX00222222")))
   }
 
-  val printSummary: Action[AnyContent] = as.default.async { implicit request =>
+  val printSummary: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     val j: MockJourney = MockJourney(userAnswers = UserAnswers.empty.copy(paymentDay  = Some("28"), monthsToPay = Some(InstalmentOption(numberOfMonths       = 4, amountToPayEachMonth = AmountInPence(50000L), interestPayment = AmountInPence(3500L)))))
     Future.successful(Ok(printSummaryPage(j.userAnswers, mockQuotation(j.userAnswers.getMonthsToPay), "222PX00222222")))
   }

@@ -91,7 +91,7 @@ class YourBillController @Inject() (
   }
   //--->
 
-  val yourBillSubmit: Action[AnyContent] = as.default { _ =>
+  val yourBillSubmit: Action[AnyContent] = as.authenticatedJourneyAction { _ =>
     Redirect(routes.UpfrontPaymentController.upfrontPayment())
   }
 

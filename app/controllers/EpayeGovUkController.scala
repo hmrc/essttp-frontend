@@ -52,8 +52,7 @@ class EpayeGovUkController @Inject() (
    * Based on the "Referrer" http header it determines
    * if the incoming request originated on the gov-uk pages.
    */
-  def isComingFromGovUk(request: Request[_]): Boolean = {
-
+  def isComingFromGovUk(request: Request[_]): Boolean =
     request.headers.get(HeaderNames.REFERER).exists(_.contains(refererForGovUk))
-  }
+
 }

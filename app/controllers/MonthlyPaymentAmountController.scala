@@ -39,7 +39,7 @@ class MonthlyPaymentAmountController @Inject() (
   extends FrontendController(mcc)
   with Logging {
 
-  val monthlyPaymentAmount: Action[AnyContent] = as.default.async { implicit request =>
+  val monthlyPaymentAmount: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     val mockJourney = MockJourney()
     Future.successful(Ok(monthlyPaymentAmountPage(
       monthlyPaymentAmountForm(mockJourney),
@@ -48,7 +48,7 @@ class MonthlyPaymentAmountController @Inject() (
     )))
   }
 
-  val monthlyPaymentAmountSubmit: Action[AnyContent] = as.default.async { implicit request =>
+  val monthlyPaymentAmountSubmit: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     val mockJourney = MockJourney()
     monthlyPaymentAmountForm(MockJourney())
       .bindFromRequest()

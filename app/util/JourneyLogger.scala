@@ -17,7 +17,6 @@
 package util
 
 import actionsmodel.JourneyRequest
-import essttp.journey.model.JourneyId
 import essttp.rootmodel.TraceId
 import essttp.utils.RequestSupport._
 import play.api.Logger
@@ -88,11 +87,6 @@ object JourneyLogger {
       case _ =>
         s"$message $context "
     }
-  }
-
-  private def makeRichMessage(message: => String, journeyId: JourneyId)(implicit request: RequestHeader): String = {
-    val traceId: TraceId = TraceId(journeyId)
-    s"$message $traceId $journeyId $context "
   }
 
   private sealed trait LogLevel

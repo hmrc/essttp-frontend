@@ -16,6 +16,7 @@
 
 package controllers
 
+import actions.Actions
 import com.google.inject.{Inject, Singleton}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -24,13 +25,14 @@ import util.Logging
 
 @Singleton
 class SignOutController @Inject() (
+    as:           Actions,
     mcc:          MessagesControllerComponents,
     timedOutPage: views.html.TimedOut
 ) extends FrontendController(mcc)
   with I18nSupport
   with Logging {
 
-  def signOutFromTimeout: Action[AnyContent] = Action { implicit request =>
+  def signOutFromTimeout: Action[AnyContent] = as.landingPageAction { implicit request =>
     Ok(timedOutPage()).withNewSession
   }
 }

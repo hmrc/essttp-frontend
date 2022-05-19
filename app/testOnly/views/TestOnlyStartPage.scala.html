@@ -20,14 +20,13 @@
 @import testOnly.formsmodel.StartJourneyForm
 @import play.api.data.Form
 @import requests.RequestSupport
-@import views.html.templates.Layout
 @import models.EligibilityErrors
 @import essttp.journey.model.Origins
 @import testOnly.formsmodel.Enrolments
 @import testOnly.formsmodel.SignInAs
 
 @this(
-        layout: Layout,
+        testOnlyLayout: TestOnlyLayout,
         govukButton: GovukButton,
         formWithCSRF: FormWithCSRF,
         govukRadios: GovukRadios,
@@ -196,7 +195,7 @@
 }
 *********************@
 
-@layout(pageTitle = Some(title)) {
+@testOnlyLayout(pageTitle = Some(title)) {
     @if(form.errors.nonEmpty) {
         @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
             ErrorLink(

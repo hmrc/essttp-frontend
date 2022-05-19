@@ -50,7 +50,8 @@
   scriptsBlock: Option[Html] = None,
   backUrl: Option[String] = None,
   hasErrors: Boolean = false,
-  showSignOutLink: Boolean = true)(
+  showSignOutLink: Boolean = true
+)(
   contentBlock: Html)(implicit
   request: Request[_]
 )
@@ -111,8 +112,8 @@
                   case TaxRegime.Vat => sys.error("VAT not handled yet")
               }
 
-          case _ =>
-              Messages.ServicePhase.`Set up a payment plan`.show
+          case other =>
+              sys.error(s"Expected JourneyRequest for non-test-only page but got ${other.getClass.getSimpleName}")
       }
     }
 
