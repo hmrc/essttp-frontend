@@ -19,7 +19,7 @@ package controllers
 import _root_.actions.Actions
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import controllers.UpfrontPaymentController.upfrontPaymentAmountForm
-import essttp.journey.model.{Journey, Origins}
+import essttp.journey.model.Journey
 import essttp.rootmodel.{AmountInPence, CanPayUpfront}
 import models.MoneyUtil.amountOfMoneyFormatter
 import models.enumsforforms.CanPayUpfrontFormValue
@@ -54,16 +54,12 @@ class UpfrontPaymentController @Inject() (
     request.journey match {
       case j: Journey.Stages.AfterStarted       => logErrorAndRouteToDefaultPage(j)
       case j: Journey.Stages.AfterComputedTaxId => logErrorAndRouteToDefaultPage(j)
-      case j: Journey.HasEligibilityCheckResult => displayPage(j)
+      case _: Journey.HasEligibilityCheckResult => displayPage()
     }
   }
 
-  private def displayPage(journey: Journey.HasEligibilityCheckResult)(implicit request: Request[_]): Result = {
-    val backUrl = journey.origin match {
-      case Origins.Epaye.Bta         => Some(routes.YourBillController.yourBill().url)
-      case Origins.Epaye.DetachedUrl => Some(routes.YourBillController.yourBill().url)
-      case Origins.Epaye.GovUk       => Some(routes.YourBillController.yourBill().url)
-    }
+  private def displayPage()(implicit request: Request[_]): Result = {
+    val backUrl: Option[String] = Some(routes.YourBillController.yourBill().url)
     Ok(views.canYouMakeAnUpFrontPayment(CanPayUpfrontForm.form, backUrl))
   }
 

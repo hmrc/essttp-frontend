@@ -16,6 +16,8 @@
 
 package controllers
 
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -31,15 +33,11 @@ import scala.concurrent.Future
 class UpfrontPaymentControllerSpec extends ItSpec {
 
   private val controller: UpfrontPaymentController = app.injector.instanceOf[UpfrontPaymentController]
-
-  private val serviceName: String = "Set up an Employers’ PAYE payment plan"
-  private val h1: String = "Can you make an upfront payment?"
-  private val pageContent: String =
+  private val expectedServiceName: String = "Set up an Employers’ PAYE payment plan"
+  private val expectedH1: String = "Can you make an upfront payment?"
+  private val expectedPageTitle: String = s"$expectedH1 - $expectedServiceName - GOV.UK"
+  private val expectedPageHint: String =
     "Your monthly payments will be lower if you can make an upfront payment. This payment will be taken from your bank account within 7 working days."
-  private val backLinkHtml: String = "<a href=\"/set-up-a-payment-plan/your-bill\" class=\"govuk-back-link\" id=\"back\">Back</a>"
-  private val signOutLinkHtml: String =
-    "<a class=\"govuk-link hmrc-sign-out-nav__link\" href=\"http://localhost:9949/auth-login-stub/session/logout\">\n              Sign out\n            </a>"
-
 
   "GET /can-you-make-an-upfront-payment" - {
     "return 200 and the can you make an upfront payment page" in {
@@ -55,12 +53,14 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       charset(result) shouldBe Some("utf-8")
 
       val pageContent: String = contentAsString(result)
+      val doc: Document = Jsoup.parse(pageContent)
 
-      pageContent should include(serviceName)
-      pageContent should include(signOutLinkHtml)
-      pageContent should include(h1)
-      pageContent should include(pageContent)
-      pageContent should include(backLinkHtml)
+      doc.title() shouldBe expectedPageTitle
+      doc.select(".govuk-fieldset__heading").text() shouldBe expectedH1
+      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
+      doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
+      doc.select("#back").attr("href") shouldBe routes.YourBillController.yourBill().url
+      doc.select("#CanYouMakeAnUpFrontPayment-hint").text() shouldBe expectedPageHint
     }
   }
 
@@ -114,12 +114,14 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     charset(result) shouldBe Some("utf-8")
 
     val pageContent: String = contentAsString(result)
+    val doc: Document = Jsoup.parse(pageContent)
 
-    pageContent should include(serviceName)
-    pageContent should include(signOutLinkHtml)
-    pageContent should include(h1)
-    pageContent should include(pageContent)
-    pageContent should include("<h2 class=\"govuk-error-summary__title\" id=\"error-summary-title\">\n    There is a problem\n  </h2>")
-    pageContent should include("<a href=\"#CanYouMakeAnUpFrontPayment\">Select yes if you can make an upfront payment</a>")
+    doc.title() shouldBe s"Error $expectedPageTitle"
+    doc.select(".govuk-fieldset__heading").text() shouldBe expectedH1
+    doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
+    doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
+    doc.select("#CanYouMakeAnUpFrontPayment-hint").text() shouldBe expectedPageHint
+    doc.select("#main-content > div > div > div > div > div > ul > li > a").text() shouldBe "Select yes if you can make an upfront payment"
+    doc.select("#main-content > div > div > div > div > div > ul > li > a").attr("href") shouldBe "#CanYouMakeAnUpFrontPayment"
   }
 }
