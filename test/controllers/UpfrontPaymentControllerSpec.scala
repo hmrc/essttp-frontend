@@ -121,7 +121,9 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
     doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
     doc.select("#CanYouMakeAnUpFrontPayment-hint").text() shouldBe expectedPageHint
-    doc.select("#main-content > div > div > div > div > div > ul > li > a").text() shouldBe "Select yes if you can make an upfront payment"
-    doc.select("#main-content > div > div > div > div > div > ul > li > a").attr("href") shouldBe "#CanYouMakeAnUpFrontPayment"
+    val errorSummary = doc.select(".govuk-error-summary")
+    val errorLink = errorSummary.select("a")
+    errorLink.text() shouldBe "Select yes if you can make an upfront payment"
+    errorLink.attr("href") shouldBe "#CanYouMakeAnUpFrontPayment"
   }
 }
