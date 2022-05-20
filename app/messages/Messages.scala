@@ -109,6 +109,10 @@ object Messages {
       english = "Set up a payment plan"
     )
 
+    val `Set up an Employers' PAYE payment plan`: Message = Message(
+      english = "Set up an Employers’ PAYE payment plan"
+    )
+
     val beta: Message = Message(
       english = "beta"
     )

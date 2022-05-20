@@ -17,11 +17,7 @@
 package controllers
 
 import essttp.journey.model.Journey
-import essttp.journey.model.Stage.AfterEligibilityCheck.Ineligible
-import essttp.journey.model.ttp.EligibilityCheckResult
-import models.EligibilityErrors
-import models.EligibilityErrors.{DisallowedChargeLocks, EligibleChargeType, ExceedsMaxDebtAge, ExistingTtp, HasRlsOnAddress, IsLessThanMinDebtAllowance, IsMoreThanMaxDebtAllowance, MarkedAsInsolvent, MissingFiledReturns, MultipleReasons}
-import play.api.mvc.{Call, Request, RequestHeader, Result}
+import play.api.mvc.{Request, Result}
 import play.api.mvc.Results.Redirect
 import util.JourneyLogger
 
@@ -34,8 +30,8 @@ object JourneyIncorrectStateRouter {
   def logErrorAndRouteToDefaultPage(journey: Journey)(implicit request: Request[_]): Result = {
 
     val defaultEndpoint = journey match {
-      case j: Journey.Stages.AfterStarted          => Redirect(routes.LandingController.landingPage())
-      case j: Journey.Stages.AfterComputedTaxId    => Redirect(routes.DetermineEligibilityController.determineEligibility())
+      case _: Journey.Stages.AfterStarted          => Redirect(routes.LandingController.landingPage())
+      case _: Journey.Stages.AfterComputedTaxId    => Redirect(routes.DetermineEligibilityController.determineEligibility())
       case j: Journey.Stages.AfterEligibilityCheck => EligibilityRouter.nextPage(j.eligibilityCheckResult)
     }
 

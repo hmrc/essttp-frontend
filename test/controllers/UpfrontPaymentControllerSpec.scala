@@ -29,7 +29,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
   private val controller: UpfrontPaymentController = app.injector.instanceOf[UpfrontPaymentController]
 
   "GET /upfrontpayment or whatever - Pawel, shall we add tests like these or just stick with int?" - {
-    "return 200 and the upfront payment page" in {
+    "return 200 and the upfront payment page" ignore {
       val fakeRequest = FakeRequest("GET", "/upfront-payment")
       val result: Future[Result] = controller.upfrontPayment(fakeRequest)
 

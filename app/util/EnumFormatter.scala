@@ -16,14 +16,18 @@
 
 package util
 
-import enumeratum.Forms.format
 import enumeratum.{Enum, EnumEntry}
-import play.api.data.{FormError, Mapping}
+import play.api.data.FormError
 import play.api.data.format.Formatter
 
 object EnumFormatter {
 
-  def format[A <: EnumEntry](enum: Enum[A], errorMessageIfMissing: String = "missing input", errorMessageIfEnumError: String = "invalid input", insensitive: Boolean = false): Formatter[A] = new Formatter[A] {
+  def format[A <: EnumEntry](
+      enum:                    Enum[A],
+      errorMessageIfMissing:   String  = "missing input",
+      errorMessageIfEnumError: String  = "invalid input",
+      insensitive:             Boolean = false
+  ): Formatter[A] = new Formatter[A] {
     val delegate = enumeratum.Forms.format(enum, insensitive)
 
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], A] = delegate.bind(key, data)

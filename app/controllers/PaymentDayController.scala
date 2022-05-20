@@ -39,11 +39,11 @@ class PaymentDayController @Inject() (
   extends FrontendController(mcc)
   with Logging {
 
-  val paymentDay: Action[AnyContent] = as.default.async { implicit request =>
+  val paymentDay: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     Future.successful(Ok(paymentDayPage(paymentDayForm())))
   }
 
-  val paymentDaySubmit: Action[AnyContent] = as.default.async { implicit request =>
+  val paymentDaySubmit: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     paymentDayForm()
       .bindFromRequest()
       .fold(

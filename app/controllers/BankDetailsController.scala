@@ -39,11 +39,11 @@ class BankDetailsController @Inject() (
 ) extends FrontendController(mcc)
   with Logging {
 
-  val setUpBankDetails: Action[AnyContent] = as.default { implicit request =>
+  val setUpBankDetails: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     Ok(bankDetailsPage(bankDetailsForm()))
   }
 
-  val setUpBankDetailsSubmit: Action[AnyContent] = as.default.async { implicit request =>
+  val setUpBankDetailsSubmit: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     bankDetailsForm()
       .bindFromRequest()
       .fold(
@@ -54,12 +54,12 @@ class BankDetailsController @Inject() (
       )
   }
 
-  val checkBankDetails: Action[AnyContent] = as.default.async { implicit request =>
+  val checkBankDetails: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     val j: MockJourney = MockJourney(userAnswers = UserAnswers.empty.copy(bankDetails = Some(BankDetails(name          = "John Doe", sortCode = SortCode("202020"), accountNumber = AccountNumber("12345678")))))
     Future.successful(Ok(checkBankDetailsPage(j.userAnswers)))
   }
 
-  val termsAndConditions: Action[AnyContent] = as.default { implicit request =>
+  val termsAndConditions: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     Ok(termsPage())
   }
 }
