@@ -22,7 +22,7 @@ GET       /your-bill                                     controllers.YourBillCon
 POST      /your-bill                                     controllers.YourBillController.yourBillSubmit
 
 GET       /can-you-make-an-upfront-payment               controllers.UpfrontPaymentController.canYouMakeAnUpfrontPayment
-POST      /can-you-make-an-upfront-payment               controllers.UpfrontPaymentController.upfrontPaymentSubmit
+POST      /can-you-make-an-upfront-payment               controllers.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit
 GET        /upfront-payment-amount                       controllers.UpfrontPaymentController.upfrontPaymentAmount
 POST       /upfront-payment-amount                       controllers.UpfrontPaymentController.upfrontPaymentAmountSubmit
 GET        /upfront-payment-summary                      controllers.UpfrontPaymentController.upfrontSummary()

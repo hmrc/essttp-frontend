@@ -31,7 +31,7 @@
 )
 
 @(
-        form: Form[Boolean],
+        form: Form[String],
         backUrl: Option[String] = None)(implicit
         request: Request[_]
 )
@@ -58,7 +58,7 @@
                     title = Text(Messages.`There is a problem`.show))
             )
         }
-        @formWithCSRF(action = routes.UpfrontPaymentController.upfrontPaymentSubmit()) {
+        @formWithCSRF(action = routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit()) {
             @govukRadios(Radios(
                 fieldset = Some(Fieldset(
                     legend = Some(Legend(
@@ -75,12 +75,12 @@
                 items = Seq(
                     RadioItem(
                         content = Text(Messages.UpfrontPayment.`Yes`.show),
-                        value = Some(true),
+                        value = Some("Yes"),
                         checked = form.data.values.toList.contains("Yes")
                     ),
                     RadioItem(
                         content = Text(Messages.UpfrontPayment.`No`.show),
-                        value = Some(false),
+                        value = Some("No"),
                         checked = form.data.values.toList.contains("No")
                     )
                 ),
