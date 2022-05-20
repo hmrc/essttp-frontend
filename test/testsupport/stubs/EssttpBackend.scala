@@ -142,16 +142,16 @@ object EssttpBackend {
         get(urlPathEqualTo(findByLatestSessionIdUrl))
           .willReturn(aResponse()
             .withStatus(200)
-            .withBody(jsonBody(additionalPayloadInfo)))
+            .withBody(jsonBody(additionalPayloadInfo._1, additionalPayloadInfo._2)))
       )
     }
 
-    val jsonBody: ((String, Boolean)) => String = (tuple: (String, Boolean)) =>
+    def jsonBody(stageValue: String, canPayUpfrontValue: Boolean): String =
       s"""
          |{
          |   "AfterCanPayUpfront" : {
          |     "stage" : {
-         |       "${tuple._1}" : { }
+         |       "$stageValue" : { }
          |    },
          |    "createdOn" : "2022-05-18T14:04:03.461",
          |    "_id" : "6284fcd33c00003d6b1f3903",
@@ -225,7 +225,7 @@ object EssttpBackend {
          |    "taxId" : {
          |      "value" : "123/456"
          |    }
-         |    "canPayUpfront": ${tuple._2}
+         |    "canPayUpfront": $canPayUpfrontValue
          |  },
          |  "sessionId" : "IamATestSessionId",
          |  "createdAt" : "2022-05-18T14:04:03.461"

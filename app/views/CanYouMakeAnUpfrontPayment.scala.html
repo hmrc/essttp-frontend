@@ -20,6 +20,7 @@
 @import play.api.data.Form
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import controllers.routes
+@import models.enumsforforms.CanPayUpfrontFormValue
 
 @this(
         layout: templates.Layout,
@@ -31,7 +32,7 @@
 )
 
 @(
-        form: Form[String],
+        form: Form[CanPayUpfrontFormValue],
         backUrl: Option[String] = None)(implicit
         request: Request[_]
 )
@@ -52,7 +53,7 @@
                 ErrorSummary(errorList = form.errors.map(e =>
                     ErrorLink(
                         href = Some(s"#${e.key}"),
-                        content = Text(Messages.UpfrontPayment.getError(e.message).show)
+                        content = Text(e.message)
                     )
                 ),
                     title = Text(Messages.`There is a problem`.show))
@@ -85,7 +86,7 @@
                     )
                 ),
                 classes = "govuk-radios--inline",
-                errorMessage = form.error(key).map(e => ErrorMessage(content = Text(Messages.UpfrontPayment.getError(e.message).show)))
+                errorMessage = form.error(key).map(e => ErrorMessage(content = Text(e.message)))
             ))
             @govukButton(Button(content = Text(Messages.continue.show)))
         }

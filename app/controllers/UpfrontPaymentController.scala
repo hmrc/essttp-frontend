@@ -18,14 +18,17 @@ package controllers
 
 import _root_.actions.Actions
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
-import controllers.UpfrontPaymentController.{canYouMakeAnUpfrontPaymentQuestionForm, upfrontPaymentAmountForm}
+import controllers.UpfrontPaymentController.upfrontPaymentAmountForm
 import essttp.journey.model.{Journey, Origins}
 import essttp.rootmodel.{AmountInPence, CanPayUpfront}
 import models.MoneyUtil.amountOfMoneyFormatter
+import models.enumsforforms.CanPayUpfrontFormValue
+import models.forms.CanPayUpfrontForm
 import models.{MockJourney, UserAnswers}
-import play.api.data.Forms.{mapping, nonEmptyText}
+import play.api.data.Forms.mapping
 import play.api.data.{Form, Forms}
 import play.api.mvc._
+import requests.RequestSupport
 import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
@@ -39,10 +42,13 @@ class UpfrontPaymentController @Inject() (
     as:             Actions,
     mcc:            MessagesControllerComponents,
     views:          Views,
-    journeyService: JourneyService
+    journeyService: JourneyService,
+    requestSupport: RequestSupport
 )(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
+
+  import requestSupport._
 
   val canYouMakeAnUpfrontPayment: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     request.journey match {
@@ -58,16 +64,16 @@ class UpfrontPaymentController @Inject() (
       case Origins.Epaye.DetachedUrl => Some(routes.YourBillController.yourBill().url)
       case Origins.Epaye.GovUk       => Some(routes.YourBillController.yourBill().url)
     }
-    Ok(views.canYouMakeAnUpFrontPayment(canYouMakeAnUpfrontPaymentQuestionForm, backUrl))
+    Ok(views.canYouMakeAnUpFrontPayment(CanPayUpfrontForm.form, backUrl))
   }
 
   val canYouMakeAnUpfrontPaymentSubmit: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
-    canYouMakeAnUpfrontPaymentQuestionForm
+    CanPayUpfrontForm.form
       .bindFromRequest()
       .fold(
         formWithErrors => Future.successful(Ok(views.canYouMakeAnUpFrontPayment(formWithErrors))),
-        (validFormYesOrNo: String) => {
-          val canPayUpfront: CanPayUpfront = UpfrontPaymentController.formToCanPayUpfront(validFormYesOrNo)
+        (canPayUpfrontForm: CanPayUpfrontFormValue) => {
+          val canPayUpfront: CanPayUpfront = canPayUpfrontForm.asCanPayUpfront
           val pageToRedirectTo: Call =
             if (canPayUpfront.value) {
               routes.UpfrontPaymentController.upfrontPaymentAmount()
@@ -75,7 +81,7 @@ class UpfrontPaymentController @Inject() (
               routes.MonthlyPaymentAmountController.monthlyPaymentAmount()
             }
           journeyService.updateCanPayUpfront(request.journeyId, canPayUpfront)
-            .flatMap(_ => Future.successful(Redirect(pageToRedirectTo)))
+            .map(_ => Redirect(pageToRedirectTo))
         }
       )
   }
@@ -112,18 +118,9 @@ class UpfrontPaymentController @Inject() (
 
 object UpfrontPaymentController {
 
-  def canYouMakeAnUpfrontPaymentQuestionForm: Form[String] = Form(
-    mapping(
-      "CanYouMakeAnUpFrontPayment" -> nonEmptyText
-    )(identity)(Some(_))
-  )
-
   def upfrontPaymentAmountForm(journey: MockJourney): Form[BigDecimal] = Form(
     mapping(
       "UpfrontPaymentAmount" -> Forms.of(amountOfMoneyFormatter(AmountInPence(100L).inPounds > _, journey.qualifyingDebt.inPounds < _))
     )(identity)(Some(_))
   )
-
-  val formToCanPayUpfront: String => CanPayUpfront = formValue => CanPayUpfront(formValue.equalsIgnoreCase("yes"))
-
 }
