@@ -41,7 +41,7 @@
 @key = @{"UpfrontPaymentAmount"}
 @title = @{Messages.UpfrontPaymentAmount.`How much can you pay upfront?`.show}
 
-@layout(pageTitle = Some(title), backUrl = Some(routes.UpfrontPaymentController.upfrontPayment().url), hasErrors = form.hasErrors) {
+@layout(pageTitle = Some(title), backUrl = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url), hasErrors = form.hasErrors) {
  @if(form.errors.nonEmpty) {
   @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
    ErrorLink(

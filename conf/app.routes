@@ -21,8 +21,8 @@ GET       /already-have-a-payment-plan                   controllers.IneligibleC
 GET       /your-bill                                     controllers.YourBillController.yourBill
 POST      /your-bill                                     controllers.YourBillController.yourBillSubmit
 
-GET        /upfront-payment                              controllers.UpfrontPaymentController.upfrontPayment
-POST       /upfront-payment                              controllers.UpfrontPaymentController.upfrontPaymentSubmit
+GET       /can-you-make-an-upfront-payment               controllers.UpfrontPaymentController.canYouMakeAnUpfrontPayment
+POST      /can-you-make-an-upfront-payment               controllers.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit
 GET        /upfront-payment-amount                       controllers.UpfrontPaymentController.upfrontPaymentAmount
 POST       /upfront-payment-amount                       controllers.UpfrontPaymentController.upfrontPaymentAmountSubmit
 GET        /upfront-payment-summary                      controllers.UpfrontPaymentController.upfrontSummary()

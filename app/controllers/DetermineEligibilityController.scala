@@ -34,11 +34,10 @@ package controllers
 
 import _root_.actions.Actions
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
-import essttp.journey.JourneyConnector
 import essttp.journey.model.Journey
 import essttp.journey.model.Journey.HasEligibilityCheckResult
 import play.api.mvc._
-import services.TtpService
+import services.{JourneyService, TtpService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.{JourneyLogger, Logging}
 
@@ -47,10 +46,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class DetermineEligibilityController @Inject() (
-    as:               Actions,
-    mcc:              MessagesControllerComponents,
-    ttpService:       TtpService,
-    journeyConnector: JourneyConnector
+    as:             Actions,
+    mcc:            MessagesControllerComponents,
+    ttpService:     TtpService,
+    journeyService: JourneyService
 )(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
@@ -68,7 +67,7 @@ class DetermineEligibilityController @Inject() (
   def determineEligibilityAndUpdateJourney(journey: Journey.Stages.AfterComputedTaxId)(implicit request: Request[_]): Future[Result] = {
     for {
       eligibilityCheckResult <- ttpService.determineEligibility(journey)
-      _ <- journeyConnector.updateEligibilityCheckResult(journey.id, eligibilityCheckResult)
+      _ <- journeyService.updateEligibilityCheckResult(journey.id, eligibilityCheckResult)
     } yield EligibilityRouter.nextPage(eligibilityCheckResult)
   }
 
