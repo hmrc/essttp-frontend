@@ -23,7 +23,7 @@
 @import models.EligibilityErrors
 @import essttp.journey.model.Origins
 @import testOnly.formsmodel.Enrolments
-@import testOnly.formsmodel.SignInAs
+@import testOnly.formsmodel.SignInAsFormValue
 
 @this(
         testOnlyLayout: TestOnlyLayout,
@@ -97,15 +97,15 @@
     items = Seq(
         RadioItem(
             content = Text("As an Organisation"),
-            value = Some(SignInAs.Organisation.entryName)
+            value = Some(SignInAsFormValue.Organisation.entryName)
         ),
         RadioItem(
             content = Text("As an Individual"),
-            value = Some(SignInAs.Individual.entryName)
+            value = Some(SignInAsFormValue.Individual.entryName)
         ),
         RadioItem(
             content = Text("Not signed in"),
-            value = Some(SignInAs.NoSignIn.entryName)
+            value = Some(SignInAsFormValue.NoSignIn.entryName)
         )
     ),
     classes = "govuk-radios--small"

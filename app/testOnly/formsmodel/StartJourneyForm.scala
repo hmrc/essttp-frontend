@@ -28,8 +28,8 @@ import util.EnumFormatter
 import scala.util.Random
 
 final case class StartJourneyForm(
-    signInAs:          SignInAs,
-    enrolments:        Seq[Enrolment],
+    signInAs:          SignInAsFormValue,
+    enrolments:        Seq[EnrolmentFormValue],
     origin:            Origin,
     eligibilityErrors: Seq[EligibilityError]
 ) {
@@ -41,13 +41,13 @@ object StartJourneyForm {
 
   def form(implicit language: Language): Form[StartJourneyForm] = {
 
-    val signInMapping: Mapping[SignInAs] = Forms.of(EnumFormatter.format(
-      enum                    = SignInAs,
+    val signInMapping: Mapping[SignInAsFormValue] = Forms.of(EnumFormatter.format(
+      enum                    = SignInAsFormValue,
       errorMessageIfMissing   = Messages.`Select how to be signed in`.show,
       errorMessageIfEnumError = Messages.`Select how to be signed in`.show
     ))
 
-    val enrolmentsMapping: Mapping[Seq[Enrolment]] = seq(
+    val enrolmentsMapping: Mapping[Seq[EnrolmentFormValue]] = seq(
       Forms.of(EnumFormatter.format(enum = Enrolments))
     )
 

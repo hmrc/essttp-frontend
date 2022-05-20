@@ -16,14 +16,19 @@
 
 package testOnly.formsmodel
 
-import enumeratum.{Enum, EnumEntry}
+import enumeratum._
 
 import scala.collection.immutable
 
-sealed trait Enrolment extends EnumEntry
+sealed trait SignInAsFormValue extends EnumEntry
 
-object Enrolments extends Enum[Enrolment] {
-  case object Epaye extends Enrolment
-  case object Vat extends Enrolment
-  override def values: immutable.IndexedSeq[Enrolment] = findValues
+object SignInAsFormValue extends Enum[SignInAsFormValue] {
+
+  case object Individual extends SignInAsFormValue
+
+  case object Organisation extends SignInAsFormValue
+
+  case object NoSignIn extends SignInAsFormValue
+
+  override def values: immutable.IndexedSeq[SignInAsFormValue] = findValues
 }

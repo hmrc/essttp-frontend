@@ -20,7 +20,7 @@
 @import play.api.data.Form
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import controllers.routes
-@import controllers.UpfrontPaymentController.CanMakeUpfrontPayment
+@import controllers.UpfrontPaymentController.CanUpfrontPaymentFormValue
 
 @this(
         layout: templates.Layout,
@@ -32,7 +32,7 @@
 )
 
 @(
-        form: Form[CanMakeUpfrontPayment],
+        form: Form[CanUpfrontPaymentFormValue],
         backUrl: Option[String] = None)(implicit
         request: Request[_]
 )
@@ -76,13 +76,13 @@
                 items = Seq(
                     RadioItem(
                         content = Text(Messages.UpfrontPayment.`Yes`.show),
-                        value = Some(CanMakeUpfrontPayment.Yes.entryName),
-                        checked = form.data.values.toList.contains(CanMakeUpfrontPayment.Yes.entryName)
+                        value = Some(CanUpfrontPaymentFormValue.Yes.entryName),
+                        checked = form.data.values.toList.contains(CanUpfrontPaymentFormValue.Yes.entryName)
                     ),
                     RadioItem(
                         content = Text(Messages.UpfrontPayment.`No`.show),
-                        value = Some(CanMakeUpfrontPayment.No.entryName),
-                        checked = form.data.values.toList.contains(CanMakeUpfrontPayment.No.entryName)
+                        value = Some(CanUpfrontPaymentFormValue.No.entryName),
+                        checked = form.data.values.toList.contains(CanUpfrontPaymentFormValue.No.entryName)
                     )
                 ),
                 classes = "govuk-radios--inline",

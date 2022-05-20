@@ -16,7 +16,7 @@
 
 package testOnly.testusermodel
 
-import testOnly.formsmodel.{Enrolments, SignInAs, StartJourneyForm}
+import testOnly.formsmodel.{Enrolments, SignInAsFormValue, StartJourneyForm}
 import uk.gov.hmrc.auth.core.{AffinityGroup, ConfidenceLevel}
 
 import scala.util.Random
@@ -57,9 +57,9 @@ object TestUser {
 
   def makeTestUser(form: StartJourneyForm): Option[TestUser] = {
     val maybeAffinityGroup = form.signInAs match {
-      case SignInAs.NoSignIn     => None
-      case SignInAs.Individual   => Some(AffinityGroup.Individual)
-      case SignInAs.Organisation => Some(AffinityGroup.Organisation)
+      case SignInAsFormValue.NoSignIn     => None
+      case SignInAsFormValue.Individual   => Some(AffinityGroup.Individual)
+      case SignInAsFormValue.Organisation => Some(AffinityGroup.Organisation)
     }
 
     maybeAffinityGroup.map { affinityGroup =>

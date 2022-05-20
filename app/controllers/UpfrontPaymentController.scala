@@ -18,7 +18,7 @@ package controllers
 
 import _root_.actions.Actions
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
-import controllers.UpfrontPaymentController.{CanMakeUpfrontPayment, form, upfrontPaymentAmountForm}
+import controllers.UpfrontPaymentController.{CanUpfrontPaymentFormValue, form, upfrontPaymentAmountForm}
 import enumeratum.Enum
 import essttp.journey.model.{Journey, Origins}
 import essttp.rootmodel.{AmountInPence, CanPayUpfront}
@@ -29,7 +29,7 @@ import play.api.data.Forms.{boolean, mapping, nonEmptyText}
 import play.api.data.{Form, Forms, Mapping}
 import play.api.mvc._
 import services.JourneyService
-import testOnly.formsmodel.SignInAs
+import testOnly.formsmodel.SignInAsFormValue
 import messages.Messages
 import requests.RequestSupport
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -75,7 +75,7 @@ class UpfrontPaymentController @Inject() (
       .bindFromRequest()
       .fold(
         formWithErrors => Future.successful(Ok(views.canYouMakeAnUpFrontPayment(formWithErrors))),
-        (canMakeUpfrontPayment: CanMakeUpfrontPayment) => {
+        (canMakeUpfrontPayment: CanUpfrontPaymentFormValue) => {
           val canPayUpfront: CanPayUpfront = canMakeUpfrontPayment.asCanPayUpfront
           val pageToRedirectTo: Call =
             if (canPayUpfront.value) {
@@ -121,22 +121,22 @@ class UpfrontPaymentController @Inject() (
 
 object UpfrontPaymentController {
 
-  sealed trait CanMakeUpfrontPayment extends enumeratum.EnumEntry {
+  sealed trait CanUpfrontPaymentFormValue extends enumeratum.EnumEntry {
     def asCanPayUpfront: CanPayUpfront = this match {
-      case CanMakeUpfrontPayment.Yes => CanPayUpfront(true)
-      case CanMakeUpfrontPayment.No  => CanPayUpfront(false)
+      case CanUpfrontPaymentFormValue.Yes => CanPayUpfront(true)
+      case CanUpfrontPaymentFormValue.No  => CanPayUpfront(false)
     }
   }
-  object CanMakeUpfrontPayment extends Enum[CanMakeUpfrontPayment] {
-    case object Yes extends CanMakeUpfrontPayment
-    case object No extends CanMakeUpfrontPayment
-    override def values: immutable.IndexedSeq[CanMakeUpfrontPayment] = findValues
+  object CanUpfrontPaymentFormValue extends Enum[CanUpfrontPaymentFormValue] {
+    case object Yes extends CanUpfrontPaymentFormValue
+    case object No extends CanUpfrontPaymentFormValue
+    override def values: immutable.IndexedSeq[CanUpfrontPaymentFormValue] = findValues
   }
 
-  def form(implicit language: Language): Form[CanMakeUpfrontPayment] = {
+  def form(implicit language: Language): Form[CanUpfrontPaymentFormValue] = {
 
-    val canMakeUpfrontPaymentMapping: Mapping[CanMakeUpfrontPayment] = Forms.of(EnumFormatter.format(
-      enum                    = CanMakeUpfrontPayment,
+    val canMakeUpfrontPaymentMapping: Mapping[CanUpfrontPaymentFormValue] = Forms.of(EnumFormatter.format(
+      enum                    = CanUpfrontPaymentFormValue,
       errorMessageIfMissing   = Messages.UpfrontPayment.`Select yes if you can make an upfront payment`.show,
       errorMessageIfEnumError = Messages.UpfrontPayment.`Select yes if you can make an upfront payment`.show
     ))
