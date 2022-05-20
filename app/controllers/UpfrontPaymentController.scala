@@ -18,20 +18,26 @@ package controllers
 
 import _root_.actions.Actions
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
-import controllers.UpfrontPaymentController.{canYouMakeAnUpfrontPaymentQuestionForm, upfrontPaymentAmountForm}
+import controllers.UpfrontPaymentController.{CanMakeUpfrontPayment, form, upfrontPaymentAmountForm}
+import enumeratum.Enum
 import essttp.journey.model.{Journey, Origins}
 import essttp.rootmodel.{AmountInPence, CanPayUpfront}
+import langswitch.Language
 import models.MoneyUtil.amountOfMoneyFormatter
-import models.{MockJourney, UserAnswers}
-import play.api.data.Forms.{mapping, nonEmptyText}
-import play.api.data.{Form, Forms}
+import models.{EligibilityError, MockJourney, UserAnswers}
+import play.api.data.Forms.{boolean, mapping, nonEmptyText}
+import play.api.data.{Form, Forms, Mapping}
 import play.api.mvc._
 import services.JourneyService
+import testOnly.formsmodel.SignInAs
+import messages.Messages
+import requests.RequestSupport
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import util.Logging
+import util.{EnumFormatter, Logging}
 import views.Views
 
 import javax.inject.{Inject, Singleton}
+import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -39,10 +45,13 @@ class UpfrontPaymentController @Inject() (
     as:             Actions,
     mcc:            MessagesControllerComponents,
     views:          Views,
-    journeyService: JourneyService
+    journeyService: JourneyService,
+    requestSupport: RequestSupport
 )(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
+
+  import requestSupport._
 
   val canYouMakeAnUpfrontPayment: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     request.journey match {
@@ -58,16 +67,16 @@ class UpfrontPaymentController @Inject() (
       case Origins.Epaye.DetachedUrl => Some(routes.YourBillController.yourBill().url)
       case Origins.Epaye.GovUk       => Some(routes.YourBillController.yourBill().url)
     }
-    Ok(views.canYouMakeAnUpFrontPayment(canYouMakeAnUpfrontPaymentQuestionForm, backUrl))
+    Ok(views.canYouMakeAnUpFrontPayment(form, backUrl))
   }
 
   val canYouMakeAnUpfrontPaymentSubmit: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
-    canYouMakeAnUpfrontPaymentQuestionForm
+    form
       .bindFromRequest()
       .fold(
         formWithErrors => Future.successful(Ok(views.canYouMakeAnUpFrontPayment(formWithErrors))),
-        (validFormYesOrNo: String) => {
-          val canPayUpfront: CanPayUpfront = UpfrontPaymentController.formToCanPayUpfront(validFormYesOrNo)
+        (canMakeUpfrontPayment: CanMakeUpfrontPayment) => {
+          val canPayUpfront: CanPayUpfront = canMakeUpfrontPayment.asCanPayUpfront
           val pageToRedirectTo: Call =
             if (canPayUpfront.value) {
               routes.UpfrontPaymentController.upfrontPaymentAmount()
@@ -112,18 +121,37 @@ class UpfrontPaymentController @Inject() (
 
 object UpfrontPaymentController {
 
-  def canYouMakeAnUpfrontPaymentQuestionForm: Form[String] = Form(
-    mapping(
-      "CanYouMakeAnUpFrontPayment" -> nonEmptyText
-    )(identity)(Some(_))
-  )
+  sealed trait CanMakeUpfrontPayment extends enumeratum.EnumEntry {
+    def asCanPayUpfront: CanPayUpfront = this match {
+      case CanMakeUpfrontPayment.Yes => CanPayUpfront(true)
+      case CanMakeUpfrontPayment.No  => CanPayUpfront(false)
+    }
+  }
+  object CanMakeUpfrontPayment extends Enum[CanMakeUpfrontPayment] {
+    case object Yes extends CanMakeUpfrontPayment
+    case object No extends CanMakeUpfrontPayment
+    override def values: immutable.IndexedSeq[CanMakeUpfrontPayment] = findValues
+  }
+
+  def form(implicit language: Language): Form[CanMakeUpfrontPayment] = {
+
+    val canMakeUpfrontPaymentMapping: Mapping[CanMakeUpfrontPayment] = Forms.of(EnumFormatter.format(
+      enum                    = CanMakeUpfrontPayment,
+      errorMessageIfMissing   = Messages.UpfrontPayment.`Select yes if you can make an upfront payment`.show,
+      errorMessageIfEnumError = Messages.UpfrontPayment.`Select yes if you can make an upfront payment`.show
+    ))
+
+    Form(
+      mapping(
+        "CanYouMakeAnUpFrontPayment" -> canMakeUpfrontPaymentMapping
+      )(identity)(Some(_))
+    )
+  }
 
   def upfrontPaymentAmountForm(journey: MockJourney): Form[BigDecimal] = Form(
     mapping(
       "UpfrontPaymentAmount" -> Forms.of(amountOfMoneyFormatter(AmountInPence(100L).inPounds > _, journey.qualifyingDebt.inPounds < _))
     )(identity)(Some(_))
   )
-
-  val formToCanPayUpfront: String => CanPayUpfront = formValue => CanPayUpfront(formValue.equalsIgnoreCase("yes"))
 
 }

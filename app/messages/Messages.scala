@@ -245,9 +245,9 @@ object Messages {
       english = "No"
     )
 
-    def getError(key: String): Message = key match {
-      case "error.required" => Message(english = "Select yes if you can make an upfront payment")
-    }
+    val `Select yes if you can make an upfront payment`: Message = Message(
+      english = "Select yes if you can make an upfront payment"
+    )
 
   }
 
