@@ -57,7 +57,7 @@ class YourBillController @Inject() (
     Ok(views.yourBillIs(YourBillController.overDuePayments(journey.eligibilityCheckResult), backUrl))
   }
 
-  val yourBillSubmit: Action[AnyContent] = as.default { implicit request =>
+  val yourBillSubmit: Action[AnyContent] = as.eligibleJourneyAction { _ =>
     Redirect(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment())
   }
 

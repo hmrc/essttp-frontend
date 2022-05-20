@@ -57,7 +57,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
     val fakeRequest = FakeRequest(
       method = "POST",
-      path = "/can-you-make-an-upfront-payment"
+      path   = "/can-you-make-an-upfront-payment"
     ).withAuthToken()
       .withSession(SessionKeys.sessionId -> "IamATestSessionId")
       .withFormUrlEncodedBody(("CanYouMakeAnUpFrontPayment", "Yes"))
@@ -74,7 +74,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
     val fakeRequest = FakeRequest(
       method = "POST",
-      path = "/can-you-make-an-upfront-payment"
+      path   = "/can-you-make-an-upfront-payment"
     ).withAuthToken()
       .withSession(SessionKeys.sessionId -> "IamATestSessionId")
       .withFormUrlEncodedBody(("CanYouMakeAnUpFrontPayment", "No"))

@@ -23,7 +23,7 @@ import essttp.journey.model.{Journey, Origins}
 import essttp.rootmodel.{AmountInPence, CanPayUpfront}
 import models.MoneyUtil.amountOfMoneyFormatter
 import models.{MockJourney, UserAnswers}
-import play.api.data.Forms.{boolean, mapping, nonEmptyText}
+import play.api.data.Forms.{mapping, nonEmptyText}
 import play.api.data.{Form, Forms}
 import play.api.mvc._
 import services.JourneyService

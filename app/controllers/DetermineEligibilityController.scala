@@ -46,10 +46,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class DetermineEligibilityController @Inject() (
-    as:               Actions,
-    mcc:              MessagesControllerComponents,
-    ttpService:       TtpService,
-    journeyService:   JourneyService
+    as:             Actions,
+    mcc:            MessagesControllerComponents,
+    ttpService:     TtpService,
+    journeyService: JourneyService
 )(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
