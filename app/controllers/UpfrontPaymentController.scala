@@ -80,12 +80,12 @@ class UpfrontPaymentController @Inject() (
       )
   }
 
-  val upfrontPaymentAmount: Action[AnyContent] = as.default.async { implicit request =>
+  val upfrontPaymentAmount: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     val mockJourney = MockJourney(userAnswers = UserAnswers.empty.copy(hasUpfrontPayment = Some(true)))
     Future.successful(Ok(views.upfrontPaymentAmountPage(upfrontPaymentAmountForm(mockJourney), mockJourney.qualifyingDebt, AmountInPence(100L))))
   }
 
-  val upfrontPaymentAmountSubmit: Action[AnyContent] = as.default.async { implicit request =>
+  val upfrontPaymentAmountSubmit: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     val mockJourney = MockJourney(userAnswers = UserAnswers.empty)
     upfrontPaymentAmountForm(mockJourney)
       .bindFromRequest()
@@ -101,7 +101,7 @@ class UpfrontPaymentController @Inject() (
       )
   }
 
-  val upfrontSummary: Action[AnyContent] = as.default.async { implicit request =>
+  val upfrontSummary: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     val mockUserAnswers = UserAnswers.empty.copy(
       hasUpfrontPayment = Some(true),
       upfrontAmount     = Some(AmountInPence(10000L))

@@ -15,12 +15,11 @@
  *@
 
 @import play.api.mvc.Request
-@import requests.RequestSupport
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-@import views.html.templates.Layout
+@import requests.RequestSupport
 
 @this(
-        layout: Layout,
+        testOnlyLayout: TestOnlyLayout,
         govukButton: GovukButton,
         formWithCSRF: FormWithCSRF,
         govukRadios: GovukRadios,
@@ -29,17 +28,15 @@
         govukCheckboxes: GovukCheckboxes,
         govukErrorSummary: GovukErrorSummary
 )
-
 @()(implicit
         request: Request[_]
 )
-
 
 @title = @{
     "I am BTA Page"
 }
 
-@layout(pageTitle = Some(title)) {
+@testOnlyLayout(pageTitle = Some(title)) {
 
     <h1 class="govuk-heading-xl">@title</h1>
     <p class="govuk-body">Set up a payment plan if you cannot pay in full</p>

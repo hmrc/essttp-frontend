@@ -23,7 +23,6 @@ import essttp.journey.model.ttp.{ChargeTypeAssessment, DisallowedChargeLocks, El
 import essttp.rootmodel.AmountInPence
 import models.{InvoicePeriod, OverDuePayments, OverduePayment}
 import play.api.mvc._
-import services.TtpService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.Views
@@ -31,15 +30,13 @@ import views.Views
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class YourBillController @Inject() (
-    as:         Actions,
-    mcc:        MessagesControllerComponents,
-    ttpService: TtpService,
-    views:      Views
-)(implicit ec: ExecutionContext)
+    as:    Actions,
+    mcc:   MessagesControllerComponents,
+    views: Views
+)
   extends FrontendController(mcc)
   with Logging {
 

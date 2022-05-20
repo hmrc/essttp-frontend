@@ -16,9 +16,7 @@
 
 package models
 
-import enumeratum.{Enum, EnumEntry}
-import models.EligibilityErrors.findValues
-import play.api.libs.json.Format
+import enumeratum.EnumEntry
 import play.api.libs.functional.syntax._
 import enumeratum.Enum
 import play.api.libs.json.Format

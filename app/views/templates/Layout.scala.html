@@ -20,7 +20,9 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
 
-@import play.api.mvc.{Request}
+@import actionsmodel.JourneyRequest
+@import essttp.rootmodel.TaxRegime
+@import play.api.mvc.Request
 @import play.twirl.api.Html
 
 @import requests.RequestSupport
@@ -41,13 +43,15 @@
         requestSupport: RequestSupport,
         languageSelection: views.html.partials.language_selection
 )
+
 @(
   pageTitle: Option[String] = None,
   headBlock: Option[Html] = None,
   scriptsBlock: Option[Html] = None,
   backUrl: Option[String] = None,
   hasErrors: Boolean = false,
-  showSignOutLink: Boolean = true)(
+  showSignOutLink: Boolean = true
+)(
   contentBlock: Html)(implicit
   request: Request[_]
 )
@@ -90,30 +94,40 @@
           govukBackLink(BackLink(href = url, attributes = Map("id" -> "back")))
         }
       }
-
-
     }
 
     @content = {
-
-
-
       <div class="govuk-!-margin-bottom-6">
       @contentBlock
       </div>
 
-
     @hmrcReportTechnicalIssueHelper()
   }
 
-  @serviceNameAndHeading = @{pageTitle.fold(Messages.ServicePhase.`Set up a payment plan`.show)(t => s"""$t - ${Messages.ServicePhase.`Set up a payment plan`.show}""")}
-  @govTitle = @{serviceNameAndHeading + " - GOV.UK"}
+    @serviceName = @{
+        (request: AnyRef) match {
+          case r: JourneyRequest[_] =>
+              r.journey.taxRegime match {
+                  case TaxRegime.Epaye => Messages.ServicePhase.`Set up an Employers' PAYE payment plan`.show
+                  case TaxRegime.Vat => sys.error("VAT not handled yet")
+              }
+
+          case other =>
+              sys.error(s"Expected JourneyRequest for non-test-only page but got ${other.getClass.getSimpleName}")
+      }
+    }
+
+  @serviceNameAndTitle = @{
+      pageTitle.fold(serviceName)(t => s"""$t - $serviceName""")
+  }
+
+  @govTitle = @{serviceNameAndTitle + " - GOV.UK"}
   @documentTitle = @{if(hasErrors) { Messages.ErrorMessages.`Error`.show + " " + govTitle } else { govTitle }}
 
   @govukLayout(
     pageTitle = Some(documentTitle),
     headBlock = Some(hmrcHead(headBlock = Some(head), nonce = CSPNonce.get)),
-    headerBlock = Some(hmrcStandardHeader(serviceName = Some(Messages.ServicePhase.`Set up a payment plan`.show), signOutUrl = if(showSignOut) Some(appConfig.Urls.signOutUrl) else None)),
+    headerBlock = Some(hmrcStandardHeader(serviceName = Some(serviceName), signOutUrl = if(showSignOut) Some(appConfig.Urls.signOutUrl) else None)),
     scriptsBlock = Some(hmrcScripts(scriptsBlock = Some(scripts), nonce = CSPNonce.get)),
     beforeContentBlock = Some(beforeContentBlock),
     footerBlock = Some(hmrcStandardFooter())

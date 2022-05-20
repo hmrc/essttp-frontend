@@ -212,10 +212,7 @@ trait CustomViewMatchers extends Matchers {
       }
     }
 
-  def containLink(withHref: String)(
-      implicit
-      messagesProvider: MessagesProvider
-  ): Matcher[Html] =
+  def containLink(withHref: String): Matcher[Html] =
     new Matcher[Html] {
       override def apply(html: Html): MatchResult = {
         val doc = Jsoup.parse(html.toString)

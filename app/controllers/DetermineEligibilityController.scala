@@ -33,29 +33,23 @@
 package controllers
 
 import _root_.actions.Actions
-import controllers.JourneyIncorrectStateRouter.{logErrorAndRouteToDefaultPage, logErrorAndRouteToDefaultPageF}
-import essttp.journey.JourneyConnector
+import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import essttp.journey.model.Journey
 import essttp.journey.model.Journey.HasEligibilityCheckResult
-import essttp.journey.model.ttp.EligibilityCheckResult
-import models.EligibilityErrors
 import play.api.mvc._
 import services.{JourneyService, TtpService}
-import models.EligibilityErrors._
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.{JourneyLogger, Logging}
-import views.Views
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class DetermineEligibilityController @Inject() (
-    as:             Actions,
-    mcc:            MessagesControllerComponents,
-    ttpService:     TtpService,
-    journeyService: JourneyService,
-    views:          Views
+    as:               Actions,
+    mcc:              MessagesControllerComponents,
+    ttpService:       TtpService,
+    journeyService:   JourneyService
 )(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {

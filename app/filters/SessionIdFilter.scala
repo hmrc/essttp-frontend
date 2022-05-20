@@ -20,19 +20,19 @@ import akka.stream.Materializer
 import play.api.http.Status
 import play.api.mvc
 import play.api.mvc.Results._
-import play.api.mvc.{Filter, RequestHeader, Results}
+import play.api.mvc.{Filter, RequestHeader}
 import uk.gov.hmrc.http.SessionKeys
 import util.JourneyLogger
 
 import java.util.UUID
 import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 /**
  * This filter adds "sessionId" entry to the session.
  * The "sessionId" is required to make SPJ call in pay-api.
  */
-class SessionIdFilter @Inject() (implicit val mat: Materializer, ex: ExecutionContext) extends Filter {
+class SessionIdFilter @Inject() (implicit val mat: Materializer) extends Filter {
 
   private def requiresSession(rh: RequestHeader): Boolean = SessionIdFilter.requiresSession(rh)
 
