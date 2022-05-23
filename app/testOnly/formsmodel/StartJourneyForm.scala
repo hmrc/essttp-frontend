@@ -21,13 +21,11 @@ import langswitch.Language
 import models.{EligibilityError, EligibilityErrors}
 import play.api.data.{Form, Forms, Mapping}
 import play.api.data.Forms.{mapping, seq}
-import play.api.mvc.Request
 import testOnly.messages.Messages
 import testOnly.testusermodel.RandomDataGenerator
 import util.EnumFormatter
 
 import scala.util.Random
-import requests.RequestSupport._
 
 final case class StartJourneyForm(
     signInAs:          SignInAs,
@@ -43,7 +41,6 @@ object StartJourneyForm {
 
   def form(implicit language: Language): Form[StartJourneyForm] = {
 
-    val legacySignInMapping: Mapping[SignInAs] = enumeratum.Forms.enum(SignInAs)
     val signInMapping: Mapping[SignInAs] = Forms.of(EnumFormatter.format(
       enum                    = SignInAs,
       errorMessageIfMissing   = Messages.`Select how to be signed in`.show,

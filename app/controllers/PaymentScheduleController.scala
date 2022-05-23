@@ -39,7 +39,7 @@ class PaymentScheduleController @Inject() (
 ) extends FrontendController(mcc)
   with Logging {
 
-  val checkPaymentSchedule: Action[AnyContent] = as.default.async { implicit request =>
+  val checkPaymentSchedule: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     val j: MockJourney = MockJourney(userAnswers = UserAnswers.empty.copy(paymentDay  = Some("28"), monthsToPay = Some(InstalmentOption(
       numberOfMonths       = 4,
       amountToPayEachMonth = AmountInPence(50000L),

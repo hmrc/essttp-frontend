@@ -20,11 +20,11 @@ import essttp.journey.model.ttp.EligibilityCheckResult
 import models.EligibilityErrors
 import models.EligibilityErrors.{DisallowedChargeLocks, EligibleChargeType, ExceedsMaxDebtAge, ExistingTtp, HasRlsOnAddress, IsLessThanMinDebtAllowance, IsMoreThanMaxDebtAllowance, MarkedAsInsolvent, MissingFiledReturns, MultipleReasons}
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{Call, Request, Result}
+import play.api.mvc.{Call, Result}
 
 object EligibilityRouter {
 
-  def nextPage(eligibilityResult: EligibilityCheckResult)(implicit request: Request[_]): Result = {
+  def nextPage(eligibilityResult: EligibilityCheckResult): Result = {
     val nextUrl: Call = if (eligibilityResult.isEligible) {
       routes.YourBillController.yourBill()
     } else {

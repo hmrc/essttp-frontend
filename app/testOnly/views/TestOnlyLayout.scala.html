@@ -1,0 +1,111 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.AppConfig
+@import views.html.helper.CSPNonce
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
+
+@import actionsmodel.JourneyRequest
+@import essttp.rootmodel.TaxRegime
+@import play.api.mvc.Request
+@import play.twirl.api.Html
+
+@import requests.RequestSupport
+@import messages.Messages
+
+@this(
+        appConfig: AppConfig,
+        govukLayout: GovukLayout,
+        govukPhaseBanner : GovukPhaseBanner,
+        govukBackLink: GovukBackLink,
+        hmrcHead: HmrcHead,
+        hmrcStandardHeader: HmrcStandardHeader,
+        hmrcStandardFooter: HmrcStandardFooter,
+        hmrcScripts: HmrcScripts,
+        requestSupport: RequestSupport
+)
+
+@(
+        pageTitle: Option[String] = None,
+        headBlock: Option[Html] = None,
+        scriptsBlock: Option[Html] = None,
+        hasErrors: Boolean = false,
+        showSignOutLink: Boolean = true
+)(
+        contentBlock: Html)(implicit
+        request: Request[_]
+)
+
+@import requestSupport._
+@showSignOut = @{RequestSupport.isLoggedIn}
+
+@head = {
+@headBlock.getOrElse(Html(""))
+
+@Html(s"""<link rel="stylesheet" media="all" href="${controllers.routes.Assets.versioned("stylesheets/application.css")}" ${CSPNonce.attr}>""")
+}
+
+@scripts = {
+@scriptsBlock.getOrElse(Html(""))
+}
+
+@beforeContentBlock = {
+
+@govukPhaseBanner(PhaseBanner(
+    tag = Some(Tag(
+        content = Text(Messages.ServicePhase.beta.show)
+    )),
+    content = HtmlContent(Messages.ServicePhase.bannerText(appConfig.Urls.betaFeedbackUrl(request)).show)
+))
+
+
+}
+
+@content = {
+    <div class="govuk-!-margin-bottom-6">
+    @contentBlock
+    </div>
+}
+
+@serviceName = @{
+    (request: AnyRef) match {
+        case r: JourneyRequest[_] =>
+            r.journey.taxRegime match {
+                case TaxRegime.Epaye => Messages.ServicePhase.`Set up an Employers' PAYE payment plan`.show
+                case TaxRegime.Vat => sys.error("VAT not handled yet")
+            }
+
+        case other =>
+            Messages.ServicePhase.`Set up a payment plan`.show
+    }
+}
+
+@serviceNameAndTitle = @{
+    pageTitle.fold(serviceName)(t => s"""$t - $serviceName""")
+}
+
+@govTitle = @{serviceNameAndTitle + " - GOV.UK"}
+@documentTitle = @{if(hasErrors) { Messages.ErrorMessages.`Error`.show + " " + govTitle } else { govTitle }}
+
+@govukLayout(
+    pageTitle = Some(documentTitle),
+    headBlock = Some(hmrcHead(headBlock = Some(head), nonce = CSPNonce.get)),
+    headerBlock = Some(hmrcStandardHeader(serviceName = Some(serviceName), signOutUrl = if(showSignOut) Some(appConfig.Urls.signOutUrl) else None)),
+    scriptsBlock = Some(hmrcScripts(scriptsBlock = Some(scripts), nonce = CSPNonce.get)),
+    beforeContentBlock = Some(beforeContentBlock),
+    footerBlock = Some(hmrcStandardFooter())
+)(content)

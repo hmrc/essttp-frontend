@@ -69,7 +69,7 @@ class StartJourneyController @Inject() (
       )
   }
 
-  private def startJourney(startJourneyForm: StartJourneyForm)(implicit request: RequestHeader): Future[Result] = {
+  private def startJourney(startJourneyForm: StartJourneyForm): Future[Result] = {
     implicit val hc: HeaderCarrier = HeaderCarrier()
     for {
       _ <- essttpStubConnector.primeStubs(makeEligibilityCheckResult(startJourneyForm))

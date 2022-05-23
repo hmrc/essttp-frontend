@@ -80,7 +80,7 @@ class DetermineTaxIdController @Inject() (
 
     for {
       empRef <- computeEmpRef
-      _ <- journeyService.UpdateTaxRef.updatePayeTaxId(journey.id, empRef)
+      _ <- journeyService.UpdateTaxRef.updateEpayeTaxId(journey.id, empRef)
     } yield ()
   }
 }

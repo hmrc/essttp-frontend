@@ -37,8 +37,8 @@ class JourneyService @Inject() (journeyConnector: JourneyConnector)(implicit ec:
   }
 
   object UpdateTaxRef {
-    //paye
-    def updatePayeTaxId(journeyId: JourneyId, empRef: EmpRef)(implicit requestHeader: RequestHeader): Future[Unit] = {
+    //epaye
+    def updateEpayeTaxId(journeyId: JourneyId, empRef: EmpRef)(implicit requestHeader: RequestHeader): Future[Unit] = {
       journeyConnector.updateTaxId(journeyId, empRef)
     }
     //vat

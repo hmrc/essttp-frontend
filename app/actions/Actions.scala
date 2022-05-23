@@ -18,13 +18,10 @@ package actions
 
 import actionsmodel.{AuthenticatedJourneyRequest, EligibleJourneyRequest, JourneyRequest}
 import controllers.{EligibilityRouter, JourneyIncorrectStateRouter}
-import controllers.support.RequestSupport.hc
 import essttp.journey.model.Journey
 import essttp.rootmodel.TaxRegime
-import play.api.Logger
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, _}
-import util.JourneyLogger
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -61,8 +58,6 @@ class Actions @Inject() (
       .andThen(filterForEligibleJourney)
 
   private def filterForEligibleJourney: ActionRefiner[AuthenticatedJourneyRequest, EligibleJourneyRequest] = new ActionRefiner[AuthenticatedJourneyRequest, EligibleJourneyRequest] {
-
-    private val logger = JourneyLogger
 
     override protected def refine[A](request: AuthenticatedJourneyRequest[A]): Future[Either[Result, EligibleJourneyRequest[A]]] = {
       implicit val r: Request[A] = request

@@ -40,12 +40,12 @@ class InstalmentsController @Inject() (
   extends FrontendController(mcc)
   with Logging {
 
-  val instalmentOptions: Action[AnyContent] = as.default.async { implicit request =>
+  val instalmentOptions: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     val mockJourney = MockJourney(userAnswers = UserAnswers.empty.copy(affordableAmount = Some(AmountInPence(50000L))))
     Future.successful(Ok(instalmentOptionsPage(instalmentsForm(), mockApi(mockJourney))))
   }
 
-  val instalmentOptionsSubmit: Action[AnyContent] = as.default.async { implicit request =>
+  val instalmentOptionsSubmit: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     val j: MockJourney = MockJourney()
     instalmentsForm()
       .bindFromRequest()

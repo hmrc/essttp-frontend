@@ -17,13 +17,9 @@
 package testOnly.controllers
 
 import _root_.actions.Actions
-import config.AppConfig
 import essttp.journey.JourneyConnector
 import play.api.libs.json.Json
 import play.api.mvc._
-import testOnly.AuthLoginApiService
-import testOnly.connectors.EssttpStubConnector
-import testOnly.views.html.TestOnlyStartPage
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 
@@ -32,13 +28,9 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class DebugJourneyController @Inject() (
-    as:                  Actions,
-    appConfig:           AppConfig,
-    essttpStubConnector: EssttpStubConnector,
-    mcc:                 MessagesControllerComponents,
-    testOnlyStartPage:   TestOnlyStartPage,
-    journeyConnector:    JourneyConnector,
-    loginService:        AuthLoginApiService
+    as:               Actions,
+    mcc:              MessagesControllerComponents,
+    journeyConnector: JourneyConnector
 )(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {

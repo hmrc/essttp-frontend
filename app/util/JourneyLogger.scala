@@ -17,7 +17,6 @@
 package util
 
 import actionsmodel.JourneyRequest
-import essttp.journey.model.JourneyId
 import essttp.rootmodel.TraceId
 import essttp.utils.RequestSupport._
 import play.api.Logger
@@ -90,11 +89,6 @@ object JourneyLogger {
     }
   }
 
-  private def makeRichMessage(message: => String, journeyId: JourneyId)(implicit request: RequestHeader): String = {
-    val traceId: TraceId = TraceId(journeyId)
-    s"$message $traceId $journeyId $context "
-  }
-
   private sealed trait LogLevel
 
   private case object Debug extends LogLevel
@@ -104,24 +98,6 @@ object JourneyLogger {
   private case object Warn extends LogLevel
 
   private case object Error extends LogLevel
-
-  private def logMessage(message: => String, ex: Throwable, level: LogLevel, journeyId: JourneyId)(implicit request: RequestHeader): Unit = {
-    level match {
-      case Debug => log.debug(makeRichMessage(message, journeyId), ex)
-      case Info  => log.info(makeRichMessage(message, journeyId), ex)
-      case Warn  => log.warn(makeRichMessage(message, journeyId), ex)
-      case Error => log.error(makeRichMessage(message, journeyId), ex)
-    }
-  }
-
-  private def logMessage(message: => String, level: LogLevel, journeyId: JourneyId)(implicit request: RequestHeader): Unit = {
-    level match {
-      case Debug => log.debug(makeRichMessage(message, journeyId))
-      case Info  => log.info(makeRichMessage(message, journeyId))
-      case Warn  => log.warn(makeRichMessage(message, journeyId))
-      case Error => log.error(makeRichMessage(message, journeyId))
-    }
-  }
 
   private def logMessage(message: => String, level: LogLevel)(implicit request: RequestHeader): Unit = {
     lazy val richMessage = makeRichMessage(message)

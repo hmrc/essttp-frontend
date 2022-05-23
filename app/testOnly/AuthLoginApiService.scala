@@ -23,7 +23,7 @@ import play.api.mvc.Session
 import testOnly.testusermodel.{AuthToken, TestUser}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, SessionKeys}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.http.HttpReads.Implicits
+import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
 import java.time.Clock
 import java.util.UUID.randomUUID
 import scala.concurrent.{ExecutionContext, Future}
