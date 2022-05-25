@@ -37,7 +37,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
   private val expectedH1: String = "Can you make an upfront payment?"
   private val expectedPageTitle: String = s"$expectedH1 - $expectedServiceName - GOV.UK"
   private val expectedPageHint: String =
-    "Your monthly payments will be lower if you can make an upfront payment. This payment will be taken from your bank account within 7 working days."
+    "Your monthly payments will be lower if you can make an upfront payment. This payment will be taken from your bank account within 10 working days."
 
   "GET /can-you-make-an-upfront-payment" - {
     "return 200 and the can you make an upfront payment page" in {
