@@ -33,7 +33,6 @@
 package controllers
 
 import _root_.actions.{Actions, EnrolmentDef}
-import essttp.journey.JourneyConnector
 import essttp.journey.model.Journey
 import essttp.rootmodel.EmpRef
 import play.api.mvc._

@@ -28,11 +28,11 @@ object JourneyIncorrectStateRouter {
   def logErrorAndRouteToDefaultPageF(journey: Journey)(implicit request: Request[_]): Future[Result] = Future.successful(logErrorAndRouteToDefaultPage(journey))
 
   def logErrorAndRouteToDefaultPage(journey: Journey)(implicit request: Request[_]): Result = {
-
     val defaultEndpoint = journey match {
       case _: Journey.Stages.AfterStarted          => Redirect(routes.LandingController.landingPage())
       case _: Journey.Stages.AfterComputedTaxId    => Redirect(routes.DetermineEligibilityController.determineEligibility())
       case j: Journey.Stages.AfterEligibilityCheck => EligibilityRouter.nextPage(j.eligibilityCheckResult)
+      case _: Journey.Stages.AfterCanPayUpfront    => Redirect(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment())
     }
 
     JourneyLogger.error(

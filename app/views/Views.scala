@@ -18,7 +18,7 @@ package views
 
 import views.html.EPaye.EPayeLanding
 import views.html.EPaye.ineligible.{Ineligible, NotEnrolled}
-import views.html.{CanYouMakeAnUpfrontPayment, UpfrontPaymentAmount, UpfrontSummary, YourBillIs}
+import views.html.{CanYouMakeAnUpfrontPayment, UpfrontPaymentAmountPage, UpfrontSummary, YourBillIs}
 import views.partials.Partials
 
 import javax.inject.Inject
@@ -30,6 +30,6 @@ class Views @Inject() (
     val ineligible:                 Ineligible,
     val partials:                   Partials,
     val canYouMakeAnUpFrontPayment: CanYouMakeAnUpfrontPayment,
-    val upfrontPaymentAmountPage:   UpfrontPaymentAmount,
+    val upfrontPaymentAmountPage:   UpfrontPaymentAmountPage,
     val upfrontSummaryPage:         UpfrontSummary
 )
