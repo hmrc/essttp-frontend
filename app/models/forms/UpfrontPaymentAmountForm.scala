@@ -19,24 +19,28 @@ package models.forms
 import essttp.journey.model.Journey
 import essttp.journey.model.ttp.DebtTotalAmount
 import essttp.rootmodel.AmountInPence
+import essttp.utils.Errors
 import models.MoneyUtil.amountOfMoneyFormatter
 import play.api.data.Forms.mapping
 import play.api.data.{Form, Forms}
 
 object UpfrontPaymentAmountForm {
-  def form(journey: Journey): Form[BigDecimal] = {
+  def form(journey: Journey, minimumPaymentAmount: AmountInPence): Form[BigDecimal] = {
     val maximumDebtAmount = formHelperToDeriveDebtAmount(journey)
     Form(
       mapping(
         "UpfrontPaymentAmount" -> Forms.of(
-          amountOfMoneyFormatter(AmountInPence(100L).inPounds > _, AmountInPence(maximumDebtAmount.value).inPounds < _)
+          amountOfMoneyFormatter(minimumPaymentAmount.inPounds > _, AmountInPence(maximumDebtAmount.value).inPounds < _)
         )
       )(identity)(Some(_))
     )
   }
 
   def formHelperToDeriveDebtAmount(journey: Journey): DebtTotalAmount = journey match {
-    case j: Journey.Epaye.AfterCanPayUpfront => j.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).head
+    case j: Journey.BeforeEligibilityChecked =>
+      Errors.throwBadRequestException(s"This should never happen, user should have an eligibilityCheck by now, investigate journey: [$j]")
+    //    case j: Journey.Stages.AnsweredCanPayUpfront => j.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).head
+    case j: Journey.AfterEligibilityChecked => j.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).head
   }
 
 }

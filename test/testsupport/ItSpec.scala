@@ -45,7 +45,8 @@ class ItSpec
   protected lazy val configMap: Map[String, Any] = Map(
     "microservice.services.auth.port" -> WireMockSupport.port,
     "microservice.services.essttp-backend.port" -> WireMockSupport.port,
-    "microservice.services.ttp.port" -> WireMockSupport.port
+    "microservice.services.ttp.port" -> WireMockSupport.port,
+    "journeyVariables.minimumUpfrontPaymentAmountInPence" -> 100L
   ) ++ configOverrides
 
   //in tests use `app`

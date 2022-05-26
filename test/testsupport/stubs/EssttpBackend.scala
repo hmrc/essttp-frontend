@@ -36,8 +36,8 @@ object EssttpBackend {
 
     def startJourneyInBackend(origin: Origin): StubMapping = {
       val (url, expectedRequestBody, responseBody): (String, String, String) = origin match {
-        case Origins.Epaye.Bta => (startJourneyBtaUrl, TdJsonBodies.StartJourneyRequestBodies.simple, TdJsonBodies.StartJourneyResponses.bta)
-        case Origins.Epaye.GovUk => (startJourneyGovUkUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.govUk)
+        case Origins.Epaye.Bta         => (startJourneyBtaUrl, TdJsonBodies.StartJourneyRequestBodies.simple, TdJsonBodies.StartJourneyResponses.bta)
+        case Origins.Epaye.GovUk       => (startJourneyGovUkUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.govUk)
         case Origins.Epaye.DetachedUrl => (startJourneyDetachedUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.detachedUrl)
       }
       stubFor(
@@ -45,7 +45,8 @@ object EssttpBackend {
           .withRequestBody(equalToJson(expectedRequestBody))
           .willReturn(aResponse()
             .withStatus(201)
-            .withBody(responseBody)))
+            .withBody(responseBody))
+      )
     }
 
     val startJourneyEpayeBta: StubMapping = startJourneyInBackend(Origins.Epaye.Bta)

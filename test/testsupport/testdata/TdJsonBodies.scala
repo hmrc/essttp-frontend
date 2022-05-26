@@ -42,7 +42,7 @@ object TdJsonBodies {
   def afterDetermineTaxIdJourneyJson(): String =
     """
       |{
-      |  "AfterComputedTaxIds": {
+      |  "ComputedTaxId": {
       |    "stage": {
       |      "ComputedTaxId": {}
       |    },
@@ -66,13 +66,13 @@ object TdJsonBodies {
       |""".stripMargin
 
   def afterEligibilityCheckJourneyJson(
-                                        overallEligibilityStatus: OverallEligibilityStatus = TdAll.eligibleOverallEligibilityStatus,
-                                        eligibilityRules: EligibilityRules = TdAll.eligibleEligibilityRules
-                                      ): String = {
+      overallEligibilityStatus: OverallEligibilityStatus = TdAll.eligibleOverallEligibilityStatus,
+      eligibilityRules:         EligibilityRules         = TdAll.eligibleEligibilityRules
+  ): String = {
     val stage: String = if (overallEligibilityStatus.value) "Eligible" else "Ineligible"
     s"""
        |{
-       |  "AfterEligibilityCheck" : {
+       |  "EligibilityChecked" : {
        |    "stage" : {
        |      "$stage" : { }
        |    },
@@ -156,9 +156,9 @@ object TdJsonBodies {
   }
 
   def ttpEligibilityCallJson(
-                              overallEligibilityStatus: OverallEligibilityStatus = TdAll.eligibleOverallEligibilityStatus,
-                              eligibilityRules: EligibilityRules = TdAll.eligibleEligibilityRules
-                            ): String = {
+      overallEligibilityStatus: OverallEligibilityStatus = TdAll.eligibleOverallEligibilityStatus,
+      eligibilityRules:         EligibilityRules         = TdAll.eligibleEligibilityRules
+  ): String = {
     s"""
        |{
        |  "idType" : "SSTTP",
@@ -225,7 +225,7 @@ object TdJsonBodies {
   def afterCanPayUpfrontJourneyJson(stageValue: String, canPayUpfrontValue: Boolean): String =
     s"""
        |{
-       |   "AfterCanPayUpfront" : {
+       |   "AnsweredCanPayUpfront" : {
        |     "stage" : {
        |       "$stageValue" : { }
        |    },

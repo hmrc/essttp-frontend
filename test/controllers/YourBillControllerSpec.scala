@@ -19,5 +19,4 @@ package controllers
 import testsupport.ItSpec
 
 class YourBillControllerSpec extends ItSpec {
-  private val controller: YourBillController = app.injector.instanceOf[YourBillController]
 }

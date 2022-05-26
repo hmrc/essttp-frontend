@@ -19,5 +19,4 @@ package controllers
 import testsupport.ItSpec
 
 class LandingPageControllerSpec extends ItSpec {
-  private val controller: LandingController = app.injector.instanceOf[LandingController]
 }

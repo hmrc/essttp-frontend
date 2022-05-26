@@ -27,7 +27,7 @@ class AuthenticatedJourneyRequest[A](
 ) extends JourneyRequest[A](journey, request)
 
 final class EligibleJourneyRequest[A](
-    override val journey:    Journey.HasEligibilityCheckResult,
+    override val journey:    Journey.AfterEligibilityChecked,
     override val enrolments: Enrolments,
     override val request:    Request[A]
 ) extends AuthenticatedJourneyRequest[A](journey, enrolments, request)

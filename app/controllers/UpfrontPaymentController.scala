@@ -17,10 +17,12 @@
 package controllers
 
 import _root_.actions.Actions
+import config.AppConfig
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import essttp.journey.model.Journey
 import essttp.journey.model.ttp.DebtTotalAmount
 import essttp.rootmodel.{AmountInPence, CanPayUpfront, UpfrontPaymentAmount}
+import essttp.utils.Errors
 import models.enumsforforms.CanPayUpfrontFormValue
 import models.forms.{CanPayUpfrontForm, UpfrontPaymentAmountForm}
 import play.api.data.Form
@@ -41,7 +43,8 @@ class UpfrontPaymentController @Inject() (
     mcc:            MessagesControllerComponents,
     views:          Views,
     journeyService: JourneyService,
-    requestSupport: RequestSupport
+    requestSupport: RequestSupport,
+    appConfig:      AppConfig
 )(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
@@ -50,9 +53,8 @@ class UpfrontPaymentController @Inject() (
 
   val canYouMakeAnUpfrontPayment: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
-      case j: Journey.Stages.AfterStarted       => logErrorAndRouteToDefaultPage(j)
-      case j: Journey.Stages.AfterComputedTaxId => logErrorAndRouteToDefaultPage(j)
-      case _: Journey.HasEligibilityCheckResult => displayCanYouPayUpfrontPage()
+      case j: Journey.BeforeEligibilityChecked => logErrorAndRouteToDefaultPage(j)
+      case _: Journey.AfterEligibilityChecked  => displayCanYouPayUpfrontPage()
     }
   }
 
@@ -86,37 +88,47 @@ class UpfrontPaymentController @Inject() (
 
   val upfrontPaymentAmount: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
-      case j: Journey.Stages.AfterStarted                                        => logErrorAndRouteToDefaultPage(j)
-      case j: Journey.Stages.AfterComputedTaxId                                  => logErrorAndRouteToDefaultPage(j)
-      case j: Journey.Stages.AfterEligibilityCheck                               => logErrorAndRouteToDefaultPage(j)
-      case j: Journey.HasCanPayUpfront if !j.canPayUpfront.userWantsToPayUpFront => logErrorAndRouteToDefaultPage(j)
-      case j: Journey.HasCanPayUpfront if j.canPayUpfront.userWantsToPayUpFront  => displayUpfrontPageAmountPage(j)
+      case j: Journey.BeforeAnsweredCanPayUpfront                                      => logErrorAndRouteToDefaultPage(j)
+      case j: Journey.AfterAnsweredCanPayUpfront if !j.canPayUpfront.userCanPayUpfront => logErrorAndRouteToDefaultPage(j)
+      case j: Journey.AfterAnsweredCanPayUpfront if j.canPayUpfront.userCanPayUpfront  => displayUpfrontPageAmountPage(j)
     }
   }
 
-  private def displayUpfrontPageAmountPage(journey: Journey.HasCanPayUpfront)(implicit request: Request[_]): Result = {
+  private val minimumUpfrontPaymentAmount: AmountInPence = appConfig.JourneyVariables.minimumUpfrontPaymentAmountInPence
+
+  private def displayUpfrontPageAmountPage(journey: Journey)(implicit request: Request[_]): Result = {
     val backUrl: Option[String] = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url)
-    val totalDebtAmount: DebtTotalAmount = UpfrontPaymentController.determineMaxDebt(journey)
+    val debtTotalAmount: DebtTotalAmount = UpfrontPaymentController.determineMaxDebt(journey) match {
+      case Some(value) => value
+      case None        => Errors.throwBadRequestException("I am an error, this should never happen")
+    }
+    val totalDebtAmountInPence: AmountInPence = AmountInPence(debtTotalAmount.value)
     Ok(views.upfrontPaymentAmountPage(
-      form = UpfrontPaymentAmountForm.form(journey),
-      maximumPayment = AmountInPence(totalDebtAmount.value),
-      minimumPayment = UpfrontPaymentController.minimumPaymentAmount,
-      backUrl = backUrl
+      form           = UpfrontPaymentAmountForm.form(journey, minimumUpfrontPaymentAmount),
+      maximumPayment = totalDebtAmountInPence,
+      minimumPayment = minimumUpfrontPaymentAmount,
+      backUrl        = backUrl
     ))
   }
 
   val upfrontPaymentAmountSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     // TODO change the totalDebtAmount calculated here - I think ttp are changing their api to have total debt on the top level, not in the chargeTypeAssessment array
-    val totalDebtAmount: DebtTotalAmount = UpfrontPaymentController.determineMaxDebt(request.journey)
-    UpfrontPaymentAmountForm.form(request.journey)
+    val debtTotalAmount: DebtTotalAmount = UpfrontPaymentController.determineMaxDebt(request.journey) match {
+      case Some(value) => value
+      case None        => Errors.throwBadRequestException("I am an error, this should never happen")
+    }
+    val totalDebtAmountInPence: AmountInPence = AmountInPence(debtTotalAmount.value)
+
+    UpfrontPaymentAmountForm.form(request.journey, minimumUpfrontPaymentAmount)
       .bindFromRequest()
       .fold(
         (formWithErrors: Form[BigDecimal]) =>
           Future.successful(Ok(
             views.upfrontPaymentAmountPage(
               form           = formWithErrors,
-              maximumPayment = AmountInPence(totalDebtAmount.value),
-              minimumPayment = UpfrontPaymentController.minimumPaymentAmount,
+              maximumPayment = totalDebtAmountInPence,
+              // todo, find out what the minimum upfront payment amount can be, for now £1
+              minimumPayment = minimumUpfrontPaymentAmount,
               backUrl        = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url)
             )
           )),
@@ -136,14 +148,10 @@ class UpfrontPaymentController @Inject() (
 }
 
 object UpfrontPaymentController {
-  def determineMaxDebt(journey: Journey): DebtTotalAmount = journey match {
-    case j: Journey.Epaye.AfterCanPayUpfront =>
-      j.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount)
-        .headOption.getOrElse(throw new RuntimeException("Total debt not found, there's nothing we can do in this situation?"))
-    case j: Journey.Epaye.AfterUpfrontPaymentAmount =>
-      j.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount)
-        .headOption.getOrElse(throw new RuntimeException("Total debt not found, there's nothing we can do in this situation?"))
+  def determineMaxDebt(journey: Journey): Option[DebtTotalAmount] = journey match {
+    case _: Journey.BeforeEligibilityChecked => None
+    case j: Journey.AfterEligibilityChecked =>
+      Some(j.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount)
+        .headOption.getOrElse(Errors.throwBadRequestException("Total debt not found, there's nothing we can do in this situation?")))
   }
-
-  val minimumPaymentAmount: AmountInPence = AmountInPence(100L) // todo, find out what the minimum upfront payment amount can be, for now £1
 }
