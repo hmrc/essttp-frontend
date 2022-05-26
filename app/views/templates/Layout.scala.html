@@ -26,6 +26,7 @@
 @import play.twirl.api.Html
 
 @import requests.RequestSupport
+@import messages.ErrorMessages
 @import messages.Messages
 
 @this(
@@ -122,7 +123,7 @@
   }
 
   @govTitle = @{serviceNameAndTitle + " - GOV.UK"}
-  @documentTitle = @{if(hasErrors) { Messages.ErrorMessages.`Error`.show + " " + govTitle } else { govTitle }}
+  @documentTitle = @{if(hasErrors) { ErrorMessages.`Error`.show + " " + govTitle } else { govTitle }}
 
   @govukLayout(
     pageTitle = Some(documentTitle),

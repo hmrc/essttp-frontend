@@ -16,6 +16,8 @@
 
 package util
 
+import cats.syntax.eq._
+
 import actionsmodel.JourneyRequest
 import essttp.rootmodel.TraceId
 import essttp.utils.RequestSupport._
@@ -54,9 +56,9 @@ object JourneyLogger {
 
   private def requestId(implicit request: RequestHeader) = s"[${hc.requestId}]"
 
-  private def referer(implicit r: RequestHeader) = s"[Referer: ${r.headers.headers.find(_._1 == "Referer").map(_._2).getOrElse("")}]"
+  private def referer(implicit r: RequestHeader) = s"[Referer: ${r.headers.headers.find(_._1 === "Referer").map(_._2).getOrElse("")}]"
 
-  private def deviceId(implicit r: RequestHeader) = s"[deviceId: ${r.cookies.find(_.name == CookieNames.deviceID).map(_.value).getOrElse("")}]"
+  private def deviceId(implicit r: RequestHeader) = s"[deviceId: ${r.cookies.find(_.name === CookieNames.deviceID).map(_.value).getOrElse("")}]"
 
   private def origin(implicit r: JourneyRequest[_]) = s"[${r.journey.origin}]"
 
@@ -65,7 +67,7 @@ object JourneyLogger {
   private def traceId(implicit r: JourneyRequest[_]) = {
     val traceIdsFromUrlIfDifferentThanInJourney: String = TraceIdExt
       .traceIdStringsFromQueryParameter()
-      .map(_.filterNot(_ == r.journey.traceId.value))
+      .map(_.filterNot(_ === r.journey.traceId.value))
       .map(_.mkString("[traceId different:", "", "]"))
       .getOrElse("")
 

@@ -30,6 +30,7 @@ project/metals.sbt
 project/project
 project/target
 /RUNNING_PID
+**/*.sc
 server.pid
 /.settings
 target

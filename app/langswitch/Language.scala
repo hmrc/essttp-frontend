@@ -26,7 +26,7 @@ import play.api.mvc.PathBindable
 
 import scala.collection.immutable
 
-sealed trait Language extends EnumEntry {
+sealed trait Language extends EnumEntry with Product with Serializable {
   val toPlayLang: Lang = Lang(code)
 
   def code: String

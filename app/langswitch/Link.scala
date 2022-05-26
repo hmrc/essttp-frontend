@@ -19,6 +19,8 @@ package langswitch
 //shamelessly copied from play-ui
 //TODO: remove what it not used
 
+import cats.Eq
+import cats.syntax.eq._
 import play.api.i18n.Messages
 import play.twirl.api.{Html, HtmlFormat}
 
@@ -28,6 +30,11 @@ trait Target {
   def toAttr: String = Link.attr("target", targetName)
 
   def hiddenInfo: Option[String] = None
+}
+
+object Target {
+
+  implicit val eq: Eq[Target] = Eq.fromUniversalEquals
 }
 
 case object SameWindow extends Target {
@@ -57,7 +64,7 @@ case object ServerSso extends PossibleSso {
   override val value = "server"
 }
 
-case class Link(
+final case class Link(
     url:            String,
     value:          Option[String],
     id:             Option[String]              = None,
@@ -94,7 +101,7 @@ case class Link(
     }
   }
 
-  private def relAttr = if (target == NewWindow) attr("rel", "external noopener noreferrer") else ""
+  private def relAttr = if (target === NewWindow) attr("rel", "external noopener noreferrer") else ""
 
   private def hiddenSpanFor(txt: Option[String]) = txt.map(t => s"""<span class="visuallyhidden">${Messages(t)}</span>""").getOrElse("")
 }
@@ -113,7 +120,7 @@ object Link {
 
   def toInternalPageWithSso: PreconfiguredLink = PreconfiguredLink(ServerSso, SameWindow)
 
-  case class PreconfiguredLink(sso: PossibleSso, target: Target) {
+  final case class PreconfiguredLink(sso: PossibleSso, target: Target) {
     def apply(
         url:            String,
         value:          Option[String],

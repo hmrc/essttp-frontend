@@ -11,6 +11,77 @@ lazy val appName: String = "essttp-frontend"
 
 val silencerVersion = "1.7.1"
 
+lazy val scalariformSettings: Def.SettingsDefinition = {
+  // description of options found here -> https://github.com/scala-ide/scalariform
+  ScalariformKeys.preferences := ScalariformKeys.preferences.value
+    .setPreference(AlignArguments, true)
+    .setPreference(AlignParameters, true)
+    .setPreference(AlignSingleLineCaseStatements, true)
+    .setPreference(AllowParamGroupsOnNewlines, true)
+    .setPreference(CompactControlReadability, false)
+    .setPreference(CompactStringConcatenation, false)
+    .setPreference(DanglingCloseParenthesis, Force)
+    .setPreference(DoubleIndentConstructorArguments, true)
+    .setPreference(DoubleIndentMethodDeclaration, true)
+    .setPreference(FirstArgumentOnNewline, Force)
+    .setPreference(FirstParameterOnNewline, Force)
+    .setPreference(FormatXml, true)
+    .setPreference(IndentLocalDefs, true)
+    .setPreference(IndentPackageBlocks, true)
+    .setPreference(IndentSpaces, 2)
+    .setPreference(IndentWithTabs, false)
+    .setPreference(MultilineScaladocCommentsStartOnFirstLine, false)
+    .setPreference(NewlineAtEndOfFile, true)
+    .setPreference(PlaceScaladocAsterisksBeneathSecondAsterisk, false)
+    .setPreference(PreserveSpaceBeforeArguments, true)
+    .setPreference(RewriteArrowSymbols, false)
+    .setPreference(SpaceBeforeColon, false)
+    .setPreference(SpaceBeforeContextColon, false)
+    .setPreference(SpaceInsideBrackets, false)
+    .setPreference(SpaceInsideParentheses, false)
+    .setPreference(SpacesAroundMultiImports, false)
+    .setPreference(SpacesWithinPatternBinders, true)
+}
+
+
+lazy val wartRemoverSettings =
+  Seq(
+    (Compile / compile / wartremoverErrors) ++= Warts.allBut(
+      Wart.DefaultArguments,
+      Wart.ImplicitConversion,
+      Wart.ImplicitParameter,
+      Wart.Nothing,
+      Wart.Overloading,
+      Wart.Throw,
+      Wart.ToString
+    ),
+    Test / compile / wartremoverErrors --= Seq(
+      Wart.Any,
+      Wart.Equals,
+      Wart.GlobalExecutionContext,
+      Wart.Null,
+      Wart.NonUnitStatements,
+      Wart.PublicInference
+    ),
+    wartremoverExcluded ++= (
+      (baseDirectory.value ** "*.sc").get ++
+        (Compile / routes).value
+      )
+  )
+
+lazy val scalaCompilerOptions = Seq(
+  "-Xfatal-warnings",
+  "-Xlint:-missing-interpolator,_",
+  "-Yno-adapted-args",
+  "-Ywarn-value-discard",
+  "-Ywarn-dead-code",
+  "-deprecation",
+  "-feature",
+  "-unchecked",
+  "-language:implicitConversions",
+  "-Ypartial-unification" //required by cats
+)
+
 lazy val root = (project in file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
@@ -36,6 +107,7 @@ lazy val root = (project in file("."))
       EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
     resolvers ++= Seq("hmrc-releases" at "https://artefacts.tax.service.gov.uk/artifactory/hmrc-releases/",Resolver.jcenterRepo),
     pipelineStages := Seq(digest),
+    scalacOptions ++= scalaCompilerOptions
   )
   .settings(
     commands += Command.command("runTestOnly") { state =>
@@ -69,95 +141,4 @@ lazy val root = (project in file("."))
 //  .aggregate(cor)
 //lazy val cor = RootProject(file("../essttp-backend"))
 
-
-lazy val testSettings: Seq[Def.Setting[_]] = Seq(
-  fork        := true,
-  javaOptions ++= Seq(
-    "-Dconfig.resource=test.application.conf"
-  )
-)
-
-lazy val scalariformSettings: Def.SettingsDefinition = {
-  // description of options found here -> https://github.com/scala-ide/scalariform
-  ScalariformKeys.preferences := ScalariformKeys.preferences.value
-    .setPreference(AlignArguments, true)
-    .setPreference(AlignParameters, true)
-    .setPreference(AlignSingleLineCaseStatements, true)
-    .setPreference(AllowParamGroupsOnNewlines, true)
-    .setPreference(CompactControlReadability, false)
-    .setPreference(CompactStringConcatenation, false)
-    .setPreference(DanglingCloseParenthesis, Force)
-    .setPreference(DoubleIndentConstructorArguments, true)
-    .setPreference(DoubleIndentMethodDeclaration, true)
-    .setPreference(FirstArgumentOnNewline, Force)
-    .setPreference(FirstParameterOnNewline, Force)
-    .setPreference(FormatXml, true)
-    .setPreference(IndentLocalDefs, true)
-    .setPreference(IndentPackageBlocks, true)
-    .setPreference(IndentSpaces, 2)
-    .setPreference(IndentWithTabs, false)
-    .setPreference(MultilineScaladocCommentsStartOnFirstLine, false)
-    .setPreference(NewlineAtEndOfFile, true)
-    .setPreference(PlaceScaladocAsterisksBeneathSecondAsterisk, false)
-    .setPreference(PreserveSpaceBeforeArguments, true)
-    .setPreference(RewriteArrowSymbols, false)
-    .setPreference(SpaceBeforeColon, false)
-    .setPreference(SpaceBeforeContextColon, false)
-    .setPreference(SpaceInsideBrackets, false)
-    .setPreference(SpaceInsideParentheses, false)
-    .setPreference(SpacesAroundMultiImports, false)
-    .setPreference(SpacesWithinPatternBinders, true)
-}
-
-lazy val wartRemoverSettings = {
-  val wartRemoverWarning = {
-    val warningWarts = Seq(
-      Wart.JavaSerializable,
-      Wart.StringPlusAny,
-      Wart.AsInstanceOf,
-      Wart.IsInstanceOf
-      //Wart.Any
-    )
-    Compile / compile / wartremoverWarnings ++= warningWarts
-  }
-
-  val wartRemoverError = {
-    // Error
-    val errorWarts = Seq(
-      Wart.StringPlusAny,
-      Wart.AsInstanceOf,
-      Wart.IsInstanceOf,
-      Wart.ArrayEquals,
-      //      Wart.Any,
-      Wart.AnyVal,
-      Wart.EitherProjectionPartial,
-      Wart.Enumeration,
-      Wart.ExplicitImplicitTypes,
-      Wart.FinalVal,
-      Wart.JavaConversions,
-      Wart.JavaSerializable,
-      Wart.LeakingSealed,
-      Wart.MutableDataStructures,
-      Wart.Null,
-      Wart.OptionPartial,
-      Wart.Recursion,
-      Wart.Return,
-      Wart.TraversableOps,
-      Wart.TryPartial,
-      Wart.Var,
-      Wart.While)
-
-    Compile / compile / wartremoverErrors  ++= errorWarts
-  }
-
-  Seq(
-    wartRemoverError,
-    wartRemoverWarning,
-    Test / compile / wartremoverErrors --= Seq(Wart.Any, Wart.Equals, Wart.Null, Wart.NonUnitStatements, Wart.PublicInference),
-    wartremoverExcluded ++= (baseDirectory.value / "test").get
-  )
-
-  //TODO currently disabled as I can't remove found warts since I don't know what marked by WR code is supposed to do
-  Seq()
-}
 

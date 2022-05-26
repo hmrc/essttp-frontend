@@ -42,7 +42,8 @@ class ItSpec
 
   protected lazy val configOverrides: Map[String, Any] = Map()
 
-  protected lazy val configMap: Map[String, Any] = Map(
+  @SuppressWarnings(Array("org.wartremover.Warts.Any"))
+  protected lazy val configMap: Map[String, Any] = Map[String, Any](
     "microservice.services.auth.port" -> WireMockSupport.port,
     "microservice.services.essttp-backend.port" -> WireMockSupport.port,
     "microservice.services.ttp.port" -> WireMockSupport.port,

@@ -14,6 +14,8 @@
  * limitations under the License.
  *@
 
+@import cats.syntax.eq._
+
 @import langswitch.Link
 @import langswitch.Language
 @import langswitch.Languages
@@ -41,7 +43,7 @@ supporting typesafe `language.Language`
 <ul class="hmrc-language-select__list">
 
   @Languages.availableLanguages.map { language: Language =>
-    @if(requestSupport.lang(request).code != language.code) {
+    @if(requestSupport.lang(request).code =!= language.code) {
       <li class="hmrc-language-select__list-item">
       @Link.toInternalPage(
         id = Some(s"${language.code}-switch"),

@@ -19,7 +19,7 @@ package models
 import essttp.rootmodel.AmountInPence
 import play.api.libs.json.{Format, Json}
 
-case class InstalmentOption(
+final case class InstalmentOption(
     numberOfMonths:       Int,
     amountToPayEachMonth: AmountInPence,
     interestPayment:      AmountInPence

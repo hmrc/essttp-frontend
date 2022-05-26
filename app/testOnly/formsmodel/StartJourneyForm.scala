@@ -17,6 +17,8 @@
 package testOnly.formsmodel
 
 import essttp.journey.model.{Origin, Origins}
+import essttp.rootmodel.EmpRef
+import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
 import langswitch.Language
 import models.{EligibilityError, EligibilityErrors}
 import play.api.data.{Form, Forms, Mapping}
@@ -34,7 +36,7 @@ final case class StartJourneyForm(
     eligibilityErrors: Seq[EligibilityError]
 ) {
   //TODO: move ton and tor to the form
-  val (ton, tor, empRef) = RandomDataGenerator.nextEpayeRefs()(Random)
+  val (ton: TaxOfficeNumber, tor: TaxOfficeReference, empRef: EmpRef) = RandomDataGenerator.nextEpayeRefs()(Random)
 }
 
 object StartJourneyForm {
