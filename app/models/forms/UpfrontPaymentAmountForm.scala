@@ -39,7 +39,6 @@ object UpfrontPaymentAmountForm {
   def formHelperToDeriveDebtAmount(journey: Journey): DebtTotalAmount = journey match {
     case j: Journey.BeforeEligibilityChecked =>
       Errors.throwBadRequestException(s"This should never happen, user should have an eligibilityCheck by now, investigate journey: [$j]")
-    //    case j: Journey.Stages.AnsweredCanPayUpfront => j.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).head
     case j: Journey.AfterEligibilityChecked => j.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).head
   }
 

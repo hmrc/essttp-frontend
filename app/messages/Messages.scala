@@ -234,7 +234,7 @@ object Messages {
       english = "Can you make an upfront payment?"
     )
     val `Your monthly payments will be lower if you ...`: Message = Message(
-      english = "Your monthly payments will be lower if you can make an upfront payment. This payment will be taken from your bank account within 7 working days."
+      english = "Your monthly payments will be lower if you can make an upfront payment. This payment will be taken from your bank account within 10 working days."
     )
 
     val `Yes`: Message = Message(
