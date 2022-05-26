@@ -23,9 +23,10 @@ POST      /your-bill                                     controllers.YourBillCon
 
 GET       /can-you-make-an-upfront-payment               controllers.UpfrontPaymentController.canYouMakeAnUpfrontPayment
 POST      /can-you-make-an-upfront-payment               controllers.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit
-GET        /upfront-payment-amount                       controllers.UpfrontPaymentController.upfrontPaymentAmount
-POST       /upfront-payment-amount                       controllers.UpfrontPaymentController.upfrontPaymentAmountSubmit
-GET        /upfront-payment-summary                      controllers.UpfrontPaymentController.upfrontSummary()
+GET       /how-much-can-you-pay-upfront                  controllers.UpfrontPaymentController.upfrontPaymentAmount
+POST      /how-much-can-you-pay-upfront                  controllers.UpfrontPaymentController.upfrontPaymentAmountSubmit
+GET       /upfront-payment-summary                       controllers.UpfrontPaymentController.upfrontPaymentSummary
+
 GET        /monthly-payment-amount                       controllers.MonthlyPaymentAmountController.monthlyPaymentAmount
 POST       /monthly-payment-amount                       controllers.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit
 GET        /payment-day                                  controllers.PaymentDayController.paymentDay()

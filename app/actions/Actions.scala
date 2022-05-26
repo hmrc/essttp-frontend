@@ -62,9 +62,9 @@ class Actions @Inject() (
     override protected def refine[A](request: AuthenticatedJourneyRequest[A]): Future[Either[Result, EligibleJourneyRequest[A]]] = {
       implicit val r: Request[A] = request
       val result: Either[Result, EligibleJourneyRequest[A]] = request.journey match {
-        case j: Journey.Stages.AfterStarted       => Left(JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j))
-        case j: Journey.Stages.AfterComputedTaxId => Left(JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j))
-        case j: Journey.HasEligibilityCheckResult =>
+        case j: Journey.Stages.Started       => Left(JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j))
+        case j: Journey.Stages.ComputedTaxId => Left(JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j))
+        case j: Journey.AfterEligibilityChecked =>
           if (j.eligibilityCheckResult.isEligible) {
             Right(new EligibleJourneyRequest[A](
               journey    = j,

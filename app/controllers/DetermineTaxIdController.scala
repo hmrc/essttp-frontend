@@ -33,7 +33,6 @@
 package controllers
 
 import _root_.actions.{Actions, EnrolmentDef}
-import essttp.journey.JourneyConnector
 import essttp.journey.model.Journey
 import essttp.rootmodel.EmpRef
 import play.api.mvc._
@@ -59,8 +58,8 @@ class DetermineTaxIdController @Inject() (
 
   def determineTaxId(): Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     val f = request.journey match {
-      case j: Journey.Stages.AfterStarted => determineTaxId(j, request.enrolments)
-      case j: Journey.HasTaxId =>
+      case j: Journey.Stages.Started => determineTaxId(j, request.enrolments)
+      case _: Journey.AfterComputedTaxId =>
         JourneyLogger.info("TaxId already determined, skipping.")
         Future.successful(())
     }
@@ -68,7 +67,7 @@ class DetermineTaxIdController @Inject() (
     f.map(_ => Redirect(routes.DetermineEligibilityController.determineEligibility()))
   }
 
-  private def determineTaxId(journey: Journey.Stages.AfterStarted, enrolments: Enrolments)(implicit request: RequestHeader): Future[Unit] = {
+  private def determineTaxId(journey: Journey.Stages.Started, enrolments: Enrolments)(implicit request: RequestHeader): Future[Unit] = {
     //todo move this to enrolment service or something
     val computeEmpRef: Future[EmpRef] = Future{
       val (taxOfficeNumber, taxOfficeReference) = EnrolmentDef

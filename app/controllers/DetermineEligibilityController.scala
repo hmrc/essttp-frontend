@@ -35,7 +35,6 @@ package controllers
 import _root_.actions.Actions
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import essttp.journey.model.Journey
-import essttp.journey.model.Journey.HasEligibilityCheckResult
 import play.api.mvc._
 import services.{JourneyService, TtpService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -56,15 +55,15 @@ class DetermineEligibilityController @Inject() (
 
   val determineEligibility: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     request.journey match {
-      case j: Journey.Stages.AfterStarted       => logErrorAndRouteToDefaultPageF(j)
-      case j: Journey.Stages.AfterComputedTaxId => determineEligibilityAndUpdateJourney(j)
-      case j: HasEligibilityCheckResult =>
+      case j: Journey.Stages.Started       => logErrorAndRouteToDefaultPageF(j)
+      case j: Journey.Stages.ComputedTaxId => determineEligibilityAndUpdateJourney(j)
+      case j: Journey.AfterEligibilityChecked =>
         JourneyLogger.info("Eligibility already determined, skipping.")
         Future.successful(EligibilityRouter.nextPage(j.eligibilityCheckResult))
     }
   }
 
-  def determineEligibilityAndUpdateJourney(journey: Journey.Stages.AfterComputedTaxId)(implicit request: Request[_]): Future[Result] = {
+  def determineEligibilityAndUpdateJourney(journey: Journey.Stages.ComputedTaxId)(implicit request: Request[_]): Future[Result] = {
     for {
       eligibilityCheckResult <- ttpService.determineEligibility(journey)
       _ <- journeyService.updateEligibilityCheckResult(journey.id, eligibilityCheckResult)

@@ -52,7 +52,7 @@ object MoneyUtil {
           s: String
       ): Either[FormError, BigDecimal] =
         Try(BigDecimal(cleanupAmountOfMoneyString(s))).toEither
-          .leftMap(_ => FormError(key, "error.pattern"))
+          .leftMap((_: Throwable) => if (s.isEmpty) FormError(key, "error.required") else FormError(key, "error.pattern"))
           .flatMap { d: BigDecimal =>
             if (isTooSmall(d)) {
               Left(FormError(key, "error.tooSmall"))

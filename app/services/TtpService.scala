@@ -18,7 +18,7 @@ package services
 
 import connectors.{CallEligibilityApiRequest, TtpConnector}
 import essttp.journey.model.Journey
-import essttp.journey.model.Journey.Stages.AfterComputedTaxId
+import essttp.journey.model.Journey.Stages.ComputedTaxId
 import essttp.journey.model.ttp.EligibilityCheckResult
 import essttp.rootmodel.EmpRef
 import play.api.mvc.RequestHeader
@@ -31,7 +31,7 @@ import scala.concurrent.Future
 @Singleton
 class TtpService @Inject() (ttpConnector: TtpConnector) {
 
-  def determineEligibility(journey: AfterComputedTaxId)(implicit request: RequestHeader): Future[EligibilityCheckResult] = {
+  def determineEligibility(journey: ComputedTaxId)(implicit request: RequestHeader): Future[EligibilityCheckResult] = {
 
     val eligibilityRequest: CallEligibilityApiRequest = journey match {
       case j: Journey.Epaye =>

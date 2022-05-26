@@ -14,21 +14,9 @@
  * limitations under the License.
  */
 
-package actionsmodel
+package controllers
 
-import essttp.journey.model.Journey
-import play.api.mvc._
-import uk.gov.hmrc.auth.core.Enrolments
+import testsupport.ItSpec
 
-class AuthenticatedJourneyRequest[A](
-    override val journey: Journey,
-    val enrolments:       Enrolments,
-    override val request: Request[A]
-) extends JourneyRequest[A](journey, request)
-
-final class EligibleJourneyRequest[A](
-    override val journey:    Journey.AfterEligibilityChecked,
-    override val enrolments: Enrolments,
-    override val request:    Request[A]
-) extends AuthenticatedJourneyRequest[A](journey, enrolments, request)
-
+class YourBillControllerSpec extends ItSpec {
+}

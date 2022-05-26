@@ -17,16 +17,16 @@
 package controllers
 
 import _root_.actions.Actions
+import config.AppConfig
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
-import controllers.UpfrontPaymentController.upfrontPaymentAmountForm
 import essttp.journey.model.Journey
-import essttp.rootmodel.{AmountInPence, CanPayUpfront}
-import models.MoneyUtil.amountOfMoneyFormatter
+import essttp.journey.model.ttp.DebtTotalAmount
+import essttp.rootmodel.{AmountInPence, CanPayUpfront, UpfrontPaymentAmount}
+import essttp.utils.Errors
 import models.enumsforforms.CanPayUpfrontFormValue
-import models.forms.CanPayUpfrontForm
-import models.{MockJourney, UserAnswers}
-import play.api.data.Forms.mapping
-import play.api.data.{Form, Forms}
+import models.forms.{CanPayUpfrontForm, UpfrontPaymentAmountForm}
+import play.api.data.Form
+import play.api.libs.json.Json
 import play.api.mvc._
 import requests.RequestSupport
 import services.JourneyService
@@ -43,31 +43,35 @@ class UpfrontPaymentController @Inject() (
     mcc:            MessagesControllerComponents,
     views:          Views,
     journeyService: JourneyService,
-    requestSupport: RequestSupport
+    requestSupport: RequestSupport,
+    appConfig:      AppConfig
 )(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 
   import requestSupport._
 
-  val canYouMakeAnUpfrontPayment: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+  val canYouMakeAnUpfrontPayment: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
-      case j: Journey.Stages.AfterStarted       => logErrorAndRouteToDefaultPage(j)
-      case j: Journey.Stages.AfterComputedTaxId => logErrorAndRouteToDefaultPage(j)
-      case _: Journey.HasEligibilityCheckResult => displayPage()
+      case j: Journey.BeforeEligibilityChecked => logErrorAndRouteToDefaultPage(j)
+      case _: Journey.AfterEligibilityChecked  => displayCanYouPayUpfrontPage()
     }
   }
 
-  private def displayPage()(implicit request: Request[_]): Result = {
+  private def displayCanYouPayUpfrontPage()(implicit request: Request[_]): Result = {
     val backUrl: Option[String] = Some(routes.YourBillController.yourBill().url)
     Ok(views.canYouMakeAnUpFrontPayment(CanPayUpfrontForm.form, backUrl))
   }
 
-  val canYouMakeAnUpfrontPaymentSubmit: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
+  val canYouMakeAnUpfrontPaymentSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     CanPayUpfrontForm.form
       .bindFromRequest()
       .fold(
-        formWithErrors => Future.successful(Ok(views.canYouMakeAnUpFrontPayment(formWithErrors))),
+        formWithErrors =>
+          Future.successful(Ok(views.canYouMakeAnUpFrontPayment(
+            form    = formWithErrors,
+            backUrl = Some(routes.YourBillController.yourBill().url)
+          ))),
         (canPayUpfrontForm: CanPayUpfrontFormValue) => {
           val canPayUpfront: CanPayUpfront = canPayUpfrontForm.asCanPayUpfront
           val pageToRedirectTo: Call =
@@ -77,46 +81,81 @@ class UpfrontPaymentController @Inject() (
               routes.MonthlyPaymentAmountController.monthlyPaymentAmount()
             }
           journeyService.updateCanPayUpfront(request.journeyId, canPayUpfront)
-            .map(_ => Redirect(pageToRedirectTo))
+            .map(_ => Redirect(pageToRedirectTo.url))
         }
       )
   }
 
-  val upfrontPaymentAmount: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
-    val mockJourney = MockJourney(userAnswers = UserAnswers.empty.copy(hasUpfrontPayment = Some(true)))
-    Future.successful(Ok(views.upfrontPaymentAmountPage(upfrontPaymentAmountForm(mockJourney), mockJourney.qualifyingDebt, AmountInPence(100L))))
+  val upfrontPaymentAmount: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    request.journey match {
+      case j: Journey.BeforeAnsweredCanPayUpfront                                      => logErrorAndRouteToDefaultPage(j)
+      case j: Journey.AfterAnsweredCanPayUpfront if !j.canPayUpfront.userCanPayUpfront => logErrorAndRouteToDefaultPage(j)
+      case j: Journey.AfterAnsweredCanPayUpfront if j.canPayUpfront.userCanPayUpfront  => displayUpfrontPageAmountPage(j)
+    }
   }
 
-  val upfrontPaymentAmountSubmit: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
-    val mockJourney = MockJourney(userAnswers = UserAnswers.empty)
-    upfrontPaymentAmountForm(mockJourney)
+  private val minimumUpfrontPaymentAmount: AmountInPence = appConfig.JourneyVariables.minimumUpfrontPaymentAmountInPence
+
+  private def displayUpfrontPageAmountPage(journey: Journey.AfterAnsweredCanPayUpfront)(implicit request: Request[_]): Result = {
+    val backUrl: Option[String] = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url)
+    val debtTotalAmount: DebtTotalAmount = UpfrontPaymentController.determineMaxDebt(journey) match {
+      case Some(value) => value
+      case None        => Errors.throwBadRequestException("Could not determine max debt")
+    }
+    val totalDebtAmountInPence: AmountInPence = AmountInPence(debtTotalAmount.value)
+    Ok(views.upfrontPaymentAmountPage(
+      form           = UpfrontPaymentAmountForm.form(debtTotalAmount, minimumUpfrontPaymentAmount),
+      maximumPayment = totalDebtAmountInPence,
+      minimumPayment = minimumUpfrontPaymentAmount,
+      backUrl        = backUrl
+    ))
+  }
+
+  val upfrontPaymentAmountSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
+    val journey = request.journey match {
+      case _: Journey.BeforeAnsweredCanPayUpfront => Errors.throwBadRequestException("User has submitted upfront payment amount before answering CanPayUpfront")
+      case j: Journey.AfterAnsweredCanPayUpfront  => j
+    }
+    /**
+     * TODO change the totalDebtAmount calculated here
+     * I think ttp are changing their api to have total debt on the top level, not in the chargeTypeAssessment array
+     */
+    val debtTotalAmount: DebtTotalAmount = UpfrontPaymentController.determineMaxDebt(journey) match {
+      case Some(value) => value
+      case None        => Errors.throwBadRequestException("Could not determine max debt")
+    }
+    val totalDebtAmountInPence: AmountInPence = AmountInPence(debtTotalAmount.value)
+
+    UpfrontPaymentAmountForm.form(debtTotalAmount, minimumUpfrontPaymentAmount)
       .bindFromRequest()
       .fold(
-        formWithErrors =>
-          Future.successful(Ok(views.upfrontPaymentAmountPage(formWithErrors, mockJourney.qualifyingDebt, AmountInPence(100L)))),
-        (s: BigDecimal) => {
-          /* TODO: compute what is remaining to pay by subtracting "s" from the initial qualifying debt amount
-             and write to session store
-           */
-          Future(Redirect(routes.UpfrontPaymentController.upfrontSummary()))
+        (formWithErrors: Form[BigDecimal]) =>
+          Future.successful(Ok(
+            views.upfrontPaymentAmountPage(
+              form           = formWithErrors,
+              maximumPayment = totalDebtAmountInPence,
+              // todo, find out what the minimum upfront payment amount can be, for now £1
+              minimumPayment = minimumUpfrontPaymentAmount,
+              backUrl        = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url)
+            )
+          )),
+        (validForm: BigDecimal) => {
+          //amount in pence case class apply method converts big decimal to pennies
+          val amountInPence: AmountInPence = AmountInPence(validForm)
+          journeyService.updateUpfrontPaymentAmount(request.journeyId, UpfrontPaymentAmount(amountInPence))
+            .map(_ => Redirect(routes.UpfrontPaymentController.upfrontPaymentSummary().url))
         }
       )
   }
 
-  val upfrontSummary: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
-    val mockUserAnswers = UserAnswers.empty.copy(
-      hasUpfrontPayment = Some(true),
-      upfrontAmount     = Some(AmountInPence(10000L))
-    )
-    Future.successful(Ok(views.upfrontSummaryPage(mockUserAnswers, AmountInPence(200000L))))
+  val upfrontPaymentSummary: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    Ok("Submitted the upfront payment amount, page is still a wip and needs wiring up...\n" +
+      s"For testing purposes for now, here's the journey:\n ${Json.prettyPrint(Json.toJson(request.journey))}")
   }
 }
 
 object UpfrontPaymentController {
-
-  def upfrontPaymentAmountForm(journey: MockJourney): Form[BigDecimal] = Form(
-    mapping(
-      "UpfrontPaymentAmount" -> Forms.of(amountOfMoneyFormatter(AmountInPence(100L).inPounds > _, journey.qualifyingDebt.inPounds < _))
-    )(identity)(Some(_))
-  )
+  def determineMaxDebt(journey: Journey.AfterAnsweredCanPayUpfront): Option[DebtTotalAmount] = journey match {
+    case j: Journey.AfterEligibilityChecked => j.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).headOption
+  }
 }

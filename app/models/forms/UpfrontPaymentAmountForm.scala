@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package actionsmodel
+package models.forms
 
-import essttp.journey.model.Journey
-import play.api.mvc._
-import uk.gov.hmrc.auth.core.Enrolments
+import essttp.journey.model.ttp.DebtTotalAmount
+import essttp.rootmodel.AmountInPence
+import models.MoneyUtil.amountOfMoneyFormatter
+import play.api.data.Forms.mapping
+import play.api.data.{Form, Forms}
 
-class AuthenticatedJourneyRequest[A](
-    override val journey: Journey,
-    val enrolments:       Enrolments,
-    override val request: Request[A]
-) extends JourneyRequest[A](journey, request)
-
-final class EligibleJourneyRequest[A](
-    override val journey:    Journey.AfterEligibilityChecked,
-    override val enrolments: Enrolments,
-    override val request:    Request[A]
-) extends AuthenticatedJourneyRequest[A](journey, enrolments, request)
-
+object UpfrontPaymentAmountForm {
+  def form(maximumDebtAmount: DebtTotalAmount, minimumPaymentAmount: AmountInPence): Form[BigDecimal] = {
+    Form(
+      mapping(
+        "UpfrontPaymentAmount" -> Forms.of(
+          amountOfMoneyFormatter(minimumPaymentAmount.inPounds > _, AmountInPence(maximumDebtAmount.value).inPounds < _)
+        )
+      )(identity)(Some(_))
+    )
+  }
+}

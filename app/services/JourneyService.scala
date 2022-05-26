@@ -20,14 +20,14 @@ import com.google.inject.{Inject, Singleton}
 import essttp.journey.JourneyConnector
 import essttp.journey.model.JourneyId
 import essttp.journey.model.ttp.EligibilityCheckResult
-import essttp.rootmodel.{CanPayUpfront, EmpRef}
+import essttp.rootmodel.{CanPayUpfront, EmpRef, UpfrontPaymentAmount}
 import play.api.mvc.RequestHeader
 import util.Logging
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 @Singleton
-class JourneyService @Inject() (journeyConnector: JourneyConnector)(implicit ec: ExecutionContext) extends Logging {
+class JourneyService @Inject() (journeyConnector: JourneyConnector) extends Logging {
 
   def updateEligibilityCheckResult(journeyId: JourneyId, eligibilityCheckResult: EligibilityCheckResult)(
       implicit
@@ -47,6 +47,10 @@ class JourneyService @Inject() (journeyConnector: JourneyConnector)(implicit ec:
 
   def updateCanPayUpfront(journeyId: JourneyId, canPayUpfront: CanPayUpfront)(implicit requestHeader: RequestHeader): Future[Unit] = {
     journeyConnector.updateCanPayUpfront(journeyId, canPayUpfront)
+  }
+
+  def updateUpfrontPaymentAmount(journeyId: JourneyId, upfrontPaymentAmount: UpfrontPaymentAmount)(implicit requestHeader: RequestHeader): Future[Unit] = {
+    journeyConnector.updateUpfrontPaymentAmount(journeyId, upfrontPaymentAmount)
   }
 
 }

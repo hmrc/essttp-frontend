@@ -16,6 +16,8 @@
 
 package config
 
+import essttp.rootmodel.AmountInPence
+
 import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc.RequestHeader
@@ -64,5 +66,9 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   object InterestRates {
     val baseRate: BigDecimal = 0.25
     val hmrcRate: BigDecimal = 2.5
+  }
+
+  object JourneyVariables {
+    val minimumUpfrontPaymentAmountInPence: AmountInPence = AmountInPence(config.get[Long]("journeyVariables.minimumUpfrontPaymentAmountInPence"))
   }
 }

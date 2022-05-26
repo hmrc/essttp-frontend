@@ -42,13 +42,12 @@ class YourBillController @Inject() (
 
   val yourBill: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
-      case j: Journey.Stages.AfterStarted       => logErrorAndRouteToDefaultPage(j)
-      case j: Journey.Stages.AfterComputedTaxId => logErrorAndRouteToDefaultPage(j)
-      case j: Journey.HasEligibilityCheckResult => displayPage(j)
+      case j: Journey.BeforeEligibilityChecked => logErrorAndRouteToDefaultPage(j)
+      case j: Journey.AfterEligibilityChecked  => displayPage(j)
     }
   }
 
-  def displayPage(journey: Journey.HasEligibilityCheckResult)(implicit request: Request[_]): Result = {
+  def displayPage(journey: Journey.AfterEligibilityChecked)(implicit request: Request[_]): Result = {
     val backUrl = journey.origin match {
       case Origins.Epaye.Bta         => Some(routes.LandingController.landingPage().url)
       case Origins.Epaye.DetachedUrl => Some(routes.LandingController.landingPage().url)

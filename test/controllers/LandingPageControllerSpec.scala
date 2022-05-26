@@ -14,17 +14,9 @@
  * limitations under the License.
  */
 
-package moveittocor.corcommon.internal.jsonext
+package controllers
 
-import play.api.libs.json._
+import testsupport.ItSpec
 
-object JsObjectFormat {
-
-  implicit val jsObjectFormat: OFormat[JsObject] = new OFormat[JsObject] {
-    override def reads(json: JsValue): JsResult[JsObject] = json match {
-      case jsObject: JsObject => JsSuccess(jsObject)
-      case _                  => JsError()
-    }
-    override def writes(o: JsObject): JsObject = o
-  }
+class LandingPageControllerSpec extends ItSpec {
 }
