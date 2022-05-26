@@ -34,7 +34,6 @@ lazy val root = (project in file("."))
     retrieveManaged := false,
     update / evictionWarningOptions :=
       EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
-    resolvers ++= Seq("hmrc-releases" at "https://artefacts.tax.service.gov.uk/artifactory/hmrc-releases/",Resolver.jcenterRepo),
     pipelineStages := Seq(digest),
   )
   .settings(

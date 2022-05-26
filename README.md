@@ -1,11 +1,7 @@
 
 # essttp-frontend
 
-This is a placeholder README.md for a new repository
-
-### License
-
-This code is open source software licensed under the [Apache 2.0 License]("http://www.apache.org/licenses/LICENSE-2.0.html").
+Frontend repo for essttp journeys
 
 # emulate start journey from gov-uk
 This will make a get request with referer value of "github.com".
@@ -21,3 +17,7 @@ https://www.qa.tax.service.gov.uk/set-up-a-payment-plan/govuk/epaye/start
 
 https://www.staging.tax.service.gov.uk/set-up-a-payment-plan/govuk/epaye/start
 
+
+### License
+
+This code is open source software licensed under the [Apache 2.0 License]("http://www.apache.org/licenses/LICENSE-2.0.html").
