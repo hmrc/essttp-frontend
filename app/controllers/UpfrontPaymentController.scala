@@ -96,15 +96,15 @@ class UpfrontPaymentController @Inject() (
 
   private val minimumUpfrontPaymentAmount: AmountInPence = appConfig.JourneyVariables.minimumUpfrontPaymentAmountInPence
 
-  private def displayUpfrontPageAmountPage(journey: Journey)(implicit request: Request[_]): Result = {
+  private def displayUpfrontPageAmountPage(journey: Journey.AfterAnsweredCanPayUpfront)(implicit request: Request[_]): Result = {
     val backUrl: Option[String] = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url)
     val debtTotalAmount: DebtTotalAmount = UpfrontPaymentController.determineMaxDebt(journey) match {
       case Some(value) => value
-      case None        => Errors.throwBadRequestException("I am an error, this should never happen")
+      case None        => Errors.throwBadRequestException("Could not determine max debt")
     }
     val totalDebtAmountInPence: AmountInPence = AmountInPence(debtTotalAmount.value)
     Ok(views.upfrontPaymentAmountPage(
-      form           = UpfrontPaymentAmountForm.form(journey, minimumUpfrontPaymentAmount),
+      form           = UpfrontPaymentAmountForm.form(debtTotalAmount, minimumUpfrontPaymentAmount),
       maximumPayment = totalDebtAmountInPence,
       minimumPayment = minimumUpfrontPaymentAmount,
       backUrl        = backUrl
@@ -112,14 +112,21 @@ class UpfrontPaymentController @Inject() (
   }
 
   val upfrontPaymentAmountSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
-    // TODO change the totalDebtAmount calculated here - I think ttp are changing their api to have total debt on the top level, not in the chargeTypeAssessment array
-    val debtTotalAmount: DebtTotalAmount = UpfrontPaymentController.determineMaxDebt(request.journey) match {
+    val journey = request.journey match {
+      case _: Journey.BeforeAnsweredCanPayUpfront => Errors.throwBadRequestException("User has submitted upfront payment amount before answering CanPayUpfront")
+      case j: Journey.AfterAnsweredCanPayUpfront  => j
+    }
+    /**
+     * TODO change the totalDebtAmount calculated here
+     * I think ttp are changing their api to have total debt on the top level, not in the chargeTypeAssessment array
+     */
+    val debtTotalAmount: DebtTotalAmount = UpfrontPaymentController.determineMaxDebt(journey) match {
       case Some(value) => value
-      case None        => Errors.throwBadRequestException("I am an error, this should never happen")
+      case None        => Errors.throwBadRequestException("Could not determine max debt")
     }
     val totalDebtAmountInPence: AmountInPence = AmountInPence(debtTotalAmount.value)
 
-    UpfrontPaymentAmountForm.form(request.journey, minimumUpfrontPaymentAmount)
+    UpfrontPaymentAmountForm.form(debtTotalAmount, minimumUpfrontPaymentAmount)
       .bindFromRequest()
       .fold(
         (formWithErrors: Form[BigDecimal]) =>
@@ -148,10 +155,7 @@ class UpfrontPaymentController @Inject() (
 }
 
 object UpfrontPaymentController {
-  def determineMaxDebt(journey: Journey): Option[DebtTotalAmount] = journey match {
-    case _: Journey.BeforeEligibilityChecked => None
-    case j: Journey.AfterEligibilityChecked =>
-      Some(j.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount)
-        .headOption.getOrElse(Errors.throwBadRequestException("Total debt not found, there's nothing we can do in this situation?")))
+  def determineMaxDebt(journey: Journey.AfterAnsweredCanPayUpfront): Option[DebtTotalAmount] = journey match {
+    case j: Journey.AfterEligibilityChecked => j.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).headOption
   }
 }

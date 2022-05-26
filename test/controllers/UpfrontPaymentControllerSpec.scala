@@ -219,7 +219,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
         ("x < 0", "-1", "How much you can pay upfront must be £1.00 or more"),
         ("x = 0", "0", "How much you can pay upfront must be £1.00 or more"),
         ("x = NaN", "one", "How much you can pay upfront must be an amount of money"),
-        ("x = null", "", "How much you can pay upfront must be an amount of money")
+        ("x = null", "", "Enter your upfront payment")
       )
     ) { (sf: String, formInput: String, errorMessage: String) =>
         s"[$sf] should redirect to /how-much-can-you-pay-upfront with correct error summary when $formInput is submitted" in {
