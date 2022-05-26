@@ -56,13 +56,13 @@ object TestUser {
   private implicit val random: Random = Random
 
   def makeTestUser(form: StartJourneyForm): Option[TestUser] = {
-    val maybeAffinityGroup = form.signInAs match {
+    val maybeAffinityGroup: Option[AffinityGroup] = form.signInAs match {
       case SignInAs.NoSignIn     => None
       case SignInAs.Individual   => Some(AffinityGroup.Individual)
       case SignInAs.Organisation => Some(AffinityGroup.Organisation)
     }
 
-    maybeAffinityGroup.map { affinityGroup =>
+    maybeAffinityGroup.map { affinityGroup: AffinityGroup =>
       TestUser(
         nino            = None, //TODO: read this from the form, populate if individual
         epayeEnrolment  = if (form.enrolments.contains(Enrolments.Epaye)) Some(EpayeEnrolment(

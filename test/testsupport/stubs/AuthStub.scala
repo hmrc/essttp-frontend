@@ -30,7 +30,7 @@ object AuthStub {
   ): StubMapping = {
 
     implicit val enrolmentFormat: OFormat[Enrolment] = {
-      implicit val f = Json.format[EnrolmentIdentifier]
+      implicit val f: OFormat[EnrolmentIdentifier] = Json.format[EnrolmentIdentifier]
       Json.format[Enrolment]
     }
 

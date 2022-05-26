@@ -20,7 +20,7 @@ import cats.implicits.catsSyntaxEq
 import essttp.rootmodel.AmountInPence
 import play.api.libs.json.{Format, Json}
 
-case class UserAnswers(
+final case class UserAnswers(
     hasUpfrontPayment: Option[Boolean],
     upfrontAmount:     Option[AmountInPence],
     affordableAmount:  Option[AmountInPence],

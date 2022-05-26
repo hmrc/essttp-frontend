@@ -110,7 +110,7 @@
   )
 }
 
-@monthlyPaymentRows = @{List(paymentDayRow) ++ monthRows :+ totalRow }
+@monthlyPaymentRows = @{List(paymentDayRow) ::: monthRows ::: List(totalRow) }
 
 @layout(pageTitle = Some(title), showSignOutLink = false) {
 

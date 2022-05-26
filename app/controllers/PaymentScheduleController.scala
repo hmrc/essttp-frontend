@@ -50,7 +50,7 @@ class PaymentScheduleController @Inject() (
 }
 
 object PaymentScheduleController {
-  case class MonthlyPayment(
+  final case class MonthlyPayment(
       month:  Int,
       year:   Int,
       amount: AmountInPence

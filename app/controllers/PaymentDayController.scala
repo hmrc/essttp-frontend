@@ -61,7 +61,7 @@ object PaymentDayController {
   import play.api.data.Form
   import uk.gov.voa.play.form.ConditionalMappings.mandatoryIfEqual
 
-  case class PaymentDayForm(
+  final case class PaymentDayForm(
       paymentDay:   String,
       differentDay: Option[Int]
   )

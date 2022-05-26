@@ -20,8 +20,6 @@ import essttp.rootmodel.AmountInPence
 
 object Messages {
 
-  val ErrorMessages = messages.ErrorMessages
-
   val continue: Message = Message(
     english = "Continue",
     welsh   = "Yn eich blaen"

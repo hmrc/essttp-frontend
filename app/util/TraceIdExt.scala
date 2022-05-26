@@ -32,14 +32,10 @@ object TraceIdExt {
   @SuppressWarnings(Array("org.wartremover.warts.TraversableOps"))
   def traceIdFromQueryParameter()(implicit request: RequestHeader): Option[TraceId] = {
     traceIdStringsFromQueryParameter()
-      .map(_.map(TraceId.apply))
-      .map(_.toSet)
-      .flatMap {
-        case s if s.isEmpty   => None
-        case s if s.size == 1 => Some(s.head)
-        case s =>
-          Logger(this.getClass).error(s"Multiple traceIds in the URL. [${s.mkString(", ")}]")
-          Some(s.head)
+      .flatMap { seq =>
+        val set = seq.map(TraceId.apply).toSet
+        if (set.size > 1) Logger(this.getClass).error(s"Multiple traceIds in the URL. [${set.mkString(", ")}]")
+        set.headOption
       }
   }
 }

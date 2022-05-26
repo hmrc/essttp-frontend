@@ -16,6 +16,8 @@
 
 package testOnly.testusermodel
 
+import cats.syntax.eq._
+
 import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
 import essttp.rootmodel.{Email, EmpRef, Vrn}
 
@@ -37,7 +39,7 @@ object RandomDataGenerator {
     Nino(s"AA${nextNumber(6)}A")
   }
 
-  def nextEmail()(implicit r: Random) = s"${nextForename()}.${nextSurname()}@${nextDomain()}"
+  def nextEmail()(implicit r: Random): String = s"${nextForename()}.${nextSurname()}@${nextDomain()}"
 
   /**
    * This was copied from direct-debit-backend
@@ -51,7 +53,7 @@ object RandomDataGenerator {
         val sum = digits.zipWithIndex.foldLeft(0){ case (acc, (d, w)) => acc + d * (8 - w) }
         val residual = {
           val r = calculateResidual(sum).toString
-          if (r.length == 1) r.padTo(2, '0').reverse else r
+          if (r.length === 1) r.padTo(2, '0').reverse else r
         }
         Vrn(digits.mkString("") + residual)
       }
@@ -92,7 +94,7 @@ object RandomDataGenerator {
     "easy.email.test"
   )
 
-  def nextCompanyName()(implicit r: Random) = choose(
+  def nextCompanyName()(implicit r: Random): String = choose(
     "Panasoftix LTD",
     "Colm Cavanagh LTD",
     "Blom Digital LDT",

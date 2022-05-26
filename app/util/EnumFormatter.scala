@@ -16,6 +16,8 @@
 
 package util
 
+import cats.syntax.either._
+import com.github.ghik.silencer.silent
 import enumeratum.{Enum, EnumEntry}
 import play.api.data.FormError
 import play.api.data.format.Formatter
@@ -30,13 +32,19 @@ object EnumFormatter {
   ): Formatter[A] = new Formatter[A] {
     val delegate = enumeratum.Forms.format(enum, insensitive)
 
-    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], A] = delegate.bind(key, data)
-      .left
-      .map(_.map(fe => fe.copy(messages = fe.messages.map {
-        case "error.required" => errorMessageIfMissing
-        case "error.enum"     => errorMessageIfEnumError
-        case x                => x
-      })))
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], A] =
+      delegate.bind(key, data).leftMap(_.map(updateMessages))
+
+    private def updateMessages(formError: FormError) =
+      FormError(
+        formError.key,
+        formError.messages.map {
+          case "error.required" => errorMessageIfMissing
+          case "error.enum"     => errorMessageIfEnumError
+          case x                => x
+        },
+        formError.args: @silent
+      )
 
     override def unbind(key: String, value: A): Map[String, String] = ???
 

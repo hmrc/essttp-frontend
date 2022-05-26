@@ -41,7 +41,14 @@
 @import requestSupport._
 
 @title = @{Messages.Confirmation.`Your payment plan is set up`.show}
-@nextPayment = @{s"${answers.getPaymentDay}${DateMessages.getSuffix(answers.getPaymentDay).show} ${DateMessages.monthName(payments.head.month).show} ${payments.head.year.toString}"}
+@nextPayment = @{
+    val payment = payments.headOption.getOrElse(sys.error("Could not find any payments"))
+    val day = s"${answers.getPaymentDay}${DateMessages.getSuffix(answers.getPaymentDay).show}"
+    val month = DateMessages.monthName(payment.month).show
+    val year = payment.year.toString
+
+    s"$day $month $year"
+}
 
 @layout(pageTitle = Some(title), backUrl = Some(routes.BankDetailsController.checkBankDetails().url)) {
   @govukPanel(Panel(
