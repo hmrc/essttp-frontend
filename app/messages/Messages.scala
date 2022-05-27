@@ -346,10 +346,6 @@ object Messages {
       english = "Payment summary"
     )
 
-    val `Can you make an upfront payment?`: Message = Message(
-      english = "Can you make an upfront payment?"
-    )
-
     val `Yes`: Message = Message(
       english = "Yes"
     )
