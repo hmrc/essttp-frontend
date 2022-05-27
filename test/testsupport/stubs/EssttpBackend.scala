@@ -164,8 +164,8 @@ object EssttpBackend {
       )
 
     def findJourneyAfterUpdateUpfrontPaymentAmount(
-                                                    jsonBody: String = TdJsonBodies.afterUpfrontPaymentAmountJourneyJson(TdAll.upfrontPaymentAmount)
-                                                  ): StubMapping = stubFor(
+        jsonBody: String = TdJsonBodies.afterUpfrontPaymentAmountJourneyJson(TdAll.upfrontPaymentAmount)
+    ): StubMapping = stubFor(
       get(urlPathEqualTo(findByLatestSessionIdUrl))
         .willReturn(aResponse()
           .withStatus(200)

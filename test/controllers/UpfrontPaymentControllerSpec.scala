@@ -216,10 +216,10 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     forAll(
       Table(
         ("Scenario flavour", "form input", "expected error message"),
-        ("x > maximum debt", "30001", "Your upfront payment must be between £1 and £3,000"),
-        ("x < 1", "0.99", "Your upfront payment must be between £1 and £3,000"),
-        ("x < 0", "-1", "Your upfront payment must be between £1 and £3,000"),
-        ("x = 0", "0", "Your upfront payment must be between £1 and £3,000"),
+        ("x > maximum debt", "30001", "Your upfront payment must be between £1 and £2,999"),
+        ("x < 1", "0.99", "Your upfront payment must be between £1 and £2,999"),
+        ("x < 0", "-1", "Your upfront payment must be between £1 and £2,999"),
+        ("x = 0", "0", "Your upfront payment must be between £1 and £2,999"),
         ("x = NaN", "one", "How much you can pay upfront must be an amount of money"),
         ("x = null", "", "Enter your upfront payment")
       )
