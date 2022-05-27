@@ -91,10 +91,12 @@ object TdJsonBodies {
        |      "idNumber" : "123/456",
        |      "regimeType" : "PAYE",
        |      "processingDate" : "2022-01-01",
-       |      "customerDetails" : {
-       |        "country" : "Narnia",
-       |        "postCode" : "AA11AA"
-       |      },
+       |      "customerPostcodes": [
+       |        {
+       |          "addressPostcode": "AA11AA",
+       |          "postcodeDate": "2022-01-31"
+       |        }
+       |      ],
        |      "minPlanLengthMonths" : 1,
        |      "maxPlanLengthMonths" : 3,
        |      "eligibilityStatus" : {
@@ -165,10 +167,12 @@ object TdJsonBodies {
        |  "idNumber" : "123/456",
        |  "regimeType" : "PAYE",
        |  "processingDate" : "2022-01-01",
-       |  "customerDetails" : {
-       |    "country" : "Narnia",
-       |    "postCode" : "AA11AA"
-       |  },
+       |  "customerPostcodes": [
+       |        {
+       |          "addressPostcode": "AA11AA",
+       |          "postcodeDate": "2022-01-31"
+       |        }
+       |  ],
        |  "minPlanLengthMonths" : 1,
        |  "maxPlanLengthMonths" : 3,
        |  "eligibilityStatus" : {
@@ -244,10 +248,12 @@ object TdJsonBodies {
        |      "idNumber" : "123/456",
        |      "regimeType" : "PAYE",
        |      "processingDate" : "",
-       |      "customerDetails" : {
-       |        "country" : "Narnia",
-       |        "postCode" : "AA11AA"
-       |      },
+       |      "customerPostcodes": [
+       |        {
+       |          "addressPostcode": "AA11AA",
+       |          "postcodeDate": "2022-01-31"
+       |        }
+       |      ],
        |      "minPlanLengthMonths" : 1,
        |      "maxPlanLengthMonths" : 3,
        |      "eligibilityStatus" : {
