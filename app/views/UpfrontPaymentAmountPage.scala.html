@@ -80,7 +80,7 @@
                 )),
                 value = form.data.get(key)
             ))
-            @govukButton(Button(content = Text(Messages.continue.show)))
+            @govukButton(Button(content = Text(Messages.continue.show), attributes = Map("id" -> "continue")))
         }
 
     }

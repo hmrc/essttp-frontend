@@ -19,7 +19,7 @@ package testsupport.testdata
 import actions.EnrolmentDef
 import essttp.journey.model.JourneyId
 import essttp.journey.model.ttp.{EligibilityRules, OverallEligibilityStatus}
-import essttp.rootmodel.CanPayUpfront
+import essttp.rootmodel.{AmountInPence, CanPayUpfront, UpfrontPaymentAmount}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 
 object TdAll {
@@ -45,6 +45,9 @@ object TdAll {
 
   val canPayUpfront: CanPayUpfront = CanPayUpfront(true)
   val canNotPayUpfront: CanPayUpfront = canPayUpfront.copy(false)
+
+  val amountInPence: AmountInPence = AmountInPence(1000)
+  val upfrontPaymentAmount: UpfrontPaymentAmount = UpfrontPaymentAmount(amountInPence)
 
   val eligibleOverallEligibilityStatus: OverallEligibilityStatus = OverallEligibilityStatus(true)
   val notEligibleOverallEligibilityStatus: OverallEligibilityStatus = eligibleOverallEligibilityStatus.copy(value = false)

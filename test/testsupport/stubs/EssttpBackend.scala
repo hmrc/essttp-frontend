@@ -20,7 +20,7 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.journey.model.{JourneyId, Origin, Origins}
 import essttp.rootmodel.CanPayUpfront
-import testsupport.testdata.TdJsonBodies
+import testsupport.testdata.{TdAll, TdJsonBodies}
 
 object EssttpBackend {
 
@@ -162,5 +162,14 @@ object EssttpBackend {
         exactly(0),
         postRequestedFor(urlPathEqualTo(updateUpfrontPaymentAmountUrl(journeyId)))
       )
+
+    def findJourneyAfterUpdateUpfrontPaymentAmount(
+                                                    jsonBody: String = TdJsonBodies.afterUpfrontPaymentAmountJourneyJson(TdAll.upfrontPaymentAmount)
+                                                  ): StubMapping = stubFor(
+      get(urlPathEqualTo(findByLatestSessionIdUrl))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withBody(jsonBody))
+    )
   }
 }

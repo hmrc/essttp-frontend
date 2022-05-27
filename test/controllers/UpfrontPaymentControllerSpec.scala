@@ -41,6 +41,8 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     "Your monthly payments will be lower if you can make an upfront payment. This payment will be taken from your bank account within 10 working days."
   private val expectedH1HowMuchCanYouPayUpfrontPage: String = "How much can you pay upfront?"
   private val expectedPageTitleHowMuchCanYouPayUpfrontPage: String = s"$expectedH1HowMuchCanYouPayUpfrontPage - $expectedServiceName - GOV.UK"
+  private val expectedH1UpfrontSummaryPage: String = "Payment summary"
+  private val expectedPageTitleUpfrontSummaryPage: String = s"$expectedH1UpfrontSummaryPage - $expectedServiceName - GOV.UK"
 
   "GET /can-you-make-an-upfront-payment" - {
     "should return 200 and the can you make an upfront payment page" in {
@@ -254,5 +256,42 @@ class UpfrontPaymentControllerSpec extends ItSpec {
           EssttpBackend.UpfrontPaymentAmount.verifyNoneUpdateUpfrontPaymentAmountRequest(TdAll.journeyId)
         }
       }
+  }
+
+  "GET /upfront-payment-summary" - {
+    "should return 200 and the upfront payment summary page" in {
+      AuthStub.authorise()
+      EssttpBackend.UpfrontPaymentAmount.findJourneyAfterUpdateUpfrontPaymentAmount()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.upfrontPaymentSummary(fakeRequest)
+
+      status(result) shouldBe Status.OK
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
+
+      val pageContent: String = contentAsString(result)
+      val doc: Document = Jsoup.parse(pageContent)
+
+      doc.title() shouldBe expectedPageTitleUpfrontSummaryPage
+      doc.select(".govuk-heading-xl").text() shouldBe expectedH1UpfrontSummaryPage
+      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
+      doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.upfrontPaymentAmount().url
+      doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
+
+      val changeCanUpfrontPaymentElement = doc.select("#changeCanMakeUpfrontPayment")
+      changeCanUpfrontPaymentElement.text() shouldBe "Change Can you make an upfront payment?"
+      changeCanUpfrontPaymentElement.attr("href") shouldBe "/set-up-a-payment-plan/can-you-make-an-upfront-payment"
+      val changeUpfrontPaymentAmountElement = doc.select("#changeUpfrontPaymentAmount")
+      changeUpfrontPaymentAmountElement.text() shouldBe "Change Upfront payment Taken within 10 working days"
+      changeUpfrontPaymentAmountElement.attr("href") shouldBe "/set-up-a-payment-plan/how-much-can-you-pay-upfront"
+      val upfrontPaymentAmountText = doc.select("#main-content > div > div > div > dl > div:nth-child(2) > dd.govuk-summary-list__value").text()
+      upfrontPaymentAmountText shouldBe "£10.00"
+      val remainingAmountToPayText = doc.select("#main-content > div > div > div > dl > div:nth-child(3) > dd").text()
+      remainingAmountToPayText shouldBe "£2,990.00 (interest will be added to this amount)"
+      val continueCta = doc.select("#continue")
+      continueCta.text() shouldBe "Continue"
+      continueCta.attr("href") shouldBe "/set-up-a-payment-plan/monthly-payment-amount"
+    }
   }
 }

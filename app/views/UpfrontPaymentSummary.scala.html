@@ -1,0 +1,112 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.AppConfig
+@import requests.RequestSupport
+@import messages.Messages
+@import play.api.mvc.Request
+@import play.twirl.api.Html
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import essttp.rootmodel.AmountInPence
+@import controllers.routes
+@import essttp.rootmodel.UpfrontPaymentAmount
+
+@this(
+        layout: templates.Layout,
+        appConfig: AppConfig,
+        requestSupport: RequestSupport,
+        govukSummaryList: GovukSummaryList,
+    govukButton: GovukButton,
+)
+
+@(
+        upfrontPayment: UpfrontPaymentAmount,
+        remainingAmountToPay: AmountInPence,
+        backUrl: Option[String] = None)(implicit
+        request: Request[_]
+)
+
+@import requestSupport._
+
+
+@title = @{
+    Messages.UpfrontPaymentSummary.`Payment summary`.show
+}
+
+@layout(pageTitle = Some(title), showSignOutLink = false, backUrl = backUrl) {
+
+    <h1 class="govuk-heading-xl">
+    @title
+    </h1>
+    @govukSummaryList(SummaryList(
+        rows = Seq(
+            SummaryListRow(
+                key = Key(
+                    content = HtmlContent(Html(Messages.UpfrontPaymentSummary.`Can you make an upfront payment?`.show)),
+                    classes = "govuk-!-width-one-half"
+                ),
+                value = Value(
+                    content = Text(Messages.UpfrontPaymentSummary.`Yes`.show)
+                ),
+                actions = Some(Actions(
+                    items = Seq(
+                        ActionItem(
+                            href = routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url,
+                            content = Text(Messages.change.show),
+                            visuallyHiddenText = Some(Messages.UpfrontPaymentSummary.`Can you make an upfront payment?`.show),
+                            attributes = Map("id" -> "changeCanMakeUpfrontPayment")
+                        )
+                    )
+                ))
+            ),
+            SummaryListRow(
+                key = Key(
+                    content = HtmlContent(Html(Messages.UpfrontPaymentSummary.`Upfront payment`.show)),
+                    classes = "govuk-!-width-one-half"
+                ),
+                value = Value(
+                    content = Text(upfrontPayment.value.formatInPounds)
+                ),
+                actions = Some(Actions(
+                    items = Seq(
+                        ActionItem(
+                            href = routes.UpfrontPaymentController.upfrontPaymentAmount().url,
+                            content = Text(Messages.change.show),
+                            visuallyHiddenText = Some(Messages.UpfrontPaymentSummary.`Upfront payment-visually-hidden-message`.show),
+                            attributes = Map("id" -> "changeUpfrontPaymentAmount")
+                        )
+                    )
+                ))
+            ),
+            SummaryListRow(
+                key = Key(
+                    content = Text(Messages.UpfrontPaymentSummary.`Remaining amount to pay`.show)
+                ),
+                value = Value(
+                    content = HtmlContent(
+                        s"""${remainingAmountToPay.formatInPounds} </br> ${Messages.UpfrontPaymentSummary.`(interest will be added to this amount)`.show}"""
+                    )
+                )
+            )
+        )
+    ))
+
+    @govukButton(Button(
+        content = Text(Messages.continue.show),
+        href = Some(routes.MonthlyPaymentAmountController.monthlyPaymentAmount().url),
+        attributes = Map("id" -> "continue")
+    ))
+}

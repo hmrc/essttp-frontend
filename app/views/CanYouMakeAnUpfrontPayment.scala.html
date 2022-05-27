@@ -77,7 +77,7 @@
                     RadioItem(
                         content = Text(Messages.UpfrontPayment.`Yes`.show),
                         value = Some("Yes"),
-                        checked = form.data.values.toList.contains("Yes")
+                        checked = form.data.values.toList.contains("Yes"),
                     ),
                     RadioItem(
                         content = Text(Messages.UpfrontPayment.`No`.show),
@@ -88,7 +88,7 @@
                 classes = "govuk-radios--inline",
                 errorMessage = form.error(key).map(e => ErrorMessage(content = Text(e.message)))
             ))
-            @govukButton(Button(content = Text(Messages.continue.show)))
+            @govukButton(Button(content = Text(Messages.continue.show), attributes = Map("id" -> "continue")))
         }
 
     }
