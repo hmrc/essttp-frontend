@@ -38,7 +38,6 @@
 
 @layout(
   pageTitle = Some(title),
-  showSignOutLink = false,
   backUrl = request.journey.backUrl.map(_.value)
 ) {
   <h1 class="govuk-heading-xl">@title</h1>
