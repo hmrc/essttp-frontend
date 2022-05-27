@@ -346,10 +346,6 @@ object Messages {
       english = "Payment summary"
     )
 
-    val `Yes`: Message = Message(
-      english = "Yes"
-    )
-
     val `Upfront payment`: Message = Message(
       english = "Upfront payment<br><span class=\"govuk-body-s\">Taken within 10 working days</span>"
     )
