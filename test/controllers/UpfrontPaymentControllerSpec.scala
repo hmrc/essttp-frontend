@@ -17,7 +17,7 @@
 package controllers
 
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
+import org.jsoup.nodes.{Document, Element}
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.http.Status
 import play.api.mvc.Result
@@ -30,6 +30,7 @@ import testsupport.testdata.TdAll
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
+import scala.jdk.CollectionConverters.asScalaIteratorConverter
 
 class UpfrontPaymentControllerSpec extends ItSpec {
 
@@ -279,16 +280,19 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.upfrontPaymentAmount().url
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
 
-      val changeCanUpfrontPaymentElement = doc.select("#changeCanMakeUpfrontPayment")
-      changeCanUpfrontPaymentElement.text() shouldBe "Change Can you make an upfront payment?"
-      changeCanUpfrontPaymentElement.attr("href") shouldBe "/set-up-a-payment-plan/can-you-make-an-upfront-payment"
-      val changeUpfrontPaymentAmountElement = doc.select("#changeUpfrontPaymentAmount")
-      changeUpfrontPaymentAmountElement.text() shouldBe "Change Upfront payment Taken within 10 working days"
-      changeUpfrontPaymentAmountElement.attr("href") shouldBe "/set-up-a-payment-plan/how-much-can-you-pay-upfront"
-      val upfrontPaymentAmountText = doc.select("#main-content > div > div > div > dl > div:nth-child(2) > dd.govuk-summary-list__value").text()
-      upfrontPaymentAmountText shouldBe "£10.00"
-      val remainingAmountToPayText = doc.select("#main-content > div > div > div > dl > div:nth-child(3) > dd").text()
-      remainingAmountToPayText shouldBe "£2,990.00 (interest will be added to this amount)"
+      def question(row: Element) = row.select(".govuk-summary-list__key").text()
+      def answer(row: Element) = row.select(".govuk-summary-list__value").text()
+      def changeUrl(row: Element) = row.select(".govuk-link").attr("href")
+      val rows =  doc.select(".govuk-summary-list__row").iterator().asScala.toList
+      question(rows(0)) shouldBe "Can you make an upfront payment?"
+      question(rows(1)) shouldBe "Upfront payment Taken within 10 working days"
+      question(rows(2)) shouldBe "Remaining amount to pay"
+      answer(rows(0)) shouldBe "Yes"
+      answer(rows(1)) shouldBe "£10.00"
+      answer(rows(2)) shouldBe "£2,990.00 (interest will be added to this amount)"
+      changeUrl(rows(0)) shouldBe "/set-up-a-payment-plan/can-you-make-an-upfront-payment"
+      changeUrl(rows(1)) shouldBe "/set-up-a-payment-plan/how-much-can-you-pay-upfront"
+
       val continueCta = doc.select("#continue")
       continueCta.text() shouldBe "Continue"
       continueCta.attr("href") shouldBe "/set-up-a-payment-plan/monthly-payment-amount"
