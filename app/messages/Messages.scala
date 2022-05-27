@@ -334,8 +334,8 @@ object Messages {
     def getError(key: String, max: AmountInPence, min: AmountInPence): Message = key match {
       case "error.required" => Message(english = "Enter your upfront payment")
       case "error.pattern"  => Message(english = "How much you can pay upfront must be an amount of money")
-      case "error.tooSmall" => Message(english = s"How much you can pay upfront must be ${min.formatInPounds} or more")
-      case "error.tooLarge" => Message(english = s"How much you can pay upfront must be ${max.formatInPounds} or less")
+      case "error.tooSmall" => Message(english = s"How much you can pay upfront must be £${min.inPounds} or more")
+      case "error.tooLarge" => Message(english = s"How much you can pay upfront must be £${max.inPounds} or less")
     }
 
   }
