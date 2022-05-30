@@ -64,7 +64,18 @@ class StartJourneyController @Inject() (
   val startJourneySubmit: Action[AnyContent] = as.default.async { implicit request =>
     StartJourneyForm.form.bindFromRequest()
       .fold(
-        formWithErrors => Future.successful(Ok(testOnlyStartPage(formWithErrors))),
+        formWithErrors => {
+          import cats.syntax.eq._
+          val form = formWithErrors.copy(errors = formWithErrors.errors.map(e =>
+            if (e.key === "debtTotalAmount") {
+              e.withMessage(StartJourneyController.amountInputErrorMessage(e.message)
+                .getOrElse(sys.error(s"Could not find error message for '${e.message}' for debtTotalAmount ")))
+            } else {
+              e
+            }))
+          Future.successful(Ok(testOnlyStartPage(form)))
+        },
+
         startJourney
       )
   }
@@ -171,11 +182,10 @@ object StartJourneyController {
     )
   }
 
-  //todo current max is 15k (for EPAYE), when vat comes along this may need to change
   def amountInputErrorMessage(key: String): Option[String] = key match {
-    case "error.required"                    => Some("Field cannot be empty")
-    case "error.pattern"                     => Some("Value must be an amount of money")
-    case "error.tooSmall" | "error.tooLarge" => Some("Amount not valid, look at the info")
+    case "error.required"                    => Some("Total debt field cannot be empty")
+    case "error.pattern"                     => Some("Total debt must be an amount of money")
+    case "error.tooSmall" | "error.tooLarge" => Some("Total debt for PAYE must be between £1 and £15,000")
     case _                                   => None
   }
 

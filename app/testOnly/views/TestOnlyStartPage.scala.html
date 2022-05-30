@@ -24,7 +24,6 @@
 @import essttp.journey.model.Origins
 @import testOnly.formsmodel.Enrolments
 @import testOnly.formsmodel.SignInAs
-@import testOnly.controllers.StartJourneyController
 
 @this(
         testOnlyLayout: TestOnlyLayout,
@@ -174,7 +173,7 @@
         content = Text("£")
     )),
     errorMessage = form.error("debtTotalAmount").map(e => ErrorMessage(
-        content = Text(StartJourneyController.amountInputErrorMessage(e.message).getOrElse("Error with total debt input"))
+        content = Text(e.message)
     )),
     value = form.data.get("debtTotalAmount"),
     hint = Some(Hint(content = Text("Enter an amount between £1 and £15,000")))
@@ -220,12 +219,13 @@
 
 @testOnlyLayout(pageTitle = Some(title)) {
     @if(form.errors.nonEmpty) {
-        @govukErrorSummary(ErrorSummary(errorList = form.errors.map { e =>
-            StartJourneyController.amountInputErrorMessage(e.message) match {
-                case Some(value) => ErrorLink(href = Some(s"#${e.key}"), content = Text(value))
-                case None        => ErrorLink(href = Some(s"#${e.key}"), content = Text(e.message))
-            }},
-            title = Text("There is a problem")))
+        @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
+            ErrorLink(
+                href = Some(s"#${e.key}"),
+                content = Text(e.message)
+            )),
+            title = Text("There is a problem")
+        ))
     }
 
 
