@@ -347,11 +347,14 @@ object Messages {
     )
 
     val `Upfront payment`: Message = Message(
-      english = "Upfront payment<br><span class=\"govuk-body-s\">Taken within 7 working days</span>"
+      english = "Upfront payment<br><span class=\"govuk-body-s\">Taken within 10 working days</span>"
+    )
+    val `Upfront payment-visually-hidden-message`: Message = Message(
+      english = "Upfront payment Taken within 10 working days"
     )
 
-    val `Taken within 7 working days`: Message = Message(
-      english = "Taken within 7 working days"
+    val `Taken within 10 working days`: Message = Message(
+      english = "Taken within 10 working days"
     )
 
     val `Remaining amount to pay`: Message = Message(
@@ -359,7 +362,7 @@ object Messages {
     )
 
     val `(interest will be added to this amount)`: Message = Message(
-      english = "(interest will be added to this amount)"
+      english = """<span class="govuk-body-s">(interest will be added to this amount)</span>"""
     )
 
   }
@@ -459,8 +462,8 @@ object Messages {
     val `Upfront payment`: Message = Message(
       english = "Upfront payment"
     )
-    val `Taken within 7 working days`: Message = Message(
-      english = "Taken within 7 working days"
+    val `Taken within 10 working days`: Message = Message(
+      english = "Taken within 10 working days"
     )
     val `Monthly payments`: Message = Message(
       english = "Monthly payments"
@@ -620,7 +623,7 @@ object Messages {
     )
 
     def paymentInfo(hasUpfrontPayment: Boolean, paymentDate: String): Message = Message(
-      english = s"${if (hasUpfrontPayment) "Your upfront payment will be taken within 7 working days. " else ""}Your next payment will be taken on ${paymentDate} or the next working day."
+      english = s"${if (hasUpfrontPayment) "Your upfront payment will be taken within 10 working days. " else ""}Your next payment will be taken on ${paymentDate} or the next working day."
     )
 
     val `Print your plan or save it as a PDF`: Message = Message(

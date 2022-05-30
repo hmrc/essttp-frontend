@@ -17,7 +17,7 @@
 package controllers
 
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
+import org.jsoup.nodes.{Document, Element}
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.http.Status
 import play.api.mvc.Result
@@ -30,6 +30,7 @@ import testsupport.testdata.TdAll
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
+import scala.jdk.CollectionConverters.asScalaIteratorConverter
 
 class UpfrontPaymentControllerSpec extends ItSpec {
 
@@ -41,6 +42,8 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     "Your monthly payments will be lower if you can make an upfront payment. This payment will be taken from your bank account within 10 working days."
   private val expectedH1HowMuchCanYouPayUpfrontPage: String = "How much can you pay upfront?"
   private val expectedPageTitleHowMuchCanYouPayUpfrontPage: String = s"$expectedH1HowMuchCanYouPayUpfrontPage - $expectedServiceName - GOV.UK"
+  private val expectedH1UpfrontSummaryPage: String = "Payment summary"
+  private val expectedPageTitleUpfrontSummaryPage: String = s"$expectedH1UpfrontSummaryPage - $expectedServiceName - GOV.UK"
 
   "GET /can-you-make-an-upfront-payment" - {
     "should return 200 and the can you make an upfront payment page" in {
@@ -214,10 +217,10 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     forAll(
       Table(
         ("Scenario flavour", "form input", "expected error message"),
-        ("x > maximum debt", "30001", "Your upfront payment must be between £1 and £3,000"),
-        ("x < 1", "0.99", "Your upfront payment must be between £1 and £3,000"),
-        ("x < 0", "-1", "Your upfront payment must be between £1 and £3,000"),
-        ("x = 0", "0", "Your upfront payment must be between £1 and £3,000"),
+        ("x > maximum debt", "30001", "Your upfront payment must be between £1 and £2,999"),
+        ("x < 1", "0.99", "Your upfront payment must be between £1 and £2,999"),
+        ("x < 0", "-1", "Your upfront payment must be between £1 and £2,999"),
+        ("x = 0", "0", "Your upfront payment must be between £1 and £2,999"),
         ("x = NaN", "one", "How much you can pay upfront must be an amount of money"),
         ("x = null", "", "Enter your upfront payment")
       )
@@ -254,5 +257,45 @@ class UpfrontPaymentControllerSpec extends ItSpec {
           EssttpBackend.UpfrontPaymentAmount.verifyNoneUpdateUpfrontPaymentAmountRequest(TdAll.journeyId)
         }
       }
+  }
+
+  "GET /upfront-payment-summary" - {
+    "should return 200 and the upfront payment summary page" in {
+      AuthStub.authorise()
+      EssttpBackend.UpfrontPaymentAmount.findJourneyAfterUpdateUpfrontPaymentAmount()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.upfrontPaymentSummary(fakeRequest)
+
+      status(result) shouldBe Status.OK
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
+
+      val pageContent: String = contentAsString(result)
+      val doc: Document = Jsoup.parse(pageContent)
+
+      doc.title() shouldBe expectedPageTitleUpfrontSummaryPage
+      doc.select(".govuk-heading-xl").text() shouldBe expectedH1UpfrontSummaryPage
+      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
+      doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.upfrontPaymentAmount().url
+      doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
+
+      def question(row: Element) = row.select(".govuk-summary-list__key").text()
+      def answer(row: Element) = row.select(".govuk-summary-list__value").text()
+      def changeUrl(row: Element) = row.select(".govuk-link").attr("href")
+      val rows =  doc.select(".govuk-summary-list__row").iterator().asScala.toList
+      question(rows(0)) shouldBe "Can you make an upfront payment?"
+      question(rows(1)) shouldBe "Upfront payment Taken within 10 working days"
+      question(rows(2)) shouldBe "Remaining amount to pay"
+      answer(rows(0)) shouldBe "Yes"
+      answer(rows(1)) shouldBe "£10.00"
+      answer(rows(2)) shouldBe "£2,990.00 (interest will be added to this amount)"
+      changeUrl(rows(0)) shouldBe "/set-up-a-payment-plan/can-you-make-an-upfront-payment"
+      changeUrl(rows(1)) shouldBe "/set-up-a-payment-plan/how-much-can-you-pay-upfront"
+
+      val continueCta = doc.select("#continue")
+      continueCta.text() shouldBe "Continue"
+      continueCta.attr("href") shouldBe "/set-up-a-payment-plan/monthly-payment-amount"
+    }
   }
 }
