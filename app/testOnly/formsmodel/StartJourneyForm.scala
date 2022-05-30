@@ -69,7 +69,7 @@ object StartJourneyForm {
         "eligibilityErrors" -> seq(enumeratum.Forms.enum(EligibilityErrors)),
         "debtTotalAmount" -> Forms.of(amountOfMoneyFormatter(
           isTooSmall = AmountInPence(100) > AmountInPence(_),
-          isTooLarge = AmountInPence(_) > AmountInPence(1000000)
+          isTooLarge = AmountInPence(_) > AmountInPence(1500000)
         ))
       )(StartJourneyForm.apply)(StartJourneyForm.unapply)
     )
