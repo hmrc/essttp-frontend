@@ -118,6 +118,8 @@ object StartJourneyController {
 
   private def makeEligibilityCheckResult(form: StartJourneyForm): EligibilityCheckResult = {
 
+    val debtAmountFromForm: DebtTotalAmount = DebtTotalAmount((form.debtTotalAmount * 100).toInt)
+
     val disallowedChargeLocks = essttp.journey.model.ttp.DisallowedChargeLocks(
       ChargeId("A00000000001"),
       MainTrans("mainTrans"),
@@ -136,7 +138,7 @@ object StartJourneyController {
     )
 
     val chargeTypeAssessments: List[ChargeTypeAssessment] = List(
-      ChargeTypeAssessment(TaxPeriodFrom("2020-08-13"), TaxPeriodTo("2020-08-14"), DebtTotalAmount(300000), List(disallowedChargeLocks))
+      ChargeTypeAssessment(TaxPeriodFrom("2020-08-13"), TaxPeriodTo("2020-08-14"), debtAmountFromForm, List(disallowedChargeLocks))
     )
 
     val containsError: EligibilityError => Boolean = (ee: EligibilityError) => form.eligibilityErrors.contains(ee)
@@ -157,7 +159,7 @@ object StartJourneyController {
       idType               = IdType("SSTTP"),
       idNumber             = IdNumber(form.empRef.value),
       regimeType           = RegimeType("PAYE"),
-      processingDate       = ProcessingDate(""),
+      processingDate       = ProcessingDate("2022-01-31"),
       customerPostcodes    = List(CustomerPostcode(Postcode("AA11AA"), PostcodeDate("2022-01-01"))),
       minPlanLengthMonths  = MinPlanLengthMonths(1),
       maxPlanLengthMonths  = MaxPlanLengthMonths(3),
@@ -167,6 +169,13 @@ object StartJourneyController {
       eligibilityRules     = eligibilityRules,
       chargeTypeAssessment = chargeTypeAssessments
     )
+  }
+
+  def totalDebtErrorMessage(key: String): Option[String] = key match {
+    case "error.required"                    => Some("Enter an amount for total debt")
+    case "error.pattern"                     => Some("Total Debt must be an amount of money")
+    case "error.tooSmall" | "error.tooLarge" => Some("Total debt must be between £1 and £10000")
+    case _                                   => None
   }
 
 }

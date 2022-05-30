@@ -24,6 +24,7 @@
 @import essttp.journey.model.Origins
 @import testOnly.formsmodel.Enrolments
 @import testOnly.formsmodel.SignInAs
+@import testOnly.controllers.StartJourneyController
 
 @this(
         testOnlyLayout: TestOnlyLayout,
@@ -33,7 +34,8 @@
         requestSupport: RequestSupport,
         govukTabs: GovukTabs,
         govukCheckboxes: GovukCheckboxes,
-        govukErrorSummary: GovukErrorSummary
+        govukErrorSummary: GovukErrorSummary,
+        govukInput: GovukInput
 )
 
 @(form: Form[StartJourneyForm])(implicit
@@ -116,7 +118,7 @@
     fieldset = Some(Fieldset(
         legend = Some(Legend(
             content = Text("Eligibility failures"),
-            classes = "govuk-fieldset__legend--s",
+            classes = "govuk-fieldset__legend--m",
             isPageHeading = false
         ))
     )),
@@ -155,6 +157,26 @@
         )
     ),
     classes = "govuk-radios--small"
+))
+}
+@debtTotalAmountContent = {
+@govukInput(Input(
+    id = "debtTotalAmount",
+    name = "debtTotalAmount",
+    label = Label(
+        isPageHeading = false,
+        classes = "govuk-label--m",
+        content = Text("Enter total debt amount")
+    ),
+    classes = "govuk-input--width-5",
+    spellcheck = Some(false),
+    prefix = Some(PrefixOrSuffix(
+        content = Text("£")
+    )),
+    errorMessage = form.error("debtTotalAmount").map(e => ErrorMessage(
+        content = Text(StartJourneyController.totalDebtErrorMessage(e.message).getOrElse("Error with total debt input"))
+    )),
+    value = form.data.get("debtTotalAmount")
 ))
 }
 
@@ -197,12 +219,11 @@
 
 @testOnlyLayout(pageTitle = Some(title)) {
     @if(form.errors.nonEmpty) {
-        @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
-            ErrorLink(
-                href = Some(s"#${e.key}"),
-                content = Text(e.message)
-            )
-        ),
+        @govukErrorSummary(ErrorSummary(errorList = form.errors.map { e =>
+            StartJourneyController.totalDebtErrorMessage(e.message) match {
+                case Some(value) => ErrorLink(href = Some(s"#${e.key}"), content = Text(value))
+                case None        => ErrorLink(href = Some(s"#${e.key}"), content = Text(e.message))
+            }},
             title = Text("There is a problem")))
     }
 
@@ -213,6 +234,7 @@
 
         @signInAsContent
         @enrolmentsContent
+        @debtTotalAmountContent
 
         @govukTabs(Tabs(
             items = Seq(

@@ -17,12 +17,13 @@
 package testOnly.formsmodel
 
 import essttp.journey.model.{Origin, Origins}
-import essttp.rootmodel.EmpRef
 import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
+import essttp.rootmodel.{AmountInPence, EmpRef}
 import langswitch.Language
+import models.MoneyUtil.amountOfMoneyFormatter
 import models.{EligibilityError, EligibilityErrors}
-import play.api.data.{Form, Forms, Mapping}
 import play.api.data.Forms.{mapping, seq}
+import play.api.data.{FieldMapping, Form, Forms, Mapping}
 import testOnly.messages.Messages
 import testOnly.testusermodel.RandomDataGenerator
 import util.EnumFormatter
@@ -33,7 +34,8 @@ final case class StartJourneyForm(
     signInAs:          SignInAs,
     enrolments:        Seq[Enrolment],
     origin:            Origin,
-    eligibilityErrors: Seq[EligibilityError]
+    eligibilityErrors: Seq[EligibilityError],
+    debtTotalAmount:   BigDecimal
 ) {
   //TODO: move ton and tor to the form
   val (ton: TaxOfficeNumber, tor: TaxOfficeReference, empRef: EmpRef) = RandomDataGenerator.nextEpayeRefs()(Random)
@@ -53,7 +55,7 @@ object StartJourneyForm {
       Forms.of(EnumFormatter.format(enum = Enrolments))
     )
 
-    val originMapping = Forms.of(EnumFormatter.format(
+    val originMapping: FieldMapping[Origin] = Forms.of(EnumFormatter.format(
       enum                    = Origins,
       errorMessageIfMissing   = Messages.`Select which origin the journey should start from`.show,
       errorMessageIfEnumError = Messages.`Select which origin the journey should start from`.show
@@ -64,7 +66,11 @@ object StartJourneyForm {
         "signInAs" -> signInMapping,
         "enrolments" -> enrolmentsMapping,
         "origin" -> originMapping,
-        "eligibilityErrors" -> seq(enumeratum.Forms.enum(EligibilityErrors))
+        "eligibilityErrors" -> seq(enumeratum.Forms.enum(EligibilityErrors)),
+        "debtTotalAmount" -> Forms.of(amountOfMoneyFormatter(
+          isTooSmall = AmountInPence(100) > AmountInPence(_),
+          isTooLarge = AmountInPence(_) > AmountInPence(1000000)
+        ))
       )(StartJourneyForm.apply)(StartJourneyForm.unapply)
     )
   }
