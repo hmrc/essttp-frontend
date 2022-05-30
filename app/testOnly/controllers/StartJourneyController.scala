@@ -172,10 +172,10 @@ object StartJourneyController {
   }
 
   //todo current max is 15k (for EPAYE), when vat comes along this may need to change
-  def totalDebtErrorMessage(key: String): Option[String] = key match {
-    case "error.required"                    => Some("Enter an amount for total debt")
-    case "error.pattern"                     => Some("Total Debt must be an amount of money")
-    case "error.tooSmall" | "error.tooLarge" => Some("Total debt must be between £1 and £15000")
+  def amountInputErrorMessage(key: String): Option[String] = key match {
+    case "error.required"                    => Some("Field cannot be empty")
+    case "error.pattern"                     => Some("Value must be an amount of money")
+    case "error.tooSmall" | "error.tooLarge" => Some("Amount not valid, look at the info")
     case _                                   => None
   }
 
