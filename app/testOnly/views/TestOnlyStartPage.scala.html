@@ -33,7 +33,8 @@
         requestSupport: RequestSupport,
         govukTabs: GovukTabs,
         govukCheckboxes: GovukCheckboxes,
-        govukErrorSummary: GovukErrorSummary
+        govukErrorSummary: GovukErrorSummary,
+        govukInput: GovukInput
 )
 
 @(form: Form[StartJourneyForm])(implicit
@@ -116,7 +117,7 @@
     fieldset = Some(Fieldset(
         legend = Some(Legend(
             content = Text("Eligibility failures"),
-            classes = "govuk-fieldset__legend--s",
+            classes = "govuk-fieldset__legend--m",
             isPageHeading = false
         ))
     )),
@@ -155,6 +156,27 @@
         )
     ),
     classes = "govuk-radios--small"
+))
+}
+@debtTotalAmountContent = {
+@govukInput(Input(
+    id = "debtTotalAmount",
+    name = "debtTotalAmount",
+    label = Label(
+        isPageHeading = false,
+        classes = "govuk-label--m",
+        content = Text("Enter total debt amount")
+    ),
+    classes = "govuk-input--width-5",
+    spellcheck = Some(false),
+    prefix = Some(PrefixOrSuffix(
+        content = Text("£")
+    )),
+    errorMessage = form.error("debtTotalAmount").map(e => ErrorMessage(
+        content = Text(e.message)
+    )),
+    value = form.data.get("debtTotalAmount"),
+    hint = Some(Hint(content = Text("Enter an amount between £1 and £15,000")))
 ))
 }
 
@@ -201,9 +223,9 @@
             ErrorLink(
                 href = Some(s"#${e.key}"),
                 content = Text(e.message)
-            )
-        ),
-            title = Text("There is a problem")))
+            )),
+            title = Text("There is a problem")
+        ))
     }
 
 
@@ -213,6 +235,7 @@
 
         @signInAsContent
         @enrolmentsContent
+        @debtTotalAmountContent
 
         @govukTabs(Tabs(
             items = Seq(
