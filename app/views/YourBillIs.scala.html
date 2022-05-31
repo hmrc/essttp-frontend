@@ -46,6 +46,7 @@
   backUrl = backUrl
 ) {
   <h1 class="govuk-heading-xl">@title</h1>
+  <h2 class="govuk-heading-m">@{Messages.`Overdue payments`.show}</h2>
   <dl class="govuk-summary-list">
     @overduePayments.payments.map(payment => overduePaymentRow(payment))
   </dl>
