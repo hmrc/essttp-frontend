@@ -81,6 +81,10 @@ object Messages {
     english = s"Your PAYE bill is ${amount.formatInPounds}"
   )
 
+  val `Overdue payments`: Message = Message(
+    english = "Overdue payments"
+  )
+
   object TimeOut {
 
     val `For your security, we signed you out`: Message = Message(
