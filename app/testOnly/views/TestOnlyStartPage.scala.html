@@ -24,6 +24,7 @@
 @import essttp.journey.model.Origins
 @import testOnly.formsmodel.Enrolments
 @import testOnly.formsmodel.SignInAs
+@import cats.syntax.eq._
 
 @this(
         testOnlyLayout: TestOnlyLayout,
@@ -46,7 +47,9 @@
     "Test only starter page"
 }
 @eligibilityErrorCheckboxes = @{
-    EligibilityErrors.values.map { error =>
+    EligibilityErrors.values
+            .filterNot(errorsToIgnore => errorsToIgnore === EligibilityErrors.MultipleReasons)
+            .map { error =>
         CheckboxItem(
             content = Text(error.entryName),
             value = error.entryName

@@ -21,10 +21,15 @@ import play.api.libs.functional.syntax._
 import enumeratum.Enum
 import play.api.libs.json.Format
 import _root_.essttp.journey.model.ttp._
+import cats.Eq
 
 import scala.collection.immutable
 
 sealed trait EligibilityError extends EnumEntry
+
+object EligibilityError {
+  implicit val eq: Eq[EligibilityError] = Eq.fromUniversalEquals
+}
 
 object EligibilityErrors extends Enum[EligibilityError] {
 
