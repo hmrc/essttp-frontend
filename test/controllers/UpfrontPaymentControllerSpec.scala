@@ -289,7 +289,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       question(rows(2)) shouldBe "Remaining amount to pay"
       answer(rows(0)) shouldBe "Yes"
       answer(rows(1)) shouldBe "£10"
-      answer(rows(2)) shouldBe "£2,990 (interest will be added to this amount)"
+      answer(rows(2)) shouldBe "£2,990 (interest may be added to this amount)"
       changeUrl(rows(0)) shouldBe "/set-up-a-payment-plan/can-you-make-an-upfront-payment"
       changeUrl(rows(1)) shouldBe "/set-up-a-payment-plan/how-much-can-you-pay-upfront"
 
