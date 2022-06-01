@@ -78,7 +78,7 @@ object Messages {
   )
 
   def yourBillIs(amount: AmountInPence): Message = Message(
-    english = s"Your PAYE bill is ${amount.formatInPounds}"
+    english = s"Your PAYE bill is ${amount.gdsFormatInPounds}"
   )
 
   val `Overdue payments`: Message = Message(
@@ -365,8 +365,8 @@ object Messages {
       english = "Remaining amount to pay"
     )
 
-    val `(interest will be added to this amount)`: Message = Message(
-      english = """<span class="govuk-body-s">(interest will be added to this amount)</span>"""
+    val `(interest may be added to this amount)`: Message = Message(
+      english = """<span class="govuk-body-s">(interest may be added to this amount)</span>"""
     )
 
   }
