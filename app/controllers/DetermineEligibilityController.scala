@@ -34,6 +34,7 @@ package controllers
 
 import _root_.actions.Actions
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
+import controllers.pagerouters.EligibilityRouter
 import essttp.journey.model.Journey
 import play.api.mvc._
 import services.{JourneyService, TtpService}

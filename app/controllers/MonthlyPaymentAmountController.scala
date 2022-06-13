@@ -17,50 +17,86 @@
 package controllers
 
 import _root_.actions.Actions
-import controllers.MonthlyPaymentAmountController._
-import models.MockJourney
+import config.AppConfig
+import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
+import essttp.journey.model.ttp.affordability.InstalmentAmounts
+import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
+import essttp.rootmodel.{AmountInPence, MonthlyPaymentAmount}
+import essttp.utils.Errors
 import models.MoneyUtil._
-import essttp.rootmodel.AmountInPence
-import play.api.data.{Form, Forms}
 import play.api.data.Forms.mapping
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.data.{Form, Forms}
+import play.api.mvc._
+import requests.RequestSupport
+import services.{JourneyService, TtpService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
-import views.html.MonthlyPaymentAmount
+import views.Views
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+
 @Singleton
 class MonthlyPaymentAmountController @Inject() (
-    as:                       Actions,
-    mcc:                      MessagesControllerComponents,
-    monthlyPaymentAmountPage: MonthlyPaymentAmount
-)(implicit ec: ExecutionContext)
-  extends FrontendController(mcc)
+    as:             Actions,
+    mcc:            MessagesControllerComponents,
+    views:          Views,
+    journeyService: JourneyService,
+    ttpService:     TtpService,
+    requestSupport: RequestSupport,
+    appConfig:      AppConfig
+)(
+    implicit
+    executionContext: ExecutionContext
+) extends FrontendController(mcc)
   with Logging {
 
-  val monthlyPaymentAmount: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
-    val mockJourney = MockJourney()
-    Future.successful(Ok(monthlyPaymentAmountPage(
-      monthlyPaymentAmountForm(mockJourney),
-      mockJourney.remainingToPay,
-      AmountInPence(mockJourney.remainingToPay.value / 6)
-    )))
+  val displayMonthlyPaymentAmount: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    request.journey match {
+      case j: Journey.BeforeUpfrontPaymentAnswers => logErrorAndRouteToDefaultPage(j)
+      case j: Journey.AfterUpfrontPaymentAnswers  => displayMonthlyPaymentAmountPage(j)
+    }
   }
 
-  val monthlyPaymentAmountSubmit: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
-    val mockJourney = MockJourney()
-    monthlyPaymentAmountForm(MockJourney())
+  private def displayMonthlyPaymentAmountPage(journey: Journey.AfterUpfrontPaymentAnswers)(implicit request: Request[_]): Result = {
+    val backUrl: Option[String] = journey.upfrontPaymentAnswers match {
+      case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => Some(routes.UpfrontPaymentController.upfrontPaymentSummary().url)
+      case UpfrontPaymentAnswers.NoUpfrontPayment          => Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url)
+    }
+
+    val minMaxResponse: InstalmentAmounts = journey match {
+      case _: Journey.BeforeRetrievedAffordabilityResult => Errors.throwServerErrorException("We don't have the affordability api response...")
+      case j: Journey.AfterRetrievedAffordabilityResult  => j.instalmentAmounts
+    }
+
+    Ok(views.monthlyPaymentAmountPage(
+      form           = MonthlyPaymentAmountController.monthlyPaymentAmountForm(minMaxResponse.minimumInstalmentAmount, minMaxResponse.maximumInstalmentAmount),
+      maximumPayment = minMaxResponse.maximumInstalmentAmount,
+      minimumPayment = minMaxResponse.minimumInstalmentAmount,
+      backUrl        = backUrl
+    ))
+  }
+
+  val monthlyPaymentAmountSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
+    val backUrl: Option[String] = Some("addme")
+    val minMaxResponse: InstalmentAmounts = request.journey match {
+      case _: Journey.BeforeRetrievedAffordabilityResult => Errors.throwServerErrorException("We don't have the affordability api response...")
+      case j: Journey.AfterRetrievedAffordabilityResult  => j.instalmentAmounts
+    }
+    MonthlyPaymentAmountController.monthlyPaymentAmountForm(minMaxResponse.minimumInstalmentAmount, minMaxResponse.maximumInstalmentAmount)
       .bindFromRequest()
       .fold(
         formWithErrors =>
-          Future.successful(Ok(
-            monthlyPaymentAmountPage(
-              formWithErrors, mockJourney.remainingToPay, AmountInPence(mockJourney.remainingToPay.value / 6)
-            )
-          )),
-        (s: BigDecimal) => {
-          Future(Redirect(routes.PaymentDayController.paymentDay()))
+          Future.successful(Ok(views.monthlyPaymentAmountPage(
+            form           = formWithErrors,
+            maximumPayment = minMaxResponse.maximumInstalmentAmount,
+            minimumPayment = minMaxResponse.minimumInstalmentAmount,
+            backUrl        = backUrl
+          ))),
+        (validForm: BigDecimal) => {
+          val monthlyPaymentAmount: MonthlyPaymentAmount = MonthlyPaymentAmount(AmountInPence(validForm))
+          journeyService.updateMonthlyPaymentAmount(request.journeyId, monthlyPaymentAmount)
+            .map(_ => Redirect(routes.PaymentDayController.paymentDay()))
         }
       )
   }
@@ -69,9 +105,9 @@ class MonthlyPaymentAmountController @Inject() (
 object MonthlyPaymentAmountController {
   val key: String = "MonthlyPaymentAmount"
 
-  def monthlyPaymentAmountForm(journey: MockJourney): Form[BigDecimal] = Form(
+  def monthlyPaymentAmountForm(minimumAmount: AmountInPence, maximumAmount: AmountInPence): Form[BigDecimal] = Form(
     mapping(
-      key -> Forms.of(amountOfMoneyFormatter(AmountInPence(journey.remainingToPay.value / 6).inPounds > _, journey.remainingToPay.inPounds < _))
+      key -> Forms.of(amountOfMoneyFormatter(minimumAmount.inPounds > _, maximumAmount.inPounds < _))
     )(identity)(Some(_))
   )
 }

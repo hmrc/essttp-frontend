@@ -17,11 +17,12 @@
 package actions
 
 import actionsmodel.{AuthenticatedJourneyRequest, EligibleJourneyRequest, JourneyRequest}
-import controllers.{EligibilityRouter, JourneyIncorrectStateRouter}
+import controllers.JourneyIncorrectStateRouter
+import controllers.pagerouters.EligibilityRouter
 import essttp.journey.model.Journey
 import essttp.rootmodel.TaxRegime
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{ActionRefiner, _}
+import play.api.mvc._
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}

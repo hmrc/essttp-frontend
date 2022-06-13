@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.pagerouters
 
+import controllers.routes
 import essttp.journey.model.ttp.EligibilityCheckResult
 import models.EligibilityErrors
 import models.EligibilityErrors.{DisallowedChargeLocks, EligibleChargeType, ExceedsMaxDebtAge, ExistingTtp, HasRlsOnAddress, IsLessThanMinDebtAllowance, IsMoreThanMaxDebtAllowance, MarkedAsInsolvent, MissingFiledReturns, MultipleReasons}

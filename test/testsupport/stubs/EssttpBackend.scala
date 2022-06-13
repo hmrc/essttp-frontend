@@ -172,4 +172,34 @@ object EssttpBackend {
           .withBody(jsonBody))
     )
   }
+
+  object AffordabilityMinMaxApi {
+    def findJourneyAfterUpdateAffordability(
+        jsonBody: String = TdJsonBodies.afterAffordabilityCheckJourneyJson()
+    ): StubMapping = stubFor(
+      get(urlPathEqualTo(findByLatestSessionIdUrl))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withBody(jsonBody))
+    )
+  }
+
+  object MonthlyPaymentAmount {
+    def monthlyPaymentAmountUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-monthly-payment-amount"
+    def verifyUpdateMonthlyPaymentAmountRequest(journeyId: JourneyId): Unit =
+      verify(postRequestedFor(urlPathEqualTo(monthlyPaymentAmountUrl(journeyId))))
+    def verifyNoneUpdateUpfrontPaymentAmountRequest(journeyId: JourneyId): Unit =
+      verify(
+        exactly(0),
+        postRequestedFor(urlPathEqualTo(monthlyPaymentAmountUrl(journeyId)))
+      )
+    def findJourneyAfterUpdateMonthlyPaymentAmount(
+        jsonBody: String = TdJsonBodies.afterUpfrontPaymentAmountJourneyJson(TdAll.upfrontPaymentAmount)
+    ): StubMapping = stubFor(
+      get(urlPathEqualTo(findByLatestSessionIdUrl))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withBody(jsonBody))
+    )
+  }
 }

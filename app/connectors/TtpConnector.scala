@@ -18,6 +18,7 @@ package connectors
 
 import com.google.inject.{Inject, Singleton}
 import essttp.journey.model.ttp.EligibilityCheckResult
+import essttp.journey.model.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
 import play.api.mvc.RequestHeader
 import requests.RequestSupport._
 import uk.gov.hmrc.http.HttpClient
@@ -37,6 +38,15 @@ class TtpConnector @Inject() (config: TtpConfig, httpClient: HttpClient)(implici
   def callEligibilityApi(eligibilityRequest: CallEligibilityApiRequest)(implicit request: RequestHeader): Future[EligibilityCheckResult] = {
     val url: String = config.baseUrl + "/time-to-pay/self-serve/eligibility"
     httpClient.POST[CallEligibilityApiRequest, EligibilityCheckResult](url, eligibilityRequest)
+  }
+
+  /**
+   * Affordability Api (min/max) implemented by Ttp service.
+   * https://confluence.tools.tax.service.gov.uk/pages/viewpage.action?pageId=433455297
+   */
+  def callAffordabilityApi(instalmentAmountRequest: InstalmentAmountRequest)(implicit request: RequestHeader): Future[InstalmentAmounts] = {
+    val url: String = config.baseUrl + "/time-to-pay/self-serve/affordability"
+    httpClient.POST[InstalmentAmountRequest, InstalmentAmounts](url, instalmentAmountRequest)
   }
 }
 

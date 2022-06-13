@@ -58,7 +58,7 @@
  ))
 }
 
-@layout(pageTitle = Some(title), backUrl = Some(routes.MonthlyPaymentAmountController.monthlyPaymentAmount().url), hasErrors = form.hasErrors) {
+@layout(pageTitle = Some(title), backUrl = Some(routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount().url), hasErrors = form.hasErrors) {
  @if(form.errors.nonEmpty) {
   @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
    ErrorLink(

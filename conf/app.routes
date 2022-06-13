@@ -27,8 +27,12 @@ GET       /how-much-can-you-pay-upfront                  controllers.UpfrontPaym
 POST      /how-much-can-you-pay-upfront                  controllers.UpfrontPaymentController.upfrontPaymentAmountSubmit
 GET       /upfront-payment-summary                       controllers.UpfrontPaymentController.upfrontPaymentSummary
 
-GET        /monthly-payment-amount                       controllers.MonthlyPaymentAmountController.monthlyPaymentAmount
-POST       /monthly-payment-amount                       controllers.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit
+GET       /retrieve-extreme-dates                        controllers.DatesApiController.retrieveExtremeDates
+GET       /determine-affordability                       controllers.DetermineAffordabilityController.determineAffordability
+
+GET       /how-much-can-you-pay-each-month               controllers.MonthlyPaymentAmountController.displayMonthlyPaymentAmount
+POST      /how-much-can-you-pay-each-month               controllers.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit
+
 GET        /payment-day                                  controllers.PaymentDayController.paymentDay()
 POST       /payment-day                                  controllers.PaymentDayController.paymentDaySubmit()
 GET        /instalment-options                           controllers.InstalmentsController.instalmentOptions()
