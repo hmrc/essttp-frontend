@@ -30,14 +30,16 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class DatesApiConnector @Inject() (config: DatesApiConfig, httpClient: HttpClient)(implicit ec: ExecutionContext) {
 
+  val startDatesUrl: String = config.baseUrl + "/essttp-dates/start-dates"
+
   def startDates(startDatesRequest: StartDatesRequest)(implicit request: RequestHeader): Future[StartDatesResponse] = {
-    val url: String = config.baseUrl + "/essttp-dates/start-dates"
-    httpClient.POST[StartDatesRequest, StartDatesResponse](url, startDatesRequest)
+    httpClient.POST[StartDatesRequest, StartDatesResponse](startDatesUrl, startDatesRequest)
   }
 
+  val extremeDatesUrl: String = config.baseUrl + "/essttp-dates/extreme-dates"
+
   def extremeDates(extremeDatesRequest: ExtremeDatesRequest)(implicit request: RequestHeader): Future[ExtremeDatesResponse] = {
-    val url: String = config.baseUrl + "/essttp-dates/extreme-dates"
-    httpClient.POST[ExtremeDatesRequest, ExtremeDatesResponse](url, extremeDatesRequest)
+    httpClient.POST[ExtremeDatesRequest, ExtremeDatesResponse](extremeDatesUrl, extremeDatesRequest)
   }
 }
 

@@ -52,10 +52,7 @@ class DatesApiController @Inject() (
   def getExtremeDatesAndUpdateJourney(
       journey: Either[Journey.Stages.EnteredUpfrontPaymentAmount, Journey.Stages.AnsweredCanPayUpfront]
   )(implicit request: Request[_]): Future[Result] = {
-    val j = journey match {
-      case Left(j)  => j
-      case Right(j) => j
-    }
+    val j = journey.merge
     for {
       extremeDatesResponse <- datesService.extremeDates(j)
       _ <- journeyService.updateExtremeDatesResult(j.id, extremeDatesResponse)
