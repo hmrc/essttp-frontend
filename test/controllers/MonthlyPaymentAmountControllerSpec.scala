@@ -68,14 +68,101 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
       val poundSymbol = doc.select(".govuk-input__prefix")
       poundSymbol.size() shouldBe 1
       poundSymbol.text() shouldBe "£"
-        doc.select(".govuk-details__summary-text").text() shouldBe progressiveRevealContent
+      doc.select(".govuk-details__summary-text").text() shouldBe progressiveRevealContent
       val progressiveRevealSubContent = doc.select(".govuk-details__text").select(".govuk-body").asScala.toSeq
-      println(progressiveRevealSubContent)
       progressiveRevealSubContent(0).text() shouldBe progressiveRevealInnerContent1
       progressiveRevealSubContent(1).text() shouldBe progressiveRevealInnerContent2
       doc.select("#continue").text() should include("Continue")
     }
   }
 
-  "POST /how-much-can-you-pay-each-month" ignore {}
+  "POST /how-much-can-you-pay-each-month should" - {
+    "redirect to what day do you want to pay on when form is valid" in {
+      AuthStub.authorise()
+      EssttpBackend.AffordabilityMinMaxApi.findJourneyAfterUpdateAffordability()
+      EssttpBackend.MonthlyPaymentAmount.updateMonthlyPaymentAmount(TdAll.journeyId)
+      val fakeRequest = FakeRequest(
+        method = "POST",
+        path   = "/how-much-can-you-pay-each-month"
+      ).withAuthToken()
+        .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+        .withFormUrlEncodedBody(("MonthlyPaymentAmount", "300"))
+      val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/payment-day")
+      EssttpBackend.MonthlyPaymentAmount.verifyUpdateMonthlyPaymentAmountRequest(TdAll.journeyId)
+    }
+
+    "display correct error message when form is submitted with value outside of bounds" in {
+      AuthStub.authorise()
+      EssttpBackend.AffordabilityMinMaxApi.findJourneyAfterUpdateAffordability()
+      val fakeRequest = FakeRequest(
+        method = "POST",
+        path   = "/how-much-can-you-pay-each-month"
+      ).withAuthToken()
+        .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+        .withFormUrlEncodedBody(("MonthlyPaymentAmount", "100"))
+      val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
+
+      status(result) shouldBe Status.OK
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
+
+      val pageContent: String = contentAsString(result)
+      val doc: Document = Jsoup.parse(pageContent)
+
+      doc.title() shouldBe s"Error $expectedPageTitle"
+      doc.select(".govuk-label--xl").text() shouldBe expectedH1
+      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
+      doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
+      doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url // todo update this, it depends on journey
+      doc.select("#MonthlyPaymentAmount-hint").text() shouldBe expectedPageHint
+      doc.select("#MonthlyPaymentAmount").size() shouldBe 1
+      val poundSymbol = doc.select(".govuk-input__prefix")
+      poundSymbol.size() shouldBe 1
+      poundSymbol.text() shouldBe "£"
+
+      val errorSummary = doc.select(".govuk-error-summary")
+      val errorLink = errorSummary.select("a")
+      errorLink.text() shouldBe "How much you can afford to pay each month must be between £299.97 and £879.44"
+      errorLink.attr("href") shouldBe "#MonthlyPaymentAmount"
+      EssttpBackend.MonthlyPaymentAmount.verifyNoneUpdateMonthlyAmountRequest(TdAll.journeyId)
+    }
+
+    "display correct error message when empty form is submitted" in {
+      AuthStub.authorise()
+      EssttpBackend.AffordabilityMinMaxApi.findJourneyAfterUpdateAffordability()
+      val fakeRequest = FakeRequest(
+        method = "POST",
+        path   = "/how-much-can-you-pay-each-month"
+      ).withAuthToken()
+        .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+        .withFormUrlEncodedBody(("MonthlyPaymentAmount", ""))
+      val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
+
+      status(result) shouldBe Status.OK
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
+
+      val pageContent: String = contentAsString(result)
+      val doc: Document = Jsoup.parse(pageContent)
+
+      doc.title() shouldBe s"Error $expectedPageTitle"
+      doc.select(".govuk-label--xl").text() shouldBe expectedH1
+      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
+      doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
+      doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url // todo update this, it depends on journey
+      doc.select("#MonthlyPaymentAmount-hint").text() shouldBe expectedPageHint
+      doc.select("#MonthlyPaymentAmount").size() shouldBe 1
+      val poundSymbol = doc.select(".govuk-input__prefix")
+      poundSymbol.size() shouldBe 1
+      poundSymbol.text() shouldBe "£"
+
+      val errorSummary = doc.select(".govuk-error-summary")
+      val errorLink = errorSummary.select("a")
+      errorLink.text() shouldBe "Enter how much you can afford to pay each month"
+      errorLink.attr("href") shouldBe "#MonthlyPaymentAmount"
+      EssttpBackend.MonthlyPaymentAmount.verifyNoneUpdateMonthlyAmountRequest(TdAll.journeyId)
+    }
+  }
 }

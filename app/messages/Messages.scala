@@ -378,14 +378,14 @@ object Messages {
     )
 
     def getHint(max: AmountInPence, min: AmountInPence): Message = Message(
-      english = s"Enter an amount between ${min.formatInPounds} and ${max.formatInPounds}"
+      english = s"Enter an amount between ${min.gdsFormatInPounds} and ${max.gdsFormatInPounds}"
     )
 
     def getError(key: String, max: AmountInPence, min: AmountInPence): Message = key match {
       case "error.required" => Message(english = "Enter how much you can afford to pay each month")
       case "error.pattern"  => Message(english = "How much you can afford to pay each month must be an amount of money")
-      case "error.tooSmall" => Message(english = s"How much you can afford to pay each month must be ${min.formatInPounds} or more")
-      case "error.tooLarge" => Message(english = s"How much you can afford to pay each month must be ${max.formatInPounds} or less")
+      case "error.tooSmall" => Message(english = s"How much you can afford to pay each month must be between ${min.gdsFormatInPounds} and ${max.gdsFormatInPounds}")
+      case "error.tooLarge" => Message(english = s"How much you can afford to pay each month must be between ${min.gdsFormatInPounds} and ${max.gdsFormatInPounds}")
     }
 
     val `I can’t afford the minimum payment`: Message = Message(

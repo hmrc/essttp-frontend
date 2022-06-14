@@ -78,7 +78,13 @@ class MonthlyPaymentAmountController @Inject() (
   }
 
   val monthlyPaymentAmountSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
-    val backUrl: Option[String] = Some("addme")
+    val backUrl: Option[String] = request.journey match {
+      case _: Journey.BeforeUpfrontPaymentAnswers => Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url)
+      case j: Journey.AfterUpfrontPaymentAnswers => j.upfrontPaymentAnswers match {
+        case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => Some(routes.UpfrontPaymentController.upfrontPaymentSummary().url)
+        case UpfrontPaymentAnswers.NoUpfrontPayment          => Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url)
+      }
+    }
     val minMaxResponse: InstalmentAmounts = request.journey match {
       case _: Journey.BeforeRetrievedAffordabilityResult => Errors.throwServerErrorException("We don't have the affordability api response...")
       case j: Journey.AfterRetrievedAffordabilityResult  => j.instalmentAmounts

@@ -16,6 +16,35 @@
 
 package controllers
 
-class DatesApiControllerSpec {
+import play.api.http.Status
+import play.api.mvc.Result
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import testsupport.ItSpec
+import testsupport.TdRequest.FakeRequestOps
+import testsupport.stubs.{AuthStub, Dates, EssttpBackend}
+import testsupport.testdata.TdAll
+import uk.gov.hmrc.http.SessionKeys
+
+import scala.concurrent.Future
+
+class DatesApiControllerSpec extends ItSpec {
+
+  private val controller: DatesApiController = app.injector.instanceOf[DatesApiController]
+
+  "GET /retrieve-extreme-dates" - {
+    "trigger call to essttp-dates microservice extreme dates endpoint and update backend" in {
+      AuthStub.authorise()
+      EssttpBackend.CanPayUpfront.findJourneyAfterUpdateCanPayUpfront(canPayUpfront = TdAll.canPayUpfront)
+      Dates.extremeDatesCall()
+      EssttpBackend.Dates.updateUpfrontPaymentAmount(TdAll.journeyId)
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.retrieveExtremeDates(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/determine-affordability")
+      EssttpBackend.Dates.verifyUpdateMonthlyPaymentAmountRequest(TdAll.journeyId)
+      Dates.verifyExtremeDates()
+    }
+  }
 
 }

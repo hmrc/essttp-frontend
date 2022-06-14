@@ -408,7 +408,7 @@ object TdJsonBodies {
   def afterAffordabilityCheckJourneyJson(): String =
     """
       |{
-      |    "_id" : "62a75e793c0000e235483e24",
+      |    "_id" : "6284fcd33c00003d6b1f3903",
       |    "RetrievedAffordabilityResult" : {
       |        "stage" : {
       |            "RetrievedAffordabilityResult" : {
@@ -420,7 +420,7 @@ object TdJsonBodies {
       |            "minimumInstalmentAmount" : 29997,
       |            "maximumInstalmentAmount" : 87944
       |        },
-      |        "_id" : "62a75e793c0000e235483e24",
+      |        "_id" : "6284fcd33c00003d6b1f3903",
       |        "extremeDatesResponse" : {
       |            "initialPaymentDate" : "2022-06-23",
       |            "earliestPlanStartDate" : "2022-07-13",

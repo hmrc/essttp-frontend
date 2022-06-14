@@ -173,6 +173,33 @@ object EssttpBackend {
     )
   }
 
+  object Dates {
+    def updateExtremeDatesUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-extreme-dates"
+    def updateUpfrontPaymentAmount(journeyId: JourneyId): StubMapping =
+      stubFor(
+        post(urlPathEqualTo(updateExtremeDatesUrl(journeyId)))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+          )
+      )
+    def verifyUpdateMonthlyPaymentAmountRequest(journeyId: JourneyId): Unit =
+      verify(postRequestedFor(urlPathEqualTo(updateExtremeDatesUrl(journeyId))))
+    def verifyNoneUpdateMonthlyAmountRequest(journeyId: JourneyId): Unit =
+      verify(
+        exactly(0),
+        postRequestedFor(urlPathEqualTo(updateExtremeDatesUrl(journeyId)))
+      )
+    def findJourneyAfterUpdateUpfrontPaymentAmount(
+        jsonBody: String = TdJsonBodies.afterUpfrontPaymentAmountJourneyJson(TdAll.upfrontPaymentAmount)
+    ): StubMapping = stubFor(
+      get(urlPathEqualTo(findByLatestSessionIdUrl))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withBody(jsonBody))
+    )
+  }
+
   object AffordabilityMinMaxApi {
     def findJourneyAfterUpdateAffordability(
         jsonBody: String = TdJsonBodies.afterAffordabilityCheckJourneyJson()
@@ -186,9 +213,17 @@ object EssttpBackend {
 
   object MonthlyPaymentAmount {
     def monthlyPaymentAmountUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-monthly-payment-amount"
+    def updateMonthlyPaymentAmount(journeyId: JourneyId): StubMapping =
+      stubFor(
+        post(urlPathEqualTo(monthlyPaymentAmountUrl(journeyId)))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+          )
+      )
     def verifyUpdateMonthlyPaymentAmountRequest(journeyId: JourneyId): Unit =
       verify(postRequestedFor(urlPathEqualTo(monthlyPaymentAmountUrl(journeyId))))
-    def verifyNoneUpdateUpfrontPaymentAmountRequest(journeyId: JourneyId): Unit =
+    def verifyNoneUpdateMonthlyAmountRequest(journeyId: JourneyId): Unit =
       verify(
         exactly(0),
         postRequestedFor(urlPathEqualTo(monthlyPaymentAmountUrl(journeyId)))
