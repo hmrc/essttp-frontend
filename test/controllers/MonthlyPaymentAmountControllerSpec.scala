@@ -36,7 +36,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
   private val expectedServiceName: String = TdAll.expectedServiceNamePaye
   private val expectedH1: String = "How much can you afford to pay each month?"
   private val expectedPageTitle: String = s"$expectedH1 - $expectedServiceName - GOV.UK"
-  private val expectedPageHint: String = "Enter an amount between £299.97 and £879.44"
+  private val expectedPageHint: String = "Enter an amount between £300 and £880"
   private val progressiveRevealContent: String = "I can’t afford the minimum payment"
   private val progressiveRevealInnerContent1: String =
     "You may still be able to set up a payment plan over the phone, but you are not eligible for an online payment plan."
@@ -124,7 +124,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
 
       val errorSummary = doc.select(".govuk-error-summary")
       val errorLink = errorSummary.select("a")
-      errorLink.text() shouldBe "How much you can afford to pay each month must be between £299.97 and £879.44"
+      errorLink.text() shouldBe "How much you can afford to pay each month must be between £300 and £880"
       errorLink.attr("href") shouldBe "#MonthlyPaymentAmount"
       EssttpBackend.MonthlyPaymentAmount.verifyNoneUpdateMonthlyAmountRequest(TdAll.journeyId)
     }

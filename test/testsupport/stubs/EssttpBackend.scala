@@ -224,7 +224,8 @@ object EssttpBackend {
     def verifyNoneUpdateAffordabilityRequest(journeyId: JourneyId): Unit =
       verify(
         exactly(0),
-        postRequestedFor(urlPathEqualTo(updateAffordabilityUrl(journeyId))))
+        postRequestedFor(urlPathEqualTo(updateAffordabilityUrl(journeyId)))
+      )
   }
 
   object MonthlyPaymentAmount {

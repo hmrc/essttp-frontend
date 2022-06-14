@@ -19,7 +19,6 @@ package controllers
 import _root_.actions.Actions
 import config.AppConfig
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
-import essttp.journey.model.ttp.affordability.InstalmentAmounts
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel.{AmountInPence, MonthlyPaymentAmount}
 import essttp.utils.Errors
@@ -53,51 +52,72 @@ class MonthlyPaymentAmountController @Inject() (
 
   val displayMonthlyPaymentAmount: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
-      case j: Journey.BeforeUpfrontPaymentAnswers => logErrorAndRouteToDefaultPage(j)
-      case j: Journey.AfterUpfrontPaymentAnswers  => displayMonthlyPaymentAmountPage(j)
+      case j: Journey.BeforeRetrievedAffordabilityResult => logErrorAndRouteToDefaultPage(j)
+      case j: Journey.AfterRetrievedAffordabilityResult  => displayMonthlyPaymentAmountPage(j)
     }
   }
 
-  private def displayMonthlyPaymentAmountPage(journey: Journey.AfterUpfrontPaymentAnswers)(implicit request: Request[_]): Result = {
-    val backUrl: Option[String] = journey.upfrontPaymentAnswers match {
+  private def displayMonthlyPaymentAmountPage(journey: Journey.AfterRetrievedAffordabilityResult)(implicit request: Request[_]): Result = {
+    val j: Journey.AfterUpfrontPaymentAnswers with Journey.AfterComputedTaxId with Journey.AfterEligibilityChecked with Journey.AfterExtremeDatesResponse with Journey.AfterRetrievedAffordabilityResult with Journey.Epaye =
+      journey match {
+        case j1: Journey.Epaye.RetrievedAffordabilityResult => j1
+        case j1: Journey.Epaye.EnteredMonthlyPaymentAmount  => j1
+      }
+    val backUrl: Option[String] = j.upfrontPaymentAnswers match {
       case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => Some(routes.UpfrontPaymentController.upfrontPaymentSummary().url)
       case UpfrontPaymentAnswers.NoUpfrontPayment          => Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url)
     }
-
-    val minMaxResponse: InstalmentAmounts = journey match {
-      case _: Journey.BeforeRetrievedAffordabilityResult => Errors.throwServerErrorException("We don't have the affordability api response...")
-      case j: Journey.AfterRetrievedAffordabilityResult  => j.instalmentAmounts
+    val totalDebt = AmountInPence(j.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value).sum)
+    val upfrontPaymentAmount = j.upfrontPaymentAnswers match {
+      case j1: UpfrontPaymentAnswers.DeclaredUpfrontPayment => j1.amount.value
+      case UpfrontPaymentAnswers.NoUpfrontPayment           => AmountInPence.zero
     }
+    val (roundedMin, roundedMax): (AmountInPence, AmountInPence) = MonthlyPaymentAmountController.roundingForMinMax(
+      amountLeft    = totalDebt.-(upfrontPaymentAmount),
+      minimumAmount = j.instalmentAmounts.minimumInstalmentAmount,
+      maximumAmount = j.instalmentAmounts.maximumInstalmentAmount
+    )
 
     Ok(views.monthlyPaymentAmountPage(
-      form           = MonthlyPaymentAmountController.monthlyPaymentAmountForm(minMaxResponse.minimumInstalmentAmount, minMaxResponse.maximumInstalmentAmount),
-      maximumPayment = minMaxResponse.maximumInstalmentAmount,
-      minimumPayment = minMaxResponse.minimumInstalmentAmount,
+      form           = MonthlyPaymentAmountController.monthlyPaymentAmountForm(roundedMin, roundedMax),
+      maximumPayment = roundedMax,
+      minimumPayment = roundedMin,
       backUrl        = backUrl
     ))
   }
 
   val monthlyPaymentAmountSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
-    val backUrl: Option[String] = request.journey match {
-      case _: Journey.BeforeUpfrontPaymentAnswers => Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url)
-      case j: Journey.AfterUpfrontPaymentAnswers => j.upfrontPaymentAnswers match {
-        case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => Some(routes.UpfrontPaymentController.upfrontPaymentSummary().url)
-        case UpfrontPaymentAnswers.NoUpfrontPayment          => Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url)
+    val (minMaxResponse, amountLeft) = request.journey match {
+      case _: Journey.BeforeRetrievedAffordabilityResult => Errors.throwServerErrorException("We don't have the affordability api response...")
+      case j: Journey.AfterRetrievedAffordabilityResult => j match {
+        case j1: Journey.Stages.RetrievedAffordabilityResult =>
+          val totalDebt: AmountInPence = AmountInPence(j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value).sum)
+          val upfrontPaymentAmount: AmountInPence = j1.upfrontPaymentAnswers match {
+            case j2: UpfrontPaymentAnswers.DeclaredUpfrontPayment => j2.amount.value
+            case UpfrontPaymentAnswers.NoUpfrontPayment           => AmountInPence.zero
+          }
+          (j.instalmentAmounts, totalDebt.-(upfrontPaymentAmount))
+        case j1: Journey.Stages.EnteredMonthlyPaymentAmount =>
+          val totalDebt: AmountInPence = AmountInPence(j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value).sum)
+          val upfrontPaymentAmount: AmountInPence = j1.upfrontPaymentAnswers match {
+            case j2: UpfrontPaymentAnswers.DeclaredUpfrontPayment => j2.amount.value
+            case UpfrontPaymentAnswers.NoUpfrontPayment           => AmountInPence.zero
+          }
+          (j.instalmentAmounts, totalDebt.-(upfrontPaymentAmount))
       }
     }
-    val minMaxResponse: InstalmentAmounts = request.journey match {
-      case _: Journey.BeforeRetrievedAffordabilityResult => Errors.throwServerErrorException("We don't have the affordability api response...")
-      case j: Journey.AfterRetrievedAffordabilityResult  => j.instalmentAmounts
-    }
-    MonthlyPaymentAmountController.monthlyPaymentAmountForm(minMaxResponse.minimumInstalmentAmount, minMaxResponse.maximumInstalmentAmount)
+    val (roundedMin, roundedMax): (AmountInPence, AmountInPence) =
+      MonthlyPaymentAmountController.roundingForMinMax(amountLeft, minMaxResponse.minimumInstalmentAmount, minMaxResponse.maximumInstalmentAmount)
+
+    MonthlyPaymentAmountController.monthlyPaymentAmountForm(roundedMin, roundedMax)
       .bindFromRequest()
       .fold(
         formWithErrors =>
           Future.successful(Ok(views.monthlyPaymentAmountPage(
             form           = formWithErrors,
-            maximumPayment = minMaxResponse.maximumInstalmentAmount,
-            minimumPayment = minMaxResponse.minimumInstalmentAmount,
-            backUrl        = backUrl
+            maximumPayment = roundedMax,
+            minimumPayment = roundedMin,
+            backUrl        = MonthlyPaymentAmountController.backUrl(request.journey)
           ))),
         (validForm: BigDecimal) => {
           val monthlyPaymentAmount: MonthlyPaymentAmount = MonthlyPaymentAmount(AmountInPence(validForm))
@@ -109,7 +129,36 @@ class MonthlyPaymentAmountController @Inject() (
 }
 
 object MonthlyPaymentAmountController {
-  val key: String = "MonthlyPaymentAmount"
+
+  //todo this probably isn't the right place for this, move to amount in pence? but it is specific to this page atm...
+  // if amount left of the balance is < £10, round to nearest £1, else round to nearest £10
+  def roundingForMinMax(amountLeft: AmountInPence, minimumAmount: AmountInPence, maximumAmount: AmountInPence): (AmountInPence, AmountInPence) = {
+    if (amountLeft.value < 1000) {
+      round(minimumAmount.inPounds, maximumAmount.inPounds, (1.0, 0.5))
+    } else {
+      round(minimumAmount.inPounds, maximumAmount.inPounds, (10.0, 5.0))
+    }
+  }
+
+  private def round(a: BigDecimal, b: BigDecimal, roundingFactors: (Double, Double)): (AmountInPence, AmountInPence) = {
+    val remainderA: BigDecimal = a % roundingFactors._1
+    val remainderB: BigDecimal = b % roundingFactors._1
+    val minRounded = if (remainderA > roundingFactors._2) a + (roundingFactors._1 - remainderA) else a - remainderA
+    val maxRounded = if (remainderB > roundingFactors._2) b + (roundingFactors._1 - remainderB) else b - remainderB
+    (AmountInPence(minRounded), AmountInPence(maxRounded))
+  }
+
+  def backUrl(journey: Journey): Option[String] = {
+    journey match {
+      case _: Journey.BeforeUpfrontPaymentAnswers => Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url)
+      case j: Journey.AfterUpfrontPaymentAnswers => j.upfrontPaymentAnswers match {
+        case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => Some(routes.UpfrontPaymentController.upfrontPaymentSummary().url)
+        case UpfrontPaymentAnswers.NoUpfrontPayment          => Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url)
+      }
+    }
+  }
+
+  private val key: String = "MonthlyPaymentAmount"
 
   def monthlyPaymentAmountForm(minimumAmount: AmountInPence, maximumAmount: AmountInPence): Form[BigDecimal] = Form(
     mapping(
