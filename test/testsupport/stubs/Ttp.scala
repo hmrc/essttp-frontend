@@ -23,6 +23,7 @@ import testsupport.testdata.TdJsonBodies
 object Ttp {
 
   private val eligibilityUrl: String = "/time-to-pay/self-serve/eligibility"
+  private val affordabilityUrl: String = "/time-to-pay/self-serve/affordability"
 
   def retrieveEligibility(jsonBody: String = TdJsonBodies.ttpEligibilityCallJson()): StubMapping = stubFor(
     post(urlPathEqualTo(eligibilityUrl))
@@ -35,6 +36,18 @@ object Ttp {
   def verifyTtpEligibilityRequests(): Unit =
     verify(
       postRequestedFor(urlPathEqualTo(eligibilityUrl))
+    )
+
+  def retrieveAffordability(jsonBody: String = TdJsonBodies.ttpAffordabilityResponseJson()): StubMapping = stubFor(
+    post(urlPathEqualTo(affordabilityUrl))
+      .willReturn(aResponse()
+        .withStatus(200)
+        .withBody(jsonBody))
+  )
+
+  def verifyTtpAffordabilityRequest(): Unit =
+    verify(
+      postRequestedFor(urlPathEqualTo(affordabilityUrl))
     )
 
 }

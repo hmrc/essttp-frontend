@@ -65,10 +65,8 @@ class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesServi
     val eligibilityCheckResult: EligibilityCheckResult = j.eligibilityCheckResult
     val request = buildInstalmentRequest(upfrontPaymentAmount, eligibilityCheckResult, j.extremeDatesResponse)
 
-    for {
-      //      extremeDates: ExtremeDatesResponse <- datesService.extremeDates(journey)
-      instalmentAmounts <- ttpConnector.callAffordabilityApi(request)
-    } yield instalmentAmounts
+    ttpConnector.callAffordabilityApi(request)
+      .map(instalmentAmounts => instalmentAmounts)
   }
 
   private def buildInstalmentRequest(

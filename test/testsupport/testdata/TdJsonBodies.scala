@@ -405,6 +405,117 @@ object TdJsonBodies {
        |}
        |""".stripMargin
 
+  def afterExtremeDatesJourneyJson(): String =
+    s"""{
+       |    "_id" : "6284fcd33c00003d6b1f3903",
+       |    "RetrievedExtremeDates" : {
+       |        "stage" : {
+       |            "ExtremeDatesResponseRetrieved" : {
+       |
+       |            }
+       |        },
+       |        "createdOn" : "2022-06-14T10:28:40.3",
+       |        "_id" : "6284fcd33c00003d6b1f3903",
+       |        "extremeDatesResponse" : {
+       |            "initialPaymentDate" : "2022-06-24",
+       |            "earliestPlanStartDate" : "2022-07-14",
+       |            "latestPlanStartDate" : "2022-08-13"
+       |        },
+       |        "origin" : "Origins.Epaye.Bta",
+       |        "sjRequest" : {
+       |            "Simple" : {
+       |                "returnUrl" : "/set-up-a-payment-plan/test-only/bta-page?return-page",
+       |                "backUrl" : "/set-up-a-payment-plan/test-only/bta-page?starting-page"
+       |            }
+       |        },
+       |        "sessionId" : "IamATestSessionId",
+       |        "eligibilityCheckResult" : {
+       |            "idType" : "SSTTP",
+       |            "idNumber" : "868/GZ93987",
+       |            "regimeType" : "PAYE",
+       |            "processingDate" : "2022-01-31",
+       |            "customerPostcodes" : [
+       |                {
+       |                    "addressPostcode" : "AA11AA",
+       |                    "postcodeDate" : "2022-01-01"
+       |                }
+       |            ],
+       |            "minPlanLengthMonths" : 1,
+       |            "maxPlanLengthMonths" : 3,
+       |            "eligibilityStatus" : {
+       |                "overallEligibilityStatus" : true
+       |            },
+       |            "eligibilityRules" : {
+       |                "hasRlsOnAddress" : false,
+       |                "markedAsInsolvent" : false,
+       |                "isLessThanMinDebtAllowance" : false,
+       |                "isMoreThanMaxDebtAllowance" : false,
+       |                "disallowedChargeLocks" : false,
+       |                "existingTTP" : false,
+       |                "exceedsMaxDebtAge" : false,
+       |                "eligibleChargeType" : false,
+       |                "missingFiledReturns" : false
+       |            },
+       |            "chargeTypeAssessment" : [
+       |                {
+       |                    "taxPeriodFrom" : "2020-08-13",
+       |                    "taxPeriodTo" : "2020-08-14",
+       |                    "debtTotalAmount" : 12301,
+       |                    "disallowedChargeLocks" : [
+       |                        {
+       |                            "chargeId" : "A00000000001",
+       |                            "mainTrans" : "mainTrans",
+       |                            "mainTransDesc" : "mainTransDesc",
+       |                            "subTrans" : "subTrans",
+       |                            "subTransDesc" : "subTransDesc",
+       |                            "outstandingDebtAmount" : 100000,
+       |                            "interestStartDate" : "2017-03-07",
+       |                            "accruedInterestToDate" : 15.97,
+       |                            "chargeLocks" : {
+       |                                "paymentLock" : {
+       |                                    "status" : false,
+       |                                    "reason" : ""
+       |                                },
+       |                                "clearingLock" : {
+       |                                    "status" : false,
+       |                                    "reason" : ""
+       |                                },
+       |                                "interestLock" : {
+       |                                    "status" : false,
+       |                                    "reason" : ""
+       |                                },
+       |                                "dunningLock" : {
+       |                                    "status" : false,
+       |                                    "reason" : ""
+       |                                }
+       |                            }
+       |                        }
+       |                    ]
+       |                }
+       |            ]
+       |        },
+       |        "upfrontPaymentAnswers" : {
+       |            "DeclaredUpfrontPayment" : {
+       |                "amount" : 2000
+       |            }
+       |        },
+       |        "taxId" : {
+       |            "value" : "868/GZ93987"
+       |        }
+       |    },
+       |    "sessionId" : "IamATestSessionId",
+       |    "createdAt" : "2022-06-14T10:28:40.3"
+       |}""".stripMargin
+
+  def ttpAffordabilityResponseJson(): String = {
+    s"""
+       |{
+       |    "minimumInstalmentAmount": 33333,
+       |    "maximumInstalmentAmount": 100000
+       |}
+       |""".stripMargin
+  }
+
   def afterAffordabilityCheckJourneyJson(): String =
     """
       |{
