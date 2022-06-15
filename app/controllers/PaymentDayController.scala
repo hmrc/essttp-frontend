@@ -17,13 +17,14 @@
 package controllers
 
 import _root_.actions.Actions
+import cats.implicits.catsSyntaxEq
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import controllers.PaymentDayController.{PaymentDayForm, paymentDayForm}
 import essttp.journey.model.Journey
 import essttp.rootmodel.DayOfMonth
 import play.api.data.Forms.{mapping, nonEmptyText}
 import play.api.data.format.Formatter
-import play.api.data.{FormError, Forms}
+import play.api.data.{Form, FormError, Forms}
 import play.api.mvc._
 import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -47,13 +48,22 @@ class PaymentDayController @Inject() (
   val paymentDay: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
       case j: Journey.BeforeEnteredMonthlyPaymentAmount => logErrorAndRouteToDefaultPage(j)
-      case _: Journey.AfterEnteredMonthlyPaymentAmount  => displayPaymentDayPage
+      case j: Journey.AfterEnteredMonthlyPaymentAmount  => displayPaymentDayPage(j)
     }
   }
 
-  private def displayPaymentDayPage(implicit request: Request[_]): Result = {
+  private def displayPaymentDayPage(journey: Journey.AfterEnteredMonthlyPaymentAmount)(implicit request: Request[_]): Result = {
+    val maybePrePopForm: Form[PaymentDayForm] = journey match {
+      case j: Journey.AfterEnteredDayOfMonth =>
+        if (j.dayOfMonth.value === 28) {
+          paymentDayForm().fill(PaymentDayForm("28", None))
+        } else {
+          paymentDayForm().fill(PaymentDayForm("", Some(j.dayOfMonth.value)))
+        }
+      case _: Journey.BeforeEnteredDayOfMonth => paymentDayForm()
+    }
     Ok(views.paymentDayPage(
-      form    = paymentDayForm(),
+      form    = maybePrePopForm,
       backUrl = PaymentDayController.backUrl
     ))
   }

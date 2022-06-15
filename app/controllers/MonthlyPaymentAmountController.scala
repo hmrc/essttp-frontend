@@ -19,6 +19,7 @@ package controllers
 import _root_.actions.Actions
 import config.AppConfig
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
+import controllers.MonthlyPaymentAmountController.monthlyPaymentAmountForm
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel.{AmountInPence, MonthlyPaymentAmount}
 import essttp.utils.Errors
@@ -78,9 +79,13 @@ class MonthlyPaymentAmountController @Inject() (
       minimumAmount = j.instalmentAmounts.minimumInstalmentAmount,
       maximumAmount = j.instalmentAmounts.maximumInstalmentAmount
     )
+    val maybePrePoppedForm: Form[BigDecimal] = journey match {
+      case _: Journey.BeforeEnteredMonthlyPaymentAmount => monthlyPaymentAmountForm(roundedMin, roundedMax)
+      case j: Journey.AfterEnteredMonthlyPaymentAmount  => monthlyPaymentAmountForm(roundedMin, roundedMax).fill(j.monthlyPaymentAmount.value.inPounds)
+    }
 
     Ok(views.monthlyPaymentAmountPage(
-      form           = MonthlyPaymentAmountController.monthlyPaymentAmountForm(roundedMin, roundedMax),
+      form           = maybePrePoppedForm,
       maximumPayment = roundedMax,
       minimumPayment = roundedMin,
       backUrl        = backUrl
