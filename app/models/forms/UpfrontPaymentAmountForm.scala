@@ -27,7 +27,7 @@ object UpfrontPaymentAmountForm {
     Form(
       mapping(
         "UpfrontPaymentAmount" -> Forms.of(
-          amountOfMoneyFormatter(minimumPaymentAmount.inPounds > _, AmountInPence(maximumDebtAmount.value).inPounds <= _)
+          amountOfMoneyFormatter(minimumPaymentAmount.inPounds > _, AmountInPence(maximumDebtAmount.value).inPounds < _)
         )
       )(identity)(Some(_))
     )
