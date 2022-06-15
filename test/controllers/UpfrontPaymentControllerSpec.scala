@@ -196,6 +196,24 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       EssttpBackend.UpfrontPaymentAmount.verifyUpdateUpfrontPaymentAmountRequest(TdAll.journeyId)
     }
 
+    "should redirect to /upfront-payment-summary when user enters a positive number, at the upper limit" in {
+      AuthStub.authorise()
+      EssttpBackend.CanPayUpfront.findJourneyAfterUpdateCanPayUpfront(TdAll.canPayUpfront)
+      EssttpBackend.UpfrontPaymentAmount.updateUpfrontPaymentAmount(TdAll.journeyId)
+
+      val fakeRequest = FakeRequest(
+        method = "POST",
+        path   = "/how-much-can-you-pay-upfront"
+      ).withAuthToken()
+        .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+        .withFormUrlEncodedBody(("UpfrontPaymentAmount", "2999"))
+
+      val result: Future[Result] = controller.upfrontPaymentAmountSubmit(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/upfront-payment-summary")
+      EssttpBackend.UpfrontPaymentAmount.verifyUpdateUpfrontPaymentAmountRequest(TdAll.journeyId)
+    }
+
     "should allow for decimal numbers if they are within the amount bounds" in {
       AuthStub.authorise()
       EssttpBackend.CanPayUpfront.findJourneyAfterUpdateCanPayUpfront(TdAll.canPayUpfront)
