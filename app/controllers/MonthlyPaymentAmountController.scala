@@ -62,6 +62,7 @@ class MonthlyPaymentAmountController @Inject() (
       journey match {
         case j1: Journey.Epaye.RetrievedAffordabilityResult => j1
         case j1: Journey.Epaye.EnteredMonthlyPaymentAmount  => j1
+        case j1: Journey.Epaye.EnteredDayOfMonth            => j1
       }
     val backUrl: Option[String] = j.upfrontPaymentAnswers match {
       case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => Some(routes.UpfrontPaymentController.upfrontPaymentSummary().url)
@@ -98,6 +99,13 @@ class MonthlyPaymentAmountController @Inject() (
           }
           (j.instalmentAmounts, totalDebt.-(upfrontPaymentAmount))
         case j1: Journey.Stages.EnteredMonthlyPaymentAmount =>
+          val totalDebt: AmountInPence = AmountInPence(j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value).sum)
+          val upfrontPaymentAmount: AmountInPence = j1.upfrontPaymentAnswers match {
+            case j2: UpfrontPaymentAnswers.DeclaredUpfrontPayment => j2.amount.value
+            case UpfrontPaymentAnswers.NoUpfrontPayment           => AmountInPence.zero
+          }
+          (j.instalmentAmounts, totalDebt.-(upfrontPaymentAmount))
+        case j1: Journey.Stages.EnteredDayOfMonth =>
           val totalDebt: AmountInPence = AmountInPence(j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value).sum)
           val upfrontPaymentAmount: AmountInPence = j1.upfrontPaymentAnswers match {
             case j2: UpfrontPaymentAnswers.DeclaredUpfrontPayment => j2.amount.value

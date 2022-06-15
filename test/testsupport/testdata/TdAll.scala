@@ -19,7 +19,7 @@ package testsupport.testdata
 import actions.EnrolmentDef
 import essttp.journey.model.JourneyId
 import essttp.journey.model.ttp.{EligibilityRules, OverallEligibilityStatus}
-import essttp.rootmodel.{AmountInPence, CanPayUpfront, UpfrontPaymentAmount}
+import essttp.rootmodel.{AmountInPence, CanPayUpfront, DayOfMonth, UpfrontPaymentAmount}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 
 object TdAll {
@@ -71,4 +71,5 @@ object TdAll {
   val notEligibleExceedsMaxDebtAge: EligibilityRules = eligibleEligibilityRules.copy(exceedsMaxDebtAge = true)
   val notEligibleEligibleChargeType: EligibilityRules = eligibleEligibilityRules.copy(eligibleChargeType = true)
   val notEligibleMissingFiledReturns: EligibilityRules = eligibleEligibilityRules.copy(missingFiledReturns = true)
+  def dayOfMonth(day: Int = 28): DayOfMonth = DayOfMonth(day)
 }

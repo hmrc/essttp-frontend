@@ -17,54 +17,75 @@
 package controllers
 
 import _root_.actions.Actions
+import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import controllers.PaymentDayController.{PaymentDayForm, paymentDayForm}
+import essttp.journey.model.Journey
+import essttp.rootmodel.DayOfMonth
 import play.api.data.Forms.{mapping, nonEmptyText}
 import play.api.data.format.Formatter
 import play.api.data.{FormError, Forms}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc._
+import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
-import views.html.PaymentDay
+import views.Views
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 @Singleton
 class PaymentDayController @Inject() (
     as:             Actions,
-    paymentDayPage: PaymentDay,
+    views:          Views,
+    journeyService: JourneyService,
     mcc:            MessagesControllerComponents
-)
+)(implicit executionContext: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 
-  val paymentDay: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
-    Future.successful(Ok(paymentDayPage(paymentDayForm())))
+  val paymentDay: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    request.journey match {
+      case j: Journey.BeforeEnteredMonthlyPaymentAmount => logErrorAndRouteToDefaultPage(j)
+      case _: Journey.AfterEnteredMonthlyPaymentAmount  => displayPaymentDayPage
+    }
   }
 
-  val paymentDaySubmit: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
+  private def displayPaymentDayPage(implicit request: Request[_]): Result = {
+    Ok(views.paymentDayPage(
+      form    = paymentDayForm(),
+      backUrl = PaymentDayController.backUrl
+    ))
+  }
+
+  val paymentDaySubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     paymentDayForm()
       .bindFromRequest()
       .fold(
-        formWithErrors => Future.successful(Ok(paymentDayPage(formWithErrors))),
-        (p: PaymentDayForm) => {
-          Future.successful(Redirect(routes.InstalmentsController.instalmentOptions()))
+        formWithErrors => Future.successful(
+          Ok(views.paymentDayPage(form    = formWithErrors, backUrl = PaymentDayController.backUrl))
+        ),
+        (form: PaymentDayForm) => {
+          val dayOfMonth: DayOfMonth = form.differentDay match {
+            case Some(otherDay) => DayOfMonth(otherDay)
+            case None           => DayOfMonth(form.paymentDay.toInt)
+          }
+          journeyService.updateDayOfMonth(request.journeyId, dayOfMonth)
+            .map(_ => Redirect(routes.InstalmentsController.instalmentOptions()))
         }
       )
-
   }
 }
 
 object PaymentDayController {
+
   import cats.syntax.either._
   import play.api.data.Form
   import uk.gov.voa.play.form.ConditionalMappings.mandatoryIfEqual
 
-  final case class PaymentDayForm(
-      paymentDay:   String,
-      differentDay: Option[Int]
-  )
+  val backUrl: Option[String] = Some(routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount().url)
+
+  final case class PaymentDayForm(paymentDay: String, differentDay: Option[Int])
 
   def paymentDayForm(): Form[PaymentDayForm] = Form(
     mapping(
@@ -90,6 +111,7 @@ object PaymentDayController {
 
   val dayOfMonthFormatter: Formatter[Int] = {
     val key = "DifferentDay"
+
       def validateDayOfMonth(day: Int): Either[FormError, Int] =
         if (day < 1 || day > 28) Left(FormError(key, "error.outOfRange"))
         else Right(day)
@@ -104,6 +126,7 @@ object PaymentDayController {
             .flatMap(validateDayOfMonth)
         result.leftMap(Seq(_))
       }
+
       override def unbind(key: String, value: Int): Map[String, String] =
         Map(key -> value.toString)
     }

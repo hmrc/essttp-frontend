@@ -181,6 +181,11 @@ class UpfrontPaymentController @Inject() (
         case UpfrontPaymentAnswers.NoUpfrontPayment =>
           Errors.throwBadRequestException(s"We should not be on the upfront payment summary page without an upfront payment... [$j]")
       }
+      case j: Journey.Epaye.EnteredDayOfMonth => j.upfrontPaymentAnswers match {
+        case j1: UpfrontPaymentAnswers.DeclaredUpfrontPayment => (j.eligibilityCheckResult, j1.amount)
+        case UpfrontPaymentAnswers.NoUpfrontPayment =>
+          Errors.throwBadRequestException(s"We should not be on the upfront payment summary page without an upfront payment... [$j]")
+      }
     }
 
     val totalAmountToPay: DebtTotalAmount = DebtTotalAmount(eligibilityCheckResultFromJourney.chargeTypeAssessment.map(_.debtTotalAmount.value).sum)
@@ -201,6 +206,7 @@ object UpfrontPaymentController {
       case j1: Journey.Stages.RetrievedExtremeDates        => j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).headOption
       case j1: Journey.Stages.RetrievedAffordabilityResult => j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).headOption
       case j1: Journey.Stages.EnteredMonthlyPaymentAmount  => j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).headOption
+      case j1: Journey.Stages.EnteredDayOfMonth            => j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).headOption
     }
   }
 

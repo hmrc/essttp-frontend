@@ -19,7 +19,7 @@ package testsupport.stubs
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.journey.model.{JourneyId, Origin, Origins}
-import essttp.rootmodel.CanPayUpfront
+import essttp.rootmodel.{CanPayUpfront, DayOfMonth}
 import testsupport.testdata.{TdAll, TdJsonBodies}
 
 object EssttpBackend {
@@ -175,6 +175,7 @@ object EssttpBackend {
 
   object Dates {
     def updateExtremeDatesUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-extreme-dates"
+
     def updateUpfrontPaymentAmount(journeyId: JourneyId): StubMapping =
       stubFor(
         post(urlPathEqualTo(updateExtremeDatesUrl(journeyId)))
@@ -183,13 +184,16 @@ object EssttpBackend {
               .withStatus(200)
           )
       )
+
     def verifyUpdateMonthlyPaymentAmountRequest(journeyId: JourneyId): Unit =
       verify(postRequestedFor(urlPathEqualTo(updateExtremeDatesUrl(journeyId))))
+
     def verifyNoneUpdateMonthlyAmountRequest(journeyId: JourneyId): Unit =
       verify(
         exactly(0),
         postRequestedFor(urlPathEqualTo(updateExtremeDatesUrl(journeyId)))
       )
+
     def findJourneyAfterUpdateExtremeDates(
         jsonBody: String = TdJsonBodies.afterExtremeDatesJourneyJson()
     ): StubMapping = stubFor(
@@ -209,7 +213,9 @@ object EssttpBackend {
           .withStatus(200)
           .withBody(jsonBody))
     )
+
     def updateAffordabilityUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-affordability-result"
+
     def updateAffordability(journeyId: JourneyId): StubMapping =
       stubFor(
         post(urlPathEqualTo(updateAffordabilityUrl(journeyId)))
@@ -221,6 +227,7 @@ object EssttpBackend {
 
     def verifyUpdateAffordabilityRequest(journeyId: JourneyId): Unit =
       verify(postRequestedFor(urlPathEqualTo(updateAffordabilityUrl(journeyId))))
+
     def verifyNoneUpdateAffordabilityRequest(journeyId: JourneyId): Unit =
       verify(
         exactly(0),
@@ -230,6 +237,7 @@ object EssttpBackend {
 
   object MonthlyPaymentAmount {
     def monthlyPaymentAmountUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-monthly-payment-amount"
+
     def updateMonthlyPaymentAmount(journeyId: JourneyId): StubMapping =
       stubFor(
         post(urlPathEqualTo(monthlyPaymentAmountUrl(journeyId)))
@@ -238,15 +246,51 @@ object EssttpBackend {
               .withStatus(200)
           )
       )
+
     def verifyUpdateMonthlyPaymentAmountRequest(journeyId: JourneyId): Unit =
       verify(postRequestedFor(urlPathEqualTo(monthlyPaymentAmountUrl(journeyId))))
+
     def verifyNoneUpdateMonthlyAmountRequest(journeyId: JourneyId): Unit =
       verify(
         exactly(0),
         postRequestedFor(urlPathEqualTo(monthlyPaymentAmountUrl(journeyId)))
       )
+
     def findJourneyAfterUpdateMonthlyPaymentAmount(
-        jsonBody: String = TdJsonBodies.afterUpfrontPaymentAmountJourneyJson(TdAll.upfrontPaymentAmount)
+        jsonBody: String = TdJsonBodies.afterMonthlyPaymentAmountJourneyJson()
+    ): StubMapping = stubFor(
+      get(urlPathEqualTo(findByLatestSessionIdUrl))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withBody(jsonBody))
+    )
+  }
+
+  object DayOfMonth {
+    def dayOfMonthUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-day-of-month"
+
+    def updateDayOfMonth(journeyId: JourneyId): StubMapping =
+      stubFor(
+        post(urlPathEqualTo(dayOfMonthUrl(journeyId)))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+          )
+      )
+
+    def verifyUpdateDayOfMonthRequest(journeyId: JourneyId, dayOfMonth: DayOfMonth = TdAll.dayOfMonth()): Unit =
+      verify(
+        postRequestedFor(urlPathEqualTo(dayOfMonthUrl(journeyId))).withRequestBody(equalToJson(s"""${dayOfMonth.value}"""))
+      )
+
+    def verifyNoneUpdateDayOfMonthRequest(journeyId: JourneyId): Unit =
+      verify(
+        exactly(0),
+        postRequestedFor(urlPathEqualTo(dayOfMonthUrl(journeyId)))
+      )
+
+    def findJourneyAfterUpdateDayOfMonth(
+        jsonBody: String = TdJsonBodies.afterDayOfMonthJourneyJson(TdAll.dayOfMonth())
     ): StubMapping = stubFor(
       get(urlPathEqualTo(findByLatestSessionIdUrl))
         .willReturn(aResponse()

@@ -89,7 +89,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
         .withFormUrlEncodedBody(("MonthlyPaymentAmount", "300"))
       val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/payment-day")
+      redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/which-day-do-you-want-to-pay-each-month")
       EssttpBackend.MonthlyPaymentAmount.verifyUpdateMonthlyPaymentAmountRequest(TdAll.journeyId)
     }
 
