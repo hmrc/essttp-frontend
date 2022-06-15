@@ -172,4 +172,86 @@ object EssttpBackend {
           .withBody(jsonBody))
     )
   }
+
+  object Dates {
+    def updateExtremeDatesUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-extreme-dates"
+    def updateUpfrontPaymentAmount(journeyId: JourneyId): StubMapping =
+      stubFor(
+        post(urlPathEqualTo(updateExtremeDatesUrl(journeyId)))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+          )
+      )
+    def verifyUpdateMonthlyPaymentAmountRequest(journeyId: JourneyId): Unit =
+      verify(postRequestedFor(urlPathEqualTo(updateExtremeDatesUrl(journeyId))))
+    def verifyNoneUpdateMonthlyAmountRequest(journeyId: JourneyId): Unit =
+      verify(
+        exactly(0),
+        postRequestedFor(urlPathEqualTo(updateExtremeDatesUrl(journeyId)))
+      )
+    def findJourneyAfterUpdateExtremeDates(
+        jsonBody: String = TdJsonBodies.afterExtremeDatesJourneyJson()
+    ): StubMapping = stubFor(
+      get(urlPathEqualTo(findByLatestSessionIdUrl))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withBody(jsonBody))
+    )
+  }
+
+  object AffordabilityMinMaxApi {
+    def findJourneyAfterUpdateAffordability(
+        jsonBody: String = TdJsonBodies.afterAffordabilityCheckJourneyJson()
+    ): StubMapping = stubFor(
+      get(urlPathEqualTo(findByLatestSessionIdUrl))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withBody(jsonBody))
+    )
+    def updateAffordabilityUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-affordability-result"
+    def updateAffordability(journeyId: JourneyId): StubMapping =
+      stubFor(
+        post(urlPathEqualTo(updateAffordabilityUrl(journeyId)))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+          )
+      )
+
+    def verifyUpdateAffordabilityRequest(journeyId: JourneyId): Unit =
+      verify(postRequestedFor(urlPathEqualTo(updateAffordabilityUrl(journeyId))))
+    def verifyNoneUpdateAffordabilityRequest(journeyId: JourneyId): Unit =
+      verify(
+        exactly(0),
+        postRequestedFor(urlPathEqualTo(updateAffordabilityUrl(journeyId)))
+      )
+  }
+
+  object MonthlyPaymentAmount {
+    def monthlyPaymentAmountUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-monthly-payment-amount"
+    def updateMonthlyPaymentAmount(journeyId: JourneyId): StubMapping =
+      stubFor(
+        post(urlPathEqualTo(monthlyPaymentAmountUrl(journeyId)))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+          )
+      )
+    def verifyUpdateMonthlyPaymentAmountRequest(journeyId: JourneyId): Unit =
+      verify(postRequestedFor(urlPathEqualTo(monthlyPaymentAmountUrl(journeyId))))
+    def verifyNoneUpdateMonthlyAmountRequest(journeyId: JourneyId): Unit =
+      verify(
+        exactly(0),
+        postRequestedFor(urlPathEqualTo(monthlyPaymentAmountUrl(journeyId)))
+      )
+    def findJourneyAfterUpdateMonthlyPaymentAmount(
+        jsonBody: String = TdJsonBodies.afterUpfrontPaymentAmountJourneyJson(TdAll.upfrontPaymentAmount)
+    ): StubMapping = stubFor(
+      get(urlPathEqualTo(findByLatestSessionIdUrl))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withBody(jsonBody))
+    )
+  }
 }

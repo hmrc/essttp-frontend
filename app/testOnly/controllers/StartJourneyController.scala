@@ -137,7 +137,7 @@ object StartJourneyController {
       MainTransDesc("mainTransDesc"),
       SubTrans("subTrans"),
       SubTransDesc("subTransDesc"),
-      OutstandingDebtAmount(100000),
+      OutstandingDebtAmount(debtAmountFromForm.value),
       InterestStartDate("2017-03-07"),
       AccruedInterestToDate(15.97),
       ChargeLocks(

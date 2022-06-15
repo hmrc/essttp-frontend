@@ -24,67 +24,84 @@
 @import play.twirl.api.Html
 
 @this(
-  layout: templates.Layout,
-  govukButton: GovukButton,
-  govukInput: GovukInput,
-  formWithCSRF: FormWithCSRF,
-  govukErrorSummary: GovukErrorSummary,
-  govukDetails : GovukDetails,
-  requestSupport: RequestSupport
+        layout: templates.Layout,
+        govukButton: GovukButton,
+        govukInput: GovukInput,
+        formWithCSRF: FormWithCSRF,
+        govukErrorSummary: GovukErrorSummary,
+        govukDetails: GovukDetails,
+        requestSupport: RequestSupport
 )
 
-@(form: Form[BigDecimal], maximumPayment: AmountInPence, minimumPayment: AmountInPence)(implicit
-  request: Request[_]
+@(
+        form: Form[BigDecimal],
+        maximumPayment: AmountInPence,
+        minimumPayment: AmountInPence,
+        backUrl: Option[String]
+)(implicit
+        request: Request[_]
 )
 
 @import requestSupport._
-@key = @{"MonthlyPaymentAmount"}
-@title = @{Messages.MonthlyPaymentAmount.`How much can you afford to pay each month?`.show}
- @detailsContent = {
-  <p class="govuk-body">@{Messages.MonthlyPaymentAmount.`You may still be able to set up a payment plan...`.show}</p>
-  <p class="govuk-body">@{Html(Messages.MonthlyPaymentAmount.`We recommend you speak to an adviser...`.show)}</p>
- }
+@key = @{
+    "MonthlyPaymentAmount"
+}
+@title = @{
+    Messages.MonthlyPaymentAmount.`How much can you afford to pay each month?`.show
+}
+@detailsContent = {
+    <p class="govuk-body">@{
+        Messages.MonthlyPaymentAmount.`You may still be able to set up a payment plan...`.show
+    }</p>
+    <p class="govuk-body">@{
+        Html(Messages.MonthlyPaymentAmount.`We recommend you speak to an adviser...`.show)
+    }</p>
+}
 
 @layout(pageTitle = Some(title), backUrl = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url), hasErrors = form.hasErrors) {
- @if(form.errors.nonEmpty) {
-  @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
-   ErrorLink(
-    href = Some(s"#${e.key}"),
-    content = Text(Messages.MonthlyPaymentAmount.getError(e.message, maximumPayment, minimumPayment).show)
-   )
-  ),
-   title = Text(Messages.`There is a problem`.show)))
- }
- @formWithCSRF(action = routes.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit()) {
+    @if(form.errors.nonEmpty) {
+        @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
+            ErrorLink(
+                href = Some(s"#${e.key}"),
+                content = Text(Messages.MonthlyPaymentAmount.getError(e.message, maximumPayment, minimumPayment).show)
+            )
+        ),
+            title = Text(Messages.`There is a problem`.show)))
+    }
+    @formWithCSRF(action = routes.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit()) {
 
-  @govukInput(Input(
-   id = key,
-   name = key,
-   label = Label(
-    isPageHeading = true,
-    classes = "govuk-label--xl",
-    content = Text(title)
-   ),
-   hint = Some(Hint(
-    content = Text(Messages.MonthlyPaymentAmount.getHint(maximumPayment, minimumPayment).show)
-   )),
-   classes = "govuk-input--width-5",
-   spellcheck = Some(false),
-   prefix = Some(PrefixOrSuffix(
-    content = Text("£")
-   )),
-   errorMessage = form.error(key).map(e => ErrorMessage(
-    content = Text(Messages.MonthlyPaymentAmount.getError(e.message, maximumPayment, minimumPayment).show)
-   )),
-   value = form.data.get(key)
-  ))
+        @govukInput(Input(
+            id = key,
+            name = key,
+            label = Label(
+                isPageHeading = true,
+                classes = "govuk-label--xl",
+                content = Text(title)
+            ),
+            hint = Some(Hint(
+                content = Text(Messages.MonthlyPaymentAmount.getHint(maximumPayment, minimumPayment).show),
+                id = Some("HowMuchCanYouPayEachMonth-hint")
+            )),
+            classes = "govuk-input--width-5",
+            spellcheck = Some(false),
+            prefix = Some(PrefixOrSuffix(
+                content = Text("£")
+            )),
+            errorMessage = form.error(key).map(e => ErrorMessage(
+                content = Text(Messages.MonthlyPaymentAmount.getError(e.message, maximumPayment, minimumPayment).show)
+            )),
+            value = form.data.get(key)
+        ))
 
-  @govukDetails(Details(
-   summary = Text(Messages.MonthlyPaymentAmount.`I can’t afford the minimum payment`.show),
-   content = HtmlContent(detailsContent)
-  ))
+        @govukDetails(Details(
+            summary = Text(Messages.MonthlyPaymentAmount.`I can’t afford the minimum payment`.show),
+            content = HtmlContent(detailsContent)
+        ))
 
-  @govukButton(Button(content = Text(Messages.continue.show)))
- }
+        @govukButton(Button(
+            content = Text(Messages.continue.show),
+            attributes = Map("id" -> "continue")
+        ))
+    }
 
 }

@@ -103,7 +103,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
       val result: Future[Result] = controller.canYouMakeAnUpfrontPaymentSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/monthly-payment-amount")
+      redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/retrieve-extreme-dates")
       EssttpBackend.CanPayUpfront.verifyUpdateCanPayUpfrontRequest(TdAll.journeyId)
     }
 
@@ -280,10 +280,10 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.upfrontPaymentAmount().url
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
 
-      def question(row: Element) = row.select(".govuk-summary-list__key").text()
-      def answer(row: Element) = row.select(".govuk-summary-list__value").text()
-      def changeUrl(row: Element) = row.select(".govuk-link").attr("href")
-      val rows =  doc.select(".govuk-summary-list__row").iterator().asScala.toList
+        def question(row: Element) = row.select(".govuk-summary-list__key").text()
+        def answer(row: Element) = row.select(".govuk-summary-list__value").text()
+        def changeUrl(row: Element) = row.select(".govuk-link").attr("href")
+      val rows = doc.select(".govuk-summary-list__row").iterator().asScala.toList
       question(rows(0)) shouldBe "Can you make an upfront payment?"
       question(rows(1)) shouldBe "Upfront payment Taken within 10 working days"
       question(rows(2)) shouldBe "Remaining amount to pay"
@@ -295,7 +295,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
       val continueCta = doc.select("#continue")
       continueCta.text() shouldBe "Continue"
-      continueCta.attr("href") shouldBe "/set-up-a-payment-plan/monthly-payment-amount"
+      continueCta.attr("href") shouldBe "/set-up-a-payment-plan/retrieve-extreme-dates"
     }
   }
 }

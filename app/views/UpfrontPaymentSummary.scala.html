@@ -29,7 +29,7 @@
         appConfig: AppConfig,
         requestSupport: RequestSupport,
         govukSummaryList: GovukSummaryList,
-    govukButton: GovukButton,
+        govukButton: GovukButton,
 )
 
 @(
@@ -106,7 +106,7 @@
 
     @govukButton(Button(
         content = Text(Messages.continue.show),
-        href = Some(routes.MonthlyPaymentAmountController.monthlyPaymentAmount().url),
+        href = Some(routes.DatesApiController.retrieveExtremeDates().url),
         attributes = Map("id" -> "continue")
     ))
 }

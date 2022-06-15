@@ -20,7 +20,9 @@ import com.google.inject.{Inject, Singleton}
 import essttp.journey.JourneyConnector
 import essttp.journey.model.JourneyId
 import essttp.journey.model.ttp.EligibilityCheckResult
-import essttp.rootmodel.{CanPayUpfront, EmpRef, UpfrontPaymentAmount}
+import essttp.journey.model.ttp.affordability.InstalmentAmounts
+import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
+import essttp.rootmodel.{CanPayUpfront, EmpRef, MonthlyPaymentAmount, UpfrontPaymentAmount}
 import play.api.mvc.RequestHeader
 import util.Logging
 
@@ -51,6 +53,18 @@ class JourneyService @Inject() (journeyConnector: JourneyConnector) extends Logg
 
   def updateUpfrontPaymentAmount(journeyId: JourneyId, upfrontPaymentAmount: UpfrontPaymentAmount)(implicit requestHeader: RequestHeader): Future[Unit] = {
     journeyConnector.updateUpfrontPaymentAmount(journeyId, upfrontPaymentAmount)
+  }
+
+  def updateExtremeDatesResult(journeyId: JourneyId, extremeDatesResponse: ExtremeDatesResponse)(implicit requestHeader: RequestHeader): Future[Unit] = {
+    journeyConnector.updateExtremeDates(journeyId, extremeDatesResponse)
+  }
+
+  def updateAffordabilityResult(journeyId: JourneyId, instalmentAmounts: InstalmentAmounts)(implicit requestHeader: RequestHeader): Future[Unit] = {
+    journeyConnector.updateAffordabilityResult(journeyId, instalmentAmounts)
+  }
+
+  def updateMonthlyPaymentAmount(journeyId: JourneyId, monthlyPaymentAmount: MonthlyPaymentAmount)(implicit requestHeader: RequestHeader): Future[Unit] = {
+    journeyConnector.updateMonthlyPaymentAmount(journeyId, monthlyPaymentAmount)
   }
 
 }

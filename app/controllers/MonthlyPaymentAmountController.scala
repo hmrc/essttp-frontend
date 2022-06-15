@@ -17,61 +17,152 @@
 package controllers
 
 import _root_.actions.Actions
-import controllers.MonthlyPaymentAmountController._
-import models.MockJourney
+import config.AppConfig
+import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
+import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
+import essttp.rootmodel.{AmountInPence, MonthlyPaymentAmount}
+import essttp.utils.Errors
 import models.MoneyUtil._
-import essttp.rootmodel.AmountInPence
-import play.api.data.{Form, Forms}
 import play.api.data.Forms.mapping
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.data.{Form, Forms}
+import play.api.mvc._
+import requests.RequestSupport
+import services.{JourneyService, TtpService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
-import views.html.MonthlyPaymentAmount
+import views.Views
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+
 @Singleton
 class MonthlyPaymentAmountController @Inject() (
-    as:                       Actions,
-    mcc:                      MessagesControllerComponents,
-    monthlyPaymentAmountPage: MonthlyPaymentAmount
-)(implicit ec: ExecutionContext)
-  extends FrontendController(mcc)
+    as:             Actions,
+    mcc:            MessagesControllerComponents,
+    views:          Views,
+    journeyService: JourneyService,
+    ttpService:     TtpService,
+    requestSupport: RequestSupport,
+    appConfig:      AppConfig
+)(
+    implicit
+    executionContext: ExecutionContext
+) extends FrontendController(mcc)
   with Logging {
 
-  val monthlyPaymentAmount: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
-    val mockJourney = MockJourney()
-    Future.successful(Ok(monthlyPaymentAmountPage(
-      monthlyPaymentAmountForm(mockJourney),
-      mockJourney.remainingToPay,
-      AmountInPence(mockJourney.remainingToPay.value / 6)
-    )))
+  val displayMonthlyPaymentAmount: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    request.journey match {
+      case j: Journey.BeforeRetrievedAffordabilityResult => logErrorAndRouteToDefaultPage(j)
+      case j: Journey.AfterRetrievedAffordabilityResult  => displayMonthlyPaymentAmountPage(j)
+    }
   }
 
-  val monthlyPaymentAmountSubmit: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
-    val mockJourney = MockJourney()
-    monthlyPaymentAmountForm(MockJourney())
+  private def displayMonthlyPaymentAmountPage(journey: Journey.AfterRetrievedAffordabilityResult)(implicit request: Request[_]): Result = {
+    val j: Journey.AfterUpfrontPaymentAnswers with Journey.AfterComputedTaxId with Journey.AfterEligibilityChecked with Journey.AfterExtremeDatesResponse with Journey.AfterRetrievedAffordabilityResult with Journey.Epaye =
+      journey match {
+        case j1: Journey.Epaye.RetrievedAffordabilityResult => j1
+        case j1: Journey.Epaye.EnteredMonthlyPaymentAmount  => j1
+      }
+    val backUrl: Option[String] = j.upfrontPaymentAnswers match {
+      case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => Some(routes.UpfrontPaymentController.upfrontPaymentSummary().url)
+      case UpfrontPaymentAnswers.NoUpfrontPayment          => Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url)
+    }
+    val totalDebt = AmountInPence(j.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value).sum)
+    val upfrontPaymentAmount = j.upfrontPaymentAnswers match {
+      case j1: UpfrontPaymentAnswers.DeclaredUpfrontPayment => j1.amount.value
+      case UpfrontPaymentAnswers.NoUpfrontPayment           => AmountInPence.zero
+    }
+    val (roundedMin, roundedMax): (AmountInPence, AmountInPence) = MonthlyPaymentAmountController.roundingForMinMax(
+      amountLeft    = totalDebt.-(upfrontPaymentAmount),
+      minimumAmount = j.instalmentAmounts.minimumInstalmentAmount,
+      maximumAmount = j.instalmentAmounts.maximumInstalmentAmount
+    )
+
+    Ok(views.monthlyPaymentAmountPage(
+      form           = MonthlyPaymentAmountController.monthlyPaymentAmountForm(roundedMin, roundedMax),
+      maximumPayment = roundedMax,
+      minimumPayment = roundedMin,
+      backUrl        = backUrl
+    ))
+  }
+
+  val monthlyPaymentAmountSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
+    val (minMaxResponse, amountLeft) = request.journey match {
+      case _: Journey.BeforeRetrievedAffordabilityResult => Errors.throwServerErrorException("We don't have the affordability api response...")
+      case j: Journey.AfterRetrievedAffordabilityResult => j match {
+        case j1: Journey.Stages.RetrievedAffordabilityResult =>
+          val totalDebt: AmountInPence = AmountInPence(j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value).sum)
+          val upfrontPaymentAmount: AmountInPence = j1.upfrontPaymentAnswers match {
+            case j2: UpfrontPaymentAnswers.DeclaredUpfrontPayment => j2.amount.value
+            case UpfrontPaymentAnswers.NoUpfrontPayment           => AmountInPence.zero
+          }
+          (j.instalmentAmounts, totalDebt.-(upfrontPaymentAmount))
+        case j1: Journey.Stages.EnteredMonthlyPaymentAmount =>
+          val totalDebt: AmountInPence = AmountInPence(j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value).sum)
+          val upfrontPaymentAmount: AmountInPence = j1.upfrontPaymentAnswers match {
+            case j2: UpfrontPaymentAnswers.DeclaredUpfrontPayment => j2.amount.value
+            case UpfrontPaymentAnswers.NoUpfrontPayment           => AmountInPence.zero
+          }
+          (j.instalmentAmounts, totalDebt.-(upfrontPaymentAmount))
+      }
+    }
+    val (roundedMin, roundedMax): (AmountInPence, AmountInPence) =
+      MonthlyPaymentAmountController.roundingForMinMax(amountLeft, minMaxResponse.minimumInstalmentAmount, minMaxResponse.maximumInstalmentAmount)
+
+    MonthlyPaymentAmountController.monthlyPaymentAmountForm(roundedMin, roundedMax)
       .bindFromRequest()
       .fold(
         formWithErrors =>
-          Future.successful(Ok(
-            monthlyPaymentAmountPage(
-              formWithErrors, mockJourney.remainingToPay, AmountInPence(mockJourney.remainingToPay.value / 6)
-            )
-          )),
-        (s: BigDecimal) => {
-          Future(Redirect(routes.PaymentDayController.paymentDay()))
+          Future.successful(Ok(views.monthlyPaymentAmountPage(
+            form           = formWithErrors,
+            maximumPayment = roundedMax,
+            minimumPayment = roundedMin,
+            backUrl        = MonthlyPaymentAmountController.backUrl(request.journey)
+          ))),
+        (validForm: BigDecimal) => {
+          val monthlyPaymentAmount: MonthlyPaymentAmount = MonthlyPaymentAmount(AmountInPence(validForm))
+          journeyService.updateMonthlyPaymentAmount(request.journeyId, monthlyPaymentAmount)
+            .map(_ => Redirect(routes.PaymentDayController.paymentDay()))
         }
       )
   }
 }
 
 object MonthlyPaymentAmountController {
-  val key: String = "MonthlyPaymentAmount"
 
-  def monthlyPaymentAmountForm(journey: MockJourney): Form[BigDecimal] = Form(
+  //todo this probably isn't the right place for this, move to amount in pence? but it is specific to this page atm...
+  // if amount left of the balance is < £10, round to nearest £1, else round to nearest £10
+  def roundingForMinMax(amountLeft: AmountInPence, minimumAmount: AmountInPence, maximumAmount: AmountInPence): (AmountInPence, AmountInPence) = {
+    if (amountLeft.value < 1000) {
+      round(minimumAmount.inPounds, maximumAmount.inPounds, (1.0, 0.5))
+    } else {
+      round(minimumAmount.inPounds, maximumAmount.inPounds, (10.0, 5.0))
+    }
+  }
+
+  private def round(a: BigDecimal, b: BigDecimal, roundingFactors: (Double, Double)): (AmountInPence, AmountInPence) = {
+    val remainderA: BigDecimal = a % roundingFactors._1
+    val remainderB: BigDecimal = b % roundingFactors._1
+    val minRounded = if (remainderA > roundingFactors._2) a + (roundingFactors._1 - remainderA) else a - remainderA
+    val maxRounded = if (remainderB > roundingFactors._2) b + (roundingFactors._1 - remainderB) else b - remainderB
+    (AmountInPence(minRounded), AmountInPence(maxRounded))
+  }
+
+  def backUrl(journey: Journey): Option[String] = {
+    journey match {
+      case _: Journey.BeforeUpfrontPaymentAnswers => Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url)
+      case j: Journey.AfterUpfrontPaymentAnswers => j.upfrontPaymentAnswers match {
+        case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => Some(routes.UpfrontPaymentController.upfrontPaymentSummary().url)
+        case UpfrontPaymentAnswers.NoUpfrontPayment          => Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url)
+      }
+    }
+  }
+
+  private val key: String = "MonthlyPaymentAmount"
+
+  def monthlyPaymentAmountForm(minimumAmount: AmountInPence, maximumAmount: AmountInPence): Form[BigDecimal] = Form(
     mapping(
-      key -> Forms.of(amountOfMoneyFormatter(AmountInPence(journey.remainingToPay.value / 6).inPounds > _, journey.remainingToPay.inPounds < _))
+      key -> Forms.of(amountOfMoneyFormatter(minimumAmount.inPounds > _, maximumAmount.inPounds < _))
     )(identity)(Some(_))
   )
 }
