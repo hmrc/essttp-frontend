@@ -68,6 +68,20 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       doc.select("#back").attr("href") shouldBe routes.YourBillController.yourBill().url
       doc.select("#CanYouMakeAnUpFrontPayment-hint").text() shouldBe expectedPageHintCanPayUpfrontPage
     }
+    "should prepopulate the form when user navigates back and they have a chosen way to pay in their journey" in {
+      AuthStub.authorise()
+      EssttpBackend.CanPayUpfront.findJourneyAfterUpdateCanPayUpfront(TdAll.canPayUpfront)
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.canYouMakeAnUpfrontPayment(fakeRequest)
+
+      status(result) shouldBe Status.OK
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
+
+      val doc: Document = Jsoup.parse(contentAsString(result))
+      doc.select(".govuk-radios__input[checked]").iterator().asScala.toList(0).`val`() shouldBe "Yes"
+    }
   }
 
   "POST /can-you-make-an-upfront-payment" - {
@@ -174,6 +188,21 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/can-you-make-an-upfront-payment")
+    }
+
+    "should prepopulate the form when user navigates back and they have an upfront payment amount in their journey" in {
+      AuthStub.authorise()
+      EssttpBackend.UpfrontPaymentAmount.findJourneyAfterUpdateUpfrontPaymentAmount()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.upfrontPaymentAmount(fakeRequest)
+
+      status(result) shouldBe Status.OK
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
+
+      val doc: Document = Jsoup.parse(contentAsString(result))
+      doc.select("#UpfrontPaymentAmount").`val`() shouldBe "10"
     }
   }
 

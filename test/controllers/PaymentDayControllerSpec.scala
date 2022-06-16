@@ -30,7 +30,7 @@ import uk.gov.hmrc.http.SessionKeys
 import org.scalatest.prop.TableDrivenPropertyChecks._
 
 import scala.concurrent.Future
-import scala.jdk.CollectionConverters.collectionAsScalaIterableConverter
+import scala.jdk.CollectionConverters.{asScalaIteratorConverter, collectionAsScalaIterableConverter}
 
 class PaymentDayControllerSpec extends ItSpec {
   private val controller: PaymentDayController = app.injector.instanceOf[PaymentDayController]
@@ -69,7 +69,23 @@ class PaymentDayControllerSpec extends ItSpec {
       doc.select("#DifferentDay").size() shouldBe 1
       doc.select(".govuk-button").text().trim shouldBe "Continue"
     }
+
+    "should prepopulate the form when user navigates back and they have a chosen day of month in their journey" in {
+      AuthStub.authorise()
+      EssttpBackend.DayOfMonth.findJourneyAfterUpdateDayOfMonth()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.paymentDay(fakeRequest)
+
+      status(result) shouldBe Status.OK
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
+
+      val doc: Document = Jsoup.parse(contentAsString(result))
+      doc.select(".govuk-radios__input[checked]").iterator().asScala.toList(0).`val`() shouldBe "28"
+    }
   }
+
   "POST /which-day-do-you-want-to-pay-each-month" - {
     "should update journey with dayOfMonth and redirect to instalment page when 28th selected" in {
       AuthStub.authorise()
