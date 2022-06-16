@@ -46,7 +46,7 @@ object EnumFormatter {
         formError.args: @silent
       )
 
-    override def unbind(key: String, value: A): Map[String, String] = ???
+    override def unbind(key: String, value: A): Map[String, String] = Map(key -> value.toString)
 
   }
 

@@ -74,6 +74,21 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
       progressiveRevealSubContent(1).text() shouldBe progressiveRevealInnerContent2
       doc.select("#continue").text() should include("Continue")
     }
+
+    "should prepopulate the form when user navigates back and they have a monthly payment amount in their journey" in {
+      AuthStub.authorise()
+      EssttpBackend.MonthlyPaymentAmount.findJourneyAfterUpdateMonthlyPaymentAmount()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.displayMonthlyPaymentAmount(fakeRequest)
+
+      status(result) shouldBe Status.OK
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
+
+      val doc: Document = Jsoup.parse(contentAsString(result))
+      doc.select("#MonthlyPaymentAmount").`val`() shouldBe "300"
+    }
   }
 
   "POST /how-much-can-you-pay-each-month should" - {
@@ -89,7 +104,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
         .withFormUrlEncodedBody(("MonthlyPaymentAmount", "300"))
       val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/payment-day")
+      redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/which-day-do-you-want-to-pay-each-month")
       EssttpBackend.MonthlyPaymentAmount.verifyUpdateMonthlyPaymentAmountRequest(TdAll.journeyId)
     }
 

@@ -22,7 +22,7 @@ import essttp.journey.model.JourneyId
 import essttp.journey.model.ttp.EligibilityCheckResult
 import essttp.journey.model.ttp.affordability.InstalmentAmounts
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
-import essttp.rootmodel.{CanPayUpfront, EmpRef, MonthlyPaymentAmount, UpfrontPaymentAmount}
+import essttp.rootmodel.{CanPayUpfront, DayOfMonth, EmpRef, MonthlyPaymentAmount, UpfrontPaymentAmount}
 import play.api.mvc.RequestHeader
 import util.Logging
 
@@ -65,6 +65,10 @@ class JourneyService @Inject() (journeyConnector: JourneyConnector) extends Logg
 
   def updateMonthlyPaymentAmount(journeyId: JourneyId, monthlyPaymentAmount: MonthlyPaymentAmount)(implicit requestHeader: RequestHeader): Future[Unit] = {
     journeyConnector.updateMonthlyPaymentAmount(journeyId, monthlyPaymentAmount)
+  }
+
+  def updateDayOfMonth(journeyId: JourneyId, dayOfMonth: DayOfMonth)(implicit requestHeader: RequestHeader): Future[Unit] = {
+    journeyConnector.updateDayOfMonth(journeyId, dayOfMonth)
   }
 
 }

@@ -19,6 +19,7 @@ package controllers
 import _root_.actions.Actions
 import config.AppConfig
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
+import controllers.MonthlyPaymentAmountController.monthlyPaymentAmountForm
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel.{AmountInPence, MonthlyPaymentAmount}
 import essttp.utils.Errors
@@ -62,6 +63,7 @@ class MonthlyPaymentAmountController @Inject() (
       journey match {
         case j1: Journey.Epaye.RetrievedAffordabilityResult => j1
         case j1: Journey.Epaye.EnteredMonthlyPaymentAmount  => j1
+        case j1: Journey.Epaye.EnteredDayOfMonth            => j1
       }
     val backUrl: Option[String] = j.upfrontPaymentAnswers match {
       case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => Some(routes.UpfrontPaymentController.upfrontPaymentSummary().url)
@@ -77,9 +79,13 @@ class MonthlyPaymentAmountController @Inject() (
       minimumAmount = j.instalmentAmounts.minimumInstalmentAmount,
       maximumAmount = j.instalmentAmounts.maximumInstalmentAmount
     )
+    val maybePrePoppedForm: Form[BigDecimal] = journey match {
+      case _: Journey.BeforeEnteredMonthlyPaymentAmount => monthlyPaymentAmountForm(roundedMin, roundedMax)
+      case j: Journey.AfterEnteredMonthlyPaymentAmount  => monthlyPaymentAmountForm(roundedMin, roundedMax).fill(j.monthlyPaymentAmount.value.inPounds)
+    }
 
     Ok(views.monthlyPaymentAmountPage(
-      form           = MonthlyPaymentAmountController.monthlyPaymentAmountForm(roundedMin, roundedMax),
+      form           = maybePrePoppedForm,
       maximumPayment = roundedMax,
       minimumPayment = roundedMin,
       backUrl        = backUrl
@@ -98,6 +104,13 @@ class MonthlyPaymentAmountController @Inject() (
           }
           (j.instalmentAmounts, totalDebt.-(upfrontPaymentAmount))
         case j1: Journey.Stages.EnteredMonthlyPaymentAmount =>
+          val totalDebt: AmountInPence = AmountInPence(j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value).sum)
+          val upfrontPaymentAmount: AmountInPence = j1.upfrontPaymentAnswers match {
+            case j2: UpfrontPaymentAnswers.DeclaredUpfrontPayment => j2.amount.value
+            case UpfrontPaymentAnswers.NoUpfrontPayment           => AmountInPence.zero
+          }
+          (j.instalmentAmounts, totalDebt.-(upfrontPaymentAmount))
+        case j1: Journey.Stages.EnteredDayOfMonth =>
           val totalDebt: AmountInPence = AmountInPence(j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value).sum)
           val upfrontPaymentAmount: AmountInPence = j1.upfrontPaymentAnswers match {
             case j2: UpfrontPaymentAnswers.DeclaredUpfrontPayment => j2.amount.value

@@ -32,8 +32,11 @@
   requestSupport: RequestSupport
 )
 
-@(form: Form[PaymentDayForm])(implicit
-  request: Request[_]
+@(
+        form: Form[PaymentDayForm],
+        backUrl: Option[String] = None
+)(implicit
+        request: Request[_]
 )
 
 @import requestSupport._

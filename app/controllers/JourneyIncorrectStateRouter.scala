@@ -38,6 +38,7 @@ object JourneyIncorrectStateRouter {
       case _: Journey.Stages.RetrievedExtremeDates        => Redirect(routes.DatesApiController.retrieveExtremeDates())
       case _: Journey.Stages.RetrievedAffordabilityResult => Redirect(routes.DetermineAffordabilityController.determineAffordability())
       case _: Journey.Stages.EnteredMonthlyPaymentAmount  => Redirect(routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount())
+      case _: Journey.Stages.EnteredDayOfMonth            => Redirect(routes.PaymentDayController.paymentDay())
     }
 
     JourneyLogger.error(

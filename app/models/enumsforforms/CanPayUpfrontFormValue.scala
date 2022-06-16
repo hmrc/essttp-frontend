@@ -31,4 +31,9 @@ object CanPayUpfrontFormValue extends Enum[CanPayUpfrontFormValue] {
   case object Yes extends CanPayUpfrontFormValue
   case object No extends CanPayUpfrontFormValue
   override def values: immutable.IndexedSeq[CanPayUpfrontFormValue] = findValues
+
+  def canPayUpfrontToFormValue(canPayUpfront: CanPayUpfront): CanPayUpfrontFormValue = canPayUpfront match {
+    case CanPayUpfront(true)  => CanPayUpfrontFormValue.Yes
+    case CanPayUpfront(false) => CanPayUpfrontFormValue.No
+  }
 }

@@ -56,6 +56,7 @@ class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesServi
       case j1: Journey.Stages.RetrievedExtremeDates        => j1
       case j1: Journey.Stages.RetrievedAffordabilityResult => j1
       case j1: Journey.Stages.EnteredMonthlyPaymentAmount  => j1
+      case j1: Journey.Stages.EnteredDayOfMonth            => j1
     }
 
     val upfrontPaymentAmount: Option[UpfrontPaymentAmount] = j.upfrontPaymentAnswers match {
