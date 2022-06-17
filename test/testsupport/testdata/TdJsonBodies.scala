@@ -515,8 +515,8 @@ object TdJsonBodies {
        |""".stripMargin
   }
 
-  def afterAffordabilityCheckJourneyJson(): String =
-    """
+  def afterAffordabilityCheckJourneyJson(minimumInstalmentAmount: Int = 29997): String =
+    s"""
       |{
       |    "_id" : "6284fcd33c00003d6b1f3903",
       |    "RetrievedAffordabilityResult" : {
@@ -527,7 +527,7 @@ object TdJsonBodies {
       |        },
       |        "createdOn" : "2022-05-18T14:04:03.461",
       |        "instalmentAmounts" : {
-      |            "minimumInstalmentAmount" : 29997,
+      |            "minimumInstalmentAmount" : ${minimumInstalmentAmount},
       |            "maximumInstalmentAmount" : 87944
       |        },
       |        "_id" : "6284fcd33c00003d6b1f3903",
