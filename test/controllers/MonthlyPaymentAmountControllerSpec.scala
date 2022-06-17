@@ -25,7 +25,7 @@ import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.{AuthStub, EssttpBackend}
-import testsupport.testdata.TdAll
+import testsupport.testdata.{TdAll, TdJsonBodies}
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
@@ -88,6 +88,19 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
 
       val doc: Document = Jsoup.parse(contentAsString(result))
       doc.select("#MonthlyPaymentAmount").`val`() shouldBe "300"
+    }
+
+    "should display the minimum amount as £1 if the minimum amount is less than £1" in {
+      AuthStub.authorise()
+      EssttpBackend.AffordabilityMinMaxApi.findJourneyAfterUpdateAffordability(TdJsonBodies.afterAffordabilityCheckJourneyJson(minimumInstalmentAmount = 1))
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.displayMonthlyPaymentAmount(fakeRequest)
+      status(result) shouldBe Status.OK
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
+      val doc: Document = Jsoup.parse(contentAsString(result))
+      doc.select("#MonthlyPaymentAmount-hint").text() shouldBe "Enter an amount between £1 and £880"
     }
   }
 
