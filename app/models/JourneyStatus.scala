@@ -22,6 +22,7 @@ import play.api.libs.json.Format
 
 import scala.collection.immutable
 
+//todo delete this soon, it's for that mock journey thing
 sealed trait JourneyStatus extends EnumEntry
 
 object JourneyStatus {

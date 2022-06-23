@@ -22,7 +22,7 @@ import _root_.testOnly.views.html.IAmBtaPage
 import config.AppConfig
 import essttp.journey.JourneyConnector
 import essttp.journey.model.{Origins, SjRequest}
-import essttp.rootmodel.{BackUrl, ReturnUrl}
+import essttp.rootmodel.{AmountInPence, BackUrl, ReturnUrl}
 import models.EligibilityErrors._
 import models.{EligibilityError, EligibilityErrors}
 import play.api.mvc._
@@ -129,7 +129,7 @@ object StartJourneyController {
 
   private def makeEligibilityCheckResult(form: StartJourneyForm): EligibilityCheckResult = {
 
-    val debtAmountFromForm: DebtTotalAmount = DebtTotalAmount((form.debtTotalAmount * 100).toInt)
+    val debtAmountFromForm: DebtTotalAmount = DebtTotalAmount(AmountInPence(form.debtTotalAmount))
 
     val disallowedChargeLocks = essttp.journey.model.ttp.DisallowedChargeLocks(
       ChargeId("A00000000001"),
@@ -139,7 +139,7 @@ object StartJourneyController {
       SubTransDesc("subTransDesc"),
       OutstandingDebtAmount(debtAmountFromForm.value),
       InterestStartDate("2017-03-07"),
-      AccruedInterestToDate(15.97),
+      AccruedInterestToDate(AmountInPence(1597)),
       ChargeLocks(
         PaymentLock(status = false, reason = ""),
         PaymentLock(status = false, reason = ""),
@@ -173,7 +173,7 @@ object StartJourneyController {
       processingDate       = ProcessingDate("2022-01-31"),
       customerPostcodes    = List(CustomerPostcode(Postcode("AA11AA"), PostcodeDate("2022-01-01"))),
       minPlanLengthMonths  = MinPlanLengthMonths(1),
-      maxPlanLengthMonths  = MaxPlanLengthMonths(3),
+      maxPlanLengthMonths  = MaxPlanLengthMonths(6),
       eligibilityStatus    = EligibilityStatus(OverallEligibilityStatus(
         eligibilityRules.isEligible
       )),

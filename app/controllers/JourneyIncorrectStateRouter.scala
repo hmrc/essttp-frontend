@@ -39,6 +39,9 @@ object JourneyIncorrectStateRouter {
       case _: Journey.Stages.RetrievedAffordabilityResult => Redirect(routes.DetermineAffordabilityController.determineAffordability())
       case _: Journey.Stages.EnteredMonthlyPaymentAmount  => Redirect(routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount())
       case _: Journey.Stages.EnteredDayOfMonth            => Redirect(routes.PaymentDayController.paymentDay())
+      case _: Journey.Stages.RetrievedStartDates          => Redirect(routes.DatesApiController.retrieveStartDates())
+      case _: Journey.Stages.RetrievedAffordableQuotes    => Redirect(routes.DetermineAffordableQuotesController.retrieveAffordableQuotes())
+      case _: Journey.Stages.ChosenPaymentPlan            => Redirect(routes.InstalmentsController.instalmentOptions())
     }
 
     JourneyLogger.error(

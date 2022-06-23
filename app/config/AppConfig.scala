@@ -64,8 +64,8 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   }
 
   object InterestRates {
-    val baseRate: BigDecimal = 0.25
-    val hmrcRate: BigDecimal = 2.5
+    val baseRate: BigDecimal = config.get[Double]("interest-rates.base-rate")
+    val hmrcRate: BigDecimal = config.get[Double]("interest-rates.hmrc-additional-rate")
   }
 
   object JourneyVariables {

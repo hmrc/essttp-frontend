@@ -176,7 +176,9 @@ object EssttpBackend {
   object Dates {
     def updateExtremeDatesUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-extreme-dates"
 
-    def updateUpfrontPaymentAmount(journeyId: JourneyId): StubMapping =
+    def updateStartDatesUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-start-dates"
+
+    def updateExtremeDates(journeyId: JourneyId): StubMapping =
       stubFor(
         post(urlPathEqualTo(updateExtremeDatesUrl(journeyId)))
           .willReturn(
@@ -185,17 +187,44 @@ object EssttpBackend {
           )
       )
 
-    def verifyUpdateMonthlyPaymentAmountRequest(journeyId: JourneyId): Unit =
+    def updateStartDates(journeyId: JourneyId): StubMapping =
+      stubFor(
+        post(urlPathEqualTo(updateStartDatesUrl(journeyId)))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+          )
+      )
+
+    def verifyUpdateExtremeDates(journeyId: JourneyId): Unit =
       verify(postRequestedFor(urlPathEqualTo(updateExtremeDatesUrl(journeyId))))
 
-    def verifyNoneUpdateMonthlyAmountRequest(journeyId: JourneyId): Unit =
+    def verifyNoneUpdateExtremeDates(journeyId: JourneyId): Unit =
       verify(
         exactly(0),
         postRequestedFor(urlPathEqualTo(updateExtremeDatesUrl(journeyId)))
       )
 
+    def verifyUpdateStartDates(journeyId: JourneyId): Unit =
+      verify(postRequestedFor(urlPathEqualTo(updateStartDatesUrl(journeyId))))
+
+    def verifyNoneUpdateStartDates(journeyId: JourneyId): Unit =
+      verify(
+        exactly(0),
+        postRequestedFor(urlPathEqualTo(updateStartDatesUrl(journeyId)))
+      )
+
     def findJourneyAfterUpdateExtremeDates(
         jsonBody: String = TdJsonBodies.afterExtremeDatesJourneyJson()
+    ): StubMapping = stubFor(
+      get(urlPathEqualTo(findByLatestSessionIdUrl))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withBody(jsonBody))
+    )
+
+    def findJourneyAfterUpdateStartDates(
+        jsonBody: String = TdJsonBodies.afterStartDatesJourneyJson()
     ): StubMapping = stubFor(
       get(urlPathEqualTo(findByLatestSessionIdUrl))
         .willReturn(aResponse()
@@ -291,6 +320,72 @@ object EssttpBackend {
 
     def findJourneyAfterUpdateDayOfMonth(
         jsonBody: String = TdJsonBodies.afterDayOfMonthJourneyJson(TdAll.dayOfMonth())
+    ): StubMapping = stubFor(
+      get(urlPathEqualTo(findByLatestSessionIdUrl))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withBody(jsonBody))
+    )
+  }
+
+  object AffordableQuotes {
+    def affordableQuotesUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-affordable-quotes"
+
+    def updateAffordableQuotes(journeyId: JourneyId): StubMapping =
+      stubFor(
+        post(urlPathEqualTo(affordableQuotesUrl(journeyId)))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+          )
+      )
+
+    def verifyUpdateAffordableQuotesRequest(journeyId: JourneyId): Unit =
+      verify(
+        postRequestedFor(urlPathEqualTo(affordableQuotesUrl(journeyId)))
+      )
+
+    def verifyNoneUpdateAffordableQuotesRequest(journeyId: JourneyId): Unit =
+      verify(
+        exactly(0),
+        postRequestedFor(urlPathEqualTo(affordableQuotesUrl(journeyId)))
+      )
+
+    def findJourneyAfterUpdateAffordableQuotes(
+        jsonBody: String = TdJsonBodies.afterAffordableQuotesJourneyJson()
+    ): StubMapping = stubFor(
+      get(urlPathEqualTo(findByLatestSessionIdUrl))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withBody(jsonBody))
+    )
+  }
+
+  object SelectedPaymentPlan {
+    def selectedPlanUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-selected-plan"
+
+    def updateSelectedPlan(journeyId: JourneyId): StubMapping =
+      stubFor(
+        post(urlPathEqualTo(selectedPlanUrl(journeyId)))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+          )
+      )
+
+    def verifyUpdateSelectedPlanRequest(journeyId: JourneyId): Unit =
+      verify(
+        postRequestedFor(urlPathEqualTo(selectedPlanUrl(journeyId)))
+      )
+
+    def verifyNoneUpdateSelectedPlanRequest(journeyId: JourneyId): Unit =
+      verify(
+        exactly(0),
+        postRequestedFor(urlPathEqualTo(selectedPlanUrl(journeyId)))
+      )
+
+    def findJourneyAfterUpdateSelectedPlan(
+        jsonBody: String = TdJsonBodies.afterSelectedPlanJourneyJson()
     ): StubMapping = stubFor(
       get(urlPathEqualTo(findByLatestSessionIdUrl))
         .willReturn(aResponse()

@@ -119,13 +119,13 @@ class UpfrontPaymentController @Inject() (
       case Some(value) => value
       case None        => Errors.throwBadRequestException("Could not determine max debt")
     }
-    val maximumUpfrontPaymentAmountInPence: AmountInPence = AmountInPence(debtTotalAmount.value) - minimumUpfrontPaymentAmount
+    val maximumUpfrontPaymentAmountInPence: AmountInPence = debtTotalAmount.value.-(minimumUpfrontPaymentAmount)
     val maybePrePoppedForm: Form[BigDecimal] = journey.merge match {
-      case _: Journey.BeforeEnteredUpfrontPaymentAmount => UpfrontPaymentAmountForm.form(DebtTotalAmount(maximumUpfrontPaymentAmountInPence.value.intValue()), minimumUpfrontPaymentAmount)
-      case j: Journey.AfterEnteredUpfrontPaymentAmount  => UpfrontPaymentAmountForm.form(DebtTotalAmount(maximumUpfrontPaymentAmountInPence.value.intValue()), minimumUpfrontPaymentAmount).fill(j.upfrontPaymentAmount.value.inPounds)
+      case _: Journey.BeforeEnteredUpfrontPaymentAmount => UpfrontPaymentAmountForm.form(DebtTotalAmount(maximumUpfrontPaymentAmountInPence), minimumUpfrontPaymentAmount)
+      case j: Journey.AfterEnteredUpfrontPaymentAmount  => UpfrontPaymentAmountForm.form(DebtTotalAmount(maximumUpfrontPaymentAmountInPence), minimumUpfrontPaymentAmount).fill(j.upfrontPaymentAmount.value.inPounds)
       case j: Journey.AfterUpfrontPaymentAnswers => j.upfrontPaymentAnswers match {
-        case j1: UpfrontPaymentAnswers.DeclaredUpfrontPayment => UpfrontPaymentAmountForm.form(DebtTotalAmount(maximumUpfrontPaymentAmountInPence.value.intValue()), minimumUpfrontPaymentAmount).fill(j1.amount.value.inPounds)
-        case UpfrontPaymentAnswers.NoUpfrontPayment           => UpfrontPaymentAmountForm.form(DebtTotalAmount(maximumUpfrontPaymentAmountInPence.value.intValue()), minimumUpfrontPaymentAmount)
+        case j1: UpfrontPaymentAnswers.DeclaredUpfrontPayment => UpfrontPaymentAmountForm.form(DebtTotalAmount(maximumUpfrontPaymentAmountInPence), minimumUpfrontPaymentAmount).fill(j1.amount.value.inPounds)
+        case UpfrontPaymentAnswers.NoUpfrontPayment           => UpfrontPaymentAmountForm.form(DebtTotalAmount(maximumUpfrontPaymentAmountInPence), minimumUpfrontPaymentAmount)
       }
     }
     Ok(views.upfrontPaymentAmountPage(
@@ -150,9 +150,9 @@ class UpfrontPaymentController @Inject() (
       case Some(value) => value
       case None        => Errors.throwBadRequestException("Could not determine max debt")
     }
-    val maximumUpfrontPaymentAmountInPence: AmountInPence = AmountInPence(debtTotalAmount.value) - minimumUpfrontPaymentAmount
+    val maximumUpfrontPaymentAmountInPence: AmountInPence = debtTotalAmount.value.-(minimumUpfrontPaymentAmount)
 
-    UpfrontPaymentAmountForm.form(DebtTotalAmount(maximumUpfrontPaymentAmountInPence.value.intValue()), minimumUpfrontPaymentAmount)
+    UpfrontPaymentAmountForm.form(DebtTotalAmount(maximumUpfrontPaymentAmountInPence), minimumUpfrontPaymentAmount)
       .bindFromRequest()
       .fold(
         (formWithErrors: Form[BigDecimal]) =>
@@ -208,9 +208,25 @@ class UpfrontPaymentController @Inject() (
         case UpfrontPaymentAnswers.NoUpfrontPayment =>
           Errors.throwBadRequestException(s"We should not be on the upfront payment summary page without an upfront payment... [$j]")
       }
+      case j: Journey.Epaye.RetrievedStartDates => j.upfrontPaymentAnswers match {
+        case j1: UpfrontPaymentAnswers.DeclaredUpfrontPayment => (j.eligibilityCheckResult, j1.amount)
+        case UpfrontPaymentAnswers.NoUpfrontPayment =>
+          Errors.throwBadRequestException(s"We should not be on the upfront payment summary page without an upfront payment... [$j]")
+      }
+      case j: Journey.Epaye.RetrievedAffordableQuotes => j.upfrontPaymentAnswers match {
+        case j1: UpfrontPaymentAnswers.DeclaredUpfrontPayment => (j.eligibilityCheckResult, j1.amount)
+        case UpfrontPaymentAnswers.NoUpfrontPayment =>
+          Errors.throwBadRequestException(s"We should not be on the upfront payment summary page without an upfront payment... [$j]")
+      }
+      case j: Journey.Epaye.ChosenPaymentPlan => j.upfrontPaymentAnswers match {
+        case j1: UpfrontPaymentAnswers.DeclaredUpfrontPayment => (j.eligibilityCheckResult, j1.amount)
+        case UpfrontPaymentAnswers.NoUpfrontPayment =>
+          Errors.throwBadRequestException(s"We should not be on the upfront payment summary page without an upfront payment... [$j]")
+      }
+
     }
 
-    val totalAmountToPay: DebtTotalAmount = DebtTotalAmount(eligibilityCheckResultFromJourney.chargeTypeAssessment.map(_.debtTotalAmount.value).sum)
+    val totalAmountToPay: DebtTotalAmount = DebtTotalAmount(AmountInPence(eligibilityCheckResultFromJourney.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum))
     val remainingAmountTest: AmountInPence = UpfrontPaymentController.deriveRemainingAmountToPay(totalAmountToPay, upfrontPaymentAmountFromJourney)
 
     Ok(views.upfrontSummaryPage(
@@ -229,11 +245,14 @@ object UpfrontPaymentController {
       case j1: Journey.Stages.RetrievedAffordabilityResult => j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).headOption
       case j1: Journey.Stages.EnteredMonthlyPaymentAmount  => j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).headOption
       case j1: Journey.Stages.EnteredDayOfMonth            => j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).headOption
+      case j1: Journey.Stages.RetrievedStartDates          => j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).headOption
+      case j1: Journey.Stages.RetrievedAffordableQuotes    => j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).headOption
+      case j1: Journey.Stages.ChosenPaymentPlan            => j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).headOption
     }
   }
 
   def deriveRemainingAmountToPay(maxDebt: DebtTotalAmount, upfrontPaymentAmount: UpfrontPaymentAmount): AmountInPence =
-    AmountInPence(maxDebt.value).-(upfrontPaymentAmount.value)
+    maxDebt.value.-(upfrontPaymentAmount.value)
 
   val canYouMakeAnUpfrontPaymentCall: Call = routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment()
   val upfrontPaymentAmountCall: Call = routes.UpfrontPaymentController.upfrontPaymentAmount()

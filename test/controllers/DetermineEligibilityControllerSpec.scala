@@ -23,13 +23,12 @@ import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.{AuthStub, EssttpBackend, Ttp}
-import testsupport.testdata.{TdAll, TdJsonBodies}
+import testsupport.testdata.{PageUrls, TdAll, TdJsonBodies}
 import uk.gov.hmrc.http.SessionKeys
 import org.scalatest.prop.TableDrivenPropertyChecks._
 
 class DetermineEligibilityControllerSpec extends ItSpec {
   private val controller: DetermineEligibilityController = app.injector.instanceOf[DetermineEligibilityController]
-  private val basePath: String = "/set-up-a-payment-plan"
 
   "Determine eligibility endpoint should route user correctly" - {
     forAll(Table(
@@ -54,7 +53,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result = controller.determineEligibility(fakeRequest)
             status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(s"$basePath$expectedRedirect")
+            redirectLocation(result) shouldBe Some(s"/set-up-a-payment-plan$expectedRedirect")
             Ttp.verifyTtpEligibilityRequests()
           }
         }
@@ -66,7 +65,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.determineEligibility(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"$basePath/your-bill")
+      redirectLocation(result) shouldBe Some(PageUrls.yourBillIsUrl)
     }
   }
 }

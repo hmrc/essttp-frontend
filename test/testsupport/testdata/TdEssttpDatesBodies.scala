@@ -24,4 +24,13 @@ object TdEssttpDatesBodies {
       |  "earliestPlanStartDate": "2022-07-14",
       |  "latestPlanStartDate": "2022-08-13"
       |}""".stripMargin
+  def startDatesWithUpfrontPayment(): String =
+    """{
+      |  "initialPaymentDate": "2022-07-03",
+      |  "instalmentStartDate": "2022-07-28"
+      |}""".stripMargin
+  def startDatesWithoutUpfrontPayment(): String =
+    """{
+      |  "instalmentStartDate": "2022-08-01"
+      |}""".stripMargin
 }

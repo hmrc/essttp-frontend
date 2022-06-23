@@ -87,10 +87,10 @@ object YourBillController {
   def monthNumber(date: LocalDate): Int = (date.getMonth.getValue - 4) % 12
 
   private def overDuePaymentOf(ass: ChargeTypeAssessment): OverduePayment =
-    OverduePayment(invoicePeriod(ass), AmountInPence(ass.debtTotalAmount.value))
+    OverduePayment(invoicePeriod(ass), ass.debtTotalAmount.value)
 
   private def overDuePayments(eligibilityResult: EligibilityCheckResult): OverDuePayments = {
-    val qualifyingDebt: AmountInPence = AmountInPence(eligibilityResult.chargeTypeAssessment.map(_.debtTotalAmount.value).sum)
+    val qualifyingDebt: AmountInPence = AmountInPence(eligibilityResult.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum)
     val payments = eligibilityResult.chargeTypeAssessment.map(overDuePaymentOf)
     OverDuePayments(qualifyingDebt, payments)
   }

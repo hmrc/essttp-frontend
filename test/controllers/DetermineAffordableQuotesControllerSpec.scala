@@ -28,22 +28,22 @@ import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
 
-class DetermineAffordabilityControllerSpec extends ItSpec {
+class DetermineAffordableQuotesControllerSpec extends ItSpec {
 
-  private val controller: DetermineAffordabilityController = app.injector.instanceOf[DetermineAffordabilityController]
+  private val controller: DetermineAffordableQuotesController = app.injector.instanceOf[DetermineAffordableQuotesController]
 
-  "GET /determine-affordability" - {
-    "trigger call to ttp microservice affordability endpoint and update backend" in {
+  "GET /determine-affordable-quotes" - {
+    "trigger call to ttp microservice affordable quotes endpoint and update backend" in {
       AuthStub.authorise()
-      EssttpBackend.Dates.findJourneyAfterUpdateExtremeDates()
-      EssttpBackend.AffordabilityMinMaxApi.updateAffordability(TdAll.journeyId)
-      Ttp.retrieveAffordability()
+      EssttpBackend.Dates.findJourneyAfterUpdateStartDates()
+      Ttp.retrieveAffordableQuotes()
+      EssttpBackend.AffordableQuotes.updateAffordableQuotes(TdAll.journeyId)
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val result: Future[Result] = controller.determineAffordability(fakeRequest)
+      val result: Future[Result] = controller.retrieveAffordableQuotes(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.howMuchCanYouPayEachMonthUrl)
-      EssttpBackend.AffordabilityMinMaxApi.verifyUpdateAffordabilityRequest(TdAll.journeyId)
-      Ttp.verifyTtpAffordabilityRequest()
+      redirectLocation(result) shouldBe Some(PageUrls.instalmentsUrl)
+      EssttpBackend.AffordableQuotes.verifyUpdateAffordableQuotesRequest(TdAll.journeyId)
+      Ttp.verifyTtpAffordableQuotesRequest()
     }
   }
 

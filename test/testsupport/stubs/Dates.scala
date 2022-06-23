@@ -33,4 +33,12 @@ object Dates {
         .withStatus(200)
         .withBody(jsonBody))
   )
+  def startDatesCall(
+      jsonBody: String = TdEssttpDatesBodies.startDatesWithUpfrontPayment()
+  ): StubMapping = stubFor(
+    post(urlPathEqualTo(startDatesUrl))
+      .willReturn(aResponse()
+        .withStatus(200)
+        .withBody(jsonBody))
+  )
 }

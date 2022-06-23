@@ -25,7 +25,7 @@ import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.{AuthStub, EssttpBackend}
-import testsupport.testdata.{TdAll, TdJsonBodies}
+import testsupport.testdata.{PageUrls, TdAll, TdJsonBodies}
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
@@ -117,7 +117,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
         .withFormUrlEncodedBody(("MonthlyPaymentAmount", "300"))
       val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/which-day-do-you-want-to-pay-each-month")
+      redirectLocation(result) shouldBe Some(PageUrls.whichDayDoYouWantToPayUrl)
       EssttpBackend.MonthlyPaymentAmount.verifyUpdateMonthlyPaymentAmountRequest(TdAll.journeyId)
     }
 

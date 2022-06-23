@@ -26,7 +26,7 @@ import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.{AuthStub, EssttpBackend}
-import testsupport.testdata.TdAll
+import testsupport.testdata.{PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
@@ -99,7 +99,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
       val result: Future[Result] = controller.canYouMakeAnUpfrontPaymentSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/how-much-can-you-pay-upfront")
+      redirectLocation(result) shouldBe Some(PageUrls.howMuchCanYouPayUpfrontUrl)
       EssttpBackend.CanPayUpfront.verifyUpdateCanPayUpfrontRequest(TdAll.journeyId)
     }
 
@@ -117,7 +117,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
       val result: Future[Result] = controller.canYouMakeAnUpfrontPaymentSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/retrieve-extreme-dates")
+      redirectLocation(result) shouldBe Some(PageUrls.retrievedExtremeDatesUrl)
       EssttpBackend.CanPayUpfront.verifyUpdateCanPayUpfrontRequest(TdAll.journeyId)
     }
 
@@ -187,7 +187,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       val result: Future[Result] = controller.upfrontPaymentAmount(fakeRequest)
 
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/can-you-make-an-upfront-payment")
+      redirectLocation(result) shouldBe Some(PageUrls.canYouMakeAnUpfrontPaymentUrl)
     }
 
     "should prepopulate the form when user navigates back and they have an upfront payment amount in their journey" in {
@@ -221,7 +221,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
       val result: Future[Result] = controller.upfrontPaymentAmountSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/upfront-payment-summary")
+      redirectLocation(result) shouldBe Some(PageUrls.upfrontPaymentSummaryUrl)
       EssttpBackend.UpfrontPaymentAmount.verifyUpdateUpfrontPaymentAmountRequest(TdAll.journeyId)
     }
 
@@ -239,7 +239,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
       val result: Future[Result] = controller.upfrontPaymentAmountSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/upfront-payment-summary")
+      redirectLocation(result) shouldBe Some(PageUrls.upfrontPaymentSummaryUrl)
       EssttpBackend.UpfrontPaymentAmount.verifyUpdateUpfrontPaymentAmountRequest(TdAll.journeyId)
     }
 
@@ -257,7 +257,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
       val result: Future[Result] = controller.upfrontPaymentAmountSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/upfront-payment-summary")
+      redirectLocation(result) shouldBe Some(PageUrls.upfrontPaymentSummaryUrl)
       EssttpBackend.UpfrontPaymentAmount.verifyUpdateUpfrontPaymentAmountRequest(TdAll.journeyId)
     }
 
@@ -337,12 +337,12 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       answer(rows(0)) shouldBe "Yes"
       answer(rows(1)) shouldBe "£10"
       answer(rows(2)) shouldBe "£2,990 (interest may be added to this amount)"
-      changeUrl(rows(0)) shouldBe "/set-up-a-payment-plan/can-you-make-an-upfront-payment"
-      changeUrl(rows(1)) shouldBe "/set-up-a-payment-plan/how-much-can-you-pay-upfront"
+      changeUrl(rows(0)) shouldBe PageUrls.canYouMakeAnUpfrontPaymentUrl
+      changeUrl(rows(1)) shouldBe PageUrls.howMuchCanYouPayUpfrontUrl
 
       val continueCta = doc.select("#continue")
       continueCta.text() shouldBe "Continue"
-      continueCta.attr("href") shouldBe "/set-up-a-payment-plan/retrieve-extreme-dates"
+      continueCta.attr("href") shouldBe PageUrls.retrievedExtremeDatesUrl
     }
   }
 }
