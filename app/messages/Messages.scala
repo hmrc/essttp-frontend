@@ -439,21 +439,29 @@ object Messages {
       english = s"$numberOfMonths month${if (numberOfMonths > 1) "s" else ""} at ${amount.formatInPounds}"
     )
 
-    val `Estimated total interest:`: Message = Message(
-      english = "Estimated total interest:"
-    )
-
-    def getInterestDescription(hmrcRate: BigDecimal): Message = Message(
-      english = s"Base rate + ${hmrcRate.toString()}%"
-    )
-
-    val `added to the final payment`: Message = Message(
-      english = "added to the final payment"
+    def `Estimated total interest of x`(interest: AmountInPence): Message = Message(
+      english = s"Estimated total interest of ${interest.gdsFormatInPounds}"
     )
 
     def getError(key: String): Message = key match {
       case "error.required" => Message(english = "Select how many months you want to pay over")
     }
+
+    val `How we calculate interest`: Message = Message(
+      english = "How we calculate interest"
+    )
+
+    val `We only charge interest on overdue amounts`: Message = Message(
+      english = "We only charge interest on overdue amounts."
+    )
+
+    val `We charge the Bank of England base rate`: Message = Message(
+      english = "We charge the Bank of England base rate plus 2.5%, calculated as simple interest."
+    )
+
+    val `If interest rates change`: Message = Message(
+      english = "If the interest rate changes during your plan, your monthly payments will not change. If we need to, we'll settle the difference at the end of the plan."
+    )
 
   }
 

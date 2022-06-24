@@ -25,7 +25,7 @@ import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.stubs.{AuthStub, EssttpBackend}
 import testsupport.TdRequest.FakeRequestOps
-import testsupport.testdata.TdAll
+import testsupport.testdata.{PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 import org.scalatest.prop.TableDrivenPropertyChecks._
 
@@ -99,7 +99,7 @@ class PaymentDayControllerSpec extends ItSpec {
         .withFormUrlEncodedBody(("PaymentDay", "28"))
       val result: Future[Result] = controller.paymentDaySubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/instalment-options")
+      redirectLocation(result) shouldBe Some(PageUrls.retrieveStartDatesUrl)
       EssttpBackend.DayOfMonth.verifyUpdateDayOfMonthRequest(TdAll.journeyId)
     }
     "should update journey with dayOfMonth and redirect to instalment page when other day selected" in {
@@ -117,7 +117,7 @@ class PaymentDayControllerSpec extends ItSpec {
         )
       val result: Future[Result] = controller.paymentDaySubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/instalment-options")
+      redirectLocation(result) shouldBe Some(PageUrls.retrieveStartDatesUrl)
       EssttpBackend.DayOfMonth.verifyUpdateDayOfMonthRequest(TdAll.journeyId, TdAll.dayOfMonth(1))
     }
     "should update journey with dayOfMonth and redirect to instalment page when other day selected and 28 entered" in {
@@ -135,7 +135,7 @@ class PaymentDayControllerSpec extends ItSpec {
         )
       val result: Future[Result] = controller.paymentDaySubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/instalment-options")
+      redirectLocation(result) shouldBe Some(PageUrls.retrieveStartDatesUrl)
       EssttpBackend.DayOfMonth.verifyUpdateDayOfMonthRequest(TdAll.journeyId)
     }
 

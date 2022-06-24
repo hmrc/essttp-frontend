@@ -24,6 +24,7 @@ object Ttp {
 
   private val eligibilityUrl: String = "/time-to-pay/self-serve/eligibility"
   private val affordabilityUrl: String = "/time-to-pay/self-serve/affordability"
+  private val affordableQuotesUrl: String = "/time-to-pay/self-serve/affordable-quotes"
 
   def retrieveEligibility(jsonBody: String = TdJsonBodies.ttpEligibilityCallJson()): StubMapping = stubFor(
     post(urlPathEqualTo(eligibilityUrl))
@@ -48,6 +49,18 @@ object Ttp {
   def verifyTtpAffordabilityRequest(): Unit =
     verify(
       postRequestedFor(urlPathEqualTo(affordabilityUrl))
+    )
+
+  def retrieveAffordableQuotes(jsonBody: String = TdJsonBodies.ttpAffordableQuotesResponseJson): StubMapping = stubFor(
+    post(urlPathEqualTo(affordableQuotesUrl))
+      .willReturn(aResponse()
+        .withStatus(200)
+        .withBody(jsonBody))
+  )
+
+  def verifyTtpAffordableQuotesRequest(): Unit =
+    verify(
+      postRequestedFor(urlPathEqualTo(affordableQuotesUrl))
     )
 
 }

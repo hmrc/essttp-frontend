@@ -112,7 +112,7 @@
 
 @monthlyPaymentRows = @{List(paymentDayRow) ::: monthRows ::: List(totalRow) }
 
-@layout(pageTitle = Some(title)) {
+@layout(pageTitle = Some(title), backUrl = Some(routes.InstalmentsController.instalmentOptions().url)) {
 
   <h1 class="govuk-heading-xl">
     @title

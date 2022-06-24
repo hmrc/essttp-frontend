@@ -21,7 +21,9 @@ import essttp.journey.JourneyConnector
 import essttp.journey.model.JourneyId
 import essttp.journey.model.ttp.EligibilityCheckResult
 import essttp.journey.model.ttp.affordability.InstalmentAmounts
+import essttp.journey.model.ttp.affordablequotes.{AffordableQuotesResponse, PaymentPlan}
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
+import essttp.rootmodel.dates.startdates.StartDatesResponse
 import essttp.rootmodel.{CanPayUpfront, DayOfMonth, EmpRef, MonthlyPaymentAmount, UpfrontPaymentAmount}
 import play.api.mvc.RequestHeader
 import util.Logging
@@ -69,6 +71,18 @@ class JourneyService @Inject() (journeyConnector: JourneyConnector) extends Logg
 
   def updateDayOfMonth(journeyId: JourneyId, dayOfMonth: DayOfMonth)(implicit requestHeader: RequestHeader): Future[Unit] = {
     journeyConnector.updateDayOfMonth(journeyId, dayOfMonth)
+  }
+
+  def updateStartDates(journeyId: JourneyId, startDatesResponse: StartDatesResponse)(implicit requestHeader: RequestHeader): Future[Unit] = {
+    journeyConnector.updateStartDates(journeyId, startDatesResponse)
+  }
+
+  def updateAffordableQuotes(journeyId: JourneyId, affordableQuotesResponse: AffordableQuotesResponse)(implicit requestHeader: RequestHeader): Future[Unit] = {
+    journeyConnector.updateAffordableQuotes(journeyId, affordableQuotesResponse)
+  }
+
+  def updateChosenPaymentPlan(journeyId: JourneyId, paymentPlan: PaymentPlan)(implicit requestHeader: RequestHeader): Future[Unit] = {
+    journeyConnector.updateChosenPaymentPlan(journeyId, paymentPlan)
   }
 
 }

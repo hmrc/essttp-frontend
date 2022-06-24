@@ -17,79 +17,89 @@
 package controllers
 
 import _root_.actions.Actions
-import config.AppConfig
-import controllers.InstalmentsController.{instalmentsForm, mockApi}
-import essttp.rootmodel.AmountInPence
-import models.{InstalmentOption, MockJourney, UserAnswers}
+import cats.syntax.eq._
+import controllers.InstalmentsController.instalmentsForm
+import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
+import essttp.journey.model.Journey
+import essttp.journey.model.ttp.affordablequotes.PaymentPlan
+import essttp.utils.Errors
+import models.InstalmentOption
 import play.api.data.Form
 import play.api.data.Forms.{mapping, nonEmptyText}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc._
+import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
-import views.html.InstalmentOptions
+import views.Views
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class InstalmentsController @Inject() (
-    as:                    Actions,
-    mcc:                   MessagesControllerComponents,
-    instalmentOptionsPage: InstalmentOptions
-)(implicit appConfig: AppConfig)
-  extends FrontendController(mcc)
+    as:             Actions,
+    mcc:            MessagesControllerComponents,
+    journeyService: JourneyService,
+    views:          Views
+)(implicit executionContext: ExecutionContext) extends FrontendController(mcc)
   with Logging {
 
-  val instalmentOptions: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
-    val mockJourney = MockJourney(userAnswers = UserAnswers.empty.copy(affordableAmount = Some(AmountInPence(50000L))))
-    Future.successful(Ok(instalmentOptionsPage(instalmentsForm(), mockApi(mockJourney))))
+  val instalmentOptions: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
+    request.journey match {
+      case j: Journey.BeforeAffordableQuotesResponse => logErrorAndRouteToDefaultPageF(j)
+      case j: Journey.AfterAffordableQuotesResponse  => displayInstalmentOptionsPage(j)
+    }
   }
 
-  val instalmentOptionsSubmit: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
-    val j: MockJourney = MockJourney()
+  private def displayInstalmentOptionsPage(journey: Journey.AfterAffordableQuotesResponse)(implicit request: Request[_]): Future[Result] = {
+    val maybePrePopForm: Form[String] = journey match {
+      case j: Journey.AfterSelectedPaymentPlan =>
+        InstalmentsController.instalmentsForm().fill(j.selectedPaymentPlan.numberOfInstalments.value.toString)
+      case _ => InstalmentsController.instalmentsForm()
+    }
+    val instalmentOptions = InstalmentsController.retrieveInstalmentOptions(journey.affordableQuotesResponse.paymentPlans)
+    Future.successful(
+      Ok(views.instalmentOptionsPage(
+        form    = maybePrePopForm,
+        options = instalmentOptions,
+        backUrl = InstalmentsController.backUrl
+      ))
+    )
+  }
+
+  val instalmentOptionsSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
+    val journey: Journey.AfterAffordableQuotesResponse =
+      request.journey match {
+        case j: Journey.BeforeAffordableQuotesResponse =>
+          Errors.throwServerErrorException(s"Cannot submit the instalment form if we don't have affordable quotes... stage: [${j.stage}]")
+        case j: Journey.Epaye.RetrievedAffordableQuotes => j
+        case j: Journey.Epaye.ChosenPaymentPlan         => j
+      }
+    val instalmentOptions = InstalmentsController.retrieveInstalmentOptions(journey.affordableQuotesResponse.paymentPlans)
+
     instalmentsForm()
       .bindFromRequest()
-      .fold(
+      .fold({
         formWithErrors =>
-          Future.successful(Ok(
-            instalmentOptionsPage(
-              formWithErrors, mockApi(j)
-            )
-          )),
-        (option: String) => {
-          Future.successful(Redirect(routes.PaymentScheduleController.checkPaymentSchedule()))
-        }
-      )
+          Future.successful(Ok(views.instalmentOptionsPage(
+            form    = formWithErrors,
+            options = instalmentOptions,
+            backUrl = InstalmentsController.backUrl
+          )))
+      }, {
+        (option: String) =>
+          val maybePaymentPlan: Option[PaymentPlan] =
+            journey.affordableQuotesResponse.paymentPlans.find(_.numberOfInstalments.value === option.toInt)
+
+          maybePaymentPlan.fold[Future[Result]](Errors.throwBadRequestExceptionF("There was no payment plan"))(plan =>
+            journeyService.updateChosenPaymentPlan(request.journeyId, plan)
+              .map(_ => Redirect(routes.PaymentScheduleController.checkPaymentSchedule())))
+      })
   }
 
 }
 
 object InstalmentsController {
-  def mockApi(journey: MockJourney)(implicit appConfig: AppConfig): List[InstalmentOption] = {
-    val monthlyInterest: BigDecimal = (appConfig.InterestRates.hmrcRate + appConfig.InterestRates.baseRate) / 12
-    val interestPerMonth: BigDecimal = journey.remainingToPay.inPounds * monthlyInterest
-    val offerMonths: Int = (journey.remainingToPay.value / journey.userAnswers.getAffordableAmount.value).intValue()
-    val month1 = if (offerMonths > 1) offerMonths - 1 else offerMonths
-    val month2 = if (offerMonths > 1) offerMonths else offerMonths + 1
-    val month3 = if (offerMonths > 1) offerMonths + 1 else offerMonths + 2
-    List(
-      InstalmentOption(
-        numberOfMonths       = month1,
-        amountToPayEachMonth = AmountInPence(journey.remainingToPay.value / month1),
-        interestPayment      = AmountInPence(interestPerMonth.longValue() * month1)
-      ),
-      InstalmentOption(
-        numberOfMonths       = month2,
-        amountToPayEachMonth = AmountInPence(journey.remainingToPay.value / month2),
-        interestPayment      = AmountInPence(interestPerMonth.longValue() * month2)
-      ),
-      InstalmentOption(
-        numberOfMonths       = month3,
-        amountToPayEachMonth = AmountInPence(journey.remainingToPay.value / month3),
-        interestPayment      = AmountInPence(interestPerMonth.longValue() * month3)
-      )
-    )
-  }
 
   val key: String = "Instalments"
 
@@ -99,4 +109,14 @@ object InstalmentsController {
     )(identity)(Some(_))
   )
 
+  val backUrl: Option[String] = Some(routes.PaymentDayController.paymentDay().url)
+
+  def retrieveInstalmentOptions(paymentPlans: List[PaymentPlan]): List[InstalmentOption] = paymentPlans.map { plan =>
+    InstalmentOption(
+      numberOfMonths       = plan.numberOfInstalments.value,
+      amountToPayEachMonth = plan.collections.regularCollections
+        .headOption.getOrElse(throw new RuntimeException("There were no regular collections")).amountDue.value,
+      interestPayment      = plan.planInterest.value
+    )
+  }
 }

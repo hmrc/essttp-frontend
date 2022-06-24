@@ -21,64 +21,88 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import controllers.routes
 @import models.InstalmentOption
-@import views.html.components.InstalmentInterest
-@import config.AppConfig
 
 @this(
-  layout: templates.Layout,
-  govukButton: GovukButton,
-  govukRadios: GovukRadios,
-  formWithCSRF: FormWithCSRF,
-  govukErrorSummary: GovukErrorSummary,
-  requestSupport: RequestSupport,
-  instalmentInterest: InstalmentInterest
+        layout: templates.Layout,
+        govukButton: GovukButton,
+        govukRadios: GovukRadios,
+        formWithCSRF: FormWithCSRF,
+        govukErrorSummary: GovukErrorSummary,
+        govukDetails: GovukDetails,
+        requestSupport: RequestSupport
 )
 
-@(form: Form[String], options: List[InstalmentOption])(implicit
-  request: Request[_],
-  appConfig: AppConfig
+@(
+        form: Form[String],
+        options: Seq[InstalmentOption],
+        backUrl: Option[String] = None
+)(implicit
+        request: Request[_]
 )
 
 @import requestSupport._
 
-@key = @{"Instalments"}
-@title = @{Messages.Instalments.`How many months do you want to pay over?`.show}
-@radioOptions = @{options.zipWithIndex.map { case (option, index) => RadioItem(
- content = Text(Messages.Instalments.getInstalmentOption(option.numberOfMonths, option.amountToPayEachMonth).show),
- value = Some(index.toString),
- hint = None,
- checked = form.data.values.toList.contains(index.toString),
- conditionalHtml = Some(instalmentInterest(option.interestPayment))
-)}.toSeq}
+@key = @{
+    "Instalments"
+}
+@title = @{
+    Messages.Instalments.`How many months do you want to pay over?`.show
+}
+@radioOptions = @{
+    options.zipWithIndex.map { case (option: InstalmentOption, index: Int) => RadioItem(
+        content = Text(Messages.Instalments.getInstalmentOption(option.numberOfMonths, option.amountToPayEachMonth).show),
+        value = Some(option.numberOfMonths.toString),
+        hint = Some(Hint(
+            content = Text(Messages.Instalments.`Estimated total interest of x`(option.interestPayment).show)
+        )),
+        checked = form.data.values.toList.contains(option.numberOfMonths.toString)
+    )}
+}
+@detailsContent = {
+    <p class="govuk-body">@{
+        Messages.Instalments.`We only charge interest on overdue amounts`.show
+    }</p>
+    <p class="govuk-body">@{
+        Messages.Instalments.`We charge the Bank of England base rate`.show
+    }</p>
+    <p class="govuk-body">@{
+        Messages.Instalments.`If interest rates change`.show
+    }</p>
+}
 
-@layout(pageTitle = Some(title), backUrl = Some(routes.PaymentDayController.paymentDay().url), hasErrors = form.hasErrors) {
- @if(form.errors.nonEmpty) {
-  @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
-   ErrorLink(
-    href = Some(s"#${e.key}"),
-    content = Text(Messages.Instalments.getError(e.message).show)
-   )
-  ),
-   title = Text(Messages.`There is a problem`.show)))
- }
- @formWithCSRF(action = routes.InstalmentsController.instalmentOptionsSubmit()) {
-  @govukRadios(Radios(
-   fieldset = Some(Fieldset(
-    legend = Some(Legend(
-     content = Text(title),
-     classes = "govuk-fieldset__legend--xl",
-     isPageHeading = true
-    ))
-   )),
-   idPrefix = Some(key),
-   name = key,
-   items = radioOptions,
-   errorMessage = form.error(key).map(e => ErrorMessage(
-    content = Text(Messages.Instalments.getError(e.message).show)
-   ))
-  ))
+@layout(pageTitle = Some(title), backUrl = backUrl, hasErrors = form.hasErrors) {
+    @if(form.errors.nonEmpty) {
+        @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
+            ErrorLink(
+                href = Some(s"#${e.key}"),
+                content = Text(Messages.Instalments.getError(e.message).show)
+            )
+        ),
+            title = Text(Messages.`There is a problem`.show)))
+    }
+    @formWithCSRF(action = routes.InstalmentsController.instalmentOptionsSubmit()) {
+        @govukRadios(Radios(
+            fieldset = Some(Fieldset(
+                legend = Some(Legend(
+                    content = Text(title),
+                    classes = "govuk-fieldset__legend--xl",
+                    isPageHeading = true
+                ))
+            )),
+            idPrefix = Some(key),
+            name = key,
+            items = radioOptions,
+            errorMessage = form.error(key).map(e => ErrorMessage(
+                content = Text(Messages.Instalments.getError(e.message).show)
+            ))
+        ))
 
-  @govukButton(Button(content = Text(Messages.continue.show)))
- }
+        @govukDetails(Details(
+            summary = Text(Messages.Instalments.`How we calculate interest`.show),
+            content = HtmlContent(detailsContent)
+        ))
+
+        @govukButton(Button(content = Text(Messages.continue.show)))
+    }
 
 }

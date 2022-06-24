@@ -59,4 +59,20 @@ class DatesApiController @Inject() (
     } yield Redirect(routes.DetermineAffordabilityController.determineAffordability())
   }
 
+  val retrieveStartDates: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
+    request.journey match {
+      case j: Journey.BeforeEnteredDayOfMonth => logErrorAndRouteToDefaultPageF(j)
+      case j: Journey.AfterEnteredDayOfMonth  => getStartDatesAndUpdateJourney(j)
+    }
+  }
+
+  def getStartDatesAndUpdateJourney(
+      journey: Journey.AfterEnteredDayOfMonth
+  )(implicit request: Request[_]): Future[Result] = {
+    for {
+      startDatesResponse <- datesService.startDates(journey)
+      _ <- journeyService.updateStartDates(journey.id, startDatesResponse)
+    } yield Redirect(routes.DetermineAffordableQuotesController.retrieveAffordableQuotes())
+  }
+
 }

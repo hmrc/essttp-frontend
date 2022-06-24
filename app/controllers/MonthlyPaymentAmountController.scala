@@ -64,12 +64,15 @@ class MonthlyPaymentAmountController @Inject() (
         case j1: Journey.Epaye.RetrievedAffordabilityResult => j1
         case j1: Journey.Epaye.EnteredMonthlyPaymentAmount  => j1
         case j1: Journey.Epaye.EnteredDayOfMonth            => j1
+        case j1: Journey.Epaye.RetrievedStartDates          => j1
+        case j1: Journey.Epaye.RetrievedAffordableQuotes    => j1
+        case j1: Journey.Epaye.ChosenPaymentPlan            => j1
       }
     val backUrl: Option[String] = j.upfrontPaymentAnswers match {
       case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => Some(routes.UpfrontPaymentController.upfrontPaymentSummary().url)
       case UpfrontPaymentAnswers.NoUpfrontPayment          => Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url)
     }
-    val totalDebt = AmountInPence(j.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value).sum)
+    val totalDebt = AmountInPence(j.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum)
     val upfrontPaymentAmount = j.upfrontPaymentAnswers match {
       case j1: UpfrontPaymentAnswers.DeclaredUpfrontPayment => j1.amount.value
       case UpfrontPaymentAnswers.NoUpfrontPayment           => AmountInPence.zero
@@ -97,21 +100,42 @@ class MonthlyPaymentAmountController @Inject() (
       case _: Journey.BeforeRetrievedAffordabilityResult => Errors.throwServerErrorException("We don't have the affordability api response...")
       case j: Journey.AfterRetrievedAffordabilityResult => j match {
         case j1: Journey.Stages.RetrievedAffordabilityResult =>
-          val totalDebt: AmountInPence = AmountInPence(j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value).sum)
+          val totalDebt: AmountInPence = AmountInPence(j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum)
           val upfrontPaymentAmount: AmountInPence = j1.upfrontPaymentAnswers match {
             case j2: UpfrontPaymentAnswers.DeclaredUpfrontPayment => j2.amount.value
             case UpfrontPaymentAnswers.NoUpfrontPayment           => AmountInPence.zero
           }
           (j.instalmentAmounts, totalDebt.-(upfrontPaymentAmount))
         case j1: Journey.Stages.EnteredMonthlyPaymentAmount =>
-          val totalDebt: AmountInPence = AmountInPence(j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value).sum)
+          val totalDebt: AmountInPence = AmountInPence(j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum)
           val upfrontPaymentAmount: AmountInPence = j1.upfrontPaymentAnswers match {
             case j2: UpfrontPaymentAnswers.DeclaredUpfrontPayment => j2.amount.value
             case UpfrontPaymentAnswers.NoUpfrontPayment           => AmountInPence.zero
           }
           (j.instalmentAmounts, totalDebt.-(upfrontPaymentAmount))
         case j1: Journey.Stages.EnteredDayOfMonth =>
-          val totalDebt: AmountInPence = AmountInPence(j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value).sum)
+          val totalDebt: AmountInPence = AmountInPence(j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum)
+          val upfrontPaymentAmount: AmountInPence = j1.upfrontPaymentAnswers match {
+            case j2: UpfrontPaymentAnswers.DeclaredUpfrontPayment => j2.amount.value
+            case UpfrontPaymentAnswers.NoUpfrontPayment           => AmountInPence.zero
+          }
+          (j.instalmentAmounts, totalDebt.-(upfrontPaymentAmount))
+        case j1: Journey.Stages.RetrievedStartDates =>
+          val totalDebt: AmountInPence = AmountInPence(j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum)
+          val upfrontPaymentAmount: AmountInPence = j1.upfrontPaymentAnswers match {
+            case j2: UpfrontPaymentAnswers.DeclaredUpfrontPayment => j2.amount.value
+            case UpfrontPaymentAnswers.NoUpfrontPayment           => AmountInPence.zero
+          }
+          (j.instalmentAmounts, totalDebt.-(upfrontPaymentAmount))
+        case j1: Journey.Stages.RetrievedAffordableQuotes =>
+          val totalDebt: AmountInPence = AmountInPence(j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum)
+          val upfrontPaymentAmount: AmountInPence = j1.upfrontPaymentAnswers match {
+            case j2: UpfrontPaymentAnswers.DeclaredUpfrontPayment => j2.amount.value
+            case UpfrontPaymentAnswers.NoUpfrontPayment           => AmountInPence.zero
+          }
+          (j.instalmentAmounts, totalDebt.-(upfrontPaymentAmount))
+        case j1: Journey.Stages.ChosenPaymentPlan =>
+          val totalDebt: AmountInPence = AmountInPence(j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum)
           val upfrontPaymentAmount: AmountInPence = j1.upfrontPaymentAnswers match {
             case j2: UpfrontPaymentAnswers.DeclaredUpfrontPayment => j2.amount.value
             case UpfrontPaymentAnswers.NoUpfrontPayment           => AmountInPence.zero

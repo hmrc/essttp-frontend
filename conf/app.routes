@@ -36,8 +36,12 @@ POST      /how-much-can-you-pay-each-month               controllers.MonthlyPaym
 GET       /which-day-do-you-want-to-pay-each-month       controllers.PaymentDayController.paymentDay()
 POST      /which-day-do-you-want-to-pay-each-month       controllers.PaymentDayController.paymentDaySubmit()
 
-GET        /instalment-options                           controllers.InstalmentsController.instalmentOptions()
-POST       /instalment-options                           controllers.InstalmentsController.instalmentOptionsSubmit()
+GET       /retrieve-start-dates                          controllers.DatesApiController.retrieveStartDates
+GET       /determine-affordable-quotes                   controllers.DetermineAffordableQuotesController.retrieveAffordableQuotes
+
+GET       /how-many-months-do-you-want-to-pay-over       controllers.InstalmentsController.instalmentOptions()
+POST      /how-many-months-do-you-want-to-pay-over       controllers.InstalmentsController.instalmentOptionsSubmit()
+
 GET        /check-payment-schedule                       controllers.PaymentScheduleController.checkPaymentSchedule()
 GET        /setup-bank-details                           controllers.BankDetailsController.setUpBankDetails()
 POST       /setup-bank-details                           controllers.BankDetailsController.setUpBankDetailsSubmit()

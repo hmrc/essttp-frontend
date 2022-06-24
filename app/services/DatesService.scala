@@ -21,7 +21,7 @@ import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel.CanPayUpfront
 import essttp.rootmodel.dates.InitialPayment
 import essttp.rootmodel.dates.extremedates.{ExtremeDatesRequest, ExtremeDatesResponse}
-import essttp.rootmodel.dates.startdates.{StartDatesRequest, StartDatesResponse}
+import essttp.rootmodel.dates.startdates.{PreferredDayOfMonth, StartDatesRequest, StartDatesResponse}
 import play.api.mvc.RequestHeader
 
 import javax.inject.{Inject, Singleton}
@@ -32,11 +32,15 @@ import scala.concurrent.Future
 @Singleton
 class DatesService @Inject() (datesApiConnector: DatesApiConnector) {
 
-  def startDates(journey: Journey.AfterUpfrontPaymentAnswers)(implicit request: RequestHeader): Future[StartDatesResponse] = {
-    val startDatesRequest: StartDatesRequest = journey.upfrontPaymentAnswers match {
-      case j: UpfrontPaymentAnswers.DeclaredUpfrontPayment => ???
-      case UpfrontPaymentAnswers.NoUpfrontPayment          => ???
+  def startDates(journey: Journey.AfterEnteredDayOfMonth)(implicit request: RequestHeader): Future[StartDatesResponse] = {
+    val dayOfMonth: PreferredDayOfMonth = PreferredDayOfMonth(journey.dayOfMonth.value)
+    val initialPayment: InitialPayment = journey match {
+      case j: Journey.Epaye.EnteredDayOfMonth         => DatesService.deriveInitialPayment(j.upfrontPaymentAnswers)
+      case j: Journey.Epaye.RetrievedStartDates       => DatesService.deriveInitialPayment(j.upfrontPaymentAnswers)
+      case j: Journey.Epaye.RetrievedAffordableQuotes => DatesService.deriveInitialPayment(j.upfrontPaymentAnswers)
+      case j: Journey.Epaye.ChosenPaymentPlan         => DatesService.deriveInitialPayment(j.upfrontPaymentAnswers)
     }
+    val startDatesRequest: StartDatesRequest = StartDatesRequest(initialPayment, dayOfMonth)
     datesApiConnector.startDates(startDatesRequest)
   }
 
@@ -50,3 +54,9 @@ class DatesService @Inject() (datesApiConnector: DatesApiConnector) {
 
 }
 
+object DatesService {
+  def deriveInitialPayment(upfrontPaymentAnswers: UpfrontPaymentAnswers): InitialPayment = upfrontPaymentAnswers match {
+    case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => InitialPayment(true)
+    case UpfrontPaymentAnswers.NoUpfrontPayment          => InitialPayment(false)
+  }
+}

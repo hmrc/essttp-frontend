@@ -126,7 +126,7 @@ object TdJsonBodies {
        |          "subTransDesc" : "subTransDesc",
        |          "outstandingDebtAmount" : 100000,
        |          "interestStartDate" : "2017-03-07",
-       |          "accruedInterestToDate" : 15.97,
+       |          "accruedInterestToDate" : 1597,
        |          "chargeLocks" : {
        |            "paymentLock" : {
        |              "status" : false,
@@ -202,7 +202,7 @@ object TdJsonBodies {
        |      "subTransDesc" : "subTransDesc",
        |      "outstandingDebtAmount" : 100000,
        |      "interestStartDate" : "2017-03-07",
-       |      "accruedInterestToDate" : 15.97,
+       |      "accruedInterestToDate" : 1597,
        |      "chargeLocks" : {
        |        "paymentLock" : {
        |          "status" : false,
@@ -256,7 +256,7 @@ object TdJsonBodies {
        |        }
        |      ],
        |      "minPlanLengthMonths" : 1,
-       |      "maxPlanLengthMonths" : 3,
+       |      "maxPlanLengthMonths" : 6,
        |      "eligibilityStatus" : {
        |        "overallEligibilityStatus" : true
        |      },
@@ -283,7 +283,7 @@ object TdJsonBodies {
        |          "subTransDesc" : "subTransDesc",
        |          "outstandingDebtAmount" : 100000,
        |          "interestStartDate" : "2017-03-07",
-       |          "accruedInterestToDate" : 15.97,
+       |          "accruedInterestToDate" : 1597,
        |          "chargeLocks" : {
        |            "paymentLock" : {
        |              "status" : false,
@@ -371,7 +371,7 @@ object TdJsonBodies {
        |          "subTransDesc" : "subTransDesc",
        |          "outstandingDebtAmount" : 100000,
        |          "interestStartDate" : "2017-03-07",
-       |          "accruedInterestToDate" : 15.97,
+       |          "accruedInterestToDate" : 1597,
        |          "chargeLocks" : {
        |            "paymentLock" : {
        |              "status" : false,
@@ -469,7 +469,7 @@ object TdJsonBodies {
        |                            "subTransDesc" : "subTransDesc",
        |                            "outstandingDebtAmount" : 100000,
        |                            "interestStartDate" : "2017-03-07",
-       |                            "accruedInterestToDate" : 15.97,
+       |                            "accruedInterestToDate" : 1597,
        |                            "chargeLocks" : {
        |                                "paymentLock" : {
        |                                    "status" : false,
@@ -585,7 +585,7 @@ object TdJsonBodies {
       |                            "subTransDesc" : "subTransDesc",
       |                            "outstandingDebtAmount" : 100000,
       |                            "interestStartDate" : "2017-03-07",
-      |                            "accruedInterestToDate" : 15.97,
+      |                            "accruedInterestToDate" : 1597,
       |                            "chargeLocks" : {
       |                                "paymentLock" : {
       |                                    "status" : false,
@@ -691,7 +691,7 @@ object TdJsonBodies {
       |                            "subTransDesc" : "subTransDesc",
       |                            "outstandingDebtAmount" : 100000,
       |                            "interestStartDate" : "2017-03-07",
-      |                            "accruedInterestToDate" : 15.97,
+      |                            "accruedInterestToDate" : 1597,
       |                            "chargeLocks" : {
       |                                "paymentLock" : {
       |                                    "status" : false,
@@ -798,7 +798,7 @@ object TdJsonBodies {
       |                            "subTransDesc" : "subTransDesc",
       |                            "outstandingDebtAmount" : 100000,
       |                            "interestStartDate" : "2017-03-07",
-      |                            "accruedInterestToDate" : 15.97,
+      |                            "accruedInterestToDate" : 1597,
       |                            "chargeLocks" : {
       |                                "paymentLock" : {
       |                                    "status" : false,
@@ -837,4 +837,896 @@ object TdJsonBodies {
       |    "createdAt" : "2022-05-18T14:04:03.461"
       |}
       |""".stripMargin
+
+  def afterStartDatesJourneyJson(): String =
+    s"""
+      |{
+      |    "_id" : "6284fcd33c00003d6b1f3903",
+      |    "RetrievedStartDates" : {
+      |        "stage" : {
+      |            "StartDatesResponseRetrieved" : {}
+      |        },
+      |        "createdOn" : "2022-05-18T14:04:03.461",
+      |        "instalmentAmounts" : {
+      |            "minimumInstalmentAmount" : 29997,
+      |            "maximumInstalmentAmount" : 87944
+      |        },
+      |        "_id" : "6284fcd33c00003d6b1f3903",
+      |        "extremeDatesResponse" : {
+      |            "initialPaymentDate" : "2022-06-23",
+      |            "earliestPlanStartDate" : "2022-07-13",
+      |            "latestPlanStartDate" : "2022-08-12"
+      |        },
+      |        "origin" : "Origins.Epaye.Bta",
+      |        "sjRequest" : {
+      |            "Simple" : {
+      |                "returnUrl" : "/set-up-a-payment-plan/test-only/bta-page?return-page",
+      |                "backUrl" : "/set-up-a-payment-plan/test-only/bta-page?starting-page"
+      |            }
+      |        },
+      |        "sessionId" : "IamATestSessionId",
+      |        "eligibilityCheckResult" : {
+      |            "idType" : "SSTTP",
+      |            "idNumber" : "840/GZ00064",
+      |            "regimeType" : "PAYE",
+      |            "processingDate" : "2022-01-31",
+      |            "customerPostcodes" : [
+      |                {
+      |                    "addressPostcode" : "AA11AA",
+      |                    "postcodeDate" : "2022-01-01"
+      |                }
+      |            ],
+      |            "minPlanLengthMonths" : 1,
+      |            "maxPlanLengthMonths" : 3,
+      |            "eligibilityStatus" : {
+      |                "overallEligibilityStatus" : true
+      |            },
+      |            "eligibilityRules" : {
+      |                "hasRlsOnAddress" : false,
+      |                "markedAsInsolvent" : false,
+      |                "isLessThanMinDebtAllowance" : false,
+      |                "isMoreThanMaxDebtAllowance" : false,
+      |                "disallowedChargeLocks" : false,
+      |                "existingTTP" : false,
+      |                "exceedsMaxDebtAge" : false,
+      |                "eligibleChargeType" : false,
+      |                "missingFiledReturns" : false
+      |            },
+      |            "chargeTypeAssessment" : [
+      |                {
+      |                    "taxPeriodFrom" : "2020-08-13",
+      |                    "taxPeriodTo" : "2020-08-14",
+      |                    "debtTotalAmount" : 1000000,
+      |                    "disallowedChargeLocks" : [
+      |                        {
+      |                            "chargeId" : "A00000000001",
+      |                            "mainTrans" : "mainTrans",
+      |                            "mainTransDesc" : "mainTransDesc",
+      |                            "subTrans" : "subTrans",
+      |                            "subTransDesc" : "subTransDesc",
+      |                            "outstandingDebtAmount" : 100000,
+      |                            "interestStartDate" : "2017-03-07",
+      |                            "accruedInterestToDate" : 1597,
+      |                            "chargeLocks" : {
+      |                                "paymentLock" : {
+      |                                    "status" : false,
+      |                                    "reason" : ""
+      |                                },
+      |                                "clearingLock" : {
+      |                                    "status" : false,
+      |                                    "reason" : ""
+      |                                },
+      |                                "interestLock" : {
+      |                                    "status" : false,
+      |                                    "reason" : ""
+      |                                },
+      |                                "dunningLock" : {
+      |                                    "status" : false,
+      |                                    "reason" : ""
+      |                                }
+      |                            }
+      |                        }
+      |                    ]
+      |                }
+      |            ]
+      |        },
+      |        "upfrontPaymentAnswers" : {
+      |            "DeclaredUpfrontPayment" : {
+      |                "amount" : 12312
+      |            }
+      |        },
+      |        "taxId" : {
+      |            "value" : "840/GZ00064"
+      |        },
+      |        "monthlyPaymentAmount": 30000,
+      |        "dayOfMonth": 1,
+      |         "startDatesResponse" : {
+      |            "initialPaymentDate" : "2022-07-03",
+      |            "instalmentStartDate" : "2022-07-28"
+      |         }
+      |    },
+      |    "sessionId" : "IamATestSessionId",
+      |    "createdAt" : "2022-05-18T14:04:03.461"
+      |}
+      |""".stripMargin
+
+  def ttpAffordableQuotesResponseJson: String =
+    """
+      |{
+      |	"paymentPlans": [{
+      |			"numberOfInstalments": 2,
+      |			"planDuration": 2,
+      |			"totalDebt": 111141,
+      |			"totalDebtIncInt": 111147,
+      |			"planInterest": 6,
+      |			"collections": {
+      |				"initialCollection": {
+      |					"dueDate": "2022-07-03",
+      |					"amountDue": 12312
+      |				},
+      |				"regularCollections": [{
+      |						"dueDate": "2022-08-28",
+      |						"amountDue": 55573
+      |					},
+      |					{
+      |						"dueDate": "2022-09-28",
+      |						"amountDue": 55573
+      |					}
+      |				]
+      |			},
+      |			"instalments": [{
+      |					"instalmentNumber": 2,
+      |					"dueDate": "2022-09-28",
+      |					"instalmentInterestAccrued": 3,
+      |					"instalmentBalance": 55571,
+      |					"debtItemChargeId": "A00000000001",
+      |					"amountDue": 55570,
+      |					"debtItemOriginalDueDate": "2021-07-28"
+      |				},
+      |				{
+      |					"instalmentNumber": 1,
+      |					"dueDate": "2022-08-28",
+      |					"instalmentInterestAccrued": 3,
+      |					"instalmentBalance": 111141,
+      |					"debtItemChargeId": "A00000000001",
+      |					"amountDue": 55570,
+      |					"debtItemOriginalDueDate": "2021-07-28"
+      |				}
+      |			]
+      |		},
+      |		{
+      |			"numberOfInstalments": 3,
+      |			"planDuration": 3,
+      |			"totalDebt": 111141,
+      |			"totalDebtIncInt": 111150,
+      |			"planInterest": 9,
+      |			"collections": {
+      |				"initialCollection": {
+      |					"dueDate": "2022-07-03",
+      |					"amountDue": 12312
+      |				},
+      |				"regularCollections": [{
+      |						"dueDate": "2022-08-28",
+      |						"amountDue": 37050
+      |					},
+      |					{
+      |						"dueDate": "2022-09-28",
+      |						"amountDue": 37050
+      |					},
+      |					{
+      |						"dueDate": "2022-10-28",
+      |						"amountDue": 37050
+      |					}
+      |				]
+      |			},
+      |			"instalments": [{
+      |					"instalmentNumber": 3,
+      |					"dueDate": "2022-10-28",
+      |					"instalmentInterestAccrued": 3,
+      |					"instalmentBalance": 37047,
+      |					"debtItemChargeId": "A00000000001",
+      |					"amountDue": 37047,
+      |					"debtItemOriginalDueDate": "2021-07-28"
+      |				},
+      |				{
+      |					"instalmentNumber": 2,
+      |					"dueDate": "2022-09-28",
+      |					"instalmentInterestAccrued": 3,
+      |					"instalmentBalance": 74094,
+      |					"debtItemChargeId": "A00000000001",
+      |					"amountDue": 37047,
+      |					"debtItemOriginalDueDate": "2021-07-28"
+      |				},
+      |				{
+      |					"instalmentNumber": 1,
+      |					"dueDate": "2022-08-28",
+      |					"instalmentInterestAccrued": 3,
+      |					"instalmentBalance": 111141,
+      |					"debtItemChargeId": "A00000000001",
+      |					"amountDue": 37047,
+      |					"debtItemOriginalDueDate": "2021-07-28"
+      |				}
+      |			]
+      |		},
+      |		{
+      |			"numberOfInstalments": 4,
+      |			"planDuration": 4,
+      |			"totalDebt": 111141,
+      |			"totalDebtIncInt": 111153,
+      |			"planInterest": 12,
+      |			"collections": {
+      |				"initialCollection": {
+      |					"dueDate": "2022-07-03",
+      |					"amountDue": 12312
+      |				},
+      |				"regularCollections": [{
+      |						"dueDate": "2022-08-28",
+      |						"amountDue": 27788
+      |					},
+      |					{
+      |						"dueDate": "2022-09-28",
+      |						"amountDue": 27788
+      |					},
+      |					{
+      |						"dueDate": "2022-10-28",
+      |						"amountDue": 27788
+      |					},
+      |					{
+      |						"dueDate": "2022-11-28",
+      |						"amountDue": 27788
+      |					}
+      |				]
+      |			},
+      |			"instalments": [{
+      |					"instalmentNumber": 4,
+      |					"dueDate": "2022-11-28",
+      |					"instalmentInterestAccrued": 3,
+      |					"instalmentBalance": 27786,
+      |					"debtItemChargeId": "A00000000001",
+      |					"amountDue": 27785,
+      |					"debtItemOriginalDueDate": "2021-07-28"
+      |				},
+      |				{
+      |					"instalmentNumber": 3,
+      |					"dueDate": "2022-10-28",
+      |					"instalmentInterestAccrued": 3,
+      |					"instalmentBalance": 55571,
+      |					"debtItemChargeId": "A00000000001",
+      |					"amountDue": 27785,
+      |					"debtItemOriginalDueDate": "2021-07-28"
+      |				},
+      |				{
+      |					"instalmentNumber": 2,
+      |					"dueDate": "2022-09-28",
+      |					"instalmentInterestAccrued": 3,
+      |					"instalmentBalance": 83356,
+      |					"debtItemChargeId": "A00000000001",
+      |					"amountDue": 27785,
+      |					"debtItemOriginalDueDate": "2021-07-28"
+      |				},
+      |				{
+      |					"instalmentNumber": 1,
+      |					"dueDate": "2022-08-28",
+      |					"instalmentInterestAccrued": 3,
+      |					"instalmentBalance": 111141,
+      |					"debtItemChargeId": "A00000000001",
+      |					"amountDue": 27785,
+      |					"debtItemOriginalDueDate": "2021-07-28"
+      |				}
+      |			]
+      |		}
+      |	]
+      |}
+      |""".stripMargin
+
+  def afterAffordableQuotesJourneyJson(): String =
+    s"""
+      |{
+      |    "_id" : "6284fcd33c00003d6b1f3903",
+      |    "RetrievedAffordableQuotes" : {
+      |        "stage" : {
+      |            "AffordableQuotesRetrieved" : {}
+      |        },
+      |        "createdOn" : "2022-05-18T14:04:03.461",
+      |        "instalmentAmounts" : {
+      |            "minimumInstalmentAmount" : 29997,
+      |            "maximumInstalmentAmount" : 87944
+      |        },
+      |        "_id" : "6284fcd33c00003d6b1f3903",
+      |        "extremeDatesResponse" : {
+      |            "initialPaymentDate" : "2022-06-23",
+      |            "earliestPlanStartDate" : "2022-07-13",
+      |            "latestPlanStartDate" : "2022-08-12"
+      |        },
+      |        "origin" : "Origins.Epaye.Bta",
+      |        "sjRequest" : {
+      |            "Simple" : {
+      |                "returnUrl" : "/set-up-a-payment-plan/test-only/bta-page?return-page",
+      |                "backUrl" : "/set-up-a-payment-plan/test-only/bta-page?starting-page"
+      |            }
+      |        },
+      |        "sessionId" : "IamATestSessionId",
+      |        "eligibilityCheckResult" : {
+      |            "idType" : "SSTTP",
+      |            "idNumber" : "840/GZ00064",
+      |            "regimeType" : "PAYE",
+      |            "processingDate" : "2022-01-31",
+      |            "customerPostcodes" : [
+      |                {
+      |                    "addressPostcode" : "AA11AA",
+      |                    "postcodeDate" : "2022-01-01"
+      |                }
+      |            ],
+      |            "minPlanLengthMonths" : 1,
+      |            "maxPlanLengthMonths" : 3,
+      |            "eligibilityStatus" : {
+      |                "overallEligibilityStatus" : true
+      |            },
+      |            "eligibilityRules" : {
+      |                "hasRlsOnAddress" : false,
+      |                "markedAsInsolvent" : false,
+      |                "isLessThanMinDebtAllowance" : false,
+      |                "isMoreThanMaxDebtAllowance" : false,
+      |                "disallowedChargeLocks" : false,
+      |                "existingTTP" : false,
+      |                "exceedsMaxDebtAge" : false,
+      |                "eligibleChargeType" : false,
+      |                "missingFiledReturns" : false
+      |            },
+      |            "chargeTypeAssessment" : [
+      |                {
+      |                    "taxPeriodFrom" : "2020-08-13",
+      |                    "taxPeriodTo" : "2020-08-14",
+      |                    "debtTotalAmount" : 1000000,
+      |                    "disallowedChargeLocks" : [
+      |                        {
+      |                            "chargeId" : "A00000000001",
+      |                            "mainTrans" : "mainTrans",
+      |                            "mainTransDesc" : "mainTransDesc",
+      |                            "subTrans" : "subTrans",
+      |                            "subTransDesc" : "subTransDesc",
+      |                            "outstandingDebtAmount" : 100000,
+      |                            "interestStartDate" : "2017-03-07",
+      |                            "accruedInterestToDate" : 1597,
+      |                            "chargeLocks" : {
+      |                                "paymentLock" : {
+      |                                    "status" : false,
+      |                                    "reason" : ""
+      |                                },
+      |                                "clearingLock" : {
+      |                                    "status" : false,
+      |                                    "reason" : ""
+      |                                },
+      |                                "interestLock" : {
+      |                                    "status" : false,
+      |                                    "reason" : ""
+      |                                },
+      |                                "dunningLock" : {
+      |                                    "status" : false,
+      |                                    "reason" : ""
+      |                                }
+      |                            }
+      |                        }
+      |                    ]
+      |                }
+      |            ]
+      |        },
+      |        "upfrontPaymentAnswers" : {
+      |            "DeclaredUpfrontPayment" : {
+      |                "amount" : 12312
+      |            }
+      |        },
+      |        "taxId" : {
+      |            "value" : "840/GZ00064"
+      |        },
+      |        "monthlyPaymentAmount": 30000,
+      |        "dayOfMonth": 1,
+      |         "startDatesResponse" : {
+      |            "initialPaymentDate" : "2022-07-03",
+      |            "instalmentStartDate" : "2022-07-28"
+      |         },
+      |         "affordableQuotesResponse" : {
+      |            "paymentPlans" : [
+      |                {
+      |                    "numberOfInstalments" : 2,
+      |                    "planDuration" : 2,
+      |                    "totalDebt" : 111141,
+      |                    "totalDebtIncInt" : 111147,
+      |                    "planInterest" : 6,
+      |                    "collections" : {
+      |                        "initialCollection" : {
+      |                            "dueDate" : "2022-07-03",
+      |                            "amountDue" : 12312
+      |                        },
+      |                        "regularCollections" : [
+      |                            {
+      |                                "dueDate" : "2022-08-28",
+      |                                "amountDue" : 55573
+      |                            },
+      |                            {
+      |                                "dueDate" : "2022-09-28",
+      |                                "amountDue" : 55573
+      |                            }
+      |                        ]
+      |                    },
+      |                    "instalments" : [
+      |                        {
+      |                            "instalmentNumber" : 2,
+      |                            "dueDate" : "2022-09-28",
+      |                            "instalmentInterestAccrued" : 3,
+      |                            "instalmentBalance" : 55571,
+      |                            "debtItemChargeId" : "A00000000001",
+      |                            "amountDue" : 55570,
+      |                            "debtItemOriginalDueDate" : "2021-07-28"
+      |                        },
+      |                        {
+      |                            "instalmentNumber" : 1,
+      |                            "dueDate" : "2022-08-28",
+      |                            "instalmentInterestAccrued" : 3,
+      |                            "instalmentBalance" : 111141,
+      |                            "debtItemChargeId" : "A00000000001",
+      |                            "amountDue" : 55570,
+      |                            "debtItemOriginalDueDate" : "2021-07-28"
+      |                        }
+      |                    ]
+      |                },
+      |                {
+      |                    "numberOfInstalments" : 3,
+      |                    "planDuration" : 3,
+      |                    "totalDebt" : 111141,
+      |                    "totalDebtIncInt" : 111150,
+      |                    "planInterest" : 9,
+      |                    "collections" : {
+      |                        "initialCollection" : {
+      |                            "dueDate" : "2022-07-03",
+      |                            "amountDue" : 12312
+      |                        },
+      |                        "regularCollections" : [
+      |                            {
+      |                                "dueDate" : "2022-08-28",
+      |                                "amountDue" : 37050
+      |                            },
+      |                            {
+      |                                "dueDate" : "2022-09-28",
+      |                                "amountDue" : 37050
+      |                            },
+      |                            {
+      |                                "dueDate" : "2022-10-28",
+      |                                "amountDue" : 37050
+      |                            }
+      |                        ]
+      |                    },
+      |                    "instalments" : [
+      |                        {
+      |                            "instalmentNumber" : 3,
+      |                            "dueDate" : "2022-10-28",
+      |                            "instalmentInterestAccrued" : 3,
+      |                            "instalmentBalance" : 37047,
+      |                            "debtItemChargeId" : "A00000000001",
+      |                            "amountDue" : 37047,
+      |                            "debtItemOriginalDueDate" : "2021-07-28"
+      |                        },
+      |                        {
+      |                            "instalmentNumber" : 2,
+      |                            "dueDate" : "2022-09-28",
+      |                            "instalmentInterestAccrued" : 3,
+      |                            "instalmentBalance" : 74094,
+      |                            "debtItemChargeId" : "A00000000001",
+      |                            "amountDue" : 37047,
+      |                            "debtItemOriginalDueDate" : "2021-07-28"
+      |                        },
+      |                        {
+      |                            "instalmentNumber" : 1,
+      |                            "dueDate" : "2022-08-28",
+      |                            "instalmentInterestAccrued" : 3,
+      |                            "instalmentBalance" : 111141,
+      |                            "debtItemChargeId" : "A00000000001",
+      |                            "amountDue" : 37047,
+      |                            "debtItemOriginalDueDate" : "2021-07-28"
+      |                        }
+      |                    ]
+      |                },
+      |                {
+      |                    "numberOfInstalments" : 4,
+      |                    "planDuration" : 4,
+      |                    "totalDebt" : 111141,
+      |                    "totalDebtIncInt" : 111153,
+      |                    "planInterest" : 12,
+      |                    "collections" : {
+      |                        "initialCollection" : {
+      |                            "dueDate" : "2022-07-03",
+      |                            "amountDue" : 12312
+      |                        },
+      |                        "regularCollections" : [
+      |                            {
+      |                                "dueDate" : "2022-08-28",
+      |                                "amountDue" : 27788
+      |                            },
+      |                            {
+      |                                "dueDate" : "2022-09-28",
+      |                                "amountDue" : 27788
+      |                            },
+      |                            {
+      |                                "dueDate" : "2022-10-28",
+      |                                "amountDue" : 27788
+      |                            },
+      |                            {
+      |                                "dueDate" : "2022-11-28",
+      |                                "amountDue" : 27788
+      |                            }
+      |                        ]
+      |                    },
+      |                    "instalments" : [
+      |                        {
+      |                            "instalmentNumber" : 4,
+      |                            "dueDate" : "2022-11-28",
+      |                            "instalmentInterestAccrued" : 3,
+      |                            "instalmentBalance" : 27786,
+      |                            "debtItemChargeId" : "A00000000001",
+      |                            "amountDue" : 27785,
+      |                            "debtItemOriginalDueDate" : "2021-07-28"
+      |                        },
+      |                        {
+      |                            "instalmentNumber" : 3,
+      |                            "dueDate" : "2022-10-28",
+      |                            "instalmentInterestAccrued" : 3,
+      |                            "instalmentBalance" : 55571,
+      |                            "debtItemChargeId" : "A00000000001",
+      |                            "amountDue" : 27785,
+      |                            "debtItemOriginalDueDate" : "2021-07-28"
+      |                        },
+      |                        {
+      |                            "instalmentNumber" : 2,
+      |                            "dueDate" : "2022-09-28",
+      |                            "instalmentInterestAccrued" : 3,
+      |                            "instalmentBalance" : 83356,
+      |                            "debtItemChargeId" : "A00000000001",
+      |                            "amountDue" : 27785,
+      |                            "debtItemOriginalDueDate" : "2021-07-28"
+      |                        },
+      |                        {
+      |                            "instalmentNumber" : 1,
+      |                            "dueDate" : "2022-08-28",
+      |                            "instalmentInterestAccrued" : 3,
+      |                            "instalmentBalance" : 111141,
+      |                            "debtItemChargeId" : "A00000000001",
+      |                            "amountDue" : 27785,
+      |                            "debtItemOriginalDueDate" : "2021-07-28"
+      |                        }
+      |                    ]
+      |                }
+      |            ]
+      |        }
+      |    },
+      |    "sessionId" : "IamATestSessionId",
+      |    "createdAt" : "2022-05-18T14:04:03.461"
+      |}
+      |""".stripMargin
+
+  def afterSelectedPlanJourneyJson(): String =
+    s"""
+       |{
+       |    "_id" : "6284fcd33c00003d6b1f3903",
+       |    "ChosenPaymentPlan" : {
+       |        "stage" : {
+       |            "SelectedPlan" : {}
+       |        },
+       |        "createdOn" : "2022-05-18T14:04:03.461",
+       |        "instalmentAmounts" : {
+       |            "minimumInstalmentAmount" : 29997,
+       |            "maximumInstalmentAmount" : 87944
+       |        },
+       |        "_id" : "6284fcd33c00003d6b1f3903",
+       |        "extremeDatesResponse" : {
+       |            "initialPaymentDate" : "2022-06-23",
+       |            "earliestPlanStartDate" : "2022-07-13",
+       |            "latestPlanStartDate" : "2022-08-12"
+       |        },
+       |        "origin" : "Origins.Epaye.Bta",
+       |        "sjRequest" : {
+       |            "Simple" : {
+       |                "returnUrl" : "/set-up-a-payment-plan/test-only/bta-page?return-page",
+       |                "backUrl" : "/set-up-a-payment-plan/test-only/bta-page?starting-page"
+       |            }
+       |        },
+       |        "sessionId" : "IamATestSessionId",
+       |        "eligibilityCheckResult" : {
+       |            "idType" : "SSTTP",
+       |            "idNumber" : "840/GZ00064",
+       |            "regimeType" : "PAYE",
+       |            "processingDate" : "2022-01-31",
+       |            "customerPostcodes" : [
+       |                {
+       |                    "addressPostcode" : "AA11AA",
+       |                    "postcodeDate" : "2022-01-01"
+       |                }
+       |            ],
+       |            "minPlanLengthMonths" : 1,
+       |            "maxPlanLengthMonths" : 3,
+       |            "eligibilityStatus" : {
+       |                "overallEligibilityStatus" : true
+       |            },
+       |            "eligibilityRules" : {
+       |                "hasRlsOnAddress" : false,
+       |                "markedAsInsolvent" : false,
+       |                "isLessThanMinDebtAllowance" : false,
+       |                "isMoreThanMaxDebtAllowance" : false,
+       |                "disallowedChargeLocks" : false,
+       |                "existingTTP" : false,
+       |                "exceedsMaxDebtAge" : false,
+       |                "eligibleChargeType" : false,
+       |                "missingFiledReturns" : false
+       |            },
+       |            "chargeTypeAssessment" : [
+       |                {
+       |                    "taxPeriodFrom" : "2020-08-13",
+       |                    "taxPeriodTo" : "2020-08-14",
+       |                    "debtTotalAmount" : 1000000,
+       |                    "disallowedChargeLocks" : [
+       |                        {
+       |                            "chargeId" : "A00000000001",
+       |                            "mainTrans" : "mainTrans",
+       |                            "mainTransDesc" : "mainTransDesc",
+       |                            "subTrans" : "subTrans",
+       |                            "subTransDesc" : "subTransDesc",
+       |                            "outstandingDebtAmount" : 100000,
+       |                            "interestStartDate" : "2017-03-07",
+       |                            "accruedInterestToDate" : 1597,
+       |                            "chargeLocks" : {
+       |                                "paymentLock" : {
+       |                                    "status" : false,
+       |                                    "reason" : ""
+       |                                },
+       |                                "clearingLock" : {
+       |                                    "status" : false,
+       |                                    "reason" : ""
+       |                                },
+       |                                "interestLock" : {
+       |                                    "status" : false,
+       |                                    "reason" : ""
+       |                                },
+       |                                "dunningLock" : {
+       |                                    "status" : false,
+       |                                    "reason" : ""
+       |                                }
+       |                            }
+       |                        }
+       |                    ]
+       |                }
+       |            ]
+       |        },
+       |        "upfrontPaymentAnswers" : {
+       |            "DeclaredUpfrontPayment" : {
+       |                "amount" : 12312
+       |            }
+       |        },
+       |        "taxId" : {
+       |            "value" : "840/GZ00064"
+       |        },
+       |        "monthlyPaymentAmount": 30000,
+       |        "dayOfMonth": 1,
+       |        "startDatesResponse" : {
+       |           "initialPaymentDate" : "2022-07-03",
+       |           "instalmentStartDate" : "2022-07-28"
+       |        },
+       |        "affordableQuotesResponse" : {
+       |           "paymentPlans" : [
+       |               {
+       |                   "numberOfInstalments" : 2,
+       |                   "planDuration" : 2,
+       |                   "totalDebt" : 111141,
+       |                   "totalDebtIncInt" : 111147,
+       |                   "planInterest" : 6,
+       |                   "collections" : {
+       |                       "initialCollection" : {
+       |                           "dueDate" : "2022-07-03",
+       |                           "amountDue" : 12312
+       |                       },
+       |                       "regularCollections" : [
+       |                           {
+       |                               "dueDate" : "2022-08-28",
+       |                               "amountDue" : 55573
+       |                           },
+       |                           {
+       |                               "dueDate" : "2022-09-28",
+       |                               "amountDue" : 55573
+       |                           }
+       |                       ]
+       |                   },
+       |                   "instalments" : [
+       |                       {
+       |                           "instalmentNumber" : 2,
+       |                           "dueDate" : "2022-09-28",
+       |                           "instalmentInterestAccrued" : 3,
+       |                           "instalmentBalance" : 55571,
+       |                           "debtItemChargeId" : "A00000000001",
+       |                           "amountDue" : 55570,
+       |                           "debtItemOriginalDueDate" : "2021-07-28"
+       |                       },
+       |                       {
+       |                           "instalmentNumber" : 1,
+       |                           "dueDate" : "2022-08-28",
+       |                           "instalmentInterestAccrued" : 3,
+       |                           "instalmentBalance" : 111141,
+       |                           "debtItemChargeId" : "A00000000001",
+       |                           "amountDue" : 55570,
+       |                           "debtItemOriginalDueDate" : "2021-07-28"
+       |                       }
+       |                   ]
+       |               },
+       |               {
+       |                   "numberOfInstalments" : 3,
+       |                   "planDuration" : 3,
+       |                   "totalDebt" : 111141,
+       |                   "totalDebtIncInt" : 111150,
+       |                   "planInterest" : 9,
+       |                   "collections" : {
+       |                       "initialCollection" : {
+       |                           "dueDate" : "2022-07-03",
+       |                           "amountDue" : 12312
+       |                       },
+       |                       "regularCollections" : [
+       |                           {
+       |                               "dueDate" : "2022-08-28",
+       |                               "amountDue" : 37050
+       |                           },
+       |                           {
+       |                               "dueDate" : "2022-09-28",
+       |                               "amountDue" : 37050
+       |                           },
+       |                           {
+       |                               "dueDate" : "2022-10-28",
+       |                               "amountDue" : 37050
+       |                           }
+       |                       ]
+       |                   },
+       |                   "instalments" : [
+       |                       {
+       |                           "instalmentNumber" : 3,
+       |                           "dueDate" : "2022-10-28",
+       |                           "instalmentInterestAccrued" : 3,
+       |                           "instalmentBalance" : 37047,
+       |                           "debtItemChargeId" : "A00000000001",
+       |                           "amountDue" : 37047,
+       |                           "debtItemOriginalDueDate" : "2021-07-28"
+       |                       },
+       |                       {
+       |                           "instalmentNumber" : 2,
+       |                           "dueDate" : "2022-09-28",
+       |                           "instalmentInterestAccrued" : 3,
+       |                           "instalmentBalance" : 74094,
+       |                           "debtItemChargeId" : "A00000000001",
+       |                           "amountDue" : 37047,
+       |                           "debtItemOriginalDueDate" : "2021-07-28"
+       |                       },
+       |                       {
+       |                           "instalmentNumber" : 1,
+       |                           "dueDate" : "2022-08-28",
+       |                           "instalmentInterestAccrued" : 3,
+       |                           "instalmentBalance" : 111141,
+       |                           "debtItemChargeId" : "A00000000001",
+       |                           "amountDue" : 37047,
+       |                           "debtItemOriginalDueDate" : "2021-07-28"
+       |                       }
+       |                   ]
+       |               },
+       |               {
+       |                   "numberOfInstalments" : 4,
+       |                   "planDuration" : 4,
+       |                   "totalDebt" : 111141,
+       |                   "totalDebtIncInt" : 111153,
+       |                   "planInterest" : 12,
+       |                   "collections" : {
+       |                       "initialCollection" : {
+       |                           "dueDate" : "2022-07-03",
+       |                           "amountDue" : 12312
+       |                       },
+       |                       "regularCollections" : [
+       |                           {
+       |                               "dueDate" : "2022-08-28",
+       |                               "amountDue" : 27788
+       |                           },
+       |                           {
+       |                               "dueDate" : "2022-09-28",
+       |                               "amountDue" : 27788
+       |                           },
+       |                           {
+       |                               "dueDate" : "2022-10-28",
+       |                               "amountDue" : 27788
+       |                           },
+       |                           {
+       |                               "dueDate" : "2022-11-28",
+       |                               "amountDue" : 27788
+       |                           }
+       |                       ]
+       |                   },
+       |                   "instalments" : [
+       |                       {
+       |                           "instalmentNumber" : 4,
+       |                           "dueDate" : "2022-11-28",
+       |                           "instalmentInterestAccrued" : 3,
+       |                           "instalmentBalance" : 27786,
+       |                           "debtItemChargeId" : "A00000000001",
+       |                           "amountDue" : 27785,
+       |                           "debtItemOriginalDueDate" : "2021-07-28"
+       |                       },
+       |                       {
+       |                           "instalmentNumber" : 3,
+       |                           "dueDate" : "2022-10-28",
+       |                           "instalmentInterestAccrued" : 3,
+       |                           "instalmentBalance" : 55571,
+       |                           "debtItemChargeId" : "A00000000001",
+       |                           "amountDue" : 27785,
+       |                           "debtItemOriginalDueDate" : "2021-07-28"
+       |                       },
+       |                       {
+       |                           "instalmentNumber" : 2,
+       |                           "dueDate" : "2022-09-28",
+       |                           "instalmentInterestAccrued" : 3,
+       |                           "instalmentBalance" : 83356,
+       |                           "debtItemChargeId" : "A00000000001",
+       |                           "amountDue" : 27785,
+       |                           "debtItemOriginalDueDate" : "2021-07-28"
+       |                       },
+       |                       {
+       |                           "instalmentNumber" : 1,
+       |                           "dueDate" : "2022-08-28",
+       |                           "instalmentInterestAccrued" : 3,
+       |                           "instalmentBalance" : 111141,
+       |                           "debtItemChargeId" : "A00000000001",
+       |                           "amountDue" : 27785,
+       |                           "debtItemOriginalDueDate" : "2021-07-28"
+       |                       }
+       |                   ]
+       |               }
+       |           ]
+       |        },
+       |        "selectedPaymentPlan": {
+       |                   "numberOfInstalments" : 2,
+       |                   "planDuration" : 2,
+       |                   "totalDebt" : 111141,
+       |                   "totalDebtIncInt" : 111147,
+       |                   "planInterest" : 6,
+       |                   "collections" : {
+       |                       "initialCollection" : {
+       |                           "dueDate" : "2022-07-03",
+       |                           "amountDue" : 12312
+       |                       },
+       |                       "regularCollections" : [
+       |                           {
+       |                               "dueDate" : "2022-08-28",
+       |                               "amountDue" : 55573
+       |                           },
+       |                           {
+       |                               "dueDate" : "2022-09-28",
+       |                               "amountDue" : 55573
+       |                           }
+       |                       ]
+       |                   },
+       |                   "instalments" : [
+       |                       {
+       |                           "instalmentNumber" : 2,
+       |                           "dueDate" : "2022-09-28",
+       |                           "instalmentInterestAccrued" : 3,
+       |                           "instalmentBalance" : 55571,
+       |                           "debtItemChargeId" : "A00000000001",
+       |                           "amountDue" : 55570,
+       |                           "debtItemOriginalDueDate" : "2021-07-28"
+       |                       },
+       |                       {
+       |                           "instalmentNumber" : 1,
+       |                           "dueDate" : "2022-08-28",
+       |                           "instalmentInterestAccrued" : 3,
+       |                           "instalmentBalance" : 111141,
+       |                           "debtItemChargeId" : "A00000000001",
+       |                           "amountDue" : 55570,
+       |                           "debtItemOriginalDueDate" : "2021-07-28"
+       |                       }
+       |                   ]
+       |               }
+       |    },
+       |    "sessionId" : "IamATestSessionId",
+       |    "createdAt" : "2022-05-18T14:04:03.461"
+       |}
+       |""".stripMargin
 }
