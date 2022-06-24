@@ -17,6 +17,8 @@
 package controllers
 
 import actions.Actions
+import config.AppConfig
+import essttp.journey.model.SjRequest
 import messages.Messages
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -27,9 +29,10 @@ import javax.inject.{Inject, Singleton}
 
 @Singleton()
 class IneligibleController @Inject() (
-    mcc:   MessagesControllerComponents,
-    views: Views,
-    as:    Actions
+    mcc:       MessagesControllerComponents,
+    views:     Views,
+    as:        Actions,
+    appConfig: AppConfig
 ) extends FrontendController(mcc) with Logging {
 
   val genericIneligiblePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
@@ -45,7 +48,15 @@ class IneligibleController @Inject() (
   }
 
   val fileYourReturnPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    Ok(views.partials.ineligibleTemplatePage(Messages.NotEligible.`File your return to use this service`, views.partials.returnsNotUpToDatePartial()))
+    val btaReturnUrl: String = request.journey.sjRequest match {
+      case SjRequest.Epaye.Simple(returnUrl, _) => returnUrl.value
+      case SjRequest.Epaye.Empty()              => appConfig.BaseUrl.businessTaxAccountFrontend
+      case SjRequest.Vat.Simple(returnUrl, _)   => returnUrl.value
+    }
+    Ok(views.partials.ineligibleTemplatePage(
+      pageh1         = Messages.NotEligible.`File your return to use this service`,
+      leadingContent = views.partials.returnsNotUpToDatePartial(btaReturnUrl)
+    ))
   }
 
   val alreadyHaveAPaymentPlanPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>

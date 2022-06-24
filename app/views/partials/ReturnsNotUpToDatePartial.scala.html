@@ -25,7 +25,9 @@
         appConfig: AppConfig
 )
 
-@()(implicit request: Request[_])
+@(
+        btaLink: String
+)(implicit request: Request[_])
 
 @import requestSupport._
 
@@ -35,5 +37,5 @@
 }
 </p>
 <p class="govuk-body">
-    <a href="@{appConfig.BaseUrl.businessTaxAccountFrontend}" class="govuk-link">@{Messages.NotEligible.`Go to your tax account`.show}</a>@{Messages.NotEligible.`to file your tax return.`.show}
+    <a href="@{btaLink}" class="govuk-link" id="bta-link">@{Messages.NotEligible.`Go to your tax account`.show}</a>@{Messages.NotEligible.`to file your tax return.`.show}
 </p>
