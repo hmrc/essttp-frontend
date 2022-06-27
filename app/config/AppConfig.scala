@@ -38,13 +38,13 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val ttpBaseUrl: String = s"${servicesConfig.baseUrl("ttp")}"
 
   object BaseUrl {
-    val essttpFrontend: String = config.get[String]("baseUrl.essttp-frontend")
+    val platformHost: Option[String] = config.getOptional[String]("platform.frontend.host")
+    val essttpFrontend: String = platformHost.getOrElse(config.get[String]("baseUrl.essttp-frontend"))
     val essttpFrontendHost: String = new URL(essttpFrontend).getHost
-    val contactFrontend: String = config.get[String]("baseUrl.contact-frontend")
-    val feedbackFrontend: String = config.get[String]("baseUrl.feedback-frontend")
-    val caFrontend: String = config.get[String]("baseUrl.ca-frontend")
+    val contactFrontend: String = platformHost.getOrElse(config.get[String]("baseUrl.contact-frontend"))
+    val feedbackFrontend: String = platformHost.getOrElse(config.get[String]("baseUrl.feedback-frontend"))
     val gg: String = config.get[String]("baseUrl.gg")
-    val businessTaxAccountFrontend: String = config.get[String]("baseUrl.business-tax-account-frontend")
+    val businessTaxAccountFrontend: String = platformHost.getOrElse(config.get[String]("baseUrl.business-tax-account-frontend"))
   }
 
   object Urls {
