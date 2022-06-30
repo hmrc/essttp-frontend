@@ -72,8 +72,7 @@ class InstalmentsController @Inject() (
       request.journey match {
         case j: Journey.BeforeAffordableQuotesResponse =>
           Errors.throwServerErrorException(s"Cannot submit the instalment form if we don't have affordable quotes... stage: [${j.stage}]")
-        case j: Journey.Epaye.RetrievedAffordableQuotes => j
-        case j: Journey.Epaye.ChosenPaymentPlan         => j
+        case j: Journey.AfterAffordableQuotesResponse => j
       }
     val instalmentOptions = InstalmentsController.retrieveInstalmentOptions(journey.affordableQuotesResponse.paymentPlans)
 

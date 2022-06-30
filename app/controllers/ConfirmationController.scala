@@ -17,7 +17,7 @@
 package controllers
 
 import _root_.actions.Actions
-import controllers.PaymentScheduleController.mockQuotation
+import controllers.ConfirmationController.mockQuotation
 import essttp.rootmodel.AmountInPence
 import models.{InstalmentOption, MockJourney, UserAnswers}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -25,6 +25,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.{Confirmation, PrintSummary}
 
+import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 
@@ -46,4 +47,26 @@ class ConfirmationController @Inject() (
     val j: MockJourney = MockJourney(userAnswers = UserAnswers.empty.copy(paymentDay  = Some("28"), monthsToPay = Some(InstalmentOption(numberOfMonths       = 4, amountToPayEachMonth = AmountInPence(50000L), interestPayment = AmountInPence(3500L)))))
     Future.successful(Ok(printSummaryPage(j.userAnswers, mockQuotation(j.userAnswers.getMonthsToPay), "222PX00222222")))
   }
+}
+
+object ConfirmationController {
+
+  final case class MonthlyPayment(
+      month:  Int,
+      year:   Int,
+      amount: AmountInPence
+  )
+
+  def mockQuotation(monthsToPay: InstalmentOption): List[MonthlyPayment] = {
+    val today = LocalDate.now()
+    for (i <- 1 to monthsToPay.numberOfMonths) yield {
+      val paymentDate: LocalDate = today.plusMonths(i)
+      MonthlyPayment(
+        month  = paymentDate.getMonthValue,
+        year   = paymentDate.getYear,
+        amount = AmountInPence(monthsToPay.amountToPayEachMonth.value + (monthsToPay.interestPayment.value / monthsToPay.numberOfMonths))
+      )
+    }
+  }.toList
+
 }

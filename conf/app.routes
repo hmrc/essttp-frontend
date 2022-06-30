@@ -42,7 +42,9 @@ GET       /determine-affordable-quotes                   controllers.DetermineAf
 GET       /how-many-months-do-you-want-to-pay-over       controllers.InstalmentsController.instalmentOptions()
 POST      /how-many-months-do-you-want-to-pay-over       controllers.InstalmentsController.instalmentOptionsSubmit()
 
-GET        /check-payment-schedule                       controllers.PaymentScheduleController.checkPaymentSchedule()
+GET        /check-your-payment-plan                      controllers.PaymentScheduleController.checkPaymentSchedule()
+POST       /check-your-payment-plan                      controllers.PaymentScheduleController.checkPaymentScheduleSubmit()
+
 GET        /setup-bank-details                           controllers.BankDetailsController.setUpBankDetails()
 POST       /setup-bank-details                           controllers.BankDetailsController.setUpBankDetailsSubmit()
 GET        /check-bank-details                           controllers.BankDetailsController.checkBankDetails()

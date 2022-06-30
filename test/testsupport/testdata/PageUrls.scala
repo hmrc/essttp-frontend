@@ -39,5 +39,5 @@ object PageUrls {
   val retrieveStartDatesUrl: String = s"$serviceBaseUrl/retrieve-start-dates"
   val determineAffordableQuotesUrl: String = s"$serviceBaseUrl/determine-affordable-quotes"
   val instalmentsUrl: String = s"$serviceBaseUrl/how-many-months-do-you-want-to-pay-over"
-  val instalmentScheduleUrl: String = s"$serviceBaseUrl/check-payment-schedule"
+  val instalmentScheduleUrl: String = s"$serviceBaseUrl/check-your-payment-plan"
 }
