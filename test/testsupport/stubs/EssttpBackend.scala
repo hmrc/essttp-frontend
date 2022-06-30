@@ -393,4 +393,23 @@ object EssttpBackend {
           .withBody(jsonBody))
     )
   }
+
+  object HasCheckedPlan {
+    def hasCheckedPlanUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-has-checked-plan"
+
+    def updateHasCheckedPlan(journeyId: JourneyId): StubMapping =
+      stubFor(
+        post(urlPathEqualTo(hasCheckedPlanUrl(journeyId)))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+          )
+      )
+
+    def verifyUpdateHasCheckedPlanRequest(journeyId: JourneyId): Unit =
+      verify(
+        postRequestedFor(urlPathEqualTo(hasCheckedPlanUrl(journeyId)))
+      )
+  }
+
 }

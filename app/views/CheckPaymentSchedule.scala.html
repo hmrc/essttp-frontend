@@ -20,50 +20,82 @@
 @import play.api.mvc.Request
 @import play.twirl.api.Html
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-@import essttp.rootmodel.AmountInPence
+@import essttp.journey.model.UpfrontPaymentAnswers
+@import essttp.rootmodel.DayOfMonth
+@import essttp.journey.model.ttp.affordablequotes.PaymentPlan
 @import controllers.routes
-@import models.UserAnswers
-@import controllers.PaymentScheduleController.MonthlyPayment
 @import messages.DateMessages
 @import cats.syntax.eq._
+
 
 @this(
   layout: templates.Layout,
   appConfig: AppConfig,
   requestSupport: RequestSupport,
-  govukSummaryList : GovukSummaryList
+  govukSummaryList : GovukSummaryList,
+  formWithCSRF: FormWithCSRF,
+  govukButton: GovukButton
 )
 
-@(answers: UserAnswers, plan: List[MonthlyPayment])(implicit request: Request[_])
+@(
+  upfrontPaymentAnswers: UpfrontPaymentAnswers,
+  paymentDay: DayOfMonth,
+  paymentPlan: PaymentPlan
+)(implicit request: Request[_])
 
 @import requestSupport._
 
 @title = @{Messages.PaymentSchedule.`Check your payment plan`.show}
-@paymentDay = @{ answers.getPaymentDay }
-@monthsToPay = @{answers.getMonthsToPay}
-@monthRows = @{
-  plan.zipWithIndex.map { case (p, index) =>
+
+@upfrontPaymentRows = @{
+  val upfrontPaymentAmount =
+    upfrontPaymentAnswers match {
+      case UpfrontPaymentAnswers.NoUpfrontPayment => None
+      case UpfrontPaymentAnswers.DeclaredUpfrontPayment(amount) => Some(amount)
+    }
+
+  val canPayUpfrontRow =
     SummaryListRow(
-      classes = s"grouped-row ${if(index > (plan.size - 1)) { "last-grouped-row" } else { "" }}",
       key = Key(
-        content = Text(s"${DateMessages.monthName(p.month).show} ${p.year}"),
-        classes = s"govuk-!-width-one-half${if(index === 0) " govuk-!-padding-top-2" else ""}"
+        content = HtmlContent(Html(Messages.UpfrontPayment.`Can you make an upfront payment?`.show)),
+        classes = "govuk-!-width-one-half"
       ),
       value = Value(
-        content = Text(p.amount.formatInPounds)
+        content = Text(upfrontPaymentAmount.fold(Messages.UpfrontPayment.`No`)(_ => Messages.UpfrontPayment.`Yes`).show)
       ),
       actions = Some(Actions(
         items = Seq(
           ActionItem(
-            href = routes.InstalmentsController.instalmentOptions().url,
-            classes = s"${if(index === 0) "" else "grouped-change"}",
+            href = routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url,
             content = Text(Messages.change.show),
-            visuallyHiddenText = Some(Messages.PaymentDay.`Which day do you want to pay each month?`.show)
+            visuallyHiddenText = Some(Messages.UpfrontPaymentSummary.`Upfront payment`.show)
+          )
+        )
+      ))
+    )
+
+  val upfrontPaymentAmountRow = upfrontPaymentAmount.map{ amount =>
+    SummaryListRow(
+      key = Key(
+        content = HtmlContent(Html(Messages.PaymentSchedule.`Taken within 10 working days`.show)),
+        classes = "govuk-!-width-one-half"
+      ),
+      value = Value(
+        content = Text(amount.value.formatInPounds)
+      ),
+      actions = Some(Actions(
+        items = Seq(
+          ActionItem(
+            href = routes.UpfrontPaymentController.upfrontPaymentAmount().url,
+            content = Text(Messages.change.show),
+            visuallyHiddenText = Some(Messages.UpfrontPaymentSummary.`Upfront payment`.show)
           )
         )
       ))
     )
   }
+
+  canPayUpfrontRow :: upfrontPaymentAmountRow.toList
 }
 
 @paymentDayRow = @{
@@ -73,7 +105,7 @@
       classes = "govuk-!-width-one-half"
     ),
     value = Value(
-      content = Text(s"${paymentDay.toString}${DateMessages.getSuffix(paymentDay).show} ${Messages.PaymentSchedule.`or next working day`.show}")
+      content = Text(s"${paymentDay.value.toString}${DateMessages.getSuffix(paymentDay.value).show} ${Messages.PaymentSchedule.`or next working day`.show}")
     ),
     actions = Some(Actions(
       items = Seq(
@@ -87,6 +119,33 @@
   )
 }
 
+@monthRows = @{
+  paymentPlan.collections.regularCollections.zipWithIndex.map { case (p, index) =>
+    SummaryListRow(
+      classes = s"grouped-row ${
+        if(index > (paymentPlan.collections.regularCollections.size - 1)) { "last-grouped-row" } else { "" }
+      }",
+      key = Key(
+         content = Text(s"${DateMessages.monthName(p.dueDate.value.getMonthValue).show} ${p.dueDate.value.getYear}"),
+        classes = s"govuk-!-width-one-half${if(index === 0) " govuk-!-padding-top-2" else ""}"
+      ),
+       value = Value(
+        content = Text(p.amountDue.value.formatInPounds)
+      ),
+      actions = Some(Actions(
+        items = Seq(
+          ActionItem(
+            href = routes.InstalmentsController.instalmentOptions().url,
+             classes = s"${if(index === 0) "" else "grouped-change"}",
+            content = Text(Messages.change.show),
+            visuallyHiddenText = Some(Messages.PaymentDay.`Which day do you want to pay each month?`.show)
+         )
+        )
+      ))
+    )
+  }
+}
+
 @totalRow = @{
   SummaryListRow(
     key = Key(
@@ -94,23 +153,13 @@
       classes = "govuk-!-width-one-half"
     ),
     value = Value(
-      content = Text(
-        AmountInPence((monthsToPay.amountToPayEachMonth.value * monthsToPay.numberOfMonths) + monthsToPay.interestPayment.value).formatInPounds
-      )
+      content = Text(paymentPlan.totalDebtIncInt.value.formatInPounds)
     ),
-    actions = Some(Actions(
-      items = Seq(
-        ActionItem(
-          href = routes.UpfrontPaymentController.upfrontPaymentAmount().url,
-          content = Text(Messages.change.show),
-          visuallyHiddenText = Some(Messages.UpfrontPaymentSummary.`Upfront payment`.show)
-        )
-      )
-    ))
+    actions = None
   )
 }
 
-@monthlyPaymentRows = @{List(paymentDayRow) ::: monthRows ::: List(totalRow) }
+@monthlyPaymentRows = @{ paymentDayRow :: monthRows ::: List(totalRow) }
 
 @layout(pageTitle = Some(title), backUrl = Some(routes.InstalmentsController.instalmentOptions().url)) {
 
@@ -118,51 +167,22 @@
     @title
   </h1>
 
-  @answers.upfrontAmount.map { upfrontAmount =>
 
-    <h2 class="govuk-heading-l">
-      @{Messages.PaymentSchedule.`Upfront payment`.show}
-    </h2>
+  <h2 class="govuk-heading-l">
+    @{Messages.PaymentSchedule.`Upfront payment`.show}
+  </h2>
 
-    @govukSummaryList(SummaryList(
-      rows = Seq(
-        SummaryListRow(
-          key = Key(
-            content = HtmlContent(Html(Messages.PaymentSchedule.`Taken within 10 working days`.show)),
-            classes = "govuk-!-width-one-half"
-          ),
-          value = Value(
-            content = Text(upfrontAmount.formatInPounds)
-          ),
-          actions = Some(Actions(
-            items = Seq(
-              ActionItem(
-                href = routes.UpfrontPaymentController.upfrontPaymentAmount().url,
-                content = Text(Messages.change.show),
-                visuallyHiddenText = Some(Messages.UpfrontPaymentSummary.`Upfront payment`.show)
-              )
-            )
-          ))
-        )
+  @govukSummaryList(SummaryList(rows = upfrontPaymentRows))
 
-      )
-    ))
+
+  <h2 class="govuk-heading-l">
+    @{Messages.PaymentSchedule.`Monthly payments`.show}
+  </h2>
+
+    @govukSummaryList(SummaryList(rows = monthlyPaymentRows))
+
+  @formWithCSRF(action = routes.PaymentScheduleController.checkPaymentScheduleSubmit()) {
+    @govukButton(Button(content = Text(Messages.continue.show)))
   }
 
-  @answers.monthsToPay.map { months =>
-
-    <h2 class="govuk-heading-l">
-      @{Messages.PaymentSchedule.`Monthly payments`.show}
-    </h2>
-
-    @govukSummaryList(SummaryList(
-      rows = monthlyPaymentRows
-    ))
-
-  }
-  <p class="govuk-body">
-    <a href="@{routes.BankDetailsController.setUpBankDetails().url}" class="govuk-button" role="button" data-module="govuk-button">
-    @Messages.continue.show
-    </a>
-  </p>
 }

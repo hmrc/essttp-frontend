@@ -1403,7 +1403,9 @@ object TdJsonBodies {
       |}
       |""".stripMargin
 
-  def afterSelectedPlanJourneyJson(): String =
+  def afterSelectedPlanJourneyJson(
+      upfrontPaymentAmountJsonString: String = """{"DeclaredUpfrontPayment": {"amount": 12312}}"""
+  ): String =
     s"""
        |{
        |    "_id" : "6284fcd33c00003d6b1f3903",
@@ -1495,11 +1497,7 @@ object TdJsonBodies {
        |                }
        |            ]
        |        },
-       |        "upfrontPaymentAnswers" : {
-       |            "DeclaredUpfrontPayment" : {
-       |                "amount" : 12312
-       |            }
-       |        },
+       |        "upfrontPaymentAnswers" : $upfrontPaymentAmountJsonString,
        |        "taxId" : {
        |            "value" : "840/GZ00064"
        |        },

@@ -184,47 +184,27 @@ class UpfrontPaymentController @Inject() (
   }
 
   private def displayUpfrontPaymentSummaryPage(journey: Journey)(implicit request: Request[_]): Result = {
-    val (eligibilityCheckResultFromJourney, upfrontPaymentAmountFromJourney) = journey match {
+    val (eligibilityCheckResultFromJourney, upfrontPaymentAnswersFromJourney) = journey match {
       case j: Journey.BeforeEnteredUpfrontPaymentAmount =>
         Errors.throwBadRequestException(s"We should not be on the upfront payment summary page without an upfront payment... [$j]")
-      case j: Journey.Epaye.EnteredUpfrontPaymentAmount => (j.eligibilityCheckResult, j.upfrontPaymentAmount)
-      case j: Journey.Epaye.RetrievedExtremeDates => j.upfrontPaymentAnswers match {
-        case j1: UpfrontPaymentAnswers.DeclaredUpfrontPayment => (j.eligibilityCheckResult, j1.amount)
-        case UpfrontPaymentAnswers.NoUpfrontPayment =>
-          Errors.throwBadRequestException(s"We should not be on the upfront payment summary page without an upfront payment... [$j]")
-      }
-      case j: Journey.Epaye.RetrievedAffordabilityResult => j.upfrontPaymentAnswers match {
-        case j1: UpfrontPaymentAnswers.DeclaredUpfrontPayment => (j.eligibilityCheckResult, j1.amount)
-        case UpfrontPaymentAnswers.NoUpfrontPayment =>
-          Errors.throwBadRequestException(s"We should not be on the upfront payment summary page without an upfront payment... [$j]")
-      }
-      case j: Journey.Epaye.EnteredMonthlyPaymentAmount => j.upfrontPaymentAnswers match {
-        case j1: UpfrontPaymentAnswers.DeclaredUpfrontPayment => (j.eligibilityCheckResult, j1.amount)
-        case UpfrontPaymentAnswers.NoUpfrontPayment =>
-          Errors.throwBadRequestException(s"We should not be on the upfront payment summary page without an upfront payment... [$j]")
-      }
-      case j: Journey.Epaye.EnteredDayOfMonth => j.upfrontPaymentAnswers match {
-        case j1: UpfrontPaymentAnswers.DeclaredUpfrontPayment => (j.eligibilityCheckResult, j1.amount)
-        case UpfrontPaymentAnswers.NoUpfrontPayment =>
-          Errors.throwBadRequestException(s"We should not be on the upfront payment summary page without an upfront payment... [$j]")
-      }
-      case j: Journey.Epaye.RetrievedStartDates => j.upfrontPaymentAnswers match {
-        case j1: UpfrontPaymentAnswers.DeclaredUpfrontPayment => (j.eligibilityCheckResult, j1.amount)
-        case UpfrontPaymentAnswers.NoUpfrontPayment =>
-          Errors.throwBadRequestException(s"We should not be on the upfront payment summary page without an upfront payment... [$j]")
-      }
-      case j: Journey.Epaye.RetrievedAffordableQuotes => j.upfrontPaymentAnswers match {
-        case j1: UpfrontPaymentAnswers.DeclaredUpfrontPayment => (j.eligibilityCheckResult, j1.amount)
-        case UpfrontPaymentAnswers.NoUpfrontPayment =>
-          Errors.throwBadRequestException(s"We should not be on the upfront payment summary page without an upfront payment... [$j]")
-      }
-      case j: Journey.Epaye.ChosenPaymentPlan => j.upfrontPaymentAnswers match {
-        case j1: UpfrontPaymentAnswers.DeclaredUpfrontPayment => (j.eligibilityCheckResult, j1.amount)
-        case UpfrontPaymentAnswers.NoUpfrontPayment =>
-          Errors.throwBadRequestException(s"We should not be on the upfront payment summary page without an upfront payment... [$j]")
-      }
-
+      case j: Journey.Epaye.EnteredUpfrontPaymentAmount =>
+        (j.eligibilityCheckResult, UpfrontPaymentAnswers.DeclaredUpfrontPayment(j.upfrontPaymentAmount))
+      case j: Journey.Epaye.RetrievedExtremeDates        => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
+      case j: Journey.Epaye.RetrievedAffordabilityResult => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
+      case j: Journey.Epaye.EnteredMonthlyPaymentAmount  => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
+      case j: Journey.Epaye.EnteredDayOfMonth            => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
+      case j: Journey.Epaye.RetrievedStartDates          => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
+      case j: Journey.Epaye.RetrievedAffordableQuotes    => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
+      case j: Journey.Epaye.ChosenPaymentPlan            => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
+      case j: Journey.Epaye.CheckedPaymentPlan           => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
     }
+
+    val upfrontPaymentAmountFromJourney =
+      upfrontPaymentAnswersFromJourney match {
+        case j: UpfrontPaymentAnswers.DeclaredUpfrontPayment => j.amount
+        case UpfrontPaymentAnswers.NoUpfrontPayment =>
+          Errors.throwBadRequestException(s"We should not be on the upfront payment summary page without an upfront payment... [$journey]")
+      }
 
     val totalAmountToPay: DebtTotalAmount = DebtTotalAmount(AmountInPence(eligibilityCheckResultFromJourney.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum))
     val remainingAmountTest: AmountInPence = UpfrontPaymentController.deriveRemainingAmountToPay(totalAmountToPay, upfrontPaymentAmountFromJourney)
@@ -238,17 +218,21 @@ class UpfrontPaymentController @Inject() (
 }
 
 object UpfrontPaymentController {
-  def determineMaxDebt(journey: Either[Journey.AfterAnsweredCanPayUpfront, Journey.AfterUpfrontPaymentAnswers]): Option[DebtTotalAmount] = journey match {
-    case Left(j: Journey.AfterEligibilityChecked) => j.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).headOption
-    case Right(j: Journey.AfterUpfrontPaymentAnswers) => j match {
-      case j1: Journey.Stages.RetrievedExtremeDates        => j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).headOption
-      case j1: Journey.Stages.RetrievedAffordabilityResult => j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).headOption
-      case j1: Journey.Stages.EnteredMonthlyPaymentAmount  => j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).headOption
-      case j1: Journey.Stages.EnteredDayOfMonth            => j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).headOption
-      case j1: Journey.Stages.RetrievedStartDates          => j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).headOption
-      case j1: Journey.Stages.RetrievedAffordableQuotes    => j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).headOption
-      case j1: Journey.Stages.ChosenPaymentPlan            => j1.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).headOption
+  def determineMaxDebt(journey: Either[Journey.AfterAnsweredCanPayUpfront, Journey.AfterUpfrontPaymentAnswers]): Option[DebtTotalAmount] = {
+    val eligibilityCheckResult = journey match {
+      case Left(j: Journey.AfterEligibilityChecked) => j.eligibilityCheckResult
+      case Right(j: Journey.AfterUpfrontPaymentAnswers) => j match {
+        case j1: Journey.Stages.RetrievedExtremeDates        => j1.eligibilityCheckResult
+        case j1: Journey.Stages.RetrievedAffordabilityResult => j1.eligibilityCheckResult
+        case j1: Journey.Stages.EnteredMonthlyPaymentAmount  => j1.eligibilityCheckResult
+        case j1: Journey.Stages.EnteredDayOfMonth            => j1.eligibilityCheckResult
+        case j1: Journey.Stages.RetrievedStartDates          => j1.eligibilityCheckResult
+        case j1: Journey.Stages.RetrievedAffordableQuotes    => j1.eligibilityCheckResult
+        case j1: Journey.Stages.ChosenPaymentPlan            => j1.eligibilityCheckResult
+        case j1: Journey.Stages.CheckedPaymentPlan           => j1.eligibilityCheckResult
+      }
     }
+    eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).headOption
   }
 
   def deriveRemainingAmountToPay(maxDebt: DebtTotalAmount, upfrontPaymentAmount: UpfrontPaymentAmount): AmountInPence =

@@ -85,4 +85,8 @@ class JourneyService @Inject() (journeyConnector: JourneyConnector) extends Logg
     journeyConnector.updateChosenPaymentPlan(journeyId, paymentPlan)
   }
 
+  def updateHasCheckedPaymentPlan(journeyId: JourneyId)(implicit requestHeader: RequestHeader): Future[Unit] = {
+    journeyConnector.updateHasCheckedPaymentPlan(journeyId)
+  }
+
 }
