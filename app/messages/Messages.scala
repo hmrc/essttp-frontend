@@ -436,7 +436,7 @@ object Messages {
     )
 
     def getInstalmentOption(numberOfMonths: Int, amount: AmountInPence): Message = Message(
-      english = s"$numberOfMonths month${if (numberOfMonths > 1) "s" else ""} at ${amount.formatInPounds}"
+      english = s"$numberOfMonths month${if (numberOfMonths > 1) "s" else ""} at ${amount.gdsFormatInPounds}"
     )
 
     def `Estimated total interest of x`(interest: AmountInPence): Message = Message(
