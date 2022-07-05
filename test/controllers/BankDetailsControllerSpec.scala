@@ -49,10 +49,26 @@ class BankDetailsControllerSpec extends ItSpec {
   private val accountHolderHintContent: String = "You must be able to set up a Direct Debit without permission from any other account holders."
   private val accountHolderRadioId: String = "#isSoleSignatory"
 
-  def testFormError(elements: Element*)(textAndHrefContent: List[(String, String)]): Unit =
-    elements.zip(textAndHrefContent).foreach { testData: (Element, (String, String)) => {
-      testData._1.text() shouldBe testData._2._1
-      testData._1.attr("href") shouldBe testData._2._2
+  def testFormError(formData: (String, String)*)(textAndHrefContent: List[(String, String)]): Unit = {
+    val fakeRequest = FakeRequest(
+      method = "POST",
+      path   = "/set-up-direct-debit"
+    ).withAuthToken()
+      .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      .withFormUrlEncodedBody(formData: _*)
+
+    val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
+    status(result) shouldBe Status.OK
+
+    val pageContent: String = contentAsString(result)
+    val doc: Document = Jsoup.parse(pageContent)
+    val errorSummary = doc.select(".govuk-error-summary__list")
+    val errorLinks = errorSummary.select("a").asScala.toList
+    errorLinks.zip(textAndHrefContent).foreach { testData: (Element, (String, String)) =>
+      {
+        testData._1.text() shouldBe testData._2._1
+        testData._1.attr("href") shouldBe testData._2._2
+      }
     }
   }
 
@@ -161,94 +177,54 @@ class BankDetailsControllerSpec extends ItSpec {
     "show correct error messages when form submitted is empty" in {
       AuthStub.authorise()
       EssttpBackend.HasCheckedPlan.findJourneyAfterUpdateHasCheckedPlan()
-
-      val fakeRequest = FakeRequest(
-        method = "POST",
-        path   = "/set-up-direct-debit"
-      ).withAuthToken()
-        .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-        .withFormUrlEncodedBody(
-          ("name", ""),
-          ("sortCode", ""),
-          ("accountNumber", ""),
-          ("isSoleSignatory", "")
-        )
-      val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
-      status(result) shouldBe Status.OK
-      EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
-
-      val pageContent: String = contentAsString(result)
-      val doc: Document = Jsoup.parse(pageContent)
-
-      val errorSummary = doc.select(".govuk-error-summary__list")
-      val errorLinks = errorSummary.select("a").asScala.toList
+      val formData: List[(String, String)] = List(
+        ("name", ""),
+        ("sortCode", ""),
+        ("accountNumber", ""),
+        ("isSoleSignatory", "")
+      )
       val expectedContentAndHref: List[(String, String)] = List(
         ("Enter the name on the account", accountNameFieldId),
         ("Enter sort code", sortCodeFieldId),
         ("Enter account number", accountNumberFieldId),
         ("Select yes if you are the account holder", accountHolderRadioId)
       )
-      testFormError(errorLinks: _*)(expectedContentAndHref)
+      testFormError(formData: _*)(expectedContentAndHref)
+      EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
     }
 
     "show correct error messages when submitted sort code and account number are not numeric" in {
       AuthStub.authorise()
       EssttpBackend.HasCheckedPlan.findJourneyAfterUpdateHasCheckedPlan()
-
-      val fakeRequest = FakeRequest(
-        method = "POST",
-        path   = "/set-up-direct-debit"
-      ).withAuthToken()
-        .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-        .withFormUrlEncodedBody(
-          ("name", "Bob Ross"),
-          ("sortCode", "12E456"),
-          ("accountNumber", "12E45678"),
-          ("isSoleSignatory", "Yes")
-        )
-      val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
-      status(result) shouldBe Status.OK
-      EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
-
-      val pageContent: String = contentAsString(result)
-      val doc: Document = Jsoup.parse(pageContent)
-      val errorSummary = doc.select(".govuk-error-summary__list")
-      val errorLinks: List[Element] = errorSummary.select("a").asScala.toList
+      val formData: List[(String, String)] = List(
+        ("name", "Bob Ross"),
+        ("sortCode", "12E456"),
+        ("accountNumber", "12E45678"),
+        ("isSoleSignatory", "Yes")
+      )
       val expectedContentAndHref: List[(String, String)] = List(
         ("Sort code must be a number", sortCodeFieldId),
         ("Account number must be a number", accountNumberFieldId)
       )
-      testFormError(errorLinks: _*)(expectedContentAndHref)
+      testFormError(formData: _*)(expectedContentAndHref)
+      EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
     }
 
     "show correct error messages when submitted sort code and account number are more than 6 and 8 digits respectively" in {
       AuthStub.authorise()
       EssttpBackend.HasCheckedPlan.findJourneyAfterUpdateHasCheckedPlan()
-
-      val fakeRequest = FakeRequest(
-        method = "POST",
-        path   = "/set-up-direct-debit"
-      ).withAuthToken()
-        .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-        .withFormUrlEncodedBody(
-          ("name", "Bob Ross"),
-          ("sortCode", "1234567"),
-          ("accountNumber", "123456789"),
-          ("isSoleSignatory", "Yes")
-        )
-      val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
-      status(result) shouldBe Status.OK
-      EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
-
-      val pageContent: String = contentAsString(result)
-      val doc: Document = Jsoup.parse(pageContent)
-      val errorSummary = doc.select(".govuk-error-summary__list")
-      val errorLinks = errorSummary.select("a").asScala.toList
+      val formData: List[(String, String)] = List(
+        ("name", "Bob Ross"),
+        ("sortCode", "1234567"),
+        ("accountNumber", "123456789"),
+        ("isSoleSignatory", "Yes")
+      )
       val expectedContentAndHref: List[(String, String)] = List(
         ("Sort code must be 6 digits", sortCodeFieldId),
         ("Account number must be between 6 and 8 digits", accountNumberFieldId)
       )
-      testFormError(errorLinks: _*)(expectedContentAndHref)
+      testFormError(formData: _*)(expectedContentAndHref)
+      EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
     }
   }
 
