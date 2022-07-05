@@ -496,20 +496,8 @@ object Messages {
   }
 
   object BankDetails {
-    val `Enter account details to set up a Direct Debit`: Message = Message(
-      english = "Enter account details to set up a Direct Debit"
-    )
-
-    val `To continue you must be:`: Message = Message(
-      english = "To continue you must be:"
-    )
-
-    val `a named account holder for this account`: Message = Message(
-      english = "a named account holder for this account"
-    )
-
-    val `the only person who needs to authorise this Direct Debit`: Message = Message(
-      english = "the only person who needs to authorise this Direct Debit"
+    val `Set up Direct Debit`: Message = Message(
+      english = "Set up Direct Debit"
     )
 
     val `Name on the account`: Message = Message(
@@ -532,15 +520,28 @@ object Messages {
       english = "Must be between 6 and 8 digits long"
     )
 
+    val `Are you an account holder`: Message = Message(
+      english = "Are you an account holder?"
+    )
+
+    val `You must be able to set up a direct debit without permission from...`: Message = Message(
+      english = "You must be able to set up a Direct Debit without permission from any other account holders."
+    )
+
+    val `Select yes if you are the account holder`: Message = Message(
+      english = "Select yes if you are the account holder"
+    )
+
     val errors: Map[String, Message] = Map(
       "name.error.required" -> Message("Enter the name on the account"),
       "name.error.pattern" -> Message("Name on the account must only include letters, apostrophes, spaces and hyphens"),
       "sortCode.error.required" -> Message("Enter sort code"),
-      "sortCode.error.nonNumeric" -> Message("Sort code must be numbers only"),
-      "sortCode.error.invalid" -> Message("Sort code must be 6 numbers only"),
+      "sortCode.error.nonNumeric" -> Message("Sort code must be a number"),
+      "sortCode.error.invalid" -> Message("Sort code must be 6 digits"),
       "accountNumber.error.required" -> Message("Enter account number"),
-      "accountNumber.error.nonNumeric" -> Message("Account number must be numbers only"),
-      "accountNumber.error.invalid" -> Message("Account number must be between 6 and 8 numbers")
+      "accountNumber.error.nonNumeric" -> Message("Account number must be a number"),
+      "accountNumber.error.invalid" -> Message("Account number must be between 6 and 8 digits"),
+      "isSoleSignatory.error.required" -> Message("Select yes if you are the account holder")
     )
 
     val `Check your Direct Debit details`: Message = Message(

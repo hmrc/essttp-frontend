@@ -183,7 +183,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
 
   s"POST ${routes.PaymentScheduleController.checkPaymentScheduleSubmit().url}" - {
 
-    s"should redirect to ${routes.BankDetailsController.setUpBankDetails().url} if the journey " +
+    s"should redirect to ${routes.BankDetailsController.enterBankDetails().url} if the journey " +
       "has been updated successfully" in {
         AuthStub.authorise()
         EssttpBackend.EligibilityCheck.findJourneyAfterEligibilityCheck(TdJsonBodies.afterSelectedPlanJourneyJson())
@@ -193,7 +193,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
 
         val result: Future[Result] = controller.checkPaymentScheduleSubmit(fakeRequest)
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.BankDetailsController.setUpBankDetails().url)
+        redirectLocation(result) shouldBe Some(routes.BankDetailsController.enterBankDetails().url)
         EssttpBackend.HasCheckedPlan.verifyUpdateHasCheckedPlanRequest(TdAll.journeyId)
 
       }

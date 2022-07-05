@@ -410,6 +410,48 @@ object EssttpBackend {
       verify(
         postRequestedFor(urlPathEqualTo(hasCheckedPlanUrl(journeyId)))
       )
+
+    def findJourneyAfterUpdateHasCheckedPlan(
+        jsonBody: String = TdJsonBodies.afterHasCheckedPlanJourneyJson()
+    ): StubMapping = stubFor(
+      get(urlPathEqualTo(findByLatestSessionIdUrl))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withBody(jsonBody))
+    )
+  }
+
+  object DirectDebitDetails {
+    def directDebitDetailsUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-direct-debit-details"
+
+    def updateDirectDebitDetails(journeyId: JourneyId): StubMapping =
+      stubFor(
+        post(urlPathEqualTo(directDebitDetailsUrl(journeyId)))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+          )
+      )
+
+    def verifyUpdateDirectDebitDetailsRequest(journeyId: JourneyId): Unit =
+      verify(
+        postRequestedFor(urlPathEqualTo(directDebitDetailsUrl(journeyId)))
+      )
+
+    def verifyNoneUpdateDirectDebitDetailsRequest(journeyId: JourneyId): Unit =
+      verify(
+        exactly(0),
+        postRequestedFor(urlPathEqualTo(directDebitDetailsUrl(journeyId)))
+      )
+
+    def findJourneyAfterUpdateDirectDebitDetails(
+        jsonBody: String = TdJsonBodies.afterDirectDebitDetailsJourneyJson()
+    ): StubMapping = stubFor(
+      get(urlPathEqualTo(findByLatestSessionIdUrl))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withBody(jsonBody))
+    )
   }
 
 }

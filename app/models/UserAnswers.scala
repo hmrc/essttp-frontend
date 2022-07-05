@@ -18,8 +18,10 @@ package models
 
 import cats.implicits.catsSyntaxEq
 import essttp.rootmodel.AmountInPence
+import essttp.rootmodel.bank.BankDetails
 import play.api.libs.json.{Format, Json}
 
+//todo delete this file when we finish building journey
 final case class UserAnswers(
     hasUpfrontPayment: Option[Boolean],
     upfrontAmount:     Option[AmountInPence],

@@ -40,7 +40,7 @@ class PaymentScheduleController @Inject() (
 )(implicit ec: ExecutionContext) extends FrontendController(mcc)
   with Logging {
 
-  val checkPaymentSchedule: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
+  val checkPaymentSchedule: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     request.journey match {
       case j: Journey.BeforeSelectedPaymentPlan =>
         logErrorAndRouteToDefaultPageF(j)
@@ -55,14 +55,14 @@ class PaymentScheduleController @Inject() (
     }
   }
 
-  val checkPaymentScheduleSubmit: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
+  val checkPaymentScheduleSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     request.journey match {
       case j: Journey.BeforeSelectedPaymentPlan =>
         logErrorAndRouteToDefaultPageF(j)
 
       case j: Journey.AfterSelectedPaymentPlan =>
         journeyService.updateHasCheckedPaymentPlan(j.journeyId)
-          .map(_ => Redirect(routes.BankDetailsController.setUpBankDetails()))
+          .map(_ => Redirect(routes.BankDetailsController.enterBankDetails()))
 
     }
   }

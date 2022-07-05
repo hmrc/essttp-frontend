@@ -1,0 +1,158 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import messages.Messages
+@import requests.RequestSupport
+@import play.api.mvc.Request
+@import play.api.data.Form
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import controllers.routes
+@import models.forms.BankDetailsForm
+@import models.enumsforforms.IsSoleSignatoryFormValue
+
+@this(
+        layout: templates.Layout,
+        govukButton: GovukButton,
+        govukInput: GovukInput,
+        formWithCSRF: FormWithCSRF,
+        govukErrorSummary: GovukErrorSummary,
+        requestSupport: RequestSupport,
+        govukRadios: GovukRadios,
+)
+
+@(
+        form: Form[BankDetailsForm],
+        backUrl: Option[String] = None
+)(implicit
+        request: Request[_]
+)
+
+@import requestSupport._
+
+@nameKey = @{
+    "name"
+}
+@sortCodeKey = @{
+    "sortCode"
+}
+@accountNumberKey = @{
+    "accountNumber"
+}
+@soleSignatoryKey = @{
+    "isSoleSignatory"
+}
+@title = @{
+    Messages.BankDetails.`Set up Direct Debit`.show
+}
+
+@layout(pageTitle = Some(title), backUrl = backUrl, hasErrors = form.hasErrors) {
+    @if(form.errors.nonEmpty) {
+        @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
+            ErrorLink(
+                href = Some(s"#${e.key}"),
+                content = Text(Messages.BankDetails.errors(s"${e.key}.${e.message}").show)
+            )
+        ),
+            title = Text(Messages.`There is a problem`.show)))
+    }
+    <h1 class="govuk-heading-xl">
+    @title
+    </h1>
+    @formWithCSRF(action = routes.BankDetailsController.enterBankDetailsSubmit()) {
+
+        @govukInput(Input(
+            id = nameKey,
+            name = nameKey,
+            label = Label(
+                classes = "govuk-label--m",
+                content = Text(Messages.BankDetails.`Name on the account`.show)
+            ),
+            classes = "govuk-!-width-two-thirds",
+            errorMessage = form.error(nameKey).map(e => ErrorMessage(
+                content = Text(Messages.BankDetails.errors(s"${nameKey}.${e.message}").show)
+            )),
+            value = form.data.get(nameKey)
+        ))
+
+        @govukInput(Input(
+            id = sortCodeKey,
+            name = sortCodeKey,
+            label = Label(
+                classes = "govuk-label--m",
+                content = Text(Messages.BankDetails.`Sort code`.show)
+            ),
+            hint = Some(Hint(
+                content = Text(Messages.BankDetails.`Must be 6 digits long`.show)
+            )),
+            classes = "govuk-!-width-two-thirds",
+            errorMessage = form.error(sortCodeKey).map(e => ErrorMessage(
+                content = Text(Messages.BankDetails.errors(s"${sortCodeKey}.${e.message}").show)
+            )),
+            value = form.data.get(sortCodeKey)
+        ))
+
+        @govukInput(Input(
+            id = accountNumberKey,
+            name = accountNumberKey,
+            label = Label(
+                classes = "govuk-label--m",
+                content = Text(Messages.BankDetails.`Account number`.show)
+            ),
+            hint = Some(Hint(
+                content = Text(Messages.BankDetails.`Must be between 6 and 8 digits long`.show)
+            )),
+            classes = "govuk-!-width-two-thirds",
+            errorMessage = form.error(accountNumberKey).map(e => ErrorMessage(
+                content = Text(Messages.BankDetails.errors(s"${accountNumberKey}.${e.message}").show)
+            )),
+            value = form.data.get(accountNumberKey)
+        ))
+
+        @govukRadios(Radios(
+            fieldset = Some(Fieldset(
+                legend = Some(Legend(
+                    content = Text(Messages.BankDetails.`Are you an account holder`.show),
+                    classes = "govuk-label--m",
+                    isPageHeading = false
+                ))
+            )),
+            hint = Some(Hint(
+                content = Text(Messages.BankDetails.`You must be able to set up a direct debit without permission from...`.show)
+            )),
+            idPrefix = Some(soleSignatoryKey),
+            name = soleSignatoryKey,
+            items = Seq(
+                RadioItem(
+                    content = Text(Messages.UpfrontPayment.`Yes`.show),
+                    value = Some(IsSoleSignatoryFormValue.Yes.entryName),
+                    checked = false
+                ),
+                RadioItem(
+                    content = Text(Messages.UpfrontPayment.`No`.show),
+                    value = Some(IsSoleSignatoryFormValue.No.entryName),
+                    checked = false
+                )
+            ),
+            classes = "govuk-radios--inline",
+            errorMessage = form.error("isSoleSignatory").map(e => ErrorMessage(
+                content = Text(Messages.BankDetails.errors(s"${soleSignatoryKey}.${e.message}").show)
+            ))
+        ))
+
+        @govukButton(Button(content = Text(Messages.continue.show)))
+    }
+
+}
