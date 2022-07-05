@@ -90,7 +90,7 @@ class BankDetailsController @Inject() (
             .map { _ =>
               bankDetailsForm.isSoleSignatory match {
                 case IsSoleSignatoryFormValue.Yes => Redirect(routes.BankDetailsController.checkBankDetails())
-                case IsSoleSignatoryFormValue.No  => Redirect(routes.IneligibleController.cannotSetupDirectDebitOnlinePage())
+                case IsSoleSignatoryFormValue.No  => Redirect(routes.BankDetailsController.cannotSetupDirectDebitOnlinePage())
               }
             }
         }
@@ -103,6 +103,11 @@ class BankDetailsController @Inject() (
 
   val termsAndConditions: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     Ok(termsPage())
+  }
+
+  val cannotSetupDirectDebitOnlinePage: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    Ok(s"This is where the not eligible to setup a dd page will go, for now, here's the journey data:\n\n\n" +
+      Json.prettyPrint(Json.toJson(request.journey)))
   }
 }
 

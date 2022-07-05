@@ -86,7 +86,7 @@ class BankDetailsControllerSpec extends ItSpec {
       radioContent(1).text() shouldBe "No"
     }
 
-    "prepopulate the form when the user has the dd details in their journey" in {
+    "prepopulate the form when the user has the direct debit details in their journey" in {
       AuthStub.authorise()
       EssttpBackend.DirectDebitDetails.findJourneyAfterUpdateDirectDebitDetails()
 

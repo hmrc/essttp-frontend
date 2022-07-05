@@ -18,8 +18,6 @@ GET       /debt-too-old                                  controllers.IneligibleC
 GET       /file-your-return                              controllers.IneligibleController.fileYourReturnPage
 GET       /already-have-a-payment-plan                   controllers.IneligibleController.alreadyHaveAPaymentPlanPage
 
-GET       /you-cannot-set-up-a-direct-debit-online       controllers.IneligibleController.cannotSetupDirectDebitOnlinePage
-
 GET       /your-bill                                     controllers.YourBillController.yourBill
 POST      /your-bill                                     controllers.YourBillController.yourBillSubmit
 
@@ -49,6 +47,8 @@ POST      /check-your-payment-plan                       controllers.PaymentSche
 
 GET       /set-up-direct-debit                           controllers.BankDetailsController.enterBankDetails()
 POST      /set-up-direct-debit                           controllers.BankDetailsController.enterBankDetailsSubmit()
+
+GET       /you-cannot-set-up-a-direct-debit-online       controllers.BankDetailsController.cannotSetupDirectDebitOnlinePage
 
 GET        /check-bank-details                           controllers.BankDetailsController.checkBankDetails()
 GET        /terms-and-conditions                         controllers.BankDetailsController.termsAndConditions()
