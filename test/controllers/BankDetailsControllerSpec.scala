@@ -17,7 +17,7 @@
 package controllers
 
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
+import org.jsoup.nodes.{Document, Element}
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -48,6 +48,13 @@ class BankDetailsControllerSpec extends ItSpec {
   private val accountHolderContent: String = "Are you an account holder?"
   private val accountHolderHintContent: String = "You must be able to set up a Direct Debit without permission from any other account holders."
   private val accountHolderRadioId: String = "#isSoleSignatory"
+
+  def testFormError(elements: Element*)(textAndHrefContent: List[(String, String)]): Unit =
+    elements.zip(textAndHrefContent).foreach { testData: (Element, (String, String)) => {
+      testData._1.text() shouldBe testData._2._1
+      testData._1.attr("href") shouldBe testData._2._2
+    }
+  }
 
   "GET /set-up-direct-debit should" - {
 
@@ -174,15 +181,14 @@ class BankDetailsControllerSpec extends ItSpec {
       val doc: Document = Jsoup.parse(pageContent)
 
       val errorSummary = doc.select(".govuk-error-summary__list")
-      val errorLink = errorSummary.select("a").asScala.toList
-      errorLink(0).text() shouldBe "Enter the name on the account"
-      errorLink(0).attr("href") shouldBe accountNameFieldId
-      errorLink(1).text() shouldBe "Enter sort code"
-      errorLink(1).attr("href") shouldBe sortCodeFieldId
-      errorLink(2).text() shouldBe "Enter account number"
-      errorLink(2).attr("href") shouldBe accountNumberFieldId
-      errorLink(3).text() shouldBe "Select yes if you are the account holder"
-      errorLink(3).attr("href") shouldBe accountHolderRadioId
+      val errorLinks = errorSummary.select("a").asScala.toList
+      val expectedContentAndHref: List[(String, String)] = List(
+        ("Enter the name on the account", accountNameFieldId),
+        ("Enter sort code", sortCodeFieldId),
+        ("Enter account number", accountNumberFieldId),
+        ("Select yes if you are the account holder", accountHolderRadioId)
+      )
+      testFormError(errorLinks: _*)(expectedContentAndHref)
     }
 
     "show correct error messages when submitted sort code and account number are not numeric" in {
@@ -206,13 +212,13 @@ class BankDetailsControllerSpec extends ItSpec {
 
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
-
       val errorSummary = doc.select(".govuk-error-summary__list")
-      val errorLink = errorSummary.select("a").asScala.toList
-      errorLink(0).text() shouldBe "Sort code must be a number"
-      errorLink(0).attr("href") shouldBe sortCodeFieldId
-      errorLink(1).text() shouldBe "Account number must be a number"
-      errorLink(1).attr("href") shouldBe accountNumberFieldId
+      val errorLinks: List[Element] = errorSummary.select("a").asScala.toList
+      val expectedContentAndHref: List[(String, String)] = List(
+        ("Sort code must be a number", sortCodeFieldId),
+        ("Account number must be a number", accountNumberFieldId)
+      )
+      testFormError(errorLinks: _*)(expectedContentAndHref)
     }
 
     "show correct error messages when submitted sort code and account number are more than 6 and 8 digits respectively" in {
@@ -236,13 +242,13 @@ class BankDetailsControllerSpec extends ItSpec {
 
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
-
       val errorSummary = doc.select(".govuk-error-summary__list")
-      val errorLink = errorSummary.select("a").asScala.toList
-      errorLink(0).text() shouldBe "Sort code must be 6 digits"
-      errorLink(0).attr("href") shouldBe sortCodeFieldId
-      errorLink(1).text() shouldBe "Account number must be between 6 and 8 digits"
-      errorLink(1).attr("href") shouldBe accountNumberFieldId
+      val errorLinks = errorSummary.select("a").asScala.toList
+      val expectedContentAndHref: List[(String, String)] = List(
+        ("Sort code must be 6 digits", sortCodeFieldId),
+        ("Account number must be between 6 and 8 digits", accountNumberFieldId)
+      )
+      testFormError(errorLinks: _*)(expectedContentAndHref)
     }
   }
 
