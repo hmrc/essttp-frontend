@@ -40,4 +40,7 @@ object PageUrls {
   val determineAffordableQuotesUrl: String = s"$serviceBaseUrl/determine-affordable-quotes"
   val instalmentsUrl: String = s"$serviceBaseUrl/how-many-months-do-you-want-to-pay-over"
   val instalmentScheduleUrl: String = s"$serviceBaseUrl/check-your-payment-plan"
+  val directDebitDetailsUrl: String = s"$serviceBaseUrl/set-up-direct-debit"
+  val cannotSetupDirectDebitOnlineUrl: String = s"$serviceBaseUrl/you-cannot-set-up-a-direct-debit-online"
+  val checkDirectDebitDetailsUrl: String = s"$serviceBaseUrl/check-bank-details"
 }

@@ -20,6 +20,7 @@ import actions.Actions
 import config.AppConfig
 import essttp.journey.model.SjRequest
 import messages.Messages
+import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
@@ -61,5 +62,10 @@ class IneligibleController @Inject() (
 
   val alreadyHaveAPaymentPlanPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     Ok(views.partials.ineligibleTemplatePage(Messages.NotEligible.`You already have a payment plan with HMRC`, views.partials.existingPaymentPlanPartial()))
+  }
+
+  val cannotSetupDirectDebitOnlinePage: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    Ok(s"This is where the not eligible to setup a dd page will go, for now, here's the journey data:\n\n\n" +
+      Json.prettyPrint(Json.toJson(request.journey)))
   }
 }

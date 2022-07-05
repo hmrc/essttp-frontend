@@ -17,92 +17,95 @@
 package controllers
 
 import _root_.actions.Actions
-import controllers.BankDetailsController.bankDetailsForm
-import models._
-import play.api.data.Forms.{mapping, nonEmptyText}
-import play.api.data.validation.{Constraint, Invalid, Valid}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import essttp.journey.model.Journey
+import essttp.rootmodel.bank.{BankDetails, DirectDebitDetails}
+import models.enumsforforms.IsSoleSignatoryFormValue
+import models.forms.BankDetailsForm
+import play.api.data.Form
+import play.api.libs.json.Json
+import play.api.mvc._
+import requests.RequestSupport
+import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
-import views.html.{BankDetailsSummary, SetUpBankDetails, TermsAndConditions}
+import views.Views
+import views.html.TermsAndConditions
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class BankDetailsController @Inject() (
-    as:                   Actions,
-    bankDetailsPage:      SetUpBankDetails,
-    checkBankDetailsPage: BankDetailsSummary,
-    termsPage:            TermsAndConditions,
-    mcc:                  MessagesControllerComponents
+    as:             Actions,
+    views:          Views,
+    termsPage:      TermsAndConditions,
+    mcc:            MessagesControllerComponents,
+    requestSupport: RequestSupport,
+    journeyService: JourneyService
+)(
+    implicit
+    executionContext: ExecutionContext
 ) extends FrontendController(mcc)
   with Logging {
 
-  val setUpBankDetails: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    Ok(bankDetailsPage(bankDetailsForm()))
+  val enterBankDetails: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    request.journey match {
+      case j: Journey.BeforeCheckedPaymentPlan => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
+      case j: Journey.AfterCheckedPaymentPlan  => displayEnterBankDetailsPage(j)
+    }
   }
 
-  val setUpBankDetailsSubmit: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
-    bankDetailsForm()
+  private def displayEnterBankDetailsPage(journey: Journey.AfterCheckedPaymentPlan)(implicit request: Request[_]): Result = {
+    val maybePrePoppedForm: Form[BankDetailsForm] = journey match {
+      case _: Journey.BeforeEnteredDirectDebitDetails => BankDetailsForm.form
+      case j: Journey.AfterEnteredDirectDebitDetails =>
+        BankDetailsForm.form.fill(BankDetailsForm(
+          name            = j.directDebitDetails.bankDetails.name,
+          sortCode        = j.directDebitDetails.bankDetails.sortCode,
+          accountNumber   = j.directDebitDetails.bankDetails.accountNumber,
+          isSoleSignatory = IsSoleSignatoryFormValue.booleanToIsSoleSignatoryFormValue(j.directDebitDetails.isAccountHolder)
+        ))
+    }
+    Ok(views.enterBankDetailsPage(form    = maybePrePoppedForm, backUrl = BankDetailsController.paymentScheduleUrl))
+  }
+
+  val enterBankDetailsSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
+    BankDetailsForm.form
       .bindFromRequest()
       .fold(
-        formWithErrors => Future.successful(Ok(bankDetailsPage(formWithErrors))),
-        (_: BankDetails) => {
-          Future.successful(Redirect(routes.BankDetailsController.checkBankDetails()))
+        formWithErrors =>
+          Future.successful(Ok(views.enterBankDetailsPage(formWithErrors))),
+        (bankDetailsForm: BankDetailsForm) => {
+
+          val directDebitDetails: DirectDebitDetails = DirectDebitDetails(
+            BankDetails(
+              name          = bankDetailsForm.name,
+              sortCode      = bankDetailsForm.sortCode,
+              accountNumber = bankDetailsForm.accountNumber
+            ),
+            bankDetailsForm.isSoleSignatory.asBoolean
+          )
+
+          journeyService.updateDirectDebitDetails(request.journeyId, directDebitDetails)
+            .map { _ =>
+              bankDetailsForm.isSoleSignatory match {
+                case IsSoleSignatoryFormValue.Yes => Redirect(routes.BankDetailsController.checkBankDetails())
+                case IsSoleSignatoryFormValue.No  => Redirect(routes.IneligibleController.cannotSetupDirectDebitOnlinePage())
+              }
+            }
         }
       )
   }
 
-  val checkBankDetails: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
-    val j: MockJourney = MockJourney(userAnswers = UserAnswers.empty.copy(bankDetails = Some(BankDetails(name          = "John Doe", sortCode = SortCode("202020"), accountNumber = AccountNumber("12345678")))))
-    Future.successful(Ok(checkBankDetailsPage(j.userAnswers)))
+  val checkBankDetails: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    Ok("This is where the check bank details page will go, for now, here's the journey:\n\n\n" + Json.prettyPrint(Json.toJson(request.journey)))
   }
 
-  val termsAndConditions: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+  val termsAndConditions: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     Ok(termsPage())
   }
 }
 
 object BankDetailsController {
-  import play.api.data.Form
-
-  def bankDetailsForm(): Form[BankDetails] = Form(
-    mapping(
-      "name" -> nonEmptyText(maxLength = 100),
-      "sortCode" -> sortCodeMapping,
-      "accountNumber" -> accountNumberMapping
-    )(BankDetails.apply)(BankDetails.unapply)
-  )
-
-  private val sortCodeRegex = "^[0-9]{6}$"
-
-  private val sortCodeContstraint: Constraint[SortCode] =
-    Constraint(sortCode =>
-      if (!sortCode.value.forall(_.isDigit)) Invalid("error.nonNumeric")
-      else if (sortCode.value.matches(sortCodeRegex)) Valid
-      else Invalid("error.invalid"))
-
-  private val sortCodeMapping = nonEmptyText
-    .transform[SortCode](
-      s => SortCode(s.replaceAllLiterally("-", "").replaceAll("\\s", "")),
-      _.value
-    )
-    .verifying(sortCodeContstraint)
-
-  private val accountNumberRegex = "^[0-9]{6,8}$"
-
-  private val accountNumberConstraint: Constraint[AccountNumber] =
-    Constraint(accountNumber =>
-      if (!accountNumber.value.forall(_.isDigit)) Invalid("error.nonNumeric")
-      else if (accountNumber.value.matches(accountNumberRegex)) Valid
-      else Invalid("error.invalid"))
-
-  private val accountNumberMapping = nonEmptyText
-    .transform[AccountNumber](
-      s => AccountNumber(s.replaceAll("\\s", "")),
-      _.value
-    )
-    .verifying(accountNumberConstraint)
-
+  val paymentScheduleUrl: Option[String] = Some(routes.PaymentScheduleController.checkPaymentSchedule().url)
 }

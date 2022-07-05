@@ -63,6 +63,7 @@ class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesServi
       case j1: Journey.Stages.RetrievedAffordableQuotes    => j1
       case j1: Journey.Stages.ChosenPaymentPlan            => j1
       case j1: Journey.Stages.CheckedPaymentPlan           => j1
+      case j1: Journey.Stages.EnteredDirectDebitDetails    => j1
     }
     val upfrontPaymentAmount: Option[UpfrontPaymentAmount] = TtpService.deriveUpfrontPaymentAmount(j.upfrontPaymentAnswers)
     val eligibilityCheckResult: EligibilityCheckResult = j.eligibilityCheckResult
@@ -77,6 +78,7 @@ class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesServi
       case j1: Journey.Stages.RetrievedAffordableQuotes => j1
       case j1: Journey.Stages.ChosenPaymentPlan         => j1
       case j1: Journey.Stages.CheckedPaymentPlan        => j1
+      case j1: Journey.Stages.EnteredDirectDebitDetails => j1
     }
     val initialPaymentAmount: Option[UpfrontPaymentAmount] = TtpService.deriveUpfrontPaymentAmount(j.upfrontPaymentAnswers)
     val debtItemCharges = j.eligibilityCheckResult.chargeTypeAssessment

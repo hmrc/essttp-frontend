@@ -18,6 +18,8 @@ GET       /debt-too-old                                  controllers.IneligibleC
 GET       /file-your-return                              controllers.IneligibleController.fileYourReturnPage
 GET       /already-have-a-payment-plan                   controllers.IneligibleController.alreadyHaveAPaymentPlanPage
 
+GET       /you-cannot-set-up-a-direct-debit-online       controllers.IneligibleController.cannotSetupDirectDebitOnlinePage
+
 GET       /your-bill                                     controllers.YourBillController.yourBill
 POST      /your-bill                                     controllers.YourBillController.yourBillSubmit
 
@@ -42,11 +44,12 @@ GET       /determine-affordable-quotes                   controllers.DetermineAf
 GET       /how-many-months-do-you-want-to-pay-over       controllers.InstalmentsController.instalmentOptions()
 POST      /how-many-months-do-you-want-to-pay-over       controllers.InstalmentsController.instalmentOptionsSubmit()
 
-GET        /check-your-payment-plan                      controllers.PaymentScheduleController.checkPaymentSchedule()
-POST       /check-your-payment-plan                      controllers.PaymentScheduleController.checkPaymentScheduleSubmit()
+GET       /check-your-payment-plan                       controllers.PaymentScheduleController.checkPaymentSchedule()
+POST      /check-your-payment-plan                       controllers.PaymentScheduleController.checkPaymentScheduleSubmit()
 
-GET        /setup-bank-details                           controllers.BankDetailsController.setUpBankDetails()
-POST       /setup-bank-details                           controllers.BankDetailsController.setUpBankDetailsSubmit()
+GET       /set-up-direct-debit                           controllers.BankDetailsController.enterBankDetails()
+POST      /set-up-direct-debit                           controllers.BankDetailsController.enterBankDetailsSubmit()
+
 GET        /check-bank-details                           controllers.BankDetailsController.checkBankDetails()
 GET        /terms-and-conditions                         controllers.BankDetailsController.termsAndConditions()
 GET        /confirmation                                 controllers.ConfirmationController.confirmation()
