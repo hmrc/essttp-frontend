@@ -123,7 +123,7 @@
   paymentPlan.collections.regularCollections.zipWithIndex.map { case (p, index) =>
     SummaryListRow(
       classes = s"grouped-row ${
-        if(index > (paymentPlan.collections.regularCollections.size - 1)) { "last-grouped-row" } else { "" }
+        if(index > (paymentPlan.collections.regularCollections.size - 2)) { "last-grouped-row" } else { "" }
       }",
       key = Key(
          content = Text(s"${DateMessages.monthName(p.dueDate.value.getMonthValue).show} ${p.dueDate.value.getYear}"),
