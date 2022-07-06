@@ -454,4 +454,37 @@ object EssttpBackend {
     )
   }
 
+  object ConfirmedDirectDebitDetails {
+    def confirmDirectDebitDetailsUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-has-confirmed-direct-debit-details"
+
+    def updateConfirmDirectDebitDetails(journeyId: JourneyId): StubMapping =
+      stubFor(
+        post(urlPathEqualTo(confirmDirectDebitDetailsUrl(journeyId)))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+          )
+      )
+
+    def verifyUpdateConfirmDirectDebitDetailsRequest(journeyId: JourneyId): Unit =
+      verify(
+        postRequestedFor(urlPathEqualTo(confirmDirectDebitDetailsUrl(journeyId)))
+      )
+
+    def verifyNoneUpdateConfirmDirectDebitDetailsRequest(journeyId: JourneyId): Unit =
+      verify(
+        exactly(0),
+        postRequestedFor(urlPathEqualTo(confirmDirectDebitDetailsUrl(journeyId)))
+      )
+
+    def findJourneyAfterConfirmUpdateDirectDebitDetails(
+        jsonBody: String = TdJsonBodies.afterConfirmDirectDebitDetailsJourneyJson()
+    ): StubMapping = stubFor(
+      get(urlPathEqualTo(findByLatestSessionIdUrl))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withBody(jsonBody))
+    )
+  }
+
 }

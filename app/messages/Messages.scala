@@ -548,6 +548,10 @@ object Messages {
       english = "Check your Direct Debit details"
     )
 
+    val `Account name`: Message = Message(
+      english = "Account name"
+    )
+
     val `You are covered by the Direct Debit Guarantee`: Message = Message(
       english = "You are covered by the Direct Debit Guarantee"
     )

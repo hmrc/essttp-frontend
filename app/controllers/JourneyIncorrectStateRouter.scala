@@ -44,6 +44,7 @@ object JourneyIncorrectStateRouter {
       case _: Journey.Stages.ChosenPaymentPlan            => Redirect(routes.InstalmentsController.instalmentOptions())
       case _: Journey.Stages.CheckedPaymentPlan           => Redirect(routes.PaymentScheduleController.checkPaymentSchedule())
       case _: Journey.Stages.EnteredDirectDebitDetails    => Redirect(routes.BankDetailsController.enterBankDetails())
+      case _: Journey.Stages.ConfirmedDirectDebitDetails  => Redirect(routes.BankDetailsController.enterBankDetails())
     }
 
     JourneyLogger.error(

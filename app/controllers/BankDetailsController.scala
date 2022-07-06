@@ -98,7 +98,19 @@ class BankDetailsController @Inject() (
   }
 
   val checkBankDetails: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
-    Ok("This is where the check bank details page will go, for now, here's the journey:\n\n\n" + Json.prettyPrint(Json.toJson(request.journey)))
+    request.journey match {
+      case j: Journey.BeforeEnteredDirectDebitDetails => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
+      case j: Journey.AfterEnteredDirectDebitDetails  => displayCheckBankDetailsPage(j)
+    }
+  }
+
+  def displayCheckBankDetailsPage(journey: Journey.AfterEnteredDirectDebitDetails)(implicit request: Request[_]): Result = {
+    Ok(views.bankDetailsSummary(journey.directDebitDetails, BankDetailsController.enterBankDetailsUrl))
+  }
+
+  val checkBankDetailsSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
+    journeyService.updateHasConfirmedDirectDebitDetails(request.journeyId)
+      .map(_ => Redirect(routes.BankDetailsController.termsAndConditions()))
   }
 
   val termsAndConditions: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
@@ -113,4 +125,5 @@ class BankDetailsController @Inject() (
 
 object BankDetailsController {
   val paymentScheduleUrl: Option[String] = Some(routes.PaymentScheduleController.checkPaymentSchedule().url)
+  val enterBankDetailsUrl: Option[String] = Some(routes.BankDetailsController.enterBankDetails().url)
 }
