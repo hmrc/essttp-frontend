@@ -100,12 +100,13 @@ class BankDetailsController @Inject() (
   val checkBankDetails: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
       case j: Journey.BeforeEnteredDirectDebitDetails => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
-      case j: Journey.AfterEnteredDirectDebitDetails  => displayCheckBankDetailsPage(j)
+      case j: Journey.AfterEnteredDirectDebitDetails =>
+        if (j.directDebitDetails.isAccountHolder) {
+          Ok(views.bankDetailsSummary(j.directDebitDetails, BankDetailsController.enterBankDetailsUrl))
+        } else {
+          Redirect(routes.BankDetailsController.cannotSetupDirectDebitOnlinePage().url)
+        }
     }
-  }
-
-  def displayCheckBankDetailsPage(journey: Journey.AfterEnteredDirectDebitDetails)(implicit request: Request[_]): Result = {
-    Ok(views.bankDetailsSummary(journey.directDebitDetails, BankDetailsController.enterBankDetailsUrl))
   }
 
   val checkBankDetailsSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>

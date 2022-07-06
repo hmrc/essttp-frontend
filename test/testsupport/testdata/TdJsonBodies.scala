@@ -2054,7 +2054,8 @@ object TdJsonBodies {
        |""".stripMargin
 
   def afterDirectDebitDetailsJourneyJson(
-      upfrontPaymentAmountJsonString: String = """{"DeclaredUpfrontPayment": {"amount": 12312}}"""
+      upfrontPaymentAmountJsonString: String  = """{"DeclaredUpfrontPayment": {"amount": 12312}}""",
+      isAccountHolder:                Boolean = true
   ): String =
     s"""
        |{
@@ -2157,7 +2158,7 @@ object TdJsonBodies {
        |            "sortCode" : "123456",
        |            "accountNumber" : "12345678"
        |          },
-       |          "isAccountHolder" : true
+       |          "isAccountHolder" : ${isAccountHolder}
        |        },
        |        "monthlyPaymentAmount": 30000,
        |        "dayOfMonth": 1,
