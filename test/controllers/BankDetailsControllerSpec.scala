@@ -308,6 +308,15 @@ class BankDetailsControllerSpec extends ItSpec {
       redirectLocation(result) shouldBe Some(PageUrls.termsAndConditionsUrl)
       EssttpBackend.ConfirmedDirectDebitDetails.verifyUpdateConfirmDirectDebitDetailsRequest(TdAll.journeyId)
     }
+    "redirect the user to cannot setup direct debit if they try and force browse, but they aren't the account holder" in {
+      AuthStub.authorise()
+      EssttpBackend.DirectDebitDetails.findJourneyAfterUpdateDirectDebitDetails(TdJsonBodies.afterDirectDebitDetailsJourneyJson(isAccountHolder = false))
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.checkBankDetailsSubmit(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.cannotSetupDirectDebitOnlineUrl)
+      EssttpBackend.ConfirmedDirectDebitDetails.verifyNoneUpdateConfirmDirectDebitDetailsRequest(TdAll.journeyId)
+    }
   }
 }
 
