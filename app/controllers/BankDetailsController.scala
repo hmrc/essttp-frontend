@@ -121,12 +121,19 @@ class BankDetailsController @Inject() (
   }
 
   val termsAndConditions: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
-    Ok(views.termsAndConditions())
+    request.journey match {
+      case j: Journey.BeforeConfirmedDirectDebitDetails => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
+      case _: Journey.AfterConfirmedDirectDebitDetails => Ok(views.termsAndConditions())
+    }
   }
 
   val termsAndConditionsSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
-    journeyService.updateAgreedTermsAndConditions(request.journeyId)
-      .map(_ => Redirect(routes.ConfirmationController.confirmation()))
+    request.journey match {
+      case j: Journey.BeforeConfirmedDirectDebitDetails => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF(j)
+      case _: Journey.AfterConfirmedDirectDebitDetails =>
+        journeyService.updateAgreedTermsAndConditions(request.journeyId)
+        .map(_ => Redirect(routes.ConfirmationController.confirmation()))
+    }
   }
 
   val cannotSetupDirectDebitOnlinePage: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
