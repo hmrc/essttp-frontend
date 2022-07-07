@@ -29,7 +29,6 @@ import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.Views
-import views.html.TermsAndConditions
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -38,7 +37,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class BankDetailsController @Inject() (
     as:             Actions,
     views:          Views,
-    termsPage:      TermsAndConditions,
     mcc:            MessagesControllerComponents,
     requestSupport: RequestSupport,
     journeyService: JourneyService
@@ -123,7 +121,12 @@ class BankDetailsController @Inject() (
   }
 
   val termsAndConditions: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
-    Ok(termsPage())
+    Ok(views.termsAndConditions())
+  }
+
+  val termsAndConditionsSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
+    journeyService.updateAgreedTermsAndConditions(request.journeyId)
+      .map(_ => Redirect(routes.ConfirmationController.confirmation()))
   }
 
   val cannotSetupDirectDebitOnlinePage: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
