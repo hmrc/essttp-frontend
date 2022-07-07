@@ -354,7 +354,7 @@ class BankDetailsControllerSpec extends ItSpec {
       )
       doc.select(".govuk-body").asScala.toList
         .zip(contentItems)
-        .map(things => things._1.text() shouldBe things._2)
+        .map { case (element, expectedText) => element.text() shouldBe expectedText }
 
       val bulletListItems = List(
         "pay late or miss a payment",
@@ -363,7 +363,7 @@ class BankDetailsControllerSpec extends ItSpec {
       )
       doc.select(".govuk-list--bullet").select("li").asScala.toList
         .zip(bulletListItems)
-        .map(things => things._1.text() shouldBe things._2)
+        .map { case (element, expectedText) => element.text() shouldBe expectedText }
 
       doc.select(".govuk-heading-m").text() shouldBe "Declaration"
       doc.select(".govuk-button").text() shouldBe "Agree and continue"

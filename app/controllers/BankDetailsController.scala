@@ -123,7 +123,7 @@ class BankDetailsController @Inject() (
   val termsAndConditions: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
       case j: Journey.BeforeConfirmedDirectDebitDetails => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
-      case _: Journey.AfterConfirmedDirectDebitDetails => Ok(views.termsAndConditions())
+      case _: Journey.AfterConfirmedDirectDebitDetails  => Ok(views.termsAndConditions())
     }
   }
 
@@ -132,7 +132,7 @@ class BankDetailsController @Inject() (
       case j: Journey.BeforeConfirmedDirectDebitDetails => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF(j)
       case _: Journey.AfterConfirmedDirectDebitDetails =>
         journeyService.updateAgreedTermsAndConditions(request.journeyId)
-        .map(_ => Redirect(routes.ConfirmationController.confirmation()))
+          .map(_ => Redirect(routes.ConfirmationController.confirmation()))
     }
   }
 
