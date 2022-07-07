@@ -198,6 +198,7 @@ class UpfrontPaymentController @Inject() (
       case j: Journey.Epaye.ChosenPaymentPlan            => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
       case j: Journey.Epaye.CheckedPaymentPlan           => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
       case j: Journey.Epaye.EnteredDirectDebitDetails    => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
+      case j: Journey.Epaye.ConfirmedDirectDebitDetails  => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
     }
 
     val upfrontPaymentAmountFromJourney =
@@ -232,6 +233,7 @@ object UpfrontPaymentController {
         case j1: Journey.Stages.ChosenPaymentPlan            => j1.eligibilityCheckResult
         case j1: Journey.Stages.CheckedPaymentPlan           => j1.eligibilityCheckResult
         case j1: Journey.Stages.EnteredDirectDebitDetails    => j1.eligibilityCheckResult
+        case j1: Journey.Stages.ConfirmedDirectDebitDetails  => j1.eligibilityCheckResult
       }
     }
     eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).headOption

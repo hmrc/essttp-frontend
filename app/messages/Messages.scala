@@ -548,6 +548,10 @@ object Messages {
       english = "Check your Direct Debit details"
     )
 
+    val `Account name`: Message = Message(
+      english = "Account name"
+    )
+
     val `You are covered by the Direct Debit Guarantee`: Message = Message(
       english = "You are covered by the Direct Debit Guarantee"
     )
@@ -561,7 +565,7 @@ object Messages {
     )
 
     val `If there are any changes to the amount...`: Message = Message(
-      english = "If there are any changes to the amount, date or frequency of your Direct Debit HMRC NDDS will notify you 10 working days in advance of your account being debited or as otherwise agreed. If you request HMRC NDDS to collect a payment, application-complete of the amount and date will be given to you at the time of the request."
+      english = "If there are any changes to the amount, date or frequency of your Direct Debit HMRC NDDS will notify you 10 working days in advance of your account being debited or as otherwise agreed. If you request HMRC NDDS to collect a payment, confirmation of the amount and date will be given to you at the time of the request."
     )
 
     val `If an error is made in the payment...`: Message = Message(
@@ -569,7 +573,7 @@ object Messages {
     )
 
     val `You can cancel a Direct Debit...`: Message = Message(
-      english = "You can cancel a Direct Debit at any time by simply contacting your bank or building society. Written application-complete may be required. Please also notify us."
+      english = "You can cancel a Direct Debit at any time by simply contacting your bank or building society. Written confirmation may be required. Please also notify us."
     )
 
     val `Terms and conditions`: Message = Message(

@@ -69,6 +69,7 @@ class MonthlyPaymentAmountController @Inject() (
         case j1: Journey.Epaye.ChosenPaymentPlan            => j1
         case j1: Journey.Epaye.CheckedPaymentPlan           => j1
         case j1: Journey.Epaye.EnteredDirectDebitDetails    => j1
+        case j1: Journey.Epaye.ConfirmedDirectDebitDetails  => j1
       }
     val backUrl: Option[String] = j.upfrontPaymentAnswers match {
       case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => Some(routes.UpfrontPaymentController.upfrontPaymentSummary().url)
@@ -110,6 +111,7 @@ class MonthlyPaymentAmountController @Inject() (
           case j1: Journey.Stages.ChosenPaymentPlan            => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
           case j1: Journey.Stages.CheckedPaymentPlan           => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
           case j1: Journey.Stages.EnteredDirectDebitDetails    => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
+          case j1: Journey.Stages.ConfirmedDirectDebitDetails  => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
         }
         val totalDebt: AmountInPence = AmountInPence(eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum)
         val upfrontPaymentAmount: AmountInPence = upfrontPaymentAnswers match {

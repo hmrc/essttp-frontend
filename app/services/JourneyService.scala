@@ -94,4 +94,8 @@ class JourneyService @Inject() (journeyConnector: JourneyConnector) extends Logg
     journeyConnector.updateDirectDebitDetails(journeyId, directDebitDetails)
   }
 
+  def updateHasConfirmedDirectDebitDetails(journeyId: JourneyId)(implicit requestHeader: RequestHeader): Future[Unit] = {
+    journeyConnector.updateHasConfirmedDirectDebitDetails(journeyId)
+  }
+
 }
