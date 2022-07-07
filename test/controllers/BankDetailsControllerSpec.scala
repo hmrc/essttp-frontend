@@ -27,6 +27,7 @@ import testsupport.ItSpec
 import testsupport.stubs.{AuthStub, EssttpBackend}
 import uk.gov.hmrc.http.SessionKeys
 import testsupport.TdRequest.FakeRequestOps
+import testsupport.reusableassertions.ContentAssertions
 import testsupport.testdata.{PageUrls, TdAll, TdJsonBodies}
 
 import scala.concurrent.Future
@@ -55,6 +56,11 @@ class BankDetailsControllerSpec extends ItSpec {
 
   object ConfirmDirectDebitDetailsPage {
     val expectedH1: String = "Check your Direct Debit details"
+    val expectedPageTitle: String = s"$expectedH1 - $expectedServiceName - GOV.UK"
+  }
+
+  object TermsAndConditionsPage {
+    val expectedH1: String = "Terms and conditions"
     val expectedPageTitle: String = s"$expectedH1 - $expectedServiceName - GOV.UK"
   }
 
@@ -316,6 +322,69 @@ class BankDetailsControllerSpec extends ItSpec {
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.cannotSetupDirectDebitOnlineUrl)
       EssttpBackend.ConfirmedDirectDebitDetails.verifyNoneUpdateConfirmDirectDebitDetailsRequest(TdAll.journeyId)
+    }
+  }
+
+  "GET /terms-and-conditions should" - {
+    "return 200 and the terms and conditions page" in {
+      AuthStub.authorise()
+      EssttpBackend.ConfirmedDirectDebitDetails.findJourneyAfterConfirmUpdateDirectDebitDetails()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.termsAndConditions(fakeRequest)
+
+      status(result) shouldBe Status.OK
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
+
+      val pageContent: String = contentAsString(result)
+      val doc: Document = Jsoup.parse(pageContent)
+
+      doc.title() shouldBe TermsAndConditionsPage.expectedPageTitle
+      doc.select(".govuk-heading-xl").text() shouldBe TermsAndConditionsPage.expectedH1
+      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
+      doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
+      doc.select("#back").attr("href") shouldBe routes.BankDetailsController.checkBankDetails().url
+
+      ContentAssertions.assertListOfContent(
+        elements = doc.select(".govuk-body")
+      )(
+        expectedContent = List(
+          "We can cancel this agreement if you:",
+          "If we cancel this agreement, you will need to pay the total amount you owe straight away.",
+          "We can use any refunds you might get to pay off your tax charges.",
+          "If your circumstances change and you can pay more or you can pay in full, you need to let us know.",
+          "I agree to the terms and conditions of this payment plan. I confirm that this is the earliest I am able to settle this debt."
+        )
+      )
+
+      ContentAssertions.assertListOfContent(
+        elements = doc.select(".govuk-list--bullet").select("li")
+      )(
+        expectedContent = List(
+          "pay late or miss a payment",
+          "pay another tax bill late",
+          "do not submit your future tax returns on time"
+        )
+      )
+
+      doc.select(".govuk-heading-m").text() shouldBe "Declaration"
+      doc.select(".govuk-button").text() shouldBe "Agree and continue"
+    }
+  }
+
+  "POST /terms-and-conditions should" - {
+    "redirect the user to terms and conditions and update backend" in {
+      AuthStub.authorise()
+      EssttpBackend.ConfirmedDirectDebitDetails.findJourneyAfterConfirmUpdateDirectDebitDetails()
+      EssttpBackend.TermsAndConditions.updateAgreedTermsAndConditions(TdAll.journeyId)
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.termsAndConditionsSubmit(fakeRequest)
+
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.confirmationUrl)
+      EssttpBackend.TermsAndConditions.verifyUpdateAgreedTermsAndConditionsRequest(TdAll.journeyId)
     }
   }
 }

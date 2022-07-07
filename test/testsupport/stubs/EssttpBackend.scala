@@ -487,4 +487,37 @@ object EssttpBackend {
     )
   }
 
+  object TermsAndConditions {
+    def agreedTermsAndConditionsUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-has-agreed-terms-and-conditions"
+
+    def updateAgreedTermsAndConditions(journeyId: JourneyId): StubMapping =
+      stubFor(
+        post(urlPathEqualTo(agreedTermsAndConditionsUrl(journeyId)))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+          )
+      )
+
+    def verifyUpdateAgreedTermsAndConditionsRequest(journeyId: JourneyId): Unit =
+      verify(
+        postRequestedFor(urlPathEqualTo(agreedTermsAndConditionsUrl(journeyId)))
+      )
+
+    def verifyNoneUpdateAgreedTermsAndConditionsRequest(journeyId: JourneyId): Unit =
+      verify(
+        exactly(0),
+        postRequestedFor(urlPathEqualTo(agreedTermsAndConditionsUrl(journeyId)))
+      )
+
+    def findJourneyAfterAgreedTermsAndConditions(
+        jsonBody: String
+    ): StubMapping = stubFor(
+      get(urlPathEqualTo(findByLatestSessionIdUrl))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withBody(jsonBody))
+    )
+  }
+
 }
