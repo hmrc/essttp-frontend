@@ -26,9 +26,15 @@ class AuthenticatedJourneyRequest[A](
     override val request: Request[A]
 ) extends JourneyRequest[A](journey, request)
 
+class NewAuthenticatedJourneyRequest[A](
+    override val request:    Request[A],
+    override val enrolments: Enrolments,
+    val journey:             Journey
+) extends AuthenticatedRequest[A](request, enrolments)
+
 final class EligibleJourneyRequest[A](
     override val journey:    Journey.AfterEligibilityChecked,
     override val enrolments: Enrolments,
     override val request:    Request[A]
-) extends AuthenticatedJourneyRequest[A](journey, enrolments, request)
+) extends NewAuthenticatedJourneyRequest[A](request, enrolments, journey)
 

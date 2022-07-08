@@ -16,7 +16,7 @@
 
 package actions
 
-import actionsmodel.{AuthenticatedJourneyRequest, EligibleJourneyRequest, JourneyRequest}
+import actionsmodel.{AuthenticatedRequest, EligibleJourneyRequest, NewAuthenticatedJourneyRequest}
 import controllers.JourneyIncorrectStateRouter
 import controllers.pagerouters.EligibilityRouter
 import essttp.journey.model.Journey
@@ -29,38 +29,50 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class Actions @Inject() (
-    actionBuilder:           DefaultActionBuilder,
-    authenticatedAction:     AuthenticateActionRefiner,
-    getJourneyActionRefiner: GetJourneyActionRefiner
+    actionBuilder:                 DefaultActionBuilder,
+    authenticateAction:            AuthenticateActionRefiner,
+    getJourneyActionRefiner:       GetJourneyActionRefiner,
+    newAuthenticatedActionRefiner: AuthenticatedActionRefiner,
+    newGetJourneyActionRefiner:    NewGetJourneyActionRefiner
 )(implicit ec: ExecutionContext) {
 
   val default: ActionBuilder[Request, AnyContent] = actionBuilder
 
-  val landingPageAction: ActionBuilder[JourneyRequest, AnyContent] =
+  val landingPageAction: ActionBuilder[AuthenticatedRequest, AnyContent] =
     actionBuilder
-      .andThen(getJourneyActionRefiner)
+      .andThen(newAuthenticatedActionRefiner)
 
-  val notEnrolledAction: ActionBuilder[JourneyRequest, AnyContent] =
-    actionBuilder
-      .andThen(getJourneyActionRefiner)
-      .andThen(authenticatedAction)
+  //  val notEnrolledAction: ActionBuilder[JourneyRequest, AnyContent] =
+  //    actionBuilder
+  //      .andThen(getJourneyActionRefiner)
+  //      .andThen(authenticateAction)
 
-  val authenticatedJourneyAction: ActionBuilder[AuthenticatedJourneyRequest, AnyContent] =
+  val notEnrolledAction: ActionBuilder[AuthenticatedRequest, AnyContent] =
     actionBuilder
-      .andThen(getJourneyActionRefiner)
-      .andThen(authenticatedAction)
+      .andThen(newAuthenticatedActionRefiner)
+
+  val authenticatedJourneyAction: ActionBuilder[NewAuthenticatedJourneyRequest, AnyContent] =
+    actionBuilder
+      .andThen(newAuthenticatedActionRefiner)
+      .andThen(newGetJourneyActionRefiner)
       .andThen(filterForRequiredEnrolments)
 
-  val eligibleJourneyAction: ActionBuilder[AuthenticatedJourneyRequest, AnyContent] =
+  //  val authenticatedJourneyAction: ActionBuilder[AuthenticatedJourneyRequest, AnyContent] =
+  //    actionBuilder
+  //      .andThen(getJourneyActionRefiner)
+  //      .andThen(authenticateAction)
+  //      .andThen(filterForRequiredEnrolments)
+
+  val eligibleJourneyAction: ActionBuilder[NewAuthenticatedJourneyRequest, AnyContent] =
     actionBuilder
-      .andThen(getJourneyActionRefiner)
-      .andThen(authenticatedAction)
+      .andThen(newAuthenticatedActionRefiner)
+      .andThen(newGetJourneyActionRefiner)
       .andThen(filterForRequiredEnrolments)
       .andThen(filterForEligibleJourney)
 
-  private def filterForEligibleJourney: ActionRefiner[AuthenticatedJourneyRequest, EligibleJourneyRequest] = new ActionRefiner[AuthenticatedJourneyRequest, EligibleJourneyRequest] {
+  private def filterForEligibleJourney: ActionRefiner[NewAuthenticatedJourneyRequest, EligibleJourneyRequest] = new ActionRefiner[NewAuthenticatedJourneyRequest, EligibleJourneyRequest] {
 
-    override protected def refine[A](request: AuthenticatedJourneyRequest[A]): Future[Either[Result, EligibleJourneyRequest[A]]] = {
+    override protected def refine[A](request: NewAuthenticatedJourneyRequest[A]): Future[Either[Result, EligibleJourneyRequest[A]]] = {
       implicit val r: Request[A] = request
       val result: Either[Result, EligibleJourneyRequest[A]] = request.journey match {
         case j: Journey.Stages.Started       => Left(JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j))
@@ -83,8 +95,8 @@ class Actions @Inject() (
 
   }
 
-  private def filterForRequiredEnrolments: ActionFilter[AuthenticatedJourneyRequest] = new ActionFilter[AuthenticatedJourneyRequest] {
-    override protected def filter[A](request: AuthenticatedJourneyRequest[A]): Future[Option[Result]] = {
+  private def filterForRequiredEnrolments: ActionFilter[NewAuthenticatedJourneyRequest] = new ActionFilter[NewAuthenticatedJourneyRequest] {
+    override protected def filter[A](request: NewAuthenticatedJourneyRequest[A]): Future[Option[Result]] = {
       val hasRequiredEnrolments: Boolean = request.journey.taxRegime match {
         case TaxRegime.Epaye => EnrolmentDef.Epaye.hasRequiredEnrolments(request.enrolments)
         case TaxRegime.Vat   => EnrolmentDef.Vat.hasRequiredEnrolments(request.enrolments)

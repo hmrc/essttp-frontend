@@ -34,12 +34,17 @@ class LandingController @Inject() (
   with Logging {
 
   val landingPage: Action[AnyContent] = as.landingPageAction { implicit request =>
-    logger.debug(s"inside landing page with journey: ${request.journey.toString}")
-    request.journey.origin match {
-      case Origins.Epaye.Bta         => Ok(views.epayeLanding())
-      case Origins.Epaye.DetachedUrl => Ok(views.epayeLanding())
-      case Origins.Epaye.GovUk       => Redirect(routes.DetermineTaxIdController.determineTaxId())
-    }
+    logger.debug(s"inside landing page with journey:") /**${request.journey.toString}**/
+//    request.journey.origin match {
+//      case Origins.Epaye.Bta         => Ok(views.epayeLanding())
+//      case Origins.Epaye.DetachedUrl => Ok(views.epayeLanding())
+//      case Origins.Epaye.GovUk       => Redirect(routes.DetermineTaxIdController.determineTaxId())
+//    }
+    Ok("")
+  }
+
+  val landingPageSubmit: Action[AnyContent] = as.landingPageAction { implicit request =>
+    Ok(views.epayeLanding())
   }
 
 }
