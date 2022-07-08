@@ -282,7 +282,7 @@ class BankDetailsControllerSpec extends ItSpec {
       extractSummaryRows(summaries) shouldBe expectedSummaryRows
 
       doc.select(".govuk-heading-m").text() shouldBe "The Direct Debit Guarantee"
-      val directDebitGuaranteeParagraphs = doc.select(".govuk-body").asScala.toList.dropRight(1)
+      val directDebitGuaranteeParagraphs = doc.select(".govuk-body").asScala.toList
       directDebitGuaranteeParagraphs(0).text() shouldBe "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
       directDebitGuaranteeParagraphs(1).text() shouldBe "If there are any changes to the amount, date or frequency of your Direct Debit HMRC NDDS will notify you 10 working days in advance of your account being debited or as otherwise agreed. If you request HMRC NDDS to collect a payment, confirmation of the amount and date will be given to you at the time of the request."
       directDebitGuaranteeParagraphs(2).text() shouldBe "If an error is made in the payment of your Direct Debit by HMRC NDDS or your bank or building society you are entitled to a full and immediate refund of the amount paid from your bank or building society. If you receive a refund you are not entitled to, you must pay it back when HMRC NDDS asks you to."
@@ -349,24 +349,24 @@ class BankDetailsControllerSpec extends ItSpec {
       ContentAssertions.assertListOfContent(
         elements = doc.select(".govuk-body")
       )(
-        expectedContent = List(
-          "We can cancel this agreement if you:",
-          "If we cancel this agreement, you will need to pay the total amount you owe straight away.",
-          "We can use any refunds you might get to pay off your tax charges.",
-          "If your circumstances change and you can pay more or you can pay in full, you need to let us know.",
-          "I agree to the terms and conditions of this payment plan. I confirm that this is the earliest I am able to settle this debt."
+          expectedContent = List(
+            "We can cancel this agreement if you:",
+            "If we cancel this agreement, you will need to pay the total amount you owe straight away.",
+            "We can use any refunds you might get to pay off your tax charges.",
+            "If your circumstances change and you can pay more or you can pay in full, you need to let us know.",
+            "I agree to the terms and conditions of this payment plan. I confirm that this is the earliest I am able to settle this debt."
+          )
         )
-      )
 
       ContentAssertions.assertListOfContent(
         elements = doc.select(".govuk-list--bullet").select("li")
       )(
-        expectedContent = List(
-          "pay late or miss a payment",
-          "pay another tax bill late",
-          "do not submit your future tax returns on time"
+          expectedContent = List(
+            "pay late or miss a payment",
+            "pay another tax bill late",
+            "do not submit your future tax returns on time"
+          )
         )
-      )
 
       doc.select(".govuk-heading-m").text() shouldBe "Declaration"
       doc.select(".govuk-button").text() shouldBe "Agree and continue"

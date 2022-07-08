@@ -28,7 +28,9 @@
   appConfig: AppConfig,
   requestSupport: RequestSupport,
   govukSummaryList : GovukSummaryList,
-  govukDetails: GovukDetails
+  govukDetails: GovukDetails,
+  formWithCSRF: FormWithCSRF,
+  govukButton: GovukButton
 )
 
 @(directDebitDetails: DirectDebitDetails, backUrl: Option[String] = None)(implicit request: Request[_])
@@ -129,9 +131,7 @@
 
   @detailsContent
 
-  <p class="govuk-body">
-    <a href="@{routes.BankDetailsController.termsAndConditions().url}" class="govuk-button" role="button" data-module="govuk-button">
-    @Messages.continue.show
-    </a>
-  </p>
+  @formWithCSRF(action = routes.BankDetailsController.checkBankDetailsSubmit()) {
+    @govukButton(Button(content = Text(Messages.continue.show)))
+  }
 }
