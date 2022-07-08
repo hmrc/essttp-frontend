@@ -16,7 +16,7 @@
 
 package actions
 
-import actionsmodel.{AuthenticatedRequest, JourneyRequest, NewAuthenticatedJourneyRequest}
+import actionsmodel.{AuthenticatedRequest, AuthenticatedJourneyRequest}
 import controllers.support.RequestSupport.hc
 import essttp.journey.JourneyConnector
 import essttp.journey.model.Journey
@@ -27,19 +27,19 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class NewGetJourneyActionRefiner @Inject() (journeyConnector: JourneyConnector)(
+class GetJourneyActionRefiner @Inject() (journeyConnector: JourneyConnector)(
     implicit
     ec: ExecutionContext
-) extends ActionRefiner[AuthenticatedRequest, NewAuthenticatedJourneyRequest] {
+) extends ActionRefiner[AuthenticatedRequest, AuthenticatedJourneyRequest] {
 
   private val logger = Logger(getClass)
 
-  override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, NewAuthenticatedJourneyRequest[A]]] = {
+  override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, AuthenticatedJourneyRequest[A]]] = {
     implicit val r: Request[A] = request
     for {
       maybeJourney: Option[Journey] <- journeyConnector.findLatestJourneyBySessionId()
     } yield maybeJourney match {
-      case Some(journey) => Right(new NewAuthenticatedJourneyRequest(request, request.enrolments, journey))
+      case Some(journey) => Right(new AuthenticatedJourneyRequest(request, request.enrolments, journey))
       case None =>
         logger.error(s"No journey found for sessionId: [ ${hc.sessionId} ]")
         Left(Results.Redirect(controllers.routes.EpayeGovUkController.startJourney()))

@@ -37,7 +37,7 @@ class EpayeGovUkController @Inject() (
 
   val refererForGovUk: String = config.get[String]("refererForGovUk")
 
-  def startJourney: Action[AnyContent] = as.default.async { implicit request =>
+  def startJourney: Action[AnyContent] = as.authenticatedAction.async { implicit request =>
 
     val sjResponse: Future[SjResponse] = if (isComingFromGovUk(request)) {
       journeyConnector.Epaye.startJourneyGovUk(SjRequest.Epaye.Empty())

@@ -20,7 +20,7 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
 
-@import actionsmodel.JourneyRequest
+@import actionsmodel.AuthenticatedJourneyRequest
 @import essttp.rootmodel.TaxRegime
 @import play.api.mvc.Request
 @import play.twirl.api.Html
@@ -106,14 +106,15 @@
 
     @serviceName = @{
         (request: AnyRef) match {
-          case r: JourneyRequest[_] =>
+          case r: AuthenticatedJourneyRequest[_] =>
               r.journey.taxRegime match {
                   case TaxRegime.Epaye => Messages.ServicePhase.`Set up an Employers' PAYE payment plan`.show
                   case TaxRegime.Vat => sys.error("VAT not handled yet")
               }
-
-          case other =>
-              sys.error(s"Expected JourneyRequest for non-test-only page but got ${other.getClass.getSimpleName}")
+          case other => Messages.ServicePhase.`Set up an Employers' PAYE payment plan`.show
+//            commented out for now until we work out something better to make it derive based on tax type - we need more endpoints...
+//          case other =>
+//              sys.error(s"Expected JourneyRequest for non-test-only page but got ${other.getClass.getSimpleName}")
       }
     }
 

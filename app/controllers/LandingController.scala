@@ -17,7 +17,7 @@
 package controllers
 
 import _root_.actions.Actions
-import essttp.journey.model.Origins
+//import essttp.journey.model.Origins
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
@@ -33,17 +33,11 @@ class LandingController @Inject() (
 ) extends FrontendController(mcc)
   with Logging {
 
-  val landingPage: Action[AnyContent] = as.landingPageAction { implicit request =>
-    logger.debug(s"inside landing page with journey:") /**${request.journey.toString}**/
-//    request.journey.origin match {
-//      case Origins.Epaye.Bta         => Ok(views.epayeLanding())
-//      case Origins.Epaye.DetachedUrl => Ok(views.epayeLanding())
-//      case Origins.Epaye.GovUk       => Redirect(routes.DetermineTaxIdController.determineTaxId())
-//    }
-    Ok("")
+  val landingPage: Action[AnyContent] = as.default { implicit request =>
+    Ok(views.epayeLanding())
   }
 
-  val landingPageSubmit: Action[AnyContent] = as.landingPageAction { implicit request =>
+  val landingPageSubmit: Action[AnyContent] = as.authenticatedAction { implicit request =>
     Ok(views.epayeLanding())
   }
 

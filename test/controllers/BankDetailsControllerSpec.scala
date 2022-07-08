@@ -349,24 +349,24 @@ class BankDetailsControllerSpec extends ItSpec {
       ContentAssertions.assertListOfContent(
         elements = doc.select(".govuk-body")
       )(
-        expectedContent = List(
-          "We can cancel this agreement if you:",
-          "If we cancel this agreement, you will need to pay the total amount you owe straight away.",
-          "We can use any refunds you might get to pay off your tax charges.",
-          "If your circumstances change and you can pay more or you can pay in full, you need to let us know.",
-          "I agree to the terms and conditions of this payment plan. I confirm that this is the earliest I am able to settle this debt."
+          expectedContent = List(
+            "We can cancel this agreement if you:",
+            "If we cancel this agreement, you will need to pay the total amount you owe straight away.",
+            "We can use any refunds you might get to pay off your tax charges.",
+            "If your circumstances change and you can pay more or you can pay in full, you need to let us know.",
+            "I agree to the terms and conditions of this payment plan. I confirm that this is the earliest I am able to settle this debt."
+          )
         )
-      )
 
       ContentAssertions.assertListOfContent(
         elements = doc.select(".govuk-list--bullet").select("li")
       )(
-        expectedContent = List(
-          "pay late or miss a payment",
-          "pay another tax bill late",
-          "do not submit your future tax returns on time"
+          expectedContent = List(
+            "pay late or miss a payment",
+            "pay another tax bill late",
+            "do not submit your future tax returns on time"
+          )
         )
-      )
 
       doc.select(".govuk-heading-m").text() shouldBe "Declaration"
       doc.select(".govuk-button").text() shouldBe "Agree and continue"

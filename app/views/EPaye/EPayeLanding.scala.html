@@ -19,7 +19,7 @@
 @import views.html.templates.Layout
 @import messages.Messages
 @import requests.RequestSupport
-@import actionsmodel.JourneyRequest
+@import play.api.mvc.Request
 
 @this(
   layout: Layout,
@@ -28,9 +28,7 @@
   requestSupport: RequestSupport
 )
 
-@()(implicit
-  request: JourneyRequest[_]
-)
+@()(implicit request: Request[_])
 
 @import requestSupport._
 
@@ -38,7 +36,7 @@
 
 @layout(
   pageTitle = Some(title),
-  backUrl = request.journey.backUrl.map(_.value)
+  backUrl = None
 ) {
   <h1 class="govuk-heading-xl">@title</h1>
   <p class="govuk-body">@{Messages.Epaye.`You can use this service to pay overdue payments...`.show}</p>
