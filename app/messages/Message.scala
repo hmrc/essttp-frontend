@@ -18,7 +18,7 @@ package messages
 
 import langswitch.{Language, Languages}
 
-final case class Message(
+final case class Message private (
     english: String,
     welsh:   Option[String]
 ) {
@@ -35,6 +35,8 @@ final case class Message(
 }
 
 object Message {
+
+  private def apply(english: String, welsh: Option[String]) = new Message(english, welsh)
   def apply(english: String, welsh: String): Message = Message(english, Option(welsh))
   def apply(english: String): Message = Message(english, None)
 }
