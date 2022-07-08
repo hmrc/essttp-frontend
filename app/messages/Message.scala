@@ -18,7 +18,7 @@ package messages
 
 import langswitch.{Language, Languages}
 
-final case class Message(
+final case class Message private (
     english: String,
     welsh:   Option[String]
 ) {
