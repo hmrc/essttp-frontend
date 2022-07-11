@@ -7,7 +7,7 @@ GET       /govuk/epaye/start                             controllers.EpayeGovUkC
 
 GET       /                                              controllers.LandingController.landingPage
 
-GET       /determine-taxId                               controllers.DetermineTaxIdController.determineTaxId
+GET       /determine-taxId                               controllers.DetermineTaxIdController.determineTaxId()
 GET       /determine-eligibility                         controllers.DetermineEligibilityController.determineEligibility
 
 GET       /not-enrolled                                  controllers.NotEnrolledController.notEnrolled

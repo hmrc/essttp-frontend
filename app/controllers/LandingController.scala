@@ -17,7 +17,6 @@
 package controllers
 
 import _root_.actions.Actions
-//import essttp.journey.model.Origins
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
@@ -34,10 +33,6 @@ class LandingController @Inject() (
   with Logging {
 
   val landingPage: Action[AnyContent] = as.default { implicit request =>
-    Ok(views.epayeLanding())
-  }
-
-  val landingPageSubmit: Action[AnyContent] = as.authenticatedAction { implicit request =>
     Ok(views.epayeLanding())
   }
 

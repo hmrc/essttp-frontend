@@ -57,10 +57,15 @@ class AuthenticatedActionRefiner @Inject() (
       }
   }
 
-  private def redirectToLoginPage(implicit request: Request[_]): Result = Redirect(
-    appConfig.BaseUrl.gg,
-    Map("continue" -> Seq(appConfig.BaseUrl.essttpFrontend + request.uri), "origin" -> Seq("essttp-frontend"))
-  )
+  private def redirectToLoginPage(implicit request: Request[_]): Result = {
+    val returnUrl =
+      if (request.uri.endsWith(controllers.routes.EpayeGovUkController.startJourney().url)) appConfig.Urls.epayeGovUkJourneyLoginContinueUrl
+      else request.uri
+    Redirect(
+      appConfig.BaseUrl.gg,
+      Map("continue" -> Seq(appConfig.BaseUrl.essttpFrontend + returnUrl), "origin" -> Seq("essttp-frontend"))
+    )
+  }
 
   override protected def executionContext: ExecutionContext = cc.executionContext
 
