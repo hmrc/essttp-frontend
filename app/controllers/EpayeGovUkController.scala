@@ -18,9 +18,9 @@ package controllers
 
 import _root_.actions.Actions
 import essttp.journey.JourneyConnector
-import essttp.journey.model.{SjRequest, SjResponse}
+import essttp.journey.model.SjRequest
 import play.api.Configuration
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
+import play.api.mvc._
 import play.mvc.Http.HeaderNames
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
@@ -37,15 +37,18 @@ class EpayeGovUkController @Inject() (
 
   val refererForGovUk: String = config.get[String]("refererForGovUk")
 
-  def startJourney: Action[AnyContent] = as.default.async { implicit request =>
-
-    val sjResponse: Future[SjResponse] = if (isComingFromGovUk(request)) {
-      journeyConnector.Epaye.startJourneyGovUk(SjRequest.Epaye.Empty())
-    } else {
-      journeyConnector.Epaye.startJourneyDetachedUrl(SjRequest.Epaye.Empty())
+  def startJourney: Action[AnyContent] = as.authenticatedAction.async { implicit request =>
+    val startJourneyRedirect: Future[Result] = {
+      // gov uk needs to skip landing page, we don't want to show guidance again.
+      if (isComingFromGovUk(request)) {
+        journeyConnector.Epaye.startJourneyGovUk(SjRequest.Epaye.Empty())
+          .map(_ => Redirect(routes.DetermineTaxIdController.determineTaxId().url))
+      } else {
+        journeyConnector.Epaye.startJourneyDetachedUrl(SjRequest.Epaye.Empty())
+          .map(r => Redirect(r.nextUrl.value))
+      }
     }
-
-    sjResponse.map(r => Redirect(r.nextUrl.value))
+    startJourneyRedirect
   }
 
   /**

@@ -16,19 +16,26 @@
 
 package actionsmodel
 
-import essttp.journey.model.Journey
+import essttp.journey.model.{Journey, JourneyId}
 import play.api.mvc._
 import uk.gov.hmrc.auth.core.Enrolments
 
+/**
+ * Authenticated Journey requests have two stages:
+ * AuthenticatedJourneyRequest -> User has some enrolments (may not be correct) and there is a journey found
+ * EligibleJourneyRequest -> User has correct enrolments, eligibility has been checking in ttp api for journey and there is a journey in backend
+ */
+
 class AuthenticatedJourneyRequest[A](
-    override val journey: Journey,
-    val enrolments:       Enrolments,
-    override val request: Request[A]
-) extends JourneyRequest[A](journey, request)
+    override val request:    Request[A],
+    override val enrolments: Enrolments,
+    val journey:             Journey
+) extends AuthenticatedRequest[A](request, enrolments) {
+  val journeyId: JourneyId = journey._id
+}
 
 final class EligibleJourneyRequest[A](
     override val journey:    Journey.AfterEligibilityChecked,
     override val enrolments: Enrolments,
     override val request:    Request[A]
-) extends AuthenticatedJourneyRequest[A](journey, enrolments, request)
-
+) extends AuthenticatedJourneyRequest[A](request, enrolments, journey)

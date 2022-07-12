@@ -16,7 +16,7 @@
 
 package actions
 
-import actionsmodel.{AuthenticatedJourneyRequest, EligibleJourneyRequest, JourneyRequest}
+import actionsmodel.{AuthenticatedRequest, EligibleJourneyRequest, AuthenticatedJourneyRequest}
 import controllers.JourneyIncorrectStateRouter
 import controllers.pagerouters.EligibilityRouter
 import essttp.journey.model.Journey
@@ -29,32 +29,31 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class Actions @Inject() (
-    actionBuilder:           DefaultActionBuilder,
-    authenticatedAction:     AuthenticateActionRefiner,
-    getJourneyActionRefiner: GetJourneyActionRefiner
+    actionBuilder:              DefaultActionBuilder,
+    authenticatedActionRefiner: AuthenticatedActionRefiner,
+    getJourneyActionRefiner:    GetJourneyActionRefiner
 )(implicit ec: ExecutionContext) {
 
   val default: ActionBuilder[Request, AnyContent] = actionBuilder
 
-  val landingPageAction: ActionBuilder[JourneyRequest, AnyContent] =
+  val authenticatedAction: ActionBuilder[AuthenticatedRequest, AnyContent] =
     actionBuilder
-      .andThen(getJourneyActionRefiner)
+      .andThen(authenticatedActionRefiner)
 
-  val notEnrolledAction: ActionBuilder[JourneyRequest, AnyContent] =
+  val notEnrolledAction: ActionBuilder[AuthenticatedRequest, AnyContent] =
     actionBuilder
-      .andThen(getJourneyActionRefiner)
-      .andThen(authenticatedAction)
+      .andThen(authenticatedActionRefiner)
 
   val authenticatedJourneyAction: ActionBuilder[AuthenticatedJourneyRequest, AnyContent] =
     actionBuilder
+      .andThen(authenticatedActionRefiner)
       .andThen(getJourneyActionRefiner)
-      .andThen(authenticatedAction)
       .andThen(filterForRequiredEnrolments)
 
   val eligibleJourneyAction: ActionBuilder[AuthenticatedJourneyRequest, AnyContent] =
     actionBuilder
+      .andThen(authenticatedActionRefiner)
       .andThen(getJourneyActionRefiner)
-      .andThen(authenticatedAction)
       .andThen(filterForRequiredEnrolments)
       .andThen(filterForEligibleJourney)
 

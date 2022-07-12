@@ -61,6 +61,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     val enrolForPayeUrl: String = config.get[String]("govUkUrls.enrolPayeUrl")
     val extraSupportUrl: String = config.get[String]("govUkUrls.extraSupportUrl")
     val relayUrl: String = config.get[String]("govUkUrls.relayUrl")
+    val epayeGovUkJourneyLoginContinueUrl: String = s"/set-up-a-payment-plan/determine-taxId"
   }
 
   object InterestRates {

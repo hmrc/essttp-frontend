@@ -14,26 +14,12 @@
  * limitations under the License.
  */
 
-package controllers
+package actionsmodel
 
-import _root_.actions.Actions
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import util.Logging
-import views.Views
+import play.api.mvc.{Request, WrappedRequest}
+import uk.gov.hmrc.auth.core.Enrolments
 
-import javax.inject.{Inject, Singleton}
-
-@Singleton
-class LandingController @Inject() (
-    as:    Actions,
-    mcc:   MessagesControllerComponents,
-    views: Views
-) extends FrontendController(mcc)
-  with Logging {
-
-  val landingPage: Action[AnyContent] = as.default { implicit request =>
-    Ok(views.epayeLanding())
-  }
-
-}
+class AuthenticatedRequest[A](
+    val request:    Request[A],
+    val enrolments: Enrolments
+) extends WrappedRequest[A](request)
