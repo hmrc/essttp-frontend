@@ -25,8 +25,9 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
+import testsupport.reusableassertions.RequestAssertions
 import testsupport.stubs.{AuthStub, EssttpBackend}
-import testsupport.testdata.{TdAll, TdJsonBodies}
+import testsupport.testdata.{JourneyJsonTemplates, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
@@ -126,15 +127,13 @@ class PaymentScheduleControllerSpec extends ItSpec {
             totalToPayValue:           String
         ) = {
           AuthStub.authorise()
-          EssttpBackend.EligibilityCheck.findJourneyAfterEligibilityCheck(journeyJsonBody)
+          EssttpBackend.EligibilityCheck.findJourney(journeyJsonBody)
 
           val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
           val result: Future[Result] = controller.checkPaymentSchedule(fakeRequest)
 
-          status(result) shouldBe Status.OK
-          contentType(result) shouldBe Some("text/html")
-          charset(result) shouldBe Some("utf-8")
+          RequestAssertions.assertGetRequestOk(result)
 
           val pageContent: String = contentAsString(result)
           val doc: Document = Jsoup.parse(pageContent)
@@ -150,11 +149,11 @@ class PaymentScheduleControllerSpec extends ItSpec {
 
       "there is an upfrontPayment amount" in {
         test(
-          TdJsonBodies.afterSelectedPlanJourneyJson()
+          JourneyJsonTemplates.`Chosen Payment Plan`()
         )(
             "Yes",
             Some("£123.12"),
-            "1st or next working day",
+            "28th or next working day",
             List(
               "August 2022" -> "£555.73",
               "September 2022" -> "£555.73"
@@ -165,11 +164,11 @@ class PaymentScheduleControllerSpec extends ItSpec {
 
       "there is no upfrontPayment amount" in {
         test(
-          TdJsonBodies.afterSelectedPlanJourneyJson("""{ "NoUpfrontPayment" : { } }""")
+          JourneyJsonTemplates.`Chosen Payment Plan`("""{ "NoUpfrontPayment" : { } }""")
         )(
             "No",
             None,
-            "1st or next working day",
+            "28th or next working day",
             List(
               "August 2022" -> "£555.73",
               "September 2022" -> "£555.73"
@@ -186,12 +185,12 @@ class PaymentScheduleControllerSpec extends ItSpec {
     s"should redirect to ${routes.BankDetailsController.enterBankDetails().url} if the journey " +
       "has been updated successfully" in {
         AuthStub.authorise()
-        EssttpBackend.EligibilityCheck.findJourneyAfterEligibilityCheck(TdJsonBodies.afterSelectedPlanJourneyJson())
+        EssttpBackend.SelectedPaymentPlan.findJourney()
         EssttpBackend.HasCheckedPlan.updateHasCheckedPlan(TdAll.journeyId)
 
         val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
         val result: Future[Result] = controller.checkPaymentScheduleSubmit(fakeRequest)
+
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.BankDetailsController.enterBankDetails().url)
         EssttpBackend.HasCheckedPlan.verifyUpdateHasCheckedPlanRequest(TdAll.journeyId)

@@ -19,8 +19,8 @@ package testsupport.stubs
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.journey.model.{JourneyId, Origin, Origins}
-import essttp.rootmodel.{CanPayUpfront, DayOfMonth}
-import testsupport.testdata.{TdAll, TdJsonBodies}
+import essttp.rootmodel.DayOfMonth
+import testsupport.testdata.{TdAll, TdJsonBodies, JourneyJsonTemplates}
 
 object EssttpBackend {
 
@@ -58,7 +58,7 @@ object EssttpBackend {
 
   object DetermineTaxId {
 
-    def findJourneyAfterDetermineTaxId(jsonBody: String = TdJsonBodies.afterDetermineTaxIdJourneyJson()): StubMapping = stubFor(
+    def findJourney(jsonBody: String = JourneyJsonTemplates.`Computed Tax Id`): StubMapping = stubFor(
       get(urlPathEqualTo(findByLatestSessionIdUrl))
         .willReturn(aResponse()
           .withStatus(200)
@@ -90,7 +90,7 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(updateEligibilityResultUrl(journeyId)))
       )
 
-    def findJourneyAfterEligibilityCheck(jsonBody: String = TdJsonBodies.afterEligibilityCheckJourneyJson()): StubMapping = stubFor(
+    def findJourney(jsonBody: String = JourneyJsonTemplates.`Eligibility Checked - Eligible`): StubMapping = stubFor(
       get(urlPathEqualTo(findByLatestSessionIdUrl))
         .willReturn(aResponse()
           .withStatus(200)
@@ -123,20 +123,12 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(updateCanPayUpfrontUrl(journeyId)))
       )
 
-    def findJourneyAfterUpdateCanPayUpfront(canPayUpfront: CanPayUpfront): StubMapping = {
-      val additionalPayloadInfo: (String, Boolean) =
-        if (canPayUpfront.value) {
-          ("Yes", true)
-        } else {
-          ("No", false)
-        }
-      stubFor(
-        get(urlPathEqualTo(findByLatestSessionIdUrl))
-          .willReturn(aResponse()
-            .withStatus(200)
-            .withBody(TdJsonBodies.afterCanPayUpfrontJourneyJson(additionalPayloadInfo._1, additionalPayloadInfo._2)))
-      )
-    }
+    def findJourney(jsonBody: String = JourneyJsonTemplates.`Answered Can Pay Upfront - Yes`): StubMapping = stubFor(
+      get(urlPathEqualTo(findByLatestSessionIdUrl))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withBody(jsonBody))
+    )
   }
 
   object UpfrontPaymentAmount {
@@ -163,8 +155,8 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(updateUpfrontPaymentAmountUrl(journeyId)))
       )
 
-    def findJourneyAfterUpdateUpfrontPaymentAmount(
-        jsonBody: String = TdJsonBodies.afterUpfrontPaymentAmountJourneyJson(TdAll.upfrontPaymentAmount)
+    def findJourney(
+        jsonBody: String = JourneyJsonTemplates.`Entered Upfront payment amount`
     ): StubMapping = stubFor(
       get(urlPathEqualTo(findByLatestSessionIdUrl))
         .willReturn(aResponse()
@@ -214,8 +206,8 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(updateStartDatesUrl(journeyId)))
       )
 
-    def findJourneyAfterUpdateExtremeDates(
-        jsonBody: String = TdJsonBodies.afterExtremeDatesJourneyJson()
+    def findJourneyExtremeDates(
+        jsonBody: String = JourneyJsonTemplates.`Retrieved Extreme Dates Response`
     ): StubMapping = stubFor(
       get(urlPathEqualTo(findByLatestSessionIdUrl))
         .willReturn(aResponse()
@@ -223,8 +215,8 @@ object EssttpBackend {
           .withBody(jsonBody))
     )
 
-    def findJourneyAfterUpdateStartDates(
-        jsonBody: String = TdJsonBodies.afterStartDatesJourneyJson()
+    def findJourney(
+        jsonBody: String = JourneyJsonTemplates.`Retrieved Start Dates`
     ): StubMapping = stubFor(
       get(urlPathEqualTo(findByLatestSessionIdUrl))
         .willReturn(aResponse()
@@ -234,8 +226,8 @@ object EssttpBackend {
   }
 
   object AffordabilityMinMaxApi {
-    def findJourneyAfterUpdateAffordability(
-        jsonBody: String = TdJsonBodies.afterAffordabilityCheckJourneyJson()
+    def findJourney(
+        jsonBody: String = JourneyJsonTemplates.`Retrieved Affordability`()
     ): StubMapping = stubFor(
       get(urlPathEqualTo(findByLatestSessionIdUrl))
         .willReturn(aResponse()
@@ -285,8 +277,8 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(monthlyPaymentAmountUrl(journeyId)))
       )
 
-    def findJourneyAfterUpdateMonthlyPaymentAmount(
-        jsonBody: String = TdJsonBodies.afterMonthlyPaymentAmountJourneyJson()
+    def findJourney(
+        jsonBody: String = JourneyJsonTemplates.`Entered Monthly Payment Amount`
     ): StubMapping = stubFor(
       get(urlPathEqualTo(findByLatestSessionIdUrl))
         .willReturn(aResponse()
@@ -319,7 +311,7 @@ object EssttpBackend {
       )
 
     def findJourneyAfterUpdateDayOfMonth(
-        jsonBody: String = TdJsonBodies.afterDayOfMonthJourneyJson(TdAll.dayOfMonth())
+        jsonBody: String = JourneyJsonTemplates.`Entered Day of Month`
     ): StubMapping = stubFor(
       get(urlPathEqualTo(findByLatestSessionIdUrl))
         .willReturn(aResponse()
@@ -351,8 +343,8 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(affordableQuotesUrl(journeyId)))
       )
 
-    def findJourneyAfterUpdateAffordableQuotes(
-        jsonBody: String = TdJsonBodies.afterAffordableQuotesJourneyJson()
+    def findJourney(
+        jsonBody: String = JourneyJsonTemplates.`Retrieved Affordable Quotes`
     ): StubMapping = stubFor(
       get(urlPathEqualTo(findByLatestSessionIdUrl))
         .willReturn(aResponse()
@@ -384,8 +376,8 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(selectedPlanUrl(journeyId)))
       )
 
-    def findJourneyAfterUpdateSelectedPlan(
-        jsonBody: String = TdJsonBodies.afterSelectedPlanJourneyJson()
+    def findJourney(
+        jsonBody: String = JourneyJsonTemplates.`Chosen Payment Plan`("""{"DeclaredUpfrontPayment": {"amount": 200}}""")
     ): StubMapping = stubFor(
       get(urlPathEqualTo(findByLatestSessionIdUrl))
         .willReturn(aResponse()
@@ -411,8 +403,8 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(hasCheckedPlanUrl(journeyId)))
       )
 
-    def findJourneyAfterUpdateHasCheckedPlan(
-        jsonBody: String = TdJsonBodies.afterHasCheckedPlanJourneyJson()
+    def findJourney(
+        jsonBody: String = JourneyJsonTemplates.`Has Checked Payment Plan`
     ): StubMapping = stubFor(
       get(urlPathEqualTo(findByLatestSessionIdUrl))
         .willReturn(aResponse()
@@ -444,8 +436,8 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(directDebitDetailsUrl(journeyId)))
       )
 
-    def findJourneyAfterUpdateDirectDebitDetails(
-        jsonBody: String = TdJsonBodies.afterDirectDebitDetailsJourneyJson()
+    def findJourney(
+        jsonBody: String = JourneyJsonTemplates.`Entered Direct Debit Details - Is Account Holder`
     ): StubMapping = stubFor(
       get(urlPathEqualTo(findByLatestSessionIdUrl))
         .willReturn(aResponse()
@@ -477,8 +469,8 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(confirmDirectDebitDetailsUrl(journeyId)))
       )
 
-    def findJourneyAfterConfirmUpdateDirectDebitDetails(
-        jsonBody: String = TdJsonBodies.afterConfirmDirectDebitDetailsJourneyJson()
+    def findJourney(
+        jsonBody: String = JourneyJsonTemplates.`Confirmed Direct Debit Details`
     ): StubMapping = stubFor(
       get(urlPathEqualTo(findByLatestSessionIdUrl))
         .willReturn(aResponse()

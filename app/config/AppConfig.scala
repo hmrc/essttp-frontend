@@ -62,6 +62,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     val extraSupportUrl: String = config.get[String]("govUkUrls.extraSupportUrl")
     val relayUrl: String = config.get[String]("govUkUrls.relayUrl")
     val epayeGovUkJourneyLoginContinueUrl: String = s"/set-up-a-payment-plan/determine-taxId"
+    val businessTaxAccountUrl: String = s"${BaseUrl.businessTaxAccountFrontend}/business-account"
   }
 
   object InterestRates {

@@ -27,8 +27,8 @@ import testsupport.ItSpec
 import testsupport.stubs.{AuthStub, EssttpBackend}
 import uk.gov.hmrc.http.SessionKeys
 import testsupport.TdRequest.FakeRequestOps
-import testsupport.reusableassertions.ContentAssertions
-import testsupport.testdata.{PageUrls, TdAll, TdJsonBodies}
+import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
+import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 
 import scala.concurrent.Future
 import scala.jdk.CollectionConverters.{asScalaIteratorConverter, collectionAsScalaIterableConverter}
@@ -64,6 +64,13 @@ class BankDetailsControllerSpec extends ItSpec {
     val expectedPageTitle: String = s"$expectedH1 - $expectedServiceName - GOV.UK"
   }
 
+  object CannotSetupDirectDebitPage {
+    val expectedH1: String = "You cannot set up a Direct Debit online"
+    val paragraphContent: String = "You need a named account holder or someone with authorisation to set up a Direct Debit."
+    val buttonContent: String = "Return to tax account"
+    val expectedPageTitle: String = s"$expectedH1 - $expectedServiceName - GOV.UK"
+  }
+
   def testFormError(formData: (String, String)*)(textAndHrefContent: List[(String, String)]): Unit = {
     val fakeRequest = FakeRequest(
       method = "POST",
@@ -73,7 +80,7 @@ class BankDetailsControllerSpec extends ItSpec {
       .withFormUrlEncodedBody(formData: _*)
 
     val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
-    status(result) shouldBe Status.OK
+    RequestAssertions.assertGetRequestOk(result)
 
     val pageContent: String = contentAsString(result)
     val doc: Document = Jsoup.parse(pageContent)
@@ -99,14 +106,12 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "should return 200 and the bank details page" in {
       AuthStub.authorise()
-      EssttpBackend.HasCheckedPlan.findJourneyAfterUpdateHasCheckedPlan()
+      EssttpBackend.HasCheckedPlan.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.enterBankDetails(fakeRequest)
 
-      status(result) shouldBe Status.OK
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
+      RequestAssertions.assertGetRequestOk(result)
 
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
@@ -134,14 +139,12 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "prepopulate the form when the user has the direct debit details in their journey" in {
       AuthStub.authorise()
-      EssttpBackend.DirectDebitDetails.findJourneyAfterUpdateDirectDebitDetails()
+      EssttpBackend.DirectDebitDetails.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.enterBankDetails(fakeRequest)
 
-      status(result) shouldBe Status.OK
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
+      RequestAssertions.assertGetRequestOk(result)
 
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
@@ -157,7 +160,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "redirect to /check-bank-details when valid form is submitted" in {
       AuthStub.authorise()
-      EssttpBackend.HasCheckedPlan.findJourneyAfterUpdateHasCheckedPlan()
+      EssttpBackend.HasCheckedPlan.findJourney()
       EssttpBackend.DirectDebitDetails.updateDirectDebitDetails(TdAll.journeyId)
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -178,7 +181,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "redirect to /you-cannot-set-up-a-direct-debit-online when user submits no for radio option relating to being account holder" in {
       AuthStub.authorise()
-      EssttpBackend.HasCheckedPlan.findJourneyAfterUpdateHasCheckedPlan()
+      EssttpBackend.HasCheckedPlan.findJourney()
       EssttpBackend.DirectDebitDetails.updateDirectDebitDetails(TdAll.journeyId)
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -199,7 +202,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "show correct error messages when form submitted is empty" in {
       AuthStub.authorise()
-      EssttpBackend.HasCheckedPlan.findJourneyAfterUpdateHasCheckedPlan()
+      EssttpBackend.HasCheckedPlan.findJourney()
       val formData: List[(String, String)] = List(
         ("name", ""),
         ("sortCode", ""),
@@ -218,7 +221,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "show correct error messages when submitted sort code and account number are not numeric" in {
       AuthStub.authorise()
-      EssttpBackend.HasCheckedPlan.findJourneyAfterUpdateHasCheckedPlan()
+      EssttpBackend.HasCheckedPlan.findJourney()
       val formData: List[(String, String)] = List(
         ("name", "Bob Ross"),
         ("sortCode", "12E456"),
@@ -235,7 +238,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "show correct error messages when submitted sort code and account number are more than 6 and 8 digits respectively" in {
       AuthStub.authorise()
-      EssttpBackend.HasCheckedPlan.findJourneyAfterUpdateHasCheckedPlan()
+      EssttpBackend.HasCheckedPlan.findJourney()
       val formData: List[(String, String)] = List(
         ("name", "Bob Ross"),
         ("sortCode", "1234567"),
@@ -254,14 +257,12 @@ class BankDetailsControllerSpec extends ItSpec {
   "GET /check-your-direct-debit-details should" - {
     "return 200 and the check your direct debit details page" in {
       AuthStub.authorise()
-      EssttpBackend.DirectDebitDetails.findJourneyAfterUpdateDirectDebitDetails()
+      EssttpBackend.DirectDebitDetails.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.checkBankDetails(fakeRequest)
 
-      status(result) shouldBe Status.OK
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
+      RequestAssertions.assertGetRequestOk(result)
 
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
@@ -291,7 +292,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "redirect user to cannot setup direct debit if they try and force browse, but they said they aren't the account holder" in {
       AuthStub.authorise()
-      EssttpBackend.DirectDebitDetails.findJourneyAfterUpdateDirectDebitDetails(TdJsonBodies.afterDirectDebitDetailsJourneyJson(isAccountHolder = false))
+      EssttpBackend.DirectDebitDetails.findJourney(JourneyJsonTemplates.`Entered Direct Debit Details - Is Not Account Holder`)
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.checkBankDetails(fakeRequest)
@@ -304,7 +305,7 @@ class BankDetailsControllerSpec extends ItSpec {
   "POST /check-your-direct-debit-details should" - {
     "redirect the user to terms and conditions and update backend" in {
       AuthStub.authorise()
-      EssttpBackend.DirectDebitDetails.findJourneyAfterUpdateDirectDebitDetails()
+      EssttpBackend.DirectDebitDetails.findJourney()
       EssttpBackend.ConfirmedDirectDebitDetails.updateConfirmDirectDebitDetails(TdAll.journeyId)
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -316,7 +317,7 @@ class BankDetailsControllerSpec extends ItSpec {
     }
     "redirect the user to cannot setup direct debit if they try and force browse, but they aren't the account holder" in {
       AuthStub.authorise()
-      EssttpBackend.DirectDebitDetails.findJourneyAfterUpdateDirectDebitDetails(TdJsonBodies.afterDirectDebitDetailsJourneyJson(isAccountHolder = false))
+      EssttpBackend.DirectDebitDetails.findJourney(JourneyJsonTemplates.`Entered Direct Debit Details - Is Not Account Holder`)
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.checkBankDetailsSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
@@ -328,14 +329,12 @@ class BankDetailsControllerSpec extends ItSpec {
   "GET /terms-and-conditions should" - {
     "return 200 and the terms and conditions page" in {
       AuthStub.authorise()
-      EssttpBackend.ConfirmedDirectDebitDetails.findJourneyAfterConfirmUpdateDirectDebitDetails()
+      EssttpBackend.ConfirmedDirectDebitDetails.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.termsAndConditions(fakeRequest)
 
-      status(result) shouldBe Status.OK
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
+      RequestAssertions.assertGetRequestOk(result)
 
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
@@ -376,7 +375,7 @@ class BankDetailsControllerSpec extends ItSpec {
   "POST /terms-and-conditions should" - {
     "redirect the user to terms and conditions and update backend" in {
       AuthStub.authorise()
-      EssttpBackend.ConfirmedDirectDebitDetails.findJourneyAfterConfirmUpdateDirectDebitDetails()
+      EssttpBackend.ConfirmedDirectDebitDetails.findJourney()
       EssttpBackend.TermsAndConditions.updateAgreedTermsAndConditions(TdAll.journeyId)
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -385,6 +384,31 @@ class BankDetailsControllerSpec extends ItSpec {
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.confirmationUrl)
       EssttpBackend.TermsAndConditions.verifyUpdateAgreedTermsAndConditionsRequest(TdAll.journeyId)
+    }
+  }
+
+  "GET /you-cannot-set-up-a-direct-debit-online should" - {
+    "return 200 and You cannot set up a direct debit online page" in {
+      AuthStub.authorise()
+      EssttpBackend.DirectDebitDetails.findJourney(JourneyJsonTemplates.`Entered Direct Debit Details - Is Not Account Holder`)
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.cannotSetupDirectDebitOnlinePage(fakeRequest)
+
+      RequestAssertions.assertGetRequestOk(result)
+
+      val pageContent: String = contentAsString(result)
+      val doc: Document = Jsoup.parse(pageContent)
+
+      doc.title() shouldBe CannotSetupDirectDebitPage.expectedPageTitle
+      doc.select(".govuk-heading-xl").text() shouldBe CannotSetupDirectDebitPage.expectedH1
+      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
+      doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
+      doc.select("#back").attr("href") shouldBe routes.BankDetailsController.enterBankDetails().url
+
+      doc.select(".govuk-body").text() shouldBe CannotSetupDirectDebitPage.paragraphContent
+      val cta = doc.select(".govuk-button")
+      cta.text() shouldBe CannotSetupDirectDebitPage.buttonContent
+      cta.attr("href") shouldBe "http://localhost:9020/business-account"
     }
   }
 }

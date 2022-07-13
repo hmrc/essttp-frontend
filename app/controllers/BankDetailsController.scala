@@ -22,7 +22,6 @@ import essttp.rootmodel.bank.{BankDetails, DirectDebitDetails}
 import models.enumsforforms.IsSoleSignatoryFormValue
 import models.forms.BankDetailsForm
 import play.api.data.Form
-import play.api.libs.json.Json
 import play.api.mvc._
 import requests.RequestSupport
 import services.JourneyService
@@ -137,8 +136,17 @@ class BankDetailsController @Inject() (
   }
 
   val cannotSetupDirectDebitOnlinePage: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
-    Ok(s"This is where the not eligible to setup a dd page will go, for now, here's the journey data:\n\n\n" +
-      Json.prettyPrint(Json.toJson(request.journey)))
+    request.journey match {
+      case j: Journey.BeforeEnteredDirectDebitDetails => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
+      case j: Journey.AfterEnteredDirectDebitDetails =>
+        //only show this page if user has said they are not the account holder
+        if (!j.directDebitDetails.isAccountHolder) {
+          Ok(views.cannotSetupDirectDebitPage())
+        } else {
+          JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
+        }
+    }
+
   }
 }
 

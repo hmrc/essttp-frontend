@@ -17,15 +17,15 @@
 package controllers
 
 import essttp.journey.model.ttp.EligibilityRules
+import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.http.Status
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.{AuthStub, EssttpBackend, Ttp}
-import testsupport.testdata.{PageUrls, TdAll, TdJsonBodies}
+import testsupport.testdata.{PageUrls, TdAll, TtpJsonResponses}
 import uk.gov.hmrc.http.SessionKeys
-import org.scalatest.prop.TableDrivenPropertyChecks._
 
 class DetermineEligibilityControllerSpec extends ItSpec {
   private val controller: DetermineEligibilityController = app.injector.instanceOf[DetermineEligibilityController]
@@ -47,8 +47,8 @@ class DetermineEligibilityControllerSpec extends ItSpec {
         {
           s"Eligibility failure: [$sf] should redirect to $expectedRedirect" in {
             AuthStub.authorise()
-            EssttpBackend.DetermineTaxId.findJourneyAfterDetermineTaxId()
-            Ttp.retrieveEligibility(TdJsonBodies.ttpEligibilityCallJson(TdAll.notEligibleOverallEligibilityStatus, eligibilityRules))
+            EssttpBackend.DetermineTaxId.findJourney()
+            Ttp.retrieveEligibility(TtpJsonResponses.ttpEligibilityCallJson(TdAll.notEligibleOverallEligibilityStatus, eligibilityRules))
             EssttpBackend.EligibilityCheck.updateEligibilityResult(TdAll.journeyId)
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result = controller.determineEligibility(fakeRequest)
@@ -61,7 +61,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
 
     "Eligibility already determined should route user to your bill is" in {
       AuthStub.authorise()
-      EssttpBackend.EligibilityCheck.findJourneyAfterEligibilityCheck()
+      EssttpBackend.EligibilityCheck.findJourney()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.determineEligibility(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER

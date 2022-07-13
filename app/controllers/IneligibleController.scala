@@ -50,7 +50,7 @@ class IneligibleController @Inject() (
   val fileYourReturnPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     val btaReturnUrl: String = request.journey.sjRequest match {
       case SjRequest.Epaye.Simple(returnUrl, _) => returnUrl.value
-      case SjRequest.Epaye.Empty()              => s"${appConfig.BaseUrl.businessTaxAccountFrontend}/business-account"
+      case SjRequest.Epaye.Empty()              => s"${appConfig.Urls.businessTaxAccountUrl}"
       case SjRequest.Vat.Simple(returnUrl, _)   => returnUrl.value
     }
     Ok(views.partials.ineligibleTemplatePage(

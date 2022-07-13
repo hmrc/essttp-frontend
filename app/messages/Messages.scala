@@ -620,6 +620,17 @@ object Messages {
       english = "Agree and continue"
     )
 
+    val `You cannot set up a Direct Debit online`: Message = Message(
+      english = "You cannot set up a Direct Debit online"
+    )
+
+    val `You need a named account holder or someone with authorisation to set up a Direct Debit.`: Message = Message(
+      english = "You need a named account holder or someone with authorisation to set up a Direct Debit."
+    )
+    val `Return to tax account`: Message = Message(
+      english = "Return to tax account"
+    )
+
   }
 
   object Confirmation {
