@@ -42,8 +42,7 @@ object TdJsonBodies {
   }
 
   def createJourneyJson(stageInfo: StageInfo, journeyInfo: List[String]): String = {
-    //drop the trailing comma
-    val jsonFormatted: String = journeyInfo.mkString(",").dropRight(1)
+    val jsonFormatted: String = journeyInfo.mkString(",")
     s"""
       |{
       |  "${stageInfo.stage}": {
