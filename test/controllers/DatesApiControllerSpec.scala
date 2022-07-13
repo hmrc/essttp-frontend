@@ -35,7 +35,7 @@ class DatesApiControllerSpec extends ItSpec {
   "GET /retrieve-extreme-dates" - {
     "trigger call to essttp-dates microservice extreme dates endpoint and update backend" in {
       AuthStub.authorise()
-      EssttpBackend.UpfrontPaymentAmount.findJourneyAfterUpdateUpfrontPaymentAmount()
+      EssttpBackend.UpfrontPaymentAmount.findJourney()
       Dates.extremeDatesCall()
       EssttpBackend.Dates.updateExtremeDates(TdAll.journeyId)
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")

@@ -1,0 +1,69 @@
+/*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package testsupport.testdata
+
+object JourneyInfo {
+  type JourneyInfoAsJson = String
+
+  /** Represents small bits of json that get added to the journey at each stage **/
+  val taxId: JourneyInfoAsJson = TdJsonBodies.taxIdJourneyInfo()
+  val eligibilityCheckEligible: JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo()
+  val ineligibleHasRls: JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleOverallEligibilityStatus, TdAll.notEligibleHasRlsOnAddress)
+  val ineligibleMaxDebt: JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleOverallEligibilityStatus, TdAll.notEligibleIsMoreThanMaxDebtAllowance)
+  val ineligibleExistingTtp: JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleOverallEligibilityStatus, TdAll.notEligibleExistingTTP)
+  val ineligibleMaxDebtAge: JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleOverallEligibilityStatus, TdAll.notEligibleExceedsMaxDebtAge)
+  val ineligibleMissingFiledReturns: JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleOverallEligibilityStatus, TdAll.notEligibleMissingFiledReturns)
+  val canPayUpfront: JourneyInfoAsJson = TdJsonBodies.canPayUpfrontJourneyInfo(true)
+  val cannotPayUpfront: JourneyInfoAsJson = TdJsonBodies.canPayUpfrontJourneyInfo(false)
+  val upfrontPaymentAmount: JourneyInfoAsJson = TdJsonBodies.upfrontPaymentAmountJourneyInfo(TdAll.upfrontPaymentAmount)
+  val upfrontPaymentAnswers: JourneyInfoAsJson = TdJsonBodies.upfrontPaymentAnswersJourneyInfo()
+  val extremeDates: JourneyInfoAsJson = TdJsonBodies.extremeDatesJourneyInfo()
+  def affordableResult(minimumInstalmentAmount: Int): JourneyInfoAsJson = TdJsonBodies.affordabilityResultJourneyInfo(minimumInstalmentAmount)
+  val monthlyPaymentAmount: JourneyInfoAsJson = TdJsonBodies.monthlyPaymentAmountJourneyInfo
+  val dayOfMonth: JourneyInfoAsJson = TdJsonBodies.dayOfMonthJourneyInfo(TdAll.dayOfMonth())
+  val startDates: JourneyInfoAsJson = TdJsonBodies.startDatesJourneyInfo
+  val affordableQuotes: JourneyInfoAsJson = TdJsonBodies.affordableQuotesJourneyInfo
+  val selectedPlan: JourneyInfoAsJson = TdJsonBodies.selectedPlanJourneyInfo
+  val directDebitDetails: JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo()
+  val directDebitDetailsNotAccountHolder: JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo(false)
+/*****/
+
+  /** accumulation of journey info, in essence it's up to stage X */
+  val taxIdDetermined: List[JourneyInfoAsJson] = List(taxId)
+
+  val eligibilityCheckedEligible: List[JourneyInfoAsJson] = eligibilityCheckEligible :: taxIdDetermined
+  val eligibilityCheckedIneligibleHasRls: List[JourneyInfoAsJson] = ineligibleHasRls :: taxIdDetermined
+  val eligibilityCheckedIneligibleMaxDebt: List[JourneyInfoAsJson] = ineligibleMaxDebt :: taxIdDetermined
+  val eligibilityCheckedIneligibleExistingTtp: List[JourneyInfoAsJson] = ineligibleExistingTtp :: taxIdDetermined
+  val eligibilityCheckedIneligibleMaxDebtAge: List[JourneyInfoAsJson] = ineligibleMaxDebtAge :: taxIdDetermined
+  val eligibilityCheckedIneligibleMissingFiledReturns: List[JourneyInfoAsJson] = ineligibleMissingFiledReturns :: taxIdDetermined
+  val answeredCanPayUpfrontYes: List[JourneyInfoAsJson] = canPayUpfront :: eligibilityCheckedEligible
+  val answeredCanPayUpfrontNo: List[JourneyInfoAsJson] = cannotPayUpfront :: eligibilityCheckedEligible
+  val answeredUpfrontPaymentAmount: List[JourneyInfoAsJson] = upfrontPaymentAmount :: answeredCanPayUpfrontYes
+  val retrievedExtremeDates: List[JourneyInfoAsJson] = extremeDates :: upfrontPaymentAnswers :: eligibilityCheckedEligible
+  def retrievedAffordabilityResult(minimumInstalmentAmount: Int = 29997): List[JourneyInfoAsJson] = affordableResult(minimumInstalmentAmount) :: retrievedExtremeDates
+  val enteredMonthlyPaymentAmount: List[JourneyInfoAsJson] = monthlyPaymentAmount :: retrievedAffordabilityResult()
+  val enteredDayOfMonth: List[JourneyInfoAsJson] = dayOfMonth :: enteredMonthlyPaymentAmount
+  val retrievedStartDates: List[JourneyInfoAsJson] = startDates :: enteredDayOfMonth
+  val retrievedAffordableQuotes: List[JourneyInfoAsJson] = affordableQuotes :: retrievedStartDates
+  val chosenPaymentPlan: List[JourneyInfoAsJson] = selectedPlan :: retrievedAffordableQuotes
+  val hasCheckedPaymentPlan: List[JourneyInfoAsJson] = chosenPaymentPlan
+  val enteredDirectDebitDetailsIsAccountHolder: List[JourneyInfoAsJson] = directDebitDetails :: chosenPaymentPlan
+  val enteredDirectDebitDetailsIsNotAccountHolder: List[JourneyInfoAsJson] = directDebitDetailsNotAccountHolder :: chosenPaymentPlan
+  val confirmedDirectDebitDetails: List[JourneyInfoAsJson] = enteredDirectDebitDetailsIsAccountHolder
+
+}

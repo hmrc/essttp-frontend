@@ -18,7 +18,7 @@ package testsupport.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import testsupport.testdata.TdJsonBodies
+import testsupport.testdata.TtpJsonResponses
 
 object Ttp {
 
@@ -26,7 +26,7 @@ object Ttp {
   private val affordabilityUrl: String = "/time-to-pay/self-serve/affordability"
   private val affordableQuotesUrl: String = "/time-to-pay/self-serve/affordable-quotes"
 
-  def retrieveEligibility(jsonBody: String = TdJsonBodies.ttpEligibilityCallJson()): StubMapping = stubFor(
+  def retrieveEligibility(jsonBody: String = TtpJsonResponses.ttpEligibilityCallJson()): StubMapping = stubFor(
     post(urlPathEqualTo(eligibilityUrl))
       .willReturn(aResponse()
         .withStatus(200)
@@ -39,7 +39,7 @@ object Ttp {
       postRequestedFor(urlPathEqualTo(eligibilityUrl))
     )
 
-  def retrieveAffordability(jsonBody: String = TdJsonBodies.ttpAffordabilityResponseJson()): StubMapping = stubFor(
+  def retrieveAffordability(jsonBody: String = TtpJsonResponses.ttpAffordabilityResponseJson()): StubMapping = stubFor(
     post(urlPathEqualTo(affordabilityUrl))
       .willReturn(aResponse()
         .withStatus(200)
@@ -51,7 +51,7 @@ object Ttp {
       postRequestedFor(urlPathEqualTo(affordabilityUrl))
     )
 
-  def retrieveAffordableQuotes(jsonBody: String = TdJsonBodies.ttpAffordableQuotesResponseJson): StubMapping = stubFor(
+  def retrieveAffordableQuotes(jsonBody: String = TtpJsonResponses.ttpAffordableQuotesResponseJson()): StubMapping = stubFor(
     post(urlPathEqualTo(affordableQuotesUrl))
       .willReturn(aResponse()
         .withStatus(200)

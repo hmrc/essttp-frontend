@@ -24,6 +24,7 @@ import play.api.test.FakeRequest
 import testsupport.TdRequest.FakeRequestOps
 import play.api.test.Helpers._
 import testsupport.ItSpec
+import testsupport.reusableassertions.RequestAssertions
 import testsupport.stubs.{AuthStub, EssttpBackend}
 import testsupport.testdata.{PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
@@ -45,14 +46,12 @@ class InstalmentsControllerSpec extends ItSpec {
   "GET /how-many-months-do-you-want-to-pay-over should" - {
     "return 200 and the instalment selection page" in {
       AuthStub.authorise()
-      EssttpBackend.AffordableQuotes.findJourneyAfterUpdateAffordableQuotes()
+      EssttpBackend.AffordableQuotes.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.instalmentOptions(fakeRequest)
 
-      status(result) shouldBe Status.OK
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
+      RequestAssertions.assertGetRequestOk(result)
 
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
@@ -85,10 +84,10 @@ class InstalmentsControllerSpec extends ItSpec {
     }
     "pre pop the selected radio option when user has navigated back and they have a chosen month in their journey" in {
       AuthStub.authorise()
-      EssttpBackend.SelectedPaymentPlan.findJourneyAfterUpdateSelectedPlan()
+      EssttpBackend.SelectedPaymentPlan.findJourney()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.instalmentOptions(fakeRequest)
-      status(result) shouldBe Status.OK
+      RequestAssertions.assertGetRequestOk(result)
       val doc: Document = Jsoup.parse(contentAsString(result))
       doc.select(".govuk-radios__input[checked]").iterator().asScala.toList(0).`val`() shouldBe "2"
     }
@@ -97,7 +96,7 @@ class InstalmentsControllerSpec extends ItSpec {
   "POST /how-many-months-do-you-want-to-pay-over should" - {
     "redirect to instalment summary page when form is valid" in {
       AuthStub.authorise()
-      EssttpBackend.AffordableQuotes.findJourneyAfterUpdateAffordableQuotes()
+      EssttpBackend.AffordableQuotes.findJourney()
       EssttpBackend.SelectedPaymentPlan.updateSelectedPlan(TdAll.journeyId)
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -112,7 +111,7 @@ class InstalmentsControllerSpec extends ItSpec {
     }
     "display correct error message when form is submitted with no value" in {
       AuthStub.authorise()
-      EssttpBackend.AffordableQuotes.findJourneyAfterUpdateAffordableQuotes()
+      EssttpBackend.AffordableQuotes.findJourney()
       EssttpBackend.SelectedPaymentPlan.updateSelectedPlan(TdAll.journeyId)
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -120,9 +119,7 @@ class InstalmentsControllerSpec extends ItSpec {
       ).withAuthToken()
         .withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.instalmentOptionsSubmit(fakeRequest)
-      status(result) shouldBe Status.OK
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
+      RequestAssertions.assertGetRequestOk(result)
       val doc: Document = Jsoup.parse(contentAsString(result))
       doc.title() shouldBe s"Error $expectedPageTitle"
       val errorSummary = doc.select(".govuk-error-summary")

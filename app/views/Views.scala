@@ -18,7 +18,7 @@ package views
 
 import views.html.EPaye.EPayeLanding
 import views.html.EPaye.ineligible.{Ineligible, NotEnrolled}
-import views.html.{BankDetailsSummary, CanYouMakeAnUpfrontPayment, EnterBankDetails, InstalmentOptions, MonthlyPaymentAmount, PaymentDay, TermsAndConditions, UpfrontPaymentAmountPage, UpfrontPaymentSummary, YourBillIs}
+import views.html.{BankDetailsSummary, CanYouMakeAnUpfrontPayment, EnterBankDetails, InstalmentOptions, MonthlyPaymentAmount, NotSoleSignatoryPage, PaymentDay, TermsAndConditions, UpfrontPaymentAmountPage, UpfrontPaymentSummary, YourBillIs}
 import views.partials.Partials
 
 import javax.inject.Inject
@@ -37,5 +37,6 @@ class Views @Inject() (
     val instalmentOptionsPage:      InstalmentOptions,
     val enterBankDetailsPage:       EnterBankDetails,
     val bankDetailsSummary:         BankDetailsSummary,
-    val termsAndConditions:         TermsAndConditions
+    val termsAndConditions:         TermsAndConditions,
+    val cannotSetupDirectDebitPage: NotSoleSignatoryPage
 )

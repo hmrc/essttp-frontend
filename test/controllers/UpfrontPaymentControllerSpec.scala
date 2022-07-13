@@ -25,8 +25,9 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
+import testsupport.reusableassertions.RequestAssertions
 import testsupport.stubs.{AuthStub, EssttpBackend}
-import testsupport.testdata.{PageUrls, TdAll}
+import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
@@ -48,15 +49,13 @@ class UpfrontPaymentControllerSpec extends ItSpec {
   "GET /can-you-make-an-upfront-payment" - {
     "should return 200 and the can you make an upfront payment page" in {
       AuthStub.authorise()
-      EssttpBackend.EligibilityCheck.findJourneyAfterEligibilityCheck()
+      EssttpBackend.EligibilityCheck.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
       val result: Future[Result] = controller.canYouMakeAnUpfrontPayment(fakeRequest)
 
-      status(result) shouldBe Status.OK
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
+      RequestAssertions.assertGetRequestOk(result)
 
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
@@ -70,14 +69,12 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     }
     "should prepopulate the form when user navigates back and they have a chosen way to pay in their journey" in {
       AuthStub.authorise()
-      EssttpBackend.CanPayUpfront.findJourneyAfterUpdateCanPayUpfront(TdAll.canPayUpfront)
+      EssttpBackend.CanPayUpfront.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.canYouMakeAnUpfrontPayment(fakeRequest)
 
-      status(result) shouldBe Status.OK
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
+      RequestAssertions.assertGetRequestOk(result)
 
       val doc: Document = Jsoup.parse(contentAsString(result))
       doc.select(".govuk-radios__input[checked]").iterator().asScala.toList(0).`val`() shouldBe "Yes"
@@ -87,7 +84,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
   "POST /can-you-make-an-upfront-payment" - {
     "should redirect to /how-much-can-you-pay-upfront when user chooses yes" in {
       AuthStub.authorise()
-      EssttpBackend.EligibilityCheck.findJourneyAfterEligibilityCheck()
+      EssttpBackend.EligibilityCheck.findJourney()
       EssttpBackend.CanPayUpfront.updateCanPayUpfront(TdAll.journeyId, canPayUpfrontScenario = true)
 
       val fakeRequest = FakeRequest(
@@ -105,7 +102,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
     "should redirect to /can-you-make-an-upfront-payment when user chooses no" in {
       AuthStub.authorise()
-      EssttpBackend.EligibilityCheck.findJourneyAfterEligibilityCheck()
+      EssttpBackend.EligibilityCheck.findJourney()
       EssttpBackend.CanPayUpfront.updateCanPayUpfront(TdAll.journeyId, canPayUpfrontScenario = false)
 
       val fakeRequest = FakeRequest(
@@ -123,7 +120,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
     "should redirect to /can-you-make-an-upfront-payment with error summary when no option is selected" in {
       AuthStub.authorise()
-      EssttpBackend.EligibilityCheck.findJourneyAfterEligibilityCheck()
+      EssttpBackend.EligibilityCheck.findJourney()
 
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -132,9 +129,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
       val result: Future[Result] = controller.canYouMakeAnUpfrontPaymentSubmit(fakeRequest)
 
-      status(result) shouldBe Status.OK
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
+      RequestAssertions.assertGetRequestOk(result)
 
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
@@ -156,14 +151,12 @@ class UpfrontPaymentControllerSpec extends ItSpec {
   "GET /how-much-can-you-pay-upfront" - {
     "should return 200 and the how much can you pay upfront page" in {
       AuthStub.authorise()
-      EssttpBackend.CanPayUpfront.findJourneyAfterUpdateCanPayUpfront(canPayUpfront = TdAll.canPayUpfront)
+      EssttpBackend.CanPayUpfront.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.upfrontPaymentAmount(fakeRequest)
 
-      status(result) shouldBe Status.OK
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
+      RequestAssertions.assertGetRequestOk(result)
 
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
@@ -181,7 +174,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
     "should route the user to /can-you-make-an-upfront-payment when they try to force browse without selecting 'Yes' on the previous page" in {
       AuthStub.authorise()
-      EssttpBackend.CanPayUpfront.findJourneyAfterUpdateCanPayUpfront(TdAll.canNotPayUpfront)
+      EssttpBackend.CanPayUpfront.findJourney(JourneyJsonTemplates.`Answered Can Pay Upfront - No`)
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.upfrontPaymentAmount(fakeRequest)
@@ -192,14 +185,12 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
     "should prepopulate the form when user navigates back and they have an upfront payment amount in their journey" in {
       AuthStub.authorise()
-      EssttpBackend.UpfrontPaymentAmount.findJourneyAfterUpdateUpfrontPaymentAmount()
+      EssttpBackend.UpfrontPaymentAmount.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.upfrontPaymentAmount(fakeRequest)
 
-      status(result) shouldBe Status.OK
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
+      RequestAssertions.assertGetRequestOk(result)
 
       val doc: Document = Jsoup.parse(contentAsString(result))
       doc.select("#UpfrontPaymentAmount").`val`() shouldBe "10"
@@ -209,7 +200,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
   "POST /how-much-can-you-pay-upfront" - {
     "should redirect to /upfront-payment-summary when user enters a positive number, less than their total debt" in {
       AuthStub.authorise()
-      EssttpBackend.CanPayUpfront.findJourneyAfterUpdateCanPayUpfront(TdAll.canPayUpfront)
+      EssttpBackend.CanPayUpfront.findJourney()
       EssttpBackend.UpfrontPaymentAmount.updateUpfrontPaymentAmount(TdAll.journeyId)
 
       val fakeRequest = FakeRequest(
@@ -227,7 +218,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
     "should redirect to /upfront-payment-summary when user enters a positive number, at the upper limit" in {
       AuthStub.authorise()
-      EssttpBackend.CanPayUpfront.findJourneyAfterUpdateCanPayUpfront(TdAll.canPayUpfront)
+      EssttpBackend.CanPayUpfront.findJourney()
       EssttpBackend.UpfrontPaymentAmount.updateUpfrontPaymentAmount(TdAll.journeyId)
 
       val fakeRequest = FakeRequest(
@@ -245,7 +236,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
     "should allow for decimal numbers if they are within the amount bounds" in {
       AuthStub.authorise()
-      EssttpBackend.CanPayUpfront.findJourneyAfterUpdateCanPayUpfront(TdAll.canPayUpfront)
+      EssttpBackend.CanPayUpfront.findJourney()
       EssttpBackend.UpfrontPaymentAmount.updateUpfrontPaymentAmount(TdAll.journeyId)
 
       val fakeRequest = FakeRequest(
@@ -274,7 +265,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     ) { (sf: String, formInput: String, errorMessage: String) =>
         s"[$sf] should redirect to /how-much-can-you-pay-upfront with correct error summary when $formInput is submitted" in {
           AuthStub.authorise()
-          EssttpBackend.CanPayUpfront.findJourneyAfterUpdateCanPayUpfront(TdAll.canPayUpfront)
+          EssttpBackend.CanPayUpfront.findJourney()
 
           val fakeRequest = FakeRequest(
             method = "POST",
@@ -285,9 +276,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
           val result: Future[Result] = controller.upfrontPaymentAmountSubmit(fakeRequest)
 
-          status(result) shouldBe Status.OK
-          contentType(result) shouldBe Some("text/html")
-          charset(result) shouldBe Some("utf-8")
+          RequestAssertions.assertGetRequestOk(result)
 
           val pageContent: String = contentAsString(result)
           val doc: Document = Jsoup.parse(pageContent)
@@ -309,14 +298,12 @@ class UpfrontPaymentControllerSpec extends ItSpec {
   "GET /upfront-payment-summary" - {
     "should return 200 and the upfront payment summary page" in {
       AuthStub.authorise()
-      EssttpBackend.UpfrontPaymentAmount.findJourneyAfterUpdateUpfrontPaymentAmount()
+      EssttpBackend.UpfrontPaymentAmount.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.upfrontPaymentSummary(fakeRequest)
 
-      status(result) shouldBe Status.OK
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
+      RequestAssertions.assertGetRequestOk(result)
 
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)

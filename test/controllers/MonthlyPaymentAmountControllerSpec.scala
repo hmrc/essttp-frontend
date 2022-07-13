@@ -24,8 +24,9 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
+import testsupport.reusableassertions.RequestAssertions
 import testsupport.stubs.{AuthStub, EssttpBackend}
-import testsupport.testdata.{PageUrls, TdAll, TdJsonBodies}
+import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
@@ -46,14 +47,12 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
   "GET /how-much-can-you-pay-each-month" - {
     "should return 200 and the how much can you pay a month page" in {
       AuthStub.authorise()
-      EssttpBackend.AffordabilityMinMaxApi.findJourneyAfterUpdateAffordability()
+      EssttpBackend.AffordabilityMinMaxApi.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.displayMonthlyPaymentAmount(fakeRequest)
 
-      status(result) shouldBe Status.OK
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
+      RequestAssertions.assertGetRequestOk(result)
 
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
@@ -77,14 +76,12 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
 
     "should prepopulate the form when user navigates back and they have a monthly payment amount in their journey" in {
       AuthStub.authorise()
-      EssttpBackend.MonthlyPaymentAmount.findJourneyAfterUpdateMonthlyPaymentAmount()
+      EssttpBackend.MonthlyPaymentAmount.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.displayMonthlyPaymentAmount(fakeRequest)
 
-      status(result) shouldBe Status.OK
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
+      RequestAssertions.assertGetRequestOk(result)
 
       val doc: Document = Jsoup.parse(contentAsString(result))
       doc.select("#MonthlyPaymentAmount").`val`() shouldBe "300"
@@ -92,13 +89,11 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
 
     "should display the minimum amount as £1 if the minimum amount is less than £1" in {
       AuthStub.authorise()
-      EssttpBackend.AffordabilityMinMaxApi.findJourneyAfterUpdateAffordability(TdJsonBodies.afterAffordabilityCheckJourneyJson(minimumInstalmentAmount = 1))
+      EssttpBackend.AffordabilityMinMaxApi.findJourney(JourneyJsonTemplates.`Retrieved Affordability`(1))
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.displayMonthlyPaymentAmount(fakeRequest)
-      status(result) shouldBe Status.OK
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
+      RequestAssertions.assertGetRequestOk(result)
       val doc: Document = Jsoup.parse(contentAsString(result))
       doc.select("#MonthlyPaymentAmount-hint").text() shouldBe "Enter an amount between £1 and £880"
     }
@@ -107,7 +102,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
   "POST /how-much-can-you-pay-each-month should" - {
     "redirect to what day do you want to pay on when form is valid" in {
       AuthStub.authorise()
-      EssttpBackend.AffordabilityMinMaxApi.findJourneyAfterUpdateAffordability()
+      EssttpBackend.AffordabilityMinMaxApi.findJourney()
       EssttpBackend.MonthlyPaymentAmount.updateMonthlyPaymentAmount(TdAll.journeyId)
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -123,7 +118,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
 
     "display correct error message when form is submitted with value outside of bounds" in {
       AuthStub.authorise()
-      EssttpBackend.AffordabilityMinMaxApi.findJourneyAfterUpdateAffordability()
+      EssttpBackend.AffordabilityMinMaxApi.findJourney()
       val fakeRequest = FakeRequest(
         method = "POST",
         path   = "/how-much-can-you-pay-each-month"
@@ -132,9 +127,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
         .withFormUrlEncodedBody(("MonthlyPaymentAmount", "100"))
       val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
 
-      status(result) shouldBe Status.OK
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
+      RequestAssertions.assertGetRequestOk(result)
 
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
@@ -159,7 +152,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
 
     "display correct error message when empty form is submitted" in {
       AuthStub.authorise()
-      EssttpBackend.AffordabilityMinMaxApi.findJourneyAfterUpdateAffordability()
+      EssttpBackend.AffordabilityMinMaxApi.findJourney()
       val fakeRequest = FakeRequest(
         method = "POST",
         path   = "/how-much-can-you-pay-each-month"
@@ -168,9 +161,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
         .withFormUrlEncodedBody(("MonthlyPaymentAmount", ""))
       val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
 
-      status(result) shouldBe Status.OK
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
+      RequestAssertions.assertGetRequestOk(result)
 
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)

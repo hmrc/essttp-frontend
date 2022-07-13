@@ -35,7 +35,7 @@ class DetermineAffordabilityControllerSpec extends ItSpec {
   "GET /determine-affordability" - {
     "trigger call to ttp microservice affordability endpoint and update backend" in {
       AuthStub.authorise()
-      EssttpBackend.Dates.findJourneyAfterUpdateExtremeDates()
+      EssttpBackend.Dates.findJourneyExtremeDates()
       EssttpBackend.AffordabilityMinMaxApi.updateAffordability(TdAll.journeyId)
       Ttp.retrieveAffordability()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")

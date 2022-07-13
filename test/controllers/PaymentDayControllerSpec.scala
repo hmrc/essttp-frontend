@@ -28,6 +28,7 @@ import testsupport.TdRequest.FakeRequestOps
 import testsupport.testdata.{PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 import org.scalatest.prop.TableDrivenPropertyChecks._
+import testsupport.reusableassertions.RequestAssertions
 
 import scala.concurrent.Future
 import scala.jdk.CollectionConverters.{asScalaIteratorConverter, collectionAsScalaIterableConverter}
@@ -41,14 +42,12 @@ class PaymentDayControllerSpec extends ItSpec {
   "GET /which-day-do-you-want-to-pay-each-month" - {
     "should return the 200 and the what day do you want to pay page" in {
       AuthStub.authorise()
-      EssttpBackend.MonthlyPaymentAmount.findJourneyAfterUpdateMonthlyPaymentAmount()
+      EssttpBackend.MonthlyPaymentAmount.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.paymentDay(fakeRequest)
 
-      status(result) shouldBe Status.OK
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
+      RequestAssertions.assertGetRequestOk(result)
 
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
@@ -77,9 +76,7 @@ class PaymentDayControllerSpec extends ItSpec {
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.paymentDay(fakeRequest)
 
-      status(result) shouldBe Status.OK
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
+      RequestAssertions.assertGetRequestOk(result)
 
       val doc: Document = Jsoup.parse(contentAsString(result))
       doc.select(".govuk-radios__input[checked]").iterator().asScala.toList(0).`val`() shouldBe "28"
@@ -89,7 +86,7 @@ class PaymentDayControllerSpec extends ItSpec {
   "POST /which-day-do-you-want-to-pay-each-month" - {
     "should update journey with dayOfMonth and redirect to instalment page when 28th selected" in {
       AuthStub.authorise()
-      EssttpBackend.MonthlyPaymentAmount.findJourneyAfterUpdateMonthlyPaymentAmount()
+      EssttpBackend.MonthlyPaymentAmount.findJourney()
       EssttpBackend.DayOfMonth.updateDayOfMonth(TdAll.journeyId)
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -104,7 +101,7 @@ class PaymentDayControllerSpec extends ItSpec {
     }
     "should update journey with dayOfMonth and redirect to instalment page when other day selected" in {
       AuthStub.authorise()
-      EssttpBackend.MonthlyPaymentAmount.findJourneyAfterUpdateMonthlyPaymentAmount()
+      EssttpBackend.MonthlyPaymentAmount.findJourney()
       EssttpBackend.DayOfMonth.updateDayOfMonth(TdAll.journeyId)
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -122,7 +119,7 @@ class PaymentDayControllerSpec extends ItSpec {
     }
     "should update journey with dayOfMonth and redirect to instalment page when other day selected and 28 entered" in {
       AuthStub.authorise()
-      EssttpBackend.MonthlyPaymentAmount.findJourneyAfterUpdateMonthlyPaymentAmount()
+      EssttpBackend.MonthlyPaymentAmount.findJourney()
       EssttpBackend.DayOfMonth.updateDayOfMonth(TdAll.journeyId)
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -150,7 +147,7 @@ class PaymentDayControllerSpec extends ItSpec {
       (scenario: String, inputValue: String, expectedErrorMessage: String) =>
         s"When input is: [ $scenario: [ $inputValue ]] error message should be $expectedErrorMessage" in {
           AuthStub.authorise()
-          EssttpBackend.MonthlyPaymentAmount.findJourneyAfterUpdateMonthlyPaymentAmount()
+          EssttpBackend.MonthlyPaymentAmount.findJourney()
           val fakeRequest = FakeRequest(
             method = "POST",
             path   = "/which-day-do-you-want-to-pay-each-month"
@@ -161,9 +158,7 @@ class PaymentDayControllerSpec extends ItSpec {
               ("DifferentDay", inputValue)
             )
           val result: Future[Result] = controller.paymentDaySubmit(fakeRequest)
-          status(result) shouldBe Status.OK
-          contentType(result) shouldBe Some("text/html")
-          charset(result) shouldBe Some("utf-8")
+          RequestAssertions.assertGetRequestOk(result)
           val pageContent: String = contentAsString(result)
           val doc: Document = Jsoup.parse(pageContent)
           doc.title() shouldBe s"Error $expectedPageTitle"
