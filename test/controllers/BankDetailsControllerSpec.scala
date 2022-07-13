@@ -406,7 +406,9 @@ class BankDetailsControllerSpec extends ItSpec {
       doc.select("#back").attr("href") shouldBe routes.BankDetailsController.enterBankDetails().url
 
       doc.select(".govuk-body").text() shouldBe CannotSetupDirectDebitPage.paragraphContent
-      doc.select(".govuk-button").text() shouldBe CannotSetupDirectDebitPage.buttonContent
+      val cta = doc.select(".govuk-button")
+      cta.text() shouldBe CannotSetupDirectDebitPage.buttonContent
+      cta.attr("href") shouldBe "http://localhost:9020/business-account"
     }
   }
 }

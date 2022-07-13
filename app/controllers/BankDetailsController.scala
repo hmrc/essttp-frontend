@@ -136,7 +136,17 @@ class BankDetailsController @Inject() (
   }
 
   val cannotSetupDirectDebitOnlinePage: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
-    Ok(views.cannotSetupDirectDebitPage())
+    request.journey match {
+      case j: Journey.BeforeEnteredDirectDebitDetails => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
+      case j: Journey.AfterEnteredDirectDebitDetails =>
+        //only show this page if user has said they are not the account holder
+        if (!j.directDebitDetails.isAccountHolder) {
+          Ok(views.cannotSetupDirectDebitPage())
+        } else {
+          JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
+        }
+    }
+
   }
 }
 

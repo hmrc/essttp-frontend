@@ -39,7 +39,7 @@
     <h1 class="govuk-heading-xl">@title</h1>
     <p class="govuk-body">@{Messages.BankDetails.`You need a named account holder or someone with authorisation to set up a Direct Debit.`.show}</p>
     @govukButton(Button(
-        href = Some(appConfig.BaseUrl.businessTaxAccountFrontend),
+        href = Some(appConfig.Urls.businessTaxAccountUrl),
         content = Text(Messages.BankDetails.`Return to tax account`.show)
     ))
 

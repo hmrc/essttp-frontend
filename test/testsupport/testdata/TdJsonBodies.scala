@@ -20,8 +20,6 @@ import essttp.journey.model.ttp.{EligibilityRules, OverallEligibilityStatus}
 import essttp.rootmodel.{DayOfMonth, UpfrontPaymentAmount}
 import testsupport.testdata.JourneyInfo.JourneyInfoAsJson
 
-import scala.annotation.tailrec
-
 object TdJsonBodies {
 
   object StartJourneyRequestBodies {
@@ -43,20 +41,14 @@ object TdJsonBodies {
     val detachedUrl: String = bta
   }
 
-  def createJourneyJson(stageInfo: (String, String), journeyInfo: List[String]): String = {
-      @tailrec
-      def createJourneyInfoJson(remainingJsonInfo: List[String], jsonAsString: String): String = {
-        remainingJsonInfo match {
-          case Nil      => jsonAsString
-          case h :: Nil => s"$jsonAsString, $h"
-          case h :: t   => createJourneyInfoJson(t, s"$jsonAsString, $h")
-        }
-      }
+  def createJourneyJson(stageInfo: StageInfo, journeyInfo: List[String]): String = {
+    //drop the trailing comma
+    val jsonFormatted: String = journeyInfo.mkString(",").dropRight(1)
     s"""
       |{
-      |  "${stageInfo._1}": {
+      |  "${stageInfo.stage}": {
       |    "stage": {
-      |      "${stageInfo._2}": {}
+      |      "${stageInfo.stageValue}": {}
       |    },
       |    "createdOn": "2022-05-17T13:28:52.261",
       |    "_id": "6284fcd33c00003d6b1f3903",
@@ -67,8 +59,8 @@ object TdJsonBodies {
       |        "backUrl" : "/set-up-a-payment-plan/test-only/bta-page?starting-page"
       |      }
       |    },
-      |    "sessionId": "IamATestSessionId"
-      |    ${createJourneyInfoJson(journeyInfo, "")}
+      |    "sessionId": "IamATestSessionId",
+      |    $jsonFormatted
       |  },
       |  "sessionId": "IamATestSessionId",
       |  "createdAt": "2022-05-17T13:28:52.261"
