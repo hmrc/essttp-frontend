@@ -496,6 +496,23 @@ object Messages {
   }
 
   object BankDetails {
+
+    val `What type of account details are you providing?`: Message = Message(
+      english = "What type of account details are you providing?"
+    )
+
+    val `Business bank account`: Message = Message(
+      english = "Business bank account"
+    )
+
+    val `Personal bank account`: Message = Message(
+      english = "Personal bank account"
+    )
+
+    val `Select what type of account details you are providing`: Message = Message(
+      english = "Select what type of account details you are providing"
+    )
+
     val `Set up Direct Debit`: Message = Message(
       english = "Set up Direct Debit"
     )

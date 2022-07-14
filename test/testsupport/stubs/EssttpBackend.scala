@@ -413,6 +413,32 @@ object EssttpBackend {
     )
   }
 
+  object ChosenTypeOfBankAccount {
+    def chosenTypeOfBankAccountUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-chosen-type-of-bank-account"
+
+    def updateChosenTypeOfBankAccount(journeyId: JourneyId): StubMapping =
+      stubFor(
+        post(urlPathEqualTo(chosenTypeOfBankAccountUrl(journeyId)))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+          )
+      )
+
+    def verifyUpdateChosenTypeOfBankAccountRequest(journeyId: JourneyId): Unit =
+      verify(postRequestedFor(urlPathEqualTo(chosenTypeOfBankAccountUrl(journeyId))))
+
+    def verifyNoneUpdateChosenTypeOfBankAccountRequest(journeyId: JourneyId): Unit =
+      verify(exactly(0), postRequestedFor(urlPathEqualTo(chosenTypeOfBankAccountUrl(journeyId))))
+
+    def findJourney(jsonBody: String = JourneyJsonTemplates.`Chosen Type of Bank Account`): StubMapping = stubFor(
+      get(urlPathEqualTo(findByLatestSessionIdUrl))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withBody(jsonBody))
+    )
+  }
+
   object DirectDebitDetails {
     def directDebitDetailsUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-direct-debit-details"
 

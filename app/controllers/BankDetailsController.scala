@@ -19,8 +19,8 @@ package controllers
 import _root_.actions.Actions
 import essttp.journey.model.Journey
 import essttp.rootmodel.bank.{BankDetails, DirectDebitDetails}
-import models.enumsforforms.IsSoleSignatoryFormValue
-import models.forms.BankDetailsForm
+import models.enumsforforms.{IsSoleSignatoryFormValue, TypeOfAccountFormValue}
+import models.forms.{BankDetailsForm, TypeOfAccountForm}
 import play.api.data.Form
 import play.api.mvc._
 import requests.RequestSupport
@@ -45,14 +45,45 @@ class BankDetailsController @Inject() (
 ) extends FrontendController(mcc)
   with Logging {
 
-  val enterBankDetails: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+  import requestSupport._
+
+  val typeOfAccount: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
       case j: Journey.BeforeCheckedPaymentPlan => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
-      case j: Journey.AfterCheckedPaymentPlan  => displayEnterBankDetailsPage(j)
+      case j: Journey.AfterCheckedPaymentPlan  => displayTypeOfBankAccountPage(j)
     }
   }
 
-  private def displayEnterBankDetailsPage(journey: Journey.AfterCheckedPaymentPlan)(implicit request: Request[_]): Result = {
+  private def displayTypeOfBankAccountPage(journey: Journey.AfterCheckedPaymentPlan)(implicit request: Request[_]): Result = {
+    val maybePrePoppedForm: Form[TypeOfAccountForm] = journey match {
+      case _: Journey.BeforeChosenTypeOfBankAccount => TypeOfAccountForm.form
+      case j: Journey.AfterChosenTypeOfBankAccount =>
+        TypeOfAccountForm.form.fill(TypeOfAccountForm(TypeOfAccountFormValue.typeOfBankAccountAsFormValue(j.typeOfBankAccount)))
+    }
+    Ok(views.chooseTypeOfAccountPage(form    = maybePrePoppedForm, backUrl = BankDetailsController.paymentScheduleUrl))
+  }
+
+  val typeOfAccountSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
+    TypeOfAccountForm.form
+      .bindFromRequest()
+      .fold(
+        formWithErrors => Future.successful(Ok(views.chooseTypeOfAccountPage(formWithErrors, BankDetailsController.paymentScheduleUrl))),
+        (typeOfBankAccountForm: TypeOfAccountForm) =>
+          journeyService.updateChosenTypeOfBankAccount(
+            journeyId         = request.journeyId,
+            typeOfBankAccount = TypeOfAccountFormValue.typeOfBankAccountFromFormValue(typeOfBankAccountForm.typeOfAccount)
+          ).map(_ => Redirect(routes.BankDetailsController.enterBankDetails()))
+      )
+  }
+
+  val enterBankDetails: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    request.journey match {
+      case j: Journey.BeforeChosenTypeOfBankAccount => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
+      case j: Journey.AfterChosenTypeOfBankAccount  => displayEnterBankDetailsPage(j)
+    }
+  }
+
+  private def displayEnterBankDetailsPage(journey: Journey.AfterChosenTypeOfBankAccount)(implicit request: Request[_]): Result = {
     val maybePrePoppedForm: Form[BankDetailsForm] = journey match {
       case _: Journey.BeforeEnteredDirectDebitDetails => BankDetailsForm.form
       case j: Journey.AfterEnteredDirectDebitDetails =>
@@ -63,7 +94,7 @@ class BankDetailsController @Inject() (
           isSoleSignatory = IsSoleSignatoryFormValue.booleanToIsSoleSignatoryFormValue(j.directDebitDetails.isAccountHolder)
         ))
     }
-    Ok(views.enterBankDetailsPage(form    = maybePrePoppedForm, backUrl = BankDetailsController.paymentScheduleUrl))
+    Ok(views.enterBankDetailsPage(form    = maybePrePoppedForm, backUrl = BankDetailsController.chooseTypeOfAccountUrl))
   }
 
   val enterBankDetailsSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
@@ -71,7 +102,7 @@ class BankDetailsController @Inject() (
       .bindFromRequest()
       .fold(
         formWithErrors =>
-          Future.successful(Ok(views.enterBankDetailsPage(formWithErrors))),
+          Future.successful(Ok(views.enterBankDetailsPage(formWithErrors, BankDetailsController.chooseTypeOfAccountUrl))),
         (bankDetailsForm: BankDetailsForm) => {
 
           val directDebitDetails: DirectDebitDetails = DirectDebitDetails(
@@ -152,5 +183,6 @@ class BankDetailsController @Inject() (
 
 object BankDetailsController {
   val paymentScheduleUrl: Option[String] = Some(routes.PaymentScheduleController.checkPaymentSchedule().url)
+  val chooseTypeOfAccountUrl: Option[String] = Some(routes.BankDetailsController.typeOfAccount().url)
   val enterBankDetailsUrl: Option[String] = Some(routes.BankDetailsController.enterBankDetails().url)
 }

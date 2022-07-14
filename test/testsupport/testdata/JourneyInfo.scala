@@ -38,9 +38,10 @@ object JourneyInfo {
   val startDates: JourneyInfoAsJson = TdJsonBodies.startDatesJourneyInfo
   val affordableQuotes: JourneyInfoAsJson = TdJsonBodies.affordableQuotesJourneyInfo
   val selectedPlan: JourneyInfoAsJson = TdJsonBodies.selectedPlanJourneyInfo
+  val typeOfBankAccount: JourneyInfoAsJson = TdJsonBodies.typeOfBankJourneyInfo()
   val directDebitDetails: JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo()
   val directDebitDetailsNotAccountHolder: JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo(false)
-/*****/
+  /** * **/
 
   /** accumulation of journey info, in essence it's up to stage X */
   val taxIdDetermined: List[JourneyInfoAsJson] = List(taxId)
@@ -62,8 +63,9 @@ object JourneyInfo {
   val retrievedAffordableQuotes: List[JourneyInfoAsJson] = affordableQuotes :: retrievedStartDates
   val chosenPaymentPlan: List[JourneyInfoAsJson] = selectedPlan :: retrievedAffordableQuotes
   val hasCheckedPaymentPlan: List[JourneyInfoAsJson] = chosenPaymentPlan
-  val enteredDirectDebitDetailsIsAccountHolder: List[JourneyInfoAsJson] = directDebitDetails :: chosenPaymentPlan
-  val enteredDirectDebitDetailsIsNotAccountHolder: List[JourneyInfoAsJson] = directDebitDetailsNotAccountHolder :: chosenPaymentPlan
+  val chosenTypeOfBankAccount: List[JourneyInfoAsJson] = typeOfBankAccount :: chosenPaymentPlan
+  val enteredDirectDebitDetailsIsAccountHolder: List[JourneyInfoAsJson] = directDebitDetails :: chosenTypeOfBankAccount
+  val enteredDirectDebitDetailsIsNotAccountHolder: List[JourneyInfoAsJson] = directDebitDetailsNotAccountHolder :: chosenTypeOfBankAccount
   val confirmedDirectDebitDetails: List[JourneyInfoAsJson] = enteredDirectDebitDetailsIsAccountHolder
 
 }

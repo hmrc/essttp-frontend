@@ -119,6 +119,11 @@ object JourneyJsonTemplates {
     journeyInfo = JourneyInfo.hasCheckedPaymentPlan
   )
 
+  val `Chosen Type of Bank Account`: String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.chosenTypeOfBankAccount,
+    journeyInfo = JourneyInfo.chosenTypeOfBankAccount
+  )
+
   val `Entered Direct Debit Details - Is Account Holder`: String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.enteredDirectDebitDetailsIsAccountHolder,
     journeyInfo = JourneyInfo.enteredDirectDebitDetailsIsAccountHolder

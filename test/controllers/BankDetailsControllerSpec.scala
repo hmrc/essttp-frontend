@@ -20,7 +20,7 @@ import controllers.BankDetailsControllerSpec.SummaryRow
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import play.api.http.Status
-import play.api.mvc.Result
+import play.api.mvc.{Action, AnyContent, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
@@ -37,6 +37,14 @@ class BankDetailsControllerSpec extends ItSpec {
 
   private val controller: BankDetailsController = app.injector.instanceOf[BankDetailsController]
   private val expectedServiceName: String = TdAll.expectedServiceNamePaye
+
+  object TypeOfBankAccountPage {
+    val expectedH1: String = "What type of account details are you providing?"
+    val expectedPageTitle: String = s"$expectedH1 - $expectedServiceName - GOV.UK"
+    val radioButtonContentBusiness: String = "Business bank account"
+    val radioButtonContentPersonal: String = "Personal bank account"
+    val buttonContent: String = "Continue"
+  }
 
   object EnterDirectDebitDetailsPage {
     val expectedH1: String = "Set up Direct Debit"
@@ -71,7 +79,7 @@ class BankDetailsControllerSpec extends ItSpec {
     val expectedPageTitle: String = s"$expectedH1 - $expectedServiceName - GOV.UK"
   }
 
-  def testFormError(formData: (String, String)*)(textAndHrefContent: List[(String, String)]): Unit = {
+  def testFormError(action: Action[AnyContent])(formData: (String, String)*)(textAndHrefContent: List[(String, String)]): Unit = {
     val fakeRequest = FakeRequest(
       method = "POST",
       path   = "/set-up-direct-debit"
@@ -79,7 +87,8 @@ class BankDetailsControllerSpec extends ItSpec {
       .withSession(SessionKeys.sessionId -> "IamATestSessionId")
       .withFormUrlEncodedBody(formData: _*)
 
-    val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
+    val result: Future[Result] = action(fakeRequest)
+
     RequestAssertions.assertGetRequestOk(result)
 
     val pageContent: String = contentAsString(result)
@@ -102,11 +111,80 @@ class BankDetailsControllerSpec extends ItSpec {
     )
   }
 
+  "GET /what-type-of-account-details-are-you-providing should" - {
+
+    "return 200 and the choose type of bank account page" in {
+      AuthStub.authorise()
+      EssttpBackend.HasCheckedPlan.findJourney()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.typeOfAccount(fakeRequest)
+
+      RequestAssertions.assertGetRequestOk(result)
+
+      val pageContent: String = contentAsString(result)
+      val doc: Document = Jsoup.parse(pageContent)
+
+      doc.title() shouldBe TypeOfBankAccountPage.expectedPageTitle
+      doc.select(".govuk-fieldset__legend--xl").text() shouldBe TypeOfBankAccountPage.expectedH1
+      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
+      doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
+      doc.select("#back").attr("href") shouldBe routes.PaymentScheduleController.checkPaymentSchedule().url
+
+      val radioContent = doc.select(".govuk-radios__label").asScala.toList
+      radioContent(0).text() shouldBe TypeOfBankAccountPage.radioButtonContentBusiness
+      radioContent(1).text() shouldBe TypeOfBankAccountPage.radioButtonContentPersonal
+      doc.select(".govuk-button").text() shouldBe TypeOfBankAccountPage.buttonContent
+    }
+
+    "prepopulate the form when the user has a chosen bank account type in their journey" in {
+      AuthStub.authorise()
+      EssttpBackend.ChosenTypeOfBankAccount.findJourney()
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.typeOfAccount(fakeRequest)
+      RequestAssertions.assertGetRequestOk(result)
+      val pageContent: String = contentAsString(result)
+      val doc: Document = Jsoup.parse(pageContent)
+      doc.select(".govuk-radios__input").asScala.toList(0).hasAttr("checked") shouldBe true
+    }
+  }
+
+  "POST /what-type-of-account-details-are-you-providing should" - {
+
+    "redirect to /set-up-direct-debit when valid form is submitted" in {
+      AuthStub.authorise()
+      EssttpBackend.HasCheckedPlan.findJourney()
+      EssttpBackend.ChosenTypeOfBankAccount.updateChosenTypeOfBankAccount(TdAll.journeyId)
+      val fakeRequest = FakeRequest(
+        method = "POST",
+        path   = "/what-type-of-account-details-are-you-providing"
+      ).withAuthToken()
+        .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+        .withFormUrlEncodedBody(("typeOfAccount", "Business"))
+      val result: Future[Result] = controller.typeOfAccountSubmit(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.directDebitDetailsUrl)
+      EssttpBackend.ChosenTypeOfBankAccount.verifyUpdateChosenTypeOfBankAccountRequest(TdAll.journeyId)
+    }
+
+    "show correct error messages when form submitted is empty" in {
+      AuthStub.authorise()
+      EssttpBackend.HasCheckedPlan.findJourney()
+      val formData: List[(String, String)] = List(("typeOfAccount", ""))
+      val expectedContentAndHref: List[(String, String)] = List(
+        ("Select what type of account details you are providing", "#typeOfAccount")
+      )
+      testFormError(controller.typeOfAccountSubmit)(formData: _*)(expectedContentAndHref)
+      EssttpBackend.ChosenTypeOfBankAccount.verifyNoneUpdateChosenTypeOfBankAccountRequest(TdAll.journeyId)
+    }
+
+  }
+
   "GET /set-up-direct-debit should" - {
 
     "should return 200 and the bank details page" in {
       AuthStub.authorise()
-      EssttpBackend.HasCheckedPlan.findJourney()
+      EssttpBackend.ChosenTypeOfBankAccount.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.enterBankDetails(fakeRequest)
@@ -120,7 +198,7 @@ class BankDetailsControllerSpec extends ItSpec {
       doc.select(".govuk-heading-xl").text() shouldBe EnterDirectDebitDetailsPage.expectedH1
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-      doc.select("#back").attr("href") shouldBe routes.PaymentScheduleController.checkPaymentSchedule().url // todo update this, it depends on journey
+      doc.select("#back").attr("href") shouldBe routes.BankDetailsController.typeOfAccount().url
 
       val subheadings = doc.select(".govuk-label--m").asScala.toList
       subheadings(0).text() shouldBe EnterDirectDebitDetailsPage.accountNameContent
@@ -148,19 +226,20 @@ class BankDetailsControllerSpec extends ItSpec {
 
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
-
+      doc.select("#back").attr("href") shouldBe routes.BankDetailsController.typeOfAccount().url
       doc.select(EnterDirectDebitDetailsPage.accountNameFieldId).`val`() shouldBe "Bob Ross"
       doc.select(EnterDirectDebitDetailsPage.sortCodeFieldId).`val`() shouldBe "123456"
       doc.select(EnterDirectDebitDetailsPage.accountNumberFieldId).`val`() shouldBe "12345678"
-      doc.select(EnterDirectDebitDetailsPage.accountHolderRadioId).`val`() shouldBe "Yes"
+      doc.select(".govuk-radios__input").asScala.toList(0).hasAttr("checked") shouldBe true
     }
+
   }
 
   "POST /set-up-direct-debit should" - {
 
     "redirect to /check-bank-details when valid form is submitted" in {
       AuthStub.authorise()
-      EssttpBackend.HasCheckedPlan.findJourney()
+      EssttpBackend.ChosenTypeOfBankAccount.findJourney()
       EssttpBackend.DirectDebitDetails.updateDirectDebitDetails(TdAll.journeyId)
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -202,7 +281,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "show correct error messages when form submitted is empty" in {
       AuthStub.authorise()
-      EssttpBackend.HasCheckedPlan.findJourney()
+      EssttpBackend.ChosenTypeOfBankAccount.findJourney()
       val formData: List[(String, String)] = List(
         ("name", ""),
         ("sortCode", ""),
@@ -215,13 +294,13 @@ class BankDetailsControllerSpec extends ItSpec {
         ("Enter account number", EnterDirectDebitDetailsPage.accountNumberFieldId),
         ("Select yes if you are the account holder", EnterDirectDebitDetailsPage.accountHolderRadioId)
       )
-      testFormError(formData: _*)(expectedContentAndHref)
+      testFormError(controller.enterBankDetailsSubmit)(formData: _*)(expectedContentAndHref)
       EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
     }
 
     "show correct error messages when submitted sort code and account number are not numeric" in {
       AuthStub.authorise()
-      EssttpBackend.HasCheckedPlan.findJourney()
+      EssttpBackend.ChosenTypeOfBankAccount.findJourney()
       val formData: List[(String, String)] = List(
         ("name", "Bob Ross"),
         ("sortCode", "12E456"),
@@ -232,13 +311,13 @@ class BankDetailsControllerSpec extends ItSpec {
         ("Sort code must be a number", EnterDirectDebitDetailsPage.sortCodeFieldId),
         ("Account number must be a number", EnterDirectDebitDetailsPage.accountNumberFieldId)
       )
-      testFormError(formData: _*)(expectedContentAndHref)
+      testFormError(controller.enterBankDetailsSubmit)(formData: _*)(expectedContentAndHref)
       EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
     }
 
     "show correct error messages when submitted sort code and account number are more than 6 and 8 digits respectively" in {
       AuthStub.authorise()
-      EssttpBackend.HasCheckedPlan.findJourney()
+      EssttpBackend.ChosenTypeOfBankAccount.findJourney()
       val formData: List[(String, String)] = List(
         ("name", "Bob Ross"),
         ("sortCode", "1234567"),
@@ -249,7 +328,7 @@ class BankDetailsControllerSpec extends ItSpec {
         ("Sort code must be 6 digits", EnterDirectDebitDetailsPage.sortCodeFieldId),
         ("Account number must be between 6 and 8 digits", EnterDirectDebitDetailsPage.accountNumberFieldId)
       )
-      testFormError(formData: _*)(expectedContentAndHref)
+      testFormError(controller.enterBankDetailsSubmit)(formData: _*)(expectedContentAndHref)
       EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
     }
   }

@@ -197,6 +197,7 @@ class UpfrontPaymentController @Inject() (
       case j: Journey.Epaye.RetrievedAffordableQuotes    => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
       case j: Journey.Epaye.ChosenPaymentPlan            => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
       case j: Journey.Epaye.CheckedPaymentPlan           => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
+      case j: Journey.Epaye.ChosenTypeOfBankAccount      => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
       case j: Journey.Epaye.EnteredDirectDebitDetails    => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
       case j: Journey.Epaye.ConfirmedDirectDebitDetails  => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
       case j: Journey.Epaye.AgreedTermsAndConditions     => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
@@ -233,6 +234,7 @@ object UpfrontPaymentController {
         case j1: Journey.Stages.RetrievedAffordableQuotes    => j1.eligibilityCheckResult
         case j1: Journey.Stages.ChosenPaymentPlan            => j1.eligibilityCheckResult
         case j1: Journey.Stages.CheckedPaymentPlan           => j1.eligibilityCheckResult
+        case j1: Journey.Stages.ChosenTypeOfBankAccount      => j1.eligibilityCheckResult
         case j1: Journey.Stages.EnteredDirectDebitDetails    => j1.eligibilityCheckResult
         case j1: Journey.Stages.ConfirmedDirectDebitDetails  => j1.eligibilityCheckResult
         case j1: Journey.Stages.AgreedTermsAndConditions     => j1.eligibilityCheckResult

@@ -40,6 +40,7 @@ class DatesService @Inject() (datesApiConnector: DatesApiConnector) {
       case j: Journey.Epaye.RetrievedAffordableQuotes   => DatesService.deriveInitialPayment(j.upfrontPaymentAnswers)
       case j: Journey.Epaye.ChosenPaymentPlan           => DatesService.deriveInitialPayment(j.upfrontPaymentAnswers)
       case j: Journey.Epaye.CheckedPaymentPlan          => DatesService.deriveInitialPayment(j.upfrontPaymentAnswers)
+      case j: Journey.Epaye.ChosenTypeOfBankAccount     => DatesService.deriveInitialPayment(j.upfrontPaymentAnswers)
       case j: Journey.Epaye.EnteredDirectDebitDetails   => DatesService.deriveInitialPayment(j.upfrontPaymentAnswers)
       case j: Journey.Epaye.ConfirmedDirectDebitDetails => DatesService.deriveInitialPayment(j.upfrontPaymentAnswers)
       case j: Journey.Epaye.AgreedTermsAndConditions    => DatesService.deriveInitialPayment(j.upfrontPaymentAnswers)
