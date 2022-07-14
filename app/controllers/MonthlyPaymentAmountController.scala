@@ -68,6 +68,7 @@ class MonthlyPaymentAmountController @Inject() (
         case j1: Journey.Epaye.RetrievedAffordableQuotes    => j1
         case j1: Journey.Epaye.ChosenPaymentPlan            => j1
         case j1: Journey.Epaye.CheckedPaymentPlan           => j1
+        case j1: Journey.Epaye.ChosenTypeOfBankAccount      => j1
         case j1: Journey.Epaye.EnteredDirectDebitDetails    => j1
         case j1: Journey.Epaye.ConfirmedDirectDebitDetails  => j1
         case j1: Journey.Epaye.AgreedTermsAndConditions     => j1
@@ -111,6 +112,7 @@ class MonthlyPaymentAmountController @Inject() (
           case j1: Journey.Stages.RetrievedAffordableQuotes    => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
           case j1: Journey.Stages.ChosenPaymentPlan            => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
           case j1: Journey.Stages.CheckedPaymentPlan           => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
+          case j1: Journey.Stages.ChosenTypeOfBankAccount      => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
           case j1: Journey.Stages.EnteredDirectDebitDetails    => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
           case j1: Journey.Stages.ConfirmedDirectDebitDetails  => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
           case j1: Journey.Stages.AgreedTermsAndConditions     => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers

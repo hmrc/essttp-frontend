@@ -22,7 +22,7 @@ import essttp.journey.model.JourneyId
 import essttp.journey.model.ttp.EligibilityCheckResult
 import essttp.journey.model.ttp.affordability.InstalmentAmounts
 import essttp.journey.model.ttp.affordablequotes.{AffordableQuotesResponse, PaymentPlan}
-import essttp.rootmodel.bank.DirectDebitDetails
+import essttp.rootmodel.bank.{DirectDebitDetails, TypeOfBankAccount}
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
 import essttp.rootmodel.dates.startdates.StartDatesResponse
 import essttp.rootmodel.{CanPayUpfront, DayOfMonth, EmpRef, MonthlyPaymentAmount, UpfrontPaymentAmount}
@@ -88,6 +88,10 @@ class JourneyService @Inject() (journeyConnector: JourneyConnector) extends Logg
 
   def updateHasCheckedPaymentPlan(journeyId: JourneyId)(implicit requestHeader: RequestHeader): Future[Unit] = {
     journeyConnector.updateHasCheckedPaymentPlan(journeyId)
+  }
+
+  def updateChosenTypeOfBankAccount(journeyId: JourneyId, typeOfBankAccount: TypeOfBankAccount)(implicit requestHeader: RequestHeader): Future[Unit] = {
+    journeyConnector.updateChosenTypeOfBankAccount(journeyId, typeOfBankAccount)
   }
 
   def updateDirectDebitDetails(journeyId: JourneyId, directDebitDetails: DirectDebitDetails)(implicit requestHeader: RequestHeader): Future[Unit] = {

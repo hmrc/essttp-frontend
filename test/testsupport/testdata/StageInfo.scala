@@ -33,6 +33,7 @@ object StageInfo {
   val retrievedAffordableQuotes: StageInfo = StageInfo("RetrievedAffordableQuotes", "AffordableQuotesRetrieved")
   val chosenPaymentPlan: StageInfo = StageInfo("ChosenPaymentPlan", "SelectedPlan")
   val hasCheckedPaymentPlan: StageInfo = StageInfo("CheckedPaymentPlan", "AcceptedPlan")
+  val chosenTypeOfBankAccount: StageInfo = StageInfo("ChosenTypeOfBankAccount", "Business")
   val enteredDirectDebitDetailsIsAccountHolder: StageInfo = StageInfo("EnteredDirectDebitDetails", "IsAccountHolder")
   val enteredDirectDebitDetailsNotAccountHolder: StageInfo = StageInfo("EnteredDirectDebitDetails", "IsNotAccountHolder")
   val confirmedDirectDebitDetails: StageInfo = StageInfo("ConfirmedDirectDebitDetails", "ConfirmedDetails")

@@ -401,6 +401,8 @@ object TdJsonBodies {
        |               }
        |""".stripMargin
 
+  def typeOfBankJourneyInfo(): String = s""""typeOfBankAccount" : "Business""""
+
   def directDebitDetailsJourneyInfo(isAccountHolder: Boolean = true): String =
     s"""
        |"directDebitDetails" : {

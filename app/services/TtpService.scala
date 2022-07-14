@@ -63,6 +63,7 @@ class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesServi
       case j1: Journey.Stages.RetrievedAffordableQuotes    => j1
       case j1: Journey.Stages.ChosenPaymentPlan            => j1
       case j1: Journey.Stages.CheckedPaymentPlan           => j1
+      case j1: Journey.Stages.ChosenTypeOfBankAccount      => j1
       case j1: Journey.Stages.EnteredDirectDebitDetails    => j1
       case j1: Journey.Stages.ConfirmedDirectDebitDetails  => j1
       case j1: Journey.Stages.AgreedTermsAndConditions     => j1
@@ -80,6 +81,7 @@ class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesServi
       case j1: Journey.Stages.RetrievedAffordableQuotes   => j1
       case j1: Journey.Stages.ChosenPaymentPlan           => j1
       case j1: Journey.Stages.CheckedPaymentPlan          => j1
+      case j1: Journey.Stages.ChosenTypeOfBankAccount     => j1
       case j1: Journey.Stages.EnteredDirectDebitDetails   => j1
       case j1: Journey.Stages.ConfirmedDirectDebitDetails => j1
       case j1: Journey.Stages.AgreedTermsAndConditions    => j1

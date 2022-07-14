@@ -192,7 +192,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
         val result: Future[Result] = controller.checkPaymentScheduleSubmit(fakeRequest)
 
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.BankDetailsController.enterBankDetails().url)
+        redirectLocation(result) shouldBe Some(routes.BankDetailsController.typeOfAccount().url)
         EssttpBackend.HasCheckedPlan.verifyUpdateHasCheckedPlanRequest(TdAll.journeyId)
 
       }
