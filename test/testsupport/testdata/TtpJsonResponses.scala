@@ -26,18 +26,27 @@ object TtpJsonResponses {
   ): String = {
     s"""
        |{
-       |  "idType" : "SSTTP",
-       |  "idNumber" : "123/456",
-       |  "regimeType" : "PAYE",
-       |  "processingDate" : "2022-01-01",
+       |  "processingDateTime": "2022-03-23T13:49:51.141Z",
+       |  "identification": [
+       |    {
+       |      "idType": "EMPREF",
+       |      "idValue": "864FZ00049"
+       |    },
+       |    {
+       |      "idType": "BROCS",
+       |      "idValue": "123PA44545546"
+       |    }
+       |  ],
        |  "customerPostcodes": [
        |        {
        |          "addressPostcode": "AA11AA",
        |          "postcodeDate": "2022-01-31"
        |        }
        |  ],
-       |  "minPlanLengthMonths" : 1,
-       |  "maxPlanLengthMonths" : 3,
+       |  "regimePaymentFrequency": "Monthly",
+       |  "paymentPlanFrequency": "Monthly",
+       |  "paymentPlanMinLength": 1,
+       |  "paymentPlanMaxLength": 6,
        |  "eligibilityStatus" : {
        |    "overallEligibilityStatus" : ${overallEligibilityStatus.value}
        |  },
@@ -48,41 +57,31 @@ object TtpJsonResponses {
        |    "isMoreThanMaxDebtAllowance" : ${eligibilityRules.isMoreThanMaxDebtAllowance},
        |    "disallowedChargeLocks" : ${eligibilityRules.disallowedChargeLocks},
        |    "existingTTP" : ${eligibilityRules.existingTTP},
-       |    "exceedsMaxDebtAge" : ${eligibilityRules.exceedsMaxDebtAge},
-       |    "eligibleChargeType" : ${eligibilityRules.eligibleChargeType},
+       |    "chargesOverMaxDebtAge" : ${eligibilityRules.chargesOverMaxDebtAge},
+       |    "ineligibleChargeTypes" : ${eligibilityRules.ineligibleChargeTypes},
        |    "missingFiledReturns" : ${eligibilityRules.missingFiledReturns}
        |  },
        |  "chargeTypeAssessment" : [ {
        |    "taxPeriodFrom" : "2020-08-13",
        |    "taxPeriodTo" : "2020-08-14",
        |    "debtTotalAmount" : 300000,
-       |    "disallowedChargeLocks" : [ {
-       |      "chargeId" : "A00000000001",
+       |    "charges" : [ {
+       |      "chargeType": "InYearRTICharge-Tax",
+       |      "mainType": "InYearRTICharge(FPS)",
+       |      "chargeReference" : "A00000000001",
        |      "mainTrans" : "mainTrans",
-       |      "mainTransDesc" : "mainTransDesc",
        |      "subTrans" : "subTrans",
-       |      "subTransDesc" : "subTransDesc",
-       |      "outstandingDebtAmount" : 100000,
+       |      "outstandingAmount" : 100000,
        |      "interestStartDate" : "2017-03-07",
-       |      "accruedInterestToDate" : 1597,
-       |      "chargeLocks" : {
-       |        "paymentLock" : {
-       |          "status" : false,
-       |          "reason" : ""
-       |        },
-       |        "clearingLock" : {
-       |          "status" : false,
-       |          "reason" : ""
-       |        },
-       |        "interestLock" : {
-       |          "status" : false,
-       |          "reason" : ""
-       |        },
-       |        "dunningLock" : {
-       |          "status" : false,
-       |          "reason" : ""
-       |        }
-       |      }
+       |      "dueDate" : "2017-03-07",
+       |      "accruedInterest" : 1597,
+       |      "ineligibleChargeType": false,
+       |      "chargeOverMaxDebtAge": false,
+       |      "locks": [ {
+       |          "lockType": "Payment",
+       |          "lockReason": "Risk/Fraud",
+       |          "disallowedChargeLockType": false
+       |       } ]
        |    } ]
        |  } ]
        |}

@@ -21,6 +21,7 @@ import _root_.essttp.journey.model.ttp._
 import _root_.testOnly.views.html.IAmBtaPage
 import config.AppConfig
 import essttp.journey.JourneyConnector
+import essttp.journey.model.ttp.affordablequotes.DueDate
 import essttp.journey.model.{Origins, SjRequest}
 import essttp.rootmodel.{AmountInPence, BackUrl, ReturnUrl}
 import models.EligibilityErrors._
@@ -37,6 +38,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 
+import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -131,25 +133,29 @@ object StartJourneyController {
 
     val debtAmountFromForm: DebtTotalAmount = DebtTotalAmount(AmountInPence(form.debtTotalAmount))
 
-    val disallowedChargeLocks = essttp.journey.model.ttp.DisallowedChargeLocks(
-      ChargeId("A00000000001"),
-      MainTrans("mainTrans"),
-      MainTransDesc("mainTransDesc"),
-      SubTrans("subTrans"),
-      SubTransDesc("subTransDesc"),
-      OutstandingDebtAmount(debtAmountFromForm.value),
-      InterestStartDate("2017-03-07"),
-      AccruedInterestToDate(AmountInPence(1597)),
-      ChargeLocks(
-        PaymentLock(status = false, reason = ""),
-        PaymentLock(status = false, reason = ""),
-        PaymentLock(status = false, reason = ""),
-        PaymentLock(status = false, reason = "")
+    val charges: Charges = Charges(
+      chargeType           = ChargeType("InYearRTICharge-Tax"),
+      mainType             = MainType("InYearRTICharge(FPS)"),
+      chargeReference      = ChargeReference(form.empRef.value),
+      mainTrans            = MainTrans("mainTrans"),
+      subTrans             = SubTrans("subTrans"),
+      outstandingAmount    = OutstandingAmount(debtAmountFromForm.value),
+      interestStartDate    = InterestStartDate(LocalDate.parse("2017-03-07")),
+      dueDate              = DueDate(LocalDate.parse("2017-03-07")),
+      accruedInterest      = AccruedInterest(AmountInPence(1597)),
+      ineligibleChargeType = IneligibleChargeType(false),
+      chargeOverMaxDebtAge = ChargeOverMaxDebtAge(false),
+      locks                = List(
+        Lock(
+          lockType                 = LockType("Payment"),
+          lockReason               = LockReason("Risk/Fraud"),
+          disallowedChargeLockType = DisallowedChargeLockType(false)
+        )
       )
     )
 
     val chargeTypeAssessments: List[ChargeTypeAssessment] = List(
-      ChargeTypeAssessment(TaxPeriodFrom("2020-08-13"), TaxPeriodTo("2020-08-14"), debtAmountFromForm, List(disallowedChargeLocks))
+      ChargeTypeAssessment(TaxPeriodFrom("2020-08-13"), TaxPeriodTo("2020-08-14"), debtAmountFromForm, List(charges))
     )
 
     val containsError: EligibilityError => Boolean = (ee: EligibilityError) => form.eligibilityErrors.contains(ee)
@@ -161,24 +167,31 @@ object StartJourneyController {
         isMoreThanMaxDebtAllowance = containsError(IsMoreThanMaxDebtAllowance),
         disallowedChargeLocks      = containsError(EligibilityErrors.DisallowedChargeLocks),
         existingTTP                = containsError(ExistingTtp),
-        exceedsMaxDebtAge          = containsError(ExceedsMaxDebtAge),
-        eligibleChargeType         = containsError(EligibleChargeType),
+        chargesOverMaxDebtAge      = containsError(ChargesOverMaxDebtAge),
+        ineligibleChargeTypes      = containsError(IneligibleChargeTypes),
         missingFiledReturns        = containsError(MissingFiledReturns)
       )
     }
     EligibilityCheckResult(
-      idType               = IdType("SSTTP"),
-      idNumber             = IdNumber(form.empRef.value),
-      regimeType           = RegimeType("PAYE"),
-      processingDate       = ProcessingDate("2022-01-31"),
-      customerPostcodes    = List(CustomerPostcode(Postcode("AA11AA"), PostcodeDate("2022-01-01"))),
-      minPlanLengthMonths  = MinPlanLengthMonths(1),
-      maxPlanLengthMonths  = MaxPlanLengthMonths(6),
-      eligibilityStatus    = EligibilityStatus(OverallEligibilityStatus(
-        eligibilityRules.isEligible
-      )),
-      eligibilityRules     = eligibilityRules,
-      chargeTypeAssessment = chargeTypeAssessments
+      processingDateTime     = ProcessingDateTime(LocalDate.now().toString),
+      identification         = List(
+        Identification(
+          idType  = IdType("EMPREF"),
+          idValue = IdValue(form.empRef.value)
+        ),
+        Identification(
+          idType  = IdType("BROCS"),
+          idValue = IdValue(form.empRef.value)
+        )
+      ),
+      customerPostcodes      = List(CustomerPostcode(Postcode("AA11AA"), PostcodeDate("2022-01-01"))),
+      regimePaymentFrequency = PaymentPlanFrequencies.Monthly,
+      paymentPlanFrequency   = PaymentPlanFrequencies.Monthly,
+      paymentPlanMinLength   = PaymentPlanMinLength(1),
+      paymentPlanMaxLength   = PaymentPlanMaxLength(6),
+      eligibilityStatus      = EligibilityStatus(OverallEligibilityStatus(eligibilityRules.isEligible)),
+      eligibilityRules       = eligibilityRules,
+      chargeTypeAssessment   = chargeTypeAssessments
     )
   }
 

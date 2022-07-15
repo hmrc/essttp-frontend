@@ -19,7 +19,7 @@ package controllers
 import _root_.actions.Actions
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import essttp.journey.model.{Journey, Origins}
-import essttp.journey.model.ttp.{ChargeTypeAssessment, DisallowedChargeLocks, EligibilityCheckResult}
+import essttp.journey.model.ttp.{ChargeTypeAssessment, Charges, EligibilityCheckResult}
 import essttp.rootmodel.AmountInPence
 import models.{InvoicePeriod, OverDuePayments, OverduePayment}
 import play.api.mvc._
@@ -63,10 +63,10 @@ class YourBillController @Inject() (
 }
 
 object YourBillController {
-  def chargeDueDate(charges: List[ChargeTypeAssessment]): LocalDate = {
-    charges.headOption.map { (chargeTypeAssessment: ChargeTypeAssessment) =>
-      chargeTypeAssessment.disallowedChargeLocks.headOption.map { disallowedChargeLocks: DisallowedChargeLocks =>
-        parseLocalDate(disallowedChargeLocks.interestStartDate.value)
+  def chargeDueDate(chargeTypeAssessments: List[ChargeTypeAssessment]): LocalDate = {
+    chargeTypeAssessments.headOption.map { (chargeTypeAssessment: ChargeTypeAssessment) =>
+      chargeTypeAssessment.charges.headOption.map { charges: Charges =>
+        parseLocalDate(charges.interestStartDate.value.toString)
       }
     }.getOrElse(throw new IllegalArgumentException("missing charge list")).getOrElse(throw new IllegalArgumentException("missing charge list"))
   }
