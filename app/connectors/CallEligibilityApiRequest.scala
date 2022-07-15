@@ -19,7 +19,7 @@ package connectors
 import play.api.libs.json.{Json, OFormat}
 
 final case class CallEligibilityApiRequest(
-    channelIdentifier:         String  = "eSSTTP",
+    channelIdentifier:         String,
     idType:                    String,
     idValue:                   String,
     regimeType:                String,
