@@ -45,9 +45,9 @@ object EligibilityErrors extends Enum[EligibilityError] {
 
   case object ExistingTtp extends EligibilityError
 
-  case object ExceedsMaxDebtAge extends EligibilityError
+  case object ChargesOverMaxDebtAge extends EligibilityError
 
-  case object EligibleChargeType extends EligibilityError
+  case object IneligibleChargeTypes extends EligibilityError
 
   case object MissingFiledReturns extends EligibilityError
 
@@ -63,8 +63,8 @@ object EligibilityErrors extends Enum[EligibilityError] {
     case EligibilityRules(false, false, false, true, false, false, false, false, false)  => Some(IsMoreThanMaxDebtAllowance)
     case EligibilityRules(false, false, false, false, true, false, false, false, false)  => Some(DisallowedChargeLocks)
     case EligibilityRules(false, false, false, false, false, true, false, false, false)  => Some(ExistingTtp)
-    case EligibilityRules(false, false, false, false, false, false, true, false, false)  => Some(ExceedsMaxDebtAge)
-    case EligibilityRules(false, false, false, false, false, false, false, true, false)  => Some(EligibleChargeType)
+    case EligibilityRules(false, false, false, false, false, false, true, false, false)  => Some(ChargesOverMaxDebtAge)
+    case EligibilityRules(false, false, false, false, false, false, false, true, false)  => Some(IneligibleChargeTypes)
     case EligibilityRules(false, false, false, false, false, false, false, false, true)  => Some(MissingFiledReturns)
     case EligibilityRules(false, false, false, false, false, false, false, false, false) => None //all false
   }

@@ -19,7 +19,7 @@ package controllers.pagerouters
 import controllers.routes
 import essttp.journey.model.ttp.EligibilityCheckResult
 import models.EligibilityErrors
-import models.EligibilityErrors.{DisallowedChargeLocks, EligibleChargeType, ExceedsMaxDebtAge, ExistingTtp, HasRlsOnAddress, IsLessThanMinDebtAllowance, IsMoreThanMaxDebtAllowance, MarkedAsInsolvent, MissingFiledReturns, MultipleReasons}
+import models.EligibilityErrors.{DisallowedChargeLocks, IneligibleChargeTypes, ChargesOverMaxDebtAge, ExistingTtp, HasRlsOnAddress, IsLessThanMinDebtAllowance, IsMoreThanMaxDebtAllowance, MarkedAsInsolvent, MissingFiledReturns, MultipleReasons}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{Call, Result}
 
@@ -38,8 +38,8 @@ object EligibilityRouter {
         case Some(IsMoreThanMaxDebtAllowance) => routes.IneligibleController.debtTooLargePage()
         case Some(DisallowedChargeLocks)      => routes.IneligibleController.genericIneligiblePage()
         case Some(ExistingTtp)                => routes.IneligibleController.alreadyHaveAPaymentPlanPage()
-        case Some(ExceedsMaxDebtAge)          => routes.IneligibleController.debtTooOldPage()
-        case Some(EligibleChargeType)         => routes.IneligibleController.genericIneligiblePage()
+        case Some(ChargesOverMaxDebtAge)      => routes.IneligibleController.debtTooOldPage()
+        case Some(IneligibleChargeTypes)      => routes.IneligibleController.genericIneligiblePage()
         case Some(MissingFiledReturns)        => routes.IneligibleController.fileYourReturnPage()
       }
     }

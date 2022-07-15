@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
-package connectors
+package services
 
-import play.api.libs.json.{Json, OFormat}
+sealed trait EligibilityRequestDefaults {
+  def idType: String
+  def regimeType: String
+}
 
-final case class CallEligibilityApiRequest(
-    channelIdentifier:         String  = "eSSTTP",
-    idType:                    String,
-    idValue:                   String,
-    regimeType:                String,
-    returnFinancialAssessment: Boolean
-)
+object EligibilityRequestDefaults {
 
-object CallEligibilityApiRequest {
-  implicit val formatter: OFormat[CallEligibilityApiRequest] = Json.format[CallEligibilityApiRequest]
+  val essttpChannelIdentifier: String = "eSSTTP"
+
+  object Epaye extends EligibilityRequestDefaults {
+    val idType: String = "EMPREF"
+    val regimeType: String = "PAYE"
+  }
+
+  object Vat extends EligibilityRequestDefaults {
+    val idType: String = "VRN"
+    val regimeType: String = "VAT"
+  }
 }

@@ -20,13 +20,12 @@ import connectors.{CallEligibilityApiRequest, TtpConnector}
 import essttp.journey.model.Journey.Stages.ComputedTaxId
 import essttp.journey.model.ttp.affordability.{DebtItemCharge, InstalmentAmountRequest, InstalmentAmounts}
 import essttp.journey.model.ttp.affordablequotes._
-import essttp.journey.model.ttp.{ChargeTypeAssessment, DisallowedChargeLocks, EligibilityCheckResult, PaymentPlanFrequencies}
+import essttp.journey.model.ttp.{ChargeTypeAssessment, Charges, EligibilityCheckResult, PaymentPlanFrequencies, PaymentPlanMaxLength, PaymentPlanMinLength}
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
 import essttp.rootmodel.{AmountInPence, EmpRef, UpfrontPaymentAmount}
 import play.api.mvc.RequestHeader
 
-import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 
@@ -41,13 +40,14 @@ class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesServi
     val eligibilityRequest: CallEligibilityApiRequest = journey match {
       case j: Journey.Epaye =>
         CallEligibilityApiRequest(
-          idType           = "SSTTP",
-          idNumber         = j.taxId match {
+          channelIdentifier         = EligibilityRequestDefaults.essttpChannelIdentifier,
+          idType                    = EligibilityRequestDefaults.Epaye.idType,
+          idValue                   = j.taxId match {
             case empRef: EmpRef => empRef.value //Hmm, will it compile, theoretically it can't be Vrn ...
             case other          => sys.error(s"Expected EmpRef but found ${other.getClass.getSimpleName}")
           },
-          regimeType       = "PAYE",
-          returnFinancials = true
+          regimeType                = EligibilityRequestDefaults.Epaye.regimeType,
+          returnFinancialAssessment = true
         )
     }
     ttpConnector.callEligibilityApi(eligibilityRequest)
@@ -88,16 +88,15 @@ class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesServi
     }
     val initialPaymentAmount: Option[UpfrontPaymentAmount] = TtpService.deriveUpfrontPaymentAmount(j.upfrontPaymentAnswers)
     val debtItemCharges = j.eligibilityCheckResult.chargeTypeAssessment
-      .flatMap(_.disallowedChargeLocks)
-      .map { chargeLocks: DisallowedChargeLocks =>
+      .flatMap(_.charges)
+      .map { charge: Charges =>
         DebtItemCharges(
-          outstandingDebtAmount = chargeLocks.outstandingDebtAmount.value,
-          mainTrans             = chargeLocks.mainTrans,
-          subTrans              = chargeLocks.subTrans,
-          debtItemChargeId      = chargeLocks.chargeId,
-          interestStartDate     = chargeLocks.interestStartDate,
-          // todo this is wrong, but we need to update the eligibility api models to obtain this... That's another ticket.
-          debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.now().minusMonths(6))
+          outstandingDebtAmount   = charge.outstandingAmount.value,
+          mainTrans               = charge.mainTrans,
+          subTrans                = charge.subTrans,
+          debtItemChargeId        = charge.chargeReference,
+          interestStartDate       = charge.interestStartDate,
+          debtItemOriginalDueDate = DebtItemOriginalDueDate(charge.dueDate.value)
         )
       }
 
@@ -132,25 +131,25 @@ object TtpService {
   ): InstalmentAmountRequest = {
     val allInterestAccrued: AmountInPence = AmountInPence(
       eligibilityCheckResult.chargeTypeAssessment
-        .flatMap(_.disallowedChargeLocks
-          .map(_.accruedInterestToDate.value.value))
+        .flatMap(_.charges
+          .map(_.accruedInterest.value.value))
         .sum
     )
     val debtChargeItemsFromEligibilityCheck: List[DebtItemCharge] = eligibilityCheckResult.chargeTypeAssessment.flatMap {
       chargeTypeAssessment: ChargeTypeAssessment =>
-        chargeTypeAssessment.disallowedChargeLocks.map { dcl: DisallowedChargeLocks =>
+        chargeTypeAssessment.charges.map { charge: Charges =>
           DebtItemCharge(
-            outstandingDebtAmount = dcl.outstandingDebtAmount.value,
-            mainTrans             = dcl.mainTrans,
-            subTrans              = dcl.subTrans,
-            debtItemChargeId      = dcl.chargeId,
-            interestStartDate     = dcl.interestStartDate
+            outstandingDebtAmount = charge.outstandingAmount.value,
+            mainTrans             = charge.mainTrans,
+            subTrans              = charge.subTrans,
+            debtItemChargeId      = charge.chargeReference,
+            interestStartDate     = charge.interestStartDate
           )
         }
     }
     InstalmentAmountRequest(
-      minPlanLength         = eligibilityCheckResult.minPlanLengthMonths,
-      maxPlanLength         = eligibilityCheckResult.maxPlanLengthMonths,
+      minPlanLength         = eligibilityCheckResult.paymentPlanMinLength,
+      maxPlanLength         = eligibilityCheckResult.paymentPlanMaxLength,
       interestAccrued       = allInterestAccrued,
       frequency             = PaymentPlanFrequencies.Monthly,
       earliestPlanStartDate = extremeDatesResponse.earliestPlanStartDate,
@@ -164,8 +163,8 @@ object TtpService {
 
   private def calculateCumulativeInterest(eligibilityCheckResult: EligibilityCheckResult): AmountInPence = AmountInPence(
     eligibilityCheckResult.chargeTypeAssessment
-      .flatMap(_.disallowedChargeLocks)
-      .map(_.accruedInterestToDate.value.value)
+      .flatMap(_.charges)
+      .map(_.accruedInterest.value.value)
       .sum
   )
 

@@ -58,8 +58,8 @@ object TdAll {
     isMoreThanMaxDebtAllowance = false,
     disallowedChargeLocks      = false,
     existingTTP                = false,
-    exceedsMaxDebtAge          = false,
-    eligibleChargeType         = false,
+    chargesOverMaxDebtAge      = false,
+    ineligibleChargeTypes      = false,
     missingFiledReturns        = false
   )
   val notEligibleHasRlsOnAddress: EligibilityRules = eligibleEligibilityRules.copy(hasRlsOnAddress = true)
@@ -68,8 +68,8 @@ object TdAll {
   val notEligibleIsMoreThanMaxDebtAllowance: EligibilityRules = eligibleEligibilityRules.copy(isMoreThanMaxDebtAllowance = true)
   val notEligibleDisallowedChargeLocks: EligibilityRules = eligibleEligibilityRules.copy(disallowedChargeLocks = true)
   val notEligibleExistingTTP: EligibilityRules = eligibleEligibilityRules.copy(existingTTP = true)
-  val notEligibleExceedsMaxDebtAge: EligibilityRules = eligibleEligibilityRules.copy(exceedsMaxDebtAge = true)
-  val notEligibleEligibleChargeType: EligibilityRules = eligibleEligibilityRules.copy(eligibleChargeType = true)
+  val notEligibleExceedsMaxDebtAge: EligibilityRules = eligibleEligibilityRules.copy(chargesOverMaxDebtAge = true)
+  val notEligibleEligibleChargeType: EligibilityRules = eligibleEligibilityRules.copy(ineligibleChargeTypes = true)
   val notEligibleMissingFiledReturns: EligibilityRules = eligibleEligibilityRules.copy(missingFiledReturns = true)
   def dayOfMonth(day: Int = 28): DayOfMonth = DayOfMonth(day)
 }
