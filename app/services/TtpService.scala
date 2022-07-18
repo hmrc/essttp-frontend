@@ -18,9 +18,9 @@ package services
 
 import connectors.{CallEligibilityApiRequest, TtpConnector}
 import essttp.journey.model.Journey.Stages.ComputedTaxId
-import essttp.journey.model.ttp.affordability.{DebtItemCharge, InstalmentAmountRequest, InstalmentAmounts}
+import essttp.journey.model.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
 import essttp.journey.model.ttp.affordablequotes._
-import essttp.journey.model.ttp.{ChargeTypeAssessment, Charges, EligibilityCheckResult, PaymentPlanFrequencies, PaymentPlanMaxLength, PaymentPlanMinLength}
+import essttp.journey.model.ttp._
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
 import essttp.rootmodel.{AmountInPence, EmpRef, UpfrontPaymentAmount}
@@ -90,8 +90,8 @@ class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesServi
     val debtItemCharges = j.eligibilityCheckResult.chargeTypeAssessment
       .flatMap(_.charges)
       .map { charge: Charges =>
-        DebtItemCharges(
-          outstandingDebtAmount   = charge.outstandingAmount.value,
+        DebtItemCharge(
+          outstandingDebtAmount   = OutstandingDebtAmount(charge.outstandingAmount.value),
           mainTrans               = charge.mainTrans,
           subTrans                = charge.subTrans,
           debtItemChargeId        = charge.chargeReference,
@@ -139,25 +139,26 @@ object TtpService {
       chargeTypeAssessment: ChargeTypeAssessment =>
         chargeTypeAssessment.charges.map { charge: Charges =>
           DebtItemCharge(
-            outstandingDebtAmount = charge.outstandingAmount.value,
-            mainTrans             = charge.mainTrans,
-            subTrans              = charge.subTrans,
-            debtItemChargeId      = charge.chargeReference,
-            interestStartDate     = charge.interestStartDate
+            outstandingDebtAmount   = OutstandingDebtAmount(charge.outstandingAmount.value),
+            mainTrans               = charge.mainTrans,
+            subTrans                = charge.subTrans,
+            debtItemChargeId        = charge.chargeReference,
+            interestStartDate       = charge.interestStartDate,
+            debtItemOriginalDueDate = DebtItemOriginalDueDate(charge.dueDate.value)
           )
         }
     }
     InstalmentAmountRequest(
-      minPlanLength         = eligibilityCheckResult.paymentPlanMinLength,
-      maxPlanLength         = eligibilityCheckResult.paymentPlanMaxLength,
-      interestAccrued       = allInterestAccrued,
-      frequency             = PaymentPlanFrequencies.Monthly,
-      earliestPlanStartDate = extremeDatesResponse.earliestPlanStartDate,
-      latestPlanStartDate   = extremeDatesResponse.latestPlanStartDate,
-      initialPaymentDate    = extremeDatesResponse.initialPaymentDate,
-      initialPaymentAmount  = upfrontPaymentAmount.map(_.value),
-      debtItemCharges       = debtChargeItemsFromEligibilityCheck,
-      customerPostcodes     = eligibilityCheckResult.customerPostcodes
+      channelIdentifier            = ChannelIdentifiers.eSSTTP,
+      paymentPlanMinLength         = eligibilityCheckResult.paymentPlanMinLength,
+      paymentPlanMaxLength         = eligibilityCheckResult.paymentPlanMaxLength,
+      paymentPlanFrequency         = PaymentPlanFrequencies.Monthly,
+      earliestPaymentPlanStartDate = extremeDatesResponse.earliestPlanStartDate,
+      latestPaymentPlanStartDate   = extremeDatesResponse.latestPlanStartDate,
+      initialPaymentDate           = extremeDatesResponse.initialPaymentDate,
+      initialPaymentAmount         = upfrontPaymentAmount.map(_.value),
+      accruedDebtInterest          = AccruedDebtInterest(allInterestAccrued),
+      debtItemCharges              = debtChargeItemsFromEligibilityCheck,
     )
   }
 
