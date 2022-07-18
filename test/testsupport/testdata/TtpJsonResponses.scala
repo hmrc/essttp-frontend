@@ -91,6 +91,7 @@ object TtpJsonResponses {
   def ttpAffordabilityResponseJson(): String = {
     s"""
        |{
+       |    "processingDateTime": "2022-03-23T13:49:51.141Z",
        |    "minimumInstalmentAmount": 33333,
        |    "maximumInstalmentAmount": 100000
        |}
