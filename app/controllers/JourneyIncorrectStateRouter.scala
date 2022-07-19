@@ -47,6 +47,7 @@ object JourneyIncorrectStateRouter {
       case _: Journey.Stages.EnteredDirectDebitDetails    => Redirect(routes.BankDetailsController.enterBankDetails())
       case _: Journey.Stages.ConfirmedDirectDebitDetails  => Redirect(routes.BankDetailsController.enterBankDetails())
       case _: Journey.Stages.AgreedTermsAndConditions     => Redirect(routes.BankDetailsController.termsAndConditions())
+      case _: Journey.Stages.SubmittedArrangement         => Redirect(routes.ConfirmationController.confirmation())
     }
 
     JourneyLogger.error(

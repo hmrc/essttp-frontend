@@ -182,7 +182,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
 
   s"POST ${routes.PaymentScheduleController.checkPaymentScheduleSubmit().url}" - {
 
-    s"should redirect to ${routes.BankDetailsController.enterBankDetails().url} if the journey " +
+    s"should redirect to ${routes.BankDetailsController.typeOfAccount().url} if the journey " +
       "has been updated successfully" in {
         AuthStub.authorise()
         EssttpBackend.SelectedPaymentPlan.findJourney()

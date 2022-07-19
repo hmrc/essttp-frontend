@@ -18,6 +18,7 @@ package controllers
 
 import actions.Actions
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
+import controllers.JourneyFinalStateCheck.finalStateCheckF
 import essttp.journey.model.Journey
 import play.api.mvc._
 import services.{DatesService, JourneyService}
@@ -43,9 +44,9 @@ class DatesApiController @Inject() (
       case j: Journey.BeforeAnsweredCanPayUpfront        => logErrorAndRouteToDefaultPageF(j)
       case j: Journey.Stages.EnteredUpfrontPaymentAmount => getExtremeDatesAndUpdateJourney(Left(j))
       case j: Journey.Stages.AnsweredCanPayUpfront       => getExtremeDatesAndUpdateJourney(Right(j))
-      case _: Journey.AfterExtremeDatesResponse =>
+      case j: Journey.AfterExtremeDatesResponse =>
         JourneyLogger.info("ExtremeDates already determined, skipping.") // we will want to update the journey perhaps?
-        Future.successful(Redirect(routes.DetermineAffordabilityController.determineAffordability()))
+        finalStateCheckF(j, Future.successful(Redirect(routes.DetermineAffordabilityController.determineAffordability())))
     }
   }
 
@@ -62,7 +63,7 @@ class DatesApiController @Inject() (
   val retrieveStartDates: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     request.journey match {
       case j: Journey.BeforeEnteredDayOfMonth => logErrorAndRouteToDefaultPageF(j)
-      case j: Journey.AfterEnteredDayOfMonth  => getStartDatesAndUpdateJourney(j)
+      case j: Journey.AfterEnteredDayOfMonth  => finalStateCheckF(j, getStartDatesAndUpdateJourney(j))
     }
   }
 

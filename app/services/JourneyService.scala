@@ -22,6 +22,7 @@ import essttp.journey.model.JourneyId
 import essttp.journey.model.ttp.EligibilityCheckResult
 import essttp.journey.model.ttp.affordability.InstalmentAmounts
 import essttp.journey.model.ttp.affordablequotes.{AffordableQuotesResponse, PaymentPlan}
+import essttp.journey.model.ttp.arrangement.ArrangementResponse
 import essttp.rootmodel.bank.{DirectDebitDetails, TypeOfBankAccount}
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
 import essttp.rootmodel.dates.startdates.StartDatesResponse
@@ -104,6 +105,10 @@ class JourneyService @Inject() (journeyConnector: JourneyConnector) extends Logg
 
   def updateAgreedTermsAndConditions(journeyId: JourneyId)(implicit requestHeader: RequestHeader): Future[Unit] = {
     journeyConnector.updateHasAgreedTermsAndConditions(journeyId)
+  }
+
+  def updateArrangementResponse(journeyId: JourneyId, arrangementResponse: ArrangementResponse)(implicit requestHeader: RequestHeader): Future[Unit] = {
+    journeyConnector.updateArrangement(journeyId, arrangementResponse)
   }
 
 }

@@ -17,6 +17,7 @@
 package controllers
 
 import _root_.actions.Actions
+import controllers.JourneyFinalStateCheck.finalStateCheck
 import essttp.journey.model.Journey
 import essttp.rootmodel.bank.{BankDetails, DirectDebitDetails}
 import models.enumsforforms.{IsSoleSignatoryFormValue, TypeOfAccountFormValue}
@@ -50,7 +51,7 @@ class BankDetailsController @Inject() (
   val typeOfAccount: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
       case j: Journey.BeforeCheckedPaymentPlan => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
-      case j: Journey.AfterCheckedPaymentPlan  => displayTypeOfBankAccountPage(j)
+      case j: Journey.AfterCheckedPaymentPlan  => finalStateCheck(j, displayTypeOfBankAccountPage(j))
     }
   }
 
@@ -79,7 +80,7 @@ class BankDetailsController @Inject() (
   val enterBankDetails: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
       case j: Journey.BeforeChosenTypeOfBankAccount => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
-      case j: Journey.AfterChosenTypeOfBankAccount  => displayEnterBankDetailsPage(j)
+      case j: Journey.AfterChosenTypeOfBankAccount  => finalStateCheck(j, displayEnterBankDetailsPage(j))
     }
   }
 
@@ -130,7 +131,7 @@ class BankDetailsController @Inject() (
       case j: Journey.BeforeEnteredDirectDebitDetails => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
       case j: Journey.AfterEnteredDirectDebitDetails =>
         if (j.directDebitDetails.isAccountHolder) {
-          Ok(views.bankDetailsSummary(j.directDebitDetails, BankDetailsController.enterBankDetailsUrl))
+          finalStateCheck(j, Ok(views.bankDetailsSummary(j.directDebitDetails, BankDetailsController.enterBankDetailsUrl)))
         } else {
           Redirect(routes.BankDetailsController.cannotSetupDirectDebitOnlinePage().url)
         }
@@ -153,7 +154,7 @@ class BankDetailsController @Inject() (
   val termsAndConditions: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
       case j: Journey.BeforeConfirmedDirectDebitDetails => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
-      case _: Journey.AfterConfirmedDirectDebitDetails  => Ok(views.termsAndConditions())
+      case j: Journey.AfterConfirmedDirectDebitDetails  => finalStateCheck(j, Ok(views.termsAndConditions()))
     }
   }
 
@@ -162,7 +163,7 @@ class BankDetailsController @Inject() (
       case j: Journey.BeforeConfirmedDirectDebitDetails => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF(j)
       case _: Journey.AfterConfirmedDirectDebitDetails =>
         journeyService.updateAgreedTermsAndConditions(request.journeyId)
-          .map(_ => Redirect(routes.ConfirmationController.confirmation()))
+          .map(_ => Redirect(routes.SubmitArrangementController.submitArrangement()))
     }
   }
 

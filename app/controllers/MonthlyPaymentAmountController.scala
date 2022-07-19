@@ -18,6 +18,7 @@ package controllers
 
 import _root_.actions.Actions
 import config.AppConfig
+import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import controllers.MonthlyPaymentAmountController.monthlyPaymentAmountForm
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
@@ -54,7 +55,7 @@ class MonthlyPaymentAmountController @Inject() (
   val displayMonthlyPaymentAmount: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
       case j: Journey.BeforeRetrievedAffordabilityResult => logErrorAndRouteToDefaultPage(j)
-      case j: Journey.AfterRetrievedAffordabilityResult  => displayMonthlyPaymentAmountPage(j)
+      case j: Journey.AfterRetrievedAffordabilityResult  => finalStateCheck(j, displayMonthlyPaymentAmountPage(j))
     }
   }
 
@@ -72,6 +73,7 @@ class MonthlyPaymentAmountController @Inject() (
         case j1: Journey.Epaye.EnteredDirectDebitDetails    => j1
         case j1: Journey.Epaye.ConfirmedDirectDebitDetails  => j1
         case j1: Journey.Epaye.AgreedTermsAndConditions     => j1
+        case j1: Journey.Epaye.SubmittedArrangement         => j1
       }
     val backUrl: Option[String] = j.upfrontPaymentAnswers match {
       case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => Some(routes.UpfrontPaymentController.upfrontPaymentSummary().url)
@@ -116,6 +118,7 @@ class MonthlyPaymentAmountController @Inject() (
           case j1: Journey.Stages.EnteredDirectDebitDetails    => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
           case j1: Journey.Stages.ConfirmedDirectDebitDetails  => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
           case j1: Journey.Stages.AgreedTermsAndConditions     => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
+          case j1: Journey.Stages.SubmittedArrangement         => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
         }
         val totalDebt: AmountInPence = AmountInPence(eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum)
         val upfrontPaymentAmount: AmountInPence = upfrontPaymentAnswers match {

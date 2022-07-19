@@ -57,6 +57,8 @@ POST   /check-your-direct-debit-details                     controllers.BankDeta
 GET    /terms-and-conditions                                controllers.BankDetailsController.termsAndConditions()
 POST   /terms-and-conditions                                controllers.BankDetailsController.termsAndConditionsSubmit()
 
+GET    /submit-arrangement                                  controllers.SubmitArrangementController.submitArrangement
+
 GET    /confirmation                                        controllers.ConfirmationController.confirmation()
 GET    /print-summary                                       controllers.ConfirmationController.printSummary()
 

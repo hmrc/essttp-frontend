@@ -18,6 +18,7 @@ package controllers
 
 import _root_.actions.Actions
 import cats.implicits.catsSyntaxEq
+import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import controllers.PaymentDayController.{PaymentDayForm, paymentDayForm}
 import essttp.journey.model.Journey
@@ -48,7 +49,7 @@ class PaymentDayController @Inject() (
   val paymentDay: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
       case j: Journey.BeforeEnteredMonthlyPaymentAmount => logErrorAndRouteToDefaultPage(j)
-      case j: Journey.AfterEnteredMonthlyPaymentAmount  => displayPaymentDayPage(j)
+      case j: Journey.AfterEnteredMonthlyPaymentAmount  => finalStateCheck(j, displayPaymentDayPage(j))
     }
   }
 

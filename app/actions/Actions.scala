@@ -16,7 +16,7 @@
 
 package actions
 
-import actionsmodel.{AuthenticatedRequest, EligibleJourneyRequest, AuthenticatedJourneyRequest}
+import actionsmodel.{AuthenticatedJourneyRequest, AuthenticatedRequest, EligibleJourneyRequest}
 import controllers.JourneyIncorrectStateRouter
 import controllers.pagerouters.EligibilityRouter
 import essttp.journey.model.Journey

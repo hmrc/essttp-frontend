@@ -19,6 +19,7 @@ package controllers
 import _root_.actions.Actions
 import config.AppConfig
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
+import controllers.JourneyFinalStateCheck.finalStateCheck
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
 import essttp.journey.model.Journey.AfterUpfrontPaymentAnswers
 import essttp.journey.model.ttp.DebtTotalAmount
@@ -54,7 +55,7 @@ class UpfrontPaymentController @Inject() (
   val canYouMakeAnUpfrontPayment: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
       case j: Journey.BeforeEligibilityChecked => logErrorAndRouteToDefaultPage(j)
-      case j: Journey.AfterEligibilityChecked  => displayCanYouPayUpfrontPage(j)
+      case j: Journey.AfterEligibilityChecked  => finalStateCheck(j, displayCanYouPayUpfrontPage(j))
     }
   }
 
@@ -104,8 +105,8 @@ class UpfrontPaymentController @Inject() (
     request.journey match {
       case j: Journey.BeforeAnsweredCanPayUpfront                                      => logErrorAndRouteToDefaultPage(j)
       case j: Journey.AfterAnsweredCanPayUpfront if !j.canPayUpfront.userCanPayUpfront => logErrorAndRouteToDefaultPage(j)
-      case j: Journey.AfterAnsweredCanPayUpfront if j.canPayUpfront.userCanPayUpfront  => displayUpfrontPageAmountPage(Left(j))
-      case j: Journey.AfterUpfrontPaymentAnswers                                       => displayUpfrontPageAmountPage(Right(j))
+      case j: Journey.AfterAnsweredCanPayUpfront if j.canPayUpfront.userCanPayUpfront  => finalStateCheck(j, displayUpfrontPageAmountPage(Left(j)))
+      case j: Journey.AfterUpfrontPaymentAnswers                                       => finalStateCheck(j, displayUpfrontPageAmountPage(Right(j)))
     }
   }
 
@@ -177,9 +178,9 @@ class UpfrontPaymentController @Inject() (
   val upfrontPaymentSummary: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
       case j: Journey.BeforeEnteredUpfrontPaymentAmount => logErrorAndRouteToDefaultPage(j)
-      case j: Journey.AfterEnteredUpfrontPaymentAmount  => displayUpfrontPaymentSummaryPage(j)
-      case j: Journey.AfterAnsweredCanPayUpfront        => displayUpfrontPaymentSummaryPage(j)
-      case j: Journey.AfterUpfrontPaymentAnswers        => displayUpfrontPaymentSummaryPage(j)
+      case j: Journey.AfterEnteredUpfrontPaymentAmount  => finalStateCheck(j, displayUpfrontPaymentSummaryPage(j))
+      case j: Journey.AfterAnsweredCanPayUpfront        => finalStateCheck(j, displayUpfrontPaymentSummaryPage(j))
+      case j: Journey.AfterUpfrontPaymentAnswers        => finalStateCheck(j, displayUpfrontPaymentSummaryPage(j))
     }
   }
 
@@ -201,6 +202,7 @@ class UpfrontPaymentController @Inject() (
       case j: Journey.Epaye.EnteredDirectDebitDetails    => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
       case j: Journey.Epaye.ConfirmedDirectDebitDetails  => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
       case j: Journey.Epaye.AgreedTermsAndConditions     => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
+      case j: Journey.Epaye.SubmittedArrangement         => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
     }
 
     val upfrontPaymentAmountFromJourney =
@@ -238,6 +240,7 @@ object UpfrontPaymentController {
         case j1: Journey.Stages.EnteredDirectDebitDetails    => j1.eligibilityCheckResult
         case j1: Journey.Stages.ConfirmedDirectDebitDetails  => j1.eligibilityCheckResult
         case j1: Journey.Stages.AgreedTermsAndConditions     => j1.eligibilityCheckResult
+        case j1: Journey.Stages.SubmittedArrangement         => j1.eligibilityCheckResult
       }
     }
     eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).headOption
