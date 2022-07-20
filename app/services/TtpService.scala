@@ -124,8 +124,8 @@ class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesServi
   def submitArrangement(journey: Journey.Stages.AgreedTermsAndConditions)(implicit requestHeader: RequestHeader): Future[ArrangementResponse] = {
 
     val regimeType: RegimeType = journey.taxRegime match {
-      case TaxRegime.Epaye => RegimeType(RegimeType.`PAYE`)
-      case TaxRegime.Vat   => RegimeType(RegimeType.`VAT`)
+      case TaxRegime.Epaye => RegimeType.`PAYE`
+      case TaxRegime.Vat   => RegimeType.`VAT`
     }
 
     val arrangementRequest: ArrangementRequest = ArrangementRequest(
@@ -134,10 +134,10 @@ class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesServi
       arrangementAgreedDate  = ArrangementAgreedDate(LocalDate.now(ZoneOffset.of("Z")).toString),
       identification         = journey.eligibilityCheckResult.identification,
       directDebitInstruction = DirectDebitInstruction(
-        sortCode       = journey.directDebitDetails.bankDetails.sortCode,
-        accountNumber  = journey.directDebitDetails.bankDetails.accountNumber,
-        accountName    = journey.directDebitDetails.bankDetails.name,
-        paperAuditFlag = PaperAuditFlag(false)
+        sortCode        = journey.directDebitDetails.bankDetails.sortCode,
+        accountNumber   = journey.directDebitDetails.bankDetails.accountNumber,
+        accountName     = journey.directDebitDetails.bankDetails.name,
+        paperAuddisFlag = PaperAuddisFlag(false)
       ),
       paymentPlan            = EnactPaymentPlan(
         planDuration         = journey.selectedPaymentPlan.planDuration,
