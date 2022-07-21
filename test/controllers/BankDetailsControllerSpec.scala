@@ -461,7 +461,7 @@ class BankDetailsControllerSpec extends ItSpec {
       val result: Future[Result] = controller.termsAndConditionsSubmit(fakeRequest)
 
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.confirmationUrl)
+      redirectLocation(result) shouldBe Some(PageUrls.submitArrangementUrl)
       EssttpBackend.TermsAndConditions.verifyUpdateAgreedTermsAndConditionsRequest(TdAll.journeyId)
     }
   }

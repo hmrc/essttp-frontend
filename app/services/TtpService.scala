@@ -18,14 +18,16 @@ package services
 
 import connectors.{CallEligibilityApiRequest, TtpConnector}
 import essttp.journey.model.Journey.Stages.ComputedTaxId
+import essttp.journey.model.ttp._
 import essttp.journey.model.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
 import essttp.journey.model.ttp.affordablequotes._
-import essttp.journey.model.ttp._
+import essttp.journey.model.ttp.arrangement._
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
-import essttp.rootmodel.{AmountInPence, EmpRef, UpfrontPaymentAmount}
+import essttp.rootmodel.{AmountInPence, EmpRef, TaxRegime, UpfrontPaymentAmount}
 import play.api.mvc.RequestHeader
 
+import java.time.{LocalDate, ZoneOffset}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 
@@ -67,6 +69,7 @@ class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesServi
       case j1: Journey.Stages.EnteredDirectDebitDetails    => j1
       case j1: Journey.Stages.ConfirmedDirectDebitDetails  => j1
       case j1: Journey.Stages.AgreedTermsAndConditions     => j1
+      case j1: Journey.Stages.SubmittedArrangement         => j1
     }
     val upfrontPaymentAmount: Option[UpfrontPaymentAmount] = TtpService.deriveUpfrontPaymentAmount(j.upfrontPaymentAnswers)
     val eligibilityCheckResult: EligibilityCheckResult = j.eligibilityCheckResult
@@ -85,6 +88,7 @@ class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesServi
       case j1: Journey.Stages.EnteredDirectDebitDetails   => j1
       case j1: Journey.Stages.ConfirmedDirectDebitDetails => j1
       case j1: Journey.Stages.AgreedTermsAndConditions    => j1
+      case j1: Journey.Stages.SubmittedArrangement        => j1
     }
     val initialPaymentAmount: Option[UpfrontPaymentAmount] = TtpService.deriveUpfrontPaymentAmount(j.upfrontPaymentAnswers)
     val debtItemCharges = j.eligibilityCheckResult.chargeTypeAssessment
@@ -117,6 +121,38 @@ class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesServi
     ttpConnector.callAffordableQuotesApi(affordableQuotesRequest)
   }
 
+  def submitArrangement(journey: Journey.Stages.AgreedTermsAndConditions)(implicit requestHeader: RequestHeader): Future[ArrangementResponse] = {
+
+    val regimeType: RegimeType = journey.taxRegime match {
+      case TaxRegime.Epaye => RegimeType.`PAYE`
+      case TaxRegime.Vat   => RegimeType.`VAT`
+    }
+
+    val arrangementRequest: ArrangementRequest = ArrangementRequest(
+      channelIdentifier      = ChannelIdentifiers.eSSTTP,
+      regimeType             = regimeType,
+      arrangementAgreedDate  = ArrangementAgreedDate(LocalDate.now(ZoneOffset.of("Z")).toString),
+      identification         = journey.eligibilityCheckResult.identification,
+      directDebitInstruction = DirectDebitInstruction(
+        sortCode        = journey.directDebitDetails.bankDetails.sortCode,
+        accountNumber   = journey.directDebitDetails.bankDetails.accountNumber,
+        accountName     = journey.directDebitDetails.bankDetails.name,
+        paperAuddisFlag = PaperAuddisFlag(false)
+      ),
+      paymentPlan            = EnactPaymentPlan(
+        planDuration         = journey.selectedPaymentPlan.planDuration,
+        paymentPlanFrequency = PaymentPlanFrequencies.Monthly,
+        numberOfInstalments  = journey.selectedPaymentPlan.numberOfInstalments,
+        totalDebt            = journey.selectedPaymentPlan.totalDebt,
+        totalDebtIncInt      = journey.selectedPaymentPlan.totalDebtIncInt,
+        planInterest         = journey.selectedPaymentPlan.planInterest,
+        collections          = journey.selectedPaymentPlan.collections,
+        instalments          = journey.selectedPaymentPlan.instalments
+      )
+    )
+
+    ttpConnector.callArrangementApi(arrangementRequest)
+  }
 }
 
 object TtpService {

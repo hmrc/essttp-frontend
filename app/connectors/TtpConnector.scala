@@ -20,6 +20,7 @@ import com.google.inject.{Inject, Singleton}
 import essttp.journey.model.ttp.EligibilityCheckResult
 import essttp.journey.model.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
 import essttp.journey.model.ttp.affordablequotes.{AffordableQuotesRequest, AffordableQuotesResponse}
+import essttp.journey.model.ttp.arrangement.{ArrangementRequest, ArrangementResponse}
 import play.api.mvc.RequestHeader
 import requests.RequestSupport._
 import uk.gov.hmrc.http.HttpClient
@@ -60,6 +61,16 @@ class TtpConnector @Inject() (config: TtpConfig, httpClient: HttpClient)(implici
 
   def callAffordableQuotesApi(affordableQuotesRequest: AffordableQuotesRequest)(implicit requestHeader: RequestHeader): Future[AffordableQuotesResponse] = {
     httpClient.POST[AffordableQuotesRequest, AffordableQuotesResponse](affordableQuotesUrl, affordableQuotesRequest)
+  }
+
+  /**
+   * Enact arrangement API (for setting up the arrangement) implemented by ttp service.
+   * https://confluence.tools.tax.service.gov.uk/display/DTDT/Enact+arrangement+API
+   */
+  private val arrangementUrl: String = config.baseUrl + "/time-to-pay/self-serve/arrangement"
+
+  def callArrangementApi(arrangementRequest: ArrangementRequest)(implicit requestHeader: RequestHeader): Future[ArrangementResponse] = {
+    httpClient.POST[ArrangementRequest, ArrangementResponse](arrangementUrl, arrangementRequest)
   }
 }
 

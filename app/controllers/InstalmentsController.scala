@@ -19,6 +19,7 @@ package controllers
 import _root_.actions.Actions
 import cats.syntax.eq._
 import controllers.InstalmentsController.instalmentsForm
+import controllers.JourneyFinalStateCheck.finalStateCheckF
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import essttp.journey.model.Journey
 import essttp.journey.model.ttp.affordablequotes.PaymentPlan
@@ -47,7 +48,7 @@ class InstalmentsController @Inject() (
   val instalmentOptions: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     request.journey match {
       case j: Journey.BeforeAffordableQuotesResponse => logErrorAndRouteToDefaultPageF(j)
-      case j: Journey.AfterAffordableQuotesResponse  => displayInstalmentOptionsPage(j)
+      case j: Journey.AfterAffordableQuotesResponse  => finalStateCheckF(j, displayInstalmentOptionsPage(j))
     }
   }
 

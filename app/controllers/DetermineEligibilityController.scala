@@ -34,6 +34,7 @@ package controllers
 
 import _root_.actions.Actions
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
+import controllers.JourneyFinalStateCheck.finalStateCheckF
 import controllers.pagerouters.EligibilityRouter
 import essttp.journey.model.Journey
 import play.api.mvc._
@@ -59,8 +60,11 @@ class DetermineEligibilityController @Inject() (
       case j: Journey.Stages.Started       => logErrorAndRouteToDefaultPageF(j)
       case j: Journey.Stages.ComputedTaxId => determineEligibilityAndUpdateJourney(j)
       case j: Journey.AfterEligibilityChecked =>
-        JourneyLogger.info("Eligibility already determined, skipping.")
-        Future.successful(EligibilityRouter.nextPage(j.eligibilityCheckResult))
+        val proposedResult = {
+          JourneyLogger.info("Eligibility already determined, skipping.")
+          Future.successful(EligibilityRouter.nextPage(j.eligibilityCheckResult))
+        }
+        finalStateCheckF(j, proposedResult)
     }
   }
 

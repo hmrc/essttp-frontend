@@ -41,6 +41,7 @@ object JourneyInfo {
   val typeOfBankAccount: JourneyInfoAsJson = TdJsonBodies.typeOfBankJourneyInfo()
   val directDebitDetails: JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo()
   val directDebitDetailsNotAccountHolder: JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo(false)
+  val arrangementSubmitted: JourneyInfoAsJson = TdJsonBodies.arrangementResponseJourneyInfo()
   /** * **/
 
   /** accumulation of journey info, in essence it's up to stage X */
@@ -67,5 +68,6 @@ object JourneyInfo {
   val enteredDirectDebitDetailsIsAccountHolder: List[JourneyInfoAsJson] = directDebitDetails :: chosenTypeOfBankAccount
   val enteredDirectDebitDetailsIsNotAccountHolder: List[JourneyInfoAsJson] = directDebitDetailsNotAccountHolder :: chosenTypeOfBankAccount
   val confirmedDirectDebitDetails: List[JourneyInfoAsJson] = enteredDirectDebitDetailsIsAccountHolder
-
+  val agreedTermsAndConditions: List[JourneyInfoAsJson] = confirmedDirectDebitDetails
+  val submittedArrangement: List[JourneyInfoAsJson] = arrangementSubmitted :: confirmedDirectDebitDetails
 }

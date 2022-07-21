@@ -17,6 +17,7 @@
 package controllers
 
 import _root_.actions.Actions
+import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import essttp.journey.model.{Journey, Origins}
 import essttp.journey.model.ttp.{ChargeTypeAssessment, Charges, EligibilityCheckResult}
@@ -43,7 +44,7 @@ class YourBillController @Inject() (
   val yourBill: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
       case j: Journey.BeforeEligibilityChecked => logErrorAndRouteToDefaultPage(j)
-      case j: Journey.AfterEligibilityChecked  => displayPage(j)
+      case j: Journey.AfterEligibilityChecked  => finalStateCheck(j, displayPage(j))
     }
   }
 

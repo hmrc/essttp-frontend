@@ -495,9 +495,7 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(confirmDirectDebitDetailsUrl(journeyId)))
       )
 
-    def findJourney(
-        jsonBody: String = JourneyJsonTemplates.`Confirmed Direct Debit Details`
-    ): StubMapping = stubFor(
+    def findJourney(jsonBody: String = JourneyJsonTemplates.`Confirmed Direct Debit Details`): StubMapping = stubFor(
       get(urlPathEqualTo(findByLatestSessionIdUrl))
         .willReturn(aResponse()
           .withStatus(200)
@@ -528,9 +526,36 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(agreedTermsAndConditionsUrl(journeyId)))
       )
 
-    def findJourneyAfterAgreedTermsAndConditions(
-        jsonBody: String
+    def findJourney(
+        jsonBody: String = JourneyJsonTemplates.`Agreed Terms and Conditions`
     ): StubMapping = stubFor(
+      get(urlPathEqualTo(findByLatestSessionIdUrl))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withBody(jsonBody))
+    )
+  }
+
+  object SubmitArrangement {
+
+    def submitArrangementUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-arrangement"
+
+    def updateSubmitArrangement(journeyId: JourneyId): StubMapping =
+      stubFor(
+        post(urlPathEqualTo(submitArrangementUrl(journeyId)))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+          )
+      )
+
+    def verifyUpdateSubmitArrangementRequest(journeyId: JourneyId): Unit =
+      verify(postRequestedFor(urlPathEqualTo(submitArrangementUrl(journeyId))))
+
+    def verifyNoneUpdateSubmitArrangementRequest(journeyId: JourneyId): Unit =
+      verify(exactly(0), postRequestedFor(urlPathEqualTo(submitArrangementUrl(journeyId))))
+
+    def findJourney(jsonBody: String = JourneyJsonTemplates.`Arrangement Submitted`): StubMapping = stubFor(
       get(urlPathEqualTo(findByLatestSessionIdUrl))
         .willReturn(aResponse()
           .withStatus(200)

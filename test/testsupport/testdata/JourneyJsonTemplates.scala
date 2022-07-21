@@ -139,4 +139,14 @@ object JourneyJsonTemplates {
     journeyInfo = JourneyInfo.confirmedDirectDebitDetails
   )
 
+  val `Agreed Terms and Conditions`: String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.agreedTermsAndConditions,
+    journeyInfo = JourneyInfo.agreedTermsAndConditions
+  )
+
+  val `Arrangement Submitted`: String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.submittedArrangement,
+    journeyInfo = JourneyInfo.submittedArrangement
+  )
+
 }

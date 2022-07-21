@@ -267,4 +267,12 @@ object TtpJsonResponses {
       |}
       |""".stripMargin
 
+  def ttpEnactArrangementResponseJson(): String =
+    s"""
+       |{
+       |  "processingDateTime": "2022-03-23T13:49:51.141Z",
+       |  "customerReference": "123PA44545546"
+       |}
+       |""".stripMargin
+
 }

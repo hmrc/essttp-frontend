@@ -18,6 +18,7 @@ package controllers
 
 import _root_.actions.Actions
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
+import controllers.JourneyFinalStateCheck.finalStateCheckF
 import essttp.journey.model.Journey
 import play.api.mvc._
 import services.{JourneyService, TtpService}
@@ -40,7 +41,7 @@ class DetermineAffordableQuotesController @Inject() (
   val retrieveAffordableQuotes: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     request.journey match {
       case j: Journey.BeforeStartDatesResponse => logErrorAndRouteToDefaultPageF(j)
-      case j: Journey.AfterStartDatesResponse  => determineAffordableQuotesAndUpdateJourney(j)
+      case j: Journey.AfterStartDatesResponse  => finalStateCheckF(j, determineAffordableQuotesAndUpdateJourney(j))
     }
   }
 

@@ -414,4 +414,11 @@ object TdJsonBodies {
        |  "isAccountHolder" : $isAccountHolder
        |}""".stripMargin
 
+  def arrangementResponseJourneyInfo(): String =
+    s"""
+       |"arrangementResponse" : {
+       |  "processingDateTime": "2022-03-23T13:49:51.141Z",
+       |  "customerReference": "123PA44545546"
+       |}
+       |""".stripMargin
 }

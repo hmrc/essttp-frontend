@@ -33,15 +33,15 @@ class DetermineEligibilityControllerSpec extends ItSpec {
   "Determine eligibility endpoint should route user correctly" - {
     forAll(Table(
       ("Scenario flavour", "eligibility rules", "expected redirect"),
-      ("HasRlsOnAddress", TdAll.notEligibleHasRlsOnAddress, "/not-eligible"),
-      ("MarkedAsInsolvent", TdAll.notEligibleMarkedAsInsolvent, "/not-eligible"),
-      ("IsLessThanMinDebtAllowance", TdAll.notEligibleIsLessThanMinDebtAllowance, "/not-eligible"),
-      ("IsMoreThanMaxDebtAllowance", TdAll.notEligibleIsMoreThanMaxDebtAllowance, "/debt-too-large"),
-      ("DisallowedChargeLocks", TdAll.notEligibleDisallowedChargeLocks, "/not-eligible"),
-      ("ExistingTTP", TdAll.notEligibleExistingTTP, "/already-have-a-payment-plan"),
-      ("ExceedsMaxDebtAge", TdAll.notEligibleExceedsMaxDebtAge, "/debt-too-old"),
-      ("EligibleChargeType", TdAll.notEligibleEligibleChargeType, "/not-eligible"),
-      ("MissingFiledReturns", TdAll.notEligibleMissingFiledReturns, "/file-your-return")
+      ("HasRlsOnAddress", TdAll.notEligibleHasRlsOnAddress, PageUrls.notEligibleUrl),
+      ("MarkedAsInsolvent", TdAll.notEligibleMarkedAsInsolvent, PageUrls.notEligibleUrl),
+      ("IsLessThanMinDebtAllowance", TdAll.notEligibleIsLessThanMinDebtAllowance, PageUrls.notEligibleUrl),
+      ("IsMoreThanMaxDebtAllowance", TdAll.notEligibleIsMoreThanMaxDebtAllowance, PageUrls.debtTooLargeUrl),
+      ("DisallowedChargeLocks", TdAll.notEligibleDisallowedChargeLocks, PageUrls.notEligibleUrl),
+      ("ExistingTTP", TdAll.notEligibleExistingTTP, PageUrls.alreadyHaveAPaymentPlanUrl),
+      ("ExceedsMaxDebtAge", TdAll.notEligibleExceedsMaxDebtAge, PageUrls.debtTooOldUrl),
+      ("EligibleChargeType", TdAll.notEligibleEligibleChargeType, PageUrls.notEligibleUrl),
+      ("MissingFiledReturns", TdAll.notEligibleMissingFiledReturns, PageUrls.fileYourReturnUrl)
     )) {
       (sf: String, eligibilityRules: EligibilityRules, expectedRedirect: String) =>
         {
@@ -53,7 +53,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result = controller.determineEligibility(fakeRequest)
             status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(s"/set-up-a-payment-plan$expectedRedirect")
+            redirectLocation(result) shouldBe Some(expectedRedirect)
             Ttp.verifyTtpEligibilityRequests()
           }
         }

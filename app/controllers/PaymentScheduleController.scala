@@ -17,6 +17,7 @@
 package controllers
 
 import _root_.actions.Actions
+import controllers.JourneyFinalStateCheck.finalStateCheckF
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import essttp.journey.model.Journey
 import io.scalaland.chimney.dsl.TransformerOps
@@ -51,7 +52,7 @@ class PaymentScheduleController @Inject() (
         val paymentDay =
           j.into[Journey.AfterEnteredDayOfMonth].transform.dayOfMonth
 
-        Future.successful(Ok(paymentSchedulePage(upfrontPaymentAnswers, paymentDay, j.selectedPaymentPlan)))
+        finalStateCheckF(j, Future.successful(Ok(paymentSchedulePage(upfrontPaymentAnswers, paymentDay, j.selectedPaymentPlan))))
     }
   }
 

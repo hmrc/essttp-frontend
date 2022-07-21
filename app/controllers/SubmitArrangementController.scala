@@ -17,19 +17,19 @@
 package controllers
 
 import _root_.actions.Actions
-import controllers.JourneyFinalStateCheck.finalStateCheckF
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import essttp.journey.model.Journey
+import essttp.utils.Errors
 import play.api.mvc._
 import services.{JourneyService, TtpService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import util.Logging
+import util.{JourneyLogger, Logging}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class DetermineAffordabilityController @Inject() (
+class SubmitArrangementController @Inject() (
     as:             Actions,
     mcc:            MessagesControllerComponents,
     ttpService:     TtpService,
@@ -38,18 +38,26 @@ class DetermineAffordabilityController @Inject() (
   extends FrontendController(mcc)
   with Logging {
 
-  val determineAffordability: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
+  val submitArrangement: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     request.journey match {
-      case j: Journey.BeforeUpfrontPaymentAnswers => logErrorAndRouteToDefaultPageF(j)
-      case j: Journey.AfterUpfrontPaymentAnswers  => finalStateCheckF(j, determineAffordabilityAndUpdateJourney(j))
+      case j: Journey.BeforeAgreedTermsAndConditions  => logErrorAndRouteToDefaultPageF(j)
+      case j: Journey.Stages.AgreedTermsAndConditions => submitArrangementAndUpdateJourney(j)
+      case _: Journey.AfterArrangementSubmitted =>
+        JourneyLogger.info("Already submitted arrangement to ttp, showing user the success page")
+        Future.successful(Redirect(routes.ConfirmationController.confirmation()))
     }
   }
 
-  def determineAffordabilityAndUpdateJourney(journey: Journey.AfterUpfrontPaymentAnswers)(implicit request: Request[_]): Future[Result] = {
+  private def submitArrangementAndUpdateJourney(journey: Journey.Stages.AgreedTermsAndConditions)(implicit request: Request[_]): Future[Result] = {
     for {
-      instalmentAmounts <- ttpService.determineAffordability(journey)
-      _ <- journeyService.updateAffordabilityResult(journey.id, instalmentAmounts)
-    } yield Redirect(routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount().url)
+      arrangementResponse <- ttpService
+        .submitArrangement(journey)
+      _ <- journeyService
+        .updateArrangementResponse(journey.id, arrangementResponse)
+        .recover {
+          case e: Exception => Errors.throwServerErrorException(e.getMessage)
+        }
+    } yield Redirect(routes.ConfirmationController.confirmation().url)
   }
 
 }

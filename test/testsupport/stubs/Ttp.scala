@@ -25,6 +25,7 @@ object Ttp {
   private val eligibilityUrl: String = "/time-to-pay/self-serve/eligibility"
   private val affordabilityUrl: String = "/time-to-pay/self-serve/affordability"
   private val affordableQuotesUrl: String = "/time-to-pay/self-serve/affordable-quotes"
+  private val enactArrangementUrl: String = "/time-to-pay/self-serve/arrangement"
 
   def retrieveEligibility(jsonBody: String = TtpJsonResponses.ttpEligibilityCallJson()): StubMapping = stubFor(
     post(urlPathEqualTo(eligibilityUrl))
@@ -34,10 +35,7 @@ object Ttp {
   )
 
   //todo add withRequestbody - tie in with backend test data cor?
-  def verifyTtpEligibilityRequests(): Unit =
-    verify(
-      postRequestedFor(urlPathEqualTo(eligibilityUrl))
-    )
+  def verifyTtpEligibilityRequests(): Unit = verify(postRequestedFor(urlPathEqualTo(eligibilityUrl)))
 
   def retrieveAffordability(jsonBody: String = TtpJsonResponses.ttpAffordabilityResponseJson()): StubMapping = stubFor(
     post(urlPathEqualTo(affordabilityUrl))
@@ -46,10 +44,7 @@ object Ttp {
         .withBody(jsonBody))
   )
 
-  def verifyTtpAffordabilityRequest(): Unit =
-    verify(
-      postRequestedFor(urlPathEqualTo(affordabilityUrl))
-    )
+  def verifyTtpAffordabilityRequest(): Unit = verify(postRequestedFor(urlPathEqualTo(affordabilityUrl)))
 
   def retrieveAffordableQuotes(jsonBody: String = TtpJsonResponses.ttpAffordableQuotesResponseJson()): StubMapping = stubFor(
     post(urlPathEqualTo(affordableQuotesUrl))
@@ -58,9 +53,20 @@ object Ttp {
         .withBody(jsonBody))
   )
 
-  def verifyTtpAffordableQuotesRequest(): Unit =
-    verify(
-      postRequestedFor(urlPathEqualTo(affordableQuotesUrl))
-    )
+  def verifyTtpAffordableQuotesRequest(): Unit = verify(postRequestedFor(urlPathEqualTo(affordableQuotesUrl)))
+
+  def enactArrangement(jsonBody: String = TtpJsonResponses.ttpEnactArrangementResponseJson()): StubMapping = stubFor(
+    post(urlPathEqualTo(enactArrangementUrl))
+      .willReturn(aResponse()
+        .withStatus(202)
+        .withBody(jsonBody))
+  )
+  def enactArrangementFail(): StubMapping = stubFor(
+    post(urlPathEqualTo(enactArrangementUrl))
+      .willReturn(aResponse()
+        .withStatus(400))
+  )
+
+  def verifyTtpEnactArrangementRequest(): Unit = verify(postRequestedFor(urlPathEqualTo(enactArrangementUrl)))
 
 }
