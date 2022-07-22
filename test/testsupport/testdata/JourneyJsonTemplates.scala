@@ -144,9 +144,14 @@ object JourneyJsonTemplates {
     journeyInfo = JourneyInfo.agreedTermsAndConditions
   )
 
-  val `Arrangement Submitted`: String = TdJsonBodies.createJourneyJson(
+  val `Arrangement Submitted - with upfront payment`: String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.submittedArrangement,
-    journeyInfo = JourneyInfo.submittedArrangement
+    journeyInfo = JourneyInfo.submittedArrangementWithUpfrontPayment
+  )
+
+  val `Arrangement Submitted - No upfront payment`: String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.submittedArrangement,
+    journeyInfo = JourneyInfo.submittedArrangementNoUpfrontPayment
   )
 
 }

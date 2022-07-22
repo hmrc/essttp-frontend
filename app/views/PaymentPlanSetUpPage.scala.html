@@ -1,0 +1,102 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import requests.RequestSupport
+@import messages.Messages
+@import play.api.mvc.Request
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import essttp.journey.model.ttp.affordablequotes.DueDate
+@import messages.DateMessages
+@import controllers.routes
+@import config.AppConfig
+
+@this(
+        layout: templates.Layout,
+        govukButton: GovukButton,
+        govukPanel: GovukPanel,
+        requestSupport: RequestSupport,
+        appConfig: AppConfig
+)
+
+@(
+        customerPaymentReference: String,
+        paymentDay: DueDate,
+        hasUpfrontPayment: Boolean
+)(
+        implicit
+        request: Request[_]
+)
+
+@import requestSupport._
+
+@title = @{
+    Messages.Confirmation.`Your payment plan is set up`.show
+}
+@nextPayment = @{
+    val dayOfMonth: Int = paymentDay.value.getDayOfMonth
+    val day = s"$dayOfMonth${DateMessages.getSuffix(dayOfMonth).show}"
+    val month: String = DateMessages.monthName(paymentDay.value.getMonth.getValue).show
+    val year: String = paymentDay.value.getYear.toString
+    s"$day $month $year"
+}
+
+@layout(pageTitle = Some(title), backUrl = None) {
+    @govukPanel(Panel(
+        headingLevel = 1,
+        title = Text(title),
+        classes = "govuk-!-margin-bottom-7",
+        content = HtmlContent(s"""${Messages.Confirmation.`Your payment reference is`.show}<br><strong>$customerPaymentReference</strong>""")
+    ))
+    <h2 class="govuk-heading-m">
+    @{
+        Messages.Confirmation.`What happens next`.show
+    }
+    </h2>
+    <p class="govuk-body">@{
+        Messages.Confirmation.`HMRC will send you a letter within 5 working days with your payment dates.`.show
+    }</p>
+    <p class="govuk-body">@{
+        Messages.Confirmation.paymentInfo(hasUpfrontPayment = hasUpfrontPayment, nextPayment).show
+    }</p>
+    <p class="govuk-body">
+        <a href="@{
+            routes.PaymentPlanSetUpController.printSummary().url
+        }" class="govuk-link" id="print-plan-link">
+        @{
+            Messages.Confirmation.`Print your plan or save it as a PDF`.show
+        }
+        </a>
+    </p>
+
+    <h2 class="govuk-heading-m">
+    @{
+        Messages.Confirmation.`If you need to change your payment plan`.show
+    }
+    </h2>
+
+    <p class="govuk-body">@{
+        Messages.Confirmation.`Call the HMRC Helpline on 0300 123 1813.`.show
+    }</p>
+
+    <p class="govuk-body">
+        <a href=@{appConfig.Urls.businessTaxAccountUrl} class="govuk-button" data-module="govuk-button">
+        @{
+            Messages.Confirmation.`Return to tax account`.show
+        }
+        </a>
+    </p>
+
+}

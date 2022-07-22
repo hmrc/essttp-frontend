@@ -31,8 +31,9 @@ object JourneyInfo {
   val cannotPayUpfront: JourneyInfoAsJson = TdJsonBodies.canPayUpfrontJourneyInfo(false)
   val upfrontPaymentAmount: JourneyInfoAsJson = TdJsonBodies.upfrontPaymentAmountJourneyInfo(TdAll.upfrontPaymentAmount)
   val upfrontPaymentAnswers: JourneyInfoAsJson = TdJsonBodies.upfrontPaymentAnswersJourneyInfo()
+  val upfrontPaymentAnswersNoUpfrontPayment: JourneyInfoAsJson = TdJsonBodies.upfrontPaymentAnswersJourneyInfo("""{"NoUpfrontPayment": {}}""")
   val extremeDates: JourneyInfoAsJson = TdJsonBodies.extremeDatesJourneyInfo()
-  def affordableResult(minimumInstalmentAmount: Int): JourneyInfoAsJson = TdJsonBodies.affordabilityResultJourneyInfo(minimumInstalmentAmount)
+  def affordableResult(minimumInstalmentAmount: Int = 29997): JourneyInfoAsJson = TdJsonBodies.affordabilityResultJourneyInfo(minimumInstalmentAmount)
   val monthlyPaymentAmount: JourneyInfoAsJson = TdJsonBodies.monthlyPaymentAmountJourneyInfo
   val dayOfMonth: JourneyInfoAsJson = TdJsonBodies.dayOfMonthJourneyInfo(TdAll.dayOfMonth())
   val startDates: JourneyInfoAsJson = TdJsonBodies.startDatesJourneyInfo
@@ -57,6 +58,7 @@ object JourneyInfo {
   val answeredCanPayUpfrontNo: List[JourneyInfoAsJson] = cannotPayUpfront :: eligibilityCheckedEligible
   val answeredUpfrontPaymentAmount: List[JourneyInfoAsJson] = upfrontPaymentAmount :: answeredCanPayUpfrontYes
   val retrievedExtremeDates: List[JourneyInfoAsJson] = extremeDates :: upfrontPaymentAnswers :: eligibilityCheckedEligible
+  val retrievedExtremeDatesNoUpfrontPayment: List[JourneyInfoAsJson] = extremeDates :: upfrontPaymentAnswersNoUpfrontPayment :: eligibilityCheckedEligible
   def retrievedAffordabilityResult(minimumInstalmentAmount: Int = 29997): List[JourneyInfoAsJson] = affordableResult(minimumInstalmentAmount) :: retrievedExtremeDates
   val enteredMonthlyPaymentAmount: List[JourneyInfoAsJson] = monthlyPaymentAmount :: retrievedAffordabilityResult()
   val enteredDayOfMonth: List[JourneyInfoAsJson] = dayOfMonth :: enteredMonthlyPaymentAmount
@@ -69,5 +71,12 @@ object JourneyInfo {
   val enteredDirectDebitDetailsIsNotAccountHolder: List[JourneyInfoAsJson] = directDebitDetailsNotAccountHolder :: chosenTypeOfBankAccount
   val confirmedDirectDebitDetails: List[JourneyInfoAsJson] = enteredDirectDebitDetailsIsAccountHolder
   val agreedTermsAndConditions: List[JourneyInfoAsJson] = confirmedDirectDebitDetails
-  val submittedArrangement: List[JourneyInfoAsJson] = arrangementSubmitted :: confirmedDirectDebitDetails
+  val submittedArrangementWithUpfrontPayment: List[JourneyInfoAsJson] = arrangementSubmitted :: confirmedDirectDebitDetails
+
+  //used in final page test
+  val submittedArrangementNoUpfrontPayment: List[JourneyInfoAsJson] =
+    arrangementSubmitted :: directDebitDetails :: typeOfBankAccount :: selectedPlan :: affordableQuotes ::
+      upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: monthlyPaymentAmount ::
+      dayOfMonth :: startDates :: cannotPayUpfront :: eligibilityCheckedEligible
+
 }

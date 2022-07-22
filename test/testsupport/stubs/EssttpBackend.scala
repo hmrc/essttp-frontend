@@ -215,7 +215,7 @@ object EssttpBackend {
           .withBody(jsonBody))
     )
 
-    def findJourney(
+    def findJourneyStartDates(
         jsonBody: String = JourneyJsonTemplates.`Retrieved Start Dates`
     ): StubMapping = stubFor(
       get(urlPathEqualTo(findByLatestSessionIdUrl))
@@ -555,7 +555,7 @@ object EssttpBackend {
     def verifyNoneUpdateSubmitArrangementRequest(journeyId: JourneyId): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(submitArrangementUrl(journeyId))))
 
-    def findJourney(jsonBody: String = JourneyJsonTemplates.`Arrangement Submitted`): StubMapping = stubFor(
+    def findJourney(jsonBody: String = JourneyJsonTemplates.`Arrangement Submitted - with upfront payment`): StubMapping = stubFor(
       get(urlPathEqualTo(findByLatestSessionIdUrl))
         .willReturn(aResponse()
           .withStatus(200)

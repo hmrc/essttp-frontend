@@ -45,11 +45,12 @@ object TdJsonBodies {
     val jsonFormatted: String = journeyInfo.mkString(",")
     s"""
       |{
+      |  "_id": "6284fcd33c00003d6b1f3903",
       |  "${stageInfo.stage}": {
       |    "stage": {
       |      "${stageInfo.stageValue}": {}
       |    },
-      |    "createdOn": "2022-05-17T13:28:52.261",
+      |    "createdOn": "2022-07-22T14:01:06.629Z",
       |    "_id": "6284fcd33c00003d6b1f3903",
       |    "origin": "Origins.Epaye.Bta",
       |    "sjRequest": {
@@ -62,7 +63,8 @@ object TdJsonBodies {
       |    $jsonFormatted
       |  },
       |  "sessionId": "IamATestSessionId",
-      |  "createdAt": "2022-05-17T13:28:52.261"
+      |  "createdAt": "2022-07-22T14:01:06.629Z",
+      |  "lastUpdated": "2022-07-22T14:01:06.629Z"
       |}
       |""".stripMargin
   }
