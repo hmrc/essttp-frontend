@@ -28,6 +28,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.html.CheckPaymentSchedule
 
+import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -40,6 +41,8 @@ class PaymentScheduleController @Inject() (
     journeyService:      JourneyService
 )(implicit ec: ExecutionContext) extends FrontendController(mcc)
   with Logging {
+
+  implicit val localDateOrdering: Ordering[LocalDate] = _ compareTo _
 
   val checkPaymentSchedule: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     request.journey match {

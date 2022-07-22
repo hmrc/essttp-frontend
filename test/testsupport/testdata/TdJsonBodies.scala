@@ -371,11 +371,11 @@ object TdJsonBodies {
        |                       },
        |                       "regularCollections" : [
        |                           {
-       |                               "dueDate" : "2022-08-28",
+       |                               "dueDate" : "2022-09-28",
        |                               "amountDue" : 55573
        |                           },
        |                           {
-       |                               "dueDate" : "2022-09-28",
+       |                               "dueDate" : "2022-08-28",
        |                               "amountDue" : 55573
        |                           }
        |                       ]
