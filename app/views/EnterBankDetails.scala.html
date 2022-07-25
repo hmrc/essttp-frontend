@@ -97,7 +97,7 @@
             hint = Some(Hint(
                 content = Text(Messages.BankDetails.`Must be 6 digits long`.show)
             )),
-            classes = "govuk-!-width-two-thirds",
+            classes = "govuk-input--width-5",
             errorMessage = form.error(sortCodeKey).map(e => ErrorMessage(
                 content = Text(Messages.BankDetails.errors(s"${sortCodeKey}.${e.message}").show)
             )),
