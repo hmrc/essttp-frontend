@@ -663,12 +663,12 @@ object Messages {
       english = "What happens next"
     )
 
-    val `HMRC will send you a letter within 5 days with your payment dates.`: Message = Message(
-      english = "HMRC will send you a letter within 5 days with your payment dates."
+    val `HMRC will send you a letter within 5 working days with your payment dates.`: Message = Message(
+      english = "HMRC will send you a letter within 5 working days with your payment dates."
     )
 
     def paymentInfo(hasUpfrontPayment: Boolean, paymentDate: String): Message = Message(
-      english = s"${if (hasUpfrontPayment) "Your upfront payment will be taken within 10 working days. " else ""}Your next payment will be taken on ${paymentDate} or the next working day."
+      english = s"${if (hasUpfrontPayment) "Your upfront payment will be taken within 10 working days. " else ""}Your next payment will be taken on $paymentDate or the next working day."
     )
 
     val `Print your plan or save it as a PDF`: Message = Message(
@@ -679,8 +679,8 @@ object Messages {
       english = "If you need to change your payment plan"
     )
 
-    val `Call the HMRC Helpline on 0300 200 3700.`: Message = Message(
-      english = "Call the HMRC Helpline on 0300 200 3700."
+    val `Call the HMRC Helpline on 0300 123 1813.`: Message = Message(
+      english = "Call the HMRC Helpline on 0300 123 1813."
     )
 
     val `Return to tax account`: Message = Message(

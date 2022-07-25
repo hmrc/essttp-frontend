@@ -8,7 +8,7 @@ object AppDependencies {
     "uk.gov.hmrc"       %% "play-conditional-form-mapping" % "1.10.0-play-28",
     "com.beachape"      %% "enumeratum-play"               % "1.7.0",
     "org.typelevel"     %% "cats-core"                     % "2.7.0",
-    "uk.gov.hmrc"       %% "essttp-backend-cor-journey"    % "1.36.0"
+    "uk.gov.hmrc"       %% "essttp-backend-cor-journey"    % "1.38.0"
   )
 
   val test: Seq[ModuleID] = Seq(
@@ -21,5 +21,5 @@ object AppDependencies {
     "org.scalacheck"          %% "scalacheck"              % "1.15.3",
     "com.vladsch.flexmark"    %  "flexmark-all"            % "0.35.10", // Required to stay at this version - see https://github.com/scalatest/scalatest/issues/1736
     "com.github.tomakehurst"  %  "wiremock-standalone"     % "2.27.1"
-  )
+  ).map(_ % Test)
 }

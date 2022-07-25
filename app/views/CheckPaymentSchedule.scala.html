@@ -26,6 +26,7 @@
 @import controllers.routes
 @import messages.DateMessages
 @import cats.syntax.eq._
+@import java.time.LocalDate
 
 
 @this(
@@ -41,7 +42,7 @@
   upfrontPaymentAnswers: UpfrontPaymentAnswers,
   paymentDay: DayOfMonth,
   paymentPlan: PaymentPlan
-)(implicit request: Request[_])
+)(implicit request: Request[_], ord: Ordering[LocalDate])
 
 @import requestSupport._
 
@@ -120,7 +121,7 @@
 }
 
 @monthRows = @{
-  paymentPlan.collections.regularCollections.zipWithIndex.map { case (p, index) =>
+  paymentPlan.collections.regularCollections.sortBy(_.dueDate.value).zipWithIndex.map { case (p, index) =>
     SummaryListRow(
       classes = s"grouped-row ${
         if(index > (paymentPlan.collections.regularCollections.size - 2)) { "last-grouped-row" } else { "" }
