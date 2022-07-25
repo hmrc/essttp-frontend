@@ -67,7 +67,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
       paragraphs(2).text() shouldBe "Print your plan or save it as a PDF"
       doc.select("#print-plan-link").attr("href") shouldBe PageUrls.printPlanUrl
       subheadings(1).text() shouldBe "If you need to change your payment plan"
-      paragraphs(3).text() shouldBe "Call the HMRC Helpline on 0300 123 1813."
+      paragraphs(3).text() shouldBe "Call the HMRC Helpline on 0300 123 1813, or write to us by post:"
       paragraphs(4).text() shouldBe "DM PAYE HM Revenue and Customs BX9 1EW United Kingdom"
     }
 
@@ -95,7 +95,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
       paragraphs(2).text() shouldBe "Print your plan or save it as a PDF"
       doc.select("#print-plan-link").attr("href") shouldBe PageUrls.printPlanUrl
       subheadings(1).text() shouldBe "If you need to change your payment plan"
-      paragraphs(3).text() shouldBe "Call the HMRC Helpline on 0300 123 1813."
+      paragraphs(3).text() shouldBe "Call the HMRC Helpline on 0300 123 1813, or write to us by post:"
       paragraphs(4).text() shouldBe "DM PAYE HM Revenue and Customs BX9 1EW United Kingdom"
     }
   }

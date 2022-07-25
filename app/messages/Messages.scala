@@ -680,7 +680,7 @@ object Messages {
     )
 
     val `Call the HMRC Helpline on 0300 123 1813.`: Message = Message(
-      english = "Call the HMRC Helpline on 0300 123 1813."
+      english = "Call the HMRC Helpline on 0300 123 1813, or write to us by post:"
     )
 
     val `DM PAYE`: Message = Message(
