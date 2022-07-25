@@ -71,7 +71,8 @@
       )
     }
 
-    @Html(s"""<link rel="stylesheet" media="all" href="${controllers.routes.Assets.versioned("stylesheets/application.css")}" ${CSPNonce.attr}>""")
+    @Html(s"""<link rel="stylesheet" media="screen" href="${controllers.routes.Assets.versioned("stylesheets/application.css")}" ${CSPNonce.attr}>""")
+    @Html(s"""<link rel="stylesheet" media="print" href="${controllers.routes.Assets.versioned("stylesheets/print.css")}" ${CSPNonce.attr}>""")
     }
 
     @scripts = {
@@ -79,7 +80,7 @@
     }
 
     @beforeContentBlock = {
-
+      <div class="govuk-!-display-none-print">
       @govukPhaseBanner(PhaseBanner(
         tag = Some(Tag(
           content = Text(Messages.ServicePhase.beta.show)
@@ -94,14 +95,16 @@
           govukBackLink(BackLink(href = url, attributes = Map("id" -> "back")))
         }
       }
+      </div>
     }
 
     @content = {
       <div class="govuk-!-margin-bottom-6">
       @contentBlock
       </div>
-
-    @hmrcReportTechnicalIssueHelper()
+      <div class="govuk-!-display-none-print">
+        @hmrcReportTechnicalIssueHelper()
+      </div>
   }
 
     @serviceName = @{
