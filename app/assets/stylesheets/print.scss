@@ -41,20 +41,6 @@ img {
 select {
   background: white; }
 
-#global-header {
-  color: #000;
-  font-weight: bold;
-  font-size: 24px;
-  margin-bottom: 1em; }
-#global-header .content {
-  margin: 0 !important; }
-#global-header a, #global-header a:visited {
-  text-decoration: none; }
-#global-header a:after {
-  content: ""; }
-#global-header img {
-  display: none; }
-
 .govuk-header__container {
   border-bottom-color: #000;
 }
