@@ -29,3 +29,7 @@
     height: 120px;
   }
 }
+
+body:not(.js-enabled) .js-visible {
+  display: none;
+}

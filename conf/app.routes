@@ -60,7 +60,7 @@ POST   /terms-and-conditions                                controllers.BankDeta
 GET    /submit-arrangement                                  controllers.SubmitArrangementController.submitArrangement
 
 GET    /payment-plan-set-up                                 controllers.PaymentPlanSetUpController.paymentPlanSetUp()
-GET    /print-summary                                       controllers.PaymentPlanSetUpController.printSummary()
+GET    /payment-plan-print-summary                          controllers.PaymentPlanSetUpController.printSummary()
 
 GET    /assets/*file                                        controllers.Assets.versioned(path="/public", file: Asset)
 

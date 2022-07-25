@@ -17,12 +17,14 @@
 package controllers
 
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
+import org.jsoup.nodes.{Document, Element}
+import org.scalatest.Assertion
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
+import testsupport.reusableassertions.ContentAssertions.assertKeyAndValue
 import testsupport.reusableassertions.RequestAssertions
 import testsupport.stubs.{AuthStub, EssttpBackend}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
@@ -35,11 +37,13 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
 
   private val controller: PaymentPlanSetUpController = app.injector.instanceOf[PaymentPlanSetUpController]
   private val expectedServiceName: String = TdAll.expectedServiceNamePaye
-  private val expectedH1ConfirmationPage: String = "Your payment plan is set up"
-  private val expectedPageTitleCanYouPayUpfrontPage: String = s"$expectedH1ConfirmationPage - $expectedServiceName - GOV.UK"
+  private val expectedH1PaymentPlanSetUpPage: String = "Your payment plan is set up"
+  private val expectedPageTitlePaymentPlanSetUpPage: String = s"$expectedH1PaymentPlanSetUpPage - $expectedServiceName - GOV.UK"
+  private val expectedH1PaymentPlanPrintPage: String = "Your payment plan"
+  private val expectedPageTitlePaymentPlanPrintPage: String = s"$expectedH1PaymentPlanPrintPage - $expectedServiceName - GOV.UK"
 
   "GET /payment-plan-set-up should" - {
-    "return the confirmation page with correct content when there is no upfront payment" in {
+    "return the confirmation page with correct content when there is an upfront payment" in {
       AuthStub.authorise()
       EssttpBackend.SubmitArrangement.findJourney()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -48,7 +52,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
 
-      doc.title() shouldBe expectedPageTitleCanYouPayUpfrontPage
+      doc.title() shouldBe expectedPageTitlePaymentPlanSetUpPage
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
       doc.select("#back").size() shouldBe 0
@@ -65,7 +69,8 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
       subheadings(1).text() shouldBe "If you need to change your payment plan"
       paragraphs(3).text() shouldBe "Call the HMRC Helpline on 0300 123 1813."
     }
-    "return the confirmation page with correct content when there is an upfront payment" in {
+
+    "return the confirmation page with correct content when there is no upfront payment" in {
       AuthStub.authorise()
       EssttpBackend.SubmitArrangement.findJourney(JourneyJsonTemplates.`Arrangement Submitted - No upfront payment`)
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -74,7 +79,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
 
-      doc.title() shouldBe expectedPageTitleCanYouPayUpfrontPage
+      doc.title() shouldBe expectedPageTitlePaymentPlanSetUpPage
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
       doc.select("#back").size() shouldBe 0
@@ -91,5 +96,93 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
       subheadings(1).text() shouldBe "If you need to change your payment plan"
       paragraphs(3).text() shouldBe "Call the HMRC Helpline on 0300 123 1813."
     }
+  }
+
+  "GET /payment-plan-print-summary should" - {
+    "return the print payment schedule page with correct content (with upfront payment)" in {
+      AuthStub.authorise()
+      EssttpBackend.SubmitArrangement.findJourney()
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.printSummary(fakeRequest)
+      RequestAssertions.assertGetRequestOk(result)
+      val pageContent: String = contentAsString(result)
+      val doc: Document = Jsoup.parse(pageContent)
+
+      doc.title() shouldBe expectedPageTitlePaymentPlanPrintPage
+      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
+      doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
+      doc.select("#back").attr("href") shouldBe routes.PaymentPlanSetUpController.paymentPlanSetUp().url
+      doc.select(".govuk-heading-xl").text() shouldBe expectedH1PaymentPlanPrintPage
+
+      val subheadings = doc.select(".govuk-heading-m").asScala.toList
+      subheadings.size shouldBe 2
+      subheadings(0).text() shouldBe "Upfront payment"
+      subheadings(1).text() shouldBe "Monthly payments"
+
+      val allSummaryLists = doc.select(".govuk-summary-list").asScala.toList
+      val paymentReferenceSummaryListRows = allSummaryLists(0).select(".govuk-summary-list__row").asScala.toList
+      val upfrontPaymentSummaryListRows = allSummaryLists(1).select(".govuk-summary-list__row").asScala.toList
+      val monthlyPaymentSummaryListRows = allSummaryLists(2).select(".govuk-summary-list__row").asScala.toList
+
+      assertPaymentReference(paymentReferenceSummaryListRows)
+
+      upfrontPaymentSummaryListRows.size shouldBe 2
+      assertKeyAndValue(upfrontPaymentSummaryListRows(0), ("Can you make an upfront payment?", "Yes"))
+      assertKeyAndValue(upfrontPaymentSummaryListRows(1), ("Taken within 10 working days", "£2"))
+
+      assertMonthlyPaymentSummaryList(monthlyPaymentSummaryListRows)
+      assertPrintLink(doc)
+    }
+
+    "return the print payment schedule page with correct content (without upfront payment)" in {
+      AuthStub.authorise()
+      EssttpBackend.SubmitArrangement.findJourney(JourneyJsonTemplates.`Arrangement Submitted - No upfront payment`)
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.printSummary(fakeRequest)
+      RequestAssertions.assertGetRequestOk(result)
+      val pageContent: String = contentAsString(result)
+      val doc: Document = Jsoup.parse(pageContent)
+
+      doc.title() shouldBe expectedPageTitlePaymentPlanPrintPage
+      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
+      doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
+      doc.select("#back").attr("href") shouldBe routes.PaymentPlanSetUpController.paymentPlanSetUp().url
+      doc.select(".govuk-heading-xl").text() shouldBe expectedH1PaymentPlanPrintPage
+
+      val subheadings = doc.select(".govuk-heading-m").asScala.toList
+      subheadings.size shouldBe 2
+      subheadings(0).text() shouldBe "Upfront payment"
+      subheadings(1).text() shouldBe "Monthly payments"
+
+      val allSummaryLists = doc.select(".govuk-summary-list").asScala.toList
+      val paymentReferenceSummaryListRows = allSummaryLists(0).select(".govuk-summary-list__row").asScala.toList
+      val upfrontPaymentSummaryListRows = allSummaryLists(1).select(".govuk-summary-list__row").asScala.toList
+      val monthlyPaymentSummaryListRows = allSummaryLists(2).select(".govuk-summary-list__row").asScala.toList
+
+      assertPaymentReference(paymentReferenceSummaryListRows)
+
+      upfrontPaymentSummaryListRows.size shouldBe 1
+      assertKeyAndValue(upfrontPaymentSummaryListRows(0), ("Can you make an upfront payment?", "No"))
+
+      assertMonthlyPaymentSummaryList(monthlyPaymentSummaryListRows)
+      assertPrintLink(doc)
+    }
+
+      def assertPaymentReference(paymentReferenceSummaryListRows: List[Element]): Assertion =
+        assertKeyAndValue(paymentReferenceSummaryListRows(0), ("Payment reference", "123PA44545546"))
+
+      def assertMonthlyPaymentSummaryList(monthlyPaymentSummaryListRows: List[Element]): Assertion = {
+        monthlyPaymentSummaryListRows.size shouldBe 4
+        assertKeyAndValue(monthlyPaymentSummaryListRows(0), ("Payments collected on", "28th or next working day"))
+        assertKeyAndValue(monthlyPaymentSummaryListRows(1), ("August 2022", "£555.73"))
+        assertKeyAndValue(monthlyPaymentSummaryListRows(2), ("September 2022", "£555.73"))
+        assertKeyAndValue(monthlyPaymentSummaryListRows(3), ("Total to pay", "£1,111.47"))
+      }
+
+      def assertPrintLink(doc: Document): Assertion = {
+        val printlink = doc.select("#printLink")
+        printlink.text() shouldBe "Print your plan or save it as a PDF"
+        printlink.attr("href") shouldBe "#print-dialogue"
+      }
   }
 }
