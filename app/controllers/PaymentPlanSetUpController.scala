@@ -18,6 +18,7 @@ package controllers
 
 import _root_.actions.Actions
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
+import essttp.rootmodel.AmountInPence
 import essttp.utils.Errors
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -68,12 +69,24 @@ class PaymentPlanSetUpController @Inject() (
     )
   }
 
-  //this is next ticket, so I'm not making it all correct atm, just basic compilation...
   val printSummary: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
       case j: Journey.BeforeArrangementSubmitted => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
-      case j: Journey.Epaye.SubmittedArrangement => Ok(views.printSummaryPage(None, j.arrangementResponse.customerReference.value))
+      case j: Journey.Epaye.SubmittedArrangement =>
+        Ok(views.printSummaryPage(
+          paymentReference     = j.arrangementResponse.customerReference.value,
+          upfrontPaymentAmount = PaymentPlanSetUpController.deriveUpfrontPaymentFromAnswers(j.upfrontPaymentAnswers),
+          dayOfMonth           = j.dayOfMonth.value,
+          paymentPlan          = j.selectedPaymentPlan
+        ))
     }
   }
 
+}
+
+object PaymentPlanSetUpController {
+  private def deriveUpfrontPaymentFromAnswers(upfrontPaymentAnswers: UpfrontPaymentAnswers): Option[AmountInPence] = upfrontPaymentAnswers match {
+    case j: UpfrontPaymentAnswers.DeclaredUpfrontPayment => Some(j.amount.value)
+    case UpfrontPaymentAnswers.NoUpfrontPayment          => None
+  }
 }

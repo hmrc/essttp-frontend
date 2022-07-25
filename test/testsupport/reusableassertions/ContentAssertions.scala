@@ -16,7 +16,9 @@
 
 package testsupport.reusableassertions
 
+import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
+import org.scalatest.Assertion
 import testsupport.RichMatchers
 
 import scala.jdk.CollectionConverters.iterableAsScalaIterableConverter
@@ -26,5 +28,11 @@ object ContentAssertions extends RichMatchers {
   def assertListOfContent(elements: Elements)(expectedContent: List[String]) = {
     elements.asScala.toList.zip(expectedContent)
       .map { case (element, expectedText) => element.text() shouldBe expectedText }
+  }
+
+  //used for summary lists
+  def assertKeyAndValue(element: Element, keyValue: (String, String)): Assertion = {
+    element.select(".govuk-summary-list__key").text() shouldBe keyValue._1
+    element.select(".govuk-summary-list__value").text() shouldBe keyValue._2
   }
 }
