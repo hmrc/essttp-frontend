@@ -1,4 +1,4 @@
-(function (document, window, navigator) {
+(function (document, window) {
     // polyfill for when forEach is not supported e.g. IE11
     if ('NodeList' in window && !NodeList.prototype.forEach) {
         NodeList.prototype.forEach = function (callback, scope) {
@@ -15,4 +15,4 @@
                 window.print();
             })
         })
-})(document, window, navigator);
+})(document, window);
