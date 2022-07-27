@@ -47,7 +47,7 @@ class TtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)(impl
    * Affordability Api (min/max) implemented by Ttp service.
    * https://confluence.tools.tax.service.gov.uk/pages/viewpage.action?pageId=433455297
    */
-  private val affordabilityUrl: String = appConfig.ttpBaseUrl + "/time-to-pay/self-serve/affordability"
+  private val affordabilityUrl: String = appConfig.BaseUrl.timeToPayUrl + "/debts/time-to-pay/self-serve/affordability"
 
   def callAffordabilityApi(instalmentAmountRequest: InstalmentAmountRequest)(implicit requestHeader: RequestHeader): Future[InstalmentAmounts] = {
     httpClient.POST[InstalmentAmountRequest, InstalmentAmounts](affordabilityUrl, instalmentAmountRequest)
@@ -57,7 +57,7 @@ class TtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)(impl
    * Affordable Quotes API (for instalments) implemented by ttp service.
    * https://confluence.tools.tax.service.gov.uk/display/DTDT/Affordable+quotes+API
    */
-  private val affordableQuotesUrl: String = appConfig.ttpBaseUrl + "/time-to-pay/self-serve/affordable-quotes"
+  private val affordableQuotesUrl: String = appConfig.BaseUrl.timeToPayUrl + "/debts/time-to-pay/affordability/affordable-quotes"
 
   def callAffordableQuotesApi(affordableQuotesRequest: AffordableQuotesRequest)(implicit requestHeader: RequestHeader): Future[AffordableQuotesResponse] = {
     httpClient.POST[AffordableQuotesRequest, AffordableQuotesResponse](affordableQuotesUrl, affordableQuotesRequest)
@@ -67,7 +67,7 @@ class TtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)(impl
    * Enact arrangement API (for setting up the arrangement) implemented by ttp service.
    * https://confluence.tools.tax.service.gov.uk/display/DTDT/Enact+arrangement+API
    */
-  private val arrangementUrl: String = appConfig.ttpBaseUrl + "/time-to-pay/self-serve/arrangement"
+  private val arrangementUrl: String = appConfig.BaseUrl.timeToPayUrl + "/debts/time-to-pay/self-serve/arrangement"
 
   def callArrangementApi(arrangementRequest: ArrangementRequest)(implicit requestHeader: RequestHeader): Future[ArrangementResponse] = {
     httpClient.POST[ArrangementRequest, ArrangementResponse](arrangementUrl, arrangementRequest)
