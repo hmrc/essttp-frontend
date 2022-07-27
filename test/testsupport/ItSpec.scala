@@ -46,7 +46,8 @@ class ItSpec
   protected lazy val configMap: Map[String, Any] = Map[String, Any](
     "microservice.services.auth.port" -> WireMockSupport.port,
     "microservice.services.essttp-backend.port" -> WireMockSupport.port,
-    "microservice.services.ttp.port" -> WireMockSupport.port,
+    "microservice.services.time-to-pay.port" -> WireMockSupport.port,
+    "microservice.services.time-to-pay-eligibility.port" -> WireMockSupport.port,
     "microservice.services.essttp-dates.port" -> WireMockSupport.port,
     "journeyVariables.minimumUpfrontPaymentAmountInPence" -> 100L
   ) ++ configOverrides
@@ -84,13 +85,5 @@ class ItSpec
       sc.copy(configuration = sc.configuration.withFallback(overrideServerConfiguration(app)))
     }
   }
-
-  //  lazy val startPage: StartPage = wire[StartPage]
-  //  lazy val startPage: StartPage = wire[StartPage]
-  //  lazy val startPage: StartPage = wire[StartPage]
-  //  lazy val startPage: StartPage = wire[StartPage]
-  //  lazy val startPage: StartPage = wire[StartPage]
-  //  lazy val startPage: StartPage = wire[StartPage]
-  //  lazy val startPage: StartPage = wire[StartPage]
 
 }
