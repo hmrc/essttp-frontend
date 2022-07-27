@@ -255,12 +255,12 @@ object Messages {
 
   object Epaye {
 
-    val `Set up a PAYE for Employers payment plan`: Message = Message(
-      english = "Set up a PAYE for Employers payment plan"
+    val `Set up an Employers' PAYE payment plan`: Message = Message(
+      english = "Set up an Employers’ PAYE payment plan"
     )
 
     val `You can use this service to pay overdue payments...`: Message = Message(
-      english = "You can use this service to pay overdue payments in instalments over a period of up to 6 months. The payments you make will incur interest."
+      english = "You can use this service to pay overdue payments in instalments over a period of up to 6 months. The payments you make may incur interest."
     )
 
     val `You are eligible to set up an online payment plan if:`: Message = Message(
@@ -281,10 +281,6 @@ object Messages {
 
     val `you have no outstanding penalties`: Message = Message(
       english = "you have no outstanding penalties"
-    )
-
-    val `you are a UK resident`: Message = Message(
-      english = "you are a UK resident"
     )
 
     val `You can use this service within 35 days of the overdue payment deadline.`: Message = Message(
