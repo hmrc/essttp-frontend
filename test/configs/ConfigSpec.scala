@@ -40,6 +40,7 @@ class ConfigSpec extends ItSpec {
       ("baseUrl.feedback-frontend", config.BaseUrl.feedbackFrontend, "http://localhost:9514"),
       ("baseUrl.gg", config.BaseUrl.gg, "http://localhost:9949/auth-login-stub/gg-sign-in"),
       ("baseUrl.business-tax-account-frontend", config.BaseUrl.businessTaxAccountFrontend, "http://localhost:9020"),
+      ("baseUrl.timeToPayEligibilityUrl", config.BaseUrl.timeToPayEligibilityUrl, "http://localhost:9218"),
 
       ("Urls.loginUrl", config.Urls.loginUrl, "http://localhost:9949/auth-login-stub/gg-sign-in"),
       ("Urls.signOutUrl", config.Urls.signOutUrl, "http://localhost:9949/auth-login-stub/session/logout"),

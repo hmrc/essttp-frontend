@@ -45,6 +45,8 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     val feedbackFrontend: String = platformHost.getOrElse(config.get[String]("baseUrl.feedback-frontend"))
     val gg: String = config.get[String]("baseUrl.gg")
     val businessTaxAccountFrontend: String = platformHost.getOrElse(config.get[String]("baseUrl.business-tax-account-frontend"))
+
+    val timeToPayEligibilityUrl: String = s"${servicesConfig.baseUrl("time-to-pay-eligibility")}"
   }
 
   object Urls {

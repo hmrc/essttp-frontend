@@ -22,7 +22,7 @@ import testsupport.testdata.TtpJsonResponses
 
 object Ttp {
 
-  private val eligibilityUrl: String = "/time-to-pay/self-serve/eligibility"
+  private val eligibilityUrl: String = "/debts/time-to-pay/eligibility"
   private val affordabilityUrl: String = "/time-to-pay/self-serve/affordability"
   private val affordableQuotesUrl: String = "/time-to-pay/self-serve/affordable-quotes"
   private val enactArrangementUrl: String = "/time-to-pay/self-serve/arrangement"

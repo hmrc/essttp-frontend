@@ -27,9 +27,9 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class EssttpStubConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig) {
 
-  val ttpUrl: String = s"${appConfig.ttpBaseUrl}/time-to-pay/self-serve/eligibility"
+  val ttpEligibilityUrl: String = s"${appConfig.BaseUrl.timeToPayEligibilityUrl}/debts/time-to-pay/eligibility"
 
   def primeStubs(response: EligibilityCheckResult)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
-    httpClient.POST[EligibilityCheckResult, Unit](s"$ttpUrl/insert", response)
+    httpClient.POST[EligibilityCheckResult, Unit](s"$ttpEligibilityUrl/insert", response)
 
 }

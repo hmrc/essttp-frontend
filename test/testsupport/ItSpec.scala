@@ -47,6 +47,7 @@ class ItSpec
     "microservice.services.auth.port" -> WireMockSupport.port,
     "microservice.services.essttp-backend.port" -> WireMockSupport.port,
     "microservice.services.ttp.port" -> WireMockSupport.port,
+    "microservice.services.time-to-pay-eligibility.port" -> WireMockSupport.port,
     "microservice.services.essttp-dates.port" -> WireMockSupport.port,
     "journeyVariables.minimumUpfrontPaymentAmountInPence" -> 100L
   ) ++ configOverrides
