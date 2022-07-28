@@ -554,7 +554,8 @@ object Messages {
       "accountNumber.error.required" -> Message("Enter account number"),
       "accountNumber.error.nonNumeric" -> Message("Account number must be a number"),
       "accountNumber.error.invalid" -> Message("Account number must be between 6 and 8 digits"),
-      "isSoleSignatory.error.required" -> Message("Select yes if you are the account holder")
+      "isSoleSignatory.error.required" -> Message("Select yes if you are the account holder"),
+      "bars.validate.error1" -> Message("Some type of BARs error"),
     )
 
     val `Check your Direct Debit details`: Message = Message(
