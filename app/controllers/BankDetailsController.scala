@@ -99,31 +99,34 @@ class BankDetailsController @Inject() (
   }
 
   val enterBankDetailsSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
-    BankDetailsForm.form
-      .bindFromRequest()
-      .fold(
-        formWithErrors =>
-          Future.successful(Ok(views.enterBankDetailsPage(formWithErrors, BankDetailsController.chooseTypeOfAccountUrl))),
-        (bankDetailsForm: BankDetailsForm) => {
+    val validForm = BankDetailsForm.form.bindFromRequest()
 
-          val directDebitDetails: DirectDebitDetails = DirectDebitDetails(
-            BankDetails(
-              name          = bankDetailsForm.name,
-              sortCode      = bankDetailsForm.sortCode,
-              accountNumber = bankDetailsForm.accountNumber
-            ),
-            bankDetailsForm.isSoleSignatory.asBoolean
-          )
+    validForm.fold(
+      hasErrors = (formWithErrors: Form[BankDetailsForm]) =>
+        Future.successful(Ok(views.enterBankDetailsPage(formWithErrors, BankDetailsController.chooseTypeOfAccountUrl))),
 
-          journeyService.updateDirectDebitDetails(request.journeyId, directDebitDetails)
-            .map { _ =>
-              bankDetailsForm.isSoleSignatory match {
-                case IsSoleSignatoryFormValue.Yes => Redirect(routes.BankDetailsController.checkBankDetails)
-                case IsSoleSignatoryFormValue.No  => Redirect(routes.BankDetailsController.cannotSetupDirectDebitOnlinePage)
-              }
+      success = (bankDetailsForm: BankDetailsForm) => {
+
+        val directDebitDetails: DirectDebitDetails = DirectDebitDetails(
+          BankDetails(
+            name          = bankDetailsForm.name,
+            sortCode      = bankDetailsForm.sortCode,
+            accountNumber = bankDetailsForm.accountNumber
+          ),
+          bankDetailsForm.isSoleSignatory.asBoolean
+        )
+
+        journeyService.updateDirectDebitDetails(request.journeyId, directDebitDetails)
+          .map { _ =>
+            bankDetailsForm.isSoleSignatory match {
+              case IsSoleSignatoryFormValue.Yes => Redirect(routes.BankDetailsController.checkBankDetails)
+              case IsSoleSignatoryFormValue.No =>
+                //Redirect(routes.BankDetailsController.cannotSetupDirectDebitOnlinePage)
+                Ok(views.enterBankDetailsPage(validForm.withError("bars", "validate.error1"), BankDetailsController.chooseTypeOfAccountUrl))
             }
-        }
-      )
+          }
+      }
+    )
   }
 
   val checkBankDetails: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
