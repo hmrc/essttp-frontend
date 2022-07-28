@@ -69,7 +69,7 @@ object TdJsonBodies {
       |""".stripMargin
   }
 
-  def taxIdJourneyInfo(taxId: String = "123/456"): JourneyInfoAsJson =
+  def taxIdJourneyInfo(taxId: String = "864FZ00049"): JourneyInfoAsJson =
     s"""
       |"taxId": {
       |      "value": "$taxId"

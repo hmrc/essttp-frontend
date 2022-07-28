@@ -32,12 +32,10 @@
 
 package controllers
 
-import _root_.actions.{Actions, EnrolmentDef}
+import _root_.actions.Actions
 import essttp.journey.model.Journey
-import essttp.rootmodel.EmpRef
 import play.api.mvc._
-import services.{JourneyService, TtpService}
-import uk.gov.hmrc.auth.core.Enrolments
+import services.{EnrolmentService, JourneyService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.{JourneyLogger, Logging}
 import views.Views
@@ -47,39 +45,23 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class DetermineTaxIdController @Inject() (
-    as:             Actions,
-    mcc:            MessagesControllerComponents,
-    ttpService:     TtpService,
-    journeyService: JourneyService,
-    views:          Views
+    as:               Actions,
+    mcc:              MessagesControllerComponents,
+    journeyService:   JourneyService,
+    enrolmentService: EnrolmentService,
+    views:            Views
 )(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 
   def determineTaxId(): Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     val f = request.journey match {
-      case j: Journey.Stages.Started => determineTaxId(j, request.enrolments)
+      case j: Journey.Stages.Started => enrolmentService.determineTaxId(j, request.enrolments)
       case _: Journey.AfterComputedTaxId =>
         JourneyLogger.info("TaxId already determined, skipping.")
         Future.successful(())
     }
 
     f.map(_ => Redirect(routes.DetermineEligibilityController.determineEligibility()))
-  }
-
-  private def determineTaxId(journey: Journey.Stages.Started, enrolments: Enrolments)(implicit request: RequestHeader): Future[Unit] = {
-    //todo move this to enrolment service or something
-    val computeEmpRef: Future[EmpRef] = Future{
-      val (taxOfficeNumber, taxOfficeReference) = EnrolmentDef
-        .Epaye
-        .findEnrolmentValues(enrolments)
-        .getOrElse(throw new RuntimeException("TaxOfficeNumber and TaxOfficeReference not found"))
-      EmpRef.makeEmpRef(taxOfficeNumber, taxOfficeReference)
-    }
-
-    for {
-      empRef <- computeEmpRef
-      _ <- journeyService.UpdateTaxRef.updateEpayeTaxId(journey.id, empRef)
-    } yield ()
   }
 }
