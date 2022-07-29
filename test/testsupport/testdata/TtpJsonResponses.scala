@@ -16,7 +16,7 @@
 
 package testsupport.testdata
 
-import essttp.journey.model.ttp.{EligibilityRules, OverallEligibilityStatus}
+import essttp.rootmodel.ttp.{EligibilityRules, OverallEligibilityStatus}
 
 object TtpJsonResponses {
 

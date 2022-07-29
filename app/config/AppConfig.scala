@@ -73,4 +73,8 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   object JourneyVariables {
     val minimumUpfrontPaymentAmountInPence: AmountInPence = AmountInPence(config.get[Long]("journeyVariables.minimumUpfrontPaymentAmountInPence"))
   }
+
+  object TtpHeaders {
+    val correlationId: String = config.get[String]("ttp.headers.correlationId")
+  }
 }

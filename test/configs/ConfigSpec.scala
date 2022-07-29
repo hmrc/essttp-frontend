@@ -50,7 +50,8 @@ class ConfigSpec extends ItSpec {
       ("Urls.extraSupportUrl", config.Urls.extraSupportUrl, "https://www.gov.uk/get-help-hmrc-extra-support"),
       ("Urls.relayUrl", config.Urls.relayUrl, "https://www.relayuk.bt.com/"),
 
-      ("JourneyVariables.minimumUpfrontPaymentAmountInPence", config.JourneyVariables.minimumUpfrontPaymentAmountInPence, AmountInPence(100L))
+      ("JourneyVariables.minimumUpfrontPaymentAmountInPence", config.JourneyVariables.minimumUpfrontPaymentAmountInPence, AmountInPence(100L)),
+      ("Ttp.headers.correlationId", config.TtpHeaders.correlationId, "correlationId")
 
     )
     configsToTest.foreach { (configData: (String, Any, Any)) =>

@@ -18,7 +18,7 @@ package testsupport.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import testsupport.testdata.TtpJsonResponses
+import testsupport.testdata.{TdAll, TtpJsonResponses}
 
 object Ttp {
 
@@ -26,47 +26,61 @@ object Ttp {
   private val affordabilityUrl: String = "/debts/time-to-pay/self-serve/affordability"
   private val affordableQuotesUrl: String = "/debts/time-to-pay/affordability/affordable-quotes"
   private val enactArrangementUrl: String = "/debts/time-to-pay/self-serve/arrangement"
+  private val ttpCorrelationIdHeader: (String, String) = ("correlationId", TdAll.correlationId.value.toString)
 
-  def retrieveEligibility(jsonBody: String = TtpJsonResponses.ttpEligibilityCallJson()): StubMapping = stubFor(
-    post(urlPathEqualTo(eligibilityUrl))
-      .willReturn(aResponse()
-        .withStatus(200)
-        .withBody(jsonBody))
+  def ttpVerify(url: String): Unit = verify(
+    postRequestedFor(urlPathEqualTo(url))
+      .withHeader(ttpCorrelationIdHeader._1, equalTo(ttpCorrelationIdHeader._2))
   )
 
-  //todo add withRequestbody - tie in with backend test data cor?
-  def verifyTtpEligibilityRequests(): Unit = verify(postRequestedFor(urlPathEqualTo(eligibilityUrl)))
+  object Eligibility {
+    def retrieveEligibility(jsonBody: String = TtpJsonResponses.ttpEligibilityCallJson()): StubMapping = stubFor(
+      post(urlPathEqualTo(eligibilityUrl))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withBody(jsonBody))
+    )
 
-  def retrieveAffordability(jsonBody: String = TtpJsonResponses.ttpAffordabilityResponseJson()): StubMapping = stubFor(
-    post(urlPathEqualTo(affordabilityUrl))
-      .willReturn(aResponse()
-        .withStatus(200)
-        .withBody(jsonBody))
-  )
+    def verifyTtpEligibilityRequests(): Unit = ttpVerify(eligibilityUrl)
+  }
 
-  def verifyTtpAffordabilityRequest(): Unit = verify(postRequestedFor(urlPathEqualTo(affordabilityUrl)))
+  object Affordability {
+    def retrieveAffordability(jsonBody: String = TtpJsonResponses.ttpAffordabilityResponseJson()): StubMapping = stubFor(
+      post(urlPathEqualTo(affordabilityUrl))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withBody(jsonBody))
+    )
 
-  def retrieveAffordableQuotes(jsonBody: String = TtpJsonResponses.ttpAffordableQuotesResponseJson()): StubMapping = stubFor(
-    post(urlPathEqualTo(affordableQuotesUrl))
-      .willReturn(aResponse()
-        .withStatus(200)
-        .withBody(jsonBody))
-  )
+    def verifyTtpAffordabilityRequest(): Unit = ttpVerify(affordabilityUrl)
+  }
 
-  def verifyTtpAffordableQuotesRequest(): Unit = verify(postRequestedFor(urlPathEqualTo(affordableQuotesUrl)))
+  object AffordableQuotes {
+    def retrieveAffordableQuotes(jsonBody: String = TtpJsonResponses.ttpAffordableQuotesResponseJson()): StubMapping = stubFor(
+      post(urlPathEqualTo(affordableQuotesUrl))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withBody(jsonBody))
+    )
 
-  def enactArrangement(jsonBody: String = TtpJsonResponses.ttpEnactArrangementResponseJson()): StubMapping = stubFor(
-    post(urlPathEqualTo(enactArrangementUrl))
-      .willReturn(aResponse()
-        .withStatus(202)
-        .withBody(jsonBody))
-  )
-  def enactArrangementFail(): StubMapping = stubFor(
-    post(urlPathEqualTo(enactArrangementUrl))
-      .willReturn(aResponse()
-        .withStatus(400))
-  )
+    def verifyTtpAffordableQuotesRequest(): Unit = ttpVerify(affordableQuotesUrl)
+  }
 
-  def verifyTtpEnactArrangementRequest(): Unit = verify(postRequestedFor(urlPathEqualTo(enactArrangementUrl)))
+  object EnactArrangement {
+    def enactArrangement(jsonBody: String = TtpJsonResponses.ttpEnactArrangementResponseJson()): StubMapping = stubFor(
+      post(urlPathEqualTo(enactArrangementUrl))
+        .willReturn(aResponse()
+          .withStatus(202)
+          .withBody(jsonBody))
+    )
+
+    def enactArrangementFail(): StubMapping = stubFor(
+      post(urlPathEqualTo(enactArrangementUrl))
+        .willReturn(aResponse()
+          .withStatus(400))
+    )
+
+    def verifyTtpEnactArrangementRequest(): Unit = ttpVerify(enactArrangementUrl)
+  }
 
 }

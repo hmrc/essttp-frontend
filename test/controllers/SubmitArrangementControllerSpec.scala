@@ -37,26 +37,26 @@ class SubmitArrangementControllerSpec extends ItSpec {
       AuthStub.authorise()
       EssttpBackend.TermsAndConditions.findJourney()
       EssttpBackend.SubmitArrangement.updateSubmitArrangement(TdAll.journeyId)
-      Ttp.enactArrangement()
+      Ttp.EnactArrangement.enactArrangement()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.submitArrangement(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.confirmationUrl)
 
-      Ttp.verifyTtpEnactArrangementRequest()
+      Ttp.EnactArrangement.verifyTtpEnactArrangementRequest()
       EssttpBackend.SubmitArrangement.verifyUpdateSubmitArrangementRequest(TdAll.journeyId)
     }
 
     "should not update backend if call to ttp enact arrangement api fails (anything other than a 202 response)" in {
       AuthStub.authorise()
       EssttpBackend.TermsAndConditions.findJourney()
-      Ttp.enactArrangementFail()
+      Ttp.EnactArrangement.enactArrangementFail()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.submitArrangement(fakeRequest)
       assertThrows[UpstreamErrorResponse](await(result))
-      Ttp.verifyTtpEnactArrangementRequest()
+      Ttp.EnactArrangement.verifyTtpEnactArrangementRequest()
       EssttpBackend.SubmitArrangement.verifyNoneUpdateSubmitArrangementRequest(TdAll.journeyId)
     }
   }

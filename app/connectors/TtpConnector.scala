@@ -18,10 +18,11 @@ package connectors
 
 import com.google.inject.{Inject, Singleton}
 import config.AppConfig
-import essttp.journey.model.ttp.EligibilityCheckResult
-import essttp.journey.model.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
-import essttp.journey.model.ttp.affordablequotes.{AffordableQuotesRequest, AffordableQuotesResponse}
-import essttp.journey.model.ttp.arrangement.{ArrangementRequest, ArrangementResponse}
+import essttp.journey.model.CorrelationId
+import essttp.rootmodel.ttp.EligibilityCheckResult
+import essttp.rootmodel.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
+import essttp.rootmodel.ttp.affordablequotes.{AffordableQuotesRequest, AffordableQuotesResponse}
+import essttp.rootmodel.ttp.arrangement.{ArrangementRequest, ArrangementResponse}
 import play.api.mvc.RequestHeader
 import requests.RequestSupport._
 import uk.gov.hmrc.http.HttpClient
@@ -33,14 +34,21 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class TtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)(implicit ec: ExecutionContext) {
 
+  private val correlationIdHeaderKey: String = appConfig.TtpHeaders.correlationId
+
   /**
    * Eligibility Api implemented by Ttp service.
    * https://confluence.tools.tax.service.gov.uk/display/DTDT/Eligibility+API
    */
   private val eligibilityUrl: String = appConfig.BaseUrl.timeToPayEligibilityUrl + "/debts/time-to-pay/eligibility"
 
-  def callEligibilityApi(eligibilityRequest: CallEligibilityApiRequest)(implicit requestHeader: RequestHeader): Future[EligibilityCheckResult] = {
-    httpClient.POST[CallEligibilityApiRequest, EligibilityCheckResult](eligibilityUrl, eligibilityRequest)
+  def callEligibilityApi(eligibilityRequest: CallEligibilityApiRequest, correlationId: CorrelationId)
+    (implicit requestHeader: RequestHeader): Future[EligibilityCheckResult] = {
+    httpClient.POST[CallEligibilityApiRequest, EligibilityCheckResult](
+      url     = eligibilityUrl,
+      body    = eligibilityRequest,
+      headers = Seq((correlationIdHeaderKey, correlationId.value.toString))
+    )
   }
 
   /**
@@ -49,8 +57,13 @@ class TtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)(impl
    */
   private val affordabilityUrl: String = appConfig.BaseUrl.timeToPayUrl + "/debts/time-to-pay/self-serve/affordability"
 
-  def callAffordabilityApi(instalmentAmountRequest: InstalmentAmountRequest)(implicit requestHeader: RequestHeader): Future[InstalmentAmounts] = {
-    httpClient.POST[InstalmentAmountRequest, InstalmentAmounts](affordabilityUrl, instalmentAmountRequest)
+  def callAffordabilityApi(instalmentAmountRequest: InstalmentAmountRequest, correlationId: CorrelationId)
+    (implicit requestHeader: RequestHeader): Future[InstalmentAmounts] = {
+    httpClient.POST[InstalmentAmountRequest, InstalmentAmounts](
+      url     = affordabilityUrl,
+      body    = instalmentAmountRequest,
+      headers = Seq((correlationIdHeaderKey, correlationId.value.toString))
+    )
   }
 
   /**
@@ -59,8 +72,13 @@ class TtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)(impl
    */
   private val affordableQuotesUrl: String = appConfig.BaseUrl.timeToPayUrl + "/debts/time-to-pay/affordability/affordable-quotes"
 
-  def callAffordableQuotesApi(affordableQuotesRequest: AffordableQuotesRequest)(implicit requestHeader: RequestHeader): Future[AffordableQuotesResponse] = {
-    httpClient.POST[AffordableQuotesRequest, AffordableQuotesResponse](affordableQuotesUrl, affordableQuotesRequest)
+  def callAffordableQuotesApi(affordableQuotesRequest: AffordableQuotesRequest, correlationId: CorrelationId)
+    (implicit requestHeader: RequestHeader): Future[AffordableQuotesResponse] = {
+    httpClient.POST[AffordableQuotesRequest, AffordableQuotesResponse](
+      url     = affordableQuotesUrl,
+      body    = affordableQuotesRequest,
+      headers = Seq((correlationIdHeaderKey, correlationId.value.toString))
+    )
   }
 
   /**
@@ -69,7 +87,12 @@ class TtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)(impl
    */
   private val arrangementUrl: String = appConfig.BaseUrl.timeToPayUrl + "/debts/time-to-pay/self-serve/arrangement"
 
-  def callArrangementApi(arrangementRequest: ArrangementRequest)(implicit requestHeader: RequestHeader): Future[ArrangementResponse] = {
-    httpClient.POST[ArrangementRequest, ArrangementResponse](arrangementUrl, arrangementRequest)
+  def callArrangementApi(arrangementRequest: ArrangementRequest, correlationId: CorrelationId)
+    (implicit requestHeader: RequestHeader): Future[ArrangementResponse] = {
+    httpClient.POST[ArrangementRequest, ArrangementResponse](
+      url     = arrangementUrl,
+      body    = arrangementRequest,
+      headers = Seq((correlationIdHeaderKey, correlationId.value.toString))
+    )
   }
 }
