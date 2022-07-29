@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
-package actionsmodel
+package models.audit.eligibility
 
-import models.GGCredId
-import play.api.mvc.{Request, WrappedRequest}
-import uk.gov.hmrc.auth.core.Enrolments
+import play.api.libs.json.{Json, OWrites}
 
-class AuthenticatedRequest[A](
-    val request:    Request[A],
-    val enrolments: Enrolments,
-    val ggCredId:   GGCredId
-) extends WrappedRequest[A](request)
+final case class TaxDetail(
+    utr:               Option[String],
+    taxOfficeNo:       Option[String],
+    taxOfficeRef:      Option[String],
+    employerRef:       Option[String],
+    accountsOfficeRef: Option[String],
+    vrn:               Option[String]
+)
+
+object TaxDetail {
+
+  implicit val writes: OWrites[TaxDetail] = Json.writes
+
+}

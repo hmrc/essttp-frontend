@@ -48,7 +48,10 @@ class ItSpec
     "microservice.services.essttp-backend.port" -> WireMockSupport.port,
     "microservice.services.ttp.port" -> WireMockSupport.port,
     "microservice.services.essttp-dates.port" -> WireMockSupport.port,
-    "journeyVariables.minimumUpfrontPaymentAmountInPence" -> 100L
+    "auditing.consumer.baseUri.port" -> WireMockSupport.port,
+    "journeyVariables.minimumUpfrontPaymentAmountInPence" -> 100L,
+    "auditing.enabled" -> true,
+    "auditing.traceRequests" -> false
   ) ++ configOverrides
 
   //in tests use `app`

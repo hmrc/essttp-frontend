@@ -39,7 +39,7 @@ class GetJourneyActionRefiner @Inject() (journeyConnector: JourneyConnector)(
     for {
       maybeJourney: Option[Journey] <- journeyConnector.findLatestJourneyBySessionId()
     } yield maybeJourney match {
-      case Some(journey) => Right(new AuthenticatedJourneyRequest(request, request.enrolments, journey))
+      case Some(journey) => Right(new AuthenticatedJourneyRequest(request, request.enrolments, journey, request.ggCredId))
       case None =>
         logger.error(s"No journey found for sessionId: [ ${hc.sessionId} ]")
         Left(Results.Redirect(controllers.routes.EpayeGovUkController.startJourney()))
