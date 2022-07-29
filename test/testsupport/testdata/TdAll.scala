@@ -17,16 +17,18 @@
 package testsupport.testdata
 
 import actions.EnrolmentDef
-import essttp.journey.model.JourneyId
-import essttp.journey.model.ttp.{EligibilityRules, OverallEligibilityStatus}
+import essttp.journey.model.{CorrelationId, JourneyId}
+import essttp.rootmodel.ttp.{EligibilityRules, OverallEligibilityStatus}
 import essttp.rootmodel.{AmountInPence, CanPayUpfront, DayOfMonth, UpfrontPaymentAmount}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
+
+import java.util.UUID
 
 object TdAll {
 
   val expectedServiceNamePaye: String = "Set up an Employers’ PAYE payment plan"
-
   val journeyId: JourneyId = JourneyId("6284fcd33c00003d6b1f3903")
+  val correlationId: CorrelationId = CorrelationId(UUID.fromString("8d89a98b-0b26-4ab2-8114-f7c7c81c3059"))
 
   private val `IR-PAYE-TaxOfficeNumber`: EnrolmentDef = EnrolmentDef(enrolmentKey  = "IR-PAYE", identifierKey = "TaxOfficeNumber")
   private val `IR-PAYE-TaxOfficeReference`: EnrolmentDef = EnrolmentDef(enrolmentKey  = "IR-PAYE", identifierKey = "TaxOfficeReference")
@@ -34,8 +36,8 @@ object TdAll {
   val payeEnrolment: Enrolment = Enrolment(
     key               = "IR-PAYE",
     identifiers       = List(
-      EnrolmentIdentifier(`IR-PAYE-TaxOfficeNumber`.identifierKey, "123"),
-      EnrolmentIdentifier(`IR-PAYE-TaxOfficeReference`.identifierKey, "456")
+      EnrolmentIdentifier(`IR-PAYE-TaxOfficeNumber`.identifierKey, "864"),
+      EnrolmentIdentifier(`IR-PAYE-TaxOfficeReference`.identifierKey, "FZ00049")
     ),
     state             = "Activated",
     delegatedAuthRule = None

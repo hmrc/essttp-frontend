@@ -17,7 +17,7 @@
 package controllers.pagerouters
 
 import controllers.routes
-import essttp.journey.model.ttp.EligibilityCheckResult
+import essttp.rootmodel.ttp.EligibilityCheckResult
 import models.EligibilityErrors
 import models.EligibilityErrors.{DisallowedChargeLocks, IneligibleChargeTypes, ChargesOverMaxDebtAge, ExistingTtp, HasRlsOnAddress, IsLessThanMinDebtAllowance, IsMoreThanMaxDebtAllowance, MarkedAsInsolvent, MissingFiledReturns, MultipleReasons}
 import play.api.mvc.Results.Redirect

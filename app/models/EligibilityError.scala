@@ -20,8 +20,8 @@ import enumeratum.EnumEntry
 import play.api.libs.functional.syntax._
 import enumeratum.Enum
 import play.api.libs.json.Format
-import _root_.essttp.journey.model.ttp._
 import cats.Eq
+import essttp.rootmodel.ttp.EligibilityRules
 
 import scala.collection.immutable
 

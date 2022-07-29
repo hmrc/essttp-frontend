@@ -17,11 +17,11 @@
 package testOnly.controllers
 
 import _root_.actions.Actions
-import _root_.essttp.journey.model.ttp._
+import _root_.essttp.rootmodel.ttp._
 import _root_.testOnly.views.html.IAmBtaPage
 import config.AppConfig
 import essttp.journey.JourneyConnector
-import essttp.journey.model.ttp.affordablequotes.DueDate
+import essttp.rootmodel.ttp.affordablequotes.DueDate
 import essttp.journey.model.{Origins, SjRequest}
 import essttp.rootmodel.{AmountInPence, BackUrl, ReturnUrl}
 import models.EligibilityErrors._

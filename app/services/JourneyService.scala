@@ -19,10 +19,10 @@ package services
 import com.google.inject.{Inject, Singleton}
 import essttp.journey.JourneyConnector
 import essttp.journey.model.JourneyId
-import essttp.journey.model.ttp.EligibilityCheckResult
-import essttp.journey.model.ttp.affordability.InstalmentAmounts
-import essttp.journey.model.ttp.affordablequotes.{AffordableQuotesResponse, PaymentPlan}
-import essttp.journey.model.ttp.arrangement.ArrangementResponse
+import essttp.rootmodel.ttp.EligibilityCheckResult
+import essttp.rootmodel.ttp.affordability.InstalmentAmounts
+import essttp.rootmodel.ttp.affordablequotes.{AffordableQuotesResponse, PaymentPlan}
+import essttp.rootmodel.ttp.arrangement.ArrangementResponse
 import essttp.rootmodel.bank.{DirectDebitDetails, TypeOfBankAccount}
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
 import essttp.rootmodel.dates.startdates.StartDatesResponse

@@ -16,7 +16,7 @@
 
 package testsupport.testdata
 
-import essttp.journey.model.ttp.{EligibilityRules, OverallEligibilityStatus}
+import essttp.rootmodel.ttp.{EligibilityRules, OverallEligibilityStatus}
 import essttp.rootmodel.{DayOfMonth, UpfrontPaymentAmount}
 import testsupport.testdata.JourneyInfo.JourneyInfoAsJson
 
@@ -60,6 +60,7 @@ object TdJsonBodies {
       |      }
       |    },
       |    "sessionId": "IamATestSessionId",
+      |    "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
       |    $jsonFormatted
       |  },
       |  "sessionId": "IamATestSessionId",

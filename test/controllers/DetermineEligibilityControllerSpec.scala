@@ -16,7 +16,7 @@
 
 package controllers
 
-import essttp.journey.model.ttp.EligibilityRules
+import essttp.rootmodel.ttp.EligibilityRules
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.http.Status
 import play.api.test.FakeRequest
@@ -48,13 +48,13 @@ class DetermineEligibilityControllerSpec extends ItSpec {
           s"Eligibility failure: [$sf] should redirect to $expectedRedirect" in {
             AuthStub.authorise()
             EssttpBackend.DetermineTaxId.findJourney()
-            Ttp.retrieveEligibility(TtpJsonResponses.ttpEligibilityCallJson(TdAll.notEligibleOverallEligibilityStatus, eligibilityRules))
+            Ttp.Eligibility.retrieveEligibility(TtpJsonResponses.ttpEligibilityCallJson(TdAll.notEligibleOverallEligibilityStatus, eligibilityRules))
             EssttpBackend.EligibilityCheck.updateEligibilityResult(TdAll.journeyId)
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result = controller.determineEligibility(fakeRequest)
             status(result) shouldBe Status.SEE_OTHER
             redirectLocation(result) shouldBe Some(expectedRedirect)
-            Ttp.verifyTtpEligibilityRequests()
+            Ttp.Eligibility.verifyTtpEligibilityRequests()
           }
         }
     }
