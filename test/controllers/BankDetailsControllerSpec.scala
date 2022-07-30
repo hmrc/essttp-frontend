@@ -24,7 +24,7 @@ import play.api.mvc.{Action, AnyContent, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
-import testsupport.stubs.{AuthStub, EssttpBackend}
+import testsupport.stubs.{AuthStub, Bars, EssttpBackend}
 import uk.gov.hmrc.http.SessionKeys
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
@@ -241,6 +241,8 @@ class BankDetailsControllerSpec extends ItSpec {
       AuthStub.authorise()
       EssttpBackend.ChosenTypeOfBankAccount.findJourney()
       EssttpBackend.DirectDebitDetails.updateDirectDebitDetails(TdAll.journeyId)
+      Bars.Validate.validateSuccess()
+
       val fakeRequest = FakeRequest(
         method = "POST",
         path   = "/set-up-direct-debit"

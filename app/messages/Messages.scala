@@ -17,6 +17,7 @@
 package messages
 
 import essttp.rootmodel.AmountInPence
+import play.api.data.FormError
 
 object Messages {
 
@@ -545,6 +546,11 @@ object Messages {
       english = "Select yes if you are the account holder"
     )
 
+    // TODO rename
+    val sortCodeIsPresentOnEiscdNoError: FormError = FormError("bars", "validate.sortCodeIsPresentOnEISCD.no")
+    val accountNumberIsWellFormattedNoError: FormError = FormError("bars", "validate.accountNumberIsWellFormatted.no")
+    val sortCodeSupportsDirectDebitNoError: FormError = FormError("bars", "validate.sortCodeSupportsDirectDebit.no")
+
     val errors: Map[String, Message] = Map(
       "name.error.required" -> Message("Enter the name on the account"),
       "name.error.pattern" -> Message("Name on the account must only include letters, apostrophes, spaces and hyphens"),
@@ -555,7 +561,13 @@ object Messages {
       "accountNumber.error.nonNumeric" -> Message("Account number must be a number"),
       "accountNumber.error.invalid" -> Message("Account number must be between 6 and 8 digits"),
       "isSoleSignatory.error.required" -> Message("Select yes if you are the account holder"),
-      "bars.validate.error1" -> Message("Some type of BARs error"),
+
+      s"bars.${sortCodeIsPresentOnEiscdNoError.message}" -> Message("Enter a valid combination of bank account number and sort code"),
+      s"bars.${accountNumberIsWellFormattedNoError.message}" -> Message("Enter a valid combination of bank account number and sort code"),
+      s"bars.${sortCodeSupportsDirectDebitNoError.message}" -> Message(
+        "You have entered a sort code which does not accept this type of payment. " +
+          "Check you have entered a valid sort code or enter details for a different account"
+      )
     )
 
     val `Check your Direct Debit details`: Message = Message(

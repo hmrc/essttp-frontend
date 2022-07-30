@@ -17,8 +17,12 @@
 package services
 
 import connectors.BarsConnector
+import models.bars.BarsModel.{BarsResponse, BarsValidateRequest}
+import essttp.rootmodel.bank.BankDetails
+import play.api.mvc.RequestHeader
 
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future
 
 /**
  * Bank Account Reputation service (BARs).
@@ -26,5 +30,10 @@ import javax.inject.{Inject, Singleton}
 @Singleton
 class BarsService @Inject() (barsConnector: BarsConnector) {
 
+  /**
+   * Call BARs to assess the correctness, existence and reputation of bank account details
+   * TODO Initially only a 'validate' call. Next step, implement the `verify` call
+   */
+  def assessBankAccountReputation(bankDetails: BankDetails)(implicit requestHeader: RequestHeader): Future[BarsResponse] =
+    barsConnector.validateBankDetails(BarsValidateRequest(bankDetails))
 }
-
