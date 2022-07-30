@@ -1,0 +1,61 @@
+POST localhost:9871/validate/bank-details
+Content-Type: application/json
+
+# "sortCode": "207102", "accountNumber": "44344655" -----> OK
+{
+  "account": {
+    "sortCode": "207102",
+    "accountNumber": "44344655"
+  }
+}
+
+<> 2022-07-29T193135.200.json
+
+###
+
+POST localhost:9871/validate/bank-details
+Content-Type: application/json
+
+# "sortCode": "206705", "accountNumber": "44311611" -----> "sortCodeSupportsDirectDebit": "no"
+{
+  "account": {
+    "sortCode": "206705",
+    "accountNumber": "44311611"
+  }
+}
+
+###
+
+POST localhost:9871/validate/bank-details
+Content-Type: application/json
+
+# "sortCode": "609593", "accountNumber": "44311611" -----> "accountNumberIsWellFormatted": "no"
+{
+  "account": {
+    "sortCode": "609593",
+    "accountNumber": "44311611"
+  }
+}
+
+<> 2022-07-29T193317.200.json
+
+###
+
+POST localhost:9871/validate/bank-details
+Content-Type: application/json
+
+# "sortCode": "309696", "accountNumber": "44333611" -----> "sortCodeIsPresentOnEISCD": "no"
+{
+  "account": {
+    "sortCode": "309696",
+    "accountNumber": "44333611"
+  }
+}
+
+<> 2022-07-29T193956.200.json
+<> 2022-07-29T193657.200.json
+<> 2022-07-29T193617.200.json
+<> 2022-07-29T193549.200.json
+
+###
+
