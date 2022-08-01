@@ -547,8 +547,8 @@ object Messages {
     )
 
     // BARs
-    val sortCodeNotPresentOnEiscd: FormError = FormError("bars", "validate.sortCodeIsPresentOnEISCD.no")
     val accountNumberNotWellFormatted: FormError = FormError("bars", "validate.accountNumberIsWellFormatted.no")
+    val sortCodeNotPresentOnEiscd: FormError = FormError("bars", "validate.sortCodeIsPresentOnEISCD.no")
     val sortCodeDoesNotSupportsDirectDebit: FormError = FormError("bars", "validate.sortCodeSupportsDirectDebit.no")
 
     val errors: Map[String, Message] = Map(
@@ -561,9 +561,8 @@ object Messages {
       "accountNumber.error.nonNumeric" -> Message("Account number must be a number"),
       "accountNumber.error.invalid" -> Message("Account number must be between 6 and 8 digits"),
       "isSoleSignatory.error.required" -> Message("Select yes if you are the account holder"),
-
-      s"bars.${sortCodeNotPresentOnEiscd.message}" -> Message("Enter a valid combination of bank account number and sort code"),
       s"bars.${accountNumberNotWellFormatted.message}" -> Message("Enter a valid combination of bank account number and sort code"),
+      s"bars.${sortCodeNotPresentOnEiscd.message}" -> Message("Enter a valid combination of bank account number and sort code"),
       s"bars.${sortCodeDoesNotSupportsDirectDebit.message}" -> Message(
         "You have entered a sort code which does not accept this type of payment. " +
           "Check you have entered a valid sort code or enter details for a different account"

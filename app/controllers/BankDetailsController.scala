@@ -133,7 +133,6 @@ class BankDetailsController @Inject() (
 
               case IsSoleSignatoryFormValue.Yes =>
                 barsService.assessBankAccountReputation(directDebitDetails.bankDetails).map {
-                  case sortCodeIsPresentOnEiscdError()  => Ok(views.errorPlaceholder()) // TODO redirect?
                   case accountNumberIsWellFormattedNo() => enterBankDetailsPageWithBarsError(accountNumberNotWellFormatted)
                   case sortCodeSupportsDirectDebitNo()  => enterBankDetailsPageWithBarsError(sortCodeDoesNotSupportsDirectDebit)
                   case sortCodeIsPresentOnEiscdNo()     => enterBankDetailsPageWithBarsError(sortCodeNotPresentOnEiscd)

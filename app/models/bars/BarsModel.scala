@@ -82,11 +82,6 @@ object BarsModel {
 
     import cats.syntax.eq._
 
-    object sortCodeIsPresentOnEiscdError {
-      def unapply(response: BarsResponse): Boolean =
-        response.sortCodeIsPresentOnEISCD === BarsAssessmentType.Error
-    }
-
     object sortCodeIsPresentOnEiscdNo {
       def unapply(response: BarsResponse): Boolean =
         response.sortCodeIsPresentOnEISCD === BarsAssessmentType.No
