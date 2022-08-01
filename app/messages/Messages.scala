@@ -546,10 +546,10 @@ object Messages {
       english = "Select yes if you are the account holder"
     )
 
-    // TODO rename
-    val sortCodeIsPresentOnEiscdNoError: FormError = FormError("bars", "validate.sortCodeIsPresentOnEISCD.no")
-    val accountNumberIsWellFormattedNoError: FormError = FormError("bars", "validate.accountNumberIsWellFormatted.no")
-    val sortCodeSupportsDirectDebitNoError: FormError = FormError("bars", "validate.sortCodeSupportsDirectDebit.no")
+    // BARs
+    val sortCodeNotPresentOnEiscd: FormError = FormError("bars", "validate.sortCodeIsPresentOnEISCD.no")
+    val accountNumberNotWellFormatted: FormError = FormError("bars", "validate.accountNumberIsWellFormatted.no")
+    val sortCodeDoesNotSupportsDirectDebit: FormError = FormError("bars", "validate.sortCodeSupportsDirectDebit.no")
 
     val errors: Map[String, Message] = Map(
       "name.error.required" -> Message("Enter the name on the account"),
@@ -562,9 +562,9 @@ object Messages {
       "accountNumber.error.invalid" -> Message("Account number must be between 6 and 8 digits"),
       "isSoleSignatory.error.required" -> Message("Select yes if you are the account holder"),
 
-      s"bars.${sortCodeIsPresentOnEiscdNoError.message}" -> Message("Enter a valid combination of bank account number and sort code"),
-      s"bars.${accountNumberIsWellFormattedNoError.message}" -> Message("Enter a valid combination of bank account number and sort code"),
-      s"bars.${sortCodeSupportsDirectDebitNoError.message}" -> Message(
+      s"bars.${sortCodeNotPresentOnEiscd.message}" -> Message("Enter a valid combination of bank account number and sort code"),
+      s"bars.${accountNumberNotWellFormatted.message}" -> Message("Enter a valid combination of bank account number and sort code"),
+      s"bars.${sortCodeDoesNotSupportsDirectDebit.message}" -> Message(
         "You have entered a sort code which does not accept this type of payment. " +
           "Check you have entered a valid sort code or enter details for a different account"
       )

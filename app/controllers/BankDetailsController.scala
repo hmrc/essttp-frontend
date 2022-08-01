@@ -20,7 +20,7 @@ import _root_.actions.Actions
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import essttp.journey.model.Journey
 import essttp.rootmodel.bank.{BankDetails, DirectDebitDetails}
-import messages.Messages.BankDetails.{accountNumberIsWellFormattedNoError, sortCodeIsPresentOnEiscdNoError, sortCodeSupportsDirectDebitNoError}
+import messages.Messages.BankDetails.{accountNumberNotWellFormatted, sortCodeNotPresentOnEiscd, sortCodeDoesNotSupportsDirectDebit}
 import models.bars.BarsModel.BarsResponse._
 import models.enumsforforms.{IsSoleSignatoryFormValue, TypeOfAccountFormValue}
 import models.forms.{BankDetailsForm, TypeOfAccountForm}
@@ -133,12 +133,12 @@ class BankDetailsController @Inject() (
 
               case IsSoleSignatoryFormValue.Yes =>
                 barsService.assessBankAccountReputation(directDebitDetails.bankDetails).map {
-                  case sortCodeIsPresentOnEiscdError()  => Ok(views.errorPlaceholder()) // TODO Error page?
-                  case accountNumberIsWellFormattedNo() => enterBankDetailsPageWithBarsError(accountNumberIsWellFormattedNoError)
-                  case sortCodeSupportsDirectDebitNo()  => enterBankDetailsPageWithBarsError(sortCodeSupportsDirectDebitNoError)
-                  case sortCodeIsPresentOnEiscdNo()     => enterBankDetailsPageWithBarsError(sortCodeIsPresentOnEiscdNoError)
+                  case sortCodeIsPresentOnEiscdError()  => Ok(views.errorPlaceholder()) // TODO redirect?
+                  case accountNumberIsWellFormattedNo() => enterBankDetailsPageWithBarsError(accountNumberNotWellFormatted)
+                  case sortCodeSupportsDirectDebitNo()  => enterBankDetailsPageWithBarsError(sortCodeDoesNotSupportsDirectDebit)
+                  case sortCodeIsPresentOnEiscdNo()     => enterBankDetailsPageWithBarsError(sortCodeNotPresentOnEiscd)
                   // BARs check was successful
-                  case _                                => Redirect(routes.BankDetailsController.checkBankDetails())
+                  case _                                => Redirect(routes.BankDetailsController.checkBankDetails)
                 }
             }
           }

@@ -29,7 +29,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class BarsConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)(implicit ec: ExecutionContext) {
 
   /**
-   * The Validate Bank Details endpoint combines several functions to provide an aggregated validation result
+   * "The Validate Bank Details endpoint combines several functions to provide an aggregated validation result"
    */
   private val validateUrl: String = appConfig.BaseUrl.barsUrl + "/validate/bank-details"
 
