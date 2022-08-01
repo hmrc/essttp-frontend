@@ -52,6 +52,7 @@ lazy val wartRemoverSettings =
       Wart.ImplicitParameter,
       Wart.Nothing,
       Wart.Overloading,
+      Wart.SizeIs,
       Wart.SortedMaxMinOption,
       Wart.Throw,
       Wart.ToString

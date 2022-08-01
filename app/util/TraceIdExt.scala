@@ -16,7 +16,6 @@
 
 package util
 
-import cats.syntax.eq._
 import essttp.rootmodel.TraceId
 import play.api.Logger
 import play.api.mvc.RequestHeader
