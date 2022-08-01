@@ -18,14 +18,16 @@ package services
 
 import connectors.{CallEligibilityApiRequest, TtpConnector}
 import essttp.journey.model.Journey.Stages.ComputedTaxId
-import essttp.journey.model.ttp._
-import essttp.journey.model.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
-import essttp.journey.model.ttp.affordablequotes._
-import essttp.journey.model.ttp.arrangement._
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
+import essttp.rootmodel.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
+import essttp.rootmodel.ttp._
+import essttp.rootmodel.ttp.affordablequotes._
+import essttp.rootmodel.ttp.arrangement._
 import essttp.rootmodel.{AmountInPence, EmpRef, TaxRegime, UpfrontPaymentAmount}
+import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
+import util.JourneyLogger
 
 import java.time.{LocalDate, ZoneOffset}
 import javax.inject.{Inject, Singleton}
@@ -38,7 +40,7 @@ import scala.concurrent.Future
 class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesService) {
 
   def determineEligibility(journey: ComputedTaxId)(implicit request: RequestHeader): Future[EligibilityCheckResult] = {
-
+    JourneyLogger.debug("EligibilityRequest:")
     val eligibilityRequest: CallEligibilityApiRequest = journey match {
       case j: Journey.Epaye =>
         CallEligibilityApiRequest(
@@ -52,7 +54,8 @@ class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesServi
           returnFinancialAssessment = true
         )
     }
-    ttpConnector.callEligibilityApi(eligibilityRequest)
+    JourneyLogger.debug(Json.prettyPrint(Json.toJson(eligibilityRequest)))
+    ttpConnector.callEligibilityApi(eligibilityRequest, journey.correlationId)
   }
 
   def determineAffordability(journey: Journey.AfterUpfrontPaymentAnswers)(implicit requestHeader: RequestHeader): Future[InstalmentAmounts] = {
@@ -73,9 +76,9 @@ class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesServi
     }
     val upfrontPaymentAmount: Option[UpfrontPaymentAmount] = TtpService.deriveUpfrontPaymentAmount(j.upfrontPaymentAnswers)
     val eligibilityCheckResult: EligibilityCheckResult = j.eligibilityCheckResult
-    val request = TtpService.buildInstalmentRequest(upfrontPaymentAmount, eligibilityCheckResult, j.extremeDatesResponse)
+    val instalmentAmountRequest: InstalmentAmountRequest = TtpService.buildInstalmentRequest(upfrontPaymentAmount, eligibilityCheckResult, j.extremeDatesResponse)
 
-    ttpConnector.callAffordabilityApi(request)
+    ttpConnector.callAffordabilityApi(instalmentAmountRequest, journey.correlationId)
   }
 
   def determineAffordableQuotes(journey: Journey.AfterStartDatesResponse)(implicit requestHeader: RequestHeader): Future[AffordableQuotesResponse] = {
@@ -118,7 +121,7 @@ class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesServi
       customerPostcodes           = j.eligibilityCheckResult.customerPostcodes
     )
 
-    ttpConnector.callAffordableQuotesApi(affordableQuotesRequest)
+    ttpConnector.callAffordableQuotesApi(affordableQuotesRequest, journey.correlationId)
   }
 
   def submitArrangement(journey: Journey.Stages.AgreedTermsAndConditions)(implicit requestHeader: RequestHeader): Future[ArrangementResponse] = {
@@ -151,7 +154,7 @@ class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesServi
       )
     )
 
-    ttpConnector.callArrangementApi(arrangementRequest)
+    ttpConnector.callArrangementApi(arrangementRequest, journey.correlationId)
   }
 }
 

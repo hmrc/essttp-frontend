@@ -32,7 +32,6 @@ class ConfigSpec extends ItSpec {
       ("welshLanguageSupportEnabled", config.welshLanguageSupportEnabled, false),
       ("authTimeoutSeconds", config.authTimeoutSeconds, 900),
       ("authTimeoutCountdownSeconds", config.authTimeoutCountdownSeconds, 120),
-      ("ttpBaseUrl", config.ttpBaseUrl, "http://localhost:9218"),
 
       ("baseUrl.essttpFrontend", config.BaseUrl.essttpFrontend, "http://localhost:9215"),
       ("baseUrl.essttpFrontendHost", config.BaseUrl.essttpFrontendHost, "localhost"),
@@ -40,6 +39,8 @@ class ConfigSpec extends ItSpec {
       ("baseUrl.feedback-frontend", config.BaseUrl.feedbackFrontend, "http://localhost:9514"),
       ("baseUrl.gg", config.BaseUrl.gg, "http://localhost:9949/auth-login-stub/gg-sign-in"),
       ("baseUrl.business-tax-account-frontend", config.BaseUrl.businessTaxAccountFrontend, "http://localhost:9020"),
+      ("baseUrl.timeToPayUrl", config.BaseUrl.timeToPayUrl, "http://localhost:9218"),
+      ("baseUrl.timeToPayEligibilityUrl", config.BaseUrl.timeToPayEligibilityUrl, "http://localhost:9218"),
 
       ("Urls.loginUrl", config.Urls.loginUrl, "http://localhost:9949/auth-login-stub/gg-sign-in"),
       ("Urls.signOutUrl", config.Urls.signOutUrl, "http://localhost:9949/auth-login-stub/session/logout"),
@@ -49,7 +50,8 @@ class ConfigSpec extends ItSpec {
       ("Urls.extraSupportUrl", config.Urls.extraSupportUrl, "https://www.gov.uk/get-help-hmrc-extra-support"),
       ("Urls.relayUrl", config.Urls.relayUrl, "https://www.relayuk.bt.com/"),
 
-      ("JourneyVariables.minimumUpfrontPaymentAmountInPence", config.JourneyVariables.minimumUpfrontPaymentAmountInPence, AmountInPence(100L))
+      ("JourneyVariables.minimumUpfrontPaymentAmountInPence", config.JourneyVariables.minimumUpfrontPaymentAmountInPence, AmountInPence(100L)),
+      ("Ttp.headers.correlationId", config.TtpHeaders.correlationId, "correlationId")
 
     )
     configsToTest.foreach { (configData: (String, Any, Any)) =>

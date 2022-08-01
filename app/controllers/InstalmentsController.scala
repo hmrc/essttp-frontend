@@ -22,7 +22,7 @@ import controllers.InstalmentsController.instalmentsForm
 import controllers.JourneyFinalStateCheck.finalStateCheckF
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import essttp.journey.model.Journey
-import essttp.journey.model.ttp.affordablequotes.PaymentPlan
+import essttp.rootmodel.ttp.affordablequotes.PaymentPlan
 import essttp.utils.Errors
 import models.InstalmentOption
 import play.api.data.Form

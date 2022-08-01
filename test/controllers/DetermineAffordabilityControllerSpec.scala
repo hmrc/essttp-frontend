@@ -37,13 +37,13 @@ class DetermineAffordabilityControllerSpec extends ItSpec {
       AuthStub.authorise()
       EssttpBackend.Dates.findJourneyExtremeDates()
       EssttpBackend.AffordabilityMinMaxApi.updateAffordability(TdAll.journeyId)
-      Ttp.retrieveAffordability()
+      Ttp.Affordability.retrieveAffordability()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.determineAffordability(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.howMuchCanYouPayEachMonthUrl)
       EssttpBackend.AffordabilityMinMaxApi.verifyUpdateAffordabilityRequest(TdAll.journeyId)
-      Ttp.verifyTtpAffordabilityRequest()
+      Ttp.Affordability.verifyTtpAffordabilityRequest()
     }
   }
 

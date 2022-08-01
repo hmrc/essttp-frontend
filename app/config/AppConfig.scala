@@ -35,8 +35,6 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val authTimeoutSeconds: Int = config.get[FiniteDuration]("timeout-dialog.timeout").toSeconds.toInt
   val authTimeoutCountdownSeconds: Int = config.get[FiniteDuration]("timeout-dialog.countdown").toSeconds.toInt
 
-  val ttpBaseUrl: String = s"${servicesConfig.baseUrl("ttp")}"
-
   object BaseUrl {
     val platformHost: Option[String] = config.getOptional[String]("platform.frontend.host")
     val essttpFrontend: String = platformHost.getOrElse(config.get[String]("baseUrl.essttp-frontend"))
@@ -45,6 +43,8 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     val feedbackFrontend: String = platformHost.getOrElse(config.get[String]("baseUrl.feedback-frontend"))
     val gg: String = config.get[String]("baseUrl.gg")
     val businessTaxAccountFrontend: String = platformHost.getOrElse(config.get[String]("baseUrl.business-tax-account-frontend"))
+    val timeToPayUrl: String = servicesConfig.baseUrl("time-to-pay")
+    val timeToPayEligibilityUrl: String = servicesConfig.baseUrl("time-to-pay-eligibility")
   }
 
   object Urls {
@@ -72,5 +72,9 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
 
   object JourneyVariables {
     val minimumUpfrontPaymentAmountInPence: AmountInPence = AmountInPence(config.get[Long]("journeyVariables.minimumUpfrontPaymentAmountInPence"))
+  }
+
+  object TtpHeaders {
+    val correlationId: String = config.get[String]("ttp.headers.correlationId")
   }
 }

@@ -16,7 +16,7 @@
 
 package controllers
 
-import essttp.journey.model.ttp.EligibilityRules
+import essttp.rootmodel.ttp.EligibilityRules
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
@@ -52,7 +52,8 @@ class DetermineEligibilityControllerSpec extends ItSpec {
 
             AuthStub.authorise()
             EssttpBackend.DetermineTaxId.findJourney()
-            Ttp.retrieveEligibility(eligibilityCheckResponseJson)
+            Ttp.Eligibility.retrieveEligibility(TtpJsonResponses.ttpEligibilityCallJson(TdAll.notEligibleOverallEligibilityStatus, eligibilityRules))
+            Ttp.Eligibility.retrieveEligibility(eligibilityCheckResponseJson)
             EssttpBackend.EligibilityCheck.updateEligibilityResult(TdAll.journeyId)
 
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -60,26 +61,26 @@ class DetermineEligibilityControllerSpec extends ItSpec {
 
             status(result) shouldBe Status.SEE_OTHER
             redirectLocation(result) shouldBe Some(expectedRedirect)
-            Ttp.verifyTtpEligibilityRequests()
+            Ttp.Eligibility.verifyTtpEligibilityRequests()
             AuditConnectorStub.verifyEventAudited(
               "EligibilityCheck",
               Json.parse(
                 s"""
-                 |{
-                 |  "eligibilityResult" : "ineligible",
-                 |  "enrollmentReasons": "did not pass eligibility check",
-                 |  "noEligibilityReasons": 1,
-                 |  "eligibilityReasons" : [ "$auditIneligibilityReason" ],
-                 |  "origin": "Bta",
-                 |  "taxType": "Epaye",
-                 |  "taxDetail": {
-                 |    "employerRef": "864FZ00049",
-                 |    "accountsOfficeRef": "123PA44545546"
-                 |  },
-                 |  "authProviderId": "authId-999",
-                 |  "chargeTypeAssessment" : ${(Json.parse(eligibilityCheckResponseJson).as[JsObject] \ "chargeTypeAssessment").get.toString}
-                 |}
-                 |""".
+                   |{
+                   |  "eligibilityResult" : "ineligible",
+                   |  "enrollmentReasons": "did not pass eligibility check",
+                   |  "noEligibilityReasons": 1,
+                   |  "eligibilityReasons" : [ "$auditIneligibilityReason" ],
+                   |  "origin": "Bta",
+                   |  "taxType": "Epaye",
+                   |  "taxDetail": {
+                   |    "employerRef": "864FZ00049",
+                   |    "accountsOfficeRef": "123PA44545546"
+                   |  },
+                   |  "authProviderId": "authId-999",
+                   |  "chargeTypeAssessment" : ${(Json.parse(eligibilityCheckResponseJson).as[JsObject] \ "chargeTypeAssessment").get.toString}
+                   |}
+                   |""".
                   stripMargin
               ).as[JsObject]
             )
@@ -93,7 +94,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
 
       AuthStub.authorise()
       EssttpBackend.DetermineTaxId.findJourney()
-      Ttp.retrieveEligibility(eligibilityCheckResponseJson)
+      Ttp.Eligibility.retrieveEligibility(eligibilityCheckResponseJson)
       EssttpBackend.EligibilityCheck.updateEligibilityResult(TdAll.journeyId)
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -101,7 +102,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
 
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.yourBillIsUrl)
-      Ttp.verifyTtpEligibilityRequests()
+      Ttp.Eligibility.verifyTtpEligibilityRequests()
       AuditConnectorStub.verifyEventAudited(
         "EligibilityCheck",
         Json.parse(

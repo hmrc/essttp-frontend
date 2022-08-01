@@ -17,68 +17,82 @@
 package connectors
 
 import com.google.inject.{Inject, Singleton}
-import essttp.journey.model.ttp.EligibilityCheckResult
-import essttp.journey.model.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
-import essttp.journey.model.ttp.affordablequotes.{AffordableQuotesRequest, AffordableQuotesResponse}
-import essttp.journey.model.ttp.arrangement.{ArrangementRequest, ArrangementResponse}
+import config.AppConfig
+import essttp.journey.model.CorrelationId
+import essttp.rootmodel.ttp.EligibilityCheckResult
+import essttp.rootmodel.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
+import essttp.rootmodel.ttp.affordablequotes.{AffordableQuotesRequest, AffordableQuotesResponse}
+import essttp.rootmodel.ttp.arrangement.{ArrangementRequest, ArrangementResponse}
 import play.api.mvc.RequestHeader
 import requests.RequestSupport._
 import uk.gov.hmrc.http.HttpClient
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.http.HttpReads.Implicits.{readUnit => _}
 import uk.gov.hmrc.http.HttpReads.Implicits.readFromJson
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class TtpConnector @Inject() (config: TtpConfig, httpClient: HttpClient)(implicit ec: ExecutionContext) {
+class TtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)(implicit ec: ExecutionContext) {
+
+  private val correlationIdHeaderKey: String = appConfig.TtpHeaders.correlationId
 
   /**
    * Eligibility Api implemented by Ttp service.
    * https://confluence.tools.tax.service.gov.uk/display/DTDT/Eligibility+API
    */
-  private val eligibilityUrl: String = config.baseUrl + "/time-to-pay/self-serve/eligibility"
+  private val eligibilityUrl: String = appConfig.BaseUrl.timeToPayEligibilityUrl + "/debts/time-to-pay/eligibility"
 
-  def callEligibilityApi(eligibilityRequest: CallEligibilityApiRequest)(implicit requestHeader: RequestHeader): Future[EligibilityCheckResult] = {
-    httpClient.POST[CallEligibilityApiRequest, EligibilityCheckResult](eligibilityUrl, eligibilityRequest)
+  def callEligibilityApi(eligibilityRequest: CallEligibilityApiRequest, correlationId: CorrelationId)
+    (implicit requestHeader: RequestHeader): Future[EligibilityCheckResult] = {
+    httpClient.POST[CallEligibilityApiRequest, EligibilityCheckResult](
+      url     = eligibilityUrl,
+      body    = eligibilityRequest,
+      headers = Seq((correlationIdHeaderKey, correlationId.value.toString))
+    )
   }
 
   /**
    * Affordability Api (min/max) implemented by Ttp service.
    * https://confluence.tools.tax.service.gov.uk/pages/viewpage.action?pageId=433455297
    */
-  private val affordabilityUrl: String = config.baseUrl + "/time-to-pay/self-serve/affordability"
+  private val affordabilityUrl: String = appConfig.BaseUrl.timeToPayUrl + "/debts/time-to-pay/self-serve/affordability"
 
-  def callAffordabilityApi(instalmentAmountRequest: InstalmentAmountRequest)(implicit requestHeader: RequestHeader): Future[InstalmentAmounts] = {
-    httpClient.POST[InstalmentAmountRequest, InstalmentAmounts](affordabilityUrl, instalmentAmountRequest)
+  def callAffordabilityApi(instalmentAmountRequest: InstalmentAmountRequest, correlationId: CorrelationId)
+    (implicit requestHeader: RequestHeader): Future[InstalmentAmounts] = {
+    httpClient.POST[InstalmentAmountRequest, InstalmentAmounts](
+      url     = affordabilityUrl,
+      body    = instalmentAmountRequest,
+      headers = Seq((correlationIdHeaderKey, correlationId.value.toString))
+    )
   }
 
   /**
    * Affordable Quotes API (for instalments) implemented by ttp service.
    * https://confluence.tools.tax.service.gov.uk/display/DTDT/Affordable+quotes+API
    */
-  private val affordableQuotesUrl: String = config.baseUrl + "/time-to-pay/self-serve/affordable-quotes"
+  private val affordableQuotesUrl: String = appConfig.BaseUrl.timeToPayUrl + "/debts/time-to-pay/affordability/affordable-quotes"
 
-  def callAffordableQuotesApi(affordableQuotesRequest: AffordableQuotesRequest)(implicit requestHeader: RequestHeader): Future[AffordableQuotesResponse] = {
-    httpClient.POST[AffordableQuotesRequest, AffordableQuotesResponse](affordableQuotesUrl, affordableQuotesRequest)
+  def callAffordableQuotesApi(affordableQuotesRequest: AffordableQuotesRequest, correlationId: CorrelationId)
+    (implicit requestHeader: RequestHeader): Future[AffordableQuotesResponse] = {
+    httpClient.POST[AffordableQuotesRequest, AffordableQuotesResponse](
+      url     = affordableQuotesUrl,
+      body    = affordableQuotesRequest,
+      headers = Seq((correlationIdHeaderKey, correlationId.value.toString))
+    )
   }
 
   /**
    * Enact arrangement API (for setting up the arrangement) implemented by ttp service.
    * https://confluence.tools.tax.service.gov.uk/display/DTDT/Enact+arrangement+API
    */
-  private val arrangementUrl: String = config.baseUrl + "/time-to-pay/self-serve/arrangement"
+  private val arrangementUrl: String = appConfig.BaseUrl.timeToPayUrl + "/debts/time-to-pay/self-serve/arrangement"
 
-  def callArrangementApi(arrangementRequest: ArrangementRequest)(implicit requestHeader: RequestHeader): Future[ArrangementResponse] = {
-    httpClient.POST[ArrangementRequest, ArrangementResponse](arrangementUrl, arrangementRequest)
-  }
-}
-
-final case class TtpConfig(baseUrl: String) {
-  @Inject()
-  def this(config: ServicesConfig) {
-    this(
-      baseUrl = config.baseUrl("ttp")
+  def callArrangementApi(arrangementRequest: ArrangementRequest, correlationId: CorrelationId)
+    (implicit requestHeader: RequestHeader): Future[ArrangementResponse] = {
+    httpClient.POST[ArrangementRequest, ArrangementResponse](
+      url     = arrangementUrl,
+      body    = arrangementRequest,
+      headers = Seq((correlationIdHeaderKey, correlationId.value.toString))
     )
   }
 }
