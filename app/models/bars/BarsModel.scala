@@ -38,14 +38,18 @@ object BarsModel {
     implicit val format: Format[BarsValidateRequest] = Json.format
 
     def apply(bankDetails: BankDetails): BarsValidateRequest =
-      BarsValidateRequest(BankAccount(bankDetails.sortCode, bankDetails.accountNumber))
+      BarsValidateRequest(
+        BankAccount(bankDetails.sortCode, bankDetails.accountNumber)
+      )
   }
 
   import enumeratum._
 
   sealed trait BarsAssessmentType extends EnumEntry
 
-  object BarsAssessmentType extends Enum[BarsAssessmentType] with PlayInsensitiveJsonEnum[BarsAssessmentType] {
+  object BarsAssessmentType
+    extends Enum[BarsAssessmentType]
+    with PlayInsensitiveJsonEnum[BarsAssessmentType] {
     implicit val eq: Eq[BarsAssessmentType] = Eq.fromUniversalEquals
 
     val values = findValues
@@ -79,31 +83,38 @@ object BarsModel {
     import cats.syntax.eq._
 
     object sortCodeIsPresentOnEiscdError {
-      def unapply(response: BarsResponse): Boolean = response.sortCodeIsPresentOnEISCD === BarsAssessmentType.Error
+      def unapply(response: BarsResponse): Boolean =
+        response.sortCodeIsPresentOnEISCD === BarsAssessmentType.Error
     }
 
     object sortCodeIsPresentOnEiscdNo {
-      def unapply(response: BarsResponse): Boolean = response.sortCodeIsPresentOnEISCD === BarsAssessmentType.No
+      def unapply(response: BarsResponse): Boolean =
+        response.sortCodeIsPresentOnEISCD === BarsAssessmentType.No
     }
 
     object accountNumberIsWellFormattedNo {
-      def unapply(response: BarsResponse): Boolean = response.accountNumberIsWellFormatted === BarsAssessmentType.No
+      def unapply(response: BarsResponse): Boolean =
+        response.accountNumberIsWellFormatted === BarsAssessmentType.No
     }
 
     object sortCodeSupportsDirectDebitNo {
-      def unapply(response: BarsResponse): Boolean = response.sortCodeSupportsDirectDebit.contains(BarsAssessmentType.No)
+      def unapply(response: BarsResponse): Boolean =
+        response.sortCodeSupportsDirectDebit.contains(BarsAssessmentType.No)
     }
   }
 
   sealed trait BarsValidateErrorMessageKeys extends EnumEntry
 
-  object BarsValidateErrorMessageKeys extends Enum[BarsValidateErrorMessageKeys] {
+  object BarsValidateErrorMessageKeys
+    extends Enum[BarsValidateErrorMessageKeys] {
     val values = findValues
 
     case object SortCodeIsPresentOnEiscdNo extends BarsValidateErrorMessageKeys
 
-    case object AccountNumberIsWellFormattedNo extends BarsValidateErrorMessageKeys
+    case object AccountNumberIsWellFormattedNo
+      extends BarsValidateErrorMessageKeys
 
-    case object SortCodeSupportsDirectDebitNo extends BarsValidateErrorMessageKeys
+    case object SortCodeSupportsDirectDebitNo
+      extends BarsValidateErrorMessageKeys
   }
 }
