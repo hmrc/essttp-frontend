@@ -57,30 +57,32 @@ class Actions @Inject() (
       .andThen(filterForRequiredEnrolments)
       .andThen(filterForEligibleJourney)
 
-  private def filterForEligibleJourney: ActionRefiner[AuthenticatedJourneyRequest, EligibleJourneyRequest] = new ActionRefiner[AuthenticatedJourneyRequest, EligibleJourneyRequest] {
+  private def filterForEligibleJourney: ActionRefiner[AuthenticatedJourneyRequest, EligibleJourneyRequest] =
+    new ActionRefiner[AuthenticatedJourneyRequest, EligibleJourneyRequest] {
 
-    override protected def refine[A](request: AuthenticatedJourneyRequest[A]): Future[Either[Result, EligibleJourneyRequest[A]]] = {
-      implicit val r: Request[A] = request
-      val result: Either[Result, EligibleJourneyRequest[A]] = request.journey match {
-        case j: Journey.Stages.Started       => Left(JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j))
-        case j: Journey.Stages.ComputedTaxId => Left(JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j))
-        case j: Journey.AfterEligibilityChecked =>
-          if (j.eligibilityCheckResult.isEligible) {
-            Right(new EligibleJourneyRequest[A](
-              journey    = j,
-              enrolments = request.enrolments,
-              request    = request
-            ))
-          } else {
-            Left(EligibilityRouter.nextPage(j.eligibilityCheckResult))
-          }
+      override protected def refine[A](request: AuthenticatedJourneyRequest[A]): Future[Either[Result, EligibleJourneyRequest[A]]] = {
+        implicit val r: Request[A] = request
+        val result: Either[Result, EligibleJourneyRequest[A]] = request.journey match {
+          case j: Journey.Stages.Started       => Left(JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j))
+          case j: Journey.Stages.ComputedTaxId => Left(JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j))
+          case j: Journey.AfterEligibilityChecked =>
+            if (j.eligibilityCheckResult.isEligible) {
+              Right(new EligibleJourneyRequest[A](
+                journey    = j,
+                enrolments = request.enrolments,
+                request    = request,
+                request.ggCredId
+              ))
+            } else {
+              Left(EligibilityRouter.nextPage(j.eligibilityCheckResult))
+            }
+        }
+        Future.successful(result)
       }
-      Future.successful(result)
+
+      override protected def executionContext: ExecutionContext = ec
+
     }
-
-    override protected def executionContext: ExecutionContext = ec
-
-  }
 
   private def filterForRequiredEnrolments: ActionFilter[AuthenticatedJourneyRequest] = new ActionFilter[AuthenticatedJourneyRequest] {
     override protected def filter[A](request: AuthenticatedJourneyRequest[A]): Future[Option[Result]] = {
@@ -92,7 +94,7 @@ class Actions @Inject() (
       if (hasRequiredEnrolments) {
         Future.successful(None)
       } else {
-        Future.successful(Some(Redirect(controllers.routes.NotEnrolledController.notEnrolled())))
+        Future.successful(Some(Redirect(controllers.routes.NotEnrolledController.notEnrolled)))
       }
     }
     override protected def executionContext: ExecutionContext = ec

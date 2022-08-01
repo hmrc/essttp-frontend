@@ -59,7 +59,7 @@
                     title = Text(Messages.`There is a problem`.show))
             )
         }
-        @formWithCSRF(action = routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit()) {
+        @formWithCSRF(action = routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit) {
             @govukRadios(Radios(
                 fieldset = Some(Fieldset(
                     legend = Some(Legend(

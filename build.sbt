@@ -9,7 +9,7 @@ import wartremover.WartRemover.autoImport.{wartremoverErrors, wartremoverExclude
 
 lazy val appName: String = "essttp-frontend"
 
-val silencerVersion = "1.7.1"
+val silencerVersion = "1.7.8"
 
 lazy val scalariformSettings: Def.SettingsDefinition = {
   // description of options found here -> https://github.com/scala-ide/scalariform
@@ -52,6 +52,8 @@ lazy val wartRemoverSettings =
       Wart.ImplicitParameter,
       Wart.Nothing,
       Wart.Overloading,
+      Wart.SizeIs,
+      Wart.SortedMaxMinOption,
       Wart.Throw,
       Wart.ToString
     ),
@@ -91,12 +93,12 @@ lazy val root = (project in file("."))
   .settings(majorVersion := 0)
   .settings(ThisBuild / useSuperShell:= false)
   .settings(
-    scalaVersion := "2.12.12",
+    scalaVersion := "2.12.15",
     name := appName,
     PlayKeys.playDefaultPort := 9215,
     ScoverageKeys.coverageExcludedFiles := "<empty>;Reverse.*;.*components.*;" +
       ".*Routes.*;",
-    ScoverageKeys.coverageMinimum := 78,
+    ScoverageKeys.coverageMinimumStmtTotal := 78,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true,
     scalacOptions ++= Seq("-feature"),
@@ -105,8 +107,7 @@ lazy val root = (project in file("."))
     retrieveManaged := false,
     update / evictionWarningOptions :=
       EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
-    resolvers ++= Seq("hmrc-releases" at "https://artefacts.tax.service.gov.uk/artifactory/hmrc-releases/",Resolver.jcenterRepo),
-    pipelineStages := Seq(digest),
+   pipelineStages := Seq(digest),
     scalacOptions ++= scalaCompilerOptions
   )
   .settings(

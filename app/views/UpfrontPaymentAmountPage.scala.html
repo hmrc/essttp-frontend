@@ -61,7 +61,7 @@
             ),
                 title = Text(Messages.`There is a problem`.show)))
         }
-        @formWithCSRF(action = routes.UpfrontPaymentController.upfrontPaymentAmountSubmit()) {
+        @formWithCSRF(action = routes.UpfrontPaymentController.upfrontPaymentAmountSubmit) {
             @govukInput(Input(
                 id = key,
                 name = key,

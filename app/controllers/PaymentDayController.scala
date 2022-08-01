@@ -82,7 +82,7 @@ class PaymentDayController @Inject() (
             case None           => DayOfMonth(form.paymentDay.toInt)
           }
           journeyService.updateDayOfMonth(request.journeyId, dayOfMonth)
-            .map(_ => Redirect(routes.DatesApiController.retrieveStartDates()))
+            .map(_ => Redirect(routes.DatesApiController.retrieveStartDates))
         }
       )
   }
@@ -94,7 +94,7 @@ object PaymentDayController {
   import play.api.data.Form
   import uk.gov.voa.play.form.ConditionalMappings.mandatoryIfEqual
 
-  val backUrl: Option[String] = Some(routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount().url)
+  val backUrl: Option[String] = Some(routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount.url)
 
   final case class PaymentDayForm(paymentDay: String, differentDay: Option[Int])
 

@@ -37,7 +37,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
 
   private val controller: PaymentScheduleController = app.injector.instanceOf[PaymentScheduleController]
 
-  s"GET ${routes.PaymentScheduleController.checkPaymentSchedule().url}" - {
+  s"GET ${routes.PaymentScheduleController.checkPaymentSchedule.url}" - {
 
       def extractSummaryRows(elements: List[Element]): List[SummaryRow] = elements.map{ e =>
         SummaryRow(
@@ -53,13 +53,13 @@ class PaymentScheduleControllerSpec extends ItSpec {
         val canPayUpfrontRow = SummaryRow(
           "Can you make an upfront payment?",
           canPayUpfrontValue,
-          routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url
+          routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url
         )
         val upfrontPaymentAmountRow = upfrontPaymentAmountValue.map(amount =>
           SummaryRow(
             "Taken within 10 working days",
             amount,
-            routes.UpfrontPaymentController.upfrontPaymentAmount().url
+            routes.UpfrontPaymentController.upfrontPaymentAmount.url
           ))
 
         val expectedSummaryRows = List(Some(canPayUpfrontRow), upfrontPaymentAmountRow).collect{ case Some(s) => s }
@@ -77,13 +77,13 @@ class PaymentScheduleControllerSpec extends ItSpec {
         val paymentDayRow = SummaryRow(
           "Payments collected on",
           paymentDayValue,
-          routes.PaymentDayController.paymentDay().url
+          routes.PaymentDayController.paymentDay.url
         )
 
         val paymentAmountRows = datesToAmountsValues.map{
           case (date, amount) =>
             SummaryRow(
-              date, amount, routes.InstalmentsController.instalmentOptions().url
+              date, amount, routes.InstalmentsController.instalmentOptions.url
             )
         }
 
@@ -108,7 +108,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
         doc.select(".govuk-heading-xl").text() shouldBe expectedH1
         doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
         doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-        doc.select("#back").attr("href") shouldBe routes.InstalmentsController.instalmentOptions().url
+        doc.select("#back").attr("href") shouldBe routes.InstalmentsController.instalmentOptions.url
 
         val summaries = doc.select(".govuk-summary-list").iterator().asScala.toList
         summaries.size shouldBe 2
@@ -180,9 +180,9 @@ class PaymentScheduleControllerSpec extends ItSpec {
 
   }
 
-  s"POST ${routes.PaymentScheduleController.checkPaymentScheduleSubmit().url}" - {
+  s"POST ${routes.PaymentScheduleController.checkPaymentScheduleSubmit.url}" - {
 
-    s"should redirect to ${routes.BankDetailsController.typeOfAccount().url} if the journey " +
+    s"should redirect to ${routes.BankDetailsController.typeOfAccount.url} if the journey " +
       "has been updated successfully" in {
         AuthStub.authorise()
         EssttpBackend.SelectedPaymentPlan.findJourney()
@@ -192,7 +192,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
         val result: Future[Result] = controller.checkPaymentScheduleSubmit(fakeRequest)
 
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.BankDetailsController.typeOfAccount().url)
+        redirectLocation(result) shouldBe Some(routes.BankDetailsController.typeOfAccount.url)
         EssttpBackend.HasCheckedPlan.verifyUpdateHasCheckedPlanRequest(TdAll.journeyId)
 
       }

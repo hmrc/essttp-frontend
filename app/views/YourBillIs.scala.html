@@ -50,7 +50,7 @@
   <dl class="govuk-summary-list">
     @overduePayments.payments.map(payment => overduePaymentRow(payment))
   </dl>
-  @formWithCSRF(action = routes.YourBillController.yourBillSubmit()) {
+  @formWithCSRF(action = routes.YourBillController.yourBillSubmit) {
   @govukButton(Button(content = Text(Messages.continue.show), attributes = Map("id" -> "continue")))
  }
 }

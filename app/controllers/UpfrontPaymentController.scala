@@ -60,7 +60,7 @@ class UpfrontPaymentController @Inject() (
   }
 
   private def displayCanYouPayUpfrontPage(journey: Journey.AfterEligibilityChecked)(implicit request: Request[_]): Result = {
-    val backUrl: Option[String] = Some(routes.YourBillController.yourBill().url)
+    val backUrl: Option[String] = Some(routes.YourBillController.yourBill.url)
     val maybePrePoppedForm: Form[CanPayUpfrontFormValue] = journey match {
       case _: Journey.BeforeAnsweredCanPayUpfront => CanPayUpfrontForm.form
       case j: Journey.AfterAnsweredCanPayUpfront =>
@@ -85,7 +85,7 @@ class UpfrontPaymentController @Inject() (
         formWithErrors =>
           Future.successful(Ok(views.canYouMakeAnUpFrontPayment(
             form    = formWithErrors,
-            backUrl = Some(routes.YourBillController.yourBill().url)
+            backUrl = Some(routes.YourBillController.yourBill.url)
           ))),
         (canPayUpfrontForm: CanPayUpfrontFormValue) => {
           val canPayUpfront: CanPayUpfront = canPayUpfrontForm.asCanPayUpfront
@@ -93,7 +93,7 @@ class UpfrontPaymentController @Inject() (
             if (canPayUpfront.value) {
               UpfrontPaymentController.upfrontPaymentAmountCall
             } else {
-              routes.DatesApiController.retrieveExtremeDates()
+              routes.DatesApiController.retrieveExtremeDates
             }
           journeyService.updateCanPayUpfront(request.journeyId, canPayUpfront)
             .map(_ => Redirect(pageToRedirectTo.url))
@@ -170,7 +170,7 @@ class UpfrontPaymentController @Inject() (
           //amount in pence case class apply method converts big decimal to pennies
           val amountInPence: AmountInPence = AmountInPence(validForm)
           journeyService.updateUpfrontPaymentAmount(request.journeyId, UpfrontPaymentAmount(amountInPence))
-            .map(_ => Redirect(routes.UpfrontPaymentController.upfrontPaymentSummary().url))
+            .map(_ => Redirect(routes.UpfrontPaymentController.upfrontPaymentSummary.url))
         }
       )
   }
@@ -249,6 +249,6 @@ object UpfrontPaymentController {
   def deriveRemainingAmountToPay(maxDebt: DebtTotalAmount, upfrontPaymentAmount: UpfrontPaymentAmount): AmountInPence =
     maxDebt.value.-(upfrontPaymentAmount.value)
 
-  val canYouMakeAnUpfrontPaymentCall: Call = routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment()
-  val upfrontPaymentAmountCall: Call = routes.UpfrontPaymentController.upfrontPaymentAmount()
+  val canYouMakeAnUpfrontPaymentCall: Call = routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment
+  val upfrontPaymentAmountCall: Call = routes.UpfrontPaymentController.upfrontPaymentAmount
 }

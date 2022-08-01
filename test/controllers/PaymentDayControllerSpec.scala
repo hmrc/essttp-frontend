@@ -56,7 +56,7 @@ class PaymentDayControllerSpec extends ItSpec {
       doc.select(".govuk-fieldset__heading").text() shouldBe expectedH1
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-      doc.select("#back").attr("href") shouldBe routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount().url
+      doc.select("#back").attr("href") shouldBe routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount.url
 
       doc.select("#PaymentDay").size() shouldBe 1
       doc.select("#PaymentDay").attr("value") shouldBe "28"
@@ -165,7 +165,7 @@ class PaymentDayControllerSpec extends ItSpec {
           doc.select(".govuk-fieldset__heading").text() shouldBe expectedH1
           doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
           doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-          doc.select("#back").attr("href") shouldBe routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount().url
+          doc.select("#back").attr("href") shouldBe routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount.url
           doc.select("#PaymentDay").size() shouldBe 1
           doc.select("#PaymentDay").attr("value") shouldBe "28"
           doc.select("#PaymentDay-2").size() shouldBe 1

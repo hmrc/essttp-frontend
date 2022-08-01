@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
-package actionsmodel
+package testsupport.stubs
 
-import models.GGCredId
-import play.api.mvc.{Request, WrappedRequest}
-import uk.gov.hmrc.auth.core.Enrolments
+import com.github.tomakehurst.wiremock.client.WireMock.{equalToJson, postRequestedFor, urlPathEqualTo, verify}
+import play.api.libs.json.JsObject
 
-class AuthenticatedRequest[A](
-    val request:    Request[A],
-    val enrolments: Enrolments,
-    val ggCredId:   GGCredId
-) extends WrappedRequest[A](request)
+object AuditConnectorStub {
+
+  def verifyEventAudited(auditType: String, auditEvent: JsObject): Unit = {
+    verify(
+      postRequestedFor(urlPathEqualTo("/write/audit"))
+        .withRequestBody(
+          equalToJson(s"""{ "auditType" : "${auditType}"  }""", true, true)
+        )
+        .withRequestBody(
+          equalToJson(s"""{ "detail" : ${auditEvent.toString} }""", true, true)
+        )
+    )
+  }
+
+}

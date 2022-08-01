@@ -109,7 +109,7 @@ object InstalmentsController {
     )(identity)(Some(_))
   )
 
-  val backUrl: Option[String] = Some(routes.PaymentDayController.paymentDay().url)
+  val backUrl: Option[String] = Some(routes.PaymentDayController.paymentDay.url)
 
   def retrieveInstalmentOptions(paymentPlans: List[PaymentPlan]): List[InstalmentOption] = paymentPlans.map { plan =>
     InstalmentOption(

@@ -60,7 +60,7 @@
                 title = Text(Messages.`There is a problem`.show))
         )
     }
-    @formWithCSRF(action = routes.BankDetailsController.typeOfAccountSubmit()) {
+    @formWithCSRF(action = routes.BankDetailsController.typeOfAccountSubmit) {
         @govukRadios(Radios(
             fieldset = Some(Fieldset(
                 legend = Some(Legend(

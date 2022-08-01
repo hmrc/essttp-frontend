@@ -129,7 +129,7 @@ class BankDetailsControllerSpec extends ItSpec {
       doc.select(".govuk-fieldset__legend--xl").text() shouldBe TypeOfBankAccountPage.expectedH1
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-      doc.select("#back").attr("href") shouldBe routes.PaymentScheduleController.checkPaymentSchedule().url
+      doc.select("#back").attr("href") shouldBe routes.PaymentScheduleController.checkPaymentSchedule.url
 
       val radioContent = doc.select(".govuk-radios__label").asScala.toList
       radioContent(0).text() shouldBe TypeOfBankAccountPage.radioButtonContentBusiness
@@ -198,7 +198,7 @@ class BankDetailsControllerSpec extends ItSpec {
       doc.select(".govuk-heading-xl").text() shouldBe EnterDirectDebitDetailsPage.expectedH1
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-      doc.select("#back").attr("href") shouldBe routes.BankDetailsController.typeOfAccount().url
+      doc.select("#back").attr("href") shouldBe routes.BankDetailsController.typeOfAccount.url
 
       val subheadings = doc.select(".govuk-label--m").asScala.toList
       subheadings(0).text() shouldBe EnterDirectDebitDetailsPage.accountNameContent
@@ -226,7 +226,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
-      doc.select("#back").attr("href") shouldBe routes.BankDetailsController.typeOfAccount().url
+      doc.select("#back").attr("href") shouldBe routes.BankDetailsController.typeOfAccount.url
       doc.select(EnterDirectDebitDetailsPage.accountNameFieldId).`val`() shouldBe "Bob Ross"
       doc.select(EnterDirectDebitDetailsPage.sortCodeFieldId).`val`() shouldBe "123456"
       doc.select(EnterDirectDebitDetailsPage.accountNumberFieldId).`val`() shouldBe "12345678"
@@ -350,14 +350,14 @@ class BankDetailsControllerSpec extends ItSpec {
       doc.select(".govuk-heading-xl").text() shouldBe ConfirmDirectDebitDetailsPage.expectedH1
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-      doc.select("#back").attr("href") shouldBe routes.BankDetailsController.enterBankDetails().url
+      doc.select("#back").attr("href") shouldBe routes.BankDetailsController.enterBankDetails.url
 
       val summaries = doc.select(".govuk-summary-list").select(".govuk-summary-list__row").iterator().asScala.toList
       summaries.size shouldBe 3
 
-      val expectedAccountNameRow = SummaryRow("Account name", "Bob Ross", routes.BankDetailsController.enterBankDetails().url)
-      val expectedSortCodeRow = SummaryRow("Sort code", "123456", routes.BankDetailsController.enterBankDetails().url)
-      val expectedAccountNumberRow = SummaryRow("Account number", "12345678", routes.BankDetailsController.enterBankDetails().url)
+      val expectedAccountNameRow = SummaryRow("Account name", "Bob Ross", routes.BankDetailsController.enterBankDetails.url)
+      val expectedSortCodeRow = SummaryRow("Sort code", "123456", routes.BankDetailsController.enterBankDetails.url)
+      val expectedAccountNumberRow = SummaryRow("Account number", "12345678", routes.BankDetailsController.enterBankDetails.url)
       val expectedSummaryRows = List(expectedAccountNameRow, expectedSortCodeRow, expectedAccountNumberRow)
       extractSummaryRows(summaries) shouldBe expectedSummaryRows
 
@@ -422,7 +422,7 @@ class BankDetailsControllerSpec extends ItSpec {
       doc.select(".govuk-heading-xl").text() shouldBe TermsAndConditionsPage.expectedH1
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-      doc.select("#back").attr("href") shouldBe routes.BankDetailsController.checkBankDetails().url
+      doc.select("#back").attr("href") shouldBe routes.BankDetailsController.checkBankDetails.url
 
       ContentAssertions.assertListOfContent(
         elements = doc.select(".govuk-body")
@@ -482,7 +482,7 @@ class BankDetailsControllerSpec extends ItSpec {
       doc.select(".govuk-heading-xl").text() shouldBe CannotSetupDirectDebitPage.expectedH1
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-      doc.select("#back").attr("href") shouldBe routes.BankDetailsController.enterBankDetails().url
+      doc.select("#back").attr("href") shouldBe routes.BankDetailsController.enterBankDetails.url
 
       doc.select(".govuk-body").text() shouldBe CannotSetupDirectDebitPage.paragraphContent
       val cta = doc.select(".govuk-button")

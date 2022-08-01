@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
-package actionsmodel
+package models.audit.eligibility
 
-import models.GGCredId
-import play.api.mvc.{Request, WrappedRequest}
-import uk.gov.hmrc.auth.core.Enrolments
+import play.api.libs.json.{JsString, Writes}
 
-class AuthenticatedRequest[A](
-    val request:    Request[A],
-    val enrolments: Enrolments,
-    val ggCredId:   GGCredId
-) extends WrappedRequest[A](request)
+sealed trait EligibilityResult extends Product with Serializable
+
+object EligibilityResult {
+
+  case object Eligible extends EligibilityResult
+
+  case object Ineligible extends EligibilityResult
+
+  implicit val writes: Writes[EligibilityResult] = Writes {
+    case Eligible   => JsString("eligible")
+    case Ineligible => JsString("ineligible")
+  }
+
+}

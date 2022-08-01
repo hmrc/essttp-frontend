@@ -14,14 +14,6 @@
  * limitations under the License.
  */
 
-package actionsmodel
+package models
 
-import models.GGCredId
-import play.api.mvc.{Request, WrappedRequest}
-import uk.gov.hmrc.auth.core.Enrolments
-
-class AuthenticatedRequest[A](
-    val request:    Request[A],
-    val enrolments: Enrolments,
-    val ggCredId:   GGCredId
-) extends WrappedRequest[A](request)
+final case class GGCredId(value: String) extends AnyVal

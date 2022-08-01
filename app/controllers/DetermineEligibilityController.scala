@@ -33,12 +33,13 @@
 package controllers
 
 import _root_.actions.Actions
+import actionsmodel.AuthenticatedJourneyRequest
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import controllers.JourneyFinalStateCheck.finalStateCheckF
 import controllers.pagerouters.EligibilityRouter
 import essttp.journey.model.Journey
 import play.api.mvc._
-import services.{JourneyService, TtpService}
+import services.{AuditService, JourneyService, TtpService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.{JourneyLogger, Logging}
 
@@ -50,7 +51,8 @@ class DetermineEligibilityController @Inject() (
     as:             Actions,
     mcc:            MessagesControllerComponents,
     ttpService:     TtpService,
-    journeyService: JourneyService
+    journeyService: JourneyService,
+    auditService:   AuditService
 )(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
@@ -68,9 +70,10 @@ class DetermineEligibilityController @Inject() (
     }
   }
 
-  def determineEligibilityAndUpdateJourney(journey: Journey.Stages.ComputedTaxId)(implicit request: Request[_]): Future[Result] = {
+  def determineEligibilityAndUpdateJourney(journey: Journey.Stages.ComputedTaxId)(implicit r: AuthenticatedJourneyRequest[_]): Future[Result] = {
     for {
       eligibilityCheckResult <- ttpService.determineEligibility(journey)
+      _ = auditService.auditEligibilityCheck(journey, eligibilityCheckResult)
       _ <- journeyService.updateEligibilityCheckResult(journey.id, eligibilityCheckResult)
     } yield EligibilityRouter.nextPage(eligibilityCheckResult)
   }

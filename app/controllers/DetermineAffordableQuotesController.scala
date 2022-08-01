@@ -49,7 +49,7 @@ class DetermineAffordableQuotesController @Inject() (
     for {
       affordableQuotes <- ttpService.determineAffordableQuotes(journey)
       _ <- journeyService.updateAffordableQuotes(journey.id, affordableQuotes)
-    } yield Redirect(routes.InstalmentsController.instalmentOptions().url)
+    } yield Redirect(routes.InstalmentsController.instalmentOptions.url)
   }
 
 }

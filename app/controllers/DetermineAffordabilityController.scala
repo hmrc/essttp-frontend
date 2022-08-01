@@ -49,7 +49,7 @@ class DetermineAffordabilityController @Inject() (
     for {
       instalmentAmounts <- ttpService.determineAffordability(journey)
       _ <- journeyService.updateAffordabilityResult(journey.id, instalmentAmounts)
-    } yield Redirect(routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount().url)
+    } yield Redirect(routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount.url)
   }
 
 }

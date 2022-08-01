@@ -49,7 +49,10 @@ class ItSpec
     "microservice.services.time-to-pay.port" -> WireMockSupport.port,
     "microservice.services.time-to-pay-eligibility.port" -> WireMockSupport.port,
     "microservice.services.essttp-dates.port" -> WireMockSupport.port,
-    "journeyVariables.minimumUpfrontPaymentAmountInPence" -> 100L
+    "auditing.consumer.baseUri.port" -> WireMockSupport.port,
+    "journeyVariables.minimumUpfrontPaymentAmountInPence" -> 100L,
+    "auditing.enabled" -> true,
+    "auditing.traceRequests" -> false
   ) ++ configOverrides
 
   //in tests use `app`

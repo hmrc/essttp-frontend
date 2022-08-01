@@ -16,7 +16,7 @@
 
 package models
 
-import enumeratum.{Enum, _}
+import enumeratum._
 import essttp.utils.EnumFormat
 import play.api.libs.json.Format
 

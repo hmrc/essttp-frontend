@@ -76,8 +76,8 @@ class MonthlyPaymentAmountController @Inject() (
         case j1: Journey.Epaye.SubmittedArrangement         => j1
       }
     val backUrl: Option[String] = j.upfrontPaymentAnswers match {
-      case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => Some(routes.UpfrontPaymentController.upfrontPaymentSummary().url)
-      case UpfrontPaymentAnswers.NoUpfrontPayment          => Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url)
+      case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => Some(routes.UpfrontPaymentController.upfrontPaymentSummary.url)
+      case UpfrontPaymentAnswers.NoUpfrontPayment          => Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url)
     }
     val totalDebt = AmountInPence(j.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum)
     val upfrontPaymentAmount = j.upfrontPaymentAnswers match {
@@ -179,10 +179,10 @@ object MonthlyPaymentAmountController {
 
   def backUrl(journey: Journey): Option[String] = {
     journey match {
-      case _: Journey.BeforeUpfrontPaymentAnswers => Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url)
+      case _: Journey.BeforeUpfrontPaymentAnswers => Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url)
       case j: Journey.AfterUpfrontPaymentAnswers => j.upfrontPaymentAnswers match {
-        case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => Some(routes.UpfrontPaymentController.upfrontPaymentSummary().url)
-        case UpfrontPaymentAnswers.NoUpfrontPayment          => Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url)
+        case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => Some(routes.UpfrontPaymentController.upfrontPaymentSummary.url)
+        case UpfrontPaymentAnswers.NoUpfrontPayment          => Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url)
       }
     }
   }
