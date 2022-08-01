@@ -35,7 +35,7 @@ object TraceIdExt {
     traceIdStringsFromQueryParameter()
       .flatMap { seq =>
         val set = seq.map(TraceId.apply).toSet
-        if (set.size === 1) Logger(this.getClass).error(s"Multiple traceIds in the URL. [${set.mkString(", ")}]")
+        if (set.size > 1) Logger(this.getClass).error(s"Multiple traceIds in the URL. [${set.mkString(", ")}]")
         set.headOption
       }
   }
