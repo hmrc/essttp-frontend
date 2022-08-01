@@ -17,7 +17,7 @@
 package messages
 
 import essttp.rootmodel.AmountInPence
-import play.api.data.FormError
+import models.forms.BankDetailsForm._
 
 object Messages {
 
@@ -545,11 +545,6 @@ object Messages {
     val `Select yes if you are the account holder`: Message = Message(
       english = "Select yes if you are the account holder"
     )
-
-    // BARs
-    val accountNumberNotWellFormatted: FormError = FormError("bars", "validate.accountNumberIsWellFormatted.no")
-    val sortCodeNotPresentOnEiscd: FormError = FormError("bars", "validate.sortCodeIsPresentOnEISCD.no")
-    val sortCodeDoesNotSupportsDirectDebit: FormError = FormError("bars", "validate.sortCodeSupportsDirectDebit.no")
 
     val errors: Map[String, Message] = Map(
       "name.error.required" -> Message("Enter the name on the account"),

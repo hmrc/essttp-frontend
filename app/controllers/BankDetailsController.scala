@@ -20,9 +20,9 @@ import _root_.actions.Actions
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import essttp.journey.model.Journey
 import essttp.rootmodel.bank.{BankDetails, DirectDebitDetails}
-import messages.Messages.BankDetails.{accountNumberNotWellFormatted, sortCodeNotPresentOnEiscd, sortCodeDoesNotSupportsDirectDebit}
 import models.bars.BarsModel.BarsResponse._
 import models.enumsforforms.{IsSoleSignatoryFormValue, TypeOfAccountFormValue}
+import models.forms.BankDetailsForm.{accountNumberNotWellFormatted, sortCodeDoesNotSupportsDirectDebit, sortCodeNotPresentOnEiscd}
 import models.forms.{BankDetailsForm, TypeOfAccountForm}
 import play.api.data.{Form, FormError}
 import play.api.mvc._
@@ -102,8 +102,8 @@ class BankDetailsController @Inject() (
   }
 
   val enterBankDetailsSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
-    val validForm = BankDetailsForm.form.bindFromRequest()
-    validForm.fold(
+    val form = BankDetailsForm.form.bindFromRequest()
+    form.fold(
       hasErrors = (formWithErrors: Form[BankDetailsForm]) =>
         Future.successful(Ok(views.enterBankDetailsPage(formWithErrors, BankDetailsController.chooseTypeOfAccountUrl))),
 
@@ -120,7 +120,7 @@ class BankDetailsController @Inject() (
 
           def enterBankDetailsPageWithBarsError(error: FormError): Result = {
             Ok(views.enterBankDetailsPage(
-              validForm.withError(error),
+              form.withError(error),
               BankDetailsController.chooseTypeOfAccountUrl
             ))
           }

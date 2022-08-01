@@ -20,7 +20,7 @@ import essttp.rootmodel.bank.{AccountName, AccountNumber, SortCode}
 import models.enumsforforms.IsSoleSignatoryFormValue
 import play.api.data.Forms.{mapping, nonEmptyText}
 import play.api.data.validation.{Constraint, Invalid, Valid}
-import play.api.data.{Form, Forms, Mapping}
+import play.api.data.{Form, FormError, Forms, Mapping}
 import util.EnumFormatter
 
 final case class BankDetailsForm(
@@ -81,4 +81,10 @@ object BankDetailsForm {
     errorMessageIfMissing   = "error.required",
     errorMessageIfEnumError = "error.required"
   ))
+
+  // BARs FormErrors
+  val accountNumberNotWellFormatted: FormError = FormError("bars", "validate.accountNumberIsWellFormatted.no")
+  val sortCodeNotPresentOnEiscd: FormError = FormError("bars", "validate.sortCodeIsPresentOnEISCD.no")
+  val sortCodeDoesNotSupportsDirectDebit: FormError = FormError("bars", "validate.sortCodeSupportsDirectDebit.no")
+
 }
