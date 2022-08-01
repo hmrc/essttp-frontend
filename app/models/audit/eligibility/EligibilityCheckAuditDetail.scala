@@ -19,7 +19,7 @@ package models.audit.eligibility
 import essttp.rootmodel.ttp.ChargeTypeAssessment
 import play.api.libs.json.{Json, OWrites}
 
-final case class EligibilityCheck(
+final case class EligibilityCheckAuditDetail(
     eligibilityResult:    EligibilityResult,
     enrollmentReasons:    Option[EnrollmentReasons],
     noEligibilityReasons: Int,
@@ -31,8 +31,8 @@ final case class EligibilityCheck(
     chargeTypeAssessment: List[ChargeTypeAssessment]
 )
 
-object EligibilityCheck {
+object EligibilityCheckAuditDetail {
 
-  implicit val writes: OWrites[EligibilityCheck] = Json.writes
+  implicit val writes: OWrites[EligibilityCheckAuditDetail] = Json.writes
 
 }

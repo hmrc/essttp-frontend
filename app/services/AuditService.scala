@@ -22,7 +22,7 @@ import com.github.ghik.silencer.silent
 import essttp.journey.model.Journey.Stages.ComputedTaxId
 import essttp.journey.model.Origin
 import essttp.rootmodel.ttp.EligibilityCheckResult
-import models.audit.eligibility.{EligibilityCheck, EligibilityResult, EnrollmentReasons, TaxDetail}
+import models.audit.eligibility.{EligibilityCheckAuditDetail, EligibilityResult, EnrollmentReasons, TaxDetail}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
@@ -45,17 +45,17 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
   private def toEligibilityCheck(
       journey:          ComputedTaxId,
       enrollmentReason: Either[EnrollmentReasons.NotEnrolled, EnrollmentReasons.InactiveEnrollment]
-  )(implicit r: AuthenticatedJourneyRequest[_]): EligibilityCheck = {
-    EligibilityCheck(
-      EligibilityResult.Ineligible,
-      Some(enrollmentReason.merge),
-      0,
-      List.empty,
-      toAuditString(journey.origin),
-      journey.taxRegime.toString,
-      TaxDetail(None, None, None, None, None, None),
-      r.ggCredId.value,
-      List.empty
+  )(implicit r: AuthenticatedJourneyRequest[_]): EligibilityCheckAuditDetail = {
+    EligibilityCheckAuditDetail(
+      eligibilityResult    = EligibilityResult.Ineligible,
+      enrollmentReasons    = Some(enrollmentReason.merge),
+      noEligibilityReasons = 0,
+      eligibilityReasons   = List.empty,
+      origin               = toAuditString(journey.origin),
+      taxType              = journey.taxRegime.toString,
+      taxDetail            = TaxDetail(None, None, None, None, None, None),
+      authProviderId       = r.ggCredId.value,
+      chargeTypeAssessment = List.empty
     )
   }
 
@@ -63,7 +63,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
   private def toEligibilityCheck(
       journey:  ComputedTaxId,
       response: EligibilityCheckResult
-  )(implicit r: AuthenticatedJourneyRequest[_]): EligibilityCheck = {
+  )(implicit r: AuthenticatedJourneyRequest[_]): EligibilityCheckAuditDetail = {
       def getTaxId(name: String): Option[String] =
         response.identification.find(_.idType.value === name).map(_.idValue.value)
 
@@ -77,24 +77,24 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       (reasons zip values).toList.collect{ case (reason, true) => reason }
     }
     val taxDetail = TaxDetail(
-      None,
-      None,
-      None,
-      getTaxId("EMPREF"),
-      getTaxId("BROCS"),
-      None
+      utr               = None,
+      taxOfficeNo       = None,
+      taxOfficeRef      = None,
+      employerRef       = getTaxId("EMPREF"),
+      accountsOfficeRef = getTaxId("BROCS"),
+      vrn               = None
     )
 
-    EligibilityCheck(
-      eligibilityResult,
-      enrollmentReasons,
-      eligibilityReasons.size,
-      eligibilityReasons,
-      toAuditString(journey.origin),
-      journey.taxRegime.toString,
-      taxDetail,
-      r.ggCredId.value,
-      response.chargeTypeAssessment
+    EligibilityCheckAuditDetail(
+      eligibilityResult    = eligibilityResult,
+      enrollmentReasons    = enrollmentReasons,
+      noEligibilityReasons = eligibilityReasons.size,
+      eligibilityReasons   = eligibilityReasons,
+      origin               = toAuditString(journey.origin),
+      taxType              = journey.taxRegime.toString,
+      taxDetail            = taxDetail,
+      authProviderId       = r.ggCredId.value,
+      chargeTypeAssessment = response.chargeTypeAssessment
     )
   }
 
