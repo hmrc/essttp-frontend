@@ -61,7 +61,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
       doc.select(".govuk-label--xl").text() shouldBe expectedH1
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-      doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url // todo update this, it depends on journey
+      doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url // todo update this, it depends on journey
       doc.select("#MonthlyPaymentAmount-hint").text() shouldBe expectedPageHint
       doc.select("#MonthlyPaymentAmount").size() shouldBe 1
       val poundSymbol = doc.select(".govuk-input__prefix")
@@ -136,7 +136,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
       doc.select(".govuk-label--xl").text() shouldBe expectedH1
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-      doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url // todo update this, it depends on journey
+      doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url // todo update this, it depends on journey
       doc.select("#MonthlyPaymentAmount-hint").text() shouldBe expectedPageHint
       doc.select("#MonthlyPaymentAmount").size() shouldBe 1
       val poundSymbol = doc.select(".govuk-input__prefix")
@@ -170,7 +170,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
       doc.select(".govuk-label--xl").text() shouldBe expectedH1
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-      doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url // todo update this, it depends on journey
+      doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url // todo update this, it depends on journey
       doc.select("#MonthlyPaymentAmount-hint").text() shouldBe expectedPageHint
       doc.select("#MonthlyPaymentAmount").size() shouldBe 1
       val poundSymbol = doc.select(".govuk-input__prefix")

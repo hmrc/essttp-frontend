@@ -79,7 +79,7 @@
           actions = Some(Actions(
             items = Seq(
               ActionItem(
-                href = routes.BankDetailsController.enterBankDetails().url,
+                href = routes.BankDetailsController.enterBankDetails.url,
                 content = Text(Messages.change.show),
                 visuallyHiddenText = Some(Messages.BankDetails.`Account name`.show)
               )
@@ -99,7 +99,7 @@
             items = Seq(
               ActionItem(
                 classes = "grouped-change",
-                href = routes.BankDetailsController.enterBankDetails().url,
+                href = routes.BankDetailsController.enterBankDetails.url,
                 content = Text(Messages.change.show),
                 visuallyHiddenText = Some(Messages.BankDetails.`Sort code`.show)
               )
@@ -119,7 +119,7 @@
             items = Seq(
               ActionItem(
                 classes = "grouped-change",
-                href = routes.BankDetailsController.enterBankDetails().url,
+                href = routes.BankDetailsController.enterBankDetails.url,
                 content = Text(Messages.change.show),
                 visuallyHiddenText = Some(Messages.BankDetails.`Account number`.show)
               )
@@ -131,7 +131,7 @@
 
   @detailsContent
 
-  @formWithCSRF(action = routes.BankDetailsController.checkBankDetailsSubmit()) {
+  @formWithCSRF(action = routes.BankDetailsController.checkBankDetailsSubmit) {
     @govukButton(Button(content = Text(Messages.continue.show)))
   }
 }

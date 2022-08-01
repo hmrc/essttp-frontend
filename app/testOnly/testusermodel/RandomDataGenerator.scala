@@ -17,7 +17,6 @@
 package testOnly.testusermodel
 
 import cats.syntax.eq._
-
 import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
 import essttp.rootmodel.{Email, EmpRef, Vrn}
 
@@ -130,6 +129,11 @@ object RandomDataGenerator {
     choices(choice)
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.TraversableOps"))
-  def chooseSeq[T](seq: Seq[T])(implicit random: Random): T = choose(seq.head, seq.tail: _*)
+  def chooseSeq[T](seq: Seq[T])(implicit random: Random): T = {
+    seq.toList match {
+      case Nil          => sys.error("expected at least one element to choose from but found none")
+      case head :: Nil  => head
+      case head :: tail => choose(head, tail: _*)
+    }
+  }
 }

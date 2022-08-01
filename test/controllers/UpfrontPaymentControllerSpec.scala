@@ -64,7 +64,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       doc.select(".govuk-fieldset__heading").text() shouldBe expectedH1CanYouPayUpfrontPage
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-      doc.select("#back").attr("href") shouldBe routes.YourBillController.yourBill().url
+      doc.select("#back").attr("href") shouldBe routes.YourBillController.yourBill.url
       doc.select("#CanYouMakeAnUpFrontPayment-hint").text() shouldBe expectedPageHintCanPayUpfrontPage
     }
     "should prepopulate the form when user navigates back and they have a chosen way to pay in their journey" in {
@@ -139,7 +139,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
       doc.select("#CanYouMakeAnUpFrontPayment-hint").text() shouldBe expectedPageHintCanPayUpfrontPage
-      doc.select("#back").attr("href") shouldBe routes.YourBillController.yourBill().url
+      doc.select("#back").attr("href") shouldBe routes.YourBillController.yourBill.url
       val errorSummary = doc.select(".govuk-error-summary")
       val errorLink = errorSummary.select("a")
       errorLink.text() shouldBe "Select yes if you can make an upfront payment"
@@ -165,7 +165,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       doc.select(".govuk-label-wrapper").text() shouldBe expectedH1HowMuchCanYouPayUpfrontPage
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-      doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url
+      doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url
       doc.select("#UpfrontPaymentAmount").size() shouldBe 1
       val poundSymbol = doc.select(".govuk-input__prefix")
       poundSymbol.size() shouldBe 1
@@ -289,7 +289,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
           val errorLink = errorSummary.select("a")
           errorLink.text() shouldBe errorMessage
           errorLink.attr("href") shouldBe "#UpfrontPaymentAmount"
-          doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url
+          doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url
           EssttpBackend.UpfrontPaymentAmount.verifyNoneUpdateUpfrontPaymentAmountRequest(TdAll.journeyId)
         }
       }
@@ -311,7 +311,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       doc.title() shouldBe expectedPageTitleUpfrontSummaryPage
       doc.select(".govuk-heading-xl").text() shouldBe expectedH1UpfrontSummaryPage
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
-      doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.upfrontPaymentAmount().url
+      doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.upfrontPaymentAmount.url
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
 
         def question(row: Element) = row.select(".govuk-summary-list__key").text()

@@ -35,7 +35,7 @@
 
 @title = @{Messages.BankDetails.`You cannot set up a Direct Debit online`.show}
 
-@layout(pageTitle = Some(title), backUrl = Some(routes.BankDetailsController.enterBankDetails().url)) {
+@layout(pageTitle = Some(title), backUrl = Some(routes.BankDetailsController.enterBankDetails.url)) {
     <h1 class="govuk-heading-xl">@title</h1>
     <p class="govuk-body">@{Messages.BankDetails.`You need a named account holder or someone with authorisation to set up a Direct Debit.`.show}</p>
     @govukButton(Button(

@@ -46,7 +46,7 @@ class DatesApiController @Inject() (
       case j: Journey.Stages.AnsweredCanPayUpfront       => getExtremeDatesAndUpdateJourney(Right(j))
       case j: Journey.AfterExtremeDatesResponse =>
         JourneyLogger.info("ExtremeDates already determined, skipping.") // we will want to update the journey perhaps?
-        finalStateCheckF(j, Future.successful(Redirect(routes.DetermineAffordabilityController.determineAffordability())))
+        finalStateCheckF(j, Future.successful(Redirect(routes.DetermineAffordabilityController.determineAffordability)))
     }
   }
 
@@ -57,7 +57,7 @@ class DatesApiController @Inject() (
     for {
       extremeDatesResponse <- datesService.extremeDates(j)
       _ <- journeyService.updateExtremeDatesResult(j.id, extremeDatesResponse)
-    } yield Redirect(routes.DetermineAffordabilityController.determineAffordability())
+    } yield Redirect(routes.DetermineAffordabilityController.determineAffordability)
   }
 
   val retrieveStartDates: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
@@ -73,7 +73,7 @@ class DatesApiController @Inject() (
     for {
       startDatesResponse <- datesService.startDates(journey)
       _ <- journeyService.updateStartDates(journey.id, startDatesResponse)
-    } yield Redirect(routes.DetermineAffordableQuotesController.retrieveAffordableQuotes())
+    } yield Redirect(routes.DetermineAffordableQuotesController.retrieveAffordableQuotes)
   }
 
 }

@@ -21,7 +21,7 @@ import cats.syntax.eq._
 import com.github.ghik.silencer.silent
 import essttp.journey.model.Journey.Stages.ComputedTaxId
 import essttp.journey.model.Origin
-import essttp.journey.model.ttp.EligibilityCheckResult
+import essttp.rootmodel.ttp.EligibilityCheckResult
 import models.audit.eligibility.{EligibilityCheck, EligibilityResult, EnrollmentReasons, TaxDetail}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector

@@ -65,7 +65,7 @@
       @hmrcTimeoutDialogHelper(
         title = Some(Messages.TimeOut.`You’re about to be signed out`.show),
         signOutUrl = appConfig.Urls.signOutUrl,
-        timeoutUrl = Some(routes.SignOutController.signOutFromTimeout().url),
+        timeoutUrl = Some(routes.SignOutController.signOutFromTimeout.url),
         countdown = Some(appConfig.authTimeoutCountdownSeconds),
         timeout = Some(appConfig.authTimeoutSeconds)
       )

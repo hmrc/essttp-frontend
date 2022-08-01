@@ -113,7 +113,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
       doc.title() shouldBe expectedPageTitlePaymentPlanPrintPage
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-      doc.select("#back").attr("href") shouldBe routes.PaymentPlanSetUpController.paymentPlanSetUp().url
+      doc.select("#back").attr("href") shouldBe routes.PaymentPlanSetUpController.paymentPlanSetUp.url
       doc.select(".govuk-heading-xl").text() shouldBe expectedH1PaymentPlanPrintPage
 
       val subheadings = doc.select(".govuk-heading-m").asScala.toList
@@ -148,7 +148,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
       doc.title() shouldBe expectedPageTitlePaymentPlanPrintPage
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-      doc.select("#back").attr("href") shouldBe routes.PaymentPlanSetUpController.paymentPlanSetUp().url
+      doc.select("#back").attr("href") shouldBe routes.PaymentPlanSetUpController.paymentPlanSetUp.url
       doc.select(".govuk-heading-xl").text() shouldBe expectedH1PaymentPlanPrintPage
 
       val subheadings = doc.select(".govuk-heading-m").asScala.toList

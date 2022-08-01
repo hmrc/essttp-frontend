@@ -118,8 +118,8 @@ class BankDetailsController @Inject() (
           journeyService.updateDirectDebitDetails(request.journeyId, directDebitDetails)
             .map { _ =>
               bankDetailsForm.isSoleSignatory match {
-                case IsSoleSignatoryFormValue.Yes => Redirect(routes.BankDetailsController.checkBankDetails())
-                case IsSoleSignatoryFormValue.No  => Redirect(routes.BankDetailsController.cannotSetupDirectDebitOnlinePage())
+                case IsSoleSignatoryFormValue.Yes => Redirect(routes.BankDetailsController.checkBankDetails)
+                case IsSoleSignatoryFormValue.No  => Redirect(routes.BankDetailsController.cannotSetupDirectDebitOnlinePage)
               }
             }
         }
@@ -133,7 +133,7 @@ class BankDetailsController @Inject() (
         if (j.directDebitDetails.isAccountHolder) {
           finalStateCheck(j, Ok(views.bankDetailsSummary(j.directDebitDetails, BankDetailsController.enterBankDetailsUrl)))
         } else {
-          Redirect(routes.BankDetailsController.cannotSetupDirectDebitOnlinePage().url)
+          Redirect(routes.BankDetailsController.cannotSetupDirectDebitOnlinePage.url)
         }
     }
   }
@@ -146,7 +146,7 @@ class BankDetailsController @Inject() (
           journeyService.updateHasConfirmedDirectDebitDetails(j.journeyId)
             .map(_ => Redirect(routes.BankDetailsController.termsAndConditions()))
         } else {
-          Future.successful(Redirect(routes.BankDetailsController.cannotSetupDirectDebitOnlinePage().url))
+          Future.successful(Redirect(routes.BankDetailsController.cannotSetupDirectDebitOnlinePage.url))
         }
     }
   }
@@ -163,7 +163,7 @@ class BankDetailsController @Inject() (
       case j: Journey.BeforeConfirmedDirectDebitDetails => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF(j)
       case _: Journey.AfterConfirmedDirectDebitDetails =>
         journeyService.updateAgreedTermsAndConditions(request.journeyId)
-          .map(_ => Redirect(routes.SubmitArrangementController.submitArrangement()))
+          .map(_ => Redirect(routes.SubmitArrangementController.submitArrangement))
     }
   }
 
@@ -183,7 +183,7 @@ class BankDetailsController @Inject() (
 }
 
 object BankDetailsController {
-  val paymentScheduleUrl: Option[String] = Some(routes.PaymentScheduleController.checkPaymentSchedule().url)
-  val chooseTypeOfAccountUrl: Option[String] = Some(routes.BankDetailsController.typeOfAccount().url)
-  val enterBankDetailsUrl: Option[String] = Some(routes.BankDetailsController.enterBankDetails().url)
+  val paymentScheduleUrl: Option[String] = Some(routes.PaymentScheduleController.checkPaymentSchedule.url)
+  val chooseTypeOfAccountUrl: Option[String] = Some(routes.BankDetailsController.typeOfAccount.url)
+  val enterBankDetailsUrl: Option[String] = Some(routes.BankDetailsController.enterBankDetails.url)
 }

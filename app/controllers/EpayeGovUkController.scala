@@ -42,7 +42,7 @@ class EpayeGovUkController @Inject() (
       // gov uk needs to skip landing page, we don't want to show guidance again.
       if (isComingFromGovUk(request)) {
         journeyConnector.Epaye.startJourneyGovUk(SjRequest.Epaye.Empty())
-          .map(_ => Redirect(routes.DetermineTaxIdController.determineTaxId().url))
+          .map(_ => Redirect(routes.DetermineTaxIdController.determineTaxId.url))
       } else {
         journeyConnector.Epaye.startJourneyDetachedUrl(SjRequest.Epaye.Empty())
           .map(r => Redirect(r.nextUrl.value))

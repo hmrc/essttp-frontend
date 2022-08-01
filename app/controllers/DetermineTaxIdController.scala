@@ -62,6 +62,6 @@ class DetermineTaxIdController @Inject() (
         Future.successful(())
     }
 
-    f.map(_ => Redirect(routes.DetermineEligibilityController.determineEligibility()))
+    f.map(_ => Redirect(routes.DetermineEligibilityController.determineEligibility))
   }
 }

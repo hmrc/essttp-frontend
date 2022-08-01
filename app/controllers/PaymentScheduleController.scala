@@ -66,7 +66,7 @@ class PaymentScheduleController @Inject() (
 
       case j: Journey.AfterSelectedPaymentPlan =>
         journeyService.updateHasCheckedPaymentPlan(j.journeyId)
-          .map(_ => Redirect(routes.BankDetailsController.typeOfAccount()))
+          .map(_ => Redirect(routes.BankDetailsController.typeOfAccount))
 
     }
   }

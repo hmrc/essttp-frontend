@@ -16,7 +16,7 @@
 
 package models.audit.eligibility
 
-import essttp.journey.model.ttp.ChargeTypeAssessment
+import essttp.rootmodel.ttp.ChargeTypeAssessment
 import play.api.libs.json.{Json, OWrites}
 
 final case class EligibilityCheck(

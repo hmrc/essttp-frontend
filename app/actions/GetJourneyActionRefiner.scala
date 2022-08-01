@@ -42,7 +42,7 @@ class GetJourneyActionRefiner @Inject() (journeyConnector: JourneyConnector)(
       case Some(journey) => Right(new AuthenticatedJourneyRequest(request, request.enrolments, journey, request.ggCredId))
       case None =>
         logger.error(s"No journey found for sessionId: [ ${hc.sessionId} ]")
-        Left(Results.Redirect(controllers.routes.EpayeGovUkController.startJourney()))
+        Left(Results.Redirect(controllers.routes.EpayeGovUkController.startJourney))
     }
   }
 

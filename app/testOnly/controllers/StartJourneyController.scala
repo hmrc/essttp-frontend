@@ -89,9 +89,9 @@ class StartJourneyController @Inject() (
       maybeTestUser = TestUser.makeTestUser(startJourneyForm)
       session <- maybeTestUser.map(testUser => loginService.logIn(testUser)).getOrElse(Future.successful(Session.emptyCookie))
       redirect: Result = startJourneyForm.origin match {
-        case Origins.Epaye.Bta         => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.showBtaPage())
+        case Origins.Epaye.Bta         => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.showBtaPage)
         case Origins.Epaye.GovUk       => Redirect("https://github.com/hmrc/essttp-frontend#emulate-start-journey-from-gov-uk")
-        case Origins.Epaye.DetachedUrl => Redirect(_root_.controllers.routes.EpayeGovUkController.startJourney().url)
+        case Origins.Epaye.DetachedUrl => Redirect(_root_.controllers.routes.EpayeGovUkController.startJourney.url)
       }
     } yield redirect.withSession(session)
   }
@@ -115,8 +115,8 @@ class StartJourneyController @Inject() (
       Future.successful(Ok("Missing session id"))
     } else {
       journeyConnector.Epaye.startJourneyBta(SjRequest.Epaye.Simple(
-        returnUrl = ReturnUrl(routes.StartJourneyController.showBtaPage().url + "?return-page"),
-        backUrl   = BackUrl(routes.StartJourneyController.showBtaPage().url + "?starting-page")
+        returnUrl = ReturnUrl(routes.StartJourneyController.showBtaPage.url + "?return-page"),
+        backUrl   = BackUrl(routes.StartJourneyController.showBtaPage.url + "?starting-page")
       )).map(x => Redirect(x.nextUrl.value))
     }
   }

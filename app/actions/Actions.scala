@@ -94,7 +94,7 @@ class Actions @Inject() (
       if (hasRequiredEnrolments) {
         Future.successful(None)
       } else {
-        Future.successful(Some(Redirect(controllers.routes.NotEnrolledController.notEnrolled())))
+        Future.successful(Some(Redirect(controllers.routes.NotEnrolledController.notEnrolled)))
       }
     }
     override protected def executionContext: ExecutionContext = ec

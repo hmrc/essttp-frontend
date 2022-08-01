@@ -66,13 +66,13 @@ class AuthenticatedActionRefiner @Inject() (
         case _: NoActiveSession => Left(redirectToLoginPage)
         case e: AuthorisationException =>
           logger.error(s"Unauthorised because of ${e.reason}, please investigate why", e)
-          Left(Redirect(controllers.routes.NotEnrolledController.notEnrolled()))
+          Left(Redirect(controllers.routes.NotEnrolledController.notEnrolled))
       }
   }
 
   private def redirectToLoginPage(implicit request: Request[_]): Result = {
     val returnUrl =
-      if (request.uri.endsWith(controllers.routes.EpayeGovUkController.startJourney().url)) appConfig.Urls.epayeGovUkJourneyLoginContinueUrl
+      if (request.uri.endsWith(controllers.routes.EpayeGovUkController.startJourney.url)) appConfig.Urls.epayeGovUkJourneyLoginContinueUrl
       else request.uri
     Redirect(
       appConfig.BaseUrl.gg,

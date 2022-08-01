@@ -67,7 +67,7 @@
       actions = Some(Actions(
         items = Seq(
           ActionItem(
-            href = routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url,
+            href = routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url,
             content = Text(Messages.change.show),
             visuallyHiddenText = Some(Messages.UpfrontPaymentSummary.`Upfront payment`.show)
           )
@@ -87,7 +87,7 @@
       actions = Some(Actions(
         items = Seq(
           ActionItem(
-            href = routes.UpfrontPaymentController.upfrontPaymentAmount().url,
+            href = routes.UpfrontPaymentController.upfrontPaymentAmount.url,
             content = Text(Messages.change.show),
             visuallyHiddenText = Some(Messages.UpfrontPaymentSummary.`Upfront payment`.show)
           )
@@ -111,7 +111,7 @@
     actions = Some(Actions(
       items = Seq(
         ActionItem(
-          href = routes.PaymentDayController.paymentDay().url,
+          href = routes.PaymentDayController.paymentDay.url,
           content = Text(Messages.change.show),
           visuallyHiddenText = Some(Messages.PaymentDay.`Which day do you want to pay each month?`.show)
         )
@@ -136,7 +136,7 @@
       actions = Some(Actions(
         items = Seq(
           ActionItem(
-            href = routes.InstalmentsController.instalmentOptions().url,
+            href = routes.InstalmentsController.instalmentOptions.url,
              classes = s"${if(index === 0) "" else "grouped-change"}",
             content = Text(Messages.change.show),
             visuallyHiddenText = Some(Messages.PaymentDay.`Which day do you want to pay each month?`.show)
@@ -162,7 +162,7 @@
 
 @monthlyPaymentRows = @{ paymentDayRow :: monthRows ::: List(totalRow) }
 
-@layout(pageTitle = Some(title), backUrl = Some(routes.InstalmentsController.instalmentOptions().url)) {
+@layout(pageTitle = Some(title), backUrl = Some(routes.InstalmentsController.instalmentOptions.url)) {
 
   <h1 class="govuk-heading-xl">
     @title

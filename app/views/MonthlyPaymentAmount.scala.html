@@ -58,7 +58,7 @@
     }</p>
 }
 
-@layout(pageTitle = Some(title), backUrl = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment().url), hasErrors = form.hasErrors) {
+@layout(pageTitle = Some(title), backUrl = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url), hasErrors = form.hasErrors) {
     @if(form.errors.nonEmpty) {
         @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
             ErrorLink(
@@ -68,7 +68,7 @@
         ),
             title = Text(Messages.`There is a problem`.show)))
     }
-    @formWithCSRF(action = routes.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit()) {
+    @formWithCSRF(action = routes.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit) {
 
         @govukInput(Input(
             id = key,

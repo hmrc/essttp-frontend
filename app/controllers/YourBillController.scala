@@ -50,15 +50,15 @@ class YourBillController @Inject() (
 
   def displayPage(journey: Journey.AfterEligibilityChecked)(implicit request: Request[_]): Result = {
     val backUrl = journey.origin match {
-      case Origins.Epaye.Bta         => Some(routes.LandingController.landingPage().url)
-      case Origins.Epaye.DetachedUrl => Some(routes.LandingController.landingPage().url)
+      case Origins.Epaye.Bta         => Some(routes.LandingController.landingPage.url)
+      case Origins.Epaye.DetachedUrl => Some(routes.LandingController.landingPage.url)
       case Origins.Epaye.GovUk       => journey.backUrl.map(_.value)
     }
     Ok(views.yourBillIs(YourBillController.overDuePayments(journey.eligibilityCheckResult), backUrl))
   }
 
   val yourBillSubmit: Action[AnyContent] = as.eligibleJourneyAction { _ =>
-    Redirect(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment())
+    Redirect(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment)
   }
 
 }

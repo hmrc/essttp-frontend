@@ -27,20 +27,20 @@ object EligibilityRouter {
 
   def nextPage(eligibilityResult: EligibilityCheckResult): Result = {
     val nextUrl: Call = if (eligibilityResult.isEligible) {
-      routes.YourBillController.yourBill()
+      routes.YourBillController.yourBill
     } else {
       EligibilityErrors.toEligibilityError(eligibilityResult.eligibilityRules) match {
-        case Some(MultipleReasons)            => routes.IneligibleController.genericIneligiblePage()
-        case None                             => routes.IneligibleController.genericIneligiblePage()
-        case Some(HasRlsOnAddress)            => routes.IneligibleController.genericIneligiblePage()
-        case Some(MarkedAsInsolvent)          => routes.IneligibleController.genericIneligiblePage()
-        case Some(IsLessThanMinDebtAllowance) => routes.IneligibleController.genericIneligiblePage()
-        case Some(IsMoreThanMaxDebtAllowance) => routes.IneligibleController.debtTooLargePage()
-        case Some(DisallowedChargeLocks)      => routes.IneligibleController.genericIneligiblePage()
-        case Some(ExistingTtp)                => routes.IneligibleController.alreadyHaveAPaymentPlanPage()
-        case Some(ChargesOverMaxDebtAge)      => routes.IneligibleController.debtTooOldPage()
-        case Some(IneligibleChargeTypes)      => routes.IneligibleController.genericIneligiblePage()
-        case Some(MissingFiledReturns)        => routes.IneligibleController.fileYourReturnPage()
+        case Some(MultipleReasons)            => routes.IneligibleController.genericIneligiblePage
+        case None                             => routes.IneligibleController.genericIneligiblePage
+        case Some(HasRlsOnAddress)            => routes.IneligibleController.genericIneligiblePage
+        case Some(MarkedAsInsolvent)          => routes.IneligibleController.genericIneligiblePage
+        case Some(IsLessThanMinDebtAllowance) => routes.IneligibleController.genericIneligiblePage
+        case Some(IsMoreThanMaxDebtAllowance) => routes.IneligibleController.debtTooLargePage
+        case Some(DisallowedChargeLocks)      => routes.IneligibleController.genericIneligiblePage
+        case Some(ExistingTtp)                => routes.IneligibleController.alreadyHaveAPaymentPlanPage
+        case Some(ChargesOverMaxDebtAge)      => routes.IneligibleController.debtTooOldPage
+        case Some(IneligibleChargeTypes)      => routes.IneligibleController.genericIneligiblePage
+        case Some(MissingFiledReturns)        => routes.IneligibleController.fileYourReturnPage
       }
     }
     Redirect(nextUrl)

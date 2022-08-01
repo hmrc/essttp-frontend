@@ -234,7 +234,7 @@
 
     <h1 class="govuk-heading-xl">@title</h1>
     <p class="govuk-body">Set up journeys and emulate entry point behaviours.</p>
-    @formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneySubmit()) {
+    @formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneySubmit) {
 
         @signInAsContent
         @enrolmentsContent
