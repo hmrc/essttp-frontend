@@ -18,51 +18,28 @@ package testsupport.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, stubFor, urlPathEqualTo}
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import testsupport.testdata.BarsJsonResponses
+import testsupport.testdata.BarsJsonResponses.Validate._
 import wiremock.org.apache.http.HttpStatus
 
 object Bars {
 
   object Validate {
-    private val validateUrl = "/validate/bank-details"
+    def success(): StubMapping = stubForValidate(successJson)
 
-    def validateSuccess(): StubMapping =
+    def accountNumberNotWellFormatted(): StubMapping = stubForValidate(accountNumberNotWellFormattedJson)
+
+    def sortCodeNotPresentOnEiscd(): StubMapping = stubForValidate(sortCodeNotPresentOnEiscdJson)
+
+    def sortCodeDoesNotSupportsDirectDebit(): StubMapping = stubForValidate(sortCodeDoesNotSupportsDirectDebitJson)
+
+    private def stubForValidate(responseJson: String): StubMapping = {
+      val validateUrl = "/validate/bank-details"
       stubFor(
         post(urlPathEqualTo(validateUrl))
           .willReturn(
             aResponse()
               .withStatus(HttpStatus.SC_OK)
-              .withBody(BarsJsonResponses.validateSuccessJson)
-          )
-      )
-
-    def accountNumberNotWellFormatted(): StubMapping =
-      stubFor(
-        post(urlPathEqualTo(validateUrl))
-          .willReturn(
-            aResponse()
-              .withStatus(HttpStatus.SC_OK)
-              .withBody(BarsJsonResponses.accountNumberNotWellFormattedJson)
-          )
-      )
-
-    def sortCodeNotPresentOnEiscd(): StubMapping =
-      stubFor(
-        post(urlPathEqualTo(validateUrl))
-          .willReturn(
-            aResponse()
-              .withStatus(HttpStatus.SC_OK)
-              .withBody(BarsJsonResponses.sortCodeNotPresentOnEiscdJson)
-          )
-      )
-
-    def sortCodeDoesNotSupportsDirectDebit(): StubMapping = {
-      stubFor(
-        post(urlPathEqualTo(validateUrl))
-          .willReturn(
-            aResponse()
-              .withStatus(HttpStatus.SC_OK)
-              .withBody(BarsJsonResponses.sortCodeDoesNotSupportsDirectDebitJson)
+              .withBody(responseJson)
           )
       )
     }

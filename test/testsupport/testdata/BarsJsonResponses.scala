@@ -18,43 +18,44 @@ package testsupport.testdata
 
 object BarsJsonResponses {
 
-  val validateSuccessJson: String =
-    """{
-      |  "accountNumberIsWellFormatted": "yes",
-      |  "nonStandardAccountDetailsRequiredForBacs": "no",
-      |  "sortCodeIsPresentOnEISCD": "yes",
-      |  "sortCodeSupportsDirectDebit": "yes",
-      |  "sortCodeSupportsDirectCredit": "no",
-      |  "iban": "GB21BARC20710244344655",
-      |  "sortCodeBankName": "BARCLAYS BANK UK PLC"
-      |}""".stripMargin
+  object Validate {
+    val successJson: String =
+      """{
+        |  "accountNumberIsWellFormatted": "yes",
+        |  "nonStandardAccountDetailsRequiredForBacs": "no",
+        |  "sortCodeIsPresentOnEISCD": "yes",
+        |  "sortCodeSupportsDirectDebit": "yes",
+        |  "sortCodeSupportsDirectCredit": "no",
+        |  "iban": "GB21BARC20710244344655",
+        |  "sortCodeBankName": "BARCLAYS BANK UK PLC"
+        |}""".stripMargin
 
-  val accountNumberNotWellFormattedJson: String =
-    """{
-      |  "accountNumberIsWellFormatted": "no",
-      |  "nonStandardAccountDetailsRequiredForBacs": "yes",
-      |  "sortCodeIsPresentOnEISCD": "yes",
-      |  "sortCodeSupportsDirectDebit": "no",
-      |  "sortCodeSupportsDirectCredit": "yes",
-      |  "sortCodeBankName": "Nottingham Building Society"
-      |}""".stripMargin
+    val accountNumberNotWellFormattedJson: String =
+      """{
+        |  "accountNumberIsWellFormatted": "no",
+        |  "nonStandardAccountDetailsRequiredForBacs": "yes",
+        |  "sortCodeIsPresentOnEISCD": "yes",
+        |  "sortCodeSupportsDirectDebit": "no",
+        |  "sortCodeSupportsDirectCredit": "yes",
+        |  "sortCodeBankName": "Nottingham Building Society"
+        |}""".stripMargin
 
-  val sortCodeNotPresentOnEiscdJson: String =
-    """{
-      |  "accountNumberIsWellFormatted": "no",
-      |  "nonStandardAccountDetailsRequiredForBacs": "no",
-      |  "sortCodeIsPresentOnEISCD": "no"
-      |}""".stripMargin
+    val sortCodeNotPresentOnEiscdJson: String =
+      """{
+        |  "accountNumberIsWellFormatted": "no",
+        |  "nonStandardAccountDetailsRequiredForBacs": "no",
+        |  "sortCodeIsPresentOnEISCD": "no"
+        |}""".stripMargin
 
-  val sortCodeDoesNotSupportsDirectDebitJson: String =
-    """{
-      |  "accountNumberIsWellFormatted": "yes",
-      |  "nonStandardAccountDetailsRequiredForBacs": "no",
-      |  "sortCodeIsPresentOnEISCD": "yes",
-      |  "sortCodeSupportsDirectDebit": "no",
-      |  "sortCodeSupportsDirectCredit": "no",
-      |  "iban": "GB21BARC20670544311611",
-      |  "sortCodeBankName": "BARCLAYS BANK UK PLC"
-      |}""".stripMargin
-
+    val sortCodeDoesNotSupportsDirectDebitJson: String =
+      """{
+        |  "accountNumberIsWellFormatted": "yes",
+        |  "nonStandardAccountDetailsRequiredForBacs": "no",
+        |  "sortCodeIsPresentOnEISCD": "yes",
+        |  "sortCodeSupportsDirectDebit": "no",
+        |  "sortCodeSupportsDirectCredit": "no",
+        |  "iban": "GB21BARC20670544311611",
+        |  "sortCodeBankName": "BARCLAYS BANK UK PLC"
+        |}""".stripMargin
+  }
 }

@@ -241,7 +241,7 @@ class BankDetailsControllerSpec extends ItSpec {
       AuthStub.authorise()
       EssttpBackend.ChosenTypeOfBankAccount.findJourney()
       EssttpBackend.DirectDebitDetails.updateDirectDebitDetails(TdAll.journeyId)
-      Bars.Validate.validateSuccess()
+      Bars.Validate.success()
 
       val fakeRequest = FakeRequest(
         method = "POST",
