@@ -9,8 +9,6 @@ Content-Type: application/json
   }
 }
 
-<> 2022-07-29T193135.200.json
-
 ###
 
 POST localhost:9871/validate/bank-details
@@ -36,8 +34,6 @@ Content-Type: application/json
     "accountNumber": "44311611"
   }
 }
-
-<> 2022-07-29T193317.200.json
 
 ###
 

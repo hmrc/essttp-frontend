@@ -18,31 +18,53 @@ package testsupport.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, stubFor, urlPathEqualTo}
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
+import testsupport.testdata.BarsJsonResponses
 import wiremock.org.apache.http.HttpStatus
 
 object Bars {
 
-  // validate/bank-details endpoint
   object Validate {
     private val validateUrl = "/validate/bank-details"
 
-    private val validateSuccessJson =
-      """{
-        |  "accountNumberIsWellFormatted": "yes",
-        |  "nonStandardAccountDetailsRequiredForBacs": "no",
-        |  "sortCodeIsPresentOnEISCD": "yes",
-        |  "sortCodeSupportsDirectDebit": "yes",
-        |  "sortCodeSupportsDirectCredit": "no",
-        |  "iban": "GB21BARC20710244344655",
-        |  "sortCodeBankName": "BARCLAYS BANK UK PLC"
-        |}""".stripMargin
+    def validateSuccess(): StubMapping =
+      stubFor(
+        post(urlPathEqualTo(validateUrl))
+          .willReturn(
+            aResponse()
+              .withStatus(HttpStatus.SC_OK)
+              .withBody(BarsJsonResponses.validateSuccessJson)
+          )
+      )
 
-    def validateSuccess(): StubMapping = stubFor(
-      post(urlPathEqualTo(validateUrl))
-        .willReturn(aResponse()
-          .withStatus(HttpStatus.SC_OK)
-          .withBody(validateSuccessJson))
-    )
+    def accountNumberNotWellFormatted(): StubMapping =
+      stubFor(
+        post(urlPathEqualTo(validateUrl))
+          .willReturn(
+            aResponse()
+              .withStatus(HttpStatus.SC_OK)
+              .withBody(BarsJsonResponses.accountNumberNotWellFormattedJson)
+          )
+      )
 
+    def sortCodeNotPresentOnEiscd(): StubMapping =
+      stubFor(
+        post(urlPathEqualTo(validateUrl))
+          .willReturn(
+            aResponse()
+              .withStatus(HttpStatus.SC_OK)
+              .withBody(BarsJsonResponses.sortCodeNotPresentOnEiscdJson)
+          )
+      )
+
+    def sortCodeDoesNotSupportsDirectDebit(): StubMapping = {
+      stubFor(
+        post(urlPathEqualTo(validateUrl))
+          .willReturn(
+            aResponse()
+              .withStatus(HttpStatus.SC_OK)
+              .withBody(BarsJsonResponses.sortCodeDoesNotSupportsDirectDebitJson)
+          )
+      )
+    }
   }
 }

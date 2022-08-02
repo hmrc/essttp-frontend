@@ -333,6 +333,58 @@ class BankDetailsControllerSpec extends ItSpec {
       testFormError(controller.enterBankDetailsSubmit)(formData: _*)(expectedContentAndHref)
       EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
     }
+
+    abstract class BarsErrorSetup(barsError: String) {
+      AuthStub.authorise()
+      val validForm: List[(String, String)] = List(
+        ("name", "Bob Ross"),
+        ("sortCode", "123456"),
+        ("accountNumber", "12345678"),
+        ("isSoleSignatory", "Yes")
+      )
+
+      EssttpBackend.DirectDebitDetails.updateDirectDebitDetails(TdAll.journeyId)
+      EssttpBackend.ChosenTypeOfBankAccount.findJourney()
+
+      val expectedContentAndHref: List[(String, String)] =
+        // TODO temporary until error handling decided - will be addressed in the next BARs ticket
+        barsError match {
+          case "accountNumberNotWellFormatted" =>
+            Bars.Validate.accountNumberNotWellFormatted()
+            List(("Enter a valid combination of bank account number and sort code", "#bars"))
+          case "sortCodeNotPresentOnEiscd" =>
+            Bars.Validate.sortCodeNotPresentOnEiscd()
+            List(("Enter a valid combination of bank account number and sort code", "#bars"))
+          case "sortCodeDoesNotSupportsDirectDebit" =>
+            Bars.Validate.sortCodeDoesNotSupportsDirectDebit()
+            List(("You have entered a sort code which does not accept this type of payment. " +
+              "Check you have entered a valid sort code or enter details for a different account", "#bars"))
+        }
+    }
+
+    "show correct error messages when BARs validate response is accountNumberNotWellFormatted" in
+      new BarsErrorSetup("accountNumberNotWellFormatted") {
+        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
+        // TODO we should probably not be updating the backend with this stage on BARs error
+        // TODO again, this will be addressed in the next BARs ticket
+        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+      }
+
+    "show correct error messages when BARs validate response is sortCodeNotPresentOnEiscd" in
+      new BarsErrorSetup("sortCodeNotPresentOnEiscd") {
+        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
+        // TODO we should probably not be updating the backend with this stage on BARs error
+        // TODO again, will be addressed in the next BARs ticket
+        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+      }
+
+    "show correct error messages when BARs validate response is sortCodeDoesNotSupportsDirectDebit" in
+      new BarsErrorSetup("sortCodeDoesNotSupportsDirectDebit") {
+        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
+        // TODO we should probably not be updating the backend with this stage on BARs error
+        // TODO again, will be addressed in the next BARs ticket
+        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+      }
   }
 
   "GET /check-your-direct-debit-details should" - {
