@@ -20,12 +20,14 @@ import _root_.actions.Actions
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import essttp.journey.model.Journey
 import essttp.rootmodel.bank.{BankDetails, DirectDebitDetails}
+import models.bars.BarsModel.BarsResponse._
 import models.enumsforforms.{IsSoleSignatoryFormValue, TypeOfAccountFormValue}
+import models.forms.BankDetailsForm.{accountNumberNotWellFormatted, sortCodeDoesNotSupportsDirectDebit, sortCodeNotPresentOnEiscd}
 import models.forms.{BankDetailsForm, TypeOfAccountForm}
-import play.api.data.Form
+import play.api.data.{Form, FormError}
 import play.api.mvc._
 import requests.RequestSupport
-import services.JourneyService
+import services.{BarsService, JourneyService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.Views
@@ -39,7 +41,8 @@ class BankDetailsController @Inject() (
     views:          Views,
     mcc:            MessagesControllerComponents,
     requestSupport: RequestSupport,
-    journeyService: JourneyService
+    journeyService: JourneyService,
+    barsService:    BarsService
 )(
     implicit
     executionContext: ExecutionContext
@@ -99,31 +102,47 @@ class BankDetailsController @Inject() (
   }
 
   val enterBankDetailsSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
-    BankDetailsForm.form
-      .bindFromRequest()
-      .fold(
-        formWithErrors =>
-          Future.successful(Ok(views.enterBankDetailsPage(formWithErrors, BankDetailsController.chooseTypeOfAccountUrl))),
-        (bankDetailsForm: BankDetailsForm) => {
+    val form = BankDetailsForm.form.bindFromRequest()
+    form.fold(
+      hasErrors = (formWithErrors: Form[BankDetailsForm]) =>
+        Future.successful(Ok(views.enterBankDetailsPage(formWithErrors, BankDetailsController.chooseTypeOfAccountUrl))),
 
-          val directDebitDetails: DirectDebitDetails = DirectDebitDetails(
-            BankDetails(
-              name          = bankDetailsForm.name,
-              sortCode      = bankDetailsForm.sortCode,
-              accountNumber = bankDetailsForm.accountNumber
-            ),
-            bankDetailsForm.isSoleSignatory.asBoolean
-          )
+      success = (bankDetailsForm: BankDetailsForm) => {
 
-          journeyService.updateDirectDebitDetails(request.journeyId, directDebitDetails)
-            .map { _ =>
-              bankDetailsForm.isSoleSignatory match {
-                case IsSoleSignatoryFormValue.Yes => Redirect(routes.BankDetailsController.checkBankDetails)
-                case IsSoleSignatoryFormValue.No  => Redirect(routes.BankDetailsController.cannotSetupDirectDebitOnlinePage)
-              }
+        val directDebitDetails: DirectDebitDetails = DirectDebitDetails(
+          BankDetails(
+            name          = bankDetailsForm.name,
+            sortCode      = bankDetailsForm.sortCode,
+            accountNumber = bankDetailsForm.accountNumber
+          ),
+          bankDetailsForm.isSoleSignatory.asBoolean
+        )
+
+          def enterBankDetailsPageWithBarsError(error: FormError): Result = {
+            Ok(views.enterBankDetailsPage(
+              form.withError(error),
+              BankDetailsController.chooseTypeOfAccountUrl
+            ))
+          }
+
+        journeyService.updateDirectDebitDetails(request.journeyId, directDebitDetails)
+          .flatMap { _ =>
+            bankDetailsForm.isSoleSignatory match {
+              case IsSoleSignatoryFormValue.No =>
+                Future.successful(Redirect(routes.BankDetailsController.cannotSetupDirectDebitOnlinePage))
+
+              case IsSoleSignatoryFormValue.Yes =>
+                barsService.assessBankAccountReputation(directDebitDetails.bankDetails).map {
+                  case accountNumberIsWellFormattedNo() => enterBankDetailsPageWithBarsError(accountNumberNotWellFormatted)
+                  case sortCodeSupportsDirectDebitNo()  => enterBankDetailsPageWithBarsError(sortCodeDoesNotSupportsDirectDebit)
+                  case sortCodeIsPresentOnEiscdNo()     => enterBankDetailsPageWithBarsError(sortCodeNotPresentOnEiscd)
+                  // BARs check was successful
+                  case _                                => Redirect(routes.BankDetailsController.checkBankDetails)
+                }
             }
-        }
-      )
+          }
+      }
+    )
   }
 
   val checkBankDetails: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>

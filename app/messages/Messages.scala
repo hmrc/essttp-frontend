@@ -17,6 +17,7 @@
 package messages
 
 import essttp.rootmodel.AmountInPence
+import models.forms.BankDetailsForm._
 
 object Messages {
 
@@ -554,7 +555,13 @@ object Messages {
       "accountNumber.error.required" -> Message("Enter account number"),
       "accountNumber.error.nonNumeric" -> Message("Account number must be a number"),
       "accountNumber.error.invalid" -> Message("Account number must be between 6 and 8 digits"),
-      "isSoleSignatory.error.required" -> Message("Select yes if you are the account holder")
+      "isSoleSignatory.error.required" -> Message("Select yes if you are the account holder"),
+      s"bars.${accountNumberNotWellFormatted.message}" -> Message("Enter a valid combination of bank account number and sort code"),
+      s"bars.${sortCodeNotPresentOnEiscd.message}" -> Message("Enter a valid combination of bank account number and sort code"),
+      s"bars.${sortCodeDoesNotSupportsDirectDebit.message}" -> Message(
+        "You have entered a sort code which does not accept this type of payment. " +
+          "Check you have entered a valid sort code or enter details for a different account"
+      )
     )
 
     val `Check your Direct Debit details`: Message = Message(
