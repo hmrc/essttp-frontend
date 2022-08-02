@@ -18,11 +18,11 @@ package testOnly.controllers
 
 import _root_.actions.Actions
 import _root_.essttp.rootmodel.ttp._
-import _root_.testOnly.views.html.IAmBtaPage
+import _root_.testOnly.views.html.{IAmBtaPage, TestOnlyStartPage}
 import config.AppConfig
 import essttp.journey.JourneyConnector
-import essttp.rootmodel.ttp.affordablequotes.DueDate
 import essttp.journey.model.{Origins, SjRequest}
+import essttp.rootmodel.ttp.affordablequotes.DueDate
 import essttp.rootmodel.{AmountInPence, BackUrl, ReturnUrl}
 import models.EligibilityErrors._
 import models.{EligibilityError, EligibilityErrors}
@@ -33,7 +33,6 @@ import testOnly.connectors.EssttpStubConnector
 import testOnly.controllers.StartJourneyController._
 import testOnly.formsmodel.StartJourneyForm
 import testOnly.testusermodel.TestUser
-import testOnly.views.html.TestOnlyStartPage
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
@@ -132,7 +131,6 @@ object StartJourneyController {
   private def makeEligibilityCheckResult(form: StartJourneyForm): EligibilityCheckResult = {
 
     val debtAmountFromForm: DebtTotalAmount = DebtTotalAmount(AmountInPence(form.debtTotalAmount))
-
     val charges: Charges = Charges(
       chargeType           = ChargeType("InYearRTICharge-Tax"),
       mainType             = MainType("InYearRTICharge(FPS)"),

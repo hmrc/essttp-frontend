@@ -22,7 +22,7 @@ import essttp.rootmodel.{AmountInPence, EmpRef}
 import langswitch.Language
 import models.MoneyUtil.amountOfMoneyFormatter
 import models.{EligibilityError, EligibilityErrors}
-import play.api.data.Forms.{mapping, seq}
+import play.api.data.Forms.{mapping, optional, seq}
 import play.api.data.{FieldMapping, Form, Forms, Mapping}
 import testOnly.messages.Messages
 import testOnly.testusermodel.RandomDataGenerator
@@ -35,10 +35,15 @@ final case class StartJourneyForm(
     enrolments:        Seq[Enrolment],
     origin:            Origin,
     eligibilityErrors: Seq[EligibilityError],
-    debtTotalAmount:   BigDecimal
+    debtTotalAmount:   BigDecimal,
+    taxReference:      Option[String]
 ) {
-  //TODO: move ton and tor to the form
-  val (ton: TaxOfficeNumber, tor: TaxOfficeReference, empRef: EmpRef) = RandomDataGenerator.nextEpayeRefs()(Random)
+  val (taxOfficeNumber: TaxOfficeNumber, taxOfficeReference: TaxOfficeReference, empRef: EmpRef) =
+    taxReference.fold(RandomDataGenerator.nextEpayeRefs()(Random)) { someTaxRef =>
+      val ton = TaxOfficeNumber(someTaxRef.take(3))
+      val tor = TaxOfficeReference(someTaxRef.drop(3))
+      (ton, tor, EmpRef.makeEmpRef(ton, tor))
+    }
 }
 
 object StartJourneyForm {
@@ -61,16 +66,21 @@ object StartJourneyForm {
       errorMessageIfEnumError = Messages.`Select which origin the journey should start from`.show
     ))
 
+    val debtTotalAmountMapping: FieldMapping[BigDecimal] = Forms.of(amountOfMoneyFormatter(
+      isTooSmall = AmountInPence(100) > AmountInPence(_),
+      isTooLarge = AmountInPence(_) > AmountInPence(1500000)
+    ))
+
+    val taxRefMapping: Mapping[Option[String]] = optional(Forms.text)
+
     Form(
       mapping(
         "signInAs" -> signInMapping,
         "enrolments" -> enrolmentsMapping,
         "origin" -> originMapping,
         "eligibilityErrors" -> seq(enumeratum.Forms.enum(EligibilityErrors)),
-        "debtTotalAmount" -> Forms.of(amountOfMoneyFormatter(
-          isTooSmall = AmountInPence(100) > AmountInPence(_),
-          isTooLarge = AmountInPence(_) > AmountInPence(1500000)
-        ))
+        "debtTotalAmount" -> debtTotalAmountMapping,
+        "taxReference" -> taxRefMapping
       )(StartJourneyForm.apply)(StartJourneyForm.unapply)
     )
   }

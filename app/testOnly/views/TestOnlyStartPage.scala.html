@@ -183,6 +183,22 @@
 ))
 }
 
+@taxRef = {
+@govukInput(Input(
+    id = "taxReference",
+    name = "taxReference",
+    label = Label(
+        isPageHeading = false,
+        classes = "govuk-label--m",
+        content = Text("Enter a tax reference")
+    ),
+    classes = "govuk-input--width-10",
+    spellcheck = Some(false),
+    value = form.data.get("taxReference"),
+    hint = Some(Hint(content = Text("Enter an tax ref in format NNNLLNNNNN, e.g. 864FZ00049. If left empty, it will be a random one. If you enter less than 4 characters, you will experience an error.")))
+))
+}
+
 @*********************
 @vatContent = {
 @govukRadios(Radios(
@@ -239,6 +255,7 @@
         @signInAsContent
         @enrolmentsContent
         @debtTotalAmountContent
+        @taxRef
 
         @govukTabs(Tabs(
             items = Seq(
