@@ -19,6 +19,7 @@ package testsupport.testdata
 final case class StageInfo(stage: String, stageValue: String)
 
 object StageInfo {
+  val started: StageInfo = StageInfo("Started", "Started")
   val computedTaxId: StageInfo = StageInfo("ComputedTaxId", "ComputedTaxId")
   val eligibilityCheckedEligible: StageInfo = StageInfo("EligibilityChecked", "Eligible")
   val eligibilityCheckedIneligible: StageInfo = StageInfo("EligibilityChecked", "Ineligible")

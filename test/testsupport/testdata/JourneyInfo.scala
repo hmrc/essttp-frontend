@@ -46,7 +46,8 @@ object JourneyInfo {
   /** * **/
 
   /** accumulation of journey info, in essence it's up to stage X */
-  val taxIdDetermined: List[JourneyInfoAsJson] = List(taxId)
+  val started: List[JourneyInfoAsJson] = List.empty
+  val taxIdDetermined: List[JourneyInfoAsJson] = taxId :: started
 
   val eligibilityCheckedEligible: List[JourneyInfoAsJson] = eligibilityCheckEligible :: taxIdDetermined
   val eligibilityCheckedIneligibleHasRls: List[JourneyInfoAsJson] = ineligibleHasRls :: taxIdDetermined

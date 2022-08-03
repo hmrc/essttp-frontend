@@ -19,8 +19,9 @@ package testsupport.stubs
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.journey.model.{JourneyId, Origin, Origins}
-import essttp.rootmodel.DayOfMonth
-import testsupport.testdata.{TdAll, TdJsonBodies, JourneyJsonTemplates}
+import essttp.rootmodel.{DayOfMonth, TaxId}
+import play.api.libs.json.Json
+import testsupport.testdata.{JourneyJsonTemplates, TdAll, TdJsonBodies}
 
 object EssttpBackend {
 
@@ -54,6 +55,14 @@ object EssttpBackend {
     val startJourneyEpayeDetached: StubMapping = startJourneyInBackend(Origins.Epaye.DetachedUrl)
 
     def verifyStartJourney(url: String): Unit = verify(exactly(0), postRequestedFor(urlPathEqualTo(url)))
+
+    def findJourney(jsonBody: String = JourneyJsonTemplates.Started): StubMapping =
+      stubFor(
+        get(urlPathEqualTo(findByLatestSessionIdUrl))
+          .willReturn(aResponse()
+            .withStatus(200)
+            .withBody(jsonBody))
+      )
   }
 
   object DetermineTaxId {
@@ -64,6 +73,24 @@ object EssttpBackend {
           .withStatus(200)
           .withBody(jsonBody))
     )
+
+    def updateTaxIdUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-tax-id"
+
+    def updateTaxId(journeyId: JourneyId): StubMapping =
+      stubFor(
+        post(urlPathEqualTo(updateTaxIdUrl(journeyId)))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+          )
+      )
+
+    def verifyTaxIdRequest(journeyId: JourneyId, taxId: TaxId) =
+      verify(
+        postRequestedFor(urlPathEqualTo(updateTaxIdUrl(journeyId)))
+          .withRequestBody(equalToJson(Json.toJson(taxId).toString()))
+      )
+
   }
 
   object EligibilityCheck {

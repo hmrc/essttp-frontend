@@ -55,13 +55,17 @@ class DetermineTaxIdController @Inject() (
   with Logging {
 
   def determineTaxId(): Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
-    val f = request.journey match {
-      case j: Journey.Stages.Started => enrolmentService.determineTaxId(j, request.enrolments)
-      case _: Journey.AfterComputedTaxId =>
+    val maybeTaxId = request.journey match {
+      case j: Journey.Stages.Started =>
+        enrolmentService.determineTaxIdAndUpdateJourney(j, request.enrolments)
+      case j: Journey.AfterComputedTaxId =>
         JourneyLogger.info("TaxId already determined, skipping.")
-        Future.successful(())
+        Future.successful(Some(j.taxId))
     }
 
-    f.map(_ => Redirect(routes.DetermineEligibilityController.determineEligibility))
+    maybeTaxId.map {
+      case Some(_) => Redirect(routes.DetermineEligibilityController.determineEligibility)
+      case None    => Redirect(routes.NotEnrolledController.notEnrolled)
+    }
   }
 }
