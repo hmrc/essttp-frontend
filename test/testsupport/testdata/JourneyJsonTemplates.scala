@@ -18,6 +18,11 @@ package testsupport.testdata
 
 object JourneyJsonTemplates {
 
+  val Started: String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.started,
+    journeyInfo = JourneyInfo.started
+  )
+
   val `Computed Tax Id`: String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.computedTaxId,
     journeyInfo = JourneyInfo.taxIdDetermined

@@ -20,8 +20,6 @@ import actionsmodel.{AuthenticatedJourneyRequest, AuthenticatedRequest, Eligible
 import controllers.JourneyIncorrectStateRouter
 import controllers.pagerouters.EligibilityRouter
 import essttp.journey.model.Journey
-import essttp.rootmodel.TaxRegime
-import play.api.mvc.Results.Redirect
 import play.api.mvc._
 
 import javax.inject.{Inject, Singleton}
@@ -40,21 +38,15 @@ class Actions @Inject() (
     actionBuilder
       .andThen(authenticatedActionRefiner)
 
-  val notEnrolledAction: ActionBuilder[AuthenticatedRequest, AnyContent] =
-    actionBuilder
-      .andThen(authenticatedActionRefiner)
-
   val authenticatedJourneyAction: ActionBuilder[AuthenticatedJourneyRequest, AnyContent] =
     actionBuilder
       .andThen(authenticatedActionRefiner)
       .andThen(getJourneyActionRefiner)
-      .andThen(filterForRequiredEnrolments)
 
   val eligibleJourneyAction: ActionBuilder[AuthenticatedJourneyRequest, AnyContent] =
     actionBuilder
       .andThen(authenticatedActionRefiner)
       .andThen(getJourneyActionRefiner)
-      .andThen(filterForRequiredEnrolments)
       .andThen(filterForEligibleJourney)
 
   private def filterForEligibleJourney: ActionRefiner[AuthenticatedJourneyRequest, EligibleJourneyRequest] =
@@ -84,20 +76,4 @@ class Actions @Inject() (
 
     }
 
-  private def filterForRequiredEnrolments: ActionFilter[AuthenticatedJourneyRequest] = new ActionFilter[AuthenticatedJourneyRequest] {
-    override protected def filter[A](request: AuthenticatedJourneyRequest[A]): Future[Option[Result]] = {
-      val hasRequiredEnrolments: Boolean = request.journey.taxRegime match {
-        case TaxRegime.Epaye => EnrolmentDef.Epaye.hasRequiredEnrolments(request.enrolments)
-        case TaxRegime.Vat   => EnrolmentDef.Vat.hasRequiredEnrolments(request.enrolments)
-      }
-
-      if (hasRequiredEnrolments) {
-        Future.successful(None)
-      } else {
-        Future.successful(Some(Redirect(controllers.routes.NotEnrolledController.notEnrolled)))
-      }
-    }
-    override protected def executionContext: ExecutionContext = ec
-  }
 }
-

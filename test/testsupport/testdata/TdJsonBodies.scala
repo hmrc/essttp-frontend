@@ -42,7 +42,7 @@ object TdJsonBodies {
   }
 
   def createJourneyJson(stageInfo: StageInfo, journeyInfo: List[String]): String = {
-    val jsonFormatted: String = journeyInfo.mkString(",")
+    val jsonFormatted: String = if (journeyInfo.isEmpty) "" else s",\n${journeyInfo.mkString(",")}"
     s"""
       |{
       |  "_id": "6284fcd33c00003d6b1f3903",
@@ -60,8 +60,7 @@ object TdJsonBodies {
       |      }
       |    },
       |    "sessionId": "IamATestSessionId",
-      |    "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-      |    $jsonFormatted
+      |    "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059"$jsonFormatted
       |  },
       |  "sessionId": "IamATestSessionId",
       |  "createdAt": "2022-07-22T14:01:06.629Z",

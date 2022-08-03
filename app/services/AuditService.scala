@@ -18,8 +18,7 @@ package services
 
 import actionsmodel.AuthenticatedJourneyRequest
 import cats.syntax.eq._
-import com.github.ghik.silencer.silent
-import essttp.journey.model.Journey.Stages.ComputedTaxId
+import essttp.journey.model.Journey.Stages.{ComputedTaxId, Started}
 import essttp.journey.model.Origin
 import essttp.rootmodel.ttp.EligibilityCheckResult
 import models.audit.eligibility.{EligibilityCheckAuditDetail, EligibilityResult, EnrollmentReasons, TaxDetail}
@@ -40,10 +39,16 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
     auditConnector.sendExplicitAudit("EligibilityCheck", auditEvent)
   }
 
-  // TODO: hook in when questions about business rules clarified
-  @silent
+  def auditEligibilityCheck(
+      journey:          Started,
+      enrollmentReason: Either[EnrollmentReasons.NotEnrolled, EnrollmentReasons.InactiveEnrollment]
+  )(implicit r: AuthenticatedJourneyRequest[_], hc: HeaderCarrier): Unit = {
+    val auditEvent = toEligibilityCheck(journey, enrollmentReason)
+    auditConnector.sendExplicitAudit("EligibilityCheck", auditEvent)
+  }
+
   private def toEligibilityCheck(
-      journey:          ComputedTaxId,
+      journey:          Started,
       enrollmentReason: Either[EnrollmentReasons.NotEnrolled, EnrollmentReasons.InactiveEnrollment]
   )(implicit r: AuthenticatedJourneyRequest[_]): EligibilityCheckAuditDetail = {
     EligibilityCheckAuditDetail(

@@ -16,6 +16,7 @@
 
 package actions
 
+import actions.EnrolmentDefResult.{EnrolmentNotFound, IdentifierNotFound, Inactive, Success}
 import essttp.rootmodel.Vrn
 import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
 import uk.gov.hmrc.auth.core.Enrolments
@@ -31,80 +32,91 @@ final case class EnrolmentDef(
 object EnrolmentDef {
 
   object Epaye {
-    def findEnrolmentValues(enrolments: Enrolments): Option[(TaxOfficeNumber, TaxOfficeReference)] = {
-      for {
-        taxOfficeNumber <- findMatchingEnrolmentsValues(enrolments, `IR-PAYE-TaxOfficeNumber`).headOption
-        taxOfficeReference <- findMatchingEnrolmentsValues(enrolments, `IR-PAYE-TaxOfficeReference`).headOption
-      } yield (TaxOfficeNumber(taxOfficeNumber), TaxOfficeReference(taxOfficeReference))
-    }
 
-    def hasRequiredEnrolments(enrolments: Enrolments): Boolean = {
-      findEnrolmentValues(enrolments).isDefined
-    }
-    private val `IR-PAYE-TaxOfficeNumber`: EnrolmentDef = EnrolmentDef("IR-PAYE", "TaxOfficeNumber")
-    private val `IR-PAYE-TaxOfficeReference`: EnrolmentDef = EnrolmentDef("IR-PAYE", "TaxOfficeReference")
+    val `IR-PAYE-TaxOfficeNumber`: EnrolmentDef = EnrolmentDef("IR-PAYE", "TaxOfficeNumber")
+    val `IR-PAYE-TaxOfficeReference`: EnrolmentDef = EnrolmentDef("IR-PAYE", "TaxOfficeReference")
+
+    def findEnrolmentValues(enrolments: Enrolments): EnrolmentDefResult[(TaxOfficeNumber, TaxOfficeReference)] =
+      (
+        findMatchingEnrolmentsValues(enrolments, `IR-PAYE-TaxOfficeNumber`),
+        findMatchingEnrolmentsValues(enrolments, `IR-PAYE-TaxOfficeReference`)
+      ) match {
+          case (Success(taxOfficeNumber), Success(taxOfficeReference)) =>
+            Success(TaxOfficeNumber(taxOfficeNumber) -> TaxOfficeReference(taxOfficeReference))
+
+          case (IdentifierNotFound(enrolmentDef1), IdentifierNotFound(enrolmentDef2)) =>
+            IdentifierNotFound(enrolmentDef1 ++ enrolmentDef2)
+
+          case (IdentifierNotFound(enrolmentDef), _) =>
+            IdentifierNotFound(enrolmentDef)
+
+          case (_, IdentifierNotFound(enrolmentDef)) =>
+            IdentifierNotFound(enrolmentDef)
+
+          case (_: EnrolmentNotFound[_], _) => EnrolmentNotFound()
+          case (_, _: EnrolmentNotFound[_]) => EnrolmentNotFound()
+          case (_: Inactive[_], _)          => Inactive()
+          case (_, _: Inactive[_])          => Inactive()
+        }
+
   }
 
   object Vat {
-    def findEnrolmentValues(enrolments: Enrolments): Option[Vrn] = findPrimaryVrn(enrolments)
 
-    def hasRequiredEnrolments(enrolments: Enrolments): Boolean = {
-      findEnrolmentValues(enrolments).isDefined
-    }
-
-    private val `HMRC-MTD-VAT`: EnrolmentDef = EnrolmentDef("HMRC-MTD-VAT", "VRN")
-    private val `HMCE-VATDEC-ORG`: EnrolmentDef = EnrolmentDef("HMCE-VATDEC-ORG", "VATRegNo")
-    private val `HMCE-VATVAR-ORG`: EnrolmentDef = EnrolmentDef("HMCE-VATVAR-ORG", "VATRegNo")
+    val `HMRC-MTD-VAT`: EnrolmentDef = EnrolmentDef("HMRC-MTD-VAT", "VRN")
+    val `HMCE-VATDEC-ORG`: EnrolmentDef = EnrolmentDef("HMCE-VATDEC-ORG", "VATRegNo")
+    val `HMCE-VATVAR-ORG`: EnrolmentDef = EnrolmentDef("HMCE-VATVAR-ORG", "VATRegNo")
 
     /**
      * It extracts VRN as an option from enrolments.It might happen that enrolments have multiple vrn values.
      * If so it selects the MTD related one.
      * see https://jira.tools.tax.service.gov.uk/browse/OPS-5542
      */
-    private def findPrimaryVrn(enrolments: Enrolments): Option[Vrn] = {
-      val mtdVatVrn: Option[String] = findMtdVatVrns(enrolments).headOption
-      val vatVarVrn: Option[String] = findVatVarVrns(enrolments).headOption
-      val vatDecVrn: Option[String] = findVatDecVrns(enrolments).headOption
-      mtdVatVrn.orElse(vatDecVrn).orElse(vatVarVrn).map(Vrn.apply)
+    def findEnrolmentValues(enrolments: Enrolments): EnrolmentDefResult[Vrn] = {
+      val mtdVatVrn: EnrolmentDefResult[String] = findMatchingEnrolmentsValues(
+        enrolments,
+        `HMRC-MTD-VAT`
+      )
+      val vatVarVrn: EnrolmentDefResult[String] = findMatchingEnrolmentsValues(
+        enrolments,
+        `HMCE-VATVAR-ORG`
+      )
+      val vatDecVrn: EnrolmentDefResult[String] = findMatchingEnrolmentsValues(
+        enrolments,
+        `HMCE-VATDEC-ORG`
+      )
+
+      val vrns = List(mtdVatVrn, vatVarVrn, vatDecVrn)
+      val vrn = vrns.collectFirst{ case Success(vrn) => Vrn(vrn) }
+
+      vrn.map(Success(_)).getOrElse{
+        val identifierNotFounds = vrns.collect{ case n: IdentifierNotFound[_] => n }
+        val enrolmentsNotFound = vrns.collect { case e: EnrolmentNotFound[_] => e }
+
+        if (identifierNotFounds.nonEmpty)
+          IdentifierNotFound(identifierNotFounds.flatMap(_.enrolmentDefs).toSet)
+        else if (enrolmentsNotFound.nonEmpty)
+          EnrolmentNotFound()
+        else
+          Inactive()
+      }
+
     }
 
-    private def findMtdVatVrns(enrolments: Enrolments): Set[String] =
-      EnrolmentDef
-        .findMatchingEnrolmentsValues(
-          enrolments,
-          `HMRC-MTD-VAT`
-        )
-
-    private def findVatVarVrns(enrolments: Enrolments): Set[String] =
-      EnrolmentDef
-        .findMatchingEnrolmentsValues(
-          enrolments,
-          `HMCE-VATVAR-ORG`
-        )
-
-    private def findVatDecVrns(enrolments: Enrolments): Set[String] =
-      EnrolmentDef
-        .findMatchingEnrolmentsValues(
-          enrolments,
-          `HMCE-VATDEC-ORG`
-        )
   }
 
-  /**
-   * Checks if Enrolments contain entry matching EnrolmentDef
-   */
-  def existEnrolmentMatchingDef(enrolments: Enrolments, enrolmentDef: EnrolmentDef): Boolean =
-    findMatchingEnrolmentsValues(enrolments, enrolmentDef)
-      .nonEmpty
+  private def findMatchingEnrolmentsValues(enrolments: Enrolments, enrolmentDef: EnrolmentDef): EnrolmentDefResult[String] = {
+    enrolments.enrolments.find(_.key.equalsIgnoreCase(enrolmentDef.enrolmentKey)) match {
+      case Some(enrolment) =>
+        enrolment.identifiers.find(_.key.equalsIgnoreCase(enrolmentDef.identifierKey))
+          .fold[EnrolmentDefResult[String]](
+            EnrolmentDefResult.IdentifierNotFound(Set(enrolmentDef))
+          )(id =>
+              if (enrolment.isActivated) EnrolmentDefResult.Success(id.value)
+              else EnrolmentDefResult.Inactive())
 
-  private def findMatchingEnrolmentsValues(enrolments: Enrolments, enrolmentDef: EnrolmentDef): Set[String] = {
-    for {
-      enrolment <- enrolments.enrolments
-      if enrolment.isActivated
-      if enrolment.key.equalsIgnoreCase(enrolmentDef.enrolmentKey)
-      identifier <- enrolment.identifiers
-      if identifier.key.equalsIgnoreCase(enrolmentDef.identifierKey)
-    } yield identifier.value
+      case None => EnrolmentDefResult.EnrolmentNotFound()
+    }
   }
 
 }
