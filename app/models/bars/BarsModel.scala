@@ -43,9 +43,9 @@ object BarsModel {
         BankAccount(bankDetails.sortCode, leftPad(bankDetails.accountNumber))
       )
 
+    val minimumLength = 8
+    val padStr = "0"
     private def leftPad(accountNumber: AccountNumber): AccountNumber = {
-      val minimumLength = 8
-      val padStr = "0"
       AccountNumber(StringUtils.leftPad(accountNumber.value, minimumLength, padStr))
     }
   }
