@@ -18,6 +18,7 @@ package models.bars
 
 import cats.Eq
 import essttp.rootmodel.bank.{AccountNumber, BankDetails, SortCode}
+import org.apache.commons.lang3.StringUtils
 import play.api.libs.json.{Format, Json}
 
 object BarsModel {
@@ -39,8 +40,14 @@ object BarsModel {
 
     def apply(bankDetails: BankDetails): BarsValidateRequest =
       BarsValidateRequest(
-        BankAccount(bankDetails.sortCode, bankDetails.accountNumber)
+        BankAccount(bankDetails.sortCode, leftPad(bankDetails.accountNumber))
       )
+
+    private val minimumLength = 8
+    private val padStr = "0"
+    private def leftPad(accountNumber: AccountNumber): AccountNumber = {
+      AccountNumber(StringUtils.leftPad(accountNumber.value, minimumLength, padStr))
+    }
   }
 
   import enumeratum._
