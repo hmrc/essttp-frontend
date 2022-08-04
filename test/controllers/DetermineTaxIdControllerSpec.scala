@@ -23,8 +23,8 @@ import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
-import testsupport.stubs.{AuditConnectorStub, AuthStub, EssttpBackend}
 import testsupport.TdRequest.FakeRequestOps
+import testsupport.stubs.{AuditConnectorStub, AuthStub, EssttpBackend}
 import testsupport.testdata.TdAll
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 import uk.gov.hmrc.http.SessionKeys
@@ -127,7 +127,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
             EnrolmentDef.Epaye.`IR-PAYE-TaxOfficeReference`.identifierKey -> "Ref"
           ),
           enrolment(EnrolmentDef.Epaye.`IR-PAYE-TaxOfficeReference`.enrolmentKey, activated = false)()
-        ).foreach{ e =>
+        ).foreach { e =>
             AuthStub.authorise(allEnrolments = Some(Set(e)))
             EssttpBackend.StartJourney.findJourney()
             EssttpBackend.DetermineTaxId.updateTaxId(TdAll.journeyId)
@@ -170,7 +170,5 @@ class DetermineTaxIdControllerSpec extends ItSpec {
       }
 
     }
-
   }
-
 }

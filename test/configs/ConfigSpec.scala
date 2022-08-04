@@ -50,6 +50,9 @@ class ConfigSpec extends ItSpec {
       ("Urls.extraSupportUrl", config.Urls.extraSupportUrl, "https://www.gov.uk/get-help-hmrc-extra-support"),
       ("Urls.relayUrl", config.Urls.relayUrl, "https://www.relayuk.bt.com/"),
 
+      ("InterestRates.baseRate", config.InterestRates.baseRate, 1.0),
+      ("InterestRates.hmrcRate", config.InterestRates.hmrcRate, 2.5),
+
       ("JourneyVariables.minimumUpfrontPaymentAmountInPence", config.JourneyVariables.minimumUpfrontPaymentAmountInPence, AmountInPence(100L)),
       ("Ttp.headers.correlationId", config.TtpHeaders.correlationId, "correlationId")
 

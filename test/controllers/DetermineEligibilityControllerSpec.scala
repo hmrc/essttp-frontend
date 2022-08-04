@@ -133,5 +133,14 @@ class DetermineEligibilityControllerSpec extends ItSpec {
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.yourBillIsUrl)
     }
+
+    "Redirect to landing page if journey is in started state" in {
+      AuthStub.authorise()
+      EssttpBackend.StartJourney.findJourney()
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result = controller.determineEligibility(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.landingPageUrl)
+    }
   }
 }

@@ -21,30 +21,30 @@ import org.jsoup.nodes.Document
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import testsupport.testdata.TdAll
 import testsupport.ItSpec
+import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.RequestAssertions
+import testsupport.stubs.{AuthStub, EssttpBackend}
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
 
-class LandingPageControllerSpec extends ItSpec {
+class SignOutControllerSpec extends ItSpec {
+  private val controller: SignOutController = app.injector.instanceOf[SignOutController]
 
-  private val controller: LandingController = app.injector.instanceOf[LandingController]
-
-  "GET /" - {
-    "return 200 and the PAYE landing page" in {
-      val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val result: Future[Result] = controller.landingPage(fakeRequest)
+  "signOutFromTimeout should" - {
+    "return the timed out page" in {
+      AuthStub.authorise()
+      EssttpBackend.EligibilityCheck.findJourney()
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.signOutFromTimeout(fakeRequest)
       RequestAssertions.assertGetRequestOk(result)
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
-      val expectedH1 = "Set up an Employers’ PAYE payment plan"
-      val expectedServiceName: String = TdAll.expectedServiceNamePaye
-      doc.title() shouldBe s"$expectedH1 - $expectedServiceName - GOV.UK"
-      doc.select(".govuk-heading-xl").text() shouldBe expectedH1
-      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
-
+      doc.title() shouldBe "For your security, we signed you out - Set up an Employers’ PAYE payment plan - GOV.UK"
+      doc.select(".govuk-heading-xl").text() shouldBe "For your security, we signed you out"
+      doc.select(".hmrc-header__service-name").text() shouldBe "Set up an Employers’ PAYE payment plan"
     }
   }
+
 }

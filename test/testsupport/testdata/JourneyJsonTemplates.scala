@@ -58,6 +58,11 @@ object JourneyJsonTemplates {
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMissingFiledReturns
   )
 
+  val `Eligibility Checked - Ineligible - MultipleReasons`: String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.eligibilityCheckedIneligible,
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMultipleReasons
+  )
+
   val `Answered Can Pay Upfront - Yes`: String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.answeredCanPayUpfrontYes,
     journeyInfo = JourneyInfo.answeredCanPayUpfrontYes
@@ -124,9 +129,14 @@ object JourneyJsonTemplates {
     journeyInfo = JourneyInfo.hasCheckedPaymentPlan
   )
 
-  val `Chosen Type of Bank Account`: String = TdJsonBodies.createJourneyJson(
-    stageInfo   = StageInfo.chosenTypeOfBankAccount,
-    journeyInfo = JourneyInfo.chosenTypeOfBankAccount
+  val `Chosen Type of Bank Account - Business`: String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.chosenTypeOfBankAccountBusiness,
+    journeyInfo = JourneyInfo.chosenTypeOfBankAccountBusiness
+  )
+
+  val `Chosen Type of Bank Account - Personal`: String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.chosenTypeOfBankAccountPersonal,
+    journeyInfo = JourneyInfo.chosenTypeOfBankAccountPersonal
   )
 
   val `Entered Direct Debit Details - Is Account Holder`: String = TdJsonBodies.createJourneyJson(

@@ -23,7 +23,10 @@ import testsupport.testdata.JourneyInfo.JourneyInfoAsJson
 object TdJsonBodies {
 
   object StartJourneyRequestBodies {
-    val empty: String = "{}"
+    val empty: String =
+      """{
+        |   "Empty": {}
+        |}""".stripMargin
     val simple: String =
       """{
         |  "returnUrl": "http://localhost:9066/return",
@@ -403,7 +406,7 @@ object TdJsonBodies {
        |               }
        |""".stripMargin
 
-  def typeOfBankJourneyInfo(): String = s""""typeOfBankAccount" : "Business""""
+  def typeOfBankJourneyInfo(typeOfAccount: String = "Business"): String = s""""typeOfBankAccount" : "$typeOfAccount""""
 
   def directDebitDetailsJourneyInfo(isAccountHolder: Boolean = true): String =
     s"""
