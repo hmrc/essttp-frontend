@@ -13,11 +13,11 @@ object ScoverageSettings {
       """.*SummaryListFluency""",
       """.*TagFluency""",
       """.*InputFluency""",
-      """.*JourneyLogger""",
+      """.*JourneyLogger"""
     ).mkString(";") + ";"
 
     Seq(
-      ScoverageKeys.coverageExcludedPackages := """.*.Reverse.*;.*.javascript.*;testOnly.*;.*viewmodels.govuk""",
+      ScoverageKeys.coverageExcludedPackages := """.*.Reverse.*;.*.javascript.*;testOnly.*;.*viewmodels.govuk;.*Reverse.*""",
       ScoverageKeys.coverageExcludedFiles := excludedFiles,
       ScoverageKeys.coverageMinimumStmtTotal := 80,
       ScoverageKeys.coverageFailOnMinimum := true,

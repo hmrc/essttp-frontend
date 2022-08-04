@@ -58,6 +58,11 @@ object JourneyJsonTemplates {
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMissingFiledReturns
   )
 
+  val `Eligibility Checked - Ineligible - MultipleReasons`: String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.eligibilityCheckedIneligible,
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMultipleReasons
+  )
+
   val `Answered Can Pay Upfront - Yes`: String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.answeredCanPayUpfrontYes,
     journeyInfo = JourneyInfo.answeredCanPayUpfrontYes

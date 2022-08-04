@@ -27,6 +27,7 @@ object JourneyInfo {
   val ineligibleExistingTtp: JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleOverallEligibilityStatus, TdAll.notEligibleExistingTTP)
   val ineligibleMaxDebtAge: JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleOverallEligibilityStatus, TdAll.notEligibleExceedsMaxDebtAge)
   val ineligibleMissingFiledReturns: JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleOverallEligibilityStatus, TdAll.notEligibleMissingFiledReturns)
+  val multipleIneligibleReasons: JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleOverallEligibilityStatus, TdAll.notEligibleHasRlsOnAddress.copy(markedAsInsolvent = true))
   val canPayUpfront: JourneyInfoAsJson = TdJsonBodies.canPayUpfrontJourneyInfo(true)
   val cannotPayUpfront: JourneyInfoAsJson = TdJsonBodies.canPayUpfrontJourneyInfo(false)
   val upfrontPaymentAmount: JourneyInfoAsJson = TdJsonBodies.upfrontPaymentAmountJourneyInfo(TdAll.upfrontPaymentAmount)
@@ -56,6 +57,7 @@ object JourneyInfo {
   val eligibilityCheckedIneligibleExistingTtp: List[JourneyInfoAsJson] = ineligibleExistingTtp :: taxIdDetermined
   val eligibilityCheckedIneligibleMaxDebtAge: List[JourneyInfoAsJson] = ineligibleMaxDebtAge :: taxIdDetermined
   val eligibilityCheckedIneligibleMissingFiledReturns: List[JourneyInfoAsJson] = ineligibleMissingFiledReturns :: taxIdDetermined
+  val eligibilityCheckedIneligibleMultipleReasons: List[JourneyInfoAsJson] = multipleIneligibleReasons :: taxIdDetermined
   val answeredCanPayUpfrontYes: List[JourneyInfoAsJson] = canPayUpfront :: eligibilityCheckedEligible
   val answeredCanPayUpfrontNo: List[JourneyInfoAsJson] = cannotPayUpfront :: eligibilityCheckedEligible
   val answeredUpfrontPaymentAmount: List[JourneyInfoAsJson] = upfrontPaymentAmount :: answeredCanPayUpfrontYes

@@ -16,10 +16,8 @@
 
 package util
 
-import cats.syntax.eq._
-
 import actionsmodel.JourneyRequest
-import essttp.rootmodel.TraceId
+import cats.syntax.eq._
 import essttp.utils.RequestSupport._
 import play.api.Logger
 import play.api.mvc.RequestHeader
@@ -64,16 +62,6 @@ object JourneyLogger {
 
   private def journeyId(implicit r: JourneyRequest[_]) = s"[${r.journey.id}]"
 
-  private def traceId(implicit r: JourneyRequest[_]) = {
-    val traceIdsFromUrlIfDifferentThanInJourney: String = TraceIdExt
-      .traceIdStringsFromQueryParameter()
-      .map(_.filterNot(_ === r.journey.traceId.value))
-      .map(_.mkString("[traceId different:", "", "]"))
-      .getOrElse("")
-
-    s"[${TraceId(r.journeyId)}] $traceIdsFromUrlIfDifferentThanInJourney"
-  }
-
   private def taxRegime(implicit r: JourneyRequest[_]) = s"[${r.journey.taxRegime}]"
 
   private def stage(implicit r: JourneyRequest[_]) = s"[${r.journey.stage}]"
@@ -85,7 +73,7 @@ object JourneyLogger {
       case r: JourneyRequest[_] =>
         implicit val req: JourneyRequest[_] = r
         //Warn, don't log whole journey as it might contain sensitive data (PII)
-        s"$message $taxRegime $origin $journeyName $stage $journeyId $context $traceId"
+        s"$message $taxRegime $origin $journeyName $stage $journeyId $context"
       case _ =>
         s"$message $context "
     }
