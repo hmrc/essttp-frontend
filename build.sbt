@@ -96,11 +96,6 @@ lazy val root = (project in file("."))
     scalaVersion := "2.12.15",
     name := appName,
     PlayKeys.playDefaultPort := 9215,
-    ScoverageKeys.coverageExcludedFiles := "<empty>;Reverse.*;.*components.*;" +
-      ".*Routes.*;",
-    ScoverageKeys.coverageMinimumStmtTotal := 78,
-    ScoverageKeys.coverageFailOnMinimum := true,
-    ScoverageKeys.coverageHighlighting := true,
     scalacOptions ++= Seq("-feature"),
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
     libraryDependencies += ws,
@@ -122,6 +117,7 @@ lazy val root = (project in file("."))
   .settings(TwirlKeys.templateImports := Seq.empty)
   .settings(scalariformSettings: _*)
   .settings(wartRemoverSettings: _*)
+  .settings(ScoverageSettings.scoverageSettings: _*)
   .settings(
     wartremoverExcluded ++= (Compile / routes).value,
     Compile / doc / wartremoverErrors := Seq(),

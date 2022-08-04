@@ -50,11 +50,14 @@ object EssttpBackend {
       )
     }
 
-    val startJourneyEpayeBta: StubMapping = startJourneyInBackend(Origins.Epaye.Bta)
-    val startJourneyEpayeGovUk: StubMapping = startJourneyInBackend(Origins.Epaye.GovUk)
-    val startJourneyEpayeDetached: StubMapping = startJourneyInBackend(Origins.Epaye.DetachedUrl)
+    def startJourneyEpayeBta: StubMapping = startJourneyInBackend(Origins.Epaye.Bta)
+    def startJourneyEpayeGovUk: StubMapping = startJourneyInBackend(Origins.Epaye.GovUk)
+    def startJourneyEpayeDetached: StubMapping = startJourneyInBackend(Origins.Epaye.DetachedUrl)
 
-    def verifyStartJourney(url: String): Unit = verify(exactly(0), postRequestedFor(urlPathEqualTo(url)))
+    def verifyStartJourney(url: String): Unit = verify(exactly(1), postRequestedFor(urlPathEqualTo(url)))
+    def verifyStartJourneyEpayeBta(): Unit = verifyStartJourney(startJourneyBtaUrl)
+    def verifyStartJourneyEpayeGovUk(): Unit = verifyStartJourney(startJourneyGovUkUrl)
+    def verifyStartJourneyEpayeDetached(): Unit = verifyStartJourney(startJourneyDetachedUrl)
 
     def findJourney(jsonBody: String = JourneyJsonTemplates.Started): StubMapping =
       stubFor(
@@ -337,7 +340,7 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(dayOfMonthUrl(journeyId)))
       )
 
-    def findJourneyAfterUpdateDayOfMonth(
+    def findJourney(
         jsonBody: String = JourneyJsonTemplates.`Entered Day of Month`
     ): StubMapping = stubFor(
       get(urlPathEqualTo(findByLatestSessionIdUrl))
@@ -458,7 +461,7 @@ object EssttpBackend {
     def verifyNoneUpdateChosenTypeOfBankAccountRequest(journeyId: JourneyId): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(chosenTypeOfBankAccountUrl(journeyId))))
 
-    def findJourney(jsonBody: String = JourneyJsonTemplates.`Chosen Type of Bank Account`): StubMapping = stubFor(
+    def findJourney(jsonBody: String = JourneyJsonTemplates.`Chosen Type of Bank Account - Business`): StubMapping = stubFor(
       get(urlPathEqualTo(findByLatestSessionIdUrl))
         .willReturn(aResponse()
           .withStatus(200)

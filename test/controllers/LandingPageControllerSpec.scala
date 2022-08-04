@@ -35,17 +35,12 @@ class LandingPageControllerSpec extends ItSpec {
   "GET /" - {
     "return 200 and the PAYE landing page" in {
       val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
       val result: Future[Result] = controller.landingPage(fakeRequest)
-
       RequestAssertions.assertGetRequestOk(result)
-
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
-
       val expectedH1 = "Set up an Employers’ PAYE payment plan"
       val expectedServiceName: String = TdAll.expectedServiceNamePaye
-
       doc.title() shouldBe s"$expectedH1 - $expectedServiceName - GOV.UK"
       doc.select(".govuk-heading-xl").text() shouldBe expectedH1
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName

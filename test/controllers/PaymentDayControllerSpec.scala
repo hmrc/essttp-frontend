@@ -71,7 +71,7 @@ class PaymentDayControllerSpec extends ItSpec {
 
     "should prepopulate the form when user navigates back and they have a chosen day of month in their journey" in {
       AuthStub.authorise()
-      EssttpBackend.DayOfMonth.findJourneyAfterUpdateDayOfMonth()
+      EssttpBackend.DayOfMonth.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.paymentDay(fakeRequest)

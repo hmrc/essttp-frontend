@@ -39,7 +39,8 @@ object JourneyInfo {
   val startDates: JourneyInfoAsJson = TdJsonBodies.startDatesJourneyInfo
   val affordableQuotes: JourneyInfoAsJson = TdJsonBodies.affordableQuotesJourneyInfo
   val selectedPlan: JourneyInfoAsJson = TdJsonBodies.selectedPlanJourneyInfo
-  val typeOfBankAccount: JourneyInfoAsJson = TdJsonBodies.typeOfBankJourneyInfo()
+  val typeOfBankAccountBusiness: JourneyInfoAsJson = TdJsonBodies.typeOfBankJourneyInfo()
+  val typeOfBankAccountPersonal: JourneyInfoAsJson = TdJsonBodies.typeOfBankJourneyInfo("Personal")
   val directDebitDetails: JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo()
   val directDebitDetailsNotAccountHolder: JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo(false)
   val arrangementSubmitted: JourneyInfoAsJson = TdJsonBodies.arrangementResponseJourneyInfo()
@@ -67,16 +68,17 @@ object JourneyInfo {
   val retrievedAffordableQuotes: List[JourneyInfoAsJson] = affordableQuotes :: retrievedStartDates
   val chosenPaymentPlan: List[JourneyInfoAsJson] = selectedPlan :: retrievedAffordableQuotes
   val hasCheckedPaymentPlan: List[JourneyInfoAsJson] = chosenPaymentPlan
-  val chosenTypeOfBankAccount: List[JourneyInfoAsJson] = typeOfBankAccount :: chosenPaymentPlan
-  val enteredDirectDebitDetailsIsAccountHolder: List[JourneyInfoAsJson] = directDebitDetails :: chosenTypeOfBankAccount
-  val enteredDirectDebitDetailsIsNotAccountHolder: List[JourneyInfoAsJson] = directDebitDetailsNotAccountHolder :: chosenTypeOfBankAccount
+  val chosenTypeOfBankAccountBusiness: List[JourneyInfoAsJson] = typeOfBankAccountBusiness :: chosenPaymentPlan
+  val chosenTypeOfBankAccountPersonal: List[JourneyInfoAsJson] = typeOfBankAccountPersonal :: chosenPaymentPlan
+  val enteredDirectDebitDetailsIsAccountHolder: List[JourneyInfoAsJson] = directDebitDetails :: chosenTypeOfBankAccountBusiness
+  val enteredDirectDebitDetailsIsNotAccountHolder: List[JourneyInfoAsJson] = directDebitDetailsNotAccountHolder :: chosenTypeOfBankAccountBusiness
   val confirmedDirectDebitDetails: List[JourneyInfoAsJson] = enteredDirectDebitDetailsIsAccountHolder
   val agreedTermsAndConditions: List[JourneyInfoAsJson] = confirmedDirectDebitDetails
   val submittedArrangementWithUpfrontPayment: List[JourneyInfoAsJson] = arrangementSubmitted :: confirmedDirectDebitDetails
 
   //used in final page test
   val submittedArrangementNoUpfrontPayment: List[JourneyInfoAsJson] =
-    arrangementSubmitted :: directDebitDetails :: typeOfBankAccount :: selectedPlan :: affordableQuotes ::
+    arrangementSubmitted :: directDebitDetails :: typeOfBankAccountBusiness :: selectedPlan :: affordableQuotes ::
       upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: monthlyPaymentAmount ::
       dayOfMonth :: startDates :: cannotPayUpfront :: eligibilityCheckedEligible
 

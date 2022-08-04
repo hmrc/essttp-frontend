@@ -25,7 +25,7 @@ import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.stubs.{AuditConnectorStub, AuthStub, EssttpBackend}
 import testsupport.TdRequest.FakeRequestOps
-import testsupport.testdata.TdAll
+import testsupport.testdata.{PageUrls, TdAll}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 import uk.gov.hmrc.http.SessionKeys
 
@@ -127,7 +127,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
             EnrolmentDef.Epaye.`IR-PAYE-TaxOfficeReference`.identifierKey -> "Ref"
           ),
           enrolment(EnrolmentDef.Epaye.`IR-PAYE-TaxOfficeReference`.enrolmentKey, activated = false)()
-        ).foreach{ e =>
+        ).foreach { e =>
             AuthStub.authorise(allEnrolments = Some(Set(e)))
             EssttpBackend.StartJourney.findJourney()
             EssttpBackend.DetermineTaxId.updateTaxId(TdAll.journeyId)
@@ -170,7 +170,43 @@ class DetermineTaxIdControllerSpec extends ItSpec {
       }
 
     }
+  }
 
+  "AuthenticatedActionRefiner bonus tests" - {
+    "should return redirect to determine eligibility when tax id is already determined" in {
+      AuthStub.authorise()
+      EssttpBackend.DetermineTaxId.findJourney()
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result = controller.determineTaxId()(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.determineEligibilityUrl)
+    }
+
+    "redirect to not enrolled when user doesn't have the right enrolments (via AuthenticatedActionRefiner)" in {
+      AuthStub.authorise(allEnrolments = Some(Set.empty))
+      EssttpBackend.StartJourney.findJourney()
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result = controller.determineTaxId()(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.notEnrolledUrl)
+    }
+
+    "redirect to login page when user has no active session (i.e. no auth token)" in {
+      AuthStub.authorise(None, None)
+      EssttpBackend.DetermineTaxId.findJourney()
+      val fakeRequest = FakeRequest()
+      val result = controller.determineTaxId()(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some("http://localhost:9949/auth-login-stub/gg-sign-in?continue=http%3A%2F%2Flocalhost%3A9215%2F&origin=essttp-frontend")
+    }
+
+    "redirect to epaye start journey when there is no session found in backend" in {
+      AuthStub.authorise()
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result = controller.determineTaxId()(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.govUkEpayeStartUrl)
+    }
   }
 
 }

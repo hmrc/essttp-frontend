@@ -137,34 +137,42 @@ class BankDetailsControllerSpec extends ItSpec {
       doc.select(".govuk-button").text() shouldBe TypeOfBankAccountPage.buttonContent
     }
 
-    "prepopulate the form when the user has a chosen bank account type in their journey" in {
-      AuthStub.authorise()
-      EssttpBackend.ChosenTypeOfBankAccount.findJourney()
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val result: Future[Result] = controller.typeOfAccount(fakeRequest)
-      RequestAssertions.assertGetRequestOk(result)
-      val pageContent: String = contentAsString(result)
-      val doc: Document = Jsoup.parse(pageContent)
-      doc.select(".govuk-radios__input").asScala.toList(0).hasAttr("checked") shouldBe true
-    }
+    Seq(
+      ("Business", JourneyJsonTemplates.`Chosen Type of Bank Account - Business`, 0),
+      ("Personal", JourneyJsonTemplates.`Chosen Type of Bank Account - Personal`, 1)
+    ).foreach {
+        case (typeOfAccount, wiremockJson, checkedElementIndex) =>
+          s"prepopulate the form when the user has a chosen $typeOfAccount bank account type in their journey" in {
+            AuthStub.authorise()
+            EssttpBackend.ChosenTypeOfBankAccount.findJourney(wiremockJson)
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+            val result: Future[Result] = controller.typeOfAccount(fakeRequest)
+            RequestAssertions.assertGetRequestOk(result)
+            val pageContent: String = contentAsString(result)
+            val doc: Document = Jsoup.parse(pageContent)
+            doc.select(".govuk-radios__input").asScala.toList(checkedElementIndex).hasAttr("checked") shouldBe true
+          }
+      }
   }
 
   "POST /what-type-of-account-details-are-you-providing should" - {
 
-    "redirect to /set-up-direct-debit when valid form is submitted" in {
-      AuthStub.authorise()
-      EssttpBackend.HasCheckedPlan.findJourney()
-      EssttpBackend.ChosenTypeOfBankAccount.updateChosenTypeOfBankAccount(TdAll.journeyId)
-      val fakeRequest = FakeRequest(
-        method = "POST",
-        path   = "/what-type-of-account-details-are-you-providing"
-      ).withAuthToken()
-        .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-        .withFormUrlEncodedBody(("typeOfAccount", "Business"))
-      val result: Future[Result] = controller.typeOfAccountSubmit(fakeRequest)
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.directDebitDetailsUrl)
-      EssttpBackend.ChosenTypeOfBankAccount.verifyUpdateChosenTypeOfBankAccountRequest(TdAll.journeyId)
+    Seq("Business", "Personal").foreach { typeOfAccount =>
+      s"redirect to /set-up-direct-debit when valid form is submitted - $typeOfAccount" in {
+        AuthStub.authorise()
+        EssttpBackend.HasCheckedPlan.findJourney()
+        EssttpBackend.ChosenTypeOfBankAccount.updateChosenTypeOfBankAccount(TdAll.journeyId)
+        val fakeRequest = FakeRequest(
+          method = "POST",
+          path   = "/what-type-of-account-details-are-you-providing"
+        ).withAuthToken()
+          .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+          .withFormUrlEncodedBody(("typeOfAccount", typeOfAccount))
+        val result: Future[Result] = controller.typeOfAccountSubmit(fakeRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(PageUrls.directDebitDetailsUrl)
+        EssttpBackend.ChosenTypeOfBankAccount.verifyUpdateChosenTypeOfBankAccountRequest(TdAll.journeyId)
+      }
     }
 
     "show correct error messages when form submitted is empty" in {

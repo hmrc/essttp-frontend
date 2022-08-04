@@ -49,7 +49,7 @@ class DatesApiControllerSpec extends ItSpec {
   "GET /retrieve-start-dates" - {
     "trigger call to essttp-dates microservice start dates endpoint and update backend" in {
       AuthStub.authorise()
-      EssttpBackend.DayOfMonth.findJourneyAfterUpdateDayOfMonth()
+      EssttpBackend.DayOfMonth.findJourney()
       Dates.startDatesCall()
       EssttpBackend.Dates.updateStartDates(TdAll.journeyId)
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
