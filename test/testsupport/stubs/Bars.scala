@@ -18,24 +18,56 @@ package testsupport.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, stubFor, urlPathEqualTo}
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import testsupport.testdata.BarsJsonResponses.Validate._
+import testsupport.testdata.BarsJsonResponses.{ValidateJson, VerifyBusinessJson, VerifyPersonalJson}
 import wiremock.org.apache.http.HttpStatus
 
 object Bars {
 
-  object Validate {
-    def success(): StubMapping = stubForValidate(successJson)
+  object ValidateStub {
+    def success(): StubMapping = stub(ValidateJson.success)
 
-    def accountNumberNotWellFormatted(): StubMapping = stubForValidate(accountNumberNotWellFormattedJson)
+    def accountNumberNotWellFormatted(): StubMapping = stub(ValidateJson.accountNumberNotWellFormatted)
 
-    def sortCodeNotPresentOnEiscd(): StubMapping = stubForValidate(sortCodeNotPresentOnEiscdJson)
+    def sortCodeNotPresentOnEiscd(): StubMapping = stub(ValidateJson.sortCodeNotPresentOnEiscd)
 
-    def sortCodeDoesNotSupportsDirectDebit(): StubMapping = stubForValidate(sortCodeDoesNotSupportsDirectDebitJson)
+    def sortCodeDoesNotSupportsDirectDebit(): StubMapping = stub(ValidateJson.sortCodeDoesNotSupportsDirectDebit)
 
-    private def stubForValidate(responseJson: String): StubMapping = {
-      val validateUrl = "/validate/bank-details"
+    private def stub(responseJson: String): StubMapping = {
+      val url = "/validate/bank-details"
       stubFor(
-        post(urlPathEqualTo(validateUrl))
+        post(urlPathEqualTo(url))
+          .willReturn(
+            aResponse()
+              .withStatus(HttpStatus.SC_OK)
+              .withBody(responseJson)
+          )
+      )
+    }
+  }
+
+  object VerifyPersonalStub {
+    def success(): StubMapping = stub(VerifyPersonalJson.success)
+
+    private def stub(responseJson: String): StubMapping = {
+      val url = "/verify/personal"
+      stubFor(
+        post(urlPathEqualTo(url))
+          .willReturn(
+            aResponse()
+              .withStatus(HttpStatus.SC_OK)
+              .withBody(responseJson)
+          )
+      )
+    }
+  }
+
+  object VerifyBusinessStub {
+    def success(): StubMapping = stub(VerifyBusinessJson.success)
+
+    private def stub(responseJson: String): StubMapping = {
+      val url = "/verify/business"
+      stubFor(
+        post(urlPathEqualTo(url))
           .willReturn(
             aResponse()
               .withStatus(HttpStatus.SC_OK)

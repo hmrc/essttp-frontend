@@ -18,8 +18,8 @@ package testsupport.testdata
 
 object BarsJsonResponses {
 
-  object Validate {
-    val successJson: String =
+  object ValidateJson {
+    val success: String =
       """{
         |  "accountNumberIsWellFormatted": "yes",
         |  "nonStandardAccountDetailsRequiredForBacs": "no",
@@ -30,7 +30,7 @@ object BarsJsonResponses {
         |  "sortCodeBankName": "BARCLAYS BANK UK PLC"
         |}""".stripMargin
 
-    val accountNumberNotWellFormattedJson: String =
+    val accountNumberNotWellFormatted: String =
       """{
         |  "accountNumberIsWellFormatted": "no",
         |  "nonStandardAccountDetailsRequiredForBacs": "yes",
@@ -40,14 +40,14 @@ object BarsJsonResponses {
         |  "sortCodeBankName": "Nottingham Building Society"
         |}""".stripMargin
 
-    val sortCodeNotPresentOnEiscdJson: String =
+    val sortCodeNotPresentOnEiscd: String =
       """{
         |  "accountNumberIsWellFormatted": "no",
         |  "nonStandardAccountDetailsRequiredForBacs": "no",
         |  "sortCodeIsPresentOnEISCD": "no"
         |}""".stripMargin
 
-    val sortCodeDoesNotSupportsDirectDebitJson: String =
+    val sortCodeDoesNotSupportsDirectDebit: String =
       """{
         |  "accountNumberIsWellFormatted": "yes",
         |  "nonStandardAccountDetailsRequiredForBacs": "no",
@@ -57,5 +57,37 @@ object BarsJsonResponses {
         |  "iban": "GB21BARC20670544311611",
         |  "sortCodeBankName": "BARCLAYS BANK UK PLC"
         |}""".stripMargin
+  }
+
+  object VerifyPersonalJson {
+    val success: String =
+      """{
+        |    "accountNumberIsWellFormatted": "yes",
+        |    "accountExists": "yes",
+        |    "nameMatches": "yes",
+        |    "nonStandardAccountDetailsRequiredForBacs": "no",
+        |    "sortCodeIsPresentOnEISCD": "yes",
+        |    "sortCodeBankName": "BARCLAYS BANK UK PLC",
+        |    "sortCodeSupportsDirectDebit": "yes",
+        |    "sortCodeSupportsDirectCredit": "no",
+        |    "iban": "GB21BARC20710244311655"
+        |}""".stripMargin
+
+  }
+
+  object VerifyBusinessJson {
+    val success: String =
+      """{
+        |    "accountNumberIsWellFormatted": "yes",
+        |    "sortCodeIsPresentOnEISCD": "yes",
+        |    "sortCodeBankName": "BARCLAYS BANK UK PLC",
+        |    "nonStandardAccountDetailsRequiredForBacs": "no",
+        |    "accountExists": "yes",
+        |    "nameMatches": "yes",
+        |    "sortCodeSupportsDirectDebit": "yes",
+        |    "sortCodeSupportsDirectCredit": "no",
+        |    "iban": "GB21BARC20710276523611"
+        |}""".stripMargin
+
   }
 }

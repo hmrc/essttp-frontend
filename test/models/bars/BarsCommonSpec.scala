@@ -16,16 +16,16 @@
 
 package models.bars
 
-import essttp.rootmodel.bank.{AccountName, AccountNumber, BankDetails, SortCode}
-import models.bars.BarsModel.BarsValidateRequest
+import essttp.rootmodel.bank.{AccountNumber, SortCode}
+import models.bars.BarsCommon.BarsBankAccount
 import org.scalatest.prop.TableDrivenPropertyChecks.forAll
 import testsupport.UnitSpec
 import org.scalatest.prop.TableDrivenPropertyChecks._
 
-class BarsModelSpec extends UnitSpec {
-  "BarsValidateRequest apply" - {
+class BarsCommonSpec extends UnitSpec {
+  "BarsBankAccount.padded" - {
     "should ensure that Account Number is not less than 8 characters, left-padding with zeroes if necessary" in {
-      val accountName = AccountName("some account")
+
       val sortCode = SortCode("123456")
       forAll(
         Table(
@@ -37,11 +37,9 @@ class BarsModelSpec extends UnitSpec {
           (AccountNumber(""), AccountNumber("00000000")) // frontend prevents this
         )
       ) { (inputAccountNumber: AccountNumber, barsAccountNumber: AccountNumber) =>
-          val bankDetails = BankDetails(accountName, sortCode, inputAccountNumber)
+          val bankAccount = BarsBankAccount.padded(sortCode, inputAccountNumber)
 
-          val barsValidateRequest = BarsValidateRequest(bankDetails)
-
-          barsValidateRequest.account.accountNumber shouldBe barsAccountNumber
+          bankAccount.accountNumber shouldBe barsAccountNumber
         }
     }
   }

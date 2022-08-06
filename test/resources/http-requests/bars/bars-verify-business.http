@@ -1,0 +1,16 @@
+POST localhost:9871/verify/business
+Content-Type: application/json
+
+# "sortCode": "207102", "accountNumber": "76523611", "companyName" : "Boneféte Fun" -----> OK
+{
+  "account" : {
+    "sortCode" : "207102",
+    "accountNumber" : "76523611"
+  },
+  "business" : {
+    "companyName" : "Boneféte Fun"
+  }
+}
+
+###
+

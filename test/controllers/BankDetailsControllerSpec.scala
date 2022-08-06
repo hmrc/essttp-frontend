@@ -249,7 +249,8 @@ class BankDetailsControllerSpec extends ItSpec {
       AuthStub.authorise()
       EssttpBackend.ChosenTypeOfBankAccount.findJourney()
       EssttpBackend.DirectDebitDetails.updateDirectDebitDetails(TdAll.journeyId)
-      Bars.Validate.success()
+      Bars.ValidateStub.success()
+      Bars.VerifyPersonalStub.success()
 
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -270,8 +271,9 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "redirect to /you-cannot-set-up-a-direct-debit-online when user submits no for radio option relating to being account holder" in {
       AuthStub.authorise()
-      EssttpBackend.HasCheckedPlan.findJourney()
+      EssttpBackend.ConfirmedDirectDebitDetails.findJourney()
       EssttpBackend.DirectDebitDetails.updateDirectDebitDetails(TdAll.journeyId)
+      Bars.ValidateStub.success()
       val fakeRequest = FakeRequest(
         method = "POST",
         path   = "/set-up-direct-debit"
@@ -358,13 +360,13 @@ class BankDetailsControllerSpec extends ItSpec {
         // TODO temporary until error handling decided - will be addressed in the next BARs ticket
         barsError match {
           case "accountNumberNotWellFormatted" =>
-            Bars.Validate.accountNumberNotWellFormatted()
+            Bars.ValidateStub.accountNumberNotWellFormatted()
             List(("Enter a valid combination of bank account number and sort code", "#bars"))
           case "sortCodeNotPresentOnEiscd" =>
-            Bars.Validate.sortCodeNotPresentOnEiscd()
+            Bars.ValidateStub.sortCodeNotPresentOnEiscd()
             List(("Enter a valid combination of bank account number and sort code", "#bars"))
           case "sortCodeDoesNotSupportsDirectDebit" =>
-            Bars.Validate.sortCodeDoesNotSupportsDirectDebit()
+            Bars.ValidateStub.sortCodeDoesNotSupportsDirectDebit()
             List(("You have entered a sort code which does not accept this type of payment. " +
               "Check you have entered a valid sort code or enter details for a different account", "#bars"))
         }

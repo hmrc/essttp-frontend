@@ -1,0 +1,15 @@
+POST localhost:9871/verify/personal
+Content-Type: application/json
+
+# "sortCode": "207102", "accountNumber": "44344655" , "name" : "Teddy Dickson" -----> OK
+{
+  "account" : {
+    "sortCode" : "207102",
+    "accountNumber" : "44311655"
+  },
+  "subject" : {
+    "name" : "Teddy Dickson"
+  }
+}
+###
+

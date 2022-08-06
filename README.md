@@ -22,12 +22,12 @@ https://www.staging.tax.service.gov.uk/set-up-a-payment-plan/govuk/epaye/start
 Use one of the following sortCode/accountNumber combinations on the Enter Bank Details page
 to get the desired behaviour (e.g. `207102 and 44344655` to successfully get past BARs validation)
 
-| Sort Code | Account Number | BARs Response                     |
-|-----------|----------------|-----------------------------------|
-| 207102    | 44344655       | OK                                |
-| 206705    | 44311611       | accountNumberIsWellFormatted - NO |
-| 609593    | 44311611       | sortCodeSupportsDirectDebit - NO  |
-| 309696    | 44311611       | sortCodeIsPresentOnEISCD - NO     |
+| Sort Code | Account Number | Account Name  | BARs Response                     |
+|-----------|----------------|---------------|-----------------------------------|
+| 207102    | 44311655       | Teddy Dickson | OK                                |
+| TODO      | TODO           | TODO          | accountNumberIsWellFormatted - NO |
+| TODO      | TODO           | TODO          | sortCodeSupportsDirectDebit - NO  |
+| TODO      | TODO           | TODO          | sortCodeIsPresentOnEISCD - NO     |
 
 see here for more BARs stub data https://github.com/hmrc/bank-account-reputation-stub
 
