@@ -53,7 +53,7 @@ GET    /set-up-direct-debit                                 controllers.BankDeta
 POST   /set-up-direct-debit                                 controllers.BankDetailsController.enterBankDetailsSubmit()
 GET    /you-cannot-set-up-a-direct-debit-online             controllers.BankDetailsController.cannotSetupDirectDebitOnlinePage
 
-GET    /error-placeholder                                   controllers.BankDetailsController.errorPlaceholder
+GET    /bars-error-placeholder                              controllers.BankDetailsController.barsErrorPlaceholder
 
 GET    /check-your-direct-debit-details                     controllers.BankDetailsController.checkBankDetails
 POST   /check-your-direct-debit-details                     controllers.BankDetailsController.checkBankDetailsSubmit

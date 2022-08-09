@@ -38,7 +38,7 @@ class Views @Inject() (
     val chooseTypeOfAccountPage:    ChooseTypeOfAccountPage,
     val enterBankDetailsPage:       EnterBankDetails,
     val bankDetailsSummary:         BankDetailsSummary,
-    val errorPlaceHolder:           ErrorPlaceholder,
+    val barsErrorPlaceHolder:       BarsErrorPlaceholder,
     val termsAndConditions:         TermsAndConditions,
     val cannotSetupDirectDebitPage: NotSoleSignatoryPage,
     val paymentPlanSetUpPage:       PaymentPlanSetUpPage,

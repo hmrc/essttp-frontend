@@ -143,7 +143,7 @@ object BarsCommon {
           resp.sortCodeSupportsDirectDebit.contains(Yes)
     }
 
-/***
+    /**
      * The sortCode is good, but account does not exist
      * - in this case, having called verify/personal
      *    calling verify/business may result in a positive response
@@ -188,10 +188,6 @@ object BarsCommon {
   }
 
   sealed trait BarsTypeOfBankAccount extends EnumEntry
-
-  object BarsTypeOfBankAccount {
-    implicit val eq: Eq[BarsTypeOfBankAccount] = Eq.fromUniversalEquals
-  }
 
   object BarsTypesOfBankAccount extends Enum[BarsTypeOfBankAccount] {
 

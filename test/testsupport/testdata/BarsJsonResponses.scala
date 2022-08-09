@@ -42,7 +42,7 @@ object BarsJsonResponses {
 
     val sortCodeNotPresentOnEiscd: String =
       """{
-        |  "accountNumberIsWellFormatted": "no",
+        |  "accountNumberIsWellFormatted": "yes",
         |  "nonStandardAccountDetailsRequiredForBacs": "no",
         |  "sortCodeIsPresentOnEISCD": "no"
         |}""".stripMargin
@@ -78,6 +78,19 @@ object BarsJsonResponses {
         |    "accountNumberIsWellFormatted": "yes",
         |    "accountExists": "error",
         |    "nameMatches": "indeterminate",
+        |    "nonStandardAccountDetailsRequiredForBacs": "no",
+        |    "sortCodeIsPresentOnEISCD": "yes",
+        |    "sortCodeBankName": "BARCLAYS BANK UK PLC",
+        |    "sortCodeSupportsDirectDebit": "yes",
+        |    "sortCodeSupportsDirectCredit": "no",
+        |    "iban": "GB21BARC20710244311655"
+        |}""".stripMargin
+
+    val accountDoesNotExist =
+      """{
+        |    "accountNumberIsWellFormatted": "yes",
+        |    "accountExists": "no",
+        |    "nameMatches": "yes",
         |    "nonStandardAccountDetailsRequiredForBacs": "no",
         |    "sortCodeIsPresentOnEISCD": "yes",
         |    "sortCodeBankName": "BARCLAYS BANK UK PLC",

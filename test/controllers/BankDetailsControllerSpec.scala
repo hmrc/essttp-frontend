@@ -458,62 +458,103 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
       }
 
-    "redirect to an error page when bars verify-personal response has accountExists is ERROR" in new BarsErrorSetup(
-      TypesOfBankAccount.Personal
-    ) {
-      BarsStub.ValidateStub.success()
-      BarsStub.VerifyPersonalStub.accountExistsError()
+    "redirect to an error page when bars verify-personal response has accountExists is ERROR" in
+      new BarsErrorSetup(TypesOfBankAccount.Personal) {
 
-      val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.errorPlaceholder)
+        BarsStub.ValidateStub.success()
+        BarsStub.VerifyPersonalStub.accountExistsError()
 
-      EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
-      BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
+        val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(PageUrls.errorPlaceholder)
+
+        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+        BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
+      }
+
+    "redirect to an error page when bars verify-business response has accountExists is ERROR" in
+      new BarsErrorSetup(TypesOfBankAccount.Business) {
+
+        BarsStub.ValidateStub.success()
+        BarsStub.VerifyBusinessStub.accountExistsError()
+
+        val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(PageUrls.errorPlaceholder)
+
+        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
+      }
+
+    "call verify-personal when bars verify-business response has accountExists is No" in
+      new BarsErrorSetup(TypesOfBankAccount.Business) {
+
+        BarsStub.ValidateStub.success()
+        BarsStub.VerifyBusinessStub.accountDoesNotExist()
+        BarsStub.VerifyPersonalStub.success()
+
+        val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(PageUrls.checkDirectDebitDetailsUrl)
+
+        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled()
+        BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled()
+      }
+
+    "call verify-business when bars verify-personal response has accountExists is No" in
+      new BarsErrorSetup(TypesOfBankAccount.Personal) {
+
+        BarsStub.ValidateStub.success()
+        BarsStub.VerifyPersonalStub.accountDoesNotExist()
+        BarsStub.VerifyBusinessStub.success()
+
+        val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(PageUrls.checkDirectDebitDetailsUrl)
+
+        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled()
+        BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled()
+      }
+
+    "redirect to an error page when bars verify-personal response has nameMatches is Error" in
+      new BarsErrorSetup(TypesOfBankAccount.Personal) {
+
+        BarsStub.ValidateStub.success()
+        BarsStub.VerifyPersonalStub.nameMatchesError()
+
+        val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(PageUrls.errorPlaceholder)
+
+        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+        BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
+      }
+
+    "redirect to an error page when bars verify-business response has nameMatches is Error" in
+      new BarsErrorSetup(TypesOfBankAccount.Business) {
+
+        BarsStub.ValidateStub.success()
+        BarsStub.VerifyBusinessStub.nameMatchesError()
+
+        val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(PageUrls.errorPlaceholder)
+
+        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
+      }
+
+  }
+
+  "GET /bars-error-placeholder should" - {
+    "return 200" in {
+      AuthStub.authorise()
+      val request = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.barsErrorPlaceholder(request)
+      status(result) shouldBe Status.OK
     }
-
-    "redirect to an error page when bars verify-business response has accountExists is ERROR" in new BarsErrorSetup(
-      TypesOfBankAccount.Business
-    ) {
-      BarsStub.ValidateStub.success()
-      BarsStub.VerifyBusinessStub.accountExistsError()
-
-      val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.errorPlaceholder)
-
-      EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
-      BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
-    }
-
-    "redirect to an error page when bars verify-personal response has nameMatches is Error" in new BarsErrorSetup(
-      TypesOfBankAccount.Personal
-    ) {
-      BarsStub.ValidateStub.success()
-      BarsStub.VerifyPersonalStub.nameMatchesError()
-
-      val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.errorPlaceholder)
-
-      EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
-      BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
-    }
-
-    "redirect to an error page when bars verify-business response has nameMatches is Error" in new BarsErrorSetup(
-      TypesOfBankAccount.Business
-    ) {
-      BarsStub.ValidateStub.success()
-      BarsStub.VerifyBusinessStub.nameMatchesError()
-
-      val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.errorPlaceholder)
-
-      EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
-      BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
-    }
-
   }
 
   "GET /check-your-direct-debit-details should" - {

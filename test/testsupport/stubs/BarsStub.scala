@@ -36,6 +36,9 @@ object BarsStub {
 
     def ensureBarsValidateNotCalled(): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(validateUrl)))
+
+    def ensureBarsValidateCalled(): Unit =
+      verify(exactly(1), postRequestedFor(urlPathEqualTo(validateUrl)))
   }
 
   object VerifyPersonalStub {
@@ -45,12 +48,17 @@ object BarsStub {
 
     def accountExistsError(): StubMapping = stubOk(verifyPersonalUrl, VerifyJson.accountExistsError)
 
+    def accountDoesNotExist(): StubMapping = stubOk(verifyPersonalUrl, VerifyJson.accountDoesNotExist)
+
     def nameMatchesError(): StubMapping = stubOk(verifyPersonalUrl, VerifyJson.nameMatchesError)
 
     def nameDoesNotMatch(): StubMapping = stubOk(verifyPersonalUrl, VerifyJson.nameDoesNotMatch)
 
     def ensureBarsVerifyPersonalNotCalled(): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(verifyPersonalUrl)))
+
+    def ensureBarsVerifyPersonalCalled(): Unit =
+      verify(exactly(1), postRequestedFor(urlPathEqualTo(verifyPersonalUrl)))
   }
 
   object VerifyBusinessStub {
@@ -60,12 +68,17 @@ object BarsStub {
 
     def accountExistsError(): StubMapping = stubOk(verifyBusinessUrl, VerifyJson.accountExistsError)
 
+    def accountDoesNotExist(): StubMapping = stubOk(verifyBusinessUrl, VerifyJson.accountDoesNotExist)
+
     def nameMatchesError(): StubMapping = stubOk(verifyBusinessUrl, VerifyJson.nameMatchesError)
 
     def nameDoesNotMatch(): StubMapping = stubOk(verifyBusinessUrl, VerifyJson.nameDoesNotMatch)
 
     def ensureBarsVerifyBusinessNotCalled(): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(verifyBusinessUrl)))
+
+    def ensureBarsVerifyBusinessCalled(): Unit =
+      verify(exactly(1), postRequestedFor(urlPathEqualTo(verifyBusinessUrl)))
   }
 
   def verifyBarsNotCalled(): Unit = {

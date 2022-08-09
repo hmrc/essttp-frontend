@@ -129,8 +129,6 @@ class BankDetailsController @Inject() (
         // format: ON
 
         request.journey match {
-          // call BARs (outcome: OK , BARs fail retry , BARs fail system error , BARs fail lockout)
-          // [ update BE BARs error details (in the service) ]
           case j: AfterChosenTypeOfBankAccount =>
             for {
               barsResponseOpt <- barsService.verifyBankDetails(directDebitDetails.bankDetails, bankDetailsForm.isSoleSignatory, j.typeOfBankAccount)
@@ -142,7 +140,7 @@ class BankDetailsController @Inject() (
                   Redirect(routes.BankDetailsController.cannotSetupDirectDebitOnlinePage)
 
                 // TODO add helper (for below?)
-                case (Some(thirdPartyError()), _) => Redirect(routes.BankDetailsController.errorPlaceholder)
+                case (Some(thirdPartyError()), _) => Redirect(routes.BankDetailsController.barsErrorPlaceholder)
 
                 case (Some(accountNumberIsWellFormattedNo()), _) => enterBankDetailsPageWithBarsError(accountNumberNotWellFormatted)
                 case (Some(sortCodeSupportsDirectDebitNo()), _) => enterBankDetailsPageWithBarsError(sortCodeDoesNotSupportsDirectDebit)
@@ -216,8 +214,8 @@ class BankDetailsController @Inject() (
   }
 
   // TODO in a future ticket
-  val errorPlaceholder: Action[AnyContent] = as.default { implicit request =>
-    Ok(views.errorPlaceHolder())
+  val barsErrorPlaceholder: Action[AnyContent] = as.default { implicit request =>
+    Ok(views.barsErrorPlaceHolder())
   }
 }
 
