@@ -21,10 +21,14 @@ import cats.syntax.eq._
 import essttp.journey.model.Journey.Stages.{ComputedTaxId, Started}
 import essttp.journey.model.Origin
 import essttp.rootmodel.ttp.EligibilityCheckResult
-import models.audit.eligibility.{EligibilityCheckAuditDetail, EligibilityResult, EnrollmentReasons, TaxDetail}
+import models.audit.eligibility.{AuditDetail, EligibilityCheckAuditDetail, EligibilityResult, EnrollmentReasons, TaxDetail}
+import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.AuditExtensions.auditHeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 
+import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
@@ -34,17 +38,25 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
   def auditEligibilityCheck(
       journey:  ComputedTaxId,
       response: EligibilityCheckResult
-  )(implicit r: AuthenticatedJourneyRequest[_], hc: HeaderCarrier): Unit = {
-    val auditEvent = toEligibilityCheck(journey, response)
-    auditConnector.sendExplicitAudit("EligibilityCheck", auditEvent)
-  }
+  )(implicit r: AuthenticatedJourneyRequest[_], hc: HeaderCarrier): Unit =
+    audit(toEligibilityCheck(journey, response))
 
   def auditEligibilityCheck(
       journey:          Started,
       enrollmentReason: Either[EnrollmentReasons.NotEnrolled, EnrollmentReasons.InactiveEnrollment]
-  )(implicit r: AuthenticatedJourneyRequest[_], hc: HeaderCarrier): Unit = {
-    val auditEvent = toEligibilityCheck(journey, enrollmentReason)
-    auditConnector.sendExplicitAudit("EligibilityCheck", auditEvent)
+  )(implicit r: AuthenticatedJourneyRequest[_], hc: HeaderCarrier): Unit =
+    audit(toEligibilityCheck(journey, enrollmentReason))
+
+  private def audit[A <: AuditDetail: Writes](a: A)(implicit hc: HeaderCarrier): Unit = {
+    val _ = auditConnector.sendExtendedEvent(
+      ExtendedDataEvent(
+        auditSource = auditSource,
+        auditType   = a.auditType,
+        eventId     = UUID.randomUUID().toString,
+        tags        = hc.toAuditTags(),
+        detail      = Json.toJson(a)
+      )
+    )
   }
 
   private def toEligibilityCheck(
@@ -105,5 +117,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
 
   private def toAuditString(origin: Origin) =
     origin.toString.split('.').lastOption.getOrElse(origin.toString)
+
+  private val auditSource: String = "set-up-payment-plan"
 
 }
