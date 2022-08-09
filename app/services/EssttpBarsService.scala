@@ -32,9 +32,6 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class EssttpBarsService @Inject() (barsService: BarsService)(implicit ec: ExecutionContext) {
 
-  // TODO remove unused methods
-
-  // calls BARs validate/bank-details endpoint
   def validateBankAccount(bankDetails: BankDetails)(implicit requestHeader: RequestHeader): Future[BarsResponse] =
     barsService.validateBankAccount(toBarsBankAccount(bankDetails))
 
@@ -44,6 +41,7 @@ class EssttpBarsService @Inject() (barsService: BarsService)(implicit ec: Execut
   def verifyBusiness(bankDetails: BankDetails)(implicit requestHeader: RequestHeader): Future[BarsResponse] =
     barsService.verifyBusiness(toBarsBankAccount(bankDetails), Some(toBarsBusiness(bankDetails)))
 
+  // TODO ItSpec
   def verifyBankDetails(
       bankDetails:       BankDetails,
       isSoleSignatory:   IsSoleSignatoryFormValue,

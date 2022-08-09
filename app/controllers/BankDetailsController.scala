@@ -142,9 +142,13 @@ class BankDetailsController @Inject() (
                   Redirect(routes.BankDetailsController.cannotSetupDirectDebitOnlinePage)
 
                 // TODO add helper (for below?)
+                case (Some(thirdPartyError()), _) => Redirect(routes.BankDetailsController.errorPlaceholder)
+
                 case (Some(accountNumberIsWellFormattedNo()), _) => enterBankDetailsPageWithBarsError(accountNumberNotWellFormatted)
                 case (Some(sortCodeSupportsDirectDebitNo()), _) => enterBankDetailsPageWithBarsError(sortCodeDoesNotSupportsDirectDebit)
                 case (Some(sortCodeIsPresentOnEiscdNo()), _) => enterBankDetailsPageWithBarsError(sortCodeNotPresentOnEiscd)
+
+                case (Some(nameMatchesNo()), _) => enterBankDetailsPageWithBarsError(nameDoesNotMatch)
 
                 case _ => Redirect(routes.BankDetailsController.checkBankDetails)
               }
@@ -209,6 +213,11 @@ class BankDetailsController @Inject() (
         }
     }
 
+  }
+
+  // TODO in a future ticket
+  val errorPlaceholder: Action[AnyContent] = as.default { implicit request =>
+    Ok(views.errorPlaceHolder())
   }
 }
 

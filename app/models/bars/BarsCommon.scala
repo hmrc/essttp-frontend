@@ -143,19 +143,46 @@ object BarsCommon {
           resp.sortCodeSupportsDirectDebit.contains(Yes)
     }
 
+/***
+     * The sortCode is good, but account does not exist
+     * - in this case, having called verify/personal
+     *    calling verify/business may result in a positive response
+     *    (or vice versa)
+     */
+    object accountDoesNotExist {
+      def unapply(resp: BarsResponse): Boolean =
+        (resp.accountNumberIsWellFormatted === Yes ||
+          resp.accountNumberIsWellFormatted === Indeterminate) &&
+          resp.accountExists.contains(No) &&
+          resp.sortCodeIsPresentOnEISCD === Yes &&
+          resp.sortCodeSupportsDirectDebit.contains(Yes)
+    }
+
+    object thirdPartyError {
+      def unapply(resp: BarsResponse): Boolean =
+        resp.accountExists.contains(Error) || resp.nameMatches.contains(Error)
+    }
+
     object sortCodeIsPresentOnEiscdNo {
-      def unapply(response: BarsResponse): Boolean =
-        response.sortCodeIsPresentOnEISCD === No
+      def unapply(resp: BarsResponse): Boolean =
+        resp.sortCodeIsPresentOnEISCD === No
+    }
+
+    object nameMatchesNo {
+      def unapply(resp: BarsResponse): Boolean =
+        resp.nameMatches.contains(No) &&
+          (resp.accountExists.contains(Yes) ||
+            resp.accountExists.contains(Indeterminate))
     }
 
     object accountNumberIsWellFormattedNo {
-      def unapply(response: BarsResponse): Boolean =
-        response.accountNumberIsWellFormatted === No
+      def unapply(resp: BarsResponse): Boolean =
+        resp.accountNumberIsWellFormatted === No
     }
 
     object sortCodeSupportsDirectDebitNo {
-      def unapply(response: BarsResponse): Boolean =
-        response.sortCodeSupportsDirectDebit.contains(No)
+      def unapply(resp: BarsResponse): Boolean =
+        resp.sortCodeSupportsDirectDebit.contains(No)
     }
 
   }

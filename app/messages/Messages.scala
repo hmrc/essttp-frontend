@@ -561,7 +561,8 @@ object Messages {
       s"bars.${sortCodeDoesNotSupportsDirectDebit.message}" -> Message(
         "You have entered a sort code which does not accept this type of payment. " +
           "Check you have entered a valid sort code or enter details for a different account"
-      )
+      ),
+      s"bars.${nameDoesNotMatch.message}" -> Message("Enter a valid account name"),
     )
 
     val `Check your Direct Debit details`: Message = Message(

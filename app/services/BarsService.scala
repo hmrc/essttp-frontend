@@ -17,9 +17,9 @@
 package services
 
 import connectors.BarsConnector
-import models.bars.BarsCommon.BarsResponse.{validateFailure, verifySuccess}
+import models.bars.BarsCommon.BarsResponse.{accountDoesNotExist, validateFailure}
 import models.bars.BarsValidateRequest
-import models.bars.BarsCommon.{BarsBankAccount, BarsResponse, BarsTypeOfBankAccount}
+import models.bars.BarsCommon.{BarsBankAccount, BarsResponse, BarsTypeOfBankAccount, BarsTypesOfBankAccount}
 import models.bars.BarsVerifyRequest._
 import play.api.Logging
 import play.api.mvc.RequestHeader
@@ -48,33 +48,37 @@ class BarsService @Inject() (barsConnector: BarsConnector)(implicit ec: Executio
   ): Future[BarsResponse] =
     barsConnector.verifyBusiness(BarsVerifyBusinessRequest(bankAccount, business)).map(BarsResponse.apply)
 
+  /**
+   * Call Validate first and if that fails, then Return the failing response
+   * Otherwise, call either Verify/Personal or Verify/Business
+   * If success response then Return the response,
+   * If there is an AccountDoesNotExist error, then call the other Verify endpoint
+   * Return the response (success or fail)
+   */
   def verifyBankDetails(
       bankAccount:       BarsBankAccount,
       subject:           BarsSubject,
       business:          BarsBusiness,
       typeOfBankAccount: BarsTypeOfBankAccount
-  )(implicit requestHeader: RequestHeader): Future[BarsResponse] = {
-
-    logger.debug(s"verifyBankDetails - account: $bankAccount, typeOfBankAccount: $typeOfBankAccount")
-
-    val resp = {
-      logger.debug("******* validate")
-      validateBankAccount(bankAccount).flatMap {
-        case validateResponse @ validateFailure() =>
-          Future.successful(validateResponse)
-        case _ =>
-          logger.debug("******* verifyPersonal")
-          verifyPersonal(bankAccount, subject).flatMap {
-            case verifyPersonalResp @ verifySuccess() =>
-              Future.successful(verifyPersonalResp)
-            case _ =>
-              logger.debug("******* verifyBusiness")
-              val verifyBusinessResp = verifyBusiness(bankAccount, Some(business))
-              verifyBusinessResp
-          }
-      }
+  )(implicit requestHeader: RequestHeader): Future[BarsResponse] =
+    validateBankAccount(bankAccount).flatMap {
+      case validateResponse @ validateFailure() =>
+        Future.successful(validateResponse)
+      case _ =>
+        typeOfBankAccount match {
+          case BarsTypesOfBankAccount.Personal =>
+            verifyPersonal(bankAccount, subject).flatMap {
+              case accountDoesNotExist() =>
+                verifyBusiness(bankAccount, Some(business))
+              case verifyPersonalResp => Future.successful(verifyPersonalResp)
+            }
+          case BarsTypesOfBankAccount.Business =>
+            verifyBusiness(bankAccount, Some(business)).flatMap {
+              case accountDoesNotExist() =>
+                verifyPersonal(bankAccount, subject)
+              case verifyBusinessResp => Future.successful(verifyBusinessResp)
+            }
+        }
     }
-    resp
-  }
 
 }
