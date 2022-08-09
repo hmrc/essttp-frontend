@@ -29,7 +29,11 @@ final case class EligibilityCheckAuditDetail(
     taxDetail:            TaxDetail,
     authProviderId:       String,
     chargeTypeAssessment: List[ChargeTypeAssessment]
-)
+) extends AuditDetail {
+
+  val auditType: String = "EligibilityCheck"
+
+}
 
 object EligibilityCheckAuditDetail {
 

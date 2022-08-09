@@ -28,6 +28,9 @@ object AuditConnectorStub {
           equalToJson(s"""{ "auditType" : "${auditType}"  }""", true, true)
         )
         .withRequestBody(
+          equalToJson(s"""{ "auditSource" : "set-up-payment-plan"  }""", true, true)
+        )
+        .withRequestBody(
           equalToJson(s"""{ "detail" : ${auditEvent.toString} }""", true, true)
         )
     )
