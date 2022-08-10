@@ -112,7 +112,7 @@ object JourneyJsonTemplates {
     stageInfo   = StageInfo.chosenPaymentPlan,
     journeyInfo = List(
       TdJsonBodies.taxIdJourneyInfo(),
-      TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.eligibleOverallEligibilityStatus, TdAll.eligibleEligibilityRules),
+      TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.eligibleEligibilityPass, TdAll.eligibleEligibilityRules),
       TdJsonBodies.upfrontPaymentAnswersJourneyInfo(upfrontPaymentAmountJsonString),
       TdJsonBodies.extremeDatesJourneyInfo(),
       TdJsonBodies.affordabilityResultJourneyInfo(),

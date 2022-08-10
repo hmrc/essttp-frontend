@@ -16,12 +16,12 @@
 
 package testsupport.testdata
 
-import essttp.rootmodel.ttp.{EligibilityRules, OverallEligibilityStatus}
+import essttp.rootmodel.ttp.{EligibilityRules, EligibilityPass}
 
 object TtpJsonResponses {
 
   def ttpEligibilityCallJson(
-      overallEligibilityStatus: OverallEligibilityStatus = TdAll.eligibleOverallEligibilityStatus,
+      eligibilityPass: EligibilityPass = TdAll.eligibleEligibilityPass,
       eligibilityRules:         EligibilityRules         = TdAll.eligibleEligibilityRules
   ): String = {
     s"""
@@ -48,7 +48,7 @@ object TtpJsonResponses {
        |  "paymentPlanMinLength": 1,
        |  "paymentPlanMaxLength": 6,
        |  "eligibilityStatus" : {
-       |    "overallEligibilityStatus" : ${overallEligibilityStatus.value}
+       |    "eligibilityPass" : ${eligibilityPass.value}
        |  },
        |  "eligibilityRules" : {
        |    "hasRlsOnAddress" : ${eligibilityRules.hasRlsOnAddress},
