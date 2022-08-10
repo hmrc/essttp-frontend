@@ -48,11 +48,11 @@ class DetermineEligibilityControllerSpec extends ItSpec {
         {
           s"Ineligible: [$sf] should redirect to $expectedRedirect" in {
             val eligibilityCheckResponseJson =
-              TtpJsonResponses.ttpEligibilityCallJson(TdAll.notEligibleOverallEligibilityStatus, eligibilityRules)
+              TtpJsonResponses.ttpEligibilityCallJson(TdAll.notEligibleEligibilityPass, eligibilityRules)
 
             AuthStub.authorise()
             EssttpBackend.DetermineTaxId.findJourney()
-            Ttp.Eligibility.retrieveEligibility(TtpJsonResponses.ttpEligibilityCallJson(TdAll.notEligibleOverallEligibilityStatus, eligibilityRules))
+            Ttp.Eligibility.retrieveEligibility(TtpJsonResponses.ttpEligibilityCallJson(TdAll.notEligibleEligibilityPass, eligibilityRules))
             Ttp.Eligibility.retrieveEligibility(eligibilityCheckResponseJson)
             EssttpBackend.EligibilityCheck.updateEligibilityResult(TdAll.journeyId)
 

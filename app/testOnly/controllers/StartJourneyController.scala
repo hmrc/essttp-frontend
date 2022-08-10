@@ -187,7 +187,7 @@ object StartJourneyController {
       paymentPlanFrequency   = PaymentPlanFrequencies.Monthly,
       paymentPlanMinLength   = PaymentPlanMinLength(1),
       paymentPlanMaxLength   = PaymentPlanMaxLength(6),
-      eligibilityStatus      = EligibilityStatus(OverallEligibilityStatus(eligibilityRules.isEligible)),
+      eligibilityStatus      = EligibilityStatus(EligibilityPass(eligibilityRules.isEligible)),
       eligibilityRules       = eligibilityRules,
       chargeTypeAssessment   = chargeTypeAssessments
     )

@@ -16,7 +16,7 @@
 
 package testsupport.testdata
 
-import essttp.rootmodel.ttp.{EligibilityRules, OverallEligibilityStatus}
+import essttp.rootmodel.ttp.{EligibilityRules, EligibilityPass}
 import essttp.rootmodel.{DayOfMonth, UpfrontPaymentAmount}
 import testsupport.testdata.JourneyInfo.JourneyInfoAsJson
 
@@ -80,7 +80,7 @@ object TdJsonBodies {
       |""".stripMargin
 
   def eligibilityCheckJourneyInfo(
-      overallEligibilityStatus: OverallEligibilityStatus = TdAll.eligibleOverallEligibilityStatus,
+      eligibilityPass: EligibilityPass = TdAll.eligibleEligibilityPass,
       eligibilityRules:         EligibilityRules         = TdAll.eligibleEligibilityRules
   ): JourneyInfoAsJson = {
     s"""
@@ -107,7 +107,7 @@ object TdJsonBodies {
       |  "paymentPlanMinLength": 1,
       |  "paymentPlanMaxLength": 6,
       |  "eligibilityStatus" : {
-      |    "overallEligibilityStatus" : ${overallEligibilityStatus.value}
+      |    "eligibilityPass" : ${eligibilityPass.value}
       |  },
       |  "eligibilityRules" : {
       |    "hasRlsOnAddress" : ${eligibilityRules.hasRlsOnAddress},
