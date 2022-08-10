@@ -21,8 +21,8 @@ import essttp.rootmodel.ttp.{EligibilityRules, EligibilityPass}
 object TtpJsonResponses {
 
   def ttpEligibilityCallJson(
-      eligibilityPass: EligibilityPass = TdAll.eligibleEligibilityPass,
-      eligibilityRules:         EligibilityRules         = TdAll.eligibleEligibilityRules
+      eligibilityPass:  EligibilityPass  = TdAll.eligibleEligibilityPass,
+      eligibilityRules: EligibilityRules = TdAll.eligibleEligibilityRules
   ): String = {
     s"""
        |{
@@ -55,7 +55,7 @@ object TtpJsonResponses {
        |    "markedAsInsolvent" : ${eligibilityRules.markedAsInsolvent},
        |    "isLessThanMinDebtAllowance" : ${eligibilityRules.isLessThanMinDebtAllowance},
        |    "isMoreThanMaxDebtAllowance" : ${eligibilityRules.isMoreThanMaxDebtAllowance},
-       |    "disallowedChargeLocks" : ${eligibilityRules.disallowedChargeLocks},
+       |    "disallowedChargeLockTypes" : ${eligibilityRules.disallowedChargeLockTypes},
        |    "existingTTP" : ${eligibilityRules.existingTTP},
        |    "chargesOverMaxDebtAge" : ${eligibilityRules.chargesOverMaxDebtAge},
        |    "ineligibleChargeTypes" : ${eligibilityRules.ineligibleChargeTypes},
@@ -91,7 +91,6 @@ object TtpJsonResponses {
   def ttpAffordabilityResponseJson(): String = {
     s"""
        |{
-       |    "processingDateTime": "2022-03-23T13:49:51.141Z",
        |    "minimumInstalmentAmount": 33333,
        |    "maximumInstalmentAmount": 100000
        |}

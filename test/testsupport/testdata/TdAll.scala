@@ -58,7 +58,7 @@ object TdAll {
     markedAsInsolvent          = false,
     isLessThanMinDebtAllowance = false,
     isMoreThanMaxDebtAllowance = false,
-    disallowedChargeLocks      = false,
+    disallowedChargeLockTypes  = false,
     existingTTP                = false,
     chargesOverMaxDebtAge      = false,
     ineligibleChargeTypes      = false,
@@ -68,7 +68,7 @@ object TdAll {
   val notEligibleMarkedAsInsolvent: EligibilityRules = eligibleEligibilityRules.copy(markedAsInsolvent = true)
   val notEligibleIsLessThanMinDebtAllowance: EligibilityRules = eligibleEligibilityRules.copy(isLessThanMinDebtAllowance = true)
   val notEligibleIsMoreThanMaxDebtAllowance: EligibilityRules = eligibleEligibilityRules.copy(isMoreThanMaxDebtAllowance = true)
-  val notEligibleDisallowedChargeLocks: EligibilityRules = eligibleEligibilityRules.copy(disallowedChargeLocks = true)
+  val notEligibleDisallowedChargeLockTypes: EligibilityRules = eligibleEligibilityRules.copy(disallowedChargeLockTypes = true)
   val notEligibleExistingTTP: EligibilityRules = eligibleEligibilityRules.copy(existingTTP = true)
   val notEligibleExceedsMaxDebtAge: EligibilityRules = eligibleEligibilityRules.copy(chargesOverMaxDebtAge = true)
   val notEligibleEligibleChargeType: EligibilityRules = eligibleEligibilityRules.copy(ineligibleChargeTypes = true)
