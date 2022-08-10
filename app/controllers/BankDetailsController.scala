@@ -19,7 +19,7 @@ package controllers
 import actions.Actions
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import essttp.journey.model.Journey
-import essttp.journey.model.Journey.AfterChosenTypeOfBankAccount
+import essttp.journey.model.Journey.{AfterChosenTypeOfBankAccount, BeforeChosenTypeOfBankAccount}
 import essttp.rootmodel.bank.{BankDetails, DirectDebitDetails}
 import models.bars.BarsCommon.BarsResponse._
 import models.enumsforforms.{IsSoleSignatoryFormValue, TypeOfAccountFormValue}
@@ -151,8 +151,8 @@ class BankDetailsController @Inject() (
                 case _ => Redirect(routes.BankDetailsController.checkBankDetails)
               }
             }
-          case _ =>
-            Future.successful(JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(request.journey))
+          case j: BeforeChosenTypeOfBankAccount =>
+            Future.successful(JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j))
         }
       }
     )

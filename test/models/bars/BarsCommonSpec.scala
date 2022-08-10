@@ -30,15 +30,16 @@ class BarsCommonSpec extends UnitSpec {
       forAll(
         Table(
           ("input accountNumber", "bars accountNumber"),
-          (AccountNumber("12345678"), AccountNumber("12345678")),
-          (AccountNumber("2345678"), AccountNumber("02345678")),
-          (AccountNumber("345678"), AccountNumber("00345678")),
-          (AccountNumber("123456789"), AccountNumber("123456789")), // frontend prevents this
-          (AccountNumber(""), AccountNumber("00000000")) // frontend prevents this
+          (AccountNumber("12345678"), "12345678"),
+          (AccountNumber("2345678"), "02345678"),
+          (AccountNumber("345678"), "00345678"),
+          (AccountNumber("123456789"), "123456789"), // frontend prevents this
+          (AccountNumber(""), "00000000") // frontend prevents this
         )
-      ) { (inputAccountNumber: AccountNumber, barsAccountNumber: AccountNumber) =>
-          val bankAccount = BarsBankAccount.padded(sortCode, inputAccountNumber)
+      ) { (inputAccountNumber: AccountNumber, barsAccountNumber: String) =>
+          val bankAccount = BarsBankAccount.padded(sortCode.value, inputAccountNumber.value)
 
+          bankAccount.sortCode shouldBe sortCode.value
           bankAccount.accountNumber shouldBe barsAccountNumber
         }
     }

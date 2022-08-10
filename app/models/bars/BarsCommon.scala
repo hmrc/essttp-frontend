@@ -17,13 +17,15 @@
 package models.bars
 
 import cats.Eq
-import essttp.rootmodel.bank.{AccountNumber, SortCode}
 import org.apache.commons.lang3.StringUtils
 import play.api.libs.json.{Format, Json}
 
 object BarsCommon {
 
   // request
+
+  type SortCode = String
+  type AccountNumber = String
 
   final case class BarsBankAccount(
       sortCode:      SortCode,
@@ -40,7 +42,7 @@ object BarsCommon {
     private val minimumLength = 8
     private val padStr = "0"
     private def leftPad(accountNumber: AccountNumber): AccountNumber = {
-      AccountNumber(StringUtils.leftPad(accountNumber.value, minimumLength, padStr))
+      StringUtils.leftPad(accountNumber, minimumLength, padStr)
     }
 
   }
