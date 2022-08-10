@@ -57,7 +57,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
         s"service=$appName&" +
         s"backUrl=${SafeRedirectUrl(BaseUrl.essttpFrontend + request.uri).encodedUrl}"
 
-    val exitSurveyUrl: String = s"${BaseUrl.feedbackFrontend}/feedback/$appName"
+    val exitSurveyUrl: String = s"${BaseUrl.feedbackFrontend}/feedback/"
     val firstPageBackUrl: String = "https://gov.uk"
     val enrolForPayeUrl: String = config.get[String]("govUkUrls.enrolPayeUrl")
     val extraSupportUrl: String = config.get[String]("govUkUrls.extraSupportUrl")
@@ -65,6 +65,8 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     val epayeGovUkJourneyLoginContinueUrl: String = s"/set-up-a-payment-plan/determine-taxId"
     val businessTaxAccountUrl: String = s"${BaseUrl.businessTaxAccountFrontend}/business-account"
   }
+
+  val serviceIdentifierPAYE: String = "eSSTTP-PAYE"
 
   object InterestRates {
     val baseRate: BigDecimal = config.get[Double]("interest-rates.base-rate")

@@ -70,3 +70,5 @@ GET    /assets/*file                                        controllers.Assets.v
 GET    /timed-out                                           controllers.SignOutController.signOutFromTimeout
 
 GET    /language/:language                                  @langswitch.LanguageSwitchController.switchToLanguage(language: langswitch.Language)
+
+GET    /exit-survey                                         controllers.SignOutController.exitSurvey
