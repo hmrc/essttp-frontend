@@ -21,7 +21,7 @@ import controllers.JourneyFinalStateCheck.finalStateCheck
 import essttp.journey.model.Journey
 import essttp.journey.model.Journey.{AfterChosenTypeOfBankAccount, BeforeChosenTypeOfBankAccount}
 import essttp.rootmodel.bank.{BankDetails, DirectDebitDetails}
-import models.bars.BarsCommon.BarsResponse._
+import models.bars.response.BarsResponse._
 import models.enumsforforms.{IsSoleSignatoryFormValue, TypeOfAccountFormValue}
 import models.forms.BankDetailsForm._
 import models.forms.{BankDetailsForm, TypeOfAccountForm}
@@ -119,14 +119,12 @@ class BankDetailsController @Inject() (
           bankDetailsForm.isSoleSignatory.asBoolean
         )
 
-        // format: OFF
-        def enterBankDetailsPageWithBarsError(error: FormError): Result = {
-          Ok(views.enterBankDetailsPage(
-            form = form.withError(error),
-            backUrl = BankDetailsController.chooseTypeOfAccountUrl
-          ))
-        }
-        // format: ON
+          def enterBankDetailsPageWithBarsError(error: FormError): Result = {
+            Ok(views.enterBankDetailsPage(
+              form    = form.withError(error),
+              backUrl = BankDetailsController.chooseTypeOfAccountUrl
+            ))
+          }
 
         request.journey match {
           case j: AfterChosenTypeOfBankAccount =>

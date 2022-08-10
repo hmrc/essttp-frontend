@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
-package models.bars
+package models.bars.response
 
-import models.bars.BarsCommon.BarsAssessmentType
 import play.api.libs.json.{Format, Json}
 
-final case class BarsValidateResponse(
+final case class BarsVerifyResponse(
     accountNumberIsWellFormatted:             BarsAssessmentType,
+    accountExists:                            BarsAssessmentType,
+    nameMatches:                              BarsAssessmentType,
     nonStandardAccountDetailsRequiredForBacs: BarsAssessmentType,
     sortCodeIsPresentOnEISCD:                 BarsAssessmentType,
-    sortCodeSupportsDirectDebit:              Option[BarsAssessmentType],
-    sortCodeSupportsDirectCredit:             Option[BarsAssessmentType],
+    sortCodeSupportsDirectDebit:              BarsAssessmentType,
+    sortCodeSupportsDirectCredit:             BarsAssessmentType,
+    accountName:                              Option[String],
     sortCodeBankName:                         Option[String],
     iban:                                     Option[String]
 )
 
-object BarsValidateResponse {
-  implicit val format: Format[BarsValidateResponse] = Json.format
+object BarsVerifyResponse {
+  implicit val format: Format[BarsVerifyResponse] = Json.format
 }
+

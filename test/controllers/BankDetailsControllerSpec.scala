@@ -261,21 +261,27 @@ class BankDetailsControllerSpec extends ItSpec {
       BarsStub.ValidateStub.success()
       BarsStub.VerifyPersonalStub.success()
 
+      val formData = List(
+        ("name", "Bob Ross"),
+        ("sortCode", "123456"),
+        ("accountNumber", "12345678"),
+        ("isSoleSignatory", "Yes")
+      )
+
       val fakeRequest = FakeRequest(
         method = "POST",
         path   = "/set-up-direct-debit"
       ).withAuthToken()
         .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-        .withFormUrlEncodedBody(
-          ("name", "Bob Ross"),
-          ("sortCode", "123456"),
-          ("accountNumber", "12345678"),
-          ("isSoleSignatory", "Yes")
-        )
+        .withFormUrlEncodedBody(formData: _*)
+
       val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.checkDirectDebitDetailsUrl)
       EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+
+      BarsStub.ValidateStub.ensureBarsValidateCalled(formData)
+      BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
       BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
     }
 
@@ -283,17 +289,21 @@ class BankDetailsControllerSpec extends ItSpec {
       AuthStub.authorise()
       EssttpBackend.ConfirmedDirectDebitDetails.findJourney()
       EssttpBackend.DirectDebitDetails.updateDirectDebitDetails(TdAll.journeyId)
+
+      val formData = List(
+        ("name", "Bob Ross"),
+        ("sortCode", "123456"),
+        ("accountNumber", "12345678"),
+        ("isSoleSignatory", "No")
+      )
+
       val fakeRequest = FakeRequest(
         method = "POST",
         path   = "/set-up-direct-debit"
       ).withAuthToken()
         .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-        .withFormUrlEncodedBody(
-          ("name", "Bob Ross"),
-          ("sortCode", "123456"),
-          ("accountNumber", "12345678"),
-          ("isSoleSignatory", "No")
-        )
+        .withFormUrlEncodedBody(formData: _*)
+
       val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.cannotSetupDirectDebitOnlineUrl)
@@ -357,17 +367,19 @@ class BankDetailsControllerSpec extends ItSpec {
     abstract class BarsErrorSetup(typeOfAccount: TypeOfBankAccount) {
       AuthStub.authorise()
 
+      val formData = List(
+        ("name", "Bob Ross"),
+        ("sortCode", "123456"),
+        ("accountNumber", "12345678"),
+        ("isSoleSignatory", "Yes")
+      )
+
       val fakeRequest = FakeRequest(
         method = "POST",
         path   = "/set-up-direct-debit"
       ).withAuthToken()
         .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-        .withFormUrlEncodedBody(
-          ("name", "Bob Ross"),
-          ("sortCode", "123456"),
-          ("accountNumber", "12345678"),
-          ("isSoleSignatory", "Yes")
-        )
+        .withFormUrlEncodedBody(formData: _*)
 
       EssttpBackend.DirectDebitDetails.updateDirectDebitDetails(TdAll.journeyId)
       typeOfAccount match {
@@ -385,12 +397,7 @@ class BankDetailsControllerSpec extends ItSpec {
     abstract class BarsFormErrorSetup(barsError: String, typeOfAccount: TypeOfBankAccount = TypesOfBankAccount.Personal)
       extends BarsErrorSetup(typeOfAccount) {
 
-      val validForm: List[(String, String)] = List(
-        ("name", "Bob Ross"),
-        ("sortCode", "123456"),
-        ("accountNumber", "12345678"),
-        ("isSoleSignatory", "Yes")
-      )
+      val validForm: List[(String, String)] = formData
 
       val expectedContentAndHref: List[(String, String)] =
         // TODO temporary until error handling decided - will be addressed in a future ticket
@@ -424,6 +431,8 @@ class BankDetailsControllerSpec extends ItSpec {
       new BarsFormErrorSetup("accountNumberNotWellFormatted") {
         testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
         EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+
+        BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
       }
@@ -432,6 +441,8 @@ class BankDetailsControllerSpec extends ItSpec {
       new BarsFormErrorSetup("sortCodeNotPresentOnEiscd") {
         testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
         EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+
+        BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
       }
@@ -440,6 +451,8 @@ class BankDetailsControllerSpec extends ItSpec {
       new BarsFormErrorSetup("sortCodeDoesNotSupportsDirectDebit") {
         testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
         EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+
+        BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
       }
@@ -448,6 +461,9 @@ class BankDetailsControllerSpec extends ItSpec {
       new BarsFormErrorSetup("nameDoesNotMatch", typeOfAccount = TypesOfBankAccount.Personal) {
         testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
         EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+
+        BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
+        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(validForm)
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
       }
 
@@ -455,6 +471,9 @@ class BankDetailsControllerSpec extends ItSpec {
       new BarsFormErrorSetup("nameDoesNotMatch", typeOfAccount = TypesOfBankAccount.Business) {
         testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
         EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+
+        BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
+        BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validForm)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
       }
 
@@ -469,6 +488,9 @@ class BankDetailsControllerSpec extends ItSpec {
         redirectLocation(result) shouldBe Some(PageUrls.errorPlaceholder)
 
         EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+
+        BarsStub.ValidateStub.ensureBarsValidateCalled(formData)
+        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
       }
 
@@ -483,6 +505,9 @@ class BankDetailsControllerSpec extends ItSpec {
         redirectLocation(result) shouldBe Some(PageUrls.errorPlaceholder)
 
         EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+
+        BarsStub.ValidateStub.ensureBarsValidateCalled(formData)
+        BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(formData)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
       }
 
@@ -498,8 +523,10 @@ class BankDetailsControllerSpec extends ItSpec {
         redirectLocation(result) shouldBe Some(PageUrls.checkDirectDebitDetailsUrl)
 
         EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
-        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled()
-        BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled()
+
+        BarsStub.ValidateStub.ensureBarsValidateCalled(formData)
+        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
+        BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(formData)
       }
 
     "call verify-business when bars verify-personal response has accountExists is No" in
@@ -514,8 +541,10 @@ class BankDetailsControllerSpec extends ItSpec {
         redirectLocation(result) shouldBe Some(PageUrls.checkDirectDebitDetailsUrl)
 
         EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
-        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled()
-        BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled()
+
+        BarsStub.ValidateStub.ensureBarsValidateCalled(formData)
+        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
+        BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(formData)
       }
 
     "redirect to an error page when bars verify-personal response has nameMatches is Error" in
@@ -529,6 +558,9 @@ class BankDetailsControllerSpec extends ItSpec {
         redirectLocation(result) shouldBe Some(PageUrls.errorPlaceholder)
 
         EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+
+        BarsStub.ValidateStub.ensureBarsValidateCalled(formData)
+        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
       }
 
@@ -543,6 +575,9 @@ class BankDetailsControllerSpec extends ItSpec {
         redirectLocation(result) shouldBe Some(PageUrls.errorPlaceholder)
 
         EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+
+        BarsStub.ValidateStub.ensureBarsValidateCalled(formData)
+        BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(formData)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
       }
 

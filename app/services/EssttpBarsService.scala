@@ -17,8 +17,9 @@
 package services
 
 import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount, TypesOfBankAccount}
-import models.bars.BarsCommon.{BarsBankAccount, BarsResponse, BarsTypeOfBankAccount, BarsTypesOfBankAccount}
-import models.bars.BarsVerifyRequest._
+import models.bars.{BarsTypeOfBankAccount, BarsTypesOfBankAccount}
+import models.bars.request.{BarsBankAccount, BarsBusiness, BarsSubject}
+import models.bars.response.BarsResponse
 import models.enumsforforms.IsSoleSignatoryFormValue
 import play.api.mvc.RequestHeader
 import services.EssttpBarsService._
@@ -39,7 +40,7 @@ class EssttpBarsService @Inject() (barsService: BarsService)(implicit ec: Execut
     barsService.verifyPersonal(toBarsBankAccount(bankDetails), toBarsSubject(bankDetails))
 
   def verifyBusiness(bankDetails: BankDetails)(implicit requestHeader: RequestHeader): Future[BarsResponse] =
-    barsService.verifyBusiness(toBarsBankAccount(bankDetails), Some(toBarsBusiness(bankDetails)))
+    barsService.verifyBusiness(toBarsBankAccount(bankDetails), toBarsBusiness(bankDetails))
 
   // TODO ItSpec
   def verifyBankDetails(

@@ -37,8 +37,23 @@ object BarsStub {
     def ensureBarsValidateNotCalled(): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(validateUrl)))
 
-    def ensureBarsValidateCalled(): Unit =
-      verify(exactly(1), postRequestedFor(urlPathEqualTo(validateUrl)))
+    def ensureBarsValidateCalled(formData: List[(String, String)]): Unit = {
+      val sortCode = getExpectedFormValue("sortCode", formData)
+      val accountNumber = getExpectedFormValue("accountNumber", formData)
+
+      verify(
+        exactly(1),
+        postRequestedFor(urlPathEqualTo(validateUrl))
+          .withRequestBody(equalToJson(
+            s"""{
+            |  "account" : {
+            |    "sortCode" : "$sortCode",
+            |    "accountNumber" : "$accountNumber"
+            |  }
+            |}""".stripMargin
+          ))
+      )
+    }
   }
 
   object VerifyPersonalStub {
@@ -57,8 +72,27 @@ object BarsStub {
     def ensureBarsVerifyPersonalNotCalled(): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(verifyPersonalUrl)))
 
-    def ensureBarsVerifyPersonalCalled(): Unit =
-      verify(exactly(1), postRequestedFor(urlPathEqualTo(verifyPersonalUrl)))
+    def ensureBarsVerifyPersonalCalled(formData: List[(String, String)]): Unit = {
+      val sortCode = getExpectedFormValue("sortCode", formData)
+      val accountNumber = getExpectedFormValue("accountNumber", formData)
+      val name = getExpectedFormValue("name", formData)
+
+      verify(
+        exactly(1),
+        postRequestedFor(urlPathEqualTo(verifyPersonalUrl))
+          .withRequestBody(equalToJson(
+            s"""{
+               |  "account" : {
+               |    "sortCode" : "$sortCode",
+               |    "accountNumber" : "$accountNumber"
+               |  },
+               |  "subject" : {
+               |    "name" : "$name"
+               |  }
+               |}""".stripMargin
+          ))
+      )
+    }
   }
 
   object VerifyBusinessStub {
@@ -77,8 +111,27 @@ object BarsStub {
     def ensureBarsVerifyBusinessNotCalled(): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(verifyBusinessUrl)))
 
-    def ensureBarsVerifyBusinessCalled(): Unit =
-      verify(exactly(1), postRequestedFor(urlPathEqualTo(verifyBusinessUrl)))
+    def ensureBarsVerifyBusinessCalled(formData: List[(String, String)]): Unit = {
+      val sortCode = getExpectedFormValue("sortCode", formData)
+      val accountNumber = getExpectedFormValue("accountNumber", formData)
+      val companyName = getExpectedFormValue("name", formData)
+
+      verify(
+        exactly(1),
+        postRequestedFor(urlPathEqualTo(verifyBusinessUrl))
+          .withRequestBody(equalToJson(
+            s"""{
+               |  "account" : {
+               |    "sortCode" : "$sortCode",
+               |    "accountNumber" : "$accountNumber"
+               |  },
+               |  "business" : {
+               |    "companyName" : "$companyName"
+               |  }
+               |}""".stripMargin
+          ))
+      )
+    }
   }
 
   def verifyBarsNotCalled(): Unit = {
@@ -97,5 +150,9 @@ object BarsStub {
         )
     )
   }
+
+  private def getExpectedFormValue(field: String, formData: List[(String, String)]): String =
+    formData.collectFirst{ case (x, value) if x == field => value }
+      .getOrElse(throw new Exception(s"Field: $field, not present in form: $formData"))
 
 }

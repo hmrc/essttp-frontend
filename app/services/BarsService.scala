@@ -17,10 +17,10 @@
 package services
 
 import connectors.BarsConnector
-import models.bars.BarsCommon.BarsResponse.{accountDoesNotExist, validateFailure}
-import models.bars.BarsValidateRequest
-import models.bars.BarsCommon.{BarsBankAccount, BarsResponse, BarsTypeOfBankAccount, BarsTypesOfBankAccount}
-import models.bars.BarsVerifyRequest._
+import models.bars.{BarsTypeOfBankAccount, BarsTypesOfBankAccount}
+import models.bars.request._
+import models.bars.response.BarsResponse
+import models.bars.response.BarsResponse.{accountDoesNotExist, validateFailure}
 import play.api.Logging
 import play.api.mvc.RequestHeader
 
@@ -42,7 +42,7 @@ class BarsService @Inject() (barsConnector: BarsConnector)(implicit ec: Executio
   ): Future[BarsResponse] =
     barsConnector.verifyPersonal(BarsVerifyPersonalRequest(bankAccount, subject)).map(BarsResponse.apply)
 
-  def verifyBusiness(bankAccount: BarsBankAccount, business: Option[BarsBusiness])(
+  def verifyBusiness(bankAccount: BarsBankAccount, business: BarsBusiness)(
       implicit
       requestHeader: RequestHeader
   ): Future[BarsResponse] =
@@ -69,11 +69,11 @@ class BarsService @Inject() (barsConnector: BarsConnector)(implicit ec: Executio
           case BarsTypesOfBankAccount.Personal =>
             verifyPersonal(bankAccount, subject).flatMap {
               case accountDoesNotExist() =>
-                verifyBusiness(bankAccount, Some(business))
+                verifyBusiness(bankAccount, business)
               case verifyPersonalResp => Future.successful(verifyPersonalResp)
             }
           case BarsTypesOfBankAccount.Business =>
-            verifyBusiness(bankAccount, Some(business)).flatMap {
+            verifyBusiness(bankAccount, business).flatMap {
               case accountDoesNotExist() =>
                 verifyPersonal(bankAccount, subject)
               case verifyBusinessResp => Future.successful(verifyBusinessResp)

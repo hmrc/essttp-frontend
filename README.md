@@ -26,8 +26,8 @@ to get the desired behaviour (e.g. `Teddy Dickson and 207102 and 44344655` to su
 |-----------|----------------|---------------|-----------------------------------|
 | 207102    | 44311655       | Teddy Dickson | OK                                |
 | 207102    | 44311655       | Teddy Bear    | nameMatches - NO                  |
-| 206705    | 44311611       | any name      | accountNumberIsWellFormatted - NO |
-| 609593    | 44311611       | any name      | sortCodeSupportsDirectDebit - NO  |
+| 609593    | 44311611       | any name      | accountNumberIsWellFormatted - NO |
+| 206705    | 44311611       | any name      | sortCodeSupportsDirectDebit - NO  |
 | 309696    | 44311611       | any name      | sortCodeIsPresentOnEISCD - NO     |
 
 see here for more BARs stub data https://github.com/hmrc/bank-account-reputation-stub

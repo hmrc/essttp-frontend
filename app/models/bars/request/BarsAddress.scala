@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package models.bars
+package models.bars.request
 
-import models.bars.BarsCommon.BarsBankAccount
 import play.api.libs.json.{Format, Json}
 
-final case class BarsValidateRequest(account: BarsBankAccount)
+final case class BarsAddress(
+    lines:    List[String], // One to four lines; cumulative length must be between 1 and 140 characters.
+    town:     Option[String], // Must be between 1 and 35 characters long
+    postcode: Option[String] // Must be between 5 and 8 characters long, all uppercase. The internal space character can be omitted.
+)
 
-object BarsValidateRequest {
-  implicit val format: Format[BarsValidateRequest] = Json.format
+object BarsAddress {
+  implicit val format: Format[BarsAddress] = Json.format
 }

@@ -18,12 +18,12 @@ package connectors
 
 import com.google.inject.{Inject, Singleton}
 import config.AppConfig
-import models.bars.{BarsValidateRequest, BarsValidateResponse, BarsVerifyResponse}
+import models.bars.request.{BarsValidateRequest, BarsVerifyBusinessRequest, BarsVerifyPersonalRequest}
 import play.api.mvc.RequestHeader
 import requests.RequestSupport._
 import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import models.bars.BarsVerifyRequest.{BarsVerifyBusinessRequest, BarsVerifyPersonalRequest}
+import models.bars.response.{BarsValidateResponse, BarsVerifyResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 

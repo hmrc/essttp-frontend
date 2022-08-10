@@ -17,12 +17,11 @@
 package models.bars
 
 import essttp.rootmodel.bank.{AccountNumber, SortCode}
-import models.bars.BarsCommon.BarsBankAccount
-import org.scalatest.prop.TableDrivenPropertyChecks.forAll
-import testsupport.UnitSpec
+import models.bars.request.BarsBankAccount
 import org.scalatest.prop.TableDrivenPropertyChecks._
+import testsupport.UnitSpec
 
-class BarsCommonSpec extends UnitSpec {
+class BarsBankAccountSpec extends UnitSpec {
   "BarsBankAccount.padded" - {
     "should ensure that Account Number is not less than 8 characters, left-padding with zeroes if necessary" in {
 
