@@ -21,8 +21,8 @@ import essttp.rootmodel.ttp.{EligibilityRules, EligibilityPass}
 object TtpJsonResponses {
 
   def ttpEligibilityCallJson(
-      eligibilityPass: EligibilityPass = TdAll.eligibleEligibilityPass,
-      eligibilityRules:         EligibilityRules         = TdAll.eligibleEligibilityRules
+      eligibilityPass:  EligibilityPass  = TdAll.eligibleEligibilityPass,
+      eligibilityRules: EligibilityRules = TdAll.eligibleEligibilityRules
   ): String = {
     s"""
        |{
@@ -55,7 +55,7 @@ object TtpJsonResponses {
        |    "markedAsInsolvent" : ${eligibilityRules.markedAsInsolvent},
        |    "isLessThanMinDebtAllowance" : ${eligibilityRules.isLessThanMinDebtAllowance},
        |    "isMoreThanMaxDebtAllowance" : ${eligibilityRules.isMoreThanMaxDebtAllowance},
-       |    "disallowedChargeLocks" : ${eligibilityRules.disallowedChargeLocks},
+       |    "disallowedChargeLockTypes" : ${eligibilityRules.disallowedChargeLockTypes},
        |    "existingTTP" : ${eligibilityRules.existingTTP},
        |    "chargesOverMaxDebtAge" : ${eligibilityRules.chargesOverMaxDebtAge},
        |    "ineligibleChargeTypes" : ${eligibilityRules.ineligibleChargeTypes},

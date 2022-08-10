@@ -19,7 +19,7 @@ package controllers.pagerouters
 import controllers.routes
 import essttp.rootmodel.ttp.EligibilityCheckResult
 import models.EligibilityErrors
-import models.EligibilityErrors.{DisallowedChargeLocks, IneligibleChargeTypes, ChargesOverMaxDebtAge, ExistingTtp, HasRlsOnAddress, IsLessThanMinDebtAllowance, IsMoreThanMaxDebtAllowance, MarkedAsInsolvent, MissingFiledReturns, MultipleReasons}
+import models.EligibilityErrors.{DisallowedChargeLockTypes, IneligibleChargeTypes, ChargesOverMaxDebtAge, ExistingTtp, HasRlsOnAddress, IsLessThanMinDebtAllowance, IsMoreThanMaxDebtAllowance, MarkedAsInsolvent, MissingFiledReturns, MultipleReasons}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{Call, Result}
 
@@ -36,7 +36,7 @@ object EligibilityRouter {
         case Some(MarkedAsInsolvent)          => routes.IneligibleController.genericIneligiblePage
         case Some(IsLessThanMinDebtAllowance) => routes.IneligibleController.genericIneligiblePage
         case Some(IsMoreThanMaxDebtAllowance) => routes.IneligibleController.debtTooLargePage
-        case Some(DisallowedChargeLocks)      => routes.IneligibleController.genericIneligiblePage
+        case Some(DisallowedChargeLockTypes)  => routes.IneligibleController.genericIneligiblePage
         case Some(ExistingTtp)                => routes.IneligibleController.alreadyHaveAPaymentPlanPage
         case Some(ChargesOverMaxDebtAge)      => routes.IneligibleController.debtTooOldPage
         case Some(IneligibleChargeTypes)      => routes.IneligibleController.genericIneligiblePage

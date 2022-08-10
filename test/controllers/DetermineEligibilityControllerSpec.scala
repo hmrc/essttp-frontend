@@ -38,7 +38,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
       ("MarkedAsInsolvent", TdAll.notEligibleMarkedAsInsolvent, "markedAsInsolvent", PageUrls.notEligibleUrl),
       ("IsLessThanMinDebtAllowance", TdAll.notEligibleIsLessThanMinDebtAllowance, "isLessThanMinDebtAllowance", PageUrls.notEligibleUrl),
       ("IsMoreThanMaxDebtAllowance", TdAll.notEligibleIsMoreThanMaxDebtAllowance, "isMoreThanMaxDebtAllowance", PageUrls.debtTooLargeUrl),
-      ("DisallowedChargeLocks", TdAll.notEligibleDisallowedChargeLocks, "disallowedChargeLocks", PageUrls.notEligibleUrl),
+      ("DisallowedChargeLockTypes", TdAll.notEligibleDisallowedChargeLockTypes, "disallowedChargeLockTypes", PageUrls.notEligibleUrl),
       ("ExistingTTP", TdAll.notEligibleExistingTTP, "existingTTP", PageUrls.alreadyHaveAPaymentPlanUrl),
       ("ExceedsMaxDebtAge", TdAll.notEligibleExceedsMaxDebtAge, "chargesOverMaxDebtAge", PageUrls.debtTooOldUrl),
       ("EligibleChargeType", TdAll.notEligibleEligibleChargeType, "ineligibleChargeTypes", PageUrls.notEligibleUrl),
