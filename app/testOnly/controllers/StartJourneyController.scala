@@ -163,7 +163,7 @@ object StartJourneyController {
         markedAsInsolvent          = containsError(MarkedAsInsolvent),
         isLessThanMinDebtAllowance = containsError(IsLessThanMinDebtAllowance),
         isMoreThanMaxDebtAllowance = containsError(IsMoreThanMaxDebtAllowance),
-        disallowedChargeLocks      = containsError(EligibilityErrors.DisallowedChargeLocks),
+        disallowedChargeLockTypes  = containsError(EligibilityErrors.DisallowedChargeLockTypes),
         existingTTP                = containsError(ExistingTtp),
         chargesOverMaxDebtAge      = containsError(ChargesOverMaxDebtAge),
         ineligibleChargeTypes      = containsError(IneligibleChargeTypes),
