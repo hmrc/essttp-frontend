@@ -198,6 +198,7 @@ object TtpService {
       initialPaymentAmount         = upfrontPaymentAmount.map(_.value),
       accruedDebtInterest          = AccruedDebtInterest(allInterestAccrued),
       debtItemCharges              = debtChargeItemsFromEligibilityCheck,
+      customerPostcodes            = eligibilityCheckResult.customerPostcodes
     )
   }
 
