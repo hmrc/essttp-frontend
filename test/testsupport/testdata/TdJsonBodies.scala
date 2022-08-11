@@ -165,7 +165,6 @@ object TdJsonBodies {
   def affordabilityResultJourneyInfo(minimumInstalmentAmount: Int = 29997): String =
     s"""
        |"instalmentAmounts": {
-       |   "processingDateTime": "2022-03-23T13:49:51.141Z",
        |   "minimumInstalmentAmount": $minimumInstalmentAmount,
        |   "maximumInstalmentAmount": 87944
        |}
