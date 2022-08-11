@@ -28,7 +28,7 @@ class SignOutController @Inject() (
     as:           Actions,
     mcc:          MessagesControllerComponents,
     timedOutPage: views.html.TimedOut,
-    appConfig: AppConfig
+    appConfig:    AppConfig
 ) extends FrontendController(mcc)
   with I18nSupport
   with Logging {
@@ -37,8 +37,8 @@ class SignOutController @Inject() (
     Ok(timedOutPage()).withNewSession
   }
 
-  val exitSurvey: Action[AnyContent] = Action { _ =>
-    val url = appConfig.Urls.exitSurveyUrl + "/" + appConfig.serviceIdentifierPAYE
+  val exitSurveyPaye: Action[AnyContent] = Action { _ =>
+    val url = appConfig.BaseUrl.feedbackFrontend + "/" + appConfig.serviceIdentifierPAYE
     Redirect(url).withNewSession
   }
 }

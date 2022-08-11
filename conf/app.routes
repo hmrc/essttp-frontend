@@ -71,4 +71,4 @@ GET    /timed-out                                           controllers.SignOutC
 
 GET    /language/:language                                  @langswitch.LanguageSwitchController.switchToLanguage(language: langswitch.Language)
 
-GET    /exit-survey                                         controllers.SignOutController.exitSurvey
+GET    /exit-survey/paye                                    controllers.SignOutController.exitSurveyPaye
