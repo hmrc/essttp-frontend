@@ -43,7 +43,7 @@ class EssttpBarsService @Inject() (barsService: BarsService)(implicit ec: Execut
     barsService.verifyBusiness(toBarsBankAccount(bankDetails), toBarsBusiness(bankDetails))
 
   // TODO ItSpec
-  def verifyBankDetails(
+  def verifyBankDetailsOLD(
       bankDetails:       BankDetails,
       isSoleSignatory:   IsSoleSignatoryFormValue,
       typeOfBankAccount: TypeOfBankAccount
@@ -59,6 +59,19 @@ class EssttpBarsService @Inject() (barsService: BarsService)(implicit ec: Execut
 
       case IsSoleSignatoryFormValue.No => Future.successful(None)
     }
+  }
+
+  def verifyBankDetails(
+      bankDetails:       BankDetails,
+      typeOfBankAccount: TypeOfBankAccount
+  )(implicit requestHeader: RequestHeader): Future[BarsResponse] = { // make Future[Either[Err, Resp]]
+    barsService.verifyBankDetails(
+      bankAccount       = toBarsBankAccount(bankDetails),
+      subject           = toBarsSubject(bankDetails),
+      business          = toBarsBusiness(bankDetails),
+      typeOfBankAccount = toBarsTypeOfBankAccount(typeOfBankAccount)
+    )
+
   }
 }
 
