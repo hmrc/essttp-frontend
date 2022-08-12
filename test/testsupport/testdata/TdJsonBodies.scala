@@ -102,8 +102,8 @@ object TdJsonBodies {
       |          "postcodeDate": "2022-01-31"
       |        }
       |  ],
-      |  "regimePaymentFrequency": "Monthly",
-      |  "paymentPlanFrequency": "Monthly",
+      |  "regimePaymentFrequency": "monthly",
+      |  "paymentPlanFrequency": "monthly",
       |  "paymentPlanMinLength": 1,
       |  "paymentPlanMaxLength": 6,
       |  "eligibilityStatus" : {
