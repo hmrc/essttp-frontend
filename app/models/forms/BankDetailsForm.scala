@@ -87,5 +87,6 @@ object BankDetailsForm {
   val sortCodeNotPresentOnEiscd: FormError = FormError("bars", "validate.sortCodeIsPresentOnEISCD.no")
   val sortCodeDoesNotSupportsDirectDebit: FormError = FormError("bars", "validate.sortCodeSupportsDirectDebit.no")
   val nameDoesNotMatch: FormError = FormError("bars", "verify.nameMatches.no")
+  val accountDoesNotExist: FormError = FormError("bars", "verify.accountExists.no")
 
 }

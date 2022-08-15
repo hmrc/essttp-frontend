@@ -405,9 +405,11 @@ class BankDetailsControllerSpec extends ItSpec {
           case "accountNumberNotWellFormatted" =>
             BarsStub.ValidateStub.accountNumberNotWellFormatted()
             List(("Enter a valid combination of bank account number and sort code", "#bars"))
+
           case "sortCodeNotPresentOnEiscd" =>
             BarsStub.ValidateStub.sortCodeNotPresentOnEiscd()
             List(("Enter a valid combination of bank account number and sort code", "#bars"))
+
           case "sortCodeDoesNotSupportsDirectDebit" =>
             BarsStub.ValidateStub.sortCodeDoesNotSupportsDirectDebit()
             List(
@@ -417,6 +419,7 @@ class BankDetailsControllerSpec extends ItSpec {
                 "#bars"
               )
             )
+
           case "nameDoesNotMatch" =>
             BarsStub.ValidateStub.success()
             typeOfAccount match {
@@ -424,6 +427,13 @@ class BankDetailsControllerSpec extends ItSpec {
               case TypesOfBankAccount.Business => BarsStub.VerifyBusinessStub.nameDoesNotMatch()
             }
             List(("Enter a valid account name", "#bars"))
+
+          case "accountDoesNotExist" =>
+            BarsStub.ValidateStub.success()
+            BarsStub.VerifyPersonalStub.accountDoesNotExist()
+            BarsStub.VerifyBusinessStub.accountDoesNotExist()
+
+            List(("Enter a valid combination of bank account number and sort code", "#bars"))
         }
     }
 
@@ -511,7 +521,7 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
       }
 
-    "call verify-personal when bars verify-business response has accountExists is No" in
+    "call verify-personal successfully after bars verify-business response has accountExists is No" in
       new BarsErrorSetup(TypesOfBankAccount.Business) {
 
         BarsStub.ValidateStub.success()
@@ -529,7 +539,7 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(formData)
       }
 
-    "call verify-business when bars verify-personal response has accountExists is No" in
+    "call verify-business successfully after bars verify-personal response has accountExists is No" in
       new BarsErrorSetup(TypesOfBankAccount.Personal) {
 
         BarsStub.ValidateStub.success()
@@ -545,6 +555,26 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.ValidateStub.ensureBarsValidateCalled(formData)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(formData)
+      }
+
+    "call verify-business has accountExists is No after bars verify-personal response has accountExists is No" in
+      new BarsFormErrorSetup("accountDoesNotExist", typeOfAccount = TypesOfBankAccount.Personal) {
+        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
+        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+
+        BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
+        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(validForm)
+        BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validForm)
+      }
+
+    "call verify-personal has accountExists is No after bars verify-business response has accountExists is No" in
+      new BarsFormErrorSetup("accountDoesNotExist", typeOfAccount = TypesOfBankAccount.Business) {
+        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
+        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+
+        BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
+        BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validForm)
+        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(validForm)
       }
 
     "redirect to an error page when bars verify-personal response has nameMatches is Error" in

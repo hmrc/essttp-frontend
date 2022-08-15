@@ -563,6 +563,7 @@ object Messages {
           "Check you have entered a valid sort code or enter details for a different account"
       ),
       s"bars.${nameDoesNotMatch.message}" -> Message("Enter a valid account name"),
+      s"bars.${accountDoesNotExist.message}" -> Message("Enter a valid combination of bank account number and sort code")
     )
 
     val `Check your Direct Debit details`: Message = Message(

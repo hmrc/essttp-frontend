@@ -19,8 +19,9 @@ package services
 import connectors.BarsConnector
 import models.bars.{BarsTypeOfBankAccount, BarsTypesOfBankAccount}
 import models.bars.request._
+import models.bars.response.ValidateResponse.validateFailure
+import models.bars.response.VerifyResponse.accountDoesNotExist
 import models.bars.response._
-import models.bars.response.BarsResponse.{accountDoesNotExist, validateFailure}
 import play.api.Logging
 import play.api.mvc.RequestHeader
 
@@ -60,38 +61,45 @@ class BarsService @Inject() (barsConnector: BarsConnector)(implicit ec: Executio
       subject:           BarsSubject,
       business:          BarsBusiness,
       typeOfBankAccount: BarsTypeOfBankAccount
-  )(implicit requestHeader: RequestHeader, ec: ExecutionContext): Future[Either[BarsError, BarsResponse]] = {
-    logger.debug(s"******** verifyBankDetails: type: $typeOfBankAccount")
+  )(implicit requestHeader: RequestHeader, ec: ExecutionContext): Future[Either[BarsError, VerifyResponse]] = {
 
     validateBankAccount(bankAccount).flatMap {
       case validateResponse @ validateFailure() =>
-        Future.successful(handleResponse(validateResponse))
+        Future.successful(Left(handleValidateErrorResponse(validateResponse)))
       case _ =>
         typeOfBankAccount match {
           case BarsTypesOfBankAccount.Personal =>
             verifyPersonal(bankAccount, subject).flatMap {
               case accountDoesNotExist() =>
-                verifyBusiness(bankAccount, business).map(handleResponse)
-              case verifyPersonalResp => Future.successful(handleResponse(verifyPersonalResp))
+                verifyBusiness(bankAccount, business).map(handleVerifyResponse)
+              case verifyPersonalResp => Future.successful(handleVerifyResponse(verifyPersonalResp))
             }
           case BarsTypesOfBankAccount.Business =>
             verifyBusiness(bankAccount, business).flatMap {
               case accountDoesNotExist() =>
-                verifyPersonal(bankAccount, subject).map(handleResponse)
-              case verifyBusinessResp => Future.successful(handleResponse(verifyBusinessResp))
+                verifyPersonal(bankAccount, subject).map(handleVerifyResponse)
+              case verifyBusinessResp => Future.successful(handleVerifyResponse(verifyBusinessResp))
             }
         }
     }
   }
 
-  private def handleResponse(response: BarsResponse): Either[BarsError, BarsResponse] = {
+  private def handleValidateErrorResponse(response: ValidateResponse): BarsError = {
     response match {
-      case BarsResponse.thirdPartyError() => Left(ThirdPartyError(response))
-      case BarsResponse.accountNumberIsWellFormattedNo() => Left(AccountNumberNotWellFormatted(response))
-      case BarsResponse.sortCodeIsPresentOnEiscdNo() => Left(SortCodeNotPresentOnEiscd(response))
-      case BarsResponse.sortCodeSupportsDirectDebitNo() => Left(SortCodeDoesNotSupportDirectDebit(response))
-      case BarsResponse.nameMatchesNo() => Left(NameDoesNotMatch(response))
-      case BarsResponse.accountDoesNotExist() => Left(AccountDoesNotExist(response))
+      case ValidateResponse.accountNumberIsWellFormattedNo() => AccountNumberNotWellFormatted(response)
+      case ValidateResponse.sortCodeIsPresentOnEiscdNo()     => SortCodeNotPresentOnEiscd(response)
+      case ValidateResponse.sortCodeSupportsDirectDebitNo()  => SortCodeDoesNotSupportDirectDebit(response)
+    }
+  }
+
+  private def handleVerifyResponse(response: VerifyResponse): Either[BarsError, VerifyResponse] = {
+    response match {
+      case VerifyResponse.thirdPartyError() => Left(ThirdPartyError(response))
+      case VerifyResponse.accountNumberIsWellFormattedNo() => Left(AccountNumberNotWellFormatted(response))
+      case VerifyResponse.sortCodeIsPresentOnEiscdNo() => Left(SortCodeNotPresentOnEiscd(response))
+      case VerifyResponse.sortCodeSupportsDirectDebitNo() => Left(SortCodeDoesNotSupportDirectDebit(response))
+      case VerifyResponse.nameMatchesNo() => Left(NameDoesNotMatch(response))
+      case VerifyResponse.accountDoesNotExist() => Left(AccountDoesNotExist(response))
       // ok
       case _ => Right(response)
     }

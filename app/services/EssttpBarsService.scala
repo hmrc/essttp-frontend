@@ -17,9 +17,9 @@
 package services
 
 import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount, TypesOfBankAccount}
-import models.bars.{BarsTypeOfBankAccount, BarsTypesOfBankAccount}
 import models.bars.request.{BarsBankAccount, BarsBusiness, BarsSubject}
-import models.bars.response.{BarsError, BarsResponse}
+import models.bars.response.{BarsError, ValidateResponse, VerifyResponse}
+import models.bars.{BarsTypeOfBankAccount, BarsTypesOfBankAccount}
 import play.api.mvc.RequestHeader
 import services.EssttpBarsService._
 
@@ -32,26 +32,25 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class EssttpBarsService @Inject() (barsService: BarsService)(implicit ec: ExecutionContext) {
 
-  def validateBankAccount(bankDetails: BankDetails)(implicit requestHeader: RequestHeader): Future[BarsResponse] =
+  def validateBankAccount(bankDetails: BankDetails)(implicit requestHeader: RequestHeader): Future[ValidateResponse] =
     barsService.validateBankAccount(toBarsBankAccount(bankDetails))
 
-  def verifyPersonal(bankDetails: BankDetails)(implicit requestHeader: RequestHeader): Future[BarsResponse] =
+  def verifyPersonal(bankDetails: BankDetails)(implicit requestHeader: RequestHeader): Future[VerifyResponse] =
     barsService.verifyPersonal(toBarsBankAccount(bankDetails), toBarsSubject(bankDetails))
 
-  def verifyBusiness(bankDetails: BankDetails)(implicit requestHeader: RequestHeader): Future[BarsResponse] =
+  def verifyBusiness(bankDetails: BankDetails)(implicit requestHeader: RequestHeader): Future[VerifyResponse] =
     barsService.verifyBusiness(toBarsBankAccount(bankDetails), toBarsBusiness(bankDetails))
 
   def verifyBankDetails(
       bankDetails:       BankDetails,
       typeOfBankAccount: TypeOfBankAccount
-  )(implicit requestHeader: RequestHeader): Future[Either[BarsError, BarsResponse]] = {
+  )(implicit requestHeader: RequestHeader): Future[Either[BarsError, VerifyResponse]] = {
     barsService.verifyBankDetails(
       bankAccount       = toBarsBankAccount(bankDetails),
       subject           = toBarsSubject(bankDetails),
       business          = toBarsBusiness(bankDetails),
       typeOfBankAccount = toBarsTypeOfBankAccount(typeOfBankAccount)
     )
-
   }
 }
 

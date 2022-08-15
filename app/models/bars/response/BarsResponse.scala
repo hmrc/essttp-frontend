@@ -22,7 +22,7 @@ sealed trait BarsResponse
 final case class ValidateResponse(barsValidateResponse: BarsValidateResponse) extends BarsResponse
 final case class VerifyResponse(barsVerifyResponse: BarsVerifyResponse) extends BarsResponse
 
-object BarsResponse {
+object ValidateResponse {
   import cats.syntax.eq._
 
   object validateFailure {
@@ -32,48 +32,54 @@ object BarsResponse {
         response.barsValidateResponse.sortCodeSupportsDirectDebit.contains(No)
   }
 
-  object thirdPartyError {
-    def unapply(barsResponse: BarsResponse): Boolean =
-      barsResponse match {
-        case ValidateResponse(_) => false // N/A
-        case VerifyResponse(resp) =>
-          resp.accountExists === Error || resp.nameMatches === Error
-      }
-  }
-
-  object nameMatchesNo {
-    def unapply(barsResponse: BarsResponse): Boolean =
-      barsResponse match {
-        case ValidateResponse(_) => false // N/A
-        case VerifyResponse(resp) =>
-          resp.nameMatches === No &&
-            (resp.accountExists === Yes ||
-              resp.accountExists === Indeterminate)
-      }
-  }
-
   object accountNumberIsWellFormattedNo {
-    def unapply(barsResponse: BarsResponse): Boolean =
-      barsResponse match {
-        case ValidateResponse(resp) => resp.accountNumberIsWellFormatted === No
-        case VerifyResponse(resp)   => resp.accountNumberIsWellFormatted === No
-      }
+    def unapply(response: ValidateResponse): Boolean =
+      response.barsValidateResponse.accountNumberIsWellFormatted === No
   }
 
   object sortCodeIsPresentOnEiscdNo {
-    def unapply(barsResponse: BarsResponse): Boolean =
-      barsResponse match {
-        case ValidateResponse(resp) => resp.sortCodeIsPresentOnEISCD === No
-        case VerifyResponse(resp)   => resp.sortCodeIsPresentOnEISCD === No
-      }
+    def unapply(response: ValidateResponse): Boolean =
+      response.barsValidateResponse.sortCodeIsPresentOnEISCD === No
   }
 
   object sortCodeSupportsDirectDebitNo {
-    def unapply(barsResponse: BarsResponse): Boolean =
-      barsResponse match {
-        case ValidateResponse(resp) => resp.sortCodeSupportsDirectDebit.contains(No)
-        case VerifyResponse(resp)   => resp.sortCodeSupportsDirectDebit === No
-      }
+    def unapply(response: ValidateResponse): Boolean =
+      response.barsValidateResponse.sortCodeSupportsDirectDebit.contains(No)
+  }
+
+}
+
+object VerifyResponse {
+  import cats.syntax.eq._
+
+  object thirdPartyError {
+    def unapply(response: VerifyResponse): Boolean = {
+      val resp = response.barsVerifyResponse
+      resp.accountExists === Error || resp.nameMatches === Error
+    }
+  }
+
+  object nameMatchesNo {
+    def unapply(response: VerifyResponse): Boolean = {
+      val resp = response.barsVerifyResponse
+      resp.nameMatches === No && (resp.accountExists === Yes || resp.accountExists === Indeterminate)
+
+    }
+  }
+
+  object accountNumberIsWellFormattedNo {
+    def unapply(response: VerifyResponse): Boolean =
+      response.barsVerifyResponse.accountNumberIsWellFormatted === No
+  }
+
+  object sortCodeIsPresentOnEiscdNo {
+    def unapply(response: VerifyResponse): Boolean =
+      response.barsVerifyResponse.sortCodeIsPresentOnEISCD === No
+  }
+
+  object sortCodeSupportsDirectDebitNo {
+    def unapply(response: VerifyResponse): Boolean =
+      response.barsVerifyResponse.sortCodeSupportsDirectDebit === No
   }
 
   /**
@@ -83,16 +89,15 @@ object BarsResponse {
    *    (or vice versa)
    */
   object accountDoesNotExist {
-    def unapply(barsResponse: BarsResponse): Boolean =
-      barsResponse match {
-        case ValidateResponse(_) => false // N/A
-        case VerifyResponse(resp) =>
-          (resp.accountNumberIsWellFormatted === Yes ||
-            resp.accountNumberIsWellFormatted === Indeterminate) &&
-            resp.accountExists === No &&
-            resp.sortCodeIsPresentOnEISCD === Yes &&
-            resp.sortCodeSupportsDirectDebit === Yes
-      }
+    def unapply(response: VerifyResponse): Boolean = {
+      val resp = response.barsVerifyResponse
+
+      (resp.accountNumberIsWellFormatted === Yes ||
+        resp.accountNumberIsWellFormatted === Indeterminate) &&
+        resp.accountExists === No &&
+        resp.sortCodeIsPresentOnEISCD === Yes &&
+        resp.sortCodeSupportsDirectDebit === Yes
+    }
   }
 
 }

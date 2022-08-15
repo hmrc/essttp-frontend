@@ -161,7 +161,7 @@ class BankDetailsController @Inject() (
       )
   }
 
-  private def handleBars(resp: Either[BarsError, BarsResponse])(implicit request: Request[_]): Result = {
+  private def handleBars(resp: Either[BarsError, VerifyResponse])(implicit request: Request[_]): Result = {
       def enterBankDetailsPageWithBarsError(error: FormError): Result =
         Ok(
           views.enterBankDetailsPage(
@@ -183,7 +183,7 @@ class BankDetailsController @Inject() (
         case NameDoesNotMatch(_) =>
           enterBankDetailsPageWithBarsError(nameDoesNotMatch)
         case AccountDoesNotExist(_) =>
-          enterBankDetailsPageWithBarsError(nameDoesNotMatch) // technically not possible
+          enterBankDetailsPageWithBarsError(accountDoesNotExist)
       },
       _ => Redirect(routes.BankDetailsController.checkBankDetails)
     )
