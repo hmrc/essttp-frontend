@@ -19,8 +19,7 @@ package services
 import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount, TypesOfBankAccount}
 import models.bars.{BarsTypeOfBankAccount, BarsTypesOfBankAccount}
 import models.bars.request.{BarsBankAccount, BarsBusiness, BarsSubject}
-import models.bars.response.BarsResponse
-import models.enumsforforms.IsSoleSignatoryFormValue
+import models.bars.response.{BarsError, BarsResponse}
 import play.api.mvc.RequestHeader
 import services.EssttpBarsService._
 
@@ -42,29 +41,10 @@ class EssttpBarsService @Inject() (barsService: BarsService)(implicit ec: Execut
   def verifyBusiness(bankDetails: BankDetails)(implicit requestHeader: RequestHeader): Future[BarsResponse] =
     barsService.verifyBusiness(toBarsBankAccount(bankDetails), toBarsBusiness(bankDetails))
 
-  // TODO ItSpec
-  def verifyBankDetailsOLD(
-      bankDetails:       BankDetails,
-      isSoleSignatory:   IsSoleSignatoryFormValue,
-      typeOfBankAccount: TypeOfBankAccount
-  )(implicit requestHeader: RequestHeader): Future[Option[BarsResponse]] = {
-    isSoleSignatory match {
-      case IsSoleSignatoryFormValue.Yes =>
-        barsService.verifyBankDetails(
-          bankAccount       = toBarsBankAccount(bankDetails),
-          subject           = toBarsSubject(bankDetails),
-          business          = toBarsBusiness(bankDetails),
-          typeOfBankAccount = toBarsTypeOfBankAccount(typeOfBankAccount)
-        ).map(Option.apply)
-
-      case IsSoleSignatoryFormValue.No => Future.successful(None)
-    }
-  }
-
   def verifyBankDetails(
       bankDetails:       BankDetails,
       typeOfBankAccount: TypeOfBankAccount
-  )(implicit requestHeader: RequestHeader): Future[BarsResponse] = { // make Future[Either[Err, Resp]]
+  )(implicit requestHeader: RequestHeader): Future[Either[BarsError, BarsResponse]] = {
     barsService.verifyBankDetails(
       bankAccount       = toBarsBankAccount(bankDetails),
       subject           = toBarsSubject(bankDetails),

@@ -19,7 +19,7 @@ package services
 import connectors.BarsConnector
 import models.bars.{BarsTypeOfBankAccount, BarsTypesOfBankAccount}
 import models.bars.request._
-import models.bars.response.BarsResponse
+import models.bars.response._
 import models.bars.response.BarsResponse.{accountDoesNotExist, validateFailure}
 import play.api.Logging
 import play.api.mvc.RequestHeader
@@ -33,20 +33,20 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class BarsService @Inject() (barsConnector: BarsConnector)(implicit ec: ExecutionContext) extends Logging {
 
-  def validateBankAccount(bankAccount: BarsBankAccount)(implicit requestHeader: RequestHeader): Future[BarsResponse] =
-    barsConnector.validateBankDetails(BarsValidateRequest(bankAccount)).map(BarsResponse.apply)
+  def validateBankAccount(bankAccount: BarsBankAccount)(implicit requestHeader: RequestHeader): Future[ValidateResponse] =
+    barsConnector.validateBankDetails(BarsValidateRequest(bankAccount)).map(ValidateResponse.apply)
 
   def verifyPersonal(bankAccount: BarsBankAccount, subject: BarsSubject)(
       implicit
       requestHeader: RequestHeader
-  ): Future[BarsResponse] =
-    barsConnector.verifyPersonal(BarsVerifyPersonalRequest(bankAccount, subject)).map(BarsResponse.apply)
+  ): Future[VerifyResponse] =
+    barsConnector.verifyPersonal(BarsVerifyPersonalRequest(bankAccount, subject)).map(VerifyResponse.apply)
 
   def verifyBusiness(bankAccount: BarsBankAccount, business: BarsBusiness)(
       implicit
       requestHeader: RequestHeader
-  ): Future[BarsResponse] =
-    barsConnector.verifyBusiness(BarsVerifyBusinessRequest(bankAccount, business)).map(BarsResponse.apply)
+  ): Future[VerifyResponse] =
+    barsConnector.verifyBusiness(BarsVerifyBusinessRequest(bankAccount, business)).map(VerifyResponse.apply)
 
   /**
    * Call Validate first and if that fails, then Return the failing response
@@ -60,25 +60,40 @@ class BarsService @Inject() (barsConnector: BarsConnector)(implicit ec: Executio
       subject:           BarsSubject,
       business:          BarsBusiness,
       typeOfBankAccount: BarsTypeOfBankAccount
-  )(implicit requestHeader: RequestHeader): Future[BarsResponse] =
+  )(implicit requestHeader: RequestHeader, ec: ExecutionContext): Future[Either[BarsError, BarsResponse]] = {
+    logger.debug(s"******** verifyBankDetails: type: $typeOfBankAccount")
+
     validateBankAccount(bankAccount).flatMap {
       case validateResponse @ validateFailure() =>
-        Future.successful(validateResponse)
+        Future.successful(handleResponse(validateResponse))
       case _ =>
         typeOfBankAccount match {
           case BarsTypesOfBankAccount.Personal =>
             verifyPersonal(bankAccount, subject).flatMap {
               case accountDoesNotExist() =>
-                verifyBusiness(bankAccount, business)
-              case verifyPersonalResp => Future.successful(verifyPersonalResp)
+                verifyBusiness(bankAccount, business).map(handleResponse)
+              case verifyPersonalResp => Future.successful(handleResponse(verifyPersonalResp))
             }
           case BarsTypesOfBankAccount.Business =>
             verifyBusiness(bankAccount, business).flatMap {
               case accountDoesNotExist() =>
-                verifyPersonal(bankAccount, subject)
-              case verifyBusinessResp => Future.successful(verifyBusinessResp)
+                verifyPersonal(bankAccount, subject).map(handleResponse)
+              case verifyBusinessResp => Future.successful(handleResponse(verifyBusinessResp))
             }
         }
     }
+  }
 
+  private def handleResponse(response: BarsResponse): Either[BarsError, BarsResponse] = {
+    response match {
+      case BarsResponse.thirdPartyError() => Left(ThirdPartyError(response))
+      case BarsResponse.accountNumberIsWellFormattedNo() => Left(AccountNumberNotWellFormatted(response))
+      case BarsResponse.sortCodeIsPresentOnEiscdNo() => Left(SortCodeNotPresentOnEiscd(response))
+      case BarsResponse.sortCodeSupportsDirectDebitNo() => Left(SortCodeDoesNotSupportDirectDebit(response))
+      case BarsResponse.nameMatchesNo() => Left(NameDoesNotMatch(response))
+      case BarsResponse.accountDoesNotExist() => Left(AccountDoesNotExist(response))
+      // ok
+      case _ => Right(response)
+    }
+  }
 }

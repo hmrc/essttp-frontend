@@ -18,65 +18,62 @@ package models.bars.response
 
 import models.bars.response.BarsAssessmentType._
 
-// union (or superset) of BarsValidateResponse and BarsVerifyResponse
-final case class BarsResponse(
-    accountNumberIsWellFormatted:             BarsAssessmentType,
-    nonStandardAccountDetailsRequiredForBacs: BarsAssessmentType,
-    sortCodeIsPresentOnEISCD:                 BarsAssessmentType,
-    sortCodeSupportsDirectDebit:              Option[BarsAssessmentType],
-    sortCodeSupportsDirectCredit:             Option[BarsAssessmentType],
-    accountExists:                            Option[BarsAssessmentType],
-    nameMatches:                              Option[BarsAssessmentType],
-    accountName:                              Option[String],
-    sortCodeBankName:                         Option[String],
-    iban:                                     Option[String]
-)
+sealed trait BarsResponse
+final case class ValidateResponse(barsValidateResponse: BarsValidateResponse) extends BarsResponse
+final case class VerifyResponse(barsVerifyResponse: BarsVerifyResponse) extends BarsResponse
 
 object BarsResponse {
-  def apply(resp: BarsValidateResponse): BarsResponse =
-    BarsResponse(
-      accountNumberIsWellFormatted             = resp.accountNumberIsWellFormatted,
-      nonStandardAccountDetailsRequiredForBacs = resp.nonStandardAccountDetailsRequiredForBacs,
-      sortCodeIsPresentOnEISCD                 = resp.sortCodeIsPresentOnEISCD,
-      sortCodeSupportsDirectDebit              = resp.sortCodeSupportsDirectDebit,
-      sortCodeSupportsDirectCredit             = resp.sortCodeSupportsDirectCredit,
-      accountExists                            = None,
-      nameMatches                              = None,
-      accountName                              = None,
-      sortCodeBankName                         = resp.sortCodeBankName,
-      iban                                     = resp.iban
-    )
-
-  def apply(resp: BarsVerifyResponse): BarsResponse =
-    BarsResponse(
-      accountNumberIsWellFormatted             = resp.accountNumberIsWellFormatted,
-      nonStandardAccountDetailsRequiredForBacs = resp.nonStandardAccountDetailsRequiredForBacs,
-      sortCodeIsPresentOnEISCD                 = resp.sortCodeIsPresentOnEISCD,
-      sortCodeSupportsDirectDebit              = Some(resp.sortCodeSupportsDirectDebit),
-      sortCodeSupportsDirectCredit             = Some(resp.sortCodeSupportsDirectCredit),
-      accountExists                            = Some(resp.accountExists),
-      nameMatches                              = Some(resp.nameMatches),
-      accountName                              = resp.accountName,
-      sortCodeBankName                         = resp.sortCodeBankName,
-      iban                                     = resp.iban
-    )
-
   import cats.syntax.eq._
 
   object validateFailure {
-    def unapply(response: BarsResponse): Boolean =
-      response.sortCodeIsPresentOnEISCD === No ||
-        response.accountNumberIsWellFormatted === No ||
-        response.sortCodeSupportsDirectDebit.contains(No)
+    def unapply(response: ValidateResponse): Boolean =
+      response.barsValidateResponse.sortCodeIsPresentOnEISCD === No ||
+        response.barsValidateResponse.accountNumberIsWellFormatted === No ||
+        response.barsValidateResponse.sortCodeSupportsDirectDebit.contains(No)
   }
 
-  object verifySuccess {
-    def unapply(resp: BarsResponse): Boolean =
-      (resp.accountNumberIsWellFormatted === Yes ||
-        resp.accountNumberIsWellFormatted === Indeterminate) &&
-        (resp.accountExists.contains(Yes) || resp.accountExists.contains(Indeterminate)) &&
-        (resp.nameMatches.contains(Yes) || resp.nameMatches.contains(Partial)) &&
-        resp.sortCodeSupportsDirectDebit.contains(Yes)
+  object thirdPartyError {
+    def unapply(barsResponse: BarsResponse): Boolean =
+      barsResponse match {
+        case ValidateResponse(_) => false // N/A
+        case VerifyResponse(resp) =>
+          resp.accountExists === Error || resp.nameMatches === Error
+      }
+  }
+
+  object nameMatchesNo {
+    def unapply(barsResponse: BarsResponse): Boolean =
+      barsResponse match {
+        case ValidateResponse(_) => false // N/A
+        case VerifyResponse(resp) =>
+          resp.nameMatches === No &&
+            (resp.accountExists === Yes ||
+              resp.accountExists === Indeterminate)
+      }
+  }
+
+  object accountNumberIsWellFormattedNo {
+    def unapply(barsResponse: BarsResponse): Boolean =
+      barsResponse match {
+        case ValidateResponse(resp) => resp.accountNumberIsWellFormatted === No
+        case VerifyResponse(resp)   => resp.accountNumberIsWellFormatted === No
+      }
+  }
+
+  object sortCodeIsPresentOnEiscdNo {
+    def unapply(barsResponse: BarsResponse): Boolean =
+      barsResponse match {
+        case ValidateResponse(resp) => resp.sortCodeIsPresentOnEISCD === No
+        case VerifyResponse(resp)   => resp.sortCodeIsPresentOnEISCD === No
+      }
+  }
+
+  object sortCodeSupportsDirectDebitNo {
+    def unapply(barsResponse: BarsResponse): Boolean =
+      barsResponse match {
+        case ValidateResponse(resp) => resp.sortCodeSupportsDirectDebit.contains(No)
+        case VerifyResponse(resp)   => resp.sortCodeSupportsDirectDebit === No
+      }
   }
 
   /**
@@ -86,39 +83,16 @@ object BarsResponse {
    *    (or vice versa)
    */
   object accountDoesNotExist {
-    def unapply(resp: BarsResponse): Boolean =
-      (resp.accountNumberIsWellFormatted === Yes ||
-        resp.accountNumberIsWellFormatted === Indeterminate) &&
-        resp.accountExists.contains(No) &&
-        resp.sortCodeIsPresentOnEISCD === Yes &&
-        resp.sortCodeSupportsDirectDebit.contains(Yes)
-  }
-
-  object thirdPartyError {
-    def unapply(resp: BarsResponse): Boolean =
-      resp.accountExists.contains(Error) || resp.nameMatches.contains(Error)
-  }
-
-  object sortCodeIsPresentOnEiscdNo {
-    def unapply(resp: BarsResponse): Boolean =
-      resp.sortCodeIsPresentOnEISCD === No
-  }
-
-  object nameMatchesNo {
-    def unapply(resp: BarsResponse): Boolean =
-      resp.nameMatches.contains(No) &&
-        (resp.accountExists.contains(Yes) ||
-          resp.accountExists.contains(Indeterminate))
-  }
-
-  object accountNumberIsWellFormattedNo {
-    def unapply(resp: BarsResponse): Boolean =
-      resp.accountNumberIsWellFormatted === No
-  }
-
-  object sortCodeSupportsDirectDebitNo {
-    def unapply(resp: BarsResponse): Boolean =
-      resp.sortCodeSupportsDirectDebit.contains(No)
+    def unapply(barsResponse: BarsResponse): Boolean =
+      barsResponse match {
+        case ValidateResponse(_) => false // N/A
+        case VerifyResponse(resp) =>
+          (resp.accountNumberIsWellFormatted === Yes ||
+            resp.accountNumberIsWellFormatted === Indeterminate) &&
+            resp.accountExists === No &&
+            resp.sortCodeIsPresentOnEISCD === Yes &&
+            resp.sortCodeSupportsDirectDebit === Yes
+      }
   }
 
 }
