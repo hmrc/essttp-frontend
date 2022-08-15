@@ -1,11 +1,10 @@
 import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import sbt.Def
-import scoverage.ScoverageKeys
 import uk.gov.hmrc.DefaultBuildSettings
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 import scalariform.formatter.preferences._
 import wartremover.Wart
-import wartremover.WartRemover.autoImport.{wartremoverErrors, wartremoverExcluded, wartremoverWarnings}
+import wartremover.WartRemover.autoImport.{wartremoverErrors, wartremoverExcluded}
 
 lazy val appName: String = "essttp-frontend"
 

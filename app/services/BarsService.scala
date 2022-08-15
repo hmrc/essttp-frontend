@@ -17,23 +17,91 @@
 package services
 
 import connectors.BarsConnector
-import models.bars.BarsModel.{BarsResponse, BarsValidateRequest}
-import essttp.rootmodel.bank.BankDetails
+import models.bars.{BarsTypeOfBankAccount, BarsTypesOfBankAccount}
+import models.bars.request._
+import models.bars.response.ValidateResponse.validateFailure
+import models.bars.response.VerifyResponse.accountDoesNotExist
+import models.bars.response._
+import play.api.Logging
 import play.api.mvc.RequestHeader
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
  * Bank Account Reputation service (BARs).
  */
 @Singleton
-class BarsService @Inject() (barsConnector: BarsConnector) {
+class BarsService @Inject() (barsConnector: BarsConnector)(implicit ec: ExecutionContext) extends Logging {
+
+  def validateBankAccount(bankAccount: BarsBankAccount)(implicit requestHeader: RequestHeader): Future[ValidateResponse] =
+    barsConnector.validateBankDetails(BarsValidateRequest(bankAccount)).map(ValidateResponse.apply)
+
+  def verifyPersonal(bankAccount: BarsBankAccount, subject: BarsSubject)(
+      implicit
+      requestHeader: RequestHeader
+  ): Future[VerifyResponse] =
+    barsConnector.verifyPersonal(BarsVerifyPersonalRequest(bankAccount, subject)).map(VerifyResponse.apply)
+
+  def verifyBusiness(bankAccount: BarsBankAccount, business: BarsBusiness)(
+      implicit
+      requestHeader: RequestHeader
+  ): Future[VerifyResponse] =
+    barsConnector.verifyBusiness(BarsVerifyBusinessRequest(bankAccount, business)).map(VerifyResponse.apply)
 
   /**
-   * Call BARs to assess the correctness, existence and reputation of bank account details
-   * TODO Initially only a 'validate' call. Next step, implement the `verify` call
+   * Call Validate first and if that fails, then Return the failing response
+   * Otherwise, call either Verify/Personal or Verify/Business
+   * If success response then Return the response,
+   * If there is an AccountDoesNotExist error, then call the other Verify endpoint
+   * Return the response (success or fail)
    */
-  def assessBankAccountReputation(bankDetails: BankDetails)(implicit requestHeader: RequestHeader): Future[BarsResponse] =
-    barsConnector.validateBankDetails(BarsValidateRequest(bankDetails))
+  def verifyBankDetails(
+      bankAccount:       BarsBankAccount,
+      subject:           BarsSubject,
+      business:          BarsBusiness,
+      typeOfBankAccount: BarsTypeOfBankAccount
+  )(implicit requestHeader: RequestHeader, ec: ExecutionContext): Future[Either[BarsError, VerifyResponse]] = {
+
+    validateBankAccount(bankAccount).flatMap {
+      case validateResponse @ validateFailure() =>
+        Future.successful(Left(handleValidateErrorResponse(validateResponse)))
+      case _ =>
+        typeOfBankAccount match {
+          case BarsTypesOfBankAccount.Personal =>
+            verifyPersonal(bankAccount, subject).flatMap {
+              case accountDoesNotExist() =>
+                verifyBusiness(bankAccount, business).map(handleVerifyResponse)
+              case verifyPersonalResp => Future.successful(handleVerifyResponse(verifyPersonalResp))
+            }
+          case BarsTypesOfBankAccount.Business =>
+            verifyBusiness(bankAccount, business).flatMap {
+              case accountDoesNotExist() =>
+                verifyPersonal(bankAccount, subject).map(handleVerifyResponse)
+              case verifyBusinessResp => Future.successful(handleVerifyResponse(verifyBusinessResp))
+            }
+        }
+    }
+  }
+
+  private def handleValidateErrorResponse(response: ValidateResponse): BarsError = {
+    response match {
+      case ValidateResponse.accountNumberIsWellFormattedNo() => AccountNumberNotWellFormatted(response)
+      case ValidateResponse.sortCodeIsPresentOnEiscdNo()     => SortCodeNotPresentOnEiscd(response)
+      case ValidateResponse.sortCodeSupportsDirectDebitNo()  => SortCodeDoesNotSupportDirectDebit(response)
+    }
+  }
+
+  private def handleVerifyResponse(response: VerifyResponse): Either[BarsError, VerifyResponse] = {
+    response match {
+      case VerifyResponse.thirdPartyError() => Left(ThirdPartyError(response))
+      case VerifyResponse.accountNumberIsWellFormattedNo() => Left(AccountNumberNotWellFormatted(response))
+      case VerifyResponse.sortCodeIsPresentOnEiscdNo() => Left(SortCodeNotPresentOnEiscd(response))
+      case VerifyResponse.sortCodeSupportsDirectDebitNo() => Left(SortCodeDoesNotSupportDirectDebit(response))
+      case VerifyResponse.nameMatchesNo() => Left(NameDoesNotMatch(response))
+      case VerifyResponse.accountDoesNotExist() => Left(AccountDoesNotExist(response))
+      // ok
+      case _ => Right(response)
+    }
+  }
 }

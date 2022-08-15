@@ -1,0 +1,63 @@
+POST localhost:9871/verify/business
+Content-Type: application/json
+
+# "sortCode": "207102", "accountNumber": "76523611", "companyName" : "Boneféte Fun" -----> OK
+{
+  "account" : {
+    "sortCode" : "207102",
+    "accountNumber" : "76523611"
+  },
+  "business" : {
+    "companyName" : "Boneféte Fun"
+  }
+}
+
+###
+
+POST localhost:9871/verify/business
+Content-Type: application/json
+
+# "sortCode": "207102", "accountNumber": "76523611", "companyName" : "Boneféte Fun" -----> "nameMatches": "no"
+{
+  "account" : {
+    "sortCode" : "207102",
+    "accountNumber" : "76523611"
+  },
+  "business" : {
+    "companyName" : "Boneféte Funk"
+  }
+}
+
+###
+
+POST localhost:9871/verify/business
+Content-Type: application/json
+
+# "sortCode": "207102", "accountNumber": "76523611", "companyName" : "Boneféte Fun" -----> "accountNumberIsWellFormatted": "no"
+{
+  "account": {
+    "sortCode": "609593",
+    "accountNumber": "44311611"
+  },
+  "business" : {
+    "companyName" : "Boneféte Fun"
+  }
+}
+
+###
+
+POST localhost:9871/verify/business
+Content-Type: application/json
+
+# "sortCode": "207102", "accountNumber": "76523611", "companyName" : "Boneféte Fun" -----> "sortCodeIsPresentOnEISCD": "no"
+{
+  "account": {
+    "sortCode": "309696",
+    "accountNumber": "44333611"
+  },
+  "business" : {
+    "companyName" : "Boneféte Fun"
+  }
+}
+
+###
