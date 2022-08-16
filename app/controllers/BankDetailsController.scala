@@ -142,7 +142,7 @@ class BankDetailsController @Inject() (
               bankDetailsForm.isSoleSignatory match {
                 case IsSoleSignatoryFormValue.Yes =>
                   barsService
-                    .verifyBankDetails(directDebitDetails.bankDetails, j.typeOfBankAccount)
+                    .verifyBankDetails(directDebitDetails.bankDetails, j.typeOfBankAccount, j)
                     .flatMap(
                       barsResponse =>
                         journeyService

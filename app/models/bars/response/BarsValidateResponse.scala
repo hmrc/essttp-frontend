@@ -16,7 +16,7 @@
 
 package models.bars.response
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{OFormat, Json}
 
 final case class BarsValidateResponse(
     accountNumberIsWellFormatted:             BarsAssessmentType,
@@ -29,5 +29,5 @@ final case class BarsValidateResponse(
 )
 
 object BarsValidateResponse {
-  implicit val format: Format[BarsValidateResponse] = Json.format
+  implicit val format: OFormat[BarsValidateResponse] = Json.format
 }

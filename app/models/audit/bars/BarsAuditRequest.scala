@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package models.bars.request
+package models.audit.bars
 
-import play.api.libs.json.{OFormat, Json}
+import play.api.libs.json.{Json, OWrites}
 
-final case class BarsBusiness(
-    companyName: String, // Must be between 1 and 70 characters long
-    address:     Option[BarsAddress]
-)
+final case class BarsAuditRequest(account: BarsAuditAccount)
 
-object BarsBusiness {
-  implicit val format: OFormat[BarsBusiness] = Json.format
+object BarsAuditRequest {
+
+  implicit val writes: OWrites[BarsAuditRequest] = Json.writes
+
 }

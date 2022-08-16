@@ -17,7 +17,7 @@
 package models.bars.request
 
 import org.apache.commons.lang3.StringUtils
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{OFormat, Json}
 
 final case class BarsBankAccount(
     sortCode:      String,
@@ -25,7 +25,7 @@ final case class BarsBankAccount(
 )
 
 object BarsBankAccount {
-  implicit val format: Format[BarsBankAccount] = Json.format
+  implicit val format: OFormat[BarsBankAccount] = Json.format
 
   def padded(sortCode: String, accountNumber: String): BarsBankAccount =
     BarsBankAccount(sortCode, leftPad(accountNumber))

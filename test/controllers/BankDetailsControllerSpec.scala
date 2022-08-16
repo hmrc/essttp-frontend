@@ -21,16 +21,19 @@ import essttp.rootmodel.bank.{TypeOfBankAccount, TypesOfBankAccount}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import play.api.http.Status
+import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{Action, AnyContent, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
-import testsupport.stubs.{AuthStub, BarsStub, EssttpBackend}
+import testsupport.stubs.{AuditConnectorStub, AuthStub, BarsStub, EssttpBackend}
 import uk.gov.hmrc.http.SessionKeys
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
+import testsupport.testdata.BarsJsonResponses.{ValidateJson, VerifyJson}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 
+import java.util.Locale
 import scala.concurrent.Future
 import scala.jdk.CollectionConverters.{asScalaIteratorConverter, collectionAsScalaIterableConverter}
 
@@ -283,6 +286,34 @@ class BankDetailsControllerSpec extends ItSpec {
       BarsStub.ValidateStub.ensureBarsValidateCalled(formData)
       BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
       BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
+
+      AuditConnectorStub.verifyEventAudited(
+        auditType  = "BarsCheck",
+        auditEvent = Json.parse(
+          s"""
+             |{
+             |  "taxDetail": {
+             |    "accountsOfficeRef": "123PA44545546",
+             |    "employerRef": "864FZ00049"
+             |  },
+             |  "taxType": "Epaye",
+             |  "request": {
+             |    "account": {
+             |       "accountType": "personal",
+             |       "accountHolderName": "Bob Ross",
+             |       "sortCode": "123456",
+             |       "accountNumber": "12345678"
+             |    }
+             |  },
+             |  "response": {
+             |   "isBankAccountValid": true,
+             |   "barsResponse":  ${VerifyJson.success}
+             |  }
+             |}
+            """.stripMargin
+        ).as[JsObject]
+      )
+
     }
 
     "redirect to /you-cannot-set-up-a-direct-debit-online when user submits no for radio option relating to being account holder" in {
@@ -309,6 +340,7 @@ class BankDetailsControllerSpec extends ItSpec {
       redirectLocation(result) shouldBe Some(PageUrls.cannotSetupDirectDebitOnlineUrl)
       EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
       BarsStub.verifyBarsNotCalled()
+      AuditConnectorStub.verifyNoAuditEvent()
     }
 
     "show correct error messages when form submitted is empty" in {
@@ -328,6 +360,7 @@ class BankDetailsControllerSpec extends ItSpec {
       )
       testFormError(controller.enterBankDetailsSubmit)(formData: _*)(expectedContentAndHref)
       EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+      AuditConnectorStub.verifyNoAuditEvent()
     }
 
     "show correct error messages when submitted sort code and account number are not numeric" in {
@@ -345,6 +378,7 @@ class BankDetailsControllerSpec extends ItSpec {
       )
       testFormError(controller.enterBankDetailsSubmit)(formData: _*)(expectedContentAndHref)
       EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+      AuditConnectorStub.verifyNoAuditEvent()
     }
 
     "show correct error messages when submitted sort code and account number are more than 6 and 8 digits respectively" in {
@@ -362,6 +396,7 @@ class BankDetailsControllerSpec extends ItSpec {
       )
       testFormError(controller.enterBankDetailsSubmit)(formData: _*)(expectedContentAndHref)
       EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+      AuditConnectorStub.verifyNoAuditEvent()
     }
 
     abstract class BarsErrorSetup(typeOfAccount: TypeOfBankAccount) {
@@ -374,6 +409,31 @@ class BankDetailsControllerSpec extends ItSpec {
         ("isSoleSignatory", "Yes")
       )
 
+      def toExpectedBarsAuditDetailJson(barsResponseJson: String, isBankAccountValid: Boolean = false): JsObject =
+        Json.parse(
+          s"""
+             |{
+             |  "taxDetail": {
+             |    "accountsOfficeRef": "123PA44545546",
+             |    "employerRef": "864FZ00049"
+             |  },
+             |  "taxType": "Epaye",
+             |  "request": {
+             |    "account": {
+             |       "accountType": "${typeOfAccount.entryName.toLowerCase(Locale.UK)}",
+             |       "accountHolderName": "Bob Ross",
+             |       "sortCode": "123456",
+             |       "accountNumber": "12345678"
+             |    }
+             |  },
+             |  "response": {
+             |   "isBankAccountValid": $isBankAccountValid,
+             |   "barsResponse":  $barsResponseJson
+             |  }
+             |}
+            """.stripMargin
+        ).as[JsObject]
+
       val fakeRequest = FakeRequest(
         method = "POST",
         path   = "/set-up-direct-debit"
@@ -382,6 +442,7 @@ class BankDetailsControllerSpec extends ItSpec {
         .withFormUrlEncodedBody(formData: _*)
 
       EssttpBackend.DirectDebitDetails.updateDirectDebitDetails(TdAll.journeyId)
+
       typeOfAccount match {
         case TypesOfBankAccount.Personal =>
           EssttpBackend.ChosenTypeOfBankAccount.findJourney(
@@ -399,16 +460,18 @@ class BankDetailsControllerSpec extends ItSpec {
 
       val validForm: List[(String, String)] = formData
 
-      val expectedContentAndHref: List[(String, String)] =
+      val (expectedContentAndHref, expectedAuditResponseJson): (List[(String, String)], String) =
         // TODO temporary until error handling decided - will be addressed in a future ticket
         barsError match {
           case "accountNumberNotWellFormatted" =>
             BarsStub.ValidateStub.accountNumberNotWellFormatted()
-            List(("Enter a valid combination of bank account number and sort code", "#bars"))
+            List(("Enter a valid combination of bank account number and sort code", "#bars")) ->
+              ValidateJson.accountNumberNotWellFormatted
 
           case "sortCodeNotPresentOnEiscd" =>
             BarsStub.ValidateStub.sortCodeNotPresentOnEiscd()
-            List(("Enter a valid combination of bank account number and sort code", "#bars"))
+            List(("Enter a valid combination of bank account number and sort code", "#bars")) ->
+              ValidateJson.sortCodeNotPresentOnEiscd
 
           case "sortCodeDoesNotSupportsDirectDebit" =>
             BarsStub.ValidateStub.sortCodeDoesNotSupportsDirectDebit()
@@ -418,7 +481,7 @@ class BankDetailsControllerSpec extends ItSpec {
                 "Check you have entered a valid sort code or enter details for a different account",
                 "#bars"
               )
-            )
+            ) -> ValidateJson.sortCodeDoesNotSupportsDirectDebit
 
           case "nameDoesNotMatch" =>
             BarsStub.ValidateStub.success()
@@ -426,15 +489,18 @@ class BankDetailsControllerSpec extends ItSpec {
               case TypesOfBankAccount.Personal => BarsStub.VerifyPersonalStub.nameDoesNotMatch()
               case TypesOfBankAccount.Business => BarsStub.VerifyBusinessStub.nameDoesNotMatch()
             }
-            List(("Enter a valid account name", "#bars"))
+            List(("Enter a valid account name", "#bars")) -> VerifyJson.nameDoesNotMatch
 
           case "accountDoesNotExist" =>
             BarsStub.ValidateStub.success()
             BarsStub.VerifyPersonalStub.accountDoesNotExist()
             BarsStub.VerifyBusinessStub.accountDoesNotExist()
 
-            List(("Enter a valid combination of bank account number and sort code", "#bars"))
+            List(("Enter a valid combination of bank account number and sort code", "#bars")) ->
+              VerifyJson.accountDoesNotExist
         }
+
+      val expectedBarsAuditDetailJson: JsObject = toExpectedBarsAuditDetailJson(expectedAuditResponseJson)
     }
 
     "show correct error messages when BARs validate response is accountNumberNotWellFormatted" in
@@ -445,6 +511,10 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
+        AuditConnectorStub.verifyEventAudited(
+          auditType  = "BarsCheck",
+          auditEvent = expectedBarsAuditDetailJson
+        )
       }
 
     "show correct error messages when BARs validate response is sortCodeNotPresentOnEiscd" in
@@ -455,6 +525,10 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
+        AuditConnectorStub.verifyEventAudited(
+          auditType  = "BarsCheck",
+          auditEvent = expectedBarsAuditDetailJson
+        )
       }
 
     "show correct error messages when BARs validate response is sortCodeDoesNotSupportsDirectDebit" in
@@ -465,6 +539,10 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
+        AuditConnectorStub.verifyEventAudited(
+          auditType  = "BarsCheck",
+          auditEvent = expectedBarsAuditDetailJson
+        )
       }
 
     "show correct error messages when BARs verify response is nameDoesNotMatch with a personal bank account" in
@@ -475,6 +553,10 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(validForm)
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
+        AuditConnectorStub.verifyEventAudited(
+          auditType  = "BarsCheck",
+          auditEvent = expectedBarsAuditDetailJson
+        )
       }
 
     "show correct error messages when BARs verify response is nameDoesNotMatch with a business bank account" in
@@ -485,6 +567,10 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validForm)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
+        AuditConnectorStub.verifyEventAudited(
+          auditType  = "BarsCheck",
+          auditEvent = expectedBarsAuditDetailJson
+        )
       }
 
     "redirect to an error page when bars verify-personal response has accountExists is ERROR" in
@@ -502,6 +588,10 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.ValidateStub.ensureBarsValidateCalled(formData)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
+        AuditConnectorStub.verifyEventAudited(
+          auditType  = "BarsCheck",
+          auditEvent = toExpectedBarsAuditDetailJson(VerifyJson.accountExistsError)
+        )
       }
 
     "redirect to an error page when bars verify-business response has accountExists is ERROR" in
@@ -519,6 +609,10 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.ValidateStub.ensureBarsValidateCalled(formData)
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(formData)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
+        AuditConnectorStub.verifyEventAudited(
+          auditType  = "BarsCheck",
+          auditEvent = toExpectedBarsAuditDetailJson(VerifyJson.accountExistsError)
+        )
       }
 
     "call verify-personal successfully after bars verify-business response has accountExists is No" in
@@ -537,6 +631,10 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.ValidateStub.ensureBarsValidateCalled(formData)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(formData)
+        AuditConnectorStub.verifyEventAudited(
+          auditType  = "BarsCheck",
+          auditEvent = toExpectedBarsAuditDetailJson(VerifyJson.success, isBankAccountValid = true)
+        )
       }
 
     "call verify-business successfully after bars verify-personal response has accountExists is No" in
@@ -555,6 +653,10 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.ValidateStub.ensureBarsValidateCalled(formData)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(formData)
+        AuditConnectorStub.verifyEventAudited(
+          auditType  = "BarsCheck",
+          auditEvent = toExpectedBarsAuditDetailJson(VerifyJson.success, isBankAccountValid = true)
+        )
       }
 
     "call verify-business has accountExists is No after bars verify-personal response has accountExists is No" in
@@ -592,6 +694,10 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.ValidateStub.ensureBarsValidateCalled(formData)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
+        AuditConnectorStub.verifyEventAudited(
+          auditType  = "BarsCheck",
+          auditEvent = toExpectedBarsAuditDetailJson(VerifyJson.nameMatchesError)
+        )
       }
 
     "redirect to an error page when bars verify-business response has nameMatches is Error" in
@@ -609,6 +715,10 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.ValidateStub.ensureBarsValidateCalled(formData)
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(formData)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
+        AuditConnectorStub.verifyEventAudited(
+          auditType  = "BarsCheck",
+          auditEvent = toExpectedBarsAuditDetailJson(VerifyJson.nameMatchesError)
+        )
       }
 
   }

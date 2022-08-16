@@ -16,12 +16,15 @@
 
 package services
 
+import essttp.journey.model.Journey.AfterChosenTypeOfBankAccount
 import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount, TypesOfBankAccount}
 import models.bars.request.{BarsBankAccount, BarsBusiness, BarsSubject}
 import models.bars.response.{BarsError, ValidateResponse, VerifyResponse}
 import models.bars.{BarsTypeOfBankAccount, BarsTypesOfBankAccount}
 import play.api.mvc.RequestHeader
 import services.EssttpBarsService._
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -30,7 +33,7 @@ import scala.concurrent.{ExecutionContext, Future}
  * ESSTTP-specific interface to Bank Account Reputation service (BARs).
  */
 @Singleton
-class EssttpBarsService @Inject() (barsService: BarsService)(implicit ec: ExecutionContext) {
+class EssttpBarsService @Inject() (barsService: BarsService, auditService: AuditService)(implicit ec: ExecutionContext) {
 
   def validateBankAccount(bankDetails: BankDetails)(implicit requestHeader: RequestHeader): Future[ValidateResponse] =
     barsService.validateBankAccount(toBarsBankAccount(bankDetails))
@@ -43,14 +46,20 @@ class EssttpBarsService @Inject() (barsService: BarsService)(implicit ec: Execut
 
   def verifyBankDetails(
       bankDetails:       BankDetails,
-      typeOfBankAccount: TypeOfBankAccount
+      typeOfBankAccount: TypeOfBankAccount,
+      journey:           AfterChosenTypeOfBankAccount
   )(implicit requestHeader: RequestHeader): Future[Either[BarsError, VerifyResponse]] = {
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(requestHeader)
+
     barsService.verifyBankDetails(
       bankAccount       = toBarsBankAccount(bankDetails),
       subject           = toBarsSubject(bankDetails),
       business          = toBarsBusiness(bankDetails),
       typeOfBankAccount = toBarsTypeOfBankAccount(typeOfBankAccount)
-    )
+    ).map { result =>
+        auditService.auditBarsCheck(journey, bankDetails, typeOfBankAccount, result)
+        result
+      }
   }
 }
 

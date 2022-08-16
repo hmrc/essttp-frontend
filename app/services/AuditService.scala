@@ -18,20 +18,24 @@ package services
 
 import actionsmodel.AuthenticatedJourneyRequest
 import cats.syntax.eq._
-import essttp.journey.model.Journey.Stages.{ChosenPaymentPlan, ComputedTaxId, Started}
+import essttp.journey.model.Journey.{AfterChosenTypeOfBankAccount, Stages}
+import essttp.journey.model.Journey.Stages.{ChosenPaymentPlan, ChosenTypeOfBankAccount, ComputedTaxId, Started}
 import essttp.journey.model.Origin
 import essttp.rootmodel.AmountInPence
+import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount}
 import essttp.rootmodel.ttp.EligibilityCheckResult
+import models.audit.bars.{BarsAuditAccount, BarsCheckAuditDetail, BarsAuditRequest, BarsAuditResponse}
 import models.audit.eligibility.{EligibilityCheckAuditDetail, EligibilityResult, EnrollmentReasons}
 import models.audit.planbeforesubmission.{AuditCollections, PaymentPlanBeforeSubmissionAuditDetail, Schedule}
 import models.audit.{AuditDetail, TaxDetail}
+import models.bars.response.{BarsError, VerifyResponse}
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions.auditHeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 
-import java.util.UUID
+import java.util.{Locale, UUID}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
@@ -54,6 +58,14 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       journey: ChosenPaymentPlan
   )(implicit headerCarrier: HeaderCarrier): Unit =
     audit(toPaymentPlanBeforeSubmissionAuditDetail(journey))
+
+  def auditBarsCheck(
+      journey:           AfterChosenTypeOfBankAccount,
+      bankDetails:       BankDetails,
+      typeOfBankAccount: TypeOfBankAccount,
+      result:            Either[BarsError, VerifyResponse]
+  )(implicit hc: HeaderCarrier): Unit =
+    audit(toBarsCheckAuditDetail(journey, bankDetails, typeOfBankAccount, result))
 
   private def audit[A <: AuditDetail: Writes](a: A)(implicit hc: HeaderCarrier): Unit = {
     val _ = auditConnector.sendExtendedEvent(
@@ -100,15 +112,6 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       val values = eligibilityCheckResult.eligibilityRules.productIterator.to
       (reasons zip values).toList.collect{ case (reason, true) => reason }
     }
-    val taxDetail = TaxDetail(
-      utr               = None,
-      taxOfficeNo       = None,
-      taxOfficeRef      = None,
-      employerRef       = getTaxId("EMPREF")(eligibilityCheckResult),
-      accountsOfficeRef = getTaxId("BROCS")(eligibilityCheckResult),
-      vrn               = None
-    )
-
     EligibilityCheckAuditDetail(
       eligibilityResult    = eligibilityResult,
       enrollmentReasons    = enrollmentReasons,
@@ -116,7 +119,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       eligibilityReasons   = eligibilityReasons,
       origin               = toAuditString(journey.origin),
       taxType              = journey.taxRegime.toString,
-      taxDetail            = taxDetail,
+      taxDetail            = toTaxDetail(eligibilityCheckResult),
       authProviderId       = r.ggCredId.value,
       chargeTypeAssessment = eligibilityCheckResult.chargeTypeAssessment,
       correlationId        = journey.correlationId.value.toString
@@ -136,14 +139,6 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
         paymentDate      = instalment.dueDate.value
       )
     }
-    val taxDetail = TaxDetail(
-      utr               = None,
-      taxOfficeNo       = None,
-      taxOfficeRef      = None,
-      employerRef       = getTaxId("EMPREF")(journey.eligibilityCheckResult),
-      accountsOfficeRef = getTaxId("BROCS")(journey.eligibilityCheckResult),
-      vrn               = None
-    )
     val schedule = Schedule(
       initialPaymentAmount           = journey.selectedPaymentPlan.collections.initialCollection.fold(AmountInPence.zero)(_.amountDue.value),
       collectionDate                 = journey.dayOfMonth,
@@ -159,12 +154,54 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       correlationId = journey.correlationId,
       origin        = toAuditString(journey.origin),
       taxType       = journey.taxRegime.toString,
-      taxDetail     = taxDetail
+      taxDetail     = toTaxDetail(journey.eligibilityCheckResult)
     )
   }
 
-  private def getTaxId(name: String)(response: EligibilityCheckResult): Option[String] =
-    response.identification.find(_.idType.value === name).map(_.idValue.value)
+  private def toBarsCheckAuditDetail(
+      journey:           AfterChosenTypeOfBankAccount,
+      bankDetails:       BankDetails,
+      typeOfBankAccount: TypeOfBankAccount,
+      result:            Either[BarsError, VerifyResponse]
+  ): BarsCheckAuditDetail = {
+    val eligibilityCheckResult = journey match {
+      case j: ChosenTypeOfBankAccount            => j.eligibilityCheckResult
+      case j: Stages.EnteredDirectDebitDetails   => j.eligibilityCheckResult
+      case j: Stages.ConfirmedDirectDebitDetails => j.eligibilityCheckResult
+      case j: Stages.AgreedTermsAndConditions    => j.eligibilityCheckResult
+      case j: Stages.SubmittedArrangement        => j.eligibilityCheckResult
+    }
+
+    BarsCheckAuditDetail(
+      journey.taxRegime.toString,
+      toTaxDetail(eligibilityCheckResult),
+      BarsAuditRequest(
+        BarsAuditAccount(
+          typeOfBankAccount.entryName.toLowerCase(Locale.UK),
+          bankDetails.name.value,
+          bankDetails.sortCode.value,
+          bankDetails.accountNumber.value
+        )
+      ),
+      BarsAuditResponse(
+        result.isRight,
+        result
+      )
+    )
+  }
+
+  private def toTaxDetail(eligibilityCheckResult: EligibilityCheckResult): TaxDetail =
+    TaxDetail(
+      utr               = None,
+      taxOfficeNo       = None,
+      taxOfficeRef      = None,
+      employerRef       = getTaxId("EMPREF")(eligibilityCheckResult),
+      accountsOfficeRef = getTaxId("BROCS")(eligibilityCheckResult),
+      vrn               = None
+    )
+
+  private def getTaxId(name: String)(eligibilityCheckResult: EligibilityCheckResult): Option[String] =
+    eligibilityCheckResult.identification.find(_.idType.value === name).map(_.idValue.value)
 
   private def toAuditString(origin: Origin) =
     origin.toString.split('.').lastOption.getOrElse(origin.toString)

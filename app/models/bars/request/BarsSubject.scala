@@ -16,7 +16,7 @@
 
 package models.bars.request
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{OFormat, Json}
 
 final case class BarsSubject(
     title:     Option[String], // e.g. "Mr" etc; must >= 2 character and <= 35 characters long
@@ -33,5 +33,5 @@ final case class BarsSubject(
 }
 
 object BarsSubject {
-  implicit val format: Format[BarsSubject] = Json.format
+  implicit val format: OFormat[BarsSubject] = Json.format
 }

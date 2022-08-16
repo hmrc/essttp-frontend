@@ -16,7 +16,7 @@
 
 package models.bars.request
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{OFormat, Json}
 
 final case class BarsVerifyBusinessRequest(
     account:  BarsBankAccount,
@@ -24,5 +24,5 @@ final case class BarsVerifyBusinessRequest(
 )
 
 object BarsVerifyBusinessRequest {
-  implicit val format: Format[BarsVerifyBusinessRequest] = Json.format
+  implicit val format: OFormat[BarsVerifyBusinessRequest] = Json.format
 }
