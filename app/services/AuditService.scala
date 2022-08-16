@@ -72,7 +72,8 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       taxType              = journey.taxRegime.toString,
       taxDetail            = TaxDetail(None, None, None, None, None, None),
       authProviderId       = r.ggCredId.value,
-      chargeTypeAssessment = List.empty
+      chargeTypeAssessment = List.empty,
+      correlationId        = journey.correlationId.value.toString
     )
   }
 
@@ -111,7 +112,8 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       taxType              = journey.taxRegime.toString,
       taxDetail            = taxDetail,
       authProviderId       = r.ggCredId.value,
-      chargeTypeAssessment = response.chargeTypeAssessment
+      chargeTypeAssessment = response.chargeTypeAssessment,
+      correlationId        = journey.correlationId.value.toString
     )
   }
 
