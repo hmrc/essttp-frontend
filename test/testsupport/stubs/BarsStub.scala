@@ -69,6 +69,8 @@ object BarsStub {
 
     def nameDoesNotMatch(): StubMapping = stubOk(verifyPersonalUrl, VerifyJson.nameDoesNotMatch)
 
+    def undocumentedError(): StubMapping = stubOk(verifyPersonalUrl, VerifyJson.undocumentedError)
+
     def ensureBarsVerifyPersonalNotCalled(): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(verifyPersonalUrl)))
 
@@ -107,6 +109,8 @@ object BarsStub {
     def nameMatchesError(): StubMapping = stubOk(verifyBusinessUrl, VerifyJson.nameMatchesError)
 
     def nameDoesNotMatch(): StubMapping = stubOk(verifyBusinessUrl, VerifyJson.nameDoesNotMatch)
+
+    def undocumentedError(): StubMapping = stubOk(verifyBusinessUrl, VerifyJson.undocumentedError)
 
     def ensureBarsVerifyBusinessNotCalled(): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(verifyBusinessUrl)))

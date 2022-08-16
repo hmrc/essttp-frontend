@@ -19,7 +19,7 @@ package services
 import essttp.journey.model.Journey.AfterChosenTypeOfBankAccount
 import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount, TypesOfBankAccount}
 import models.bars.request.{BarsBankAccount, BarsBusiness, BarsSubject}
-import models.bars.response.{BarsError, ValidateResponse, VerifyResponse}
+import models.bars.response.{BarsError, VerifyResponse}
 import models.bars.{BarsTypeOfBankAccount, BarsTypesOfBankAccount}
 import play.api.mvc.RequestHeader
 import services.EssttpBarsService._
@@ -34,15 +34,6 @@ import scala.concurrent.{ExecutionContext, Future}
  */
 @Singleton
 class EssttpBarsService @Inject() (barsService: BarsService, auditService: AuditService)(implicit ec: ExecutionContext) {
-
-  def validateBankAccount(bankDetails: BankDetails)(implicit requestHeader: RequestHeader): Future[ValidateResponse] =
-    barsService.validateBankAccount(toBarsBankAccount(bankDetails))
-
-  def verifyPersonal(bankDetails: BankDetails)(implicit requestHeader: RequestHeader): Future[VerifyResponse] =
-    barsService.verifyPersonal(toBarsBankAccount(bankDetails), toBarsSubject(bankDetails))
-
-  def verifyBusiness(bankDetails: BankDetails)(implicit requestHeader: RequestHeader): Future[VerifyResponse] =
-    barsService.verifyBusiness(toBarsBankAccount(bankDetails), toBarsBusiness(bankDetails))
 
   def verifyBankDetails(
       bankDetails:       BankDetails,

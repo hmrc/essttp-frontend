@@ -52,6 +52,17 @@ object ValidateResponse {
 object VerifyResponse {
   import cats.syntax.eq._
 
+  object verifySuccess {
+    def unapply(response: VerifyResponse): Boolean = {
+      val resp = response.barsVerifyResponse
+      (resp.accountNumberIsWellFormatted === Yes || resp.accountNumberIsWellFormatted === Indeterminate) &&
+        resp.sortCodeIsPresentOnEISCD === Yes &&
+        (resp.accountExists === Yes || resp.accountExists === Indeterminate) &&
+        (resp.nameMatches === Yes || resp.nameMatches === Partial) &&
+        resp.sortCodeSupportsDirectDebit === Yes
+    }
+  }
+
   object thirdPartyError {
     def unapply(response: VerifyResponse): Boolean = {
       val resp = response.barsVerifyResponse

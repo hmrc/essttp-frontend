@@ -381,6 +381,23 @@ class BankDetailsControllerSpec extends ItSpec {
       AuditConnectorStub.verifyNoAuditEvent()
     }
 
+    "show correct error message when account name is more than 70 characters" in {
+      AuthStub.authorise()
+      EssttpBackend.ChosenTypeOfBankAccount.findJourney()
+      val formData: List[(String, String)] = List(
+        ("name", "a" * 71),
+        ("sortCode", "123456"),
+        ("accountNumber", "12345678"),
+        ("isSoleSignatory", "Yes")
+      )
+      val expectedContentAndHref: List[(String, String)] = List(
+        ("Name on the account must be 70 characters or less", EnterDirectDebitDetailsPage.accountNameFieldId)
+      )
+      testFormError(controller.enterBankDetailsSubmit)(formData: _*)(expectedContentAndHref)
+      EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+      AuditConnectorStub.verifyNoAuditEvent()
+    }
+
     "show correct error messages when submitted sort code and account number are more than 6 and 8 digits respectively" in {
       AuthStub.authorise()
       EssttpBackend.ChosenTypeOfBankAccount.findJourney()
@@ -455,7 +472,7 @@ class BankDetailsControllerSpec extends ItSpec {
       }
     }
 
-    abstract class BarsFormErrorSetup(barsError: String, typeOfAccount: TypeOfBankAccount = TypesOfBankAccount.Personal)
+    abstract class BarsFormErrorSetup(barsError: String, typeOfAccount: TypeOfBankAccount)
       extends BarsErrorSetup(typeOfAccount) {
 
       val validForm: List[(String, String)] = formData
@@ -495,16 +512,24 @@ class BankDetailsControllerSpec extends ItSpec {
             BarsStub.ValidateStub.success()
             BarsStub.VerifyPersonalStub.accountDoesNotExist()
             BarsStub.VerifyBusinessStub.accountDoesNotExist()
-
             List(("Enter a valid combination of bank account number and sort code", "#bars")) ->
               VerifyJson.accountDoesNotExist
+
+          case "undocumentedErrorResponse" =>
+            BarsStub.ValidateStub.success()
+            typeOfAccount match {
+              case TypesOfBankAccount.Personal => BarsStub.VerifyPersonalStub.undocumentedError()
+              case TypesOfBankAccount.Business => BarsStub.VerifyBusinessStub.undocumentedError()
+            }
+            List(("Enter a valid combination of bank account number and sort code", "#bars")) ->
+              VerifyJson.undocumentedError
         }
 
       val expectedBarsAuditDetailJson: JsObject = toExpectedBarsAuditDetailJson(expectedAuditResponseJson)
     }
 
-    "show correct error messages when BARs validate response is accountNumberNotWellFormatted" in
-      new BarsFormErrorSetup("accountNumberNotWellFormatted") {
+    "show correct error message when BARs validate response is accountNumberNotWellFormatted" in
+      new BarsFormErrorSetup("accountNumberNotWellFormatted", TypesOfBankAccount.Personal) {
         testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
         EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
 
@@ -517,8 +542,8 @@ class BankDetailsControllerSpec extends ItSpec {
         )
       }
 
-    "show correct error messages when BARs validate response is sortCodeNotPresentOnEiscd" in
-      new BarsFormErrorSetup("sortCodeNotPresentOnEiscd") {
+    "show correct error message when BARs validate response is sortCodeNotPresentOnEiscd" in
+      new BarsFormErrorSetup("sortCodeNotPresentOnEiscd", TypesOfBankAccount.Personal) {
         testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
         EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
 
@@ -531,8 +556,8 @@ class BankDetailsControllerSpec extends ItSpec {
         )
       }
 
-    "show correct error messages when BARs validate response is sortCodeDoesNotSupportsDirectDebit" in
-      new BarsFormErrorSetup("sortCodeDoesNotSupportsDirectDebit") {
+    "show correct error message when BARs validate response is sortCodeDoesNotSupportsDirectDebit" in
+      new BarsFormErrorSetup("sortCodeDoesNotSupportsDirectDebit", TypesOfBankAccount.Personal) {
         testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
         EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
 
@@ -545,7 +570,7 @@ class BankDetailsControllerSpec extends ItSpec {
         )
       }
 
-    "show correct error messages when BARs verify response is nameDoesNotMatch with a personal bank account" in
+    "show correct error message when BARs verify response is nameDoesNotMatch with a personal bank account" in
       new BarsFormErrorSetup("nameDoesNotMatch", typeOfAccount = TypesOfBankAccount.Personal) {
         testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
         EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
@@ -559,7 +584,7 @@ class BankDetailsControllerSpec extends ItSpec {
         )
       }
 
-    "show correct error messages when BARs verify response is nameDoesNotMatch with a business bank account" in
+    "show correct error message when BARs verify response is nameDoesNotMatch with a business bank account" in
       new BarsFormErrorSetup("nameDoesNotMatch", typeOfAccount = TypesOfBankAccount.Business) {
         testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
         EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
@@ -659,7 +684,7 @@ class BankDetailsControllerSpec extends ItSpec {
         )
       }
 
-    "call verify-business has accountExists is No after bars verify-personal response has accountExists is No" in
+    "show correct error message when bars verify-business and bars verify-personal respond with accountExists is No for personal account" in
       new BarsFormErrorSetup("accountDoesNotExist", typeOfAccount = TypesOfBankAccount.Personal) {
         testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
         EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
@@ -669,7 +694,7 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validForm)
       }
 
-    "call verify-personal has accountExists is No after bars verify-business response has accountExists is No" in
+    "show correct error message when bars verify-business and bars verify-personal respond with accountExists is No for business account" in
       new BarsFormErrorSetup("accountDoesNotExist", typeOfAccount = TypesOfBankAccount.Business) {
         testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
         EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
@@ -719,6 +744,26 @@ class BankDetailsControllerSpec extends ItSpec {
           auditType  = "BarsCheck",
           auditEvent = toExpectedBarsAuditDetailJson(VerifyJson.nameMatchesError)
         )
+      }
+
+    "show correct error message when bars verify-personal is undocumented-error response" in
+      new BarsFormErrorSetup("undocumentedErrorResponse", typeOfAccount = TypesOfBankAccount.Personal) {
+        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
+        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+
+        BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
+        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(validForm)
+        BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
+      }
+
+    "show correct error message when bars verify-business is undocumented-error response" in
+      new BarsFormErrorSetup("undocumentedErrorResponse", typeOfAccount = TypesOfBankAccount.Business) {
+        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
+        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+
+        BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
+        BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validForm)
+        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
       }
 
   }

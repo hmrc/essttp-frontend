@@ -557,6 +557,7 @@ object Messages {
     val errors: Map[String, Message] = Map(
       "name.error.required" -> Message("Enter the name on the account"),
       "name.error.pattern" -> Message("Name on the account must only include letters, apostrophes, spaces and hyphens"),
+      "name.error.maxlength" -> Message("Name on the account must be 70 characters or less"),
       "sortCode.error.required" -> Message("Enter sort code"),
       "sortCode.error.nonNumeric" -> Message("Sort code must be a number"),
       "sortCode.error.invalid" -> Message("Sort code must be 6 digits"),
@@ -571,7 +572,8 @@ object Messages {
           "Check you have entered a valid sort code or enter details for a different account"
       ),
       s"bars.${nameDoesNotMatch.message}" -> Message("Enter a valid account name"),
-      s"bars.${accountDoesNotExist.message}" -> Message("Enter a valid combination of bank account number and sort code")
+      s"bars.${accountDoesNotExist.message}" -> Message("Enter a valid combination of bank account number and sort code"),
+      s"bars.${undocumentedError.message}" -> Message("Enter a valid combination of bank account number and sort code")
     )
 
     val `Check your Direct Debit details`: Message = Message(
