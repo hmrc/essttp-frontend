@@ -19,7 +19,7 @@ package models.bars.response
 import cats.Eq
 import enumeratum._
 
-sealed trait BarsAssessmentType extends EnumEntry
+sealed trait BarsAssessmentType extends EnumEntry with EnumEntry.Uncapitalised
 
 object BarsAssessmentType extends Enum[BarsAssessmentType] with PlayInsensitiveJsonEnum[BarsAssessmentType] {
   implicit val eq: Eq[BarsAssessmentType] = Eq.fromUniversalEquals

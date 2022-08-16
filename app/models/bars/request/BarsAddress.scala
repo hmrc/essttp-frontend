@@ -16,7 +16,7 @@
 
 package models.bars.request
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{OFormat, Json}
 
 final case class BarsAddress(
     lines:    List[String], // One to four lines; cumulative length must be between 1 and 140 characters.
@@ -25,5 +25,5 @@ final case class BarsAddress(
 )
 
 object BarsAddress {
-  implicit val format: Format[BarsAddress] = Json.format
+  implicit val format: OFormat[BarsAddress] = Json.format
 }

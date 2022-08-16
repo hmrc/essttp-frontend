@@ -14,15 +14,24 @@
  * limitations under the License.
  */
 
-package models.bars.response
+package models.audit.bars
 
-sealed trait BarsError {
-  val barsResponse: BarsResponse
+import models.audit.{AuditDetail, TaxDetail}
+import play.api.libs.json.{Json, OWrites}
+
+final case class BarsCheckAuditDetail(
+    taxType:   String,
+    taxDetail: TaxDetail,
+    request:   BarsAuditRequest,
+    response:  BarsAuditResponse
+) extends AuditDetail {
+
+  override val auditType: String = "BarsCheck"
+
 }
 
-final case class ThirdPartyError(barsResponse: BarsResponse) extends BarsError
-final case class AccountNumberNotWellFormatted(barsResponse: BarsResponse) extends BarsError
-final case class SortCodeNotPresentOnEiscd(barsResponse: BarsResponse) extends BarsError
-final case class SortCodeDoesNotSupportDirectDebit(barsResponse: BarsResponse) extends BarsError
-final case class AccountDoesNotExist(barsResponse: BarsResponse) extends BarsError
-final case class NameDoesNotMatch(barsResponse: BarsResponse) extends BarsError
+object BarsCheckAuditDetail {
+
+  implicit val writes: OWrites[BarsCheckAuditDetail] = Json.writes
+
+}

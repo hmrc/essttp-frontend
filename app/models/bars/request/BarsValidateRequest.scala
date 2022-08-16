@@ -16,10 +16,10 @@
 
 package models.bars.request
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{OFormat, Json}
 
 final case class BarsValidateRequest(account: BarsBankAccount)
 
 object BarsValidateRequest {
-  implicit val format: Format[BarsValidateRequest] = Json.format
+  implicit val format: OFormat[BarsValidateRequest] = Json.format
 }

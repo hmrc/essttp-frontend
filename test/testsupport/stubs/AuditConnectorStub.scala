@@ -16,14 +16,16 @@
 
 package testsupport.stubs
 
-import com.github.tomakehurst.wiremock.client.WireMock.{equalToJson, postRequestedFor, urlPathEqualTo, verify}
+import com.github.tomakehurst.wiremock.client.WireMock.{equalToJson, exactly, postRequestedFor, urlPathEqualTo, verify}
 import play.api.libs.json.JsObject
 
 object AuditConnectorStub {
 
+  val auditUrl: String = "/write/audit"
+
   def verifyEventAudited(auditType: String, auditEvent: JsObject): Unit = {
     verify(
-      postRequestedFor(urlPathEqualTo("/write/audit"))
+      postRequestedFor(urlPathEqualTo(auditUrl))
         .withRequestBody(
           equalToJson(s"""{ "auditType" : "${auditType}"  }""", true, true)
         )
@@ -35,5 +37,8 @@ object AuditConnectorStub {
         )
     )
   }
+
+  def verifyNoAuditEvent(): Unit =
+    verify(exactly(0), postRequestedFor(urlPathEqualTo(auditUrl)))
 
 }
