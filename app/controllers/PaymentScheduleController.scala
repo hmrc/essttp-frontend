@@ -66,13 +66,12 @@ class PaymentScheduleController @Inject() (
         logErrorAndRouteToDefaultPageF(j)
 
       case j: Journey.AfterSelectedPaymentPlan =>
-        for {
-          _ <- journeyService.updateHasCheckedPaymentPlan(j.journeyId)
-          _ = j match {
-            case j1: Journey.Stages.ChosenPaymentPlan => auditService.auditPaymentPlanBeforeSubmission(j1)
-            case _                                    => JourneyLogger.info("Nothing to audit, so I won't")
-          }
-        } yield Redirect(routes.BankDetailsController.typeOfAccount)
+        j match {
+          case j1: Journey.Stages.ChosenPaymentPlan => auditService.auditPaymentPlanBeforeSubmission(j1)
+          case _                                    => JourneyLogger.debug(s"Nothing to audit for stage: ${j.stage}")
+        }
+        journeyService.updateHasCheckedPaymentPlan(j.journeyId)
+          .map(_ => Redirect(routes.BankDetailsController.typeOfAccount))
     }
   }
 
