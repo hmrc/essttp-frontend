@@ -118,7 +118,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       taxType              = journey.taxRegime.toString,
       taxDetail            = taxDetail,
       authProviderId       = r.ggCredId.value,
-      chargeTypeAssessment = eligibilityCheckResult.chargeTypeAssessment
+      chargeTypeAssessment = eligibilityCheckResult.chargeTypeAssessment,
       correlationId        = journey.correlationId.value.toString
     )
   }
