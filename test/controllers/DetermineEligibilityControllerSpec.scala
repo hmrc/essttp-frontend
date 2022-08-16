@@ -78,6 +78,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
                    |    "accountsOfficeRef": "123PA44545546"
                    |  },
                    |  "authProviderId": "authId-999",
+                   |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
                    |  "chargeTypeAssessment" : ${(Json.parse(eligibilityCheckResponseJson).as[JsObject] \ "chargeTypeAssessment").get.toString}
                    |}
                    |""".
@@ -117,6 +118,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
              |    "accountsOfficeRef": "123PA44545546"
              |  },
              |  "authProviderId": "authId-999",
+             |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
              |  "chargeTypeAssessment" : ${(Json.parse(eligibilityCheckResponseJson).as[JsObject] \ "chargeTypeAssessment").get.toString}
              |}
              |""".
