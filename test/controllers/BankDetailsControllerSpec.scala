@@ -471,7 +471,7 @@ class BankDetailsControllerSpec extends ItSpec {
           case "sortCodeNotPresentOnEiscd" =>
             BarsStub.ValidateStub.sortCodeNotPresentOnEiscd()
             List(("Enter a valid combination of bank account number and sort code", "#bars")) ->
-              ValidateJson.accountNumberNotWellFormatted
+              ValidateJson.sortCodeNotPresentOnEiscd
 
           case "sortCodeDoesNotSupportsDirectDebit" =>
             BarsStub.ValidateStub.sortCodeDoesNotSupportsDirectDebit()

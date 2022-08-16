@@ -30,7 +30,7 @@ object BarsStub {
 
     def accountNumberNotWellFormatted(): StubMapping = stubOk(validateUrl, ValidateJson.accountNumberNotWellFormatted)
 
-    def sortCodeNotPresentOnEiscd(): StubMapping = stubOk(validateUrl, ValidateJson.accountNumberNotWellFormatted)
+    def sortCodeNotPresentOnEiscd(): StubMapping = stubOk(validateUrl, ValidateJson.sortCodeNotPresentOnEiscd)
 
     def sortCodeDoesNotSupportsDirectDebit(): StubMapping = stubOk(validateUrl, ValidateJson.sortCodeDoesNotSupportsDirectDebit)
 
