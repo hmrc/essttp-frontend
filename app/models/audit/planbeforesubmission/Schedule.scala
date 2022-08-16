@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package models.audit.eligibility
+package models.audit.planbeforesubmission
 
+import essttp.rootmodel.{AmountInPence, DayOfMonth}
 import play.api.libs.json.{Json, OWrites}
 
-final case class TaxDetail(
-    utr:               Option[String],
-    taxOfficeNo:       Option[String],
-    taxOfficeRef:      Option[String],
-    employerRef:       Option[String],
-    accountsOfficeRef: Option[String],
-    vrn:               Option[String]
+final case class Schedule(
+    initialPaymentAmount:           AmountInPence,
+    collectionDate:                 DayOfMonth,
+    collectionLengthCalendarMonths: Int,
+    collections:                    List[AuditCollections],
+    totalNoPayments:                Int,
+    totalInterestCharged:           AmountInPence,
+    totalPayable:                   AmountInPence,
+    totalPaymentWithoutInterest:    AmountInPence
 )
 
-object TaxDetail {
-
-  implicit val writes: OWrites[TaxDetail] = Json.writes
-
+object Schedule {
+  implicit val writes: OWrites[Schedule] = Json.writes
 }

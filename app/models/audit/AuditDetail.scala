@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package models.audit.eligibility
+package models.audit
 
 trait AuditDetail {
 
