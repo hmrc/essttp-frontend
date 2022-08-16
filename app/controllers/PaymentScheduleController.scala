@@ -23,9 +23,9 @@ import essttp.journey.model.Journey
 import io.scalaland.chimney.dsl.TransformerOps
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import requests.RequestSupport
-import services.JourneyService
+import services.{AuditService, JourneyService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import util.Logging
+import util.{JourneyLogger, Logging}
 import views.html.CheckPaymentSchedule
 
 import java.time.LocalDate
@@ -38,7 +38,8 @@ class PaymentScheduleController @Inject() (
     mcc:                 MessagesControllerComponents,
     requestSupport:      RequestSupport,
     paymentSchedulePage: CheckPaymentSchedule,
-    journeyService:      JourneyService
+    journeyService:      JourneyService,
+    auditService:        AuditService
 )(implicit ec: ExecutionContext) extends FrontendController(mcc)
   with Logging {
 
@@ -65,9 +66,12 @@ class PaymentScheduleController @Inject() (
         logErrorAndRouteToDefaultPageF(j)
 
       case j: Journey.AfterSelectedPaymentPlan =>
+        j match {
+          case j1: Journey.Stages.ChosenPaymentPlan => auditService.auditPaymentPlanBeforeSubmission(j1)
+          case _                                    => JourneyLogger.debug(s"Nothing to audit for stage: ${j.stage}")
+        }
         journeyService.updateHasCheckedPaymentPlan(j.journeyId)
           .map(_ => Redirect(routes.BankDetailsController.typeOfAccount))
-
     }
   }
 

@@ -31,7 +31,7 @@ import uk.gov.hmrc.http.SessionKeys
 class DetermineEligibilityControllerSpec extends ItSpec {
   private val controller: DetermineEligibilityController = app.injector.instanceOf[DetermineEligibilityController]
 
-  "Determine eligibility endpoint should route user correctly" - {
+  "Determine eligibility endpoint should route user correctly and send an audit event" - {
     forAll(Table(
       ("Scenario flavour", "eligibility rules", "ineligibility reason audit string", "expected redirect"),
       ("HasRlsOnAddress", TdAll.notEligibleHasRlsOnAddress, "hasRlsOnAddress", PageUrls.notEligibleUrl),
@@ -89,7 +89,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
         }
     }
 
-    "Eligible: should redirect to your bill" in {
+    "Eligible: should redirect to your bill and send an audit event" in {
       val eligibilityCheckResponseJson =
         TtpJsonResponses.ttpEligibilityCallJson()
 

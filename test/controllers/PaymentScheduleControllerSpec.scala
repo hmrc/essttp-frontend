@@ -20,13 +20,14 @@ import controllers.PaymentScheduleControllerSpec.SummaryRow
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import play.api.http.Status
+import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.RequestAssertions
-import testsupport.stubs.{AuthStub, EssttpBackend}
+import testsupport.stubs.{AuditConnectorStub, AuthStub, EssttpBackend}
 import testsupport.testdata.{JourneyJsonTemplates, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
@@ -183,7 +184,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
   s"POST ${routes.PaymentScheduleController.checkPaymentScheduleSubmit.url}" - {
 
     s"should redirect to ${routes.BankDetailsController.typeOfAccount.url} if the journey " +
-      "has been updated successfully" in {
+      "has been updated successfully and send an audit event" in {
         AuthStub.authorise()
         EssttpBackend.SelectedPaymentPlan.findJourney()
         EssttpBackend.HasCheckedPlan.updateHasCheckedPlan(TdAll.journeyId)
@@ -195,14 +196,48 @@ class PaymentScheduleControllerSpec extends ItSpec {
         redirectLocation(result) shouldBe Some(routes.BankDetailsController.typeOfAccount.url)
         EssttpBackend.HasCheckedPlan.verifyUpdateHasCheckedPlanRequest(TdAll.journeyId)
 
+        AuditConnectorStub.verifyEventAudited(
+          auditType  = "PlanDetails",
+          auditEvent = Json.parse(
+            s"""
+               |{
+               |        "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+               |        "origin": "Bta",
+               |        "schedule": {
+               |            "collectionDate": 28,
+               |            "collectionLengthCalendarMonths": 2,
+               |            "collections": [
+               |                {
+               |                    "amount": 55570,
+               |                    "collectionNumber": 2,
+               |                    "paymentDate": "2022-09-28"
+               |                },
+               |                {
+               |                    "amount": 55570,
+               |                    "collectionNumber": 1,
+               |                    "paymentDate": "2022-08-28"
+               |                }
+               |            ],
+               |            "initialPaymentAmount": 12312,
+               |            "totalInterestCharged": 6,
+               |            "totalNoPayments": 3,
+               |            "totalPayable": 111147,
+               |            "totalPaymentWithoutInterest": 111141
+               |        },
+               |        "taxDetail": {
+               |            "accountsOfficeRef": "123PA44545546",
+               |            "employerRef": "864FZ00049"
+               |        },
+               |        "taxType": "Epaye"
+               |}
+            """.stripMargin
+          ).as[JsObject]
+        )
       }
-
   }
 
 }
 
 object PaymentScheduleControllerSpec {
-
   final case class SummaryRow(question: String, answer: String, changeLink: String)
-
 }

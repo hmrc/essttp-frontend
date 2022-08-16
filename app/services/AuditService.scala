@@ -18,10 +18,13 @@ package services
 
 import actionsmodel.AuthenticatedJourneyRequest
 import cats.syntax.eq._
-import essttp.journey.model.Journey.Stages.{ComputedTaxId, Started}
+import essttp.journey.model.Journey.Stages.{ChosenPaymentPlan, ComputedTaxId, Started}
 import essttp.journey.model.Origin
+import essttp.rootmodel.AmountInPence
 import essttp.rootmodel.ttp.EligibilityCheckResult
-import models.audit.eligibility.{AuditDetail, EligibilityCheckAuditDetail, EligibilityResult, EnrollmentReasons, TaxDetail}
+import models.audit.eligibility.{EligibilityCheckAuditDetail, EligibilityResult, EnrollmentReasons}
+import models.audit.planbeforesubmission.{AuditCollections, PaymentPlanBeforeSubmissionAuditDetail, Schedule}
+import models.audit.{AuditDetail, TaxDetail}
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions.auditHeaderCarrier
@@ -46,6 +49,11 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       enrollmentReason: Either[EnrollmentReasons.NotEnrolled, EnrollmentReasons.InactiveEnrollment]
   )(implicit r: AuthenticatedJourneyRequest[_], hc: HeaderCarrier): Unit =
     audit(toEligibilityCheck(journey, enrollmentReason))
+
+  def auditPaymentPlanBeforeSubmission(
+      journey: ChosenPaymentPlan
+  )(implicit headerCarrier: HeaderCarrier): Unit =
+    audit(toPaymentPlanBeforeSubmissionAuditDetail(journey))
 
   private def audit[A <: AuditDetail: Writes](a: A)(implicit hc: HeaderCarrier): Unit = {
     val _ = auditConnector.sendExtendedEvent(
@@ -79,27 +87,25 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   private def toEligibilityCheck(
-      journey:  ComputedTaxId,
-      response: EligibilityCheckResult
+      journey:                ComputedTaxId,
+      eligibilityCheckResult: EligibilityCheckResult
   )(implicit r: AuthenticatedJourneyRequest[_]): EligibilityCheckAuditDetail = {
-      def getTaxId(name: String): Option[String] =
-        response.identification.find(_.idType.value === name).map(_.idValue.value)
 
     val eligibilityResult =
-      if (response.isEligible) EligibilityResult.Eligible else EligibilityResult.Ineligible
+      if (eligibilityCheckResult.isEligible) EligibilityResult.Eligible else EligibilityResult.Ineligible
     val enrollmentReasons =
-      if (response.isEligible) None else Some(EnrollmentReasons.DidNotPassEligibilityCheck())
+      if (eligibilityCheckResult.isEligible) None else Some(EnrollmentReasons.DidNotPassEligibilityCheck())
     val eligibilityReasons = {
-      val reasons = response.eligibilityRules.getClass.getDeclaredFields.map(_.getName)
-      val values = response.eligibilityRules.productIterator.to
+      val reasons = eligibilityCheckResult.eligibilityRules.getClass.getDeclaredFields.map(_.getName)
+      val values = eligibilityCheckResult.eligibilityRules.productIterator.to
       (reasons zip values).toList.collect{ case (reason, true) => reason }
     }
     val taxDetail = TaxDetail(
       utr               = None,
       taxOfficeNo       = None,
       taxOfficeRef      = None,
-      employerRef       = getTaxId("EMPREF"),
-      accountsOfficeRef = getTaxId("BROCS"),
+      employerRef       = getTaxId("EMPREF")(eligibilityCheckResult),
+      accountsOfficeRef = getTaxId("BROCS")(eligibilityCheckResult),
       vrn               = None
     )
 
@@ -112,10 +118,53 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       taxType              = journey.taxRegime.toString,
       taxDetail            = taxDetail,
       authProviderId       = r.ggCredId.value,
-      chargeTypeAssessment = response.chargeTypeAssessment,
+      chargeTypeAssessment = eligibilityCheckResult.chargeTypeAssessment,
       correlationId        = journey.correlationId.value.toString
     )
   }
+
+  private def toPaymentPlanBeforeSubmissionAuditDetail(journey: ChosenPaymentPlan): PaymentPlanBeforeSubmissionAuditDetail = {
+    val totalNumberOfPaymentsIncludingUpfrontPayment: Int = {
+      journey.selectedPaymentPlan.collections.regularCollections.size + {
+        if (journey.selectedPaymentPlan.collections.initialCollection.isDefined) 1 else 0
+      }
+    }
+    val auditCollections: List[AuditCollections] = journey.selectedPaymentPlan.instalments.map { instalment =>
+      AuditCollections(
+        collectionNumber = instalment.instalmentNumber.value,
+        amount           = instalment.amountDue.value,
+        paymentDate      = instalment.dueDate.value
+      )
+    }
+    val taxDetail = TaxDetail(
+      utr               = None,
+      taxOfficeNo       = None,
+      taxOfficeRef      = None,
+      employerRef       = getTaxId("EMPREF")(journey.eligibilityCheckResult),
+      accountsOfficeRef = getTaxId("BROCS")(journey.eligibilityCheckResult),
+      vrn               = None
+    )
+    val schedule = Schedule(
+      initialPaymentAmount           = journey.selectedPaymentPlan.collections.initialCollection.fold(AmountInPence.zero)(_.amountDue.value),
+      collectionDate                 = journey.dayOfMonth,
+      collectionLengthCalendarMonths = journey.selectedPaymentPlan.numberOfInstalments.value,
+      collections                    = auditCollections,
+      totalNoPayments                = totalNumberOfPaymentsIncludingUpfrontPayment,
+      totalInterestCharged           = journey.selectedPaymentPlan.planInterest.value,
+      totalPayable                   = journey.selectedPaymentPlan.totalDebtIncInt.value,
+      totalPaymentWithoutInterest    = journey.selectedPaymentPlan.totalDebt.value
+    )
+    PaymentPlanBeforeSubmissionAuditDetail(
+      schedule      = schedule,
+      correlationId = journey.correlationId,
+      origin        = toAuditString(journey.origin),
+      taxType       = journey.taxRegime.toString,
+      taxDetail     = taxDetail
+    )
+  }
+
+  private def getTaxId(name: String)(response: EligibilityCheckResult): Option[String] =
+    response.identification.find(_.idType.value === name).map(_.idValue.value)
 
   private def toAuditString(origin: Origin) =
     origin.toString.split('.').lastOption.getOrElse(origin.toString)
