@@ -18,8 +18,8 @@ package testsupport.testdata
 
 object BarsJsonResponses {
 
-  object Validate {
-    val successJson: String =
+  object ValidateJson {
+    val success: String =
       """{
         |  "accountNumberIsWellFormatted": "yes",
         |  "nonStandardAccountDetailsRequiredForBacs": "no",
@@ -30,7 +30,7 @@ object BarsJsonResponses {
         |  "sortCodeBankName": "BARCLAYS BANK UK PLC"
         |}""".stripMargin
 
-    val accountNumberNotWellFormattedJson: String =
+    val accountNumberNotWellFormatted: String =
       """{
         |  "accountNumberIsWellFormatted": "no",
         |  "nonStandardAccountDetailsRequiredForBacs": "yes",
@@ -40,14 +40,14 @@ object BarsJsonResponses {
         |  "sortCodeBankName": "Nottingham Building Society"
         |}""".stripMargin
 
-    val sortCodeNotPresentOnEiscdJson: String =
+    val sortCodeNotPresentOnEiscd: String =
       """{
-        |  "accountNumberIsWellFormatted": "no",
+        |  "accountNumberIsWellFormatted": "yes",
         |  "nonStandardAccountDetailsRequiredForBacs": "no",
         |  "sortCodeIsPresentOnEISCD": "no"
         |}""".stripMargin
 
-    val sortCodeDoesNotSupportsDirectDebitJson: String =
+    val sortCodeDoesNotSupportsDirectDebit: String =
       """{
         |  "accountNumberIsWellFormatted": "yes",
         |  "nonStandardAccountDetailsRequiredForBacs": "no",
@@ -58,4 +58,73 @@ object BarsJsonResponses {
         |  "sortCodeBankName": "BARCLAYS BANK UK PLC"
         |}""".stripMargin
   }
+
+  object VerifyJson {
+    val success: String =
+      """{
+        |    "accountNumberIsWellFormatted": "yes",
+        |    "accountExists": "yes",
+        |    "nameMatches": "yes",
+        |    "nonStandardAccountDetailsRequiredForBacs": "no",
+        |    "sortCodeIsPresentOnEISCD": "yes",
+        |    "sortCodeBankName": "BARCLAYS BANK UK PLC",
+        |    "sortCodeSupportsDirectDebit": "yes",
+        |    "sortCodeSupportsDirectCredit": "no",
+        |    "iban": "GB21BARC20710244311655"
+        |}""".stripMargin
+
+    val accountExistsError =
+      """{
+        |    "accountNumberIsWellFormatted": "yes",
+        |    "accountExists": "error",
+        |    "nameMatches": "indeterminate",
+        |    "nonStandardAccountDetailsRequiredForBacs": "no",
+        |    "sortCodeIsPresentOnEISCD": "yes",
+        |    "sortCodeBankName": "BARCLAYS BANK UK PLC",
+        |    "sortCodeSupportsDirectDebit": "yes",
+        |    "sortCodeSupportsDirectCredit": "no",
+        |    "iban": "GB21BARC20710244311655"
+        |}""".stripMargin
+
+    val accountDoesNotExist =
+      """{
+        |    "accountNumberIsWellFormatted": "yes",
+        |    "accountExists": "no",
+        |    "nameMatches": "yes",
+        |    "nonStandardAccountDetailsRequiredForBacs": "no",
+        |    "sortCodeIsPresentOnEISCD": "yes",
+        |    "sortCodeBankName": "BARCLAYS BANK UK PLC",
+        |    "sortCodeSupportsDirectDebit": "yes",
+        |    "sortCodeSupportsDirectCredit": "no",
+        |    "iban": "GB21BARC20710244311655"
+        |}""".stripMargin
+
+    val nameMatchesError =
+      """{
+        |    "accountNumberIsWellFormatted": "yes",
+        |    "accountExists": "indeterminate",
+        |    "nameMatches": "error",
+        |    "nonStandardAccountDetailsRequiredForBacs": "no",
+        |    "sortCodeIsPresentOnEISCD": "yes",
+        |    "sortCodeBankName": "BARCLAYS BANK UK PLC",
+        |    "sortCodeSupportsDirectDebit": "yes",
+        |    "sortCodeSupportsDirectCredit": "no",
+        |    "iban": "GB21BARC20710244311655"
+        |}""".stripMargin
+
+    val nameDoesNotMatch =
+      """{
+        |    "accountNumberIsWellFormatted": "yes",
+        |    "accountExists": "indeterminate",
+        |    "nameMatches": "no",
+        |    "nonStandardAccountDetailsRequiredForBacs": "no",
+        |    "sortCodeIsPresentOnEISCD": "yes",
+        |    "sortCodeBankName": "BARCLAYS BANK UK PLC",
+        |    "sortCodeSupportsDirectDebit": "yes",
+        |    "sortCodeSupportsDirectCredit": "no",
+        |    "iban": "GB21BARC20710244311655"
+        |}""".stripMargin
+
+  }
+
 }

@@ -29,7 +29,8 @@ final case class EligibilityCheckAuditDetail(
     taxType:              String,
     taxDetail:            TaxDetail,
     authProviderId:       String,
-    chargeTypeAssessment: List[ChargeTypeAssessment]
+    chargeTypeAssessment: List[ChargeTypeAssessment],
+    correlationId:        String
 ) extends AuditDetail {
   val auditType: String = "EligibilityCheck"
 }

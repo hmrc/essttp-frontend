@@ -52,6 +52,9 @@ POST   /what-type-of-account-details-are-you-providing      controllers.BankDeta
 GET    /set-up-direct-debit                                 controllers.BankDetailsController.enterBankDetails()
 POST   /set-up-direct-debit                                 controllers.BankDetailsController.enterBankDetailsSubmit()
 GET    /you-cannot-set-up-a-direct-debit-online             controllers.BankDetailsController.cannotSetupDirectDebitOnlinePage
+
+GET    /bars-error-placeholder                              controllers.BankDetailsController.barsErrorPlaceholder
+
 GET    /check-your-direct-debit-details                     controllers.BankDetailsController.checkBankDetails
 POST   /check-your-direct-debit-details                     controllers.BankDetailsController.checkBankDetailsSubmit
 GET    /terms-and-conditions                                controllers.BankDetailsController.termsAndConditions()
