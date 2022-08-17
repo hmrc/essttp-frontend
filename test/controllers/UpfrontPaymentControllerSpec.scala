@@ -134,7 +134,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
 
-      doc.title() shouldBe s"Error $expectedPageTitleCanYouPayUpfrontPage"
+      doc.title() shouldBe s"Error: $expectedPageTitleCanYouPayUpfrontPage"
       doc.select(".govuk-fieldset__heading").text() shouldBe expectedH1CanYouPayUpfrontPage
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
@@ -281,7 +281,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
           val pageContent: String = contentAsString(result)
           val doc: Document = Jsoup.parse(pageContent)
 
-          doc.title() shouldBe s"Error $expectedPageTitleHowMuchCanYouPayUpfrontPage"
+          doc.title() shouldBe s"Error: $expectedPageTitleHowMuchCanYouPayUpfrontPage"
           doc.select(".govuk-label--xl").text() shouldBe expectedH1HowMuchCanYouPayUpfrontPage
           doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
           doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"

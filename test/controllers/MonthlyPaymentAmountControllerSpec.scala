@@ -132,7 +132,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
 
-      doc.title() shouldBe s"Error $expectedPageTitle"
+      doc.title() shouldBe s"Error: $expectedPageTitle"
       doc.select(".govuk-label--xl").text() shouldBe expectedH1
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
@@ -166,7 +166,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
 
-      doc.title() shouldBe s"Error $expectedPageTitle"
+      doc.title() shouldBe s"Error: $expectedPageTitle"
       doc.select(".govuk-label--xl").text() shouldBe expectedH1
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"

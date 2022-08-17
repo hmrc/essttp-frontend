@@ -432,9 +432,17 @@ object Messages {
       english = "How many months do you want to pay over?"
     )
 
-    def getInstalmentOption(numberOfMonths: Int, amount: AmountInPence): Message = Message(
-      english = s"$numberOfMonths month${if (numberOfMonths > 1) "s" else ""} at ${amount.gdsFormatInPounds}"
+    private def getInstalmentOptionOneMonth(amount: AmountInPence): Message = Message(
+      english = s"1 month at ${amount.gdsFormatInPounds}"
     )
+
+    private def getInstalmentOptionMoreThanOneMonth(numberOfMonths: Int, amount: AmountInPence): Message = Message(
+      english = s"$numberOfMonths months at ${amount.gdsFormatInPounds}"
+    )
+
+    def getInstalmentOption(numberOfMonths: Int, amount: AmountInPence): Message =
+      if(numberOfMonths > 1) getInstalmentOptionMoreThanOneMonth(numberOfMonths, amount)
+      else getInstalmentOptionOneMonth(amount)
 
     def `Estimated total interest of x`(interest: AmountInPence): Message = Message(
       english = s"Estimated total interest of ${interest.gdsFormatInPounds}"

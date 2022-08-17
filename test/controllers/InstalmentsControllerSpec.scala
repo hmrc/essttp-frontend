@@ -121,7 +121,7 @@ class InstalmentsControllerSpec extends ItSpec {
       val result: Future[Result] = controller.instalmentOptionsSubmit(fakeRequest)
       RequestAssertions.assertGetRequestOk(result)
       val doc: Document = Jsoup.parse(contentAsString(result))
-      doc.title() shouldBe s"Error $expectedPageTitle"
+      doc.title() shouldBe s"Error: $expectedPageTitle"
       val errorSummary = doc.select(".govuk-error-summary")
       val errorLink = errorSummary.select("a")
       errorLink.text() shouldBe "Select how many months you want to pay over"
