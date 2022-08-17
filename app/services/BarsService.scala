@@ -85,23 +85,28 @@ class BarsService @Inject() (barsConnector: BarsConnector)(implicit ec: Executio
   }
 
   private def handleValidateErrorResponse(response: ValidateResponse): BarsError = {
+    import ValidateResponse._
     response match {
-      case ValidateResponse.accountNumberIsWellFormattedNo() => AccountNumberNotWellFormatted(response)
-      case ValidateResponse.sortCodeIsPresentOnEiscdNo()     => SortCodeNotPresentOnEiscd(response)
-      case ValidateResponse.sortCodeSupportsDirectDebitNo()  => SortCodeDoesNotSupportDirectDebit(response)
+      case accountNumberIsWellFormattedNo() => AccountNumberNotWellFormatted(response)
+      case sortCodeIsPresentOnEiscdNo()     => SortCodeNotPresentOnEiscd(response)
+      case sortCodeSupportsDirectDebitNo()  => SortCodeDoesNotSupportDirectDebit(response)
     }
   }
 
   private def handleVerifyResponse(response: VerifyResponse): Either[BarsError, VerifyResponse] = {
+    import VerifyResponse._
     response match {
-      case VerifyResponse.thirdPartyError() => Left(ThirdPartyError(response))
-      case VerifyResponse.accountNumberIsWellFormattedNo() => Left(AccountNumberNotWellFormatted(response))
-      case VerifyResponse.sortCodeIsPresentOnEiscdNo() => Left(SortCodeNotPresentOnEiscd(response))
-      case VerifyResponse.sortCodeSupportsDirectDebitNo() => Left(SortCodeDoesNotSupportDirectDebit(response))
-      case VerifyResponse.nameMatchesNo() => Left(NameDoesNotMatch(response))
-      case VerifyResponse.accountDoesNotExist() => Left(AccountDoesNotExist(response))
-      // ok
-      case _ => Right(response)
+      // success
+      case verifySuccess()                  => Right(response)
+      // defined errors
+      case thirdPartyError()                => Left(ThirdPartyError(response))
+      case accountNumberIsWellFormattedNo() => Left(AccountNumberNotWellFormatted(response))
+      case sortCodeIsPresentOnEiscdNo()     => Left(SortCodeNotPresentOnEiscd(response))
+      case sortCodeSupportsDirectDebitNo()  => Left(SortCodeDoesNotSupportDirectDebit(response))
+      case nameMatchesNo()                  => Left(NameDoesNotMatch(response))
+      case accountDoesNotExist()            => Left(AccountDoesNotExist(response))
+      // not an expected error response or a success response, so fallback to this
+      case _                                => Left(OtherBarsError(response))
     }
   }
 }

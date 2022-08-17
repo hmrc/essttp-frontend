@@ -125,6 +125,18 @@ object BarsJsonResponses {
         |    "iban": "GB21BARC20710244311655"
         |}""".stripMargin
 
+    val otherBarsError =
+      """{
+        |  "accountNumberIsWellFormatted": "yes",
+        |  "sortCodeIsPresentOnEISCD": "yes",
+        |  "sortCodeBankName": "BARCLAYS BANK PLC",
+        |  "nonStandardAccountDetailsRequiredForBacs": "no",
+        |  "accountExists": "indeterminate",
+        |  "nameMatches": "indeterminate",
+        |  "sortCodeSupportsDirectDebit": "yes",
+        |  "sortCodeSupportsDirectCredit": "no"
+        |}""".stripMargin
+
   }
 
 }

@@ -43,8 +43,8 @@ object BankDetailsForm {
 
   val accountNameConstraint: Constraint[AccountName] = {
     Constraint(accountName =>
-      if (accountName.value.length < 100) Valid
-      else Invalid("error.invalid"))
+      if (accountName.value.length <= 70) Valid
+      else Invalid("error.maxlength"))
   }
   val accountNameMapping: Mapping[AccountName] =
     nonEmptyText.transform[AccountName](name => AccountName(name), _.value).verifying(accountNameConstraint)
@@ -88,5 +88,6 @@ object BankDetailsForm {
   val sortCodeDoesNotSupportsDirectDebit: FormError = FormError("bars", "validate.sortCodeSupportsDirectDebit.no")
   val nameDoesNotMatch: FormError = FormError("bars", "verify.nameMatches.no")
   val accountDoesNotExist: FormError = FormError("bars", "verify.accountExists.no")
+  val otherBarsError: FormError = FormError("bars", "verify.otherError")
 
 }

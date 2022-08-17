@@ -184,6 +184,8 @@ class BankDetailsController @Inject() (
           enterBankDetailsPageWithBarsError(nameDoesNotMatch)
         case AccountDoesNotExist(_) =>
           enterBankDetailsPageWithBarsError(accountDoesNotExist)
+        case OtherBarsError(_) =>
+          enterBankDetailsPageWithBarsError(otherBarsError)
       },
       _ => Redirect(routes.BankDetailsController.checkBankDetails)
     )
@@ -246,7 +248,6 @@ class BankDetailsController @Inject() (
           JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
         }
     }
-
   }
 
   // TODO in a future ticket
