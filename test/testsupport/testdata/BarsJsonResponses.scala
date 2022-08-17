@@ -125,7 +125,7 @@ object BarsJsonResponses {
         |    "iban": "GB21BARC20710244311655"
         |}""".stripMargin
 
-    val undocumentedError =
+    val otherBarsError =
       """{
         |  "accountNumberIsWellFormatted": "yes",
         |  "sortCodeIsPresentOnEISCD": "yes",

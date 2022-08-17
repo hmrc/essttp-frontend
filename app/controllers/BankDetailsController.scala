@@ -184,8 +184,8 @@ class BankDetailsController @Inject() (
           enterBankDetailsPageWithBarsError(nameDoesNotMatch)
         case AccountDoesNotExist(_) =>
           enterBankDetailsPageWithBarsError(accountDoesNotExist)
-        case UndocumentedError(_) =>
-          enterBankDetailsPageWithBarsError(undocumentedError)
+        case OtherBarsError(_) =>
+          enterBankDetailsPageWithBarsError(otherBarsError)
       },
       _ => Redirect(routes.BankDetailsController.checkBankDetails)
     )

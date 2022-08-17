@@ -106,7 +106,7 @@ class BarsService @Inject() (barsConnector: BarsConnector)(implicit ec: Executio
       case nameMatchesNo()                  => Left(NameDoesNotMatch(response))
       case accountDoesNotExist()            => Left(AccountDoesNotExist(response))
       // not an expected error response or a success response, so fallback to this
-      case _                                => Left(UndocumentedError(response))
+      case _                                => Left(OtherBarsError(response))
     }
   }
 }

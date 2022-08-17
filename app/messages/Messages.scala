@@ -441,7 +441,7 @@ object Messages {
     )
 
     def getInstalmentOption(numberOfMonths: Int, amount: AmountInPence): Message =
-      if(numberOfMonths > 1) getInstalmentOptionMoreThanOneMonth(numberOfMonths, amount)
+      if (numberOfMonths > 1) getInstalmentOptionMoreThanOneMonth(numberOfMonths, amount)
       else getInstalmentOptionOneMonth(amount)
 
     def `Estimated total interest of x`(interest: AmountInPence): Message = Message(
@@ -573,7 +573,7 @@ object Messages {
       ),
       s"bars.${nameDoesNotMatch.message}" -> Message("Enter a valid account name"),
       s"bars.${accountDoesNotExist.message}" -> Message("Enter a valid combination of bank account number and sort code"),
-      s"bars.${undocumentedError.message}" -> Message("Enter a valid combination of bank account number and sort code")
+      s"bars.${otherBarsError.message}" -> Message("Enter a valid combination of bank account number and sort code")
     )
 
     val `Check your Direct Debit details`: Message = Message(

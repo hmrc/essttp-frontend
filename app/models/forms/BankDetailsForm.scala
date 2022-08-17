@@ -88,6 +88,6 @@ object BankDetailsForm {
   val sortCodeDoesNotSupportsDirectDebit: FormError = FormError("bars", "validate.sortCodeSupportsDirectDebit.no")
   val nameDoesNotMatch: FormError = FormError("bars", "verify.nameMatches.no")
   val accountDoesNotExist: FormError = FormError("bars", "verify.accountExists.no")
-  val undocumentedError: FormError = FormError("bars", "verify.undocumentedError")
+  val otherBarsError: FormError = FormError("bars", "verify.otherError")
 
 }

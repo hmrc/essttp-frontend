@@ -515,14 +515,14 @@ class BankDetailsControllerSpec extends ItSpec {
             List(("Enter a valid combination of bank account number and sort code", "#bars")) ->
               VerifyJson.accountDoesNotExist
 
-          case "undocumentedErrorResponse" =>
+          case "otherBarsError" =>
             BarsStub.ValidateStub.success()
             typeOfAccount match {
-              case TypesOfBankAccount.Personal => BarsStub.VerifyPersonalStub.undocumentedError()
-              case TypesOfBankAccount.Business => BarsStub.VerifyBusinessStub.undocumentedError()
+              case TypesOfBankAccount.Personal => BarsStub.VerifyPersonalStub.otherBarsError()
+              case TypesOfBankAccount.Business => BarsStub.VerifyBusinessStub.otherBarsError()
             }
             List(("Enter a valid combination of bank account number and sort code", "#bars")) ->
-              VerifyJson.undocumentedError
+              VerifyJson.otherBarsError
         }
 
       val expectedBarsAuditDetailJson: JsObject = toExpectedBarsAuditDetailJson(expectedAuditResponseJson)
@@ -746,8 +746,8 @@ class BankDetailsControllerSpec extends ItSpec {
         )
       }
 
-    "show correct error message when bars verify-personal is undocumented-error response" in
-      new BarsFormErrorSetup("undocumentedErrorResponse", typeOfAccount = TypesOfBankAccount.Personal) {
+    "show correct error message when bars verify-personal is an undocumented error response" in
+      new BarsFormErrorSetup("otherBarsError", typeOfAccount = TypesOfBankAccount.Personal) {
         testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
         EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
 
@@ -756,8 +756,8 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
       }
 
-    "show correct error message when bars verify-business is undocumented-error response" in
-      new BarsFormErrorSetup("undocumentedErrorResponse", typeOfAccount = TypesOfBankAccount.Business) {
+    "show correct error message when bars verify-business is an undocumented error response" in
+      new BarsFormErrorSetup("otherBarsError", typeOfAccount = TypesOfBankAccount.Business) {
         testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
         EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
 
