@@ -17,11 +17,14 @@
 package controllers
 
 import _root_.actions.Actions
+import actionsmodel.AuthenticatedJourneyRequest
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import essttp.journey.model.Journey
+import essttp.rootmodel.ttp.arrangement.ArrangementResponse
 import essttp.utils.Errors
 import play.api.mvc._
-import services.{JourneyService, TtpService}
+import services.{AuditService, JourneyService, TtpService}
+import uk.gov.hmrc.http.HttpException
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.{JourneyLogger, Logging}
 
@@ -33,7 +36,8 @@ class SubmitArrangementController @Inject() (
     as:             Actions,
     mcc:            MessagesControllerComponents,
     ttpService:     TtpService,
-    journeyService: JourneyService
+    journeyService: JourneyService,
+    auditService:   AuditService
 )(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
@@ -48,16 +52,26 @@ class SubmitArrangementController @Inject() (
     }
   }
 
-  private def submitArrangementAndUpdateJourney(journey: Journey.Stages.AgreedTermsAndConditions)(implicit request: Request[_]): Future[Result] = {
-    for {
-      arrangementResponse <- ttpService
-        .submitArrangement(journey)
-      _ <- journeyService
-        .updateArrangementResponse(journey.id, arrangementResponse)
-        .recover {
-          case e: Exception => Errors.throwServerErrorException(e.getMessage)
-        }
-    } yield Redirect(routes.PaymentPlanSetUpController.paymentPlanSetUp())
+  private def submitArrangementAndUpdateJourney(
+      journey: Journey.Stages.AgreedTermsAndConditions
+  )(implicit request: AuthenticatedJourneyRequest[_]): Future[Result] = {
+    ttpService.submitArrangement(journey)
+      .map { (r: ArrangementResponse) =>
+        auditService.auditPaymentPlanSetUp(journey, Right(r))
+        r
+      }.recover {
+        case aHttpError: HttpException =>
+          try {
+            auditService.auditPaymentPlanSetUp(journey, Left(aHttpError))
+          } catch {
+            case _: Throwable =>
+              JourneyLogger.error("Could not send audit event for failed ttp call, investigate.")
+          }
+          Errors.throwServerErrorException(aHttpError.message)
+      }.flatMap { arrangementResponse =>
+        journeyService.updateArrangementResponse(journey.id, arrangementResponse)
+          .map(_ => Redirect(routes.PaymentPlanSetUpController.paymentPlanSetUp()))
+      }
   }
 
 }

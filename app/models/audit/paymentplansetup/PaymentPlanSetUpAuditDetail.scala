@@ -14,22 +14,28 @@
  * limitations under the License.
  */
 
-package models.audit.planbeforesubmission
+package models.audit.paymentplansetup
 
 import essttp.journey.model.CorrelationId
+import essttp.rootmodel.bank.BankDetails
 import models.audit.{AuditDetail, Schedule, TaxDetail}
 import play.api.libs.json.{Json, OWrites}
 
-final case class PaymentPlanBeforeSubmissionAuditDetail(
-    schedule:      Schedule,
-    correlationId: CorrelationId,
-    origin:        String,
-    taxType:       String,
-    taxDetail:     TaxDetail
+final case class PaymentPlanSetUpAuditDetail(
+    bankDetails:            BankDetails,
+    schedule:               Schedule,
+    status:                 String,
+    failedSubmissionReason: Int,
+    origin:                 String,
+    taxType:                String,
+    taxDetail:              TaxDetail,
+    correlationId:          CorrelationId,
+    ppReferenceNo:          String,
+    authProviderId:         String
 ) extends AuditDetail {
-  val auditType: String = "PlanDetails"
+  val auditType: String = "PlanSetUp"
 }
 
-object PaymentPlanBeforeSubmissionAuditDetail {
-  implicit val writes: OWrites[PaymentPlanBeforeSubmissionAuditDetail] = Json.writes
+object PaymentPlanSetUpAuditDetail {
+  implicit val writes: OWrites[PaymentPlanSetUpAuditDetail] = Json.writes
 }

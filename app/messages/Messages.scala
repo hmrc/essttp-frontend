@@ -441,7 +441,7 @@ object Messages {
     )
 
     def getInstalmentOption(numberOfMonths: Int, amount: AmountInPence): Message =
-      if(numberOfMonths > 1) getInstalmentOptionMoreThanOneMonth(numberOfMonths, amount)
+      if (numberOfMonths > 1) getInstalmentOptionMoreThanOneMonth(numberOfMonths, amount)
       else getInstalmentOptionOneMonth(amount)
 
     def `Estimated total interest of x`(interest: AmountInPence): Message = Message(

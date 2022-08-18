@@ -17,12 +17,13 @@
 package controllers
 
 import play.api.http.Status
+import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
-import testsupport.stubs.{AuthStub, EssttpBackend, Ttp}
+import testsupport.stubs.{AuditConnectorStub, AuthStub, EssttpBackend, Ttp}
 import testsupport.testdata.{PageUrls, TdAll}
 import uk.gov.hmrc.http.{SessionKeys, UpstreamErrorResponse}
 
@@ -33,7 +34,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
   private val controller: SubmitArrangementController = app.injector.instanceOf[SubmitArrangementController]
 
   "GET /submit-arrangement should" - {
-    "trigger call to ttp enact arrangement api and update backend" in {
+    "trigger call to ttp enact arrangement api, send an audit event and also update backend" in {
       AuthStub.authorise()
       EssttpBackend.TermsAndConditions.findJourney()
       EssttpBackend.SubmitArrangement.updateSubmitArrangement(TdAll.journeyId)
@@ -45,6 +46,49 @@ class SubmitArrangementControllerSpec extends ItSpec {
       redirectLocation(result) shouldBe Some(PageUrls.confirmationUrl)
 
       Ttp.EnactArrangement.verifyTtpEnactArrangementRequest()
+      AuditConnectorStub.verifyEventAudited(
+        "PlanSetUp",
+        Json.parse(
+          s"""
+             |{
+             |	"bankDetails": {
+             |		"name": "Bob Ross",
+             |		"sortCode": "123456",
+             |		"accountNumber": "12345678"
+             |	},
+             |	"schedule": {
+             |		"initialPaymentAmount": 12312,
+             |		"collectionDate": 28,
+             |		"collectionLengthCalendarMonths": 2,
+             |		"collections": [{
+             |			"collectionNumber": 2,
+             |			"amount": 55570,
+             |			"paymentDate": "2022-09-28"
+             |		}, {
+             |			"collectionNumber": 1,
+             |			"amount": 55570,
+             |			"paymentDate": "2022-08-28"
+             |		}],
+             |		"totalNoPayments": 3,
+             |		"totalInterestCharged": 6,
+             |		"totalPayable": 111147,
+             |		"totalPaymentWithoutInterest": 111141
+             |	},
+             |	"status": "successfully sent to TTP",
+             |	"failedSubmissionReason": 202,
+             |	"origin": "Bta",
+             |	"taxType": "Epaye",
+             |	"taxDetail": {
+             |		"employerRef": "864FZ00049",
+             |		"accountsOfficeRef": "123PA44545546"
+             |	},
+             |	"correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+             |	"ppReferenceNo": "123PA44545546",
+             |	"authProviderId": "authId-999"
+             |}
+             |""".stripMargin
+        ).as[JsObject]
+      )
       EssttpBackend.SubmitArrangement.verifyUpdateSubmitArrangementRequest(TdAll.journeyId)
     }
 

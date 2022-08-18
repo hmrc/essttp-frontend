@@ -20,8 +20,8 @@ import connectors.{CallEligibilityApiRequest, TtpConnector}
 import essttp.journey.model.Journey.Stages.ComputedTaxId
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
-import essttp.rootmodel.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
 import essttp.rootmodel.ttp._
+import essttp.rootmodel.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
 import essttp.rootmodel.ttp.affordablequotes._
 import essttp.rootmodel.ttp.arrangement._
 import essttp.rootmodel.{AmountInPence, EmpRef, TaxRegime, UpfrontPaymentAmount}
@@ -31,16 +31,15 @@ import util.JourneyLogger
 
 import java.time.{LocalDate, ZoneOffset}
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future
+import scala.concurrent.{Future}
 
 /**
  * Time To Pay (Ttp) Service.
  */
 @Singleton
-class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesService) {
+class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesService, auditService: AuditService) {
 
   def determineEligibility(journey: ComputedTaxId)(implicit request: RequestHeader): Future[EligibilityCheckResult] = {
-    JourneyLogger.debug("EligibilityRequest:")
     val eligibilityRequest: CallEligibilityApiRequest = journey match {
       case j: Journey.Epaye =>
         CallEligibilityApiRequest(
@@ -54,7 +53,7 @@ class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesServi
           returnFinancialAssessment = true
         )
     }
-    JourneyLogger.debug(Json.prettyPrint(Json.toJson(eligibilityRequest)))
+    JourneyLogger.debug("EligibilityRequest: " + Json.prettyPrint(Json.toJson(eligibilityRequest)))
     ttpConnector.callEligibilityApi(eligibilityRequest, journey.correlationId)
   }
 
@@ -130,7 +129,6 @@ class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesServi
       case TaxRegime.Epaye => RegimeType.`PAYE`
       case TaxRegime.Vat   => RegimeType.`VAT`
     }
-
     val arrangementRequest: ArrangementRequest = ArrangementRequest(
       channelIdentifier      = ChannelIdentifiers.eSSTTP,
       regimeType             = regimeType,
