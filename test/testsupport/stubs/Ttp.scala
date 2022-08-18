@@ -76,8 +76,7 @@ object Ttp {
 
     def enactArrangementFail(): StubMapping = stubFor(
       post(urlPathEqualTo(enactArrangementUrl))
-        .willReturn(aResponse()
-          .withStatus(400))
+        .willReturn(serviceUnavailable())
     )
 
     def verifyTtpEnactArrangementRequest(): Unit = ttpVerify(enactArrangementUrl)

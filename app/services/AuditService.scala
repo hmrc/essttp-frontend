@@ -18,19 +18,21 @@ package services
 
 import actionsmodel.AuthenticatedJourneyRequest
 import cats.syntax.eq._
+import essttp.journey.model.Journey.Stages._
 import essttp.journey.model.Journey.{AfterChosenTypeOfBankAccount, Stages}
-import essttp.journey.model.Journey.Stages.{ChosenPaymentPlan, ChosenTypeOfBankAccount, ComputedTaxId, Started}
 import essttp.journey.model.Origin
-import essttp.rootmodel.AmountInPence
 import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount}
 import essttp.rootmodel.ttp.EligibilityCheckResult
-import models.audit.bars.{BarsAuditAccount, BarsCheckAuditDetail, BarsAuditRequest, BarsAuditResponse}
+import essttp.rootmodel.ttp.arrangement.ArrangementResponse
+import models.audit.bars.{BarsAuditAccount, BarsAuditRequest, BarsAuditResponse, BarsCheckAuditDetail}
 import models.audit.eligibility.{EligibilityCheckAuditDetail, EligibilityResult, EnrollmentReasons}
-import models.audit.planbeforesubmission.{AuditCollections, PaymentPlanBeforeSubmissionAuditDetail, Schedule}
-import models.audit.{AuditDetail, TaxDetail}
+import models.audit.paymentplansetup.PaymentPlanSetUpAuditDetail
+import models.audit.planbeforesubmission.PaymentPlanBeforeSubmissionAuditDetail
+import models.audit.{AuditDetail, Schedule, TaxDetail}
 import models.bars.response.{BarsError, VerifyResponse}
+import play.api.http.Status
 import play.api.libs.json.{Json, Writes}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
 import uk.gov.hmrc.play.audit.AuditExtensions.auditHeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
@@ -66,6 +68,13 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       result:            Either[BarsError, VerifyResponse]
   )(implicit hc: HeaderCarrier): Unit =
     audit(toBarsCheckAuditDetail(journey, bankDetails, typeOfBankAccount, result))
+
+  def auditPaymentPlanSetUp(
+      journey:         AgreedTermsAndConditions,
+      responseFromTtp: Either[HttpException, ArrangementResponse]
+  )(implicit authenticatedJourneyRequest: AuthenticatedJourneyRequest[_], headerCarrier: HeaderCarrier): Unit = {
+    audit(toPaymentPlanSetupAuditDetail(journey, responseFromTtp))
+  }
 
   private def audit[A <: AuditDetail: Writes](a: A)(implicit hc: HeaderCarrier): Unit = {
     val _ = auditConnector.sendExtendedEvent(
@@ -127,30 +136,8 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
   }
 
   private def toPaymentPlanBeforeSubmissionAuditDetail(journey: ChosenPaymentPlan): PaymentPlanBeforeSubmissionAuditDetail = {
-    val totalNumberOfPaymentsIncludingUpfrontPayment: Int = {
-      journey.selectedPaymentPlan.collections.regularCollections.size + {
-        if (journey.selectedPaymentPlan.collections.initialCollection.isDefined) 1 else 0
-      }
-    }
-    val auditCollections: List[AuditCollections] = journey.selectedPaymentPlan.instalments.map { instalment =>
-      AuditCollections(
-        collectionNumber = instalment.instalmentNumber.value,
-        amount           = instalment.amountDue.value,
-        paymentDate      = instalment.dueDate.value
-      )
-    }
-    val schedule = Schedule(
-      initialPaymentAmount           = journey.selectedPaymentPlan.collections.initialCollection.fold(AmountInPence.zero)(_.amountDue.value),
-      collectionDate                 = journey.dayOfMonth,
-      collectionLengthCalendarMonths = journey.selectedPaymentPlan.numberOfInstalments.value,
-      collections                    = auditCollections,
-      totalNoPayments                = totalNumberOfPaymentsIncludingUpfrontPayment,
-      totalInterestCharged           = journey.selectedPaymentPlan.planInterest.value,
-      totalPayable                   = journey.selectedPaymentPlan.totalDebtIncInt.value,
-      totalPaymentWithoutInterest    = journey.selectedPaymentPlan.totalDebt.value
-    )
     PaymentPlanBeforeSubmissionAuditDetail(
-      schedule      = schedule,
+      schedule      = Schedule.createSchedule(journey.selectedPaymentPlan, journey.dayOfMonth),
       correlationId = journey.correlationId,
       origin        = toAuditString(journey.origin),
       taxType       = journey.taxRegime.toString,
@@ -187,6 +174,26 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
         result.isRight,
         result
       )
+    )
+  }
+
+  private def toPaymentPlanSetupAuditDetail(
+      journey:         AgreedTermsAndConditions,
+      responseFromTtp: Either[HttpException, ArrangementResponse]
+  )(implicit r: AuthenticatedJourneyRequest[_]): PaymentPlanSetUpAuditDetail = {
+    val maybeArrangementResponse: Option[ArrangementResponse] = responseFromTtp.toOption
+    val status: Int = responseFromTtp.fold(_.responseCode, _ => Status.ACCEPTED)
+    PaymentPlanSetUpAuditDetail(
+      bankDetails            = journey.directDebitDetails.bankDetails,
+      schedule               = Schedule.createSchedule(journey.selectedPaymentPlan, journey.dayOfMonth),
+      status                 = if (Status.isSuccessful(status)) "successfully sent to TTP" else "failed",
+      failedSubmissionReason = status,
+      origin                 = toAuditString(journey.origin),
+      taxType                = journey.taxRegime.toString,
+      taxDetail              = toTaxDetail(journey.eligibilityCheckResult),
+      correlationId          = journey.correlationId,
+      ppReferenceNo          = maybeArrangementResponse.map(_.customerReference.value).getOrElse("N/A"),
+      authProviderId         = r.ggCredId.value
     )
   }
 

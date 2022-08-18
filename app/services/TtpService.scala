@@ -16,31 +16,38 @@
 
 package services
 
+import actionsmodel.AuthenticatedJourneyRequest
 import connectors.{CallEligibilityApiRequest, TtpConnector}
+import controllers.support.RequestSupport.hc
 import essttp.journey.model.Journey.Stages.ComputedTaxId
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
-import essttp.rootmodel.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
 import essttp.rootmodel.ttp._
+import essttp.rootmodel.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
 import essttp.rootmodel.ttp.affordablequotes._
 import essttp.rootmodel.ttp.arrangement._
 import essttp.rootmodel.{AmountInPence, EmpRef, TaxRegime, UpfrontPaymentAmount}
+import essttp.utils.Errors
 import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
+import uk.gov.hmrc.http.HttpException
 import util.JourneyLogger
 
 import java.time.{LocalDate, ZoneOffset}
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
  * Time To Pay (Ttp) Service.
  */
 @Singleton
-class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesService) {
+class TtpService @Inject() (
+    ttpConnector: TtpConnector,
+    datesService: DatesService,
+    auditService: AuditService
+)(implicit executionContext: ExecutionContext) {
 
   def determineEligibility(journey: ComputedTaxId)(implicit request: RequestHeader): Future[EligibilityCheckResult] = {
-    JourneyLogger.debug("EligibilityRequest:")
     val eligibilityRequest: CallEligibilityApiRequest = journey match {
       case j: Journey.Epaye =>
         CallEligibilityApiRequest(
@@ -54,7 +61,7 @@ class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesServi
           returnFinancialAssessment = true
         )
     }
-    JourneyLogger.debug(Json.prettyPrint(Json.toJson(eligibilityRequest)))
+    JourneyLogger.debug("EligibilityRequest: " + Json.prettyPrint(Json.toJson(eligibilityRequest)))
     ttpConnector.callEligibilityApi(eligibilityRequest, journey.correlationId)
   }
 
@@ -124,13 +131,17 @@ class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesServi
     ttpConnector.callAffordableQuotesApi(affordableQuotesRequest, journey.correlationId)
   }
 
-  def submitArrangement(journey: Journey.Stages.AgreedTermsAndConditions)(implicit requestHeader: RequestHeader): Future[ArrangementResponse] = {
+  def submitArrangement(
+      journey: Journey.Stages.AgreedTermsAndConditions
+  )(
+      implicit
+      authenticatedJourneyRequest: AuthenticatedJourneyRequest[_]
+  ): Future[ArrangementResponse] = {
 
     val regimeType: RegimeType = journey.taxRegime match {
       case TaxRegime.Epaye => RegimeType.`PAYE`
       case TaxRegime.Vat   => RegimeType.`VAT`
     }
-
     val arrangementRequest: ArrangementRequest = ArrangementRequest(
       channelIdentifier      = ChannelIdentifiers.eSSTTP,
       regimeType             = regimeType,
@@ -155,6 +166,14 @@ class TtpService @Inject() (ttpConnector: TtpConnector, datesService: DatesServi
     )
 
     ttpConnector.callArrangementApi(arrangementRequest, journey.correlationId)
+      .map { response: ArrangementResponse =>
+        auditService.auditPaymentPlanSetUp(journey, Right(response))
+        response
+      }.recover {
+        case httpException: HttpException =>
+          auditService.auditPaymentPlanSetUp(journey, Left(httpException))
+          Errors.throwServerErrorException(httpException.message)
+      }
   }
 }
 

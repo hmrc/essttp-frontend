@@ -17,11 +17,11 @@
 package controllers
 
 import _root_.actions.Actions
+import actionsmodel.AuthenticatedJourneyRequest
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import essttp.journey.model.Journey
-import essttp.utils.Errors
 import play.api.mvc._
-import services.{JourneyService, TtpService}
+import services.{AuditService, JourneyService, TtpService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.{JourneyLogger, Logging}
 
@@ -33,7 +33,8 @@ class SubmitArrangementController @Inject() (
     as:             Actions,
     mcc:            MessagesControllerComponents,
     ttpService:     TtpService,
-    journeyService: JourneyService
+    journeyService: JourneyService,
+    auditService:   AuditService
 )(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
@@ -48,15 +49,12 @@ class SubmitArrangementController @Inject() (
     }
   }
 
-  private def submitArrangementAndUpdateJourney(journey: Journey.Stages.AgreedTermsAndConditions)(implicit request: Request[_]): Future[Result] = {
+  private def submitArrangementAndUpdateJourney(
+      journey: Journey.Stages.AgreedTermsAndConditions
+  )(implicit request: AuthenticatedJourneyRequest[_]): Future[Result] = {
     for {
-      arrangementResponse <- ttpService
-        .submitArrangement(journey)
-      _ <- journeyService
-        .updateArrangementResponse(journey.id, arrangementResponse)
-        .recover {
-          case e: Exception => Errors.throwServerErrorException(e.getMessage)
-        }
+      arrangementResponse <- ttpService.submitArrangement(journey)
+      _ <- journeyService.updateArrangementResponse(journey.id, arrangementResponse)
     } yield Redirect(routes.PaymentPlanSetUpController.paymentPlanSetUp())
   }
 
