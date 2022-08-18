@@ -23,7 +23,6 @@ import essttp.journey.model.Journey.{AfterChosenTypeOfBankAccount, BeforeChosenT
 import essttp.rootmodel.bank.{BankDetails, DirectDebitDetails}
 import models.bars.response._
 import models.enumsforforms.{IsSoleSignatoryFormValue, TypeOfAccountFormValue}
-import models.forms.BankDetailsForm._
 import models.forms.{BankDetailsForm, TypeOfAccountForm}
 import play.api.data.{Form, FormError}
 import play.api.mvc._
@@ -119,49 +118,48 @@ class BankDetailsController @Inject() (
   }
 
   val enterBankDetailsSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
-    BankDetailsForm.form
-      .bindFromRequest()
-      .fold(
-        formWithErrors =>
-          Future.successful(
-            Ok(views.enterBankDetailsPage(formWithErrors, BankDetailsController.chooseTypeOfAccountUrl))
+    val formFromRequest = BankDetailsForm.form.bindFromRequest()
+    formFromRequest.fold(
+      formWithErrors =>
+        Future.successful(
+          Ok(views.enterBankDetailsPage(formWithErrors, BankDetailsController.chooseTypeOfAccountUrl))
+        ),
+      (bankDetailsForm: BankDetailsForm) => {
+
+        val directDebitDetails: DirectDebitDetails = DirectDebitDetails(
+          BankDetails(
+            name          = bankDetailsForm.name,
+            sortCode      = bankDetailsForm.sortCode,
+            accountNumber = bankDetailsForm.accountNumber
           ),
-        (bankDetailsForm: BankDetailsForm) => {
+          bankDetailsForm.isSoleSignatory.asBoolean
+        )
 
-          val directDebitDetails: DirectDebitDetails = DirectDebitDetails(
-            BankDetails(
-              name          = bankDetailsForm.name,
-              sortCode      = bankDetailsForm.sortCode,
-              accountNumber = bankDetailsForm.accountNumber
-            ),
-            bankDetailsForm.isSoleSignatory.asBoolean
-          )
-
-          request.journey match {
-            case j: AfterChosenTypeOfBankAccount =>
-              bankDetailsForm.isSoleSignatory match {
-                case IsSoleSignatoryFormValue.Yes =>
-                  barsService
-                    .verifyBankDetails(directDebitDetails.bankDetails, j.typeOfBankAccount, j)
-                    .flatMap(
-                      barsResponse =>
-                        journeyService
-                          .updateDirectDebitDetails(request.journeyId, directDebitDetails)
-                          .map(_ => handleBars(barsResponse))
-                    )
-                case IsSoleSignatoryFormValue.No =>
-                  journeyService.updateDirectDebitDetails(request.journeyId, directDebitDetails).map { _ =>
-                    Redirect(routes.BankDetailsController.cannotSetupDirectDebitOnlinePage)
-                  }
-              }
-            case j: BeforeChosenTypeOfBankAccount =>
-              Future.successful(JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j))
-          }
+        request.journey match {
+          case j: AfterChosenTypeOfBankAccount =>
+            bankDetailsForm.isSoleSignatory match {
+              case IsSoleSignatoryFormValue.Yes =>
+                barsService
+                  .verifyBankDetails(directDebitDetails.bankDetails, j.typeOfBankAccount, j)
+                  .flatMap(
+                    barsResponse =>
+                      journeyService
+                        .updateDirectDebitDetails(request.journeyId, directDebitDetails)
+                        .map(_ => handleBars(barsResponse, formFromRequest))
+                  )
+              case IsSoleSignatoryFormValue.No =>
+                journeyService.updateDirectDebitDetails(request.journeyId, directDebitDetails).map { _ =>
+                  Redirect(routes.BankDetailsController.cannotSetupDirectDebitOnlinePage)
+                }
+            }
+          case j: BeforeChosenTypeOfBankAccount =>
+            Future.successful(JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j))
         }
-      )
+      }
+    )
   }
 
-  private def handleBars(resp: Either[BarsError, VerifyResponse])(implicit request: Request[_]): Result = {
+  private def handleBars(resp: Either[BarsError, VerifyResponse], form: Form[BankDetailsForm])(implicit request: Request[_]): Result = {
       def enterBankDetailsPageWithBarsError(error: FormError): Result =
         Ok(
           views.enterBankDetailsPage(
@@ -170,6 +168,7 @@ class BankDetailsController @Inject() (
           )
         )
 
+    import models.forms.BankDetailsForm._
     resp.fold(
       {
         case ThirdPartyError(_) =>

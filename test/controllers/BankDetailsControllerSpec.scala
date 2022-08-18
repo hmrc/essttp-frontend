@@ -85,6 +85,26 @@ class BankDetailsControllerSpec extends ItSpec {
     val expectedPageTitle: String = s"$expectedH1 - $expectedServiceName - GOV.UK"
   }
 
+  private def getExpectedFormValue(field: String, formData: Seq[(String, String)]): String =
+    formData.collectFirst{ case (x, value) if x == field => value }.getOrElse("")
+
+  def assertFieldsPopulated(result: Future[Result], form: Seq[(String, String)]): Unit = {
+    val pageContent: String = contentAsString(result)
+    val doc: Document = Jsoup.parse(pageContent)
+    doc.select(EnterDirectDebitDetailsPage.accountNameFieldId).`val`() shouldBe getExpectedFormValue("name", form)
+    doc.select(EnterDirectDebitDetailsPage.sortCodeFieldId).`val`() shouldBe getExpectedFormValue("sortCode", form)
+    doc.select(EnterDirectDebitDetailsPage.accountNumberFieldId).`val`() shouldBe getExpectedFormValue("accountNumber", form)
+    val isSoleSignatoryRadios = doc.select(".govuk-radios__input").asScala.toList
+    getExpectedFormValue("isSoleSignatory", form) match {
+      case "Yes" => isSoleSignatoryRadios(0).hasAttr("checked") shouldBe true
+      case "No"  => isSoleSignatoryRadios(1).hasAttr("checked") shouldBe true
+      case _ =>
+        isSoleSignatoryRadios(0).hasAttr("checked") shouldBe false
+        isSoleSignatoryRadios(1).hasAttr("checked") shouldBe false
+    }
+    ()
+  }
+
   def testFormError(action: Action[AnyContent])(formData: (String, String)*)(
       textAndHrefContent: List[(String, String)]
   ): Unit = {
@@ -109,6 +129,9 @@ class BankDetailsControllerSpec extends ItSpec {
         testData._1.attr("href") shouldBe testData._2._2
       }
     }
+
+    assertFieldsPopulated(result, formData)
+
   }
 
   def extractSummaryRows(elements: List[Element]): List[SummaryRow] = elements.map { e =>
