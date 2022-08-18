@@ -171,12 +171,7 @@ class TtpService @Inject() (
         response
       }.recover {
         case httpException: HttpException =>
-          try {
-            auditService.auditPaymentPlanSetUp(journey, Left(httpException))
-          } catch {
-            case _: Throwable =>
-              JourneyLogger.error("Could not send audit event for failed ttp call, investigate.")
-          }
+          auditService.auditPaymentPlanSetUp(journey, Left(httpException))
           Errors.throwServerErrorException(httpException.message)
       }
   }

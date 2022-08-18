@@ -36,8 +36,9 @@ object Schedule {
   implicit val writes: OWrites[Schedule] = Json.writes
 
   def createSchedule(selectedPaymentPlan: PaymentPlan, dayOfMonth: DayOfMonth): Schedule = {
-    val totalNumberOfPaymentsIncludingUpfrontPayment: Int = selectedPaymentPlan.collections.initialCollection
-      .fold(selectedPaymentPlan.collections.regularCollections.length)(_ => selectedPaymentPlan.collections.regularCollections.length + 1)
+    val totalNumberOfPaymentsIncludingUpfrontPayment: Int =
+      selectedPaymentPlan.collections.regularCollections.size +
+        selectedPaymentPlan.collections.initialCollection.fold(0)(_ => 1)
     val auditCollections: List[AuditCollections] = selectedPaymentPlan.instalments.map { instalment =>
       AuditCollections(
         collectionNumber = instalment.instalmentNumber.value,
