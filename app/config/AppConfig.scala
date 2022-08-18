@@ -34,6 +34,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val welshLanguageSupportEnabled: Boolean = config.getOptional[Boolean]("features.welsh-language-support").getOrElse(false)
   val authTimeoutSeconds: Int = config.get[FiniteDuration]("timeout-dialog.timeout").toSeconds.toInt
   val authTimeoutCountdownSeconds: Int = config.get[FiniteDuration]("timeout-dialog.countdown").toSeconds.toInt
+  val serviceIdentifierPAYE: String = "eSSTTP-PAYE"
 
   object BaseUrl {
     val platformHost: Option[String] = config.getOptional[String]("platform.frontend.host")
@@ -57,7 +58,6 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
         s"service=$appName&" +
         s"backUrl=${SafeRedirectUrl(BaseUrl.essttpFrontend + request.uri).encodedUrl}"
 
-    val exitSurveyUrl: String = s"${BaseUrl.feedbackFrontend}/feedback/"
     val firstPageBackUrl: String = "https://gov.uk"
     val enrolForPayeUrl: String = config.get[String]("govUkUrls.enrolPayeUrl")
     val extraSupportUrl: String = config.get[String]("govUkUrls.extraSupportUrl")
@@ -65,8 +65,6 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     val epayeGovUkJourneyLoginContinueUrl: String = s"/set-up-a-payment-plan/determine-taxId"
     val businessTaxAccountUrl: String = s"${BaseUrl.businessTaxAccountFrontend}/business-account"
   }
-
-  val serviceIdentifierPAYE: String = "eSSTTP-PAYE"
 
   object InterestRates {
     val baseRate: BigDecimal = config.get[Double]("interest-rates.base-rate")
@@ -80,4 +78,9 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   object TtpHeaders {
     val correlationId: String = config.get[String]("ttp.headers.correlationId")
   }
+
+  object ExitSurvey {
+    val payeExitSurveyUrl: String = s"${BaseUrl.feedbackFrontend}/$serviceIdentifierPAYE"
+  }
+
 }

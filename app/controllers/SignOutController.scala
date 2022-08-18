@@ -38,7 +38,6 @@ class SignOutController @Inject() (
   }
 
   val exitSurveyPaye: Action[AnyContent] = Action { _ =>
-    val url = appConfig.BaseUrl.feedbackFrontend + "/" + appConfig.serviceIdentifierPAYE
-    Redirect(url).withNewSession
+    Redirect(appConfig.ExitSurvey.payeExitSurveyUrl).withNewSession
   }
 }

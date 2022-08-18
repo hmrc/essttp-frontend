@@ -36,7 +36,7 @@ class ConfigSpec extends ItSpec {
       ("baseUrl.essttpFrontend", config.BaseUrl.essttpFrontend, "http://localhost:9215"),
       ("baseUrl.essttpFrontendHost", config.BaseUrl.essttpFrontendHost, "localhost"),
       ("baseUrl.contact-frontend", config.BaseUrl.contactFrontend, "http://localhost:9250"),
-      ("baseUrl.feedback-frontend", config.BaseUrl.feedbackFrontend, "http://localhost:9514"),
+      ("baseUrl.feedback-frontend", config.BaseUrl.feedbackFrontend, "http://localhost:9514/feedback"),
       ("baseUrl.gg", config.BaseUrl.gg, "http://localhost:9949/auth-login-stub/gg-sign-in"),
       ("baseUrl.business-tax-account-frontend", config.BaseUrl.businessTaxAccountFrontend, "http://localhost:9020"),
       ("baseUrl.timeToPayUrl", config.BaseUrl.timeToPayUrl, "http://localhost:9218"),
@@ -44,7 +44,6 @@ class ConfigSpec extends ItSpec {
 
       ("Urls.loginUrl", config.Urls.loginUrl, "http://localhost:9949/auth-login-stub/gg-sign-in"),
       ("Urls.signOutUrl", config.Urls.signOutUrl, "http://localhost:9949/auth-login-stub/session/logout"),
-      ("Urls.exitSurveyUrl", config.Urls.exitSurveyUrl, "http://localhost:9514/feedback/essttp-frontend"),
       ("Urls.firstPageBackUrl", config.Urls.firstPageBackUrl, "https://gov.uk"),
       ("Urls.enrolForPayeUrl", config.Urls.enrolForPayeUrl, "https://www.gov.uk/paye-online/enrol"),
       ("Urls.extraSupportUrl", config.Urls.extraSupportUrl, "https://www.gov.uk/get-help-hmrc-extra-support"),
@@ -54,7 +53,9 @@ class ConfigSpec extends ItSpec {
       ("InterestRates.hmrcRate", config.InterestRates.hmrcRate, 2.5),
 
       ("JourneyVariables.minimumUpfrontPaymentAmountInPence", config.JourneyVariables.minimumUpfrontPaymentAmountInPence, AmountInPence(100L)),
-      ("Ttp.headers.correlationId", config.TtpHeaders.correlationId, "correlationId")
+      ("Ttp.headers.correlationId", config.TtpHeaders.correlationId, "correlationId"),
+
+      ("ExitSurvey.payeExitSurveyUrl", config.ExitSurvey.payeExitSurveyUrl, "http://localhost:9514/feedback/eSSTTP-PAYE")
 
     )
     configsToTest.foreach { (configData: (String, Any, Any)) =>
