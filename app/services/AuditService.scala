@@ -182,7 +182,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       responseFromTtp: Either[HttpException, ArrangementResponse]
   )(implicit r: AuthenticatedJourneyRequest[_]): PaymentPlanSetUpAuditDetail = {
     val maybeArrangementResponse: Option[ArrangementResponse] = responseFromTtp.toOption
-    val status: Int = responseFromTtp.fold(something => something.responseCode, _ => Status.ACCEPTED)
+    val status: Int = responseFromTtp.fold(_.responseCode, _ => Status.ACCEPTED)
     PaymentPlanSetUpAuditDetail(
       bankDetails            = journey.directDebitDetails.bankDetails,
       schedule               = Schedule.createSchedule(journey.selectedPaymentPlan, journey.dayOfMonth),
