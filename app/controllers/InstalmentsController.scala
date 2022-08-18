@@ -113,7 +113,7 @@ object InstalmentsController {
 
   def retrieveInstalmentOptions(paymentPlans: List[PaymentPlan]): List[InstalmentOption] = paymentPlans.map { plan =>
     InstalmentOption(
-      numberOfMonths       = plan.numberOfInstalments.value,
+      numberOfMonths       = plan.collections.regularCollections.size,
       amountToPayEachMonth = plan.collections.regularCollections
         .headOption.getOrElse(throw new RuntimeException("There were no regular collections")).amountDue.value,
       interestPayment      = plan.planInterest.value
