@@ -80,7 +80,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   }
 
   object ExitSurvey {
-    val payeExitSurveyUrl: String = s"${BaseUrl.feedbackFrontend}/$serviceIdentifierPAYE"
+    val payeExitSurveyUrl: String = s"${BaseUrl.feedbackFrontend}/feedback/$serviceIdentifierPAYE"
   }
 
 }
