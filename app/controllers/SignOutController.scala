@@ -22,17 +22,22 @@ import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
-
+import config.AppConfig
 @Singleton
 class SignOutController @Inject() (
     as:           Actions,
     mcc:          MessagesControllerComponents,
-    timedOutPage: views.html.TimedOut
+    timedOutPage: views.html.TimedOut,
+    appConfig:    AppConfig
 ) extends FrontendController(mcc)
   with I18nSupport
   with Logging {
 
   def signOutFromTimeout: Action[AnyContent] = as.authenticatedAction { implicit request =>
     Ok(timedOutPage()).withNewSession
+  }
+
+  val exitSurveyPaye: Action[AnyContent] = Action { _ =>
+    Redirect(appConfig.ExitSurvey.payeExitSurveyUrl).withNewSession
   }
 }

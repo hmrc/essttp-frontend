@@ -716,6 +716,14 @@ object Messages {
       english = "Return to tax account"
     )
 
+    val `What did you think of this service`: Message = Message(
+      english = "What did you think of this service?"
+    )
+
+    val `(takes 30 seconds)`: Message = Message(
+      english = "(takes 30 seconds)"
+    )
+
   }
 
   object PrintSummary {

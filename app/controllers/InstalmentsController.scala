@@ -89,7 +89,7 @@ class InstalmentsController @Inject() (
       }, {
         (option: String) =>
           val maybePaymentPlan: Option[PaymentPlan] =
-            journey.affordableQuotesResponse.paymentPlans.find(_.numberOfInstalments.value === option.toInt)
+            journey.affordableQuotesResponse.paymentPlans.find(_.collections.regularCollections.length === option.toInt)
 
           maybePaymentPlan.fold[Future[Result]](Errors.throwBadRequestExceptionF("There was no payment plan"))(plan =>
             journeyService.updateChosenPaymentPlan(request.journeyId, plan)
@@ -113,7 +113,7 @@ object InstalmentsController {
 
   def retrieveInstalmentOptions(paymentPlans: List[PaymentPlan]): List[InstalmentOption] = paymentPlans.map { plan =>
     InstalmentOption(
-      numberOfMonths       = plan.collections.regularCollections.size,
+      numberOfMonths       = plan.collections.regularCollections.length,
       amountToPayEachMonth = plan.collections.regularCollections
         .headOption.getOrElse(throw new RuntimeException("There were no regular collections")).amountDue.value,
       interestPayment      = plan.planInterest.value

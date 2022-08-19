@@ -18,7 +18,8 @@ package controllers
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import play.api.mvc.Result
+import play.api.http.Status
+import play.api.mvc.{Result, Session}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
@@ -44,6 +45,18 @@ class SignOutControllerSpec extends ItSpec {
       doc.title() shouldBe "For your security, we signed you out - Set up an Employers’ PAYE payment plan - GOV.UK"
       doc.select(".govuk-heading-xl").text() shouldBe "For your security, we signed you out"
       doc.select(".hmrc-header__service-name").text() shouldBe "Set up an Employers’ PAYE payment plan"
+    }
+  }
+
+  "exitSurveyPaye should" - {
+    "redirect to feedback frontend with eSSTTP-PAYE as the service identifier" in {
+      AuthStub.authorise()
+      EssttpBackend.SubmitArrangement.findJourney()
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.exitSurveyPaye(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some("http://localhost:9514/feedback/eSSTTP-PAYE")
+      session(result) shouldBe Session(Map.empty)
     }
   }
 
