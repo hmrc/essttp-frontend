@@ -36,7 +36,7 @@ class ConfigSpec extends ItSpec {
       ("baseUrl.essttpFrontend", config.BaseUrl.essttpFrontend, "http://localhost:9215"),
       ("baseUrl.essttpFrontendHost", config.BaseUrl.essttpFrontendHost, "localhost"),
       ("baseUrl.contact-frontend", config.BaseUrl.contactFrontend, "http://localhost:9250"),
-      ("baseUrl.feedback-frontend", config.BaseUrl.feedbackFrontend, "http://localhost:9514/feedback"),
+      ("baseUrl.feedback-frontend", config.BaseUrl.feedbackFrontend, "http://localhost:9514"),
       ("baseUrl.gg", config.BaseUrl.gg, "http://localhost:9949/auth-login-stub/gg-sign-in"),
       ("baseUrl.business-tax-account-frontend", config.BaseUrl.businessTaxAccountFrontend, "http://localhost:9020"),
       ("baseUrl.timeToPayUrl", config.BaseUrl.timeToPayUrl, "http://localhost:9218"),
