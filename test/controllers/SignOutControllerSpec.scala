@@ -19,7 +19,7 @@ package controllers
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.http.Status
-import play.api.mvc.Result
+import play.api.mvc.{Result, Session}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
@@ -56,6 +56,7 @@ class SignOutControllerSpec extends ItSpec {
       val result: Future[Result] = controller.exitSurveyPaye(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some("http://localhost:9514/feedback/eSSTTP-PAYE")
+      session(result) shouldBe Session(Map.empty)
     }
   }
 
