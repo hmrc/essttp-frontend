@@ -16,14 +16,19 @@
 
 package services
 
+import cats.implicits.catsSyntaxEq
 import connectors.BarsConnector
-import models.bars.{BarsTypeOfBankAccount, BarsTypesOfBankAccount}
 import models.bars.request._
 import models.bars.response.ValidateResponse.validateFailure
 import models.bars.response.VerifyResponse.accountDoesNotExist
 import models.bars.response._
+import models.bars.{BarsTypeOfBankAccount, BarsTypesOfBankAccount}
+import util.HttpResponseUtils.HttpResponseOps
 import play.api.Logging
+import play.api.http.Status.BAD_REQUEST
+import play.api.libs.json._
 import play.api.mvc.RequestHeader
+import uk.gov.hmrc.http.{HttpResponse, UpstreamErrorResponse}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -34,15 +39,33 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class BarsService @Inject() (barsConnector: BarsConnector)(implicit ec: ExecutionContext) extends Logging {
 
-  def validateBankAccount(bankAccount: BarsBankAccount)(implicit requestHeader: RequestHeader): Future[ValidateResponse] =
-    barsConnector.validateBankDetails(BarsValidateRequest(bankAccount)).map(ValidateResponse.apply)
+  def validateBankAccount(bankAccount: BarsBankAccount)(implicit requestHeader: RequestHeader): Future[BarsResponse] = {
 
+    barsConnector.validateBankDetails(BarsValidateRequest(bankAccount)).map { httpResponse: HttpResponse =>
+      httpResponse.status match {
+        case BAD_REQUEST =>
+          httpResponse.json.validate[BarsErrorResponse] match {
+            case JsSuccess(barsErrorResponse, _) if barsErrorResponse.code === "SORT_CODE_ON_DENY_LIST" =>
+              logger.info(s"SORT_CODE_ON_DENY_LIST: ${barsErrorResponse.desc}")
+              SortCodeOnDenyList(barsErrorResponse)
+            case JsError(_) =>
+              throw UpstreamErrorResponse(httpResponse.body, httpResponse.status)
+          }
+        case _ =>
+          httpResponse.parseJSON[BarsValidateResponse].map(ValidateResponse.apply)
+            .getOrElse(throw UpstreamErrorResponse(httpResponse.body, httpResponse.status))
+      }
+    }
+  }
+
+  // TODO implement sortCodeOnDenyList (as done for validate)
   def verifyPersonal(bankAccount: BarsBankAccount, subject: BarsSubject)(
       implicit
       requestHeader: RequestHeader
   ): Future[VerifyResponse] =
     barsConnector.verifyPersonal(BarsVerifyPersonalRequest(bankAccount, subject)).map(VerifyResponse.apply)
 
+  // TODO implement sortCodeOnDenyList (as done for validate)
   def verifyBusiness(bankAccount: BarsBankAccount, business: BarsBusiness)(
       implicit
       requestHeader: RequestHeader
@@ -66,6 +89,8 @@ class BarsService @Inject() (barsConnector: BarsConnector)(implicit ec: Executio
     validateBankAccount(bankAccount).flatMap {
       case validateResponse @ validateFailure() =>
         Future.successful(Left(handleValidateErrorResponse(validateResponse)))
+      case response: SortCodeOnDenyList => Future.successful(Left(SortCodeOnDenyListError(response)))
+
       case _ =>
         typeOfBankAccount match {
           case BarsTypesOfBankAccount.Personal =>

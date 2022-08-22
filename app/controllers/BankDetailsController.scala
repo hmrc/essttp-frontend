@@ -183,6 +183,8 @@ class BankDetailsController @Inject() (
           enterBankDetailsPageWithBarsError(nameDoesNotMatch)
         case AccountDoesNotExist(_) =>
           enterBankDetailsPageWithBarsError(accountDoesNotExist)
+        case SortCodeOnDenyListError(_) =>
+          enterBankDetailsPageWithBarsError(sortCodeOnDenyList)
         case OtherBarsError(_) =>
           enterBankDetailsPageWithBarsError(otherBarsError)
       },

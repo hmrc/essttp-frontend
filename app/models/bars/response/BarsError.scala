@@ -26,4 +26,5 @@ final case class SortCodeNotPresentOnEiscd(barsResponse: BarsResponse) extends B
 final case class SortCodeDoesNotSupportDirectDebit(barsResponse: BarsResponse) extends BarsError
 final case class AccountDoesNotExist(barsResponse: BarsResponse) extends BarsError
 final case class NameDoesNotMatch(barsResponse: BarsResponse) extends BarsError
+final case class SortCodeOnDenyListError(barsResponse: BarsResponse) extends BarsError
 final case class OtherBarsError(barsResponse: BarsResponse) extends BarsError

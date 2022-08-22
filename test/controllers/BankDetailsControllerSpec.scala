@@ -542,6 +542,11 @@ class BankDetailsControllerSpec extends ItSpec {
             List(("Enter a valid combination of bank account number and sort code", "#bars")) ->
               VerifyJson.accountDoesNotExist
 
+          case "sortCodeOnDenyList" =>
+            BarsStub.ValidateStub.sortCodeOnDenyList()
+            List(("Enter a valid combination of bank account number and sort code", "#bars")) ->
+              ValidateJson.sortCodeOnDenyList
+
           case "otherBarsError" =>
             BarsStub.ValidateStub.success()
             typeOfAccount match {
@@ -729,6 +734,16 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validForm)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(validForm)
+      }
+
+    "show correct error message when bars validate response is 400 sortCodeOnDenyList" in
+      new BarsFormErrorSetup("sortCodeOnDenyList", typeOfAccount = TypesOfBankAccount.Business) {
+        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
+        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+
+        BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
+        BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
+        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
       }
 
     "redirect to an error page when bars verify-personal response has nameMatches is Error" in
