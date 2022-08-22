@@ -663,6 +663,22 @@ object Messages {
       english = "Return to tax account"
     )
 
+    val `You've tried to confirm your bank details too many times`: Message = Message(
+      english = "You’ve tried to confirm your bank details too many times"
+    )
+
+    def waitUntil(lockExpires: String): Message = Message(
+      english = s"You’ll need to wait until ${lockExpires} before trying to confirm your bank details again."
+    )
+
+    val `You may still be able to set up a payment plan over the phone.`: Message = Message(
+      english = "You may still be able to set up a payment plan over the phone."
+    )
+
+    val `For further support you can contact the Payment Support Service...`: Message = Message(
+      english = "For further support you can contact the Payment Support Service on <strong>0300 200 3835</strong> to speak to an adviser."
+    )
+
   }
 
   object Confirmation {
