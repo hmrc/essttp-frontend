@@ -111,6 +111,10 @@ object InstalmentsController {
 
   val backUrl: Option[String] = Some(routes.PaymentDayController.paymentDay.url)
 
+  /**
+   * We should not show the user any plan that has a monthly payment of less than £1.00
+   * We filter here and return instalment options that have a regular collection greater than £1.
+   */
   def retrieveInstalmentOptions(paymentPlans: List[PaymentPlan]): List[InstalmentOption] = paymentPlans.map { plan =>
     InstalmentOption(
       numberOfMonths       = plan.collections.regularCollections.length,
@@ -118,5 +122,5 @@ object InstalmentsController {
         .headOption.getOrElse(throw new RuntimeException("There were no regular collections")).amountDue.value,
       interestPayment      = plan.planInterest.value
     )
-  }
+  }.filter(_.amountToPayEachMonth.value >= 100)
 }

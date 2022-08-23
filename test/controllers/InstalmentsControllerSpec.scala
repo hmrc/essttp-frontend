@@ -16,6 +16,9 @@
 
 package controllers
 
+import essttp.rootmodel.AmountInPence
+import essttp.rootmodel.ttp.affordablequotes.{AmountDue, PaymentPlan}
+import models.InstalmentOption
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.http.Status
@@ -127,6 +130,21 @@ class InstalmentsControllerSpec extends ItSpec {
       errorLink.text() shouldBe "Select how many months you want to pay over"
       errorLink.attr("href") shouldBe "#Instalments"
       EssttpBackend.SelectedPaymentPlan.verifyNoneUpdateSelectedPlanRequest(TdAll.journeyId)
+    }
+  }
+
+  "InstalmentsController.retrieveInstalmentOptions" - {
+    "should filter out any instalments that are less than £1" in {
+      val plansIncludingOneLessThanAPound: List[PaymentPlan] = List(
+        TdAll.paymentPlan(1, amountDue = AmountDue(AmountInPence(1))),
+        TdAll.paymentPlan(2, amountDue = AmountDue(AmountInPence(99))),
+        TdAll.paymentPlan(3),
+        TdAll.paymentPlan(4),
+        TdAll.paymentPlan(5),
+      )
+      val result: List[InstalmentOption] = InstalmentsController.retrieveInstalmentOptions(plansIncludingOneLessThanAPound)
+      result.length shouldBe 3
+      result.foreach(instalmentOption => (instalmentOption.amountToPayEachMonth.value >= 100) shouldBe true)
     }
   }
 
