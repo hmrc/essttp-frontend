@@ -18,10 +18,12 @@ package testsupport.testdata
 
 import actions.EnrolmentDef
 import essttp.journey.model.{CorrelationId, JourneyId}
-import essttp.rootmodel.ttp.{EligibilityRules, EligibilityPass}
+import essttp.rootmodel.ttp.affordablequotes.{AmountDue, Collection, DebtItemOriginalDueDate, DueDate, InitialCollection, Instalment, InstalmentBalance, InstalmentNumber, NumberOfInstalments, PaymentPlan, PlanDuration, PlanInterest, RegularCollection, TotalDebt, TotalDebtIncludingInterest}
+import essttp.rootmodel.ttp.{ChargeReference, EligibilityPass, EligibilityRules, InterestAccrued}
 import essttp.rootmodel.{AmountInPence, CanPayUpfront, DayOfMonth, UpfrontPaymentAmount}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 
+import java.time.LocalDate
 import java.util.UUID
 
 object TdAll {
@@ -75,4 +77,25 @@ object TdAll {
   val notEligibleMissingFiledReturns: EligibilityRules = eligibleEligibilityRules.copy(missingFiledReturns = true)
   val notEligibleMultipleReasons: EligibilityRules = eligibleEligibilityRules.copy(missingFiledReturns = true).copy(hasRlsOnAddress = true)
   def dayOfMonth(day: Int = 28): DayOfMonth = DayOfMonth(day)
+
+  def paymentPlan(numberOfInstalments: Int, amountDue: AmountDue): PaymentPlan = PaymentPlan(
+    numberOfInstalments = NumberOfInstalments(numberOfInstalments),
+    planDuration        = PlanDuration(numberOfInstalments),
+    totalDebt           = TotalDebt(AmountInPence(amountInPence.value * numberOfInstalments)),
+    totalDebtIncInt     = TotalDebtIncludingInterest(amountInPence.+(amountInPence)),
+    planInterest        = PlanInterest(amountInPence),
+    collections         = Collection(
+      initialCollection  = Some(InitialCollection(dueDate   = DueDate(LocalDate.parse("2022-02-01")), amountDue = AmountDue(amountInPence))),
+      regularCollections = List(RegularCollection(dueDate   = DueDate(LocalDate.parse("2022-02-01")), amountDue = amountDue))
+    ),
+    instalments         = List(Instalment(
+      instalmentNumber          = InstalmentNumber(numberOfInstalments),
+      dueDate                   = DueDate(LocalDate.parse("2022-02-01")),
+      instalmentInterestAccrued = InterestAccrued(amountInPence),
+      instalmentBalance         = InstalmentBalance(amountInPence),
+      debtItemChargeId          = ChargeReference("testchargeid"),
+      amountDue                 = AmountDue(amountInPence),
+      debtItemOriginalDueDate   = DebtItemOriginalDueDate(LocalDate.parse("2022-01-01"))
+    ))
+  )
 }
