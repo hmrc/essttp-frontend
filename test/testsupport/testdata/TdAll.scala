@@ -78,7 +78,7 @@ object TdAll {
   val notEligibleMultipleReasons: EligibilityRules = eligibleEligibilityRules.copy(missingFiledReturns = true).copy(hasRlsOnAddress = true)
   def dayOfMonth(day: Int = 28): DayOfMonth = DayOfMonth(day)
 
-  def paymentPlan(numberOfInstalments: Int, amountDue: AmountDue = AmountDue(amountInPence)): PaymentPlan = PaymentPlan(
+  def paymentPlan(numberOfInstalments: Int, amountDue: AmountDue): PaymentPlan = PaymentPlan(
     numberOfInstalments = NumberOfInstalments(numberOfInstalments),
     planDuration        = PlanDuration(numberOfInstalments),
     totalDebt           = TotalDebt(AmountInPence(amountInPence.value * numberOfInstalments)),

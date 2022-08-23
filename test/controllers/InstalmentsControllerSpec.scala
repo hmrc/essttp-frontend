@@ -138,9 +138,9 @@ class InstalmentsControllerSpec extends ItSpec {
       val plansIncludingOneLessThanAPound: List[PaymentPlan] = List(
         TdAll.paymentPlan(1, amountDue = AmountDue(AmountInPence(1))),
         TdAll.paymentPlan(2, amountDue = AmountDue(AmountInPence(99))),
-        TdAll.paymentPlan(3),
-        TdAll.paymentPlan(4),
-        TdAll.paymentPlan(5),
+        TdAll.paymentPlan(3, amountDue = AmountDue(AmountInPence(100))),
+        TdAll.paymentPlan(4, amountDue = AmountDue(AmountInPence(101))),
+        TdAll.paymentPlan(5, amountDue = AmountDue(AmountInPence(999))),
       )
       val result: List[InstalmentOption] = InstalmentsController.retrieveInstalmentOptions(plansIncludingOneLessThanAPound)
       result.length shouldBe 3
