@@ -1,22 +1,61 @@
-
 # essttp-frontend
 
-Frontend repo for essttp journeys
+---
 
-# emulate start journey from gov-uk
-This will make a get request with referer value of "github.com".
-That referer was configured on test environments to represent a journey which is started from a gov-uk.
-Obviously we can't hook those urls on the gov.uk sites and for that reason we used that test domain to test 
-those cases.
+This repository contains the frontend microservice for eSSTTP (Enhanced Self Service Time To Pay). 
+It is built using Scala (2.12) and the Play framework (2.8). We use linting tools such as WartRemover and Sclariform.
+This microservice allows users to set up an arrangement and recurring direct debit to repay any debts they may have with HMRC.
 
-http://localhost:9215/set-up-a-payment-plan/govuk/epaye/start
+Current tax regimes supported:
+* PAYE
+* VAT (wip)
 
-https://www.development.tax.service.gov.uk/set-up-a-payment-plan/govuk/epaye/start
+---
 
-https://www.qa.tax.service.gov.uk/set-up-a-payment-plan/govuk/epaye/start
+## Contents:
 
-https://www.staging.tax.service.gov.uk/set-up-a-payment-plan/govuk/epaye/start
+* [Running the service locally](https://github.com/hmrc/essttp-frontend#running-locally)
+* [Running tests](https://github.com/hmrc/essttp-frontend#running-tests)
+* [Accessing the service](https://github.com/hmrc/essttp-frontend#accessing-the-service)
+* [Bars stub data](https://github.com/hmrc/essttp-frontend#bars-stub-data)
+* [Emulate start journey from gov-uk](https://github.com/hmrc/essttp-frontend#emulate-start-journey-from-gov-uk)
 
+---
+
+### Running locally
+
+You can run the service locally using sbt: `sbt run`
+
+To run with test endpoints enabled: `sbt runTestOnly`
+
+If running locally, the service runs on port `9215`
+
+---
+
+### Running tests
+
+You can run the unit/integration tests locally using sbt: `sbt test`
+
+To run a specific spec, run `sbt 'testOnly *<SpecName>'`, e.g. `sbt 'testOnly *LandingPageControllerSpec'`
+
+---
+
+### Accessing the service
+
+The standard entry point for the service is https://www.tax.service.gov.uk/set-up-a-payment-plan
+
+However, you will need a valid government gateway account and various other data in ETMP to actually be a valid user.
+
+In pre-production environments, there is a test only page that can be used to start journeys.
+
+| Environment | Url                                                                                      |
+|-------------|------------------------------------------------------------------------------------------|
+| **Local**       | http://localhost:9215/set-up-a-payment-plan/test-only/start-journey                      |
+| **Development** | https://www.development.tax.service.gov.uk/set-up-a-payment-plan/test-only/start-journey |
+| **QA**          | https://www.qa.tax.service.gov.uk/set-up-a-payment-plan/test-only/start-journey          |
+| **Staging**     | https://www.staging.tax.service.gov.uk/set-up-a-payment-plan/test-only/start-journey     |
+
+---
 
 ### BARs stub data
 Use one of the following name/sortCode/accountNumber combinations on the 'Enter Bank Details' page
@@ -33,6 +72,25 @@ to get the desired behaviour (e.g. `Teddy Dickson and 207102 and 44344655` to su
 | 309696    | 44311611       | any                  | sortCodeIsPresentOnEISCD - NO     | any          |
 
 see here for more BARs stub data https://github.com/hmrc/bank-account-reputation-stub
+
+---
+
+### Emulate start journey from gov-uk
+
+This will make a get request with referer value of "github.com".
+That referer was configured on test environments to represent a journey which is started from a gov-uk.
+Obviously we can't hook those urls on the gov.uk sites and for that reason we used that test domain to test 
+those cases.
+
+http://localhost:9215/set-up-a-payment-plan/govuk/epaye/start
+
+https://www.development.tax.service.gov.uk/set-up-a-payment-plan/govuk/epaye/start
+
+https://www.qa.tax.service.gov.uk/set-up-a-payment-plan/govuk/epaye/start
+
+https://www.staging.tax.service.gov.uk/set-up-a-payment-plan/govuk/epaye/start
+
+---
 
 ### Licence
 This code is open source software licensed under the [Apache 2.0 License]("http://www.apache.org/licenses/LICENSE-2.0.html").
