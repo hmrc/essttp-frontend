@@ -25,9 +25,13 @@
 )
 
 @(lockoutExpires: String = "[date and time of expiry]")(implicit request: Request[_])
+
 @import requestSupport._
-@layout(pageTitle = Some("Placeholder"), backUrl = None) {
-  <h1 class="govuk-heading-xl">@{Messages.BankDetails.`You've tried to confirm your bank details too many times`.show}</h1>
+
+@title = @{ Messages.BankDetails.`You've tried to confirm your bank details too many times`.show }
+
+@layout(pageTitle = Some(title), backUrl = None) {
+  <h1 class="govuk-heading-xl">@title</h1>
   <p class="govuk-body">@{Messages.BankDetails.waitUntil(lockoutExpires).show}</p>
   <p class="govuk-body">@{Messages.BankDetails.`You may still be able to set up a payment plan over the phone.`.show}</p>
   <p class="govuk-body">@{Html(Messages.BankDetails.`For further support you can contact the Payment Support Service...`.show)}</p>

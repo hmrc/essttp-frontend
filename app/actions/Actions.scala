@@ -29,7 +29,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class Actions @Inject() (
     actionBuilder:              DefaultActionBuilder,
     authenticatedActionRefiner: AuthenticatedActionRefiner,
-    getJourneyActionRefiner:    GetJourneyActionRefiner
+    getJourneyActionRefiner:    GetJourneyActionRefiner,
+    barsLockoutActionFilter:    BarsLockoutActionFilter
 )(implicit ec: ExecutionContext) {
 
   val default: ActionBuilder[Request, AnyContent] = actionBuilder
@@ -47,24 +48,29 @@ class Actions @Inject() (
     actionBuilder
       .andThen(authenticatedActionRefiner)
       .andThen(getJourneyActionRefiner)
+      .andThen(barsLockoutActionFilter)
       .andThen(filterForEligibleJourney)
 
   private def filterForEligibleJourney: ActionRefiner[AuthenticatedJourneyRequest, EligibleJourneyRequest] =
     new ActionRefiner[AuthenticatedJourneyRequest, EligibleJourneyRequest] {
 
-      override protected def refine[A](request: AuthenticatedJourneyRequest[A]): Future[Either[Result, EligibleJourneyRequest[A]]] = {
+      override protected def refine[A](
+          request: AuthenticatedJourneyRequest[A]
+      ): Future[Either[Result, EligibleJourneyRequest[A]]] = {
         implicit val r: Request[A] = request
         val result: Either[Result, EligibleJourneyRequest[A]] = request.journey match {
           case j: Journey.Stages.Started       => Left(JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j))
           case j: Journey.Stages.ComputedTaxId => Left(JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j))
           case j: Journey.AfterEligibilityChecked =>
             if (j.eligibilityCheckResult.isEligible) {
-              Right(new EligibleJourneyRequest[A](
-                journey    = j,
-                enrolments = request.enrolments,
-                request    = request,
-                request.ggCredId
-              ))
+              Right(
+                new EligibleJourneyRequest[A](
+                  journey    = j,
+                  enrolments = request.enrolments,
+                  request    = request,
+                  request.ggCredId
+                )
+              )
             } else {
               Left(EligibilityRouter.nextPage(j.eligibilityCheckResult))
             }

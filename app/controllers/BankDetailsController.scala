@@ -185,7 +185,7 @@ class BankDetailsController @Inject() (
           enterBankDetailsPageWithBarsError(accountDoesNotExist)
         case SortCodeOnDenyListError(_) =>
           enterBankDetailsPageWithBarsError(sortCodeOnDenyList)
-        case OtherBarsError(_) =>
+        case OtherBarsError(_) | TooManyAttempts(_) => // TODO
           enterBankDetailsPageWithBarsError(otherBarsError)
       },
       _ => Redirect(routes.BankDetailsController.checkBankDetails)
@@ -254,6 +254,10 @@ class BankDetailsController @Inject() (
   // TODO in a future ticket
   val barsErrorPlaceholder: Action[AnyContent] = as.default { implicit request =>
     Ok(views.barsErrorPlaceHolder())
+  }
+
+  def barsLockout(expiresAt: String): Action[AnyContent] = as.default { implicit request =>
+    Ok(views.barsLockout(expiresAt))
   }
 }
 

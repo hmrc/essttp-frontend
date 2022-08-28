@@ -28,3 +28,5 @@ final case class AccountDoesNotExist(barsResponse: BarsResponse) extends BarsErr
 final case class NameDoesNotMatch(barsResponse: BarsResponse) extends BarsError
 final case class SortCodeOnDenyListError(barsResponse: BarsResponse) extends BarsError
 final case class OtherBarsError(barsResponse: BarsResponse) extends BarsError
+// not strictly a BARs error, but we use this error to indicate too many attempts
+final case class TooManyAttempts(barsResponse: BarsResponse) extends BarsError
