@@ -346,9 +346,11 @@ object Messages {
     val `Payment summary`: Message = Message(
       english = "Payment summary"
     )
-
+    val `Change Payment`: Message = Message(
+      english = "Change upfront payment"
+    )
     val `Upfront payment`: Message = Message(
-      english = "Upfront payment<br><span class=\"govuk-body-s\">Taken within 10 working days</span>"
+      english = "Change payment amount"
     )
     val `Upfront payment-visually-hidden-message`: Message = Message(
       english = "Upfront payment Taken within 10 working days"
@@ -402,8 +404,13 @@ object Messages {
   object PaymentDay {
 
     val `Which day do you want to pay each month?`: Message = Message(
-      english = "Which day do you want to pay each month?"
+      english = "Change payment day"
     )
+
+    val `Change months duration`: Message = Message(
+      english = "Change how many months you want to pay over"
+    )
+
 
     val `28th or next working day`: Message = Message(
       english = "28th or next working day"
