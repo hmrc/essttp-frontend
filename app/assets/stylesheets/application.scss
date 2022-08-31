@@ -33,3 +33,7 @@
 body:not(.js-enabled) .js-visible {
   display: none;
 }
+
+.language-toggle-position {
+  float: right;
+}

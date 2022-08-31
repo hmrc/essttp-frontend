@@ -29,7 +29,7 @@ class ConfigSpec extends ItSpec {
     val config: AppConfig = app.injector.instanceOf[AppConfig]
     val configsToTest = List(
       ("appName", config.appName, "essttp-frontend"),
-      ("welshLanguageSupportEnabled", config.welshLanguageSupportEnabled, false),
+      ("welshLanguageSupportEnabled", config.welshLanguageSupportEnabled, true),
       ("authTimeoutSeconds", config.authTimeoutSeconds, 900),
       ("authTimeoutCountdownSeconds", config.authTimeoutCountdownSeconds, 120),
 

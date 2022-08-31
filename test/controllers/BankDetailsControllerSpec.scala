@@ -130,8 +130,8 @@ class BankDetailsControllerSpec extends ItSpec {
       }
     }
 
+    ContentAssertions.languageToggleExists(doc)
     assertFieldsPopulated(result, formData)
-
   }
 
   def extractSummaryRows(elements: List[Element]): List[SummaryRow] = elements.map { e =>
@@ -159,6 +159,7 @@ class BankDetailsControllerSpec extends ItSpec {
       doc.title() shouldBe TypeOfBankAccountPage.expectedPageTitle
       doc.select(".govuk-fieldset__legend--xl").text() shouldBe TypeOfBankAccountPage.expectedH1
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
+      ContentAssertions.languageToggleExists(doc)
       doc
         .select(".hmrc-sign-out-nav__link")
         .attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
@@ -184,6 +185,7 @@ class BankDetailsControllerSpec extends ItSpec {
             val pageContent: String = contentAsString(result)
             val doc: Document = Jsoup.parse(pageContent)
             doc.select(".govuk-radios__input").asScala.toList(checkedElementIndex).hasAttr("checked") shouldBe true
+            ContentAssertions.languageToggleExists(doc)
           }
       }
   }
@@ -238,6 +240,7 @@ class BankDetailsControllerSpec extends ItSpec {
       doc.title() shouldBe EnterDirectDebitDetailsPage.expectedPageTitle
       doc.select(".govuk-heading-xl").text() shouldBe EnterDirectDebitDetailsPage.expectedH1
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
+      ContentAssertions.languageToggleExists(doc)
       doc
         .select(".hmrc-sign-out-nav__link")
         .attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
@@ -269,6 +272,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
+      ContentAssertions.languageToggleExists(doc)
       doc.select("#back").attr("href") shouldBe routes.BankDetailsController.typeOfAccount.url
       doc.select(EnterDirectDebitDetailsPage.accountNameFieldId).`val`() shouldBe "Bob Ross"
       doc.select(EnterDirectDebitDetailsPage.sortCodeFieldId).`val`() shouldBe "123456"
@@ -816,6 +820,7 @@ class BankDetailsControllerSpec extends ItSpec {
       doc.title() shouldBe ConfirmDirectDebitDetailsPage.expectedPageTitle
       doc.select(".govuk-heading-xl").text() shouldBe ConfirmDirectDebitDetailsPage.expectedH1
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
+      ContentAssertions.languageToggleExists(doc)
       doc
         .select(".hmrc-sign-out-nav__link")
         .attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
@@ -900,6 +905,7 @@ class BankDetailsControllerSpec extends ItSpec {
       doc.title() shouldBe TermsAndConditionsPage.expectedPageTitle
       doc.select(".govuk-heading-xl").text() shouldBe TermsAndConditionsPage.expectedH1
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
+      ContentAssertions.languageToggleExists(doc)
       doc
         .select(".hmrc-sign-out-nav__link")
         .attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"

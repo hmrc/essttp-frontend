@@ -25,6 +25,7 @@ import play.api.test.Helpers.contentAsString
 import testsupport.ItSpec
 import play.api.test.Helpers._
 import testsupport.TdRequest.FakeRequestOps
+import testsupport.reusableassertions.ContentAssertions
 import testsupport.stubs.{AuthStub, EssttpBackend}
 import testsupport.testdata.JourneyJsonTemplates
 import uk.gov.hmrc.http.SessionKeys
@@ -45,6 +46,7 @@ class IneligibleControllerSpec extends ItSpec {
   }
 
   def assertCommonEligibilityContent(page: Document): Assertion = {
+    ContentAssertions.languageToggleExists(page)
     val commonEligibilityWrapper = page.select(".common-eligibility")
     val govukBodyElements = commonEligibilityWrapper.select(".govuk-body").asScala.toList
     govukBodyElements(0).text() shouldBe "For further support you can contact the Payment Support Service on 0300 200 3835 to speak to an advisor."

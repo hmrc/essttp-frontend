@@ -16,12 +16,13 @@
 
 package controllers
 
+import org.jsoup.Jsoup
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
-import testsupport.reusableassertions.RequestAssertions
+import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.{AuthStub, EssttpBackend}
 import testsupport.testdata.PageUrls
@@ -39,6 +40,7 @@ class YourBillControllerSpec extends ItSpec {
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.yourBill(fakeRequest)
       RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.languageToggleExists(Jsoup.parse(contentAsString(result)))
     }
   }
 

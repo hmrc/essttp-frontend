@@ -21,7 +21,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
-import testsupport.reusableassertions.RequestAssertions
+import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.{AuthStub, EssttpBackend}
 import testsupport.testdata.TdAll
 import uk.gov.hmrc.http.SessionKeys
@@ -43,6 +43,7 @@ class NotEnrolledControllerSpec extends ItSpec {
       page.title() shouldBe s"$expectedH1 - $expectedServiceName - GOV.UK"
       page.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       page.select(".govuk-heading-xl").text() shouldBe expectedH1
+      ContentAssertions.languageToggleExists(page)
       page.select(".govuk-body").asScala.toList(0).text() shouldBe "You are not eligible for an online payment plan because you need to enrol for PAYE Online. Find out how to enrol."
       page.select("#how-to-enrol-link").attr("href") shouldBe "https://www.gov.uk/paye-online/enrol"
       val commonEligibilityWrapper = page.select(".common-eligibility")

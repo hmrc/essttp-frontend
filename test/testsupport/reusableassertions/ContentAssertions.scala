@@ -22,6 +22,7 @@ import org.scalatest.Assertion
 import testsupport.RichMatchers
 
 import scala.jdk.CollectionConverters.iterableAsScalaIterableConverter
+import org.jsoup.nodes.Document
 
 object ContentAssertions extends RichMatchers {
 
@@ -34,5 +35,12 @@ object ContentAssertions extends RichMatchers {
   def assertKeyAndValue(element: Element, keyValue: (String, String)): Assertion = {
     element.select(".govuk-summary-list__key").text() shouldBe keyValue._1
     element.select(".govuk-summary-list__value").text() shouldBe keyValue._2
+  }
+
+  def languageToggleExists(document: Document): Assertion = {
+    val langToggleItems: List[Element] = document.select(".hmrc-language-select__list-item").asScala.toList
+    langToggleItems.size shouldBe 2
+    langToggleItems.headOption.map(someToggleItem => someToggleItem.text()) shouldBe Some("English")
+    langToggleItems.drop(1).headOption.map(someToggleItem => someToggleItem.text()) shouldBe Some("Cymraeg")
   }
 }
