@@ -82,10 +82,13 @@ object YourBillController {
     val dueDate: LocalDate = chargeDueDate(List(ass))
     val startDate: LocalDate = parseLocalDate(ass.taxPeriodFrom.value)
     val endDate: LocalDate = parseLocalDate(ass.taxPeriodTo.value)
-    InvoicePeriod(monthNumber(startDate), startDate, endDate, dueDate)
+    InvoicePeriod(monthNumberInTaxYear(startDate), startDate, endDate, dueDate)
   }
 
-  def monthNumber(date: LocalDate): Int = (date.getMonth.getValue - 4) % 12
+  def monthNumberInTaxYear(date: LocalDate): Int = {
+    val month: Int = date.getMonth.getValue
+    if (month >= 4) month - 3 else month + 9
+  }
 
   private def overDuePaymentOf(ass: ChargeTypeAssessment): OverduePayment =
     OverduePayment(invoicePeriod(ass), ass.debtTotalAmount.value)

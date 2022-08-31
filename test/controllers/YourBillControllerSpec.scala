@@ -17,6 +17,7 @@
 package controllers
 
 import org.jsoup.Jsoup
+import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -28,6 +29,7 @@ import testsupport.stubs.{AuthStub, EssttpBackend}
 import testsupport.testdata.PageUrls
 import uk.gov.hmrc.http.SessionKeys
 
+import java.time.LocalDate
 import scala.concurrent.Future
 
 class YourBillControllerSpec extends ItSpec {
@@ -52,6 +54,29 @@ class YourBillControllerSpec extends ItSpec {
       val result = controller.yourBillSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.canYouMakeAnUpfrontPaymentUrl)
+    }
+  }
+
+  "YourBillController.monthNumberInTaxYear should return correct tax month" in {
+    forAll(Table(
+      ("Senario", "Date", "Expected result"),
+      ("January", "2022-01-10", 10),
+      ("February", "2022-02-10", 11),
+      ("March", "2022-03-10", 12),
+      ("April", "2022-04-10", 1),
+      ("May", "2022-05-10", 2),
+      ("June", "2022-06-10", 3),
+      ("July", "2022-07-10", 4),
+      ("August", "2022-08-10", 5),
+      ("September", "2022-09-10", 6),
+      ("October", "2022-10-10", 7),
+      ("November", "2022-11-10", 8),
+      ("December", "2022-12-10", 9)
+    )) {
+      (scenario: String, date: String, expectedResult: Int) =>
+        {
+          YourBillController.monthNumberInTaxYear(LocalDate.parse(date)) shouldBe expectedResult withClue s"monthNumberInTaxYear failed for $scenario"
+        }
     }
   }
 }
