@@ -89,7 +89,7 @@
           ActionItem(
             href = routes.UpfrontPaymentController.upfrontPaymentAmount.url,
             content = Text(Messages.change.show),
-            visuallyHiddenText = Some(Messages.UpfrontPaymentSummary.`Upfront payment`.show)
+            visuallyHiddenText = Some(Messages.UpfrontPaymentSummary.`Upfront payment-visually-hidden-message`.show)
           )
         )
       ))
@@ -113,7 +113,7 @@
         ActionItem(
           href = routes.PaymentDayController.paymentDay.url,
           content = Text(Messages.change.show),
-          visuallyHiddenText = Some(Messages.PaymentDay.`Which day do you want to pay each month?`.show)
+          visuallyHiddenText = Some(Messages.PaymentDay.`payment day`.show)
         )
       )
     ))
