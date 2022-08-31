@@ -27,7 +27,7 @@ import play.api.test.FakeRequest
 import testsupport.TdRequest.FakeRequestOps
 import play.api.test.Helpers._
 import testsupport.ItSpec
-import testsupport.reusableassertions.RequestAssertions
+import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.{AuthStub, EssttpBackend}
 import testsupport.testdata.{PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
@@ -64,6 +64,7 @@ class InstalmentsControllerSpec extends ItSpec {
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
       doc.select("#back").attr("href") shouldBe routes.PaymentDayController.paymentDay.url
+      ContentAssertions.languageToggleExists(doc)
 
       val radioButtonGroup = doc.select(".govuk-radios")
       val individualButtons = radioButtonGroup.select(".govuk-radios__item").asScala.toSeq

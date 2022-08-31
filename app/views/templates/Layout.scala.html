@@ -78,24 +78,24 @@
       @scriptsBlock.getOrElse(Html(""))
     }
 
-    @beforeContentBlock = {
-      <div class="govuk-!-display-none-print">
-      @govukPhaseBanner(PhaseBanner(
-        tag = Some(Tag(
-          content = Text(Messages.ServicePhase.beta.show)
-        )),
-        content = HtmlContent(Messages.ServicePhase.bannerText(appConfig.Urls.betaFeedbackUrl(request)).show)
-      ))
-      @if(appConfig.welshLanguageSupportEnabled) {
-        @languageSelection()
-      }
-      @{
-        backUrl map { url =>
-          govukBackLink(BackLink(href = url, attributes = Map("id" -> "back")))
+@beforeContentBlock = {
+    <div class="govuk-!-display-none-print">
+        @govukPhaseBanner(PhaseBanner(
+            tag = Some(Tag(
+                content = Text(Messages.ServicePhase.beta.show)
+            )),
+            content = HtmlContent(Messages.ServicePhase.bannerText(appConfig.Urls.betaFeedbackUrl(request)).show)
+        ))
+        @if(appConfig.welshLanguageSupportEnabled) {
+            @languageSelection()
         }
-      }
-      </div>
-    }
+        @{
+            backUrl map { url =>
+                govukBackLink(BackLink(href = url, attributes = Map("id" -> "back")))
+            }
+        }
+    </div>
+}
 
     @content = {
       <div class="govuk-!-margin-bottom-6">

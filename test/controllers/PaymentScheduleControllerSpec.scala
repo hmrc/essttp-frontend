@@ -26,7 +26,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
-import testsupport.reusableassertions.RequestAssertions
+import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.{AuditConnectorStub, AuthStub, EssttpBackend}
 import testsupport.testdata.{JourneyJsonTemplates, TdAll}
 import uk.gov.hmrc.http.SessionKeys
@@ -110,6 +110,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
         doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
         doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
         doc.select("#back").attr("href") shouldBe routes.InstalmentsController.instalmentOptions.url
+        ContentAssertions.languageToggleExists(doc)
 
         val summaries = doc.select(".govuk-summary-list").iterator().asScala.toList
         summaries.size shouldBe 2

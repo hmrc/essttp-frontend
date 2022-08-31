@@ -25,7 +25,7 @@ import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.ContentAssertions.assertKeyAndValue
-import testsupport.reusableassertions.RequestAssertions
+import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.{AuthStub, EssttpBackend}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
@@ -56,6 +56,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
       doc.select("#back").size() shouldBe 0
+      ContentAssertions.languageToggleExists(doc)
 
       doc.select(".govuk-panel__title").text() shouldBe "Your payment plan is set up"
       doc.select(".govuk-panel__body").text() shouldBe "Your payment reference is 123PA44545546"
@@ -84,6 +85,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
       doc.select("#back").size() shouldBe 0
+      ContentAssertions.languageToggleExists(doc)
 
       doc.select(".govuk-panel__title").text() shouldBe "Your payment plan is set up"
       doc.select(".govuk-panel__body").text() shouldBe "Your payment reference is 123PA44545546"

@@ -23,7 +23,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.testdata.TdAll
 import testsupport.ItSpec
-import testsupport.reusableassertions.RequestAssertions
+import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
@@ -44,7 +44,7 @@ class LandingPageControllerSpec extends ItSpec {
       doc.title() shouldBe s"$expectedH1 - $expectedServiceName - GOV.UK"
       doc.select(".govuk-heading-xl").text() shouldBe expectedH1
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
-
+      ContentAssertions.languageToggleExists(doc)
     }
   }
 }

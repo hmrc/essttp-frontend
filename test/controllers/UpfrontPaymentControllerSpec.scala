@@ -25,7 +25,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
-import testsupport.reusableassertions.RequestAssertions
+import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.{AuthStub, EssttpBackend}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
@@ -65,6 +65,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
       doc.select("#back").attr("href") shouldBe routes.YourBillController.yourBill.url
+      ContentAssertions.languageToggleExists(doc)
       doc.select("#CanYouMakeAnUpFrontPayment-hint").text() shouldBe expectedPageHintCanPayUpfrontPage
     }
     "should prepopulate the form when user navigates back and they have a chosen way to pay in their journey" in {
@@ -166,6 +167,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
       doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url
+      ContentAssertions.languageToggleExists(doc)
       doc.select("#UpfrontPaymentAmount").size() shouldBe 1
       val poundSymbol = doc.select(".govuk-input__prefix")
       poundSymbol.size() shouldBe 1
@@ -312,6 +314,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       doc.select(".govuk-heading-xl").text() shouldBe expectedH1UpfrontSummaryPage
       doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
       doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.upfrontPaymentAmount.url
+      ContentAssertions.languageToggleExists(doc)
       doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
 
         def question(row: Element) = row.select(".govuk-summary-list__key").text()
