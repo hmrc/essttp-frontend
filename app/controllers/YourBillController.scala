@@ -85,8 +85,13 @@ object YourBillController {
     InvoicePeriod(monthNumberInTaxYear(startDate), startDate, endDate, dueDate)
   }
 
+  private val taxMonthStartDay: Int = 6
+
   def monthNumberInTaxYear(date: LocalDate): Int = {
-    val month: Int = date.getMonth.getValue
+    val day: Int = date.getDayOfMonth
+    val month: Int = if (day >= taxMonthStartDay) date.getMonthValue else {
+      date.getMonthValue - 1
+    }
     if (month >= 4) month - 3 else month + 9
   }
 

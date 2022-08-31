@@ -59,7 +59,7 @@ class YourBillControllerSpec extends ItSpec {
 
   "YourBillController.monthNumberInTaxYear should return correct tax month" in {
     forAll(Table(
-      ("Senario", "Date", "Expected result"),
+      ("Scenario", "Date", "Expected result"),
       ("January", "2022-01-10", 10),
       ("February", "2022-02-10", 11),
       ("March", "2022-03-10", 12),
@@ -71,7 +71,11 @@ class YourBillControllerSpec extends ItSpec {
       ("September", "2022-09-10", 6),
       ("October", "2022-10-10", 7),
       ("November", "2022-11-10", 8),
-      ("December", "2022-12-10", 9)
+      ("December", "2022-12-10", 9),
+      ("April 5th", "2022-04-05", 12),
+      ("April 6th", "2022-04-06", 1),
+      ("March 5th", "2022-03-05", 11),
+      ("March 6th", "2022-03-06", 12)
     )) {
       (scenario: String, date: String, expectedResult: Int) =>
         {
