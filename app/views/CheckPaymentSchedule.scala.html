@@ -69,7 +69,7 @@
           ActionItem(
             href = routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url,
             content = Text(Messages.change.show),
-            visuallyHiddenText = Some(Messages.UpfrontPaymentSummary.`Upfront payment`.show)
+            visuallyHiddenText = Some(Messages.UpfrontPaymentSummary.`Change Payment`.show)
           )
         )
       ))
@@ -89,7 +89,7 @@
           ActionItem(
             href = routes.UpfrontPaymentController.upfrontPaymentAmount.url,
             content = Text(Messages.change.show),
-            visuallyHiddenText = Some(Messages.UpfrontPaymentSummary.`Upfront payment`.show)
+            visuallyHiddenText = Some(Messages.UpfrontPaymentSummary.`Upfront payment-visually-hidden-message`.show)
           )
         )
       ))
@@ -113,7 +113,7 @@
         ActionItem(
           href = routes.PaymentDayController.paymentDay.url,
           content = Text(Messages.change.show),
-          visuallyHiddenText = Some(Messages.PaymentDay.`Which day do you want to pay each month?`.show)
+          visuallyHiddenText = Some(Messages.PaymentDay.`payment day`.show)
         )
       )
     ))
@@ -139,7 +139,7 @@
             href = routes.InstalmentsController.instalmentOptions.url,
              classes = s"${if(index === 0) "" else "grouped-change"}",
             content = Text(Messages.change.show),
-            visuallyHiddenText = Some(Messages.PaymentDay.`Which day do you want to pay each month?`.show)
+            visuallyHiddenText = Some(Messages.PaymentDay.`Change months duration`.show)
          )
         )
       ))
