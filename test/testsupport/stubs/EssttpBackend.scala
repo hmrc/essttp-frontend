@@ -88,7 +88,7 @@ object EssttpBackend {
           )
       )
 
-    def verifyTaxIdRequest(journeyId: JourneyId, taxId: TaxId) =
+    def verifyTaxIdRequest(journeyId: JourneyId, taxId: TaxId): Unit =
       verify(
         postRequestedFor(urlPathEqualTo(updateTaxIdUrl(journeyId)))
           .withRequestBody(equalToJson(Json.toJson(taxId).toString()))

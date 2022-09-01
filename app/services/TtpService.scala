@@ -145,6 +145,7 @@ class TtpService @Inject() (
     val arrangementRequest: ArrangementRequest = ArrangementRequest(
       channelIdentifier      = ChannelIdentifiers.eSSTTP,
       regimeType             = regimeType,
+      regimePaymentFrequency = PaymentPlanFrequencies.Monthly,
       arrangementAgreedDate  = ArrangementAgreedDate(LocalDate.now(ZoneOffset.of("Z")).toString),
       identification         = journey.eligibilityCheckResult.identification,
       directDebitInstruction = DirectDebitInstruction(
