@@ -39,7 +39,8 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class BarsService @Inject() (barsConnector: BarsConnector)(implicit ec: ExecutionContext) extends Logging {
 
-  // TODO COMMENT HERE about handling "SORT_CODE_ON_DENY_LIST" in verify call if validate call is removed
+  // NOTE: if the validate call is removed in the future (it is said to be deprecated)
+  // then implement the "SORT_CODE_ON_DENY_LIST" handling in the verify calls below
   def validateBankAccount(bankAccount: BarsBankAccount)(implicit requestHeader: RequestHeader): Future[BarsResponse] = {
 
     barsConnector.validateBankDetails(BarsValidateRequest(bankAccount)).map { httpResponse: HttpResponse =>
