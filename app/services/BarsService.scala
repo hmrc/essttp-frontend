@@ -25,7 +25,7 @@ import models.bars.response._
 import models.bars.{BarsTypeOfBankAccount, BarsTypesOfBankAccount}
 import util.HttpResponseUtils.HttpResponseOps
 import play.api.Logging
-import play.api.http.Status.BAD_REQUEST
+import play.api.http.Status._
 import play.api.libs.json._
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.{HttpResponse, UpstreamErrorResponse}
@@ -39,33 +39,37 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class BarsService @Inject() (barsConnector: BarsConnector)(implicit ec: ExecutionContext) extends Logging {
 
+  // TODO COMMENT HERE about handling "SORT_CODE_ON_DENY_LIST" in verify call if validate call is removed
   def validateBankAccount(bankAccount: BarsBankAccount)(implicit requestHeader: RequestHeader): Future[BarsResponse] = {
 
     barsConnector.validateBankDetails(BarsValidateRequest(bankAccount)).map { httpResponse: HttpResponse =>
       httpResponse.status match {
+        case OK =>
+          httpResponse.parseJSON[BarsValidateResponse].map(ValidateResponse.apply)
+            .getOrElse(throw UpstreamErrorResponse(httpResponse.body, httpResponse.status))
+
         case BAD_REQUEST =>
           httpResponse.json.validate[BarsErrorResponse] match {
             case JsSuccess(barsErrorResponse, _) if barsErrorResponse.code === "SORT_CODE_ON_DENY_LIST" =>
-              logger.info(s"SORT_CODE_ON_DENY_LIST: ${barsErrorResponse.desc}")
               SortCodeOnDenyList(barsErrorResponse)
             case JsError(_) =>
               throw UpstreamErrorResponse(httpResponse.body, httpResponse.status)
           }
+
         case _ =>
-          httpResponse.parseJSON[BarsValidateResponse].map(ValidateResponse.apply)
-            .getOrElse(throw UpstreamErrorResponse(httpResponse.body, httpResponse.status))
+          throw UpstreamErrorResponse(httpResponse.body, httpResponse.status)
       }
     }
   }
 
-  // TODO implement sortCodeOnDenyList (as done for validate)
+  // implement sortCodeOnDenyList (if validate is removed)
   def verifyPersonal(bankAccount: BarsBankAccount, subject: BarsSubject)(
       implicit
       requestHeader: RequestHeader
   ): Future[VerifyResponse] =
     barsConnector.verifyPersonal(BarsVerifyPersonalRequest(bankAccount, subject)).map(VerifyResponse.apply)
 
-  // TODO implement sortCodeOnDenyList (as done for validate)
+  // implement sortCodeOnDenyList (if validate is removed)
   def verifyBusiness(bankAccount: BarsBankAccount, business: BarsBusiness)(
       implicit
       requestHeader: RequestHeader
@@ -75,9 +79,6 @@ class BarsService @Inject() (barsConnector: BarsConnector)(implicit ec: Executio
   /**
    * Call Validate first and if that fails, then Return the failing response
    * Otherwise, call either Verify/Personal or Verify/Business
-   * If success response then Return the response,
-   * If there is an AccountDoesNotExist error, then call the other Verify endpoint
-   * Return the response (success or fail)
    */
   def verifyBankDetails(
       bankAccount:       BarsBankAccount,
@@ -89,23 +90,13 @@ class BarsService @Inject() (barsConnector: BarsConnector)(implicit ec: Executio
     validateBankAccount(bankAccount).flatMap {
       case validateResponse @ validateFailure() =>
         Future.successful(Left(handleValidateErrorResponse(validateResponse)))
-      case response: SortCodeOnDenyList => Future.successful(Left(SortCodeOnDenyListError(response)))
-
+      case response: SortCodeOnDenyList =>
+        Future.successful(Left(SortCodeOnDenyListError(response)))
       case _ =>
-        typeOfBankAccount match {
-          case BarsTypesOfBankAccount.Personal =>
-            verifyPersonal(bankAccount, subject).flatMap {
-              case accountDoesNotExist() =>
-                verifyBusiness(bankAccount, business).map(handleVerifyResponse)
-              case verifyPersonalResp => Future.successful(handleVerifyResponse(verifyPersonalResp))
-            }
-          case BarsTypesOfBankAccount.Business =>
-            verifyBusiness(bankAccount, business).flatMap {
-              case accountDoesNotExist() =>
-                verifyPersonal(bankAccount, subject).map(handleVerifyResponse)
-              case verifyBusinessResp => Future.successful(handleVerifyResponse(verifyBusinessResp))
-            }
-        }
+        (typeOfBankAccount match {
+          case BarsTypesOfBankAccount.Personal => verifyPersonal(bankAccount, subject)
+          case BarsTypesOfBankAccount.Business => verifyBusiness(bankAccount, business)
+        }).map(handleVerifyResponse)
     }
   }
 

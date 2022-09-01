@@ -19,13 +19,11 @@ package actions
 import actionsmodel.AuthenticatedJourneyRequest
 import controllers.{JourneyIncorrectStateRouter, routes}
 import essttp.bars.BarsVerifyStatusConnector
-import essttp.bars.model.BarsGetStatusParams
 import essttp.journey.model.Journey
 import play.api.Logging
 import play.api.mvc.{ActionFilter, Request, Result, Results}
+import util.QueryParameterUtils._
 
-import java.time.{Instant, ZoneId}
-import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -42,21 +40,13 @@ class BarsLockoutActionFilter @Inject() (barsVerifyStatusConnector: BarsVerifySt
       case j: Journey.BeforeComputedTaxId =>
         JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF(j).map(Some(_))
       case j: Journey.AfterComputedTaxId =>
-        barsVerifyStatusConnector.status(BarsGetStatusParams(j.taxId)).map { status =>
+        barsVerifyStatusConnector.status(j.taxId).map { status =>
           status.lockoutExpiryDateTime.map { expiresAt =>
             logger.info(s"BARs lockout for taxId: ${j.taxId}")
-            Redirect(routes.BankDetailsController.barsLockout(formatted(expiresAt)))
+            Redirect(routes.BankDetailsController.barsLockout(expiresAt.encodedLongFormat))
           }
         }
     }
-  }
-
-  private val fmt: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy, h:mma")
-
-  private def formatted(expiresAt: Instant): String = {
-    fmt.format(expiresAt.atZone(ZoneId.of("Europe/London")))
-      .replaceAll("AM$", "am")
-      .replaceAll("PM$", "pm")
   }
 
   override protected def executionContext: ExecutionContext = ec

@@ -25,6 +25,7 @@ import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import play.api.test.{DefaultTestServerFactory, RunningServer}
 import play.api.{Application, Mode}
 import play.core.server.ServerConfig
+import testsupport.stubs.EssttpBackend
 import uk.gov.hmrc.http.HttpReadsInstances
 
 class ItSpec
@@ -77,6 +78,7 @@ class ItSpec
 
   override def beforeEach(): Unit = {
     super.beforeEach()
+    EssttpBackend.BarsVerifyStatusStub.statusUnlocked()
     webDriver.manage().deleteAllCookies()
   }
 

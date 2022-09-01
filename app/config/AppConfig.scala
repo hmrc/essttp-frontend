@@ -36,8 +36,6 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val authTimeoutCountdownSeconds: Int = config.get[FiniteDuration]("timeout-dialog.countdown").toSeconds.toInt
   val serviceIdentifierPAYE: String = "eSSTTP-PAYE"
 
-  val barsVerifyMaxAttempts: Int = config.get[Int]("bars.verify.max-attempts")
-
   object BaseUrl {
     val platformHost: Option[String] = config.getOptional[String]("platform.frontend.host")
     val essttpFrontend: String = platformHost.getOrElse(config.get[String]("baseUrl.essttp-frontend"))

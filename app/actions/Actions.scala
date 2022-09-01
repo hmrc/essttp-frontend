@@ -48,8 +48,8 @@ class Actions @Inject() (
     actionBuilder
       .andThen(authenticatedActionRefiner)
       .andThen(getJourneyActionRefiner)
-      .andThen(barsLockoutActionFilter)
       .andThen(filterForEligibleJourney)
+      .andThen(barsLockoutActionFilter)
 
   private def filterForEligibleJourney: ActionRefiner[AuthenticatedJourneyRequest, EligibleJourneyRequest] =
     new ActionRefiner[AuthenticatedJourneyRequest, EligibleJourneyRequest] {

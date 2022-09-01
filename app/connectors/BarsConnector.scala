@@ -36,7 +36,6 @@ class BarsConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)(imp
   private val validateUrl: String = appConfig.BaseUrl.barsUrl + "/validate/bank-details"
 
   def validateBankDetails(barsValidateRequest: BarsValidateRequest)(implicit requestHeader: RequestHeader): Future[HttpResponse] = {
-    //httpClient.POST[BarsValidateRequest, BarsValidateResponse](validateUrl, barsValidateRequest)
     httpClient.POST[BarsValidateRequest, HttpResponse](validateUrl, barsValidateRequest)
   }
 
