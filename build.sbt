@@ -8,8 +8,6 @@ import wartremover.WartRemover.autoImport.{wartremoverErrors, wartremoverExclude
 
 lazy val appName: String = "essttp-frontend"
 
-val silencerVersion = "1.7.8"
-
 lazy val scalariformSettings: Def.SettingsDefinition = {
   // description of options found here -> https://github.com/scala-ide/scalariform
   ScalariformKeys.preferences := ScalariformKeys.preferences.value
@@ -80,7 +78,10 @@ lazy val scalaCompilerOptions = Seq(
   "-feature",
   "-unchecked",
   "-language:implicitConversions",
-  "-Ypartial-unification" //required by cats
+  "-Ypartial-unification", //required by cats,
+  // required in place of silencer plugin
+  "-Wconf:cat=unused-imports&src=html/.*:s",
+  "-Wconf:src=routes/.*:s"
 )
 
 lazy val root = (project in file("."))
@@ -122,16 +123,7 @@ lazy val root = (project in file("."))
     Compile / doc / wartremoverErrors := Seq(),
     Compile / doc / scalacOptions := Seq() //this will allow to have warnings in `doc` task
   )
-  .settings(
-    // ***************
-    // Use the silencer plugin to suppress warnings (this is only here for play routes files, don't ignore other warnings...)
-    scalacOptions += "-P:silencer:pathFilters=routes",
-    libraryDependencies ++= Seq(
-      compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
-      "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
-    )
-    // ***************
-  )
+
 //Hint: Uncomment below lines if you want to work on both projects in tandem from intellj
 //  .dependsOn(cor)
 //  .aggregate(cor)
