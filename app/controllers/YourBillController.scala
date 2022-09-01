@@ -67,7 +67,7 @@ object YourBillController {
   def chargeDueDate(chargeTypeAssessments: List[ChargeTypeAssessment]): LocalDate = {
     chargeTypeAssessments.headOption.map { (chargeTypeAssessment: ChargeTypeAssessment) =>
       chargeTypeAssessment.charges.headOption.map { charges: Charges =>
-        parseLocalDate(charges.interestStartDate.value.toString)
+        parseLocalDate(charges.dueDate.value.toString)
       }
     }.getOrElse(throw new IllegalArgumentException("missing charge list")).getOrElse(throw new IllegalArgumentException("missing charge list"))
   }

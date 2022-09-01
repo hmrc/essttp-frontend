@@ -138,7 +138,7 @@ object StartJourneyController {
       mainTrans            = MainTrans("mainTrans"),
       subTrans             = SubTrans("subTrans"),
       outstandingAmount    = OutstandingAmount(debtAmountFromForm.value),
-      interestStartDate    = InterestStartDate(LocalDate.parse("2017-03-07")),
+      interestStartDate    = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
       dueDate              = DueDate(LocalDate.parse("2017-03-07")),
       accruedInterest      = AccruedInterest(AmountInPence(1597)),
       ineligibleChargeType = IneligibleChargeType(false),
