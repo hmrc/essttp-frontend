@@ -1,6 +1,6 @@
 @import "lib/govuk-frontend/govuk/base";
 
-grouped-row {
+.grouped-row {
 
   @include govuk-media-query($from: tablet) {
     border-bottom-style: none;
