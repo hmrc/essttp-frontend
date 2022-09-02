@@ -18,6 +18,7 @@ package controllers
 
 import actions.Actions
 import actionsmodel.AuthenticatedJourneyRequest
+import cats.syntax.eq._
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import essttp.journey.model.Journey
 import essttp.journey.model.Journey.{AfterChosenTypeOfBankAccount, BeforeChosenTypeOfBankAccount}
@@ -33,13 +34,10 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import util.QueryParameterUtils.InstantOps
 import views.Views
-import cats.syntax.eq._
 
 import java.nio.charset.Charset
-import java.time.Instant
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
 @Singleton
 class BankDetailsController @Inject() (
@@ -288,10 +286,7 @@ class BankDetailsController @Inject() (
 
   def barsLockout(p: String): Action[AnyContent] = as.default { implicit request =>
     val charset = Charset.forName("UTF-8")
-    val expiry = Try[String] {
-      new String(java.util.Base64.getDecoder.decode(p.getBytes(charset)), charset)
-    }.getOrElse(Instant.now.longFormat)
-
+    val expiry = new String(java.util.Base64.getDecoder.decode(p.getBytes(charset)), charset)
     Ok(views.barsLockout(expiry))
   }
 }
