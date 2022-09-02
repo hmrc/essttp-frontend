@@ -42,7 +42,6 @@ class BarsLockoutActionFilter @Inject() (barsVerifyStatusConnector: BarsVerifySt
       case j: Journey.AfterComputedTaxId =>
         barsVerifyStatusConnector.status(j.taxId).map { status =>
           status.lockoutExpiryDateTime.map { expiresAt =>
-            logger.info(s"BARs lockout for taxId: ${j.taxId}")
             Redirect(routes.BankDetailsController.barsLockout(expiresAt.encodedLongFormat))
           }
         }

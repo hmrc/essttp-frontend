@@ -36,8 +36,10 @@ import views.Views
 import cats.syntax.eq._
 
 import java.nio.charset.Charset
+import java.time.Instant
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 @Singleton
 class BankDetailsController @Inject() (
@@ -286,7 +288,10 @@ class BankDetailsController @Inject() (
 
   def barsLockout(p: String): Action[AnyContent] = as.default { implicit request =>
     val charset = Charset.forName("UTF-8")
-    val expiry = new String(java.util.Base64.getDecoder.decode(p.getBytes(charset)), charset)
+    val expiry = Try[String] {
+      new String(java.util.Base64.getDecoder.decode(p.getBytes(charset)), charset)
+    }.getOrElse(Instant.now.longFormat)
+
     Ok(views.barsLockout(expiry))
   }
 }

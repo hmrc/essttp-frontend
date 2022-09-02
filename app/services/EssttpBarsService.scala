@@ -18,7 +18,7 @@ package services
 
 import config.AppConfig
 import essttp.bars.BarsVerifyStatusConnector
-import essttp.journey.model.Journey.{AfterChosenTypeOfBankAccount, Stages}
+import essttp.journey.model.Journey.{AfterChosenTypeOfBankAccount, AfterComputedTaxId}
 import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount, TypesOfBankAccount}
 import models.bars.request.{BarsBankAccount, BarsBusiness, BarsSubject}
 import models.bars.response.{BarsError, TooManyAttempts, VerifyResponse}
@@ -50,22 +50,22 @@ class EssttpBarsService @Inject() (
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(requestHeader)
 
     val taxId = journey match {
-      case account: Stages.ChosenTypeOfBankAccount     => account.taxId
-      case details: Stages.EnteredDirectDebitDetails   => details.taxId
-      case details: Stages.ConfirmedDirectDebitDetails => details.taxId
-      case conditions: Stages.AgreedTermsAndConditions => conditions.taxId
-      case arrangement: Stages.SubmittedArrangement    => arrangement.taxId
+      case j: AfterComputedTaxId => j.taxId
+      case _                     => throw new RuntimeException("Expected to find a taxId but none found")
     }
 
-    barsService.verifyBankDetails(
-      bankAccount       = toBarsBankAccount(bankDetails),
-      subject           = toBarsSubject(bankDetails),
-      business          = toBarsBusiness(bankDetails),
-      typeOfBankAccount = toBarsTypeOfBankAccount(typeOfBankAccount)
-    ).flatMap { result: Either[BarsError, VerifyResponse] =>
-        barsVerifyStatusConnector.update(taxId)
+    barsService
+      .verifyBankDetails(
+        bankAccount       = toBarsBankAccount(bankDetails),
+        subject           = toBarsSubject(bankDetails),
+        business          = toBarsBusiness(bankDetails),
+        typeOfBankAccount = toBarsTypeOfBankAccount(typeOfBankAccount)
+      )
+      .flatMap { result =>
+        auditService.auditBarsCheck(journey, bankDetails, typeOfBankAccount, result)
+        barsVerifyStatusConnector
+          .update(taxId)
           .map { verifyStatus =>
-            auditService.auditBarsCheck(journey, bankDetails, typeOfBankAccount, result)
             // here we catch a lockout BarsStatus condition,
             // and force a TooManyAttempts (BarsError) response
             verifyStatus.lockoutExpiryDateTime
