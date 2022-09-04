@@ -22,12 +22,40 @@ import essttp.journey.model.{JourneyId, Origin, Origins}
 import essttp.rootmodel.{DayOfMonth, TaxId}
 import play.api.libs.json.Json
 import testsupport.testdata.{JourneyJsonTemplates, TdAll, TdJsonBodies}
+import wiremock.org.apache.http.HttpStatus._
 
 object EssttpBackend {
 
   private val findByLatestSessionIdUrl: String = "/essttp-backend/journey/find-latest-by-session-id"
 
   def verifyFindByLatestSessionId(): Unit = verify(postRequestedFor(urlPathEqualTo(findByLatestSessionIdUrl)))
+
+  object BarsVerifyStatusStub {
+    // TODO move the body
+    val noLockoutBody = """{ "attempts": 0 }"""
+
+    def statusUnlocked(): StubMapping = {
+      val url: String = "/essttp-backend/bars/verify/status"
+      stubFor(
+        post(urlPathEqualTo(url))
+          .withRequestBody(matchingJsonPath("$.taxId"))
+          .willReturn(aResponse()
+            .withStatus(SC_OK)
+            .withBody(noLockoutBody))
+      )
+    }
+
+    def update(): StubMapping = {
+      val url: String = "/essttp-backend/bars/verify/update"
+      stubFor(
+        post(urlPathEqualTo(url))
+          .withRequestBody(matchingJsonPath("$.taxId"))
+          .willReturn(aResponse()
+            .withStatus(SC_OK)
+            .withBody(noLockoutBody))
+      )
+    }
+  }
 
   object StartJourney {
 

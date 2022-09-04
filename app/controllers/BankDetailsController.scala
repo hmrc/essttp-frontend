@@ -17,6 +17,8 @@
 package controllers
 
 import actions.Actions
+import actionsmodel.AuthenticatedJourneyRequest
+import cats.syntax.eq._
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import essttp.journey.model.Journey
 import essttp.journey.model.Journey.{AfterChosenTypeOfBankAccount, BeforeChosenTypeOfBankAccount}
@@ -30,8 +32,10 @@ import requests.RequestSupport
 import services.{EssttpBarsService, JourneyService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
+import util.QueryParameterUtils.InstantOps
 import views.Views
 
+import java.nio.charset.Charset
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -101,21 +105,26 @@ class BankDetailsController @Inject() (
       implicit
       request: Request[_]
   ): Result = {
-    val maybePrePoppedForm: Form[BankDetailsForm] = journey match {
-      case _: Journey.BeforeEnteredDirectDebitDetails => BankDetailsForm.form
-      case j: Journey.AfterEnteredDirectDebitDetails =>
+    val maybePrePoppedForm: Form[BankDetailsForm] = currentDirectDebitDetails(journey)
+      .fold(BankDetailsForm.form) { directDebitDetails =>
         BankDetailsForm.form.fill(
           BankDetailsForm(
-            name            = j.directDebitDetails.bankDetails.name,
-            sortCode        = j.directDebitDetails.bankDetails.sortCode,
-            accountNumber   = j.directDebitDetails.bankDetails.accountNumber,
+            name            = directDebitDetails.bankDetails.name,
+            sortCode        = directDebitDetails.bankDetails.sortCode,
+            accountNumber   = directDebitDetails.bankDetails.accountNumber,
             isSoleSignatory =
-              IsSoleSignatoryFormValue.booleanToIsSoleSignatoryFormValue(j.directDebitDetails.isAccountHolder)
+              IsSoleSignatoryFormValue.booleanToIsSoleSignatoryFormValue(directDebitDetails.isAccountHolder)
           )
         )
-    }
+      }
     Ok(views.enterBankDetailsPage(form    = maybePrePoppedForm, backUrl = BankDetailsController.chooseTypeOfAccountUrl))
   }
+
+  private def currentDirectDebitDetails(journey: Journey): Option[DirectDebitDetails] =
+    journey match {
+      case _: Journey.BeforeEnteredDirectDebitDetails => None
+      case j: Journey.AfterEnteredDirectDebitDetails  => Some(j.directDebitDetails)
+    }
 
   val enterBankDetailsSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     val formFromRequest = BankDetailsForm.form.bindFromRequest()
@@ -136,35 +145,47 @@ class BankDetailsController @Inject() (
         )
 
         request.journey match {
+          case j: BeforeChosenTypeOfBankAccount =>
+            Future.successful(JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j))
           case j: AfterChosenTypeOfBankAccount =>
             bankDetailsForm.isSoleSignatory match {
-              case IsSoleSignatoryFormValue.Yes =>
-                barsService
-                  .verifyBankDetails(directDebitDetails.bankDetails, j.typeOfBankAccount, j)
-                  .flatMap(
-                    barsResponse =>
-                      journeyService
-                        .updateDirectDebitDetails(request.journeyId, directDebitDetails)
-                        .map(_ => handleBars(barsResponse, formFromRequest))
-                  )
               case IsSoleSignatoryFormValue.No =>
                 journeyService.updateDirectDebitDetails(request.journeyId, directDebitDetails).map { _ =>
                   Redirect(routes.BankDetailsController.cannotSetupDirectDebitOnlinePage)
                 }
+              case IsSoleSignatoryFormValue.Yes =>
+                currentDirectDebitDetails(request.journey) match {
+                  case Some(current) if directDebitDetails === current =>
+                    // nothing changed so don't call BARs and don't update journey
+                    Future.successful(Redirect(routes.BankDetailsController.checkBankDetails))
+                  case _ =>
+                    barsService
+                      .verifyBankDetails(directDebitDetails.bankDetails, j.typeOfBankAccount, j)
+                      .flatMap { barsResponse =>
+                        handleBars(barsResponse, directDebitDetails, formFromRequest)
+                      }
+                }
             }
-          case j: BeforeChosenTypeOfBankAccount =>
-            Future.successful(JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j))
         }
       }
     )
   }
 
-  private def handleBars(resp: Either[BarsError, VerifyResponse], form: Form[BankDetailsForm])(implicit request: Request[_]): Result = {
-      def enterBankDetailsPageWithBarsError(error: FormError): Result =
-        Ok(
-          views.enterBankDetailsPage(
-            form    = form.withError(error),
-            backUrl = BankDetailsController.chooseTypeOfAccountUrl
+  private def handleBars(
+      resp:               Either[BarsError, VerifyResponse],
+      directDebitDetails: DirectDebitDetails,
+      form:               Form[BankDetailsForm]
+  )(
+      implicit
+      request: AuthenticatedJourneyRequest[_]
+  ): Future[Result] = {
+      def enterBankDetailsPageWithBarsError(error: FormError): Future[Result] =
+        Future.successful(
+          Ok(
+            views.enterBankDetailsPage(
+              form    = form.withError(error),
+              backUrl = BankDetailsController.chooseTypeOfAccountUrl
+            )
           )
         )
 
@@ -172,7 +193,7 @@ class BankDetailsController @Inject() (
     resp.fold(
       {
         case ThirdPartyError(_) =>
-          Redirect(routes.BankDetailsController.barsErrorPlaceholder)
+          Future.successful(Redirect(routes.BankDetailsController.barsErrorPlaceholder))
         case AccountNumberNotWellFormatted(_) =>
           enterBankDetailsPageWithBarsError(accountNumberNotWellFormatted)
         case SortCodeDoesNotSupportDirectDebit(_) =>
@@ -183,10 +204,19 @@ class BankDetailsController @Inject() (
           enterBankDetailsPageWithBarsError(nameDoesNotMatch)
         case AccountDoesNotExist(_) =>
           enterBankDetailsPageWithBarsError(accountDoesNotExist)
+        case SortCodeOnDenyListError(_) =>
+          enterBankDetailsPageWithBarsError(sortCodeOnDenyList)
         case OtherBarsError(_) =>
           enterBankDetailsPageWithBarsError(otherBarsError)
+        case TooManyAttempts(_, expiry) =>
+          Future.successful(Redirect(routes.BankDetailsController.barsLockout(expiry.encodedLongFormat)))
       },
-      _ => Redirect(routes.BankDetailsController.checkBankDetails)
+      _ =>
+        journeyService
+          .updateDirectDebitDetails(request.journeyId, directDebitDetails)
+          .map { _ =>
+            Redirect(routes.BankDetailsController.checkBankDetails)
+          }
     )
   }
 
@@ -252,6 +282,12 @@ class BankDetailsController @Inject() (
   // TODO in a future ticket
   val barsErrorPlaceholder: Action[AnyContent] = as.default { implicit request =>
     Ok(views.barsErrorPlaceHolder())
+  }
+
+  def barsLockout(p: String): Action[AnyContent] = as.default { implicit request =>
+    val charset = Charset.forName("UTF-8")
+    val expiry = new String(java.util.Base64.getDecoder.decode(p.getBytes(charset)), charset)
+    Ok(views.barsLockout(expiry))
   }
 }
 
