@@ -194,17 +194,17 @@ class BankDetailsController @Inject() (
       {
         case ThirdPartyError(_) =>
           Future.successful(Redirect(routes.BankDetailsController.barsErrorPlaceholder))
-        case AccountNumberNotWellFormatted(_) =>
+        case AccountNumberNotWellFormatted(_) | AccountNumberNotWellFormattedValidateResponse(_) =>
           enterBankDetailsPageWithBarsError(accountNumberNotWellFormatted)
-        case SortCodeDoesNotSupportDirectDebit(_) =>
+        case SortCodeDoesNotSupportDirectDebit(_) | SortCodeDoesNotSupportDirectDebitValidateResponse(_) =>
           enterBankDetailsPageWithBarsError(sortCodeDoesNotSupportsDirectDebit)
-        case SortCodeNotPresentOnEiscd(_) =>
+        case SortCodeNotPresentOnEiscd(_) | SortCodeNotPresentOnEiscdValidateResponse(_) =>
           enterBankDetailsPageWithBarsError(sortCodeNotPresentOnEiscd)
         case NameDoesNotMatch(_) =>
           enterBankDetailsPageWithBarsError(nameDoesNotMatch)
         case AccountDoesNotExist(_) =>
           enterBankDetailsPageWithBarsError(accountDoesNotExist)
-        case SortCodeOnDenyListError(_) =>
+        case SortCodeOnDenyListErrorValidateResponse(_) =>
           enterBankDetailsPageWithBarsError(sortCodeOnDenyList)
         case OtherBarsError(_) =>
           enterBankDetailsPageWithBarsError(otherBarsError)

@@ -25,7 +25,6 @@ object QueryParameterUtils {
 
   implicit class InstantOps(private val instant: Instant) extends AnyVal {
     def encodedLongFormat: String = encode(formatted(instant))
-    def longFormat: String = formatted(instant)
   }
 
   private val fmt: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy, h:mma")
