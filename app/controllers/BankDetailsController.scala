@@ -204,7 +204,7 @@ class BankDetailsController @Inject() (
           enterBankDetailsPageWithBarsError(nameDoesNotMatch)
         case AccountDoesNotExist(_) =>
           enterBankDetailsPageWithBarsError(accountDoesNotExist)
-        case SortCodeOnDenyListErrorValidateResponse(_) =>
+        case SortCodeOnDenyListErrorResponse(_) =>
           enterBankDetailsPageWithBarsError(sortCodeOnDenyList)
         case OtherBarsError(_) =>
           enterBankDetailsPageWithBarsError(otherBarsError)

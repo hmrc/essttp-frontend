@@ -92,7 +92,7 @@ class BarsService @Inject() (barsConnector: BarsConnector)(implicit ec: Executio
       case validateResponse @ validateFailure() =>
         Future.successful(Left(handleValidateErrorResponse(validateResponse)))
       case response: SortCodeOnDenyList =>
-        Future.successful(Left(SortCodeOnDenyListErrorValidateResponse(response)))
+        Future.successful(Left(SortCodeOnDenyListErrorResponse(response)))
       case _ =>
         (typeOfBankAccount match {
           case BarsTypesOfBankAccount.Personal => verifyPersonal(bankAccount, subject)
