@@ -36,8 +36,8 @@ class DatesApiControllerSpec extends ItSpec {
     "trigger call to essttp-dates microservice extreme dates endpoint and update backend" in {
       AuthStub.authorise()
       EssttpBackend.UpfrontPaymentAmount.findJourney()
-      Dates.extremeDatesCall()
-      EssttpBackend.Dates.updateExtremeDates(TdAll.journeyId)
+      Dates.stubExtremeDatesCall()
+      EssttpBackend.Dates.stubUpdateExtremeDates(TdAll.journeyId)
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.retrieveExtremeDates(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
@@ -50,8 +50,8 @@ class DatesApiControllerSpec extends ItSpec {
     "trigger call to essttp-dates microservice start dates endpoint and update backend" in {
       AuthStub.authorise()
       EssttpBackend.DayOfMonth.findJourney()
-      Dates.startDatesCall()
-      EssttpBackend.Dates.updateStartDates(TdAll.journeyId)
+      Dates.stubStartDatesCall()
+      EssttpBackend.Dates.stubUpdateStartDates(TdAll.journeyId)
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.retrieveStartDates(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER

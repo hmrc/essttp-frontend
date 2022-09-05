@@ -104,7 +104,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
     "redirect to what day do you want to pay on when form is valid" in {
       AuthStub.authorise()
       EssttpBackend.AffordabilityMinMaxApi.findJourney()
-      EssttpBackend.MonthlyPaymentAmount.updateMonthlyPaymentAmount(TdAll.journeyId)
+      EssttpBackend.MonthlyPaymentAmount.stubUpdateMonthlyPaymentAmount(TdAll.journeyId)
       val fakeRequest = FakeRequest(
         method = "POST",
         path   = "/how-much-can-you-pay-each-month"

@@ -196,7 +196,7 @@ class BankDetailsControllerSpec extends ItSpec {
       s"redirect to /set-up-direct-debit when valid form is submitted - $typeOfAccount" in {
         AuthStub.authorise()
         EssttpBackend.HasCheckedPlan.findJourney()
-        EssttpBackend.ChosenTypeOfBankAccount.updateChosenTypeOfBankAccount(TdAll.journeyId)
+        EssttpBackend.ChosenTypeOfBankAccount.stubUpdateChosenTypeOfBankAccount(TdAll.journeyId)
         val fakeRequest = FakeRequest(
           method = "POST",
           path   = "/what-type-of-account-details-are-you-providing"
@@ -287,7 +287,7 @@ class BankDetailsControllerSpec extends ItSpec {
     "redirect to /check-bank-details when valid form is submitted and bank account type of personal" in {
       AuthStub.authorise()
       EssttpBackend.ChosenTypeOfBankAccount.findJourney(JourneyJsonTemplates.`Chosen Type of Bank Account - Personal`)
-      EssttpBackend.DirectDebitDetails.updateDirectDebitDetails(TdAll.journeyId)
+      EssttpBackend.DirectDebitDetails.stubUpdateDirectDebitDetails(TdAll.journeyId)
       BarsStub.ValidateStub.success()
       BarsStub.VerifyPersonalStub.success()
 
@@ -346,7 +346,7 @@ class BankDetailsControllerSpec extends ItSpec {
     "redirect to /you-cannot-set-up-a-direct-debit-online when user submits no for radio option relating to being account holder" in {
       AuthStub.authorise()
       EssttpBackend.ConfirmedDirectDebitDetails.findJourney()
-      EssttpBackend.DirectDebitDetails.updateDirectDebitDetails(TdAll.journeyId)
+      EssttpBackend.DirectDebitDetails.stubUpdateDirectDebitDetails(TdAll.journeyId)
 
       val formData = List(
         ("name", "Bob Ross"),
@@ -485,7 +485,7 @@ class BankDetailsControllerSpec extends ItSpec {
         .withSession(SessionKeys.sessionId -> "IamATestSessionId")
         .withFormUrlEncodedBody(formData: _*)
 
-      EssttpBackend.DirectDebitDetails.updateDirectDebitDetails(TdAll.journeyId)
+      EssttpBackend.DirectDebitDetails.stubUpdateDirectDebitDetails(TdAll.journeyId)
 
       typeOfAccount match {
         case TypesOfBankAccount.Personal =>
@@ -867,7 +867,7 @@ class BankDetailsControllerSpec extends ItSpec {
     "redirect the user to terms and conditions and update backend" in {
       AuthStub.authorise()
       EssttpBackend.DirectDebitDetails.findJourney()
-      EssttpBackend.ConfirmedDirectDebitDetails.updateConfirmDirectDebitDetails(TdAll.journeyId)
+      EssttpBackend.ConfirmedDirectDebitDetails.stubUpdateConfirmDirectDebitDetails(TdAll.journeyId)
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.checkBankDetailsSubmit(fakeRequest)
@@ -942,7 +942,7 @@ class BankDetailsControllerSpec extends ItSpec {
     "redirect the user to terms and conditions and update backend" in {
       AuthStub.authorise()
       EssttpBackend.ConfirmedDirectDebitDetails.findJourney()
-      EssttpBackend.TermsAndConditions.updateAgreedTermsAndConditions(TdAll.journeyId)
+      EssttpBackend.TermsAndConditions.stubUpdateAgreedTermsAndConditions(TdAll.journeyId)
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.termsAndConditionsSubmit(fakeRequest)

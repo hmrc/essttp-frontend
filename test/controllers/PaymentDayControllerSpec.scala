@@ -89,7 +89,7 @@ class PaymentDayControllerSpec extends ItSpec {
     "should update journey with dayOfMonth and redirect to instalment page when 28th selected" in {
       AuthStub.authorise()
       EssttpBackend.MonthlyPaymentAmount.findJourney()
-      EssttpBackend.DayOfMonth.updateDayOfMonth(TdAll.journeyId)
+      EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(TdAll.journeyId)
       val fakeRequest = FakeRequest(
         method = "POST",
         path   = "/which-day-do-you-want-to-pay-each-month"
@@ -104,7 +104,7 @@ class PaymentDayControllerSpec extends ItSpec {
     "should update journey with dayOfMonth and redirect to instalment page when other day selected" in {
       AuthStub.authorise()
       EssttpBackend.MonthlyPaymentAmount.findJourney()
-      EssttpBackend.DayOfMonth.updateDayOfMonth(TdAll.journeyId)
+      EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(TdAll.journeyId)
       val fakeRequest = FakeRequest(
         method = "POST",
         path   = "/which-day-do-you-want-to-pay-each-month"
@@ -122,7 +122,7 @@ class PaymentDayControllerSpec extends ItSpec {
     "should update journey with dayOfMonth and redirect to instalment page when other day selected and 28 entered" in {
       AuthStub.authorise()
       EssttpBackend.MonthlyPaymentAmount.findJourney()
-      EssttpBackend.DayOfMonth.updateDayOfMonth(TdAll.journeyId)
+      EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(TdAll.journeyId)
       val fakeRequest = FakeRequest(
         method = "POST",
         path   = "/which-day-do-you-want-to-pay-each-month"

@@ -52,9 +52,9 @@ class DetermineEligibilityControllerSpec extends ItSpec {
 
             AuthStub.authorise()
             EssttpBackend.DetermineTaxId.findJourney()
-            Ttp.Eligibility.retrieveEligibility(TtpJsonResponses.ttpEligibilityCallJson(TdAll.notEligibleEligibilityPass, eligibilityRules))
-            Ttp.Eligibility.retrieveEligibility(eligibilityCheckResponseJson)
-            EssttpBackend.EligibilityCheck.updateEligibilityResult(TdAll.journeyId)
+            Ttp.Eligibility.stubRetrieveEligibility(TtpJsonResponses.ttpEligibilityCallJson(TdAll.notEligibleEligibilityPass, eligibilityRules))
+            Ttp.Eligibility.stubRetrieveEligibility(eligibilityCheckResponseJson)
+            EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(TdAll.journeyId)
 
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result = controller.determineEligibility(fakeRequest)
@@ -62,6 +62,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
             status(result) shouldBe Status.SEE_OTHER
             redirectLocation(result) shouldBe Some(expectedRedirect)
             Ttp.Eligibility.verifyTtpEligibilityRequests()
+            EssttpBackend.EligibilityCheck.verifyUpdateEligibilityRequest(TdAll.journeyId)
             AuditConnectorStub.verifyEventAudited(
               "EligibilityCheck",
               Json.parse(
@@ -95,8 +96,8 @@ class DetermineEligibilityControllerSpec extends ItSpec {
 
       AuthStub.authorise()
       EssttpBackend.DetermineTaxId.findJourney()
-      Ttp.Eligibility.retrieveEligibility(eligibilityCheckResponseJson)
-      EssttpBackend.EligibilityCheck.updateEligibilityResult(TdAll.journeyId)
+      Ttp.Eligibility.stubRetrieveEligibility(eligibilityCheckResponseJson)
+      EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(TdAll.journeyId)
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.determineEligibility(fakeRequest)
@@ -104,6 +105,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.yourBillIsUrl)
       Ttp.Eligibility.verifyTtpEligibilityRequests()
+      EssttpBackend.EligibilityCheck.verifyUpdateEligibilityRequest(TdAll.journeyId)
       AuditConnectorStub.verifyEventAudited(
         "EligibilityCheck",
         Json.parse(
@@ -127,13 +129,14 @@ class DetermineEligibilityControllerSpec extends ItSpec {
       )
     }
 
-    "Eligibility already determined should route user to your bill is" in {
+    "Eligibility already determined should route user to your bill is and not update backend again" in {
       AuthStub.authorise()
       EssttpBackend.EligibilityCheck.findJourney()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.determineEligibility(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.yourBillIsUrl)
+      EssttpBackend.EligibilityCheck.verifyNoneUpdateEligibilityRequest(TdAll.journeyId)
     }
 
     "Redirect to landing page if journey is in started state" in {
@@ -143,6 +146,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
       val result = controller.determineEligibility(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.landingPageUrl)
+      EssttpBackend.EligibilityCheck.verifyNoneUpdateEligibilityRequest(TdAll.journeyId)
     }
   }
 }

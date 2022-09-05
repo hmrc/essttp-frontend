@@ -86,7 +86,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     "should redirect to /how-much-can-you-pay-upfront when user chooses yes" in {
       AuthStub.authorise()
       EssttpBackend.EligibilityCheck.findJourney()
-      EssttpBackend.CanPayUpfront.updateCanPayUpfront(TdAll.journeyId, canPayUpfrontScenario = true)
+      EssttpBackend.CanPayUpfront.stubUpdateCanPayUpfront(TdAll.journeyId, canPayUpfrontScenario = true)
 
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -104,7 +104,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     "should redirect to /can-you-make-an-upfront-payment when user chooses no" in {
       AuthStub.authorise()
       EssttpBackend.EligibilityCheck.findJourney()
-      EssttpBackend.CanPayUpfront.updateCanPayUpfront(TdAll.journeyId, canPayUpfrontScenario = false)
+      EssttpBackend.CanPayUpfront.stubUpdateCanPayUpfront(TdAll.journeyId, canPayUpfrontScenario = false)
 
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -203,7 +203,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     "should redirect to /upfront-payment-summary when user enters a positive number, less than their total debt" in {
       AuthStub.authorise()
       EssttpBackend.CanPayUpfront.findJourney()
-      EssttpBackend.UpfrontPaymentAmount.updateUpfrontPaymentAmount(TdAll.journeyId)
+      EssttpBackend.UpfrontPaymentAmount.stubUpdateUpfrontPaymentAmount(TdAll.journeyId)
 
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -221,7 +221,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     "should redirect to /upfront-payment-summary when user enters a positive number, at the upper limit" in {
       AuthStub.authorise()
       EssttpBackend.CanPayUpfront.findJourney()
-      EssttpBackend.UpfrontPaymentAmount.updateUpfrontPaymentAmount(TdAll.journeyId)
+      EssttpBackend.UpfrontPaymentAmount.stubUpdateUpfrontPaymentAmount(TdAll.journeyId)
 
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -239,7 +239,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     "should allow for decimal numbers if they are within the amount bounds" in {
       AuthStub.authorise()
       EssttpBackend.CanPayUpfront.findJourney()
-      EssttpBackend.UpfrontPaymentAmount.updateUpfrontPaymentAmount(TdAll.journeyId)
+      EssttpBackend.UpfrontPaymentAmount.stubUpdateUpfrontPaymentAmount(TdAll.journeyId)
 
       val fakeRequest = FakeRequest(
         method = "POST",

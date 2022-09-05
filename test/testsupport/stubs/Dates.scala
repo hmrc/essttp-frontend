@@ -16,29 +16,22 @@
 
 package testsupport.stubs
 
-import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
+import essttp.rootmodel.dates.extremedates.ExtremeDatesRequest
+import essttp.rootmodel.dates.startdates.StartDatesRequest
 import testsupport.testdata.TdEssttpDatesBodies
 
 object Dates {
   private val startDatesUrl: String = "/essttp-dates/start-dates"
   private val extremeDatesUrl: String = "/essttp-dates/extreme-dates"
-  def verifyStartDates(): Unit = verify(postRequestedFor(urlPathEqualTo(startDatesUrl)))
-  def verifyExtremeDates(): Unit = verify(postRequestedFor(urlPathEqualTo(extremeDatesUrl)))
-  def extremeDatesCall(
-      jsonBody: String = TdEssttpDatesBodies.extremeDates()
-  ): StubMapping = stubFor(
-    post(urlPathEqualTo(extremeDatesUrl))
-      .willReturn(aResponse()
-        .withStatus(200)
-        .withBody(jsonBody))
-  )
-  def startDatesCall(
-      jsonBody: String = TdEssttpDatesBodies.startDatesWithUpfrontPayment()
-  ): StubMapping = stubFor(
-    post(urlPathEqualTo(startDatesUrl))
-      .willReturn(aResponse()
-        .withStatus(200)
-        .withBody(jsonBody))
-  )
+
+  def verifyStartDates(): Unit = WireMockHelpers.verifyWithBodyParse(startDatesUrl)(StartDatesRequest.format)
+
+  def verifyExtremeDates(): Unit = WireMockHelpers.verifyWithBodyParse(extremeDatesUrl)(ExtremeDatesRequest.format)
+
+  def stubExtremeDatesCall(jsonBody: String = TdEssttpDatesBodies.extremeDates()): StubMapping =
+    WireMockHelpers.stubForPostWithResponseBody(extremeDatesUrl, jsonBody)
+
+  def stubStartDatesCall(jsonBody: String = TdEssttpDatesBodies.startDatesWithUpfrontPayment()): StubMapping =
+    WireMockHelpers.stubForPostWithResponseBody(startDatesUrl, jsonBody)
 }

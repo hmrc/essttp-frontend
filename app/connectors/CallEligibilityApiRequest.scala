@@ -27,5 +27,5 @@ final case class CallEligibilityApiRequest(
 )
 
 object CallEligibilityApiRequest {
-  implicit val formatter: OFormat[CallEligibilityApiRequest] = Json.format[CallEligibilityApiRequest]
+  implicit val format: OFormat[CallEligibilityApiRequest] = Json.format[CallEligibilityApiRequest]
 }

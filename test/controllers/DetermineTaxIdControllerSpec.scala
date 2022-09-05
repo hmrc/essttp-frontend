@@ -62,7 +62,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
 
         AuthStub.authorise(allEnrolments = Some(enrolments))
         EssttpBackend.StartJourney.findJourney()
-        EssttpBackend.DetermineTaxId.updateTaxId(TdAll.journeyId)
+        EssttpBackend.DetermineTaxId.stubUpdateTaxId(TdAll.journeyId)
 
         val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
         val result = controller.determineTaxId()(fakeRequest)
@@ -130,7 +130,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
         ).foreach { e =>
             AuthStub.authorise(allEnrolments = Some(Set(e)))
             EssttpBackend.StartJourney.findJourney()
-            EssttpBackend.DetermineTaxId.updateTaxId(TdAll.journeyId)
+            EssttpBackend.DetermineTaxId.stubUpdateTaxId(TdAll.journeyId)
 
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
