@@ -78,7 +78,7 @@ class ItSpec
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    EssttpBackend.BarsVerifyStatusStub.statusUnlocked()
+    EssttpBackend.BarsVerifyStatusStub.statusUnlocked() // required by almost all tests
     webDriver.manage().deleteAllCookies()
   }
 

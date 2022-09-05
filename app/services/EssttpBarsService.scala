@@ -21,7 +21,7 @@ import essttp.bars.BarsVerifyStatusConnector
 import essttp.journey.model.Journey.{AfterChosenTypeOfBankAccount, AfterComputedTaxId}
 import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount, TypesOfBankAccount}
 import models.bars.request.{BarsBankAccount, BarsBusiness, BarsSubject}
-import models.bars.response.{BarsError, TooManyAttempts, VerifyResponse}
+import models.bars.response._
 import models.bars.{BarsTypeOfBankAccount, BarsTypesOfBankAccount}
 import play.api.mvc.RequestHeader
 import services.EssttpBarsService._
@@ -63,16 +63,21 @@ class EssttpBarsService @Inject() (
       )
       .flatMap { result =>
         auditService.auditBarsCheck(journey, bankDetails, typeOfBankAccount, result)
-        barsVerifyStatusConnector
-          .update(taxId)
-          .map { verifyStatus =>
-            // here we catch a lockout BarsStatus condition,
-            // and force a TooManyAttempts (BarsError) response
-            verifyStatus.lockoutExpiryDateTime
-              .fold(result) { expiry =>
-                result.flatMap(resp => Left(TooManyAttempts(resp, expiry)))
+        result match {
+          case Left(_: BarsValidateError) =>
+            Future.successful(result) // don't update the verify count on validate errors
+          case Right(_) | Left(_: BarsVerifyError) =>
+            barsVerifyStatusConnector
+              .update(taxId)
+              .map { verifyStatus =>
+                // here we catch a lockout BarsStatus condition,
+                // and force a TooManyAttempts (BarsError) response
+                verifyStatus.lockoutExpiryDateTime
+                  .fold(result) { expiry =>
+                    result.flatMap(resp => Left(TooManyAttempts(resp, expiry)))
+                  }
               }
-          }
+        }
       }
   }
 }

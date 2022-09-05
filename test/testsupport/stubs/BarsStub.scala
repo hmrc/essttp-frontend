@@ -147,14 +147,14 @@ object BarsStub {
   }
 
   private def stubOk(url: String, responseJson: String): StubMapping = {
-    stubUrl(url, HttpStatus.SC_OK, responseJson)
+    stubPost(url, HttpStatus.SC_OK, responseJson)
   }
 
   private def stubBadRequest(url: String, responseJson: String): StubMapping = {
-    stubUrl(url, HttpStatus.SC_BAD_REQUEST, responseJson)
+    stubPost(url, HttpStatus.SC_BAD_REQUEST, responseJson)
   }
 
-  private def stubUrl(url: String, status: Int, responseJson: String): StubMapping = {
+  private def stubPost(url: String, status: Int, responseJson: String): StubMapping = {
     stubFor(
       post(urlPathEqualTo(url))
         .willReturn(

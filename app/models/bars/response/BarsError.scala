@@ -22,13 +22,28 @@ sealed trait BarsError {
   val barsResponse: BarsResponse
 }
 
-final case class ThirdPartyError(barsResponse: BarsResponse) extends BarsError
-final case class AccountNumberNotWellFormatted(barsResponse: BarsResponse) extends BarsError
-final case class SortCodeNotPresentOnEiscd(barsResponse: BarsResponse) extends BarsError
-final case class SortCodeDoesNotSupportDirectDebit(barsResponse: BarsResponse) extends BarsError
-final case class AccountDoesNotExist(barsResponse: BarsResponse) extends BarsError
-final case class NameDoesNotMatch(barsResponse: BarsResponse) extends BarsError
-final case class SortCodeOnDenyListError(barsResponse: BarsResponse) extends BarsError
-final case class OtherBarsError(barsResponse: BarsResponse) extends BarsError
+sealed trait BarsValidateError extends BarsError {
+  override val barsResponse: BarsResponse
+}
+
+sealed trait SortCodeOnDenyListError extends BarsValidateError
+
+sealed trait BarsVerifyError extends BarsError {
+  override val barsResponse: VerifyResponse
+}
+
+final case class AccountNumberNotWellFormattedValidateResponse(barsResponse: ValidateResponse) extends BarsValidateError
+final case class SortCodeNotPresentOnEiscdValidateResponse(barsResponse: ValidateResponse) extends BarsValidateError
+final case class SortCodeDoesNotSupportDirectDebitValidateResponse(barsResponse: ValidateResponse) extends BarsValidateError
+
+final case class SortCodeOnDenyListErrorResponse(barsResponse: SortCodeOnDenyList) extends SortCodeOnDenyListError
+
+final case class AccountNumberNotWellFormatted(barsResponse: VerifyResponse) extends BarsVerifyError
+final case class SortCodeNotPresentOnEiscd(barsResponse: VerifyResponse) extends BarsVerifyError
+final case class SortCodeDoesNotSupportDirectDebit(barsResponse: VerifyResponse) extends BarsVerifyError
+final case class ThirdPartyError(barsResponse: VerifyResponse) extends BarsVerifyError
+final case class AccountDoesNotExist(barsResponse: VerifyResponse) extends BarsVerifyError
+final case class NameDoesNotMatch(barsResponse: VerifyResponse) extends BarsVerifyError
+final case class OtherBarsError(barsResponse: VerifyResponse) extends BarsVerifyError
 // not strictly a BARs error, but we use this error to indicate too many attempts
-final case class TooManyAttempts(barsResponse: BarsResponse, lockoutExpiry: Instant) extends BarsError
+final case class TooManyAttempts(barsResponse: VerifyResponse, lockoutExpiry: Instant) extends BarsVerifyError

@@ -92,7 +92,7 @@ class BarsService @Inject() (barsConnector: BarsConnector)(implicit ec: Executio
       case validateResponse @ validateFailure() =>
         Future.successful(Left(handleValidateErrorResponse(validateResponse)))
       case response: SortCodeOnDenyList =>
-        Future.successful(Left(SortCodeOnDenyListError(response)))
+        Future.successful(Left(SortCodeOnDenyListErrorResponse(response)))
       case _ =>
         (typeOfBankAccount match {
           case BarsTypesOfBankAccount.Personal => verifyPersonal(bankAccount, subject)
@@ -104,9 +104,9 @@ class BarsService @Inject() (barsConnector: BarsConnector)(implicit ec: Executio
   private def handleValidateErrorResponse(response: ValidateResponse): BarsError = {
     import ValidateResponse._
     response match {
-      case accountNumberIsWellFormattedNo() => AccountNumberNotWellFormatted(response)
-      case sortCodeIsPresentOnEiscdNo()     => SortCodeNotPresentOnEiscd(response)
-      case sortCodeSupportsDirectDebitNo()  => SortCodeDoesNotSupportDirectDebit(response)
+      case accountNumberIsWellFormattedNo() => AccountNumberNotWellFormattedValidateResponse(response)
+      case sortCodeIsPresentOnEiscdNo()     => SortCodeNotPresentOnEiscdValidateResponse(response)
+      case sortCodeSupportsDirectDebitNo()  => SortCodeDoesNotSupportDirectDebitValidateResponse(response)
     }
   }
 
