@@ -31,28 +31,40 @@ object EssttpBackend {
   def verifyFindByLatestSessionId(): Unit = verify(postRequestedFor(urlPathEqualTo(findByLatestSessionIdUrl)))
 
   object BarsVerifyStatusStub {
-    // TODO move the body
-    val noLockoutBody = """{ "attempts": 0 }"""
+    val noLockoutBody = """{
+                          |    "attempts": 4
+                          |}""".stripMargin
 
-    def statusUnlocked(): StubMapping = {
-      val url: String = "/essttp-backend/bars/verify/status"
-      stubFor(
-        post(urlPathEqualTo(url))
-          .withRequestBody(matchingJsonPath("$.taxId"))
-          .willReturn(aResponse()
-            .withStatus(SC_OK)
-            .withBody(noLockoutBody))
-      )
+    val lockoutBody = """{
+                        |    "attempts": 4,
+                        |    "lockoutExpiryDateTime": "2022-09-06T11:28:42.316Z"
+                        |}""".stripMargin
+
+    private val getVerifyStatusUrl: String = "/essttp-backend/bars/verify/status"
+    private val updateVerifyStatusUrl: String = "/essttp-backend/bars/verify/update"
+
+    def statusUnlocked(): StubMapping = stubPost(getVerifyStatusUrl, SC_OK, noLockoutBody)
+
+    def update(): StubMapping = stubPost(updateVerifyStatusUrl, SC_OK, noLockoutBody)
+
+    def updateAndLockout(): StubMapping = stubPost(updateVerifyStatusUrl, SC_OK, lockoutBody)
+
+    def ensureVerifyUpdateStatusIsCalled(): Unit = {
+      verify(exactly(1), postRequestedFor(urlPathEqualTo(updateVerifyStatusUrl)))
     }
 
-    def update(): StubMapping = {
-      val url: String = "/essttp-backend/bars/verify/update"
+    def ensureVerifyUpdateStatusIsNotCalled(): Unit =
+      verify(exactly(0), postRequestedFor(urlPathEqualTo(updateVerifyStatusUrl)))
+
+    private def stubPost(url: String, status: Int, responseJson: String): StubMapping = {
       stubFor(
         post(urlPathEqualTo(url))
           .withRequestBody(matchingJsonPath("$.taxId"))
-          .willReturn(aResponse()
-            .withStatus(SC_OK)
-            .withBody(noLockoutBody))
+          .willReturn(
+            aResponse()
+              .withStatus(status)
+              .withBody(responseJson)
+          )
       )
     }
   }
