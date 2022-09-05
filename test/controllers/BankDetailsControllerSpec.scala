@@ -733,7 +733,6 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validForm)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
         BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
-        BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
       }
 
     "show correct error message when bars validate response is 400 sortCodeOnDenyList" in
