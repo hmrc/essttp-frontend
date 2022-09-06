@@ -37,8 +37,8 @@ class SubmitArrangementControllerSpec extends ItSpec {
     "trigger call to ttp enact arrangement api, send an audit event and also update backend" in {
       AuthStub.authorise()
       EssttpBackend.TermsAndConditions.findJourney()
-      EssttpBackend.SubmitArrangement.updateSubmitArrangement(TdAll.journeyId)
-      Ttp.EnactArrangement.enactArrangement()
+      EssttpBackend.SubmitArrangement.stubUpdateSubmitArrangement(TdAll.journeyId)
+      Ttp.EnactArrangement.stubEnactArrangement()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.submitArrangement(fakeRequest)
@@ -89,13 +89,13 @@ class SubmitArrangementControllerSpec extends ItSpec {
              |""".stripMargin
         ).as[JsObject]
       )
-      EssttpBackend.SubmitArrangement.verifyUpdateSubmitArrangementRequest(TdAll.journeyId)
+      EssttpBackend.SubmitArrangement.verifyUpdateSubmitArrangementRequest(TdAll.journeyId, TdAll.arrangementResponse)
     }
 
     "should not update backend if call to ttp enact arrangement api fails (anything other than a 202 response)" in {
       AuthStub.authorise()
       EssttpBackend.TermsAndConditions.findJourney()
-      Ttp.EnactArrangement.enactArrangementFail()
+      Ttp.EnactArrangement.stubEnactArrangementFail()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.submitArrangement(fakeRequest)

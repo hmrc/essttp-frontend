@@ -19,7 +19,14 @@ package testsupport.stubs
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.journey.model.{JourneyId, Origin, Origins}
-import essttp.rootmodel.{DayOfMonth, TaxId}
+import essttp.rootmodel.bank.TypeOfBankAccount
+import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
+import essttp.rootmodel.dates.startdates.StartDatesResponse
+import essttp.rootmodel.ttp.EligibilityCheckResult
+import essttp.rootmodel.ttp.affordability.InstalmentAmounts
+import essttp.rootmodel.ttp.affordablequotes.{AffordableQuotesResponse, PaymentPlan}
+import essttp.rootmodel.ttp.arrangement.ArrangementResponse
+import essttp.rootmodel.{CanPayUpfront, DayOfMonth, MonthlyPaymentAmount, TaxId, UpfrontPaymentAmount}
 import play.api.libs.json.Json
 import testsupport.testdata.{JourneyJsonTemplates, TdAll, TdJsonBodies}
 import wiremock.org.apache.http.HttpStatus._
@@ -28,6 +35,13 @@ import java.time.Instant
 object EssttpBackend {
 
   private val findByLatestSessionIdUrl: String = "/essttp-backend/journey/find-latest-by-session-id"
+
+  def findByLatestSessionId(jsonBody: String): StubMapping = stubFor(
+    get(urlPathEqualTo(findByLatestSessionIdUrl))
+      .willReturn(aResponse()
+        .withStatus(200)
+        .withBody(jsonBody))
+  )
 
   def verifyFindByLatestSessionId(): Unit = verify(postRequestedFor(urlPathEqualTo(findByLatestSessionIdUrl)))
 
@@ -71,7 +85,6 @@ object EssttpBackend {
   }
 
   object StartJourney {
-
     private val startJourneyBtaUrl = "/essttp-backend/epaye/bta/journey/start"
     private val startJourneyGovUkUrl = "/essttp-backend/epaye/gov-uk/journey/start"
     private val startJourneyDetachedUrl = "/essttp-backend/epaye/detached-url/journey/start"
@@ -100,80 +113,43 @@ object EssttpBackend {
     def verifyStartJourneyEpayeGovUk(): Unit = verifyStartJourney(startJourneyGovUkUrl)
     def verifyStartJourneyEpayeDetached(): Unit = verifyStartJourney(startJourneyDetachedUrl)
 
-    def findJourney(jsonBody: String = JourneyJsonTemplates.Started): StubMapping =
-      stubFor(
-        get(urlPathEqualTo(findByLatestSessionIdUrl))
-          .willReturn(aResponse()
-            .withStatus(200)
-            .withBody(jsonBody))
-      )
+    def findJourney(jsonBody: String = JourneyJsonTemplates.Started): StubMapping = findByLatestSessionId(jsonBody)
   }
 
   object DetermineTaxId {
-
-    def findJourney(jsonBody: String = JourneyJsonTemplates.`Computed Tax Id`): StubMapping = stubFor(
-      get(urlPathEqualTo(findByLatestSessionIdUrl))
-        .willReturn(aResponse()
-          .withStatus(200)
-          .withBody(jsonBody))
-    )
+    def findJourney(jsonBody: String = JourneyJsonTemplates.`Computed Tax Id`): StubMapping = findByLatestSessionId(jsonBody)
 
     def updateTaxIdUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-tax-id"
 
-    def updateTaxId(journeyId: JourneyId): StubMapping =
-      stubFor(
-        post(urlPathEqualTo(updateTaxIdUrl(journeyId)))
-          .willReturn(
-            aResponse()
-              .withStatus(200)
-          )
-      )
+    def stubUpdateTaxId(journeyId: JourneyId): StubMapping =
+      WireMockHelpers.stubForPostNoResponseBody(updateTaxIdUrl(journeyId))
 
     def verifyTaxIdRequest(journeyId: JourneyId, taxId: TaxId): Unit =
       verify(
         postRequestedFor(urlPathEqualTo(updateTaxIdUrl(journeyId)))
           .withRequestBody(equalToJson(Json.toJson(taxId).toString()))
       )
-
   }
 
   object EligibilityCheck {
-
     def updateEligibilityResultUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-eligibility-result"
 
-    def updateEligibilityResult(journeyId: JourneyId): StubMapping =
-      stubFor(
-        post(urlPathEqualTo(updateEligibilityResultUrl(journeyId)))
-          .willReturn(
-            aResponse()
-              .withStatus(200)
-          )
-      )
+    def stubUpdateEligibilityResult(journeyId: JourneyId): StubMapping =
+      WireMockHelpers.stubForPostNoResponseBody(updateEligibilityResultUrl(journeyId))
 
-    //todo add withRequestbody - tie in with backend test data cor?
-    def verifyUpdateEligibilityRequest(journeyId: JourneyId): Unit =
-      verify(postRequestedFor(urlPathEqualTo(updateEligibilityResultUrl(journeyId))))
+    def verifyUpdateEligibilityRequest(journeyId: JourneyId, expectedEligibilityCheckResult: EligibilityCheckResult): Unit =
+      WireMockHelpers.verifyWithBodyParse(updateEligibilityResultUrl(journeyId), expectedEligibilityCheckResult)(EligibilityCheckResult.format)
 
-    //todo add withRequestbody - tie in with backend test data cor?
     def verifyNoneUpdateEligibilityRequest(journeyId: JourneyId): Unit =
-      verify(
-        exactly(0),
-        postRequestedFor(urlPathEqualTo(updateEligibilityResultUrl(journeyId)))
-      )
+      verify(exactly(0), postRequestedFor(urlPathEqualTo(updateEligibilityResultUrl(journeyId))))
 
-    def findJourney(jsonBody: String = JourneyJsonTemplates.`Eligibility Checked - Eligible`): StubMapping = stubFor(
-      get(urlPathEqualTo(findByLatestSessionIdUrl))
-        .willReturn(aResponse()
-          .withStatus(200)
-          .withBody(jsonBody))
-    )
+    def findJourney(jsonBody: String = JourneyJsonTemplates.`Eligibility Checked - Eligible`): StubMapping = findByLatestSessionId(jsonBody)
   }
 
   object CanPayUpfront {
-
     def updateCanPayUpfrontUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-can-pay-upfront"
 
-    def updateCanPayUpfront(journeyId: JourneyId, canPayUpfrontScenario: Boolean): StubMapping =
+    def stubUpdateCanPayUpfront(journeyId: JourneyId, canPayUpfrontScenario: Boolean): StubMapping =
       stubFor(
         post(urlPathEqualTo(updateCanPayUpfrontUrl(journeyId)))
           .withRequestBody(equalTo(canPayUpfrontScenario.toString))
@@ -183,57 +159,34 @@ object EssttpBackend {
           )
       )
 
-    //todo add withRequestbody - tie in with backend test data cor?
-    def verifyUpdateCanPayUpfrontRequest(journeyId: JourneyId): Unit =
-      verify(postRequestedFor(urlPathEqualTo(updateCanPayUpfrontUrl(journeyId))))
+    def verifyUpdateCanPayUpfrontRequest(journeyId: JourneyId, expectedCanPayUpFront: CanPayUpfront): Unit =
+      WireMockHelpers.verifyWithBodyParse(updateCanPayUpfrontUrl(journeyId), expectedCanPayUpFront)(essttp.rootmodel.CanPayUpfront.format)
 
-    //todo add withRequestbody - tie in with backend test data cor?
     def verifyNoneUpdateCanPayUpfrontRequest(journeyId: JourneyId): Unit =
       verify(
         exactly(0),
         postRequestedFor(urlPathEqualTo(updateCanPayUpfrontUrl(journeyId)))
       )
 
-    def findJourney(jsonBody: String = JourneyJsonTemplates.`Answered Can Pay Upfront - Yes`): StubMapping = stubFor(
-      get(urlPathEqualTo(findByLatestSessionIdUrl))
-        .willReturn(aResponse()
-          .withStatus(200)
-          .withBody(jsonBody))
-    )
+    def findJourney(jsonBody: String = JourneyJsonTemplates.`Answered Can Pay Upfront - Yes`): StubMapping = findByLatestSessionId(jsonBody)
   }
 
   object UpfrontPaymentAmount {
-
     def updateUpfrontPaymentAmountUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-upfront-payment-amount"
 
-    def updateUpfrontPaymentAmount(journeyId: JourneyId): StubMapping =
-      stubFor(
-        post(urlPathEqualTo(updateUpfrontPaymentAmountUrl(journeyId)))
-          .willReturn(
-            aResponse()
-              .withStatus(200)
-          )
-      )
+    def stubUpdateUpfrontPaymentAmount(journeyId: JourneyId): StubMapping =
+      WireMockHelpers.stubForPostNoResponseBody(updateUpfrontPaymentAmountUrl(journeyId))
 
-    //todo add withRequestbody - tie in with backend test data cor?
-    def verifyUpdateUpfrontPaymentAmountRequest(journeyId: JourneyId): Unit =
-      verify(postRequestedFor(urlPathEqualTo(updateUpfrontPaymentAmountUrl(journeyId))))
+    def verifyUpdateUpfrontPaymentAmountRequest(journeyId: JourneyId, expectedUpfrontPaymentAmount: UpfrontPaymentAmount): Unit =
+      WireMockHelpers.verifyWithBodyParse(updateUpfrontPaymentAmountUrl(journeyId), expectedUpfrontPaymentAmount)(essttp.rootmodel.UpfrontPaymentAmount.format)
 
-    //todo add withRequestbody - tie in with backend test data cor?
     def verifyNoneUpdateUpfrontPaymentAmountRequest(journeyId: JourneyId): Unit =
       verify(
         exactly(0),
         postRequestedFor(urlPathEqualTo(updateUpfrontPaymentAmountUrl(journeyId)))
       )
 
-    def findJourney(
-        jsonBody: String = JourneyJsonTemplates.`Entered Upfront payment amount`
-    ): StubMapping = stubFor(
-      get(urlPathEqualTo(findByLatestSessionIdUrl))
-        .willReturn(aResponse()
-          .withStatus(200)
-          .withBody(jsonBody))
-    )
+    def findJourney(jsonBody: String = JourneyJsonTemplates.`Entered Upfront payment amount`): StubMapping = findByLatestSessionId(jsonBody)
   }
 
   object Dates {
@@ -241,26 +194,14 @@ object EssttpBackend {
 
     def updateStartDatesUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-start-dates"
 
-    def updateExtremeDates(journeyId: JourneyId): StubMapping =
-      stubFor(
-        post(urlPathEqualTo(updateExtremeDatesUrl(journeyId)))
-          .willReturn(
-            aResponse()
-              .withStatus(200)
-          )
-      )
+    def stubUpdateExtremeDates(journeyId: JourneyId): StubMapping =
+      WireMockHelpers.stubForPostNoResponseBody(updateExtremeDatesUrl(journeyId))
 
-    def updateStartDates(journeyId: JourneyId): StubMapping =
-      stubFor(
-        post(urlPathEqualTo(updateStartDatesUrl(journeyId)))
-          .willReturn(
-            aResponse()
-              .withStatus(200)
-          )
-      )
+    def stubUpdateStartDates(journeyId: JourneyId): StubMapping =
+      WireMockHelpers.stubForPostNoResponseBody(updateStartDatesUrl(journeyId))
 
-    def verifyUpdateExtremeDates(journeyId: JourneyId): Unit =
-      verify(postRequestedFor(urlPathEqualTo(updateExtremeDatesUrl(journeyId))))
+    def verifyUpdateExtremeDates(journeyId: JourneyId, expectedExtremeDatesResponse: ExtremeDatesResponse): Unit =
+      WireMockHelpers.verifyWithBodyParse(updateExtremeDatesUrl(journeyId), expectedExtremeDatesResponse)(ExtremeDatesResponse.format)
 
     def verifyNoneUpdateExtremeDates(journeyId: JourneyId): Unit =
       verify(
@@ -268,8 +209,8 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(updateExtremeDatesUrl(journeyId)))
       )
 
-    def verifyUpdateStartDates(journeyId: JourneyId): Unit =
-      verify(postRequestedFor(urlPathEqualTo(updateStartDatesUrl(journeyId))))
+    def verifyUpdateStartDates(journeyId: JourneyId, expectedStartDatesResponse: StartDatesResponse): Unit =
+      WireMockHelpers.verifyWithBodyParse(updateStartDatesUrl(journeyId), expectedStartDatesResponse)(StartDatesResponse.format)
 
     def verifyNoneUpdateStartDates(journeyId: JourneyId): Unit =
       verify(
@@ -277,48 +218,21 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(updateStartDatesUrl(journeyId)))
       )
 
-    def findJourneyExtremeDates(
-        jsonBody: String = JourneyJsonTemplates.`Retrieved Extreme Dates Response`
-    ): StubMapping = stubFor(
-      get(urlPathEqualTo(findByLatestSessionIdUrl))
-        .willReturn(aResponse()
-          .withStatus(200)
-          .withBody(jsonBody))
-    )
+    def findJourneyExtremeDates(jsonBody: String = JourneyJsonTemplates.`Retrieved Extreme Dates Response`): StubMapping = findByLatestSessionId(jsonBody)
 
-    def findJourneyStartDates(
-        jsonBody: String = JourneyJsonTemplates.`Retrieved Start Dates`
-    ): StubMapping = stubFor(
-      get(urlPathEqualTo(findByLatestSessionIdUrl))
-        .willReturn(aResponse()
-          .withStatus(200)
-          .withBody(jsonBody))
-    )
+    def findJourneyStartDates(jsonBody: String = JourneyJsonTemplates.`Retrieved Start Dates`): StubMapping = findByLatestSessionId(jsonBody)
   }
 
   object AffordabilityMinMaxApi {
-    def findJourney(
-        jsonBody: String = JourneyJsonTemplates.`Retrieved Affordability`()
-    ): StubMapping = stubFor(
-      get(urlPathEqualTo(findByLatestSessionIdUrl))
-        .willReturn(aResponse()
-          .withStatus(200)
-          .withBody(jsonBody))
-    )
+    def findJourney(jsonBody: String = JourneyJsonTemplates.`Retrieved Affordability`()): StubMapping = findByLatestSessionId(jsonBody)
 
     def updateAffordabilityUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-affordability-result"
 
-    def updateAffordability(journeyId: JourneyId): StubMapping =
-      stubFor(
-        post(urlPathEqualTo(updateAffordabilityUrl(journeyId)))
-          .willReturn(
-            aResponse()
-              .withStatus(200)
-          )
-      )
+    def stubUpdateAffordability(journeyId: JourneyId): StubMapping =
+      WireMockHelpers.stubForPostNoResponseBody(updateAffordabilityUrl(journeyId))
 
-    def verifyUpdateAffordabilityRequest(journeyId: JourneyId): Unit =
-      verify(postRequestedFor(urlPathEqualTo(updateAffordabilityUrl(journeyId))))
+    def verifyUpdateAffordabilityRequest(journeyId: JourneyId, expectedInstalmentAmounts: InstalmentAmounts): Unit =
+      WireMockHelpers.verifyWithBodyParse(updateAffordabilityUrl(journeyId), expectedInstalmentAmounts)(InstalmentAmounts.format)
 
     def verifyNoneUpdateAffordabilityRequest(journeyId: JourneyId): Unit =
       verify(
@@ -330,17 +244,11 @@ object EssttpBackend {
   object MonthlyPaymentAmount {
     def monthlyPaymentAmountUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-monthly-payment-amount"
 
-    def updateMonthlyPaymentAmount(journeyId: JourneyId): StubMapping =
-      stubFor(
-        post(urlPathEqualTo(monthlyPaymentAmountUrl(journeyId)))
-          .willReturn(
-            aResponse()
-              .withStatus(200)
-          )
-      )
+    def stubUpdateMonthlyPaymentAmount(journeyId: JourneyId): StubMapping =
+      WireMockHelpers.stubForPostNoResponseBody(monthlyPaymentAmountUrl(journeyId))
 
-    def verifyUpdateMonthlyPaymentAmountRequest(journeyId: JourneyId): Unit =
-      verify(postRequestedFor(urlPathEqualTo(monthlyPaymentAmountUrl(journeyId))))
+    def verifyUpdateMonthlyPaymentAmountRequest(journeyId: JourneyId, expectedMonthlyPaymentAmount: MonthlyPaymentAmount): Unit =
+      WireMockHelpers.verifyWithBodyParse(monthlyPaymentAmountUrl(journeyId), expectedMonthlyPaymentAmount)(essttp.rootmodel.MonthlyPaymentAmount.format)
 
     def verifyNoneUpdateMonthlyAmountRequest(journeyId: JourneyId): Unit =
       verify(
@@ -348,27 +256,14 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(monthlyPaymentAmountUrl(journeyId)))
       )
 
-    def findJourney(
-        jsonBody: String = JourneyJsonTemplates.`Entered Monthly Payment Amount`
-    ): StubMapping = stubFor(
-      get(urlPathEqualTo(findByLatestSessionIdUrl))
-        .willReturn(aResponse()
-          .withStatus(200)
-          .withBody(jsonBody))
-    )
+    def findJourney(jsonBody: String = JourneyJsonTemplates.`Entered Monthly Payment Amount`): StubMapping = findByLatestSessionId(jsonBody)
   }
 
   object DayOfMonth {
     def dayOfMonthUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-day-of-month"
 
-    def updateDayOfMonth(journeyId: JourneyId): StubMapping =
-      stubFor(
-        post(urlPathEqualTo(dayOfMonthUrl(journeyId)))
-          .willReturn(
-            aResponse()
-              .withStatus(200)
-          )
-      )
+    def stubUpdateDayOfMonth(journeyId: JourneyId): StubMapping =
+      WireMockHelpers.stubForPostNoResponseBody(dayOfMonthUrl(journeyId))
 
     def verifyUpdateDayOfMonthRequest(journeyId: JourneyId, dayOfMonth: DayOfMonth = TdAll.dayOfMonth()): Unit =
       verify(
@@ -381,32 +276,17 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(dayOfMonthUrl(journeyId)))
       )
 
-    def findJourney(
-        jsonBody: String = JourneyJsonTemplates.`Entered Day of Month`
-    ): StubMapping = stubFor(
-      get(urlPathEqualTo(findByLatestSessionIdUrl))
-        .willReturn(aResponse()
-          .withStatus(200)
-          .withBody(jsonBody))
-    )
+    def findJourney(jsonBody: String = JourneyJsonTemplates.`Entered Day of Month`): StubMapping = findByLatestSessionId(jsonBody)
   }
 
   object AffordableQuotes {
     def affordableQuotesUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-affordable-quotes"
 
-    def updateAffordableQuotes(journeyId: JourneyId): StubMapping =
-      stubFor(
-        post(urlPathEqualTo(affordableQuotesUrl(journeyId)))
-          .willReturn(
-            aResponse()
-              .withStatus(200)
-          )
-      )
+    def stubUpdateAffordableQuotes(journeyId: JourneyId): StubMapping =
+      WireMockHelpers.stubForPostNoResponseBody(affordableQuotesUrl(journeyId))
 
     def verifyUpdateAffordableQuotesRequest(journeyId: JourneyId): Unit =
-      verify(
-        postRequestedFor(urlPathEqualTo(affordableQuotesUrl(journeyId)))
-      )
+      WireMockHelpers.verifyWithBodyParse(affordableQuotesUrl(journeyId))(AffordableQuotesResponse.format)
 
     def verifyNoneUpdateAffordableQuotesRequest(journeyId: JourneyId): Unit =
       verify(
@@ -414,32 +294,17 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(affordableQuotesUrl(journeyId)))
       )
 
-    def findJourney(
-        jsonBody: String = JourneyJsonTemplates.`Retrieved Affordable Quotes`
-    ): StubMapping = stubFor(
-      get(urlPathEqualTo(findByLatestSessionIdUrl))
-        .willReturn(aResponse()
-          .withStatus(200)
-          .withBody(jsonBody))
-    )
+    def findJourney(jsonBody: String = JourneyJsonTemplates.`Retrieved Affordable Quotes`): StubMapping = findByLatestSessionId(jsonBody)
   }
 
   object SelectedPaymentPlan {
     def selectedPlanUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-selected-plan"
 
-    def updateSelectedPlan(journeyId: JourneyId): StubMapping =
-      stubFor(
-        post(urlPathEqualTo(selectedPlanUrl(journeyId)))
-          .willReturn(
-            aResponse()
-              .withStatus(200)
-          )
-      )
+    def stubUpdateSelectedPlan(journeyId: JourneyId): StubMapping =
+      WireMockHelpers.stubForPostNoResponseBody(selectedPlanUrl(journeyId))
 
     def verifyUpdateSelectedPlanRequest(journeyId: JourneyId): Unit =
-      verify(
-        postRequestedFor(urlPathEqualTo(selectedPlanUrl(journeyId)))
-      )
+      WireMockHelpers.verifyWithBodyParse(selectedPlanUrl(journeyId))(PaymentPlan.format)
 
     def verifyNoneUpdateSelectedPlanRequest(journeyId: JourneyId): Unit =
       verify(
@@ -447,85 +312,47 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(selectedPlanUrl(journeyId)))
       )
 
-    def findJourney(
-        jsonBody: String = JourneyJsonTemplates.`Chosen Payment Plan`("""{"DeclaredUpfrontPayment": {"amount": 200}}""")
-    ): StubMapping = stubFor(
-      get(urlPathEqualTo(findByLatestSessionIdUrl))
-        .willReturn(aResponse()
-          .withStatus(200)
-          .withBody(jsonBody))
-    )
+    def findJourney(jsonBody: String = JourneyJsonTemplates.`Chosen Payment Plan`("""{"DeclaredUpfrontPayment": {"amount": 200}}""")): StubMapping =
+      findByLatestSessionId(jsonBody)
   }
 
   object HasCheckedPlan {
     def hasCheckedPlanUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-has-checked-plan"
 
-    def updateHasCheckedPlan(journeyId: JourneyId): StubMapping =
-      stubFor(
-        post(urlPathEqualTo(hasCheckedPlanUrl(journeyId)))
-          .willReturn(
-            aResponse()
-              .withStatus(200)
-          )
-      )
+    def stubUpdateHasCheckedPlan(journeyId: JourneyId): StubMapping =
+      WireMockHelpers.stubForPostNoResponseBody(hasCheckedPlanUrl(journeyId))
 
     def verifyUpdateHasCheckedPlanRequest(journeyId: JourneyId): Unit =
       verify(
         postRequestedFor(urlPathEqualTo(hasCheckedPlanUrl(journeyId)))
       )
 
-    def findJourney(
-        jsonBody: String = JourneyJsonTemplates.`Has Checked Payment Plan`
-    ): StubMapping = stubFor(
-      get(urlPathEqualTo(findByLatestSessionIdUrl))
-        .willReturn(aResponse()
-          .withStatus(200)
-          .withBody(jsonBody))
-    )
+    def findJourney(jsonBody: String = JourneyJsonTemplates.`Has Checked Payment Plan`): StubMapping = findByLatestSessionId(jsonBody)
   }
 
   object ChosenTypeOfBankAccount {
     def chosenTypeOfBankAccountUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-chosen-type-of-bank-account"
 
-    def updateChosenTypeOfBankAccount(journeyId: JourneyId): StubMapping =
-      stubFor(
-        post(urlPathEqualTo(chosenTypeOfBankAccountUrl(journeyId)))
-          .willReturn(
-            aResponse()
-              .withStatus(200)
-          )
-      )
+    def stubUpdateChosenTypeOfBankAccount(journeyId: JourneyId): StubMapping =
+      WireMockHelpers.stubForPostNoResponseBody(chosenTypeOfBankAccountUrl(journeyId))
 
-    def verifyUpdateChosenTypeOfBankAccountRequest(journeyId: JourneyId): Unit =
-      verify(postRequestedFor(urlPathEqualTo(chosenTypeOfBankAccountUrl(journeyId))))
+    def verifyUpdateChosenTypeOfBankAccountRequest(journeyId: JourneyId, expectedTypeOfAccount: TypeOfBankAccount): Unit =
+      WireMockHelpers.verifyWithBodyParse(chosenTypeOfBankAccountUrl(journeyId), expectedTypeOfAccount)(TypeOfBankAccount.format)
 
     def verifyNoneUpdateChosenTypeOfBankAccountRequest(journeyId: JourneyId): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(chosenTypeOfBankAccountUrl(journeyId))))
 
-    def findJourney(jsonBody: String = JourneyJsonTemplates.`Chosen Type of Bank Account - Business`): StubMapping = stubFor(
-      get(urlPathEqualTo(findByLatestSessionIdUrl))
-        .willReturn(aResponse()
-          .withStatus(200)
-          .withBody(jsonBody))
-    )
+    def findJourney(jsonBody: String = JourneyJsonTemplates.`Chosen Type of Bank Account - Business`): StubMapping = findByLatestSessionId(jsonBody)
   }
 
   object DirectDebitDetails {
     def directDebitDetailsUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-direct-debit-details"
 
-    def updateDirectDebitDetails(journeyId: JourneyId): StubMapping =
-      stubFor(
-        post(urlPathEqualTo(directDebitDetailsUrl(journeyId)))
-          .willReturn(
-            aResponse()
-              .withStatus(200)
-          )
-      )
+    def stubUpdateDirectDebitDetails(journeyId: JourneyId): StubMapping =
+      WireMockHelpers.stubForPostNoResponseBody(directDebitDetailsUrl(journeyId))
 
-    def verifyUpdateDirectDebitDetailsRequest(journeyId: JourneyId): Unit =
-      verify(
-        postRequestedFor(urlPathEqualTo(directDebitDetailsUrl(journeyId)))
-      )
+    def verifyUpdateDirectDebitDetailsRequest(journeyId: JourneyId, expectedDirectDebitDetails: essttp.rootmodel.bank.DirectDebitDetails): Unit =
+      WireMockHelpers.verifyWithBodyParse(directDebitDetailsUrl(journeyId), expectedDirectDebitDetails)(essttp.rootmodel.bank.DirectDebitDetails.format)
 
     def verifyNoneUpdateDirectDebitDetailsRequest(journeyId: JourneyId): Unit =
       verify(
@@ -533,27 +360,14 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(directDebitDetailsUrl(journeyId)))
       )
 
-    def findJourney(
-        jsonBody: String = JourneyJsonTemplates.`Entered Direct Debit Details - Is Account Holder`
-    ): StubMapping = stubFor(
-      get(urlPathEqualTo(findByLatestSessionIdUrl))
-        .willReturn(aResponse()
-          .withStatus(200)
-          .withBody(jsonBody))
-    )
+    def findJourney(jsonBody: String = JourneyJsonTemplates.`Entered Direct Debit Details - Is Account Holder`): StubMapping = findByLatestSessionId(jsonBody)
   }
 
   object ConfirmedDirectDebitDetails {
     def confirmDirectDebitDetailsUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-has-confirmed-direct-debit-details"
 
-    def updateConfirmDirectDebitDetails(journeyId: JourneyId): StubMapping =
-      stubFor(
-        post(urlPathEqualTo(confirmDirectDebitDetailsUrl(journeyId)))
-          .willReturn(
-            aResponse()
-              .withStatus(200)
-          )
-      )
+    def stubUpdateConfirmDirectDebitDetails(journeyId: JourneyId): StubMapping =
+      WireMockHelpers.stubForPostNoResponseBody(confirmDirectDebitDetailsUrl(journeyId))
 
     def verifyUpdateConfirmDirectDebitDetailsRequest(journeyId: JourneyId): Unit =
       verify(
@@ -566,25 +380,14 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(confirmDirectDebitDetailsUrl(journeyId)))
       )
 
-    def findJourney(jsonBody: String = JourneyJsonTemplates.`Confirmed Direct Debit Details`): StubMapping = stubFor(
-      get(urlPathEqualTo(findByLatestSessionIdUrl))
-        .willReturn(aResponse()
-          .withStatus(200)
-          .withBody(jsonBody))
-    )
+    def findJourney(jsonBody: String = JourneyJsonTemplates.`Confirmed Direct Debit Details`): StubMapping = findByLatestSessionId(jsonBody)
   }
 
   object TermsAndConditions {
     def agreedTermsAndConditionsUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-has-agreed-terms-and-conditions"
 
-    def updateAgreedTermsAndConditions(journeyId: JourneyId): StubMapping =
-      stubFor(
-        post(urlPathEqualTo(agreedTermsAndConditionsUrl(journeyId)))
-          .willReturn(
-            aResponse()
-              .withStatus(200)
-          )
-      )
+    def stubUpdateAgreedTermsAndConditions(journeyId: JourneyId): StubMapping =
+      WireMockHelpers.stubForPostNoResponseBody(agreedTermsAndConditionsUrl(journeyId))
 
     def verifyUpdateAgreedTermsAndConditionsRequest(journeyId: JourneyId): Unit =
       verify(
@@ -597,41 +400,22 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(agreedTermsAndConditionsUrl(journeyId)))
       )
 
-    def findJourney(
-        jsonBody: String = JourneyJsonTemplates.`Agreed Terms and Conditions`
-    ): StubMapping = stubFor(
-      get(urlPathEqualTo(findByLatestSessionIdUrl))
-        .willReturn(aResponse()
-          .withStatus(200)
-          .withBody(jsonBody))
-    )
+    def findJourney(jsonBody: String = JourneyJsonTemplates.`Agreed Terms and Conditions`): StubMapping = findByLatestSessionId(jsonBody)
   }
 
   object SubmitArrangement {
-
     def submitArrangementUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-arrangement"
 
-    def updateSubmitArrangement(journeyId: JourneyId): StubMapping =
-      stubFor(
-        post(urlPathEqualTo(submitArrangementUrl(journeyId)))
-          .willReturn(
-            aResponse()
-              .withStatus(200)
-          )
-      )
+    def stubUpdateSubmitArrangement(journeyId: JourneyId): StubMapping =
+      WireMockHelpers.stubForPostNoResponseBody(submitArrangementUrl(journeyId))
 
-    def verifyUpdateSubmitArrangementRequest(journeyId: JourneyId): Unit =
-      verify(postRequestedFor(urlPathEqualTo(submitArrangementUrl(journeyId))))
+    def verifyUpdateSubmitArrangementRequest(journeyId: JourneyId, expectedArrangementResponse: ArrangementResponse): Unit =
+      WireMockHelpers.verifyWithBodyParse(submitArrangementUrl(journeyId), expectedArrangementResponse)(ArrangementResponse.format)
 
     def verifyNoneUpdateSubmitArrangementRequest(journeyId: JourneyId): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(submitArrangementUrl(journeyId))))
 
-    def findJourney(jsonBody: String = JourneyJsonTemplates.`Arrangement Submitted - with upfront payment`): StubMapping = stubFor(
-      get(urlPathEqualTo(findByLatestSessionIdUrl))
-        .willReturn(aResponse()
-          .withStatus(200)
-          .withBody(jsonBody))
-    )
+    def findJourney(jsonBody: String = JourneyJsonTemplates.`Arrangement Submitted - with upfront payment`): StubMapping = findByLatestSessionId(jsonBody)
   }
 
 }

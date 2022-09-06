@@ -200,7 +200,7 @@ class BankDetailsControllerSpec extends ItSpec {
       s"redirect to /set-up-direct-debit when valid form is submitted - $typeOfAccount" in {
         AuthStub.authorise()
         EssttpBackend.HasCheckedPlan.findJourney()
-        EssttpBackend.ChosenTypeOfBankAccount.updateChosenTypeOfBankAccount(TdAll.journeyId)
+        EssttpBackend.ChosenTypeOfBankAccount.stubUpdateChosenTypeOfBankAccount(TdAll.journeyId)
         val fakeRequest = FakeRequest(
           method = "POST",
           path   = "/what-type-of-account-details-are-you-providing"
@@ -210,7 +210,7 @@ class BankDetailsControllerSpec extends ItSpec {
         val result: Future[Result] = controller.typeOfAccountSubmit(fakeRequest)
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(PageUrls.directDebitDetailsUrl)
-        EssttpBackend.ChosenTypeOfBankAccount.verifyUpdateChosenTypeOfBankAccountRequest(TdAll.journeyId)
+        EssttpBackend.ChosenTypeOfBankAccount.verifyUpdateChosenTypeOfBankAccountRequest(TdAll.journeyId, TdAll.typeOfBankAccount(typeOfAccount))
       }
     }
 
@@ -292,7 +292,7 @@ class BankDetailsControllerSpec extends ItSpec {
       AuthStub.authorise()
       BarsVerifyStatusStub.update()
       EssttpBackend.ChosenTypeOfBankAccount.findJourney(JourneyJsonTemplates.`Chosen Type of Bank Account - Personal`)
-      EssttpBackend.DirectDebitDetails.updateDirectDebitDetails(TdAll.journeyId)
+      EssttpBackend.DirectDebitDetails.stubUpdateDirectDebitDetails(TdAll.journeyId)
       BarsStub.ValidateStub.success()
       BarsStub.VerifyPersonalStub.success()
 
@@ -313,7 +313,11 @@ class BankDetailsControllerSpec extends ItSpec {
       val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.checkDirectDebitDetailsUrl)
-      EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+
+      EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(
+        TdAll.journeyId,
+        TdAll.directDebitDetails("Bob Ross", "123456", "12345678", true)
+      )
 
       BarsStub.ValidateStub.ensureBarsValidateCalled(formData)
       BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
@@ -352,7 +356,7 @@ class BankDetailsControllerSpec extends ItSpec {
     "redirect to /you-cannot-set-up-a-direct-debit-online when user submits no for radio option relating to being account holder" in {
       AuthStub.authorise()
       EssttpBackend.ConfirmedDirectDebitDetails.findJourney()
-      EssttpBackend.DirectDebitDetails.updateDirectDebitDetails(TdAll.journeyId)
+      EssttpBackend.DirectDebitDetails.stubUpdateDirectDebitDetails(TdAll.journeyId)
 
       val formData = List(
         ("name", "Bob Ross"),
@@ -371,7 +375,12 @@ class BankDetailsControllerSpec extends ItSpec {
       val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.cannotSetupDirectDebitOnlineUrl)
-      EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+
+      EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(
+        TdAll.journeyId,
+        TdAll.directDebitDetails("Bob Ross", "123456", "12345678", false)
+      )
+
       BarsStub.verifyBarsNotCalled()
       BarsVerifyStatusStub.ensureVerifyUpdateStatusIsNotCalled()
       AuditConnectorStub.verifyNoAuditEvent()
@@ -494,7 +503,7 @@ class BankDetailsControllerSpec extends ItSpec {
         .withSession(SessionKeys.sessionId -> "IamATestSessionId")
         .withFormUrlEncodedBody(formData: _*)
 
-      EssttpBackend.DirectDebitDetails.updateDirectDebitDetails(TdAll.journeyId)
+      EssttpBackend.DirectDebitDetails.stubUpdateDirectDebitDetails(TdAll.journeyId)
 
       typeOfAccount match {
         case TypesOfBankAccount.Personal =>
@@ -677,9 +686,29 @@ class BankDetailsControllerSpec extends ItSpec {
         )
       }
 
-    // TODO this should now go to Technical Difficulties page
+    "show correct error message when bars verify-personal responds with accountExists is No" in
+      new BarsFormErrorSetup("accountDoesNotExist", typeOfAccount = TypesOfBankAccount.Personal) {
+        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
+
+        BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
+        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(validForm)
+        BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
+        BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
+      }
+
+    "show correct error message when bars verify-business responds with accountExists is No" in
+      new BarsFormErrorSetup("accountDoesNotExist", typeOfAccount = TypesOfBankAccount.Business) {
+        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
+
+        BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
+        BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validForm)
+        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
+        BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
+      }
+
     "redirect to an error page when bars verify-personal response has nameMatches is Error" in
       new BarsErrorSetup(TypesOfBankAccount.Personal) {
+
         BarsStub.ValidateStub.success()
         BarsStub.VerifyPersonalStub.nameMatchesError()
 
@@ -687,14 +716,15 @@ class BankDetailsControllerSpec extends ItSpec {
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(PageUrls.errorPlaceholderUrl)
 
-        BarsStub.ValidateStub.ensureBarsValidateCalled(formData)
-        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
+      }
+
+    "show correct error message when bars validate response is 400 sortCodeOnDenyList" in
+      new BarsFormErrorSetup("sortCodeOnDenyList", typeOfAccount = TypesOfBankAccount.Business) {
+        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
+        BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
-        BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
-        AuditConnectorStub.verifyEventAudited(
-          auditType  = "BarsCheck",
-          auditEvent = toExpectedBarsAuditDetailJson(VerifyJson.nameMatchesError)
-        )
+        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
+        BarsVerifyStatusStub.ensureVerifyUpdateStatusIsNotCalled()
       }
 
     // TODO this should now go to Technical Difficulties page
@@ -718,36 +748,6 @@ class BankDetailsControllerSpec extends ItSpec {
         )
       }
 
-    "show correct error message when bars verify-personal responds with accountExists is No" in
-      new BarsFormErrorSetup("accountDoesNotExist", typeOfAccount = TypesOfBankAccount.Personal) {
-        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
-
-        BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
-        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(validForm)
-        BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
-        BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
-      }
-
-    "show correct error message when bars verify-business responds with accountExists is No" in
-      new BarsFormErrorSetup("accountDoesNotExist", typeOfAccount = TypesOfBankAccount.Business) {
-        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
-
-        BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
-        BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validForm)
-        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
-        BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
-      }
-
-    "show correct error message when bars validate response is 400 sortCodeOnDenyList" in
-      new BarsFormErrorSetup("sortCodeOnDenyList", typeOfAccount = TypesOfBankAccount.Business) {
-        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
-
-        BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
-        BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
-        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
-        BarsVerifyStatusStub.ensureVerifyUpdateStatusIsNotCalled()
-      }
-
     "show correct error message when bars verify-personal is an undocumented error response" in
       new BarsFormErrorSetup("otherBarsError", typeOfAccount = TypesOfBankAccount.Personal) {
         testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
@@ -761,7 +761,6 @@ class BankDetailsControllerSpec extends ItSpec {
     "show correct error message when bars verify-business is an undocumented error response" in
       new BarsFormErrorSetup("otherBarsError", typeOfAccount = TypesOfBankAccount.Business) {
         testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
-
         BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validForm)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
@@ -864,7 +863,7 @@ class BankDetailsControllerSpec extends ItSpec {
     "redirect the user to terms and conditions and update backend" in {
       AuthStub.authorise()
       EssttpBackend.DirectDebitDetails.findJourney()
-      EssttpBackend.ConfirmedDirectDebitDetails.updateConfirmDirectDebitDetails(TdAll.journeyId)
+      EssttpBackend.ConfirmedDirectDebitDetails.stubUpdateConfirmDirectDebitDetails(TdAll.journeyId)
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.checkBankDetailsSubmit(fakeRequest)
@@ -939,7 +938,7 @@ class BankDetailsControllerSpec extends ItSpec {
     "redirect the user to terms and conditions and update backend" in {
       AuthStub.authorise()
       EssttpBackend.ConfirmedDirectDebitDetails.findJourney()
-      EssttpBackend.TermsAndConditions.updateAgreedTermsAndConditions(TdAll.journeyId)
+      EssttpBackend.TermsAndConditions.stubUpdateAgreedTermsAndConditions(TdAll.journeyId)
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.termsAndConditionsSubmit(fakeRequest)

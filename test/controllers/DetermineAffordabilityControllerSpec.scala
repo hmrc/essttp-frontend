@@ -36,13 +36,13 @@ class DetermineAffordabilityControllerSpec extends ItSpec {
     "trigger call to ttp microservice affordability endpoint and update backend" in {
       AuthStub.authorise()
       EssttpBackend.Dates.findJourneyExtremeDates()
-      EssttpBackend.AffordabilityMinMaxApi.updateAffordability(TdAll.journeyId)
-      Ttp.Affordability.retrieveAffordability()
+      EssttpBackend.AffordabilityMinMaxApi.stubUpdateAffordability(TdAll.journeyId)
+      Ttp.Affordability.stubRetrieveAffordability()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.determineAffordability(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.howMuchCanYouPayEachMonthUrl)
-      EssttpBackend.AffordabilityMinMaxApi.verifyUpdateAffordabilityRequest(TdAll.journeyId)
+      EssttpBackend.AffordabilityMinMaxApi.verifyUpdateAffordabilityRequest(TdAll.journeyId, TdAll.instalmentAmounts)
       Ttp.Affordability.verifyTtpAffordabilityRequest()
     }
   }

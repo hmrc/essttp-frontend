@@ -104,7 +104,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
     "redirect to what day do you want to pay on when form is valid" in {
       AuthStub.authorise()
       EssttpBackend.AffordabilityMinMaxApi.findJourney()
-      EssttpBackend.MonthlyPaymentAmount.updateMonthlyPaymentAmount(TdAll.journeyId)
+      EssttpBackend.MonthlyPaymentAmount.stubUpdateMonthlyPaymentAmount(TdAll.journeyId)
       val fakeRequest = FakeRequest(
         method = "POST",
         path   = "/how-much-can-you-pay-each-month"
@@ -114,7 +114,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
       val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.whichDayDoYouWantToPayUrl)
-      EssttpBackend.MonthlyPaymentAmount.verifyUpdateMonthlyPaymentAmountRequest(TdAll.journeyId)
+      EssttpBackend.MonthlyPaymentAmount.verifyUpdateMonthlyPaymentAmountRequest(TdAll.journeyId, TdAll.monthlyPaymentAmount)
     }
 
     "display correct error message when form is submitted with value outside of bounds" in {

@@ -86,7 +86,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     "should redirect to /how-much-can-you-pay-upfront when user chooses yes" in {
       AuthStub.authorise()
       EssttpBackend.EligibilityCheck.findJourney()
-      EssttpBackend.CanPayUpfront.updateCanPayUpfront(TdAll.journeyId, canPayUpfrontScenario = true)
+      EssttpBackend.CanPayUpfront.stubUpdateCanPayUpfront(TdAll.journeyId, canPayUpfrontScenario = true)
 
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -98,13 +98,13 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       val result: Future[Result] = controller.canYouMakeAnUpfrontPaymentSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.howMuchCanYouPayUpfrontUrl)
-      EssttpBackend.CanPayUpfront.verifyUpdateCanPayUpfrontRequest(TdAll.journeyId)
+      EssttpBackend.CanPayUpfront.verifyUpdateCanPayUpfrontRequest(TdAll.journeyId, TdAll.canPayUpfront)
     }
 
     "should redirect to /can-you-make-an-upfront-payment when user chooses no" in {
       AuthStub.authorise()
       EssttpBackend.EligibilityCheck.findJourney()
-      EssttpBackend.CanPayUpfront.updateCanPayUpfront(TdAll.journeyId, canPayUpfrontScenario = false)
+      EssttpBackend.CanPayUpfront.stubUpdateCanPayUpfront(TdAll.journeyId, canPayUpfrontScenario = false)
 
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -116,7 +116,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       val result: Future[Result] = controller.canYouMakeAnUpfrontPaymentSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.retrievedExtremeDatesUrl)
-      EssttpBackend.CanPayUpfront.verifyUpdateCanPayUpfrontRequest(TdAll.journeyId)
+      EssttpBackend.CanPayUpfront.verifyUpdateCanPayUpfrontRequest(TdAll.journeyId, TdAll.canNotPayUpfront)
     }
 
     "should redirect to /can-you-make-an-upfront-payment with error summary when no option is selected" in {
@@ -203,7 +203,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     "should redirect to /upfront-payment-summary when user enters a positive number, less than their total debt" in {
       AuthStub.authorise()
       EssttpBackend.CanPayUpfront.findJourney()
-      EssttpBackend.UpfrontPaymentAmount.updateUpfrontPaymentAmount(TdAll.journeyId)
+      EssttpBackend.UpfrontPaymentAmount.stubUpdateUpfrontPaymentAmount(TdAll.journeyId)
 
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -215,13 +215,13 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       val result: Future[Result] = controller.upfrontPaymentAmountSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.upfrontPaymentSummaryUrl)
-      EssttpBackend.UpfrontPaymentAmount.verifyUpdateUpfrontPaymentAmountRequest(TdAll.journeyId)
+      EssttpBackend.UpfrontPaymentAmount.verifyUpdateUpfrontPaymentAmountRequest(TdAll.journeyId, TdAll.upfrontPaymentAmount(100))
     }
 
     "should redirect to /upfront-payment-summary when user enters a positive number, at the upper limit" in {
       AuthStub.authorise()
       EssttpBackend.CanPayUpfront.findJourney()
-      EssttpBackend.UpfrontPaymentAmount.updateUpfrontPaymentAmount(TdAll.journeyId)
+      EssttpBackend.UpfrontPaymentAmount.stubUpdateUpfrontPaymentAmount(TdAll.journeyId)
 
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -233,13 +233,13 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       val result: Future[Result] = controller.upfrontPaymentAmountSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.upfrontPaymentSummaryUrl)
-      EssttpBackend.UpfrontPaymentAmount.verifyUpdateUpfrontPaymentAmountRequest(TdAll.journeyId)
+      EssttpBackend.UpfrontPaymentAmount.verifyUpdateUpfrontPaymentAmountRequest(TdAll.journeyId, TdAll.upfrontPaymentAmount(299900))
     }
 
     "should allow for decimal numbers if they are within the amount bounds" in {
       AuthStub.authorise()
       EssttpBackend.CanPayUpfront.findJourney()
-      EssttpBackend.UpfrontPaymentAmount.updateUpfrontPaymentAmount(TdAll.journeyId)
+      EssttpBackend.UpfrontPaymentAmount.stubUpdateUpfrontPaymentAmount(TdAll.journeyId)
 
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -251,7 +251,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       val result: Future[Result] = controller.upfrontPaymentAmountSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.upfrontPaymentSummaryUrl)
-      EssttpBackend.UpfrontPaymentAmount.verifyUpdateUpfrontPaymentAmountRequest(TdAll.journeyId)
+      EssttpBackend.UpfrontPaymentAmount.verifyUpdateUpfrontPaymentAmountRequest(TdAll.journeyId, TdAll.upfrontPaymentAmount(110))
     }
 
     forAll(

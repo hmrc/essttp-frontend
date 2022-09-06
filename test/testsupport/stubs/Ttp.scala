@@ -18,6 +18,12 @@ package testsupport.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
+import connectors.CallEligibilityApiRequest
+import essttp.rootmodel.ttp.affordability.InstalmentAmountRequest
+import essttp.rootmodel.ttp.affordablequotes.AffordableQuotesRequest
+import essttp.rootmodel.ttp.arrangement.ArrangementRequest
+import play.api.http.Status
+import play.api.libs.json.Format
 import testsupport.testdata.{TdAll, TtpJsonResponses}
 
 object Ttp {
@@ -28,58 +34,44 @@ object Ttp {
   private val enactArrangementUrl: String = "/debts/time-to-pay/self-serve/arrangement"
   private val ttpCorrelationIdHeader: (String, String) = ("correlationId", TdAll.correlationId.value.toString)
 
-  def ttpVerify(url: String): Unit = verify(
-    postRequestedFor(urlPathEqualTo(url))
-      .withHeader(ttpCorrelationIdHeader._1, equalTo(ttpCorrelationIdHeader._2))
-  )
+  def ttpVerify[A](url: String, expectedPayload: A)(implicit format: Format[A]): Unit =
+    WireMockHelpers.verifyWithBodyParse(url, ttpCorrelationIdHeader, expectedPayload)
 
   object Eligibility {
-    def retrieveEligibility(jsonBody: String = TtpJsonResponses.ttpEligibilityCallJson()): StubMapping = stubFor(
-      post(urlPathEqualTo(eligibilityUrl))
-        .willReturn(aResponse()
-          .withStatus(200)
-          .withBody(jsonBody))
-    )
+    def stubRetrieveEligibility(jsonBody: String = TtpJsonResponses.ttpEligibilityCallJson()): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(eligibilityUrl, jsonBody)
 
-    def verifyTtpEligibilityRequests(): Unit = ttpVerify(eligibilityUrl)
+    def verifyTtpEligibilityRequests(): Unit =
+      ttpVerify(eligibilityUrl, TdAll.callEligibilityApiRequest)(CallEligibilityApiRequest.format)
   }
 
   object Affordability {
-    def retrieveAffordability(jsonBody: String = TtpJsonResponses.ttpAffordabilityResponseJson()): StubMapping = stubFor(
-      post(urlPathEqualTo(affordabilityUrl))
-        .willReturn(aResponse()
-          .withStatus(200)
-          .withBody(jsonBody))
-    )
+    def stubRetrieveAffordability(jsonBody: String = TtpJsonResponses.ttpAffordabilityResponseJson()): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(affordabilityUrl, jsonBody)
 
-    def verifyTtpAffordabilityRequest(): Unit = ttpVerify(affordabilityUrl)
+    def verifyTtpAffordabilityRequest(): Unit =
+      ttpVerify(affordabilityUrl, TdAll.instalmentAmountRequest)(InstalmentAmountRequest.format)
   }
 
   object AffordableQuotes {
-    def retrieveAffordableQuotes(jsonBody: String = TtpJsonResponses.ttpAffordableQuotesResponseJson()): StubMapping = stubFor(
-      post(urlPathEqualTo(affordableQuotesUrl))
-        .willReturn(aResponse()
-          .withStatus(200)
-          .withBody(jsonBody))
-    )
+    def stubRetrieveAffordableQuotes(jsonBody: String = TtpJsonResponses.ttpAffordableQuotesResponseJson()): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(affordableQuotesUrl, jsonBody)
 
-    def verifyTtpAffordableQuotesRequest(): Unit = ttpVerify(affordableQuotesUrl)
+    def verifyTtpAffordableQuotesRequest(): Unit =
+      ttpVerify(affordableQuotesUrl, TdAll.affordableQuotesRequest)(AffordableQuotesRequest.format)
   }
 
   object EnactArrangement {
-    def enactArrangement(jsonBody: String = TtpJsonResponses.ttpEnactArrangementResponseJson()): StubMapping = stubFor(
-      post(urlPathEqualTo(enactArrangementUrl))
-        .willReturn(aResponse()
-          .withStatus(202)
-          .withBody(jsonBody))
-    )
+    def stubEnactArrangement(jsonBody: String = TtpJsonResponses.ttpEnactArrangementResponseJson()): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(enactArrangementUrl, jsonBody, Status.CREATED)
 
-    def enactArrangementFail(): StubMapping = stubFor(
+    def stubEnactArrangementFail(): StubMapping = stubFor(
       post(urlPathEqualTo(enactArrangementUrl))
         .willReturn(serviceUnavailable())
     )
 
-    def verifyTtpEnactArrangementRequest(): Unit = ttpVerify(enactArrangementUrl)
+    def verifyTtpEnactArrangementRequest(): Unit =
+      ttpVerify(enactArrangementUrl, TdAll.arrangementRequest)(ArrangementRequest.format)
   }
 
 }

@@ -101,7 +101,7 @@ class InstalmentsControllerSpec extends ItSpec {
     "redirect to instalment summary page when form is valid" in {
       AuthStub.authorise()
       EssttpBackend.AffordableQuotes.findJourney()
-      EssttpBackend.SelectedPaymentPlan.updateSelectedPlan(TdAll.journeyId)
+      EssttpBackend.SelectedPaymentPlan.stubUpdateSelectedPlan(TdAll.journeyId)
       val fakeRequest = FakeRequest(
         method = "POST",
         path   = "/how-many-months-do-you-want-to-pay-over"
@@ -116,7 +116,7 @@ class InstalmentsControllerSpec extends ItSpec {
     "display correct error message when form is submitted with no value" in {
       AuthStub.authorise()
       EssttpBackend.AffordableQuotes.findJourney()
-      EssttpBackend.SelectedPaymentPlan.updateSelectedPlan(TdAll.journeyId)
+      EssttpBackend.SelectedPaymentPlan.stubUpdateSelectedPlan(TdAll.journeyId)
       val fakeRequest = FakeRequest(
         method = "POST",
         path   = "/how-many-months-do-you-want-to-pay-over"

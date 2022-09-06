@@ -36,8 +36,8 @@ class DetermineAffordableQuotesControllerSpec extends ItSpec {
     "trigger call to ttp microservice affordable quotes endpoint and update backend" in {
       AuthStub.authorise()
       EssttpBackend.Dates.findJourneyStartDates()
-      Ttp.AffordableQuotes.retrieveAffordableQuotes()
-      EssttpBackend.AffordableQuotes.updateAffordableQuotes(TdAll.journeyId)
+      Ttp.AffordableQuotes.stubRetrieveAffordableQuotes()
+      EssttpBackend.AffordableQuotes.stubUpdateAffordableQuotes(TdAll.journeyId)
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.retrieveAffordableQuotes(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
