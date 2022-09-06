@@ -19,6 +19,7 @@ package services
 import config.AppConfig
 import essttp.bars.BarsVerifyStatusConnector
 import essttp.journey.model.Journey.{AfterChosenTypeOfBankAccount, AfterComputedTaxId}
+import essttp.rootmodel.TaxId
 import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount, TypesOfBankAccount}
 import models.bars.request.{BarsBankAccount, BarsBusiness, BarsSubject}
 import models.bars.response._
@@ -66,18 +67,25 @@ class EssttpBarsService @Inject() (
         result match {
           case Left(_: BarsValidateError) =>
             Future.successful(result) // don't update the verify count on validate errors
-          case Right(_) | Left(_: BarsVerifyError) =>
-            barsVerifyStatusConnector
-              .update(taxId)
-              .map { verifyStatus =>
-                // here we catch a lockout BarsStatus condition,
-                // and force a TooManyAttempts (BarsError) response
-                verifyStatus.lockoutExpiryDateTime
-                  .fold(result) { expiry =>
-                    result.flatMap(resp => Left(TooManyAttempts(resp, expiry)))
-                  }
-              }
+          case Left(bve: BarsVerifyError) =>
+            updateVerifyStatus(taxId, result, bve.barsResponse)
+          case Right(vr) =>
+            updateVerifyStatus(taxId, result, vr)
         }
+      }
+  }
+
+  private def updateVerifyStatus(taxId: TaxId, result: Either[BarsError, VerifyResponse], br: BarsResponse)
+    (implicit requestHeader: RequestHeader): Future[Either[BarsError, VerifyResponse]] = {
+    barsVerifyStatusConnector
+      .update(taxId)
+      .map { verifyStatus =>
+        // here we catch a lockout BarsStatus condition,
+        // and force a TooManyAttempts (BarsError) response
+        verifyStatus.lockoutExpiryDateTime
+          .fold(result) { expiry =>
+            Left(TooManyAttempts(br, expiry))
+          }
       }
   }
 }

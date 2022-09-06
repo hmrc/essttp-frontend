@@ -33,7 +33,10 @@ import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.EssttpBackend.BarsVerifyStatusStub
 import testsupport.testdata.BarsJsonResponses.{ValidateJson, VerifyJson}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
+import util.QueryParameterUtils._
 
+import java.net.URLEncoder
+import java.time.Instant
 import java.util.Locale
 import scala.concurrent.Future
 import scala.jdk.CollectionConverters.{asScalaIteratorConverter, collectionAsScalaIterableConverter}
@@ -765,6 +768,28 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
       }
 
+    "redirect to the lockout page when update bars verify status response contains an expiry date-time" in
+      new BarsErrorSetup(TypesOfBankAccount.Business) {
+        private val expiry = Instant.now
+        private val encodedExpiry = URLEncoder.encode(expiry.encodedLongFormat, "utf-8")
+
+        BarsStub.ValidateStub.success()
+        BarsStub.VerifyBusinessStub.otherBarsError() // any error will do
+        BarsVerifyStatusStub.updateAndLockout(expiry)
+
+        val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(s"${PageUrls.lockoutUrl}?p=$encodedExpiry")
+
+        BarsStub.ValidateStub.ensureBarsValidateCalled(formData)
+        BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(formData)
+        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
+        BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
+        AuditConnectorStub.verifyEventAudited(
+          auditType  = "BarsCheck",
+          auditEvent = toExpectedBarsAuditDetailJson(VerifyJson.otherBarsError)
+        )
+      }
   }
 
   "GET /bars-error-placeholder should" - {
