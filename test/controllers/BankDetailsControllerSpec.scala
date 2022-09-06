@@ -582,11 +582,6 @@ class BankDetailsControllerSpec extends ItSpec {
       new BarsFormErrorSetup("accountNumberNotWellFormatted", TypesOfBankAccount.Personal) {
         testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
 
-        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(
-          TdAll.journeyId,
-          TdAll.directDebitDetails("Bob Ross", "123456", "12345678", true)
-        )
-
         BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
@@ -599,11 +594,6 @@ class BankDetailsControllerSpec extends ItSpec {
     "show correct error message when BARs validate response is sortCodeNotPresentOnEiscd" in
       new BarsFormErrorSetup("sortCodeNotPresentOnEiscd", TypesOfBankAccount.Personal) {
         testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
-
-        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(
-          TdAll.journeyId,
-          TdAll.directDebitDetails("Bob Ross", "123456", "12345678", true)
-        )
 
         BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
@@ -618,11 +608,6 @@ class BankDetailsControllerSpec extends ItSpec {
       new BarsFormErrorSetup("sortCodeDoesNotSupportsDirectDebit", TypesOfBankAccount.Personal) {
         testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
 
-        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(
-          TdAll.journeyId,
-          TdAll.directDebitDetails("Bob Ross", "123456", "12345678", true)
-        )
-
         BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
@@ -636,11 +621,6 @@ class BankDetailsControllerSpec extends ItSpec {
       new BarsFormErrorSetup("nameDoesNotMatch", typeOfAccount = TypesOfBankAccount.Personal) {
         testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
 
-        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(
-          TdAll.journeyId,
-          TdAll.directDebitDetails("Bob Ross", "123456", "12345678", true)
-        )
-
         BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(validForm)
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
@@ -653,11 +633,6 @@ class BankDetailsControllerSpec extends ItSpec {
     "show correct error message when BARs verify response is nameDoesNotMatch with a business bank account" in
       new BarsFormErrorSetup("nameDoesNotMatch", typeOfAccount = TypesOfBankAccount.Business) {
         testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
-
-        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(
-          TdAll.journeyId,
-          TdAll.directDebitDetails("Bob Ross", "123456", "12345678", true)
-        )
 
         BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validForm)
@@ -677,12 +652,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
         val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(PageUrls.errorPlaceholder)
-
-        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(
-          TdAll.journeyId,
-          TdAll.directDebitDetails("Bob Ross", "123456", "12345678", true)
-        )
+        redirectLocation(result) shouldBe Some(PageUrls.errorPlaceholderUrl)
 
         BarsStub.ValidateStub.ensureBarsValidateCalled(formData)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
@@ -704,12 +674,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
         val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(PageUrls.errorPlaceholder)
-
-        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(
-          TdAll.journeyId,
-          TdAll.directDebitDetails("Bob Ross", "123456", "12345678", true)
-        )
+        redirectLocation(result) shouldBe Some(PageUrls.errorPlaceholderUrl)
 
         BarsStub.ValidateStub.ensureBarsValidateCalled(formData)
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(formData)
@@ -721,64 +686,9 @@ class BankDetailsControllerSpec extends ItSpec {
         )
       }
 
-    // TODO this should now go to Technical Difficulties page
-    "redirect to an error page when bars verify-personal response has nameMatches is Error" in
-      new BarsErrorSetup(TypesOfBankAccount.Personal) {
-        BarsStub.ValidateStub.success()
-        BarsStub.VerifyPersonalStub.nameMatchesError()
-
-        val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(PageUrls.checkDirectDebitDetailsUrl)
-
-        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(
-          TdAll.journeyId,
-          TdAll.directDebitDetails("Bob Ross", "123456", "12345678", true)
-        )
-
-        BarsStub.ValidateStub.ensureBarsValidateCalled(formData)
-        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
-        BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
-        BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
-        AuditConnectorStub.verifyEventAudited(
-          auditType  = "BarsCheck",
-          auditEvent = toExpectedBarsAuditDetailJson(VerifyJson.nameMatchesError)
-        )
-      }
-
-    // TODO this should now go to Technical Difficulties page
-    "redirect to an error page when bars verify-business response has nameMatches is Error" in
-      new BarsErrorSetup(TypesOfBankAccount.Business) {
-
-        BarsStub.ValidateStub.success()
-        BarsStub.VerifyBusinessStub.nameMatchesError()
-
-        val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(PageUrls.checkDirectDebitDetailsUrl)
-
-        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(
-          TdAll.journeyId,
-          TdAll.directDebitDetails("Bob Ross", "123456", "12345678", true)
-        )
-
-        BarsStub.ValidateStub.ensureBarsValidateCalled(formData)
-        BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(formData)
-        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
-        BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
-        AuditConnectorStub.verifyEventAudited(
-          auditType  = "BarsCheck",
-          auditEvent = toExpectedBarsAuditDetailJson(VerifyJson.nameMatchesError)
-        )
-      }
-
     "show correct error message when bars verify-personal responds with accountExists is No" in
       new BarsFormErrorSetup("accountDoesNotExist", typeOfAccount = TypesOfBankAccount.Personal) {
         testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
-        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(
-          TdAll.journeyId,
-          TdAll.directDebitDetails("Bob Ross", "123456", "12345678", true)
-        )
 
         BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(validForm)
@@ -789,11 +699,6 @@ class BankDetailsControllerSpec extends ItSpec {
     "show correct error message when bars verify-business responds with accountExists is No" in
       new BarsFormErrorSetup("accountDoesNotExist", typeOfAccount = TypesOfBankAccount.Business) {
         testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
-
-        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(
-          TdAll.journeyId,
-          TdAll.directDebitDetails("Bob Ross", "123456", "12345678", true)
-        )
 
         BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validForm)
@@ -809,18 +714,13 @@ class BankDetailsControllerSpec extends ItSpec {
 
         val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(PageUrls.errorPlaceholder)
+        redirectLocation(result) shouldBe Some(PageUrls.errorPlaceholderUrl)
 
-        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(
-          TdAll.journeyId,
-          TdAll.directDebitDetails("Bob Ross", "123456", "12345678", true)
-        )
       }
 
     "show correct error message when bars validate response is 400 sortCodeOnDenyList" in
       new BarsFormErrorSetup("sortCodeOnDenyList", typeOfAccount = TypesOfBankAccount.Business) {
         testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
-        
         BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
@@ -852,11 +752,6 @@ class BankDetailsControllerSpec extends ItSpec {
       new BarsFormErrorSetup("otherBarsError", typeOfAccount = TypesOfBankAccount.Personal) {
         testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
 
-        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(
-          TdAll.journeyId,
-          TdAll.directDebitDetails("Bob Ross", "123456", "12345678", true)
-        )
-
         BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(validForm)
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
@@ -866,12 +761,6 @@ class BankDetailsControllerSpec extends ItSpec {
     "show correct error message when bars verify-business is an undocumented error response" in
       new BarsFormErrorSetup("otherBarsError", typeOfAccount = TypesOfBankAccount.Business) {
         testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
-
-        EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(
-          TdAll.journeyId,
-          TdAll.directDebitDetails("Bob Ross", "123456", "12345678", true)
-        )
-
         BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validForm)
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
