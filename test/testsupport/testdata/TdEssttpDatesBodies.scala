@@ -18,25 +18,12 @@ package testsupport.testdata
 
 object TdEssttpDatesBodies {
 
-  def extremeDatesRequest(): String =
-    """{
-      |
-      |""".stripMargin
-
   def extremeDatesResponse(): String =
     """{
       |  "initialPaymentDate": "2022-06-24",
       |  "earliestPlanStartDate": "2022-07-14",
       |  "latestPlanStartDate": "2022-08-13"
       |}""".stripMargin
-
-  def startDatesRequest(initialPayment: Boolean): String =
-    s"""
-      |{
-      |   "initialPayment" : $initialPayment,
-      |   "preferredDayOfMonth" : 28
-      |}
-      |""".stripMargin
 
   def startDatesResponseWithUpfrontPayment(): String =
     """{
