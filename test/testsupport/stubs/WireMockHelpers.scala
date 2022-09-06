@@ -17,7 +17,7 @@
 package testsupport.stubs
 
 import cats.syntax.eq._
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, equalTo, post, postRequestedFor, stubFor, urlPathEqualTo, verify}
+import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.http.Request
 import com.github.tomakehurst.wiremock.matching.MatchResult
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
@@ -39,12 +39,31 @@ object WireMockHelpers {
   )
 
   /**
+   * Same as above, but it also compares a Json serialised expected A with the wiremock request
+   */
+  def verifyWithBodyParse[A](url: String, expected: A)(implicit format: Format[A]): Unit = verify(
+    postRequestedFor(urlPathEqualTo(url))
+      .andMatching((value: Request) => customValueMatcher(url, value))
+      .withRequestBody(equalToJson(Json.toJson(expected).toString()))
+  )
+
+  /**
    * Same as above, but overloaded with headers to check
    */
   def verifyWithBodyParse[A](url: String, headers: (String, String))(implicit format: Format[A]): Unit = verify(
     postRequestedFor(urlPathEqualTo(url))
       .withHeader(headers._1, equalTo(headers._2))
       .andMatching((value: Request) => customValueMatcher(url, value))
+  )
+
+  /**
+   * Same as above, but overloaded with headers to check and also compares a Json serialised expected A with the wiremock request
+   */
+  def verifyWithBodyParse[A](url: String, headers: (String, String), expected: A)(implicit format: Format[A]): Unit = verify(
+    postRequestedFor(urlPathEqualTo(url))
+      .withHeader(headers._1, equalTo(headers._2))
+      .andMatching((value: Request) => customValueMatcher(url, value))
+      .withRequestBody(equalToJson(Json.toJson(expected).toString()))
   )
 
   /**

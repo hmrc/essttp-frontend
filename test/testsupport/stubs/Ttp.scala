@@ -34,28 +34,31 @@ object Ttp {
   private val enactArrangementUrl: String = "/debts/time-to-pay/self-serve/arrangement"
   private val ttpCorrelationIdHeader: (String, String) = ("correlationId", TdAll.correlationId.value.toString)
 
-  def ttpVerify[A](url: String)(implicit format: Format[A]): Unit =
-    WireMockHelpers.verifyWithBodyParse(url, ttpCorrelationIdHeader)
+  def ttpVerify[A](url: String, expectedPayload: A)(implicit format: Format[A]): Unit =
+    WireMockHelpers.verifyWithBodyParse(url, ttpCorrelationIdHeader, expectedPayload)
 
   object Eligibility {
     def stubRetrieveEligibility(jsonBody: String = TtpJsonResponses.ttpEligibilityCallJson()): StubMapping =
       WireMockHelpers.stubForPostWithResponseBody(eligibilityUrl, jsonBody)
 
-    def verifyTtpEligibilityRequests(): Unit = ttpVerify(eligibilityUrl)(CallEligibilityApiRequest.format)
+    def verifyTtpEligibilityRequests(): Unit =
+      ttpVerify(eligibilityUrl, TdAll.callEligibilityApiRequest)(CallEligibilityApiRequest.format)
   }
 
   object Affordability {
     def stubRetrieveAffordability(jsonBody: String = TtpJsonResponses.ttpAffordabilityResponseJson()): StubMapping =
       WireMockHelpers.stubForPostWithResponseBody(affordabilityUrl, jsonBody)
 
-    def verifyTtpAffordabilityRequest(): Unit = ttpVerify(affordabilityUrl)(InstalmentAmountRequest.format)
+    def verifyTtpAffordabilityRequest(): Unit =
+      ttpVerify(affordabilityUrl, TdAll.instalmentAmountRequest)(InstalmentAmountRequest.format)
   }
 
   object AffordableQuotes {
     def stubRetrieveAffordableQuotes(jsonBody: String = TtpJsonResponses.ttpAffordableQuotesResponseJson()): StubMapping =
       WireMockHelpers.stubForPostWithResponseBody(affordableQuotesUrl, jsonBody)
 
-    def verifyTtpAffordableQuotesRequest(): Unit = ttpVerify(affordableQuotesUrl)(AffordableQuotesRequest.format)
+    def verifyTtpAffordableQuotesRequest(): Unit =
+      ttpVerify(affordableQuotesUrl, TdAll.affordableQuotesRequest)(AffordableQuotesRequest.format)
   }
 
   object EnactArrangement {
@@ -67,7 +70,8 @@ object Ttp {
         .willReturn(serviceUnavailable())
     )
 
-    def verifyTtpEnactArrangementRequest(): Unit = ttpVerify(enactArrangementUrl)(ArrangementRequest.format)
+    def verifyTtpEnactArrangementRequest(): Unit =
+      ttpVerify(enactArrangementUrl, TdAll.arrangementRequest)(ArrangementRequest.format)
   }
 
 }

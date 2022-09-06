@@ -114,7 +114,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
       val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.whichDayDoYouWantToPayUrl)
-      EssttpBackend.MonthlyPaymentAmount.verifyUpdateMonthlyPaymentAmountRequest(TdAll.journeyId)
+      EssttpBackend.MonthlyPaymentAmount.verifyUpdateMonthlyPaymentAmountRequest(TdAll.journeyId, TdAll.monthlyPaymentAmount)
     }
 
     "display correct error message when form is submitted with value outside of bounds" in {

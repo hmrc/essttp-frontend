@@ -42,7 +42,7 @@ class DetermineAffordabilityControllerSpec extends ItSpec {
       val result: Future[Result] = controller.determineAffordability(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.howMuchCanYouPayEachMonthUrl)
-      EssttpBackend.AffordabilityMinMaxApi.verifyUpdateAffordabilityRequest(TdAll.journeyId)
+      EssttpBackend.AffordabilityMinMaxApi.verifyUpdateAffordabilityRequest(TdAll.journeyId, TdAll.instalmentAmounts)
       Ttp.Affordability.verifyTtpAffordabilityRequest()
     }
   }

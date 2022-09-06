@@ -26,7 +26,7 @@ import essttp.rootmodel.ttp.EligibilityCheckResult
 import essttp.rootmodel.ttp.affordability.InstalmentAmounts
 import essttp.rootmodel.ttp.affordablequotes.{AffordableQuotesResponse, PaymentPlan}
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
-import essttp.rootmodel.{DayOfMonth, TaxId}
+import essttp.rootmodel.{CanPayUpfront, DayOfMonth, MonthlyPaymentAmount, TaxId, UpfrontPaymentAmount}
 import play.api.libs.json.Json
 import testsupport.testdata.{JourneyJsonTemplates, TdAll, TdJsonBodies}
 
@@ -88,7 +88,6 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(updateTaxIdUrl(journeyId)))
           .withRequestBody(equalToJson(Json.toJson(taxId).toString()))
       )
-
   }
 
   object EligibilityCheck {
@@ -97,8 +96,8 @@ object EssttpBackend {
     def stubUpdateEligibilityResult(journeyId: JourneyId): StubMapping =
       WireMockHelpers.stubForPostNoResponseBody(updateEligibilityResultUrl(journeyId))
 
-    def verifyUpdateEligibilityRequest(journeyId: JourneyId): Unit =
-      WireMockHelpers.verifyWithBodyParse(updateEligibilityResultUrl(journeyId))(EligibilityCheckResult.format)
+    def verifyUpdateEligibilityRequest(journeyId: JourneyId, expectedEligibilityCheckResult: EligibilityCheckResult): Unit =
+      WireMockHelpers.verifyWithBodyParse(updateEligibilityResultUrl(journeyId), expectedEligibilityCheckResult)(EligibilityCheckResult.format)
 
     def verifyNoneUpdateEligibilityRequest(journeyId: JourneyId): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(updateEligibilityResultUrl(journeyId))))
@@ -119,8 +118,8 @@ object EssttpBackend {
           )
       )
 
-    def verifyUpdateCanPayUpfrontRequest(journeyId: JourneyId): Unit =
-      WireMockHelpers.verifyWithBodyParse(updateCanPayUpfrontUrl(journeyId))(essttp.rootmodel.CanPayUpfront.format)
+    def verifyUpdateCanPayUpfrontRequest(journeyId: JourneyId, expectedCanPayUpFront: CanPayUpfront): Unit =
+      WireMockHelpers.verifyWithBodyParse(updateCanPayUpfrontUrl(journeyId), expectedCanPayUpFront)(essttp.rootmodel.CanPayUpfront.format)
 
     def verifyNoneUpdateCanPayUpfrontRequest(journeyId: JourneyId): Unit =
       verify(
@@ -137,8 +136,8 @@ object EssttpBackend {
     def stubUpdateUpfrontPaymentAmount(journeyId: JourneyId): StubMapping =
       WireMockHelpers.stubForPostNoResponseBody(updateUpfrontPaymentAmountUrl(journeyId))
 
-    def verifyUpdateUpfrontPaymentAmountRequest(journeyId: JourneyId): Unit =
-      WireMockHelpers.verifyWithBodyParse(updateUpfrontPaymentAmountUrl(journeyId))(essttp.rootmodel.UpfrontPaymentAmount.format)
+    def verifyUpdateUpfrontPaymentAmountRequest(journeyId: JourneyId, expectedUpfrontPaymentAmount: UpfrontPaymentAmount): Unit =
+      WireMockHelpers.verifyWithBodyParse(updateUpfrontPaymentAmountUrl(journeyId), expectedUpfrontPaymentAmount)(essttp.rootmodel.UpfrontPaymentAmount.format)
 
     def verifyNoneUpdateUpfrontPaymentAmountRequest(journeyId: JourneyId): Unit =
       verify(
@@ -160,8 +159,8 @@ object EssttpBackend {
     def stubUpdateStartDates(journeyId: JourneyId): StubMapping =
       WireMockHelpers.stubForPostNoResponseBody(updateStartDatesUrl(journeyId))
 
-    def verifyUpdateExtremeDates(journeyId: JourneyId): Unit =
-      WireMockHelpers.verifyWithBodyParse(updateExtremeDatesUrl(journeyId))(ExtremeDatesResponse.format)
+    def verifyUpdateExtremeDates(journeyId: JourneyId, expectedExtremeDatesResponse: ExtremeDatesResponse): Unit =
+      WireMockHelpers.verifyWithBodyParse(updateExtremeDatesUrl(journeyId), expectedExtremeDatesResponse)(ExtremeDatesResponse.format)
 
     def verifyNoneUpdateExtremeDates(journeyId: JourneyId): Unit =
       verify(
@@ -169,8 +168,8 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(updateExtremeDatesUrl(journeyId)))
       )
 
-    def verifyUpdateStartDates(journeyId: JourneyId): Unit =
-      WireMockHelpers.verifyWithBodyParse(updateStartDatesUrl(journeyId))(StartDatesResponse.format)
+    def verifyUpdateStartDates(journeyId: JourneyId, expectedStartDatesResponse: StartDatesResponse): Unit =
+      WireMockHelpers.verifyWithBodyParse(updateStartDatesUrl(journeyId), expectedStartDatesResponse)(StartDatesResponse.format)
 
     def verifyNoneUpdateStartDates(journeyId: JourneyId): Unit =
       verify(
@@ -191,8 +190,8 @@ object EssttpBackend {
     def stubUpdateAffordability(journeyId: JourneyId): StubMapping =
       WireMockHelpers.stubForPostNoResponseBody(updateAffordabilityUrl(journeyId))
 
-    def verifyUpdateAffordabilityRequest(journeyId: JourneyId): Unit =
-      WireMockHelpers.verifyWithBodyParse(updateAffordabilityUrl(journeyId))(InstalmentAmounts.format)
+    def verifyUpdateAffordabilityRequest(journeyId: JourneyId, expectedInstalmentAmounts: InstalmentAmounts): Unit =
+      WireMockHelpers.verifyWithBodyParse(updateAffordabilityUrl(journeyId), expectedInstalmentAmounts)(InstalmentAmounts.format)
 
     def verifyNoneUpdateAffordabilityRequest(journeyId: JourneyId): Unit =
       verify(
@@ -207,8 +206,8 @@ object EssttpBackend {
     def stubUpdateMonthlyPaymentAmount(journeyId: JourneyId): StubMapping =
       WireMockHelpers.stubForPostNoResponseBody(monthlyPaymentAmountUrl(journeyId))
 
-    def verifyUpdateMonthlyPaymentAmountRequest(journeyId: JourneyId): Unit =
-      WireMockHelpers.verifyWithBodyParse(monthlyPaymentAmountUrl(journeyId))(essttp.rootmodel.MonthlyPaymentAmount.format)
+    def verifyUpdateMonthlyPaymentAmountRequest(journeyId: JourneyId, expectedMonthlyPaymentAmount: MonthlyPaymentAmount): Unit =
+      WireMockHelpers.verifyWithBodyParse(monthlyPaymentAmountUrl(journeyId), expectedMonthlyPaymentAmount)(essttp.rootmodel.MonthlyPaymentAmount.format)
 
     def verifyNoneUpdateMonthlyAmountRequest(journeyId: JourneyId): Unit =
       verify(
@@ -296,8 +295,8 @@ object EssttpBackend {
     def stubUpdateChosenTypeOfBankAccount(journeyId: JourneyId): StubMapping =
       WireMockHelpers.stubForPostNoResponseBody(chosenTypeOfBankAccountUrl(journeyId))
 
-    def verifyUpdateChosenTypeOfBankAccountRequest(journeyId: JourneyId): Unit =
-      WireMockHelpers.verifyWithBodyParse(chosenTypeOfBankAccountUrl(journeyId))(TypeOfBankAccount.format)
+    def verifyUpdateChosenTypeOfBankAccountRequest(journeyId: JourneyId, expectedTypeOfAccount: TypeOfBankAccount): Unit =
+      WireMockHelpers.verifyWithBodyParse(chosenTypeOfBankAccountUrl(journeyId), expectedTypeOfAccount)(TypeOfBankAccount.format)
 
     def verifyNoneUpdateChosenTypeOfBankAccountRequest(journeyId: JourneyId): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(chosenTypeOfBankAccountUrl(journeyId))))
@@ -311,8 +310,8 @@ object EssttpBackend {
     def stubUpdateDirectDebitDetails(journeyId: JourneyId): StubMapping =
       WireMockHelpers.stubForPostNoResponseBody(directDebitDetailsUrl(journeyId))
 
-    def verifyUpdateDirectDebitDetailsRequest(journeyId: JourneyId): Unit =
-      WireMockHelpers.verifyWithBodyParse(directDebitDetailsUrl(journeyId))(essttp.rootmodel.bank.DirectDebitDetails.format)
+    def verifyUpdateDirectDebitDetailsRequest(journeyId: JourneyId, expectedDirectDebitDetails: essttp.rootmodel.bank.DirectDebitDetails): Unit =
+      WireMockHelpers.verifyWithBodyParse(directDebitDetailsUrl(journeyId), expectedDirectDebitDetails)(essttp.rootmodel.bank.DirectDebitDetails.format)
 
     def verifyNoneUpdateDirectDebitDetailsRequest(journeyId: JourneyId): Unit =
       verify(
@@ -369,8 +368,8 @@ object EssttpBackend {
     def stubUpdateSubmitArrangement(journeyId: JourneyId): StubMapping =
       WireMockHelpers.stubForPostNoResponseBody(submitArrangementUrl(journeyId))
 
-    def verifyUpdateSubmitArrangementRequest(journeyId: JourneyId): Unit =
-      WireMockHelpers.verifyWithBodyParse(submitArrangementUrl(journeyId))(ArrangementResponse.format)
+    def verifyUpdateSubmitArrangementRequest(journeyId: JourneyId, expectedArrangementResponse: ArrangementResponse): Unit =
+      WireMockHelpers.verifyWithBodyParse(submitArrangementUrl(journeyId), expectedArrangementResponse)(ArrangementResponse.format)
 
     def verifyNoneUpdateSubmitArrangementRequest(journeyId: JourneyId): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(submitArrangementUrl(journeyId))))

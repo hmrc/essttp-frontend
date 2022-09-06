@@ -62,7 +62,12 @@ class DetermineEligibilityControllerSpec extends ItSpec {
             status(result) shouldBe Status.SEE_OTHER
             redirectLocation(result) shouldBe Some(expectedRedirect)
             Ttp.Eligibility.verifyTtpEligibilityRequests()
-            EssttpBackend.EligibilityCheck.verifyUpdateEligibilityRequest(TdAll.journeyId)
+
+            EssttpBackend.EligibilityCheck.verifyUpdateEligibilityRequest(
+              journeyId                      = TdAll.journeyId,
+              expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(TdAll.notEligibleEligibilityPass, eligibilityRules)
+            )
+
             AuditConnectorStub.verifyEventAudited(
               "EligibilityCheck",
               Json.parse(
@@ -91,8 +96,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
     }
 
     "Eligible: should redirect to your bill and send an audit event" in {
-      val eligibilityCheckResponseJson =
-        TtpJsonResponses.ttpEligibilityCallJson()
+      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson()
 
       AuthStub.authorise()
       EssttpBackend.DetermineTaxId.findJourney()
@@ -105,7 +109,12 @@ class DetermineEligibilityControllerSpec extends ItSpec {
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.yourBillIsUrl)
       Ttp.Eligibility.verifyTtpEligibilityRequests()
-      EssttpBackend.EligibilityCheck.verifyUpdateEligibilityRequest(TdAll.journeyId)
+
+      EssttpBackend.EligibilityCheck.verifyUpdateEligibilityRequest(
+        journeyId                      = TdAll.journeyId,
+        expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(TdAll.eligibleEligibilityPass, TdAll.eligibleEligibilityRules)
+      )
+
       AuditConnectorStub.verifyEventAudited(
         "EligibilityCheck",
         Json.parse(

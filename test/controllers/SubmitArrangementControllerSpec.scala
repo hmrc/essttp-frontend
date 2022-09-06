@@ -89,7 +89,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
              |""".stripMargin
         ).as[JsObject]
       )
-      EssttpBackend.SubmitArrangement.verifyUpdateSubmitArrangementRequest(TdAll.journeyId)
+      EssttpBackend.SubmitArrangement.verifyUpdateSubmitArrangementRequest(TdAll.journeyId, TdAll.arrangementResponse)
     }
 
     "should not update backend if call to ttp enact arrangement api fails (anything other than a 202 response)" in {

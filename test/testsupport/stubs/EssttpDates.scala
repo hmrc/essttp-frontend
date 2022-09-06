@@ -21,17 +21,19 @@ import essttp.rootmodel.dates.extremedates.ExtremeDatesRequest
 import essttp.rootmodel.dates.startdates.StartDatesRequest
 import testsupport.testdata.TdEssttpDatesBodies
 
-object Dates {
+object EssttpDates {
   private val startDatesUrl: String = "/essttp-dates/start-dates"
   private val extremeDatesUrl: String = "/essttp-dates/extreme-dates"
 
-  def verifyStartDates(): Unit = WireMockHelpers.verifyWithBodyParse(startDatesUrl)(StartDatesRequest.format)
+  def verifyStartDates(expectedStartDatesRequest: StartDatesRequest): Unit =
+    WireMockHelpers.verifyWithBodyParse(startDatesUrl, expectedStartDatesRequest)(StartDatesRequest.format)
 
-  def verifyExtremeDates(): Unit = WireMockHelpers.verifyWithBodyParse(extremeDatesUrl)(ExtremeDatesRequest.format)
+  def verifyExtremeDates(expectedExtremeDatesRequest: ExtremeDatesRequest): Unit =
+    WireMockHelpers.verifyWithBodyParse(extremeDatesUrl, expectedExtremeDatesRequest)(ExtremeDatesRequest.format)
 
-  def stubExtremeDatesCall(jsonBody: String = TdEssttpDatesBodies.extremeDates()): StubMapping =
+  def stubExtremeDatesCall(jsonBody: String = TdEssttpDatesBodies.extremeDatesResponse()): StubMapping =
     WireMockHelpers.stubForPostWithResponseBody(extremeDatesUrl, jsonBody)
 
-  def stubStartDatesCall(jsonBody: String = TdEssttpDatesBodies.startDatesWithUpfrontPayment()): StubMapping =
+  def stubStartDatesCall(jsonBody: String = TdEssttpDatesBodies.startDatesResponseWithUpfrontPayment()): StubMapping =
     WireMockHelpers.stubForPostWithResponseBody(startDatesUrl, jsonBody)
 }

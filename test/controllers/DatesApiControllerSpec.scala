@@ -22,7 +22,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
-import testsupport.stubs.{AuthStub, Dates, EssttpBackend}
+import testsupport.stubs.{AuthStub, EssttpBackend, EssttpDates}
 import testsupport.testdata.{PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
@@ -36,28 +36,28 @@ class DatesApiControllerSpec extends ItSpec {
     "trigger call to essttp-dates microservice extreme dates endpoint and update backend" in {
       AuthStub.authorise()
       EssttpBackend.UpfrontPaymentAmount.findJourney()
-      Dates.stubExtremeDatesCall()
+      EssttpDates.stubExtremeDatesCall()
       EssttpBackend.Dates.stubUpdateExtremeDates(TdAll.journeyId)
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.retrieveExtremeDates(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.determineAffordabilityUrl)
-      EssttpBackend.Dates.verifyUpdateExtremeDates(TdAll.journeyId)
-      Dates.verifyExtremeDates()
+      EssttpBackend.Dates.verifyUpdateExtremeDates(TdAll.journeyId, TdAll.extremeDatesResponse())
+      EssttpDates.verifyExtremeDates(TdAll.extremeDatesRequest(initialPayment = true))
     }
   }
   "GET /retrieve-start-dates" - {
     "trigger call to essttp-dates microservice start dates endpoint and update backend" in {
       AuthStub.authorise()
       EssttpBackend.DayOfMonth.findJourney()
-      Dates.stubStartDatesCall()
+      EssttpDates.stubStartDatesCall()
       EssttpBackend.Dates.stubUpdateStartDates(TdAll.journeyId)
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.retrieveStartDates(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.determineAffordableQuotesUrl)
-      EssttpBackend.Dates.verifyUpdateStartDates(TdAll.journeyId)
-      Dates.verifyStartDates()
+      EssttpBackend.Dates.verifyUpdateStartDates(TdAll.journeyId, TdAll.startDatesResponse())
+      EssttpDates.verifyStartDates(TdAll.startDatesRequest(initialPayment = true, day = 28))
     }
   }
 
