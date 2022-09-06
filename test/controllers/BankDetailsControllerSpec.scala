@@ -680,26 +680,7 @@ class BankDetailsControllerSpec extends ItSpec {
         )
       }
 
-    "show correct error message when bars verify-personal responds with accountExists is No" in
-      new BarsFormErrorSetup("accountDoesNotExist", typeOfAccount = TypesOfBankAccount.Personal) {
-        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
-
-        BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
-        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(validForm)
-        BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
-        BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
-      }
-
-    "show correct error message when bars verify-business responds with accountExists is No" in
-      new BarsFormErrorSetup("accountDoesNotExist", typeOfAccount = TypesOfBankAccount.Business) {
-        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
-
-        BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
-        BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validForm)
-        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
-        BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
-      }
-
+    // TODO this should now go to Technical Difficulties page
     "redirect to an error page when bars verify-personal response has nameMatches is Error" in
       new BarsErrorSetup(TypesOfBankAccount.Personal) {
 
@@ -710,12 +691,6 @@ class BankDetailsControllerSpec extends ItSpec {
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(PageUrls.errorPlaceholderUrl)
 
-        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
-        BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
-        AuditConnectorStub.verifyEventAudited(
-          auditType  = "BarsCheck",
-          auditEvent = toExpectedBarsAuditDetailJson(VerifyJson.nameMatchesError)
-        )
       }
 
     // TODO this should now go to Technical Difficulties page
