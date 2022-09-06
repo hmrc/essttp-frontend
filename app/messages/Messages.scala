@@ -583,6 +583,7 @@ object Messages {
       ),
       s"bars.${nameDoesNotMatch.message}" -> Message("Enter a valid account name"),
       s"bars.${accountDoesNotExist.message}" -> Message("Enter a valid combination of bank account number and sort code"),
+      s"bars.${sortCodeOnDenyList.message}" -> Message("Enter a valid combination of bank account number and sort code"),
       s"bars.${otherBarsError.message}" -> Message("Enter a valid combination of bank account number and sort code")
     )
 

@@ -21,9 +21,9 @@ import config.AppConfig
 import models.bars.request.{BarsValidateRequest, BarsVerifyBusinessRequest, BarsVerifyPersonalRequest}
 import play.api.mvc.RequestHeader
 import requests.RequestSupport._
-import uk.gov.hmrc.http.HttpClient
+import uk.gov.hmrc.http.{HttpClient, HttpResponse}
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import models.bars.response.{BarsValidateResponse, BarsVerifyResponse}
+import models.bars.response.{BarsVerifyResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -35,8 +35,8 @@ class BarsConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)(imp
    */
   private val validateUrl: String = appConfig.BaseUrl.barsUrl + "/validate/bank-details"
 
-  def validateBankDetails(barsValidateRequest: BarsValidateRequest)(implicit requestHeader: RequestHeader): Future[BarsValidateResponse] = {
-    httpClient.POST[BarsValidateRequest, BarsValidateResponse](validateUrl, barsValidateRequest)
+  def validateBankDetails(barsValidateRequest: BarsValidateRequest)(implicit requestHeader: RequestHeader): Future[HttpResponse] = {
+    httpClient.POST[BarsValidateRequest, HttpResponse](validateUrl, barsValidateRequest)
   }
 
   /**

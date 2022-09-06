@@ -57,6 +57,12 @@ object BarsJsonResponses {
         |  "iban": "GB21BARC20670544311611",
         |  "sortCodeBankName": "BARCLAYS BANK UK PLC"
         |}""".stripMargin
+
+    val sortCodeOnDenyList: String =
+      """{
+        |  "code": "SORT_CODE_ON_DENY_LIST",
+        |  "desc": "q"
+        |}""".stripMargin
   }
 
   object VerifyJson {

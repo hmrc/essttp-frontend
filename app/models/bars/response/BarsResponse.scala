@@ -21,6 +21,7 @@ import models.bars.response.BarsAssessmentType._
 sealed trait BarsResponse
 final case class ValidateResponse(barsValidateResponse: BarsValidateResponse) extends BarsResponse
 final case class VerifyResponse(barsVerifyResponse: BarsVerifyResponse) extends BarsResponse
+final case class SortCodeOnDenyList(error: BarsErrorResponse) extends BarsResponse
 
 object ValidateResponse {
   import cats.syntax.eq._

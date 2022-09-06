@@ -18,19 +18,18 @@ package testsupport
 
 import com.google.inject.AbstractModule
 import org.openqa.selenium.htmlunit.HtmlUnitDriver
-import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import play.api.test.{DefaultTestServerFactory, RunningServer}
 import play.api.{Application, Mode}
 import play.core.server.ServerConfig
+import testsupport.stubs.EssttpBackend
 import uk.gov.hmrc.http.HttpReadsInstances
 
 class ItSpec
-  extends AnyFreeSpec
+  extends UnitSpec
   with GuiceOneServerPerSuite
-  with RichMatchers
   with WireMockSupport
   with HttpReadsInstances {
 
@@ -77,6 +76,7 @@ class ItSpec
 
   override def beforeEach(): Unit = {
     super.beforeEach()
+    EssttpBackend.BarsVerifyStatusStub.statusUnlocked() // required by almost all tests
     webDriver.manage().deleteAllCookies()
   }
 

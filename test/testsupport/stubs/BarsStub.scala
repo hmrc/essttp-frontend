@@ -34,6 +34,8 @@ object BarsStub {
 
     def sortCodeDoesNotSupportsDirectDebit(): StubMapping = stubOk(validateUrl, ValidateJson.sortCodeDoesNotSupportsDirectDebit)
 
+    def sortCodeOnDenyList(): StubMapping = stubBadRequest(validateUrl, ValidateJson.sortCodeOnDenyList)
+
     def ensureBarsValidateNotCalled(): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(validateUrl)))
 
@@ -145,11 +147,19 @@ object BarsStub {
   }
 
   private def stubOk(url: String, responseJson: String): StubMapping = {
+    stubPost(url, HttpStatus.SC_OK, responseJson)
+  }
+
+  private def stubBadRequest(url: String, responseJson: String): StubMapping = {
+    stubPost(url, HttpStatus.SC_BAD_REQUEST, responseJson)
+  }
+
+  private def stubPost(url: String, status: Int, responseJson: String): StubMapping = {
     stubFor(
       post(urlPathEqualTo(url))
         .willReturn(
           aResponse()
-            .withStatus(HttpStatus.SC_OK)
+            .withStatus(status)
             .withBody(responseJson)
         )
     )

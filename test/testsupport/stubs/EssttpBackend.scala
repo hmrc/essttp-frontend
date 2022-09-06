@@ -29,6 +29,8 @@ import essttp.rootmodel.ttp.arrangement.ArrangementResponse
 import essttp.rootmodel.{CanPayUpfront, DayOfMonth, MonthlyPaymentAmount, TaxId, UpfrontPaymentAmount}
 import play.api.libs.json.Json
 import testsupport.testdata.{JourneyJsonTemplates, TdAll, TdJsonBodies}
+import wiremock.org.apache.http.HttpStatus._
+import java.time.Instant
 
 object EssttpBackend {
 
@@ -42,6 +44,45 @@ object EssttpBackend {
   )
 
   def verifyFindByLatestSessionId(): Unit = verify(postRequestedFor(urlPathEqualTo(findByLatestSessionIdUrl)))
+
+  object BarsVerifyStatusStub {
+    private val noLockoutBody = """{
+                          |    "attempts": 4
+                          |}""".stripMargin
+
+    private def lockoutBody(expiry: Instant) = s"""{
+                        |    "attempts": 4,
+                        |    "lockoutExpiryDateTime": "${expiry.toString}"
+                        |}""".stripMargin
+
+    private val getVerifyStatusUrl: String = "/essttp-backend/bars/verify/status"
+    private val updateVerifyStatusUrl: String = "/essttp-backend/bars/verify/update"
+
+    def statusUnlocked(): StubMapping = stubPost(getVerifyStatusUrl, SC_OK, noLockoutBody)
+
+    def update(): StubMapping = stubPost(updateVerifyStatusUrl, SC_OK, noLockoutBody)
+
+    def updateAndLockout(expiry: Instant): StubMapping = stubPost(updateVerifyStatusUrl, SC_OK, lockoutBody(expiry))
+
+    def ensureVerifyUpdateStatusIsCalled(): Unit = {
+      verify(exactly(1), postRequestedFor(urlPathEqualTo(updateVerifyStatusUrl)))
+    }
+
+    def ensureVerifyUpdateStatusIsNotCalled(): Unit =
+      verify(exactly(0), postRequestedFor(urlPathEqualTo(updateVerifyStatusUrl)))
+
+    private def stubPost(url: String, status: Int, responseJson: String): StubMapping = {
+      stubFor(
+        post(urlPathEqualTo(url))
+          .withRequestBody(matchingJsonPath("$.taxId"))
+          .willReturn(
+            aResponse()
+              .withStatus(status)
+              .withBody(responseJson)
+          )
+      )
+    }
+  }
 
   object StartJourney {
     private val startJourneyBtaUrl = "/essttp-backend/epaye/bta/journey/start"

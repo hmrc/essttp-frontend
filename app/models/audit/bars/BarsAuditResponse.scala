@@ -16,7 +16,7 @@
 
 package models.audit.bars
 
-import models.bars.response.{BarsError, BarsValidateResponse, BarsVerifyResponse, ValidateResponse, VerifyResponse}
+import models.bars.response._
 import play.api.libs.json.{Json, OWrites}
 
 final case class BarsAuditResponse(
@@ -32,6 +32,7 @@ object BarsAuditResponse {
         e.barsResponse match {
           case ValidateResponse(barsValidateResponse) => BarsValidateResponse.format.writes(barsValidateResponse)
           case VerifyResponse(barsVerifyResponse)     => BarsVerifyResponse.format.writes(barsVerifyResponse)
+          case SortCodeOnDenyList(barsErrorResponse)  => BarsErrorResponse.format.writes(barsErrorResponse)
         }
 
       case Right(VerifyResponse(barsVerifyResponse: BarsVerifyResponse)) => BarsVerifyResponse.format.writes(barsVerifyResponse)
