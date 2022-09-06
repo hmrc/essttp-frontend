@@ -23,6 +23,7 @@ import essttp.rootmodel.{DayOfMonth, TaxId}
 import play.api.libs.json.Json
 import testsupport.testdata.{JourneyJsonTemplates, TdAll, TdJsonBodies}
 import wiremock.org.apache.http.HttpStatus._
+import java.time.Instant
 
 object EssttpBackend {
 
@@ -31,13 +32,13 @@ object EssttpBackend {
   def verifyFindByLatestSessionId(): Unit = verify(postRequestedFor(urlPathEqualTo(findByLatestSessionIdUrl)))
 
   object BarsVerifyStatusStub {
-    val noLockoutBody = """{
+    private val noLockoutBody = """{
                           |    "attempts": 4
                           |}""".stripMargin
 
-    val lockoutBody = """{
+    private def lockoutBody(expiry: Instant) = s"""{
                         |    "attempts": 4,
-                        |    "lockoutExpiryDateTime": "2022-09-06T11:28:42.316Z"
+                        |    "lockoutExpiryDateTime": "${expiry.toString}"
                         |}""".stripMargin
 
     private val getVerifyStatusUrl: String = "/essttp-backend/bars/verify/status"
@@ -47,7 +48,7 @@ object EssttpBackend {
 
     def update(): StubMapping = stubPost(updateVerifyStatusUrl, SC_OK, noLockoutBody)
 
-    def updateAndLockout(): StubMapping = stubPost(updateVerifyStatusUrl, SC_OK, lockoutBody)
+    def updateAndLockout(expiry: Instant): StubMapping = stubPost(updateVerifyStatusUrl, SC_OK, lockoutBody(expiry))
 
     def ensureVerifyUpdateStatusIsCalled(): Unit = {
       verify(exactly(1), postRequestedFor(urlPathEqualTo(updateVerifyStatusUrl)))
