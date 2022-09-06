@@ -66,7 +66,7 @@ object BarsStub {
 
   }
   object VerifyPersonalStub {
-    val verifyPersonalUrl: String = "/verify/personal"
+    private val verifyPersonalUrl = "/verify/personal"
 
     def success(): StubMapping = stubOk(verifyPersonalUrl, VerifyJson.success)
 

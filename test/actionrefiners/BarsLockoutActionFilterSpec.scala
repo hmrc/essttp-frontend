@@ -32,7 +32,7 @@ import java.time.Instant
 
 class BarsLockoutActionFilterSpec extends ItSpec {
 
-  // this is the first page that in journey that th BarsLockoutActionFilter can lockout
+  // this is the first page in the journey that the BarsLockoutActionFilter can lockout
   val controller: YourBillController = app.injector.instanceOf[YourBillController]
 
   "BarsLockoutActionFilter" - {

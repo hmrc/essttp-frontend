@@ -89,6 +89,11 @@ class BankDetailsControllerSpec extends ItSpec {
     val expectedPageTitle: String = s"$expectedH1 - $expectedServiceName - GOV.UK"
   }
 
+  object BarsLockoutPage {
+    val expectedH1: String = "You’ve tried to confirm your bank details too many times"
+    val expectedPageTitle: String = s"$expectedH1 - $expectedServiceName - GOV.UK"
+  }
+
   private def getExpectedFormValue(field: String, formData: Seq[(String, String)]): String =
     formData.collectFirst{ case (x, value) if x == field => value }.getOrElse("")
 
@@ -794,12 +799,27 @@ class BankDetailsControllerSpec extends ItSpec {
       }
   }
 
-  "GET /bars-error-placeholder should" - {
+  "GET /lockout should" - {
     "return 200" in {
-      AuthStub.authorise()
+      val expiry = Instant.now
+      val encodedExpiry = expiry.encodedLongFormat
+
       val request = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val result: Future[Result] = controller.barsErrorPlaceholder(request)
+      val result: Future[Result] = controller.barsLockout(encodedExpiry)(request)
       status(result) shouldBe Status.OK
+
+      val pageContent: String = contentAsString(result)
+      val doc: Document = Jsoup.parse(pageContent)
+
+      doc.title() shouldBe BarsLockoutPage.expectedPageTitle
+      doc.select(".govuk-heading-xl").text() shouldBe BarsLockoutPage.expectedH1
+      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
+      ContentAssertions.languageToggleExists(doc)
+
+      val paragraphs = doc.select("p.govuk-body").asScala.toList
+      paragraphs(0).text() shouldBe s"You’ll need to wait until ${expiry.longFormat} before trying to confirm your bank details again."
+      paragraphs(1).text() shouldBe "You may still be able to set up a payment plan over the phone."
+      paragraphs(2).text() shouldBe "For further support you can contact the Payment Support Service on 0300 200 3835 to speak to an adviser."
     }
   }
 
