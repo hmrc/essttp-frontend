@@ -58,8 +58,15 @@ object BarsStub {
     }
   }
 
+  object VerifyStub {
+    def ensureBarsVerifyNotCalled(): Unit = {
+      VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
+      VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
+    }
+
+  }
   object VerifyPersonalStub {
-    private val verifyPersonalUrl = "/verify/personal"
+    val verifyPersonalUrl: String = "/verify/personal"
 
     def success(): StubMapping = stubOk(verifyPersonalUrl, VerifyJson.success)
 
@@ -77,6 +84,9 @@ object BarsStub {
       verify(exactly(0), postRequestedFor(urlPathEqualTo(verifyPersonalUrl)))
 
     def ensureBarsVerifyPersonalCalled(formData: List[(String, String)]): Unit = {
+      BarsStub.ValidateStub.ensureBarsValidateCalled(formData)
+      BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
+
       val sortCode = getExpectedFormValue("sortCode", formData)
       val accountNumber = getExpectedFormValue("accountNumber", formData)
       val name = getExpectedFormValue("name", formData)
@@ -118,6 +128,9 @@ object BarsStub {
       verify(exactly(0), postRequestedFor(urlPathEqualTo(verifyBusinessUrl)))
 
     def ensureBarsVerifyBusinessCalled(formData: List[(String, String)]): Unit = {
+      BarsStub.ValidateStub.ensureBarsValidateCalled(formData)
+      BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
+
       val sortCode = getExpectedFormValue("sortCode", formData)
       val accountNumber = getExpectedFormValue("accountNumber", formData)
       val companyName = getExpectedFormValue("name", formData)

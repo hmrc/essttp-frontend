@@ -47,11 +47,11 @@ object EssttpBackend {
 
   object BarsVerifyStatusStub {
     private val noLockoutBody = """{
-                          |    "attempts": 4
+                          |    "attempts": 1
                           |}""".stripMargin
 
     private def lockoutBody(expiry: Instant) = s"""{
-                        |    "attempts": 4,
+                        |    "attempts": 3,
                         |    "lockoutExpiryDateTime": "${expiry.toString}"
                         |}""".stripMargin
 
@@ -59,6 +59,8 @@ object EssttpBackend {
     private val updateVerifyStatusUrl: String = "/essttp-backend/bars/verify/update"
 
     def statusUnlocked(): StubMapping = stubPost(getVerifyStatusUrl, SC_OK, noLockoutBody)
+
+    def statusLocked(expiry: Instant): StubMapping = stubPost(getVerifyStatusUrl, SC_OK, lockoutBody(expiry))
 
     def update(): StubMapping = stubPost(updateVerifyStatusUrl, SC_OK, noLockoutBody)
 
