@@ -137,8 +137,8 @@ object BarsJsonResponses {
         |  "sortCodeIsPresentOnEISCD": "yes",
         |  "sortCodeBankName": "BARCLAYS BANK PLC",
         |  "nonStandardAccountDetailsRequiredForBacs": "no",
-        |  "accountExists": "indeterminate",
-        |  "nameMatches": "indeterminate",
+        |  "accountExists": "inapplicable",
+        |  "nameMatches": "inapplicable",
         |  "sortCodeSupportsDirectDebit": "yes",
         |  "sortCodeSupportsDirectCredit": "no"
         |}""".stripMargin
