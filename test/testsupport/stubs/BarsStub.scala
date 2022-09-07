@@ -19,22 +19,24 @@ package testsupport.stubs
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import testsupport.testdata.BarsJsonResponses.{ValidateJson, VerifyJson}
-import wiremock.org.apache.http.HttpStatus
+import play.api.http.Status._
+import testsupport.stubs.WireMockHelpers._
 
 object BarsStub {
 
   object ValidateStub {
     private val validateUrl = "/validate/bank-details"
 
-    def success(): StubMapping = stubOk(validateUrl, ValidateJson.success)
+    def success(): StubMapping = stubForPostWithResponseBody(validateUrl, ValidateJson.success)
 
-    def accountNumberNotWellFormatted(): StubMapping = stubOk(validateUrl, ValidateJson.accountNumberNotWellFormatted)
+    def accountNumberNotWellFormatted(): StubMapping = stubForPostWithResponseBody(validateUrl, ValidateJson.accountNumberNotWellFormatted)
 
-    def sortCodeNotPresentOnEiscd(): StubMapping = stubOk(validateUrl, ValidateJson.sortCodeNotPresentOnEiscd)
+    def sortCodeNotPresentOnEiscd(): StubMapping = stubForPostWithResponseBody(validateUrl, ValidateJson.sortCodeNotPresentOnEiscd)
 
-    def sortCodeDoesNotSupportsDirectDebit(): StubMapping = stubOk(validateUrl, ValidateJson.sortCodeDoesNotSupportsDirectDebit)
+    def sortCodeDoesNotSupportsDirectDebit(): StubMapping = stubForPostWithResponseBody(validateUrl, ValidateJson.sortCodeDoesNotSupportsDirectDebit)
 
-    def sortCodeOnDenyList(): StubMapping = stubBadRequest(validateUrl, ValidateJson.sortCodeOnDenyList)
+    def sortCodeOnDenyList(): StubMapping =
+      stubForPostWithResponseBody(validateUrl, ValidateJson.sortCodeOnDenyList, BAD_REQUEST)
 
     def ensureBarsValidateNotCalled(): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(validateUrl)))
@@ -68,17 +70,17 @@ object BarsStub {
   object VerifyPersonalStub {
     private val verifyPersonalUrl = "/verify/personal"
 
-    def success(): StubMapping = stubOk(verifyPersonalUrl, VerifyJson.success)
+    def success(): StubMapping = stubForPostWithResponseBody(verifyPersonalUrl, VerifyJson.success)
 
-    def accountExistsError(): StubMapping = stubOk(verifyPersonalUrl, VerifyJson.accountExistsError)
+    def accountExistsError(): StubMapping = stubForPostWithResponseBody(verifyPersonalUrl, VerifyJson.accountExistsError)
 
-    def accountDoesNotExist(): StubMapping = stubOk(verifyPersonalUrl, VerifyJson.accountDoesNotExist)
+    def accountDoesNotExist(): StubMapping = stubForPostWithResponseBody(verifyPersonalUrl, VerifyJson.accountDoesNotExist)
 
-    def nameMatchesError(): StubMapping = stubOk(verifyPersonalUrl, VerifyJson.nameMatchesError)
+    def nameMatchesError(): StubMapping = stubForPostWithResponseBody(verifyPersonalUrl, VerifyJson.nameMatchesError)
 
-    def nameDoesNotMatch(): StubMapping = stubOk(verifyPersonalUrl, VerifyJson.nameDoesNotMatch)
+    def nameDoesNotMatch(): StubMapping = stubForPostWithResponseBody(verifyPersonalUrl, VerifyJson.nameDoesNotMatch)
 
-    def otherBarsError(): StubMapping = stubOk(verifyPersonalUrl, VerifyJson.otherBarsError)
+    def otherBarsError(): StubMapping = stubForPostWithResponseBody(verifyPersonalUrl, VerifyJson.otherBarsError)
 
     def ensureBarsVerifyPersonalNotCalled(): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(verifyPersonalUrl)))
@@ -112,17 +114,17 @@ object BarsStub {
   object VerifyBusinessStub {
     private val verifyBusinessUrl = "/verify/business"
 
-    def success(): StubMapping = stubOk(verifyBusinessUrl, VerifyJson.success)
+    def success(): StubMapping = stubForPostWithResponseBody(verifyBusinessUrl, VerifyJson.success)
 
-    def accountExistsError(): StubMapping = stubOk(verifyBusinessUrl, VerifyJson.accountExistsError)
+    def accountExistsError(): StubMapping = stubForPostWithResponseBody(verifyBusinessUrl, VerifyJson.accountExistsError)
 
-    def accountDoesNotExist(): StubMapping = stubOk(verifyBusinessUrl, VerifyJson.accountDoesNotExist)
+    def accountDoesNotExist(): StubMapping = stubForPostWithResponseBody(verifyBusinessUrl, VerifyJson.accountDoesNotExist)
 
-    def nameMatchesError(): StubMapping = stubOk(verifyBusinessUrl, VerifyJson.nameMatchesError)
+    def nameMatchesError(): StubMapping = stubForPostWithResponseBody(verifyBusinessUrl, VerifyJson.nameMatchesError)
 
-    def nameDoesNotMatch(): StubMapping = stubOk(verifyBusinessUrl, VerifyJson.nameDoesNotMatch)
+    def nameDoesNotMatch(): StubMapping = stubForPostWithResponseBody(verifyBusinessUrl, VerifyJson.nameDoesNotMatch)
 
-    def otherBarsError(): StubMapping = stubOk(verifyBusinessUrl, VerifyJson.otherBarsError)
+    def otherBarsError(): StubMapping = stubForPostWithResponseBody(verifyBusinessUrl, VerifyJson.otherBarsError)
 
     def ensureBarsVerifyBusinessNotCalled(): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(verifyBusinessUrl)))
@@ -157,25 +159,6 @@ object BarsStub {
     ValidateStub.ensureBarsValidateNotCalled()
     VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
     VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
-  }
-
-  private def stubOk(url: String, responseJson: String): StubMapping = {
-    stubPost(url, HttpStatus.SC_OK, responseJson)
-  }
-
-  private def stubBadRequest(url: String, responseJson: String): StubMapping = {
-    stubPost(url, HttpStatus.SC_BAD_REQUEST, responseJson)
-  }
-
-  private def stubPost(url: String, status: Int, responseJson: String): StubMapping = {
-    stubFor(
-      post(urlPathEqualTo(url))
-        .willReturn(
-          aResponse()
-            .withStatus(status)
-            .withBody(responseJson)
-        )
-    )
   }
 
   private def getExpectedFormValue(field: String, formData: List[(String, String)]): String =

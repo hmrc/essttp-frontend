@@ -73,10 +73,10 @@ object WireMockHelpers {
   private def customValueMatcher[A](url: String, request: Request)(implicit format: Format[A]): MatchResult =
     MatchResult.of(request.getUrl === url && Json.parse(request.getBodyAsString).asOpt[A].nonEmpty)
 
-  def stubForPostNoResponseBody(url: String): StubMapping = stubFor(
+  def stubForPostNoResponseBody(url: String, responseStatus: Int = Status.OK): StubMapping = stubFor(
     post(urlPathEqualTo(url)).willReturn(
       aResponse()
-        .withStatus(200)
+        .withStatus(responseStatus)
     )
   )
 
@@ -86,6 +86,16 @@ object WireMockHelpers {
         .withStatus(responseStatus)
         .withBody(jsonBody)
     )
+  )
+
+  def stubForPostWithRequestBodyMatching(url: String, requestMatchingPath: String, jsonBody: String, responseStatus: Int = Status.OK): StubMapping = stubFor(
+    post(urlPathEqualTo(url))
+      .withRequestBody(matchingJsonPath(requestMatchingPath))
+      .willReturn(
+        aResponse()
+          .withStatus(responseStatus)
+          .withBody(jsonBody)
+      )
   )
 
 }

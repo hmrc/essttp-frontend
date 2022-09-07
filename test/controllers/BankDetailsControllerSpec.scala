@@ -26,13 +26,13 @@ import play.api.mvc.{Action, AnyContent, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
-import testsupport.stubs.{AuditConnectorStub, AuthStub, BarsStub, EssttpBackend}
-import uk.gov.hmrc.http.SessionKeys
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.EssttpBackend.BarsVerifyStatusStub
+import testsupport.stubs.{AuditConnectorStub, AuthStub, BarsStub, EssttpBackend}
 import testsupport.testdata.BarsJsonResponses.{ValidateJson, VerifyJson}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
+import uk.gov.hmrc.http.SessionKeys
 import util.QueryParameterUtils._
 
 import java.net.URLEncoder
