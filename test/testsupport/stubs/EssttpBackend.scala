@@ -28,8 +28,10 @@ import essttp.rootmodel.ttp.affordablequotes.{AffordableQuotesResponse, PaymentP
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
 import essttp.rootmodel.{CanPayUpfront, DayOfMonth, MonthlyPaymentAmount, TaxId, UpfrontPaymentAmount}
 import play.api.libs.json.Json
+import testsupport.stubs.WireMockHelpers._
 import testsupport.testdata.{JourneyJsonTemplates, TdAll, TdJsonBodies}
-import wiremock.org.apache.http.HttpStatus._
+import play.api.http.Status._
+
 import java.time.Instant
 
 object EssttpBackend {
@@ -39,7 +41,7 @@ object EssttpBackend {
   def findByLatestSessionId(jsonBody: String): StubMapping = stubFor(
     get(urlPathEqualTo(findByLatestSessionIdUrl))
       .willReturn(aResponse()
-        .withStatus(200)
+        .withStatus(OK)
         .withBody(jsonBody))
   )
 
@@ -58,13 +60,13 @@ object EssttpBackend {
     private val getVerifyStatusUrl: String = "/essttp-backend/bars/verify/status"
     private val updateVerifyStatusUrl: String = "/essttp-backend/bars/verify/update"
 
-    def statusUnlocked(): StubMapping = stubPost(getVerifyStatusUrl, SC_OK, noLockoutBody)
+    def statusUnlocked(): StubMapping = stubPost(getVerifyStatusUrl, noLockoutBody)
 
-    def statusLocked(expiry: Instant): StubMapping = stubPost(getVerifyStatusUrl, SC_OK, lockoutBody(expiry))
+    def statusLocked(expiry: Instant): StubMapping = stubPost(getVerifyStatusUrl, lockoutBody(expiry))
 
-    def update(): StubMapping = stubPost(updateVerifyStatusUrl, SC_OK, noLockoutBody)
+    def update(): StubMapping = stubPost(updateVerifyStatusUrl, noLockoutBody)
 
-    def updateAndLockout(expiry: Instant): StubMapping = stubPost(updateVerifyStatusUrl, SC_OK, lockoutBody(expiry))
+    def updateAndLockout(expiry: Instant): StubMapping = stubPost(updateVerifyStatusUrl, lockoutBody(expiry))
 
     def ensureVerifyUpdateStatusIsCalled(): Unit = {
       verify(exactly(1), postRequestedFor(urlPathEqualTo(updateVerifyStatusUrl)))
@@ -73,17 +75,8 @@ object EssttpBackend {
     def ensureVerifyUpdateStatusIsNotCalled(): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(updateVerifyStatusUrl)))
 
-    private def stubPost(url: String, status: Int, responseJson: String): StubMapping = {
-      stubFor(
-        post(urlPathEqualTo(url))
-          .withRequestBody(matchingJsonPath("$.taxId"))
-          .willReturn(
-            aResponse()
-              .withStatus(status)
-              .withBody(responseJson)
-          )
-      )
-    }
+    private def stubPost(url: String, responseJson: String, status: Int = OK): StubMapping =
+      stubForPostWithRequestBodyMatching(url, "$.taxId", responseJson, status)
   }
 
   object StartJourney {
@@ -101,7 +94,7 @@ object EssttpBackend {
         post(urlPathEqualTo(url))
           .withRequestBody(equalToJson(expectedRequestBody))
           .willReturn(aResponse()
-            .withStatus(201)
+            .withStatus(ACCEPTED)
             .withBody(responseBody))
       )
     }
@@ -157,7 +150,7 @@ object EssttpBackend {
           .withRequestBody(equalTo(canPayUpfrontScenario.toString))
           .willReturn(
             aResponse()
-              .withStatus(200)
+              .withStatus(OK)
           )
       )
 
