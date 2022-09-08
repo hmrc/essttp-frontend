@@ -192,8 +192,8 @@ class BankDetailsController @Inject() (
     import models.forms.BankDetailsForm._
     resp.fold(
       {
-        case ThirdPartyError(_) =>
-          Future.successful(Redirect(routes.BankDetailsController.barsErrorPlaceholder))
+        case ThirdPartyError(resp) =>
+          throw new RuntimeException(s"BARS verify third-party error. BARS response: $resp")
         case AccountNumberNotWellFormatted(_) | AccountNumberNotWellFormattedValidateResponse(_) =>
           enterBankDetailsPageWithBarsError(accountNumberNotWellFormatted)
         case SortCodeDoesNotSupportDirectDebit(_) | SortCodeDoesNotSupportDirectDebitValidateResponse(_) =>
@@ -277,11 +277,6 @@ class BankDetailsController @Inject() (
           JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
         }
     }
-  }
-
-  // TODO in a future ticket
-  val barsErrorPlaceholder: Action[AnyContent] = as.default { implicit request =>
-    Ok(views.barsErrorPlaceHolder())
   }
 
   def barsLockout(p: String): Action[AnyContent] = as.default { implicit request =>

@@ -95,7 +95,7 @@ class BankDetailsControllerSpec extends ItSpec {
   }
 
   private def getExpectedFormValue(field: String, formData: Seq[(String, String)]): String =
-    formData.collectFirst{ case (x, value) if x == field => value }.getOrElse("")
+    formData.collectFirst { case (x, value) if x == field => value }.getOrElse("")
 
   def assertFieldsPopulated(result: Future[Result], form: Seq[(String, String)]): Unit = {
     val pageContent: String = contentAsString(result)
@@ -325,7 +325,7 @@ class BankDetailsControllerSpec extends ItSpec {
       )
 
       BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
-      BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
+      BarsVerifyStatusStub.ensureVerifyUpdateStatusIsNotCalled()
 
       AuditConnectorStub.verifyEventAudited(
         auditType  = "BarsCheck",
@@ -641,16 +641,12 @@ class BankDetailsControllerSpec extends ItSpec {
         )
       }
 
-    // TODO this should now go to Technical Difficulties page
-    "redirect to an error page when bars verify-personal response has accountExists is ERROR" in
+    "go to technical difficulties page when bars verify-personal response has accountExists is ERROR" in
       new BarsErrorSetup(TypesOfBankAccount.Personal) {
-
         BarsStub.ValidateStub.success()
         BarsStub.VerifyPersonalStub.accountExistsError()
 
-        val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(PageUrls.errorPlaceholderUrl)
+        a[RuntimeException] shouldBe thrownBy(await(controller.enterBankDetailsSubmit(fakeRequest)))
 
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
         BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
@@ -661,16 +657,13 @@ class BankDetailsControllerSpec extends ItSpec {
         )
       }
 
-    // TODO this should now go to Technical Difficulties page
-    "redirect to an error page when bars verify-business response has accountExists is ERROR" in
+    "go to technical difficulties page when bars verify-business response has accountExists is ERROR" in
       new BarsErrorSetup(TypesOfBankAccount.Business) {
 
         BarsStub.ValidateStub.success()
         BarsStub.VerifyBusinessStub.accountExistsError()
 
-        val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(PageUrls.errorPlaceholderUrl)
+        a[RuntimeException] shouldBe thrownBy(await(controller.enterBankDetailsSubmit(fakeRequest)))
 
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(formData)
         BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
@@ -680,29 +673,28 @@ class BankDetailsControllerSpec extends ItSpec {
         )
       }
 
-    // TODO this should now go to Technical Difficulties page
-    "redirect to an error page when bars verify-personal response has nameMatches is Error" in
+    "go to technical difficulties page when bars verify-personal response has nameMatches is Error" in
       new BarsErrorSetup(TypesOfBankAccount.Personal) {
 
         BarsStub.ValidateStub.success()
         BarsStub.VerifyPersonalStub.nameMatchesError()
 
-        val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(PageUrls.errorPlaceholderUrl)
+        a[RuntimeException] shouldBe thrownBy(await(controller.enterBankDetailsSubmit(fakeRequest)))
 
+        BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
+        BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
+        AuditConnectorStub.verifyEventAudited(
+          auditType  = "BarsCheck",
+          auditEvent = toExpectedBarsAuditDetailJson(VerifyJson.nameMatchesError)
+        )
       }
 
-    // TODO this should now go to Technical Difficulties page
-    "redirect to an error page when bars verify-business response has nameMatches is Error" in
+    "go to technical difficulties page when bars verify-business response has nameMatches is Error" in
       new BarsErrorSetup(TypesOfBankAccount.Business) {
-
         BarsStub.ValidateStub.success()
         BarsStub.VerifyBusinessStub.nameMatchesError()
 
-        val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(PageUrls.errorPlaceholderUrl)
+        a[RuntimeException] shouldBe thrownBy(await(controller.enterBankDetailsSubmit(fakeRequest)))
 
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(formData)
         BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()

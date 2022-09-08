@@ -19,11 +19,15 @@ package models.bars.response
 import models.bars.response.BarsAssessmentType._
 
 sealed trait BarsResponse
+
 final case class ValidateResponse(barsValidateResponse: BarsValidateResponse) extends BarsResponse
+
 final case class VerifyResponse(barsVerifyResponse: BarsVerifyResponse) extends BarsResponse
+
 final case class SortCodeOnDenyList(error: BarsErrorResponse) extends BarsResponse
 
 object ValidateResponse {
+
   import cats.syntax.eq._
 
   object validateFailure {
@@ -51,6 +55,7 @@ object ValidateResponse {
 }
 
 object VerifyResponse {
+
   import cats.syntax.eq._
 
   object verifySuccess {
@@ -59,7 +64,7 @@ object VerifyResponse {
       (resp.accountNumberIsWellFormatted === Yes || resp.accountNumberIsWellFormatted === Indeterminate) &&
         resp.sortCodeIsPresentOnEISCD === Yes &&
         (resp.accountExists === Yes || resp.accountExists === Indeterminate) &&
-        (resp.nameMatches === Yes || resp.nameMatches === Partial) &&
+        (resp.nameMatches === Yes || resp.nameMatches === Partial || (resp.nameMatches === Indeterminate && resp.accountExists === Indeterminate)) &&
         resp.sortCodeSupportsDirectDebit === Yes
     }
   }
@@ -94,12 +99,6 @@ object VerifyResponse {
       response.barsVerifyResponse.sortCodeSupportsDirectDebit === No
   }
 
-  /**
-   * The sortCode is good, but account does not exist
-   * - in this case, having called verify/personal
-   *    calling verify/business may result in a positive response
-   *    (or vice versa)
-   */
   object accountDoesNotExist {
     def unapply(response: VerifyResponse): Boolean = {
       val resp = response.barsVerifyResponse
