@@ -325,7 +325,7 @@ class BankDetailsControllerSpec extends ItSpec {
       )
 
       BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
-      BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
+      BarsVerifyStatusStub.ensureVerifyUpdateStatusIsNotCalled()
 
       AuditConnectorStub.verifyEventAudited(
         auditType  = "BarsCheck",
