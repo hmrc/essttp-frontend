@@ -40,8 +40,7 @@
         hmrcLanguageSelectHelper: HmrcLanguageSelectHelper,
         hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
         hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper,
-        requestSupport: RequestSupport,
-        languageSelection: views.html.partials.language_selection
+        requestSupport: RequestSupport
 )
 
 @(
@@ -87,7 +86,7 @@
             content = HtmlContent(Messages.ServicePhase.bannerText(appConfig.Urls.betaFeedbackUrl(request)).show)
         ))
         @if(appConfig.welshLanguageSupportEnabled) {
-            @languageSelection()
+          @hmrcLanguageSelectHelper()
         }
         @{
             backUrl map { url =>

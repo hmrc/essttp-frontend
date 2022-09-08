@@ -41,6 +41,10 @@ object ContentAssertions extends RichMatchers {
     val langToggleItems: List[Element] = document.select(".hmrc-language-select__list-item").asScala.toList
     langToggleItems.size shouldBe 2
     langToggleItems.headOption.map(someToggleItem => someToggleItem.text()) shouldBe Some("English")
-    langToggleItems.drop(1).headOption.map(someToggleItem => someToggleItem.text()) shouldBe Some("Cymraeg")
+
+    val welshOption = langToggleItems.drop(1).headOption
+    welshOption.map(_.select("a").attr("hreflang")) shouldBe Some("cy")
+    welshOption.map(_.select("span.govuk-visually-hidden").text()) shouldBe Some("Newid yr iaith ir Gymraeg")
+    welshOption.map(_.select("span[aria-hidden=true]").text()) shouldBe Some("Cymraeg")
   }
 }
