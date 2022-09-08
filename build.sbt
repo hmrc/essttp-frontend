@@ -68,6 +68,20 @@ lazy val wartRemoverSettings =
       )
   )
 
+lazy val sbtUpdatesSettings = Seq(
+  dependencyUpdatesFailBuild := true,
+  (Compile / compile) := ((Compile / compile) dependsOn dependencyUpdates).value,
+  dependencyUpdatesFilter -= moduleFilter("org.scala-lang"),
+  dependencyUpdatesFilter -= moduleFilter("com.typesafe.play"),
+  // later versions result in this error:
+  // ---
+  // java.lang.UnsupportedClassVersionError: com/vladsch/flexmark/util/ast/Node has been
+  // compiled by a more recent version of the Java Runtime (class file version 55.0), this
+  // version of the Java Runtime only recognizes class file versions up to 52.0
+  // ---
+  dependencyUpdatesFilter -= moduleFilter("com.vladsch.flexmark", "flexmark-all")
+)
+
 lazy val scalaCompilerOptions = Seq(
   "-Xfatal-warnings",
   "-Xlint:-missing-interpolator,_",
@@ -93,7 +107,7 @@ lazy val root = (project in file("."))
   .settings(majorVersion := 0)
   .settings(ThisBuild / useSuperShell:= false)
   .settings(
-    scalaVersion := "2.12.15",
+    scalaVersion := "2.12.16",
     name := appName,
     PlayKeys.playDefaultPort := 9215,
     scalacOptions ++= Seq("-feature"),
@@ -123,6 +137,7 @@ lazy val root = (project in file("."))
     Compile / doc / wartremoverErrors := Seq(),
     Compile / doc / scalacOptions := Seq() //this will allow to have warnings in `doc` task
   )
+  .settings(sbtUpdatesSettings: _*)
 
 //Hint: Uncomment below lines if you want to work on both projects in tandem from intellj
 //  .dependsOn(cor)
