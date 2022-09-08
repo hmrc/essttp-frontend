@@ -36,7 +36,7 @@ import scala.concurrent.{ExecutionContext, Future}
  * Bank Account Reputation service (BARs).
  */
 @Singleton
-class BarsService @Inject()(barsConnector: BarsConnector)(implicit ec: ExecutionContext) extends Logging {
+class BarsService @Inject() (barsConnector: BarsConnector)(implicit ec: ExecutionContext) extends Logging {
 
   // NOTE: if the validate call is removed in the future (it is said to be deprecated)
   // then implement the "SORT_CODE_ON_DENY_LIST" handling in the verify calls below
@@ -64,15 +64,15 @@ class BarsService @Inject()(barsConnector: BarsConnector)(implicit ec: Execution
 
   // implement sortCodeOnDenyList (if validate is removed)
   def verifyPersonal(bankAccount: BarsBankAccount, subject: BarsSubject)(
-    implicit
-    requestHeader: RequestHeader
+      implicit
+      requestHeader: RequestHeader
   ): Future[VerifyResponse] =
     barsConnector.verifyPersonal(BarsVerifyPersonalRequest(bankAccount, subject)).map(VerifyResponse.apply)
 
   // implement sortCodeOnDenyList (if validate is removed)
   def verifyBusiness(bankAccount: BarsBankAccount, business: BarsBusiness)(
-    implicit
-    requestHeader: RequestHeader
+      implicit
+      requestHeader: RequestHeader
   ): Future[VerifyResponse] =
     barsConnector.verifyBusiness(BarsVerifyBusinessRequest(bankAccount, business)).map(VerifyResponse.apply)
 
@@ -81,14 +81,14 @@ class BarsService @Inject()(barsConnector: BarsConnector)(implicit ec: Execution
    * Otherwise, call either Verify/Personal or Verify/Business
    */
   def verifyBankDetails(
-                         bankAccount: BarsBankAccount,
-                         subject: BarsSubject,
-                         business: BarsBusiness,
-                         typeOfBankAccount: BarsTypeOfBankAccount
-                       )(implicit requestHeader: RequestHeader, ec: ExecutionContext): Future[Either[BarsError, VerifyResponse]] = {
+      bankAccount:       BarsBankAccount,
+      subject:           BarsSubject,
+      business:          BarsBusiness,
+      typeOfBankAccount: BarsTypeOfBankAccount
+  )(implicit requestHeader: RequestHeader, ec: ExecutionContext): Future[Either[BarsError, VerifyResponse]] = {
 
     validateBankAccount(bankAccount).flatMap {
-      case validateResponse@validateFailure() =>
+      case validateResponse @ validateFailure() =>
         Future.successful(Left(handleValidateErrorResponse(validateResponse)))
       case response: SortCodeOnDenyList =>
         Future.successful(Left(SortCodeOnDenyListErrorResponse(response)))
@@ -104,8 +104,8 @@ class BarsService @Inject()(barsConnector: BarsConnector)(implicit ec: Execution
     import ValidateResponse._
     response match {
       case accountNumberIsWellFormattedNo() => AccountNumberNotWellFormattedValidateResponse(response)
-      case sortCodeIsPresentOnEiscdNo() => SortCodeNotPresentOnEiscdValidateResponse(response)
-      case sortCodeSupportsDirectDebitNo() => SortCodeDoesNotSupportDirectDebitValidateResponse(response)
+      case sortCodeIsPresentOnEiscdNo()     => SortCodeNotPresentOnEiscdValidateResponse(response)
+      case sortCodeSupportsDirectDebitNo()  => SortCodeDoesNotSupportDirectDebitValidateResponse(response)
     }
   }
 
@@ -113,16 +113,16 @@ class BarsService @Inject()(barsConnector: BarsConnector)(implicit ec: Execution
     import VerifyResponse._
     response match {
       // success
-      case verifySuccess() => Right(response)
+      case verifySuccess()                  => Right(response)
       // defined errors
-      case thirdPartyError() => Left(ThirdPartyError(response))
+      case thirdPartyError()                => Left(ThirdPartyError(response))
       case accountNumberIsWellFormattedNo() => Left(AccountNumberNotWellFormatted(response))
-      case sortCodeIsPresentOnEiscdNo() => Left(SortCodeNotPresentOnEiscd(response))
-      case sortCodeSupportsDirectDebitNo() => Left(SortCodeDoesNotSupportDirectDebit(response))
-      case nameMatchesNo() => Left(NameDoesNotMatch(response))
-      case accountDoesNotExist() => Left(AccountDoesNotExist(response))
+      case sortCodeIsPresentOnEiscdNo()     => Left(SortCodeNotPresentOnEiscd(response))
+      case sortCodeSupportsDirectDebitNo()  => Left(SortCodeDoesNotSupportDirectDebit(response))
+      case nameMatchesNo()                  => Left(NameDoesNotMatch(response))
+      case accountDoesNotExist()            => Left(AccountDoesNotExist(response))
       // not an expected error response or a success response, so fallback to this
-      case _ => Left(OtherBarsError(response))
+      case _                                => Left(OtherBarsError(response))
     }
   }
 }

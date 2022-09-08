@@ -106,7 +106,7 @@ class BankDetailsControllerSpec extends ItSpec {
     val isSoleSignatoryRadios = doc.select(".govuk-radios__input").asScala.toList
     getExpectedFormValue("isSoleSignatory", form) match {
       case "Yes" => isSoleSignatoryRadios(0).hasAttr("checked") shouldBe true
-      case "No" => isSoleSignatoryRadios(1).hasAttr("checked") shouldBe true
+      case "No"  => isSoleSignatoryRadios(1).hasAttr("checked") shouldBe true
       case _ =>
         isSoleSignatoryRadios(0).hasAttr("checked") shouldBe false
         isSoleSignatoryRadios(1).hasAttr("checked") shouldBe false
@@ -115,11 +115,11 @@ class BankDetailsControllerSpec extends ItSpec {
   }
 
   def testFormError(action: Action[AnyContent])(formData: (String, String)*)(
-    textAndHrefContent: List[(String, String)]
+      textAndHrefContent: List[(String, String)]
   ): Unit = {
     val fakeRequest = FakeRequest(
       method = "POST",
-      path = "/set-up-direct-debit"
+      path   = "/set-up-direct-debit"
     ).withAuthToken()
       .withSession(SessionKeys.sessionId -> "IamATestSessionId")
       .withFormUrlEncodedBody(formData: _*)
@@ -132,10 +132,11 @@ class BankDetailsControllerSpec extends ItSpec {
     val doc: Document = Jsoup.parse(pageContent)
     val errorSummary = doc.select(".govuk-error-summary__list")
     val errorLinks = errorSummary.select("a").asScala.toList
-    errorLinks.zip(textAndHrefContent).foreach { testData: (Element, (String, String)) => {
-      testData._1.text() shouldBe testData._2._1
-      testData._1.attr("href") shouldBe testData._2._2
-    }
+    errorLinks.zip(textAndHrefContent).foreach { testData: (Element, (String, String)) =>
+      {
+        testData._1.text() shouldBe testData._2._1
+        testData._1.attr("href") shouldBe testData._2._2
+      }
     }
 
     ContentAssertions.languageToggleExists(doc)
@@ -183,19 +184,19 @@ class BankDetailsControllerSpec extends ItSpec {
       ("Business", JourneyJsonTemplates.`Chosen Type of Bank Account - Business`, 0),
       ("Personal", JourneyJsonTemplates.`Chosen Type of Bank Account - Personal`, 1)
     ).foreach {
-      case (typeOfAccount, wiremockJson, checkedElementIndex) =>
-        s"prepopulate the form when the user has a chosen $typeOfAccount bank account type in their journey" in {
-          AuthStub.authorise()
-          EssttpBackend.ChosenTypeOfBankAccount.findJourney(wiremockJson)
-          val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-          val result: Future[Result] = controller.typeOfAccount(fakeRequest)
-          RequestAssertions.assertGetRequestOk(result)
-          val pageContent: String = contentAsString(result)
-          val doc: Document = Jsoup.parse(pageContent)
-          doc.select(".govuk-radios__input").asScala.toList(checkedElementIndex).hasAttr("checked") shouldBe true
-          ContentAssertions.languageToggleExists(doc)
-        }
-    }
+        case (typeOfAccount, wiremockJson, checkedElementIndex) =>
+          s"prepopulate the form when the user has a chosen $typeOfAccount bank account type in their journey" in {
+            AuthStub.authorise()
+            EssttpBackend.ChosenTypeOfBankAccount.findJourney(wiremockJson)
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+            val result: Future[Result] = controller.typeOfAccount(fakeRequest)
+            RequestAssertions.assertGetRequestOk(result)
+            val pageContent: String = contentAsString(result)
+            val doc: Document = Jsoup.parse(pageContent)
+            doc.select(".govuk-radios__input").asScala.toList(checkedElementIndex).hasAttr("checked") shouldBe true
+            ContentAssertions.languageToggleExists(doc)
+          }
+      }
   }
 
   "POST /what-type-of-account-details-are-you-providing should" - {
@@ -207,7 +208,7 @@ class BankDetailsControllerSpec extends ItSpec {
         EssttpBackend.ChosenTypeOfBankAccount.stubUpdateChosenTypeOfBankAccount(TdAll.journeyId)
         val fakeRequest = FakeRequest(
           method = "POST",
-          path = "/what-type-of-account-details-are-you-providing"
+          path   = "/what-type-of-account-details-are-you-providing"
         ).withAuthToken()
           .withSession(SessionKeys.sessionId -> "IamATestSessionId")
           .withFormUrlEncodedBody(("typeOfAccount", typeOfAccount))
@@ -309,7 +310,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
       val fakeRequest = FakeRequest(
         method = "POST",
-        path = "/set-up-direct-debit"
+        path   = "/set-up-direct-debit"
       ).withAuthToken()
         .withSession(SessionKeys.sessionId -> "IamATestSessionId")
         .withFormUrlEncodedBody(formData: _*)
@@ -327,7 +328,7 @@ class BankDetailsControllerSpec extends ItSpec {
       BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
 
       AuditConnectorStub.verifyEventAudited(
-        auditType = "BarsCheck",
+        auditType  = "BarsCheck",
         auditEvent = Json.parse(
           s"""
              |{
@@ -369,7 +370,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
       val fakeRequest = FakeRequest(
         method = "POST",
-        path = "/set-up-direct-debit"
+        path   = "/set-up-direct-debit"
       ).withAuthToken()
         .withSession(SessionKeys.sessionId -> "IamATestSessionId")
         .withFormUrlEncodedBody(formData: _*)
@@ -500,7 +501,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
       val fakeRequest = FakeRequest(
         method = "POST",
-        path = "/set-up-direct-debit"
+        path   = "/set-up-direct-debit"
       ).withAuthToken()
         .withSession(SessionKeys.sessionId -> "IamATestSessionId")
         .withFormUrlEncodedBody(formData: _*)
@@ -525,7 +526,7 @@ class BankDetailsControllerSpec extends ItSpec {
       val validForm: List[(String, String)] = formData
 
       val (expectedContentAndHref, expectedAuditResponseJson): (List[(String, String)], String) =
-      // TODO temporary until error handling decided - will be addressed in a future ticket
+        // TODO temporary until error handling decided - will be addressed in a future ticket
         barsError match {
           case "accountNumberNotWellFormatted" =>
             BarsStub.ValidateStub.accountNumberNotWellFormatted()
@@ -542,7 +543,7 @@ class BankDetailsControllerSpec extends ItSpec {
             List(
               (
                 "You have entered a sort code which does not accept this type of payment. " +
-                  "Check you have entered a valid sort code or enter details for a different account",
+                "Check you have entered a valid sort code or enter details for a different account",
                 "#bars"
               )
             ) -> ValidateJson.sortCodeDoesNotSupportsDirectDebit
@@ -589,7 +590,7 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyStub.ensureBarsVerifyNotCalled()
         AuditConnectorStub.verifyEventAudited(
-          auditType = "BarsCheck",
+          auditType  = "BarsCheck",
           auditEvent = expectedBarsAuditDetailJson
         )
       }
@@ -601,7 +602,7 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyStub.ensureBarsVerifyNotCalled()
         AuditConnectorStub.verifyEventAudited(
-          auditType = "BarsCheck",
+          auditType  = "BarsCheck",
           auditEvent = expectedBarsAuditDetailJson
         )
       }
@@ -613,7 +614,7 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyStub.ensureBarsVerifyNotCalled()
         AuditConnectorStub.verifyEventAudited(
-          auditType = "BarsCheck",
+          auditType  = "BarsCheck",
           auditEvent = expectedBarsAuditDetailJson
         )
       }
@@ -624,7 +625,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(validForm)
         AuditConnectorStub.verifyEventAudited(
-          auditType = "BarsCheck",
+          auditType  = "BarsCheck",
           auditEvent = expectedBarsAuditDetailJson
         )
       }
@@ -635,7 +636,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validForm)
         AuditConnectorStub.verifyEventAudited(
-          auditType = "BarsCheck",
+          auditType  = "BarsCheck",
           auditEvent = expectedBarsAuditDetailJson
         )
       }
@@ -651,7 +652,7 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
 
         AuditConnectorStub.verifyEventAudited(
-          auditType = "BarsCheck",
+          auditType  = "BarsCheck",
           auditEvent = toExpectedBarsAuditDetailJson(VerifyJson.accountExistsError)
         )
       }
@@ -667,7 +668,7 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(formData)
         BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
         AuditConnectorStub.verifyEventAudited(
-          auditType = "BarsCheck",
+          auditType  = "BarsCheck",
           auditEvent = toExpectedBarsAuditDetailJson(VerifyJson.accountExistsError)
         )
       }
@@ -675,8 +676,8 @@ class BankDetailsControllerSpec extends ItSpec {
     "go to technical difficulties page when bars verify-personal response has nameMatches is Error" in
       new BarsErrorSetup(TypesOfBankAccount.Personal) {
 
-                BarsStub.ValidateStub.success()
-                BarsStub.VerifyPersonalStub.nameMatchesError()
+        BarsStub.ValidateStub.success()
+        BarsStub.VerifyPersonalStub.nameMatchesError()
 
         a[RuntimeException] shouldBe thrownBy(await(controller.enterBankDetailsSubmit(fakeRequest)))
 
@@ -759,7 +760,7 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(formData)
         BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
         AuditConnectorStub.verifyEventAudited(
-          auditType = "BarsCheck",
+          auditType  = "BarsCheck",
           auditEvent = toExpectedBarsAuditDetailJson(VerifyJson.otherBarsError)
         )
       }
@@ -899,24 +900,24 @@ class BankDetailsControllerSpec extends ItSpec {
       ContentAssertions.assertListOfContent(
         elements = doc.select(".govuk-body")
       )(
-        expectedContent = List(
-          "We can cancel this agreement if you:",
-          "If we cancel this agreement, you will need to pay the total amount you owe straight away.",
-          "We can use any refunds you might get to pay off your tax charges.",
-          "If your circumstances change and you can pay more or you can pay in full, you need to let us know.",
-          "I agree to the terms and conditions of this payment plan. I confirm that this is the earliest I am able to settle this debt."
+          expectedContent = List(
+            "We can cancel this agreement if you:",
+            "If we cancel this agreement, you will need to pay the total amount you owe straight away.",
+            "We can use any refunds you might get to pay off your tax charges.",
+            "If your circumstances change and you can pay more or you can pay in full, you need to let us know.",
+            "I agree to the terms and conditions of this payment plan. I confirm that this is the earliest I am able to settle this debt."
+          )
         )
-      )
 
       ContentAssertions.assertListOfContent(
         elements = doc.select(".govuk-list--bullet").select("li")
       )(
-        expectedContent = List(
-          "pay late or miss a payment",
-          "pay another tax bill late",
-          "do not submit your future tax returns on time"
+          expectedContent = List(
+            "pay late or miss a payment",
+            "pay another tax bill late",
+            "do not submit your future tax returns on time"
+          )
         )
-      )
 
       doc.select(".govuk-heading-m").text() shouldBe "Declaration"
       doc.select(".govuk-button").text() shouldBe "Agree and continue"

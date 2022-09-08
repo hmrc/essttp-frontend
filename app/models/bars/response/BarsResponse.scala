@@ -99,12 +99,6 @@ object VerifyResponse {
       response.barsVerifyResponse.sortCodeSupportsDirectDebit === No
   }
 
-  /**
-   * The sortCode is good, but account does not exist
-   * - in this case, having called verify/personal
-   * calling verify/business may result in a positive response
-   * (or vice versa)
-   */
   object accountDoesNotExist {
     def unapply(response: VerifyResponse): Boolean = {
       val resp = response.barsVerifyResponse
