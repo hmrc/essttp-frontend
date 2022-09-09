@@ -97,12 +97,16 @@ class BankDetailsControllerSpec extends ItSpec {
   private def getExpectedFormValue(field: String, formData: Seq[(String, String)]): String =
     formData.collectFirst { case (x, value) if x == field => value }.getOrElse("")
 
-  def assertFieldsPopulated(result: Future[Result], form: Seq[(String, String)]): Unit = {
-    val pageContent: String = contentAsString(result)
-    val doc: Document = Jsoup.parse(pageContent)
+  def assertFieldsPopulated(doc: Document, form: Seq[(String, String)], fieldErrors: Seq[(String, String)]): Unit = {
     doc.select(EnterDirectDebitDetailsPage.accountNameFieldId).`val`() shouldBe getExpectedFormValue("name", form)
     doc.select(EnterDirectDebitDetailsPage.sortCodeFieldId).`val`() shouldBe getExpectedFormValue("sortCode", form)
     doc.select(EnterDirectDebitDetailsPage.accountNumberFieldId).`val`() shouldBe getExpectedFormValue("accountNumber", form)
+
+    fieldErrors.foreach {
+      case (field, errorMessage) =>
+        doc.getElementById(s"$field-error").text.trim shouldBe s"Error: $errorMessage"
+    }
+
     val isSoleSignatoryRadios = doc.select(".govuk-radios__input").asScala.toList
     getExpectedFormValue("isSoleSignatory", form) match {
       case "Yes" => isSoleSignatoryRadios(0).hasAttr("checked") shouldBe true
@@ -115,7 +119,7 @@ class BankDetailsControllerSpec extends ItSpec {
   }
 
   def testFormError(action: Action[AnyContent])(formData: (String, String)*)(
-      textAndHrefContent: List[(String, String)]
+      textAndHrefContent: List[(String, String)], fieldErrors: Seq[(String, String)] = Seq.empty
   ): Unit = {
     val fakeRequest = FakeRequest(
       method = "POST",
@@ -140,7 +144,7 @@ class BankDetailsControllerSpec extends ItSpec {
     }
 
     ContentAssertions.languageToggleExists(doc)
-    assertFieldsPopulated(result, formData)
+    assertFieldsPopulated(doc, formData, fieldErrors)
   }
 
   def extractSummaryRows(elements: List[Element]): List[SummaryRow] = elements.map { e =>
@@ -538,28 +542,50 @@ class BankDetailsControllerSpec extends ItSpec {
 
       val validForm: List[(String, String)] = formData
 
-      val (expectedContentAndHref, expectedAuditResponseJson): (List[(String, String)], String) =
-        // TODO temporary until error handling decided - will be addressed in a future ticket
+      private val sortCodeErrorMessage: Seq[(String, String)] = Seq(
+        "sortCode" -> "Confirm the sort code"
+      )
+
+      private val sortCodeAndAccountNumberErrorMessages: Seq[(String, String)] = Seq(
+        "sortCode" -> "Confirm the sort code",
+        "accountNumber" -> "Confirm the account number"
+      )
+
+      private val nameErrorMessage: Seq[(String, String)] = Seq(
+        "name" -> "Confirm the account name"
+      )
+
+      val (expectedContentAndHref, expectedFieldErrors, expectedAuditResponseJson): (List[(String, String)], Seq[(String, String)], String) =
         barsError match {
           case "accountNumberNotWellFormatted" =>
             BarsStub.ValidateStub.accountNumberNotWellFormatted()
-            List(("Enter a valid combination of bank account number and sort code", "#sortCode")) ->
+            (
+              List(("Enter a valid combination of bank account number and sort code", "#sortCode")),
+              sortCodeAndAccountNumberErrorMessages,
               ValidateJson.accountNumberNotWellFormatted
+            )
 
           case "sortCodeNotPresentOnEiscd" =>
             BarsStub.ValidateStub.sortCodeNotPresentOnEiscd()
-            List(("Enter a valid combination of bank account number and sort code", "#sortCode")) ->
+            (
+              List(("Enter a valid combination of bank account number and sort code", "#sortCode")),
+              sortCodeAndAccountNumberErrorMessages,
               ValidateJson.sortCodeNotPresentOnEiscd
+            )
 
           case "sortCodeDoesNotSupportsDirectDebit" =>
             BarsStub.ValidateStub.sortCodeDoesNotSupportsDirectDebit()
-            List(
-              (
-                "You have entered a sort code which does not accept this type of payment. " +
-                "Check you have entered a valid sort code or enter details for a different account",
-                "#sortCode"
-              )
-            ) -> ValidateJson.sortCodeDoesNotSupportsDirectDebit
+            (
+              List(
+                (
+                  "You have entered a sort code which does not accept this type of payment. " +
+                  "Check you have entered a valid sort code or enter details for a different account",
+                  "#sortCode"
+                )
+              ),
+                sortCodeErrorMessage,
+                ValidateJson.sortCodeDoesNotSupportsDirectDebit
+            )
 
           case "nameDoesNotMatch" =>
             BarsStub.ValidateStub.success()
@@ -567,7 +593,11 @@ class BankDetailsControllerSpec extends ItSpec {
               case TypesOfBankAccount.Personal => BarsStub.VerifyPersonalStub.nameDoesNotMatch()
               case TypesOfBankAccount.Business => BarsStub.VerifyBusinessStub.nameDoesNotMatch()
             }
-            List(("Enter a valid account name", "#name")) -> VerifyJson.nameDoesNotMatch
+            (
+              List(("Enter a valid account name", "#name")),
+              nameErrorMessage,
+              VerifyJson.nameDoesNotMatch
+            )
 
           case "accountDoesNotExist" =>
             BarsStub.ValidateStub.success()
@@ -575,13 +605,19 @@ class BankDetailsControllerSpec extends ItSpec {
               case TypesOfBankAccount.Personal => BarsStub.VerifyPersonalStub.accountDoesNotExist()
               case TypesOfBankAccount.Business => BarsStub.VerifyBusinessStub.accountDoesNotExist()
             }
-            List(("Enter a valid combination of bank account number and sort code", "#sortCode")) ->
+            (
+              List(("Enter a valid combination of bank account number and sort code", "#sortCode")),
+              sortCodeAndAccountNumberErrorMessages,
               VerifyJson.accountDoesNotExist
+            )
 
           case "sortCodeOnDenyList" =>
             BarsStub.ValidateStub.sortCodeOnDenyList()
-            List(("Enter a valid combination of bank account number and sort code", "#sortCode")) ->
+            (
+              List(("Enter a valid combination of bank account number and sort code", "#sortCode")),
+              sortCodeAndAccountNumberErrorMessages,
               ValidateJson.sortCodeOnDenyList
+            )
 
           case "otherBarsError" =>
             BarsStub.ValidateStub.success()
@@ -589,8 +625,11 @@ class BankDetailsControllerSpec extends ItSpec {
               case TypesOfBankAccount.Personal => BarsStub.VerifyPersonalStub.otherBarsError()
               case TypesOfBankAccount.Business => BarsStub.VerifyBusinessStub.otherBarsError()
             }
-            List(("Enter a valid combination of bank account number and sort code", "#sortCode")) ->
+            (
+              List(("Enter a valid combination of bank account number and sort code", "#sortCode")),
+              sortCodeAndAccountNumberErrorMessages,
               VerifyJson.otherBarsError
+            )
         }
 
       val expectedBarsAuditDetailJson: JsObject = toExpectedBarsAuditDetailJson(expectedAuditResponseJson)
@@ -598,7 +637,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "show correct error message when BARs validate response is accountNumberNotWellFormatted" in
       new BarsFormErrorSetup("accountNumberNotWellFormatted", TypesOfBankAccount.Personal) {
-        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
+        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref, expectedFieldErrors)
 
         BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyStub.ensureBarsVerifyNotCalled()
@@ -610,7 +649,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "show correct error message when BARs validate response is sortCodeNotPresentOnEiscd" in
       new BarsFormErrorSetup("sortCodeNotPresentOnEiscd", TypesOfBankAccount.Personal) {
-        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
+        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref, expectedFieldErrors)
 
         BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyStub.ensureBarsVerifyNotCalled()
@@ -622,7 +661,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "show correct error message when BARs validate response is sortCodeDoesNotSupportsDirectDebit" in
       new BarsFormErrorSetup("sortCodeDoesNotSupportsDirectDebit", TypesOfBankAccount.Personal) {
-        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
+        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref, expectedFieldErrors)
 
         BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyStub.ensureBarsVerifyNotCalled()
@@ -634,7 +673,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "show correct error message when BARs verify response is nameDoesNotMatch with a personal bank account" in
       new BarsFormErrorSetup("nameDoesNotMatch", typeOfAccount = TypesOfBankAccount.Personal) {
-        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
+        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref, expectedFieldErrors)
 
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(validForm)
         AuditConnectorStub.verifyEventAudited(
@@ -645,7 +684,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "show correct error message when BARs verify response is nameDoesNotMatch with a business bank account" in
       new BarsFormErrorSetup("nameDoesNotMatch", typeOfAccount = TypesOfBankAccount.Business) {
-        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
+        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref, expectedFieldErrors)
 
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validForm)
         AuditConnectorStub.verifyEventAudited(
@@ -719,7 +758,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "show correct error message when bars verify-personal responds with accountExists is No" in
       new BarsFormErrorSetup("accountDoesNotExist", typeOfAccount = TypesOfBankAccount.Personal) {
-        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
+        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref, expectedFieldErrors)
 
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(validForm)
         BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
@@ -727,7 +766,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "show correct error message when bars verify-business responds with accountExists is No" in
       new BarsFormErrorSetup("accountDoesNotExist", typeOfAccount = TypesOfBankAccount.Business) {
-        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
+        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref, expectedFieldErrors)
 
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validForm)
         BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
@@ -735,7 +774,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "show correct error message when bars validate response is 400 sortCodeOnDenyList" in
       new BarsFormErrorSetup("sortCodeOnDenyList", typeOfAccount = TypesOfBankAccount.Business) {
-        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
+        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref, expectedFieldErrors)
 
         BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
         BarsStub.VerifyStub.ensureBarsVerifyNotCalled()
@@ -744,7 +783,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "show correct error message when bars verify-personal is an undocumented error response" in
       new BarsFormErrorSetup("otherBarsError", typeOfAccount = TypesOfBankAccount.Personal) {
-        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
+        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref, expectedFieldErrors)
 
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(validForm)
         BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
@@ -752,7 +791,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "show correct error message when bars verify-business is an undocumented error response" in
       new BarsFormErrorSetup("otherBarsError", typeOfAccount = TypesOfBankAccount.Business) {
-        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref)
+        testFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedContentAndHref, expectedFieldErrors)
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validForm)
         BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
       }

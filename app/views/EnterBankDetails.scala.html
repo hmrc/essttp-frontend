@@ -91,6 +91,8 @@
             ),
             classes = "govuk-!-width-two-thirds",
             errorMessage = fieldErrorMessage(nameKey, form, errorMessageOverrides),
+            autocomplete = Some("name"),
+            spellcheck = Some(false),
             value = form.data.get(nameKey)
         ))
 
@@ -106,6 +108,8 @@
             )),
             classes = "govuk-input--width-5",
             errorMessage = fieldErrorMessage(sortCodeKey, form, errorMessageOverrides),
+            spellcheck = Some(false),
+            inputmode = Some("numeric"),
             value = form.data.get(sortCodeKey)
         ))
 
@@ -121,6 +125,8 @@
             )),
             classes = "govuk-!-width-two-thirds",
             errorMessage = fieldErrorMessage(accountNumberKey, form, errorMessageOverrides),
+            spellcheck = Some(false),
+            inputmode = Some("numeric"),
             value = form.data.get(accountNumberKey)
         ))
 
