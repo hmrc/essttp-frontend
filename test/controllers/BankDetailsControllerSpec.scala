@@ -376,8 +376,8 @@ class BankDetailsControllerSpec extends ItSpec {
 
       val formData = List(
         ("name", "Bob Ross"),
-        ("sortCode", "123456"),
-        ("accountNumber", "12345678"),
+        ("sortCode", " 12-34-56 "),
+        ("accountNumber", " 1234 5678 "),
         ("isSoleSignatory", "No")
       )
 

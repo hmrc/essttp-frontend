@@ -24,11 +24,13 @@ import cats.syntax.eq._
 import scala.util.Try
 
 object MoneyUtil {
-  def cleanupAmountOfMoneyString(s: String): String = {
-    s.trim().filter(c => c =!= ',' && c =!= '£')
+  private def cleanupAmountOfMoneyString(s: String): String = {
+    s.replaceAll("\\s", "").filter(c => c =!= ',' && c =!= '£')
   }
+
   def formatAmountOfMoneyWithoutPoundSign(d: BigDecimal): String =
     d.toString().replaceAllLiterally("£", "")
+
   def amountOfMoneyFormatter(
       isTooSmall: BigDecimal => Boolean,
       isTooLarge: BigDecimal => Boolean
@@ -50,18 +52,27 @@ object MoneyUtil {
           isTooLarge: BigDecimal => Boolean
       )(
           s: String
-      ): Either[FormError, BigDecimal] =
-        Try(BigDecimal(cleanupAmountOfMoneyString(s))).toEither
-          .leftMap((_: Throwable) => if (s.isEmpty) FormError(key, "error.required") else FormError(key, "error.pattern"))
-          .flatMap { d: BigDecimal =>
-            if (isTooSmall(d)) {
-              Left(FormError(key, "error.tooSmall"))
-            } else if (isTooLarge(d)) {
-              Left(FormError(key, "error.tooLarge"))
-            } else {
-              Right(d)
+      ): Either[FormError, BigDecimal] = {
+        // catch out cases where users use scientific notation, e.g. 1e2
+        if (s.exists(_.isLetter)) {
+          Left(FormError(key, "error.pattern"))
+        } else {
+          Try(BigDecimal(cleanupAmountOfMoneyString(s))).toEither
+            .leftMap((_: Throwable) =>
+              if (s.isEmpty) FormError(key, "error.required") else FormError(key, "error.pattern"))
+            .flatMap { d: BigDecimal =>
+              if (!(d * BigDecimal(100)).isWhole()) {
+                Left(FormError(key, "error.pattern"))
+              } else if (isTooSmall(d)) {
+                Left(FormError(key, "error.tooSmall"))
+              } else if (isTooLarge(d)) {
+                Left(FormError(key, "error.tooLarge"))
+              } else {
+                Right(d)
+              }
             }
-          }
+        }
+      }
 
       override def unbind(key: String, value: BigDecimal): Map[String, String] =
         Map(key -> formatAmountOfMoneyWithoutPoundSign(value))

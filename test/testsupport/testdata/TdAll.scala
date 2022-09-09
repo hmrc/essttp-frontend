@@ -60,7 +60,7 @@ object TdAll {
   val amountInPence: AmountInPence = AmountInPence(1000)
   val upfrontPaymentAmount: UpfrontPaymentAmount = UpfrontPaymentAmount(amountInPence)
 
-  def upfrontPaymentAmount(amount: Int): UpfrontPaymentAmount = UpfrontPaymentAmount(AmountInPence(amount))
+  def upfrontPaymentAmount(amount: Long): UpfrontPaymentAmount = UpfrontPaymentAmount(AmountInPence(amount))
 
   val eligibleEligibilityPass: EligibilityPass = EligibilityPass(true)
   val notEligibleEligibilityPass: EligibilityPass = eligibleEligibilityPass.copy(value = false)
