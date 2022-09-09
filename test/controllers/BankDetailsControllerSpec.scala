@@ -543,12 +543,12 @@ class BankDetailsControllerSpec extends ItSpec {
         barsError match {
           case "accountNumberNotWellFormatted" =>
             BarsStub.ValidateStub.accountNumberNotWellFormatted()
-            List(("Enter a valid combination of bank account number and sort code", "#bars")) ->
+            List(("Enter a valid combination of bank account number and sort code", "#sortCode")) ->
               ValidateJson.accountNumberNotWellFormatted
 
           case "sortCodeNotPresentOnEiscd" =>
             BarsStub.ValidateStub.sortCodeNotPresentOnEiscd()
-            List(("Enter a valid combination of bank account number and sort code", "#bars")) ->
+            List(("Enter a valid combination of bank account number and sort code", "#sortCode")) ->
               ValidateJson.sortCodeNotPresentOnEiscd
 
           case "sortCodeDoesNotSupportsDirectDebit" =>
@@ -557,7 +557,7 @@ class BankDetailsControllerSpec extends ItSpec {
               (
                 "You have entered a sort code which does not accept this type of payment. " +
                 "Check you have entered a valid sort code or enter details for a different account",
-                "#bars"
+                "#sortCode"
               )
             ) -> ValidateJson.sortCodeDoesNotSupportsDirectDebit
 
@@ -567,7 +567,7 @@ class BankDetailsControllerSpec extends ItSpec {
               case TypesOfBankAccount.Personal => BarsStub.VerifyPersonalStub.nameDoesNotMatch()
               case TypesOfBankAccount.Business => BarsStub.VerifyBusinessStub.nameDoesNotMatch()
             }
-            List(("Enter a valid account name", "#bars")) -> VerifyJson.nameDoesNotMatch
+            List(("Enter a valid account name", "#name")) -> VerifyJson.nameDoesNotMatch
 
           case "accountDoesNotExist" =>
             BarsStub.ValidateStub.success()
@@ -575,12 +575,12 @@ class BankDetailsControllerSpec extends ItSpec {
               case TypesOfBankAccount.Personal => BarsStub.VerifyPersonalStub.accountDoesNotExist()
               case TypesOfBankAccount.Business => BarsStub.VerifyBusinessStub.accountDoesNotExist()
             }
-            List(("Enter a valid combination of bank account number and sort code", "#bars")) ->
+            List(("Enter a valid combination of bank account number and sort code", "#sortCode")) ->
               VerifyJson.accountDoesNotExist
 
           case "sortCodeOnDenyList" =>
             BarsStub.ValidateStub.sortCodeOnDenyList()
-            List(("Enter a valid combination of bank account number and sort code", "#bars")) ->
+            List(("Enter a valid combination of bank account number and sort code", "#sortCode")) ->
               ValidateJson.sortCodeOnDenyList
 
           case "otherBarsError" =>
@@ -589,7 +589,7 @@ class BankDetailsControllerSpec extends ItSpec {
               case TypesOfBankAccount.Personal => BarsStub.VerifyPersonalStub.otherBarsError()
               case TypesOfBankAccount.Business => BarsStub.VerifyBusinessStub.otherBarsError()
             }
-            List(("Enter a valid combination of bank account number and sort code", "#bars")) ->
+            List(("Enter a valid combination of bank account number and sort code", "#sortCode")) ->
               VerifyJson.otherBarsError
         }
 
