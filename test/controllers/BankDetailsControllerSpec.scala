@@ -255,6 +255,19 @@ class BankDetailsControllerSpec extends ItSpec {
         .attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
       doc.select("#back").attr("href") shouldBe routes.BankDetailsController.typeOfAccount.url
 
+      val nameInput = doc.select("input[name=name]")
+      val sortCodeInput = doc.select("input[name=sortCode]")
+      val accountNumberInput = doc.select("input[name=accountNumber]")
+
+      nameInput.attr("autocomplete") shouldBe "name"
+      nameInput.attr("spellcheck") shouldBe "false"
+
+      sortCodeInput.attr("inputmode") shouldBe "numeric"
+      sortCodeInput.attr("spellcheck") shouldBe "false"
+
+      accountNumberInput.attr("inputmode") shouldBe "numeric"
+      accountNumberInput.attr("spellcheck") shouldBe "false"
+
       val subheadings = doc.select(".govuk-label--m").asScala.toList
       subheadings(0).text() shouldBe EnterDirectDebitDetailsPage.accountNameContent
       subheadings(1).text() shouldBe EnterDirectDebitDetailsPage.sortCodeContent
