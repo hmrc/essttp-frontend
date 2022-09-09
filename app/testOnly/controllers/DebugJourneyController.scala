@@ -17,6 +17,7 @@
 package testOnly.controllers
 
 import _root_.actions.Actions
+import crypto.NoOpCrypto
 import essttp.journey.JourneyConnector
 import play.api.libs.json.Json
 import play.api.mvc._
@@ -31,7 +32,7 @@ class DebugJourneyController @Inject() (
     as:               Actions,
     mcc:              MessagesControllerComponents,
     journeyConnector: JourneyConnector
-)(implicit ec: ExecutionContext)
+)(implicit ec: ExecutionContext, crypto: NoOpCrypto)
   extends FrontendController(mcc)
   with Logging {
 

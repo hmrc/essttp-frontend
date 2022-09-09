@@ -99,6 +99,7 @@ lazy val root = (project in file("."))
     scalacOptions ++= Seq("-feature"),
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
     libraryDependencies += ws,
+    routesImport ++= Seq("crypto._"),
     retrieveManaged := false,
     update / evictionWarningOptions :=
       EvictionWarningOptions.default.withWarnScalaVersionEviction(false),

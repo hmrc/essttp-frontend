@@ -19,6 +19,7 @@ package services
 import actionsmodel.AuthenticatedJourneyRequest
 import connectors.{CallEligibilityApiRequest, TtpConnector}
 import controllers.support.RequestSupport.hc
+import crypto.NoOpCrypto
 import essttp.journey.model.Journey.Stages.ComputedTaxId
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
@@ -135,7 +136,7 @@ class TtpService @Inject() (
       journey: Journey.Stages.AgreedTermsAndConditions
   )(
       implicit
-      authenticatedJourneyRequest: AuthenticatedJourneyRequest[_]
+      authenticatedJourneyRequest: AuthenticatedJourneyRequest[_], noOpCrypto: NoOpCrypto
   ): Future[ArrangementResponse] = {
 
     val regimeType: RegimeType = journey.taxRegime match {

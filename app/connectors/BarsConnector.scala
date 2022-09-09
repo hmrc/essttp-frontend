@@ -23,7 +23,7 @@ import play.api.mvc.RequestHeader
 import requests.RequestSupport._
 import uk.gov.hmrc.http.{HttpClient, HttpResponse}
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import models.bars.response.{BarsVerifyResponse}
+import models.bars.response.BarsVerifyResponse
 
 import scala.concurrent.{ExecutionContext, Future}
 

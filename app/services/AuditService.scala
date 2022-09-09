@@ -18,6 +18,7 @@ package services
 
 import actionsmodel.AuthenticatedJourneyRequest
 import cats.syntax.eq._
+import crypto.NoOpCrypto
 import essttp.journey.model.Journey.Stages._
 import essttp.journey.model.Journey.{AfterChosenTypeOfBankAccount, Stages}
 import essttp.journey.model.Origin
@@ -72,7 +73,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
   def auditPaymentPlanSetUp(
       journey:         AgreedTermsAndConditions,
       responseFromTtp: Either[HttpException, ArrangementResponse]
-  )(implicit authenticatedJourneyRequest: AuthenticatedJourneyRequest[_], headerCarrier: HeaderCarrier): Unit = {
+  )(implicit authenticatedJourneyRequest: AuthenticatedJourneyRequest[_], headerCarrier: HeaderCarrier, crypto: NoOpCrypto): Unit = {
     audit(toPaymentPlanSetupAuditDetail(journey, responseFromTtp))
   }
 
@@ -165,7 +166,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       BarsAuditRequest(
         BarsAuditAccount(
           typeOfBankAccount.entryName.toLowerCase(Locale.UK),
-          bankDetails.name.value,
+          bankDetails.name.value.decryptedValue,
           bankDetails.sortCode.value,
           bankDetails.accountNumber.value
         )

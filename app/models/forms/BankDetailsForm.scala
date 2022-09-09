@@ -21,6 +21,7 @@ import models.enumsforforms.IsSoleSignatoryFormValue
 import play.api.data.Forms.{mapping, nonEmptyText}
 import play.api.data.validation.{Constraint, Invalid, Valid}
 import play.api.data.{Form, FormError, Forms, Mapping}
+import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 import util.EnumFormatter
 
 final case class BankDetailsForm(
@@ -43,11 +44,11 @@ object BankDetailsForm {
 
   val accountNameConstraint: Constraint[AccountName] = {
     Constraint(accountName =>
-      if (accountName.value.length <= 70) Valid
+      if (accountName.value.decryptedValue.length <= 70) Valid
       else Invalid("error.maxlength"))
   }
   val accountNameMapping: Mapping[AccountName] =
-    nonEmptyText.transform[AccountName](name => AccountName(name), _.value).verifying(accountNameConstraint)
+    nonEmptyText.transform[AccountName](name => AccountName(SensitiveString.apply(name)), _.value.decryptedValue).verifying(accountNameConstraint)
 
   val sortCodeRegex: String = "^[0-9]{6}$"
   val sortCodeConstraint: Constraint[SortCode] =

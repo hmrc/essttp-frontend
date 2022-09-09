@@ -19,6 +19,7 @@ package controllers
 import _root_.actions.Actions
 import actionsmodel.AuthenticatedJourneyRequest
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
+import crypto.NoOpCrypto
 import essttp.journey.model.Journey
 import play.api.mvc._
 import services.{AuditService, JourneyService, TtpService}
@@ -34,7 +35,8 @@ class SubmitArrangementController @Inject() (
     mcc:            MessagesControllerComponents,
     ttpService:     TtpService,
     journeyService: JourneyService,
-    auditService:   AuditService
+    auditService:   AuditService,
+    noOpCrypto:     NoOpCrypto
 )(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
@@ -53,7 +55,7 @@ class SubmitArrangementController @Inject() (
       journey: Journey.Stages.AgreedTermsAndConditions
   )(implicit request: AuthenticatedJourneyRequest[_]): Future[Result] = {
     for {
-      arrangementResponse <- ttpService.submitArrangement(journey)
+      arrangementResponse <- ttpService.submitArrangement(journey)(request, noOpCrypto)
       _ <- journeyService.updateArrangementResponse(journey.id, arrangementResponse)
     } yield Redirect(routes.PaymentPlanSetUpController.paymentPlanSetUp())
   }

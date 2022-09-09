@@ -96,7 +96,7 @@ object EssttpBarsService {
 
   def toBarsSubject(bankDetails: BankDetails): BarsSubject = BarsSubject(
     title     = None,
-    name      = Some(bankDetails.name.value),
+    name      = Some(bankDetails.name.value.decryptedValue),
     firstName = None,
     lastName  = None,
     dob       = None,
@@ -104,7 +104,7 @@ object EssttpBarsService {
   )
 
   def toBarsBusiness(bankDetails: BankDetails): BarsBusiness =
-    BarsBusiness(companyName = bankDetails.name.value, address = None)
+    BarsBusiness(companyName = bankDetails.name.value.decryptedValue, address = None)
 
   def toBarsTypeOfBankAccount(accountType: TypeOfBankAccount): BarsTypeOfBankAccount =
     accountType match {
