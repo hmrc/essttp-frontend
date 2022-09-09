@@ -16,8 +16,11 @@
 
 package controllers
 
+import essttp.rootmodel.{AmountInPence, MonthlyPaymentAmount}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import org.scalatest.prop.Tables.Table
+import org.scalatest.prop.TableDrivenPropertyChecks.forAll
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -117,72 +120,78 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
       EssttpBackend.MonthlyPaymentAmount.verifyUpdateMonthlyPaymentAmountRequest(TdAll.journeyId, TdAll.monthlyPaymentAmount)
     }
 
-    "display correct error message when form is submitted with value outside of bounds" in {
-      AuthStub.authorise()
-      EssttpBackend.AffordabilityMinMaxApi.findJourney()
-      val fakeRequest = FakeRequest(
-        method = "POST",
-        path   = "/how-much-can-you-pay-each-month"
-      ).withAuthToken()
-        .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-        .withFormUrlEncodedBody(("MonthlyPaymentAmount", "100"))
-      val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
+    forAll(
+      Table(
+        ("Scenario flavour", "form input", "expected amount of money"),
+        ("one decimal place", "300.1", AmountInPence(30010)),
+        ("two decimal places", "300.11", AmountInPence(30011)),
+        ("spaces", " 3 00 . 1  1  ", AmountInPence(30011)),
+        ("commas", "3,00", AmountInPence(30000)),
+        ("'£' symbols", "300", AmountInPence(30000))
+      )
+    ) { (sf: String, formInput: String, expectedAmount: AmountInPence) =>
+        s"should allow for $sf" in {
+          AuthStub.authorise()
+          EssttpBackend.AffordabilityMinMaxApi.findJourney()
+          EssttpBackend.MonthlyPaymentAmount.stubUpdateMonthlyPaymentAmount(TdAll.journeyId)
+          val fakeRequest = FakeRequest(
+            method = "POST",
+            path   = "/how-much-can-you-pay-each-month"
+          ).withAuthToken()
+            .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+            .withFormUrlEncodedBody(("MonthlyPaymentAmount", formInput))
+          val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
+          status(result) shouldBe Status.SEE_OTHER
+          redirectLocation(result) shouldBe Some(PageUrls.whichDayDoYouWantToPayUrl)
+          EssttpBackend.MonthlyPaymentAmount.verifyUpdateMonthlyPaymentAmountRequest(TdAll.journeyId, MonthlyPaymentAmount(expectedAmount))
+        }
+      }
 
-      RequestAssertions.assertGetRequestOk(result)
+    forAll(
+      Table(
+        ("Scenario flavour", "form input", "expected error message"),
+        ("x > maximum value", "880.01", "How much you can afford to pay each month must be between £300 and £880"),
+        ("x < minimum value", "299.99", "How much you can afford to pay each month must be between £300 and £880"),
+        ("x = NaN", "one", "How much you can afford to pay each month must be an amount of money"),
+        ("x = null", "", "Enter how much you can afford to pay each month"),
+        ("scientific notation", "1e2", "How much you can afford to pay each month must be an amount of money"),
+        ("more than one decimal place", "1.123", "How much you can afford to pay each month must be an amount of money")
+      )
+    ) { (sf: String, formInput: String, errorMessage: String) =>
+        s"[$sf] should show the page with the correct error message when $formInput is submitted" in {
+          AuthStub.authorise()
+          EssttpBackend.AffordabilityMinMaxApi.findJourney()
+          val fakeRequest = FakeRequest(
+            method = "POST",
+            path   = "/how-much-can-you-pay-each-month"
+          ).withAuthToken()
+            .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+            .withFormUrlEncodedBody(("MonthlyPaymentAmount", formInput))
+          val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
 
-      val pageContent: String = contentAsString(result)
-      val doc: Document = Jsoup.parse(pageContent)
+          RequestAssertions.assertGetRequestOk(result)
 
-      doc.title() shouldBe s"Error: $expectedPageTitle"
-      doc.select(".govuk-label--xl").text() shouldBe expectedH1
-      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
-      doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-      doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url // todo update this, it depends on journey
-      doc.select("#MonthlyPaymentAmount-hint").text() shouldBe expectedPageHint
-      doc.select("#MonthlyPaymentAmount").size() shouldBe 1
-      val poundSymbol = doc.select(".govuk-input__prefix")
-      poundSymbol.size() shouldBe 1
-      poundSymbol.text() shouldBe "£"
+          val pageContent: String = contentAsString(result)
+          val doc: Document = Jsoup.parse(pageContent)
 
-      val errorSummary = doc.select(".govuk-error-summary")
-      val errorLink = errorSummary.select("a")
-      errorLink.text() shouldBe "How much you can afford to pay each month must be between £300 and £880"
-      errorLink.attr("href") shouldBe "#MonthlyPaymentAmount"
-      EssttpBackend.MonthlyPaymentAmount.verifyNoneUpdateMonthlyAmountRequest(TdAll.journeyId)
-    }
+          doc.title() shouldBe s"Error: $expectedPageTitle"
+          doc.select(".govuk-label--xl").text() shouldBe expectedH1
+          doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
+          doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
+          doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url // todo update this, it depends on journey
+          doc.select("#MonthlyPaymentAmount-hint").text() shouldBe expectedPageHint
+          doc.select("#MonthlyPaymentAmount").size() shouldBe 1
+          val poundSymbol = doc.select(".govuk-input__prefix")
+          poundSymbol.size() shouldBe 1
+          poundSymbol.text() shouldBe "£"
 
-    "display correct error message when empty form is submitted" in {
-      AuthStub.authorise()
-      EssttpBackend.AffordabilityMinMaxApi.findJourney()
-      val fakeRequest = FakeRequest(
-        method = "POST",
-        path   = "/how-much-can-you-pay-each-month"
-      ).withAuthToken()
-        .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-        .withFormUrlEncodedBody(("MonthlyPaymentAmount", ""))
-      val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
+          val errorSummary = doc.select(".govuk-error-summary")
+          val errorLink = errorSummary.select("a")
+          errorLink.text() shouldBe errorMessage
+          errorLink.attr("href") shouldBe "#MonthlyPaymentAmount"
+          EssttpBackend.MonthlyPaymentAmount.verifyNoneUpdateMonthlyAmountRequest(TdAll.journeyId)
+        }
+      }
 
-      RequestAssertions.assertGetRequestOk(result)
-
-      val pageContent: String = contentAsString(result)
-      val doc: Document = Jsoup.parse(pageContent)
-
-      doc.title() shouldBe s"Error: $expectedPageTitle"
-      doc.select(".govuk-label--xl").text() shouldBe expectedH1
-      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
-      doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-      doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url // todo update this, it depends on journey
-      doc.select("#MonthlyPaymentAmount-hint").text() shouldBe expectedPageHint
-      doc.select("#MonthlyPaymentAmount").size() shouldBe 1
-      val poundSymbol = doc.select(".govuk-input__prefix")
-      poundSymbol.size() shouldBe 1
-      poundSymbol.text() shouldBe "£"
-
-      val errorSummary = doc.select(".govuk-error-summary")
-      val errorLink = errorSummary.select("a")
-      errorLink.text() shouldBe "Enter how much you can afford to pay each month"
-      errorLink.attr("href") shouldBe "#MonthlyPaymentAmount"
-      EssttpBackend.MonthlyPaymentAmount.verifyNoneUpdateMonthlyAmountRequest(TdAll.journeyId)
-    }
   }
 }
