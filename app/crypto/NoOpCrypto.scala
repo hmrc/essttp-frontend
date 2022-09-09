@@ -28,7 +28,17 @@ import java.nio.charset.Charset
 @Singleton
 class NoOpCrypto @Inject() extends Encrypter with Decrypter {
 
-  override def encrypt(plain: PlainContent): Crypted = Crypted(plain.toString)
+  private def sanitiseWrappingQuotes(s: String): String = s.replaceAll("^\"(.*)\"$", "$1")
+
+  /**
+   * We need to replace the wrapping quotes on the value within PlainText (i.e. ""Abc"" -> "Abc") to make the 'dummy' no operation crypto work
+   * It is because of a 'feature' in the Library where we otherwise send extra quotes within Json.
+   * --> JsonEncryption.sensitiveEncrypterDecrypter
+   */
+  override def encrypt(plain: PlainContent): Crypted = Crypted(plain match {
+    case PlainText(value)  => sanitiseWrappingQuotes(value)
+    case PlainBytes(value) => sanitiseWrappingQuotes(new String(value, Charset.forName("UTF-8")))
+  })
 
   override def decrypt(encrypted: Crypted): PlainText = PlainText(encrypted.value)
 
