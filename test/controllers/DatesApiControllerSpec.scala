@@ -34,7 +34,7 @@ class DatesApiControllerSpec extends ItSpec {
 
   "GET /retrieve-extreme-dates" - {
     "trigger call to essttp-dates microservice extreme dates endpoint and update backend" in {
-      stubActionDefaults()
+      stubCommonActions()
       EssttpBackend.UpfrontPaymentAmount.findJourney()
       EssttpDates.stubExtremeDatesCall()
       EssttpBackend.Dates.stubUpdateExtremeDates(TdAll.journeyId)
@@ -48,7 +48,7 @@ class DatesApiControllerSpec extends ItSpec {
   }
   "GET /retrieve-start-dates" - {
     "trigger call to essttp-dates microservice start dates endpoint and update backend" in {
-      stubActionDefaults()
+      stubCommonActions()
       EssttpBackend.DayOfMonth.findJourney()
       EssttpDates.stubStartDatesCall()
       EssttpBackend.Dates.stubUpdateStartDates(TdAll.journeyId)

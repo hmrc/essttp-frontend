@@ -48,7 +48,7 @@ class InstalmentsControllerSpec extends ItSpec {
 
   "GET /how-many-months-do-you-want-to-pay-over should" - {
     "return 200 and the instalment selection page" in {
-      stubActionDefaults()
+      stubCommonActions()
       EssttpBackend.AffordableQuotes.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -87,7 +87,7 @@ class InstalmentsControllerSpec extends ItSpec {
       doc.select(".govuk-button").text().trim shouldBe "Continue"
     }
     "pre pop the selected radio option when user has navigated back and they have a chosen month in their journey" in {
-      stubActionDefaults()
+      stubCommonActions()
       EssttpBackend.SelectedPaymentPlan.findJourney()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.instalmentOptions(fakeRequest)
@@ -99,7 +99,7 @@ class InstalmentsControllerSpec extends ItSpec {
 
   "POST /how-many-months-do-you-want-to-pay-over should" - {
     "redirect to instalment summary page when form is valid" in {
-      stubActionDefaults()
+      stubCommonActions()
       EssttpBackend.AffordableQuotes.findJourney()
       EssttpBackend.SelectedPaymentPlan.stubUpdateSelectedPlan(TdAll.journeyId)
       val fakeRequest = FakeRequest(
@@ -114,7 +114,7 @@ class InstalmentsControllerSpec extends ItSpec {
       EssttpBackend.SelectedPaymentPlan.verifyUpdateSelectedPlanRequest(TdAll.journeyId)
     }
     "display correct error message when form is submitted with no value" in {
-      stubActionDefaults()
+      stubCommonActions()
       EssttpBackend.AffordableQuotes.findJourney()
       EssttpBackend.SelectedPaymentPlan.stubUpdateSelectedPlan(TdAll.journeyId)
       val fakeRequest = FakeRequest(

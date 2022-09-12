@@ -128,7 +128,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
             datesToAmountsValues:      List[(String, String)],
             totalToPayValue:           String
         ) = {
-          stubActionDefaults()
+          stubCommonActions()
           EssttpBackend.EligibilityCheck.findJourney(journeyJsonBody)
 
           val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -186,7 +186,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
 
     s"should redirect to ${routes.BankDetailsController.typeOfAccount.url} if the journey " +
       "has been updated successfully and send an audit event" in {
-        stubActionDefaults()
+        stubCommonActions()
         EssttpBackend.SelectedPaymentPlan.findJourney()
         EssttpBackend.HasCheckedPlan.stubUpdateHasCheckedPlan(TdAll.journeyId)
 

@@ -85,16 +85,8 @@ class ItSpec
     webDriver.manage().deleteAllCookies()
   }
 
-  // suitable for most tests
-  def stubActionDefaults(): StubMapping = {
-    stubCommonActionsWith(
-      authAllEnrolments = Some(Set(TdAll.payeEnrolment)),
-      authCredentials   = Some(Credentials("authId-999", "GovernmentGateway")),
-      barsLockoutExpiry = None
-    )
-  }
-  // custom action setup
-  def stubCommonActionsWith(
+  // defaults are suitable for most tests
+  def stubCommonActions(
       authAllEnrolments: Option[Set[Enrolment]] = Some(Set(TdAll.payeEnrolment)),
       authCredentials:   Option[Credentials]    = Some(Credentials("authId-999", "GovernmentGateway")),
       barsLockoutExpiry: Option[Instant]        = None

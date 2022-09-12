@@ -41,7 +41,7 @@ class PaymentDayControllerSpec extends ItSpec {
 
   "GET /which-day-do-you-want-to-pay-each-month" - {
     "should return the 200 and the what day do you want to pay page" in {
-      stubActionDefaults()
+      stubCommonActions()
       EssttpBackend.MonthlyPaymentAmount.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -71,7 +71,7 @@ class PaymentDayControllerSpec extends ItSpec {
     }
 
     "should prepopulate the form when user navigates back and they have a chosen day of month in their journey" in {
-      stubActionDefaults()
+      stubCommonActions()
       EssttpBackend.DayOfMonth.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -87,7 +87,7 @@ class PaymentDayControllerSpec extends ItSpec {
 
   "POST /which-day-do-you-want-to-pay-each-month" - {
     "should update journey with dayOfMonth and redirect to instalment page when 28th selected" in {
-      stubActionDefaults()
+      stubCommonActions()
       EssttpBackend.MonthlyPaymentAmount.findJourney()
       EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(TdAll.journeyId)
       val fakeRequest = FakeRequest(
@@ -102,7 +102,7 @@ class PaymentDayControllerSpec extends ItSpec {
       EssttpBackend.DayOfMonth.verifyUpdateDayOfMonthRequest(TdAll.journeyId)
     }
     "should update journey with dayOfMonth and redirect to instalment page when other day selected" in {
-      stubActionDefaults()
+      stubCommonActions()
       EssttpBackend.MonthlyPaymentAmount.findJourney()
       EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(TdAll.journeyId)
       val fakeRequest = FakeRequest(
@@ -120,7 +120,7 @@ class PaymentDayControllerSpec extends ItSpec {
       EssttpBackend.DayOfMonth.verifyUpdateDayOfMonthRequest(TdAll.journeyId, TdAll.dayOfMonth(1))
     }
     "should update journey with dayOfMonth and redirect to instalment page when other day selected and 28 entered" in {
-      stubActionDefaults()
+      stubCommonActions()
       EssttpBackend.MonthlyPaymentAmount.findJourney()
       EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(TdAll.journeyId)
       val fakeRequest = FakeRequest(
@@ -148,7 +148,7 @@ class PaymentDayControllerSpec extends ItSpec {
     )) {
       (scenario: String, inputValue: String, expectedErrorMessage: String) =>
         s"When input is: [ $scenario: [ $inputValue ]] error message should be $expectedErrorMessage" in {
-          stubActionDefaults()
+          stubCommonActions()
           EssttpBackend.MonthlyPaymentAmount.findJourney()
           val fakeRequest = FakeRequest(
             method = "POST",

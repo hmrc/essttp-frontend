@@ -41,7 +41,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
     "for EPAYE when" - {
 
       "the tax id has already been determined" in {
-        stubActionDefaults()
+        stubCommonActions()
         EssttpBackend.DetermineTaxId.findJourney()
 
         val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -60,7 +60,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
             )
           )
 
-        stubCommonActionsWith(authAllEnrolments = Some(enrolments))
+        stubCommonActions(authAllEnrolments = Some(enrolments))
         EssttpBackend.StartJourney.findJourney()
         EssttpBackend.DetermineTaxId.stubUpdateTaxId(TdAll.journeyId)
 
@@ -82,7 +82,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
             )
           )
 
-        stubCommonActionsWith(authAllEnrolments = Some(enrolments))
+        stubCommonActions(authAllEnrolments = Some(enrolments))
         EssttpBackend.StartJourney.findJourney()
 
         val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -128,7 +128,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
           ),
           enrolment(EnrolmentDef.Epaye.`IR-PAYE-TaxOfficeReference`.enrolmentKey, activated = false)()
         ).foreach { e =>
-            stubCommonActionsWith(authAllEnrolments = Some(Set(e)))
+            stubCommonActions(authAllEnrolments = Some(Set(e)))
             EssttpBackend.StartJourney.findJourney()
             EssttpBackend.DetermineTaxId.stubUpdateTaxId(TdAll.journeyId)
 
@@ -140,7 +140,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
       }
 
       "the relevant enrolment is not found" in {
-        stubCommonActionsWith(authAllEnrolments = Some(Set.empty))
+        stubCommonActions(authAllEnrolments = Some(Set.empty))
         EssttpBackend.StartJourney.findJourney()
 
         val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")

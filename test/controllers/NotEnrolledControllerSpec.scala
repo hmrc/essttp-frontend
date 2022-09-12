@@ -32,7 +32,7 @@ class NotEnrolledControllerSpec extends ItSpec {
   private val controller = app.injector.instanceOf[NotEnrolledController]
   "GET /not-enrolled should" - {
     "return the not enrolled page" in {
-      stubCommonActionsWith(authAllEnrolments = Some(Set.empty))
+      stubCommonActions(authAllEnrolments = Some(Set.empty))
       EssttpBackend.StartJourney.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")

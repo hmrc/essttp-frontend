@@ -52,7 +52,7 @@ class JourneyIncorrectStateRouter extends ItSpec {
       (scenario: String, journeyState: () => StubMapping, expectedRedirectUrl: String) =>
         {
           s"[ GET $scenario ] should redirect to the first page that supports that journey: [ $expectedRedirectUrl ]" in {
-            stubActionDefaults()
+            stubCommonActions()
             journeyState()
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result = app.injector.instanceOf[SubmitArrangementController].submitArrangement(fakeRequest)

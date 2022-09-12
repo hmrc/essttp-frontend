@@ -49,7 +49,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
 
   "GET /how-much-can-you-pay-each-month" - {
     "should return 200 and the how much can you pay a month page" in {
-      stubActionDefaults()
+      stubCommonActions()
       EssttpBackend.AffordabilityMinMaxApi.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -79,7 +79,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
     }
 
     "should prepopulate the form when user navigates back and they have a monthly payment amount in their journey" in {
-      stubActionDefaults()
+      stubCommonActions()
       EssttpBackend.MonthlyPaymentAmount.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -92,7 +92,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
     }
 
     "should display the minimum amount as £1 if the minimum amount is less than £1" in {
-      stubActionDefaults()
+      stubCommonActions()
       EssttpBackend.AffordabilityMinMaxApi.findJourney(JourneyJsonTemplates.`Retrieved Affordability`(1))
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -105,7 +105,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
 
   "POST /how-much-can-you-pay-each-month should" - {
     "redirect to what day do you want to pay on when form is valid" in {
-      stubActionDefaults()
+      stubCommonActions()
       EssttpBackend.AffordabilityMinMaxApi.findJourney()
       EssttpBackend.MonthlyPaymentAmount.stubUpdateMonthlyPaymentAmount(TdAll.journeyId)
       val fakeRequest = FakeRequest(
@@ -131,7 +131,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
       )
     ) { (sf: String, formInput: String, expectedAmount: AmountInPence) =>
         s"should allow for $sf" in {
-          stubActionDefaults()
+          stubCommonActions()
           EssttpBackend.AffordabilityMinMaxApi.findJourney()
           EssttpBackend.MonthlyPaymentAmount.stubUpdateMonthlyPaymentAmount(TdAll.journeyId)
           val fakeRequest = FakeRequest(
@@ -159,7 +159,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
       )
     ) { (sf: String, formInput: String, errorMessage: String) =>
         s"[$sf] should show the page with the correct error message when $formInput is submitted" in {
-          stubActionDefaults()
+          stubCommonActions()
           EssttpBackend.AffordabilityMinMaxApi.findJourney()
           val fakeRequest = FakeRequest(
             method = "POST",

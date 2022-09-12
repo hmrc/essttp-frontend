@@ -49,7 +49,7 @@ class EpayeGovUkControllerSpec extends ItSpec {
   "start journey endpoint" - {
     "should start govuk journey and redirect to determine tax id when user is coming from govuk and user is authenticated" in {
       val refererForGovUk = "https://www.gov.uk/"
-      stubActionDefaults()
+      stubCommonActions()
       EssttpBackend.StartJourney.startJourneyEpayeGovUk
       EssttpBackend.StartJourney.findJourney()
 
@@ -64,7 +64,7 @@ class EpayeGovUkControllerSpec extends ItSpec {
       EssttpBackend.StartJourney.verifyStartJourneyEpayeGovUk()
     }
     "should start detached url journey and redirect to nextUrl when user is authenticated" in {
-      stubActionDefaults()
+      stubCommonActions()
       EssttpBackend.StartJourney.startJourneyEpayeDetached
       EssttpBackend.StartJourney.findJourney()
 

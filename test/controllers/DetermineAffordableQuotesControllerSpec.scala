@@ -34,7 +34,7 @@ class DetermineAffordableQuotesControllerSpec extends ItSpec {
 
   "GET /determine-affordable-quotes" - {
     "trigger call to ttp microservice affordable quotes endpoint and update backend" in {
-      stubActionDefaults()
+      stubCommonActions()
       EssttpBackend.Dates.findJourneyStartDates()
       Ttp.AffordableQuotes.stubRetrieveAffordableQuotes()
       EssttpBackend.AffordableQuotes.stubUpdateAffordableQuotes(TdAll.journeyId)

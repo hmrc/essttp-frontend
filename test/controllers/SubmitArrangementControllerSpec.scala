@@ -35,7 +35,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
 
   "GET /submit-arrangement should" - {
     "trigger call to ttp enact arrangement api, send an audit event and also update backend" in {
-      stubActionDefaults()
+      stubCommonActions()
       EssttpBackend.TermsAndConditions.findJourney()
       EssttpBackend.SubmitArrangement.stubUpdateSubmitArrangement(TdAll.journeyId)
       Ttp.EnactArrangement.stubEnactArrangement()
@@ -93,7 +93,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
     }
 
     "should not update backend if call to ttp enact arrangement api fails (anything other than a 202 response)" in {
-      stubActionDefaults()
+      stubCommonActions()
       EssttpBackend.TermsAndConditions.findJourney()
       Ttp.EnactArrangement.stubEnactArrangementFail()
 
