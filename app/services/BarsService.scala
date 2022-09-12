@@ -20,7 +20,6 @@ import cats.implicits.catsSyntaxEq
 import connectors.BarsConnector
 import models.bars.request._
 import models.bars.response.ValidateResponse.validateFailure
-import models.bars.response.VerifyResponse.accountDoesNotExist
 import models.bars.response._
 import models.bars.{BarsTypeOfBankAccount, BarsTypesOfBankAccount}
 import util.HttpResponseUtils.HttpResponseOps

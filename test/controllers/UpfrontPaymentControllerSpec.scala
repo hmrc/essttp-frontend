@@ -16,6 +16,8 @@
 
 package controllers
 
+//import essttp.rootmodel.AmountInPence
+import essttp.rootmodel.AmountInPence
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import org.scalatest.prop.TableDrivenPropertyChecks._
@@ -236,23 +238,34 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       EssttpBackend.UpfrontPaymentAmount.verifyUpdateUpfrontPaymentAmountRequest(TdAll.journeyId, TdAll.upfrontPaymentAmount(299900))
     }
 
-    "should allow for decimal numbers if they are within the amount bounds" in {
-      AuthStub.authorise()
-      EssttpBackend.CanPayUpfront.findJourney()
-      EssttpBackend.UpfrontPaymentAmount.stubUpdateUpfrontPaymentAmount(TdAll.journeyId)
+    forAll(
+      Table(
+        ("Scenario flavour", "form input", "expected amount of money"),
+        ("one decimal place", "1.1", AmountInPence(110)),
+        ("two decimal places", "1.11", AmountInPence(111)),
+        ("spaces", " 1 . 1  1  ", AmountInPence(111)),
+        ("commas", "1,234", AmountInPence(123400)),
+        ("'£' symbols", "£1234", AmountInPence(123400))
+      )
+    ) { (sf: String, formInput: String, expectedAmount: AmountInPence) =>
+        s"should allow for $sf" in {
+          AuthStub.authorise()
+          EssttpBackend.CanPayUpfront.findJourney()
+          EssttpBackend.UpfrontPaymentAmount.stubUpdateUpfrontPaymentAmount(TdAll.journeyId)
 
-      val fakeRequest = FakeRequest(
-        method = "POST",
-        path   = "/how-much-can-you-pay-upfront"
-      ).withAuthToken()
-        .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-        .withFormUrlEncodedBody(("UpfrontPaymentAmount", "1.1"))
+          val fakeRequest = FakeRequest(
+            method = "POST",
+            path   = "/how-much-can-you-pay-upfront"
+          ).withAuthToken()
+            .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+            .withFormUrlEncodedBody(("UpfrontPaymentAmount", formInput))
 
-      val result: Future[Result] = controller.upfrontPaymentAmountSubmit(fakeRequest)
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.upfrontPaymentSummaryUrl)
-      EssttpBackend.UpfrontPaymentAmount.verifyUpdateUpfrontPaymentAmountRequest(TdAll.journeyId, TdAll.upfrontPaymentAmount(110))
-    }
+          val result: Future[Result] = controller.upfrontPaymentAmountSubmit(fakeRequest)
+          status(result) shouldBe Status.SEE_OTHER
+          redirectLocation(result) shouldBe Some(PageUrls.upfrontPaymentSummaryUrl)
+          EssttpBackend.UpfrontPaymentAmount.verifyUpdateUpfrontPaymentAmountRequest(TdAll.journeyId, TdAll.upfrontPaymentAmount(expectedAmount.value))
+        }
+      }
 
     forAll(
       Table(
@@ -262,7 +275,9 @@ class UpfrontPaymentControllerSpec extends ItSpec {
         ("x < 0", "-1", "Your upfront payment must be between £1 and £2,999"),
         ("x = 0", "0", "Your upfront payment must be between £1 and £2,999"),
         ("x = NaN", "one", "How much you can pay upfront must be an amount of money"),
-        ("x = null", "", "Enter your upfront payment")
+        ("x = null", "", "Enter your upfront payment"),
+        ("scientific notation", "1e2", "How much you can pay upfront must be an amount of money"),
+        ("more than one decimal place", "1.123", "How much you can pay upfront must be an amount of money")
       )
     ) { (sf: String, formInput: String, errorMessage: String) =>
         s"[$sf] should redirect to /how-much-can-you-pay-upfront with correct error summary when $formInput is submitted" in {

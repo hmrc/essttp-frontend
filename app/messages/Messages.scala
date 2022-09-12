@@ -575,16 +575,19 @@ object Messages {
       "accountNumber.error.nonNumeric" -> Message("Account number must be a number"),
       "accountNumber.error.invalid" -> Message("Account number must be between 6 and 8 digits"),
       "isSoleSignatory.error.required" -> Message("Select yes if you are the account holder"),
-      s"bars.${accountNumberNotWellFormatted.message}" -> Message("Enter a valid combination of bank account number and sort code"),
-      s"bars.${sortCodeNotPresentOnEiscd.message}" -> Message("Enter a valid combination of bank account number and sort code"),
-      s"bars.${sortCodeDoesNotSupportsDirectDebit.message}" -> Message(
+      s"sortCode.${accountNumberNotWellFormatted.formError.message}" -> Message("Enter a valid combination of bank account number and sort code"),
+      s"sortCode.${sortCodeNotPresentOnEiscd.formError.message}" -> Message("Enter a valid combination of bank account number and sort code"),
+      s"sortCode.${sortCodeDoesNotSupportsDirectDebit.formError.message}" -> Message(
         "You have entered a sort code which does not accept this type of payment. " +
           "Check you have entered a valid sort code or enter details for a different account"
       ),
-      s"bars.${nameDoesNotMatch.message}" -> Message("Enter a valid account name"),
-      s"bars.${accountDoesNotExist.message}" -> Message("Enter a valid combination of bank account number and sort code"),
-      s"bars.${sortCodeOnDenyList.message}" -> Message("Enter a valid combination of bank account number and sort code"),
-      s"bars.${otherBarsError.message}" -> Message("Enter a valid combination of bank account number and sort code")
+      s"name.${nameDoesNotMatch.formError.message}" -> Message("Enter a valid account name"),
+      s"sortCode.${accountDoesNotExist.formError.message}" -> Message("Enter a valid combination of bank account number and sort code"),
+      s"sortCode.${sortCodeOnDenyList.formError.message}" -> Message("Enter a valid combination of bank account number and sort code"),
+      s"sortCode.${otherBarsError.formError.message}" -> Message("Enter a valid combination of bank account number and sort code"),
+      "name.bars.confirm" -> Message("Confirm the account name"),
+      "sortCode.bars.confirm" -> Message("Confirm the sort code"),
+      "accountNumber.bars.confirm" -> Message("Confirm the account number"),
     )
 
     val `Check your Direct Debit details`: Message = Message(

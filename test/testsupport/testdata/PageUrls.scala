@@ -44,7 +44,6 @@ object PageUrls {
   val directDebitDetailsUrl: String = s"$serviceBaseUrl/set-up-direct-debit"
   val cannotSetupDirectDebitOnlineUrl: String = s"$serviceBaseUrl/you-cannot-set-up-a-direct-debit-online"
   val checkDirectDebitDetailsUrl: String = s"$serviceBaseUrl/check-your-direct-debit-details"
-  val errorPlaceholderUrl: String = s"$serviceBaseUrl/bars-error-placeholder"
   val lockoutUrl: String = s"$serviceBaseUrl/lockout"
   val termsAndConditionsUrl: String = s"$serviceBaseUrl/terms-and-conditions"
   val submitArrangementUrl: String = s"$serviceBaseUrl/submit-arrangement"

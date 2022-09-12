@@ -65,12 +65,11 @@ class EssttpBarsService @Inject() (
       .flatMap { result =>
         auditService.auditBarsCheck(journey, bankDetails, typeOfBankAccount, result)
         result match {
-          case Left(_: BarsValidateError) =>
-            Future.successful(result) // don't update the verify count on validate errors
+          case Right(_) | Left(_: BarsValidateError) =>
+            // don't update the verify count on success or validate error
+            Future.successful(result)
           case Left(bve: BarsVerifyError) =>
             updateVerifyStatus(taxId, result, bve.barsResponse)
-          case Right(vr) =>
-            updateVerifyStatus(taxId, result, vr)
         }
       }
   }

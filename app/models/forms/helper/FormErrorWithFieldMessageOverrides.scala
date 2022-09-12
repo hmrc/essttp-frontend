@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,15 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import uk.gov.hmrc.govukfrontend.views.html.components._
-@import play.api.mvc.Request
+package models.forms.helper
 
-@this(layout: templates.Layout)
+import play.api.data.FormError
 
-@()(implicit request: Request[_])
-@layout(pageTitle = Some("Placeholder")) {
-  <h1 class="govuk-heading-xl">@{Text("Placeholder").asHtml}</h1>
-  <p class="govuk-body">@{Text("Placeholder").asHtml}</p>
-}
+final case class FormErrorWithFieldMessageOverrides(
+    formError:             FormError,
+    fieldMessageOverrides: Seq[FormError]
+)

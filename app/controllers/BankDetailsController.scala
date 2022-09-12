@@ -25,8 +25,9 @@ import essttp.journey.model.Journey.{AfterChosenTypeOfBankAccount, BeforeChosenT
 import essttp.rootmodel.bank.{BankDetails, DirectDebitDetails}
 import models.bars.response._
 import models.enumsforforms.{IsSoleSignatoryFormValue, TypeOfAccountFormValue}
+import models.forms.helper.FormErrorWithFieldMessageOverrides
 import models.forms.{BankDetailsForm, TypeOfAccountForm}
-import play.api.data.{Form, FormError}
+import play.api.data.Form
 import play.api.mvc._
 import requests.RequestSupport
 import services.{EssttpBarsService, JourneyService}
@@ -131,7 +132,7 @@ class BankDetailsController @Inject() (
     formFromRequest.fold(
       formWithErrors =>
         Future.successful(
-          Ok(views.enterBankDetailsPage(formWithErrors, BankDetailsController.chooseTypeOfAccountUrl))
+          Ok(views.enterBankDetailsPage(formWithErrors, backUrl = BankDetailsController.chooseTypeOfAccountUrl))
         ),
       (bankDetailsForm: BankDetailsForm) => {
 
@@ -179,21 +180,23 @@ class BankDetailsController @Inject() (
       implicit
       request: AuthenticatedJourneyRequest[_]
   ): Future[Result] = {
-      def enterBankDetailsPageWithBarsError(error: FormError): Future[Result] =
+      def enterBankDetailsPageWithBarsError(error: FormErrorWithFieldMessageOverrides): Future[Result] = {
         Future.successful(
           Ok(
             views.enterBankDetailsPage(
-              form    = form.withError(error),
-              backUrl = BankDetailsController.chooseTypeOfAccountUrl
+              form                  = form.withError(error.formError),
+              backUrl               = BankDetailsController.chooseTypeOfAccountUrl,
+              errorMessageOverrides = error.fieldMessageOverrides
             )
           )
         )
+      }
 
     import models.forms.BankDetailsForm._
     resp.fold(
       {
-        case ThirdPartyError(_) =>
-          Future.successful(Redirect(routes.BankDetailsController.barsErrorPlaceholder))
+        case ThirdPartyError(resp) =>
+          throw new RuntimeException(s"BARS verify third-party error. BARS response: $resp")
         case AccountNumberNotWellFormatted(_) | AccountNumberNotWellFormattedValidateResponse(_) =>
           enterBankDetailsPageWithBarsError(accountNumberNotWellFormatted)
         case SortCodeDoesNotSupportDirectDebit(_) | SortCodeDoesNotSupportDirectDebitValidateResponse(_) =>
@@ -277,11 +280,6 @@ class BankDetailsController @Inject() (
           JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
         }
     }
-  }
-
-  // TODO in a future ticket
-  val barsErrorPlaceholder: Action[AnyContent] = as.default { implicit request =>
-    Ok(views.barsErrorPlaceHolder())
   }
 
   def barsLockout(p: String): Action[AnyContent] = as.default { implicit request =>
