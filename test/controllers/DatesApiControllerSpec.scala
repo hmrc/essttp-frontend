@@ -22,7 +22,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
-import testsupport.stubs.{AuthStub, EssttpBackend, EssttpDates}
+import testsupport.stubs.{EssttpBackend, EssttpDates}
 import testsupport.testdata.{PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
@@ -34,7 +34,7 @@ class DatesApiControllerSpec extends ItSpec {
 
   "GET /retrieve-extreme-dates" - {
     "trigger call to essttp-dates microservice extreme dates endpoint and update backend" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.UpfrontPaymentAmount.findJourney()
       EssttpDates.stubExtremeDatesCall()
       EssttpBackend.Dates.stubUpdateExtremeDates(TdAll.journeyId)
@@ -48,7 +48,7 @@ class DatesApiControllerSpec extends ItSpec {
   }
   "GET /retrieve-start-dates" - {
     "trigger call to essttp-dates microservice start dates endpoint and update backend" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.DayOfMonth.findJourney()
       EssttpDates.stubStartDatesCall()
       EssttpBackend.Dates.stubUpdateStartDates(TdAll.journeyId)

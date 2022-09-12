@@ -24,7 +24,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
-import testsupport.stubs.{AuditConnectorStub, AuthStub, EssttpBackend}
+import testsupport.stubs.{AuditConnectorStub, EssttpBackend}
 import testsupport.testdata.TdAll
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 import uk.gov.hmrc.http.SessionKeys
@@ -41,7 +41,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
     "for EPAYE when" - {
 
       "the tax id has already been determined" in {
-        AuthStub.authorise()
+        stubCommonActions()
         EssttpBackend.DetermineTaxId.findJourney()
 
         val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -60,7 +60,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
             )
           )
 
-        AuthStub.authorise(allEnrolments = Some(enrolments))
+        stubCommonActions(authAllEnrolments = Some(enrolments))
         EssttpBackend.StartJourney.findJourney()
         EssttpBackend.DetermineTaxId.stubUpdateTaxId(TdAll.journeyId)
 
@@ -82,7 +82,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
             )
           )
 
-        AuthStub.authorise(allEnrolments = Some(enrolments))
+        stubCommonActions(authAllEnrolments = Some(enrolments))
         EssttpBackend.StartJourney.findJourney()
 
         val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -128,7 +128,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
           ),
           enrolment(EnrolmentDef.Epaye.`IR-PAYE-TaxOfficeReference`.enrolmentKey, activated = false)()
         ).foreach { e =>
-            AuthStub.authorise(allEnrolments = Some(Set(e)))
+            stubCommonActions(authAllEnrolments = Some(Set(e)))
             EssttpBackend.StartJourney.findJourney()
             EssttpBackend.DetermineTaxId.stubUpdateTaxId(TdAll.journeyId)
 
@@ -140,7 +140,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
       }
 
       "the relevant enrolment is not found" in {
-        AuthStub.authorise(allEnrolments = Some(Set.empty))
+        stubCommonActions(authAllEnrolments = Some(Set.empty))
         EssttpBackend.StartJourney.findJourney()
 
         val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")

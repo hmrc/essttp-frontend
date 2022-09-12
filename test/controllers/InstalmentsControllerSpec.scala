@@ -24,11 +24,11 @@ import org.jsoup.nodes.Document
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
-import testsupport.TdRequest.FakeRequestOps
 import play.api.test.Helpers._
 import testsupport.ItSpec
+import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
-import testsupport.stubs.{AuthStub, EssttpBackend}
+import testsupport.stubs.EssttpBackend
 import testsupport.testdata.{PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
@@ -48,7 +48,7 @@ class InstalmentsControllerSpec extends ItSpec {
 
   "GET /how-many-months-do-you-want-to-pay-over should" - {
     "return 200 and the instalment selection page" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.AffordableQuotes.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -87,7 +87,7 @@ class InstalmentsControllerSpec extends ItSpec {
       doc.select(".govuk-button").text().trim shouldBe "Continue"
     }
     "pre pop the selected radio option when user has navigated back and they have a chosen month in their journey" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.SelectedPaymentPlan.findJourney()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.instalmentOptions(fakeRequest)
@@ -99,7 +99,7 @@ class InstalmentsControllerSpec extends ItSpec {
 
   "POST /how-many-months-do-you-want-to-pay-over should" - {
     "redirect to instalment summary page when form is valid" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.AffordableQuotes.findJourney()
       EssttpBackend.SelectedPaymentPlan.stubUpdateSelectedPlan(TdAll.journeyId)
       val fakeRequest = FakeRequest(
@@ -114,7 +114,7 @@ class InstalmentsControllerSpec extends ItSpec {
       EssttpBackend.SelectedPaymentPlan.verifyUpdateSelectedPlanRequest(TdAll.journeyId)
     }
     "display correct error message when form is submitted with no value" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.AffordableQuotes.findJourney()
       EssttpBackend.SelectedPaymentPlan.stubUpdateSelectedPlan(TdAll.journeyId)
       val fakeRequest = FakeRequest(
