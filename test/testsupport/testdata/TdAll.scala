@@ -29,6 +29,7 @@ import essttp.rootmodel.ttp.affordability.{InstalmentAmountRequest, InstalmentAm
 import essttp.rootmodel.ttp.arrangement.{ArrangementAgreedDate, ArrangementRequest, ArrangementResponse, DirectDebitInstruction, EnactPaymentPlan, PaperAuddisFlag}
 import essttp.rootmodel.{AmountInPence, CanPayUpfront, DayOfMonth, MonthlyPaymentAmount, UpfrontPaymentAmount}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
+import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 
 import java.time.{LocalDate, ZoneOffset}
 import java.util.UUID
@@ -219,7 +220,7 @@ object TdAll {
     if (typeOfAccount == "Business") TypesOfBankAccount.Business else TypesOfBankAccount.Personal
 
   def directDebitDetails(name: String, sortCode: String, accountNumber: String, isSoleSignatory: Boolean): DirectDebitDetails =
-    DirectDebitDetails(BankDetails(AccountName(name), SortCode(sortCode), AccountNumber(accountNumber)), isSoleSignatory)
+    DirectDebitDetails(BankDetails(AccountName(SensitiveString(name)), SortCode(SensitiveString(sortCode)), AccountNumber(SensitiveString(accountNumber))), isSoleSignatory)
 
   val arrangementRequest: ArrangementRequest = ArrangementRequest(
     channelIdentifier      = ChannelIdentifiers.eSSTTP,
@@ -231,9 +232,9 @@ object TdAll {
       Identification(IdType("BROCS"), IdValue("123PA44545546"))
     ),
     directDebitInstruction = DirectDebitInstruction(
-      sortCode        = SortCode("123456"),
-      accountNumber   = AccountNumber("12345678"),
-      accountName     = AccountName("Bob Ross"),
+      sortCode        = SortCode(SensitiveString("123456")),
+      accountNumber   = AccountNumber(SensitiveString("12345678")),
+      accountName     = AccountName(SensitiveString("Bob Ross")),
       paperAuddisFlag = PaperAuddisFlag(false)
     ),
     paymentPlan            = EnactPaymentPlan(

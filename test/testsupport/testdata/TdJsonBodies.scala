@@ -411,9 +411,9 @@ object TdJsonBodies {
     s"""
        |"directDebitDetails" : {
        |  "bankDetails" : {
-       |    "name" : "Bob Ross",
-       |    "sortCode" : "123456",
-       |    "accountNumber" : "12345678"
+       |    "name" : "fpc6qdRX0ZoOmG8t74o7CkW45wQgBWj4WbOjbVMP3AZhl0yXEdXSF7R/",
+       |    "sortCode" : "sseqsAzwByXjnOGpM3LC72AyVuVrj9NC4FeGh5nhiEzVosgXBkdEqg==",
+       |    "accountNumber" : "Om9OcYE4Eh52gzT3RskJiIfEbTCJ/gfqW99z2QFgQlC7qsgu0px6zjtX"
        |  },
        |  "isAccountHolder" : $isAccountHolder
        |}""".stripMargin

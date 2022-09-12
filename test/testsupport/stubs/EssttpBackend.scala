@@ -18,6 +18,7 @@ package testsupport.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
+import essttp.crypto.Crypto
 import essttp.journey.model.{JourneyId, Origin, Origins}
 import essttp.rootmodel.bank.TypeOfBankAccount
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
@@ -346,7 +347,10 @@ object EssttpBackend {
     def stubUpdateDirectDebitDetails(journeyId: JourneyId): StubMapping =
       WireMockHelpers.stubForPostNoResponseBody(directDebitDetailsUrl(journeyId))
 
-    def verifyUpdateDirectDebitDetailsRequest(journeyId: JourneyId, expectedDirectDebitDetails: essttp.rootmodel.bank.DirectDebitDetails): Unit =
+    def verifyUpdateDirectDebitDetailsRequest(
+        journeyId:                  JourneyId,
+        expectedDirectDebitDetails: essttp.rootmodel.bank.DirectDebitDetails
+    )(implicit crypto: Crypto): Unit =
       WireMockHelpers.verifyWithBodyParse(directDebitDetailsUrl(journeyId), expectedDirectDebitDetails)(essttp.rootmodel.bank.DirectDebitDetails.format)
 
     def verifyNoneUpdateDirectDebitDetailsRequest(journeyId: JourneyId): Unit =

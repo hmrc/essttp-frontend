@@ -16,6 +16,7 @@
 
 package controllers
 
+import crypto.NoOpCrypto
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Result
@@ -31,6 +32,7 @@ import scala.concurrent.Future
 
 class SubmitArrangementControllerSpec extends ItSpec {
 
+  private val crypto: NoOpCrypto = app.injector.instanceOf[NoOpCrypto]
   private val controller: SubmitArrangementController = app.injector.instanceOf[SubmitArrangementController]
 
   "GET /submit-arrangement should" - {
@@ -45,7 +47,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.confirmationUrl)
 
-      Ttp.EnactArrangement.verifyTtpEnactArrangementRequest()
+      Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(crypto)
       AuditConnectorStub.verifyEventAudited(
         "PlanSetUp",
         Json.parse(
@@ -100,7 +102,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.submitArrangement(fakeRequest)
       assertThrows[UpstreamErrorResponse](await(result))
-      Ttp.EnactArrangement.verifyTtpEnactArrangementRequest()
+      Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(crypto)
       EssttpBackend.SubmitArrangement.verifyNoneUpdateSubmitArrangementRequest(TdAll.journeyId)
     }
   }

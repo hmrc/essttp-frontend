@@ -167,8 +167,8 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
         BarsAuditAccount(
           typeOfBankAccount.entryName.toLowerCase(Locale.UK),
           bankDetails.name.value.decryptedValue,
-          bankDetails.sortCode.value,
-          bankDetails.accountNumber.value
+          bankDetails.sortCode.value.decryptedValue,
+          bankDetails.accountNumber.value.decryptedValue
         )
       ),
       BarsAuditResponse(

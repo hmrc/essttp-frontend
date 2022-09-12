@@ -52,7 +52,8 @@ class ItSpec
     "auditing.consumer.baseUri.port" -> WireMockSupport.port,
     "journeyVariables.minimumUpfrontPaymentAmountInPence" -> 100L,
     "auditing.enabled" -> true,
-    "auditing.traceRequests" -> false
+    "auditing.traceRequests" -> false,
+    "crypto.encryption-key" -> "P5xsJ9Nt+quxGZzB4DeLfw=="
   ) ++ configOverrides
 
   //in tests use `app`

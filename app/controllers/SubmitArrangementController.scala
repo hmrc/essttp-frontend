@@ -35,9 +35,8 @@ class SubmitArrangementController @Inject() (
     mcc:            MessagesControllerComponents,
     ttpService:     TtpService,
     journeyService: JourneyService,
-    auditService:   AuditService,
-    noOpCrypto:     NoOpCrypto
-)(implicit ec: ExecutionContext)
+    auditService:   AuditService
+)(implicit ec: ExecutionContext, noOpCrypto: NoOpCrypto)
   extends FrontendController(mcc)
   with Logging {
 
@@ -55,7 +54,7 @@ class SubmitArrangementController @Inject() (
       journey: Journey.Stages.AgreedTermsAndConditions
   )(implicit request: AuthenticatedJourneyRequest[_]): Future[Result] = {
     for {
-      arrangementResponse <- ttpService.submitArrangement(journey)(request, noOpCrypto)
+      arrangementResponse <- ttpService.submitArrangement(journey)
       _ <- journeyService.updateArrangementResponse(journey.id, arrangementResponse)
     } yield Redirect(routes.PaymentPlanSetUpController.paymentPlanSetUp())
   }

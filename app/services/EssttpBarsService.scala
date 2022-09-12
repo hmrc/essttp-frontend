@@ -91,7 +91,7 @@ class EssttpBarsService @Inject() (
 
 object EssttpBarsService {
   def toBarsBankAccount(bankDetails: BankDetails): BarsBankAccount =
-    BarsBankAccount.padded(bankDetails.sortCode.value, bankDetails.accountNumber.value)
+    BarsBankAccount.padded(bankDetails.sortCode.value.decryptedValue, bankDetails.accountNumber.value.decryptedValue)
 
   def toBarsSubject(bankDetails: BankDetails): BarsSubject = BarsSubject(
     title     = None,

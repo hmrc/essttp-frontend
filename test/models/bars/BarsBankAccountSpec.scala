@@ -20,23 +20,24 @@ import essttp.rootmodel.bank.{AccountNumber, SortCode}
 import models.bars.request.BarsBankAccount
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import testsupport.UnitSpec
+import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 
 class BarsBankAccountSpec extends UnitSpec {
   "BarsBankAccount.padded" - {
     "should ensure that Account Number is not less than 8 characters, left-padding with zeroes if necessary" in {
 
-      val sortCode = SortCode("123456")
+      val sortCode = SortCode(SensitiveString("123456"))
       forAll(
         Table(
           ("input accountNumber", "bars accountNumber"),
-          (AccountNumber("12345678"), "12345678"),
-          (AccountNumber("2345678"), "02345678"),
-          (AccountNumber("345678"), "00345678"),
-          (AccountNumber("123456789"), "123456789"), // frontend prevents this
-          (AccountNumber(""), "00000000") // frontend prevents this
+          (AccountNumber(SensitiveString("12345678")), "12345678"),
+          (AccountNumber(SensitiveString("2345678")), "02345678"),
+          (AccountNumber(SensitiveString("345678")), "00345678"),
+          (AccountNumber(SensitiveString("123456789")), "123456789"), // frontend prevents this
+          (AccountNumber(SensitiveString("")), "00000000") // frontend prevents this
         )
       ) { (inputAccountNumber: AccountNumber, barsAccountNumber: String) =>
-          val bankAccount = BarsBankAccount.padded(sortCode.value, inputAccountNumber.value)
+          val bankAccount = BarsBankAccount.padded(sortCode.value.decryptedValue, inputAccountNumber.value.decryptedValue)
 
           bankAccount.sortCode shouldBe sortCode.value
           bankAccount.accountNumber shouldBe barsAccountNumber

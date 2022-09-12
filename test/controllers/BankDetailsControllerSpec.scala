@@ -17,6 +17,7 @@
 package controllers
 
 import controllers.BankDetailsControllerSpec.SummaryRow
+import essttp.crypto.Crypto
 import essttp.rootmodel.bank.{TypeOfBankAccount, TypesOfBankAccount}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
@@ -45,6 +46,8 @@ class BankDetailsControllerSpec extends ItSpec {
 
   private val controller: BankDetailsController = app.injector.instanceOf[BankDetailsController]
   private val expectedServiceName: String = TdAll.expectedServiceNamePaye
+
+  private val crypto: Crypto = app.injector.instanceOf[Crypto]
 
   object TypeOfBankAccountPage {
     val expectedH1: String = "What type of account details are you providing?"
@@ -339,7 +342,7 @@ class BankDetailsControllerSpec extends ItSpec {
       EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(
         TdAll.journeyId,
         TdAll.directDebitDetails("Bob Ross", "123456", "12345678", true)
-      )
+      )(crypto)
 
       BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
       BarsVerifyStatusStub.ensureVerifyUpdateStatusIsNotCalled()
@@ -399,7 +402,7 @@ class BankDetailsControllerSpec extends ItSpec {
       EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(
         TdAll.journeyId,
         TdAll.directDebitDetails("Bob Ross", "123456", "12345678", false)
-      )
+      )(crypto)
 
       BarsStub.verifyBarsNotCalled()
       BarsVerifyStatusStub.ensureVerifyUpdateStatusIsNotCalled()
