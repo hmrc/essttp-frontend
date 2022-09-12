@@ -22,7 +22,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
-import testsupport.stubs.{AuthStub, EssttpBackend, Ttp}
+import testsupport.stubs.{EssttpBackend, Ttp}
 import testsupport.testdata.{PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
@@ -34,7 +34,7 @@ class DetermineAffordabilityControllerSpec extends ItSpec {
 
   "GET /determine-affordability" - {
     "trigger call to ttp microservice affordability endpoint and update backend" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.Dates.findJourneyExtremeDates()
       EssttpBackend.AffordabilityMinMaxApi.stubUpdateAffordability(TdAll.journeyId)
       Ttp.Affordability.stubRetrieveAffordability()

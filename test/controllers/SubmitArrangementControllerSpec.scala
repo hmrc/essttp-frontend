@@ -23,7 +23,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
-import testsupport.stubs.{AuditConnectorStub, AuthStub, EssttpBackend, Ttp}
+import testsupport.stubs.{AuditConnectorStub, EssttpBackend, Ttp}
 import testsupport.testdata.{PageUrls, TdAll}
 import uk.gov.hmrc.http.{SessionKeys, UpstreamErrorResponse}
 
@@ -35,7 +35,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
 
   "GET /submit-arrangement should" - {
     "trigger call to ttp enact arrangement api, send an audit event and also update backend" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.TermsAndConditions.findJourney()
       EssttpBackend.SubmitArrangement.stubUpdateSubmitArrangement(TdAll.journeyId)
       Ttp.EnactArrangement.stubEnactArrangement()
@@ -93,7 +93,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
     }
 
     "should not update backend if call to ttp enact arrangement api fails (anything other than a 202 response)" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.TermsAndConditions.findJourney()
       Ttp.EnactArrangement.stubEnactArrangementFail()
 

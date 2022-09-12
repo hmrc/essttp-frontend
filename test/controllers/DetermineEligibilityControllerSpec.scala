@@ -24,7 +24,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
-import testsupport.stubs.{AuditConnectorStub, AuthStub, EssttpBackend, Ttp}
+import testsupport.stubs.{AuditConnectorStub, EssttpBackend, Ttp}
 import testsupport.testdata.{PageUrls, TdAll, TtpJsonResponses}
 import uk.gov.hmrc.http.SessionKeys
 
@@ -50,7 +50,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
             val eligibilityCheckResponseJson =
               TtpJsonResponses.ttpEligibilityCallJson(TdAll.notEligibleEligibilityPass, eligibilityRules)
 
-            AuthStub.authorise()
+            stubCommonActions()
             EssttpBackend.DetermineTaxId.findJourney()
             Ttp.Eligibility.stubRetrieveEligibility(TtpJsonResponses.ttpEligibilityCallJson(TdAll.notEligibleEligibilityPass, eligibilityRules))
             Ttp.Eligibility.stubRetrieveEligibility(eligibilityCheckResponseJson)
@@ -98,7 +98,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
     "Eligible: should redirect to your bill and send an audit event" in {
       val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson()
 
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.DetermineTaxId.findJourney()
       Ttp.Eligibility.stubRetrieveEligibility(eligibilityCheckResponseJson)
       EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(TdAll.journeyId)
@@ -139,7 +139,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
     }
 
     "Eligibility already determined should route user to your bill is and not update backend again" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.determineEligibility(fakeRequest)
@@ -149,7 +149,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
     }
 
     "Redirect to landing page if journey is in started state" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.StartJourney.findJourney()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.determineEligibility(fakeRequest)

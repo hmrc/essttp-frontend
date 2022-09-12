@@ -23,9 +23,9 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
-import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.TdRequest.FakeRequestOps
-import testsupport.stubs.{AuthStub, EssttpBackend}
+import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
+import testsupport.stubs.EssttpBackend
 import testsupport.testdata.PageUrls
 import uk.gov.hmrc.http.SessionKeys
 
@@ -37,7 +37,7 @@ class YourBillControllerSpec extends ItSpec {
 
   "GET /your-bill should" - {
     "return you bill page" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.yourBill(fakeRequest)
@@ -48,7 +48,7 @@ class YourBillControllerSpec extends ItSpec {
 
   "POST /your-bill should" - {
     "redirect to can you make an upfront payment question page" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.yourBillSubmit(fakeRequest)

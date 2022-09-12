@@ -21,12 +21,11 @@ import org.jsoup.nodes.Document
 import org.scalatest.Assertion
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
-import play.api.test.Helpers.contentAsString
-import testsupport.ItSpec
 import play.api.test.Helpers._
+import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.ContentAssertions
-import testsupport.stubs.{AuthStub, EssttpBackend}
+import testsupport.stubs.EssttpBackend
 import testsupport.testdata.JourneyJsonTemplates
 import uk.gov.hmrc.http.SessionKeys
 
@@ -74,7 +73,7 @@ class IneligibleControllerSpec extends ItSpec {
 
   "IneligibleController should display" - {
     "Generic not eligible page correctly" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`)
       val result: Future[Result] = controller.genericIneligiblePage(fakeRequest)
       val page = pageContentAsDoc(result)
@@ -86,7 +85,7 @@ class IneligibleControllerSpec extends ItSpec {
       assertCommonEligibilityContent(page)
     }
     "Debt too large ineligible page correctly" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`)
       val result: Future[Result] = controller.debtTooLargePage(fakeRequest)
       val page = pageContentAsDoc(result)
@@ -98,7 +97,7 @@ class IneligibleControllerSpec extends ItSpec {
       assertCommonEligibilityContent(page)
     }
     "Existing ttp ineligible page correctly" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExistingTTP`)
       val result: Future[Result] = controller.alreadyHaveAPaymentPlanPage(fakeRequest)
       val page = pageContentAsDoc(result)
@@ -110,7 +109,7 @@ class IneligibleControllerSpec extends ItSpec {
       assertCommonEligibilityContent(page)
     }
     "Debt too old ineligible page correctly" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`)
       val result: Future[Result] = controller.debtTooOldPage(fakeRequest)
       val page = pageContentAsDoc(result)
@@ -122,7 +121,7 @@ class IneligibleControllerSpec extends ItSpec {
       assertCommonEligibilityContent(page)
     }
     "Returns not up to date ineligible page correctly" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(JourneyJsonTemplates.`Eligibility Checked - Ineligible - MissingFiledReturns`)
       val result: Future[Result] = controller.fileYourReturnPage(fakeRequest)
       val page = pageContentAsDoc(result)
