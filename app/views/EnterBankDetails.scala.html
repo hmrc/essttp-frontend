@@ -17,11 +17,12 @@
 @import messages.Messages
 @import requests.RequestSupport
 @import play.api.mvc.Request
-@import play.api.data.Form
+@import play.api.data.{Form, FormError}
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import controllers.routes
 @import models.forms.BankDetailsForm
 @import models.enumsforforms.IsSoleSignatoryFormValue
+@import cats.syntax.eq._
 
 @this(
         layout: templates.Layout,
@@ -35,7 +36,8 @@
 
 @(
         form: Form[BankDetailsForm],
-        backUrl: Option[String] = None
+        backUrl: Option[String] = None,
+        errorMessageOverrides: Seq[FormError] = Seq.empty
 )(implicit
         request: Request[_]
 )
@@ -56,6 +58,13 @@
 }
 @title = @{
     Messages.BankDetails.`Set up Direct Debit`.show
+}
+
+@fieldErrorMessage(key: String, form: Form[BankDetailsForm], overrides: Seq[FormError]) = @{
+    overrides.find(_.key === key).orElse(form.error(key))
+    .map(e => ErrorMessage(
+        content = Text(Messages.BankDetails.errors(s"$key.${e.message}").show)
+    ))
 }
 
 @layout(pageTitle = Some(title), backUrl = backUrl, hasErrors = form.hasErrors) {
@@ -81,12 +90,10 @@
                 content = Text(Messages.BankDetails.`Name on the account`.show)
             ),
             classes = "govuk-!-width-two-thirds",
-            errorMessage = form.error(nameKey).map(e => ErrorMessage(
-                content = Text(Messages.BankDetails.errors(s"${nameKey}.${e.message}").show)
-            )),
-          autocomplete = Some("name"),
-          spellcheck = Some(false),
-          value = form.data.get(nameKey)
+            errorMessage = fieldErrorMessage(nameKey, form, errorMessageOverrides),
+            autocomplete = Some("name"),
+            spellcheck = Some(false),
+            value = form.data.get(nameKey)
         ))
 
         @govukInput(Input(
@@ -100,9 +107,7 @@
                 content = Text(Messages.BankDetails.`Must be 6 digits long`.show)
             )),
             classes = "govuk-input--width-5",
-            errorMessage = form.error(sortCodeKey).map(e => ErrorMessage(
-                content = Text(Messages.BankDetails.errors(s"${sortCodeKey}.${e.message}").show)
-            )),
+            errorMessage = fieldErrorMessage(sortCodeKey, form, errorMessageOverrides),
             spellcheck = Some(false),
             inputmode = Some("numeric"),
             value = form.data.get(sortCodeKey)
@@ -119,9 +124,7 @@
                 content = Text(Messages.BankDetails.`Must be between 6 and 8 digits long`.show)
             )),
             classes = "govuk-!-width-two-thirds",
-            errorMessage = form.error(accountNumberKey).map(e => ErrorMessage(
-                content = Text(Messages.BankDetails.errors(s"${accountNumberKey}.${e.message}").show)
-            )),
+            errorMessage = fieldErrorMessage(accountNumberKey, form, errorMessageOverrides),
             spellcheck = Some(false),
             inputmode = Some("numeric"),
             value = form.data.get(accountNumberKey)
@@ -153,9 +156,7 @@
                 )
             ),
             classes = "govuk-radios--inline",
-            errorMessage = form.error("isSoleSignatory").map(e => ErrorMessage(
-                content = Text(Messages.BankDetails.errors(s"${soleSignatoryKey}.${e.message}").show)
-            ))
+            errorMessage = fieldErrorMessage(soleSignatoryKey, form, errorMessageOverrides)
         ))
 
         @govukButton(Button(content = Text(Messages.continue.show)))
