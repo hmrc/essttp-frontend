@@ -41,7 +41,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
     "for EPAYE when" - {
 
       "the tax id has already been determined" in {
-        stubCommonActions()
+        stubActionDefaults()
         EssttpBackend.DetermineTaxId.findJourney()
 
         val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")

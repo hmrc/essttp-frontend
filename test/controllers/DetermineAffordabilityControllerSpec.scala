@@ -34,7 +34,7 @@ class DetermineAffordabilityControllerSpec extends ItSpec {
 
   "GET /determine-affordability" - {
     "trigger call to ttp microservice affordability endpoint and update backend" in {
-      stubCommonActions()
+      stubActionDefaults()
       EssttpBackend.Dates.findJourneyExtremeDates()
       EssttpBackend.AffordabilityMinMaxApi.stubUpdateAffordability(TdAll.journeyId)
       Ttp.Affordability.stubRetrieveAffordability()

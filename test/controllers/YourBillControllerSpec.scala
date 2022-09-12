@@ -37,7 +37,7 @@ class YourBillControllerSpec extends ItSpec {
 
   "GET /your-bill should" - {
     "return you bill page" in {
-      stubCommonActions()
+      stubActionDefaults()
       EssttpBackend.EligibilityCheck.findJourney()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.yourBill(fakeRequest)
@@ -48,7 +48,7 @@ class YourBillControllerSpec extends ItSpec {
 
   "POST /your-bill should" - {
     "redirect to can you make an upfront payment question page" in {
-      stubCommonActions()
+      stubActionDefaults()
       EssttpBackend.EligibilityCheck.findJourney()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.yourBillSubmit(fakeRequest)

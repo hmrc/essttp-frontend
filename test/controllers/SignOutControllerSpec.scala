@@ -35,7 +35,7 @@ class SignOutControllerSpec extends ItSpec {
 
   "signOutFromTimeout should" - {
     "return the timed out page" in {
-      stubCommonActions()
+      stubActionDefaults()
       EssttpBackend.EligibilityCheck.findJourney()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.signOutFromTimeout(fakeRequest)
@@ -50,7 +50,7 @@ class SignOutControllerSpec extends ItSpec {
 
   "exitSurveyPaye should" - {
     "redirect to feedback frontend with eSSTTP-PAYE as the service identifier" in {
-      stubCommonActions()
+      stubActionDefaults()
       EssttpBackend.SubmitArrangement.findJourney()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.exitSurveyPaye(fakeRequest)

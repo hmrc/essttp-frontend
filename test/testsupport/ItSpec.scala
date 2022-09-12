@@ -86,7 +86,7 @@ class ItSpec
   }
 
   // suitable for most tests
-  def stubCommonActions(): StubMapping = {
+  def stubActionDefaults(): StubMapping = {
     stubCommonActionsWith(
       authAllEnrolments = Some(Set(TdAll.payeEnrolment)),
       authCredentials   = Some(Credentials("authId-999", "GovernmentGateway")),

@@ -50,7 +50,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
   "GET /can-you-make-an-upfront-payment" - {
     "should return 200 and the can you make an upfront payment page" in {
-      stubCommonActions()
+      stubActionDefaults()
       EssttpBackend.EligibilityCheck.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -71,7 +71,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       doc.select("#CanYouMakeAnUpFrontPayment-hint").text() shouldBe expectedPageHintCanPayUpfrontPage
     }
     "should prepopulate the form when user navigates back and they have a chosen way to pay in their journey" in {
-      stubCommonActions()
+      stubActionDefaults()
       EssttpBackend.CanPayUpfront.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -86,7 +86,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
   "POST /can-you-make-an-upfront-payment" - {
     "should redirect to /how-much-can-you-pay-upfront when user chooses yes" in {
-      stubCommonActions()
+      stubActionDefaults()
       EssttpBackend.EligibilityCheck.findJourney()
       EssttpBackend.CanPayUpfront.stubUpdateCanPayUpfront(TdAll.journeyId, canPayUpfrontScenario = true)
 
@@ -104,7 +104,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     }
 
     "should redirect to /can-you-make-an-upfront-payment when user chooses no" in {
-      stubCommonActions()
+      stubActionDefaults()
       EssttpBackend.EligibilityCheck.findJourney()
       EssttpBackend.CanPayUpfront.stubUpdateCanPayUpfront(TdAll.journeyId, canPayUpfrontScenario = false)
 
@@ -122,7 +122,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     }
 
     "should redirect to /can-you-make-an-upfront-payment with error summary when no option is selected" in {
-      stubCommonActions()
+      stubActionDefaults()
       EssttpBackend.EligibilityCheck.findJourney()
 
       val fakeRequest = FakeRequest(
@@ -153,7 +153,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
   "GET /how-much-can-you-pay-upfront" - {
     "should return 200 and the how much can you pay upfront page" in {
-      stubCommonActions()
+      stubActionDefaults()
       EssttpBackend.CanPayUpfront.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -177,7 +177,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     }
 
     "should route the user to /can-you-make-an-upfront-payment when they try to force browse without selecting 'Yes' on the previous page" in {
-      stubCommonActions()
+      stubActionDefaults()
       EssttpBackend.CanPayUpfront.findJourney(JourneyJsonTemplates.`Answered Can Pay Upfront - No`)
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -188,7 +188,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     }
 
     "should prepopulate the form when user navigates back and they have an upfront payment amount in their journey" in {
-      stubCommonActions()
+      stubActionDefaults()
       EssttpBackend.UpfrontPaymentAmount.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -203,7 +203,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
   "POST /how-much-can-you-pay-upfront" - {
     "should redirect to /upfront-payment-summary when user enters a positive number, less than their total debt" in {
-      stubCommonActions()
+      stubActionDefaults()
       EssttpBackend.CanPayUpfront.findJourney()
       EssttpBackend.UpfrontPaymentAmount.stubUpdateUpfrontPaymentAmount(TdAll.journeyId)
 
@@ -221,7 +221,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     }
 
     "should redirect to /upfront-payment-summary when user enters a positive number, at the upper limit" in {
-      stubCommonActions()
+      stubActionDefaults()
       EssttpBackend.CanPayUpfront.findJourney()
       EssttpBackend.UpfrontPaymentAmount.stubUpdateUpfrontPaymentAmount(TdAll.journeyId)
 
@@ -249,7 +249,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       )
     ) { (sf: String, formInput: String, expectedAmount: AmountInPence) =>
         s"should allow for $sf" in {
-          stubCommonActions()
+          stubActionDefaults()
           EssttpBackend.CanPayUpfront.findJourney()
           EssttpBackend.UpfrontPaymentAmount.stubUpdateUpfrontPaymentAmount(TdAll.journeyId)
 
@@ -281,7 +281,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       )
     ) { (sf: String, formInput: String, errorMessage: String) =>
         s"[$sf] should redirect to /how-much-can-you-pay-upfront with correct error summary when $formInput is submitted" in {
-          stubCommonActions()
+          stubActionDefaults()
           EssttpBackend.CanPayUpfront.findJourney()
 
           val fakeRequest = FakeRequest(
@@ -314,7 +314,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
   "GET /upfront-payment-summary" - {
     "should return 200 and the upfront payment summary page" in {
-      stubCommonActions()
+      stubActionDefaults()
       EssttpBackend.UpfrontPaymentAmount.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
