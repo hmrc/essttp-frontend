@@ -129,7 +129,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
             totalToPayValue:           String
         ) = {
           AuthStub.authorise()
-          EssttpBackend.EligibilityCheck.findJourney(journeyJsonBody)
+          EssttpBackend.EligibilityCheck.findJourney(testCrypto)(journeyJsonBody)
 
           val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
@@ -151,7 +151,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
 
       "there is an upfrontPayment amount" in {
         test(
-          JourneyJsonTemplates.`Chosen Payment Plan`()
+          JourneyJsonTemplates.`Chosen Payment Plan`(encrypter = testCrypto)
         )(
             "Yes",
             Some("£123.12"),
@@ -166,7 +166,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
 
       "there is no upfrontPayment amount" in {
         test(
-          JourneyJsonTemplates.`Chosen Payment Plan`("""{ "NoUpfrontPayment" : { } }""")
+          JourneyJsonTemplates.`Chosen Payment Plan`("""{ "NoUpfrontPayment" : { } }""", encrypter = testCrypto)
         )(
             "No",
             None,
@@ -187,7 +187,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
     s"should redirect to ${routes.BankDetailsController.typeOfAccount.url} if the journey " +
       "has been updated successfully and send an audit event" in {
         AuthStub.authorise()
-        EssttpBackend.SelectedPaymentPlan.findJourney()
+        EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto)()
         EssttpBackend.HasCheckedPlan.stubUpdateHasCheckedPlan(TdAll.journeyId)
 
         val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")

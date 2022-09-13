@@ -24,7 +24,7 @@ import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 
 object TdJsonBodies {
 
-  def encryptString(s: String, encrypter: Encrypter) =
+  def encryptString(s: String, encrypter: Encrypter): String =
     encrypter.encrypt(
       PlainText("\"" + SensitiveString(s).decryptedValue + "\"")
     ).value
@@ -88,7 +88,8 @@ object TdJsonBodies {
 
   def eligibilityCheckJourneyInfo(
       eligibilityPass:  EligibilityPass  = TdAll.eligibleEligibilityPass,
-      eligibilityRules: EligibilityRules = TdAll.eligibleEligibilityRules
+      eligibilityRules: EligibilityRules = TdAll.eligibleEligibilityRules,
+      encrypter:        Encrypter
   ): JourneyInfoAsJson = {
     s"""
       |"eligibilityCheckResult" : {
@@ -105,7 +106,7 @@ object TdJsonBodies {
       |  ],
       |  "customerPostcodes": [
       |        {
-      |          "addressPostcode": "AA11AA",
+      |          "addressPostcode": "${encryptString("AA11AA", encrypter)}",
       |          "postcodeDate": "2022-01-31"
       |        }
       |  ],

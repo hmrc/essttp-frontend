@@ -61,6 +61,8 @@ object TdAll {
   val amountInPence: AmountInPence = AmountInPence(1000)
   val upfrontPaymentAmount: UpfrontPaymentAmount = UpfrontPaymentAmount(amountInPence)
 
+  val customerPostcode: Postcode = Postcode(SensitiveString("AA11AA"))
+
   def upfrontPaymentAmount(amount: Long): UpfrontPaymentAmount = UpfrontPaymentAmount(AmountInPence(amount))
 
   val eligibleEligibilityPass: EligibilityPass = EligibilityPass(true)
@@ -101,7 +103,7 @@ object TdAll {
       Identification(IdType("EMPREF"), IdValue("864FZ00049")),
       Identification(IdType("BROCS"), IdValue("123PA44545546"))
     ),
-    customerPostcodes      = List(CustomerPostcode(Postcode("AA11AA"), PostcodeDate("2022-01-31"))),
+    customerPostcodes      = List(CustomerPostcode(customerPostcode, PostcodeDate("2022-01-31"))),
     regimePaymentFrequency = PaymentPlanFrequencies.Monthly,
     paymentPlanFrequency   = PaymentPlanFrequencies.Monthly,
     paymentPlanMinLength   = PaymentPlanMinLength(1),
@@ -166,7 +168,7 @@ object TdAll {
         debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-03-07"))
       )
     ),
-    customerPostcodes            = List(CustomerPostcode(Postcode("AA11AA"), PostcodeDate("2022-01-31")))
+    customerPostcodes            = List(CustomerPostcode(customerPostcode, PostcodeDate("2022-01-31")))
   )
 
   val affordableQuotesRequest: AffordableQuotesRequest = AffordableQuotesRequest(
@@ -187,7 +189,7 @@ object TdAll {
         debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-03-07"))
       )
     ),
-    customerPostcodes           = List(CustomerPostcode(Postcode("AA11AA"), PostcodeDate("2022-01-31"))),
+    customerPostcodes           = List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate("2022-01-31"))),
     paymentPlanAffordableAmount = PaymentPlanAffordableAmount(AmountInPence(30000)),
     paymentPlanStartDate        = InstalmentStartDate(LocalDate.parse("2022-07-28"))
   )

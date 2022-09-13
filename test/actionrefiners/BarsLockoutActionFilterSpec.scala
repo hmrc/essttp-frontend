@@ -33,12 +33,12 @@ import java.time.Instant
 class BarsLockoutActionFilterSpec extends ItSpec {
 
   // this is the first page in the journey that the BarsLockoutActionFilter can lockout
-  val controller: YourBillController = app.injector.instanceOf[YourBillController]
+  private val controller: YourBillController = app.injector.instanceOf[YourBillController]
 
   "BarsLockoutActionFilter" - {
     "should return redirect to your bill page when bars verify status does not have a lockout expiry set" in {
       AuthStub.authorise()
-      EssttpBackend.EligibilityCheck.findJourney()
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
       BarsVerifyStatusStub.statusUnlocked()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -49,7 +49,7 @@ class BarsLockoutActionFilterSpec extends ItSpec {
 
     "should return redirect to the lockout page when bars verify status has a lockout expiry set" in {
       AuthStub.authorise()
-      EssttpBackend.EligibilityCheck.findJourney()
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
 
       val expiry = Instant.now
       BarsVerifyStatusStub.statusLocked(expiry)

@@ -70,7 +70,7 @@ class ItSpec
   //in tests use `app`
   override def fakeApplication(): Application = new GuiceApplicationBuilder()
     .overrides(modules: _*)
-    .disable(classOf[essttp.modules.CryptoModule])
+    .disable(classOf[essttp.module.CryptoModule])
     .configure(configMap)
     .build()
 

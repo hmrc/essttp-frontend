@@ -36,7 +36,7 @@ class SignOutControllerSpec extends ItSpec {
   "signOutFromTimeout should" - {
     "return the timed out page" in {
       AuthStub.authorise()
-      EssttpBackend.EligibilityCheck.findJourney()
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.signOutFromTimeout(fakeRequest)
       RequestAssertions.assertGetRequestOk(result)

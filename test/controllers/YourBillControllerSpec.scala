@@ -38,7 +38,7 @@ class YourBillControllerSpec extends ItSpec {
   "GET /your-bill should" - {
     "return you bill page" in {
       AuthStub.authorise()
-      EssttpBackend.EligibilityCheck.findJourney()
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.yourBill(fakeRequest)
       RequestAssertions.assertGetRequestOk(result)
@@ -49,7 +49,7 @@ class YourBillControllerSpec extends ItSpec {
   "POST /your-bill should" - {
     "redirect to can you make an upfront payment question page" in {
       AuthStub.authorise()
-      EssttpBackend.EligibilityCheck.findJourney()
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.yourBillSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER

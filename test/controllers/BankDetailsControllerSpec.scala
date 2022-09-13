@@ -159,7 +159,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "return 200 and the choose type of bank account page" in {
       AuthStub.authorise()
-      EssttpBackend.HasCheckedPlan.findJourney()
+      EssttpBackend.HasCheckedPlan.findJourney(testCrypto)()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.typeOfAccount(fakeRequest)
@@ -185,13 +185,13 @@ class BankDetailsControllerSpec extends ItSpec {
     }
 
     Seq(
-      ("Business", JourneyJsonTemplates.`Chosen Type of Bank Account - Business`, 0),
-      ("Personal", JourneyJsonTemplates.`Chosen Type of Bank Account - Personal`, 1)
+      ("Business", JourneyJsonTemplates.`Chosen Type of Bank Account - Business`(testCrypto), 0),
+      ("Personal", JourneyJsonTemplates.`Chosen Type of Bank Account - Personal`(testCrypto), 1)
     ).foreach {
         case (typeOfAccount, wiremockJson, checkedElementIndex) =>
           s"prepopulate the form when the user has a chosen $typeOfAccount bank account type in their journey" in {
             AuthStub.authorise()
-            EssttpBackend.ChosenTypeOfBankAccount.findJourney(wiremockJson)
+            EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto)(wiremockJson)
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result: Future[Result] = controller.typeOfAccount(fakeRequest)
             RequestAssertions.assertGetRequestOk(result)
@@ -208,7 +208,7 @@ class BankDetailsControllerSpec extends ItSpec {
     Seq("Business", "Personal").foreach { typeOfAccount =>
       s"redirect to /set-up-direct-debit when valid form is submitted - $typeOfAccount" in {
         AuthStub.authorise()
-        EssttpBackend.HasCheckedPlan.findJourney()
+        EssttpBackend.HasCheckedPlan.findJourney(testCrypto)()
         EssttpBackend.ChosenTypeOfBankAccount.stubUpdateChosenTypeOfBankAccount(TdAll.journeyId)
         val fakeRequest = FakeRequest(
           method = "POST",
@@ -225,7 +225,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "show correct error messages when form submitted is empty" in {
       AuthStub.authorise()
-      EssttpBackend.HasCheckedPlan.findJourney()
+      EssttpBackend.HasCheckedPlan.findJourney(testCrypto)()
       val formData: List[(String, String)] = List(("typeOfAccount", ""))
       val expectedContentAndHref: List[(String, String)] = List(
         ("Select what type of account details you are providing", "#typeOfAccount")
@@ -240,7 +240,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "should return 200 and the bank details page" in {
       AuthStub.authorise()
-      EssttpBackend.ChosenTypeOfBankAccount.findJourney()
+      EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto)()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.enterBankDetails(fakeRequest)
@@ -313,7 +313,7 @@ class BankDetailsControllerSpec extends ItSpec {
     "redirect to /check-bank-details when valid form is submitted and bank account type of personal" in {
       AuthStub.authorise()
       BarsVerifyStatusStub.update()
-      EssttpBackend.ChosenTypeOfBankAccount.findJourney(JourneyJsonTemplates.`Chosen Type of Bank Account - Personal`)
+      EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto)(JourneyJsonTemplates.`Chosen Type of Bank Account - Personal`(testCrypto))
       EssttpBackend.DirectDebitDetails.stubUpdateDirectDebitDetails(TdAll.journeyId)
       BarsStub.ValidateStub.success()
       BarsStub.VerifyPersonalStub.success()
@@ -408,7 +408,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "show correct error messages when form submitted is empty" in {
       AuthStub.authorise()
-      EssttpBackend.ChosenTypeOfBankAccount.findJourney()
+      EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto)()
       val formData: List[(String, String)] = List(
         ("name", ""),
         ("sortCode", ""),
@@ -428,7 +428,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "show correct error messages when submitted sort code and account number are not numeric" in {
       AuthStub.authorise()
-      EssttpBackend.ChosenTypeOfBankAccount.findJourney()
+      EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto)()
       val formData: List[(String, String)] = List(
         ("name", "Bob Ross"),
         ("sortCode", "12E456"),
@@ -446,7 +446,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "show correct error message when account name is more than 70 characters" in {
       AuthStub.authorise()
-      EssttpBackend.ChosenTypeOfBankAccount.findJourney()
+      EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto)()
       val formData: List[(String, String)] = List(
         ("name", "a" * 71),
         ("sortCode", "123456"),
@@ -463,7 +463,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "show correct error messages when submitted sort code and account number are more than 6 and 8 digits respectively" in {
       AuthStub.authorise()
-      EssttpBackend.ChosenTypeOfBankAccount.findJourney()
+      EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto)()
       val formData: List[(String, String)] = List(
         ("name", "Bob Ross"),
         ("sortCode", "1234567"),
@@ -527,12 +527,12 @@ class BankDetailsControllerSpec extends ItSpec {
 
       typeOfAccount match {
         case TypesOfBankAccount.Personal =>
-          EssttpBackend.ChosenTypeOfBankAccount.findJourney(
-            JourneyJsonTemplates.`Chosen Type of Bank Account - Personal`
+          EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto)(
+            JourneyJsonTemplates.`Chosen Type of Bank Account - Personal`(testCrypto)
           )
         case TypesOfBankAccount.Business =>
-          EssttpBackend.ChosenTypeOfBankAccount.findJourney(
-            JourneyJsonTemplates.`Chosen Type of Bank Account - Business`
+          EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto)(
+            JourneyJsonTemplates.`Chosen Type of Bank Account - Business`(testCrypto)
           )
       }
     }
