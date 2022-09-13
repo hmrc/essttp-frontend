@@ -39,7 +39,7 @@ class BarsBankAccountSpec extends UnitSpec {
       ) { (inputAccountNumber: AccountNumber, barsAccountNumber: String) =>
           val bankAccount = BarsBankAccount.padded(sortCode.value.decryptedValue, inputAccountNumber.value.decryptedValue)
 
-          bankAccount.sortCode shouldBe sortCode.value
+          bankAccount.sortCode shouldBe sortCode.value.decryptedValue
           bankAccount.accountNumber shouldBe barsAccountNumber
         }
     }

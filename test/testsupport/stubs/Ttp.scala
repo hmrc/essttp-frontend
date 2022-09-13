@@ -19,7 +19,7 @@ package testsupport.stubs
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import connectors.CallEligibilityApiRequest
-import crypto.NoOpCrypto
+import essttp.crypto.CryptoFormat
 import essttp.rootmodel.ttp.affordability.InstalmentAmountRequest
 import essttp.rootmodel.ttp.affordablequotes.AffordableQuotesRequest
 import essttp.rootmodel.ttp.arrangement.ArrangementRequest
@@ -71,7 +71,7 @@ object Ttp {
         .willReturn(serviceUnavailable())
     )
 
-    def verifyTtpEnactArrangementRequest(implicit crypto: NoOpCrypto): Unit =
+    def verifyTtpEnactArrangementRequest(implicit cryptoFormat: CryptoFormat): Unit =
       ttpVerify(enactArrangementUrl, TdAll.arrangementRequest)(ArrangementRequest.format)
   }
 

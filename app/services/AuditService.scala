@@ -18,7 +18,7 @@ package services
 
 import actionsmodel.AuthenticatedJourneyRequest
 import cats.syntax.eq._
-import crypto.NoOpCrypto
+import essttp.crypto.CryptoFormat
 import essttp.journey.model.Journey.Stages._
 import essttp.journey.model.Journey.{AfterChosenTypeOfBankAccount, Stages}
 import essttp.journey.model.Origin
@@ -44,6 +44,8 @@ import scala.concurrent.ExecutionContext
 
 @Singleton
 class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: ExecutionContext) {
+
+  implicit val cryptoFormat: CryptoFormat = CryptoFormat.NoOpCryptoFormat
 
   def auditEligibilityCheck(
       journey:  ComputedTaxId,
@@ -73,7 +75,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
   def auditPaymentPlanSetUp(
       journey:         AgreedTermsAndConditions,
       responseFromTtp: Either[HttpException, ArrangementResponse]
-  )(implicit authenticatedJourneyRequest: AuthenticatedJourneyRequest[_], headerCarrier: HeaderCarrier, crypto: NoOpCrypto): Unit = {
+  )(implicit authenticatedJourneyRequest: AuthenticatedJourneyRequest[_], headerCarrier: HeaderCarrier): Unit = {
     audit(toPaymentPlanSetupAuditDetail(journey, responseFromTtp))
   }
 

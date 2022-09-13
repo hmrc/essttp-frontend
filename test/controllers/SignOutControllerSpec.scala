@@ -51,7 +51,7 @@ class SignOutControllerSpec extends ItSpec {
   "exitSurveyPaye should" - {
     "redirect to feedback frontend with eSSTTP-PAYE as the service identifier" in {
       AuthStub.authorise()
-      EssttpBackend.SubmitArrangement.findJourney()
+      EssttpBackend.SubmitArrangement.findJourney(testCrypto)()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.exitSurveyPaye(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER

@@ -16,6 +16,8 @@
 
 package testsupport.testdata
 
+import uk.gov.hmrc.crypto.Encrypter
+
 object JourneyJsonTemplates {
 
   val Started: String = TdJsonBodies.createJourneyJson(
@@ -139,34 +141,34 @@ object JourneyJsonTemplates {
     journeyInfo = JourneyInfo.chosenTypeOfBankAccountPersonal
   )
 
-  val `Entered Direct Debit Details - Is Account Holder`: String = TdJsonBodies.createJourneyJson(
+  def `Entered Direct Debit Details - Is Account Holder`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.enteredDirectDebitDetailsIsAccountHolder,
-    journeyInfo = JourneyInfo.enteredDirectDebitDetailsIsAccountHolder
+    journeyInfo = JourneyInfo.enteredDirectDebitDetailsIsAccountHolder(encrypter)
   )
 
-  val `Entered Direct Debit Details - Is Not Account Holder`: String = TdJsonBodies.createJourneyJson(
+  def `Entered Direct Debit Details - Is Not Account Holder`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.enteredDirectDebitDetailsNotAccountHolder,
-    journeyInfo = JourneyInfo.enteredDirectDebitDetailsIsNotAccountHolder
+    journeyInfo = JourneyInfo.enteredDirectDebitDetailsIsNotAccountHolder(encrypter)
   )
 
-  val `Confirmed Direct Debit Details`: String = TdJsonBodies.createJourneyJson(
+  def `Confirmed Direct Debit Details`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.confirmedDirectDebitDetails,
-    journeyInfo = JourneyInfo.confirmedDirectDebitDetails
+    journeyInfo = JourneyInfo.confirmedDirectDebitDetails(encrypter)
   )
 
-  val `Agreed Terms and Conditions`: String = TdJsonBodies.createJourneyJson(
+  def `Agreed Terms and Conditions`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.agreedTermsAndConditions,
-    journeyInfo = JourneyInfo.agreedTermsAndConditions
+    journeyInfo = JourneyInfo.agreedTermsAndConditions(encrypter)
   )
 
-  val `Arrangement Submitted - with upfront payment`: String = TdJsonBodies.createJourneyJson(
+  def `Arrangement Submitted - with upfront payment`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.submittedArrangement,
-    journeyInfo = JourneyInfo.submittedArrangementWithUpfrontPayment
+    journeyInfo = JourneyInfo.submittedArrangementWithUpfrontPayment(encrypter)
   )
 
-  val `Arrangement Submitted - No upfront payment`: String = TdJsonBodies.createJourneyJson(
+  def `Arrangement Submitted - No upfront payment`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.submittedArrangement,
-    journeyInfo = JourneyInfo.submittedArrangementNoUpfrontPayment
+    journeyInfo = JourneyInfo.submittedArrangementNoUpfrontPayment(encrypter)
   )
 
 }

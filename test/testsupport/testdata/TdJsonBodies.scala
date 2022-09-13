@@ -16,11 +16,18 @@
 
 package testsupport.testdata
 
-import essttp.rootmodel.ttp.{EligibilityRules, EligibilityPass}
+import essttp.rootmodel.ttp.{EligibilityPass, EligibilityRules}
 import essttp.rootmodel.{DayOfMonth, UpfrontPaymentAmount}
 import testsupport.testdata.JourneyInfo.JourneyInfoAsJson
+import uk.gov.hmrc.crypto.{Encrypter, PlainText}
+import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 
 object TdJsonBodies {
+
+  def encryptString(s: String, encrypter: Encrypter) =
+    encrypter.encrypt(
+      PlainText("\"" + SensitiveString(s).decryptedValue + "\"")
+    ).value
 
   object StartJourneyRequestBodies {
     val empty: String =
@@ -407,13 +414,13 @@ object TdJsonBodies {
 
   def typeOfBankJourneyInfo(typeOfAccount: String = "Business"): String = s""""typeOfBankAccount" : "$typeOfAccount""""
 
-  def directDebitDetailsJourneyInfo(isAccountHolder: Boolean = true): String =
+  def directDebitDetailsJourneyInfo(isAccountHolder: Boolean = true, encrypter: Encrypter): String =
     s"""
        |"directDebitDetails" : {
        |  "bankDetails" : {
-       |    "name" : "fpc6qdRX0ZoOmG8t74o7CkW45wQgBWj4WbOjbVMP3AZhl0yXEdXSF7R/",
-       |    "sortCode" : "sseqsAzwByXjnOGpM3LC72AyVuVrj9NC4FeGh5nhiEzVosgXBkdEqg==",
-       |    "accountNumber" : "Om9OcYE4Eh52gzT3RskJiIfEbTCJ/gfqW99z2QFgQlC7qsgu0px6zjtX"
+       |    "name" : "${encryptString("Bob Ross", encrypter)}",
+       |    "sortCode" : "${encryptString("123456", encrypter)}",
+       |    "accountNumber" : "${encryptString("12345678", encrypter)}"
        |  },
        |  "isAccountHolder" : $isAccountHolder
        |}""".stripMargin

@@ -16,11 +16,11 @@
 
 package models.audit.paymentplansetup
 
+import essttp.crypto.CryptoFormat
 import essttp.journey.model.CorrelationId
 import essttp.rootmodel.bank.BankDetails
 import models.audit.{AuditDetail, Schedule, TaxDetail}
 import play.api.libs.json.{Json, OWrites}
-import uk.gov.hmrc.crypto.{Encrypter, Decrypter}
 
 final case class PaymentPlanSetUpAuditDetail(
     bankDetails:            BankDetails,
@@ -38,5 +38,7 @@ final case class PaymentPlanSetUpAuditDetail(
 }
 
 object PaymentPlanSetUpAuditDetail {
-  implicit def writes(implicit crypto: Encrypter with Decrypter): OWrites[PaymentPlanSetUpAuditDetail] = Json.writes
+
+  implicit def writes(implicit crypto: CryptoFormat): OWrites[PaymentPlanSetUpAuditDetail] = Json.writes
+
 }

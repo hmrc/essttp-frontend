@@ -16,7 +16,7 @@
 
 package controllers
 
-import crypto.NoOpCrypto
+import essttp.crypto.CryptoFormat
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Result
@@ -32,13 +32,12 @@ import scala.concurrent.Future
 
 class SubmitArrangementControllerSpec extends ItSpec {
 
-  private val crypto: NoOpCrypto = app.injector.instanceOf[NoOpCrypto]
   private val controller: SubmitArrangementController = app.injector.instanceOf[SubmitArrangementController]
 
   "GET /submit-arrangement should" - {
     "trigger call to ttp enact arrangement api, send an audit event and also update backend" in {
       AuthStub.authorise()
-      EssttpBackend.TermsAndConditions.findJourney()
+      EssttpBackend.TermsAndConditions.findJourney(testCrypto)()
       EssttpBackend.SubmitArrangement.stubUpdateSubmitArrangement(TdAll.journeyId)
       Ttp.EnactArrangement.stubEnactArrangement()
 
@@ -47,7 +46,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.confirmationUrl)
 
-      Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(crypto)
+      Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(CryptoFormat.NoOpCryptoFormat)
       AuditConnectorStub.verifyEventAudited(
         "PlanSetUp",
         Json.parse(
@@ -96,13 +95,13 @@ class SubmitArrangementControllerSpec extends ItSpec {
 
     "should not update backend if call to ttp enact arrangement api fails (anything other than a 202 response)" in {
       AuthStub.authorise()
-      EssttpBackend.TermsAndConditions.findJourney()
+      EssttpBackend.TermsAndConditions.findJourney(testCrypto)()
       Ttp.EnactArrangement.stubEnactArrangementFail()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.submitArrangement(fakeRequest)
       assertThrows[UpstreamErrorResponse](await(result))
-      Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(crypto)
+      Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(CryptoFormat.NoOpCryptoFormat)
       EssttpBackend.SubmitArrangement.verifyNoneUpdateSubmitArrangementRequest(TdAll.journeyId)
     }
   }

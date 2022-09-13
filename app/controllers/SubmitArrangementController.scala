@@ -19,7 +19,6 @@ package controllers
 import _root_.actions.Actions
 import actionsmodel.AuthenticatedJourneyRequest
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
-import crypto.NoOpCrypto
 import essttp.journey.model.Journey
 import play.api.mvc._
 import services.{AuditService, JourneyService, TtpService}
@@ -36,7 +35,7 @@ class SubmitArrangementController @Inject() (
     ttpService:     TtpService,
     journeyService: JourneyService,
     auditService:   AuditService
-)(implicit ec: ExecutionContext, noOpCrypto: NoOpCrypto)
+)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 

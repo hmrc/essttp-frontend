@@ -18,7 +18,7 @@ package testsupport.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import essttp.crypto.Crypto
+import essttp.crypto.CryptoFormat
 import essttp.journey.model.{JourneyId, Origin, Origins}
 import essttp.rootmodel.bank.TypeOfBankAccount
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
@@ -32,6 +32,7 @@ import play.api.libs.json.Json
 import testsupport.stubs.WireMockHelpers._
 import testsupport.testdata.{JourneyJsonTemplates, TdAll, TdJsonBodies}
 import play.api.http.Status._
+import uk.gov.hmrc.crypto.Encrypter
 
 import java.time.Instant
 
@@ -350,7 +351,7 @@ object EssttpBackend {
     def verifyUpdateDirectDebitDetailsRequest(
         journeyId:                  JourneyId,
         expectedDirectDebitDetails: essttp.rootmodel.bank.DirectDebitDetails
-    )(implicit crypto: Crypto): Unit =
+    )(implicit cryptoFormat: CryptoFormat): Unit =
       WireMockHelpers.verifyWithBodyParse(directDebitDetailsUrl(journeyId), expectedDirectDebitDetails)(essttp.rootmodel.bank.DirectDebitDetails.format)
 
     def verifyNoneUpdateDirectDebitDetailsRequest(journeyId: JourneyId): Unit =
@@ -359,7 +360,8 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(directDebitDetailsUrl(journeyId)))
       )
 
-    def findJourney(jsonBody: String = JourneyJsonTemplates.`Entered Direct Debit Details - Is Account Holder`): StubMapping = findByLatestSessionId(jsonBody)
+    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Entered Direct Debit Details - Is Account Holder`(encrypter)): StubMapping =
+      findByLatestSessionId(jsonBody)
   }
 
   object ConfirmedDirectDebitDetails {
@@ -379,7 +381,7 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(confirmDirectDebitDetailsUrl(journeyId)))
       )
 
-    def findJourney(jsonBody: String = JourneyJsonTemplates.`Confirmed Direct Debit Details`): StubMapping = findByLatestSessionId(jsonBody)
+    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Confirmed Direct Debit Details`(encrypter)): StubMapping = findByLatestSessionId(jsonBody)
   }
 
   object TermsAndConditions {
@@ -399,7 +401,7 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(agreedTermsAndConditionsUrl(journeyId)))
       )
 
-    def findJourney(jsonBody: String = JourneyJsonTemplates.`Agreed Terms and Conditions`): StubMapping = findByLatestSessionId(jsonBody)
+    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Agreed Terms and Conditions`(encrypter)): StubMapping = findByLatestSessionId(jsonBody)
   }
 
   object SubmitArrangement {
@@ -414,7 +416,7 @@ object EssttpBackend {
     def verifyNoneUpdateSubmitArrangementRequest(journeyId: JourneyId): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(submitArrangementUrl(journeyId))))
 
-    def findJourney(jsonBody: String = JourneyJsonTemplates.`Arrangement Submitted - with upfront payment`): StubMapping = findByLatestSessionId(jsonBody)
+    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Arrangement Submitted - with upfront payment`(encrypter)): StubMapping = findByLatestSessionId(jsonBody)
   }
 
 }

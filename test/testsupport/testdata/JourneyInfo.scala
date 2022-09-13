@@ -16,6 +16,8 @@
 
 package testsupport.testdata
 
+import uk.gov.hmrc.crypto.Encrypter
+
 object JourneyInfo {
   type JourneyInfoAsJson = String
 
@@ -42,8 +44,8 @@ object JourneyInfo {
   val selectedPlan: JourneyInfoAsJson = TdJsonBodies.selectedPlanJourneyInfo
   val typeOfBankAccountBusiness: JourneyInfoAsJson = TdJsonBodies.typeOfBankJourneyInfo()
   val typeOfBankAccountPersonal: JourneyInfoAsJson = TdJsonBodies.typeOfBankJourneyInfo("Personal")
-  val directDebitDetails: JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo()
-  val directDebitDetailsNotAccountHolder: JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo(false)
+  def directDebitDetails(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo(isAccountHolder = true, encrypter)
+  def directDebitDetailsNotAccountHolder(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo(isAccountHolder = false, encrypter)
   val arrangementSubmitted: JourneyInfoAsJson = TdJsonBodies.arrangementResponseJourneyInfo()
   /** * **/
 
@@ -72,15 +74,15 @@ object JourneyInfo {
   val hasCheckedPaymentPlan: List[JourneyInfoAsJson] = chosenPaymentPlan
   val chosenTypeOfBankAccountBusiness: List[JourneyInfoAsJson] = typeOfBankAccountBusiness :: chosenPaymentPlan
   val chosenTypeOfBankAccountPersonal: List[JourneyInfoAsJson] = typeOfBankAccountPersonal :: chosenPaymentPlan
-  val enteredDirectDebitDetailsIsAccountHolder: List[JourneyInfoAsJson] = directDebitDetails :: chosenTypeOfBankAccountBusiness
-  val enteredDirectDebitDetailsIsNotAccountHolder: List[JourneyInfoAsJson] = directDebitDetailsNotAccountHolder :: chosenTypeOfBankAccountBusiness
-  val confirmedDirectDebitDetails: List[JourneyInfoAsJson] = enteredDirectDebitDetailsIsAccountHolder
-  val agreedTermsAndConditions: List[JourneyInfoAsJson] = confirmedDirectDebitDetails
-  val submittedArrangementWithUpfrontPayment: List[JourneyInfoAsJson] = arrangementSubmitted :: confirmedDirectDebitDetails
+  def enteredDirectDebitDetailsIsAccountHolder(encrypter: Encrypter): List[JourneyInfoAsJson] = directDebitDetails(encrypter) :: chosenTypeOfBankAccountBusiness
+  def enteredDirectDebitDetailsIsNotAccountHolder(encrypter: Encrypter): List[JourneyInfoAsJson] = directDebitDetailsNotAccountHolder(encrypter) :: chosenTypeOfBankAccountBusiness
+  def confirmedDirectDebitDetails(encrypter: Encrypter): List[JourneyInfoAsJson] = enteredDirectDebitDetailsIsAccountHolder(encrypter)
+  def agreedTermsAndConditions(encrypter: Encrypter): List[JourneyInfoAsJson] = confirmedDirectDebitDetails(encrypter)
+  def submittedArrangementWithUpfrontPayment(encrypter: Encrypter): List[JourneyInfoAsJson] = arrangementSubmitted :: confirmedDirectDebitDetails(encrypter)
 
   //used in final page test
-  val submittedArrangementNoUpfrontPayment: List[JourneyInfoAsJson] =
-    arrangementSubmitted :: directDebitDetails :: typeOfBankAccountBusiness :: selectedPlan :: affordableQuotes ::
+  def submittedArrangementNoUpfrontPayment(encrypter: Encrypter): List[JourneyInfoAsJson] =
+    arrangementSubmitted :: directDebitDetails(encrypter) :: typeOfBankAccountBusiness :: selectedPlan :: affordableQuotes ::
       upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: monthlyPaymentAmount ::
       dayOfMonth :: startDates :: cannotPayUpfront :: eligibilityCheckedEligible
 

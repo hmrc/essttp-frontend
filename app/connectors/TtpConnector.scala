@@ -18,7 +18,7 @@ package connectors
 
 import com.google.inject.{Inject, Singleton}
 import config.AppConfig
-import crypto.NoOpCrypto
+import essttp.crypto.CryptoFormat
 import essttp.journey.model.CorrelationId
 import essttp.rootmodel.ttp.EligibilityCheckResult
 import essttp.rootmodel.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
@@ -32,7 +32,9 @@ import uk.gov.hmrc.http.HttpReads.Implicits.readFromJson
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class TtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)(implicit ec: ExecutionContext, noOpCrypto: NoOpCrypto) {
+class TtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)(implicit ec: ExecutionContext) {
+
+  implicit val cryptoFormat: CryptoFormat = CryptoFormat.NoOpCryptoFormat
 
   private val correlationIdHeaderKey: String = appConfig.TtpHeaders.correlationId
 

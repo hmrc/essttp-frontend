@@ -17,7 +17,6 @@
 package controllers
 
 import controllers.BankDetailsControllerSpec.SummaryRow
-import essttp.crypto.Crypto
 import essttp.rootmodel.bank.{TypeOfBankAccount, TypesOfBankAccount}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
@@ -46,8 +45,6 @@ class BankDetailsControllerSpec extends ItSpec {
 
   private val controller: BankDetailsController = app.injector.instanceOf[BankDetailsController]
   private val expectedServiceName: String = TdAll.expectedServiceNamePaye
-
-  private val crypto: Crypto = app.injector.instanceOf[Crypto]
 
   object TypeOfBankAccountPage {
     val expectedH1: String = "What type of account details are you providing?"
@@ -292,7 +289,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "prepopulate the form when the user has the direct debit details in their journey" in {
       AuthStub.authorise()
-      EssttpBackend.DirectDebitDetails.findJourney()
+      EssttpBackend.DirectDebitDetails.findJourney(testCrypto)()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.enterBankDetails(fakeRequest)
@@ -342,7 +339,7 @@ class BankDetailsControllerSpec extends ItSpec {
       EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(
         TdAll.journeyId,
         TdAll.directDebitDetails("Bob Ross", "123456", "12345678", true)
-      )(crypto)
+      )(testOperationCryptoFormat)
 
       BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
       BarsVerifyStatusStub.ensureVerifyUpdateStatusIsNotCalled()
@@ -378,7 +375,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "redirect to /you-cannot-set-up-a-direct-debit-online when user submits no for radio option relating to being account holder" in {
       AuthStub.authorise()
-      EssttpBackend.ConfirmedDirectDebitDetails.findJourney()
+      EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto)()
       EssttpBackend.DirectDebitDetails.stubUpdateDirectDebitDetails(TdAll.journeyId)
 
       val formData = List(
@@ -402,7 +399,7 @@ class BankDetailsControllerSpec extends ItSpec {
       EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(
         TdAll.journeyId,
         TdAll.directDebitDetails("Bob Ross", "123456", "12345678", false)
-      )(crypto)
+      )(testOperationCryptoFormat)
 
       BarsStub.verifyBarsNotCalled()
       BarsVerifyStatusStub.ensureVerifyUpdateStatusIsNotCalled()
@@ -848,7 +845,7 @@ class BankDetailsControllerSpec extends ItSpec {
   "GET /check-your-direct-debit-details should" - {
     "return 200 and the check your direct debit details page" in {
       AuthStub.authorise()
-      EssttpBackend.DirectDebitDetails.findJourney()
+      EssttpBackend.DirectDebitDetails.findJourney(testCrypto)()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.checkBankDetails(fakeRequest)
@@ -892,8 +889,8 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "redirect user to cannot setup direct debit if they try and force browse, but they said they aren't the account holder" in {
       AuthStub.authorise()
-      EssttpBackend.DirectDebitDetails.findJourney(
-        JourneyJsonTemplates.`Entered Direct Debit Details - Is Not Account Holder`
+      EssttpBackend.DirectDebitDetails.findJourney(testCrypto)(
+        JourneyJsonTemplates.`Entered Direct Debit Details - Is Not Account Holder`(testCrypto)
       )
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -907,7 +904,7 @@ class BankDetailsControllerSpec extends ItSpec {
   "POST /check-your-direct-debit-details should" - {
     "redirect the user to terms and conditions and update backend" in {
       AuthStub.authorise()
-      EssttpBackend.DirectDebitDetails.findJourney()
+      EssttpBackend.DirectDebitDetails.findJourney(testCrypto)()
       EssttpBackend.ConfirmedDirectDebitDetails.stubUpdateConfirmDirectDebitDetails(TdAll.journeyId)
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -919,8 +916,8 @@ class BankDetailsControllerSpec extends ItSpec {
     }
     "redirect the user to cannot setup direct debit if they try and force browse, but they aren't the account holder" in {
       AuthStub.authorise()
-      EssttpBackend.DirectDebitDetails.findJourney(
-        JourneyJsonTemplates.`Entered Direct Debit Details - Is Not Account Holder`
+      EssttpBackend.DirectDebitDetails.findJourney(testCrypto)(
+        JourneyJsonTemplates.`Entered Direct Debit Details - Is Not Account Holder`(testCrypto)
       )
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.checkBankDetailsSubmit(fakeRequest)
@@ -933,7 +930,7 @@ class BankDetailsControllerSpec extends ItSpec {
   "GET /terms-and-conditions should" - {
     "return 200 and the terms and conditions page" in {
       AuthStub.authorise()
-      EssttpBackend.ConfirmedDirectDebitDetails.findJourney()
+      EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto)()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.termsAndConditions(fakeRequest)
@@ -982,7 +979,7 @@ class BankDetailsControllerSpec extends ItSpec {
   "POST /terms-and-conditions should" - {
     "redirect the user to terms and conditions and update backend" in {
       AuthStub.authorise()
-      EssttpBackend.ConfirmedDirectDebitDetails.findJourney()
+      EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto)()
       EssttpBackend.TermsAndConditions.stubUpdateAgreedTermsAndConditions(TdAll.journeyId)
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -997,8 +994,8 @@ class BankDetailsControllerSpec extends ItSpec {
   "GET /you-cannot-set-up-a-direct-debit-online should" - {
     "return 200 and You cannot set up a direct debit online page" in {
       AuthStub.authorise()
-      EssttpBackend.DirectDebitDetails.findJourney(
-        JourneyJsonTemplates.`Entered Direct Debit Details - Is Not Account Holder`
+      EssttpBackend.DirectDebitDetails.findJourney(testCrypto)(
+        JourneyJsonTemplates.`Entered Direct Debit Details - Is Not Account Holder`(testCrypto)
       )
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.cannotSetupDirectDebitOnlinePage(fakeRequest)
