@@ -17,6 +17,7 @@
 package testOnly.controllers
 
 import _root_.actions.Actions
+import essttp.crypto.CryptoFormat
 import essttp.journey.JourneyConnector
 import play.api.libs.json.Json
 import play.api.mvc._
@@ -34,6 +35,8 @@ class DebugJourneyController @Inject() (
 )(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
+
+  implicit val cryptoFormat: CryptoFormat = CryptoFormat.NoOpCryptoFormat
 
   val showJourney: Action[AnyContent] = as.default.async { implicit request =>
     if (hc.sessionId.isEmpty) {

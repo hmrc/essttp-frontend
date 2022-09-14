@@ -33,6 +33,7 @@ import testOnly.connectors.EssttpStubConnector
 import testOnly.controllers.StartJourneyController._
 import testOnly.formsmodel.StartJourneyForm
 import testOnly.testusermodel.TestUser
+import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
@@ -182,7 +183,7 @@ object StartJourneyController {
           idValue = IdValue(form.empRef.value)
         )
       ),
-      customerPostcodes      = List(CustomerPostcode(Postcode("AA11AA"), PostcodeDate("2022-01-01"))),
+      customerPostcodes      = List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate("2022-01-01"))),
       regimePaymentFrequency = PaymentPlanFrequencies.Monthly,
       paymentPlanFrequency   = PaymentPlanFrequencies.Monthly,
       paymentPlanMinLength   = PaymentPlanMinLength(1),

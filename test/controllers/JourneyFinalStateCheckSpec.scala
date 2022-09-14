@@ -53,7 +53,7 @@ class JourneyFinalStateCheckSpec extends ItSpec {
         {
           s"GET $scenario should redirect to ${PageUrls.confirmationUrl}" in {
             stubCommonActions()
-            EssttpBackend.SubmitArrangement.findJourney()
+            EssttpBackend.SubmitArrangement.findJourney(testCrypto)()
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result = action(fakeRequest)
             status(result) shouldBe Status.SEE_OTHER

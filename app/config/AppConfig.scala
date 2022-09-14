@@ -83,4 +83,8 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     val payeExitSurveyUrl: String = s"${BaseUrl.feedbackFrontend}/feedback/$serviceIdentifierPAYE"
   }
 
+  object Crypto {
+    val aesGcmCryptoKey: String = config.get[String]("crypto.encryption-key")
+  }
+
 }

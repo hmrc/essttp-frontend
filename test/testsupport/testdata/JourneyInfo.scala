@@ -16,18 +16,20 @@
 
 package testsupport.testdata
 
+import uk.gov.hmrc.crypto.Encrypter
+
 object JourneyInfo {
   type JourneyInfoAsJson = String
 
   /** Represents small bits of json that get added to the journey at each stage **/
   val taxId: JourneyInfoAsJson = TdJsonBodies.taxIdJourneyInfo()
-  val eligibilityCheckEligible: JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo()
-  val ineligibleHasRls: JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleHasRlsOnAddress)
-  val ineligibleMaxDebt: JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleIsMoreThanMaxDebtAllowance)
-  val ineligibleExistingTtp: JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleExistingTTP)
-  val ineligibleMaxDebtAge: JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleExceedsMaxDebtAge)
-  val ineligibleMissingFiledReturns: JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleMissingFiledReturns)
-  val multipleIneligibleReasons: JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleHasRlsOnAddress.copy(markedAsInsolvent = true))
+  def eligibilityCheckEligible(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(encrypter = encrypter)
+  def ineligibleHasRls(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleHasRlsOnAddress, encrypter)
+  def ineligibleMaxDebt(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleIsMoreThanMaxDebtAllowance, encrypter)
+  def ineligibleExistingTtp(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleExistingTTP, encrypter)
+  def ineligibleMaxDebtAge(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleExceedsMaxDebtAge, encrypter)
+  def ineligibleMissingFiledReturns(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleMissingFiledReturns, encrypter)
+  def multipleIneligibleReasons(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleHasRlsOnAddress.copy(markedAsInsolvent = true), encrypter)
   val canPayUpfront: JourneyInfoAsJson = TdJsonBodies.canPayUpfrontJourneyInfo(true)
   val cannotPayUpfront: JourneyInfoAsJson = TdJsonBodies.canPayUpfrontJourneyInfo(false)
   val upfrontPaymentAmount: JourneyInfoAsJson = TdJsonBodies.upfrontPaymentAmountJourneyInfo(TdAll.upfrontPaymentAmount)
@@ -42,8 +44,8 @@ object JourneyInfo {
   val selectedPlan: JourneyInfoAsJson = TdJsonBodies.selectedPlanJourneyInfo
   val typeOfBankAccountBusiness: JourneyInfoAsJson = TdJsonBodies.typeOfBankJourneyInfo()
   val typeOfBankAccountPersonal: JourneyInfoAsJson = TdJsonBodies.typeOfBankJourneyInfo("Personal")
-  val directDebitDetails: JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo()
-  val directDebitDetailsNotAccountHolder: JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo(false)
+  def directDebitDetails(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo(isAccountHolder = true, encrypter)
+  def directDebitDetailsNotAccountHolder(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo(isAccountHolder = false, encrypter)
   val arrangementSubmitted: JourneyInfoAsJson = TdJsonBodies.arrangementResponseJourneyInfo()
   /** * **/
 
@@ -51,37 +53,37 @@ object JourneyInfo {
   val started: List[JourneyInfoAsJson] = List.empty
   val taxIdDetermined: List[JourneyInfoAsJson] = taxId :: started
 
-  val eligibilityCheckedEligible: List[JourneyInfoAsJson] = eligibilityCheckEligible :: taxIdDetermined
-  val eligibilityCheckedIneligibleHasRls: List[JourneyInfoAsJson] = ineligibleHasRls :: taxIdDetermined
-  val eligibilityCheckedIneligibleMaxDebt: List[JourneyInfoAsJson] = ineligibleMaxDebt :: taxIdDetermined
-  val eligibilityCheckedIneligibleExistingTtp: List[JourneyInfoAsJson] = ineligibleExistingTtp :: taxIdDetermined
-  val eligibilityCheckedIneligibleMaxDebtAge: List[JourneyInfoAsJson] = ineligibleMaxDebtAge :: taxIdDetermined
-  val eligibilityCheckedIneligibleMissingFiledReturns: List[JourneyInfoAsJson] = ineligibleMissingFiledReturns :: taxIdDetermined
-  val eligibilityCheckedIneligibleMultipleReasons: List[JourneyInfoAsJson] = multipleIneligibleReasons :: taxIdDetermined
-  val answeredCanPayUpfrontYes: List[JourneyInfoAsJson] = canPayUpfront :: eligibilityCheckedEligible
-  val answeredCanPayUpfrontNo: List[JourneyInfoAsJson] = cannotPayUpfront :: eligibilityCheckedEligible
-  val answeredUpfrontPaymentAmount: List[JourneyInfoAsJson] = upfrontPaymentAmount :: answeredCanPayUpfrontYes
-  val retrievedExtremeDates: List[JourneyInfoAsJson] = extremeDates :: upfrontPaymentAnswers :: eligibilityCheckedEligible
-  val retrievedExtremeDatesNoUpfrontPayment: List[JourneyInfoAsJson] = extremeDates :: upfrontPaymentAnswersNoUpfrontPayment :: eligibilityCheckedEligible
-  def retrievedAffordabilityResult(minimumInstalmentAmount: Int = 29997): List[JourneyInfoAsJson] = affordableResult(minimumInstalmentAmount) :: retrievedExtremeDates
-  val enteredMonthlyPaymentAmount: List[JourneyInfoAsJson] = monthlyPaymentAmount :: retrievedAffordabilityResult()
-  val enteredDayOfMonth: List[JourneyInfoAsJson] = dayOfMonth :: enteredMonthlyPaymentAmount
-  val retrievedStartDates: List[JourneyInfoAsJson] = startDates :: enteredDayOfMonth
-  val retrievedAffordableQuotes: List[JourneyInfoAsJson] = affordableQuotes :: retrievedStartDates
-  val chosenPaymentPlan: List[JourneyInfoAsJson] = selectedPlan :: retrievedAffordableQuotes
-  val hasCheckedPaymentPlan: List[JourneyInfoAsJson] = chosenPaymentPlan
-  val chosenTypeOfBankAccountBusiness: List[JourneyInfoAsJson] = typeOfBankAccountBusiness :: chosenPaymentPlan
-  val chosenTypeOfBankAccountPersonal: List[JourneyInfoAsJson] = typeOfBankAccountPersonal :: chosenPaymentPlan
-  val enteredDirectDebitDetailsIsAccountHolder: List[JourneyInfoAsJson] = directDebitDetails :: chosenTypeOfBankAccountBusiness
-  val enteredDirectDebitDetailsIsNotAccountHolder: List[JourneyInfoAsJson] = directDebitDetailsNotAccountHolder :: chosenTypeOfBankAccountBusiness
-  val confirmedDirectDebitDetails: List[JourneyInfoAsJson] = enteredDirectDebitDetailsIsAccountHolder
-  val agreedTermsAndConditions: List[JourneyInfoAsJson] = confirmedDirectDebitDetails
-  val submittedArrangementWithUpfrontPayment: List[JourneyInfoAsJson] = arrangementSubmitted :: confirmedDirectDebitDetails
+  def eligibilityCheckedEligible(encrypter: Encrypter): List[JourneyInfoAsJson] = eligibilityCheckEligible(encrypter) :: taxIdDetermined
+  def eligibilityCheckedIneligibleHasRls(encrypter: Encrypter): List[JourneyInfoAsJson] = ineligibleHasRls(encrypter) :: taxIdDetermined
+  def eligibilityCheckedIneligibleMaxDebt(encrypter: Encrypter): List[JourneyInfoAsJson] = ineligibleMaxDebt(encrypter) :: taxIdDetermined
+  def eligibilityCheckedIneligibleExistingTtp(encrypter: Encrypter): List[JourneyInfoAsJson] = ineligibleExistingTtp(encrypter) :: taxIdDetermined
+  def eligibilityCheckedIneligibleMaxDebtAge(encrypter: Encrypter): List[JourneyInfoAsJson] = ineligibleMaxDebtAge(encrypter) :: taxIdDetermined
+  def eligibilityCheckedIneligibleMissingFiledReturns(encrypter: Encrypter): List[JourneyInfoAsJson] = ineligibleMissingFiledReturns(encrypter) :: taxIdDetermined
+  def eligibilityCheckedIneligibleMultipleReasons(encrypter: Encrypter): List[JourneyInfoAsJson] = multipleIneligibleReasons(encrypter) :: taxIdDetermined
+  def answeredCanPayUpfrontYes(encrypter: Encrypter): List[JourneyInfoAsJson] = canPayUpfront :: eligibilityCheckedEligible(encrypter)
+  def answeredCanPayUpfrontNo(encrypter: Encrypter): List[JourneyInfoAsJson] = cannotPayUpfront :: eligibilityCheckedEligible(encrypter)
+  def answeredUpfrontPaymentAmount(encrypter: Encrypter): List[JourneyInfoAsJson] = upfrontPaymentAmount :: answeredCanPayUpfrontYes(encrypter)
+  def retrievedExtremeDates(encrypter: Encrypter): List[JourneyInfoAsJson] = extremeDates :: upfrontPaymentAnswers :: eligibilityCheckedEligible(encrypter)
+  def retrievedExtremeDatesNoUpfrontPayment(encrypter: Encrypter): List[JourneyInfoAsJson] = extremeDates :: upfrontPaymentAnswersNoUpfrontPayment :: eligibilityCheckedEligible(encrypter)
+  def retrievedAffordabilityResult(minimumInstalmentAmount: Int = 29997, encrypter: Encrypter): List[JourneyInfoAsJson] = affordableResult(minimumInstalmentAmount) :: retrievedExtremeDates(encrypter)
+  def enteredMonthlyPaymentAmount(encrypter: Encrypter): List[JourneyInfoAsJson] = monthlyPaymentAmount :: retrievedAffordabilityResult(encrypter = encrypter)
+  def enteredDayOfMonth(encrypter: Encrypter): List[JourneyInfoAsJson] = dayOfMonth :: enteredMonthlyPaymentAmount(encrypter)
+  def retrievedStartDates(encrypter: Encrypter): List[JourneyInfoAsJson] = startDates :: enteredDayOfMonth(encrypter)
+  def retrievedAffordableQuotes(encrypter: Encrypter): List[JourneyInfoAsJson] = affordableQuotes :: retrievedStartDates(encrypter)
+  def chosenPaymentPlan(encrypter: Encrypter): List[JourneyInfoAsJson] = selectedPlan :: retrievedAffordableQuotes(encrypter)
+  def hasCheckedPaymentPlan(encrypter: Encrypter): List[JourneyInfoAsJson] = chosenPaymentPlan(encrypter)
+  def chosenTypeOfBankAccountBusiness(encrypter: Encrypter): List[JourneyInfoAsJson] = typeOfBankAccountBusiness :: chosenPaymentPlan(encrypter)
+  def chosenTypeOfBankAccountPersonal(encrypter: Encrypter): List[JourneyInfoAsJson] = typeOfBankAccountPersonal :: chosenPaymentPlan(encrypter)
+  def enteredDirectDebitDetailsIsAccountHolder(encrypter: Encrypter): List[JourneyInfoAsJson] = directDebitDetails(encrypter) :: chosenTypeOfBankAccountBusiness(encrypter)
+  def enteredDirectDebitDetailsIsNotAccountHolder(encrypter: Encrypter): List[JourneyInfoAsJson] = directDebitDetailsNotAccountHolder(encrypter) :: chosenTypeOfBankAccountBusiness(encrypter)
+  def confirmedDirectDebitDetails(encrypter: Encrypter): List[JourneyInfoAsJson] = enteredDirectDebitDetailsIsAccountHolder(encrypter)
+  def agreedTermsAndConditions(encrypter: Encrypter): List[JourneyInfoAsJson] = confirmedDirectDebitDetails(encrypter)
+  def submittedArrangementWithUpfrontPayment(encrypter: Encrypter): List[JourneyInfoAsJson] = arrangementSubmitted :: confirmedDirectDebitDetails(encrypter)
 
   //used in final page test
-  val submittedArrangementNoUpfrontPayment: List[JourneyInfoAsJson] =
-    arrangementSubmitted :: directDebitDetails :: typeOfBankAccountBusiness :: selectedPlan :: affordableQuotes ::
+  def submittedArrangementNoUpfrontPayment(encrypter: Encrypter): List[JourneyInfoAsJson] =
+    arrangementSubmitted :: directDebitDetails(encrypter) :: typeOfBankAccountBusiness :: selectedPlan :: affordableQuotes ::
       upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: monthlyPaymentAmount ::
-      dayOfMonth :: startDates :: cannotPayUpfront :: eligibilityCheckedEligible
+      dayOfMonth :: startDates :: cannotPayUpfront :: eligibilityCheckedEligible(encrypter)
 
 }

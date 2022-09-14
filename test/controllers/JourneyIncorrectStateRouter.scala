@@ -33,21 +33,21 @@ class JourneyIncorrectStateRouter extends ItSpec {
       ("Stage", "Journey wiremock response", "Expected Redirect Location"),
       ("Stages.Started", () => EssttpBackend.StartJourney.findJourney(), PageUrls.landingPageUrl),
       ("Stages.ComputedTaxId", () => EssttpBackend.DetermineTaxId.findJourney(), PageUrls.determineEligibilityUrl),
-      ("Stages.EligibilityChecked", () => EssttpBackend.EligibilityCheck.findJourney(), PageUrls.yourBillIsUrl), //check this
-      ("Stages.AnsweredCanPayUpfront", () => EssttpBackend.CanPayUpfront.findJourney(), PageUrls.canYouMakeAnUpfrontPaymentUrl),
-      ("Stages.EnteredUpfrontPaymentAmount", () => EssttpBackend.UpfrontPaymentAmount.findJourney(), PageUrls.howMuchCanYouPayUpfrontUrl),
-      ("Stages.RetrievedExtremeDates", () => EssttpBackend.Dates.findJourneyExtremeDates(), PageUrls.retrievedExtremeDatesUrl),
-      ("Stages.RetrievedAffordabilityResult", () => EssttpBackend.AffordabilityMinMaxApi.findJourney(), PageUrls.determineAffordabilityUrl),
-      ("Stages.EnteredMonthlyPaymentAmount", () => EssttpBackend.MonthlyPaymentAmount.findJourney(), PageUrls.howMuchCanYouPayEachMonthUrl),
-      ("Stages.EnteredDayOfMonth", () => EssttpBackend.DayOfMonth.findJourney(), PageUrls.whichDayDoYouWantToPayUrl),
-      ("Stages.RetrievedStartDates", () => EssttpBackend.Dates.findJourneyStartDates(), PageUrls.retrieveStartDatesUrl),
-      ("Stages.RetrievedAffordableQuotes", () => EssttpBackend.AffordableQuotes.findJourney(), PageUrls.determineAffordableQuotesUrl),
-      ("Stages.ChosenPaymentPlan", () => EssttpBackend.SelectedPaymentPlan.findJourney(), PageUrls.instalmentsUrl),
-      ("Stages.CheckedPaymentPlan", () => EssttpBackend.HasCheckedPlan.findJourney(), PageUrls.instalmentScheduleUrl),
-      ("Stages.ChosenTypeOfBankAccount", () => EssttpBackend.ChosenTypeOfBankAccount.findJourney(), PageUrls.typeOfAccountUrl),
-      ("Stages.EnteredDirectDebitDetails", () => EssttpBackend.DirectDebitDetails.findJourney(), PageUrls.directDebitDetailsUrl),
-      ("Stages.ConfirmedDirectDebitDetails", () => EssttpBackend.ConfirmedDirectDebitDetails.findJourney(), PageUrls.directDebitDetailsUrl),
-      ("Stages.SubmittedArrangement", () => EssttpBackend.SubmitArrangement.findJourney(), PageUrls.confirmationUrl)
+      ("Stages.EligibilityChecked", () => EssttpBackend.EligibilityCheck.findJourney(testCrypto)(), PageUrls.yourBillIsUrl), //check this
+      ("Stages.AnsweredCanPayUpfront", () => EssttpBackend.CanPayUpfront.findJourney(testCrypto)(), PageUrls.canYouMakeAnUpfrontPaymentUrl),
+      ("Stages.EnteredUpfrontPaymentAmount", () => EssttpBackend.UpfrontPaymentAmount.findJourney(testCrypto)(), PageUrls.howMuchCanYouPayUpfrontUrl),
+      ("Stages.RetrievedExtremeDates", () => EssttpBackend.Dates.findJourneyExtremeDates(testCrypto)(), PageUrls.retrievedExtremeDatesUrl),
+      ("Stages.RetrievedAffordabilityResult", () => EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto)(), PageUrls.determineAffordabilityUrl),
+      ("Stages.EnteredMonthlyPaymentAmount", () => EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto)(), PageUrls.howMuchCanYouPayEachMonthUrl),
+      ("Stages.EnteredDayOfMonth", () => EssttpBackend.DayOfMonth.findJourney(testCrypto)(), PageUrls.whichDayDoYouWantToPayUrl),
+      ("Stages.RetrievedStartDates", () => EssttpBackend.Dates.findJourneyStartDates(testCrypto)(), PageUrls.retrieveStartDatesUrl),
+      ("Stages.RetrievedAffordableQuotes", () => EssttpBackend.AffordableQuotes.findJourney(testCrypto)(), PageUrls.determineAffordableQuotesUrl),
+      ("Stages.ChosenPaymentPlan", () => EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto)(), PageUrls.instalmentsUrl),
+      ("Stages.CheckedPaymentPlan", () => EssttpBackend.HasCheckedPlan.findJourney(testCrypto)(), PageUrls.instalmentScheduleUrl),
+      ("Stages.ChosenTypeOfBankAccount", () => EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto)(), PageUrls.typeOfAccountUrl),
+      ("Stages.EnteredDirectDebitDetails", () => EssttpBackend.DirectDebitDetails.findJourney(testCrypto)(), PageUrls.directDebitDetailsUrl),
+      ("Stages.ConfirmedDirectDebitDetails", () => EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto)(), PageUrls.directDebitDetailsUrl),
+      ("Stages.SubmittedArrangement", () => EssttpBackend.SubmitArrangement.findJourney(testCrypto)(), PageUrls.confirmationUrl)
     )) {
       (scenario: String, journeyState: () => StubMapping, expectedRedirectUrl: String) =>
         {

@@ -19,6 +19,7 @@ package testsupport.stubs
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import connectors.CallEligibilityApiRequest
+import essttp.crypto.CryptoFormat
 import essttp.rootmodel.ttp.affordability.InstalmentAmountRequest
 import essttp.rootmodel.ttp.affordablequotes.AffordableQuotesRequest
 import essttp.rootmodel.ttp.arrangement.ArrangementRequest
@@ -49,7 +50,7 @@ object Ttp {
     def stubRetrieveAffordability(jsonBody: String = TtpJsonResponses.ttpAffordabilityResponseJson()): StubMapping =
       WireMockHelpers.stubForPostWithResponseBody(affordabilityUrl, jsonBody)
 
-    def verifyTtpAffordabilityRequest(): Unit =
+    def verifyTtpAffordabilityRequest(implicit cryptoFormat: CryptoFormat): Unit =
       ttpVerify(affordabilityUrl, TdAll.instalmentAmountRequest)(InstalmentAmountRequest.format)
   }
 
@@ -57,7 +58,7 @@ object Ttp {
     def stubRetrieveAffordableQuotes(jsonBody: String = TtpJsonResponses.ttpAffordableQuotesResponseJson()): StubMapping =
       WireMockHelpers.stubForPostWithResponseBody(affordableQuotesUrl, jsonBody)
 
-    def verifyTtpAffordableQuotesRequest(): Unit =
+    def verifyTtpAffordableQuotesRequest(implicit cryptoFormat: CryptoFormat): Unit =
       ttpVerify(affordableQuotesUrl, TdAll.affordableQuotesRequest)(AffordableQuotesRequest.format)
   }
 
@@ -70,7 +71,7 @@ object Ttp {
         .willReturn(serviceUnavailable())
     )
 
-    def verifyTtpEnactArrangementRequest(): Unit =
+    def verifyTtpEnactArrangementRequest(implicit cryptoFormat: CryptoFormat): Unit =
       ttpVerify(enactArrangementUrl, TdAll.arrangementRequest)(ArrangementRequest.format)
   }
 

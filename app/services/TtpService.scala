@@ -19,6 +19,7 @@ package services
 import actionsmodel.AuthenticatedJourneyRequest
 import connectors.{CallEligibilityApiRequest, TtpConnector}
 import controllers.support.RequestSupport.hc
+import essttp.crypto.CryptoFormat
 import essttp.journey.model.Journey.Stages.ComputedTaxId
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
@@ -46,6 +47,8 @@ class TtpService @Inject() (
     datesService: DatesService,
     auditService: AuditService
 )(implicit executionContext: ExecutionContext) {
+
+  implicit val cryptoFormat: CryptoFormat = CryptoFormat.NoOpCryptoFormat
 
   def determineEligibility(journey: ComputedTaxId)(implicit request: RequestHeader): Future[EligibilityCheckResult] = {
     val eligibilityRequest: CallEligibilityApiRequest = journey match {

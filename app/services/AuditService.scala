@@ -18,6 +18,7 @@ package services
 
 import actionsmodel.AuthenticatedJourneyRequest
 import cats.syntax.eq._
+import essttp.crypto.CryptoFormat
 import essttp.journey.model.Journey.Stages._
 import essttp.journey.model.Journey.{AfterChosenTypeOfBankAccount, Stages}
 import essttp.journey.model.Origin
@@ -43,6 +44,8 @@ import scala.concurrent.ExecutionContext
 
 @Singleton
 class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: ExecutionContext) {
+
+  implicit val cryptoFormat: CryptoFormat = CryptoFormat.NoOpCryptoFormat
 
   def auditEligibilityCheck(
       journey:  ComputedTaxId,
@@ -165,9 +168,9 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       BarsAuditRequest(
         BarsAuditAccount(
           typeOfBankAccount.entryName.toLowerCase(Locale.UK),
-          bankDetails.name.value,
-          bankDetails.sortCode.value,
-          bankDetails.accountNumber.value
+          bankDetails.name.value.decryptedValue,
+          bankDetails.sortCode.value.decryptedValue,
+          bankDetails.accountNumber.value.decryptedValue
         )
       ),
       BarsAuditResponse(

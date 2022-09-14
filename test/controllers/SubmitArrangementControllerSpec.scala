@@ -16,6 +16,7 @@
 
 package controllers
 
+import essttp.crypto.CryptoFormat
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Result
@@ -36,7 +37,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
   "GET /submit-arrangement should" - {
     "trigger call to ttp enact arrangement api, send an audit event and also update backend" in {
       stubCommonActions()
-      EssttpBackend.TermsAndConditions.findJourney()
+      EssttpBackend.TermsAndConditions.findJourney(testCrypto)()
       EssttpBackend.SubmitArrangement.stubUpdateSubmitArrangement(TdAll.journeyId)
       Ttp.EnactArrangement.stubEnactArrangement()
 
@@ -45,7 +46,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.confirmationUrl)
 
-      Ttp.EnactArrangement.verifyTtpEnactArrangementRequest()
+      Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(CryptoFormat.NoOpCryptoFormat)
       AuditConnectorStub.verifyEventAudited(
         "PlanSetUp",
         Json.parse(
@@ -94,13 +95,13 @@ class SubmitArrangementControllerSpec extends ItSpec {
 
     "should not update backend if call to ttp enact arrangement api fails (anything other than a 202 response)" in {
       stubCommonActions()
-      EssttpBackend.TermsAndConditions.findJourney()
+      EssttpBackend.TermsAndConditions.findJourney(testCrypto)()
       Ttp.EnactArrangement.stubEnactArrangementFail()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.submitArrangement(fakeRequest)
       assertThrows[UpstreamErrorResponse](await(result))
-      Ttp.EnactArrangement.verifyTtpEnactArrangementRequest()
+      Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(CryptoFormat.NoOpCryptoFormat)
       EssttpBackend.SubmitArrangement.verifyNoneUpdateSubmitArrangementRequest(TdAll.journeyId)
     }
   }

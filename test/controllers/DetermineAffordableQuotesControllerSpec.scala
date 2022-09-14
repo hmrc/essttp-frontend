@@ -16,6 +16,7 @@
 
 package controllers
 
+import essttp.crypto.CryptoFormat
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -35,7 +36,7 @@ class DetermineAffordableQuotesControllerSpec extends ItSpec {
   "GET /determine-affordable-quotes" - {
     "trigger call to ttp microservice affordable quotes endpoint and update backend" in {
       stubCommonActions()
-      EssttpBackend.Dates.findJourneyStartDates()
+      EssttpBackend.Dates.findJourneyStartDates(testCrypto)()
       Ttp.AffordableQuotes.stubRetrieveAffordableQuotes()
       EssttpBackend.AffordableQuotes.stubUpdateAffordableQuotes(TdAll.journeyId)
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -43,7 +44,7 @@ class DetermineAffordableQuotesControllerSpec extends ItSpec {
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.instalmentsUrl)
       EssttpBackend.AffordableQuotes.verifyUpdateAffordableQuotesRequest(TdAll.journeyId)
-      Ttp.AffordableQuotes.verifyTtpAffordableQuotesRequest()
+      Ttp.AffordableQuotes.verifyTtpAffordableQuotesRequest(CryptoFormat.NoOpCryptoFormat)
     }
   }
 

@@ -17,10 +17,10 @@
 package testsupport
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import com.google.inject.AbstractModule
-import org.openqa.selenium.htmlunit.HtmlUnitDriver
+import essttp.crypto.CryptoFormat.OperationalCryptoFormat
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
+import play.api.inject.bind
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import play.api.test.{DefaultTestServerFactory, RunningServer}
 import play.api.{Application, Mode}
@@ -29,6 +29,7 @@ import testsupport.stubs.{AuthStub, EssttpBackend}
 import testsupport.testdata.TdAll
 import uk.gov.hmrc.auth.core.Enrolment
 import uk.gov.hmrc.auth.core.retrieve.Credentials
+import uk.gov.hmrc.crypto.{AesCrypto, Decrypter, Encrypter}
 import uk.gov.hmrc.http.HttpReadsInstances
 
 import java.time.Instant
@@ -47,6 +48,12 @@ class ItSpec
 
   protected lazy val configOverrides: Map[String, Any] = Map()
 
+  val testCrypto: Encrypter with Decrypter = new AesCrypto {
+    override protected val encryptionKey: String = "P5xsJ9Nt+quxGZzB4DeLfw=="
+  }
+
+  val testOperationCryptoFormat: OperationalCryptoFormat = OperationalCryptoFormat(testCrypto)
+
   @SuppressWarnings(Array("org.wartremover.Warts.Any"))
   protected lazy val configMap: Map[String, Any] = Map[String, Any](
     "microservice.services.auth.port" -> WireMockSupport.port,
@@ -61,28 +68,24 @@ class ItSpec
     "auditing.traceRequests" -> false
   ) ++ configOverrides
 
+  lazy val modules: List[GuiceableModule] =
+    List(
+      bind[OperationalCryptoFormat].toInstance(testOperationCryptoFormat)
+    )
+
   //in tests use `app`
   override def fakeApplication(): Application = new GuiceApplicationBuilder()
-    .overrides(GuiceableModule.fromGuiceModules(Seq(module)))
+    .overrides(modules: _*)
+    .disable(classOf[essttp.module.CryptoModule])
     .configure(configMap)
     .build()
 
   val frozenDateString: String = "2019-11-25"
   val frozenTimeString: String = s"${frozenDateString}T16:33:51.880"
 
-  lazy val module: AbstractModule = new AbstractModule {
-    override def configure(): Unit = ()
-  }
-
-  implicit lazy val webDriver: HtmlUnitDriver = {
-    val wd = new HtmlUnitDriver(true)
-    wd.setJavascriptEnabled(false)
-    wd
-  }
-
   override def beforeEach(): Unit = {
     super.beforeEach()
-    webDriver.manage().deleteAllCookies()
+    ()
   }
 
   // defaults are suitable for most tests

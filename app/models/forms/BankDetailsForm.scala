@@ -22,6 +22,7 @@ import models.forms.helper.FormErrorWithFieldMessageOverrides
 import play.api.data.Forms.{mapping, nonEmptyText}
 import play.api.data.validation.{Constraint, Invalid, Valid}
 import play.api.data.{Form, FormError, Forms, Mapping}
+import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 import util.EnumFormatter
 
 final case class BankDetailsForm(
@@ -44,37 +45,37 @@ object BankDetailsForm {
 
   val accountNameConstraint: Constraint[AccountName] = {
     Constraint(accountName =>
-      if (accountName.value.length <= 70) Valid
+      if (accountName.value.decryptedValue.length <= 70) Valid
       else Invalid("error.maxlength"))
   }
   val accountNameMapping: Mapping[AccountName] =
-    nonEmptyText.transform[AccountName](name => AccountName(name), _.value).verifying(accountNameConstraint)
+    nonEmptyText.transform[AccountName](name => AccountName(SensitiveString.apply(name)), _.value.decryptedValue).verifying(accountNameConstraint)
 
   val sortCodeRegex: String = "^[0-9]{6}$"
   val sortCodeConstraint: Constraint[SortCode] =
     Constraint(sortCode =>
-      if (!sortCode.value.forall(_.isDigit)) Invalid("error.nonNumeric")
-      else if (sortCode.value.matches(sortCodeRegex)) Valid
+      if (!sortCode.value.decryptedValue.forall(_.isDigit)) Invalid("error.nonNumeric")
+      else if (sortCode.value.decryptedValue.matches(sortCodeRegex)) Valid
       else Invalid("error.invalid"))
 
   val sortCodeMapping: Mapping[SortCode] = nonEmptyText
     .transform[SortCode](
-      s => SortCode(s.replaceAllLiterally("-", "").replaceAll("\\s", "")),
-      _.value
+      sortCode => SortCode(SensitiveString.apply(sortCode.replaceAllLiterally("-", "").replaceAll("\\s", ""))),
+      _.value.decryptedValue
     ).verifying(sortCodeConstraint)
 
   val accountNumberRegex: String = "^[0-9]{6,8}$"
 
   val accountNumberConstraint: Constraint[AccountNumber] =
     Constraint(accountNumber =>
-      if (!accountNumber.value.forall(_.isDigit)) Invalid("error.nonNumeric")
-      else if (accountNumber.value.matches(accountNumberRegex)) Valid
+      if (!accountNumber.value.decryptedValue.forall(_.isDigit)) Invalid("error.nonNumeric")
+      else if (accountNumber.value.decryptedValue.matches(accountNumberRegex)) Valid
       else Invalid("error.invalid"))
 
   val accountNumberMapping: Mapping[AccountNumber] = nonEmptyText
     .transform[AccountNumber](
-      s => AccountNumber(s.replaceAll("\\s", "")),
-      _.value
+      accountNumber => AccountNumber(SensitiveString.apply(accountNumber.replaceAll("\\s", ""))),
+      _.value.decryptedValue
     ).verifying(accountNumberConstraint)
 
   val isSoleSignatoryFormMapping: Mapping[IsSoleSignatoryFormValue] = Forms.of(EnumFormatter.format(

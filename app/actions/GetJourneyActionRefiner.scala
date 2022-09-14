@@ -16,7 +16,7 @@
 
 package actions
 
-import actionsmodel.{AuthenticatedRequest, AuthenticatedJourneyRequest}
+import actionsmodel.{AuthenticatedJourneyRequest, AuthenticatedRequest}
 import controllers.support.RequestSupport.hc
 import essttp.journey.JourneyConnector
 import essttp.journey.model.Journey

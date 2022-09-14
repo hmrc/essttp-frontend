@@ -16,6 +16,7 @@
 
 package models.audit.paymentplansetup
 
+import essttp.crypto.CryptoFormat
 import essttp.journey.model.CorrelationId
 import essttp.rootmodel.bank.BankDetails
 import models.audit.{AuditDetail, Schedule, TaxDetail}
@@ -37,5 +38,7 @@ final case class PaymentPlanSetUpAuditDetail(
 }
 
 object PaymentPlanSetUpAuditDetail {
-  implicit val writes: OWrites[PaymentPlanSetUpAuditDetail] = Json.writes
+
+  implicit def writes(implicit crypto: CryptoFormat): OWrites[PaymentPlanSetUpAuditDetail] = Json.writes
+
 }

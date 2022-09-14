@@ -16,6 +16,7 @@
 
 package controllers
 
+import essttp.crypto.CryptoFormat
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -35,7 +36,7 @@ class DetermineAffordabilityControllerSpec extends ItSpec {
   "GET /determine-affordability" - {
     "trigger call to ttp microservice affordability endpoint and update backend" in {
       stubCommonActions()
-      EssttpBackend.Dates.findJourneyExtremeDates()
+      EssttpBackend.Dates.findJourneyExtremeDates(testCrypto)()
       EssttpBackend.AffordabilityMinMaxApi.stubUpdateAffordability(TdAll.journeyId)
       Ttp.Affordability.stubRetrieveAffordability()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -43,7 +44,7 @@ class DetermineAffordabilityControllerSpec extends ItSpec {
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.howMuchCanYouPayEachMonthUrl)
       EssttpBackend.AffordabilityMinMaxApi.verifyUpdateAffordabilityRequest(TdAll.journeyId, TdAll.instalmentAmounts)
-      Ttp.Affordability.verifyTtpAffordabilityRequest()
+      Ttp.Affordability.verifyTtpAffordabilityRequest(CryptoFormat.NoOpCryptoFormat)
     }
   }
 

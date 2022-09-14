@@ -16,11 +16,18 @@
 
 package testsupport.testdata
 
-import essttp.rootmodel.ttp.{EligibilityRules, EligibilityPass}
+import essttp.rootmodel.ttp.{EligibilityPass, EligibilityRules}
 import essttp.rootmodel.{DayOfMonth, UpfrontPaymentAmount}
 import testsupport.testdata.JourneyInfo.JourneyInfoAsJson
+import uk.gov.hmrc.crypto.{Encrypter, PlainText}
+import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 
 object TdJsonBodies {
+
+  def encryptString(s: String, encrypter: Encrypter): String =
+    encrypter.encrypt(
+      PlainText("\"" + SensitiveString(s).decryptedValue + "\"")
+    ).value
 
   object StartJourneyRequestBodies {
     val empty: String =
@@ -81,7 +88,8 @@ object TdJsonBodies {
 
   def eligibilityCheckJourneyInfo(
       eligibilityPass:  EligibilityPass  = TdAll.eligibleEligibilityPass,
-      eligibilityRules: EligibilityRules = TdAll.eligibleEligibilityRules
+      eligibilityRules: EligibilityRules = TdAll.eligibleEligibilityRules,
+      encrypter:        Encrypter
   ): JourneyInfoAsJson = {
     s"""
       |"eligibilityCheckResult" : {
@@ -98,7 +106,7 @@ object TdJsonBodies {
       |  ],
       |  "customerPostcodes": [
       |        {
-      |          "addressPostcode": "AA11AA",
+      |          "addressPostcode": "${encryptString("AA11AA", encrypter)}",
       |          "postcodeDate": "2022-01-31"
       |        }
       |  ],
@@ -407,13 +415,13 @@ object TdJsonBodies {
 
   def typeOfBankJourneyInfo(typeOfAccount: String = "Business"): String = s""""typeOfBankAccount" : "$typeOfAccount""""
 
-  def directDebitDetailsJourneyInfo(isAccountHolder: Boolean = true): String =
+  def directDebitDetailsJourneyInfo(isAccountHolder: Boolean = true, encrypter: Encrypter): String =
     s"""
        |"directDebitDetails" : {
        |  "bankDetails" : {
-       |    "name" : "Bob Ross",
-       |    "sortCode" : "123456",
-       |    "accountNumber" : "12345678"
+       |    "name" : "${encryptString("Bob Ross", encrypter)}",
+       |    "sortCode" : "${encryptString("123456", encrypter)}",
+       |    "accountNumber" : "${encryptString("12345678", encrypter)}"
        |  },
        |  "isAccountHolder" : $isAccountHolder
        |}""".stripMargin
