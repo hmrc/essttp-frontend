@@ -19,11 +19,10 @@ package controllers
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{redirectLocation, status}
-import testsupport.ItSpec
 import play.api.test.Helpers._
+import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
-import testsupport.stubs.{AuthStub, EssttpBackend}
+import testsupport.stubs.EssttpBackend
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
@@ -50,7 +49,7 @@ class EpayeGovUkControllerSpec extends ItSpec {
   "start journey endpoint" - {
     "should start govuk journey and redirect to determine tax id when user is coming from govuk and user is authenticated" in {
       val refererForGovUk = "https://www.gov.uk/"
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.StartJourney.startJourneyEpayeGovUk
       EssttpBackend.StartJourney.findJourney()
 
@@ -65,7 +64,7 @@ class EpayeGovUkControllerSpec extends ItSpec {
       EssttpBackend.StartJourney.verifyStartJourneyEpayeGovUk()
     }
     "should start detached url journey and redirect to nextUrl when user is authenticated" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.StartJourney.startJourneyEpayeDetached
       EssttpBackend.StartJourney.findJourney()
 

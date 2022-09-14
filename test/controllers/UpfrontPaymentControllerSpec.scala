@@ -16,7 +16,6 @@
 
 package controllers
 
-//import essttp.rootmodel.AmountInPence
 import essttp.rootmodel.AmountInPence
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
@@ -28,7 +27,7 @@ import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
-import testsupport.stubs.{AuthStub, EssttpBackend}
+import testsupport.stubs.EssttpBackend
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
@@ -50,7 +49,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
   "GET /can-you-make-an-upfront-payment" - {
     "should return 200 and the can you make an upfront payment page" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -71,7 +70,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       doc.select("#CanYouMakeAnUpFrontPayment-hint").text() shouldBe expectedPageHintCanPayUpfrontPage
     }
     "should prepopulate the form when user navigates back and they have a chosen way to pay in their journey" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.CanPayUpfront.findJourney(testCrypto)()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -86,7 +85,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
   "POST /can-you-make-an-upfront-payment" - {
     "should redirect to /how-much-can-you-pay-upfront when user chooses yes" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
       EssttpBackend.CanPayUpfront.stubUpdateCanPayUpfront(TdAll.journeyId, canPayUpfrontScenario = true)
 
@@ -104,7 +103,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     }
 
     "should redirect to /can-you-make-an-upfront-payment when user chooses no" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
       EssttpBackend.CanPayUpfront.stubUpdateCanPayUpfront(TdAll.journeyId, canPayUpfrontScenario = false)
 
@@ -122,7 +121,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     }
 
     "should redirect to /can-you-make-an-upfront-payment with error summary when no option is selected" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
 
       val fakeRequest = FakeRequest(
@@ -153,7 +152,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
   "GET /how-much-can-you-pay-upfront" - {
     "should return 200 and the how much can you pay upfront page" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.CanPayUpfront.findJourney(testCrypto)()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -177,7 +176,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     }
 
     "should route the user to /can-you-make-an-upfront-payment when they try to force browse without selecting 'Yes' on the previous page" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.CanPayUpfront.findJourney(testCrypto)(JourneyJsonTemplates.`Answered Can Pay Upfront - No`(testCrypto))
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -188,7 +187,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     }
 
     "should prepopulate the form when user navigates back and they have an upfront payment amount in their journey" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.UpfrontPaymentAmount.findJourney(testCrypto)()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -203,7 +202,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
   "POST /how-much-can-you-pay-upfront" - {
     "should redirect to /upfront-payment-summary when user enters a positive number, less than their total debt" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.CanPayUpfront.findJourney(testCrypto)()
       EssttpBackend.UpfrontPaymentAmount.stubUpdateUpfrontPaymentAmount(TdAll.journeyId)
 
@@ -221,7 +220,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     }
 
     "should redirect to /upfront-payment-summary when user enters a positive number, at the upper limit" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.CanPayUpfront.findJourney(testCrypto)()
       EssttpBackend.UpfrontPaymentAmount.stubUpdateUpfrontPaymentAmount(TdAll.journeyId)
 
@@ -249,7 +248,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       )
     ) { (sf: String, formInput: String, expectedAmount: AmountInPence) =>
         s"should allow for $sf" in {
-          AuthStub.authorise()
+          stubCommonActions()
           EssttpBackend.CanPayUpfront.findJourney(testCrypto)()
           EssttpBackend.UpfrontPaymentAmount.stubUpdateUpfrontPaymentAmount(TdAll.journeyId)
 
@@ -281,7 +280,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       )
     ) { (sf: String, formInput: String, errorMessage: String) =>
         s"[$sf] should redirect to /how-much-can-you-pay-upfront with correct error summary when $formInput is submitted" in {
-          AuthStub.authorise()
+          stubCommonActions()
           EssttpBackend.CanPayUpfront.findJourney(testCrypto)()
 
           val fakeRequest = FakeRequest(
@@ -314,7 +313,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
   "GET /upfront-payment-summary" - {
     "should return 200 and the upfront payment summary page" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.UpfrontPaymentAmount.findJourney(testCrypto)()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")

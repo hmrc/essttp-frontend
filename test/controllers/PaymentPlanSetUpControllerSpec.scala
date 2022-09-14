@@ -26,7 +26,7 @@ import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.ContentAssertions.assertKeyAndValue
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
-import testsupport.stubs.{AuthStub, EssttpBackend}
+import testsupport.stubs.EssttpBackend
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
@@ -44,7 +44,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
 
   "GET /payment-plan-set-up should" - {
     "return the confirmation page with correct content when there is an upfront payment" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.SubmitArrangement.findJourney(testCrypto)()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.paymentPlanSetUp(fakeRequest)
@@ -73,7 +73,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
     }
 
     "return the confirmation page with correct content when there is no upfront payment" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.SubmitArrangement.findJourney(testCrypto)(JourneyJsonTemplates.`Arrangement Submitted - No upfront payment`(testCrypto))
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.paymentPlanSetUp(fakeRequest)
@@ -104,7 +104,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
 
   "GET /payment-plan-print-summary should" - {
     "return the print payment schedule page with correct content (with upfront payment)" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.SubmitArrangement.findJourney(testCrypto)()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.printSummary(fakeRequest)
@@ -139,7 +139,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
     }
 
     "return the print payment schedule page with correct content (without upfront payment)" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.SubmitArrangement.findJourney(testCrypto)(JourneyJsonTemplates.`Arrangement Submitted - No upfront payment`(testCrypto))
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.printSummary(fakeRequest)

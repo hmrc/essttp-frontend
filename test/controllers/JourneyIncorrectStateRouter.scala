@@ -23,7 +23,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
-import testsupport.stubs.{AuthStub, EssttpBackend}
+import testsupport.stubs.EssttpBackend
 import testsupport.testdata.PageUrls
 import uk.gov.hmrc.http.SessionKeys
 
@@ -52,7 +52,7 @@ class JourneyIncorrectStateRouter extends ItSpec {
       (scenario: String, journeyState: () => StubMapping, expectedRedirectUrl: String) =>
         {
           s"[ GET $scenario ] should redirect to the first page that supports that journey: [ $expectedRedirectUrl ]" in {
-            AuthStub.authorise()
+            stubCommonActions()
             journeyState()
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result = app.injector.instanceOf[SubmitArrangementController].submitArrangement(fakeRequest)

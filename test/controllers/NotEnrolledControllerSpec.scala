@@ -22,7 +22,7 @@ import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
-import testsupport.stubs.{AuthStub, EssttpBackend}
+import testsupport.stubs.EssttpBackend
 import testsupport.testdata.TdAll
 import uk.gov.hmrc.http.SessionKeys
 
@@ -32,8 +32,9 @@ class NotEnrolledControllerSpec extends ItSpec {
   private val controller = app.injector.instanceOf[NotEnrolledController]
   "GET /not-enrolled should" - {
     "return the not enrolled page" in {
-      AuthStub.authorise(allEnrolments = Some(Set.empty))
+      stubCommonActions(authAllEnrolments = Some(Set.empty))
       EssttpBackend.StartJourney.findJourney()
+
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.notEnrolled(fakeRequest)
       RequestAssertions.assertGetRequestOk(result)

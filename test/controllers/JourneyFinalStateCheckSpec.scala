@@ -23,7 +23,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
-import testsupport.stubs.{AuthStub, EssttpBackend}
+import testsupport.stubs.EssttpBackend
 import testsupport.testdata.PageUrls
 import uk.gov.hmrc.http.SessionKeys
 
@@ -52,7 +52,7 @@ class JourneyFinalStateCheckSpec extends ItSpec {
       (scenario: String, action: Action[AnyContent]) =>
         {
           s"GET $scenario should redirect to ${PageUrls.confirmationUrl}" in {
-            AuthStub.authorise()
+            stubCommonActions()
             EssttpBackend.SubmitArrangement.findJourney(testCrypto)()
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result = action(fakeRequest)

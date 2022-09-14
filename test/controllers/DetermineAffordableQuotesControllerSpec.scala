@@ -23,7 +23,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
-import testsupport.stubs.{AuthStub, EssttpBackend, Ttp}
+import testsupport.stubs.{EssttpBackend, Ttp}
 import testsupport.testdata.{PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
@@ -35,7 +35,7 @@ class DetermineAffordableQuotesControllerSpec extends ItSpec {
 
   "GET /determine-affordable-quotes" - {
     "trigger call to ttp microservice affordable quotes endpoint and update backend" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.Dates.findJourneyStartDates(testCrypto)()
       Ttp.AffordableQuotes.stubRetrieveAffordableQuotes()
       EssttpBackend.AffordableQuotes.stubUpdateAffordableQuotes(TdAll.journeyId)

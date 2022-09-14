@@ -25,7 +25,7 @@ import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.RequestAssertions
-import testsupport.stubs.{AuthStub, EssttpBackend}
+import testsupport.stubs.EssttpBackend
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
@@ -35,7 +35,7 @@ class SignOutControllerSpec extends ItSpec {
 
   "signOutFromTimeout should" - {
     "return the timed out page" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.signOutFromTimeout(fakeRequest)
@@ -50,7 +50,7 @@ class SignOutControllerSpec extends ItSpec {
 
   "exitSurveyPaye should" - {
     "redirect to feedback frontend with eSSTTP-PAYE as the service identifier" in {
-      AuthStub.authorise()
+      stubCommonActions()
       EssttpBackend.SubmitArrangement.findJourney(testCrypto)()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.exitSurveyPaye(fakeRequest)

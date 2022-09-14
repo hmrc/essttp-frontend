@@ -16,6 +16,9 @@
 
 package testsupport
 
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
+import com.google.inject.AbstractModule
+import org.openqa.selenium.htmlunit.HtmlUnitDriver
 import essttp.crypto.CryptoFormat.OperationalCryptoFormat
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
@@ -24,9 +27,15 @@ import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import play.api.test.{DefaultTestServerFactory, RunningServer}
 import play.api.{Application, Mode}
 import play.core.server.ServerConfig
+import testsupport.stubs.{AuthStub, EssttpBackend}
+import testsupport.testdata.TdAll
+import uk.gov.hmrc.auth.core.Enrolment
+import uk.gov.hmrc.auth.core.retrieve.Credentials
 import testsupport.stubs.EssttpBackend
 import uk.gov.hmrc.crypto.{AesCrypto, Decrypter, Encrypter}
 import uk.gov.hmrc.http.HttpReadsInstances
+
+import java.time.Instant
 
 class ItSpec
   extends UnitSpec
@@ -79,8 +88,21 @@ class ItSpec
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    EssttpBackend.BarsVerifyStatusStub.statusUnlocked() // required by almost all tests
     ()
+  }
+
+  // defaults are suitable for most tests
+  def stubCommonActions(
+      authAllEnrolments: Option[Set[Enrolment]] = Some(Set(TdAll.payeEnrolment)),
+      authCredentials:   Option[Credentials]    = Some(Credentials("authId-999", "GovernmentGateway")),
+      barsLockoutExpiry: Option[Instant]        = None
+  ): StubMapping = {
+    // stub Authenticated action
+    AuthStub.authorise(authAllEnrolments, authCredentials)
+    // stub Bars lockout filter
+    barsLockoutExpiry.fold(EssttpBackend.BarsVerifyStatusStub.statusUnlocked()) { expiry =>
+      EssttpBackend.BarsVerifyStatusStub.statusLocked(expiry)
+    }
   }
 
   override implicit protected lazy val runningServer: RunningServer =
