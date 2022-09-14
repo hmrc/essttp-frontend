@@ -17,8 +17,6 @@
 package testsupport
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import com.google.inject.AbstractModule
-import org.openqa.selenium.htmlunit.HtmlUnitDriver
 import essttp.crypto.CryptoFormat.OperationalCryptoFormat
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
@@ -31,7 +29,6 @@ import testsupport.stubs.{AuthStub, EssttpBackend}
 import testsupport.testdata.TdAll
 import uk.gov.hmrc.auth.core.Enrolment
 import uk.gov.hmrc.auth.core.retrieve.Credentials
-import testsupport.stubs.EssttpBackend
 import uk.gov.hmrc.crypto.{AesCrypto, Decrypter, Encrypter}
 import uk.gov.hmrc.http.HttpReadsInstances
 
