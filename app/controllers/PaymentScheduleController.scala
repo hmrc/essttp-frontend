@@ -47,9 +47,7 @@ class PaymentScheduleController @Inject() (
   val checkPaymentSchedule: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
       case _: Journey.BeforeSelectedPaymentPlan =>
-        JourneyLogger.warn("Not enough information in session to show check payment plan page. " +
-          "Redirecting to missing info page")
-        Redirect(routes.MissingInfoController.missingInfo)
+        MissingInfoController.redirectToMissingInfoPage()
 
       case j: Journey.AfterSelectedPaymentPlan =>
         val upfrontPaymentAnswers =
@@ -64,9 +62,7 @@ class PaymentScheduleController @Inject() (
   val checkPaymentScheduleSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     request.journey match {
       case _: Journey.BeforeSelectedPaymentPlan =>
-        JourneyLogger.warn("Not enough information in session to show the check payment schedule page. " +
-          "Redirecting to missing info page")
-        Future.successful(Redirect(routes.MissingInfoController.missingInfo))
+        Future.successful(MissingInfoController.redirectToMissingInfoPage())
 
       case j: Journey.AfterSelectedPaymentPlan =>
         j match {

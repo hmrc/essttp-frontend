@@ -27,15 +27,15 @@ import essttp.rootmodel.TaxRegime
 import models.enumsforforms.GiveFeedbackFormValue
 import models.forms.GiveFeedbackForm
 import requests.RequestSupport
+import views.Views
 
 @Singleton
 class SignOutController @Inject() (
-    as:                          Actions,
-    mcc:                         MessagesControllerComponents,
-    requestSupport:              RequestSupport,
-    timedOutPage:                views.html.TimedOut,
-    doYouWantToGiveFeedbackPage: views.html.DoYouWantToGiveFeedback,
-    appConfig:                   AppConfig
+    as:             Actions,
+    mcc:            MessagesControllerComponents,
+    requestSupport: RequestSupport,
+    views:          Views,
+    appConfig:      AppConfig
 ) extends FrontendController(mcc)
   with I18nSupport
   with Logging {
@@ -45,7 +45,7 @@ class SignOutController @Inject() (
   def signOutFromTimeout: Action[AnyContent] = Action { implicit request =>
     // N.B. the implicit request being passed into the page here may still have the auth
     // token in it so take care to ensure that the sign out link is not shown by mistake
-    Ok(timedOutPage()).withNewSession
+    Ok(views.timedOutPage()).withNewSession
   }
 
   def signOut: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
@@ -54,13 +54,13 @@ class SignOutController @Inject() (
   }
 
   def doYouWantToGiveFeedback: Action[AnyContent] = Action { implicit request =>
-    Ok(doYouWantToGiveFeedbackPage(GiveFeedbackForm.form))
+    Ok(views.doYouWantToGiveFeedbackPage(GiveFeedbackForm.form))
   }
 
   def doYouWantToGiveFeedbackSubmit: Action[AnyContent] = Action { implicit request =>
     GiveFeedbackForm.form.bindFromRequest()
       .fold(
-        formWithErrors => Ok(doYouWantToGiveFeedbackPage(formWithErrors)), {
+        formWithErrors => Ok(views.doYouWantToGiveFeedbackPage(formWithErrors)), {
           case GiveFeedbackFormValue.Yes =>
             val taxRegimeString = request.session.get(SignOutController.feedbackRegimeKey).getOrElse(
               sys.error("Could not find tax regime in cookie session")

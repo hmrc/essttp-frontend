@@ -33,7 +33,7 @@ import play.api.mvc._
 import requests.RequestSupport
 import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import util.{JourneyLogger, Logging}
+import util.Logging
 import views.Views
 
 import javax.inject.{Inject, Singleton}
@@ -174,15 +174,9 @@ class UpfrontPaymentController @Inject() (
   }
 
   val upfrontPaymentSummary: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
-    lazy val redirectToMissingInfoPage = {
-      JourneyLogger.warn("Not enough information in session to show upfront payment summary page. " +
-        "Redirecting to missing info page")
-      Redirect(routes.MissingInfoController.missingInfo)
-    }
-
     request.journey match {
       case _: Journey.BeforeEnteredUpfrontPaymentAmount =>
-        redirectToMissingInfoPage
+        MissingInfoController.redirectToMissingInfoPage()
 
       case j: Journey.AfterEnteredUpfrontPaymentAmount =>
         val declaredUpfrontPayment = UpfrontPaymentAnswers.DeclaredUpfrontPayment(j.upfrontPaymentAmount)
@@ -191,7 +185,7 @@ class UpfrontPaymentController @Inject() (
       case j: Journey.AfterUpfrontPaymentAnswers =>
         j.upfrontPaymentAnswers match {
           case UpfrontPaymentAnswers.NoUpfrontPayment =>
-            finalStateCheck(request.journey, redirectToMissingInfoPage)
+            finalStateCheck(request.journey, MissingInfoController.redirectToMissingInfoPage())
           case d: UpfrontPaymentAnswers.DeclaredUpfrontPayment =>
             finalStateCheck(request.journey, displayUpfrontPaymentSummaryPage(request.eligibilityCheckResult, d))
         }

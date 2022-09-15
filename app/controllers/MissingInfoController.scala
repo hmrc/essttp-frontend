@@ -17,22 +17,24 @@
 package controllers
 
 import actions.Actions
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.Results.Redirect
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import util.Logging
+import util.{JourneyLogger, Logging}
+import views.Views
 
 import javax.inject.{Inject, Singleton}
 
 @Singleton
 class MissingInfoController @Inject() (
-    as:              Actions,
-    mcc:             MessagesControllerComponents,
-    missingInfoPage: views.html.MissingInformation
+    as:    Actions,
+    mcc:   MessagesControllerComponents,
+    views: Views
 ) extends FrontendController(mcc)
   with Logging {
 
   val missingInfo: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    Ok(missingInfoPage())
+    Ok(views.missingInfoPage())
   }
 
   val determineNextPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
@@ -41,3 +43,12 @@ class MissingInfoController @Inject() (
 
 }
 
+object MissingInfoController {
+
+  def redirectToMissingInfoPage()(implicit r: Request[_]): Result = {
+    JourneyLogger.warn(s"Not enough information in session to show ${r.uri}. " +
+      "Redirecting to missing info page")
+    Redirect(routes.MissingInfoController.missingInfo)
+  }
+
+}
