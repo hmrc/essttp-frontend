@@ -17,6 +17,7 @@
 package actionsmodel
 
 import essttp.journey.model.{Journey, JourneyId}
+import essttp.rootmodel.ttp.EligibilityCheckResult
 import models.GGCredId
 import play.api.mvc._
 import uk.gov.hmrc.auth.core.Enrolments
@@ -37,8 +38,9 @@ class AuthenticatedJourneyRequest[A](
 }
 
 final class EligibleJourneyRequest[A](
-    override val journey:    Journey.AfterEligibilityChecked,
-    override val enrolments: Enrolments,
-    override val request:    Request[A],
-    ggCredId:                GGCredId
+    override val journey:       Journey,
+    override val enrolments:    Enrolments,
+    override val request:       Request[A],
+    ggCredId:                   GGCredId,
+    val eligibilityCheckResult: EligibilityCheckResult
 ) extends AuthenticatedJourneyRequest[A](request, enrolments, journey, ggCredId)

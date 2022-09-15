@@ -186,7 +186,8 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(updateUpfrontPaymentAmountUrl(journeyId)))
       )
 
-    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Entered Upfront payment amount`(encrypter)): StubMapping = findByLatestSessionId(jsonBody)
+    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Entered Upfront payment amount`(encrypter)): StubMapping =
+      findByLatestSessionId(jsonBody)
   }
 
   object Dates {
@@ -218,13 +219,16 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(updateStartDatesUrl(journeyId)))
       )
 
-    def findJourneyExtremeDates(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Retrieved Extreme Dates Response`(encrypter)): StubMapping = findByLatestSessionId(jsonBody)
+    def findJourneyExtremeDates(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Retrieved Extreme Dates Response`(encrypter)): StubMapping =
+      findByLatestSessionId(jsonBody)
 
-    def findJourneyStartDates(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Retrieved Start Dates`(encrypter)): StubMapping = findByLatestSessionId(jsonBody)
+    def findJourneyStartDates(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Retrieved Start Dates`(encrypter)): StubMapping =
+      findByLatestSessionId(jsonBody)
   }
 
   object AffordabilityMinMaxApi {
-    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Retrieved Affordability`(encrypter = encrypter)): StubMapping = findByLatestSessionId(jsonBody)
+    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Retrieved Affordability`(encrypter = encrypter)): StubMapping =
+      findByLatestSessionId(jsonBody)
 
     def updateAffordabilityUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-affordability-result"
 
@@ -424,7 +428,8 @@ object EssttpBackend {
     def verifyNoneUpdateSubmitArrangementRequest(journeyId: JourneyId): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(submitArrangementUrl(journeyId))))
 
-    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Arrangement Submitted - with upfront payment`(encrypter)): StubMapping = findByLatestSessionId(jsonBody)
+    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Arrangement Submitted - with upfront payment`(encrypter)): StubMapping =
+      findByLatestSessionId(jsonBody)
   }
 
 }

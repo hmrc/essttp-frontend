@@ -784,5 +784,17 @@ object Messages {
 
   }
 
+  object MissingInformation {
+
+    val `Some information is missing`: Message = Message(
+      english = "Some information is missing"
+    )
+
+    val `You must provide more information to set up a payment plan.`: Message = Message(
+      english = "You must provide more information to set up a payment plan."
+    )
+
+  }
+
 }
 

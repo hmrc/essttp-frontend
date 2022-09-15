@@ -90,6 +90,11 @@ object JourneyJsonTemplates {
     journeyInfo = JourneyInfo.retrievedAffordabilityResult(minimumInstalmentAmount, encrypter)
   )
 
+  def `Retrieved Affordability no upfront payment`(minimumInstalmentAmount: Int = 29997, encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.retrievedAffordabilityResult,
+    journeyInfo = JourneyInfo.retrievedAffordabilityResultNoUpfrontPayment(minimumInstalmentAmount, encrypter)
+  )
+
   def `Entered Monthly Payment Amount`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.enteredMonthlyPaymentAmount,
     journeyInfo = JourneyInfo.enteredMonthlyPaymentAmount(encrypter)

@@ -22,7 +22,8 @@ import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
 import essttp.journey.model.Journey.AfterUpfrontPaymentAnswers
-import essttp.rootmodel.ttp.DebtTotalAmount
+import essttp.journey.model.UpfrontPaymentAnswers.DeclaredUpfrontPayment
+import essttp.rootmodel.ttp.{DebtTotalAmount, EligibilityCheckResult}
 import essttp.rootmodel.{AmountInPence, CanPayUpfront, UpfrontPaymentAmount}
 import essttp.utils.Errors
 import models.enumsforforms.CanPayUpfrontFormValue
@@ -32,7 +33,7 @@ import play.api.mvc._
 import requests.RequestSupport
 import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import util.Logging
+import util.{JourneyLogger, Logging}
 import views.Views
 
 import javax.inject.{Inject, Singleton}
@@ -53,13 +54,10 @@ class UpfrontPaymentController @Inject() (
   import requestSupport._
 
   val canYouMakeAnUpfrontPayment: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
-    request.journey match {
-      case j: Journey.BeforeEligibilityChecked => logErrorAndRouteToDefaultPage(j)
-      case j: Journey.AfterEligibilityChecked  => finalStateCheck(j, displayCanYouPayUpfrontPage(j))
-    }
+    finalStateCheck(request.journey, displayCanYouPayUpfrontPage(request.journey))
   }
 
-  private def displayCanYouPayUpfrontPage(journey: Journey.AfterEligibilityChecked)(implicit request: Request[_]): Result = {
+  private def displayCanYouPayUpfrontPage(journey: Journey)(implicit request: Request[_]): Result = {
     val backUrl: Option[String] = Some(routes.YourBillController.yourBill.url)
     val maybePrePoppedForm: Form[CanPayUpfrontFormValue] = journey match {
       case _: Journey.BeforeAnsweredCanPayUpfront => CanPayUpfrontForm.form
@@ -176,47 +174,39 @@ class UpfrontPaymentController @Inject() (
   }
 
   val upfrontPaymentSummary: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    lazy val redirectToMissingInfoPage = {
+      JourneyLogger.warn("Not enough information in session to show upfront payment summary page. " +
+        "Redirecting to missing info page")
+      Redirect(routes.MissingInfoController.missingInfo)
+    }
+
     request.journey match {
-      case j: Journey.BeforeEnteredUpfrontPaymentAmount => logErrorAndRouteToDefaultPage(j)
-      case j: Journey.AfterEnteredUpfrontPaymentAmount  => finalStateCheck(j, displayUpfrontPaymentSummaryPage(j))
-      case j: Journey.AfterAnsweredCanPayUpfront        => finalStateCheck(j, displayUpfrontPaymentSummaryPage(j))
-      case j: Journey.AfterUpfrontPaymentAnswers        => finalStateCheck(j, displayUpfrontPaymentSummaryPage(j))
+      case _: Journey.BeforeEnteredUpfrontPaymentAmount =>
+        redirectToMissingInfoPage
+
+      case j: Journey.AfterEnteredUpfrontPaymentAmount =>
+        val declaredUpfrontPayment = UpfrontPaymentAnswers.DeclaredUpfrontPayment(j.upfrontPaymentAmount)
+        finalStateCheck(request.journey, displayUpfrontPaymentSummaryPage(request.eligibilityCheckResult, declaredUpfrontPayment))
+
+      case j: Journey.AfterUpfrontPaymentAnswers =>
+        j.upfrontPaymentAnswers match {
+          case UpfrontPaymentAnswers.NoUpfrontPayment =>
+            finalStateCheck(request.journey, redirectToMissingInfoPage)
+          case d: UpfrontPaymentAnswers.DeclaredUpfrontPayment =>
+            finalStateCheck(request.journey, displayUpfrontPaymentSummaryPage(request.eligibilityCheckResult, d))
+        }
     }
   }
 
-  private def displayUpfrontPaymentSummaryPage(journey: Journey)(implicit request: Request[_]): Result = {
-    val (eligibilityCheckResultFromJourney, upfrontPaymentAnswersFromJourney) = journey match {
-      case j: Journey.BeforeEnteredUpfrontPaymentAmount =>
-        Errors.throwBadRequestException(s"We should not be on the upfront payment summary page without an upfront payment... [$j]")
-      case j: Journey.Epaye.EnteredUpfrontPaymentAmount =>
-        (j.eligibilityCheckResult, UpfrontPaymentAnswers.DeclaredUpfrontPayment(j.upfrontPaymentAmount))
-      case j: Journey.Epaye.RetrievedExtremeDates        => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
-      case j: Journey.Epaye.RetrievedAffordabilityResult => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
-      case j: Journey.Epaye.EnteredMonthlyPaymentAmount  => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
-      case j: Journey.Epaye.EnteredDayOfMonth            => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
-      case j: Journey.Epaye.RetrievedStartDates          => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
-      case j: Journey.Epaye.RetrievedAffordableQuotes    => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
-      case j: Journey.Epaye.ChosenPaymentPlan            => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
-      case j: Journey.Epaye.CheckedPaymentPlan           => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
-      case j: Journey.Epaye.ChosenTypeOfBankAccount      => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
-      case j: Journey.Epaye.EnteredDirectDebitDetails    => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
-      case j: Journey.Epaye.ConfirmedDirectDebitDetails  => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
-      case j: Journey.Epaye.AgreedTermsAndConditions     => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
-      case j: Journey.Epaye.SubmittedArrangement         => (j.eligibilityCheckResult, j.upfrontPaymentAnswers)
-    }
-
-    val upfrontPaymentAmountFromJourney =
-      upfrontPaymentAnswersFromJourney match {
-        case j: UpfrontPaymentAnswers.DeclaredUpfrontPayment => j.amount
-        case UpfrontPaymentAnswers.NoUpfrontPayment =>
-          Errors.throwBadRequestException(s"We should not be on the upfront payment summary page without an upfront payment... [$journey]")
-      }
-
-    val totalAmountToPay: DebtTotalAmount = DebtTotalAmount(AmountInPence(eligibilityCheckResultFromJourney.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum))
-    val remainingAmountTest: AmountInPence = UpfrontPaymentController.deriveRemainingAmountToPay(totalAmountToPay, upfrontPaymentAmountFromJourney)
+  private def displayUpfrontPaymentSummaryPage(
+      eligibilityCheckResult: EligibilityCheckResult,
+      declaredUpfrontPayment: DeclaredUpfrontPayment
+  )(implicit request: Request[_]): Result = {
+    val totalAmountToPay: DebtTotalAmount = DebtTotalAmount(AmountInPence(eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum))
+    val remainingAmountTest: AmountInPence = UpfrontPaymentController.deriveRemainingAmountToPay(totalAmountToPay, declaredUpfrontPayment.amount)
 
     Ok(views.upfrontSummaryPage(
-      upfrontPayment       = upfrontPaymentAmountFromJourney,
+      upfrontPayment       = declaredUpfrontPayment.amount,
       remainingAmountToPay = remainingAmountTest,
       backUrl              = Some(UpfrontPaymentController.upfrontPaymentAmountCall.url)
     ))
