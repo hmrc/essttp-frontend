@@ -23,7 +23,6 @@ import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.EssttpBackend
-import testsupport.testdata.TdAll
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.jdk.CollectionConverters.collectionAsScalaIterableConverter
@@ -36,20 +35,25 @@ class NotEnrolledControllerSpec extends ItSpec {
       EssttpBackend.StartJourney.findJourney()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
       val result = controller.notEnrolled(fakeRequest)
-      RequestAssertions.assertGetRequestOk(result)
       val page: Document = Jsoup.parse(contentAsString(result))
-      val expectedH1 = "You are not enrolled"
-      val expectedServiceName: String = TdAll.expectedServiceNamePaye
-      page.title() shouldBe s"$expectedH1 - $expectedServiceName - GOV.UK"
-      page.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
-      page.select(".govuk-heading-xl").text() shouldBe expectedH1
-      ContentAssertions.languageToggleExists(page)
+
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        page,
+        expectedH1        = "You are not enrolled",
+        expectedBack      = None,
+        expectedSubmitUrl = None
+      )
+
       page.select(".govuk-body").asScala.toList(0).text() shouldBe "You are not eligible for an online payment plan because you need to enrol for PAYE Online. Find out how to enrol."
       page.select("#how-to-enrol-link").attr("href") shouldBe "https://www.gov.uk/paye-online/enrol"
+
       val commonEligibilityWrapper = page.select(".common-eligibility")
       val govukBodyElements = commonEligibilityWrapper.select(".govuk-body").asScala.toList
       govukBodyElements(0).text() shouldBe "If you need to speak to an adviser call us on 0300 200 3835 at the Business Support Service to talk about your payment options."
+
       val detailsReveal = commonEligibilityWrapper.select(".govuk-details")
       detailsReveal.select(".govuk-details__summary-text").text() shouldBe "If you cannot use speech recognition software"
       val detailsRevealText = detailsReveal.select(".govuk-details__text").select(".govuk-body").asScala.toList
@@ -57,14 +61,17 @@ class NotEnrolledControllerSpec extends ItSpec {
       detailsRevealText(1).html() shouldBe "You can also use <a href=\"https://www.relayuk.bt.com/\" class=\"govuk-link\">Relay UK</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>."
       detailsRevealText(2).html() shouldBe "If you are outside the UK: <strong>+44 2890 538 192</strong>"
       govukBodyElements(4).text() shouldBe "Before you call, make sure you have:"
+
       val bulletLists = commonEligibilityWrapper.select(".govuk-list").asScala.toList
       val beforeYouCallList = bulletLists(0).select("li").asScala.toList
       beforeYouCallList(0).text() shouldBe "your Accounts Office reference. This is 13 characters, for example, 123PX00123456"
       beforeYouCallList(1).text() shouldBe "your bank details"
+
       govukBodyElements(5).text() shouldBe "We’re likely to ask:"
       val likelyToAskList = bulletLists(1).select("li").asScala.toList
       likelyToAskList(0).text() shouldBe "what you’ve done to try to pay the bill"
       likelyToAskList(1).text() shouldBe "if you can pay some of the bill now"
+
       govukBodyElements(6).text() shouldBe "Our opening times are Monday to Friday: 8am to 6pm (we are closed on bank holidays)"
     }
   }

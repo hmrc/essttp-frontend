@@ -38,8 +38,10 @@ class DatesApiControllerSpec extends ItSpec {
       EssttpBackend.UpfrontPaymentAmount.findJourney(testCrypto)()
       EssttpDates.stubExtremeDatesCall()
       EssttpBackend.Dates.stubUpdateExtremeDates(TdAll.journeyId)
+
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.retrieveExtremeDates(fakeRequest)
+
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.determineAffordabilityUrl)
       EssttpBackend.Dates.verifyUpdateExtremeDates(TdAll.journeyId, TdAll.extremeDatesResponse())
@@ -52,8 +54,10 @@ class DatesApiControllerSpec extends ItSpec {
       EssttpBackend.DayOfMonth.findJourney(testCrypto)()
       EssttpDates.stubStartDatesCall()
       EssttpBackend.Dates.stubUpdateStartDates(TdAll.journeyId)
+
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.retrieveStartDates(fakeRequest)
+
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.determineAffordableQuotesUrl)
       EssttpBackend.Dates.verifyUpdateStartDates(TdAll.journeyId, TdAll.startDatesResponse())

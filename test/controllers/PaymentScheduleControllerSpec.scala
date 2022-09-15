@@ -95,33 +95,11 @@ class PaymentScheduleControllerSpec extends ItSpec {
         extractSummaryRows(paymentPlanRows) shouldBe expectedRows
       }
 
-      def testPage(doc: Document)(
-          canPayUpfrontValue:        String,
-          upfrontPaymentAmountValue: Option[String],
-          paymentDayValue:           String,
-          datesToAmountsValues:      List[(String, String)],
-          totalToPayValue:           String
-      ) = {
-        val expectedH1 = "Check your payment plan"
-        val expectedServiceName: String = TdAll.expectedServiceNamePaye
-
-        doc.title() shouldBe s"$expectedH1 - $expectedServiceName - GOV.UK"
-        doc.select(".govuk-heading-xl").text() shouldBe expectedH1
-        doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
-        doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-        doc.select("#back").attr("href") shouldBe routes.InstalmentsController.instalmentOptions.url
-        ContentAssertions.languageToggleExists(doc)
-
-        val summaries = doc.select(".govuk-summary-list").iterator().asScala.toList
-        summaries.size shouldBe 2
-
-        testUpfrontPaymentSummaryRows(summaries(0))(canPayUpfrontValue, upfrontPaymentAmountValue)
-        testPaymentPlanRows(summaries(1))(paymentDayValue, datesToAmountsValues, totalToPayValue)
-      }
-
     "should return 200 and the can you make an upfront payment page when" - {
 
-        def test(journeyJsonBody: String)(
+        def test(
+            journeyJsonBody: String
+        )(
             canPayUpfrontValue:        String,
             upfrontPaymentAmountValue: Option[String],
             paymentDayValue:           String,
@@ -134,19 +112,22 @@ class PaymentScheduleControllerSpec extends ItSpec {
           val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
           val result: Future[Result] = controller.checkPaymentSchedule(fakeRequest)
-
-          RequestAssertions.assertGetRequestOk(result)
-
           val pageContent: String = contentAsString(result)
           val doc: Document = Jsoup.parse(pageContent)
 
-          testPage(doc)(
-            canPayUpfrontValue,
-            upfrontPaymentAmountValue,
-            paymentDayValue,
-            datesToAmountsValues,
-            totalToPayValue
+          RequestAssertions.assertGetRequestOk(result)
+          ContentAssertions.commonPageChecks(
+            doc,
+            expectedH1        = "Check your payment plan",
+            expectedBack      = Some(routes.InstalmentsController.instalmentOptions.url),
+            expectedSubmitUrl = Some(routes.PaymentScheduleController.checkPaymentScheduleSubmit.url)
           )
+
+          val summaries = doc.select(".govuk-summary-list").iterator().asScala.toList
+          summaries.size shouldBe 2
+
+          testUpfrontPaymentSummaryRows(summaries(0))(canPayUpfrontValue, upfrontPaymentAmountValue)
+          testPaymentPlanRows(summaries(1))(paymentDayValue, datesToAmountsValues, totalToPayValue)
         }
 
       "there is an upfrontPayment amount" in {
@@ -191,8 +172,8 @@ class PaymentScheduleControllerSpec extends ItSpec {
         EssttpBackend.HasCheckedPlan.stubUpdateHasCheckedPlan(TdAll.journeyId)
 
         val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-        val result: Future[Result] = controller.checkPaymentScheduleSubmit(fakeRequest)
 
+        val result: Future[Result] = controller.checkPaymentScheduleSubmit(fakeRequest)
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.BankDetailsController.typeOfAccount.url)
         EssttpBackend.HasCheckedPlan.verifyUpdateHasCheckedPlanRequest(TdAll.journeyId)
@@ -240,5 +221,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
 }
 
 object PaymentScheduleControllerSpec {
+
   final case class SummaryRow(question: String, answer: String, changeLink: String)
+
 }

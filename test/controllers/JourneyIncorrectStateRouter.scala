@@ -54,7 +54,9 @@ class JourneyIncorrectStateRouter extends ItSpec {
           s"[ GET $scenario ] should redirect to the first page that supports that journey: [ $expectedRedirectUrl ]" in {
             stubCommonActions()
             journeyState()
+
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
             val result = app.injector.instanceOf[SubmitArrangementController].submitArrangement(fakeRequest)
             status(result) shouldBe Status.SEE_OTHER
             redirectLocation(result) shouldBe Some(expectedRedirectUrl)

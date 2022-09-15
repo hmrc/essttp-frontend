@@ -58,7 +58,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
         s"service=$appName&" +
         s"backUrl=${SafeRedirectUrl(BaseUrl.essttpFrontend + request.uri).encodedUrl}"
 
-    val firstPageBackUrl: String = "https://gov.uk"
+    val govUkUrl: String = config.get[String]("govUkUrls.govUk")
     val enrolForPayeUrl: String = config.get[String]("govUkUrls.enrolPayeUrl")
     val extraSupportUrl: String = config.get[String]("govUkUrls.extraSupportUrl")
     val relayUrl: String = config.get[String]("govUkUrls.relayUrl")

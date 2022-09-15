@@ -17,6 +17,7 @@
 package controllers
 
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.http.Status
 import play.api.mvc.Result
@@ -33,16 +34,27 @@ import java.time.LocalDate
 import scala.concurrent.Future
 
 class YourBillControllerSpec extends ItSpec {
+
   private val controller: YourBillController = app.injector.instanceOf[YourBillController]
 
   "GET /your-bill should" - {
     "return you bill page" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
+
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
       val result: Future[Result] = controller.yourBill(fakeRequest)
+      val pageContent: String = contentAsString(result)
+      val doc: Document = Jsoup.parse(pageContent)
+
       RequestAssertions.assertGetRequestOk(result)
-      ContentAssertions.languageToggleExists(Jsoup.parse(contentAsString(result)))
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1        = "Your PAYE bill is £3,000",
+        expectedBack      = Some(routes.LandingController.landingPage.url),
+        expectedSubmitUrl = Some(routes.YourBillController.yourBillSubmit.url)
+      )
     }
   }
 
@@ -50,7 +62,9 @@ class YourBillControllerSpec extends ItSpec {
     "redirect to can you make an upfront payment question page" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
+
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
       val result = controller.yourBillSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.canYouMakeAnUpfrontPaymentUrl)

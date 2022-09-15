@@ -36,16 +36,32 @@ import scala.concurrent.Future
 import scala.jdk.CollectionConverters.collectionAsScalaIterableConverter
 
 class MonthlyPaymentAmountControllerSpec extends ItSpec {
+
   private val controller: MonthlyPaymentAmountController = app.injector.instanceOf[MonthlyPaymentAmountController]
-  private val expectedServiceName: String = TdAll.expectedServiceNamePaye
   private val expectedH1: String = "How much can you afford to pay each month?"
-  private val expectedPageTitle: String = s"$expectedH1 - $expectedServiceName - GOV.UK"
   private val expectedPageHint: String = "Enter an amount between £300 and £880"
   private val progressiveRevealContent: String = "I can’t afford the minimum payment"
   private val progressiveRevealInnerContent1: String =
     "You may still be able to set up a payment plan over the phone, but you are not eligible for an online payment plan."
   private val progressiveRevealInnerContent2: String =
     "We recommend you speak to an adviser on 0300 200 3835 at the Payment Support Service to talk about your payment options."
+
+  def testMonthlyPaymentAmountContent(doc: Document): Unit = {
+    doc.select("#MonthlyPaymentAmount-hint").text() shouldBe expectedPageHint
+    doc.select("#MonthlyPaymentAmount").size() shouldBe 1
+
+    val poundSymbol = doc.select(".govuk-input__prefix")
+    poundSymbol.size() shouldBe 1
+    poundSymbol.text() shouldBe "£"
+
+    doc.select(".govuk-details__summary-text").text() shouldBe progressiveRevealContent
+    val progressiveRevealSubContent = doc.select(".govuk-details__text").select(".govuk-body").asScala.toSeq
+    progressiveRevealSubContent(0).text() shouldBe progressiveRevealInnerContent1
+    progressiveRevealSubContent(1).text() shouldBe progressiveRevealInnerContent2
+
+    doc.select("#continue").text() should include("Continue")
+    ()
+  }
 
   "GET /how-much-can-you-pay-each-month" - {
     "should return 200 and the how much can you pay a month page" in {
@@ -54,28 +70,18 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.displayMonthlyPaymentAmount(fakeRequest)
-
-      RequestAssertions.assertGetRequestOk(result)
-
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
 
-      doc.title() shouldBe expectedPageTitle
-      doc.select(".govuk-label--xl").text() shouldBe expectedH1
-      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
-      doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-      doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url // todo update this, it depends on journey
-      ContentAssertions.languageToggleExists(doc)
-      doc.select("#MonthlyPaymentAmount-hint").text() shouldBe expectedPageHint
-      doc.select("#MonthlyPaymentAmount").size() shouldBe 1
-      val poundSymbol = doc.select(".govuk-input__prefix")
-      poundSymbol.size() shouldBe 1
-      poundSymbol.text() shouldBe "£"
-      doc.select(".govuk-details__summary-text").text() shouldBe progressiveRevealContent
-      val progressiveRevealSubContent = doc.select(".govuk-details__text").select(".govuk-body").asScala.toSeq
-      progressiveRevealSubContent(0).text() shouldBe progressiveRevealInnerContent1
-      progressiveRevealSubContent(1).text() shouldBe progressiveRevealInnerContent2
-      doc.select("#continue").text() should include("Continue")
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1        = expectedH1,
+        expectedBack      = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url), // todo update this, it depends on journey
+        expectedSubmitUrl = Some(routes.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit.url)
+      )
+
+      testMonthlyPaymentAmountContent(doc)
     }
 
     "should prepopulate the form when user navigates back and they have a monthly payment amount in their journey" in {
@@ -97,6 +103,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.displayMonthlyPaymentAmount(fakeRequest)
+
       RequestAssertions.assertGetRequestOk(result)
       val doc: Document = Jsoup.parse(contentAsString(result))
       doc.select("#MonthlyPaymentAmount-hint").text() shouldBe "Enter an amount between £1 and £880"
@@ -108,12 +115,14 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
       stubCommonActions()
       EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto)()
       EssttpBackend.MonthlyPaymentAmount.stubUpdateMonthlyPaymentAmount(TdAll.journeyId)
+
       val fakeRequest = FakeRequest(
         method = "POST",
         path   = "/how-much-can-you-pay-each-month"
       ).withAuthToken()
         .withSession(SessionKeys.sessionId -> "IamATestSessionId")
         .withFormUrlEncodedBody(("MonthlyPaymentAmount", "300"))
+
       val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.whichDayDoYouWantToPayUrl)
@@ -134,12 +143,14 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
           stubCommonActions()
           EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto)()
           EssttpBackend.MonthlyPaymentAmount.stubUpdateMonthlyPaymentAmount(TdAll.journeyId)
+
           val fakeRequest = FakeRequest(
             method = "POST",
             path   = "/how-much-can-you-pay-each-month"
           ).withAuthToken()
             .withSession(SessionKeys.sessionId -> "IamATestSessionId")
             .withFormUrlEncodedBody(("MonthlyPaymentAmount", formInput))
+
           val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
           status(result) shouldBe Status.SEE_OTHER
           redirectLocation(result) shouldBe Some(PageUrls.whichDayDoYouWantToPayUrl)
@@ -161,29 +172,27 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
         s"[$sf] should show the page with the correct error message when $formInput is submitted" in {
           stubCommonActions()
           EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto)()
+
           val fakeRequest = FakeRequest(
             method = "POST",
             path   = "/how-much-can-you-pay-each-month"
           ).withAuthToken()
             .withSession(SessionKeys.sessionId -> "IamATestSessionId")
             .withFormUrlEncodedBody(("MonthlyPaymentAmount", formInput))
+
           val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
-
-          RequestAssertions.assertGetRequestOk(result)
-
           val pageContent: String = contentAsString(result)
           val doc: Document = Jsoup.parse(pageContent)
 
-          doc.title() shouldBe s"Error: $expectedPageTitle"
-          doc.select(".govuk-label--xl").text() shouldBe expectedH1
-          doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
-          doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-          doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url // todo update this, it depends on journey
-          doc.select("#MonthlyPaymentAmount-hint").text() shouldBe expectedPageHint
-          doc.select("#MonthlyPaymentAmount").size() shouldBe 1
-          val poundSymbol = doc.select(".govuk-input__prefix")
-          poundSymbol.size() shouldBe 1
-          poundSymbol.text() shouldBe "£"
+          RequestAssertions.assertGetRequestOk(result)
+          ContentAssertions.commonPageChecks(
+            doc,
+            expectedH1        = expectedH1,
+            expectedBack      = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url), // todo update this, it depends on journey
+            expectedSubmitUrl = Some(routes.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit.url),
+            hasFormError      = true
+          )
+          testMonthlyPaymentAmountContent(doc)
 
           val errorSummary = doc.select(".govuk-error-summary")
           val errorLink = errorSummary.select("a")

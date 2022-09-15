@@ -44,6 +44,14 @@ object Messages {
     english = "Sign in"
   )
 
+  val `Yes`: Message = Message(
+    english = "Yes"
+  )
+
+  val `No`: Message = Message(
+    english = "No"
+  )
+
   val error: Message = Message(
     english = "Error: ",
     welsh   = "Gwall: "
@@ -238,14 +246,6 @@ object Messages {
     )
     val `Your monthly payments will be lower if you ...`: Message = Message(
       english = "Your monthly payments will be lower if you can make an upfront payment. This payment will be taken from your bank account within 10 working days."
-    )
-
-    val `Yes`: Message = Message(
-      english = "Yes"
-    )
-
-    val `No`: Message = Message(
-      english = "No"
     )
 
     val `Select yes if you can make an upfront payment`: Message = Message(
@@ -767,5 +767,22 @@ object Messages {
     )
 
   }
+
+  object GiveFeedback {
+
+    val `Do you want to give feedback?`: Message = Message(
+      english = "Do you want to give feedback on this service?"
+    )
+
+    val `If you select no`: Message = Message(
+      english = "If you select no, you will be directed to GOV.UK."
+    )
+
+    val `Select yes if you want to give feedback`: Message = Message(
+      english = "Select yes if you want to give feedback on this service"
+    )
+
+  }
+
 }
 

@@ -48,7 +48,6 @@ class BankDetailsControllerSpec extends ItSpec {
 
   object TypeOfBankAccountPage {
     val expectedH1: String = "What type of account details are you providing?"
-    val expectedPageTitle: String = s"$expectedH1 - $expectedServiceName - GOV.UK"
     val radioButtonContentBusiness: String = "Business bank account"
     val radioButtonContentPersonal: String = "Personal bank account"
     val buttonContent: String = "Continue"
@@ -56,7 +55,6 @@ class BankDetailsControllerSpec extends ItSpec {
 
   object EnterDirectDebitDetailsPage {
     val expectedH1: String = "Set up Direct Debit"
-    val expectedPageTitle: String = s"$expectedH1 - $expectedServiceName - GOV.UK"
     val accountNameContent: String = "Name on the account"
     val accountNameFieldId: String = "#name"
     val sortCodeContent: String = "Sort code"
@@ -73,12 +71,10 @@ class BankDetailsControllerSpec extends ItSpec {
 
   object ConfirmDirectDebitDetailsPage {
     val expectedH1: String = "Check your Direct Debit details"
-    val expectedPageTitle: String = s"$expectedH1 - $expectedServiceName - GOV.UK"
   }
 
   object TermsAndConditionsPage {
     val expectedH1: String = "Terms and conditions"
-    val expectedPageTitle: String = s"$expectedH1 - $expectedServiceName - GOV.UK"
   }
 
   object CannotSetupDirectDebitPage {
@@ -86,7 +82,6 @@ class BankDetailsControllerSpec extends ItSpec {
     val paragraphContent: String =
       "You need a named account holder or someone with authorisation to set up a Direct Debit."
     val buttonContent: String = "Return to tax account"
-    val expectedPageTitle: String = s"$expectedH1 - $expectedServiceName - GOV.UK"
   }
 
   object BarsLockoutPage {
@@ -137,10 +132,8 @@ class BankDetailsControllerSpec extends ItSpec {
     val errorSummary = doc.select(".govuk-error-summary__list")
     val errorLinks = errorSummary.select("a").asScala.toList
     errorLinks.zip(textAndHrefContent).foreach { testData: (Element, (String, String)) =>
-      {
-        testData._1.text() shouldBe testData._2._1
-        testData._1.attr("href") shouldBe testData._2._2
-      }
+      testData._1.text() shouldBe testData._2._1
+      testData._1.attr("href") shouldBe testData._2._2
     }
 
     ContentAssertions.languageToggleExists(doc)
@@ -162,21 +155,18 @@ class BankDetailsControllerSpec extends ItSpec {
       EssttpBackend.HasCheckedPlan.findJourney(testCrypto)()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
       val result: Future[Result] = controller.typeOfAccount(fakeRequest)
-
-      RequestAssertions.assertGetRequestOk(result)
-
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
 
-      doc.title() shouldBe TypeOfBankAccountPage.expectedPageTitle
-      doc.select(".govuk-fieldset__legend--xl").text() shouldBe TypeOfBankAccountPage.expectedH1
-      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
-      ContentAssertions.languageToggleExists(doc)
-      doc
-        .select(".hmrc-sign-out-nav__link")
-        .attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-      doc.select("#back").attr("href") shouldBe routes.PaymentScheduleController.checkPaymentSchedule.url
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1        = TypeOfBankAccountPage.expectedH1,
+        expectedBack      = Some(routes.PaymentScheduleController.checkPaymentSchedule.url),
+        expectedSubmitUrl = Some(routes.BankDetailsController.typeOfAccountSubmit.url)
+      )
 
       val radioContent = doc.select(".govuk-radios__label").asScala.toList
       radioContent(0).text() shouldBe TypeOfBankAccountPage.radioButtonContentBusiness
@@ -192,11 +182,14 @@ class BankDetailsControllerSpec extends ItSpec {
           s"prepopulate the form when the user has a chosen $typeOfAccount bank account type in their journey" in {
             stubCommonActions()
             EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto)(wiremockJson)
+
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
             val result: Future[Result] = controller.typeOfAccount(fakeRequest)
-            RequestAssertions.assertGetRequestOk(result)
             val pageContent: String = contentAsString(result)
             val doc: Document = Jsoup.parse(pageContent)
+
+            RequestAssertions.assertGetRequestOk(result)
             doc.select(".govuk-radios__input").asScala.toList(checkedElementIndex).hasAttr("checked") shouldBe true
             ContentAssertions.languageToggleExists(doc)
           }
@@ -210,12 +203,14 @@ class BankDetailsControllerSpec extends ItSpec {
         stubCommonActions()
         EssttpBackend.HasCheckedPlan.findJourney(testCrypto)()
         EssttpBackend.ChosenTypeOfBankAccount.stubUpdateChosenTypeOfBankAccount(TdAll.journeyId)
+
         val fakeRequest = FakeRequest(
           method = "POST",
           path   = "/what-type-of-account-details-are-you-providing"
         ).withAuthToken()
           .withSession(SessionKeys.sessionId -> "IamATestSessionId")
           .withFormUrlEncodedBody(("typeOfAccount", typeOfAccount))
+
         val result: Future[Result] = controller.typeOfAccountSubmit(fakeRequest)
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(PageUrls.directDebitDetailsUrl)
@@ -226,6 +221,7 @@ class BankDetailsControllerSpec extends ItSpec {
     "show correct error messages when form submitted is empty" in {
       stubCommonActions()
       EssttpBackend.HasCheckedPlan.findJourney(testCrypto)()
+
       val formData: List[(String, String)] = List(("typeOfAccount", ""))
       val expectedContentAndHref: List[(String, String)] = List(
         ("Select what type of account details you are providing", "#typeOfAccount")
@@ -243,21 +239,18 @@ class BankDetailsControllerSpec extends ItSpec {
       EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto)()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
       val result: Future[Result] = controller.enterBankDetails(fakeRequest)
-
-      RequestAssertions.assertGetRequestOk(result)
-
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
 
-      doc.title() shouldBe EnterDirectDebitDetailsPage.expectedPageTitle
-      doc.select(".govuk-heading-xl").text() shouldBe EnterDirectDebitDetailsPage.expectedH1
-      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
-      ContentAssertions.languageToggleExists(doc)
-      doc
-        .select(".hmrc-sign-out-nav__link")
-        .attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-      doc.select("#back").attr("href") shouldBe routes.BankDetailsController.typeOfAccount.url
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1        = EnterDirectDebitDetailsPage.expectedH1,
+        expectedBack      = Some(routes.BankDetailsController.typeOfAccount.url),
+        expectedSubmitUrl = Some(routes.BankDetailsController.enterBankDetailsSubmit().url)
+      )
 
       val nameInput = doc.select("input[name=name]")
       val sortCodeInput = doc.select("input[name=sortCode]")
@@ -292,13 +285,14 @@ class BankDetailsControllerSpec extends ItSpec {
       EssttpBackend.DirectDebitDetails.findJourney(testCrypto)()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
       val result: Future[Result] = controller.enterBankDetails(fakeRequest)
-
-      RequestAssertions.assertGetRequestOk(result)
-
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
+
+      RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.languageToggleExists(doc)
+
       doc.select("#back").attr("href") shouldBe routes.BankDetailsController.typeOfAccount.url
       doc.select(EnterDirectDebitDetailsPage.accountNameFieldId).`val`() shouldBe "Bob Ross"
       doc.select(EnterDirectDebitDetailsPage.sortCodeFieldId).`val`() shouldBe "123456"
@@ -872,14 +866,12 @@ class BankDetailsControllerSpec extends ItSpec {
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
 
-      doc.title() shouldBe ConfirmDirectDebitDetailsPage.expectedPageTitle
-      doc.select(".govuk-heading-xl").text() shouldBe ConfirmDirectDebitDetailsPage.expectedH1
-      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
-      ContentAssertions.languageToggleExists(doc)
-      doc
-        .select(".hmrc-sign-out-nav__link")
-        .attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-      doc.select("#back").attr("href") shouldBe routes.BankDetailsController.enterBankDetails.url
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1        = ConfirmDirectDebitDetailsPage.expectedH1,
+        expectedBack      = Some(routes.BankDetailsController.enterBankDetails().url),
+        expectedSubmitUrl = Some(routes.BankDetailsController.checkBankDetailsSubmit.url)
+      )
 
       val summaries = doc.select(".govuk-summary-list").select(".govuk-summary-list__row").iterator().asScala.toList
       summaries.size shouldBe 3
@@ -919,29 +911,34 @@ class BankDetailsControllerSpec extends ItSpec {
   }
 
   "POST /check-your-direct-debit-details should" - {
+
     "redirect the user to terms and conditions and update backend" in {
       stubCommonActions()
       EssttpBackend.DirectDebitDetails.findJourney(testCrypto)()
       EssttpBackend.ConfirmedDirectDebitDetails.stubUpdateConfirmDirectDebitDetails(TdAll.journeyId)
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val result: Future[Result] = controller.checkBankDetailsSubmit(fakeRequest)
 
+      val result: Future[Result] = controller.checkBankDetailsSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.termsAndConditionsUrl)
       EssttpBackend.ConfirmedDirectDebitDetails.verifyUpdateConfirmDirectDebitDetailsRequest(TdAll.journeyId)
     }
+
     "redirect the user to cannot setup direct debit if they try and force browse, but they aren't the account holder" in {
       stubCommonActions()
       EssttpBackend.DirectDebitDetails.findJourney(testCrypto)(
         JourneyJsonTemplates.`Entered Direct Debit Details - Is Not Account Holder`(testCrypto)
       )
+
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
       val result: Future[Result] = controller.checkBankDetailsSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.cannotSetupDirectDebitOnlineUrl)
       EssttpBackend.ConfirmedDirectDebitDetails.verifyNoneUpdateConfirmDirectDebitDetailsRequest(TdAll.journeyId)
     }
+
   }
 
   "GET /terms-and-conditions should" - {
@@ -951,20 +948,16 @@ class BankDetailsControllerSpec extends ItSpec {
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.termsAndConditions(fakeRequest)
-
-      RequestAssertions.assertGetRequestOk(result)
-
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
 
-      doc.title() shouldBe TermsAndConditionsPage.expectedPageTitle
-      doc.select(".govuk-heading-xl").text() shouldBe TermsAndConditionsPage.expectedH1
-      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
-      ContentAssertions.languageToggleExists(doc)
-      doc
-        .select(".hmrc-sign-out-nav__link")
-        .attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-      doc.select("#back").attr("href") shouldBe routes.BankDetailsController.checkBankDetails.url
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1        = TermsAndConditionsPage.expectedH1,
+        expectedBack      = Some(routes.BankDetailsController.checkBankDetails.url),
+        expectedSubmitUrl = Some(routes.BankDetailsController.termsAndConditionsSubmit.url)
+      )
 
       ContentAssertions.assertListOfContent(
         elements = doc.select(".govuk-body")
@@ -1000,8 +993,8 @@ class BankDetailsControllerSpec extends ItSpec {
       EssttpBackend.TermsAndConditions.stubUpdateAgreedTermsAndConditions(TdAll.journeyId)
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val result: Future[Result] = controller.termsAndConditionsSubmit(fakeRequest)
 
+      val result: Future[Result] = controller.termsAndConditionsSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.submitArrangementUrl)
       EssttpBackend.TermsAndConditions.verifyUpdateAgreedTermsAndConditionsRequest(TdAll.journeyId)
@@ -1015,20 +1008,19 @@ class BankDetailsControllerSpec extends ItSpec {
         JourneyJsonTemplates.`Entered Direct Debit Details - Is Not Account Holder`(testCrypto)
       )
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val result: Future[Result] = controller.cannotSetupDirectDebitOnlinePage(fakeRequest)
 
+      val result: Future[Result] = controller.cannotSetupDirectDebitOnlinePage(fakeRequest)
       RequestAssertions.assertGetRequestOk(result)
 
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
 
-      doc.title() shouldBe CannotSetupDirectDebitPage.expectedPageTitle
-      doc.select(".govuk-heading-xl").text() shouldBe CannotSetupDirectDebitPage.expectedH1
-      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
-      doc
-        .select(".hmrc-sign-out-nav__link")
-        .attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-      doc.select("#back").attr("href") shouldBe routes.BankDetailsController.enterBankDetails.url
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1        = CannotSetupDirectDebitPage.expectedH1,
+        expectedBack      = Some(routes.BankDetailsController.enterBankDetails().url),
+        expectedSubmitUrl = None
+      )
 
       doc.select(".govuk-body").text() shouldBe CannotSetupDirectDebitPage.paragraphContent
       val cta = doc.select(".govuk-button")

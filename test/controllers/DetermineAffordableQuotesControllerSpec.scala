@@ -39,8 +39,10 @@ class DetermineAffordableQuotesControllerSpec extends ItSpec {
       EssttpBackend.Dates.findJourneyStartDates(testCrypto)()
       Ttp.AffordableQuotes.stubRetrieveAffordableQuotes()
       EssttpBackend.AffordableQuotes.stubUpdateAffordableQuotes(TdAll.journeyId)
+
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.retrieveAffordableQuotes(fakeRequest)
+
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.instalmentsUrl)
       EssttpBackend.AffordableQuotes.verifyUpdateAffordableQuotesRequest(TdAll.journeyId)

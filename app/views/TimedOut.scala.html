@@ -32,7 +32,7 @@
 
 @title = @{Messages.TimeOut.`For your security, we signed you out`.show}
 
-@layout(pageTitle = Some(title)) {
+@layout(pageTitle = Some(title), showSignOutOverride = Some(false)) {
 
   <h1 class="govuk-heading-xl">
     @title

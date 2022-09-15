@@ -23,21 +23,66 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import config.AppConfig
+import essttp.rootmodel.TaxRegime
+import models.enumsforforms.GiveFeedbackFormValue
+import models.forms.GiveFeedbackForm
+import requests.RequestSupport
+
 @Singleton
 class SignOutController @Inject() (
-    as:           Actions,
-    mcc:          MessagesControllerComponents,
-    timedOutPage: views.html.TimedOut,
-    appConfig:    AppConfig
+    as:                          Actions,
+    mcc:                         MessagesControllerComponents,
+    requestSupport:              RequestSupport,
+    timedOutPage:                views.html.TimedOut,
+    doYouWantToGiveFeedbackPage: views.html.DoYouWantToGiveFeedback,
+    appConfig:                   AppConfig
 ) extends FrontendController(mcc)
   with I18nSupport
   with Logging {
 
-  def signOutFromTimeout: Action[AnyContent] = as.authenticatedAction { implicit request =>
+  import requestSupport._
+
+  def signOutFromTimeout: Action[AnyContent] = Action { implicit request =>
+    // N.B. the implicit request being passed into the page here may still have the auth
+    // token in it so take care to ensure that the sign out link is not shown by mistake
     Ok(timedOutPage()).withNewSession
+  }
+
+  def signOut: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    Redirect(routes.SignOutController.doYouWantToGiveFeedback)
+      .withSession(SignOutController.feedbackRegimeKey -> request.journey.taxRegime.entryName)
+  }
+
+  def doYouWantToGiveFeedback: Action[AnyContent] = Action { implicit request =>
+    Ok(doYouWantToGiveFeedbackPage(GiveFeedbackForm.form))
+  }
+
+  def doYouWantToGiveFeedbackSubmit: Action[AnyContent] = Action { implicit request =>
+    GiveFeedbackForm.form.bindFromRequest()
+      .fold(
+        formWithErrors => Ok(doYouWantToGiveFeedbackPage(formWithErrors)), {
+          case GiveFeedbackFormValue.Yes =>
+            val taxRegimeString = request.session.get(SignOutController.feedbackRegimeKey).getOrElse(
+              sys.error("Could not find tax regime in cookie session")
+            )
+            TaxRegime.withNameInsensitive(taxRegimeString) match {
+              case TaxRegime.Epaye => Redirect(routes.SignOutController.exitSurveyPaye).withNewSession
+              case TaxRegime.Vat   => sys.error("Sign out survey not implemented for VAT yet")
+            }
+
+          case GiveFeedbackFormValue.No =>
+            Redirect(appConfig.Urls.govUkUrl).withNewSession
+        }
+      )
   }
 
   val exitSurveyPaye: Action[AnyContent] = Action { _ =>
     Redirect(appConfig.ExitSurvey.payeExitSurveyUrl).withNewSession
   }
+}
+
+object SignOutController {
+
+  val feedbackRegimeKey: String = "essttpTaxRegime"
+
 }

@@ -52,19 +52,18 @@ class InstalmentsControllerSpec extends ItSpec {
       EssttpBackend.AffordableQuotes.findJourney(testCrypto)()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
       val result: Future[Result] = controller.instalmentOptions(fakeRequest)
-
-      RequestAssertions.assertGetRequestOk(result)
-
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
 
-      doc.title() shouldBe expectedPageTitle
-      doc.select(".govuk-fieldset__heading").text() shouldBe expectedH1
-      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
-      doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-      doc.select("#back").attr("href") shouldBe routes.PaymentDayController.paymentDay.url
-      ContentAssertions.languageToggleExists(doc)
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1        = expectedH1,
+        expectedBack      = Some(routes.PaymentDayController.paymentDay.url),
+        expectedSubmitUrl = Some(routes.InstalmentsController.instalmentOptionsSubmit.url)
+      )
 
       val radioButtonGroup = doc.select(".govuk-radios")
       val individualButtons = radioButtonGroup.select(".govuk-radios__item").asScala.toSeq
@@ -86,55 +85,70 @@ class InstalmentsControllerSpec extends ItSpec {
       progressiveRevealSubContent(2).text() shouldBe progressiveRevealInnerContent3
       doc.select(".govuk-button").text().trim shouldBe "Continue"
     }
+
     "pre pop the selected radio option when user has navigated back and they have a chosen month in their journey" in {
       stubCommonActions()
       EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto)()
+
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.instalmentOptions(fakeRequest)
-      RequestAssertions.assertGetRequestOk(result)
       val doc: Document = Jsoup.parse(contentAsString(result))
+
+      RequestAssertions.assertGetRequestOk(result)
       doc.select(".govuk-radios__input[checked]").iterator().asScala.toList(0).`val`() shouldBe "2"
     }
+
   }
 
   "POST /how-many-months-do-you-want-to-pay-over should" - {
+
     "redirect to instalment summary page when form is valid" in {
       stubCommonActions()
       EssttpBackend.AffordableQuotes.findJourney(testCrypto)()
       EssttpBackend.SelectedPaymentPlan.stubUpdateSelectedPlan(TdAll.journeyId)
+
       val fakeRequest = FakeRequest(
         method = "POST",
         path   = "/how-many-months-do-you-want-to-pay-over"
       ).withAuthToken()
         .withSession(SessionKeys.sessionId -> "IamATestSessionId")
         .withFormUrlEncodedBody(("Instalments", "2"))
+
       val result: Future[Result] = controller.instalmentOptionsSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.instalmentScheduleUrl)
       EssttpBackend.SelectedPaymentPlan.verifyUpdateSelectedPlanRequest(TdAll.journeyId)
     }
+
     "display correct error message when form is submitted with no value" in {
       stubCommonActions()
       EssttpBackend.AffordableQuotes.findJourney(testCrypto)()
       EssttpBackend.SelectedPaymentPlan.stubUpdateSelectedPlan(TdAll.journeyId)
+
       val fakeRequest = FakeRequest(
         method = "POST",
         path   = "/how-many-months-do-you-want-to-pay-over"
       ).withAuthToken()
         .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
       val result: Future[Result] = controller.instalmentOptionsSubmit(fakeRequest)
-      RequestAssertions.assertGetRequestOk(result)
       val doc: Document = Jsoup.parse(contentAsString(result))
+
+      RequestAssertions.assertGetRequestOk(result)
+
       doc.title() shouldBe s"Error: $expectedPageTitle"
       val errorSummary = doc.select(".govuk-error-summary")
       val errorLink = errorSummary.select("a")
       errorLink.text() shouldBe "Select how many months you want to pay over"
       errorLink.attr("href") shouldBe "#Instalments"
+
       EssttpBackend.SelectedPaymentPlan.verifyNoneUpdateSelectedPlanRequest(TdAll.journeyId)
     }
+
   }
 
   "InstalmentsController.retrieveInstalmentOptions" - {
+
     "should filter out any instalments that are less than £1" in {
       val plansIncludingOneLessThanAPound: List[PaymentPlan] = List(
         TdAll.paymentPlan(1, amountDue = AmountDue(AmountInPence(1))),
@@ -147,6 +161,7 @@ class InstalmentsControllerSpec extends ItSpec {
       result.length shouldBe 3
       result.foreach(instalmentOption => (instalmentOption.amountToPayEachMonth.value >= 100) shouldBe true)
     }
+
   }
 
 }

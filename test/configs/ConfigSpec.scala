@@ -44,7 +44,7 @@ class ConfigSpec extends ItSpec {
 
       ("Urls.loginUrl", config.Urls.loginUrl, "http://localhost:9949/auth-login-stub/gg-sign-in"),
       ("Urls.signOutUrl", config.Urls.signOutUrl, "http://localhost:9949/auth-login-stub/session/logout"),
-      ("Urls.firstPageBackUrl", config.Urls.firstPageBackUrl, "https://gov.uk"),
+      ("Urls.firstPageBackUrl", config.Urls.govUkUrl, "https://www.gov.uk"),
       ("Urls.enrolForPayeUrl", config.Urls.enrolForPayeUrl, "https://www.gov.uk/paye-online/enrol"),
       ("Urls.extraSupportUrl", config.Urls.extraSupportUrl, "https://www.gov.uk/get-help-hmrc-extra-support"),
       ("Urls.relayUrl", config.Urls.relayUrl, "https://www.relayuk.bt.com/"),
