@@ -145,12 +145,12 @@
             name = soleSignatoryKey,
             items = Seq(
                 RadioItem(
-                    content = Text(Messages.UpfrontPayment.`Yes`.show),
+                    content = Text(Messages.`Yes`.show),
                     value = Some(IsSoleSignatoryFormValue.Yes.entryName),
                     checked = form.data.values.toList.contains("Yes")
                 ),
                 RadioItem(
-                    content = Text(Messages.UpfrontPayment.`No`.show),
+                    content = Text(Messages.`No`.show),
                     value = Some(IsSoleSignatoryFormValue.No.entryName),
                     checked = form.data.values.toList.contains("No")
                 )

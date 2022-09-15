@@ -35,6 +35,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
   private val controller: SubmitArrangementController = app.injector.instanceOf[SubmitArrangementController]
 
   "GET /submit-arrangement should" - {
+
     "trigger call to ttp enact arrangement api, send an audit event and also update backend" in {
       stubCommonActions()
       EssttpBackend.TermsAndConditions.findJourney(testCrypto)()
@@ -42,6 +43,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
       Ttp.EnactArrangement.stubEnactArrangement()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
       val result: Future[Result] = controller.submitArrangement(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.confirmationUrl)
@@ -99,10 +101,13 @@ class SubmitArrangementControllerSpec extends ItSpec {
       Ttp.EnactArrangement.stubEnactArrangementFail()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
       val result = controller.submitArrangement(fakeRequest)
       assertThrows[UpstreamErrorResponse](await(result))
       Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(CryptoFormat.NoOpCryptoFormat)
       EssttpBackend.SubmitArrangement.verifyNoneUpdateSubmitArrangementRequest(TdAll.journeyId)
     }
+
   }
+
 }

@@ -141,8 +141,10 @@ class DetermineEligibilityControllerSpec extends ItSpec {
     "Eligibility already determined should route user to your bill is and not update backend again" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
+
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.determineEligibility(fakeRequest)
+
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.yourBillIsUrl)
       EssttpBackend.EligibilityCheck.verifyNoneUpdateEligibilityRequest(TdAll.journeyId)
@@ -151,8 +153,10 @@ class DetermineEligibilityControllerSpec extends ItSpec {
     "Redirect to landing page if journey is in started state" in {
       stubCommonActions()
       EssttpBackend.StartJourney.findJourney()
+
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.determineEligibility(fakeRequest)
+
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.landingPageUrl)
       EssttpBackend.EligibilityCheck.verifyNoneUpdateEligibilityRequest(TdAll.journeyId)

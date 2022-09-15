@@ -48,14 +48,15 @@
   headBlock: Option[Html] = None,
   scriptsBlock: Option[Html] = None,
   backUrl: Option[String] = None,
-  hasErrors: Boolean = false
+  hasErrors: Boolean = false,
+  showSignOutOverride: Option[Boolean] = None
 )(
   contentBlock: Html)(implicit
   request: Request[_]
 )
 
   @import requestSupport._
-  @showSignOut = @{RequestSupport.isLoggedIn}
+  @showSignOut = @{ showSignOutOverride.getOrElse(RequestSupport.isLoggedIn) }
 
   @head = {
     @headBlock.getOrElse(Html(""))
@@ -129,7 +130,7 @@
   @govukLayout(
     pageTitle = Some(documentTitle),
     headBlock = Some(hmrcHead(headBlock = Some(head), nonce = CSPNonce.get)),
-    headerBlock = Some(hmrcStandardHeader(serviceName = Some(serviceName), signOutUrl = if(showSignOut) Some(appConfig.Urls.signOutUrl) else None)),
+    headerBlock = Some(hmrcStandardHeader(serviceName = Some(serviceName), signOutUrl = if(showSignOut) Some(routes.SignOutController.signOut.url) else None)),
     scriptsBlock = Some(hmrcScripts(scriptsBlock = Some(scripts), nonce = CSPNonce.get)),
     beforeContentBlock = Some(beforeContentBlock),
     footerBlock = Some(hmrcStandardFooter())

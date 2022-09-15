@@ -34,40 +34,46 @@ import scala.concurrent.Future
 import scala.jdk.CollectionConverters.{asScalaIteratorConverter, collectionAsScalaIterableConverter}
 
 class PaymentDayControllerSpec extends ItSpec {
+
   private val controller: PaymentDayController = app.injector.instanceOf[PaymentDayController]
-  private val expectedServiceName: String = TdAll.expectedServiceNamePaye
   private val expectedH1: String = "Which day do you want to pay each month?"
-  private val expectedPageTitle: String = s"$expectedH1 - $expectedServiceName - GOV.UK"
+
+  def assertPaymentDayPageContent(doc: Document): Unit = {
+    doc.select("#PaymentDay").size() shouldBe 1
+    doc.select("#PaymentDay").attr("value") shouldBe "28"
+    doc.select("#PaymentDay-2").size() shouldBe 1
+
+    val radioLabels = doc.select(".govuk-radios__label").asScala.toSeq
+    radioLabels(0).text() should include("28th or next working day")
+    radioLabels(1).text() should include("A different day")
+
+    doc.select("#conditional-PaymentDay-2 > div > label").text() shouldBe "Enter a day between 1 and 28"
+    doc.select("#DifferentDay").size() shouldBe 1
+    doc.select(".govuk-button").text().trim shouldBe "Continue"
+    ()
+  }
 
   "GET /which-day-do-you-want-to-pay-each-month" - {
+
     "should return the 200 and the what day do you want to pay page" in {
       stubCommonActions()
       EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto)()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
       val result: Future[Result] = controller.paymentDay(fakeRequest)
-
-      RequestAssertions.assertGetRequestOk(result)
-
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
 
-      doc.title() shouldBe expectedPageTitle
-      doc.select(".govuk-fieldset__heading").text() shouldBe expectedH1
-      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
-      doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-      doc.select("#back").attr("href") shouldBe routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount.url
-      ContentAssertions.languageToggleExists(doc)
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1        = expectedH1,
+        expectedBack      = Some(routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount.url),
+        expectedSubmitUrl = Some(routes.PaymentDayController.paymentDaySubmit().url)
+      )
 
-      doc.select("#PaymentDay").size() shouldBe 1
-      doc.select("#PaymentDay").attr("value") shouldBe "28"
-      doc.select("#PaymentDay-2").size() shouldBe 1
-      val radioLabels = doc.select(".govuk-radios__label").asScala.toSeq
-      radioLabels(0).text() should include("28th or next working day")
-      radioLabels(1).text() should include("A different day")
-      doc.select("#conditional-PaymentDay-2 > div > label").text() shouldBe "Enter a day between 1 and 28"
-      doc.select("#DifferentDay").size() shouldBe 1
-      doc.select(".govuk-button").text().trim shouldBe "Continue"
+      assertPaymentDayPageContent(doc)
     }
 
     "should prepopulate the form when user navigates back and they have a chosen day of month in their journey" in {
@@ -75,36 +81,40 @@ class PaymentDayControllerSpec extends ItSpec {
       EssttpBackend.DayOfMonth.findJourney(testCrypto)()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
       val result: Future[Result] = controller.paymentDay(fakeRequest)
+      val doc: Document = Jsoup.parse(contentAsString(result))
 
       RequestAssertions.assertGetRequestOk(result)
-
-      val doc: Document = Jsoup.parse(contentAsString(result))
-      ContentAssertions.languageToggleExists(doc)
       doc.select(".govuk-radios__input[checked]").iterator().asScala.toList(0).`val`() shouldBe "28"
     }
   }
 
   "POST /which-day-do-you-want-to-pay-each-month" - {
+
     "should update journey with dayOfMonth and redirect to instalment page when 28th selected" in {
       stubCommonActions()
       EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto)()
       EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(TdAll.journeyId)
+
       val fakeRequest = FakeRequest(
         method = "POST",
         path   = "/which-day-do-you-want-to-pay-each-month"
       ).withAuthToken()
         .withSession(SessionKeys.sessionId -> "IamATestSessionId")
         .withFormUrlEncodedBody(("PaymentDay", "28"))
+
       val result: Future[Result] = controller.paymentDaySubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.retrieveStartDatesUrl)
       EssttpBackend.DayOfMonth.verifyUpdateDayOfMonthRequest(TdAll.journeyId)
     }
+
     "should update journey with dayOfMonth and redirect to instalment page when other day selected" in {
       stubCommonActions()
       EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto)()
       EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(TdAll.journeyId)
+
       val fakeRequest = FakeRequest(
         method = "POST",
         path   = "/which-day-do-you-want-to-pay-each-month"
@@ -114,15 +124,18 @@ class PaymentDayControllerSpec extends ItSpec {
           ("PaymentDay", "other"),
           ("DifferentDay", "1")
         )
+
       val result: Future[Result] = controller.paymentDaySubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.retrieveStartDatesUrl)
       EssttpBackend.DayOfMonth.verifyUpdateDayOfMonthRequest(TdAll.journeyId, TdAll.dayOfMonth(1))
     }
+
     "should update journey with dayOfMonth and redirect to instalment page when other day selected and 28 entered" in {
       stubCommonActions()
       EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto)()
       EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(TdAll.journeyId)
+
       val fakeRequest = FakeRequest(
         method = "POST",
         path   = "/which-day-do-you-want-to-pay-each-month"
@@ -132,6 +145,7 @@ class PaymentDayControllerSpec extends ItSpec {
           ("PaymentDay", "other"),
           ("DifferentDay", "28")
         )
+
       val result: Future[Result] = controller.paymentDaySubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.retrieveStartDatesUrl)
@@ -150,6 +164,7 @@ class PaymentDayControllerSpec extends ItSpec {
         s"When input is: [ $scenario: [ $inputValue ]] error message should be $expectedErrorMessage" in {
           stubCommonActions()
           EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto)()
+
           val fakeRequest = FakeRequest(
             method = "POST",
             path   = "/which-day-do-you-want-to-pay-each-month"
@@ -159,31 +174,27 @@ class PaymentDayControllerSpec extends ItSpec {
               ("PaymentDay", "other"),
               ("DifferentDay", inputValue)
             )
+
           val result: Future[Result] = controller.paymentDaySubmit(fakeRequest)
-          RequestAssertions.assertGetRequestOk(result)
           val pageContent: String = contentAsString(result)
           val doc: Document = Jsoup.parse(pageContent)
-          doc.title() shouldBe s"Error: $expectedPageTitle"
-          doc.select(".govuk-fieldset__heading").text() shouldBe expectedH1
-          doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
-          doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-          doc.select("#back").attr("href") shouldBe routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount.url
-          doc.select("#PaymentDay").size() shouldBe 1
-          doc.select("#PaymentDay").attr("value") shouldBe "28"
-          doc.select("#PaymentDay-2").size() shouldBe 1
-          val radioLabels = doc.select(".govuk-radios__label").asScala.toSeq
-          radioLabels(0).text() should include("28th or next working day")
-          radioLabels(1).text() should include("A different day")
-          doc.select("#conditional-PaymentDay-2 > div > label").text() shouldBe "Enter a day between 1 and 28"
-          doc.select("#DifferentDay").size() shouldBe 1
-          doc.select(".govuk-button").text().trim shouldBe "Continue"
+
+          RequestAssertions.assertGetRequestOk(result)
+          ContentAssertions.commonPageChecks(
+            doc,
+            expectedH1        = expectedH1,
+            expectedBack      = Some(routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount.url),
+            expectedSubmitUrl = Some(routes.PaymentDayController.paymentDaySubmit().url),
+            hasFormError      = true
+          )
+
+          assertPaymentDayPageContent(doc)
 
           val errorSummary = doc.select(".govuk-error-summary")
           val errorLink = errorSummary.select("a")
           errorLink.text() shouldBe expectedErrorMessage
           errorLink.attr("href") shouldBe "#DifferentDay"
           EssttpBackend.MonthlyPaymentAmount.verifyNoneUpdateMonthlyAmountRequest(TdAll.journeyId)
-
         }
     }
   }

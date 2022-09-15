@@ -16,6 +16,7 @@
 
 package testsupport.reusableassertions
 
+import controllers.routes
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 import org.scalatest.Assertion
@@ -23,6 +24,9 @@ import testsupport.RichMatchers
 
 import scala.jdk.CollectionConverters.iterableAsScalaIterableConverter
 import org.jsoup.nodes.Document
+import testsupport.testdata.TdAll
+
+import scala.annotation.nowarn
 
 object ContentAssertions extends RichMatchers {
 
@@ -46,5 +50,41 @@ object ContentAssertions extends RichMatchers {
     welshOption.map(_.select("a").attr("hreflang")) shouldBe Some("cy")
     welshOption.map(_.select("span.govuk-visually-hidden").text()) shouldBe Some("Newid yr iaith ir Gymraeg")
     welshOption.map(_.select("span[aria-hidden=true]").text()) shouldBe Some("Cymraeg")
+  }
+
+  @nowarn
+  def commonPageChecks(
+      page:              Document,
+      expectedH1:        String,
+      expectedBack:      Option[String],
+      expectedSubmitUrl: Option[String],
+      signedIn:          Boolean        = true,
+      hasFormError:      Boolean        = false
+  ): Unit = {
+    val expectedServiceName: String = TdAll.expectedServiceNamePaye
+    val titlePrefix = if (hasFormError) "Error: " else ""
+    page.title() shouldBe s"$titlePrefix$expectedH1 - $expectedServiceName - GOV.UK"
+    page.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
+
+    page.select("h1").text() shouldBe expectedH1
+    ContentAssertions.languageToggleExists(page)
+
+    val signOutLink = page.select(".hmrc-sign-out-nav__link")
+    if (signedIn) signOutLink.attr("href") shouldBe routes.SignOutController.signOut.url
+    else signOutLink.isEmpty shouldBe true
+
+    val backLink = page.select("#back")
+
+    expectedBack match {
+      case None       => backLink.isEmpty shouldBe true
+      case Some(back) => backLink.attr("href") shouldBe back
+    }
+
+    val form = page.select("form")
+    expectedSubmitUrl match {
+      case None         => form.isEmpty shouldBe true
+      case Some(submit) => form.attr("action") shouldBe submit
+    }
+
   }
 }

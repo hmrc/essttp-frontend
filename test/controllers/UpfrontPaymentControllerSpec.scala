@@ -32,22 +32,19 @@ import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
-import scala.jdk.CollectionConverters.asScalaIteratorConverter
+import scala.collection.JavaConverters._
 
 class UpfrontPaymentControllerSpec extends ItSpec {
 
   private val controller: UpfrontPaymentController = app.injector.instanceOf[UpfrontPaymentController]
-  private val expectedServiceName: String = TdAll.expectedServiceNamePaye
   private val expectedH1CanYouPayUpfrontPage: String = "Can you make an upfront payment?"
-  private val expectedPageTitleCanYouPayUpfrontPage: String = s"$expectedH1CanYouPayUpfrontPage - $expectedServiceName - GOV.UK"
   private val expectedPageHintCanPayUpfrontPage: String =
     "Your monthly payments will be lower if you can make an upfront payment. This payment will be taken from your bank account within 10 working days."
   private val expectedH1HowMuchCanYouPayUpfrontPage: String = "How much can you pay upfront?"
-  private val expectedPageTitleHowMuchCanYouPayUpfrontPage: String = s"$expectedH1HowMuchCanYouPayUpfrontPage - $expectedServiceName - GOV.UK"
   private val expectedH1UpfrontSummaryPage: String = "Payment summary"
-  private val expectedPageTitleUpfrontSummaryPage: String = s"$expectedH1UpfrontSummaryPage - $expectedServiceName - GOV.UK"
 
   "GET /can-you-make-an-upfront-payment" - {
+
     "should return 200 and the can you make an upfront payment page" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
@@ -55,30 +52,34 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
       val result: Future[Result] = controller.canYouMakeAnUpfrontPayment(fakeRequest)
-
-      RequestAssertions.assertGetRequestOk(result)
-
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
 
-      doc.title() shouldBe expectedPageTitleCanYouPayUpfrontPage
-      doc.select(".govuk-fieldset__heading").text() shouldBe expectedH1CanYouPayUpfrontPage
-      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
-      doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-      doc.select("#back").attr("href") shouldBe routes.YourBillController.yourBill.url
-      ContentAssertions.languageToggleExists(doc)
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1        = expectedH1CanYouPayUpfrontPage,
+        expectedBack      = Some(routes.YourBillController.yourBill.url),
+        expectedSubmitUrl = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit.url)
+      )
+
+      val radioContent = doc.select(".govuk-radios__label").asScala.toList
+      radioContent(0).text() shouldBe "Yes"
+      radioContent(1).text() shouldBe "No"
+
       doc.select("#CanYouMakeAnUpFrontPayment-hint").text() shouldBe expectedPageHintCanPayUpfrontPage
     }
+
     "should prepopulate the form when user navigates back and they have a chosen way to pay in their journey" in {
       stubCommonActions()
       EssttpBackend.CanPayUpfront.findJourney(testCrypto)()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
       val result: Future[Result] = controller.canYouMakeAnUpfrontPayment(fakeRequest)
+      val doc: Document = Jsoup.parse(contentAsString(result))
 
       RequestAssertions.assertGetRequestOk(result)
-
-      val doc: Document = Jsoup.parse(contentAsString(result))
       doc.select(".govuk-radios__input[checked]").iterator().asScala.toList(0).`val`() shouldBe "Yes"
     }
   }
@@ -130,18 +131,19 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       ).withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
       val result: Future[Result] = controller.canYouMakeAnUpfrontPaymentSubmit(fakeRequest)
-
-      RequestAssertions.assertGetRequestOk(result)
-
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
 
-      doc.title() shouldBe s"Error: $expectedPageTitleCanYouPayUpfrontPage"
-      doc.select(".govuk-fieldset__heading").text() shouldBe expectedH1CanYouPayUpfrontPage
-      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
-      doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1        = expectedH1CanYouPayUpfrontPage,
+        expectedSubmitUrl = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit.url),
+        expectedBack      = Some(routes.YourBillController.yourBill.url),
+        hasFormError      = true
+      )
+
       doc.select("#CanYouMakeAnUpFrontPayment-hint").text() shouldBe expectedPageHintCanPayUpfrontPage
-      doc.select("#back").attr("href") shouldBe routes.YourBillController.yourBill.url
       val errorSummary = doc.select(".govuk-error-summary")
       val errorLink = errorSummary.select("a")
       errorLink.text() shouldBe "Select yes if you can make an upfront payment"
@@ -157,18 +159,17 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.upfrontPaymentAmount(fakeRequest)
-
-      RequestAssertions.assertGetRequestOk(result)
-
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
 
-      doc.title() shouldBe expectedPageTitleHowMuchCanYouPayUpfrontPage
-      doc.select(".govuk-label-wrapper").text() shouldBe expectedH1HowMuchCanYouPayUpfrontPage
-      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
-      doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
-      doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url
-      ContentAssertions.languageToggleExists(doc)
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1        = expectedH1HowMuchCanYouPayUpfrontPage,
+        expectedSubmitUrl = Some(routes.UpfrontPaymentController.upfrontPaymentAmountSubmit.url),
+        expectedBack      = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit.url)
+      )
+
       doc.select("#UpfrontPaymentAmount").size() shouldBe 1
       val poundSymbol = doc.select(".govuk-input__prefix")
       poundSymbol.size() shouldBe 1
@@ -291,21 +292,22 @@ class UpfrontPaymentControllerSpec extends ItSpec {
             .withFormUrlEncodedBody(("UpfrontPaymentAmount", formInput))
 
           val result: Future[Result] = controller.upfrontPaymentAmountSubmit(fakeRequest)
-
-          RequestAssertions.assertGetRequestOk(result)
-
           val pageContent: String = contentAsString(result)
           val doc: Document = Jsoup.parse(pageContent)
 
-          doc.title() shouldBe s"Error: $expectedPageTitleHowMuchCanYouPayUpfrontPage"
-          doc.select(".govuk-label--xl").text() shouldBe expectedH1HowMuchCanYouPayUpfrontPage
-          doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
-          doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
+          RequestAssertions.assertGetRequestOk(result)
+          ContentAssertions.commonPageChecks(
+            doc,
+            expectedH1        = expectedH1HowMuchCanYouPayUpfrontPage,
+            expectedSubmitUrl = Some(routes.UpfrontPaymentController.upfrontPaymentAmountSubmit.url),
+            expectedBack      = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit.url),
+            hasFormError      = true
+          )
+
           val errorSummary = doc.select(".govuk-error-summary")
           val errorLink = errorSummary.select("a")
           errorLink.text() shouldBe errorMessage
           errorLink.attr("href") shouldBe "#UpfrontPaymentAmount"
-          doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url
           EssttpBackend.UpfrontPaymentAmount.verifyNoneUpdateUpfrontPaymentAmountRequest(TdAll.journeyId)
         }
       }
@@ -317,23 +319,23 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       EssttpBackend.UpfrontPaymentAmount.findJourney(testCrypto)()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
       val result: Future[Result] = controller.upfrontPaymentSummary(fakeRequest)
-
-      RequestAssertions.assertGetRequestOk(result)
-
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
 
-      doc.title() shouldBe expectedPageTitleUpfrontSummaryPage
-      doc.select(".govuk-heading-xl").text() shouldBe expectedH1UpfrontSummaryPage
-      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
-      doc.select("#back").attr("href") shouldBe routes.UpfrontPaymentController.upfrontPaymentAmount.url
-      ContentAssertions.languageToggleExists(doc)
-      doc.select(".hmrc-sign-out-nav__link").attr("href") shouldBe "http://localhost:9949/auth-login-stub/session/logout"
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1        = expectedH1UpfrontSummaryPage,
+        expectedSubmitUrl = None,
+        expectedBack      = Some(routes.UpfrontPaymentController.upfrontPaymentAmount.url)
+      )
 
         def question(row: Element) = row.select(".govuk-summary-list__key").text()
         def answer(row: Element) = row.select(".govuk-summary-list__value").text()
         def changeUrl(row: Element) = row.select(".govuk-link").attr("href")
+
       val rows = doc.select(".govuk-summary-list__row").iterator().asScala.toList
       question(rows(0)) shouldBe "Can you make an upfront payment?"
       question(rows(1)) shouldBe "Upfront payment Taken within 10 working days"

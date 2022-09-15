@@ -39,13 +39,10 @@ class IneligibleControllerSpec extends ItSpec {
 
   def pageContentAsDoc(result: Future[Result]): Document = Jsoup.parse(contentAsString(result))
 
-  def ineligiblePageLeadingContent(page: Document, expectedH1: String, leadingP1: String): Assertion = {
-    page.select(".govuk-heading-xl").text() shouldBe expectedH1
+  def assertIneligiblePageLeadingP1(page: Document, leadingP1: String): Assertion =
     page.select(".govuk-body").asScala.toList(0).text() shouldBe leadingP1
-  }
 
   def assertCommonEligibilityContent(page: Document): Assertion = {
-    ContentAssertions.languageToggleExists(page)
     val commonEligibilityWrapper = page.select(".common-eligibility")
     val govukBodyElements = commonEligibilityWrapper.select(".govuk-body").asScala.toList
     govukBodyElements(0).text() shouldBe "For further support you can contact the Payment Support Service on 0300 200 3835 to speak to an advisor."
@@ -72,67 +69,109 @@ class IneligibleControllerSpec extends ItSpec {
   }
 
   "IneligibleController should display" - {
+
     "Generic not eligible page correctly" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(testCrypto))
+
       val result: Future[Result] = controller.genericIneligiblePage(fakeRequest)
       val page = pageContentAsDoc(result)
-      ineligiblePageLeadingContent(
-        page       = page,
-        expectedH1 = "Call us",
-        leadingP1  = "You are not eligible for an online payment plan. You may still be able to set up a payment plan over the phone."
+
+      ContentAssertions.commonPageChecks(
+        page,
+        expectedH1        = "Call us",
+        expectedBack      = None,
+        expectedSubmitUrl = None
+      )
+      assertIneligiblePageLeadingP1(
+        page      = page,
+        leadingP1 = "You are not eligible for an online payment plan. You may still be able to set up a payment plan over the phone."
       )
       assertCommonEligibilityContent(page)
     }
+
     "Debt too large ineligible page correctly" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(testCrypto))
+
       val result: Future[Result] = controller.debtTooLargePage(fakeRequest)
       val page = pageContentAsDoc(result)
-      ineligiblePageLeadingContent(
-        page       = page,
-        expectedH1 = "Call us",
-        leadingP1  = "You must owe £15,000 or less to be eligible for a payment plan online. You may still be able to set up a plan over the phone."
+
+      ContentAssertions.commonPageChecks(
+        page,
+        expectedH1        = "Call us",
+        expectedBack      = None,
+        expectedSubmitUrl = None
+      )
+      assertIneligiblePageLeadingP1(
+        page      = page,
+        leadingP1 = "You must owe £15,000 or less to be eligible for a payment plan online. You may still be able to set up a plan over the phone."
       )
       assertCommonEligibilityContent(page)
     }
+
     "Existing ttp ineligible page correctly" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExistingTTP`(testCrypto))
+
       val result: Future[Result] = controller.alreadyHaveAPaymentPlanPage(fakeRequest)
       val page = pageContentAsDoc(result)
-      ineligiblePageLeadingContent(
-        page       = page,
-        expectedH1 = "You already have a payment plan with HMRC",
-        leadingP1  = "You can only have one payment plan at a time."
+
+      ContentAssertions.commonPageChecks(
+        page,
+        expectedH1        = "You already have a payment plan with HMRC",
+        expectedBack      = None,
+        expectedSubmitUrl = None
+      )
+      assertIneligiblePageLeadingP1(
+        page      = page,
+        leadingP1 = "You can only have one payment plan at a time."
       )
       assertCommonEligibilityContent(page)
     }
+
     "Debt too old ineligible page correctly" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(testCrypto))
+
       val result: Future[Result] = controller.debtTooOldPage(fakeRequest)
       val page = pageContentAsDoc(result)
-      ineligiblePageLeadingContent(
-        page       = page,
-        expectedH1 = "Call us",
-        leadingP1  = "Your overdue amount must have a due date that is less than 35 days ago for you to be eligible for a payment plan online. You may still be able to set up a plan over the phone."
+
+      ContentAssertions.commonPageChecks(
+        page,
+        expectedH1        = "Call us",
+        expectedBack      = None,
+        expectedSubmitUrl = None
+      )
+      assertIneligiblePageLeadingP1(
+        page      = page,
+        leadingP1 = "Your overdue amount must have a due date that is less than 35 days ago for you to be eligible for a payment plan online. You may still be able to set up a plan over the phone."
       )
       assertCommonEligibilityContent(page)
     }
+
     "Returns not up to date ineligible page correctly" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - MissingFiledReturns`(testCrypto))
+
       val result: Future[Result] = controller.fileYourReturnPage(fakeRequest)
       val page = pageContentAsDoc(result)
-      ineligiblePageLeadingContent(
-        page       = page,
-        expectedH1 = "File your return to use this service",
-        leadingP1  = "To be eligible for a payment plan online, you need to be up to date with your PAYE for Employers returns. Once you have done this, you can return to this service."
+
+      ContentAssertions.commonPageChecks(
+        page,
+        expectedH1        = "File your return to use this service",
+        expectedBack      = None,
+        expectedSubmitUrl = None
       )
+      assertIneligiblePageLeadingP1(
+        page      = page,
+        leadingP1 = "To be eligible for a payment plan online, you need to be up to date with your PAYE for Employers returns. Once you have done this, you can return to this service."
+      )
+
       assertCommonEligibilityContent(page)
       page.select(".govuk-body").asScala.toList(1).text() shouldBe "Go to your tax account to file your tax return."
       page.select("#bta-link").attr("href") shouldBe "/set-up-a-payment-plan/test-only/bta-page?return-page"
     }
+
   }
 }
