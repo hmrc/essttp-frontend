@@ -6,8 +6,8 @@ GET    /                                                    controllers.LandingC
 # start journey endpoint for gov-uk (this is the link on gov-uk pages pointint to our application)
 
 GET    /sign-out                                            controllers.SignOutController.signOut
-GET    /do-you-want-to-give-feedback-on-this-service        controllers.SignOutController.doYouWantToGiveFeedback
-POST   /do-you-want-to-give-feedback-on-this-service        controllers.SignOutController.doYouWantToGiveFeedbackSubmit
+GET    /do-you-want-to-give-feedback                        controllers.SignOutController.doYouWantToGiveFeedback
+POST   /do-you-want-to-give-feedback                        controllers.SignOutController.doYouWantToGiveFeedbackSubmit
 
 
 GET    /govuk/epaye/start                                   controllers.EpayeGovUkController.startJourney
