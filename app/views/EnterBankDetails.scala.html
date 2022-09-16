@@ -110,6 +110,7 @@
             errorMessage = fieldErrorMessage(sortCodeKey, form, errorMessageOverrides),
             spellcheck = Some(false),
             inputmode = Some("numeric"),
+            autocomplete = Some("off"),
             value = form.data.get(sortCodeKey)
         ))
 
@@ -127,6 +128,7 @@
             errorMessage = fieldErrorMessage(accountNumberKey, form, errorMessageOverrides),
             spellcheck = Some(false),
             inputmode = Some("numeric"),
+            autocomplete = Some("off"),
             value = form.data.get(accountNumberKey)
         ))
 

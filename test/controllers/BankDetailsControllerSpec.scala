@@ -259,9 +259,11 @@ class BankDetailsControllerSpec extends ItSpec {
       nameInput.attr("autocomplete") shouldBe "name"
       nameInput.attr("spellcheck") shouldBe "false"
 
+      sortCodeInput.attr("autocomplete") shouldBe "off"
       sortCodeInput.attr("inputmode") shouldBe "numeric"
       sortCodeInput.attr("spellcheck") shouldBe "false"
 
+      accountNumberInput.attr("autocomplete") shouldBe "off"
       accountNumberInput.attr("inputmode") shouldBe "numeric"
       accountNumberInput.attr("spellcheck") shouldBe "false"
 
