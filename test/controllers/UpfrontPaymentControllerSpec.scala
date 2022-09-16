@@ -176,7 +176,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       poundSymbol.text() shouldBe "£"
     }
 
-    "should route the user to /can-you-make-an-upfront-payment when they try to force browse without selecting 'Yes' on the previous page" in {
+    "should route the user to /retrieve-extreme-dates when they try to force browse without selecting 'Yes' on the previous page" in {
       stubCommonActions()
       EssttpBackend.CanPayUpfront.findJourney(testCrypto)(JourneyJsonTemplates.`Answered Can Pay Upfront - No`(testCrypto))
 
@@ -184,7 +184,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       val result: Future[Result] = controller.upfrontPaymentAmount(fakeRequest)
 
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.canYouMakeAnUpfrontPaymentUrl)
+      redirectLocation(result) shouldBe Some(PageUrls.retrievedExtremeDatesUrl)
     }
 
     "should prepopulate the form when user navigates back and they have an upfront payment amount in their journey" in {

@@ -143,7 +143,8 @@ object EssttpBackend {
     def verifyNoneUpdateEligibilityRequest(journeyId: JourneyId): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(updateEligibilityResultUrl(journeyId))))
 
-    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Eligibility Checked - Eligible`(encrypter)): StubMapping = findByLatestSessionId(jsonBody)
+    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Eligibility Checked - Eligible`(encrypter)): StubMapping =
+      findByLatestSessionId(jsonBody)
   }
 
   object CanPayUpfront {
@@ -413,7 +414,8 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(agreedTermsAndConditionsUrl(journeyId)))
       )
 
-    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Agreed Terms and Conditions`(encrypter)): StubMapping = findByLatestSessionId(jsonBody)
+    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Agreed Terms and Conditions`(encrypter)): StubMapping =
+      findByLatestSessionId(jsonBody)
   }
 
   object SubmitArrangement {
