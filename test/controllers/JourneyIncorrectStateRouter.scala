@@ -38,10 +38,11 @@ class JourneyIncorrectStateRouter extends ItSpec {
       ("Stages.EligibilityChecked", () => EssttpBackend.EligibilityCheck.findJourney(testCrypto)(
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(testCrypto)
       ), PageUrls.notEligibleUrl),
-      ("Stages.AnsweredCanPayUpfront", () => EssttpBackend.CanPayUpfront.findJourney(testCrypto)(), PageUrls.canYouMakeAnUpfrontPaymentUrl),
-      ("Stages.AnsweredCanPayUpfront", () => EssttpBackend.CanPayUpfront.findJourney(testCrypto)(
-        JourneyJsonTemplates.`Answered Can Pay Upfront - No`(testCrypto)
-      ), PageUrls.retrievedExtremeDatesUrl),
+      ("Stages.AnsweredCanPayUpfront", () => EssttpBackend.CanPayUpfront.findJourney(testCrypto)(), PageUrls.howMuchCanYouPayUpfrontUrl),
+      ("Stages.AnsweredCanPayUpfront",
+        () => EssttpBackend.CanPayUpfront.findJourney(testCrypto)(JourneyJsonTemplates.`Answered Can Pay Upfront - No`(testCrypto)),
+        PageUrls.retrievedExtremeDatesUrl
+      ),
       ("Stages.EnteredUpfrontPaymentAmount", () => EssttpBackend.UpfrontPaymentAmount.findJourney(testCrypto)(), PageUrls.upfrontPaymentSummaryUrl),
       ("Stages.RetrievedExtremeDates", () => EssttpBackend.Dates.findJourneyExtremeDates(testCrypto)(), PageUrls.determineAffordabilityUrl),
       ("Stages.RetrievedAffordabilityResult", () => EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto)(), PageUrls.howMuchCanYouPayEachMonthUrl),
