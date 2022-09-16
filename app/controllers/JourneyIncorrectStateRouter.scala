@@ -35,7 +35,7 @@ object JourneyIncorrectStateRouter {
       case j: Journey.Stages.EligibilityChecked => EligibilityRouter.nextPage(j.eligibilityCheckResult)
       case j: Journey.Stages.AnsweredCanPayUpfront =>
         if (j.canPayUpfront.value)
-          Redirect(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment)
+          Redirect(routes.UpfrontPaymentController.upfrontPaymentAmount)
         else
           Redirect(routes.DatesApiController.retrieveExtremeDates)
       case _: Journey.Stages.EnteredUpfrontPaymentAmount  => Redirect(routes.UpfrontPaymentController.upfrontPaymentSummary)
