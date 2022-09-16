@@ -33,7 +33,7 @@ object JourneyFinalStateCheck {
   private val endStateConditional: Journey => Boolean = journey => journey.stage === AfterSubmittedArrangement.Submitted
 
   private def logMessage(implicit requestHeader: RequestHeader): Unit =
-    JourneyLogger.info(s"User tried to force browse to a page in the journey, but they have finished their journey. Redirecting to confirmation page")
+    JourneyLogger.info("User tried to force browser to a page in the journey, but they have finished their journey. Redirecting to confirmation page")
 
   private val confirmationRedirect: Result = Redirect(routes.PaymentPlanSetUpController.paymentPlanSetUp())
 

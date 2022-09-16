@@ -314,41 +314,107 @@ class UpfrontPaymentControllerSpec extends ItSpec {
   }
 
   "GET /upfront-payment-summary" - {
-    "should return 200 and the upfront payment summary page" in {
-      stubCommonActions()
-      EssttpBackend.UpfrontPaymentAmount.findJourney(testCrypto)()
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+    "should return 200 and the upfront payment summary page" - {
 
-      val result: Future[Result] = controller.upfrontPaymentSummary(fakeRequest)
-      val pageContent: String = contentAsString(result)
-      val doc: Document = Jsoup.parse(pageContent)
+        def test(
+            stubActions:                        () => Unit,
+            expectedUpfrontPaymentAmountString: String,
+            expectedRemainingAmountString:      String
+        ) = {
+          stubActions()
+          val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
-      RequestAssertions.assertGetRequestOk(result)
-      ContentAssertions.commonPageChecks(
-        doc,
-        expectedH1        = expectedH1UpfrontSummaryPage,
-        expectedSubmitUrl = None,
-        expectedBack      = Some(routes.UpfrontPaymentController.upfrontPaymentAmount.url)
-      )
+          val result: Future[Result] = controller.upfrontPaymentSummary(fakeRequest)
+          val pageContent: String = contentAsString(result)
+          val doc: Document = Jsoup.parse(pageContent)
 
-        def question(row: Element) = row.select(".govuk-summary-list__key").text()
-        def answer(row: Element) = row.select(".govuk-summary-list__value").text()
-        def changeUrl(row: Element) = row.select(".govuk-link").attr("href")
+          RequestAssertions.assertGetRequestOk(result)
+          ContentAssertions.commonPageChecks(
+            doc,
+            expectedH1        = expectedH1UpfrontSummaryPage,
+            expectedSubmitUrl = None,
+            expectedBack      = Some(routes.UpfrontPaymentController.upfrontPaymentAmount.url)
+          )
 
-      val rows = doc.select(".govuk-summary-list__row").iterator().asScala.toList
-      question(rows(0)) shouldBe "Can you make an upfront payment?"
-      question(rows(1)) shouldBe "Upfront payment Taken within 10 working days"
-      question(rows(2)) shouldBe "Remaining amount to pay"
-      answer(rows(0)) shouldBe "Yes"
-      answer(rows(1)) shouldBe "£10"
-      answer(rows(2)) shouldBe "£2,990 (interest may be added to this amount)"
-      changeUrl(rows(0)) shouldBe PageUrls.canYouMakeAnUpfrontPaymentUrl
-      changeUrl(rows(1)) shouldBe PageUrls.howMuchCanYouPayUpfrontUrl
+            def question(row: Element) = row.select(".govuk-summary-list__key").text()
+            def answer(row: Element) = row.select(".govuk-summary-list__value").text()
+            def changeUrl(row: Element) = row.select(".govuk-link").attr("href")
 
-      val continueCta = doc.select("#continue")
-      continueCta.text() shouldBe "Continue"
-      continueCta.attr("href") shouldBe PageUrls.retrievedExtremeDatesUrl
+          val rows = doc.select(".govuk-summary-list__row").iterator().asScala.toList
+          question(rows(0)) shouldBe "Can you make an upfront payment?"
+          question(rows(1)) shouldBe "Upfront payment Taken within 10 working days"
+          question(rows(2)) shouldBe "Remaining amount to pay"
+          answer(rows(0)) shouldBe "Yes"
+          answer(rows(1)) shouldBe expectedUpfrontPaymentAmountString
+          answer(rows(2)) shouldBe expectedRemainingAmountString
+          changeUrl(rows(0)) shouldBe PageUrls.canYouMakeAnUpfrontPaymentUrl
+          changeUrl(rows(1)) shouldBe PageUrls.howMuchCanYouPayUpfrontUrl
+
+          val continueCta = doc.select("#continue")
+          continueCta.text() shouldBe "Continue"
+          continueCta.attr("href") shouldBe PageUrls.retrievedExtremeDatesUrl
+
+        }
+
+      "when they have just given an upfront payment amount" in {
+        test(
+          { () =>
+            stubCommonActions()
+            EssttpBackend.UpfrontPaymentAmount.findJourney(testCrypto)()
+            ()
+          },
+          expectedUpfrontPaymentAmountString = "£10",
+          expectedRemainingAmountString      = "£2,990 (interest may be added to this amount)"
+        )
+      }
+
+      "when they have confirmed they upfront payment answers and they have said " +
+        "they can make an upfront payment" in {
+          test(
+            { () =>
+              stubCommonActions()
+              EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto)()
+              ()
+            },
+            expectedUpfrontPaymentAmountString = "£2",
+            expectedRemainingAmountString      = "£2,998 (interest may be added to this amount)"
+          )
+        }
+
     }
+
+    "should redirect to the missing info page" - {
+
+        def test(stubActions: () => Unit) = {
+          stubActions()
+          val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+          val result: Future[Result] = controller.upfrontPaymentSummary(fakeRequest)
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.MissingInfoController.missingInfo.url)
+        }
+
+      "when the user has not given an upfront payment amount yet" in {
+        test({ () =>
+          stubCommonActions()
+          EssttpBackend.CanPayUpfront.findJourney(testCrypto)()
+          ()
+        })
+      }
+
+      "when the user has given upfront payment answers but they have said they can't " +
+        "make an upfront payment" in {
+          test({ () =>
+            stubCommonActions()
+            EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto)(
+              JourneyJsonTemplates.`Retrieved Affordability no upfront payment`(29997, testCrypto)
+            )
+            ()
+          })
+        }
+
+    }
+
   }
 }

@@ -17,8 +17,7 @@
 package controllers
 
 import _root_.actions.Actions
-import controllers.JourneyFinalStateCheck.finalStateCheckF
-import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
+import controllers.JourneyFinalStateCheck.finalStateCheck
 import essttp.journey.model.Journey
 import io.scalaland.chimney.dsl.TransformerOps
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -45,10 +44,10 @@ class PaymentScheduleController @Inject() (
 
   implicit val localDateOrdering: Ordering[LocalDate] = _ compareTo _
 
-  val checkPaymentSchedule: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
+  val checkPaymentSchedule: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
-      case j: Journey.BeforeSelectedPaymentPlan =>
-        logErrorAndRouteToDefaultPageF(j)
+      case _: Journey.BeforeSelectedPaymentPlan =>
+        MissingInfoController.redirectToMissingInfoPage()
 
       case j: Journey.AfterSelectedPaymentPlan =>
         val upfrontPaymentAnswers =
@@ -56,14 +55,14 @@ class PaymentScheduleController @Inject() (
         val paymentDay =
           j.into[Journey.AfterEnteredDayOfMonth].transform.dayOfMonth
 
-        finalStateCheckF(j, Future.successful(Ok(paymentSchedulePage(upfrontPaymentAnswers, paymentDay, j.selectedPaymentPlan))))
+        finalStateCheck(j, Ok(paymentSchedulePage(upfrontPaymentAnswers, paymentDay, j.selectedPaymentPlan)))
     }
   }
 
   val checkPaymentScheduleSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     request.journey match {
-      case j: Journey.BeforeSelectedPaymentPlan =>
-        logErrorAndRouteToDefaultPageF(j)
+      case _: Journey.BeforeSelectedPaymentPlan =>
+        Future.successful(MissingInfoController.redirectToMissingInfoPage())
 
       case j: Journey.AfterSelectedPaymentPlan =>
         j match {

@@ -44,12 +44,12 @@ class Actions @Inject() (
       .andThen(authenticatedActionRefiner)
       .andThen(getJourneyActionRefiner)
 
-  val eligibleJourneyAction: ActionBuilder[AuthenticatedJourneyRequest, AnyContent] =
+  val eligibleJourneyAction: ActionBuilder[EligibleJourneyRequest, AnyContent] =
     actionBuilder
       .andThen(authenticatedActionRefiner)
       .andThen(getJourneyActionRefiner)
-      .andThen(filterForEligibleJourney)
       .andThen(barsLockoutActionFilter)
+      .andThen(filterForEligibleJourney)
 
   private def filterForEligibleJourney: ActionRefiner[AuthenticatedJourneyRequest, EligibleJourneyRequest] =
     new ActionRefiner[AuthenticatedJourneyRequest, EligibleJourneyRequest] {
@@ -68,7 +68,8 @@ class Actions @Inject() (
                   journey    = j,
                   enrolments = request.enrolments,
                   request    = request,
-                  request.ggCredId
+                  request.ggCredId,
+                  j.eligibilityCheckResult
                 )
               )
             } else {

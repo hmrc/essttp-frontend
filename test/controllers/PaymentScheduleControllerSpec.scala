@@ -161,6 +161,18 @@ class PaymentScheduleControllerSpec extends ItSpec {
       }
     }
 
+    "redirect to the missing info page if no payment plan has been selected yet" in {
+      stubCommonActions()
+      EssttpBackend.AffordableQuotes.findJourney(testCrypto)()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+      val result: Future[Result] = controller.checkPaymentSchedule(fakeRequest)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.MissingInfoController.missingInfo.url)
+
+    }
+
   }
 
   s"POST ${routes.PaymentScheduleController.checkPaymentScheduleSubmit.url}" - {
