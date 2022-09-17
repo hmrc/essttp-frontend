@@ -512,6 +512,10 @@ object Messages {
 
   object BankDetails {
 
+    val `Bank details`: Message = Message(
+      english = "Bank details"
+    )
+
     val `What type of account details are you providing?`: Message = Message(
       english = "What type of account details are you providing?"
     )
@@ -576,6 +580,7 @@ object Messages {
       "accountNumber.error.invalid" -> Message("Account number must be between 6 and 8 digits"),
       "isSoleSignatory.error.required" -> Message("Select yes if you are the account holder"),
       s"sortCode.${accountNumberNotWellFormatted.formError.message}" -> Message("Enter a valid combination of bank account number and sort code"),
+      s"sortCodeXXX.${accountNumberNotWellFormatted.formError.message}" -> Message("Enter a valid combination of bank account number and sort code"),
       s"sortCode.${sortCodeNotPresentOnEiscd.formError.message}" -> Message("Enter a valid combination of bank account number and sort code"),
       s"sortCode.${sortCodeDoesNotSupportsDirectDebit.formError.message}" -> Message(
         "You have entered a sort code which does not accept this type of payment. " +
