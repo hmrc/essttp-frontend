@@ -85,8 +85,8 @@ object BankDetailsForm {
   ))
 
   private val sortCodeAndAccountNumberOverrides: Seq[FormError] = Seq(
-    FormError("sortCode", ""), // FormErrors with usual styling but no content
-    FormError("accountNumber", ""), // FormErrors with usual styling but no content
+    FormError("sortCode", ""), // 'turns off' the sortCode field error
+    FormError("accountNumber", ""), // 'turns off' the accountNumber field error
     FormError("sortCodeAndAccountNumber", "sortCode.validate.accountNumberIsWellFormatted.no")
   )
   val accountNumberNotWellFormatted: FormErrorWithFieldMessageOverrides =
@@ -101,13 +101,11 @@ object BankDetailsForm {
     )
   val sortCodeDoesNotSupportsDirectDebit: FormErrorWithFieldMessageOverrides =
     FormErrorWithFieldMessageOverrides(
-      formError             = FormError("sortCode", "sortCode.validate.sortCodeSupportsDirectDebit.no"),
-      fieldMessageOverrides = Seq()
+      formError = FormError("sortCode", "sortCode.validate.sortCodeSupportsDirectDebit.no")
     )
   val nameDoesNotMatch: FormErrorWithFieldMessageOverrides =
     FormErrorWithFieldMessageOverrides(
-      formError             = FormError("name", "name.verify.nameMatches.no"),
-      fieldMessageOverrides = Seq()
+      formError = FormError("name", "name.verify.nameMatches.no")
     )
   val accountDoesNotExist: FormErrorWithFieldMessageOverrides =
     FormErrorWithFieldMessageOverrides(

@@ -22,6 +22,7 @@
 @import controllers.routes
 @import models.forms.BankDetailsForm
 @import models.enumsforforms.IsSoleSignatoryFormValue
+@import play.twirl.api.TwirlFeatureImports.defining
 @import cats.syntax.eq._
 
 @this(
@@ -62,7 +63,7 @@
 
 @fieldErrorMessage(key: String, form: Form[BankDetailsForm], overrides: Seq[FormError]) = @{
     if (overrides.exists(_.key === key)) {
-        Some(ErrorMessage())
+        None
     } else {
         (form.error(key))
                 .map(e => ErrorMessage(
@@ -71,7 +72,7 @@
     }
 }
 
-@sortCodeAndAccountNumberError= @{ errorMessageOverrides.find(_.key === "sortCodeAndAccountNumber") }
+@sortCodeAndAccountNumberFormError= @{ errorMessageOverrides.find(_.key === "sortCodeAndAccountNumber") }
 
 
 @layout(pageTitle = Some(title), backUrl = backUrl, hasErrors = form.hasErrors) {
@@ -103,13 +104,13 @@
             value = form.data.get(nameKey)
         ))
 
-        <fieldset class="govuk-fieldset long-word-wrap" @if(sortCodeAndAccountNumberError.isDefined) {
+        @defining(sortCodeAndAccountNumberFormError) { formError  =>
+            <fieldset class="govuk-fieldset" @if(formError.isDefined) {
                 aria-describedby="sort-code-and-account-number-error"}>
-            <legend class="govuk-label govuk-visually-hidden">@Messages.BankDetails.`Bank details`.show</legend>
 
-            <div id="bars-invalid" class="form-field @sortCodeAndAccountNumberError.map { error => govuk-form-group--error }">
-                @sortCodeAndAccountNumberError.map { error =>
-                    <span class="govuk-error-message" id="bars-invalid-error">
+            <div class="form-field @formError.map { _ => govuk-form-group--error }">
+                @formError.map { error =>
+                    <span class="govuk-error-message" id="sort-code-and-account-number-error">
                         <span class="govuk-visually-hidden">@Messages.error.show</span>
                         @Messages.BankDetails.errors(s"sortCode.${error.message}").show
                     </span>
@@ -125,7 +126,7 @@
                     hint = Some(Hint(
                         content = Text(Messages.BankDetails.`Must be 6 digits long`.show)
                     )),
-                    classes = "govuk-input--width-5",
+                    classes = s"govuk-input--width-5 ${errorMessageOverrides.find(_.key === sortCodeKey).fold("")(_ => "govuk-input--error")}",
                     errorMessage = fieldErrorMessage(sortCodeKey, form, errorMessageOverrides),
                     spellcheck = Some(false),
                     inputmode = Some("numeric"),
@@ -143,7 +144,7 @@
                     hint = Some(Hint(
                         content = Text(Messages.BankDetails.`Must be between 6 and 8 digits long`.show)
                     )),
-                    classes = "govuk-!-width-two-thirds",
+                    classes = s"govuk-!-width-two-thirds ${errorMessageOverrides.find(_.key === sortCodeKey).fold("")(_ => "govuk-input--error")}",
                     errorMessage = fieldErrorMessage(accountNumberKey, form, errorMessageOverrides),
                     spellcheck = Some(false),
                     inputmode = Some("numeric"),
@@ -151,7 +152,8 @@
                     value = form.data.get(accountNumberKey)
                 ))
             </div>
-        </fieldset>
+            </fieldset>
+        }
 
         @govukRadios(Radios(
             fieldset = Some(Fieldset(
