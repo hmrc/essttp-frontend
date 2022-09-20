@@ -22,6 +22,7 @@
 @import controllers.routes
 @import models.forms.BankDetailsForm
 @import models.enumsforforms.IsSoleSignatoryFormValue
+@import play.twirl.api.TwirlFeatureImports.defining
 @import cats.syntax.eq._
 
 @this(
@@ -61,11 +62,18 @@
 }
 
 @fieldErrorMessage(key: String, form: Form[BankDetailsForm], overrides: Seq[FormError]) = @{
-    overrides.find(_.key === key).orElse(form.error(key))
-    .map(e => ErrorMessage(
-        content = Text(Messages.BankDetails.errors(s"$key.${e.message}").show)
-    ))
+    if (overrides.exists(_.key === key)) {
+        None
+    } else {
+        (form.error(key))
+                .map(e => ErrorMessage(
+            content = Text(Messages.BankDetails.errors(s"$key.${e.message}").show)
+        ))
+    }
 }
+
+@sortCodeAndAccountNumberFormError= @{ errorMessageOverrides.find(_.key === "sortCodeAndAccountNumber") }
+
 
 @layout(pageTitle = Some(title), backUrl = backUrl, hasErrors = form.hasErrors) {
     @if(form.errors.nonEmpty) {
@@ -96,41 +104,56 @@
             value = form.data.get(nameKey)
         ))
 
-        @govukInput(Input(
-            id = sortCodeKey,
-            name = sortCodeKey,
-            label = Label(
-                classes = "govuk-label--m",
-                content = Text(Messages.BankDetails.`Sort code`.show)
-            ),
-            hint = Some(Hint(
-                content = Text(Messages.BankDetails.`Must be 6 digits long`.show)
-            )),
-            classes = "govuk-input--width-5",
-            errorMessage = fieldErrorMessage(sortCodeKey, form, errorMessageOverrides),
-            spellcheck = Some(false),
-            inputmode = Some("numeric"),
-            autocomplete = Some("off"),
-            value = form.data.get(sortCodeKey)
-        ))
+        @defining(sortCodeAndAccountNumberFormError) { formError  =>
+            <fieldset class="govuk-fieldset" @if(formError.isDefined) {
+                aria-describedby="sort-code-and-account-number-error"}>
 
-        @govukInput(Input(
-            id = accountNumberKey,
-            name = accountNumberKey,
-            label = Label(
-                classes = "govuk-label--m",
-                content = Text(Messages.BankDetails.`Account number`.show)
-            ),
-            hint = Some(Hint(
-                content = Text(Messages.BankDetails.`Must be between 6 and 8 digits long`.show)
-            )),
-            classes = "govuk-!-width-two-thirds",
-            errorMessage = fieldErrorMessage(accountNumberKey, form, errorMessageOverrides),
-            spellcheck = Some(false),
-            inputmode = Some("numeric"),
-            autocomplete = Some("off"),
-            value = form.data.get(accountNumberKey)
-        ))
+            <div class="form-field @formError.map { _ => govuk-form-group--error }">
+                @formError.map { error =>
+                    <span class="govuk-error-message" id="sort-code-and-account-number-error">
+                        <span class="govuk-visually-hidden">@Messages.error.show</span>
+                        @Messages.BankDetails.errors(s"sortCode.${error.message}").show
+                    </span>
+                }
+
+                @govukInput(Input(
+                    id = sortCodeKey,
+                    name = sortCodeKey,
+                    label = Label(
+                        classes = "govuk-label--m",
+                        content = Text(Messages.BankDetails.`Sort code`.show)
+                    ),
+                    hint = Some(Hint(
+                        content = Text(Messages.BankDetails.`Must be 6 digits long`.show)
+                    )),
+                    classes = s"govuk-input--width-5 ${errorMessageOverrides.find(_.key === sortCodeKey).fold("")(_ => "govuk-input--error")}",
+                    errorMessage = fieldErrorMessage(sortCodeKey, form, errorMessageOverrides),
+                    spellcheck = Some(false),
+                    inputmode = Some("numeric"),
+                    autocomplete = Some("off"),
+                    value = form.data.get(sortCodeKey)
+                ))
+
+                @govukInput(Input(
+                    id = accountNumberKey,
+                    name = accountNumberKey,
+                    label = Label(
+                        classes = "govuk-label--m",
+                        content = Text(Messages.BankDetails.`Account number`.show)
+                    ),
+                    hint = Some(Hint(
+                        content = Text(Messages.BankDetails.`Must be between 6 and 8 digits long`.show)
+                    )),
+                    classes = s"govuk-!-width-two-thirds ${errorMessageOverrides.find(_.key === accountNumberKey).fold("")(_ => "govuk-input--error")}",
+                    errorMessage = fieldErrorMessage(accountNumberKey, form, errorMessageOverrides),
+                    spellcheck = Some(false),
+                    inputmode = Some("numeric"),
+                    autocomplete = Some("off"),
+                    value = form.data.get(accountNumberKey)
+                ))
+            </div>
+            </fieldset>
+        }
 
         @govukRadios(Radios(
             fieldset = Some(Fieldset(
