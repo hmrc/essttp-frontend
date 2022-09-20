@@ -144,7 +144,7 @@
                     hint = Some(Hint(
                         content = Text(Messages.BankDetails.`Must be between 6 and 8 digits long`.show)
                     )),
-                    classes = s"govuk-!-width-two-thirds ${errorMessageOverrides.find(_.key === sortCodeKey).fold("")(_ => "govuk-input--error")}",
+                    classes = s"govuk-!-width-two-thirds ${errorMessageOverrides.find(_.key === accountNumberKey).fold("")(_ => "govuk-input--error")}",
                     errorMessage = fieldErrorMessage(accountNumberKey, form, errorMessageOverrides),
                     spellcheck = Some(false),
                     inputmode = Some("numeric"),
