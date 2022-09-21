@@ -16,6 +16,7 @@
 
 package controllers
 
+import essttp.rootmodel.DayOfMonth
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalatest.prop.TableDrivenPropertyChecks._
@@ -76,17 +77,45 @@ class PaymentDayControllerSpec extends ItSpec {
       assertPaymentDayPageContent(doc)
     }
 
-    "should prepopulate the form when user navigates back and they have a chosen day of month in their journey" in {
-      stubCommonActions()
-      EssttpBackend.DayOfMonth.findJourney(testCrypto)()
+    "should prepopulate the form" - {
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      "when user navigates back and they have a chosen the 28th of each month in their journey" in {
+        stubCommonActions()
+        EssttpBackend.DayOfMonth.findJourney(DayOfMonth(28), testCrypto)()
 
-      val result: Future[Result] = controller.paymentDay(fakeRequest)
-      val doc: Document = Jsoup.parse(contentAsString(result))
+        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
-      RequestAssertions.assertGetRequestOk(result)
-      doc.select(".govuk-radios__input[checked]").iterator().asScala.toList(0).`val`() shouldBe "28"
+        val result: Future[Result] = controller.paymentDay(fakeRequest)
+        val doc: Document = Jsoup.parse(contentAsString(result))
+
+        RequestAssertions.assertGetRequestOk(result)
+
+        val radioInputs = doc.select(".govuk-radios__input").iterator().asScala.toList
+        radioInputs.size shouldBe 2
+        radioInputs(0).select("[checked]").`val`() shouldBe "28"
+        radioInputs(1).select("[checked]").isEmpty shouldBe true
+      }
+
+      "when user navigates back and they have a chosen a day different from the 28th of each month in their journey" in {
+        stubCommonActions()
+        EssttpBackend.DayOfMonth.findJourney(DayOfMonth(5), testCrypto)()
+
+        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+        val result: Future[Result] = controller.paymentDay(fakeRequest)
+        val doc: Document = Jsoup.parse(contentAsString(result))
+
+        RequestAssertions.assertGetRequestOk(result)
+
+        val radioInputs = doc.select(".govuk-radios__input").iterator().asScala.toList
+        radioInputs.size shouldBe 2
+        radioInputs(0).select("[checked]").isEmpty shouldBe true
+        radioInputs(1).select("[checked]").isEmpty shouldBe false
+
+        doc.select(".govuk-radios__conditional > .govuk-form-group > .govuk-input").`val`() shouldBe "5"
+
+      }
+
     }
   }
 

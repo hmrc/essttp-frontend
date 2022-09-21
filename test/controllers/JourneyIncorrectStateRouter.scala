@@ -24,7 +24,7 @@ import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.EssttpBackend
-import testsupport.testdata.{JourneyJsonTemplates, PageUrls}
+import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
 class JourneyIncorrectStateRouter extends ItSpec {
@@ -47,7 +47,7 @@ class JourneyIncorrectStateRouter extends ItSpec {
       ("Stages.RetrievedExtremeDates", () => EssttpBackend.Dates.findJourneyExtremeDates(testCrypto)(), PageUrls.determineAffordabilityUrl),
       ("Stages.RetrievedAffordabilityResult", () => EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto)(), PageUrls.howMuchCanYouPayEachMonthUrl),
       ("Stages.EnteredMonthlyPaymentAmount", () => EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto)(), PageUrls.whichDayDoYouWantToPayUrl),
-      ("Stages.EnteredDayOfMonth", () => EssttpBackend.DayOfMonth.findJourney(testCrypto)(), PageUrls.retrieveStartDatesUrl),
+      ("Stages.EnteredDayOfMonth", () => EssttpBackend.DayOfMonth.findJourney(TdAll.dayOfMonth(), testCrypto)(), PageUrls.retrieveStartDatesUrl),
       ("Stages.RetrievedStartDates", () => EssttpBackend.Dates.findJourneyStartDates(testCrypto)(), PageUrls.determineAffordableQuotesUrl),
       ("Stages.RetrievedAffordableQuotes", () => EssttpBackend.AffordableQuotes.findJourney(testCrypto)(), PageUrls.instalmentsUrl),
       ("Stages.ChosenPaymentPlan", () => EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto)(), PageUrls.instalmentScheduleUrl),
