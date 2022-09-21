@@ -53,7 +53,7 @@ class ConfigSpec extends ItSpec {
       ("InterestRates.hmrcRate", config.InterestRates.hmrcRate, 2.5),
 
       ("JourneyVariables.minimumUpfrontPaymentAmountInPence", config.JourneyVariables.minimumUpfrontPaymentAmountInPence, AmountInPence(100L)),
-      ("Ttp.headers.correlationId", config.TtpHeaders.correlationId, "correlationId"),
+      ("Ttp.headers.correlationId", config.TtpHeaders.correlationId, "CorrelationId"),
 
       ("ExitSurvey.payeExitSurveyUrl", config.ExitSurvey.payeExitSurveyUrl, "http://localhost:9514/feedback/eSSTTP-PAYE")
 
