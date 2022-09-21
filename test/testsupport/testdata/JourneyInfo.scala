@@ -16,6 +16,7 @@
 
 package testsupport.testdata
 
+import essttp.rootmodel.DayOfMonth
 import uk.gov.hmrc.crypto.Encrypter
 
 object JourneyInfo {
@@ -38,7 +39,7 @@ object JourneyInfo {
   val extremeDates: JourneyInfoAsJson = TdJsonBodies.extremeDatesJourneyInfo()
   def affordableResult(minimumInstalmentAmount: Int = 29997): JourneyInfoAsJson = TdJsonBodies.affordabilityResultJourneyInfo(minimumInstalmentAmount)
   val monthlyPaymentAmount: JourneyInfoAsJson = TdJsonBodies.monthlyPaymentAmountJourneyInfo
-  val dayOfMonth: JourneyInfoAsJson = TdJsonBodies.dayOfMonthJourneyInfo(TdAll.dayOfMonth())
+  def dayOfMonth(dayOfMonth: DayOfMonth = TdAll.dayOfMonth()): JourneyInfoAsJson = TdJsonBodies.dayOfMonthJourneyInfo(dayOfMonth)
   val startDates: JourneyInfoAsJson = TdJsonBodies.startDatesJourneyInfo
   val affordableQuotes: JourneyInfoAsJson = TdJsonBodies.affordableQuotesJourneyInfo
   val selectedPlan: JourneyInfoAsJson = TdJsonBodies.selectedPlanJourneyInfo
@@ -97,11 +98,11 @@ object JourneyInfo {
   def enteredMonthlyPaymentAmount(encrypter: Encrypter): List[JourneyInfoAsJson] =
     monthlyPaymentAmount :: retrievedAffordabilityResult(encrypter = encrypter)
 
-  def enteredDayOfMonth(encrypter: Encrypter): List[JourneyInfoAsJson] =
-    dayOfMonth :: enteredMonthlyPaymentAmount(encrypter)
+  def enteredDayOfMonth(day: DayOfMonth, encrypter: Encrypter): List[JourneyInfoAsJson] =
+    dayOfMonth(day) :: enteredMonthlyPaymentAmount(encrypter)
 
   def retrievedStartDates(encrypter: Encrypter): List[JourneyInfoAsJson] =
-    startDates :: enteredDayOfMonth(encrypter)
+    startDates :: enteredDayOfMonth(TdAll.dayOfMonth(), encrypter)
 
   def retrievedAffordableQuotes(encrypter: Encrypter): List[JourneyInfoAsJson] =
     affordableQuotes :: retrievedStartDates(encrypter)
@@ -137,6 +138,6 @@ object JourneyInfo {
   def submittedArrangementNoUpfrontPayment(encrypter: Encrypter): List[JourneyInfoAsJson] =
     arrangementSubmitted :: directDebitDetails(encrypter) :: typeOfBankAccountBusiness :: selectedPlan :: affordableQuotes ::
       upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: monthlyPaymentAmount ::
-      dayOfMonth :: startDates :: cannotPayUpfront :: eligibilityCheckedEligible(encrypter)
+      dayOfMonth() :: startDates :: cannotPayUpfront :: eligibilityCheckedEligible(encrypter)
 
 }

@@ -51,7 +51,7 @@ class DatesApiControllerSpec extends ItSpec {
   "GET /retrieve-start-dates" - {
     "trigger call to essttp-dates microservice start dates endpoint and update backend" in {
       stubCommonActions()
-      EssttpBackend.DayOfMonth.findJourney(testCrypto)()
+      EssttpBackend.DayOfMonth.findJourney(TdAll.dayOfMonth(), testCrypto)()
       EssttpDates.stubStartDatesCall()
       EssttpBackend.Dates.stubUpdateStartDates(TdAll.journeyId)
 

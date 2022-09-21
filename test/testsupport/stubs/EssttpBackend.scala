@@ -281,7 +281,11 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(dayOfMonthUrl(journeyId)))
       )
 
-    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Entered Day of Month`(encrypter)): StubMapping = findByLatestSessionId(jsonBody)
+    def findJourney(
+        dayOfMonth: DayOfMonth,
+        encrypter:  Encrypter
+    )(jsonBody: String = JourneyJsonTemplates.`Entered Day of Month`(dayOfMonth, encrypter)): StubMapping =
+      findByLatestSessionId(jsonBody)
   }
 
   object AffordableQuotes {

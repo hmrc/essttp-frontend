@@ -16,6 +16,7 @@
 
 package testsupport.testdata
 
+import essttp.rootmodel.DayOfMonth
 import uk.gov.hmrc.crypto.Encrypter
 
 object JourneyJsonTemplates {
@@ -100,9 +101,9 @@ object JourneyJsonTemplates {
     journeyInfo = JourneyInfo.enteredMonthlyPaymentAmount(encrypter)
   )
 
-  def `Entered Day of Month`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Entered Day of Month`(dayOfMonth: DayOfMonth, encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.enteredDayOfMonth,
-    journeyInfo = JourneyInfo.enteredDayOfMonth(encrypter)
+    journeyInfo = JourneyInfo.enteredDayOfMonth(dayOfMonth, encrypter)
   )
 
   def `Retrieved Start Dates`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(

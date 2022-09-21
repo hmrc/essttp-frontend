@@ -86,12 +86,12 @@
      RadioItem(
       content = Text(Messages.PaymentDay.`28th or next working day`.show),
       value = Some("28"),
-      checked = form.data.values.toList.contains("28")
+      checked = form.value.exists(_.differentDay.isEmpty)
      ),
      RadioItem(
       content = Text(Messages.PaymentDay.`A different day`.show),
       value = Some("other"),
-      checked = form.data.values.toList.contains("other"),
+      checked = form.value.exists(_.differentDay.isDefined),
       conditionalHtml = Some(conditionalHtml)
      )
     ),
