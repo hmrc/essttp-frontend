@@ -1,72 +1,7 @@
-import com.typesafe.sbt.SbtScalariform.ScalariformKeys
-import sbt.Def
 import uk.gov.hmrc.DefaultBuildSettings
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
-import scalariform.formatter.preferences._
-import wartremover.Wart
-import wartremover.WartRemover.autoImport.{wartremoverErrors, wartremoverExcluded}
 
 lazy val appName: String = "essttp-frontend"
-
-lazy val scalariformSettings: Def.SettingsDefinition = {
-  // description of options found here -> https://github.com/scala-ide/scalariform
-  ScalariformKeys.preferences := ScalariformKeys.preferences.value
-    .setPreference(AlignArguments, true)
-    .setPreference(AlignParameters, true)
-    .setPreference(AlignSingleLineCaseStatements, true)
-    .setPreference(AllowParamGroupsOnNewlines, true)
-    .setPreference(CompactControlReadability, false)
-    .setPreference(CompactStringConcatenation, false)
-    .setPreference(DanglingCloseParenthesis, Force)
-    .setPreference(DoubleIndentConstructorArguments, true)
-    .setPreference(DoubleIndentMethodDeclaration, true)
-    .setPreference(FirstArgumentOnNewline, Force)
-    .setPreference(FirstParameterOnNewline, Force)
-    .setPreference(FormatXml, true)
-    .setPreference(IndentLocalDefs, true)
-    .setPreference(IndentPackageBlocks, true)
-    .setPreference(IndentSpaces, 2)
-    .setPreference(IndentWithTabs, false)
-    .setPreference(MultilineScaladocCommentsStartOnFirstLine, false)
-    .setPreference(NewlineAtEndOfFile, true)
-    .setPreference(PlaceScaladocAsterisksBeneathSecondAsterisk, false)
-    .setPreference(PreserveSpaceBeforeArguments, true)
-    .setPreference(RewriteArrowSymbols, false)
-    .setPreference(SpaceBeforeColon, false)
-    .setPreference(SpaceBeforeContextColon, false)
-    .setPreference(SpaceInsideBrackets, false)
-    .setPreference(SpaceInsideParentheses, false)
-    .setPreference(SpacesAroundMultiImports, false)
-    .setPreference(SpacesWithinPatternBinders, true)
-}
-
-
-lazy val wartRemoverSettings =
-  Seq(
-    (Compile / compile / wartremoverErrors) ++= Warts.allBut(
-      Wart.DefaultArguments,
-      Wart.ImplicitConversion,
-      Wart.ImplicitParameter,
-      Wart.Nothing,
-      Wart.Overloading,
-      Wart.SizeIs,
-      Wart.SortedMaxMinOption,
-      Wart.Throw,
-      Wart.ToString
-    ),
-    Test / compile / wartremoverErrors --= Seq(
-      Wart.Any,
-      Wart.Equals,
-      Wart.GlobalExecutionContext,
-      Wart.Null,
-      Wart.NonUnitStatements,
-      Wart.PublicInference
-    ),
-    wartremoverExcluded ++= (
-      (baseDirectory.value ** "*.sc").get ++
-        (Compile / routes).value
-      )
-  )
 
 lazy val scalaCompilerOptions = Seq(
   "-Xfatal-warnings",
@@ -93,7 +28,7 @@ lazy val root = (project in file("."))
   .settings(majorVersion := 0)
   .settings(ThisBuild / useSuperShell:= false)
   .settings(
-    scalaVersion := "2.12.15",
+    scalaVersion := "2.12.16",
     name := appName,
     PlayKeys.playDefaultPort := 9215,
     scalacOptions ++= Seq("-feature"),
@@ -115,14 +50,13 @@ lazy val root = (project in file("."))
     }
   )
   .settings(TwirlKeys.templateImports := Seq.empty)
-  .settings(scalariformSettings: _*)
-  .settings(wartRemoverSettings: _*)
+  .settings(ScalariformSettings.scalariformSettings: _*)
+  .settings(WartRemoverSettings.wartRemoverSettings: _*)
   .settings(ScoverageSettings.scoverageSettings: _*)
   .settings(
-    wartremoverExcluded ++= (Compile / routes).value,
-    Compile / doc / wartremoverErrors := Seq(),
     Compile / doc / scalacOptions := Seq() //this will allow to have warnings in `doc` task
   )
+  .settings(SbtUpdatesSettings.sbtUpdatesSettings: _*)
 
 //Hint: Uncomment below lines if you want to work on both projects in tandem from intellj
 //  .dependsOn(cor)
