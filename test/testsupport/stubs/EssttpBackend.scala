@@ -20,7 +20,7 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.crypto.CryptoFormat
 import essttp.journey.model.{JourneyId, Origin, Origins}
-import essttp.rootmodel.bank.TypeOfBankAccount
+import essttp.rootmodel.bank.DetailsAboutBankAccount
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
 import essttp.rootmodel.dates.startdates.StartDatesResponse
 import essttp.rootmodel.ttp.EligibilityCheckResult
@@ -344,19 +344,24 @@ object EssttpBackend {
     def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Has Checked Payment Plan`(encrypter)): StubMapping = findByLatestSessionId(jsonBody)
   }
 
-  object ChosenTypeOfBankAccount {
-    def chosenTypeOfBankAccountUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-chosen-type-of-bank-account"
+  object EnteredDetailsAboutBankAccount {
+    def enterDetailsAboutBankAccountUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-details-about-bank-account"
 
-    def stubUpdateChosenTypeOfBankAccount(journeyId: JourneyId): StubMapping =
-      WireMockHelpers.stubForPostNoResponseBody(chosenTypeOfBankAccountUrl(journeyId))
+    def stubUpdateEnteredDetailsAboutBankAccount(journeyId: JourneyId): StubMapping =
+      WireMockHelpers.stubForPostNoResponseBody(enterDetailsAboutBankAccountUrl(journeyId))
 
-    def verifyUpdateChosenTypeOfBankAccountRequest(journeyId: JourneyId, expectedTypeOfAccount: TypeOfBankAccount): Unit =
-      WireMockHelpers.verifyWithBodyParse(chosenTypeOfBankAccountUrl(journeyId), expectedTypeOfAccount)(TypeOfBankAccount.format)
+    def verifyUpdateEnteredDetailsAboutBankAccountRequest(journeyId: JourneyId, expectedDetailsAboutBankAccount: DetailsAboutBankAccount): Unit =
+      WireMockHelpers.verifyWithBodyParse(enterDetailsAboutBankAccountUrl(journeyId), expectedDetailsAboutBankAccount)(DetailsAboutBankAccount.format)
 
-    def verifyNoneUpdateChosenTypeOfBankAccountRequest(journeyId: JourneyId): Unit =
-      verify(exactly(0), postRequestedFor(urlPathEqualTo(chosenTypeOfBankAccountUrl(journeyId))))
+    def verifyNoneUpdateEnteredDetailsAboutBankAccountRequest(journeyId: JourneyId): Unit =
+      verify(exactly(0), postRequestedFor(urlPathEqualTo(enterDetailsAboutBankAccountUrl(journeyId))))
 
-    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Chosen Type of Bank Account - Business`(encrypter)): StubMapping = findByLatestSessionId(jsonBody)
+    def findJourney(
+        encrypter: Encrypter
+    )(
+        jsonBody: String = JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = true, encrypter)
+    ): StubMapping =
+      findByLatestSessionId(jsonBody)
   }
 
   object DirectDebitDetails {
@@ -367,9 +372,9 @@ object EssttpBackend {
 
     def verifyUpdateDirectDebitDetailsRequest(
         journeyId:                  JourneyId,
-        expectedDirectDebitDetails: essttp.rootmodel.bank.DirectDebitDetails
+        expectedDirectDebitDetails: essttp.rootmodel.bank.BankDetails
     )(implicit cryptoFormat: CryptoFormat): Unit =
-      WireMockHelpers.verifyWithBodyParse(directDebitDetailsUrl(journeyId), expectedDirectDebitDetails)(essttp.rootmodel.bank.DirectDebitDetails.format)
+      WireMockHelpers.verifyWithBodyParse(directDebitDetailsUrl(journeyId), expectedDirectDebitDetails)(essttp.rootmodel.bank.BankDetails.format)
 
     def verifyNoneUpdateDirectDebitDetailsRequest(journeyId: JourneyId): Unit =
       verify(
@@ -377,7 +382,7 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(directDebitDetailsUrl(journeyId)))
       )
 
-    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Entered Direct Debit Details - Is Account Holder`(encrypter)): StubMapping =
+    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Entered Direct Debit Details`(encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
   }
 

@@ -20,7 +20,7 @@ import actionsmodel.AuthenticatedJourneyRequest
 import cats.syntax.eq._
 import essttp.crypto.CryptoFormat
 import essttp.journey.model.Journey.Stages._
-import essttp.journey.model.Journey.{AfterChosenTypeOfBankAccount, Stages}
+import essttp.journey.model.Journey.{AfterEnteredDetailsAboutBankAccount, Stages}
 import essttp.journey.model.Origin
 import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount}
 import essttp.rootmodel.ttp.EligibilityCheckResult
@@ -65,7 +65,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
     audit(toPaymentPlanBeforeSubmissionAuditDetail(journey))
 
   def auditBarsCheck(
-      journey:           AfterChosenTypeOfBankAccount,
+      journey:           AfterEnteredDetailsAboutBankAccount,
       bankDetails:       BankDetails,
       typeOfBankAccount: TypeOfBankAccount,
       result:            Either[BarsError, VerifyResponse]
@@ -149,13 +149,13 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
   }
 
   private def toBarsCheckAuditDetail(
-      journey:           AfterChosenTypeOfBankAccount,
+      journey:           AfterEnteredDetailsAboutBankAccount,
       bankDetails:       BankDetails,
       typeOfBankAccount: TypeOfBankAccount,
       result:            Either[BarsError, VerifyResponse]
   ): BarsCheckAuditDetail = {
     val eligibilityCheckResult = journey match {
-      case j: ChosenTypeOfBankAccount            => j.eligibilityCheckResult
+      case j: EnteredDetailsAboutBankAccount     => j.eligibilityCheckResult
       case j: Stages.EnteredDirectDebitDetails   => j.eligibilityCheckResult
       case j: Stages.ConfirmedDirectDebitDetails => j.eligibilityCheckResult
       case j: Stages.AgreedTermsAndConditions    => j.eligibilityCheckResult
@@ -187,7 +187,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
     val maybeArrangementResponse: Option[ArrangementResponse] = responseFromTtp.toOption
     val status: Int = responseFromTtp.fold(_.responseCode, _ => Status.ACCEPTED)
     PaymentPlanSetUpAuditDetail(
-      bankDetails            = journey.directDebitDetails.bankDetails,
+      bankDetails            = journey.directDebitDetails,
       schedule               = Schedule.createSchedule(journey.selectedPaymentPlan, journey.dayOfMonth),
       status                 = if (Status.isSuccessful(status)) "successfully sent to TTP" else "failed",
       failedSubmissionReason = status,

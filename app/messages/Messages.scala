@@ -512,8 +512,8 @@ object Messages {
 
   object BankDetails {
 
-    val `Bank details`: Message = Message(
-      english = "Bank details"
+    val `About your bank account`: Message = Message(
+      english = "About your bank account"
     )
 
     val `What type of account details are you providing?`: Message = Message(
@@ -556,12 +556,12 @@ object Messages {
       english = "Must be between 6 and 8 digits long"
     )
 
-    val `Are you an account holder`: Message = Message(
-      english = "Are you an account holder?"
+    val `Are you the account holder`: Message = Message(
+      english = "Are you the account holder?"
     )
 
-    val `You must be able to set up a direct debit without permission from...`: Message = Message(
-      english = "You must be able to set up a Direct Debit without permission from any other account holders."
+    val `You must be the sole account holder...`: Message = Message(
+      english = "You must be the sole account holder, or for multi-signature accounts you must have authority to set up a Direct Debit without additional signatures."
     )
 
     val `Select yes if you are the account holder`: Message = Message(
@@ -578,7 +578,6 @@ object Messages {
       "accountNumber.error.required" -> Message("Enter account number"),
       "accountNumber.error.nonNumeric" -> Message("Account number must be a number"),
       "accountNumber.error.invalid" -> Message("Account number must be between 6 and 8 digits"),
-      "isSoleSignatory.error.required" -> Message("Select yes if you are the account holder"),
       s"sortCode.${accountNumberNotWellFormatted.formError.message}" -> Message("Enter a valid combination of bank account number and sort code"),
       s"sortCodeXXX.${accountNumberNotWellFormatted.formError.message}" -> Message("Enter a valid combination of bank account number and sort code"),
       s"sortCode.${sortCodeNotPresentOnEiscd.formError.message}" -> Message("Enter a valid combination of bank account number and sort code"),

@@ -19,14 +19,13 @@ package controllers.pagerouters
 import controllers.routes
 import essttp.rootmodel.ttp.EligibilityCheckResult
 import models.EligibilityErrors
-import models.EligibilityErrors.{DisallowedChargeLockTypes, IneligibleChargeTypes, ChargesOverMaxDebtAge, ExistingTtp, HasRlsOnAddress, IsLessThanMinDebtAllowance, IsMoreThanMaxDebtAllowance, MarkedAsInsolvent, MissingFiledReturns, MultipleReasons}
-import play.api.mvc.Results.Redirect
-import play.api.mvc.{Call, Result}
+import models.EligibilityErrors._
+import play.api.mvc.Call
 
 object EligibilityRouter {
 
-  def nextPage(eligibilityResult: EligibilityCheckResult): Result = {
-    val nextUrl: Call = if (eligibilityResult.isEligible) {
+  def nextPage(eligibilityResult: EligibilityCheckResult): Call = {
+    if (eligibilityResult.isEligible) {
       routes.YourBillController.yourBill
     } else {
       EligibilityErrors.toEligibilityError(eligibilityResult.eligibilityRules) match {
@@ -43,7 +42,6 @@ object EligibilityRouter {
         case Some(MissingFiledReturns)        => routes.IneligibleController.fileYourReturnPage
       }
     }
-    Redirect(nextUrl)
   }
 
 }

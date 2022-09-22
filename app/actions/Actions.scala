@@ -20,6 +20,7 @@ import actionsmodel.{AuthenticatedJourneyRequest, AuthenticatedRequest, Eligible
 import controllers.JourneyIncorrectStateRouter
 import controllers.pagerouters.EligibilityRouter
 import essttp.journey.model.Journey
+import play.api.mvc.Results.Redirect
 import play.api.mvc._
 
 import javax.inject.{Inject, Singleton}
@@ -73,7 +74,7 @@ class Actions @Inject() (
                 )
               )
             } else {
-              Left(EligibilityRouter.nextPage(j.eligibilityCheckResult))
+              Left(Redirect(EligibilityRouter.nextPage(j.eligibilityCheckResult)))
             }
         }
         Future.successful(result)

@@ -71,7 +71,7 @@ class PaymentDayControllerSpec extends ItSpec {
         doc,
         expectedH1        = expectedH1,
         expectedBack      = Some(routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount.url),
-        expectedSubmitUrl = Some(routes.PaymentDayController.paymentDaySubmit().url)
+        expectedSubmitUrl = Some(routes.PaymentDayController.paymentDaySubmit.url)
       )
 
       assertPaymentDayPageContent(doc)
@@ -213,7 +213,7 @@ class PaymentDayControllerSpec extends ItSpec {
             doc,
             expectedH1        = expectedH1,
             expectedBack      = Some(routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount.url),
-            expectedSubmitUrl = Some(routes.PaymentDayController.paymentDaySubmit().url),
+            expectedSubmitUrl = Some(routes.PaymentDayController.paymentDaySubmit.url),
             hasFormError      = true
           )
 

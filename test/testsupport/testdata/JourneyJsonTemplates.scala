@@ -137,24 +137,19 @@ object JourneyJsonTemplates {
     journeyInfo = JourneyInfo.hasCheckedPaymentPlan(encrypter)
   )
 
-  def `Chosen Type of Bank Account - Business`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
-    stageInfo   = StageInfo.chosenTypeOfBankAccountBusiness,
-    journeyInfo = JourneyInfo.chosenTypeOfBankAccountBusiness(encrypter)
+  def `Entered Details About Bank Account - Business`(isAccountHolder: Boolean, encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = if (isAccountHolder) StageInfo.enteredDetailsAboutBankAccount else StageInfo.enteredDetailsAboutBankAccountNotAccountHolder,
+    journeyInfo = JourneyInfo.enteredDetailsAboutBankAccountBusiness(isAccountHolder, encrypter)
   )
 
-  def `Chosen Type of Bank Account - Personal`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
-    stageInfo   = StageInfo.chosenTypeOfBankAccountPersonal,
-    journeyInfo = JourneyInfo.chosenTypeOfBankAccountPersonal(encrypter)
+  def `Entered Details About Bank Account - Personal`(isAccountHolder: Boolean, encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = if (isAccountHolder) StageInfo.enteredDetailsAboutBankAccountPersonal else StageInfo.enteredDetailsAboutBankAccountNotAccountHolder,
+    journeyInfo = JourneyInfo.enteredDetailsAboutBankAccountPersonal(isAccountHolder, encrypter)
   )
 
-  def `Entered Direct Debit Details - Is Account Holder`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
-    stageInfo   = StageInfo.enteredDirectDebitDetailsIsAccountHolder,
-    journeyInfo = JourneyInfo.enteredDirectDebitDetailsIsAccountHolder(encrypter)
-  )
-
-  def `Entered Direct Debit Details - Is Not Account Holder`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
-    stageInfo   = StageInfo.enteredDirectDebitDetailsNotAccountHolder,
-    journeyInfo = JourneyInfo.enteredDirectDebitDetailsIsNotAccountHolder(encrypter)
+  def `Entered Direct Debit Details`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.enteredDirectDebitDetails,
+    journeyInfo = JourneyInfo.enteredDirectDebitDetails(encrypter)
   )
 
   def `Confirmed Direct Debit Details`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(

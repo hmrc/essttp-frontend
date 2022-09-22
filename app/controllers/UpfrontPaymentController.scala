@@ -212,19 +212,19 @@ object UpfrontPaymentController {
     val eligibilityCheckResult = journey match {
       case Left(j: Journey.AfterEligibilityChecked) => j.eligibilityCheckResult
       case Right(j: Journey.AfterUpfrontPaymentAnswers) => j match {
-        case j1: Journey.Stages.RetrievedExtremeDates        => j1.eligibilityCheckResult
-        case j1: Journey.Stages.RetrievedAffordabilityResult => j1.eligibilityCheckResult
-        case j1: Journey.Stages.EnteredMonthlyPaymentAmount  => j1.eligibilityCheckResult
-        case j1: Journey.Stages.EnteredDayOfMonth            => j1.eligibilityCheckResult
-        case j1: Journey.Stages.RetrievedStartDates          => j1.eligibilityCheckResult
-        case j1: Journey.Stages.RetrievedAffordableQuotes    => j1.eligibilityCheckResult
-        case j1: Journey.Stages.ChosenPaymentPlan            => j1.eligibilityCheckResult
-        case j1: Journey.Stages.CheckedPaymentPlan           => j1.eligibilityCheckResult
-        case j1: Journey.Stages.ChosenTypeOfBankAccount      => j1.eligibilityCheckResult
-        case j1: Journey.Stages.EnteredDirectDebitDetails    => j1.eligibilityCheckResult
-        case j1: Journey.Stages.ConfirmedDirectDebitDetails  => j1.eligibilityCheckResult
-        case j1: Journey.Stages.AgreedTermsAndConditions     => j1.eligibilityCheckResult
-        case j1: Journey.Stages.SubmittedArrangement         => j1.eligibilityCheckResult
+        case j1: Journey.Stages.RetrievedExtremeDates          => j1.eligibilityCheckResult
+        case j1: Journey.Stages.RetrievedAffordabilityResult   => j1.eligibilityCheckResult
+        case j1: Journey.Stages.EnteredMonthlyPaymentAmount    => j1.eligibilityCheckResult
+        case j1: Journey.Stages.EnteredDayOfMonth              => j1.eligibilityCheckResult
+        case j1: Journey.Stages.RetrievedStartDates            => j1.eligibilityCheckResult
+        case j1: Journey.Stages.RetrievedAffordableQuotes      => j1.eligibilityCheckResult
+        case j1: Journey.Stages.ChosenPaymentPlan              => j1.eligibilityCheckResult
+        case j1: Journey.Stages.CheckedPaymentPlan             => j1.eligibilityCheckResult
+        case j1: Journey.Stages.EnteredDetailsAboutBankAccount => j1.eligibilityCheckResult
+        case j1: Journey.Stages.EnteredDirectDebitDetails      => j1.eligibilityCheckResult
+        case j1: Journey.Stages.ConfirmedDirectDebitDetails    => j1.eligibilityCheckResult
+        case j1: Journey.Stages.AgreedTermsAndConditions       => j1.eligibilityCheckResult
+        case j1: Journey.Stages.SubmittedArrangement           => j1.eligibilityCheckResult
       }
     }
     eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount).headOption

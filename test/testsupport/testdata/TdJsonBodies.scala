@@ -413,17 +413,19 @@ object TdJsonBodies {
        |               }
        |""".stripMargin
 
-  def typeOfBankJourneyInfo(typeOfAccount: String = "Business"): String = s""""typeOfBankAccount" : "$typeOfAccount""""
+  def detailsAboutBankAccountJourneyInfo(typeOfAccount: String = "Business", isAccountHolder: Boolean = true): String =
+    s"""
+       |"detailsAboutBankAccount": {
+       |  "typeOfBankAccount" : "$typeOfAccount",
+       |  "isAccountHolder": $isAccountHolder
+       |}""".stripMargin
 
-  def directDebitDetailsJourneyInfo(isAccountHolder: Boolean = true, encrypter: Encrypter): String =
+  def directDebitDetailsJourneyInfo(encrypter: Encrypter): String =
     s"""
        |"directDebitDetails" : {
-       |  "bankDetails" : {
-       |    "name" : "${encryptString("Bob Ross", encrypter)}",
-       |    "sortCode" : "${encryptString("123456", encrypter)}",
-       |    "accountNumber" : "${encryptString("12345678", encrypter)}"
-       |  },
-       |  "isAccountHolder" : $isAccountHolder
+       |  "name" : "${encryptString("Bob Ross", encrypter)}",
+       |  "sortCode" : "${encryptString("123456", encrypter)}",
+       |  "accountNumber" : "${encryptString("12345678", encrypter)}"
        |}""".stripMargin
 
   def arrangementResponseJourneyInfo(): String =

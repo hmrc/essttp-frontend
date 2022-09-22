@@ -60,7 +60,7 @@ class EpayeGovUkControllerSpec extends ItSpec {
 
       val result: Future[Result] = controller.startJourney(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.DetermineTaxIdController.determineTaxId().url)
+      redirectLocation(result) shouldBe Some(routes.DetermineTaxIdController.determineTaxId.url)
       EssttpBackend.StartJourney.verifyStartJourneyEpayeGovUk()
     }
     "should start detached url journey and redirect to nextUrl when user is authenticated" in {

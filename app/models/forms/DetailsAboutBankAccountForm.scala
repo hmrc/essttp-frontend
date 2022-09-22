@@ -16,17 +16,18 @@
 
 package models.forms
 
-import models.enumsforforms.TypeOfAccountFormValue
+import models.enumsforforms.{IsSoleSignatoryFormValue, TypeOfAccountFormValue}
 import play.api.data.{Form, Forms, Mapping}
 import play.api.data.Forms.mapping
 import util.EnumFormatter
 import langswitch.Language
 import messages.Messages
 
-final case class TypeOfAccountForm(typeOfAccount: TypeOfAccountFormValue)
+final case class DetailsAboutBankAccountForm(typeOfAccount: TypeOfAccountFormValue, isSoleSignatory: IsSoleSignatoryFormValue)
 
-object TypeOfAccountForm {
-  def form(implicit language: Language): Form[TypeOfAccountForm] = {
+object DetailsAboutBankAccountForm {
+
+  def form(implicit language: Language): Form[DetailsAboutBankAccountForm] = {
     val typeOfAccountFormMapping: Mapping[TypeOfAccountFormValue] = Forms.of(EnumFormatter.format(
       enum                    = TypeOfAccountFormValue,
       errorMessageIfMissing   = Messages.BankDetails.`Select what type of account details you are providing`.show,
@@ -34,8 +35,15 @@ object TypeOfAccountForm {
     ))
     Form(
       mapping(
-        "typeOfAccount" -> typeOfAccountFormMapping
-      )(TypeOfAccountForm.apply)(TypeOfAccountForm.unapply)
+        "typeOfAccount" -> typeOfAccountFormMapping,
+        "isSoleSignatory" -> isSoleSignatoryFormMapping
+      )(DetailsAboutBankAccountForm.apply)(DetailsAboutBankAccountForm.unapply)
     )
   }
+
+  private def isSoleSignatoryFormMapping(implicit language: Language): Mapping[IsSoleSignatoryFormValue] = Forms.of(EnumFormatter.format(
+    enum                    = IsSoleSignatoryFormValue,
+    errorMessageIfMissing   = Messages.BankDetails.`Select yes if you are the account holder`.show,
+    errorMessageIfEnumError = Messages.BankDetails.`Select yes if you are the account holder`.show
+  ))
 }

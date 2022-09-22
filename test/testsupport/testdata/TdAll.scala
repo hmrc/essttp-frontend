@@ -19,14 +19,14 @@ package testsupport.testdata
 import actions.EnrolmentDef
 import connectors.CallEligibilityApiRequest
 import essttp.journey.model.{CorrelationId, JourneyId}
-import essttp.rootmodel.bank.{AccountName, AccountNumber, BankDetails, DirectDebitDetails, SortCode, TypeOfBankAccount, TypesOfBankAccount}
+import essttp.rootmodel.bank.{AccountName, AccountNumber, BankDetails, DetailsAboutBankAccount, SortCode, TypeOfBankAccount, TypesOfBankAccount}
 import essttp.rootmodel.dates.{InitialPayment, InitialPaymentDate}
 import essttp.rootmodel.dates.extremedates.{EarliestPaymentPlanStartDate, ExtremeDatesRequest, ExtremeDatesResponse, LatestPaymentPlanStartDate}
 import essttp.rootmodel.dates.startdates.{InstalmentStartDate, PreferredDayOfMonth, StartDatesRequest, StartDatesResponse}
 import essttp.rootmodel.ttp.affordablequotes._
 import essttp.rootmodel.ttp._
 import essttp.rootmodel.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
-import essttp.rootmodel.ttp.arrangement.{ArrangementAgreedDate, ArrangementRequest, ArrangementResponse, DirectDebitInstruction, EnactPaymentPlan, PaperAuddisFlag}
+import essttp.rootmodel.ttp.arrangement._
 import essttp.rootmodel.{AmountInPence, CanPayUpfront, DayOfMonth, MonthlyPaymentAmount, UpfrontPaymentAmount}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
@@ -221,8 +221,11 @@ object TdAll {
   def typeOfBankAccount(typeOfAccount: String): TypeOfBankAccount =
     if (typeOfAccount == "Business") TypesOfBankAccount.Business else TypesOfBankAccount.Personal
 
-  def directDebitDetails(name: String, sortCode: String, accountNumber: String, isSoleSignatory: Boolean): DirectDebitDetails =
-    DirectDebitDetails(BankDetails(AccountName(SensitiveString(name)), SortCode(SensitiveString(sortCode)), AccountNumber(SensitiveString(accountNumber))), isSoleSignatory)
+  def detailsAboutBankAccount(typeOfAccount: String, isAccountHolder: Boolean): DetailsAboutBankAccount =
+    DetailsAboutBankAccount(typeOfBankAccount(typeOfAccount), isAccountHolder)
+
+  def directDebitDetails(name: String, sortCode: String, accountNumber: String): BankDetails =
+    BankDetails(AccountName(SensitiveString(name)), SortCode(SensitiveString(sortCode)), AccountNumber(SensitiveString(accountNumber)))
 
   val arrangementRequest: ArrangementRequest = ArrangementRequest(
     channelIdentifier      = ChannelIdentifiers.eSSTTP,

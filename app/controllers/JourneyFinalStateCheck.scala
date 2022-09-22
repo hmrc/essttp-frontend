@@ -35,7 +35,7 @@ object JourneyFinalStateCheck {
   private def logMessage(implicit requestHeader: RequestHeader): Unit =
     JourneyLogger.info("User tried to force browser to a page in the journey, but they have finished their journey. Redirecting to confirmation page")
 
-  private val confirmationRedirect: Result = Redirect(routes.PaymentPlanSetUpController.paymentPlanSetUp())
+  private val confirmationRedirect: Result = Redirect(routes.PaymentPlanSetUpController.paymentPlanSetUp)
 
   def finalStateCheckF(journey: Journey, result: => Future[Result])(implicit request: Request[_]): Future[Result] = {
     if (endStateConditional(journey)) {

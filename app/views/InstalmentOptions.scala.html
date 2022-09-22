@@ -80,7 +80,7 @@
         ),
             title = Text(Messages.`There is a problem`.show)))
     }
-    @formWithCSRF(action = routes.InstalmentsController.instalmentOptionsSubmit()) {
+    @formWithCSRF(action = routes.InstalmentsController.instalmentOptionsSubmit) {
         @govukRadios(Radios(
             fieldset = Some(Fieldset(
                 legend = Some(Legend(
