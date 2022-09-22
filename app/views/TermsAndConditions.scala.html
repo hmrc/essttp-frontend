@@ -45,7 +45,7 @@
   <p class="govuk-body">@{Messages.BankDetails.`If your circumstances change...`.show}</p>
   <h2 class="govuk-heading-m">@{Messages.BankDetails.`Declaration`.show}</h2>
   <p class="govuk-body">@{Messages.BankDetails.`I agree to the terms and conditions...`.show}</p>
-    @formWithCSRF(action = routes.BankDetailsController.termsAndConditionsSubmit()) {
+    @formWithCSRF(action = routes.BankDetailsController.termsAndConditionsSubmit) {
         @govukButton(Button(content = Text(Messages.BankDetails.`Agree and continue`.show)))
     }
 }

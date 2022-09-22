@@ -70,19 +70,19 @@ class TtpService @Inject() (
 
   def determineAffordability(journey: Journey.AfterUpfrontPaymentAnswers)(implicit requestHeader: RequestHeader): Future[InstalmentAmounts] = {
     val j = journey match {
-      case j1: Journey.Stages.RetrievedExtremeDates        => j1
-      case j1: Journey.Stages.RetrievedAffordabilityResult => j1
-      case j1: Journey.Stages.EnteredMonthlyPaymentAmount  => j1
-      case j1: Journey.Stages.EnteredDayOfMonth            => j1
-      case j1: Journey.Stages.RetrievedStartDates          => j1
-      case j1: Journey.Stages.RetrievedAffordableQuotes    => j1
-      case j1: Journey.Stages.ChosenPaymentPlan            => j1
-      case j1: Journey.Stages.CheckedPaymentPlan           => j1
-      case j1: Journey.Stages.ChosenTypeOfBankAccount      => j1
-      case j1: Journey.Stages.EnteredDirectDebitDetails    => j1
-      case j1: Journey.Stages.ConfirmedDirectDebitDetails  => j1
-      case j1: Journey.Stages.AgreedTermsAndConditions     => j1
-      case j1: Journey.Stages.SubmittedArrangement         => j1
+      case j1: Journey.Stages.RetrievedExtremeDates          => j1
+      case j1: Journey.Stages.RetrievedAffordabilityResult   => j1
+      case j1: Journey.Stages.EnteredMonthlyPaymentAmount    => j1
+      case j1: Journey.Stages.EnteredDayOfMonth              => j1
+      case j1: Journey.Stages.RetrievedStartDates            => j1
+      case j1: Journey.Stages.RetrievedAffordableQuotes      => j1
+      case j1: Journey.Stages.ChosenPaymentPlan              => j1
+      case j1: Journey.Stages.CheckedPaymentPlan             => j1
+      case j1: Journey.Stages.EnteredDetailsAboutBankAccount => j1
+      case j1: Journey.Stages.EnteredDirectDebitDetails      => j1
+      case j1: Journey.Stages.ConfirmedDirectDebitDetails    => j1
+      case j1: Journey.Stages.AgreedTermsAndConditions       => j1
+      case j1: Journey.Stages.SubmittedArrangement           => j1
     }
     val upfrontPaymentAmount: Option[UpfrontPaymentAmount] = TtpService.deriveUpfrontPaymentAmount(j.upfrontPaymentAnswers)
     val eligibilityCheckResult: EligibilityCheckResult = j.eligibilityCheckResult
@@ -93,15 +93,15 @@ class TtpService @Inject() (
 
   def determineAffordableQuotes(journey: Journey.AfterStartDatesResponse)(implicit requestHeader: RequestHeader): Future[AffordableQuotesResponse] = {
     val j = journey match {
-      case j1: Journey.Stages.RetrievedStartDates         => j1
-      case j1: Journey.Stages.RetrievedAffordableQuotes   => j1
-      case j1: Journey.Stages.ChosenPaymentPlan           => j1
-      case j1: Journey.Stages.CheckedPaymentPlan          => j1
-      case j1: Journey.Stages.ChosenTypeOfBankAccount     => j1
-      case j1: Journey.Stages.EnteredDirectDebitDetails   => j1
-      case j1: Journey.Stages.ConfirmedDirectDebitDetails => j1
-      case j1: Journey.Stages.AgreedTermsAndConditions    => j1
-      case j1: Journey.Stages.SubmittedArrangement        => j1
+      case j1: Journey.Stages.RetrievedStartDates            => j1
+      case j1: Journey.Stages.RetrievedAffordableQuotes      => j1
+      case j1: Journey.Stages.ChosenPaymentPlan              => j1
+      case j1: Journey.Stages.CheckedPaymentPlan             => j1
+      case j1: Journey.Stages.EnteredDetailsAboutBankAccount => j1
+      case j1: Journey.Stages.EnteredDirectDebitDetails      => j1
+      case j1: Journey.Stages.ConfirmedDirectDebitDetails    => j1
+      case j1: Journey.Stages.AgreedTermsAndConditions       => j1
+      case j1: Journey.Stages.SubmittedArrangement           => j1
     }
     val initialPaymentAmount: Option[UpfrontPaymentAmount] = TtpService.deriveUpfrontPaymentAmount(j.upfrontPaymentAnswers)
     val debtItemCharges = j.eligibilityCheckResult.chargeTypeAssessment
@@ -152,9 +152,9 @@ class TtpService @Inject() (
       arrangementAgreedDate  = ArrangementAgreedDate(LocalDate.now(ZoneOffset.of("Z")).toString),
       identification         = journey.eligibilityCheckResult.identification,
       directDebitInstruction = DirectDebitInstruction(
-        sortCode        = journey.directDebitDetails.bankDetails.sortCode,
-        accountNumber   = journey.directDebitDetails.bankDetails.accountNumber,
-        accountName     = journey.directDebitDetails.bankDetails.name,
+        sortCode        = journey.directDebitDetails.sortCode,
+        accountNumber   = journey.directDebitDetails.accountNumber,
+        accountName     = journey.directDebitDetails.name,
         paperAuddisFlag = PaperAuddisFlag(false)
       ),
       paymentPlan            = EnactPaymentPlan(

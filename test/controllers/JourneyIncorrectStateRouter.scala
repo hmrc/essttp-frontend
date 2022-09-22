@@ -38,8 +38,8 @@ class JourneyIncorrectStateRouter extends ItSpec {
       ("Stages.EligibilityChecked", () => EssttpBackend.EligibilityCheck.findJourney(testCrypto)(
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(testCrypto)
       ), PageUrls.notEligibleUrl),
-      ("Stages.AnsweredCanPayUpfront", () => EssttpBackend.CanPayUpfront.findJourney(testCrypto)(), PageUrls.howMuchCanYouPayUpfrontUrl),
-      ("Stages.AnsweredCanPayUpfront",
+      ("Stages.AnsweredCanPayUpfront - can pay upfront", () => EssttpBackend.CanPayUpfront.findJourney(testCrypto)(), PageUrls.howMuchCanYouPayUpfrontUrl),
+      ("Stages.AnsweredCanPayUpfront - can't pay upfront",
         () => EssttpBackend.CanPayUpfront.findJourney(testCrypto)(JourneyJsonTemplates.`Answered Can Pay Upfront - No`(testCrypto)),
         PageUrls.retrievedExtremeDatesUrl
       ),
@@ -51,8 +51,12 @@ class JourneyIncorrectStateRouter extends ItSpec {
       ("Stages.RetrievedStartDates", () => EssttpBackend.Dates.findJourneyStartDates(testCrypto)(), PageUrls.determineAffordableQuotesUrl),
       ("Stages.RetrievedAffordableQuotes", () => EssttpBackend.AffordableQuotes.findJourney(testCrypto)(), PageUrls.instalmentsUrl),
       ("Stages.ChosenPaymentPlan", () => EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto)(), PageUrls.instalmentScheduleUrl),
-      ("Stages.CheckedPaymentPlan", () => EssttpBackend.HasCheckedPlan.findJourney(testCrypto)(), PageUrls.typeOfAccountUrl),
-      ("Stages.ChosenTypeOfBankAccount", () => EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto)(), PageUrls.directDebitDetailsUrl),
+      ("Stages.CheckedPaymentPlan", () => EssttpBackend.HasCheckedPlan.findJourney(testCrypto)(), PageUrls.aboutYourBankAccountUrl),
+      ("Stages.EnteredDetailsAboutBankAccount - is account holder", () => EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto)(), PageUrls.directDebitDetailsUrl),
+      ("Stages.EnteredDetailsAboutBankAccount - is not account holder",
+        () => EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto)(JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = false, testCrypto)),
+        PageUrls.cannotSetupDirectDebitOnlineUrl
+      ),
       ("Stages.EnteredDirectDebitDetails", () => EssttpBackend.DirectDebitDetails.findJourney(testCrypto)(), PageUrls.checkDirectDebitDetailsUrl),
       ("Stages.ConfirmedDirectDebitDetails", () => EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto)(), PageUrls.termsAndConditionsUrl),
       ("Stages.SubmittedArrangement", () => EssttpBackend.SubmitArrangement.findJourney(testCrypto)(), PageUrls.confirmationUrl)

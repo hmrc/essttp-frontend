@@ -64,7 +64,7 @@ class DetermineEligibilityController @Inject() (
       case j: Journey.AfterEligibilityChecked =>
         val proposedResult = {
           JourneyLogger.info("Eligibility already determined, skipping.")
-          Future.successful(EligibilityRouter.nextPage(j.eligibilityCheckResult))
+          Future.successful(Redirect(EligibilityRouter.nextPage(j.eligibilityCheckResult)))
         }
         finalStateCheckF(j, proposedResult)
     }
@@ -75,7 +75,7 @@ class DetermineEligibilityController @Inject() (
       eligibilityCheckResult <- ttpService.determineEligibility(journey)
       _ = auditService.auditEligibilityCheck(journey, eligibilityCheckResult)
       _ <- journeyService.updateEligibilityCheckResult(journey.id, eligibilityCheckResult)
-    } yield EligibilityRouter.nextPage(eligibilityCheckResult)
+    } yield Redirect(EligibilityRouter.nextPage(eligibilityCheckResult))
   }
 
 }

@@ -62,18 +62,18 @@ class MonthlyPaymentAmountController @Inject() (
   private def displayMonthlyPaymentAmountPage(journey: Journey.AfterRetrievedAffordabilityResult)(implicit request: Request[_]): Result = {
     val j: Journey.AfterUpfrontPaymentAnswers with Journey.AfterComputedTaxId with Journey.AfterEligibilityChecked with Journey.AfterExtremeDatesResponse with Journey.AfterRetrievedAffordabilityResult with Journey.Epaye =
       journey match {
-        case j1: Journey.Epaye.RetrievedAffordabilityResult => j1
-        case j1: Journey.Epaye.EnteredMonthlyPaymentAmount  => j1
-        case j1: Journey.Epaye.EnteredDayOfMonth            => j1
-        case j1: Journey.Epaye.RetrievedStartDates          => j1
-        case j1: Journey.Epaye.RetrievedAffordableQuotes    => j1
-        case j1: Journey.Epaye.ChosenPaymentPlan            => j1
-        case j1: Journey.Epaye.CheckedPaymentPlan           => j1
-        case j1: Journey.Epaye.ChosenTypeOfBankAccount      => j1
-        case j1: Journey.Epaye.EnteredDirectDebitDetails    => j1
-        case j1: Journey.Epaye.ConfirmedDirectDebitDetails  => j1
-        case j1: Journey.Epaye.AgreedTermsAndConditions     => j1
-        case j1: Journey.Epaye.SubmittedArrangement         => j1
+        case j1: Journey.Epaye.RetrievedAffordabilityResult   => j1
+        case j1: Journey.Epaye.EnteredMonthlyPaymentAmount    => j1
+        case j1: Journey.Epaye.EnteredDayOfMonth              => j1
+        case j1: Journey.Epaye.RetrievedStartDates            => j1
+        case j1: Journey.Epaye.RetrievedAffordableQuotes      => j1
+        case j1: Journey.Epaye.ChosenPaymentPlan              => j1
+        case j1: Journey.Epaye.CheckedPaymentPlan             => j1
+        case j1: Journey.Epaye.EnteredDetailsAboutBankAccount => j1
+        case j1: Journey.Epaye.EnteredDirectDebitDetails      => j1
+        case j1: Journey.Epaye.ConfirmedDirectDebitDetails    => j1
+        case j1: Journey.Epaye.AgreedTermsAndConditions       => j1
+        case j1: Journey.Epaye.SubmittedArrangement           => j1
       }
     val backUrl: Option[String] = j.upfrontPaymentAnswers match {
       case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => Some(routes.UpfrontPaymentController.upfrontPaymentSummary.url)
@@ -107,18 +107,18 @@ class MonthlyPaymentAmountController @Inject() (
       case _: Journey.BeforeRetrievedAffordabilityResult => Errors.throwServerErrorException("We don't have the affordability api response...")
       case j: Journey.AfterRetrievedAffordabilityResult =>
         val (eligibilityCheckResult, upfrontPaymentAnswers) = j match {
-          case j1: Journey.Stages.RetrievedAffordabilityResult => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
-          case j1: Journey.Stages.EnteredMonthlyPaymentAmount  => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
-          case j1: Journey.Stages.EnteredDayOfMonth            => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
-          case j1: Journey.Stages.RetrievedStartDates          => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
-          case j1: Journey.Stages.RetrievedAffordableQuotes    => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
-          case j1: Journey.Stages.ChosenPaymentPlan            => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
-          case j1: Journey.Stages.CheckedPaymentPlan           => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
-          case j1: Journey.Stages.ChosenTypeOfBankAccount      => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
-          case j1: Journey.Stages.EnteredDirectDebitDetails    => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
-          case j1: Journey.Stages.ConfirmedDirectDebitDetails  => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
-          case j1: Journey.Stages.AgreedTermsAndConditions     => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
-          case j1: Journey.Stages.SubmittedArrangement         => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
+          case j1: Journey.Stages.RetrievedAffordabilityResult   => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
+          case j1: Journey.Stages.EnteredMonthlyPaymentAmount    => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
+          case j1: Journey.Stages.EnteredDayOfMonth              => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
+          case j1: Journey.Stages.RetrievedStartDates            => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
+          case j1: Journey.Stages.RetrievedAffordableQuotes      => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
+          case j1: Journey.Stages.ChosenPaymentPlan              => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
+          case j1: Journey.Stages.CheckedPaymentPlan             => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
+          case j1: Journey.Stages.EnteredDetailsAboutBankAccount => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
+          case j1: Journey.Stages.EnteredDirectDebitDetails      => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
+          case j1: Journey.Stages.ConfirmedDirectDebitDetails    => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
+          case j1: Journey.Stages.AgreedTermsAndConditions       => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
+          case j1: Journey.Stages.SubmittedArrangement           => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
         }
         val totalDebt: AmountInPence = AmountInPence(eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum)
         val upfrontPaymentAmount: AmountInPence = upfrontPaymentAnswers match {
@@ -143,7 +143,7 @@ class MonthlyPaymentAmountController @Inject() (
         (validForm: BigDecimal) => {
           val monthlyPaymentAmount: MonthlyPaymentAmount = MonthlyPaymentAmount(AmountInPence(validForm))
           journeyService.updateMonthlyPaymentAmount(request.journeyId, monthlyPaymentAmount)
-            .map(_ => Redirect(routes.PaymentDayController.paymentDay()))
+            .map(_ => Redirect(routes.PaymentDayController.paymentDay))
         }
       )
   }

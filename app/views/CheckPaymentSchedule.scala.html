@@ -182,7 +182,7 @@
 
     @govukSummaryList(SummaryList(rows = monthlyPaymentRows))
 
-  @formWithCSRF(action = routes.PaymentScheduleController.checkPaymentScheduleSubmit()) {
+  @formWithCSRF(action = routes.PaymentScheduleController.checkPaymentScheduleSubmit) {
     @govukButton(Button(content = Text(Messages.continue.show)))
   }
 

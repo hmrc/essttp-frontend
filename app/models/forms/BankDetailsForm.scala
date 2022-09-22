@@ -17,19 +17,16 @@
 package models.forms
 
 import essttp.rootmodel.bank.{AccountName, AccountNumber, SortCode}
-import models.enumsforforms.IsSoleSignatoryFormValue
 import models.forms.helper.FormErrorWithFieldMessageOverrides
 import play.api.data.Forms.{mapping, nonEmptyText}
 import play.api.data.validation.{Constraint, Invalid, Valid}
-import play.api.data.{Form, FormError, Forms, Mapping}
+import play.api.data.{Form, FormError, Mapping}
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
-import util.EnumFormatter
 
 final case class BankDetailsForm(
-    name:            AccountName,
-    sortCode:        SortCode,
-    accountNumber:   AccountNumber,
-    isSoleSignatory: IsSoleSignatoryFormValue
+    name:          AccountName,
+    sortCode:      SortCode,
+    accountNumber: AccountNumber
 )
 
 object BankDetailsForm {
@@ -38,8 +35,7 @@ object BankDetailsForm {
       mapping(
         "name" -> accountNameMapping,
         "sortCode" -> sortCodeMapping,
-        "accountNumber" -> accountNumberMapping,
-        "isSoleSignatory" -> isSoleSignatoryFormMapping
+        "accountNumber" -> accountNumberMapping
       )(BankDetailsForm.apply)(BankDetailsForm.unapply)
     )
 
@@ -77,12 +73,6 @@ object BankDetailsForm {
       accountNumber => AccountNumber(SensitiveString.apply(accountNumber.replaceAll("\\s", ""))),
       _.value.decryptedValue
     ).verifying(accountNumberConstraint)
-
-  val isSoleSignatoryFormMapping: Mapping[IsSoleSignatoryFormValue] = Forms.of(EnumFormatter.format(
-    enum                    = IsSoleSignatoryFormValue,
-    errorMessageIfMissing   = "error.required",
-    errorMessageIfEnumError = "error.required"
-  ))
 
   private val sortCodeAndAccountNumberOverrides: Seq[FormError] = Seq(
     FormError("sortCode", ""), // 'turns off' the sortCode field error

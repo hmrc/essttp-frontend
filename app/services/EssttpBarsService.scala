@@ -18,7 +18,7 @@ package services
 
 import config.AppConfig
 import essttp.bars.BarsVerifyStatusConnector
-import essttp.journey.model.Journey.{AfterChosenTypeOfBankAccount, AfterComputedTaxId}
+import essttp.journey.model.Journey.{AfterComputedTaxId, AfterEnteredDetailsAboutBankAccount}
 import essttp.rootmodel.TaxId
 import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount, TypesOfBankAccount}
 import models.bars.request.{BarsBankAccount, BarsBusiness, BarsSubject}
@@ -46,7 +46,7 @@ class EssttpBarsService @Inject() (
   def verifyBankDetails(
       bankDetails:       BankDetails,
       typeOfBankAccount: TypeOfBankAccount,
-      journey:           AfterChosenTypeOfBankAccount
+      journey:           AfterEnteredDetailsAboutBankAccount
   )(implicit requestHeader: RequestHeader): Future[Either[BarsError, VerifyResponse]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(requestHeader)
 

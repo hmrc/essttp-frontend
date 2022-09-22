@@ -12,7 +12,7 @@ POST   /do-you-want-to-give-feedback                        controllers.SignOutC
 
 GET    /govuk/epaye/start                                   controllers.EpayeGovUkController.startJourney
 
-GET    /determine-taxId                                     controllers.DetermineTaxIdController.determineTaxId()
+GET    /determine-taxId                                     controllers.DetermineTaxIdController.determineTaxId
 
 GET    /determine-eligibility                               controllers.DetermineEligibilityController.determineEligibility
 
@@ -39,36 +39,36 @@ GET    /determine-affordability                             controllers.Determin
 GET    /how-much-can-you-pay-each-month                     controllers.MonthlyPaymentAmountController.displayMonthlyPaymentAmount
 POST   /how-much-can-you-pay-each-month                     controllers.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit
 
-GET    /which-day-do-you-want-to-pay-each-month             controllers.PaymentDayController.paymentDay()
-POST   /which-day-do-you-want-to-pay-each-month             controllers.PaymentDayController.paymentDaySubmit()
+GET    /which-day-do-you-want-to-pay-each-month             controllers.PaymentDayController.paymentDay
+POST   /which-day-do-you-want-to-pay-each-month             controllers.PaymentDayController.paymentDaySubmit
 
 GET    /retrieve-start-dates                                controllers.DatesApiController.retrieveStartDates
 
 GET    /determine-affordable-quotes                         controllers.DetermineAffordableQuotesController.retrieveAffordableQuotes
 
-GET    /how-many-months-do-you-want-to-pay-over             controllers.InstalmentsController.instalmentOptions()
-POST   /how-many-months-do-you-want-to-pay-over             controllers.InstalmentsController.instalmentOptionsSubmit()
+GET    /how-many-months-do-you-want-to-pay-over             controllers.InstalmentsController.instalmentOptions
+POST   /how-many-months-do-you-want-to-pay-over             controllers.InstalmentsController.instalmentOptionsSubmit
 
-GET    /check-your-payment-plan                             controllers.PaymentScheduleController.checkPaymentSchedule()
-POST   /check-your-payment-plan                             controllers.PaymentScheduleController.checkPaymentScheduleSubmit()
+GET    /check-your-payment-plan                             controllers.PaymentScheduleController.checkPaymentSchedule
+POST   /check-your-payment-plan                             controllers.PaymentScheduleController.checkPaymentScheduleSubmit
 
-GET    /what-type-of-account-details-are-you-providing      controllers.BankDetailsController.typeOfAccount
-POST   /what-type-of-account-details-are-you-providing      controllers.BankDetailsController.typeOfAccountSubmit
-GET    /set-up-direct-debit                                 controllers.BankDetailsController.enterBankDetails()
-POST   /set-up-direct-debit                                 controllers.BankDetailsController.enterBankDetailsSubmit()
+GET    /about-your-bank-account                             controllers.BankDetailsController.detailsAboutBankAccount
+POST   /about-your-bank-account                             controllers.BankDetailsController.detailsAboutBankAccountSubmit
+GET    /set-up-direct-debit                                 controllers.BankDetailsController.enterBankDetails
+POST   /set-up-direct-debit                                 controllers.BankDetailsController.enterBankDetailsSubmit
 GET    /you-cannot-set-up-a-direct-debit-online             controllers.BankDetailsController.cannotSetupDirectDebitOnlinePage
 
 GET    /lockout                                             controllers.BankDetailsController.barsLockout(p: String)
 
 GET    /check-your-direct-debit-details                     controllers.BankDetailsController.checkBankDetails
 POST   /check-your-direct-debit-details                     controllers.BankDetailsController.checkBankDetailsSubmit
-GET    /terms-and-conditions                                controllers.BankDetailsController.termsAndConditions()
-POST   /terms-and-conditions                                controllers.BankDetailsController.termsAndConditionsSubmit()
+GET    /terms-and-conditions                                controllers.BankDetailsController.termsAndConditions
+POST   /terms-and-conditions                                controllers.BankDetailsController.termsAndConditionsSubmit
 
 GET    /submit-arrangement                                  controllers.SubmitArrangementController.submitArrangement
 
-GET    /payment-plan-set-up                                 controllers.PaymentPlanSetUpController.paymentPlanSetUp()
-GET    /payment-plan-print-summary                          controllers.PaymentPlanSetUpController.printSummary()
+GET    /payment-plan-set-up                                 controllers.PaymentPlanSetUpController.paymentPlanSetUp
+GET    /payment-plan-print-summary                          controllers.PaymentPlanSetUpController.printSummary
 
 GET    /assets/*file                                        controllers.Assets.versioned(path="/public", file: Asset)
 

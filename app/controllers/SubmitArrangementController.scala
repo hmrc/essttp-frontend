@@ -45,7 +45,7 @@ class SubmitArrangementController @Inject() (
       case j: Journey.Stages.AgreedTermsAndConditions => submitArrangementAndUpdateJourney(j)
       case _: Journey.AfterArrangementSubmitted =>
         JourneyLogger.info("Already submitted arrangement to ttp, showing user the success page")
-        Future.successful(Redirect(routes.PaymentPlanSetUpController.paymentPlanSetUp()))
+        Future.successful(Redirect(routes.PaymentPlanSetUpController.paymentPlanSetUp))
     }
   }
 
@@ -55,7 +55,7 @@ class SubmitArrangementController @Inject() (
     for {
       arrangementResponse <- ttpService.submitArrangement(journey)
       _ <- journeyService.updateArrangementResponse(journey.id, arrangementResponse)
-    } yield Redirect(routes.PaymentPlanSetUpController.paymentPlanSetUp())
+    } yield Redirect(routes.PaymentPlanSetUpController.paymentPlanSetUp)
   }
 
 }

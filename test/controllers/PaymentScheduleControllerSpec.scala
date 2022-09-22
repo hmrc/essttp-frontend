@@ -177,7 +177,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
 
   s"POST ${routes.PaymentScheduleController.checkPaymentScheduleSubmit.url}" - {
 
-    s"should redirect to ${routes.BankDetailsController.typeOfAccount.url} if the journey " +
+    s"should redirect to ${routes.BankDetailsController.detailsAboutBankAccount.url} if the journey " +
       "has been updated successfully and send an audit event" in {
         stubCommonActions()
         EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto)()
@@ -187,7 +187,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
 
         val result: Future[Result] = controller.checkPaymentScheduleSubmit(fakeRequest)
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.BankDetailsController.typeOfAccount.url)
+        redirectLocation(result) shouldBe Some(routes.BankDetailsController.detailsAboutBankAccount.url)
         EssttpBackend.HasCheckedPlan.verifyUpdateHasCheckedPlanRequest(TdAll.journeyId)
 
         AuditConnectorStub.verifyEventAudited(

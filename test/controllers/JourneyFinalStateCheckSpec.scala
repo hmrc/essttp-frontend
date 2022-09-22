@@ -43,7 +43,7 @@ class JourneyFinalStateCheckSpec extends ItSpec {
       (PageUrls.determineAffordableQuotesUrl, app.injector.instanceOf[DetermineAffordableQuotesController].retrieveAffordableQuotes),
       (PageUrls.instalmentsUrl, app.injector.instanceOf[InstalmentsController].instalmentOptions),
       (PageUrls.instalmentScheduleUrl, app.injector.instanceOf[PaymentScheduleController].checkPaymentSchedule),
-      (PageUrls.typeOfAccountUrl, app.injector.instanceOf[BankDetailsController].typeOfAccount),
+      (PageUrls.aboutYourBankAccountUrl, app.injector.instanceOf[BankDetailsController].detailsAboutBankAccount),
       (PageUrls.directDebitDetailsUrl, app.injector.instanceOf[BankDetailsController].enterBankDetails),
       (PageUrls.checkDirectDebitDetailsUrl, app.injector.instanceOf[BankDetailsController].checkBankDetails),
       (PageUrls.termsAndConditionsUrl, app.injector.instanceOf[BankDetailsController].termsAndConditions),

@@ -43,10 +43,10 @@ object JourneyInfo {
   val startDates: JourneyInfoAsJson = TdJsonBodies.startDatesJourneyInfo
   val affordableQuotes: JourneyInfoAsJson = TdJsonBodies.affordableQuotesJourneyInfo
   val selectedPlan: JourneyInfoAsJson = TdJsonBodies.selectedPlanJourneyInfo
-  val typeOfBankAccountBusiness: JourneyInfoAsJson = TdJsonBodies.typeOfBankJourneyInfo()
-  val typeOfBankAccountPersonal: JourneyInfoAsJson = TdJsonBodies.typeOfBankJourneyInfo("Personal")
-  def directDebitDetails(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo(isAccountHolder = true, encrypter)
-  def directDebitDetailsNotAccountHolder(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo(isAccountHolder = false, encrypter)
+  def detailsAboutBankAccountBusiness(isAccountHolder: Boolean): JourneyInfoAsJson = TdJsonBodies.detailsAboutBankAccountJourneyInfo("Business", isAccountHolder)
+  def detailsAboutBankAccountPersonal(isAccountHolder: Boolean): JourneyInfoAsJson = TdJsonBodies.detailsAboutBankAccountJourneyInfo("Personal", isAccountHolder)
+  def directDebitDetails(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo(encrypter)
+  def directDebitDetailsNotAccountHolder(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo(encrypter)
   val arrangementSubmitted: JourneyInfoAsJson = TdJsonBodies.arrangementResponseJourneyInfo()
   /** * **/
 
@@ -113,20 +113,17 @@ object JourneyInfo {
   def hasCheckedPaymentPlan(encrypter: Encrypter): List[JourneyInfoAsJson] =
     chosenPaymentPlan(encrypter)
 
-  def chosenTypeOfBankAccountBusiness(encrypter: Encrypter): List[JourneyInfoAsJson] =
-    typeOfBankAccountBusiness :: chosenPaymentPlan(encrypter)
+  def enteredDetailsAboutBankAccountBusiness(isAccountHolder: Boolean, encrypter: Encrypter): List[JourneyInfoAsJson] =
+    detailsAboutBankAccountBusiness(isAccountHolder) :: chosenPaymentPlan(encrypter)
 
-  def chosenTypeOfBankAccountPersonal(encrypter: Encrypter): List[JourneyInfoAsJson] =
-    typeOfBankAccountPersonal :: chosenPaymentPlan(encrypter)
+  def enteredDetailsAboutBankAccountPersonal(isAccountHolder: Boolean, encrypter: Encrypter): List[JourneyInfoAsJson] =
+    detailsAboutBankAccountPersonal(isAccountHolder) :: chosenPaymentPlan(encrypter)
 
-  def enteredDirectDebitDetailsIsAccountHolder(encrypter: Encrypter): List[JourneyInfoAsJson] =
-    directDebitDetails(encrypter) :: chosenTypeOfBankAccountBusiness(encrypter)
-
-  def enteredDirectDebitDetailsIsNotAccountHolder(encrypter: Encrypter): List[JourneyInfoAsJson] =
-    directDebitDetailsNotAccountHolder(encrypter) :: chosenTypeOfBankAccountBusiness(encrypter)
+  def enteredDirectDebitDetails(encrypter: Encrypter): List[JourneyInfoAsJson] =
+    directDebitDetails(encrypter) :: enteredDetailsAboutBankAccountBusiness(isAccountHolder = true, encrypter)
 
   def confirmedDirectDebitDetails(encrypter: Encrypter): List[JourneyInfoAsJson] =
-    enteredDirectDebitDetailsIsAccountHolder(encrypter)
+    enteredDirectDebitDetails(encrypter)
 
   def agreedTermsAndConditions(encrypter: Encrypter): List[JourneyInfoAsJson] =
     confirmedDirectDebitDetails(encrypter)
@@ -136,7 +133,7 @@ object JourneyInfo {
 
   //used in final page test
   def submittedArrangementNoUpfrontPayment(encrypter: Encrypter): List[JourneyInfoAsJson] =
-    arrangementSubmitted :: directDebitDetails(encrypter) :: typeOfBankAccountBusiness :: selectedPlan :: affordableQuotes ::
+    arrangementSubmitted :: directDebitDetails(encrypter) :: detailsAboutBankAccountBusiness(isAccountHolder = true) :: selectedPlan :: affordableQuotes ::
       upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: monthlyPaymentAmount ::
       dayOfMonth() :: startDates :: cannotPayUpfront :: eligibilityCheckedEligible(encrypter)
 

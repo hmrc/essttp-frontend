@@ -21,7 +21,6 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import controllers.routes
 @import models.forms.BankDetailsForm
-@import models.enumsforforms.IsSoleSignatoryFormValue
 @import play.twirl.api.TwirlFeatureImports.defining
 @import cats.syntax.eq._
 
@@ -54,9 +53,7 @@
 @accountNumberKey = @{
     "accountNumber"
 }
-@soleSignatoryKey = @{
-    "isSoleSignatory"
-}
+
 @title = @{
     Messages.BankDetails.`Set up Direct Debit`.show
 }
@@ -88,7 +85,7 @@
     <h1 class="govuk-heading-xl">
     @title
     </h1>
-    @formWithCSRF(action = routes.BankDetailsController.enterBankDetailsSubmit()) {
+    @formWithCSRF(action = routes.BankDetailsController.enterBankDetailsSubmit) {
 
         @govukInput(Input(
             id = nameKey,
@@ -154,35 +151,6 @@
             </div>
             </fieldset>
         }
-
-        @govukRadios(Radios(
-            fieldset = Some(Fieldset(
-                legend = Some(Legend(
-                    content = Text(Messages.BankDetails.`Are you an account holder`.show),
-                    classes = "govuk-label--m",
-                    isPageHeading = false
-                ))
-            )),
-            hint = Some(Hint(
-                content = Text(Messages.BankDetails.`You must be able to set up a direct debit without permission from...`.show)
-            )),
-            idPrefix = Some(soleSignatoryKey),
-            name = soleSignatoryKey,
-            items = Seq(
-                RadioItem(
-                    content = Text(Messages.`Yes`.show),
-                    value = Some(IsSoleSignatoryFormValue.Yes.entryName),
-                    checked = form.data.values.toList.contains("Yes")
-                ),
-                RadioItem(
-                    content = Text(Messages.`No`.show),
-                    value = Some(IsSoleSignatoryFormValue.No.entryName),
-                    checked = form.data.values.toList.contains("No")
-                )
-            ),
-            classes = "govuk-radios--inline",
-            errorMessage = fieldErrorMessage(soleSignatoryKey, form, errorMessageOverrides)
-        ))
 
         @govukButton(Button(content = Text(Messages.continue.show)))
     }
