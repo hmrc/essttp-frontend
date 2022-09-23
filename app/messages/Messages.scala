@@ -698,7 +698,7 @@ object Messages {
     )
 
     val `HMRC Direct Debit Support Team VAT 2...`: Message = Message(
-      english = "HMRC Direct Debit Support Team VAT 2<br>DMB 612<br>BX5 5AB<br>United Kingdom"
+      english = "DM PAYE<br>HM Revenue and Customs<br>BX9 1EW<br>United Kingdom"
     )
 
     val `Declaration`: Message = Message(
