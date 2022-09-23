@@ -784,25 +784,11 @@ object Messages {
     )
 
     val `Call the HMRC Helpline on 0300 123 1813.`: Message = Message(
-      english = "Call the HMRC Helpline on 0300 123 1813, or write to us by post:"
+      english = "Call the HMRC Helpline on 0300 123 1813."
     )
 
-    val `DM PAYE`: Message = Message(
-      english = "DM PAYE"
-    )
-
-    val `HM Revenue and Customs`: Message = Message(
-      "HM Revenue and Customs"
-    )
-    val `BX9 1EW`: Message = Message(
-      "BX9 1EW"
-    )
-    val `United Kingdom`: Message = Message(
-      "United Kingdom"
-    )
-
-    val `Return to tax account`: Message = Message(
-      english = "Return to tax account"
+    val `Go to tax account`: Message = Message(
+      english = "Go to tax account"
     )
 
     val `What did you think of this service`: Message = Message(

@@ -40,76 +40,72 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
   private val expectedH1PaymentPlanPrintPage: String = "Your payment plan"
 
   "GET /payment-plan-set-up should" - {
+
+      def test(
+          stubActions:       () => Unit,
+          hasUpfrontPayment: Boolean
+      ): Unit = {
+        stubActions()
+
+        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+        val result: Future[Result] = controller.paymentPlanSetUp(fakeRequest)
+        val pageContent: String = contentAsString(result)
+        val doc: Document = Jsoup.parse(pageContent)
+
+        RequestAssertions.assertGetRequestOk(result)
+        ContentAssertions.commonPageChecks(
+          doc,
+          expectedH1        = expectedH1PaymentPlanSetUpPage,
+          expectedBack      = None,
+          expectedSubmitUrl = None
+        )
+
+        doc.select(".govuk-panel__title").text() shouldBe "Your payment plan is set up"
+        doc.select(".govuk-panel__body").text() shouldBe "Your payment reference is 123PA44545546"
+
+        val subheadings = doc.select(".govuk-heading-m").asScala.toList
+        val paragraphs = doc.select(".govuk-body").asScala.toList
+
+        subheadings(0).text() shouldBe "What happens next"
+        paragraphs(0).text() shouldBe "HMRC will send you a letter within 5 working days with your payment dates."
+
+        if (hasUpfrontPayment) {
+          paragraphs(1).text() shouldBe "Your upfront payment will be taken within 10 working days. Your next payment will be taken on 28th August 2022 or the next working day."
+        } else {
+          paragraphs(1).text() shouldBe "Your next payment will be taken on 28th August 2022 or the next working day."
+        }
+        paragraphs(2).text() shouldBe "Print your plan or save it as a PDF"
+
+        doc.select("#print-plan-link").attr("href") shouldBe PageUrls.printPlanUrl
+
+        subheadings(1).text() shouldBe "If you need to change your payment plan"
+        paragraphs(3).text() shouldBe "Call the HMRC Helpline on 0300 123 1813."
+
+        doc.select(".govuk-button").text() shouldBe "Go to tax account"
+        ()
+      }
+
     "return the confirmation page with correct content when there is an upfront payment" in {
-      stubCommonActions()
-      EssttpBackend.SubmitArrangement.findJourney(testCrypto)()
-
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
-      val result: Future[Result] = controller.paymentPlanSetUp(fakeRequest)
-      val pageContent: String = contentAsString(result)
-      val doc: Document = Jsoup.parse(pageContent)
-
-      RequestAssertions.assertGetRequestOk(result)
-      ContentAssertions.commonPageChecks(
-        doc,
-        expectedH1        = expectedH1PaymentPlanSetUpPage,
-        expectedBack      = None,
-        expectedSubmitUrl = None
+      test(
+        { () =>
+          stubCommonActions()
+          EssttpBackend.SubmitArrangement.findJourney(testCrypto)()
+          ()
+        },
+        hasUpfrontPayment = true
       )
-
-      doc.select(".govuk-panel__title").text() shouldBe "Your payment plan is set up"
-      doc.select(".govuk-panel__body").text() shouldBe "Your payment reference is 123PA44545546"
-
-      val subheadings = doc.select(".govuk-heading-m").asScala.toList
-      val paragraphs = doc.select(".govuk-body").asScala.toList
-
-      subheadings(0).text() shouldBe "What happens next"
-      paragraphs(0).text() shouldBe "HMRC will send you a letter within 5 working days with your payment dates."
-      paragraphs(1).text() shouldBe "Your upfront payment will be taken within 10 working days. Your next payment will be taken on 28th August 2022 or the next working day."
-      paragraphs(2).text() shouldBe "Print your plan or save it as a PDF"
-
-      doc.select("#print-plan-link").attr("href") shouldBe PageUrls.printPlanUrl
-
-      subheadings(1).text() shouldBe "If you need to change your payment plan"
-      paragraphs(3).text() shouldBe "Call the HMRC Helpline on 0300 123 1813, or write to us by post:"
-      paragraphs(4).text() shouldBe "DM PAYE HM Revenue and Customs BX9 1EW United Kingdom"
     }
 
     "return the confirmation page with correct content when there is no upfront payment" in {
-      stubCommonActions()
-      EssttpBackend.SubmitArrangement.findJourney(testCrypto)(JourneyJsonTemplates.`Arrangement Submitted - No upfront payment`(testCrypto))
-
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
-      val result: Future[Result] = controller.paymentPlanSetUp(fakeRequest)
-      val pageContent: String = contentAsString(result)
-      val doc: Document = Jsoup.parse(pageContent)
-
-      RequestAssertions.assertGetRequestOk(result)
-      ContentAssertions.commonPageChecks(
-        doc,
-        expectedH1        = expectedH1PaymentPlanSetUpPage,
-        expectedBack      = None,
-        expectedSubmitUrl = None
+      test(
+        { () =>
+          stubCommonActions()
+          EssttpBackend.SubmitArrangement.findJourney(testCrypto)(JourneyJsonTemplates.`Arrangement Submitted - No upfront payment`(testCrypto))
+          ()
+        },
+        hasUpfrontPayment = false
       )
-
-      doc.select(".govuk-panel__title").text() shouldBe "Your payment plan is set up"
-      doc.select(".govuk-panel__body").text() shouldBe "Your payment reference is 123PA44545546"
-
-      val subheadings = doc.select(".govuk-heading-m").asScala.toList
-      val paragraphs = doc.select(".govuk-body").asScala.toList
-
-      subheadings(0).text() shouldBe "What happens next"
-      paragraphs(0).text() shouldBe "HMRC will send you a letter within 5 working days with your payment dates."
-      paragraphs(1).text() shouldBe "Your next payment will be taken on 28th August 2022 or the next working day."
-      paragraphs(2).text() shouldBe "Print your plan or save it as a PDF"
-
-      doc.select("#print-plan-link").attr("href") shouldBe PageUrls.printPlanUrl
-
-      subheadings(1).text() shouldBe "If you need to change your payment plan"
-      paragraphs(3).text() shouldBe "Call the HMRC Helpline on 0300 123 1813, or write to us by post:"
-      paragraphs(4).text() shouldBe "DM PAYE HM Revenue and Customs BX9 1EW United Kingdom"
     }
   }
 
