@@ -530,7 +530,7 @@ object Messages {
 
   }
 
-  object BankDetails {
+  object AboutYourBankAccount {
 
     val `About your bank account`: Message = Message(
       english = "About your bank account"
@@ -551,6 +551,22 @@ object Messages {
     val `Select what type of account details you are providing`: Message = Message(
       english = "Select what type of account details you are providing"
     )
+
+    val `Are you the account holder`: Message = Message(
+      english = "Are you the account holder?"
+    )
+
+    val `You must be the sole account holder...`: Message = Message(
+      english = "You must be the sole account holder, or for multi-signature accounts you must have authority to set up a Direct Debit without additional signatures."
+    )
+
+    val `Select yes if you are the account holder`: Message = Message(
+      english = "Select yes if you are the account holder"
+    )
+
+  }
+
+  object BankDetails {
 
     val `Set up Direct Debit`: Message = Message(
       english = "Set up Direct Debit"
@@ -574,18 +590,6 @@ object Messages {
 
     val `Must be between 6 and 8 digits long`: Message = Message(
       english = "Must be between 6 and 8 digits long"
-    )
-
-    val `Are you the account holder`: Message = Message(
-      english = "Are you the account holder?"
-    )
-
-    val `You must be the sole account holder...`: Message = Message(
-      english = "You must be the sole account holder, or for multi-signature accounts you must have authority to set up a Direct Debit without additional signatures."
-    )
-
-    val `Select yes if you are the account holder`: Message = Message(
-      english = "Select yes if you are the account holder"
     )
 
     val errors: Map[String, Message] = Map(
@@ -613,6 +617,9 @@ object Messages {
       "sortCode.bars.confirm" -> Message("Confirm the sort code"),
       "accountNumber.bars.confirm" -> Message("Confirm the account number"),
     )
+  }
+
+  object CheckBankDetails {
 
     val `Check your Direct Debit details`: Message = Message(
       english = "Check your Direct Debit details"
@@ -645,6 +652,10 @@ object Messages {
     val `You can cancel a Direct Debit...`: Message = Message(
       english = "You can cancel a Direct Debit at any time by simply contacting your bank or building society. Written confirmation may be required. Please also notify us."
     )
+
+  }
+
+  object TermsAndConditions {
 
     val `Terms and conditions`: Message = Message(
       english = "Terms and conditions"
@@ -689,7 +700,9 @@ object Messages {
     val `Agree and continue`: Message = Message(
       english = "Agree and continue"
     )
+  }
 
+  object NotSoleSignatory {
     val `You cannot set up a Direct Debit online`: Message = Message(
       english = "You cannot set up a Direct Debit online"
     )
@@ -697,9 +710,19 @@ object Messages {
     val `You need a named account holder or someone with authorisation to set up a Direct Debit.`: Message = Message(
       english = "You need a named account holder or someone with authorisation to set up a Direct Debit."
     )
-    val `Return to tax account`: Message = Message(
-      english = "Return to tax account"
+
+    val `If you are not the account holder...`: Message = Message(
+      english = "If you are not the account holder or you wish to set up a Direct Debit with a multi-signature account, we " +
+        "recommend you speak to an adviser on <strong>0300 200 3835</strong> at the Payment Support Service. You must ensure all account " +
+        "holders are present when calling."
     )
+
+    val `Go to tax account`: Message = Message(
+      english = "Go to tax account"
+    )
+  }
+
+  object BankDetailsLockout {
 
     val `You've tried to confirm your bank details too many times`: Message = Message(
       english = "You’ve tried to confirm your bank details too many times"

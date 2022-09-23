@@ -37,25 +37,25 @@
 
 @import requestSupport._
 
-@title = @{Messages.BankDetails.`Check your Direct Debit details`.show}
+@title = @{Messages.CheckBankDetails.`Check your Direct Debit details`.show}
 @detailsContent = {
   <div class="dd-logo">
     <img src="/set-up-a-payment-plan/assets/images/dd-logo.jpg" alt="Direct Debit logo">
   </div>
   <h2 class="govuk-heading-m">
-    @{Messages.BankDetails.`The Direct Debit Guarantee`.show}
+    @{Messages.CheckBankDetails.`The Direct Debit Guarantee`.show}
   </h2>
   <p class="govuk-body">
-    @{Messages.BankDetails.`This Guarantee is offered...`.show}
+    @{Messages.CheckBankDetails.`This Guarantee is offered...`.show}
   </p>
   <p class="govuk-body">
-    @{Messages.BankDetails.`If there are any changes to the amount...`.show}
+    @{Messages.CheckBankDetails.`If there are any changes to the amount...`.show}
   </p>
   <p class="govuk-body">
-    @{Messages.BankDetails.`If an error is made in the payment...`.show}
+    @{Messages.CheckBankDetails.`If an error is made in the payment...`.show}
   </p>
   <p class="govuk-body">
-    @{Messages.BankDetails.`You can cancel a Direct Debit...`.show}
+    @{Messages.CheckBankDetails.`You can cancel a Direct Debit...`.show}
   </p>
 }
 
@@ -70,7 +70,7 @@
         SummaryListRow(
           classes = "grouped-row",
           key = Key(
-            content = HtmlContent(Html(Messages.BankDetails.`Account name`.show)),
+            content = HtmlContent(Html(Messages.CheckBankDetails.`Account name`.show)),
             classes = "govuk-!-width-one-half"
           ),
           value = Value(
@@ -81,7 +81,7 @@
               ActionItem(
                 href = routes.BankDetailsController.enterBankDetails.url,
                 content = Text(Messages.change.show),
-                visuallyHiddenText = Some(Messages.BankDetails.`Account name`.show)
+                visuallyHiddenText = Some(Messages.CheckBankDetails.`Account name`.show)
               )
             )
           ))
