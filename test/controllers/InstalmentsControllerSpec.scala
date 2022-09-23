@@ -44,7 +44,7 @@ class InstalmentsControllerSpec extends ItSpec {
   private val progressiveRevealInnerContent1: String = "We only charge interest on overdue amounts."
   private val progressiveRevealInnerContent2: String = "We charge the Bank of England base rate plus 2.5%, calculated as simple interest."
   private val progressiveRevealInnerContent3: String =
-    "If the interest rate changes during your plan, your monthly payments will not change. If we need to, we'll settle the difference at the end of the plan."
+    "If the interest rate changes during your plan, your monthly payments will not change. If we need to, we’ll settle the difference at the end of the plan."
 
   "GET /how-many-months-do-you-want-to-pay-over should" - {
     "return 200 and the instalment selection page" in {
