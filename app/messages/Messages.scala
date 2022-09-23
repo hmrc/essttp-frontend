@@ -689,6 +689,14 @@ object Messages {
       english = "If your circumstances change and you can pay more or you can pay in full, you need to let us know."
     )
 
+    val `You can write to us...`: Message = Message(
+      english = "You can write to us about your Direct Debit:"
+    )
+
+    val `HMRC Direct Debit Support Team VAT 2...`: Message = Message(
+      english = "HMRC Direct Debit Support Team VAT 2<br>DMB 612<br>BX5 5AB<br>United Kingdom"
+    )
+
     val `Declaration`: Message = Message(
       english = "Declaration"
     )
