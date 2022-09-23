@@ -261,11 +261,15 @@ object Messages {
     )
 
     val `You can use this service to pay overdue payments...`: Message = Message(
-      english = "You can use this service to pay overdue payments in instalments over a period of up to 6 months. The payments you make may incur interest."
+      english = "You can use this service to pay overdue payments in instalments. The payments you make may incur interest."
     )
 
     val `You are eligible to set up an online payment plan if:`: Message = Message(
       english = "You are eligible to set up an online payment plan if:"
+    )
+
+    val `you plan to pay the debt off within the next 6 months or less`: Message = Message(
+      english = "you plan to pay the debt off within the next 6 months or less"
     )
 
     val `you owe £15,000 or less`: Message = Message(
