@@ -86,7 +86,6 @@
           hint= Some(Hint(content = Text(Messages.UpfrontPaymentAmount.`Your monthly payments will be lower if...`.show) )),
             value = form.data.get(key)
         ))
-        @govukButton(Button(content = Text(Messages.continue.show), attributes = Map("id" -> "continue")))
 
         @govukDetails(
             Details(
@@ -94,6 +93,9 @@
                 content = HtmlContent(detailsContent)
             )
         )
+
+        @govukButton(Button(content = Text(Messages.continue.show), attributes = Map("id" -> "continue")))
+
     }
 
 }
