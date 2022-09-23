@@ -339,6 +339,26 @@ object Messages {
       case "error.tooLarge" => Message(english = s"Your upfront payment must be between ${min.gdsFormatInPounds} and ${max.gdsFormatInPounds}")
     }
 
+    val `Your monthly payments will be lower if...`: Message = Message(
+      english = "Your monthly payments will be lower if you make an upfront payment. This payment will be taken from your bank account within 10 working days."
+    )
+
+    val `How we calculate interest`: Message = Message(
+      english = "How we calculate interest"
+    )
+
+    val `We only charge interest on overdue amounts.`: Message = Message(
+      english = "We only charge interest on overdue amounts."
+    )
+
+    val `We charge the Bank of England base rate plus....`: Message = Message(
+      english = "We charge the Bank of England base rate plus 2.5%, calculated as simple interest."
+    )
+
+    val `If the interest rate changes during your plan...`: Message = Message(
+      english = "If the interest rate changes during your plan, your monthly payments will not change. If we need to, we’ll settle the difference at the end of the plan."
+    )
+
   }
 
   object UpfrontPaymentSummary {
@@ -475,7 +495,7 @@ object Messages {
     )
 
     val `If interest rates change`: Message = Message(
-      english = "If the interest rate changes during your plan, your monthly payments will not change. If we need to, we'll settle the difference at the end of the plan."
+      english = "If the interest rate changes during your plan, your monthly payments will not change. If we need to, we’ll settle the difference at the end of the plan."
     )
 
   }

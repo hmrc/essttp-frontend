@@ -62,7 +62,6 @@ class UpfrontPaymentControllerSpec extends ItSpec {
         expectedBack      = Some(routes.YourBillController.yourBill.url),
         expectedSubmitUrl = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit.url)
       )
-
       val radioContent = doc.select(".govuk-radios__label").asScala.toList
       radioContent(0).text() shouldBe "Yes"
       radioContent(1).text() shouldBe "No"
@@ -174,6 +173,11 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       val poundSymbol = doc.select(".govuk-input__prefix")
       poundSymbol.size() shouldBe 1
       poundSymbol.text() shouldBe "£"
+
+      doc.select(".govuk-hint").text shouldBe "Your monthly payments will be lower if you make an upfront payment. " +
+        "This payment will be taken from your bank account within 10 working days."
+
+      doc.select(".govuk-details__summary").text shouldBe "How we calculate interest"
     }
 
     "should route the user to /retrieve-extreme-dates when they try to force browse without selecting 'Yes' on the previous page" in {
