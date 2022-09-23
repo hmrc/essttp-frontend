@@ -102,7 +102,7 @@
                 checked = form.data.get(soleSignatoryKey).contains(IsSoleSignatoryFormValue.No.entryName)
             )
         ),
-        classes = "govuk-radios--inline",
+        classes = "govuk-radios",
         errorMessage = form.error(soleSignatoryKey).map(e => ErrorMessage(content = Text(e.message)))
     ))
 }
