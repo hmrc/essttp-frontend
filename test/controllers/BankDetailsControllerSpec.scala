@@ -1021,7 +1021,7 @@ class BankDetailsControllerSpec extends ItSpec {
             "We can use any refunds you might get to pay off your tax charges.",
             "If your circumstances change and you can pay more or you can pay in full, you need to let us know.",
             "You can write to us about your Direct Debit:",
-            "HMRC Direct Debit Support Team VAT 2 DMB 612 BX5 5AB United Kingdom",
+            "DM PAYE HM Revenue and Customs BX9 1EW United Kingdom",
             "I agree to the terms and conditions of this payment plan. I confirm that this is the earliest I am able to settle this debt."
           )
         )
