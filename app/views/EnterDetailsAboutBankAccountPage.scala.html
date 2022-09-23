@@ -46,14 +46,14 @@
 @soleSignatoryKey = @{"isSoleSignatory"}
 
 @title = @{
-    Messages.BankDetails.`About your bank account`.show
+    Messages.AboutYourBankAccount.`About your bank account`.show
 }
 
 @typeOfBankAccountRadios = @{
     govukRadios(Radios(
         fieldset = Some(Fieldset(
             legend = Some(Legend(
-                content = Text(Messages.BankDetails.`What type of account details are you providing?`.show),
+                content = Text(Messages.AboutYourBankAccount.`What type of account details are you providing?`.show),
                 classes = "govuk-fieldset__legend--m",
                 isPageHeading = false
             ))
@@ -62,12 +62,12 @@
         name = typeOfAccountKey,
         items = Seq(
             RadioItem(
-                content = Text(Messages.BankDetails.`Business bank account`.show),
+                content = Text(Messages.AboutYourBankAccount.`Business bank account`.show),
                 value = Some(TypesOfBankAccount.Business.entryName),
                 checked = form.data.get(typeOfAccountKey).contains(TypesOfBankAccount.Business.entryName),
             ),
             RadioItem(
-                content = Text(Messages.BankDetails.`Personal bank account`.show),
+                content = Text(Messages.AboutYourBankAccount.`Personal bank account`.show),
                 value = Some(TypesOfBankAccount.Personal.entryName),
                 checked = form.data.get(typeOfAccountKey).contains(TypesOfBankAccount.Personal.entryName)
             )
@@ -80,13 +80,13 @@
     govukRadios(Radios(
         fieldset = Some(Fieldset(
             legend = Some(Legend(
-                content = Text(Messages.BankDetails.`Are you the account holder`.show),
+                content = Text(Messages.AboutYourBankAccount.`Are you the account holder`.show),
                 classes = "govuk-label--m",
                 isPageHeading = false
             ))
         )),
         hint = Some(Hint(
-            content = Text(Messages.BankDetails.`You must be the sole account holder...`.show)
+            content = Text(Messages.AboutYourBankAccount.`You must be the sole account holder...`.show)
         )),
         idPrefix = Some(soleSignatoryKey),
         name = soleSignatoryKey,

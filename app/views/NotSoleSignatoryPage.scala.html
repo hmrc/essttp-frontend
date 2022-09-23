@@ -17,6 +17,7 @@
 @import requests.RequestSupport
 @import messages.Messages
 @import play.api.mvc.Request
+@import play.twirl.api.Html
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import controllers.routes
 @import config.AppConfig
@@ -33,14 +34,22 @@
 
 @import requestSupport._
 
-@title = @{Messages.BankDetails.`You cannot set up a Direct Debit online`.show}
+@title = @{Messages.NotSoleSignatory.`You cannot set up a Direct Debit online`.show}
 
 @layout(pageTitle = Some(title), backUrl = Some(routes.BankDetailsController.detailsAboutBankAccount.url)) {
     <h1 class="govuk-heading-xl">@title</h1>
-    <p class="govuk-body">@{Messages.BankDetails.`You need a named account holder or someone with authorisation to set up a Direct Debit.`.show}</p>
+
+    <p class="govuk-body">@{
+        Messages.NotSoleSignatory.`You need a named account holder or someone with authorisation to set up a Direct Debit.`.show
+    }</p>
+
+    <p class="govuk-body">@{
+        Html(Messages.NotSoleSignatory.`If you are not the account holder...`.show)
+    }</p>
+
     @govukButton(Button(
         href = Some(appConfig.Urls.businessTaxAccountUrl),
-        content = Text(Messages.BankDetails.`Return to tax account`.show)
+        content = Text(Messages.NotSoleSignatory.`Go to tax account`.show)
     ))
 
 }

@@ -85,9 +85,13 @@ class BankDetailsControllerSpec extends ItSpec {
 
   object CannotSetupDirectDebitPage {
     val expectedH1: String = "You cannot set up a Direct Debit online"
-    val paragraphContent: String =
+    val paragraphContent1: String =
       "You need a named account holder or someone with authorisation to set up a Direct Debit."
-    val buttonContent: String = "Return to tax account"
+    val paragraphContent2: String =
+      "If you are not the account holder or you wish to set up a Direct Debit with a multi-signature account, we recommend " +
+        "you speak to an adviser on 0300 200 3835 at the Payment Support Service. You must ensure all account holders are " +
+        "present when calling."
+    val buttonContent: String = "Go to tax account"
   }
 
   object BarsLockoutPage {
@@ -1071,7 +1075,12 @@ class BankDetailsControllerSpec extends ItSpec {
         expectedSubmitUrl = None
       )
 
-      doc.select(".govuk-body").text() shouldBe CannotSetupDirectDebitPage.paragraphContent
+      val paragraphs = doc.select(".govuk-body").asScala.toList
+      paragraphs.size shouldBe 2
+
+      paragraphs(0).text() shouldBe CannotSetupDirectDebitPage.paragraphContent1
+      paragraphs(1).text() shouldBe CannotSetupDirectDebitPage.paragraphContent2
+
       val cta = doc.select(".govuk-button")
       cta.text() shouldBe CannotSetupDirectDebitPage.buttonContent
       cta.attr("href") shouldBe "http://localhost:9020/business-account"
