@@ -90,17 +90,12 @@
     <p class="govuk-body">@{
         Messages.Confirmation.`Call the HMRC Helpline on 0300 123 1813.`.show
     }</p>
-    <p class="govuk-body" id="paye-address">
-        @{Messages.Confirmation.`DM PAYE`.show}<br>
-        @{Messages.Confirmation.`HM Revenue and Customs`.show}<br>
-        @{Messages.Confirmation.`BX9 1EW`.show}<br>
-        @{Messages.Confirmation.`United Kingdom`.show}<br>
-    </p>
+
 
     <p class="govuk-body">
         <a href=@{appConfig.Urls.businessTaxAccountUrl} class="govuk-button" data-module="govuk-button">
         @{
-            Messages.Confirmation.`Return to tax account`.show
+            Messages.Confirmation.`Go to tax account`.show
         }
         </a>
     </p>
