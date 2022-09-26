@@ -126,7 +126,9 @@ object TdAll {
         accruedInterest      = AccruedInterest(AmountInPence(1597)),
         ineligibleChargeType = IneligibleChargeType(false),
         chargeOverMaxDebtAge = ChargeOverMaxDebtAge(false),
-        locks                = List(Lock(LockType("Payment"), LockReason("Risk/Fraud"), DisallowedChargeLockType(false)))
+        locks                = Some(
+          List(Lock(LockType("Payment"), LockReason("Risk/Fraud"), DisallowedChargeLockType(false)))
+        )
       ))
     ))
   )
