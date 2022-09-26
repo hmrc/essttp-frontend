@@ -16,8 +16,8 @@
 
 package testsupport
 
-import langswitch.Language
-import langswitch.Languages.{English, Welsh}
+import models.Language
+import models.Languages.{English, Welsh}
 import play.api.mvc.Cookie
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.{HeaderNames, SessionKeys}

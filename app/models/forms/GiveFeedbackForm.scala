@@ -16,7 +16,7 @@
 
 package models.forms
 
-import langswitch.Language
+import models.Language
 import messages.Messages
 import models.enumsforforms.GiveFeedbackFormValue
 import play.api.data.Forms.mapping

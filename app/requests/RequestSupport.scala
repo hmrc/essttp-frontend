@@ -16,7 +16,7 @@
 
 package requests
 
-import langswitch.Language
+import models.Language
 import play.api.i18n._
 import play.api.mvc.{Request, RequestHeader}
 import uk.gov.hmrc.http.{HeaderCarrier, SessionKeys}
