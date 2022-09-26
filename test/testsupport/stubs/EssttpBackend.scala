@@ -50,8 +50,8 @@ object EssttpBackend {
   def verifyFindByLatestSessionId(): Unit = verify(postRequestedFor(urlPathEqualTo(findByLatestSessionIdUrl)))
 
   object BarsVerifyStatusStub {
-    private val noLockoutBody = """{
-                          |    "attempts": 1
+    private def noLockoutBody(numberOfAttempts: Int) = s"""{
+                          |    "attempts": $numberOfAttempts
                           |}""".stripMargin
 
     private def lockoutBody(expiry: Instant) = s"""{
@@ -62,11 +62,11 @@ object EssttpBackend {
     private val getVerifyStatusUrl: String = "/essttp-backend/bars/verify/status"
     private val updateVerifyStatusUrl: String = "/essttp-backend/bars/verify/update"
 
-    def statusUnlocked(): StubMapping = stubPost(getVerifyStatusUrl, noLockoutBody)
+    def statusUnlocked(): StubMapping = stubPost(getVerifyStatusUrl, noLockoutBody(numberOfAttempts = 1))
 
     def statusLocked(expiry: Instant): StubMapping = stubPost(getVerifyStatusUrl, lockoutBody(expiry))
 
-    def update(): StubMapping = stubPost(updateVerifyStatusUrl, noLockoutBody)
+    def update(numberOfAttempts: Int = 1): StubMapping = stubPost(updateVerifyStatusUrl, noLockoutBody(numberOfAttempts))
 
     def updateAndLockout(expiry: Instant): StubMapping = stubPost(updateVerifyStatusUrl, lockoutBody(expiry))
 

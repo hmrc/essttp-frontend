@@ -16,33 +16,44 @@
 
 package actions
 
-import actionsmodel.AuthenticatedJourneyRequest
+import actionsmodel.{AuthenticatedJourneyRequest, BarsNotLockedOutRequest}
 import controllers.{JourneyIncorrectStateRouter, routes}
 import essttp.bars.BarsVerifyStatusConnector
 import essttp.journey.model.Journey
 import play.api.Logging
-import play.api.mvc.{ActionFilter, Request, Result, Results}
+import play.api.mvc.{ActionRefiner, Request, Result, Results}
 import util.QueryParameterUtils._
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class BarsLockoutActionFilter @Inject() (barsVerifyStatusConnector: BarsVerifyStatusConnector)(
+class BarsLockoutActionRefiner @Inject() (barsVerifyStatusConnector: BarsVerifyStatusConnector)(
     implicit
     ec: ExecutionContext
-) extends ActionFilter[AuthenticatedJourneyRequest] with Logging with Results {
+) extends ActionRefiner[AuthenticatedJourneyRequest, BarsNotLockedOutRequest] with Logging with Results {
 
-  override protected def filter[A](journeyRequest: AuthenticatedJourneyRequest[A]): Future[Option[Result]] = {
-    implicit val rh: Request[A] = journeyRequest.request
+  override protected def refine[A](request: AuthenticatedJourneyRequest[A]): Future[Either[Result, BarsNotLockedOutRequest[A]]] = {
+    implicit val rh: Request[A] = request.request
 
-    journeyRequest.journey match {
+    request.journey match {
       case j: Journey.BeforeComputedTaxId =>
-        JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF(j).map(Some(_))
+        JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF(j).map(Left(_))
       case j: Journey.AfterComputedTaxId =>
         barsVerifyStatusConnector.status(j.taxId).map { status =>
-          status.lockoutExpiryDateTime.map { expiresAt =>
-            Redirect(routes.BankDetailsController.barsLockout(expiresAt.encodedLongFormat))
+          status.lockoutExpiryDateTime match {
+            case Some(expiresAt) =>
+              Left(Redirect(routes.BankDetailsController.barsLockout(expiresAt.encodedLongFormat)))
+            case None =>
+              Right(
+                new BarsNotLockedOutRequest(
+                  request.request,
+                  request.enrolments,
+                  j,
+                  request.ggCredId,
+                  status.attempts
+                )
+              )
           }
         }
     }

@@ -18,6 +18,7 @@ package services
 
 import actionsmodel.AuthenticatedJourneyRequest
 import cats.syntax.eq._
+import essttp.bars.model.BarsVerifyStatusResponse
 import essttp.crypto.CryptoFormat
 import essttp.journey.model.Journey.Stages._
 import essttp.journey.model.Journey.{AfterEnteredDetailsAboutBankAccount, Stages}
@@ -25,7 +26,7 @@ import essttp.journey.model.Origin
 import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount}
 import essttp.rootmodel.ttp.EligibilityCheckResult
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
-import models.audit.bars.{BarsAuditAccount, BarsAuditRequest, BarsAuditResponse, BarsCheckAuditDetail}
+import models.audit.bars.{BarsAuditAccount, BarsAuditRequest, BarsAuditResponse, BarsCheckAuditDetail, BarsVerifyDetails}
 import models.audit.eligibility.{EligibilityCheckAuditDetail, EligibilityResult, EnrollmentReasons}
 import models.audit.paymentplansetup.PaymentPlanSetUpAuditDetail
 import models.audit.planbeforesubmission.PaymentPlanBeforeSubmissionAuditDetail
@@ -65,12 +66,13 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
     audit(toPaymentPlanBeforeSubmissionAuditDetail(journey))
 
   def auditBarsCheck(
-      journey:           AfterEnteredDetailsAboutBankAccount,
-      bankDetails:       BankDetails,
-      typeOfBankAccount: TypeOfBankAccount,
-      result:            Either[BarsError, VerifyResponse]
+      journey:              AfterEnteredDetailsAboutBankAccount,
+      bankDetails:          BankDetails,
+      typeOfBankAccount:    TypeOfBankAccount,
+      result:               Either[BarsError, VerifyResponse],
+      verifyStatusResponse: BarsVerifyStatusResponse
   )(implicit hc: HeaderCarrier): Unit =
-    audit(toBarsCheckAuditDetail(journey, bankDetails, typeOfBankAccount, result))
+    audit(toBarsCheckAuditDetail(journey, bankDetails, typeOfBankAccount, result, verifyStatusResponse))
 
   def auditPaymentPlanSetUp(
       journey:         AgreedTermsAndConditions,
@@ -149,10 +151,11 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
   }
 
   private def toBarsCheckAuditDetail(
-      journey:           AfterEnteredDetailsAboutBankAccount,
-      bankDetails:       BankDetails,
-      typeOfBankAccount: TypeOfBankAccount,
-      result:            Either[BarsError, VerifyResponse]
+      journey:              AfterEnteredDetailsAboutBankAccount,
+      bankDetails:          BankDetails,
+      typeOfBankAccount:    TypeOfBankAccount,
+      result:               Either[BarsError, VerifyResponse],
+      verifyStatusResponse: BarsVerifyStatusResponse
   ): BarsCheckAuditDetail = {
     val eligibilityCheckResult = journey match {
       case j: EnteredDetailsAboutBankAccount     => j.eligibilityCheckResult
@@ -176,7 +179,12 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       BarsAuditResponse(
         result.isRight,
         result
+      ),
+      BarsVerifyDetails(
+        verifyStatusResponse.attempts.value,
+        verifyStatusResponse.lockoutExpiryDateTime.map(_.toString)
       )
+
     )
   }
 

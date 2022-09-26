@@ -16,6 +16,7 @@
 
 package actionsmodel
 
+import essttp.bars.model.NumberOfBarsVerifyAttempts
 import essttp.journey.model.{Journey, JourneyId}
 import essttp.rootmodel.ttp.EligibilityCheckResult
 import models.GGCredId
@@ -37,10 +38,21 @@ class AuthenticatedJourneyRequest[A](
   val journeyId: JourneyId = journey._id
 }
 
+class BarsNotLockedOutRequest[A](
+    override val request:           Request[A],
+    override val enrolments:        Enrolments,
+    val journey:                    Journey,
+    ggCredId:                       GGCredId,
+    val numberOfBarsVerifyAttempts: NumberOfBarsVerifyAttempts
+) extends AuthenticatedRequest[A](request, enrolments, ggCredId) {
+  val journeyId: JourneyId = journey._id
+}
+
 final class EligibleJourneyRequest[A](
-    override val journey:       Journey,
-    override val enrolments:    Enrolments,
-    override val request:       Request[A],
-    ggCredId:                   GGCredId,
-    val eligibilityCheckResult: EligibilityCheckResult
+    override val journey:           Journey,
+    override val enrolments:        Enrolments,
+    override val request:           Request[A],
+    ggCredId:                       GGCredId,
+    val numberOfBarsVerifyAttempts: NumberOfBarsVerifyAttempts,
+    val eligibilityCheckResult:     EligibilityCheckResult
 ) extends AuthenticatedJourneyRequest[A](request, enrolments, journey, ggCredId)

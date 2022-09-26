@@ -16,23 +16,12 @@
 
 package models.audit.bars
 
-import models.audit.{AuditDetail, TaxDetail}
 import play.api.libs.json.{Json, OWrites}
 
-final case class BarsCheckAuditDetail(
-    taxType:    String,
-    taxDetail:  TaxDetail,
-    request:    BarsAuditRequest,
-    response:   BarsAuditResponse,
-    barsVerify: BarsVerifyDetails
-) extends AuditDetail {
+final case class BarsVerifyDetails(attempts: Int, lockoutExpiryDateTime: Option[String])
 
-  override val auditType: String = "BarsCheck"
+object BarsVerifyDetails {
 
-}
-
-object BarsCheckAuditDetail {
-
-  implicit val writes: OWrites[BarsCheckAuditDetail] = Json.writes
+  implicit val writes: OWrites[BarsVerifyDetails] = Json.writes
 
 }
