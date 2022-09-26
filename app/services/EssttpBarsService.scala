@@ -16,8 +16,10 @@
 
 package services
 
+import actionsmodel.EligibleJourneyRequest
 import config.AppConfig
 import essttp.bars.BarsVerifyStatusConnector
+import essttp.bars.model.BarsVerifyStatusResponse
 import essttp.journey.model.Journey.{AfterComputedTaxId, AfterEnteredDetailsAboutBankAccount}
 import essttp.rootmodel.TaxId
 import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount, TypesOfBankAccount}
@@ -47,8 +49,9 @@ class EssttpBarsService @Inject() (
       bankDetails:       BankDetails,
       typeOfBankAccount: TypeOfBankAccount,
       journey:           AfterEnteredDetailsAboutBankAccount
-  )(implicit requestHeader: RequestHeader): Future[Either[BarsError, VerifyResponse]] = {
-    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(requestHeader)
+  )(implicit request: EligibleJourneyRequest[_]): Future[Either[BarsError, VerifyResponse]] = {
+
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request.request)
 
     val taxId = journey match {
       case j: AfterComputedTaxId => j.taxId
@@ -63,22 +66,30 @@ class EssttpBarsService @Inject() (
         typeOfBankAccount = toBarsTypeOfBankAccount(typeOfBankAccount)
       )
       .flatMap { result =>
-        auditService.auditBarsCheck(journey, bankDetails, typeOfBankAccount, result)
+          def auditBars(barsVerifyStatusResponse: BarsVerifyStatusResponse): Unit =
+            auditService.auditBarsCheck(journey, bankDetails, typeOfBankAccount, result, barsVerifyStatusResponse)
+
         result match {
           case Right(_) | Left(_: BarsValidateError) =>
             // don't update the verify count on success or validate error
+            auditBars(BarsVerifyStatusResponse(request.numberOfBarsVerifyAttempts, None))
             Future.successful(result)
           case Left(bve: BarsVerifyError) =>
-            updateVerifyStatus(taxId, result, bve.barsResponse)
+            updateVerifyStatus(taxId, result, bve.barsResponse, auditBars)
         }
       }
   }
 
-  private def updateVerifyStatus(taxId: TaxId, result: Either[BarsError, VerifyResponse], br: BarsResponse)
-    (implicit requestHeader: RequestHeader): Future[Either[BarsError, VerifyResponse]] = {
+  private def updateVerifyStatus(
+      taxId:     TaxId,
+      result:    Either[BarsError, VerifyResponse],
+      br:        BarsResponse,
+      auditBars: BarsVerifyStatusResponse => Unit
+  )(implicit requestHeader: RequestHeader): Future[Either[BarsError, VerifyResponse]] =
     barsVerifyStatusConnector
       .update(taxId)
       .map { verifyStatus =>
+        auditBars(verifyStatus)
         // here we catch a lockout BarsStatus condition,
         // and force a TooManyAttempts (BarsError) response
         verifyStatus.lockoutExpiryDateTime
@@ -86,7 +97,7 @@ class EssttpBarsService @Inject() (
             Left(TooManyAttempts(br, expiry))
           }
       }
-  }
+
 }
 
 object EssttpBarsService {

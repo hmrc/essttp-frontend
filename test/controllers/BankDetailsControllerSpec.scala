@@ -476,8 +476,11 @@ class BankDetailsControllerSpec extends ItSpec {
              |    }
              |  },
              |  "response": {
-             |   "isBankAccountValid": true,
-             |   "barsResponse":  ${VerifyJson.success}
+             |    "isBankAccountValid": true,
+             |    "barsResponse":  ${VerifyJson.success}
+             |  },
+             |  "barsVerify": {
+             |    "attempts" : 1
              |  }
              |}
             """.stripMargin
@@ -576,7 +579,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
     abstract class BarsErrorSetup(typeOfAccount: TypeOfBankAccount) {
       stubCommonActions()
-      BarsVerifyStatusStub.update()
+      BarsVerifyStatusStub.update(numberOfAttempts = 2)
       EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
 
       val formData: List[(String, String)] = List(
@@ -585,7 +588,21 @@ class BankDetailsControllerSpec extends ItSpec {
         ("accountNumber", "12345678")
       )
 
-      def toExpectedBarsAuditDetailJson(barsResponseJson: String, isBankAccountValid: Boolean = false): JsObject =
+      def toExpectedBarsAuditDetailJson(
+          barsResponseJson:           String,
+          isBankAccountValid:         Boolean         = false,
+          numberOfBarsVerifyAttempts: Int             = 1,
+          barsVerifyLockoutTime:      Option[Instant] = None
+      ): JsObject = {
+        val barsVerifyJsonString =
+          s"""
+            |"barsVerify": {
+            |  "attempts": $numberOfBarsVerifyAttempts${
+            barsVerifyLockoutTime.fold("")(t => s""","lockoutExpiryDateTime": "${t.toString}"""")
+          }
+            |}
+            |""".stripMargin
+
         Json.parse(
           s"""
              |{
@@ -605,10 +622,12 @@ class BankDetailsControllerSpec extends ItSpec {
              |  "response": {
              |   "isBankAccountValid": $isBankAccountValid,
              |   "barsResponse":  $barsResponseJson
-             |  }
+             |  },
+             |  $barsVerifyJsonString
              |}
             """.stripMargin
         ).as[JsObject]
+      }
 
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -724,7 +743,15 @@ class BankDetailsControllerSpec extends ItSpec {
             )
         }
 
-      val expectedBarsAuditDetailJson: JsObject = toExpectedBarsAuditDetailJson(expectedAuditResponseJson)
+      def expectedBarsAuditDetailJson(
+          numberOfBarsVerifyAttempts: Int             = 1,
+          barsVerifyLockoutTime:      Option[Instant] = None
+      ): JsObject =
+        toExpectedBarsAuditDetailJson(
+          expectedAuditResponseJson,
+          numberOfBarsVerifyAttempts = numberOfBarsVerifyAttempts,
+          barsVerifyLockoutTime      = barsVerifyLockoutTime
+        )
     }
 
     "show correct error message when BARs validate response is accountNumberNotWellFormatted" in
@@ -735,7 +762,7 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.VerifyStub.ensureBarsVerifyNotCalled()
         AuditConnectorStub.verifyEventAudited(
           auditType  = "BarsCheck",
-          auditEvent = expectedBarsAuditDetailJson
+          auditEvent = expectedBarsAuditDetailJson()
         )
       }
 
@@ -747,7 +774,7 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.VerifyStub.ensureBarsVerifyNotCalled()
         AuditConnectorStub.verifyEventAudited(
           auditType  = "BarsCheck",
-          auditEvent = expectedBarsAuditDetailJson
+          auditEvent = expectedBarsAuditDetailJson()
         )
       }
 
@@ -759,7 +786,7 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.VerifyStub.ensureBarsVerifyNotCalled()
         AuditConnectorStub.verifyEventAudited(
           auditType  = "BarsCheck",
-          auditEvent = expectedBarsAuditDetailJson
+          auditEvent = expectedBarsAuditDetailJson()
         )
       }
 
@@ -770,7 +797,7 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(validForm)
         AuditConnectorStub.verifyEventAudited(
           auditType  = "BarsCheck",
-          auditEvent = expectedBarsAuditDetailJson
+          auditEvent = expectedBarsAuditDetailJson(numberOfBarsVerifyAttempts = 2)
         )
       }
 
@@ -781,7 +808,7 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validForm)
         AuditConnectorStub.verifyEventAudited(
           auditType  = "BarsCheck",
-          auditEvent = expectedBarsAuditDetailJson
+          auditEvent = expectedBarsAuditDetailJson(numberOfBarsVerifyAttempts = 2)
         )
       }
 
@@ -837,7 +864,10 @@ class BankDetailsControllerSpec extends ItSpec {
 
         AuditConnectorStub.verifyEventAudited(
           auditType  = "BarsCheck",
-          auditEvent = toExpectedBarsAuditDetailJson(VerifyJson.accountExistsError)
+          auditEvent = toExpectedBarsAuditDetailJson(
+            VerifyJson.accountExistsError,
+            numberOfBarsVerifyAttempts = 2
+          )
         )
       }
 
@@ -853,7 +883,10 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
         AuditConnectorStub.verifyEventAudited(
           auditType  = "BarsCheck",
-          auditEvent = toExpectedBarsAuditDetailJson(VerifyJson.accountExistsError)
+          auditEvent = toExpectedBarsAuditDetailJson(
+            VerifyJson.accountExistsError,
+            numberOfBarsVerifyAttempts = 2
+          )
         )
       }
 
@@ -869,7 +902,10 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
         AuditConnectorStub.verifyEventAudited(
           auditType  = "BarsCheck",
-          auditEvent = toExpectedBarsAuditDetailJson(VerifyJson.nameMatchesError)
+          auditEvent = toExpectedBarsAuditDetailJson(
+            VerifyJson.nameMatchesError,
+            numberOfBarsVerifyAttempts = 2
+          )
         )
       }
 
@@ -884,7 +920,10 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
         AuditConnectorStub.verifyEventAudited(
           auditType  = "BarsCheck",
-          auditEvent = toExpectedBarsAuditDetailJson(VerifyJson.nameMatchesError)
+          auditEvent = toExpectedBarsAuditDetailJson(
+            VerifyJson.nameMatchesError,
+            numberOfBarsVerifyAttempts = 2
+          )
         )
       }
 
@@ -906,7 +945,11 @@ class BankDetailsControllerSpec extends ItSpec {
         BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
         AuditConnectorStub.verifyEventAudited(
           auditType  = "BarsCheck",
-          auditEvent = toExpectedBarsAuditDetailJson(VerifyJson.otherBarsError)
+          auditEvent = toExpectedBarsAuditDetailJson(
+            VerifyJson.otherBarsError,
+            numberOfBarsVerifyAttempts = 3,
+            barsVerifyLockoutTime      = Some(expiry)
+          )
         )
       }
   }

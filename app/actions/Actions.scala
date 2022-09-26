@@ -17,22 +17,18 @@
 package actions
 
 import actionsmodel.{AuthenticatedJourneyRequest, AuthenticatedRequest, EligibleJourneyRequest}
-import controllers.JourneyIncorrectStateRouter
-import controllers.pagerouters.EligibilityRouter
-import essttp.journey.model.Journey
-import play.api.mvc.Results.Redirect
 import play.api.mvc._
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class Actions @Inject() (
     actionBuilder:              DefaultActionBuilder,
     authenticatedActionRefiner: AuthenticatedActionRefiner,
     getJourneyActionRefiner:    GetJourneyActionRefiner,
-    barsLockoutActionFilter:    BarsLockoutActionFilter
-)(implicit ec: ExecutionContext) {
+    barsLockoutActionFilter:    BarsLockoutActionRefiner,
+    eligibleJourneyRefiner:     EligibleJourneyRefiner
+) {
 
   val default: ActionBuilder[Request, AnyContent] = actionBuilder
 
@@ -50,38 +46,6 @@ class Actions @Inject() (
       .andThen(authenticatedActionRefiner)
       .andThen(getJourneyActionRefiner)
       .andThen(barsLockoutActionFilter)
-      .andThen(filterForEligibleJourney)
-
-  private def filterForEligibleJourney: ActionRefiner[AuthenticatedJourneyRequest, EligibleJourneyRequest] =
-    new ActionRefiner[AuthenticatedJourneyRequest, EligibleJourneyRequest] {
-
-      override protected def refine[A](
-          request: AuthenticatedJourneyRequest[A]
-      ): Future[Either[Result, EligibleJourneyRequest[A]]] = {
-        implicit val r: Request[A] = request
-        val result: Either[Result, EligibleJourneyRequest[A]] = request.journey match {
-          case j: Journey.Stages.Started       => Left(JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j))
-          case j: Journey.Stages.ComputedTaxId => Left(JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j))
-          case j: Journey.AfterEligibilityChecked =>
-            if (j.eligibilityCheckResult.isEligible) {
-              Right(
-                new EligibleJourneyRequest[A](
-                  journey    = j,
-                  enrolments = request.enrolments,
-                  request    = request,
-                  request.ggCredId,
-                  j.eligibilityCheckResult
-                )
-              )
-            } else {
-              Left(Redirect(EligibilityRouter.nextPage(j.eligibilityCheckResult)))
-            }
-        }
-        Future.successful(result)
-      }
-
-      override protected def executionContext: ExecutionContext = ec
-
-    }
+      .andThen(eligibleJourneyRefiner)
 
 }
