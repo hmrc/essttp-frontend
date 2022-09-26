@@ -480,7 +480,7 @@ class BankDetailsControllerSpec extends ItSpec {
              |    "barsResponse":  ${VerifyJson.success}
              |  },
              |  "barsVerify": {
-             |    "attempts" : 1
+             |    "unsuccessfulAttempts" : 1
              |  }
              |}
             """.stripMargin
@@ -597,7 +597,7 @@ class BankDetailsControllerSpec extends ItSpec {
         val barsVerifyJsonString =
           s"""
             |"barsVerify": {
-            |  "attempts": $numberOfBarsVerifyAttempts${
+            |  "unsuccessfulAttempts": $numberOfBarsVerifyAttempts${
             barsVerifyLockoutTime.fold("")(t => s""","lockoutExpiryDateTime": "${t.toString}"""")
           }
             |}
