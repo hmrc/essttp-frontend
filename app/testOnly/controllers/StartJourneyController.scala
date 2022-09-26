@@ -144,11 +144,13 @@ object StartJourneyController {
       accruedInterest      = AccruedInterest(AmountInPence(1597)),
       ineligibleChargeType = IneligibleChargeType(false),
       chargeOverMaxDebtAge = ChargeOverMaxDebtAge(false),
-      locks                = List(
-        Lock(
-          lockType                 = LockType("Payment"),
-          lockReason               = LockReason("Risk/Fraud"),
-          disallowedChargeLockType = DisallowedChargeLockType(false)
+      locks                = Some(
+        List(
+          Lock(
+            lockType                 = LockType("Payment"),
+            lockReason               = LockReason("Risk/Fraud"),
+            disallowedChargeLockType = DisallowedChargeLockType(false)
+          )
         )
       )
     )
