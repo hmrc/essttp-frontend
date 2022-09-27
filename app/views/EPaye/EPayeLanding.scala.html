@@ -61,10 +61,11 @@
     <li>@{Messages.Epaye.`able to authorise a Direct Debit`.show}</li>
   </ul>
 
+  <p class="govuk-body">@{Messages.Epaye.`HMRC intend this as a one-off payment plan...`.show}</p>
+
   @govukButton(Button(
     href = Some(routes.DetermineTaxIdController.determineTaxId.url),
     content = Text(Messages.Epaye.`Start now`.show)
   ))
 
-  <p class="govuk-body">@{Messages.Epaye.`HMRC intend this as a one-off payment plan...`.show}</p>
 }
