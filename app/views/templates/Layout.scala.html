@@ -18,6 +18,7 @@
 @import config.AppConfig
 @import controllers.routes
 @import views.html.helper.CSPNonce
+@import uk.gov.hmrc.govukfrontend.views.html.components.BackLink
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
 
@@ -47,8 +48,8 @@
 @(
   pageTitle: Option[String] = None,
   headBlock: Option[Html] = None,
-  scriptsBlock: Option[Html] = None,
-  backUrl: Option[String] = None,
+  additionalScripts: Option[Html] = None,
+  showBackLink: Boolean = true,
   hasErrors: Boolean = false,
   showSignOutOverride: Option[Boolean] = None
 )(
@@ -76,7 +77,8 @@
     }
 
     @scripts = {
-      @scriptsBlock.getOrElse(Html(""))
+       @if(showBackLink){ <script src="@{controllers.routes.Assets.versioned("javascripts/back-link.js")}" @{CSPNonce.attr}></script> }
+       @additionalScripts.getOrElse(Html(""))
     }
 
 @beforeContentBlock = {
@@ -90,10 +92,8 @@
         @if(appConfig.welshLanguageSupportEnabled) {
           @hmrcLanguageSelectHelper()
         }
-        @{
-            backUrl map { url =>
-                govukBackLink(BackLink(href = url, attributes = Map("id" -> "back")))
-            }
+        @if(showBackLink) {
+            @govukBackLink(BackLink(href = "#", classes = "js-visible"))
         }
     </div>
 }

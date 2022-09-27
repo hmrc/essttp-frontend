@@ -19,7 +19,7 @@ package controllers
 import _root_.actions.Actions
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
-import essttp.journey.model.{Journey, Origins}
+import essttp.journey.model.Journey
 import essttp.rootmodel.ttp.{ChargeTypeAssessment, Charges, EligibilityCheckResult}
 import essttp.rootmodel.AmountInPence
 import models.{InvoicePeriod, OverDuePayments, OverduePayment}
@@ -49,12 +49,7 @@ class YourBillController @Inject() (
   }
 
   def displayPage(journey: Journey.AfterEligibilityChecked)(implicit request: Request[_]): Result = {
-    val backUrl = journey.origin match {
-      case Origins.Epaye.Bta         => Some(routes.LandingController.landingPage.url)
-      case Origins.Epaye.DetachedUrl => Some(routes.LandingController.landingPage.url)
-      case Origins.Epaye.GovUk       => journey.backUrl.map(_.value)
-    }
-    Ok(views.yourBillIs(YourBillController.overDuePayments(journey.eligibilityCheckResult), backUrl))
+    Ok(views.yourBillIs(YourBillController.overDuePayments(journey.eligibilityCheckResult)))
   }
 
   val yourBillSubmit: Action[AnyContent] = as.eligibleJourneyAction { _ =>

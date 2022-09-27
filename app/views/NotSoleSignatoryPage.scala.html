@@ -36,7 +36,7 @@
 
 @title = @{Messages.NotSoleSignatory.`You cannot set up a Direct Debit online`.show}
 
-@layout(pageTitle = Some(title), backUrl = Some(routes.BankDetailsController.detailsAboutBankAccount.url)) {
+@layout(pageTitle = Some(title)) {
     <h1 class="govuk-heading-xl">@title</h1>
 
     <p class="govuk-body">@{

@@ -45,7 +45,7 @@
     @{Html(Messages.NotEligible.`If you are outside the UK...`.show)}
   </p>
 }
-@layout(pageTitle = Some(Messages.EnrolmentMissing.`You are not enrolled`.show)) {
+@layout(pageTitle = Some(Messages.EnrolmentMissing.`You are not enrolled`.show), showBackLink = false) {
    <h1 class="govuk-heading-xl">
     @{Messages.EnrolmentMissing.`You are not enrolled`.show}
    </h1>

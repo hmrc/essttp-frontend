@@ -62,8 +62,7 @@ class InstalmentsController @Inject() (
     Future.successful(
       Ok(views.instalmentOptionsPage(
         form    = maybePrePopForm,
-        options = instalmentOptions,
-        backUrl = InstalmentsController.backUrl
+        options = instalmentOptions
       ))
     )
   }
@@ -83,8 +82,7 @@ class InstalmentsController @Inject() (
         formWithErrors =>
           Future.successful(Ok(views.instalmentOptionsPage(
             form    = formWithErrors,
-            options = instalmentOptions,
-            backUrl = InstalmentsController.backUrl
+            options = instalmentOptions
           )))
       }, {
         (option: String) =>

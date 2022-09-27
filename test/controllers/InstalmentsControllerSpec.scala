@@ -60,9 +60,9 @@ class InstalmentsControllerSpec extends ItSpec {
       RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1        = expectedH1,
-        expectedBack      = Some(routes.PaymentDayController.paymentDay.url),
-        expectedSubmitUrl = Some(routes.InstalmentsController.instalmentOptionsSubmit.url)
+        expectedH1              = expectedH1,
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl       = Some(routes.InstalmentsController.instalmentOptionsSubmit.url)
       )
 
       val radioButtonGroup = doc.select(".govuk-radios")

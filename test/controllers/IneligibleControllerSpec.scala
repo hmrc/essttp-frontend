@@ -79,9 +79,9 @@ class IneligibleControllerSpec extends ItSpec {
 
       ContentAssertions.commonPageChecks(
         page,
-        expectedH1        = "Call us",
-        expectedBack      = None,
-        expectedSubmitUrl = None
+        expectedH1              = "Call us",
+        shouldBackLinkBePresent = false,
+        expectedSubmitUrl       = None
       )
       assertIneligiblePageLeadingP1(
         page      = page,
@@ -99,9 +99,9 @@ class IneligibleControllerSpec extends ItSpec {
 
       ContentAssertions.commonPageChecks(
         page,
-        expectedH1        = "Call us",
-        expectedBack      = None,
-        expectedSubmitUrl = None
+        expectedH1              = "Call us",
+        shouldBackLinkBePresent = false,
+        expectedSubmitUrl       = None
       )
       assertIneligiblePageLeadingP1(
         page      = page,
@@ -119,9 +119,9 @@ class IneligibleControllerSpec extends ItSpec {
 
       ContentAssertions.commonPageChecks(
         page,
-        expectedH1        = "You already have a payment plan with HMRC",
-        expectedBack      = None,
-        expectedSubmitUrl = None
+        expectedH1              = "You already have a payment plan with HMRC",
+        shouldBackLinkBePresent = false,
+        expectedSubmitUrl       = None
       )
       assertIneligiblePageLeadingP1(
         page      = page,
@@ -139,9 +139,9 @@ class IneligibleControllerSpec extends ItSpec {
 
       ContentAssertions.commonPageChecks(
         page,
-        expectedH1        = "Call us",
-        expectedBack      = None,
-        expectedSubmitUrl = None
+        expectedH1              = "Call us",
+        shouldBackLinkBePresent = false,
+        expectedSubmitUrl       = None
       )
       assertIneligiblePageLeadingP1(
         page      = page,
@@ -159,9 +159,9 @@ class IneligibleControllerSpec extends ItSpec {
 
       ContentAssertions.commonPageChecks(
         page,
-        expectedH1        = "File your return to use this service",
-        expectedBack      = None,
-        expectedSubmitUrl = None
+        expectedH1              = "File your return to use this service",
+        shouldBackLinkBePresent = false,
+        expectedSubmitUrl       = None
       )
       assertIneligiblePageLeadingP1(
         page      = page,

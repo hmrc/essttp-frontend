@@ -30,7 +30,7 @@
 
 @title = @{ Messages.BankDetailsLockout.`You've tried to confirm your bank details too many times`.show }
 
-@layout(pageTitle = Some(title), backUrl = None) {
+@layout(pageTitle = Some(title), showBackLink = false) {
   <h1 class="govuk-heading-xl">@title</h1>
   <p class="govuk-body">@{Messages.BankDetailsLockout.waitUntil(lockoutExpires).show}</p>
   <p class="govuk-body">@{Messages.BankDetailsLockout.`You may still be able to set up a payment plan over the phone.`.show}</p>

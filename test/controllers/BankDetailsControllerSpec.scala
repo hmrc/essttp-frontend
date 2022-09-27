@@ -44,7 +44,6 @@ import scala.jdk.CollectionConverters.{asScalaIteratorConverter, collectionAsSca
 class BankDetailsControllerSpec extends ItSpec {
 
   private val controller: BankDetailsController = app.injector.instanceOf[BankDetailsController]
-  private val expectedServiceName: String = TdAll.expectedServiceNamePaye
 
   object DetailsAboutBankAccountPage {
     val expectedH1: String = "About your bank account"
@@ -96,7 +95,6 @@ class BankDetailsControllerSpec extends ItSpec {
 
   object BarsLockoutPage {
     val expectedH1: String = "You’ve tried to confirm your bank details too many times"
-    val expectedPageTitle: String = s"$expectedH1 - $expectedServiceName - GOV.UK"
   }
 
   private def getExpectedFormValue(field: String, formData: Seq[(String, String)]): String =
@@ -152,9 +150,9 @@ class BankDetailsControllerSpec extends ItSpec {
       RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1        = DetailsAboutBankAccountPage.expectedH1,
-        expectedBack      = Some(routes.PaymentScheduleController.checkPaymentSchedule.url),
-        expectedSubmitUrl = Some(routes.BankDetailsController.detailsAboutBankAccountSubmit.url)
+        expectedH1              = DetailsAboutBankAccountPage.expectedH1,
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl       = Some(routes.BankDetailsController.detailsAboutBankAccountSubmit.url)
       )
 
       val formGroups = doc.select(".govuk-form-group").asScala.toList
@@ -319,9 +317,9 @@ class BankDetailsControllerSpec extends ItSpec {
       RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1        = EnterDirectDebitDetailsPage.expectedH1,
-        expectedBack      = Some(routes.BankDetailsController.detailsAboutBankAccount.url),
-        expectedSubmitUrl = Some(routes.BankDetailsController.enterBankDetailsSubmit.url)
+        expectedH1              = EnterDirectDebitDetailsPage.expectedH1,
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl       = Some(routes.BankDetailsController.enterBankDetailsSubmit.url)
       )
 
       val nameInput = doc.select("input[name=name]")
@@ -359,10 +357,14 @@ class BankDetailsControllerSpec extends ItSpec {
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
 
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1              = EnterDirectDebitDetailsPage.expectedH1,
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl       = Some(routes.BankDetailsController.enterBankDetailsSubmit.url)
+      )
       RequestAssertions.assertGetRequestOk(result)
-      ContentAssertions.languageToggleExists(doc)
 
-      doc.select("#back").attr("href") shouldBe routes.BankDetailsController.detailsAboutBankAccount.url
       doc.select(EnterDirectDebitDetailsPage.accountNameFieldId).`val`() shouldBe "Bob Ross"
       doc.select(EnterDirectDebitDetailsPage.sortCodeFieldId).`val`() shouldBe "123456"
       doc.select(EnterDirectDebitDetailsPage.accountNumberFieldId).`val`() shouldBe "12345678"
@@ -966,10 +968,12 @@ class BankDetailsControllerSpec extends ItSpec {
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
 
-      doc.title() shouldBe BarsLockoutPage.expectedPageTitle
-      doc.select(".govuk-heading-xl").text() shouldBe BarsLockoutPage.expectedH1
-      doc.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
-      ContentAssertions.languageToggleExists(doc)
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1              = BarsLockoutPage.expectedH1,
+        shouldBackLinkBePresent = false,
+        expectedSubmitUrl       = None
+      )
 
       val paragraphs = doc.select("p.govuk-body").asScala.toList
       paragraphs(0).text() shouldBe s"You’ll need to wait until ${expiry.longFormat} before trying to confirm your bank details again."
@@ -993,9 +997,9 @@ class BankDetailsControllerSpec extends ItSpec {
 
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1        = ConfirmDirectDebitDetailsPage.expectedH1,
-        expectedBack      = Some(routes.BankDetailsController.enterBankDetails.url),
-        expectedSubmitUrl = Some(routes.BankDetailsController.checkBankDetailsSubmit.url)
+        expectedH1              = ConfirmDirectDebitDetailsPage.expectedH1,
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl       = Some(routes.BankDetailsController.checkBankDetailsSubmit.url)
       )
 
       val summaries = doc.select(".govuk-summary-list").select(".govuk-summary-list__row").iterator().asScala.toList
@@ -1050,9 +1054,9 @@ class BankDetailsControllerSpec extends ItSpec {
       RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1        = TermsAndConditionsPage.expectedH1,
-        expectedBack      = Some(routes.BankDetailsController.checkBankDetails.url),
-        expectedSubmitUrl = Some(routes.BankDetailsController.termsAndConditionsSubmit.url)
+        expectedH1              = TermsAndConditionsPage.expectedH1,
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl       = Some(routes.BankDetailsController.termsAndConditionsSubmit.url)
       )
 
       ContentAssertions.assertListOfContent(
@@ -1115,9 +1119,9 @@ class BankDetailsControllerSpec extends ItSpec {
 
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1        = CannotSetupDirectDebitPage.expectedH1,
-        expectedBack      = Some(routes.BankDetailsController.detailsAboutBankAccount.url),
-        expectedSubmitUrl = None
+        expectedH1              = CannotSetupDirectDebitPage.expectedH1,
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl       = None
       )
 
       val paragraphs = doc.select(".govuk-body").asScala.toList

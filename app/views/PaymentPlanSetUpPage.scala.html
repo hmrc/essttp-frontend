@@ -53,7 +53,7 @@
     s"$day $month $year"
 }
 
-@layout(pageTitle = Some(title), backUrl = None) {
+@layout(pageTitle = Some(title), showBackLink = false) {
     @govukPanel(Panel(
         headingLevel = 1,
         title = Text(title),

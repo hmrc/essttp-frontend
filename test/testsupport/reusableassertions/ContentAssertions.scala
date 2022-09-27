@@ -56,7 +56,7 @@ object ContentAssertions extends RichMatchers {
   def commonPageChecks(
       page:                        Document,
       expectedH1:                  String,
-      expectedBack:                Option[String],
+      shouldBackLinkBePresent:     Boolean,
       expectedSubmitUrl:           Option[String],
       signedIn:                    Boolean        = true,
       hasFormError:                Boolean        = false,
@@ -81,12 +81,9 @@ object ContentAssertions extends RichMatchers {
     if (signedIn) signOutLink.attr("href") shouldBe routes.SignOutController.signOut.url
     else signOutLink.isEmpty shouldBe true
 
-    val backLink = page.select("#back")
-
-    expectedBack match {
-      case None       => backLink.isEmpty shouldBe true
-      case Some(back) => backLink.attr("href") shouldBe back
-    }
+    val backLink = page.select(".govuk-back-link")
+    if (shouldBackLinkBePresent) backLink.hasClass("js-visible") shouldBe true
+    else backLink.isEmpty shouldBe true
 
     val form = page.select("form")
     expectedSubmitUrl match {

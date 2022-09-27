@@ -69,9 +69,9 @@ class PaymentDayControllerSpec extends ItSpec {
       RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1        = expectedH1,
-        expectedBack      = Some(routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount.url),
-        expectedSubmitUrl = Some(routes.PaymentDayController.paymentDaySubmit.url)
+        expectedH1              = expectedH1,
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl       = Some(routes.PaymentDayController.paymentDaySubmit.url)
       )
 
       assertPaymentDayPageContent(doc)
@@ -211,10 +211,10 @@ class PaymentDayControllerSpec extends ItSpec {
           RequestAssertions.assertGetRequestOk(result)
           ContentAssertions.commonPageChecks(
             doc,
-            expectedH1        = expectedH1,
-            expectedBack      = Some(routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount.url),
-            expectedSubmitUrl = Some(routes.PaymentDayController.paymentDaySubmit.url),
-            hasFormError      = true
+            expectedH1              = expectedH1,
+            shouldBackLinkBePresent = true,
+            expectedSubmitUrl       = Some(routes.PaymentDayController.paymentDaySubmit.url),
+            hasFormError            = true
           )
 
           assertPaymentDayPageContent(doc)

@@ -76,9 +76,9 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
       RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1        = expectedH1,
-        expectedBack      = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url), // todo update this, it depends on journey
-        expectedSubmitUrl = Some(routes.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit.url)
+        expectedH1              = expectedH1,
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl       = Some(routes.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit.url)
       )
 
       testMonthlyPaymentAmountContent(doc)
@@ -187,10 +187,10 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
           RequestAssertions.assertGetRequestOk(result)
           ContentAssertions.commonPageChecks(
             doc,
-            expectedH1        = expectedH1,
-            expectedBack      = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url), // todo update this, it depends on journey
-            expectedSubmitUrl = Some(routes.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit.url),
-            hasFormError      = true
+            expectedH1              = expectedH1,
+            shouldBackLinkBePresent = true,
+            expectedSubmitUrl       = Some(routes.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit.url),
+            hasFormError            = true
           )
           testMonthlyPaymentAmountContent(doc)
 

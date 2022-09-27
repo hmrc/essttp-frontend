@@ -57,10 +57,10 @@ class SignOutControllerSpec extends ItSpec {
       RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1        = "For your security, we signed you out",
-        expectedBack      = None,
-        expectedSubmitUrl = None,
-        signedIn          = false
+        expectedH1              = "For your security, we signed you out",
+        shouldBackLinkBePresent = false,
+        expectedSubmitUrl       = None,
+        signedIn                = false
       )
     }
   }
@@ -106,10 +106,10 @@ class SignOutControllerSpec extends ItSpec {
       RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1        = "Do you want to give feedback on this service?",
-        expectedBack      = None,
-        expectedSubmitUrl = Some(routes.SignOutController.doYouWantToGiveFeedbackSubmit.url),
-        signedIn          = false
+        expectedH1              = "Do you want to give feedback on this service?",
+        shouldBackLinkBePresent = false,
+        expectedSubmitUrl       = Some(routes.SignOutController.doYouWantToGiveFeedbackSubmit.url),
+        signedIn                = false
       )
 
       checkDoYouWantToGiveFeedbackContent(doc)
@@ -131,11 +131,11 @@ class SignOutControllerSpec extends ItSpec {
         RequestAssertions.assertGetRequestOk(result)
         ContentAssertions.commonPageChecks(
           doc,
-          expectedH1        = "Do you want to give feedback on this service?",
-          expectedBack      = None,
-          expectedSubmitUrl = Some(routes.SignOutController.doYouWantToGiveFeedbackSubmit.url),
-          hasFormError      = true,
-          signedIn          = false
+          expectedH1              = "Do you want to give feedback on this service?",
+          shouldBackLinkBePresent = false,
+          expectedSubmitUrl       = Some(routes.SignOutController.doYouWantToGiveFeedbackSubmit.url),
+          hasFormError            = true,
+          signedIn                = false
         )
 
         checkDoYouWantToGiveFeedbackContent(doc)
