@@ -76,7 +76,7 @@ class BankDetailsController @Inject() (
           )
         )
     }
-    Ok(views.enterDetailsAboutBankAccountPage(form    = maybePrePoppedForm, backUrl = BankDetailsController.paymentScheduleUrl))
+    Ok(views.enterDetailsAboutBankAccountPage(form = maybePrePoppedForm))
   }
 
   val detailsAboutBankAccountSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
@@ -85,7 +85,7 @@ class BankDetailsController @Inject() (
       .fold(
         formWithErrors =>
           Future.successful(
-            Ok(views.enterDetailsAboutBankAccountPage(formWithErrors, BankDetailsController.paymentScheduleUrl))
+            Ok(views.enterDetailsAboutBankAccountPage(formWithErrors))
           ),
         (detailsAboutBankAccountForm: DetailsAboutBankAccountForm) =>
           journeyService
@@ -131,7 +131,7 @@ class BankDetailsController @Inject() (
           )
         )
       }
-    Ok(views.enterBankDetailsPage(form    = maybePrePoppedForm, backUrl = BankDetailsController.detailsAboutBankAccountUrl))
+    Ok(views.enterBankDetailsPage(form = maybePrePoppedForm))
   }
 
   private def currentDirectDebitDetails(journey: Journey): Option[BankDetails] =
@@ -153,7 +153,7 @@ class BankDetailsController @Inject() (
           formFromRequest.fold(
             formWithErrors =>
               Future.successful(
-                Ok(views.enterBankDetailsPage(formWithErrors, backUrl = BankDetailsController.detailsAboutBankAccountUrl))
+                Ok(views.enterBankDetailsPage(formWithErrors))
               ),
             (bankDetailsForm: BankDetailsForm) => {
               val directDebitDetails: BankDetails =
@@ -194,7 +194,6 @@ class BankDetailsController @Inject() (
           Ok(
             views.enterBankDetailsPage(
               form                  = form.withError(error.formError),
-              backUrl               = BankDetailsController.detailsAboutBankAccountUrl,
               errorMessageOverrides = error.fieldMessageOverrides
             )
           )
@@ -236,7 +235,7 @@ class BankDetailsController @Inject() (
     request.journey match {
       case j: Journey.BeforeEnteredDirectDebitDetails => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
       case j: Journey.AfterEnteredDirectDebitDetails =>
-        finalStateCheck(j, Ok(views.bankDetailsSummary(j.directDebitDetails, BankDetailsController.enterBankDetailsUrl)))
+        finalStateCheck(j, Ok(views.bankDetailsSummary(j.directDebitDetails)))
     }
   }
 

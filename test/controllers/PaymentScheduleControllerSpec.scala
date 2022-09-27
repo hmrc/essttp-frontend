@@ -118,9 +118,9 @@ class PaymentScheduleControllerSpec extends ItSpec {
           RequestAssertions.assertGetRequestOk(result)
           ContentAssertions.commonPageChecks(
             doc,
-            expectedH1        = "Check your payment plan",
-            expectedBack      = Some(routes.InstalmentsController.instalmentOptions.url),
-            expectedSubmitUrl = Some(routes.PaymentScheduleController.checkPaymentScheduleSubmit.url)
+            expectedH1              = "Check your payment plan",
+            shouldBackLinkBePresent = true,
+            expectedSubmitUrl       = Some(routes.PaymentScheduleController.checkPaymentScheduleSubmit.url)
           )
 
           val summaries = doc.select(".govuk-summary-list").iterator().asScala.toList

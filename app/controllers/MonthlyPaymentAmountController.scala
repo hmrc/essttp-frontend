@@ -75,10 +75,6 @@ class MonthlyPaymentAmountController @Inject() (
         case j1: Journey.Epaye.AgreedTermsAndConditions       => j1
         case j1: Journey.Epaye.SubmittedArrangement           => j1
       }
-    val backUrl: Option[String] = j.upfrontPaymentAnswers match {
-      case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => Some(routes.UpfrontPaymentController.upfrontPaymentSummary.url)
-      case UpfrontPaymentAnswers.NoUpfrontPayment          => Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url)
-    }
     val totalDebt = AmountInPence(j.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum)
     val upfrontPaymentAmount = j.upfrontPaymentAnswers match {
       case j1: UpfrontPaymentAnswers.DeclaredUpfrontPayment => j1.amount.value
@@ -97,8 +93,7 @@ class MonthlyPaymentAmountController @Inject() (
     Ok(views.monthlyPaymentAmountPage(
       form           = maybePrePoppedForm,
       maximumPayment = roundedMax,
-      minimumPayment = roundedMin,
-      backUrl        = backUrl
+      minimumPayment = roundedMin
     ))
   }
 
@@ -137,8 +132,7 @@ class MonthlyPaymentAmountController @Inject() (
           Future.successful(Ok(views.monthlyPaymentAmountPage(
             form           = formWithErrors,
             maximumPayment = roundedMax,
-            minimumPayment = roundedMin,
-            backUrl        = MonthlyPaymentAmountController.backUrl(request.journey)
+            minimumPayment = roundedMin
           ))),
         (validForm: BigDecimal) => {
           val monthlyPaymentAmount: MonthlyPaymentAmount = MonthlyPaymentAmount(AmountInPence(validForm))

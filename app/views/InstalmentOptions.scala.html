@@ -32,13 +32,7 @@
         requestSupport: RequestSupport
 )
 
-@(
-        form: Form[String],
-        options: Seq[InstalmentOption],
-        backUrl: Option[String] = None
-)(implicit
-        request: Request[_]
-)
+@(form: Form[String], options: Seq[InstalmentOption])(implicit request: Request[_])
 
 @import requestSupport._
 
@@ -70,7 +64,7 @@
     }</p>
 }
 
-@layout(pageTitle = Some(title), backUrl = backUrl, hasErrors = form.hasErrors) {
+@layout(pageTitle = Some(title), hasErrors = form.hasErrors) {
     @if(form.errors.nonEmpty) {
         @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
             ErrorLink(

@@ -51,9 +51,9 @@ class YourBillControllerSpec extends ItSpec {
       RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1        = "Your PAYE bill is £3,000",
-        expectedBack      = Some(routes.LandingController.landingPage.url),
-        expectedSubmitUrl = Some(routes.YourBillController.yourBillSubmit.url)
+        expectedH1              = "Your PAYE bill is £3,000",
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl       = Some(routes.YourBillController.yourBillSubmit.url)
       )
     }
   }

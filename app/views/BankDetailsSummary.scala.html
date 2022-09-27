@@ -33,7 +33,7 @@
   govukButton: GovukButton
 )
 
-@(directDebitDetails: BankDetails, backUrl: Option[String] = None)(implicit request: Request[_])
+@(directDebitDetails: BankDetails)(implicit request: Request[_])
 
 @import requestSupport._
 
@@ -59,7 +59,7 @@
   </p>
 }
 
-@layout(pageTitle = Some(title), backUrl = backUrl) {
+@layout(pageTitle = Some(title)) {
 
   <h1 class="govuk-heading-xl">
     @title

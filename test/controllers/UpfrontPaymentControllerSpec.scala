@@ -58,9 +58,9 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1        = expectedH1CanYouPayUpfrontPage,
-        expectedBack      = Some(routes.YourBillController.yourBill.url),
-        expectedSubmitUrl = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit.url)
+        expectedH1              = expectedH1CanYouPayUpfrontPage,
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl       = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit.url)
       )
       val radioContent = doc.select(".govuk-radios__label").asScala.toList
       radioContent(0).text() shouldBe "Yes"
@@ -136,10 +136,10 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1        = expectedH1CanYouPayUpfrontPage,
-        expectedSubmitUrl = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit.url),
-        expectedBack      = Some(routes.YourBillController.yourBill.url),
-        hasFormError      = true
+        expectedH1              = expectedH1CanYouPayUpfrontPage,
+        expectedSubmitUrl       = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit.url),
+        shouldBackLinkBePresent = true,
+        hasFormError            = true
       )
 
       doc.select("#CanYouMakeAnUpFrontPayment-hint").text() shouldBe expectedPageHintCanPayUpfrontPage
@@ -164,9 +164,9 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1        = expectedH1HowMuchCanYouPayUpfrontPage,
-        expectedSubmitUrl = Some(routes.UpfrontPaymentController.upfrontPaymentAmountSubmit.url),
-        expectedBack      = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit.url)
+        expectedH1              = expectedH1HowMuchCanYouPayUpfrontPage,
+        expectedSubmitUrl       = Some(routes.UpfrontPaymentController.upfrontPaymentAmountSubmit.url),
+        shouldBackLinkBePresent = true
       )
 
       doc.select("#UpfrontPaymentAmount").size() shouldBe 1
@@ -302,10 +302,10 @@ class UpfrontPaymentControllerSpec extends ItSpec {
           RequestAssertions.assertGetRequestOk(result)
           ContentAssertions.commonPageChecks(
             doc,
-            expectedH1        = expectedH1HowMuchCanYouPayUpfrontPage,
-            expectedSubmitUrl = Some(routes.UpfrontPaymentController.upfrontPaymentAmountSubmit.url),
-            expectedBack      = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit.url),
-            hasFormError      = true
+            expectedH1              = expectedH1HowMuchCanYouPayUpfrontPage,
+            expectedSubmitUrl       = Some(routes.UpfrontPaymentController.upfrontPaymentAmountSubmit.url),
+            shouldBackLinkBePresent = true,
+            hasFormError            = true
           )
 
           val errorSummary = doc.select(".govuk-error-summary")
@@ -336,9 +336,9 @@ class UpfrontPaymentControllerSpec extends ItSpec {
           RequestAssertions.assertGetRequestOk(result)
           ContentAssertions.commonPageChecks(
             doc,
-            expectedH1        = expectedH1UpfrontSummaryPage,
-            expectedSubmitUrl = None,
-            expectedBack      = Some(routes.UpfrontPaymentController.upfrontPaymentAmount.url)
+            expectedH1              = expectedH1UpfrontSummaryPage,
+            expectedSubmitUrl       = None,
+            shouldBackLinkBePresent = true
           )
 
             def question(row: Element) = row.select(".govuk-summary-list__key").text()

@@ -64,8 +64,7 @@ class PaymentDayController @Inject() (
       case _: Journey.BeforeEnteredDayOfMonth => paymentDayForm()
     }
     Ok(views.paymentDayPage(
-      form    = maybePrePopForm,
-      backUrl = PaymentDayController.backUrl
+      form = maybePrePopForm
     ))
   }
 
@@ -74,7 +73,7 @@ class PaymentDayController @Inject() (
       .bindFromRequest()
       .fold(
         formWithErrors => Future.successful(
-          Ok(views.paymentDayPage(form    = formWithErrors, backUrl = PaymentDayController.backUrl))
+          Ok(views.paymentDayPage(form = formWithErrors))
         ),
         (form: PaymentDayForm) => {
           val dayOfMonth: DayOfMonth = form.differentDay match {
@@ -93,8 +92,6 @@ object PaymentDayController {
   import cats.syntax.either._
   import play.api.data.Form
   import uk.gov.voa.play.form.ConditionalMappings.mandatoryIfEqual
-
-  val backUrl: Option[String] = Some(routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount.url)
 
   final case class PaymentDayForm(paymentDay: String, differentDay: Option[Int])
 

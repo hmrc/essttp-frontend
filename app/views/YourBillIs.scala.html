@@ -31,19 +31,14 @@
   overduePaymentRow: OverduePaymentRow
 )
 
-@(
-  overduePayments: OverDuePayments,
-  backUrl: Option[String] = None)(implicit
-  request: Request[_]
-)
+@(overduePayments: OverDuePayments)(implicit request: Request[_])
 
 @import requestSupport._
 
 @title= @{Messages.yourBillIs(overduePayments.total).show}
 
 @layout(
-  pageTitle = Some(title),
-  backUrl = backUrl
+  pageTitle = Some(title)
 ) {
   <h1 class="govuk-heading-xl">@title</h1>
   <h2 class="govuk-heading-m">@{Messages.`Overdue payments`.show}</h2>

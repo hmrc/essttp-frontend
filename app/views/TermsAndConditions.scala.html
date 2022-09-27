@@ -33,7 +33,7 @@
 
 @title = @{Messages.TermsAndConditions.`Terms and conditions`.show}
 
-@layout(pageTitle = Some(title), backUrl = Some(routes.BankDetailsController.checkBankDetails.url)) {
+@layout(pageTitle = Some(title)) {
   <h1 class="govuk-heading-xl">@title</h1>
   <p class="govuk-body">@{Messages.TermsAndConditions.`We can cancel this agreement if you:`.show}</p>
   <ul class="govuk-list govuk-list--bullet">

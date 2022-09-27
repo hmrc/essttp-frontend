@@ -43,7 +43,7 @@
     Messages.GiveFeedback.`Do you want to give feedback?`.show
 }
 
-@layout(pageTitle = Some(title), backUrl = None, hasErrors = form.hasErrors) {
+@layout(pageTitle = Some(title), showBackLink = false, hasErrors = form.hasErrors) {
     @if(form.errors.nonEmpty) {
         @govukErrorSummary(
             ErrorSummary(errorList = form.errors.map(e =>

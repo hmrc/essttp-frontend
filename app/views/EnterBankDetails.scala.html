@@ -36,7 +36,6 @@
 
 @(
         form: Form[BankDetailsForm],
-        backUrl: Option[String] = None,
         errorMessageOverrides: Seq[FormError] = Seq.empty
 )(implicit
         request: Request[_]
@@ -72,7 +71,7 @@
 @sortCodeAndAccountNumberFormError= @{ errorMessageOverrides.find(_.key === "sortCodeAndAccountNumber") }
 
 
-@layout(pageTitle = Some(title), backUrl = backUrl, hasErrors = form.hasErrors) {
+@layout(pageTitle = Some(title), hasErrors = form.hasErrors) {
     @if(form.errors.nonEmpty) {
         @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
             ErrorLink(

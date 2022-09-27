@@ -32,12 +32,7 @@
         govukButton: GovukButton,
 )
 
-@(
-        upfrontPayment: UpfrontPaymentAmount,
-        remainingAmountToPay: AmountInPence,
-        backUrl: Option[String] = None)(implicit
-        request: Request[_]
-)
+@(upfrontPayment: UpfrontPaymentAmount, remainingAmountToPay: AmountInPence)(implicit request: Request[_])
 
 @import requestSupport._
 
@@ -46,7 +41,7 @@
     Messages.UpfrontPaymentSummary.`Payment summary`.show
 }
 
-@layout(pageTitle = Some(title), backUrl = backUrl) {
+@layout(pageTitle = Some(title)) {
 
     <h1 class="govuk-heading-xl">
     @title

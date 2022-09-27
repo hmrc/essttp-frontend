@@ -42,9 +42,9 @@ class NotEnrolledControllerSpec extends ItSpec {
       RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.commonPageChecks(
         page,
-        expectedH1        = "You are not enrolled",
-        expectedBack      = None,
-        expectedSubmitUrl = None
+        expectedH1              = "You are not enrolled",
+        shouldBackLinkBePresent = false,
+        expectedSubmitUrl       = None
       )
 
       page.select(".govuk-body").asScala.toList(0).text() shouldBe "You are not eligible for an online payment plan because you need to enrol for PAYE Online. Find out how to enrol."

@@ -56,9 +56,9 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
         RequestAssertions.assertGetRequestOk(result)
         ContentAssertions.commonPageChecks(
           doc,
-          expectedH1        = expectedH1PaymentPlanSetUpPage,
-          expectedBack      = None,
-          expectedSubmitUrl = None
+          expectedH1              = expectedH1PaymentPlanSetUpPage,
+          shouldBackLinkBePresent = false,
+          expectedSubmitUrl       = None
         )
 
         doc.select(".govuk-panel__title").text() shouldBe "Your payment plan is set up"
@@ -123,9 +123,9 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
       RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1        = expectedH1PaymentPlanPrintPage,
-        expectedBack      = Some(routes.PaymentPlanSetUpController.paymentPlanSetUp.url),
-        expectedSubmitUrl = None
+        expectedH1              = expectedH1PaymentPlanPrintPage,
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl       = None
       )
 
       val subheadings = doc.select(".govuk-heading-m").asScala.toList
@@ -161,9 +161,9 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
       RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1        = expectedH1PaymentPlanPrintPage,
-        expectedBack      = Some(routes.PaymentPlanSetUpController.paymentPlanSetUp.url),
-        expectedSubmitUrl = None
+        expectedH1              = expectedH1PaymentPlanPrintPage,
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl       = None
       )
 
       val subheadings = doc.select(".govuk-heading-m").asScala.toList

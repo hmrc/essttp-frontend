@@ -58,7 +58,6 @@ class UpfrontPaymentController @Inject() (
   }
 
   private def displayCanYouPayUpfrontPage(journey: Journey)(implicit request: Request[_]): Result = {
-    val backUrl: Option[String] = Some(routes.YourBillController.yourBill.url)
     val maybePrePoppedForm: Form[CanPayUpfrontFormValue] = journey match {
       case _: Journey.BeforeAnsweredCanPayUpfront => CanPayUpfrontForm.form
       case j: Journey.AfterAnsweredCanPayUpfront =>
@@ -70,21 +69,14 @@ class UpfrontPaymentController @Inject() (
           CanPayUpfrontForm.form.fill(CanPayUpfrontFormValue.canPayUpfrontToFormValue(CanPayUpfront(false)))
       }
     }
-    Ok(views.canYouMakeAnUpFrontPayment(
-      form    = maybePrePoppedForm,
-      backUrl = backUrl
-    ))
+    Ok(views.canYouMakeAnUpFrontPayment(maybePrePoppedForm))
   }
 
   val canYouMakeAnUpfrontPaymentSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     CanPayUpfrontForm.form
       .bindFromRequest()
       .fold(
-        formWithErrors =>
-          Future.successful(Ok(views.canYouMakeAnUpFrontPayment(
-            form    = formWithErrors,
-            backUrl = Some(routes.YourBillController.yourBill.url)
-          ))),
+        formWithErrors => Future.successful(Ok(views.canYouMakeAnUpFrontPayment(formWithErrors))),
         (canPayUpfrontForm: CanPayUpfrontFormValue) => {
           val canPayUpfront: CanPayUpfront = canPayUpfrontForm.asCanPayUpfront
           val pageToRedirectTo: Call =
@@ -113,7 +105,6 @@ class UpfrontPaymentController @Inject() (
   private def displayUpfrontPageAmountPage(
       journey: Either[Journey.AfterAnsweredCanPayUpfront, Journey.AfterUpfrontPaymentAnswers]
   )(implicit request: Request[_]): Result = {
-    val backUrl: Option[String] = Some(UpfrontPaymentController.canYouMakeAnUpfrontPaymentCall.url)
     val debtTotalAmount: DebtTotalAmount = UpfrontPaymentController.determineMaxDebt(journey) match {
       case Some(value) => value
       case None        => Errors.throwBadRequestException("Could not determine max debt")
@@ -130,8 +121,7 @@ class UpfrontPaymentController @Inject() (
     Ok(views.upfrontPaymentAmountPage(
       form           = maybePrePoppedForm,
       maximumPayment = maximumUpfrontPaymentAmountInPence,
-      minimumPayment = minimumUpfrontPaymentAmount,
-      backUrl        = backUrl
+      minimumPayment = minimumUpfrontPaymentAmount
     ))
   }
 
@@ -160,8 +150,7 @@ class UpfrontPaymentController @Inject() (
               form           = formWithErrors,
               maximumPayment = maximumUpfrontPaymentAmountInPence,
               // todo, find out what the minimum upfront payment amount can be, for now £1
-              minimumPayment = minimumUpfrontPaymentAmount,
-              backUrl        = Some(UpfrontPaymentController.canYouMakeAnUpfrontPaymentCall.url)
+              minimumPayment = minimumUpfrontPaymentAmount
             )
           )),
         (validForm: BigDecimal) => {
@@ -201,8 +190,7 @@ class UpfrontPaymentController @Inject() (
 
     Ok(views.upfrontSummaryPage(
       upfrontPayment       = declaredUpfrontPayment.amount,
-      remainingAmountToPay = remainingAmountTest,
-      backUrl              = Some(UpfrontPaymentController.upfrontPaymentAmountCall.url)
+      remainingAmountToPay = remainingAmountTest
     ))
   }
 }

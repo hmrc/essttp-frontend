@@ -31,64 +31,60 @@
         requestSupport: RequestSupport
 )
 
-@(
-        form: Form[CanPayUpfrontFormValue],
-        backUrl: Option[String] = None)(implicit
-        request: Request[_]
-)
+@(form: Form[CanPayUpfrontFormValue])(implicit request: Request[_])
 
-    @import requestSupport._
+@import requestSupport._
 
-    @key = @{
-        "CanYouMakeAnUpFrontPayment"
+@key = @{
+    "CanYouMakeAnUpFrontPayment"
+}
+
+@title = @{
+    Messages.UpfrontPayment.`Can you make an upfront payment?`.show
+}
+
+@layout(pageTitle = Some(title), hasErrors = form.hasErrors) {
+    @if(form.errors.nonEmpty) {
+        @govukErrorSummary(
+            ErrorSummary(errorList = form.errors.map(e =>
+                ErrorLink(
+                    href = Some(s"#${e.key}"),
+                    content = Text(e.message)
+                )
+            ),
+                title = Text(Messages.`There is a problem`.show))
+        )
     }
-
-    @title = @{
-        Messages.UpfrontPayment.`Can you make an upfront payment?`.show
-    }
-
-    @layout(pageTitle = Some(title), backUrl = backUrl, hasErrors = form.hasErrors) {
-        @if(form.errors.nonEmpty) {
-            @govukErrorSummary(
-                ErrorSummary(errorList = form.errors.map(e =>
-                    ErrorLink(
-                        href = Some(s"#${e.key}"),
-                        content = Text(e.message)
-                    )
+    @formWithCSRF(action = routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit) {
+        @govukRadios(Radios(
+            fieldset = Some(Fieldset(
+                legend = Some(Legend(
+                    content = Text(title),
+                    classes = "govuk-fieldset__legend--xl",
+                    isPageHeading = true
+                ))
+            )),
+            hint = Some(Hint(
+                content = Text(Messages.UpfrontPayment.`Your monthly payments will be lower if you ...`.show)
+            )),
+            idPrefix = Some(key),
+            name = key,
+            items = Seq(
+                RadioItem(
+                    content = Text(Messages.`Yes`.show),
+                    value = Some("Yes"),
+                    checked = form.data.values.toList.contains("Yes"),
                 ),
-                    title = Text(Messages.`There is a problem`.show))
-            )
-        }
-        @formWithCSRF(action = routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit) {
-            @govukRadios(Radios(
-                fieldset = Some(Fieldset(
-                    legend = Some(Legend(
-                        content = Text(title),
-                        classes = "govuk-fieldset__legend--xl",
-                        isPageHeading = true
-                    ))
-                )),
-                hint = Some(Hint(
-                    content = Text(Messages.UpfrontPayment.`Your monthly payments will be lower if you ...`.show)
-                )),
-                idPrefix = Some(key),
-                name = key,
-                items = Seq(
-                    RadioItem(
-                        content = Text(Messages.`Yes`.show),
-                        value = Some("Yes"),
-                        checked = form.data.values.toList.contains("Yes"),
-                    ),
-                    RadioItem(
-                        content = Text(Messages.`No`.show),
-                        value = Some("No"),
-                        checked = form.data.values.toList.contains("No")
-                    )
-                ),
-                classes = "govuk-radios--inline",
-                errorMessage = form.error(key).map(e => ErrorMessage(content = Text(e.message)))
-            ))
-            @govukButton(Button(content = Text(Messages.continue.show), attributes = Map("id" -> "continue")))
-        }
-
+                RadioItem(
+                    content = Text(Messages.`No`.show),
+                    value = Some("No"),
+                    checked = form.data.values.toList.contains("No")
+                )
+            ),
+            classes = "govuk-radios--inline",
+            errorMessage = form.error(key).map(e => ErrorMessage(content = Text(e.message)))
+        ))
+        @govukButton(Button(content = Text(Messages.continue.show), attributes = Map("id" -> "continue")))
     }
+
+}

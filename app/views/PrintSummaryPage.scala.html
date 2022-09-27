@@ -52,7 +52,7 @@
     Messages.PrintSummary.`Your payment plan`.show
 }
 
-@scripts = { <script src="@{controllers.routes.Assets.versioned("javascripts/application.js")}" @{CSPNonce.attr}></script> }
+@scripts = { <script src="@{controllers.routes.Assets.versioned("javascripts/print-dialogue.js")}" @{CSPNonce.attr}></script> }
 
 @maybeUpfrontPaymentAmount = @{
     upfrontPaymentAmount.map { someAmount =>
@@ -119,7 +119,7 @@
 
 @monthlyPaymentRows = @{ paymentDayRow :: monthRows ::: List(totalRow) }
 
-@layout(pageTitle = Some(title), backUrl = Some(routes.PaymentPlanSetUpController.paymentPlanSetUp.url), scriptsBlock = Some(scripts)) {
+@layout(pageTitle = Some(title), additionalScripts = Some(scripts)) {
 
     <h1 class="govuk-heading-xl">
     @title

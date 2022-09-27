@@ -43,7 +43,7 @@ class LandingPageControllerSpec extends ItSpec {
       ContentAssertions.commonPageChecks(
         doc,
         expectedH1                  = "Set up an Employers’ PAYE payment plan",
-        expectedBack                = None,
+        shouldBackLinkBePresent     = false,
         expectedSubmitUrl           = None,
         signedIn                    = false,
         shouldH1BeSameAsServiceName = true
