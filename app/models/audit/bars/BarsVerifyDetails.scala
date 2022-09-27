@@ -18,7 +18,7 @@ package models.audit.bars
 
 import play.api.libs.json.{Json, OWrites}
 
-final case class BarsVerifyDetails(attempts: Int, lockoutExpiryDateTime: Option[String])
+final case class BarsVerifyDetails(unsuccessfulAttempts: Int, lockoutExpiryDateTime: Option[String])
 
 object BarsVerifyDetails {
 

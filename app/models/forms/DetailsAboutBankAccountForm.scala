@@ -20,7 +20,7 @@ import models.enumsforforms.{IsSoleSignatoryFormValue, TypeOfAccountFormValue}
 import play.api.data.{Form, Forms, Mapping}
 import play.api.data.Forms.mapping
 import util.EnumFormatter
-import langswitch.Language
+import models.Language
 import messages.Messages
 
 final case class DetailsAboutBankAccountForm(typeOfAccount: TypeOfAccountFormValue, isSoleSignatory: IsSoleSignatoryFormValue)

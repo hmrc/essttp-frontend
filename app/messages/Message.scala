@@ -16,7 +16,7 @@
 
 package messages
 
-import langswitch.{Language, Languages}
+import models.{Language, Languages}
 
 final case class Message private (
     english: String,

@@ -19,7 +19,7 @@ package testOnly.formsmodel
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
 import essttp.rootmodel.{AmountInPence, EmpRef}
-import langswitch.Language
+import models.Language
 import models.MoneyUtil.amountOfMoneyFormatter
 import models.{EligibilityError, EligibilityErrors}
 import play.api.data.Forms.{mapping, optional, seq}

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package langswitch
+package models
 
 import enumeratum.{Enum, EnumEntry}
 import essttp.utils.EnumFormat
 import essttp.utils.ValueClassBinder.valueClassBinder
-import langswitch.Languages.{English, Welsh}
+import models.Languages.{English, Welsh}
 import play.api.i18n.Lang
 import play.api.libs.json.Format
 import play.api.mvc.PathBindable
