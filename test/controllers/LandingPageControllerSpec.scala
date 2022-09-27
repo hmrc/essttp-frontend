@@ -42,10 +42,11 @@ class LandingPageControllerSpec extends ItSpec {
 
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1        = "Set up an Employers’ PAYE payment plan",
-        expectedBack      = None,
-        expectedSubmitUrl = None,
-        signedIn          = false
+        expectedH1                  = "Set up an Employers’ PAYE payment plan",
+        expectedBack                = None,
+        expectedSubmitUrl           = None,
+        signedIn                    = false,
+        shouldH1BeSameAsServiceName = true
       )
 
       val button = doc.select(".govuk-button")

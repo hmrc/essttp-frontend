@@ -54,17 +54,25 @@ object ContentAssertions extends RichMatchers {
 
   @nowarn
   def commonPageChecks(
-      page:              Document,
-      expectedH1:        String,
-      expectedBack:      Option[String],
-      expectedSubmitUrl: Option[String],
-      signedIn:          Boolean        = true,
-      hasFormError:      Boolean        = false
+      page:                        Document,
+      expectedH1:                  String,
+      expectedBack:                Option[String],
+      expectedSubmitUrl:           Option[String],
+      signedIn:                    Boolean        = true,
+      hasFormError:                Boolean        = false,
+      shouldH1BeSameAsServiceName: Boolean        = false
   ): Unit = {
-    val expectedServiceName: String = TdAll.expectedServiceNamePaye
     val titlePrefix = if (hasFormError) "Error: " else ""
-    page.title() shouldBe s"$titlePrefix$expectedH1 - $expectedServiceName - GOV.UK"
-    page.select(".hmrc-header__service-name").text() shouldBe expectedServiceName
+
+    if (shouldH1BeSameAsServiceName) {
+      expectedH1 shouldBe TdAll.expectedServiceNamePaye
+      page.title() shouldBe s"$titlePrefix$expectedH1 - GOV.UK"
+    } else {
+      expectedH1 shouldNot be(TdAll.expectedServiceNamePaye)
+      page.title() shouldBe s"$titlePrefix$expectedH1 - ${TdAll.expectedServiceNamePaye} - GOV.UK"
+    }
+
+    page.select(".hmrc-header__service-name").text() shouldBe TdAll.expectedServiceNamePaye
 
     page.select("h1").text() shouldBe expectedH1
     ContentAssertions.languageToggleExists(page)
