@@ -32,7 +32,7 @@
 
 @import requestSupport._
 
-@exiryTimeString = @{
+@expiryTimeString = @{
   val zonedDateTime = lockoutExpires.atZone(ZoneId.of("Europe/London"))
   val date = zonedDateTime.toLocalDate
   val time = zonedDateTime.toLocalTime
@@ -48,7 +48,7 @@
 
 @layout(pageTitle = Some(title), showBackLink = false) {
   <h1 class="govuk-heading-xl">@title</h1>
-  <p class="govuk-body">@{Messages.BankDetailsLockout.waitUntil(exiryTimeString).show}</p>
+  <p class="govuk-body">@{Messages.BankDetailsLockout.waitUntil(expiryTimeString).show}</p>
   <p class="govuk-body">@{Messages.BankDetailsLockout.`You may still be able to set up a payment plan over the phone.`.show}</p>
   <p class="govuk-body">@{Html(Messages.BankDetailsLockout.`For further support you can contact the Payment Support Service...`.show)}</p>
 }
