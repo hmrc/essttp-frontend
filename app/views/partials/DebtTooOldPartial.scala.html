@@ -18,9 +18,11 @@
 @import requests.RequestSupport
 @import messages.Messages
 @import play.twirl.api.Html
+@import config.AppConfig
 
 @this(
-        requestSupport: RequestSupport
+        requestSupport: RequestSupport,
+        appConfig: AppConfig
 )
 
 @()(implicit request: Request[_])
@@ -29,6 +31,6 @@
 
 <p class="govuk-body">
 @{
-    Html(Messages.NotEligible.`Your overdue amount must have a due date that is less than 35 days ago ...`.show)
+    Html(Messages.NotEligible.`Your overdue amount must have a due date that is less than ... days ago ...`(appConfig.PolicyParameters.EPAYE.maxAgeOfDebtInDays).show)
 }
 </p>

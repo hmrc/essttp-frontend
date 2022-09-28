@@ -27,6 +27,7 @@ import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
+import scala.collection.JavaConverters._
 
 class LandingPageControllerSpec extends ItSpec {
 
@@ -48,6 +49,18 @@ class LandingPageControllerSpec extends ItSpec {
         signedIn                    = false,
         shouldH1BeSameAsServiceName = true
       )
+
+      val lists = doc.select(".govuk-list").asScala.toList
+      lists.size shouldBe 3
+
+      val firstListBullets = lists(0).select("li").asScala.toList
+      firstListBullets.size shouldBe 5
+
+      firstListBullets(0).text() shouldBe "you plan to pay the debt off within the next 6 months or less"
+      firstListBullets(1).text() shouldBe "you owe £15,000 or less"
+
+      val paragraphs = doc.select("p.govuk-body").asScala.toList
+      paragraphs(2).text() shouldBe "You can use this service within 35 days of the overdue payment deadline."
 
       val button = doc.select(".govuk-button")
       button.attr("href") shouldBe routes.DetermineTaxIdController.determineTaxId.url

@@ -19,7 +19,7 @@ package config
 import essttp.rootmodel.AmountInPence
 
 import javax.inject.{Inject, Singleton}
-import play.api.Configuration
+import play.api.{ConfigLoader, Configuration}
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.play.bootstrap.binders.SafeRedirectUrl
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -66,15 +66,6 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     val businessTaxAccountUrl: String = s"${BaseUrl.businessTaxAccountFrontend}/business-account"
   }
 
-  object InterestRates {
-    val baseRate: BigDecimal = config.get[Double]("interest-rates.base-rate")
-    val hmrcRate: BigDecimal = config.get[Double]("interest-rates.hmrc-additional-rate")
-  }
-
-  object JourneyVariables {
-    val minimumUpfrontPaymentAmountInPence: AmountInPence = AmountInPence(config.get[Long]("journeyVariables.minimumUpfrontPaymentAmountInPence"))
-  }
-
   object TtpHeaders {
     val correlationId: String = config.get[String]("ttp.headers.correlationId")
   }
@@ -85,6 +76,27 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
 
   object Crypto {
     val aesGcmCryptoKey: String = config.get[String]("crypto.encryption-key")
+  }
+
+  object PolicyParameters {
+
+    val minimumUpfrontPaymentAmountInPence: AmountInPence = AmountInPence(config.get[Long]("policy-parameters.minimumUpfrontPaymentAmountInPence"))
+
+    object InterestRates {
+      val baseRate: BigDecimal = config.get[Double]("policy-parameters.interest-rates.base-rate")
+      val hmrcRate: BigDecimal = config.get[Double]("policy-parameters.interest-rates.hmrc-additional-rate")
+    }
+
+    object EPAYE {
+
+      private def getParam[A: ConfigLoader](path: String): A = config.get[A](s"policy-parameters.epaye.$path")
+
+      val maxAmountOfDebt: AmountInPence = AmountInPence(getParam[Long]("max-amount-of-debt-in-pounds") * 100L)
+
+      val maxPlanDurationInMonths: Int = getParam[Int]("max-plan-duration-in-months")
+
+      val maxAgeOfDebtInDays: Int = getParam[Int]("max-age-of-debt-in-days")
+    }
   }
 
 }

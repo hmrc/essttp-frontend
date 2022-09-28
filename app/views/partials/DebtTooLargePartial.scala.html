@@ -14,13 +14,16 @@
  * limitations under the License.
  *@
 
+@import config.AppConfig
+
 @import play.api.mvc.Request
 @import requests.RequestSupport
 @import messages.Messages
 @import play.twirl.api.Html
 
 @this(
-        requestSupport: RequestSupport
+        requestSupport: RequestSupport,
+        appConfig: AppConfig
 )
 
 @()(implicit request: Request[_])
@@ -29,6 +32,6 @@
 
 <p class="govuk-body">
 @{
-    Html(Messages.NotEligible.`You must owe £15,000 or less to be eligible for a payment plan online...`.show)
+    Html(Messages.NotEligible.`You must owe ... or less to be eligible...`(appConfig.PolicyParameters.EPAYE.maxAmountOfDebt).show)
 }
 </p>
