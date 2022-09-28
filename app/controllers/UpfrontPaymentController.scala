@@ -100,7 +100,7 @@ class UpfrontPaymentController @Inject() (
     }
   }
 
-  private val minimumUpfrontPaymentAmount: AmountInPence = appConfig.JourneyVariables.minimumUpfrontPaymentAmountInPence
+  private val minimumUpfrontPaymentAmount: AmountInPence = appConfig.PolicyParameters.minimumUpfrontPaymentAmountInPence
 
   private def displayUpfrontPageAmountPage(
       journey: Either[Journey.AfterAnsweredCanPayUpfront, Journey.AfterUpfrontPaymentAnswers]

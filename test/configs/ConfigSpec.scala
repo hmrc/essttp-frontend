@@ -49,13 +49,16 @@ class ConfigSpec extends ItSpec {
       ("Urls.extraSupportUrl", config.Urls.extraSupportUrl, "https://www.gov.uk/get-help-hmrc-extra-support"),
       ("Urls.relayUrl", config.Urls.relayUrl, "https://www.relayuk.bt.com/"),
 
-      ("InterestRates.baseRate", config.InterestRates.baseRate, 1.0),
-      ("InterestRates.hmrcRate", config.InterestRates.hmrcRate, 2.5),
-
-      ("JourneyVariables.minimumUpfrontPaymentAmountInPence", config.JourneyVariables.minimumUpfrontPaymentAmountInPence, AmountInPence(100L)),
       ("Ttp.headers.correlationId", config.TtpHeaders.correlationId, "CorrelationId"),
 
-      ("ExitSurvey.payeExitSurveyUrl", config.ExitSurvey.payeExitSurveyUrl, "http://localhost:9514/feedback/eSSTTP-PAYE")
+      ("ExitSurvey.payeExitSurveyUrl", config.ExitSurvey.payeExitSurveyUrl, "http://localhost:9514/feedback/eSSTTP-PAYE"),
+
+      ("PolicyParameters.minimumUpfrontPaymentAmountInPence", config.PolicyParameters.minimumUpfrontPaymentAmountInPence, AmountInPence(100L)),
+      ("PolicyParameters.InterestRates.baseRate", config.PolicyParameters.InterestRates.baseRate, 1.0),
+      ("PolicyParameters.InterestRates.hmrcRate", config.PolicyParameters.InterestRates.hmrcRate, 2.5),
+      ("PolicyParameters.EPAYE.maxAmountOfDebt", config.PolicyParameters.EPAYE.maxAmountOfDebt, AmountInPence(15000 * 100)),
+      ("PolicyParameters.EPAYE.maxPlanDurationInMonths", config.PolicyParameters.EPAYE.maxPlanDurationInMonths, 6),
+      ("PolicyParameters.EPAYE.maxAgeOfDebtInDays", config.PolicyParameters.EPAYE.maxAgeOfDebtInDays, 35)
 
     )
     configsToTest.foreach { (configData: (String, Any, Any)) =>

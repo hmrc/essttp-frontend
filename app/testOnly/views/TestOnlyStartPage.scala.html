@@ -25,6 +25,7 @@
 @import testOnly.formsmodel.Enrolments
 @import testOnly.formsmodel.SignInAs
 @import cats.syntax.eq._
+@import config.AppConfig
 
 @this(
         testOnlyLayout: TestOnlyLayout,
@@ -35,7 +36,8 @@
         govukTabs: GovukTabs,
         govukCheckboxes: GovukCheckboxes,
         govukErrorSummary: GovukErrorSummary,
-        govukInput: GovukInput
+        govukInput: GovukInput,
+        appConfig: AppConfig
 )
 
 @(form: Form[StartJourneyForm])(implicit
@@ -179,7 +181,7 @@
         content = Text(e.message)
     )),
     value = form.data.get("debtTotalAmount"),
-    hint = Some(Hint(content = Text("Enter an amount between £1 and £15,000")))
+    hint = Some(Hint(content = Text(s"Enter an amount between £1 and £${appConfig.PolicyParameters.EPAYE.maxAmountOfDebt.gdsFormatInPounds}")))
 ))
 }
 

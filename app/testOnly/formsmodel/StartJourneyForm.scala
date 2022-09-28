@@ -48,7 +48,7 @@ final case class StartJourneyForm(
 
 object StartJourneyForm {
 
-  def form(implicit language: Language): Form[StartJourneyForm] = {
+  def form(maxAmountOfDebt: AmountInPence)(implicit language: Language): Form[StartJourneyForm] = {
 
     val signInMapping: Mapping[SignInAs] = Forms.of(EnumFormatter.format(
       enum                    = SignInAs,
@@ -68,7 +68,7 @@ object StartJourneyForm {
 
     val debtTotalAmountMapping: FieldMapping[BigDecimal] = Forms.of(amountOfMoneyFormatter(
       isTooSmall = AmountInPence(100) > AmountInPence(_),
-      isTooLarge = AmountInPence(_) > AmountInPence(1500000)
+      isTooLarge = AmountInPence(_) > maxAmountOfDebt
     ))
 
     val taxRefMapping: Mapping[Option[String]] = optional(Forms.text)

@@ -187,12 +187,12 @@ object Messages {
       english = "Call us"
     )
 
-    val `You must owe £15,000 or less to be eligible for a payment plan online...`: Message = Message(
-      english = "You must owe £15,000 or less to be eligible for a payment plan online. You may still be able to set up a plan over the phone."
+    def `You must owe ... or less to be eligible...`(maxAmountOfDebt: AmountInPence): Message = Message(
+      english = s"You must owe ${maxAmountOfDebt.gdsFormatInPounds} or less to be eligible for a payment plan online. You may still be able to set up a plan over the phone."
     )
 
-    val `Your overdue amount must have a due date that is less than 35 days ago ...`: Message = Message(
-      english = "Your overdue amount must have a due date that is less than 35 days ago for you to be eligible for a payment plan online. You may still be able to set up a plan over the phone. "
+    def `Your overdue amount must have a due date that is less than ... days ago ...`(maxAgeOfDebtInDays: Int): Message = Message(
+      english = s"Your overdue amount must have a due date that is less than $maxAgeOfDebtInDays days ago for you to be eligible for a payment plan online. You may still be able to set up a plan over the phone. "
     )
 
     val `For further support you can contact the Payment Support Service on 0300 200 3835 to speak to an advisor.`: Message = Message(
@@ -268,12 +268,12 @@ object Messages {
       english = "You are eligible to set up an online payment plan if:"
     )
 
-    val `you plan to pay the debt off within the next 6 months or less`: Message = Message(
-      english = "you plan to pay the debt off within the next 6 months or less"
+    def `you plan to pay the debt off within the next ... months or less`(maxPlanDurationInMonths: Int): Message = Message(
+      english = s"you plan to pay the debt off within the next $maxPlanDurationInMonths months or less"
     )
 
-    val `you owe £15,000 or less`: Message = Message(
-      english = "you owe £15,000 or less"
+    def `you owe ... or less`(maxAmountOfDebt: AmountInPence): Message = Message(
+      english = s"you owe ${maxAmountOfDebt.gdsFormatInPounds} or less"
     )
 
     val `you do not have any other payment plans or debts with HMRC`: Message = Message(
@@ -288,8 +288,8 @@ object Messages {
       english = "you have no outstanding penalties"
     )
 
-    val `You can use this service within 35 days of the overdue payment deadline.`: Message = Message(
-      english = "You can use this service within 35 days of the overdue payment deadline."
+    def `You can use this service within ... days of the overdue payment deadline.`(maxAgeOfDebtInDays: Int): Message = Message(
+      english = s"You can use this service within $maxAgeOfDebtInDays days of the overdue payment deadline."
     )
 
     val `You can choose to pay:`: Message = Message(
