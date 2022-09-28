@@ -23,6 +23,8 @@ import models.GGCredId
 import play.api.mvc._
 import uk.gov.hmrc.auth.core.Enrolments
 
+import java.time.Instant
+
 /**
  * Authenticated Journey requests have two stages:
  * AuthenticatedJourneyRequest -> User has some enrolments (may not be correct) and there is a journey found
@@ -34,6 +36,17 @@ class AuthenticatedJourneyRequest[A](
     override val enrolments: Enrolments,
     val journey:             Journey,
     ggCredId:                GGCredId
+) extends AuthenticatedRequest[A](request, enrolments, ggCredId) {
+  val journeyId: JourneyId = journey._id
+}
+
+class BarsLockedOutRequest[A](
+    override val request:           Request[A],
+    override val enrolments:        Enrolments,
+    val journey:                    Journey,
+    ggCredId:                       GGCredId,
+    val numberOfBarsVerifyAttempts: NumberOfBarsVerifyAttempts,
+    val barsLockoutExpiryTime:      Instant
 ) extends AuthenticatedRequest[A](request, enrolments, ggCredId) {
   val journeyId: JourneyId = journey._id
 }

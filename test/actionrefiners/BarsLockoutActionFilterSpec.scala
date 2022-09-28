@@ -26,8 +26,6 @@ import testsupport.stubs.EssttpBackend.BarsVerifyStatusStub
 import testsupport.stubs.{AuthStub, EssttpBackend}
 import testsupport.testdata.PageUrls
 import uk.gov.hmrc.http.SessionKeys
-import util.QueryParameterUtils._
-import java.net.URLEncoder
 import java.time.Instant
 
 class BarsLockoutActionFilterSpec extends ItSpec {
@@ -58,8 +56,7 @@ class BarsLockoutActionFilterSpec extends ItSpec {
       val result = controller.yourBill(fakeRequest)
 
       status(result) shouldBe Status.SEE_OTHER
-      val encodedExpiry = URLEncoder.encode(expiry.encodedLongFormat, "utf-8")
-      redirectLocation(result) shouldBe Some(s"${PageUrls.lockoutUrl}?p=$encodedExpiry")
+      redirectLocation(result) shouldBe Some(PageUrls.lockoutUrl)
     }
 
   }
