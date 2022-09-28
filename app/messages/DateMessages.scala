@@ -20,33 +20,33 @@ import cats.syntax.eq._
 object DateMessages {
 
   val monthName: Map[Int, Message] = Map(
-    1 -> Message("January"),
-    2 -> Message("February"),
-    3 -> Message("March"),
-    4 -> Message("April"),
-    5 -> Message("May"),
-    6 -> Message("June"),
-    7 -> Message("July"),
-    8 -> Message("August"),
-    9 -> Message("September"),
-    10 -> Message("October"),
-    11 -> Message("November"),
-    12 -> Message("December")
+    1 -> Message(english = "January"),
+    2 -> Message(english = "February"),
+    3 -> Message(english = "March"),
+    4 -> Message(english = "April"),
+    5 -> Message(english = "May"),
+    6 -> Message(english = "June"),
+    7 -> Message(english = "July"),
+    8 -> Message(english = "August"),
+    9 -> Message(english = "September"),
+    10 -> Message(english = "October"),
+    11 -> Message(english = "November"),
+    12 -> Message(english = "December")
   )
 
   val shortMonthName: Map[Int, Message] = Map(
-    1 -> Message("Jan"),
-    2 -> Message("Feb"),
-    3 -> Message("Mar"),
-    4 -> Message("Apr"),
-    5 -> Message("May"),
-    6 -> Message("Jun"),
-    7 -> Message("Jul"),
-    8 -> Message("Aug"),
-    9 -> Message("Sep"),
-    10 -> Message("Oct"),
-    11 -> Message("Nov"),
-    12 -> Message("Dec")
+    1 -> Message(english = "Jan"),
+    2 -> Message(english = "Feb"),
+    3 -> Message(english = "Mar"),
+    4 -> Message(english = "Apr"),
+    5 -> Message(english = "May"),
+    6 -> Message(english = "Jun"),
+    7 -> Message(english = "Jul"),
+    8 -> Message(english = "Aug"),
+    9 -> Message(english = "Sep"),
+    10 -> Message(english = "Oct"),
+    11 -> Message(english = "Nov"),
+    12 -> Message(english = "Dec")
   )
 
   def getSuffix(day: Int): Message = {

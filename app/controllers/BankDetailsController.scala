@@ -33,10 +33,8 @@ import requests.RequestSupport
 import services.{EssttpBarsService, JourneyService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
-import util.QueryParameterUtils.InstantOps
 import views.Views
 
-import java.nio.charset.Charset
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -219,8 +217,8 @@ class BankDetailsController @Inject() (
           enterBankDetailsPageWithBarsError(sortCodeOnDenyList)
         case OtherBarsError(_) =>
           enterBankDetailsPageWithBarsError(otherBarsError)
-        case TooManyAttempts(_, expiry) =>
-          Future.successful(Redirect(routes.BankDetailsController.barsLockout(expiry.encodedLongFormat)))
+        case TooManyAttempts(_, _) =>
+          Future.successful(Redirect(routes.BankDetailsController.barsLockout))
       },
       _ =>
         journeyService
@@ -278,10 +276,8 @@ class BankDetailsController @Inject() (
     }
   }
 
-  def barsLockout(p: String): Action[AnyContent] = as.default { implicit request =>
-    val charset = Charset.forName("UTF-8")
-    val expiry = new String(java.util.Base64.getDecoder.decode(p.getBytes(charset)), charset)
-    Ok(views.barsLockout(expiry))
+  val barsLockout: Action[AnyContent] = as.barsLockedOutJourneyAction { implicit request =>
+    Ok(views.barsLockout(request.barsLockoutExpiryTime))
   }
 }
 

@@ -752,6 +752,14 @@ object Messages {
       english = "For further support you can contact the Payment Support Service on <strong>0300 200 3835</strong> to speak to an adviser."
     )
 
+    val am: Message = Message(
+      english = "am"
+    )
+
+    val pm: Message = Message(
+      english = "pm"
+    )
+
   }
 
   object Confirmation {

@@ -16,23 +16,22 @@
 
 package actions
 
-import actionsmodel.{AuthenticatedJourneyRequest, BarsNotLockedOutRequest}
-import controllers.{JourneyIncorrectStateRouter, routes}
+import actionsmodel.{AuthenticatedJourneyRequest, BarsLockedOutRequest}
+import controllers.JourneyIncorrectStateRouter
 import essttp.bars.BarsVerifyStatusConnector
 import essttp.journey.model.Journey
 import play.api.Logging
 import play.api.mvc.{ActionRefiner, Request, Result, Results}
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-@Singleton
-class BarsLockoutActionRefiner @Inject() (barsVerifyStatusConnector: BarsVerifyStatusConnector)(
+class BarsLockedOutJourneyRefiner @Inject() (barsVerifyStatusConnector: BarsVerifyStatusConnector)(
     implicit
     ec: ExecutionContext
-) extends ActionRefiner[AuthenticatedJourneyRequest, BarsNotLockedOutRequest] with Logging with Results {
+) extends ActionRefiner[AuthenticatedJourneyRequest, BarsLockedOutRequest] with Logging with Results {
 
-  override protected def refine[A](request: AuthenticatedJourneyRequest[A]): Future[Either[Result, BarsNotLockedOutRequest[A]]] = {
+  override protected def refine[A](request: AuthenticatedJourneyRequest[A]): Future[Either[Result, BarsLockedOutRequest[A]]] = {
     implicit val rh: Request[A] = request.request
 
     request.journey match {
@@ -41,18 +40,20 @@ class BarsLockoutActionRefiner @Inject() (barsVerifyStatusConnector: BarsVerifyS
       case j: Journey.AfterComputedTaxId =>
         barsVerifyStatusConnector.status(j.taxId).map { status =>
           status.lockoutExpiryDateTime match {
-            case Some(_) =>
-              Left(Redirect(routes.BankDetailsController.barsLockout))
-            case None =>
+            case Some(expiresAt) =>
               Right(
-                new BarsNotLockedOutRequest(
+                new BarsLockedOutRequest(
                   request.request,
                   request.enrolments,
-                  j,
+                  request.journey,
                   request.ggCredId,
-                  status.attempts
+                  status.attempts,
+                  expiresAt
                 )
               )
+
+            case None =>
+              Left(JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(request.journey))
           }
         }
     }

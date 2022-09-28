@@ -16,18 +16,19 @@
 
 package actions
 
-import actionsmodel.{AuthenticatedJourneyRequest, AuthenticatedRequest, EligibleJourneyRequest}
+import actionsmodel.{AuthenticatedJourneyRequest, AuthenticatedRequest, BarsLockedOutRequest, EligibleJourneyRequest}
 import play.api.mvc._
 
 import javax.inject.{Inject, Singleton}
 
 @Singleton
 class Actions @Inject() (
-    actionBuilder:              DefaultActionBuilder,
-    authenticatedActionRefiner: AuthenticatedActionRefiner,
-    getJourneyActionRefiner:    GetJourneyActionRefiner,
-    barsLockoutActionFilter:    BarsLockoutActionRefiner,
-    eligibleJourneyRefiner:     EligibleJourneyRefiner
+    actionBuilder:               DefaultActionBuilder,
+    authenticatedActionRefiner:  AuthenticatedActionRefiner,
+    getJourneyActionRefiner:     GetJourneyActionRefiner,
+    barsLockoutActionFilter:     BarsLockoutActionRefiner,
+    barsLockedOutJourneyRefiner: BarsLockedOutJourneyRefiner,
+    eligibleJourneyRefiner:      EligibleJourneyRefiner
 ) {
 
   val default: ActionBuilder[Request, AnyContent] = actionBuilder
@@ -47,5 +48,11 @@ class Actions @Inject() (
       .andThen(getJourneyActionRefiner)
       .andThen(barsLockoutActionFilter)
       .andThen(eligibleJourneyRefiner)
+
+  val barsLockedOutJourneyAction: ActionBuilder[BarsLockedOutRequest, AnyContent] =
+    actionBuilder
+      .andThen(authenticatedActionRefiner)
+      .andThen(getJourneyActionRefiner)
+      .andThen(barsLockedOutJourneyRefiner)
 
 }

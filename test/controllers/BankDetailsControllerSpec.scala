@@ -33,10 +33,8 @@ import testsupport.stubs.{AuditConnectorStub, BarsStub, EssttpBackend}
 import testsupport.testdata.BarsJsonResponses.{ValidateJson, VerifyJson}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
-import util.QueryParameterUtils._
 
-import java.net.URLEncoder
-import java.time.Instant
+import java.time.{Instant, LocalDate, LocalDateTime, LocalTime, ZoneOffset}
 import java.util.Locale
 import scala.concurrent.Future
 import scala.jdk.CollectionConverters.{asScalaIteratorConverter, collectionAsScalaIterableConverter}
@@ -933,7 +931,6 @@ class BankDetailsControllerSpec extends ItSpec {
       new BarsErrorSetup(TypesOfBankAccount.Business) {
 
         private val expiry = Instant.now
-        private val encodedExpiry = URLEncoder.encode(expiry.encodedLongFormat, "utf-8")
 
         BarsStub.ValidateStub.success()
         BarsStub.VerifyBusinessStub.otherBarsError() // any error will do
@@ -941,7 +938,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
         val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(s"${PageUrls.lockoutUrl}?p=$encodedExpiry")
+        redirectLocation(result) shouldBe Some(PageUrls.lockoutUrl)
 
         BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(formData)
         BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
@@ -957,12 +954,30 @@ class BankDetailsControllerSpec extends ItSpec {
   }
 
   "GET /lockout should" - {
-    "return 200" in {
-      val expiry = Instant.now
-      val encodedExpiry = expiry.encodedLongFormat
+
+    "redirect to the relevant page when the journey has not been locked out" in {
+      stubCommonActions(barsLockoutExpiry = None)
+      EssttpBackend.CanPayUpfront.findJourney(testCrypto)()
 
       val request = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val result: Future[Result] = controller.barsLockout(encodedExpiry)(request)
+      val result = controller.barsLockout(request)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.UpfrontPaymentController.upfrontPaymentAmount.url)
+
+    }
+
+    "return 200 when the journey has been locked ou" in {
+      // expiry time displayed is in UK time - for 30th Sep, 14:59 UTC is 15:59 BST
+      val expiry = LocalDateTime.of(
+        LocalDate.of(2020, 9, 30),
+        LocalTime.of(14, 59, 46)
+      ).toInstant(ZoneOffset.UTC)
+
+      stubCommonActions(barsLockoutExpiry = Some(expiry))
+      EssttpBackend.DetermineTaxId.findJourney()
+
+      val request = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.barsLockout(request)
       status(result) shouldBe Status.OK
 
       val pageContent: String = contentAsString(result)
@@ -976,7 +991,7 @@ class BankDetailsControllerSpec extends ItSpec {
       )
 
       val paragraphs = doc.select("p.govuk-body").asScala.toList
-      paragraphs(0).text() shouldBe s"You’ll need to wait until ${expiry.longFormat} before trying to confirm your bank details again."
+      paragraphs(0).text() shouldBe s"You’ll need to wait until 30 September 2020, 3:59pm before trying to confirm your bank details again."
       paragraphs(1).text() shouldBe "You may still be able to set up a payment plan over the phone."
       paragraphs(2).text() shouldBe "For further support you can contact the Payment Support Service on 0300 200 3835 to speak to an adviser."
     }
