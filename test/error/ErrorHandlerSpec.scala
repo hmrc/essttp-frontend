@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,16 +12,29 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import uk.gov.hmrc.govukfrontend.views.html.components._
-@import play.api.mvc.Request
+package error
 
-@this(layout: templates.Layout)
+import org.jsoup.Jsoup
+import play.api.mvc.Request
+import play.api.test.FakeRequest
+import testsupport.ItSpec
 
-@(pageTitle: String, heading: String, message: String)(implicit request: Request[_])
+class ErrorHandlerSpec extends ItSpec {
 
-@layout(pageTitle = Some(pageTitle), showBackLink = false) {
-  <h1 class="govuk-heading-xl">@{Text(heading).asHtml}</h1>
-  <p class="govuk-body">@{Text(message).asHtml}</p>
+  val errorHandler = app.injector.instanceOf[ErrorHandler]
+
+  "The standard error template" - {
+
+    "must not have a back link" in {
+      implicit val request: Request[_] = FakeRequest()
+      val html = errorHandler.standardErrorTemplate("title", "heading", "message")
+
+      val doc = Jsoup.parse(html.body)
+      doc.select(".govuk-back-link").isEmpty shouldBe true
+    }
+
+  }
+
 }
