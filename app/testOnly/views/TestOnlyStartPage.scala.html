@@ -181,7 +181,7 @@
         content = Text(e.message)
     )),
     value = form.data.get("debtTotalAmount"),
-    hint = Some(Hint(content = Text(s"Enter an amount between £1 and £${appConfig.PolicyParameters.EPAYE.maxAmountOfDebt.gdsFormatInPounds}")))
+    hint = Some(Hint(content = Text(s"Enter an amount between £1 and ${appConfig.PolicyParameters.EPAYE.maxAmountOfDebt.gdsFormatInPounds}")))
 ))
 }
 
