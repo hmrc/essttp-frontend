@@ -47,6 +47,7 @@ object PageUrls {
   val lockoutUrl: String = s"$serviceBaseUrl/lockout"
   val termsAndConditionsUrl: String = s"$serviceBaseUrl/terms-and-conditions"
   val submitArrangementUrl: String = s"$serviceBaseUrl/submit-arrangement"
+  val dummyEmailUrl: String = s"$serviceBaseUrl/email-dummy"
   val confirmationUrl: String = s"$serviceBaseUrl/payment-plan-set-up"
   val printPlanUrl: String = s"$serviceBaseUrl/payment-plan-print-summary"
 }
