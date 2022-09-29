@@ -47,7 +47,7 @@
 }
 @nextPayment = @{
     val dayOfMonth: Int = paymentDay.value.getDayOfMonth
-    val day = s"$dayOfMonth${DateMessages.getSuffix(dayOfMonth).show}"
+    val day = s"$dayOfMonth${DateMessages.getSuffix(dayOfMonth)}"
     val month: String = DateMessages.monthName(paymentDay.value.getMonth.getValue).show
     val year: String = paymentDay.value.getYear.toString
     s"$day $month $year"
