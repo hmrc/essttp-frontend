@@ -976,17 +976,17 @@ object Messages {
 
     val `Your payment reference is`: Message = Message(
       english = "Your payment reference is",
-      welsh   = ""
+      welsh   = "Eich cyfeirnod talu yw"
     )
 
     val `What happens next`: Message = Message(
       english = "What happens next",
-      welsh   = ""
+      welsh   = "Yr hyn sy’n digwydd nesaf"
     )
 
     val `HMRC will send you a letter within 5 working days with your payment dates.`: Message = Message(
       english = "HMRC will send you a letter within 5 working days with your payment dates.",
-      welsh   = ""
+      welsh   = "Bydd CThEM yn anfon llythyr atoch cyn pen 5 diwrnod gyda’ch dyddiadau talu."
     )
 
     def paymentInfo(hasUpfrontPayment: Boolean, paymentDate: String): Message = Message(
