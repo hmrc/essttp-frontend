@@ -93,7 +93,7 @@
           @hmrcLanguageSelectHelper()
         }
         @if(showBackLink) {
-            @govukBackLink(BackLink(href = "#", classes = "js-visible"))
+            @govukBackLink(BackLink(href = "#", classes = "js-visible", content = Text(Messages.back.show)))
         }
     </div>
 }
