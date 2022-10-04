@@ -328,9 +328,14 @@ object Messages {
       welsh   = "nid oes gennych unrhyw gynlluniau talu na dyledion eraill gyda CThEM"
     )
 
-    val `your tax returns are up to date`: Message = Message(
-      english = "your tax returns are up to date",
-      welsh   = "rydych wedi cyflwyno’r Ffurflenni Treth sydd eu hangen hyd yn hyn"
+    val `your Employers’ PAYE submissions are up to date`: Message = Message(
+      english = "your Employers’ PAYE submissions are up to date",
+      welsh   = "mae’ch cyflwyniadau TWE y Cyflogwr yn gyfredol"
+    )
+
+    val `your Construction Industry Scheme (CIS) returns are up to date`: Message = Message(
+      english = "your Construction Industry Scheme (CIS) returns are up to date (if applicable)",
+      welsh   = "mae’ch datganiadau ar gyfer Cynllun y Diwydiant Adeiladu (CIS) yn gyfredol (os yw’n berthnasol)"
     )
 
     val `you have no outstanding penalties`: Message = Message(
