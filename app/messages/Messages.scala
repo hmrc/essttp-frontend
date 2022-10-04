@@ -1027,9 +1027,9 @@ object Messages {
       welsh   = s"${if (hasUpfrontPayment) "Caiff eich taliad ymlaen llaw ei gymryd cyn pen 10 diwrnod gwaith. " else ""}Caiff eich taliad nesaf ei gymryd ar $paymentDate neu’r diwrnod gwaith nesaf."
     )
 
-    val `Print your plan or save it as a PDF`: Message = Message(
-      english = "Print your plan or save it as a PDF",
-      welsh   = "Argraffu eich cynllun neu ei gadw fel PDF"
+    val `Print or save your plan`: Message = Message(
+      english = "Print or save your plan",
+      welsh   = "Argraffwch neu gadw eich cynllun"
     )
 
     val `If you need to change your payment plan`: Message = Message(

@@ -75,7 +75,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
         } else {
           paragraphs(1).text() shouldBe "Your next payment will be taken on 28th August 2022 or the next working day."
         }
-        paragraphs(2).text() shouldBe "Print your plan or save it as a PDF"
+        paragraphs(2).text() shouldBe "Print or save your plan"
 
         doc.select("#print-plan-link").attr("href") shouldBe PageUrls.printPlanUrl
 
@@ -198,7 +198,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
 
       def assertPrintLink(doc: Document): Assertion = {
         val printlink = doc.select("#printLink")
-        printlink.text() shouldBe "Print your plan or save it as a PDF"
+        printlink.text() shouldBe "Print or save your plan"
         printlink.attr("href") shouldBe "#print-dialogue"
       }
   }
