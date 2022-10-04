@@ -144,7 +144,8 @@ object Messages {
   object NotEligible {
 
     val `If you need to speak to an adviser call us...`: Message = Message(
-      english = "If you need to speak to an adviser call us on <strong>0300 200 3835</strong> at the Business Support Service to talk about your payment options."
+      english = "If you need to speak to an adviser call us on <strong>0300 200 3835</strong> at the Business Support Service to talk about your payment options.",
+      welsh   = "Os oes angen i chi siarad ag ymgynghorydd, ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEF ar <strong>0300 200 1900</strong> i drafod eich opsiynau talu."
     )
 
     val `If you cannot use speech recognition software`: Message = Message(
