@@ -1019,6 +1019,9 @@ class BankDetailsControllerSpec extends ItSpec {
 
       val summaries = doc.select(".govuk-summary-list").select(".govuk-summary-list__row").iterator().asScala.toList
       summaries.size shouldBe 3
+      val changeLinks = summaries.map(_.select(".govuk-summary-list__actions").select(".govuk-link"))
+      changeLinks.size shouldBe 3
+      changeLinks.foreach(_.attr("href") shouldBe routes.BankDetailsController.enterBankDetails.url)
 
       val expectedAccountNameRow =
         SummaryRow("Account name", "Bob Ross", routes.BankDetailsController.enterBankDetails.url)
