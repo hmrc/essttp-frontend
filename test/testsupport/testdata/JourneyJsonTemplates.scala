@@ -157,9 +157,9 @@ object JourneyJsonTemplates {
     journeyInfo = JourneyInfo.confirmedDirectDebitDetails(encrypter)
   )
 
-  def `Agreed Terms and Conditions`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
-    stageInfo   = StageInfo.agreedTermsAndConditions,
-    journeyInfo = JourneyInfo.agreedTermsAndConditions(encrypter)
+  def `Agreed Terms and Conditions`(isEmailAddresRequired: Boolean, encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = if (isEmailAddresRequired) StageInfo.agreedTermsAndConditionsEmailAddressRequired else StageInfo.agreedTermsAndConditionsEmailAddressNotRequired,
+    journeyInfo = JourneyInfo.agreedTermsAndConditions(isEmailAddresRequired, encrypter)
   )
 
   def `Arrangement Submitted - with upfront payment`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(

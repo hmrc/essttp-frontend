@@ -47,6 +47,7 @@ object JourneyInfo {
   def detailsAboutBankAccountPersonal(isAccountHolder: Boolean): JourneyInfoAsJson = TdJsonBodies.detailsAboutBankAccountJourneyInfo("Personal", isAccountHolder)
   def directDebitDetails(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo(encrypter)
   def directDebitDetailsNotAccountHolder(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo(encrypter)
+  def emailAddressRequired(isEmailAddressRequired: Boolean): JourneyInfoAsJson = TdJsonBodies.isEmailAddressRequiredJourneyInfo(isEmailAddressRequired)
   val arrangementSubmitted: JourneyInfoAsJson = TdJsonBodies.arrangementResponseJourneyInfo()
   /** * **/
 
@@ -125,15 +126,16 @@ object JourneyInfo {
   def confirmedDirectDebitDetails(encrypter: Encrypter): List[JourneyInfoAsJson] =
     enteredDirectDebitDetails(encrypter)
 
-  def agreedTermsAndConditions(encrypter: Encrypter): List[JourneyInfoAsJson] =
-    confirmedDirectDebitDetails(encrypter)
+  def agreedTermsAndConditions(isEmailAddressRequired: Boolean, encrypter: Encrypter): List[JourneyInfoAsJson] =
+    emailAddressRequired(isEmailAddressRequired) :: confirmedDirectDebitDetails(encrypter)
 
   def submittedArrangementWithUpfrontPayment(encrypter: Encrypter): List[JourneyInfoAsJson] =
-    arrangementSubmitted :: confirmedDirectDebitDetails(encrypter)
+    arrangementSubmitted :: agreedTermsAndConditions(isEmailAddressRequired = false, encrypter)
 
   //used in final page test
   def submittedArrangementNoUpfrontPayment(encrypter: Encrypter): List[JourneyInfoAsJson] =
-    arrangementSubmitted :: directDebitDetails(encrypter) :: detailsAboutBankAccountBusiness(isAccountHolder = true) :: selectedPlan :: affordableQuotes ::
+    arrangementSubmitted :: emailAddressRequired(isEmailAddressRequired = false) :: directDebitDetails(encrypter) ::
+      detailsAboutBankAccountBusiness(isAccountHolder = true) :: selectedPlan :: affordableQuotes ::
       upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: monthlyPaymentAmount ::
       dayOfMonth() :: startDates :: cannotPayUpfront :: eligibilityCheckedEligible(encrypter)
 

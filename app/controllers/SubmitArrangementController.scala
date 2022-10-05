@@ -41,8 +41,9 @@ class SubmitArrangementController @Inject() (
 
   val submitArrangement: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     request.journey match {
-      case j: Journey.BeforeAgreedTermsAndConditions  => logErrorAndRouteToDefaultPageF(j)
-      case j: Journey.Stages.AgreedTermsAndConditions => submitArrangementAndUpdateJourney(j)
+      case j: Journey.BeforeAgreedTermsAndConditions => logErrorAndRouteToDefaultPageF(j)
+      case j: Journey.Stages.AgreedTermsAndConditions =>
+        if (j.isEmailAddressRequired) logErrorAndRouteToDefaultPageF(j) else submitArrangementAndUpdateJourney(j)
       case _: Journey.AfterArrangementSubmitted =>
         JourneyLogger.info("Already submitted arrangement to ttp, showing user the success page")
         Future.successful(Redirect(routes.PaymentPlanSetUpController.paymentPlanSetUp))

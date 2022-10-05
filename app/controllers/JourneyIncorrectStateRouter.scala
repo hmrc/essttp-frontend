@@ -49,10 +49,12 @@ object JourneyIncorrectStateRouter {
         if (j.detailsAboutBankAccount.isAccountHolder) routes.BankDetailsController.enterBankDetails
         else routes.BankDetailsController.cannotSetupDirectDebitOnlinePage
       case _: Journey.Stages.EnteredDirectDebitDetails   => routes.BankDetailsController.checkBankDetails
-      case _: Journey.Stages.ConfirmedDirectDebitDetails => routes.BankDetailsController.termsAndConditions
+      case _: Journey.Stages.ConfirmedDirectDebitDetails => routes.TermsAndConditionsController.termsAndConditions
       // prevent accidentally submitting arrangement twice
-      case _: Journey.Stages.AgreedTermsAndConditions    => routes.PaymentPlanSetUpController.paymentPlanSetUp
-      case _: Journey.Stages.SubmittedArrangement        => routes.PaymentPlanSetUpController.paymentPlanSetUp
+      case j: Journey.Stages.AgreedTermsAndConditions =>
+        if (j.isEmailAddressRequired) routes.EmailController.dummy
+        else routes.PaymentPlanSetUpController.paymentPlanSetUp
+      case _: Journey.Stages.SubmittedArrangement => routes.PaymentPlanSetUpController.paymentPlanSetUp
     }
 
     JourneyLogger.error(

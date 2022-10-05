@@ -428,6 +428,11 @@ object TdJsonBodies {
        |  "accountNumber" : "${encryptString("12345678", encrypter)}"
        |}""".stripMargin
 
+  def isEmailAddressRequiredJourneyInfo(isEmailAddressRequired: Boolean): String =
+    s"""
+       |"isEmailAddressRequired": $isEmailAddressRequired
+       |""".stripMargin
+
   def arrangementResponseJourneyInfo(): String =
     s"""
        |"arrangementResponse" : {

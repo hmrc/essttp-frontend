@@ -46,7 +46,7 @@ class JourneyFinalStateCheckSpec extends ItSpec {
       (PageUrls.aboutYourBankAccountUrl, app.injector.instanceOf[BankDetailsController].detailsAboutBankAccount),
       (PageUrls.directDebitDetailsUrl, app.injector.instanceOf[BankDetailsController].enterBankDetails),
       (PageUrls.checkDirectDebitDetailsUrl, app.injector.instanceOf[BankDetailsController].checkBankDetails),
-      (PageUrls.termsAndConditionsUrl, app.injector.instanceOf[BankDetailsController].termsAndConditions),
+      (PageUrls.termsAndConditionsUrl, app.injector.instanceOf[TermsAndConditionsController].termsAndConditions),
       (PageUrls.submitArrangementUrl, app.injector.instanceOf[SubmitArrangementController].submitArrangement)
     )) {
       (scenario: String, action: Action[AnyContent]) =>
