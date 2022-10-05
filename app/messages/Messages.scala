@@ -144,7 +144,8 @@ object Messages {
   object NotEligible {
 
     val `If you need to speak to an adviser call us...`: Message = Message(
-      english = s"""If you need to speak to an adviser call us on <strong>0300 200 3835</strong> at the Business Support Service to talk about your payment options."""
+      english = "If you need to speak to an adviser call us on <strong>0300 200 3835</strong> at the Business Support Service to talk about your payment options.",
+      welsh   = "Os oes angen i chi siarad ag ymgynghorydd, ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEF ar <strong>0300 200 1900</strong> i drafod eich opsiynau talu."
     )
 
     val `If you cannot use speech recognition software`: Message = Message(
@@ -271,7 +272,8 @@ object Messages {
     )
 
     val `Find out how to enrol`: Message = Message(
-      english = "Find out how to enrol"
+      english = "Find out how to enrol",
+      welsh   = "Dysgwch sut i ymrestru"
     )
 
   }
@@ -282,6 +284,7 @@ object Messages {
       english = "Can you make an upfront payment?",
       welsh   = "A allwch wneud taliad ymlaen llaw?"
     )
+
     val `Your monthly payments will be lower if you ...`: Message = Message(
       english = "Your monthly payments will be lower if you can make an upfront payment. This payment will be taken from your bank account within 10 working days.",
       welsh   = "Bydd eich taliadau misol yn is os gallwch wneud taliad ymlaen llaw. Caiff y taliad hwn ei gymryd o’ch cyfrif banc cyn pen 10 diwrnod gwaith."
@@ -326,9 +329,14 @@ object Messages {
       welsh   = "nid oes gennych unrhyw gynlluniau talu na dyledion eraill gyda CThEM"
     )
 
-    val `your tax returns are up to date`: Message = Message(
-      english = "your tax returns are up to date",
-      welsh   = "rydych wedi cyflwyno’r Ffurflenni Treth sydd eu hangen hyd yn hyn"
+    val `your Employers’ PAYE submissions are up to date`: Message = Message(
+      english = "your Employers’ PAYE submissions are up to date",
+      welsh   = "mae’ch cyflwyniadau TWE y Cyflogwr yn gyfredol"
+    )
+
+    val `your Construction Industry Scheme (CIS) returns are up to date`: Message = Message(
+      english = "your Construction Industry Scheme (CIS) returns are up to date (if applicable)",
+      welsh   = "mae’ch datganiadau ar gyfer Cynllun y Diwydiant Adeiladu (CIS) yn gyfredol (os yw’n berthnasol)"
     )
 
     val `you have no outstanding penalties`: Message = Message(
@@ -410,7 +418,8 @@ object Messages {
 
         case "error.pattern" =>
           Message(
-            english = "How much you can pay upfront must be an amount of money"
+            english = "How much you can pay upfront must be an amount of money",
+            welsh   = "Mae’n rhaid i’r hyn y gallwch ei dalu ymlaen llaw fod yn swm o arian"
           )
 
         case "error.tooSmall" => outOfBoundsMessage
@@ -418,6 +427,11 @@ object Messages {
         case "error.tooLarge" => outOfBoundsMessage
       }
     }
+
+    def `Enter an amount between`(min: AmountInPence, max: AmountInPence): Message = Message(
+      english = s"Enter an amount between ${min.gdsFormatInPounds} and ${max.gdsFormatInPounds}",
+      welsh   = s"Nodwch swm sydd rhwng ${min.gdsFormatInPounds} a ${max.gdsFormatInPounds}"
+    )
 
     val `Your monthly payments will be lower if...`: Message = Message(
       english = "Your monthly payments will be lower if you make an upfront payment. This payment will be taken from your bank account within 10 working days.",
@@ -464,7 +478,8 @@ object Messages {
     )
 
     val `Upfront payment-visually-hidden-message`: Message = Message(
-      english = "payment amount"
+      english = "payment amount",
+      welsh   = "swm y taliad"
     )
 
     val `Remaining amount to pay`: Message = Message(
@@ -498,8 +513,17 @@ object Messages {
       )
 
       key match {
-        case "error.required" => Message(english = "Enter how much you can afford to pay each month", welsh = "Nodwch faint y gallwch fforddio ei dalu bob mis")
-        case "error.pattern"  => Message(english = "How much you can afford to pay each month must be an amount of money")
+        case "error.required" =>
+          Message(
+            english = "Enter how much you can afford to pay each month",
+            welsh   = "Nodwch faint y gallwch fforddio ei dalu bob mis"
+          )
+        case "error.pattern" =>
+          Message(
+            english = "How much you can afford to pay each month must be an amount of money",
+            welsh   = "Mae’n rhaid i’r hyn y gallwch fforddio ei dalu bob mis fod yn swm o arian"
+          )
+
         case "error.tooSmall" => outOfBoundsMessage
         case "error.tooLarge" => outOfBoundsMessage
       }
@@ -547,7 +571,10 @@ object Messages {
         )
 
       case "DifferentDay.error.required" =>
-        Message(english = "Enter the day you want to pay each month")
+        Message(
+          english = "Enter the day you want to pay each month",
+          welsh   = "Nodwch y diwrnod rydych eisiau talu arno bob mis"
+        )
 
       case "DifferentDay.error.outOfRange" =>
         Message(
@@ -556,7 +583,10 @@ object Messages {
         )
 
       case "DifferentDay.error.invalid" =>
-        Message(english = "The day you want to pay must be a number")
+        Message(
+          english = "The day you want to pay must be a number",
+          welsh   = "Mae’n rhaid i’r diwrnod rydych eisiau talu arno fod yn rhif"
+        )
     }
 
     val `Enter a day between 1 and 28`: Message = Message(
@@ -655,11 +685,13 @@ object Messages {
     )
 
     val `payment day`: Message = Message(
-      english = "payment day"
+      english = "payment day",
+      welsh   = "y diwrnod talu"
     )
 
     val `Change months duration`: Message = Message(
-      english = "how many months you want to pay over"
+      english = "how many months you want to pay over",
+      welsh   = "dros sawl mis yr hoffech dalu"
     )
 
     val `Total to pay`: Message = Message(
@@ -745,64 +777,65 @@ object Messages {
       welsh   = "Mae’n rhaid iddo fod rhwng 6 ac 8 digid o hyd"
     )
 
-    val errors: Map[String, Message] = Map(
-      "name.error.required" -> Message(
-        english = "Enter the name on the account",
-        welsh   = "Nodwch yr enw sydd ar y cyfrif"
-      ),
-      "name.error.pattern" -> Message(
-        english = "Name on the account must only include letters, apostrophes, spaces and hyphens"
-      ),
-      "name.error.maxlength" -> Message(
-        english = "Name on the account must be 70 characters or less"
-      ),
-      "sortCode.error.required" -> Message(
-        english = "Enter sort code",
-        welsh   = "Nodwch god didoli"
-      ),
-      "sortCode.error.nonNumeric" -> Message(
-        english = "Sort code must be a number"
-      ),
-      "sortCode.error.invalid" -> Message(
-        english = "Sort code must be 6 digits",
-        welsh   = "Mae’n rhaid i’r cod didoli fod yn 6 digid"
-      ),
-      "accountNumber.error.required" -> Message(
-        english = "Enter account number",
-        welsh   = "Nodwch rif y cyfrif"
-      ),
-      "accountNumber.error.nonNumeric" -> Message(
-        english = "Account number must be a number"
-      ),
-      "accountNumber.error.invalid" -> Message(
-        english = "Account number must be between 6 and 8 digits",
-        welsh   = "Mae’n rhaid i rif y cyfrif fod rhwng 6 ac 8 digid"
-      ),
-      s"sortCode.${accountNumberNotWellFormatted.formError.message}" -> Message(
-        english = "Enter a valid combination of bank account number and sort code"
-      ),
-      s"sortCodeXXX.${accountNumberNotWellFormatted.formError.message}" -> Message(
-        english = "Enter a valid combination of bank account number and sort code"
-      ),
-      s"sortCode.${sortCodeNotPresentOnEiscd.formError.message}" -> Message(
-        english = "Enter a valid combination of bank account number and sort code"
-      ),
-      s"sortCode.${sortCodeDoesNotSupportsDirectDebit.formError.message}" -> Message(
-        english = "You have entered a sort code which does not accept this type of payment. Check you have entered a valid sort code or enter details for a different account"
-      ),
-      s"name.${nameDoesNotMatch.formError.message}" -> Message(
-        english = "Enter a valid account name"
-      ),
-      s"sortCode.${accountDoesNotExist.formError.message}" -> Message(
-        english = "Enter a valid combination of bank account number and sort code"
-      ),
-      s"sortCode.${sortCodeOnDenyList.formError.message}" -> Message(
-        english = "Enter a valid combination of bank account number and sort code"
-      ),
-      s"sortCode.${otherBarsError.formError.message}" -> Message(
-        english = "Enter a valid combination of bank account number and sort code"
+    val errors: Map[String, Message] = {
+      val `Enter a valid combination of bank account number and sort code`: Message = Message(
+        english = "Enter a valid combination of bank account number and sort code",
+        welsh   = "Nodwch gyfuniad dilys o rif cyfrif banc a chod didoli"
       )
-    )
+
+      Map(
+        "name.error.required" -> Message(
+          english = "Enter the name on the account",
+          welsh   = "Nodwch yr enw sydd ar y cyfrif"
+        ),
+        "name.error.pattern" -> Message(
+          english = "Name on the account must only include letters, apostrophes, spaces and hyphens",
+          welsh   = "Mae’n rhaid i’r enw ar y cyfrif gynnwys dim ond llythrennau, collnodau, bylchau a chysylltnodau"
+        ),
+        "name.error.maxlength" -> Message(
+          english = "Name on the account must be 70 characters or less",
+          welsh   = "Mae’n rhaid i’r enw sydd ar y cyfrif fod yn 70 o gymeriadau neu lai"
+        ),
+        "sortCode.error.required" -> Message(
+          english = "Enter sort code",
+          welsh   = "Nodwch god didoli"
+        ),
+        "sortCode.error.nonNumeric" -> Message(
+          english = "Sort code must be a number",
+          welsh   = "Mae’n rhaid i’r cod didoli fod yn rhif"
+        ),
+        "sortCode.error.invalid" -> Message(
+          english = "Sort code must be 6 digits",
+          welsh   = "Mae’n rhaid i’r cod didoli fod yn 6 digid"
+        ),
+        "accountNumber.error.required" -> Message(
+          english = "Enter account number",
+          welsh   = "Nodwch rif y cyfrif"
+        ),
+        "accountNumber.error.nonNumeric" -> Message(
+          english = "Account number must be a number",
+          welsh   = "Mae’n rhaid i rif y cyfrif fod yn rhif"
+        ),
+        "accountNumber.error.invalid" -> Message(
+          english = "Account number must be between 6 and 8 digits",
+          welsh   = "Mae’n rhaid i rif y cyfrif fod rhwng 6 ac 8 digid"
+        ),
+        s"sortCode.${accountNumberNotWellFormatted.formError.message}" -> `Enter a valid combination of bank account number and sort code`,
+        s"sortCodeXXX.${accountNumberNotWellFormatted.formError.message}" -> `Enter a valid combination of bank account number and sort code`,
+        s"sortCode.${sortCodeNotPresentOnEiscd.formError.message}" -> `Enter a valid combination of bank account number and sort code`,
+        s"sortCode.${sortCodeDoesNotSupportsDirectDebit.formError.message}" -> Message(
+          english = "You have entered a sort code which does not accept this type of payment. Check you have entered a valid sort code or enter details for a different account",
+          welsh   = "Rydych wedi nodi cod didoli nad yw’n derbyn y math hwn o daliad. Gwiriwch eich bod wedi nodi cod didoli dilys, neu nodwch fanylion ar gyfer cyfrif gwahanol"
+        ),
+        s"name.${nameDoesNotMatch.formError.message}" -> Message(
+          english = "Enter a valid account name",
+          welsh   = "Nodwch enw cyfrif dilys"
+        ),
+        s"sortCode.${accountDoesNotExist.formError.message}" -> `Enter a valid combination of bank account number and sort code`,
+        s"sortCode.${sortCodeOnDenyList.formError.message}" -> `Enter a valid combination of bank account number and sort code`,
+        s"sortCode.${otherBarsError.formError.message}" -> `Enter a valid combination of bank account number and sort code`
+      )
+    }
   }
 
   object CheckBankDetails {
@@ -943,27 +976,33 @@ object Messages {
   object BankDetailsLockout {
 
     val `You've tried to confirm your bank details too many times`: Message = Message(
-      english = "You’ve tried to confirm your bank details too many times"
+      english = "You’ve tried to confirm your bank details too many times",
+      welsh   = "Rydych wedi ceisio cadarnhau eich manylion banc gormod o weithiau"
     )
 
     def waitUntil(lockExpires: String): Message = Message(
-      english = s"You’ll need to wait until ${lockExpires} before trying to confirm your bank details again."
+      english = s"You’ll need to wait until ${lockExpires} before trying to confirm your bank details again.",
+      welsh   = s"Bydd angen i chi aros tan $lockExpires cyn ceisio cadarnhau eich manylion banc eto."
     )
 
     val `You may still be able to set up a payment plan over the phone.`: Message = Message(
-      english = "You may still be able to set up a payment plan over the phone."
+      english = "You may still be able to set up a payment plan over the phone.",
+      welsh   = "Mae’n bosibl y byddwch yn dal i allu trefnu cynllun talu dros y ffôn."
     )
 
     val `For further support you can contact the Payment Support Service...`: Message = Message(
-      english = "For further support you can contact the Payment Support Service on <strong>0300 200 3835</strong> to speak to an adviser."
+      english = "For further support you can contact the Payment Support Service on <strong>0300 200 3835</strong> to speak to an adviser.",
+      welsh   = "I gael cymorth pellach, gallwch gysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEF ar <strong>0300 200 1900</strong> a siarad ag ymgynghorydd."
     )
 
     val am: Message = Message(
-      english = "am"
+      english = "am",
+      welsh   = "am"
     )
 
     val pm: Message = Message(
-      english = "pm"
+      english = "pm",
+      welsh   = "pm"
     )
 
   }
@@ -994,9 +1033,9 @@ object Messages {
       welsh   = s"${if (hasUpfrontPayment) "Caiff eich taliad ymlaen llaw ei gymryd cyn pen 10 diwrnod gwaith. " else ""}Caiff eich taliad nesaf ei gymryd ar $paymentDate neu’r diwrnod gwaith nesaf."
     )
 
-    val `Print your plan or save it as a PDF`: Message = Message(
-      english = "Print your plan or save it as a PDF",
-      welsh   = "Argraffu eich cynllun neu ei gadw fel PDF"
+    val `Print or save your plan`: Message = Message(
+      english = "Print or save your plan",
+      welsh   = "Argraffwch neu gadw eich cynllun"
     )
 
     val `If you need to change your payment plan`: Message = Message(
@@ -1043,15 +1082,18 @@ object Messages {
   object GiveFeedback {
 
     val `Do you want to give feedback?`: Message = Message(
-      english = "Do you want to give feedback on this service?"
+      english = "Do you want to give feedback on this service?",
+      welsh   = "A ydych am roi adborth am y gwasanaeth hwn?"
     )
 
     val `If you select no`: Message = Message(
-      english = "If you select no, you will be directed to GOV.UK."
+      english = "If you select no, you will be directed to GOV.UK.",
+      welsh   = "Os ydych yn dewis ‘Na’, byddwch yn cael eich cyfeirio at GOV.UK."
     )
 
     val `Select yes if you want to give feedback`: Message = Message(
-      english = "Select yes if you want to give feedback on this service"
+      english = "Select yes if you want to give feedback on this service",
+      welsh   = "Dewiswch ‘Iawn’ os ydych am roi adborth am y gwasanaeth hwn"
     )
 
   }
@@ -1059,11 +1101,13 @@ object Messages {
   object MissingInformation {
 
     val `Some information is missing`: Message = Message(
-      english = "Some information is missing"
+      english = "Some information is missing",
+      welsh   = "Mae rhywfaint o wybodaeth ar goll"
     )
 
     val `You must provide more information to set up a payment plan.`: Message = Message(
-      english = "You must provide more information to set up a payment plan."
+      english = "You must provide more information to set up a payment plan.",
+      welsh   = "Mae’n rhaid i chi roi rhagor o wybodaeth er mwyn sefydlu cynllun talu."
     )
 
   }

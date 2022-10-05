@@ -38,7 +38,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
 
     "trigger call to ttp enact arrangement api, send an audit event and also update backend" in {
       stubCommonActions()
-      EssttpBackend.TermsAndConditions.findJourney(testCrypto)()
+      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto)()
       EssttpBackend.SubmitArrangement.stubUpdateSubmitArrangement(TdAll.journeyId)
       Ttp.EnactArrangement.stubEnactArrangement()
 
@@ -97,7 +97,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
 
     "should not update backend if call to ttp enact arrangement api fails (anything other than a 202 response)" in {
       stubCommonActions()
-      EssttpBackend.TermsAndConditions.findJourney(testCrypto)()
+      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto)()
       Ttp.EnactArrangement.stubEnactArrangementFail()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")

@@ -243,24 +243,7 @@ class BankDetailsController @Inject() (
       case j: Journey.AfterEnteredDirectDebitDetails =>
         journeyService
           .updateHasConfirmedDirectDebitDetails(j.journeyId)
-          .map(_ => Redirect(routes.BankDetailsController.termsAndConditions))
-    }
-  }
-
-  val termsAndConditions: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
-    request.journey match {
-      case j: Journey.BeforeConfirmedDirectDebitDetails => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
-      case j: Journey.AfterConfirmedDirectDebitDetails  => finalStateCheck(j, Ok(views.termsAndConditions()))
-    }
-  }
-
-  val termsAndConditionsSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
-    request.journey match {
-      case j: Journey.BeforeConfirmedDirectDebitDetails => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF(j)
-      case _: Journey.AfterConfirmedDirectDebitDetails =>
-        journeyService
-          .updateAgreedTermsAndConditions(request.journeyId)
-          .map(_ => Redirect(routes.SubmitArrangementController.submitArrangement))
+          .map(_ => Redirect(routes.TermsAndConditionsController.termsAndConditions))
     }
   }
 

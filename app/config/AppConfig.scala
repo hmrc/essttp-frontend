@@ -31,7 +31,8 @@ import scala.concurrent.duration.FiniteDuration
 class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
 
   val appName: String = config.get[String]("appName")
-  val welshLanguageSupportEnabled: Boolean = config.getOptional[Boolean]("features.welsh-language-support").getOrElse(false)
+  val welshLanguageSupportEnabled: Boolean = config.get[Boolean]("features.welsh-language-support")
+  val emailJourneyEnabled: Boolean = config.get[Boolean]("features.email-journey")
   val authTimeoutSeconds: Int = config.get[FiniteDuration]("timeout-dialog.timeout").toSeconds.toInt
   val authTimeoutCountdownSeconds: Int = config.get[FiniteDuration]("timeout-dialog.countdown").toSeconds.toInt
   val serviceIdentifierPAYE: String = "eSSTTP-PAYE"
