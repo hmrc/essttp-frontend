@@ -27,7 +27,7 @@ import essttp.rootmodel.ttp.EligibilityCheckResult
 import essttp.rootmodel.ttp.affordability.InstalmentAmounts
 import essttp.rootmodel.ttp.affordablequotes.{AffordableQuotesResponse, PaymentPlan}
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
-import essttp.rootmodel.{CanPayUpfront, DayOfMonth, MonthlyPaymentAmount, TaxId, UpfrontPaymentAmount}
+import essttp.rootmodel.{CanPayUpfront, DayOfMonth, IsEmailAddressRequired, MonthlyPaymentAmount, TaxId, UpfrontPaymentAmount}
 import play.api.libs.json.Json
 import testsupport.stubs.WireMockHelpers._
 import testsupport.testdata.{JourneyJsonTemplates, TdAll, TdJsonBodies}
@@ -412,9 +412,10 @@ object EssttpBackend {
     def stubUpdateAgreedTermsAndConditions(journeyId: JourneyId): StubMapping =
       WireMockHelpers.stubForPostNoResponseBody(agreedTermsAndConditionsUrl(journeyId))
 
-    def verifyUpdateAgreedTermsAndConditionsRequest(journeyId: JourneyId): Unit =
-      verify(
-        postRequestedFor(urlPathEqualTo(agreedTermsAndConditionsUrl(journeyId)))
+    def verifyUpdateAgreedTermsAndConditionsRequest(journeyId: JourneyId, isEmailAddressRequired: IsEmailAddressRequired): Unit =
+      WireMockHelpers.verifyWithBodyParse(
+        agreedTermsAndConditionsUrl(journeyId),
+        IsEmailAddressRequired(isEmailAddressRequired)
       )
 
     def verifyNoneUpdateAgreedTermsAndConditionsRequest(journeyId: JourneyId): Unit =
@@ -423,7 +424,10 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(agreedTermsAndConditionsUrl(journeyId)))
       )
 
-    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Agreed Terms and Conditions`(encrypter)): StubMapping =
+    def findJourney(
+        isEmailAddressRequired: Boolean,
+        encrypter:              Encrypter
+    )(jsonBody: String = JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddressRequired, encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
   }
 
@@ -434,7 +438,7 @@ object EssttpBackend {
       WireMockHelpers.stubForPostNoResponseBody(submitArrangementUrl(journeyId))
 
     def verifyUpdateSubmitArrangementRequest(journeyId: JourneyId, expectedArrangementResponse: ArrangementResponse): Unit =
-      WireMockHelpers.verifyWithBodyParse(submitArrangementUrl(journeyId), expectedArrangementResponse)(ArrangementResponse.format)
+      WireMockHelpers.verifyWithBodyParse(submitArrangementUrl(journeyId), expectedArrangementResponse)
 
     def verifyNoneUpdateSubmitArrangementRequest(journeyId: JourneyId): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(submitArrangementUrl(journeyId))))

@@ -62,8 +62,9 @@ GET    /lockout                                             controllers.BankDeta
 
 GET    /check-your-direct-debit-details                     controllers.BankDetailsController.checkBankDetails
 POST   /check-your-direct-debit-details                     controllers.BankDetailsController.checkBankDetailsSubmit
-GET    /terms-and-conditions                                controllers.BankDetailsController.termsAndConditions
-POST   /terms-and-conditions                                controllers.BankDetailsController.termsAndConditionsSubmit
+
+GET    /terms-and-conditions                                controllers.TermsAndConditionsController.termsAndConditions
+POST   /terms-and-conditions                                controllers.TermsAndConditionsController.termsAndConditionsSubmit
 
 GET    /submit-arrangement                                  controllers.SubmitArrangementController.submitArrangement
 
@@ -78,4 +79,6 @@ GET    /exit-survey/paye                                    controllers.SignOutC
 
 GET    /information-missing                                 controllers.MissingInfoController.missingInfo
 GET    /determine-next                                      controllers.MissingInfoController.determineNextPage
+
+GET    /email-dummy                                         controllers.EmailController.dummy
 
