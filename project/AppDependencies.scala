@@ -8,7 +8,7 @@ object AppDependencies {
     "uk.gov.hmrc"       %% "play-conditional-form-mapping" % "1.11.0-play-28",
     "com.beachape"      %% "enumeratum-play"               % "1.7.0",
     "org.typelevel"     %% "cats-core"                     % "2.8.0",
-    "uk.gov.hmrc"       %% "essttp-backend-cor-journey"    % "1.61.0"
+    "uk.gov.hmrc"       %% "essttp-backend-cor-journey"    % "1.62.0"
   )
 
   val test: Seq[ModuleID] = Seq(
