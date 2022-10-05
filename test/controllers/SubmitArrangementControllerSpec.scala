@@ -60,22 +60,22 @@ class SubmitArrangementControllerSpec extends ItSpec {
              |		"accountNumber": "12345678"
              |	},
              |	"schedule": {
-             |		"initialPaymentAmount": 12312,
+             |		"initialPaymentAmount": 123.12,
              |		"collectionDate": 28,
              |		"collectionLengthCalendarMonths": 2,
              |		"collections": [{
              |			"collectionNumber": 2,
-             |			"amount": 55570,
+             |			"amount": 555.70,
              |			"paymentDate": "2022-09-28"
              |		}, {
              |			"collectionNumber": 1,
-             |			"amount": 55570,
+             |			"amount": 555.70,
              |			"paymentDate": "2022-08-28"
              |		}],
              |		"totalNoPayments": 3,
-             |		"totalInterestCharged": 6,
-             |		"totalPayable": 111147,
-             |		"totalPaymentWithoutInterest": 111141
+             |		"totalInterestCharged": 0.06,
+             |		"totalPayable": 1111.47,
+             |		"totalPaymentWithoutInterest": 1111.41
              |	},
              |	"status": "successfully sent to TTP",
              |	"failedSubmissionReason": 202,

@@ -202,21 +202,21 @@ class PaymentScheduleControllerSpec extends ItSpec {
                |            "collectionLengthCalendarMonths": 2,
                |            "collections": [
                |                {
-               |                    "amount": 55570,
+               |                    "amount": 555.70,
                |                    "collectionNumber": 2,
                |                    "paymentDate": "2022-09-28"
                |                },
                |                {
-               |                    "amount": 55570,
+               |                    "amount": 555.70,
                |                    "collectionNumber": 1,
                |                    "paymentDate": "2022-08-28"
                |                }
                |            ],
-               |            "initialPaymentAmount": 12312,
-               |            "totalInterestCharged": 6,
+               |            "initialPaymentAmount": 123.12,
+               |            "totalInterestCharged": 0.06,
                |            "totalNoPayments": 3,
-               |            "totalPayable": 111147,
-               |            "totalPaymentWithoutInterest": 111141
+               |            "totalPayable": 1111.47,
+               |            "totalPaymentWithoutInterest": 1111.41
                |        },
                |        "taxDetail": {
                |            "accountsOfficeRef": "123PA44545546",

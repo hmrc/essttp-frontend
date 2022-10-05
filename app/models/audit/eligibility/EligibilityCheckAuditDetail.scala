@@ -16,9 +16,8 @@
 
 package models.audit.eligibility
 
-import essttp.rootmodel.ttp.ChargeTypeAssessment
 import models.audit.{AuditDetail, TaxDetail}
-import play.api.libs.json.{Json, OWrites}
+import play.api.libs.json.{JsValue, Json, OWrites}
 
 final case class EligibilityCheckAuditDetail(
     eligibilityResult:    EligibilityResult,
@@ -29,7 +28,7 @@ final case class EligibilityCheckAuditDetail(
     taxType:              String,
     taxDetail:            TaxDetail,
     authProviderId:       String,
-    chargeTypeAssessment: List[ChargeTypeAssessment],
+    chargeTypeAssessment: JsValue,
     correlationId:        String
 ) extends AuditDetail {
   val auditType: String = "EligibilityCheck"

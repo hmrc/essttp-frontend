@@ -27,6 +27,7 @@ import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend, Ttp}
 import testsupport.testdata.{PageUrls, TdAll, TtpJsonResponses}
 import uk.gov.hmrc.http.SessionKeys
+import util.JsonTransformers
 
 class DetermineEligibilityControllerSpec extends ItSpec {
   private val controller: DetermineEligibilityController = app.injector.instanceOf[DetermineEligibilityController]
@@ -68,6 +69,9 @@ class DetermineEligibilityControllerSpec extends ItSpec {
               expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(TdAll.notEligibleEligibilityPass, eligibilityRules)
             )(testOperationCryptoFormat)
 
+            val eligibilityCheckResponseJsonInPounds: JsObject =
+              Json.parse(eligibilityCheckResponseJson).transform(JsonTransformers.updateChargeTypeAssessment).get
+
             AuditConnectorStub.verifyEventAudited(
               "EligibilityCheck",
               Json.parse(
@@ -85,7 +89,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
                    |  },
                    |  "authProviderId": "authId-999",
                    |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-                   |  "chargeTypeAssessment" : ${(Json.parse(eligibilityCheckResponseJson).as[JsObject] \ "chargeTypeAssessment").get.toString}
+                   |  "chargeTypeAssessment" : ${(eligibilityCheckResponseJsonInPounds \ "chargeTypeAssessment").get.toString()}
                    |}
                    |""".
                   stripMargin
@@ -115,6 +119,9 @@ class DetermineEligibilityControllerSpec extends ItSpec {
         expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(TdAll.eligibleEligibilityPass, TdAll.eligibleEligibilityRules)
       )(testOperationCryptoFormat)
 
+      val eligibilityCheckResponseJsonInPounds: JsObject =
+        Json.parse(eligibilityCheckResponseJson).transform(JsonTransformers.updateChargeTypeAssessment).get
+
       AuditConnectorStub.verifyEventAudited(
         "EligibilityCheck",
         Json.parse(
@@ -130,7 +137,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
              |  },
              |  "authProviderId": "authId-999",
              |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-             |  "chargeTypeAssessment" : ${(Json.parse(eligibilityCheckResponseJson).as[JsObject] \ "chargeTypeAssessment").get.toString}
+             |  "chargeTypeAssessment" : ${(eligibilityCheckResponseJsonInPounds \ "chargeTypeAssessment").get.toString()}
              |}
              |""".
             stripMargin
