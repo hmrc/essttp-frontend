@@ -22,14 +22,14 @@ import models.audit.planbeforesubmission.AuditCollections
 import play.api.libs.json.{Json, OWrites}
 
 final case class Schedule(
-    initialPaymentAmount:           AmountInPence,
+    initialPaymentAmount:           BigDecimal,
     collectionDate:                 DayOfMonth,
     collectionLengthCalendarMonths: Int,
     collections:                    List[AuditCollections],
     totalNoPayments:                Int,
-    totalInterestCharged:           AmountInPence,
-    totalPayable:                   AmountInPence,
-    totalPaymentWithoutInterest:    AmountInPence
+    totalInterestCharged:           BigDecimal,
+    totalPayable:                   BigDecimal,
+    totalPaymentWithoutInterest:    BigDecimal
 )
 
 object Schedule {
@@ -42,19 +42,19 @@ object Schedule {
     val auditCollections: List[AuditCollections] = selectedPaymentPlan.instalments.map { instalment =>
       AuditCollections(
         collectionNumber = instalment.instalmentNumber.value,
-        amount           = instalment.amountDue.value,
+        amount           = instalment.amountDue.value.inPounds,
         paymentDate      = instalment.dueDate.value
       )
     }
     Schedule(
-      initialPaymentAmount           = selectedPaymentPlan.collections.initialCollection.fold(AmountInPence.zero)(_.amountDue.value),
+      initialPaymentAmount           = selectedPaymentPlan.collections.initialCollection.fold(AmountInPence.zero)(_.amountDue.value).inPounds,
       collectionDate                 = dayOfMonth,
       collectionLengthCalendarMonths = selectedPaymentPlan.numberOfInstalments.value,
       collections                    = auditCollections,
       totalNoPayments                = totalNumberOfPaymentsIncludingUpfrontPayment,
-      totalInterestCharged           = selectedPaymentPlan.planInterest.value,
-      totalPayable                   = selectedPaymentPlan.totalDebtIncInt.value,
-      totalPaymentWithoutInterest    = selectedPaymentPlan.totalDebt.value
+      totalInterestCharged           = selectedPaymentPlan.planInterest.value.inPounds,
+      totalPayable                   = selectedPaymentPlan.totalDebtIncInt.value.inPounds,
+      totalPaymentWithoutInterest    = selectedPaymentPlan.totalDebt.value.inPounds
     )
   }
 }

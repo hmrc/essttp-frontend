@@ -16,12 +16,11 @@
 
 package models.audit.planbeforesubmission
 
-import essttp.rootmodel.AmountInPence
 import play.api.libs.json.{Json, OWrites}
 
 import java.time.LocalDate
 
-final case class AuditCollections(collectionNumber: Int, amount: AmountInPence, paymentDate: LocalDate)
+final case class AuditCollections(collectionNumber: Int, amount: BigDecimal, paymentDate: LocalDate)
 
 object AuditCollections {
   implicit val writes: OWrites[AuditCollections] = Json.writes

@@ -21,8 +21,9 @@ import essttp.rootmodel.ttp.{EligibilityRules, EligibilityPass}
 object TtpJsonResponses {
 
   def ttpEligibilityCallJson(
-      eligibilityPass:  EligibilityPass  = TdAll.eligibleEligibilityPass,
-      eligibilityRules: EligibilityRules = TdAll.eligibleEligibilityRules
+      eligibilityPass:      EligibilityPass  = TdAll.eligibleEligibilityPass,
+      eligibilityRules:     EligibilityRules = TdAll.eligibleEligibilityRules,
+      poundsInsteadOfPence: Boolean          = false
   ): String = {
     s"""
        |{
@@ -64,17 +65,17 @@ object TtpJsonResponses {
        |  "chargeTypeAssessment" : [ {
        |    "taxPeriodFrom" : "2020-08-13",
        |    "taxPeriodTo" : "2020-08-14",
-       |    "debtTotalAmount" : 300000,
+       |    "debtTotalAmount" : ${if (poundsInsteadOfPence) "3000.00" else "300000"},
        |    "charges" : [ {
        |      "chargeType": "InYearRTICharge-Tax",
        |      "mainType": "InYearRTICharge(FPS)",
        |      "chargeReference" : "A00000000001",
        |      "mainTrans" : "mainTrans",
        |      "subTrans" : "subTrans",
-       |      "outstandingAmount" : 100000,
+       |      "outstandingAmount" : ${if (poundsInsteadOfPence) "1000.00" else "100000"},
        |      "interestStartDate" : "2017-03-07",
        |      "dueDate" : "2017-03-07",
-       |      "accruedInterest" : 1597,
+       |      "accruedInterest" : ${if (poundsInsteadOfPence) "15.97" else "1597"},
        |      "ineligibleChargeType": false,
        |      "chargeOverMaxDebtAge": false,
        |      "locks": [ {

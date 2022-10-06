@@ -26,14 +26,14 @@ import essttp.journey.model.Origin
 import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount}
 import essttp.rootmodel.ttp.EligibilityCheckResult
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
-import models.audit.bars.{BarsAuditAccount, BarsAuditRequest, BarsAuditResponse, BarsCheckAuditDetail, BarsVerifyDetails}
+import models.audit.bars._
 import models.audit.eligibility.{EligibilityCheckAuditDetail, EligibilityResult, EnrollmentReasons}
 import models.audit.paymentplansetup.PaymentPlanSetUpAuditDetail
 import models.audit.planbeforesubmission.PaymentPlanBeforeSubmissionAuditDetail
 import models.audit.{AuditDetail, Schedule, TaxDetail}
 import models.bars.response.{BarsError, VerifyResponse}
 import play.api.http.Status
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
 import uk.gov.hmrc.play.audit.AuditExtensions.auditHeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -126,6 +126,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       val values = eligibilityCheckResult.eligibilityRules.productIterator.to
       (reasons zip values).toList.collect{ case (reason, true) => reason }
     }
+
     EligibilityCheckAuditDetail(
       eligibilityResult    = eligibilityResult,
       enrollmentReasons    = enrollmentReasons,
