@@ -27,7 +27,6 @@ import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend, Ttp}
 import testsupport.testdata.{PageUrls, TdAll, TtpJsonResponses}
 import uk.gov.hmrc.http.SessionKeys
-import util.JsonTransformers
 
 class DetermineEligibilityControllerSpec extends ItSpec {
   private val controller: DetermineEligibilityController = app.injector.instanceOf[DetermineEligibilityController]
@@ -48,8 +47,10 @@ class DetermineEligibilityControllerSpec extends ItSpec {
       (sf: String, eligibilityRules: EligibilityRules, auditIneligibilityReason: String, expectedRedirect: String) =>
         {
           s"Ineligible: [$sf] should redirect to $expectedRedirect" in {
-            val eligibilityCheckResponseJson =
-              TtpJsonResponses.ttpEligibilityCallJson(TdAll.notEligibleEligibilityPass, eligibilityRules)
+            val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(TdAll.notEligibleEligibilityPass, eligibilityRules)
+            // for audit event
+            val eligibilityCheckResponseJsonAsPounds =
+              TtpJsonResponses.ttpEligibilityCallJson(TdAll.notEligibleEligibilityPass, eligibilityRules, poundsInsteadOfPence = true)
 
             stubCommonActions()
             EssttpBackend.DetermineTaxId.findJourney()
@@ -69,9 +70,6 @@ class DetermineEligibilityControllerSpec extends ItSpec {
               expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(TdAll.notEligibleEligibilityPass, eligibilityRules)
             )(testOperationCryptoFormat)
 
-            val eligibilityCheckResponseJsonInPounds: JsObject =
-              Json.parse(eligibilityCheckResponseJson).transform(JsonTransformers.updateChargeTypeAssessment).get
-
             AuditConnectorStub.verifyEventAudited(
               "EligibilityCheck",
               Json.parse(
@@ -89,7 +87,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
                    |  },
                    |  "authProviderId": "authId-999",
                    |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-                   |  "chargeTypeAssessment" : ${(eligibilityCheckResponseJsonInPounds \ "chargeTypeAssessment").get.toString()}
+                   |  "chargeTypeAssessment" :${(Json.parse(eligibilityCheckResponseJsonAsPounds).as[JsObject] \ "chargeTypeAssessment").get.toString}
                    |}
                    |""".
                   stripMargin
@@ -101,6 +99,8 @@ class DetermineEligibilityControllerSpec extends ItSpec {
 
     "Eligible: should redirect to your bill and send an audit event" in {
       val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson()
+      // for audit event
+      val eligibilityCheckResponseJsonAsPounds = TtpJsonResponses.ttpEligibilityCallJson(poundsInsteadOfPence = true)
 
       stubCommonActions()
       EssttpBackend.DetermineTaxId.findJourney()
@@ -119,9 +119,6 @@ class DetermineEligibilityControllerSpec extends ItSpec {
         expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(TdAll.eligibleEligibilityPass, TdAll.eligibleEligibilityRules)
       )(testOperationCryptoFormat)
 
-      val eligibilityCheckResponseJsonInPounds: JsObject =
-        Json.parse(eligibilityCheckResponseJson).transform(JsonTransformers.updateChargeTypeAssessment).get
-
       AuditConnectorStub.verifyEventAudited(
         "EligibilityCheck",
         Json.parse(
@@ -137,7 +134,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
              |  },
              |  "authProviderId": "authId-999",
              |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-             |  "chargeTypeAssessment" : ${(eligibilityCheckResponseJsonInPounds \ "chargeTypeAssessment").get.toString()}
+             |  "chargeTypeAssessment" : ${(Json.parse(eligibilityCheckResponseJsonAsPounds).as[JsObject] \ "chargeTypeAssessment").get.toString}
              |}
              |""".
             stripMargin

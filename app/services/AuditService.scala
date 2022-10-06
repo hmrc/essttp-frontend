@@ -24,10 +24,9 @@ import essttp.journey.model.Journey.Stages._
 import essttp.journey.model.Journey.{AfterEnteredDetailsAboutBankAccount, Stages}
 import essttp.journey.model.Origin
 import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount}
-import essttp.rootmodel.ttp.arrangement.ArrangementResponse
 import essttp.rootmodel.ttp.EligibilityCheckResult
+import essttp.rootmodel.ttp.arrangement.ArrangementResponse
 import models.audit.bars._
-import util.JsonTransformers
 import models.audit.eligibility.{EligibilityCheckAuditDetail, EligibilityResult, EnrollmentReasons}
 import models.audit.paymentplansetup.PaymentPlanSetUpAuditDetail
 import models.audit.planbeforesubmission.PaymentPlanBeforeSubmissionAuditDetail
@@ -107,7 +106,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       taxType              = journey.taxRegime.toString,
       taxDetail            = TaxDetail(None, None, None, None, None, None),
       authProviderId       = r.ggCredId.value,
-      chargeTypeAssessment = JsArray.empty,
+      chargeTypeAssessment = List.empty,
       correlationId        = journey.correlationId.value.toString
     )
   }
@@ -128,12 +127,6 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       (reasons zip values).toList.collect{ case (reason, true) => reason }
     }
 
-    val chargeTypeAssessmentToPounds: JsValue = (
-      Json.toJson(eligibilityCheckResult)
-      .transform(JsonTransformers.updateChargeTypeAssessment)
-      .get \ "chargeTypeAssessment"
-    ).getOrElse(JsArray.empty)
-
     EligibilityCheckAuditDetail(
       eligibilityResult    = eligibilityResult,
       enrollmentReasons    = enrollmentReasons,
@@ -143,7 +136,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       taxType              = journey.taxRegime.toString,
       taxDetail            = toTaxDetail(eligibilityCheckResult),
       authProviderId       = r.ggCredId.value,
-      chargeTypeAssessment = chargeTypeAssessmentToPounds,
+      chargeTypeAssessment = eligibilityCheckResult.chargeTypeAssessment,
       correlationId        = journey.correlationId.value.toString
     )
   }
