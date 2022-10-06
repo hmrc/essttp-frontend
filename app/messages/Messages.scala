@@ -428,6 +428,11 @@ object Messages {
       }
     }
 
+    def `Enter an amount between`(min: AmountInPence, max: AmountInPence): Message = Message(
+      english = s"Enter an amount between ${min.gdsFormatInPounds} and ${max.gdsFormatInPounds}",
+      welsh   = s"Nodwch swm sydd rhwng ${min.gdsFormatInPounds} a ${max.gdsFormatInPounds}"
+    )
+
     val `Your monthly payments will be lower if...`: Message = Message(
       english = "Your monthly payments will be lower if you make an upfront payment. This payment will be taken from your bank account within 10 working days.",
       welsh   = "Bydd eich taliadau misol yn is os gallwch wneud taliad ymlaen llaw. Caiff y taliad hwn ei gymryd o’ch cyfrif banc cyn pen 10 diwrnod gwaith."

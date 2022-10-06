@@ -49,6 +49,11 @@
        Messages.UpfrontPaymentAmount.`How much can you pay upfront?`.show
 }
 
+@hintText = {
+  <p class="govuk-body">@{Messages.UpfrontPaymentAmount.`Enter an amount between`(minimumPayment, maximumPayment).show}</p>
+  <p class="govuk-body">@{Messages.UpfrontPaymentAmount.`Your monthly payments will be lower if...`.show}</p>
+}
+
 @detailsContent = {
     <p class="govuk-body">@{Messages.UpfrontPaymentAmount.`We only charge interest on overdue amounts.`.show}</p>
     <p class="govuk-body">@{Messages.UpfrontPaymentAmount.`We charge the Bank of England base rate plus....`.show}</p>
@@ -82,7 +87,7 @@
             errorMessage = form.error(key).map(e => ErrorMessage(
                 content = Text(Messages.UpfrontPaymentAmount.getError(e.message, maximumPayment, minimumPayment).show)
             )),
-          hint= Some(Hint(content = Text(Messages.UpfrontPaymentAmount.`Your monthly payments will be lower if...`.show) )),
+          hint = Some(Hint(content = HtmlContent(hintText))),
             value = form.data.get(key)
         ))
 
