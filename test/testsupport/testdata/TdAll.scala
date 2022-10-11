@@ -159,15 +159,23 @@ object TdAll {
     latestPaymentPlanStartDate   = LatestPaymentPlanStartDate(LocalDate.parse("2022-08-13")),
     initialPaymentDate           = Some(InitialPaymentDate(LocalDate.parse("2022-06-24"))),
     initialPaymentAmount         = Some(AmountInPence(200)),
-    accruedDebtInterest          = AccruedDebtInterest(AmountInPence(1597)),
+    accruedDebtInterest          = AccruedDebtInterest(AmountInPence(3194)),
     debtItemCharges              = List(
       DebtItemCharge(
-        OutstandingDebtAmount(AmountInPence(100000)),
+        OutstandingDebtAmount(AmountInPence(50000)),
         mainTrans               = MainTrans("mainTrans"),
         subTrans                = SubTrans("subTrans"),
         debtItemChargeId        = ChargeReference("A00000000001"),
         interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
         debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-03-07"))
+      ),
+      DebtItemCharge(
+        OutstandingDebtAmount(AmountInPence(100000)),
+        mainTrans               = MainTrans("mainTrans"),
+        subTrans                = SubTrans("subTrans"),
+        debtItemChargeId        = ChargeReference("A00000000002"),
+        interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-02-07"))),
+        debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-02-07"))
       )
     ),
     customerPostcodes            = List(CustomerPostcode(customerPostcode, PostcodeDate("2022-01-31")))
@@ -180,15 +188,23 @@ object TdAll {
     paymentPlanMaxLength        = PaymentPlanMaxLength(6),
     initialPaymentDate          = Some(InitialPaymentDate(LocalDate.parse("2022-07-03"))),
     initialPaymentAmount        = Some(UpfrontPaymentAmount(AmountInPence(200))),
-    accruedDebtInterest         = AccruedDebtInterest(AmountInPence(1597)),
+    accruedDebtInterest         = AccruedDebtInterest(AmountInPence(3194)),
     debtItemCharges             = List(
       DebtItemCharge(
-        OutstandingDebtAmount(AmountInPence(100000)),
+        OutstandingDebtAmount(AmountInPence(50000)),
         mainTrans               = MainTrans("mainTrans"),
         subTrans                = SubTrans("subTrans"),
         debtItemChargeId        = ChargeReference("A00000000001"),
         interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
         debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-03-07"))
+      ),
+      DebtItemCharge(
+        OutstandingDebtAmount(AmountInPence(100000)),
+        mainTrans               = MainTrans("mainTrans"),
+        subTrans                = SubTrans("subTrans"),
+        debtItemChargeId        = ChargeReference("A00000000002"),
+        interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-02-07"))),
+        debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-02-07"))
       )
     ),
     customerPostcodes           = List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate("2022-01-31"))),

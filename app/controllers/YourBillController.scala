@@ -94,7 +94,7 @@ object YourBillController {
     OverduePayment(invoicePeriod(ass), ass.debtTotalAmount.value)
 
   private def overDuePayments(eligibilityResult: EligibilityCheckResult): OverDuePayments = {
-    val qualifyingDebt: AmountInPence = AmountInPence(eligibilityResult.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum)
+    val qualifyingDebt: AmountInPence = eligibilityResult.chargeTypeAssessment.map(_.debtTotalAmount.value).fold(AmountInPence.zero)(_ + _)
     val payments = eligibilityResult.chargeTypeAssessment.map(overDuePaymentOf)
     OverDuePayments(qualifyingDebt, payments)
   }
