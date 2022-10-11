@@ -128,29 +128,54 @@ object TdJsonBodies {
       |    "ineligibleChargeTypes" : ${eligibilityRules.ineligibleChargeTypes},
       |    "missingFiledReturns" : ${eligibilityRules.missingFiledReturns}
       |  },
-      |  "chargeTypeAssessment" : [ {
-      |    "taxPeriodFrom" : "2020-08-13",
-      |    "taxPeriodTo" : "2020-08-14",
-      |    "debtTotalAmount" : 300000,
-      |    "charges" : [ {
-      |      "chargeType": "InYearRTICharge-Tax",
-      |      "mainType": "InYearRTICharge(FPS)",
-      |      "chargeReference" : "A00000000001",
-      |      "mainTrans" : "mainTrans",
-      |      "subTrans" : "subTrans",
-      |      "outstandingAmount" : 100000,
-      |      "interestStartDate" : "2017-03-07",
-      |      "dueDate" : "2017-03-07",
-      |      "accruedInterest" : 1597,
-      |      "ineligibleChargeType": false,
-      |      "chargeOverMaxDebtAge": false,
-      |      "locks": [ {
-      |          "lockType": "Payment",
-      |          "lockReason": "Risk/Fraud",
-      |          "disallowedChargeLockType": false
-      |       } ]
-      |    } ]
-      |  } ]
+      |  "chargeTypeAssessment" : [
+      |    {
+      |      "taxPeriodFrom" : "2020-08-13",
+      |      "taxPeriodTo" : "2020-08-14",
+      |      "debtTotalAmount" : 100000,
+      |      "charges" : [ {
+      |        "chargeType": "InYearRTICharge-Tax",
+      |        "mainType": "InYearRTICharge(FPS)",
+      |        "chargeReference" : "A00000000001",
+      |        "mainTrans" : "mainTrans",
+      |        "subTrans" : "subTrans",
+      |        "outstandingAmount" : 50000,
+      |        "interestStartDate" : "2017-03-07",
+      |        "dueDate" : "2017-03-07",
+      |        "accruedInterest" : 1597,
+      |        "ineligibleChargeType": false,
+      |        "chargeOverMaxDebtAge": false,
+      |        "locks": [ {
+      |            "lockType": "Payment",
+      |            "lockReason": "Risk/Fraud",
+      |            "disallowedChargeLockType": false
+      |         } ]
+      |      } ]
+      |    },
+      |    {
+      |      "taxPeriodFrom" : "2020-07-13",
+      |      "taxPeriodTo" : "2020-07-14",
+      |      "debtTotalAmount" : 200000,
+      |      "charges" : [ {
+      |        "chargeType": "InYearRTICharge-Tax",
+      |        "mainType": "InYearRTICharge(FPS)",
+      |        "chargeReference" : "A00000000002",
+      |        "mainTrans" : "mainTrans",
+      |        "subTrans" : "subTrans",
+      |        "outstandingAmount" : 100000,
+      |        "interestStartDate" : "2017-02-07",
+      |        "dueDate" : "2017-02-07",
+      |        "accruedInterest" : 1597,
+      |        "ineligibleChargeType": false,
+      |        "chargeOverMaxDebtAge": false,
+      |        "locks": [ {
+      |            "lockType": "Payment",
+      |            "lockReason": "Risk/Fraud",
+      |            "disallowedChargeLockType": false
+      |         } ]
+      |      } ]
+      |    }
+      |  ]
       |}
       |""".stripMargin
   }
