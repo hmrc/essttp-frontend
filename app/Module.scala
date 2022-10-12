@@ -16,7 +16,6 @@
 
 import com.google.inject.{AbstractModule, Provides, Singleton}
 import play.api.i18n.{I18nSupport, MessagesApi}
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 
 import java.time.{Clock, ZoneOffset}
 
@@ -29,12 +28,6 @@ class Module extends AbstractModule {
   @Provides
   @Singleton
   def clock(): Clock = Clock.systemDefaultZone.withZone(ZoneOffset.UTC)
-
-  @Provides
-  @Singleton
-  def authorisedFunctions(ac: AuthConnector): AuthorisedFunctions = new AuthorisedFunctions {
-    override def authConnector: AuthConnector = ac
-  }
 
   @Provides
   @Singleton

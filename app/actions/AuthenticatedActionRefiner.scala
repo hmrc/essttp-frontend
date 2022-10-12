@@ -27,25 +27,25 @@ import requests.RequestSupport._
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.~
-import uk.gov.hmrc.auth.core.{AuthProviders, AuthorisationException, AuthorisedFunctions, NoActiveSession}
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthProviders, AuthorisationException, AuthorisedFunctions, NoActiveSession}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthenticatedActionRefiner @Inject() (
-    af:        AuthorisedFunctions,
-    appConfig: AppConfig,
-    cc:        MessagesControllerComponents
+    val authConnector: AuthConnector,
+    appConfig:         AppConfig,
+    cc:                MessagesControllerComponents
 )(
     implicit
     ec: ExecutionContext
-) extends ActionRefiner[Request, AuthenticatedRequest] {
+) extends ActionRefiner[Request, AuthenticatedRequest] with AuthorisedFunctions {
 
   private val logger = Logger(getClass)
 
   override protected def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
     implicit val r: Request[A] = request
 
-    af.authorised(AuthProviders(GovernmentGateway)).retrieve(
+    authorised(AuthProviders(GovernmentGateway)).retrieve(
       Retrievals.allEnrolments and Retrievals.credentials
     ) {
         case enrolments ~ credentials =>
