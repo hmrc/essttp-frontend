@@ -82,7 +82,7 @@
                 )
             ),
             classes = "govuk-radios--inline",
-            errorMessage = form.error(key).map(e => ErrorMessage(content = Text(e.message)))
+            errorMessage = form.error(key).map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(content = Text(e.message)))
         ))
         @govukButton(Button(content = Text(Messages.continue.show), attributes = Map("id" -> "continue")))
     }

@@ -84,7 +84,7 @@
             prefix = Some(PrefixOrSuffix(
                 content = Text("£")
             )),
-            errorMessage = form.error(key).map(e => ErrorMessage(
+            errorMessage = form.error(key).map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
                 content = Text(Messages.UpfrontPaymentAmount.getError(e.message, maximumPayment, minimumPayment).show)
             )),
           hint = Some(Hint(content = HtmlContent(hintText))),

@@ -62,7 +62,7 @@
         None
     } else {
         (form.error(key))
-                .map(e => ErrorMessage(
+                .map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
             content = Text(Messages.BankDetails.errors(s"$key.${e.message}").show)
         ))
     }

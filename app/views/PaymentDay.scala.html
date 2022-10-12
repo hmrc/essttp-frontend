@@ -49,7 +49,7 @@
    content = Text(Messages.PaymentDay.`Enter a day between 1 and 28`.show)
   ),
   spellcheck = Some(false),
-  errorMessage = form.error(differentDayKey).map(e => ErrorMessage(
+  errorMessage = form.error(differentDayKey).map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
    content = Text(Messages.PaymentDay.getError(s"${e.key}.${e.message}").show)
   )),
   value = form(differentDayKey).value
@@ -90,7 +90,7 @@
       conditionalHtml = Some(conditionalHtml)
      )
     ),
-    errorMessage = form.error(key).map(e => ErrorMessage(content = Text(Messages.PaymentDay.getError(s"${e.key}.${e.message}").show)))
+    errorMessage = form.error(key).map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(content = Text(Messages.PaymentDay.getError(s"${e.key}.${e.message}").show)))
    ))
   @govukButton(Button(content = Text(Messages.continue.show)))
  }
