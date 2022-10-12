@@ -43,7 +43,7 @@
     Messages.Instalments.`How many months do you want to pay over?`.show
 }
 @radioOptions = @{
-    options.zipWithIndex.map { case (option: InstalmentOption, index: Int) => RadioItem(
+    options.zipWithIndex.map { case (option: InstalmentOption, _: Int) => RadioItem(
         content = Text(Messages.Instalments.getInstalmentOption(option.numberOfMonths, option.amountToPayEachMonth).show),
         value = Some(option.numberOfMonths.toString),
         hint = Some(Hint(

@@ -17,7 +17,6 @@
 package services
 
 import actionsmodel.EligibleJourneyRequest
-import config.AppConfig
 import essttp.bars.BarsVerifyStatusConnector
 import essttp.bars.model.BarsVerifyStatusResponse
 import essttp.journey.model.Journey.{AfterComputedTaxId, AfterEnteredDetailsAboutBankAccount}
@@ -41,8 +40,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class EssttpBarsService @Inject() (
     barsService:               BarsService,
     barsVerifyStatusConnector: BarsVerifyStatusConnector,
-    auditService:              AuditService,
-    appConfig:                 AppConfig
+    auditService:              AuditService
 )(implicit ec: ExecutionContext) {
 
   def verifyBankDetails(

@@ -79,7 +79,7 @@ trait CustomViewMatchers extends Matchers {
       withTag:           String,
       withMessageKey:    String,
       withMessageParams: String*
-  )(expectHtmlEscaped: Boolean = true)(implicit messagesProvider: MessagesProvider): Matcher[Html] = {
+  )(implicit messagesProvider: MessagesProvider): Matcher[Html] = {
     containElementWithMessage(withTag, withAttrs = Map.empty, withMessageKey, withMessageParams: _*)
   }
 

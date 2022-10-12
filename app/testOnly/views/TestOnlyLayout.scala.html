@@ -31,7 +31,6 @@
         appConfig: AppConfig,
         govukLayout: GovukLayout,
         govukPhaseBanner : GovukPhaseBanner,
-        govukBackLink: GovukBackLink,
         hmrcHead: HmrcHead,
         hmrcStandardHeader: HmrcStandardHeader,
         hmrcStandardFooter: HmrcStandardFooter,
@@ -88,7 +87,7 @@
                 case TaxRegime.Vat => sys.error("VAT not handled yet")
             }
 
-        case other =>
+        case _ =>
             "Set up a payment plan"
     }
 }

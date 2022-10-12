@@ -14,7 +14,6 @@
  * limitations under the License.
  *@
 
-@import config.AppConfig
 @import requests.RequestSupport
 @import messages.Messages
 @import play.api.mvc.Request
@@ -23,10 +22,9 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components.GovukButton
 
 @this(
-layout: templates.Layout,
-govukButton: GovukButton,
-appConfig: AppConfig,
-requestSupport: RequestSupport
+  layout: templates.Layout,
+  govukButton: GovukButton,
+  requestSupport: RequestSupport
 )
 
 @()(implicit request: Request[_])

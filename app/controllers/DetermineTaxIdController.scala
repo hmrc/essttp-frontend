@@ -35,10 +35,9 @@ package controllers
 import _root_.actions.Actions
 import essttp.journey.model.Journey
 import play.api.mvc._
-import services.{EnrolmentService, JourneyService}
+import services.EnrolmentService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.{JourneyLogger, Logging}
-import views.Views
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -47,9 +46,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class DetermineTaxIdController @Inject() (
     as:               Actions,
     mcc:              MessagesControllerComponents,
-    journeyService:   JourneyService,
-    enrolmentService: EnrolmentService,
-    views:            Views
+    enrolmentService: EnrolmentService
 )(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
