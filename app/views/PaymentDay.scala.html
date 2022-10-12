@@ -86,7 +86,7 @@
      RadioItem(
       content = Text(Messages.PaymentDay.`A different day`.show),
       value = Some("other"),
-      checked = form.value.exists(_.differentDay.isDefined),
+      checked = form.value.exists(_.differentDay.isDefined) || form.error(differentDayKey).isDefined ,
       conditionalHtml = Some(conditionalHtml)
      )
     ),

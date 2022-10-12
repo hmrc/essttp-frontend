@@ -21,7 +21,6 @@ import controllers.JourneyFinalStateCheck.finalStateCheck
 import essttp.journey.model.Journey
 import io.scalaland.chimney.dsl.TransformerOps
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import requests.RequestSupport
 import services.{AuditService, JourneyService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.{JourneyLogger, Logging}
@@ -35,7 +34,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class PaymentScheduleController @Inject() (
     as:                  Actions,
     mcc:                 MessagesControllerComponents,
-    requestSupport:      RequestSupport,
     paymentSchedulePage: CheckPaymentSchedule,
     journeyService:      JourneyService,
     auditService:        AuditService

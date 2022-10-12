@@ -16,17 +16,10 @@
 
 @import play.api.mvc.Request
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-@import requests.RequestSupport
 
 @this(
         testOnlyLayout: TestOnlyLayout,
-        govukButton: GovukButton,
-        formWithCSRF: FormWithCSRF,
-        govukRadios: GovukRadios,
-        requestSupport: RequestSupport,
-        govukTabs: GovukTabs,
-        govukCheckboxes: GovukCheckboxes,
-        govukErrorSummary: GovukErrorSummary
+        govukButton: GovukButton
 )
 @()(implicit
         request: Request[_]

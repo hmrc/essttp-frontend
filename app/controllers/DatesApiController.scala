@@ -30,11 +30,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class DatesApiController @Inject() (
-    as:                               Actions,
-    mcc:                              MessagesControllerComponents,
-    datesService:                     DatesService,
-    journeyService:                   JourneyService,
-    determineAffordabilityController: DetermineAffordabilityController
+    as:             Actions,
+    mcc:            MessagesControllerComponents,
+    datesService:   DatesService,
+    journeyService: JourneyService
 )(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {

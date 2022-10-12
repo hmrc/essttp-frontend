@@ -17,7 +17,6 @@
 package controllers
 
 import _root_.actions.Actions
-import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import controllers.MonthlyPaymentAmountController.monthlyPaymentAmountForm
@@ -28,8 +27,7 @@ import models.MoneyUtil._
 import play.api.data.Forms.mapping
 import play.api.data.{Form, Forms}
 import play.api.mvc._
-import requests.RequestSupport
-import services.{JourneyService, TtpService}
+import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.Views
@@ -42,10 +40,7 @@ class MonthlyPaymentAmountController @Inject() (
     as:             Actions,
     mcc:            MessagesControllerComponents,
     views:          Views,
-    journeyService: JourneyService,
-    ttpService:     TtpService,
-    requestSupport: RequestSupport,
-    appConfig:      AppConfig
+    journeyService: JourneyService
 )(
     implicit
     executionContext: ExecutionContext

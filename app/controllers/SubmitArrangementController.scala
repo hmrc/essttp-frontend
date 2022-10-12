@@ -21,7 +21,7 @@ import actionsmodel.AuthenticatedJourneyRequest
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import essttp.journey.model.Journey
 import play.api.mvc._
-import services.{AuditService, JourneyService, TtpService}
+import services.{JourneyService, TtpService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.{JourneyLogger, Logging}
 
@@ -33,8 +33,7 @@ class SubmitArrangementController @Inject() (
     as:             Actions,
     mcc:            MessagesControllerComponents,
     ttpService:     TtpService,
-    journeyService: JourneyService,
-    auditService:   AuditService
+    journeyService: JourneyService
 )(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {

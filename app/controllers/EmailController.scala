@@ -17,7 +17,6 @@
 package controllers
 
 import actions.Actions
-import config.AppConfig
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import essttp.journey.model.Journey
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -27,9 +26,8 @@ import util.Logging
 import javax.inject.Inject
 
 class EmailController @Inject() (
-    as:        Actions,
-    appConfig: AppConfig,
-    mcc:       MessagesControllerComponents
+    as:  Actions,
+    mcc: MessagesControllerComponents
 ) extends FrontendController(mcc) with Logging {
 
   val dummy: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>

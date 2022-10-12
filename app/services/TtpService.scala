@@ -44,7 +44,6 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class TtpService @Inject() (
     ttpConnector: TtpConnector,
-    datesService: DatesService,
     auditService: AuditService
 )(implicit executionContext: ExecutionContext) {
 

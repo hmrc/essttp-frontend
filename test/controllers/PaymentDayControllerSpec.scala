@@ -219,6 +219,11 @@ class PaymentDayControllerSpec extends ItSpec {
 
           assertPaymentDayPageContent(doc)
 
+          val radioInputs = doc.select(".govuk-radios__input").asScala.toList
+          radioInputs.size shouldBe 2
+          radioInputs(0).hasAttr("checked") shouldBe false
+          radioInputs(1).hasAttr("checked") shouldBe true
+
           val errorSummary = doc.select(".govuk-error-summary")
           val errorLink = errorSummary.select("a")
           errorLink.text() shouldBe expectedErrorMessage

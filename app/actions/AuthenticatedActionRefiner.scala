@@ -17,7 +17,6 @@
 package actions
 
 import actionsmodel.AuthenticatedRequest
-import cats.syntax.eq._
 import com.google.inject.Inject
 import config.AppConfig
 import models.GGCredId
@@ -25,36 +24,34 @@ import play.api.Logger
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Request, Result}
 import requests.RequestSupport._
+import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.~
-import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions, NoActiveSession}
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthProviders, AuthorisationException, AuthorisedFunctions, NoActiveSession}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthenticatedActionRefiner @Inject() (
-    af:        AuthorisedFunctions,
-    appConfig: AppConfig,
-    cc:        MessagesControllerComponents
+    val authConnector: AuthConnector,
+    appConfig:         AppConfig,
+    cc:                MessagesControllerComponents
 )(
     implicit
     ec: ExecutionContext
-) extends ActionRefiner[Request, AuthenticatedRequest] {
+) extends ActionRefiner[Request, AuthenticatedRequest] with AuthorisedFunctions {
 
   private val logger = Logger(getClass)
 
   override protected def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
     implicit val r: Request[A] = request
 
-    af.authorised().retrieve(
+    authorised(AuthProviders(GovernmentGateway)).retrieve(
       Retrievals.allEnrolments and Retrievals.credentials
     ) {
         case enrolments ~ credentials =>
-          credentials.filter(_.providerType === "GovernmentGateway") match {
+          credentials match {
             case None =>
-              Future.failed(
-                new RuntimeException(s"Found unsupported provider type '${credentials.map(_.providerType).getOrElse("")}'. " +
-                  "Expected provider type 'GovernmentGateway'")
-              )
+              Future.failed(new RuntimeException(s"Could not find credentials"))
 
             case Some(ggCredId) =>
               Future.successful(
