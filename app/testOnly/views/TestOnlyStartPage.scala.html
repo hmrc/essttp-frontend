@@ -97,7 +97,7 @@
     )),
     idPrefix = Some("signInAs"),
     name = "signInAs",
-    errorMessage = form.error("signInAs").map(e => ErrorMessage(
+    errorMessage = form.error("signInAs").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
         content = Text(e.message)
     )),
     items = Seq(
@@ -141,7 +141,7 @@
     )),
     idPrefix = Some("origin"),
     name = "origin",
-    errorMessage = form.error("origin").map(e => ErrorMessage(
+    errorMessage = form.error("origin").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
         content = Text(e.message)
     )),
     items = Seq(
@@ -177,7 +177,7 @@
     prefix = Some(PrefixOrSuffix(
         content = Text("£")
     )),
-    errorMessage = form.error("debtTotalAmount").map(e => ErrorMessage(
+    errorMessage = form.error("debtTotalAmount").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
         content = Text(e.message)
     )),
     value = form.data.get("debtTotalAmount"),

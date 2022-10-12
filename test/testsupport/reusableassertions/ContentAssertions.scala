@@ -85,6 +85,9 @@ object ContentAssertions extends RichMatchers {
     if (shouldBackLinkBePresent) backLink.hasClass("js-visible") shouldBe true
     else backLink.isEmpty shouldBe true
 
+    if (hasFormError)
+      page.select(".govuk-error-message > .govuk-visually-hidden").text shouldBe "Error:"
+
     val form = page.select("form")
     expectedSubmitUrl match {
       case None         => form.isEmpty shouldBe true

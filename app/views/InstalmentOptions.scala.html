@@ -86,7 +86,7 @@
             idPrefix = Some(key),
             name = key,
             items = radioOptions,
-            errorMessage = form.error(key).map(e => ErrorMessage(
+            errorMessage = form.error(key).map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
                 content = Text(Messages.Instalments.getError(e.message).show)
             ))
         ))
