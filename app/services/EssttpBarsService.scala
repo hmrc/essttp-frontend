@@ -22,13 +22,12 @@ import essttp.bars.model.BarsVerifyStatusResponse
 import essttp.journey.model.Journey.{AfterComputedTaxId, AfterEnteredDetailsAboutBankAccount}
 import essttp.rootmodel.TaxId
 import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount, TypesOfBankAccount}
+import essttp.utils.RequestSupport._
 import models.bars.request.{BarsBankAccount, BarsBusiness, BarsSubject}
 import models.bars.response._
 import models.bars.{BarsTypeOfBankAccount, BarsTypesOfBankAccount}
 import play.api.mvc.RequestHeader
 import services.EssttpBarsService._
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -48,9 +47,6 @@ class EssttpBarsService @Inject() (
       typeOfBankAccount: TypeOfBankAccount,
       journey:           AfterEnteredDetailsAboutBankAccount
   )(implicit request: EligibleJourneyRequest[_]): Future[Either[BarsError, VerifyResponse]] = {
-
-    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request.request)
-
     val taxId = journey match {
       case j: AfterComputedTaxId => j.taxId
       case _                     => throw new RuntimeException("Expected to find a taxId but none found")
