@@ -68,6 +68,7 @@ class MonthlyPaymentAmountController @Inject() (
         case j1: Journey.Epaye.EnteredDirectDebitDetails      => j1
         case j1: Journey.Epaye.ConfirmedDirectDebitDetails    => j1
         case j1: Journey.Epaye.AgreedTermsAndConditions       => j1
+        case j1: Journey.Epaye.SelectedEmailToBeVerified      => j1
         case j1: Journey.Epaye.SubmittedArrangement           => j1
       }
     val totalDebt = AmountInPence(j.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum)
@@ -108,6 +109,7 @@ class MonthlyPaymentAmountController @Inject() (
           case j1: Journey.Stages.EnteredDirectDebitDetails      => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
           case j1: Journey.Stages.ConfirmedDirectDebitDetails    => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
           case j1: Journey.Stages.AgreedTermsAndConditions       => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
+          case j1: Journey.Stages.SelectedEmailToBeVerified      => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
           case j1: Journey.Stages.SubmittedArrangement           => j1.eligibilityCheckResult -> j1.upfrontPaymentAnswers
         }
         val totalDebt: AmountInPence = AmountInPence(eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum)

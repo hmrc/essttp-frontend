@@ -81,6 +81,7 @@ class TtpService @Inject() (
       case j1: Journey.Stages.EnteredDirectDebitDetails      => j1
       case j1: Journey.Stages.ConfirmedDirectDebitDetails    => j1
       case j1: Journey.Stages.AgreedTermsAndConditions       => j1
+      case j1: Journey.Stages.SelectedEmailToBeVerified      => j1
       case j1: Journey.Stages.SubmittedArrangement           => j1
     }
     val upfrontPaymentAmount: Option[UpfrontPaymentAmount] = TtpService.deriveUpfrontPaymentAmount(j.upfrontPaymentAnswers)
@@ -100,6 +101,7 @@ class TtpService @Inject() (
       case j1: Journey.Stages.EnteredDirectDebitDetails      => j1
       case j1: Journey.Stages.ConfirmedDirectDebitDetails    => j1
       case j1: Journey.Stages.AgreedTermsAndConditions       => j1
+      case j1: Journey.Stages.SelectedEmailToBeVerified      => j1
       case j1: Journey.Stages.SubmittedArrangement           => j1
     }
     val initialPaymentAmount: Option[UpfrontPaymentAmount] = TtpService.deriveUpfrontPaymentAmount(j.upfrontPaymentAnswers)

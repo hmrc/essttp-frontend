@@ -48,6 +48,8 @@ object JourneyInfo {
   def directDebitDetails(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo(encrypter)
   def directDebitDetailsNotAccountHolder(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo(encrypter)
   def emailAddressRequired(isEmailAddressRequired: Boolean): JourneyInfoAsJson = TdJsonBodies.isEmailAddressRequiredJourneyInfo(isEmailAddressRequired)
+  def emailToBeVerified(email: String, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.emailAddressSelectedToBeVerified(email, encrypter)
+  def emailVerificationAnswers: JourneyInfoAsJson = TdJsonBodies.emailVerificationAnswers
   val arrangementSubmitted: JourneyInfoAsJson = TdJsonBodies.arrangementResponseJourneyInfo()
   /** * **/
 
@@ -129,12 +131,18 @@ object JourneyInfo {
   def agreedTermsAndConditions(isEmailAddressRequired: Boolean, encrypter: Encrypter): List[JourneyInfoAsJson] =
     emailAddressRequired(isEmailAddressRequired) :: confirmedDirectDebitDetails(encrypter)
 
+  def selectedEmailToBeVerified(email: String, encrypter: Encrypter): List[JourneyInfoAsJson] =
+    emailToBeVerified(email, encrypter) :: agreedTermsAndConditions(isEmailAddressRequired = true, encrypter)
+
+  def emailVerificationAnswers(isEmailAddressRequired: Boolean, encrypter: Encrypter): List[JourneyInfoAsJson] =
+    emailVerificationAnswers :: agreedTermsAndConditions(isEmailAddressRequired, encrypter)
+
   def submittedArrangementWithUpfrontPayment(encrypter: Encrypter): List[JourneyInfoAsJson] =
-    arrangementSubmitted :: agreedTermsAndConditions(isEmailAddressRequired = false, encrypter)
+    arrangementSubmitted :: emailVerificationAnswers(isEmailAddressRequired = false, encrypter)
 
   //used in final page test
   def submittedArrangementNoUpfrontPayment(encrypter: Encrypter): List[JourneyInfoAsJson] =
-    arrangementSubmitted :: emailAddressRequired(isEmailAddressRequired = false) :: directDebitDetails(encrypter) ::
+    arrangementSubmitted :: emailVerificationAnswers :: emailAddressRequired(isEmailAddressRequired = false) :: directDebitDetails(encrypter) ::
       detailsAboutBankAccountBusiness(isAccountHolder = true) :: selectedPlan :: affordableQuotes ::
       upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: monthlyPaymentAmount ::
       dayOfMonth() :: startDates :: cannotPayUpfront :: eligibilityCheckedEligible(encrypter)

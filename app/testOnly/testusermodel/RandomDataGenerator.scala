@@ -19,6 +19,7 @@ package testOnly.testusermodel
 import cats.syntax.eq._
 import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
 import essttp.rootmodel.{Email, EmpRef, Vrn}
+import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 
 import scala.annotation.tailrec
 import scala.util.Random
@@ -79,7 +80,7 @@ object RandomDataGenerator {
   def nextFullNameAndEmail()(implicit r: Random): (String, Email) = {
     val forename = nextForename()
     val surname = nextSurname()
-    val email = Email(s"$forename.$surname@${nextDomain()}")
+    val email = Email(SensitiveString(s"$forename.$surname@${nextDomain()}"))
     val fullName = s"$forename $surname"
     (fullName, email)
   }

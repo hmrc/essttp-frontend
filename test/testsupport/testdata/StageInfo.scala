@@ -41,5 +41,6 @@ object StageInfo {
   val confirmedDirectDebitDetails: StageInfo = StageInfo("ConfirmedDirectDebitDetails", "ConfirmedDetails")
   val agreedTermsAndConditionsEmailAddressRequired: StageInfo = StageInfo("AgreedTermsAndConditions", "EmailAddressRequired")
   val agreedTermsAndConditionsEmailAddressNotRequired: StageInfo = StageInfo("AgreedTermsAndConditions", "EmailAddressNotRequired")
+  val selectedEmailToBeVerified: StageInfo = StageInfo("SelectedEmailToBeVerified", "EmailChosen")
   val submittedArrangement: StageInfo = StageInfo("SubmittedArrangement", "Submitted")
 }

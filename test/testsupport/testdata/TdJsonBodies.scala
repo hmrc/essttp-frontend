@@ -454,9 +454,13 @@ object TdJsonBodies {
        |}""".stripMargin
 
   def isEmailAddressRequiredJourneyInfo(isEmailAddressRequired: Boolean): String =
-    s"""
-       |"isEmailAddressRequired": $isEmailAddressRequired
-       |""".stripMargin
+    s""""isEmailAddressRequired": $isEmailAddressRequired"""
+
+  def emailAddressSelectedToBeVerified(email: String, encrypter: Encrypter): String =
+    s""""emailToBeVerified": "${encryptString(email, encrypter)}""""
+
+  def emailVerificationAnswers: String =
+    s""""emailVerificationAnswers" : { "NoEmailJourney": {}}"""
 
   def arrangementResponseJourneyInfo(): String =
     s"""

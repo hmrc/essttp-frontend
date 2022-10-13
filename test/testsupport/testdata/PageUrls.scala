@@ -46,8 +46,9 @@ object PageUrls {
   val checkDirectDebitDetailsUrl: String = s"$serviceBaseUrl/check-your-direct-debit-details"
   val lockoutUrl: String = s"$serviceBaseUrl/lockout"
   val termsAndConditionsUrl: String = s"$serviceBaseUrl/terms-and-conditions"
+  val whichEmailDoYouWantToUseUrl: String = s"$serviceBaseUrl/which-email-do-you-want-to-use"
+  val confirmYourEmailUrl: String = s"$serviceBaseUrl/confirm-your-email-address"
   val submitArrangementUrl: String = s"$serviceBaseUrl/submit-arrangement"
-  val dummyEmailUrl: String = s"$serviceBaseUrl/email-dummy"
   val confirmationUrl: String = s"$serviceBaseUrl/payment-plan-set-up"
   val printPlanUrl: String = s"$serviceBaseUrl/payment-plan-print-summary"
 }
