@@ -66,6 +66,10 @@ POST   /check-your-direct-debit-details                     controllers.BankDeta
 GET    /terms-and-conditions                                controllers.TermsAndConditionsController.termsAndConditions
 POST   /terms-and-conditions                                controllers.TermsAndConditionsController.termsAndConditionsSubmit
 
+GET    /which-email-do-you-want-to-use                      controllers.EmailController.whichEmailDoYouWantToUse
+POST   /which-email-do-you-want-to-use                      controllers.EmailController.whichEmailDoYouWantToUseSubmit
+GET    /confirm-your-email-address                          controllers.EmailController.confirmYourEmail
+
 GET    /submit-arrangement                                  controllers.SubmitArrangementController.submitArrangement
 
 GET    /payment-plan-set-up                                 controllers.PaymentPlanSetUpController.paymentPlanSetUp
@@ -79,6 +83,3 @@ GET    /exit-survey/paye                                    controllers.SignOutC
 
 GET    /information-missing                                 controllers.MissingInfoController.missingInfo
 GET    /determine-next                                      controllers.MissingInfoController.determineNextPage
-
-GET    /email-dummy                                         controllers.EmailController.dummy
-

@@ -162,6 +162,11 @@ object JourneyJsonTemplates {
     journeyInfo = JourneyInfo.agreedTermsAndConditions(isEmailAddresRequired, encrypter)
   )
 
+  def `Selected email to be verified`(email: String, encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.selectedEmailToBeVerified,
+    journeyInfo = JourneyInfo.selectedEmailToBeVerified(email, encrypter)
+  )
+
   def `Arrangement Submitted - with upfront payment`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.submittedArrangement,
     journeyInfo = JourneyInfo.submittedArrangementWithUpfrontPayment(encrypter)

@@ -20,6 +20,7 @@ import _root_.actions.Actions
 import actionsmodel.AuthenticatedJourneyRequest
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import essttp.journey.model.Journey
+import essttp.utils.Errors
 import play.api.mvc._
 import services.{JourneyService, TtpService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -43,6 +44,8 @@ class SubmitArrangementController @Inject() (
       case j: Journey.BeforeAgreedTermsAndConditions => logErrorAndRouteToDefaultPageF(j)
       case j: Journey.Stages.AgreedTermsAndConditions =>
         if (j.isEmailAddressRequired) logErrorAndRouteToDefaultPageF(j) else submitArrangementAndUpdateJourney(j)
+      case _: Journey.Stages.SelectedEmailToBeVerified =>
+        Errors.throwServerErrorException("This journey isn't finished yet, comeback when we've added the next page...")
       case _: Journey.AfterArrangementSubmitted =>
         JourneyLogger.info("Already submitted arrangement to ttp, showing user the success page")
         Future.successful(Redirect(routes.PaymentPlanSetUpController.paymentPlanSetUp))

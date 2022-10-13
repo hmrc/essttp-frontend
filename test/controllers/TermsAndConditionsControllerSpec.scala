@@ -98,7 +98,7 @@ class TermsAndConditionsControllerSpec extends ItSpec {
 
       val result: Future[Result] = controller.termsAndConditionsSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.dummyEmailUrl)
+      redirectLocation(result) shouldBe Some(PageUrls.whichEmailDoYouWantToUseUrl)
       EssttpBackend.TermsAndConditions.verifyUpdateAgreedTermsAndConditionsRequest(TdAll.journeyId, IsEmailAddressRequired(true))
     }
   }
@@ -109,7 +109,7 @@ class TermsAndConditionsControllerEmailDisabledSpec extends ItSpec {
 
   override lazy val configOverrides: Map[String, Any] = Map("features.email-journey" -> false)
 
-  val controller = app.injector.instanceOf[TermsAndConditionsController]
+  val controller: TermsAndConditionsController = app.injector.instanceOf[TermsAndConditionsController]
 
   "POST /terms-and-conditions should" - {
 

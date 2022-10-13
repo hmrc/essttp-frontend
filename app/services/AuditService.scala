@@ -163,6 +163,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       case j: Stages.EnteredDirectDebitDetails   => j.eligibilityCheckResult
       case j: Stages.ConfirmedDirectDebitDetails => j.eligibilityCheckResult
       case j: Stages.AgreedTermsAndConditions    => j.eligibilityCheckResult
+      case j: Stages.SelectedEmailToBeVerified   => j.eligibilityCheckResult
       case j: Stages.SubmittedArrangement        => j.eligibilityCheckResult
     }
 

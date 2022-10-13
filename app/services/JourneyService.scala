@@ -26,7 +26,7 @@ import essttp.rootmodel.ttp.arrangement.ArrangementResponse
 import essttp.rootmodel.bank.{BankDetails, DetailsAboutBankAccount}
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
 import essttp.rootmodel.dates.startdates.StartDatesResponse
-import essttp.rootmodel.{CanPayUpfront, DayOfMonth, EmpRef, IsEmailAddressRequired, MonthlyPaymentAmount, UpfrontPaymentAmount}
+import essttp.rootmodel.{CanPayUpfront, DayOfMonth, Email, EmpRef, IsEmailAddressRequired, MonthlyPaymentAmount, UpfrontPaymentAmount}
 import play.api.mvc.RequestHeader
 import util.Logging
 
@@ -93,6 +93,9 @@ class JourneyService @Inject() (journeyConnector: JourneyConnector) extends Logg
       isEmailAddressRequired: IsEmailAddressRequired
   )(implicit requestHeader: RequestHeader): Future[Unit] =
     journeyConnector.updateHasAgreedTermsAndConditions(journeyId, isEmailAddressRequired)
+
+  def updateSelectedEmailToBeVerified(journeyId: JourneyId, email: Email)(implicit requestHeader: RequestHeader): Future[Unit] =
+    journeyConnector.updateSelectedEmailToBeVerified(journeyId, email)
 
   def updateArrangementResponse(journeyId: JourneyId, arrangementResponse: ArrangementResponse)(implicit requestHeader: RequestHeader): Future[Unit] =
     journeyConnector.updateArrangement(journeyId, arrangementResponse)

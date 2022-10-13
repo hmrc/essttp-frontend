@@ -27,7 +27,7 @@ import essttp.rootmodel.ttp.EligibilityCheckResult
 import essttp.rootmodel.ttp.affordability.InstalmentAmounts
 import essttp.rootmodel.ttp.affordablequotes.{AffordableQuotesResponse, PaymentPlan}
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
-import essttp.rootmodel.{CanPayUpfront, DayOfMonth, IsEmailAddressRequired, MonthlyPaymentAmount, TaxId, UpfrontPaymentAmount}
+import essttp.rootmodel.{CanPayUpfront, DayOfMonth, Email, IsEmailAddressRequired, MonthlyPaymentAmount, TaxId, UpfrontPaymentAmount}
 import play.api.libs.json.Json
 import testsupport.stubs.WireMockHelpers._
 import testsupport.testdata.{JourneyJsonTemplates, TdAll, TdJsonBodies}
@@ -429,6 +429,26 @@ object EssttpBackend {
         encrypter:              Encrypter
     )(jsonBody: String = JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddressRequired, encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
+  }
+
+  object SelectEmail {
+    def selectEmailUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-chosen-email"
+
+    def stubUpdateSelectedEmail(journeyId: JourneyId): StubMapping =
+      WireMockHelpers.stubForPostNoResponseBody(selectEmailUrl(journeyId))
+
+    def verifyUpdateSelectedEmailRequest(journeyId: JourneyId, email: Email)(implicit cryptoFormat: CryptoFormat): Unit =
+      WireMockHelpers.verifyWithBodyParse(selectEmailUrl(journeyId), email)
+
+    def verifyNoneUpdateSelectedEmailRequest(journeyId: JourneyId): Unit =
+      verify(exactly(0), postRequestedFor(urlPathEqualTo(selectEmailUrl(journeyId))))
+
+    def findJourney(
+        email:     String,
+        encrypter: Encrypter
+    )(jsonBody: String = JourneyJsonTemplates.`Selected email to be verified`(email, encrypter)): StubMapping =
+      findByLatestSessionId(jsonBody)
+
   }
 
   object SubmitArrangement {

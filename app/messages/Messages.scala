@@ -945,6 +945,46 @@ object Messages {
     )
   }
 
+  object Email {
+    val `Which email do you want to use?`: Message = Message(
+      english = "Which email do you want to use?"
+    )
+
+    val `A new email address`: Message = Message(
+      english = "A new email address"
+    )
+
+    val `For example, myname@sample.com`: Message = Message(
+      english = "For example, myname@sample.com"
+    )
+
+    val `Select which email address you want to use`: Message = Message(
+      english = "Select which email address you want to use"
+    )
+
+    def getError(key: String): Message = key match {
+      case "selectAnEmailToUseRadio.error.required" =>
+        Message(
+          english = "Select which email address you want to use"
+        )
+
+      case "newEmailInput.error.required" =>
+        Message(
+          english = "Enter your email address in the correct format, like name@example.com"
+        )
+
+      case "newEmailInput.error.tooManyChar" =>
+        Message(
+          english = "Enter an email address with 256 characters or less"
+        )
+
+      case "newEmailInput.error.invalidFormat" =>
+        Message(
+          english = "Enter your email address in the correct format, like name@example.com"
+        )
+    }
+  }
+
   object NotSoleSignatory {
 
     val `You cannot set up a Direct Debit online`: Message = Message(

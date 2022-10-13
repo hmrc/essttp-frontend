@@ -52,9 +52,10 @@ object JourneyIncorrectStateRouter {
       case _: Journey.Stages.ConfirmedDirectDebitDetails => routes.TermsAndConditionsController.termsAndConditions
       // prevent accidentally submitting arrangement twice
       case j: Journey.Stages.AgreedTermsAndConditions =>
-        if (j.isEmailAddressRequired) routes.EmailController.dummy
+        if (j.isEmailAddressRequired) routes.EmailController.whichEmailDoYouWantToUse
         else routes.PaymentPlanSetUpController.paymentPlanSetUp
-      case _: Journey.Stages.SubmittedArrangement => routes.PaymentPlanSetUpController.paymentPlanSetUp
+      case _: Journey.Stages.SelectedEmailToBeVerified => routes.EmailController.whichEmailDoYouWantToUse
+      case _: Journey.Stages.SubmittedArrangement      => routes.PaymentPlanSetUpController.paymentPlanSetUp
     }
 
     JourneyLogger.error(

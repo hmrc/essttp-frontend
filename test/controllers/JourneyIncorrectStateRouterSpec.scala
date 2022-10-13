@@ -27,7 +27,7 @@ import testsupport.stubs.EssttpBackend
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
-class JourneyIncorrectStateRouter extends ItSpec {
+class JourneyIncorrectStateRouterSpec extends ItSpec {
 
   "When JourneyIncorrectStateRouter is triggered by journey being in wrong state" - {
     forAll(Table(
@@ -59,7 +59,7 @@ class JourneyIncorrectStateRouter extends ItSpec {
       ),
       ("Stages.EnteredDirectDebitDetails", () => EssttpBackend.DirectDebitDetails.findJourney(testCrypto)(), PageUrls.checkDirectDebitDetailsUrl),
       ("Stages.ConfirmedDirectDebitDetails", () => EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto)(), PageUrls.termsAndConditionsUrl),
-      ("Stages.ConfirmedDirectDebitDetails", () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, testCrypto)(), PageUrls.dummyEmailUrl),
+      ("Stages.ConfirmedDirectDebitDetails", () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, testCrypto)(), PageUrls.whichEmailDoYouWantToUseUrl),
       ("Stages.SubmittedArrangement", () => EssttpBackend.SubmitArrangement.findJourney(testCrypto)(), PageUrls.confirmationUrl)
     )) {
       (scenario: String, journeyState: () => StubMapping, expectedRedirectUrl: String) =>
