@@ -132,6 +132,8 @@ object StartJourneyController {
   private def makeEligibilityCheckResult(form: StartJourneyForm): EligibilityCheckResult = {
 
     val debtAmountFromForm: DebtTotalAmount = DebtTotalAmount(AmountInPence(form.debtTotalAmount))
+    val interestAmount: AmountInPence = AmountInPence(form.interestAmount.getOrElse(BigDecimal(0)))
+
     val charges: Charges = Charges(
       chargeType           = ChargeType("InYearRTICharge-Tax"),
       mainType             = MainType("InYearRTICharge(FPS)"),
@@ -141,7 +143,7 @@ object StartJourneyController {
       outstandingAmount    = OutstandingAmount(debtAmountFromForm.value),
       interestStartDate    = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
       dueDate              = DueDate(LocalDate.parse("2017-03-07")),
-      accruedInterest      = AccruedInterest(AmountInPence(1597)),
+      accruedInterest      = AccruedInterest(interestAmount),
       ineligibleChargeType = IneligibleChargeType(false),
       chargeOverMaxDebtAge = ChargeOverMaxDebtAge(false),
       locks                = Some(
@@ -156,7 +158,12 @@ object StartJourneyController {
     )
 
     val chargeTypeAssessments: List[ChargeTypeAssessment] = List(
-      ChargeTypeAssessment(TaxPeriodFrom("2020-08-13"), TaxPeriodTo("2020-08-14"), debtAmountFromForm, List(charges))
+      ChargeTypeAssessment(
+        TaxPeriodFrom("2020-08-13"),
+        TaxPeriodTo("2020-08-14"),
+        DebtTotalAmount(debtAmountFromForm.value + interestAmount),
+        List(charges)
+      )
     )
 
     val containsError: EligibilityError => Boolean = (ee: EligibilityError) => form.eligibilityErrors.contains(ee)

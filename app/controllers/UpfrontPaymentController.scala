@@ -111,7 +111,7 @@ class UpfrontPaymentController @Inject() (
       eligibilityCheckResult: EligibilityCheckResult,
       journey:                Either[Journey.AfterAnsweredCanPayUpfront, Journey.AfterUpfrontPaymentAnswers]
   )(implicit request: Request[_]): Result = {
-    val debtTotalAmount: DebtTotalAmount = UpfrontPaymentController.determineTotalAmountToPay(eligibilityCheckResult)
+    val debtTotalAmount: DebtTotalAmount = UpfrontPaymentController.determineTotalAmountToPayWithoutInterest(eligibilityCheckResult)
     val maximumUpfrontPaymentAmountInPence: AmountInPence = debtTotalAmount.value.-(minimumUpfrontPaymentAmount)
 
     val maybePrePoppedForm: Form[BigDecimal] = journey.merge match {
@@ -138,7 +138,7 @@ class UpfrontPaymentController @Inject() (
   }
 
   val upfrontPaymentAmountSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
-    val debtTotalAmount: DebtTotalAmount = UpfrontPaymentController.determineTotalAmountToPay(request.eligibilityCheckResult)
+    val debtTotalAmount: DebtTotalAmount = UpfrontPaymentController.determineTotalAmountToPayWithoutInterest(request.eligibilityCheckResult)
     val maximumUpfrontPaymentAmountInPence: AmountInPence = debtTotalAmount.value.-(minimumUpfrontPaymentAmount)
 
     UpfrontPaymentAmountForm.form(DebtTotalAmount(maximumUpfrontPaymentAmountInPence), minimumUpfrontPaymentAmount)
@@ -184,7 +184,7 @@ class UpfrontPaymentController @Inject() (
       eligibilityCheckResult: EligibilityCheckResult,
       declaredUpfrontPayment: DeclaredUpfrontPayment
   )(implicit request: Request[_]): Result = {
-    val totalAmountToPay: DebtTotalAmount = UpfrontPaymentController.determineTotalAmountToPay(eligibilityCheckResult)
+    val totalAmountToPay: DebtTotalAmount = UpfrontPaymentController.determineTotalAmountToPayWithInterest(eligibilityCheckResult)
     val remainingAmountTest: AmountInPence = UpfrontPaymentController.deriveRemainingAmountToPay(totalAmountToPay, declaredUpfrontPayment.amount)
 
     Ok(views.upfrontSummaryPage(
@@ -196,9 +196,14 @@ class UpfrontPaymentController @Inject() (
 
 object UpfrontPaymentController {
 
-  def determineTotalAmountToPay(eligibilityCheckResult: EligibilityCheckResult): DebtTotalAmount =
+  def determineTotalAmountToPayWithInterest(eligibilityCheckResult: EligibilityCheckResult): DebtTotalAmount =
     DebtTotalAmount(
       eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value).fold(AmountInPence.zero)(_ + _)
+    )
+
+  def determineTotalAmountToPayWithoutInterest(eligibilityCheckResult: EligibilityCheckResult): DebtTotalAmount =
+    DebtTotalAmount(
+      eligibilityCheckResult.chargeTypeAssessment.flatMap(_.charges.map(_.outstandingAmount.value)).fold(AmountInPence.zero)(_ + _)
     )
 
   def deriveRemainingAmountToPay(totalDebt: DebtTotalAmount, upfrontPaymentAmount: UpfrontPaymentAmount): AmountInPence =
