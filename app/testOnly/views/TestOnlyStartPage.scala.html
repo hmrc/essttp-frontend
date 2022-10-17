@@ -170,7 +170,7 @@
     label = Label(
         isPageHeading = false,
         classes = "govuk-label--m",
-        content = Text("Enter total debt amount")
+        content = Text("Enter total debt amount (without interest)")
     ),
     classes = "govuk-input--width-5",
     spellcheck = Some(false),
@@ -182,6 +182,27 @@
     )),
     value = form.data.get("debtTotalAmount"),
     hint = Some(Hint(content = Text(s"Enter an amount between £1 and ${appConfig.PolicyParameters.EPAYE.maxAmountOfDebt.gdsFormatInPounds}")))
+))
+}
+
+@interestAmountContent = {
+@govukInput(Input(
+    id = "interestAmount",
+    name = "interestAmount",
+    label = Label(
+        isPageHeading = false,
+        classes = "govuk-label--m",
+        content = Text("Enter interest amount (leave blank for 0)")
+    ),
+    classes = "govuk-input--width-5",
+    spellcheck = Some(false),
+    prefix = Some(PrefixOrSuffix(
+        content = Text("£")
+    )),
+    errorMessage = form.error("interestAmount").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
+        content = Text(e.message)
+    )),
+    value = form.data.get("interestAmount")
 ))
 }
 
@@ -257,6 +278,7 @@
         @signInAsContent
         @enrolmentsContent
         @debtTotalAmountContent
+        @interestAmountContent
         @taxRef
 
         @govukTabs(Tabs(

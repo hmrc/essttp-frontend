@@ -177,7 +177,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
       val hint = doc.select(".govuk-hint")
       val hintParagraphs = hint.select("p.govuk-body").asScala.toList
       hintParagraphs.size shouldBe 2
-      hintParagraphs(0).text shouldBe "Enter an amount between £1 and £2,999"
+      hintParagraphs(0).text shouldBe "Enter an amount between £1 and £1,499"
       hintParagraphs(1).text shouldBe "Your monthly payments will be lower if you make an upfront payment. " +
         "This payment will be taken from your bank account within 10 working days."
 
@@ -238,12 +238,12 @@ class UpfrontPaymentControllerSpec extends ItSpec {
         path   = "/how-much-can-you-pay-upfront"
       ).withAuthToken()
         .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-        .withFormUrlEncodedBody(("UpfrontPaymentAmount", "2999"))
+        .withFormUrlEncodedBody(("UpfrontPaymentAmount", "1499"))
 
       val result: Future[Result] = controller.upfrontPaymentAmountSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.upfrontPaymentSummaryUrl)
-      EssttpBackend.UpfrontPaymentAmount.verifyUpdateUpfrontPaymentAmountRequest(TdAll.journeyId, TdAll.upfrontPaymentAmount(299900))
+      EssttpBackend.UpfrontPaymentAmount.verifyUpdateUpfrontPaymentAmountRequest(TdAll.journeyId, TdAll.upfrontPaymentAmount(149900))
     }
 
     forAll(
@@ -278,10 +278,10 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     forAll(
       Table(
         ("Scenario flavour", "form input", "expected error message"),
-        ("x > maximum debt", "30001", "Your upfront payment must be between £1 and £2,999"),
-        ("x < 1", "0.99", "Your upfront payment must be between £1 and £2,999"),
-        ("x < 0", "-1", "Your upfront payment must be between £1 and £2,999"),
-        ("x = 0", "0", "Your upfront payment must be between £1 and £2,999"),
+        ("x > maximum debt", "1499.01", "Your upfront payment must be between £1 and £1,499"),
+        ("x < 1", "0.99", "Your upfront payment must be between £1 and £1,499"),
+        ("x < 0", "-1", "Your upfront payment must be between £1 and £1,499"),
+        ("x = 0", "0", "Your upfront payment must be between £1 and £1,499"),
         ("x = NaN", "one", "How much you can pay upfront must be an amount of money"),
         ("x = null", "", "Enter your upfront payment"),
         ("scientific notation", "1e2", "How much you can pay upfront must be an amount of money"),

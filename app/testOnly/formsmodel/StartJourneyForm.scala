@@ -36,6 +36,7 @@ final case class StartJourneyForm(
     origin:            Origin,
     eligibilityErrors: Seq[EligibilityError],
     debtTotalAmount:   BigDecimal,
+    interestAmount:    Option[BigDecimal],
     taxReference:      Option[String]
 ) {
   val (taxOfficeNumber: TaxOfficeNumber, taxOfficeReference: TaxOfficeReference, empRef: EmpRef) =
@@ -71,6 +72,9 @@ object StartJourneyForm {
       isTooLarge = AmountInPence(_) > maxAmountOfDebt
     ))
 
+    val interestAmountMapping: Mapping[Option[BigDecimal]] =
+      optional(Forms.of(amountOfMoneyFormatter(_ < 0, _ => false)))
+
     val taxRefMapping: Mapping[Option[String]] = optional(Forms.text)
 
     Form(
@@ -80,6 +84,7 @@ object StartJourneyForm {
         "origin" -> originMapping,
         "eligibilityErrors" -> seq(enumeratum.Forms.enum(EligibilityErrors)),
         "debtTotalAmount" -> debtTotalAmountMapping,
+        "interestAmount" -> interestAmountMapping,
         "taxReference" -> taxRefMapping
       )(StartJourneyForm.apply)(StartJourneyForm.unapply)
     )
