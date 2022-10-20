@@ -94,5 +94,7 @@ object ContentAssertions extends RichMatchers {
       case Some(submit) => form.attr("action") shouldBe submit
     }
 
+    val footerLinks = page.select(".govuk-footer__link").asScala.toList
+    footerLinks(1).attr("href") should startWith("http://localhost:12346/accessibility-statement/set-up-a-payment-plan")
   }
 }
