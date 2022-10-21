@@ -5,7 +5,7 @@ resolvers += MavenRepository("HMRC-open-artefacts-maven2", "https://open.artefac
 
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.16")
 
-addSbtPlugin("org.irundaia.sbt" % "sbt-sassify" % "1.5.1")
+addSbtPlugin("io.github.irundaia" % "sbt-sassify" % "1.5.2")
 
 addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.3")
 

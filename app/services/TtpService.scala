@@ -27,7 +27,7 @@ import essttp.rootmodel.ttp._
 import essttp.rootmodel.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
 import essttp.rootmodel.ttp.affordablequotes._
 import essttp.rootmodel.ttp.arrangement._
-import essttp.rootmodel.{AmountInPence, EmpRef, TaxRegime, UpfrontPaymentAmount}
+import essttp.rootmodel.{AmountInPence, EmpRef, TaxRegime, UpfrontPaymentAmount, Vrn}
 import essttp.utils.Errors
 import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
@@ -56,10 +56,22 @@ class TtpService @Inject() (
           channelIdentifier         = EligibilityRequestDefaults.essttpChannelIdentifier,
           idType                    = EligibilityRequestDefaults.Epaye.idType,
           idValue                   = j.taxId match {
-            case empRef: EmpRef => empRef.value //Hmm, will it compile, theoretically it can't be Vrn ...
+            case empRef: EmpRef => empRef.value
             case other          => sys.error(s"Expected EmpRef but found ${other.getClass.getSimpleName}")
           },
           regimeType                = EligibilityRequestDefaults.Epaye.regimeType,
+          returnFinancialAssessment = true
+        )
+
+      case j: Journey.Vat =>
+        CallEligibilityApiRequest(
+          channelIdentifier         = EligibilityRequestDefaults.essttpChannelIdentifier,
+          idType                    = EligibilityRequestDefaults.Vat.idType,
+          idValue                   = j.taxId match {
+            case vrn: Vrn => vrn.value
+            case other    => sys.error(s"Expected Vrn but found ${other.getClass.getSimpleName}")
+          },
+          regimeType                = EligibilityRequestDefaults.Vat.regimeType,
           returnFinancialAssessment = true
         )
     }

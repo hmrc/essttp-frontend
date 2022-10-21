@@ -69,7 +69,8 @@ class AuthenticatedActionRefiner @Inject() (
 
   private def redirectToLoginPage(implicit request: Request[_]): Result = {
     val returnUrl =
-      if (request.uri.endsWith(controllers.routes.EpayeGovUkController.startJourney.url)) appConfig.Urls.epayeGovUkJourneyLoginContinueUrl
+      if (request.uri.endsWith(controllers.routes.GovUkController.startEpayeJourney.url)) appConfig.Urls.epayeGovUkJourneyLoginContinueUrl
+      else if (request.uri.endsWith(controllers.routes.GovUkController.startVatJourney.url)) appConfig.Urls.vatGovUkJourneyLoginContinueUrl
       else request.uri
     Redirect(
       appConfig.BaseUrl.gg,

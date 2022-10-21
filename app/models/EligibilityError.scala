@@ -51,22 +51,44 @@ object EligibilityErrors extends Enum[EligibilityError] {
 
   case object MissingFiledReturns extends EligibilityError
 
+  case object HasInvalidInterestSignals extends EligibilityError
+
+  case object DmSpecialOfficeProcessingRequired extends EligibilityError
+
   case object MultipleReasons extends EligibilityError
 
   override val values: immutable.IndexedSeq[EligibilityError] = findValues
 
-  def toEligibilityError(eligibilityRules: EligibilityRules): Option[EligibilityError] = eligibilityRules match {
-    case eligibilityRules if eligibilityRules.moreThanOneReasonForIneligibility          => Some(MultipleReasons)
-    case EligibilityRules(true, false, false, false, false, false, false, false, false)  => Some(HasRlsOnAddress)
-    case EligibilityRules(false, true, false, false, false, false, false, false, false)  => Some(MarkedAsInsolvent)
-    case EligibilityRules(false, false, true, false, false, false, false, false, false)  => Some(IsLessThanMinDebtAllowance)
-    case EligibilityRules(false, false, false, true, false, false, false, false, false)  => Some(IsMoreThanMaxDebtAllowance)
-    case EligibilityRules(false, false, false, false, true, false, false, false, false)  => Some(DisallowedChargeLockTypes)
-    case EligibilityRules(false, false, false, false, false, true, false, false, false)  => Some(ExistingTtp)
-    case EligibilityRules(false, false, false, false, false, false, true, false, false)  => Some(ChargesOverMaxDebtAge)
-    case EligibilityRules(false, false, false, false, false, false, false, true, false)  => Some(IneligibleChargeTypes)
-    case EligibilityRules(false, false, false, false, false, false, false, false, true)  => Some(MissingFiledReturns)
-    case EligibilityRules(false, false, false, false, false, false, false, false, false) => None //all false
+  def toEligibilityError(eligibilityRules: EligibilityRules): Option[EligibilityError] = {
+
+    val normalisedEligibilityRules: EligibilityRules = eligibilityRulesWithoutNone(eligibilityRules)
+
+    normalisedEligibilityRules match {
+      case eligibilityRules if eligibilityRules.moreThanOneReasonForIneligibility                                    => Some(MultipleReasons)
+      case EligibilityRules(true, false, false, false, false, false, false, false, false, Some(false), Some(false))  => Some(HasRlsOnAddress)
+      case EligibilityRules(false, true, false, false, false, false, false, false, false, Some(false), Some(false))  => Some(MarkedAsInsolvent)
+      case EligibilityRules(false, false, true, false, false, false, false, false, false, Some(false), Some(false))  => Some(IsLessThanMinDebtAllowance)
+      case EligibilityRules(false, false, false, true, false, false, false, false, false, Some(false), Some(false))  => Some(IsMoreThanMaxDebtAllowance)
+      case EligibilityRules(false, false, false, false, true, false, false, false, false, Some(false), Some(false))  => Some(DisallowedChargeLockTypes)
+      case EligibilityRules(false, false, false, false, false, true, false, false, false, Some(false), Some(false))  => Some(ExistingTtp)
+      case EligibilityRules(false, false, false, false, false, false, true, false, false, Some(false), Some(false))  => Some(ChargesOverMaxDebtAge)
+      case EligibilityRules(false, false, false, false, false, false, false, true, false, Some(false), Some(false))  => Some(IneligibleChargeTypes)
+      case EligibilityRules(false, false, false, false, false, false, false, false, true, Some(false), Some(false))  => Some(MissingFiledReturns)
+      case EligibilityRules(false, false, false, false, false, false, false, false, true, Some(true), Some(false))   => Some(HasInvalidInterestSignals)
+      case EligibilityRules(false, false, false, false, false, false, false, false, true, Some(false), Some(true))   => Some(DmSpecialOfficeProcessingRequired)
+      case EligibilityRules(false, false, false, false, false, false, false, false, false, Some(false), Some(false)) => None //all false
+    }
+  }
+
+  def eligibilityRulesWithoutNone(eligibilityRules: EligibilityRules): EligibilityRules = {
+    val hasInvalidInterestSignalsAsSomeBoolean =
+      eligibilityRules.hasInvalidInterestSignals.fold(Some(false))(isDefined => Some(isDefined))
+    val dmSpecialOfficeProcessingRequiredAsSomeBoolean =
+      eligibilityRules.dmSpecialOfficeProcessingRequired.fold(Some(false))(isDefined => Some(isDefined))
+
+    eligibilityRules
+      .copy(hasInvalidInterestSignals = hasInvalidInterestSignalsAsSomeBoolean)
+      .copy(dmSpecialOfficeProcessingRequired = dmSpecialOfficeProcessingRequiredAsSomeBoolean)
   }
 
   implicit val format: Format[EligibilityError] = implicitly[Format[String]].inmap(EligibilityErrors.withName, _.entryName)

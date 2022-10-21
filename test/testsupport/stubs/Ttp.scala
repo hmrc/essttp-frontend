@@ -43,7 +43,7 @@ object Ttp {
       WireMockHelpers.stubForPostWithResponseBody(eligibilityUrl, jsonBody)
 
     def verifyTtpEligibilityRequests(): Unit =
-      ttpVerify(eligibilityUrl, TdAll.callEligibilityApiRequest)(CallEligibilityApiRequest.format)
+      ttpVerify(eligibilityUrl, TdAll.callEligibilityApiRequestEpaye)(CallEligibilityApiRequest.format)
   }
 
   object Affordability {

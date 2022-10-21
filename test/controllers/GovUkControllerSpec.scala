@@ -16,6 +16,7 @@
 
 package controllers
 
+import essttp.journey.model.Origins
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -23,13 +24,14 @@ import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.EssttpBackend
+import testsupport.testdata.JourneyJsonTemplates
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
 
-class EpayeGovUkControllerSpec extends ItSpec {
+class GovUkControllerSpec extends ItSpec {
 
-  private val controller = app.injector.instanceOf[EpayeGovUkController]
+  private val controller = app.injector.instanceOf[GovUkController]
 
   "isComingFromGovUk" in {
     val refererForGovUk = "https://www.gov.uk/"
@@ -46,7 +48,7 @@ class EpayeGovUkControllerSpec extends ItSpec {
     "refererForGovUk" -> "https://www.gov.uk"
   )
 
-  "start journey endpoint" - {
+  "EPAYE start journey endpoint" - {
     "should start govuk journey and redirect to determine tax id when user is coming from govuk and user is authenticated" in {
       val refererForGovUk = "https://www.gov.uk/"
       stubCommonActions()
@@ -58,7 +60,7 @@ class EpayeGovUkControllerSpec extends ItSpec {
         .withSession(SessionKeys.sessionId -> "IamATestSessionId")
         .withHeaders("Referer" -> refererForGovUk)
 
-      val result: Future[Result] = controller.startJourney(fakeRequest)
+      val result: Future[Result] = controller.startEpayeJourney(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.DetermineTaxIdController.determineTaxId.url)
       EssttpBackend.StartJourney.verifyStartJourneyEpayeGovUk()
@@ -72,10 +74,43 @@ class EpayeGovUkControllerSpec extends ItSpec {
         .withAuthToken()
         .withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
-      val result: Future[Result] = controller.startJourney(fakeRequest)
+      val result: Future[Result] = controller.startEpayeJourney(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some("http://localhost:19001/set-up-a-payment-plan?traceId=33678917")
       EssttpBackend.StartJourney.verifyStartJourneyEpayeDetached()
+    }
+  }
+
+  "VAT start journey endpoint" - {
+    "should start govuk journey and redirect to determine tax id when user is coming from govuk and user is authenticated" in {
+      val refererForGovUk = "https://www.gov.uk/"
+      stubCommonActions()
+      EssttpBackend.StartJourney.startJourneyVatGovUk
+      EssttpBackend.StartJourney.findJourney(jsonBody = JourneyJsonTemplates.Started(Origins.Vat.GovUk))
+
+      val fakeRequest = FakeRequest()
+        .withAuthToken()
+        .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+        .withHeaders("Referer" -> refererForGovUk)
+
+      val result: Future[Result] = controller.startVatJourney(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.DetermineTaxIdController.determineTaxId.url)
+      EssttpBackend.StartJourney.verifyStartJourneyVatGovUk()
+    }
+    "should start detached url journey and redirect to nextUrl when user is authenticated" in {
+      stubCommonActions()
+      EssttpBackend.StartJourney.startJourneyVatDetached
+      EssttpBackend.StartJourney.findJourney(jsonBody = JourneyJsonTemplates.Started(Origins.Vat.DetachedUrl))
+
+      val fakeRequest = FakeRequest()
+        .withAuthToken()
+        .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+      val result: Future[Result] = controller.startVatJourney(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some("http://localhost:19001/set-up-a-payment-plan?traceId=33678917")
+      EssttpBackend.StartJourney.verifyStartJourneyVatDetached()
     }
   }
 

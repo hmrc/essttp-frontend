@@ -68,15 +68,17 @@ object TdAll {
   val eligibleEligibilityPass: EligibilityPass = EligibilityPass(true)
   val notEligibleEligibilityPass: EligibilityPass = eligibleEligibilityPass.copy(value = false)
   val eligibleEligibilityRules: EligibilityRules = EligibilityRules(
-    hasRlsOnAddress            = false,
-    markedAsInsolvent          = false,
-    isLessThanMinDebtAllowance = false,
-    isMoreThanMaxDebtAllowance = false,
-    disallowedChargeLockTypes  = false,
-    existingTTP                = false,
-    chargesOverMaxDebtAge      = false,
-    ineligibleChargeTypes      = false,
-    missingFiledReturns        = false
+    hasRlsOnAddress                   = false,
+    markedAsInsolvent                 = false,
+    isLessThanMinDebtAllowance        = false,
+    isMoreThanMaxDebtAllowance        = false,
+    disallowedChargeLockTypes         = false,
+    existingTTP                       = false,
+    chargesOverMaxDebtAge             = false,
+    ineligibleChargeTypes             = false,
+    missingFiledReturns               = false,
+    hasInvalidInterestSignals         = None,
+    dmSpecialOfficeProcessingRequired = None
   )
   val notEligibleHasRlsOnAddress: EligibilityRules = eligibleEligibilityRules.copy(hasRlsOnAddress = true)
   val notEligibleMarkedAsInsolvent: EligibilityRules = eligibleEligibilityRules.copy(markedAsInsolvent = true)
@@ -89,7 +91,7 @@ object TdAll {
   val notEligibleMissingFiledReturns: EligibilityRules = eligibleEligibilityRules.copy(missingFiledReturns = true)
   val notEligibleMultipleReasons: EligibilityRules = eligibleEligibilityRules.copy(missingFiledReturns = true).copy(hasRlsOnAddress = true)
 
-  val callEligibilityApiRequest: CallEligibilityApiRequest = CallEligibilityApiRequest(
+  val callEligibilityApiRequestEpaye: CallEligibilityApiRequest = CallEligibilityApiRequest(
     channelIdentifier         = "eSSTTP",
     idType                    = "EMPREF",
     idValue                   = "864FZ00049",
@@ -98,19 +100,19 @@ object TdAll {
   )
 
   def eligibilityCheckResult(eligibilityPass: EligibilityPass, eligibilityRules: EligibilityRules): EligibilityCheckResult = EligibilityCheckResult(
-    processingDateTime     = ProcessingDateTime("2022-03-23T13:49:51.141Z"),
-    identification         = List(
+    processingDateTime          = ProcessingDateTime("2022-03-23T13:49:51.141Z"),
+    identification              = List(
       Identification(IdType("EMPREF"), IdValue("864FZ00049")),
       Identification(IdType("BROCS"), IdValue("123PA44545546"))
     ),
-    customerPostcodes      = List(CustomerPostcode(customerPostcode, PostcodeDate("2022-01-31"))),
-    regimePaymentFrequency = PaymentPlanFrequencies.Monthly,
-    paymentPlanFrequency   = PaymentPlanFrequencies.Monthly,
-    paymentPlanMinLength   = PaymentPlanMinLength(1),
-    paymentPlanMaxLength   = PaymentPlanMaxLength(6),
-    eligibilityStatus      = EligibilityStatus(eligibilityPass),
-    eligibilityRules       = eligibilityRules,
-    chargeTypeAssessment   = List(ChargeTypeAssessment(
+    customerPostcodes           = List(CustomerPostcode(customerPostcode, PostcodeDate("2022-01-31"))),
+    regimePaymentFrequency      = PaymentPlanFrequencies.Monthly,
+    paymentPlanFrequency        = PaymentPlanFrequencies.Monthly,
+    paymentPlanMinLength        = PaymentPlanMinLength(1),
+    paymentPlanMaxLength        = PaymentPlanMaxLength(6),
+    eligibilityStatus           = EligibilityStatus(eligibilityPass),
+    eligibilityRules            = eligibilityRules,
+    chargeTypeAssessment        = List(ChargeTypeAssessment(
       taxPeriodFrom   = TaxPeriodFrom("2020-08-13"),
       taxPeriodTo     = TaxPeriodTo("2020-08-14"),
       debtTotalAmount = DebtTotalAmount(AmountInPence(300000)),
@@ -130,7 +132,9 @@ object TdAll {
           List(Lock(LockType("Payment"), LockReason("Risk/Fraud"), DisallowedChargeLockType(false)))
         )
       ))
-    ))
+    )),
+    customerDetails             = None,
+    regimeDigitalCorrespondence = None
   )
 
   def dayOfMonth(day: Int = 28): DayOfMonth = DayOfMonth(day)

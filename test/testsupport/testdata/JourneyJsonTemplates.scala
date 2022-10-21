@@ -16,14 +16,16 @@
 
 package testsupport.testdata
 
+import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.DayOfMonth
 import uk.gov.hmrc.crypto.Encrypter
 
 object JourneyJsonTemplates {
 
-  val Started: String = TdJsonBodies.createJourneyJson(
+  def Started(origin: Origin = Origins.Epaye.Bta): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.started,
-    journeyInfo = JourneyInfo.started
+    journeyInfo = JourneyInfo.started,
+    origin
   )
 
   val `Computed Tax Id`: String = TdJsonBodies.createJourneyJson(

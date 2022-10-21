@@ -52,6 +52,7 @@ class IneligibleController @Inject() (
       case SjRequest.Epaye.Simple(returnUrl, _) => returnUrl.value
       case SjRequest.Epaye.Empty()              => s"${appConfig.Urls.businessTaxAccountUrl}"
       case SjRequest.Vat.Simple(returnUrl, _)   => returnUrl.value
+      case SjRequest.Vat.Empty()                => s"${appConfig.Urls.businessTaxAccountUrl}"
     }
     Ok(views.partials.ineligibleTemplatePage(
       pageh1         = Messages.NotEligible.`File your return to use this service`,

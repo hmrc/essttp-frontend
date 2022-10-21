@@ -10,7 +10,8 @@ GET    /do-you-want-to-give-feedback                        controllers.SignOutC
 POST   /do-you-want-to-give-feedback                        controllers.SignOutController.doYouWantToGiveFeedbackSubmit
 
 
-GET    /govuk/epaye/start                                   controllers.EpayeGovUkController.startJourney
+GET    /govuk/epaye/start                                   controllers.GovUkController.startEpayeJourney
+GET    /govuk/vat/start                                     controllers.GovUkController.startVatJourney
 
 GET    /determine-taxId                                     controllers.DetermineTaxIdController.determineTaxId
 
