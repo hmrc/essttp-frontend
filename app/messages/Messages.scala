@@ -389,9 +389,9 @@ object Messages {
       welsh   = "Dechrau nawr"
     )
 
-    val `HMRC intend this as a one-off payment plan...`: Message = Message(
-      english = "HMRC intend this as a one-off payment plan to give you extra support. You must keep up to date with your payments. If you do not, HMRC may ask you to pay the total outstanding amount.",
-      welsh   = "Bwriad CThEM yw bod hwn yn gynllun talu un-tro i roi cymorth ychwanegol i chi. Mae’n rhaid i chi sicrhau eich bod yn gwneud eich taliadau mewn pryd. Os na fyddwch yn gwneud hynny, mae’n bosibl y bydd CThEM yn gofyn i chi dalu’r cyfanswm sydd heb ei dalu."
+    val `You must keep up to date with your payments...`: Message = Message(
+      english = "You must keep up to date with your payments. HMRC may ask you to pay the total outstanding amount if you do not. HMRC intend this as a one-off payment plan to give you extra support.",
+      welsh   = "Mae’n rhaid i chi sicrhau eich bod yn gwneud eich taliadau mewn pryd. Mae’n bosibl y bydd CThEF yn gofyn i chi dalu’r cyfanswm sydd heb ei dalu os na fyddwch yn gwneud eich taliadau mewn pryd. Bwriad CThEF yw bod hwn yn gynllun talu untro i roi cymorth ychwanegol i chi."
     )
 
   }
