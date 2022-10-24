@@ -62,7 +62,7 @@ class AuthenticatedActionRefiner @Inject() (
       }.recover {
         case _: NoActiveSession => Left(redirectToLoginPage)
         case e: AuthorisationException =>
-          logger.error(s"Unauthorised because of ${e.reason}, please investigate why", e)
+          logger.warn(s"Unauthorised because of ${e.reason}, please investigate why", e)
           Left(Redirect(controllers.routes.NotEnrolledController.notEnrolled))
       }
   }
