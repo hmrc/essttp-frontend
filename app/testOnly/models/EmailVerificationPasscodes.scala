@@ -14,16 +14,23 @@
  * limitations under the License.
  */
 
-package testOnly.formsmodel
+package testOnly.models
 
-import enumeratum.{Enum, EnumEntry}
+import play.api.libs.json.{Json, OFormat}
+import testOnly.models.EmailVerificationPasscodes.EmailVerificationPasscode
 
-import scala.collection.immutable
+final case class EmailVerificationPasscodes(passcodes: List[EmailVerificationPasscode])
 
-sealed trait Enrolment extends EnumEntry
+object EmailVerificationPasscodes {
 
-object Enrolments extends Enum[Enrolment] {
-  case object Epaye extends Enrolment
-  case object Vat extends Enrolment
-  override def values: immutable.IndexedSeq[Enrolment] = findValues
+  final case class EmailVerificationPasscode(email: String, passcode: String)
+
+  object EmailVerificationPasscode {
+
+    implicit val format: OFormat[EmailVerificationPasscode] = Json.format
+
+  }
+
+  implicit val format: OFormat[EmailVerificationPasscodes] = Json.format
+
 }

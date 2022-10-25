@@ -17,7 +17,7 @@
 package testOnly
 
 import play.api.libs.json.{JsArray, JsNull, JsObject, Json}
-import testOnly.testusermodel.{EpayeEnrolment, TestUser}
+import testOnly.models.testusermodel.{EpayeEnrolment, TestUser}
 
 object LoginRequestMaker {
 

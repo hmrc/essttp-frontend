@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-package testOnly.testusermodel
+package testOnly.models.testusermodel
 
 /**
- * The same as bearer token
+ * The same as CredId
  */
-final case class AuthToken(value: String)
+final case class AuthorityId(value: String)
+
+object AuthorityId {
+
+}

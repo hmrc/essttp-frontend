@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-package testOnly.testusermodel
+package testOnly.models.testusermodel
 
-final case class Nino(value: String)
+import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
 
+final case class EpayeEnrolment(
+    taxOfficeNumber:    TaxOfficeNumber,
+    taxOfficeReference: TaxOfficeReference,
+    enrolmentStatus:    EnrolmentStatus
+)

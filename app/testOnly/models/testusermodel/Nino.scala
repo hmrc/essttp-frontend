@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-package testOnly.testusermodel
+package testOnly.models.testusermodel
 
-/**
- * The same as CredId
- */
-final case class AuthorityId(value: String)
+final case class Nino(value: String)
 
-object AuthorityId {
-
-}

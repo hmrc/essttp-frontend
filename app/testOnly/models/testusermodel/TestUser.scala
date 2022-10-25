@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package testOnly.testusermodel
+package testOnly.models.testusermodel
 
-import testOnly.formsmodel.{Enrolments, SignInAs, StartJourneyForm}
+import testOnly.models.formsmodel.{Enrolments, SignInAs, StartJourneyForm}
 import uk.gov.hmrc.auth.core.{AffinityGroup, ConfidenceLevel}
 
 import scala.util.Random
