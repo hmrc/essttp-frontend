@@ -16,10 +16,12 @@
 
 package testOnly.connectors
 
+import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import config.AppConfig
+import play.api.http.Status.NOT_FOUND
 import testOnly.models.EmailVerificationPasscodes
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, UpstreamErrorResponse}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -31,5 +33,8 @@ class EmailVerificationConnector @Inject() (appConfig: AppConfig, httpClient: Ht
 
   def requestEmailVerification()(implicit hc: HeaderCarrier): Future[EmailVerificationPasscodes] =
     httpClient.GET[EmailVerificationPasscodes](getPasscodesUrl)
+      .recover{
+        case e: UpstreamErrorResponse if e.statusCode === NOT_FOUND => EmailVerificationPasscodes(List.empty)
+      }
 
 }
