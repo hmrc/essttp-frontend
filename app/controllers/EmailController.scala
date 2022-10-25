@@ -20,13 +20,14 @@ import actions.Actions
 import cats.implicits.catsSyntaxEq
 import controllers.EmailController.{ChooseEmailForm, chooseEmailForm}
 import controllers.JourneyFinalStateCheck.finalStateCheck
-import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
+import controllers.JourneyIncorrectStateRouter.{logErrorAndRouteToDefaultPage, logErrorAndRouteToDefaultPageF}
 import essttp.journey.model.Journey
 import essttp.rootmodel.Email
 import essttp.utils.Errors
+import models.emailverification.RequestEmailVerificationResponse
 import play.api.data.Form
 import play.api.mvc._
-import services.JourneyService
+import services.{EmailVerificationService, JourneyService}
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 import uk.gov.hmrc.emailaddress.EmailAddress
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -38,10 +39,11 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class EmailController @Inject() (
-    as:             Actions,
-    mcc:            MessagesControllerComponents,
-    views:          Views,
-    journeyService: JourneyService
+    as:                       Actions,
+    mcc:                      MessagesControllerComponents,
+    views:                    Views,
+    emailVerificationService: EmailVerificationService,
+    journeyService:           JourneyService
 )(implicit execution: ExecutionContext) extends FrontendController(mcc) with Logging {
 
   //todo get email from eligibilityCheckResponse by pattern matching, pass into chooseEmailPage -- it's not available in eligibilityCheckResponse yet
@@ -91,13 +93,37 @@ class EmailController @Inject() (
               journeyId = request.journeyId,
               email     = emailAddress
             )
-            .map(_ => Redirect(routes.EmailController.confirmYourEmail))
+            .map(_ => Redirect(routes.EmailController.requestVerification))
         }
       )
   }
 
-  val confirmYourEmail: Action[AnyContent] = as.eligibleJourneyAction { _ =>
-    Ok("This is where the \"Confirm your email address\" page will go...")
+  val requestVerification: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
+    request.journey match {
+      case j: Journey.BeforeEmailAddressSelectedToBeVerified =>
+        logErrorAndRouteToDefaultPageF(j)
+
+      case j: Journey.AfterArrangementSubmitted =>
+        logErrorAndRouteToDefaultPageF(j)
+
+      case j: Journey.AfterEmailAddressSelectedToBeVerified =>
+        emailVerificationService.requestEmailVerification(j.emailToBeVerified).map {
+          case RequestEmailVerificationResponse.Success(redirectUri) =>
+            logger.info(s"Email verification journey successfully started. Redirecting to $redirectUri")
+            Redirect(redirectUri)
+          case RequestEmailVerificationResponse.LockedOut =>
+            Redirect(routes.EmailController.tooManyEmailAddresses)
+        }
+    }
+
+  }
+
+  val emailCallback: Action[AnyContent] = as.eligibleJourneyAction { _ =>
+    Ok("this is a placeholder for the email-callback endpoint")
+  }
+
+  val tooManyEmailAddresses: Action[AnyContent] = as.eligibleJourneyAction { _ =>
+    Ok("this is a placeholder for the too-many-email-addresses endpoint")
   }
 
 }

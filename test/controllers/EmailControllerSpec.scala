@@ -17,18 +17,20 @@
 package controllers
 
 import essttp.rootmodel.Email
+import models.GGCredId
+import models.emailverification.RequestEmailVerificationResponse
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import org.jsoup.select.Elements
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.http.Status
-import play.api.mvc.Result
+import play.api.mvc.{Cookie, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
-import testsupport.stubs.EssttpBackend
+import testsupport.stubs.{EmailVerificationStub, EssttpBackend}
 import testsupport.testdata.{PageUrls, TdAll}
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 import uk.gov.hmrc.http.SessionKeys
@@ -39,7 +41,8 @@ import scala.jdk.CollectionConverters.{asScalaIteratorConverter, iterableAsScala
 class EmailControllerSpec extends ItSpec {
 
   private val controller = app.injector.instanceOf[EmailController]
-  configOverrides + ("features.email-journey" -> true)
+
+  override lazy val configOverrides: Map[String, Any] = Map("features.email-journey" -> true)
 
   "GET /which-email-do-you-want-to-use" - {
 
@@ -126,7 +129,7 @@ class EmailControllerSpec extends ItSpec {
 
       val result: Future[Result] = controller.whichEmailDoYouWantToUseSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.confirmYourEmailUrl)
+      redirectLocation(result) shouldBe Some(PageUrls.requestEmailVerificationUrl)
       EssttpBackend.SelectEmail.verifyUpdateSelectedEmailRequest(TdAll.journeyId, email)(testOperationCryptoFormat)
     }
 
@@ -149,7 +152,7 @@ class EmailControllerSpec extends ItSpec {
 
       val result: Future[Result] = controller.whichEmailDoYouWantToUseSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.confirmYourEmailUrl)
+      redirectLocation(result) shouldBe Some(PageUrls.requestEmailVerificationUrl)
       EssttpBackend.SelectEmail.verifyUpdateSelectedEmailRequest(TdAll.journeyId, email)(testOperationCryptoFormat)
     }
 
@@ -195,14 +198,142 @@ class EmailControllerSpec extends ItSpec {
 
   }
 
-  "GET /confirm-your-email-address" - {
-    "should return the confirm your email address page" in {
+  "GET /email-verification should" - {
+
+    val email: Email = Email(SensitiveString("email@domain.com"))
+    val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+    val urlPrefix = "http://localhost:9215"
+
+    "not allow journeys where an email has not been selected" in {
       stubCommonActions()
-      EssttpBackend.SelectEmail.findJourney("bobross@joyOfPainting.com", encrypter = testCrypto)()
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val result: Future[Result] = controller.confirmYourEmail(fakeRequest)
-      status(result) shouldBe Status.OK
+      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto)()
+
+      val result = controller.requestVerification(fakeRequest)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.EmailController.whichEmailDoYouWantToUse.url)
     }
+
+    "redirect to the given redirectUri if the call to request email verification is successful" in {
+      val redirectUri: String = "/redirect"
+
+      stubCommonActions()
+      EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)()
+      EmailVerificationStub.requestEmailVerification(Right(RequestEmailVerificationResponse.Success(redirectUri)))
+
+      val result = controller.requestVerification(fakeRequest)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"http://localhost:9890$redirectUri")
+
+      EmailVerificationStub.verifyRequestEmailVerification(
+        email,
+        GGCredId("authId-999"),
+        "Set up an Employers’ PAYE payment plan",
+        "en",
+        urlPrefix
+      )
+    }
+
+    "maintain the redirectUri in the email verification response if the environment is local and the uri is absolute" in {
+      val redirectUri: String = "http:///host:12345/redirect"
+
+      stubCommonActions()
+      EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)()
+      EmailVerificationStub.requestEmailVerification(Right(RequestEmailVerificationResponse.Success(redirectUri)))
+
+      val result = controller.requestVerification(fakeRequest)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(redirectUri)
+
+      EmailVerificationStub.verifyRequestEmailVerification(
+        email,
+        GGCredId("authId-999"),
+        "Set up an Employers’ PAYE payment plan",
+        "en",
+        urlPrefix
+      )
+    }
+
+    "handle Welsh correctly" in {
+      val redirectUri: String = "http:///host:12345/redirect"
+      val fakeRequest =
+        FakeRequest()
+          .withAuthToken()
+          .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+          .withCookies(Cookie("PLAY_LANG", "cy"))
+
+      stubCommonActions()
+      EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)()
+      EmailVerificationStub.requestEmailVerification(Right(RequestEmailVerificationResponse.Success(redirectUri)))
+
+      val result = controller.requestVerification(fakeRequest)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(redirectUri)
+
+      EmailVerificationStub.verifyRequestEmailVerification(
+        email,
+        GGCredId("authId-999"),
+        "Trefnu cynllun talu ar gyfer TWE Cyflogwyr",
+        "cy",
+        urlPrefix
+      )
+    }
+
+    "redirect to the too-many-emails page if a 401 (UNAUTHORIZED) response is given by email-verification" in {
+      stubCommonActions()
+      EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)()
+      EmailVerificationStub.requestEmailVerification(Left(UNAUTHORIZED))
+
+      val result = controller.requestVerification(fakeRequest)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.tooManyEmailAddressesUrl)
+
+      EmailVerificationStub.verifyRequestEmailVerification(
+        email,
+        GGCredId("authId-999"),
+        "Set up an Employers’ PAYE payment plan",
+        "en",
+        urlPrefix
+      )
+    }
+
+  }
+
+}
+
+class EmailNonLocalControllerSpec extends ItSpec {
+
+  private val controller = app.injector.instanceOf[EmailController]
+
+  override lazy val configOverrides: Map[String, Any] = Map(
+    "platform.frontend.host" -> "https://platform-host",
+    "features.email-journey" -> true
+  )
+
+  "GET /email-verification should" - {
+
+    "redirect to the given redirectUri if the call to request email verification is successful" in {
+      val redirectUri: String = "/redirect"
+      val email: Email = Email(SensitiveString("email@domain.com"))
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+      stubCommonActions()
+      EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)()
+      EmailVerificationStub.requestEmailVerification(Right(RequestEmailVerificationResponse.Success(redirectUri)))
+
+      val result = controller.requestVerification(fakeRequest)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(redirectUri)
+
+      EmailVerificationStub.verifyRequestEmailVerification(
+        email,
+        GGCredId("authId-999"),
+        "Set up an Employers’ PAYE payment plan",
+        "en",
+        ""
+      )
+    }
+
   }
 
 }

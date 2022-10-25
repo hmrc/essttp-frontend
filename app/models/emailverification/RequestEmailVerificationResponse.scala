@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package models
+package models.emailverification
 
-import play.api.libs.json.{Json, Writes}
+sealed trait RequestEmailVerificationResponse
 
-final case class GGCredId(value: String) extends AnyVal
+object RequestEmailVerificationResponse {
 
-object GGCredId {
+  final case class Success(redirectUri: String) extends RequestEmailVerificationResponse
 
-  implicit val format: Writes[GGCredId] = Json.valueWrites
+  case object LockedOut extends RequestEmailVerificationResponse
 
 }

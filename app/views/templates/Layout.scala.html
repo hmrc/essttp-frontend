@@ -109,12 +109,8 @@
 
     @serviceName = @{
         (request: AnyRef) match {
-          case r: AuthenticatedJourneyRequest[_] =>
-              r.journey.taxRegime match {
-                  case TaxRegime.Epaye => Messages.ServicePhase.`Set up an Employers' PAYE payment plan`.show
-                  case TaxRegime.Vat => sys.error("VAT not handled yet")
-              }
-          case _ => Messages.ServicePhase.`Set up an Employers' PAYE payment plan`.show
+          case r: AuthenticatedJourneyRequest[_] => Messages.ServicePhase.serviceName(r.journey.taxRegime).show
+          case _ => Messages.ServicePhase.serviceName(TaxRegime.Epaye).show
 //            commented out for now until we work out something better to make it derive based on tax type - we need more endpoints...
 //          case other =>
 //              sys.error(s"Expected JourneyRequest for non-test-only page but got ${other.getClass.getSimpleName}")
