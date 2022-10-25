@@ -16,7 +16,7 @@
 
 package messages
 
-import essttp.rootmodel.AmountInPence
+import essttp.rootmodel.{AmountInPence, TaxRegime}
 import models.forms.BankDetailsForm._
 
 object Messages {
@@ -125,10 +125,18 @@ object Messages {
 
   object ServicePhase {
 
-    val `Set up an Employers' PAYE payment plan`: Message = Message(
-      english = "Set up an Employers’ PAYE payment plan",
-      welsh   = "Trefnu cynllun talu ar gyfer TWE Cyflogwyr"
-    )
+    def serviceName(taxRegime: TaxRegime): Message = taxRegime match {
+      case TaxRegime.Epaye =>
+        Message(
+          english = "Set up an Employers’ PAYE payment plan",
+          welsh   = "Trefnu cynllun talu ar gyfer TWE Cyflogwyr"
+        )
+
+      case TaxRegime.Vat =>
+        Message(
+          english = "Set up a VAT payment plan",
+        )
+    }
 
     val beta: Message = Message(
       english = "beta",

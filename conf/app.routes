@@ -69,7 +69,12 @@ POST   /terms-and-conditions                                controllers.TermsAnd
 
 GET    /which-email-do-you-want-to-use                      controllers.EmailController.whichEmailDoYouWantToUse
 POST   /which-email-do-you-want-to-use                      controllers.EmailController.whichEmailDoYouWantToUseSubmit
-GET    /confirm-your-email-address                          controllers.EmailController.confirmYourEmail
+
+GET    /email-verification                                  controllers.EmailController.requestVerification
+
+GET    /tried-to-confirm-email-too-many-times               controllers.EmailController.tooManyEmailAddresses
+
+GET    /email-callback                                      controllers.EmailController.emailCallback
 
 GET    /submit-arrangement                                  controllers.SubmitArrangementController.submitArrangement
 

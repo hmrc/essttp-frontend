@@ -35,6 +35,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val emailJourneyEnabled: Boolean = config.get[Boolean]("features.email-journey")
   val authTimeoutSeconds: Int = config.get[FiniteDuration]("timeout-dialog.timeout").toSeconds.toInt
   val authTimeoutCountdownSeconds: Int = config.get[FiniteDuration]("timeout-dialog.countdown").toSeconds.toInt
+  val accessibilityStatementPath: String = config.get[String]("accessibility-statement.service-path")
   val serviceIdentifierPAYE: String = "eSSTTP-PAYE"
 
   object BaseUrl {
@@ -48,6 +49,8 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     val timeToPayUrl: String = servicesConfig.baseUrl("time-to-pay")
     val timeToPayEligibilityUrl: String = servicesConfig.baseUrl("time-to-pay-eligibility")
     val barsUrl: String = servicesConfig.baseUrl("bank-account-reputation")
+    val emailVerificationUrl: String = servicesConfig.baseUrl("email-verification")
+    val emailVerificationFrontendUrl: String = platformHost.getOrElse(config.get[String]("baseUrl.email-verification-frontend"))
   }
 
   object Urls {
