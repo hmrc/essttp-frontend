@@ -31,8 +31,8 @@ import requests.RequestSupport
 import testOnly.AuthLoginApiService
 import testOnly.connectors.EssttpStubConnector
 import testOnly.controllers.StartJourneyController._
-import testOnly.formsmodel.StartJourneyForm
-import testOnly.testusermodel.TestUser
+import testOnly.models.formsmodel.StartJourneyForm
+import testOnly.models.testusermodel.TestUser
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController

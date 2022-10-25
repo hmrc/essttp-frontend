@@ -14,12 +14,21 @@
  * limitations under the License.
  */
 
-package testOnly.testusermodel
+package testOnly.models.formsmodel
 
-import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
+import enumeratum._
 
-final case class EpayeEnrolment(
-    taxOfficeNumber:    TaxOfficeNumber,
-    taxOfficeReference: TaxOfficeReference,
-    enrolmentStatus:    EnrolmentStatus
-)
+import scala.collection.immutable
+
+sealed trait SignInAs extends EnumEntry
+
+object SignInAs extends Enum[SignInAs] {
+
+  case object Individual extends SignInAs
+
+  case object Organisation extends SignInAs
+
+  case object NoSignIn extends SignInAs
+
+  override def values: immutable.IndexedSeq[SignInAs] = findValues
+}

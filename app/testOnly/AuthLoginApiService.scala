@@ -20,7 +20,7 @@ import com.google.inject.{Inject, Singleton}
 import play.api.http.HeaderNames
 import play.api.libs.json.JsObject
 import play.api.mvc.Session
-import testOnly.testusermodel.{AuthToken, TestUser}
+import testOnly.models.testusermodel.{AuthToken, TestUser}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, SessionKeys}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.http.HttpReads.Implicits.readRaw

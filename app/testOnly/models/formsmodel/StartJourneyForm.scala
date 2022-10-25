@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package testOnly.formsmodel
+package testOnly.models.formsmodel
 
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
@@ -25,7 +25,7 @@ import models.{EligibilityError, EligibilityErrors}
 import play.api.data.Forms.{mapping, optional, seq}
 import play.api.data.{FieldMapping, Form, Forms, Mapping}
 import testOnly.messages.Messages
-import testOnly.testusermodel.RandomDataGenerator
+import testOnly.models.testusermodel.RandomDataGenerator
 import util.EnumFormatter
 
 import scala.util.Random

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package testOnly.testusermodel
+package testOnly.models.testusermodel
 
 import cats.syntax.eq._
 import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
