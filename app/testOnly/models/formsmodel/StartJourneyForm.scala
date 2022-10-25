@@ -18,12 +18,11 @@ package testOnly.models.formsmodel
 
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
-import essttp.rootmodel.{AmountInPence, EmpRef}
-import models.Language
+import essttp.rootmodel.{AmountInPence, EmpRef, Vrn}
 import models.MoneyUtil.amountOfMoneyFormatter
-import models.{EligibilityError, EligibilityErrors}
+import models.{EligibilityError, EligibilityErrors, Language}
 import play.api.data.Forms.{mapping, optional, seq}
-import play.api.data.{FieldMapping, Form, Forms, Mapping}
+import play.api.data._
 import testOnly.messages.Messages
 import testOnly.models.testusermodel.RandomDataGenerator
 import util.EnumFormatter
@@ -31,25 +30,29 @@ import util.EnumFormatter
 import scala.util.Random
 
 final case class StartJourneyForm(
-    signInAs:          SignInAs,
-    enrolments:        Seq[Enrolment],
-    origin:            Origin,
-    eligibilityErrors: Seq[EligibilityError],
-    debtTotalAmount:   BigDecimal,
-    interestAmount:    Option[BigDecimal],
-    taxReference:      Option[String]
+    signInAs:            SignInAs,
+    enrolments:          Seq[Enrolment],
+    origin:              Origin,
+    eligibilityErrors:   Seq[EligibilityError],
+    payeDebtTotalAmount: Option[BigDecimal],
+    vatDebtTotalAmount:  Option[BigDecimal],
+    interestAmount:      Option[BigDecimal],
+    payeTaxReference:    Option[String],
+    vatTaxReference:     Option[String]
 ) {
-  val (taxOfficeNumber: TaxOfficeNumber, taxOfficeReference: TaxOfficeReference, empRef: EmpRef) =
-    taxReference.fold(RandomDataGenerator.nextEpayeRefs()(Random)) { someTaxRef =>
+  val (taxOfficeNumber: TaxOfficeNumber, taxOfficeReference: TaxOfficeReference, empRef: EmpRef) = {
+    payeTaxReference.fold(RandomDataGenerator.nextEpayeRefs()(Random)) { someTaxRef =>
       val ton = TaxOfficeNumber(someTaxRef.take(3))
       val tor = TaxOfficeReference(someTaxRef.drop(3))
       (ton, tor, EmpRef.makeEmpRef(ton, tor))
     }
+  }
+  val vrn: Vrn = vatTaxReference.fold(RandomDataGenerator.nextVrn()(Random))(Vrn(_))
 }
 
 object StartJourneyForm {
 
-  def form(maxAmountOfDebt: AmountInPence)(implicit language: Language): Form[StartJourneyForm] = {
+  def form(payeMaxAmountOfDebt: AmountInPence, vatMaxAmountOfDebt: AmountInPence)(implicit language: Language): Form[StartJourneyForm] = {
 
     val signInMapping: Mapping[SignInAs] = Forms.of(EnumFormatter.format(
       enum                    = SignInAs,
@@ -67,10 +70,10 @@ object StartJourneyForm {
       errorMessageIfEnumError = Messages.`Select which origin the journey should start from`.show
     ))
 
-    val debtTotalAmountMapping: FieldMapping[BigDecimal] = Forms.of(amountOfMoneyFormatter(
-      isTooSmall = AmountInPence(100) > AmountInPence(_),
-      isTooLarge = AmountInPence(_) > maxAmountOfDebt
-    ))
+      def debtTotalAmountMapping(maxAmountOfDebtForRegime: AmountInPence): FieldMapping[BigDecimal] = Forms.of(amountOfMoneyFormatter(
+        isTooSmall = AmountInPence(100) > AmountInPence(_),
+        isTooLarge = AmountInPence(_) > maxAmountOfDebtForRegime
+      ))
 
     val interestAmountMapping: Mapping[Option[BigDecimal]] =
       optional(Forms.of(amountOfMoneyFormatter(_ < 0, _ => false)))
@@ -83,9 +86,11 @@ object StartJourneyForm {
         "enrolments" -> enrolmentsMapping,
         "origin" -> originMapping,
         "eligibilityErrors" -> seq(enumeratum.Forms.enum(EligibilityErrors)),
-        "debtTotalAmount" -> debtTotalAmountMapping,
+        "payeDebtTotalAmount" -> optional(debtTotalAmountMapping(payeMaxAmountOfDebt)),
+        "vatDebtTotalAmount" -> optional(debtTotalAmountMapping(vatMaxAmountOfDebt)),
         "interestAmount" -> interestAmountMapping,
-        "taxReference" -> taxRefMapping
+        "payeTaxReference" -> taxRefMapping,
+        "vatTaxReference" -> taxRefMapping
       )(StartJourneyForm.apply)(StartJourneyForm.unapply)
     )
   }

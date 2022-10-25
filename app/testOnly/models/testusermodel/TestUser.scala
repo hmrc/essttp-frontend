@@ -27,9 +27,9 @@ import scala.util.Random
  * log user in with defined enrolments.
  */
 final case class TestUser(
-    nino:           Option[Nino],
-    epayeEnrolment: Option[EpayeEnrolment],
-    //TODO vat enrolment
+    nino:            Option[Nino],
+    epayeEnrolment:  Option[EpayeEnrolment],
+    vatEnrolment:    Option[VatEnrolment],
     authorityId:     AuthorityId,
     affinityGroup:   AffinityGroup,
     confidenceLevel: ConfidenceLevel
@@ -58,10 +58,16 @@ object TestUser {
       }
     }
 
+    val maybeVatEnrolment: StartJourneyForm => Option[VatEnrolment] = { form =>
+      if (form.enrolments.contains(Enrolments.Vat)) Some(VatEnrolment(form.vrn, EnrolmentStatus.Activated))
+      else None
+    }
+
     maybeAffinityGroup.map { affinityGroup: AffinityGroup =>
       TestUser(
         nino            = None, //TODO: read this from the form, populate if individual
         epayeEnrolment  = maybeEpayeEnrolment(form),
+        vatEnrolment    = maybeVatEnrolment(form),
         authorityId     = RandomDataGenerator.nextAuthorityId(),
         affinityGroup   = affinityGroup,
         confidenceLevel = ConfidenceLevel.L50 //TODO: read this from the form

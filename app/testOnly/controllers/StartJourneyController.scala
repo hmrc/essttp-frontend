@@ -60,17 +60,20 @@ class StartJourneyController @Inject() (
   import requestSupport._
 
   val startJourneyGet: Action[AnyContent] = as.default { implicit request =>
-    Ok(testOnlyStartPage(StartJourneyForm.form(appConfig.PolicyParameters.EPAYE.maxAmountOfDebt)))
+    Ok(testOnlyStartPage(StartJourneyForm.form(appConfig.PolicyParameters.EPAYE.maxAmountOfDebt, appConfig.PolicyParameters.VAT.maxAmountOfDebt)))
   }
 
   val startJourneySubmit: Action[AnyContent] = as.default.async { implicit request =>
-    StartJourneyForm.form(appConfig.PolicyParameters.EPAYE.maxAmountOfDebt).bindFromRequest()
+    StartJourneyForm.form(appConfig.PolicyParameters.EPAYE.maxAmountOfDebt, appConfig.PolicyParameters.VAT.maxAmountOfDebt).bindFromRequest()
       .fold(
         formWithErrors => {
           import cats.syntax.eq._
           val form = formWithErrors.copy(errors = formWithErrors.errors.map(e =>
-            if (e.key === "debtTotalAmount") {
-              e.withMessage(StartJourneyController.amountInputErrorMessage(e.message, appConfig.PolicyParameters.EPAYE.maxAmountOfDebt)
+            if (e.key === "payeDebtTotalAmount") {
+              e.withMessage(StartJourneyController.amountInputErrorMessage(e.message, appConfig.PolicyParameters.EPAYE.maxAmountOfDebt, "PAYE")
+                .getOrElse(sys.error(s"Could not find error message for '${e.message}' for debtTotalAmount ")))
+            } else if (e.key === "vatDebtTotalAmount") {
+              e.withMessage(StartJourneyController.amountInputErrorMessage(e.message, appConfig.PolicyParameters.VAT.maxAmountOfDebt, "VAT")
                 .getOrElse(sys.error(s"Could not find error message for '${e.message}' for debtTotalAmount ")))
             } else {
               e
@@ -134,7 +137,13 @@ object StartJourneyController {
 
   private def makeEligibilityCheckResult(form: StartJourneyForm): EligibilityCheckResult = {
 
-    val debtAmountFromForm: DebtTotalAmount = DebtTotalAmount(AmountInPence(form.debtTotalAmount))
+    val debtAmountFromForm: DebtTotalAmount =
+      DebtTotalAmount(AmountInPence(
+        form.payeDebtTotalAmount.getOrElse {
+          form.vatDebtTotalAmount.getOrElse(BigDecimal(1234.53))
+        }
+      ))
+
     val interestAmount: AmountInPence = AmountInPence(form.interestAmount.getOrElse(BigDecimal(0)))
 
     val charges: Charges = Charges(
@@ -210,10 +219,10 @@ object StartJourneyController {
     )
   }
 
-  def amountInputErrorMessage(key: String, maxAmountOfDebt: AmountInPence): Option[String] = key match {
+  def amountInputErrorMessage(key: String, maxAmountOfDebt: AmountInPence, regimeInfo: String): Option[String] = key match {
     case "error.required"                    => Some("Total debt field cannot be empty")
     case "error.pattern"                     => Some("Total debt must be an amount of money")
-    case "error.tooSmall" | "error.tooLarge" => Some(s"Total debt for PAYE must be between £1 and £${maxAmountOfDebt.gdsFormatInPounds}")
+    case "error.tooSmall" | "error.tooLarge" => Some(s"Total debt for $regimeInfo must be between £1 and ${maxAmountOfDebt.gdsFormatInPounds}")
     case _                                   => None
   }
 
