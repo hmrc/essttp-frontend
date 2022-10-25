@@ -91,7 +91,10 @@ class StartJourneyController @Inject() (
       redirect: Result = startJourneyForm.origin match {
         case Origins.Epaye.Bta         => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.showBtaPage)
         case Origins.Epaye.GovUk       => Redirect("https://github.com/hmrc/essttp-frontend#emulate-start-journey-from-gov-uk")
-        case Origins.Epaye.DetachedUrl => Redirect(_root_.controllers.routes.EpayeGovUkController.startJourney.url)
+        case Origins.Epaye.DetachedUrl => Redirect(_root_.controllers.routes.GovUkController.startEpayeJourney.url)
+        case Origins.Vat.Bta           => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.showBtaPage)
+        case Origins.Vat.GovUk         => Redirect("https://github.com/hmrc/essttp-frontend#emulate-start-journey-from-gov-uk")
+        case Origins.Vat.DetachedUrl   => Redirect(_root_.controllers.routes.GovUkController.startVatJourney.url)
       }
     } yield redirect.withSession(session)
   }
@@ -169,20 +172,22 @@ object StartJourneyController {
     val containsError: EligibilityError => Boolean = (ee: EligibilityError) => form.eligibilityErrors.contains(ee)
     val eligibilityRules: EligibilityRules = {
       EligibilityRules(
-        hasRlsOnAddress            = containsError(HasRlsOnAddress),
-        markedAsInsolvent          = containsError(MarkedAsInsolvent),
-        isLessThanMinDebtAllowance = containsError(IsLessThanMinDebtAllowance),
-        isMoreThanMaxDebtAllowance = containsError(IsMoreThanMaxDebtAllowance),
-        disallowedChargeLockTypes  = containsError(EligibilityErrors.DisallowedChargeLockTypes),
-        existingTTP                = containsError(ExistingTtp),
-        chargesOverMaxDebtAge      = containsError(ChargesOverMaxDebtAge),
-        ineligibleChargeTypes      = containsError(IneligibleChargeTypes),
-        missingFiledReturns        = containsError(MissingFiledReturns)
+        hasRlsOnAddress                   = containsError(HasRlsOnAddress),
+        markedAsInsolvent                 = containsError(MarkedAsInsolvent),
+        isLessThanMinDebtAllowance        = containsError(IsLessThanMinDebtAllowance),
+        isMoreThanMaxDebtAllowance        = containsError(IsMoreThanMaxDebtAllowance),
+        disallowedChargeLockTypes         = containsError(EligibilityErrors.DisallowedChargeLockTypes),
+        existingTTP                       = containsError(ExistingTtp),
+        chargesOverMaxDebtAge             = containsError(ChargesOverMaxDebtAge),
+        ineligibleChargeTypes             = containsError(IneligibleChargeTypes),
+        missingFiledReturns               = containsError(MissingFiledReturns),
+        hasInvalidInterestSignals         = None,
+        dmSpecialOfficeProcessingRequired = None
       )
     }
     EligibilityCheckResult(
-      processingDateTime     = ProcessingDateTime(LocalDate.now().toString),
-      identification         = List(
+      processingDateTime          = ProcessingDateTime(LocalDate.now().toString),
+      identification              = List(
         Identification(
           idType  = IdType("EMPREF"),
           idValue = IdValue(form.empRef.value)
@@ -192,14 +197,16 @@ object StartJourneyController {
           idValue = IdValue(form.empRef.value)
         )
       ),
-      customerPostcodes      = List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate("2022-01-01"))),
-      regimePaymentFrequency = PaymentPlanFrequencies.Monthly,
-      paymentPlanFrequency   = PaymentPlanFrequencies.Monthly,
-      paymentPlanMinLength   = PaymentPlanMinLength(1),
-      paymentPlanMaxLength   = PaymentPlanMaxLength(6),
-      eligibilityStatus      = EligibilityStatus(EligibilityPass(eligibilityRules.isEligible)),
-      eligibilityRules       = eligibilityRules,
-      chargeTypeAssessment   = chargeTypeAssessments
+      customerPostcodes           = List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate("2022-01-01"))),
+      regimePaymentFrequency      = PaymentPlanFrequencies.Monthly,
+      paymentPlanFrequency        = PaymentPlanFrequencies.Monthly,
+      paymentPlanMinLength        = PaymentPlanMinLength(1),
+      paymentPlanMaxLength        = PaymentPlanMaxLength(6),
+      eligibilityStatus           = EligibilityStatus(EligibilityPass(eligibilityRules.isEligible)),
+      eligibilityRules            = eligibilityRules,
+      chargeTypeAssessment        = chargeTypeAssessments,
+      customerDetails             = None,
+      regimeDigitalCorrespondence = None
     )
   }
 

@@ -32,6 +32,6 @@ object EligibilityRequestDefaults {
 
   object Vat extends EligibilityRequestDefaults {
     val idType: String = "VRN"
-    val regimeType: String = "VAT"
+    val regimeType: String = "VATC"
   }
 }

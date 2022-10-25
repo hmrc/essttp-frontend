@@ -16,6 +16,7 @@
 
 package testsupport.testdata
 
+import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.ttp.{EligibilityPass, EligibilityRules}
 import essttp.rootmodel.{DayOfMonth, UpfrontPaymentAmount}
 import testsupport.testdata.JourneyInfo.JourneyInfoAsJson
@@ -51,7 +52,7 @@ object TdJsonBodies {
     val detachedUrl: String = bta
   }
 
-  def createJourneyJson(stageInfo: StageInfo, journeyInfo: List[String]): String = {
+  def createJourneyJson(stageInfo: StageInfo, journeyInfo: List[String], origin: Origin = Origins.Epaye.Bta): String = {
     val jsonFormatted: String = if (journeyInfo.isEmpty) "" else s",\n${journeyInfo.mkString(",")}"
     s"""
       |{
@@ -62,7 +63,7 @@ object TdJsonBodies {
       |    },
       |    "createdOn": "2022-07-22T14:01:06.629Z",
       |    "_id": "6284fcd33c00003d6b1f3903",
-      |    "origin": "Origins.Epaye.Bta",
+      |    "origin": "${origin.toString()}",
       |    "sjRequest": {
       |      "Simple": {
       |        "returnUrl" : "/set-up-a-payment-plan/test-only/bta-page?return-page",

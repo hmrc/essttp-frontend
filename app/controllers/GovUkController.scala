@@ -28,7 +28,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton()
-class EpayeGovUkController @Inject() (
+class GovUkController @Inject() (
     cc:               MessagesControllerComponents,
     journeyConnector: JourneyConnector,
     as:               Actions,
@@ -37,7 +37,7 @@ class EpayeGovUkController @Inject() (
 
   val refererForGovUk: String = config.get[String]("refererForGovUk")
 
-  def startJourney: Action[AnyContent] = as.authenticatedAction.async { implicit request =>
+  def startEpayeJourney: Action[AnyContent] = as.authenticatedAction.async { implicit request =>
     val startJourneyRedirect: Future[Result] = {
       // gov uk needs to skip landing page, we don't want to show guidance again.
       if (isComingFromGovUk(request)) {
@@ -45,6 +45,20 @@ class EpayeGovUkController @Inject() (
           .map(_ => Redirect(routes.DetermineTaxIdController.determineTaxId.url))
       } else {
         journeyConnector.Epaye.startJourneyDetachedUrl(SjRequest.Epaye.Empty())
+          .map(r => Redirect(r.nextUrl.value))
+      }
+    }
+    startJourneyRedirect
+  }
+
+  def startVatJourney: Action[AnyContent] = as.authenticatedAction.async { implicit request =>
+    val startJourneyRedirect: Future[Result] = {
+      // gov uk needs to skip landing page, we don't want to show guidance again.
+      if (isComingFromGovUk(request)) {
+        journeyConnector.Vat.startJourneyGovUk(SjRequest.Vat.Empty())
+          .map(_ => Redirect(routes.DetermineTaxIdController.determineTaxId.url))
+      } else {
+        journeyConnector.Vat.startJourneyDetachedUrl(SjRequest.Vat.Empty())
           .map(r => Redirect(r.nextUrl.value))
       }
     }

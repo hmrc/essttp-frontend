@@ -82,15 +82,21 @@ object EssttpBackend {
   }
 
   object StartJourney {
-    private val startJourneyBtaUrl = "/essttp-backend/epaye/bta/journey/start"
-    private val startJourneyGovUkUrl = "/essttp-backend/epaye/gov-uk/journey/start"
-    private val startJourneyDetachedUrl = "/essttp-backend/epaye/detached-url/journey/start"
+    private val startJourneyBtaEpayeUrl = "/essttp-backend/epaye/bta/journey/start"
+    private val startJourneyGovUkEpayeUrl = "/essttp-backend/epaye/gov-uk/journey/start"
+    private val startJourneyDetachedEpayeUrl = "/essttp-backend/epaye/detached-url/journey/start"
+    private val startJourneyBtaVatUrl = "/essttp-backend/vat/bta/journey/start"
+    private val startJourneyGovUkVatUrl = "/essttp-backend/vat/gov-uk/journey/start"
+    private val startJourneyDetachedVatUrl = "/essttp-backend/vat/detached-url/journey/start"
 
     def startJourneyInBackend(origin: Origin): StubMapping = {
       val (url, expectedRequestBody, responseBody): (String, String, String) = origin match {
-        case Origins.Epaye.Bta         => (startJourneyBtaUrl, TdJsonBodies.StartJourneyRequestBodies.simple, TdJsonBodies.StartJourneyResponses.bta)
-        case Origins.Epaye.GovUk       => (startJourneyGovUkUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.govUk)
-        case Origins.Epaye.DetachedUrl => (startJourneyDetachedUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.detachedUrl)
+        case Origins.Epaye.Bta         => (startJourneyBtaEpayeUrl, TdJsonBodies.StartJourneyRequestBodies.simple, TdJsonBodies.StartJourneyResponses.bta)
+        case Origins.Epaye.GovUk       => (startJourneyGovUkEpayeUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.govUk)
+        case Origins.Epaye.DetachedUrl => (startJourneyDetachedEpayeUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.detachedUrl)
+        case Origins.Vat.Bta           => (startJourneyBtaVatUrl, TdJsonBodies.StartJourneyRequestBodies.simple, TdJsonBodies.StartJourneyResponses.bta)
+        case Origins.Vat.GovUk         => (startJourneyGovUkVatUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.govUk)
+        case Origins.Vat.DetachedUrl   => (startJourneyDetachedVatUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.detachedUrl)
       }
       stubFor(
         post(urlPathEqualTo(url))
@@ -104,13 +110,19 @@ object EssttpBackend {
     def startJourneyEpayeBta: StubMapping = startJourneyInBackend(Origins.Epaye.Bta)
     def startJourneyEpayeGovUk: StubMapping = startJourneyInBackend(Origins.Epaye.GovUk)
     def startJourneyEpayeDetached: StubMapping = startJourneyInBackend(Origins.Epaye.DetachedUrl)
+    def startJourneyVatBta: StubMapping = startJourneyInBackend(Origins.Vat.Bta)
+    def startJourneyVatGovUk: StubMapping = startJourneyInBackend(Origins.Vat.GovUk)
+    def startJourneyVatDetached: StubMapping = startJourneyInBackend(Origins.Vat.DetachedUrl)
 
     def verifyStartJourney(url: String): Unit = verify(exactly(1), postRequestedFor(urlPathEqualTo(url)))
-    def verifyStartJourneyEpayeBta(): Unit = verifyStartJourney(startJourneyBtaUrl)
-    def verifyStartJourneyEpayeGovUk(): Unit = verifyStartJourney(startJourneyGovUkUrl)
-    def verifyStartJourneyEpayeDetached(): Unit = verifyStartJourney(startJourneyDetachedUrl)
+    def verifyStartJourneyEpayeBta(): Unit = verifyStartJourney(startJourneyBtaEpayeUrl)
+    def verifyStartJourneyEpayeGovUk(): Unit = verifyStartJourney(startJourneyGovUkEpayeUrl)
+    def verifyStartJourneyEpayeDetached(): Unit = verifyStartJourney(startJourneyDetachedEpayeUrl)
+    def verifyStartJourneyVatBta(): Unit = verifyStartJourney(startJourneyBtaVatUrl)
+    def verifyStartJourneyVatGovUk(): Unit = verifyStartJourney(startJourneyGovUkVatUrl)
+    def verifyStartJourneyVatDetached(): Unit = verifyStartJourney(startJourneyDetachedVatUrl)
 
-    def findJourney(jsonBody: String = JourneyJsonTemplates.Started): StubMapping = findByLatestSessionId(jsonBody)
+    def findJourney(jsonBody: String = JourneyJsonTemplates.Started()): StubMapping = findByLatestSessionId(jsonBody)
   }
 
   object DetermineTaxId {
