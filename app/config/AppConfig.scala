@@ -51,6 +51,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     val barsUrl: String = servicesConfig.baseUrl("bank-account-reputation")
     val emailVerificationUrl: String = servicesConfig.baseUrl("email-verification")
     val emailVerificationFrontendUrl: String = platformHost.getOrElse(config.get[String]("baseUrl.email-verification-frontend"))
+    val accessibilityStatementFrontendUrl: String = platformHost.getOrElse(config.get[String]("baseUrl.accessibility-statement-frontend"))
   }
 
   object Urls {

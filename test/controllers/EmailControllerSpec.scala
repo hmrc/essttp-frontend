@@ -228,6 +228,7 @@ class EmailControllerSpec extends ItSpec {
       EmailVerificationStub.verifyRequestEmailVerification(
         email,
         GGCredId("authId-999"),
+        "http://localhost:12346/accessibility-statement/set-up-a-payment-plan",
         "Set up an Employers’ PAYE payment plan",
         "en",
         urlPrefix
@@ -248,6 +249,7 @@ class EmailControllerSpec extends ItSpec {
       EmailVerificationStub.verifyRequestEmailVerification(
         email,
         GGCredId("authId-999"),
+        "http://localhost:12346/accessibility-statement/set-up-a-payment-plan",
         "Set up an Employers’ PAYE payment plan",
         "en",
         urlPrefix
@@ -273,6 +275,7 @@ class EmailControllerSpec extends ItSpec {
       EmailVerificationStub.verifyRequestEmailVerification(
         email,
         GGCredId("authId-999"),
+        "http://localhost:12346/accessibility-statement/set-up-a-payment-plan",
         "Trefnu cynllun talu ar gyfer TWE Cyflogwyr",
         "cy",
         urlPrefix
@@ -291,6 +294,7 @@ class EmailControllerSpec extends ItSpec {
       EmailVerificationStub.verifyRequestEmailVerification(
         email,
         GGCredId("authId-999"),
+        "http://localhost:12346/accessibility-statement/set-up-a-payment-plan",
         "Set up an Employers’ PAYE payment plan",
         "en",
         urlPrefix
@@ -328,6 +332,7 @@ class EmailNonLocalControllerSpec extends ItSpec {
       EmailVerificationStub.verifyRequestEmailVerification(
         email,
         GGCredId("authId-999"),
+        "/accessibility-statement/set-up-a-payment-plan",
         "Set up an Employers’ PAYE payment plan",
         "en",
         ""

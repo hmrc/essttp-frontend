@@ -46,11 +46,12 @@ object EmailVerificationStub {
     )
 
   def verifyRequestEmailVerification(
-      emailAddress:         Email,
-      ggCredId:             GGCredId,
-      expectedPageTitle:    String,
-      expectedLanguageCode: String,
-      urlPrefix:            String
+      emailAddress:                      Email,
+      ggCredId:                          GGCredId,
+      expectedAccessibilityStatementUrl: String,
+      expectedPageTitle:                 String,
+      expectedLanguageCode:              String,
+      urlPrefix:                         String
   ): Unit =
     verify(
       exactly(1),
@@ -62,7 +63,7 @@ object EmailVerificationStub {
                |  "continueUrl": "$urlPrefix/set-up-a-payment-plan/email-callback",
                |  "origin": "essttp-frontend",
                |  "deskproServiceName": "essttp-frontend",
-               |  "accessibilityStatementUrl": "/set-up-a-payment-plan",
+               |  "accessibilityStatementUrl": "$expectedAccessibilityStatementUrl",
                |  "pageTitle": "$expectedPageTitle",
                |  "backUrl": "$urlPrefix${PageUrls.whichEmailDoYouWantToUseUrl}",
                |  "email": {

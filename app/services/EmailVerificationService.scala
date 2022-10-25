@@ -88,12 +88,15 @@ class EmailVerificationService @Inject() (
   }
 
   object RequestEmailVerification {
-    private def url(s: String): String = if (appConfig.BaseUrl.platformHost.isDefined) s else s"${appConfig.BaseUrl.essttpFrontend}$s"
+    private def url(s: String): String = if (isLocal) s"${appConfig.BaseUrl.essttpFrontend}$s" else s
 
     val continueUrl: String = url(routes.EmailController.emailCallback.url)
     val origin: String = appConfig.appName
     val deskproServiceName: String = contactFrontendConfig.serviceId.getOrElse(sys.error("Could not find contact frontend serviceId"))
-    val accessibilityStatementUrl: String = appConfig.accessibilityStatementPath
+    val accessibilityStatementUrl: String = {
+      val u = s"/accessibility-statement${appConfig.accessibilityStatementPath}"
+      if (isLocal) s"${appConfig.BaseUrl.accessibilityStatementFrontendUrl}$u" else u
+    }
     val whichEmailUrl: String = url(routes.EmailController.whichEmailDoYouWantToUse.url)
   }
 
