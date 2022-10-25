@@ -40,7 +40,6 @@ object EligibilityRouter {
         case Some(ChargesOverMaxDebtAge)             => routes.IneligibleController.debtTooOldPage
         case Some(IneligibleChargeTypes)             => routes.IneligibleController.genericIneligiblePage
         case Some(MissingFiledReturns)               => routes.IneligibleController.fileYourReturnPage
-        //todo someone ask Karen if we will have unique pages for these, if not, delete this todo and leave as generic
         case Some(HasInvalidInterestSignals)         => routes.IneligibleController.genericIneligiblePage
         case Some(DmSpecialOfficeProcessingRequired) => routes.IneligibleController.genericIneligiblePage
       }
