@@ -404,6 +404,71 @@ object Messages {
 
   }
 
+  object Vat {
+    val `Set up a VAT payment plan`: Message = Message(
+      english = "Set up a VAT payment plan"
+    )
+    val `The payment plan covers all appropriate overdue amounts...`: Message = Message(
+      english = "The payment plan covers all appropriate overdue amounts, surcharges, penalties and interest. The payments you make may incur interest."
+    )
+    val `Who can use this service`: Message = Message(
+      english = "Who can use this service"
+    )
+    val `You are eligible to set up an online payment plan if:`: Message = Message(
+      english = "You are eligible to set up an online payment plan if:",
+      welsh   = "Rydych yn gymwys i drefnu cynllun talu ar-lein os:"
+    )
+    def `you plan to pay the debt off within the next 6 months or less`(maxPlanDuration: Int): Message = Message(
+      english = s"you plan to pay the debt off within the next $maxPlanDuration months or less"
+    )
+    def `you owe £20,000 or less`(maxAmountOfDebt: AmountInPence): Message = Message(
+      english = s"you owe ${maxAmountOfDebt.gdsFormatInPounds} or less"
+    )
+    val `you do not have any other payment plans or debts with HMRC`: Message = Message(
+      english = "you do not have any other payment plans or debts with HMRC"
+    )
+    val `your tax returns are up to date`: Message = Message(
+      english = "your tax returns are up to date"
+    )
+    def `You can use this service within 28 days of the overdue payment deadline.`(maxAgeOfDebtInDays: Int): Message = Message(
+      english = s"You can use this service within $maxAgeOfDebtInDays days of the overdue payment deadline."
+    )
+    val `If you have a Customer Compliance Manager...`: Message = Message(
+      english = "If you have a Customer Compliance Manager, consider discussing your needs with them before using this service."
+    )
+    val `Before you start`: Message = Message(
+      english = "Before you start"
+    )
+    val `You must be:`: Message = Message(
+      english = "You must be:"
+    )
+    val `a named account holder for the UK bank account you intend to use`: Message = Message(
+      english = "a named account holder for the UK bank account you intend to use"
+    )
+    val `able to authorise a Direct Debit`: Message = Message(
+      english = "able to authorise a Direct Debit"
+    )
+    val `Who cannot use this service:`: Message = Message(
+      english = "Who cannot use this service:"
+    )
+    val `cash accounting customers`: Message = Message(
+      english = "cash accounting customers"
+    )
+    val `annual accounting scheme members`: Message = Message(
+      english = "annual accounting scheme members"
+    )
+    val `payment on account customers`: Message = Message(
+      english = "payment on account customers"
+    )
+    val `You must keep up to date with your payments...`: Message = Message(
+      english = "You must keep up to date with your payments. HMRC may ask you to pay the total outstanding amount if you do not. HMRC intend this as a one-off payment plan to give you extra support."
+    )
+    val `Start now`: Message = Message(
+      english = "Start now",
+      welsh   = "Dechrau nawr"
+    )
+  }
+
   object UpfrontPaymentAmount {
 
     val `How much can you pay upfront?`: Message = Message(

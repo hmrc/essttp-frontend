@@ -16,7 +16,7 @@
 
 package views.partials
 
-import views.html.EPaye.ineligible.Ineligible
+import views.html.epaye.ineligible.Ineligible
 import views.html.partials._
 
 import javax.inject.Inject
