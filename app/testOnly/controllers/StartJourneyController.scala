@@ -64,7 +64,8 @@ class StartJourneyController @Inject() (
   }
 
   val startJourneySubmit: Action[AnyContent] = as.default.async { implicit request =>
-    StartJourneyForm.form(appConfig.PolicyParameters.EPAYE.maxAmountOfDebt, appConfig.PolicyParameters.VAT.maxAmountOfDebt).bindFromRequest()
+    StartJourneyForm.form(appConfig.PolicyParameters.EPAYE.maxAmountOfDebt, appConfig.PolicyParameters.VAT.maxAmountOfDebt)
+      .bindFromRequest()
       .fold(
         formWithErrors =>
           Future.successful(Ok(testOnlyStartPage(formWithErrors))),
@@ -73,8 +74,6 @@ class StartJourneyController @Inject() (
   }
 
   private def startJourney(startJourneyForm: StartJourneyForm): Future[Result] = {
-    println(s"Got $startJourneyForm\n\n\n")
-
     implicit val hc: HeaderCarrier = HeaderCarrier()
     for {
       _ <- essttpStubConnector.primeStubs(makeEligibilityCheckResult(startJourneyForm))
@@ -112,7 +111,18 @@ class StartJourneyController @Inject() (
       journeyConnector.Epaye.startJourneyBta(SjRequest.Epaye.Simple(
         returnUrl = ReturnUrl(routes.StartJourneyController.showBtaPage.url + "?return-page"),
         backUrl   = BackUrl(routes.StartJourneyController.showBtaPage.url + "?starting-page")
-      )).map(x => Redirect(x.nextUrl.value))
+      )).map(sjResponse => Redirect(sjResponse.nextUrl.value))
+    }
+  }
+
+  val startJourneyVatBta: Action[AnyContent] = as.default.async { implicit request =>
+    if (hc.sessionId.isEmpty) {
+      Future.successful(Ok("Missing session id"))
+    } else {
+      journeyConnector.Vat.startJourneyBta(SjRequest.Vat.Simple(
+        returnUrl = ReturnUrl(routes.StartJourneyController.showBtaPage.url + "?return-page"),
+        backUrl   = BackUrl(routes.StartJourneyController.showBtaPage.url + "?starting-page")
+      )).map(sjResponse => Redirect(sjResponse.nextUrl.value))
     }
   }
 }
