@@ -76,8 +76,8 @@
                 value = Enrolments.Epaye.entryName
             ),
             CheckboxItem(
-             content = Text("VAT"),
-             value = Enrolments.Vat.entryName
+                content = Text("VAT"),
+                value = Enrolments.Vat.entryName
             )
         ),
         classes = "govuk-checkboxes--small"
@@ -116,173 +116,6 @@
 ))
 }
 
-@payeContent = {
-
-@govukInput(Input(
-    id = "payeDebtTotalAmount",
-    name = "payeDebtTotalAmount",
-    label = Label(
-        isPageHeading = false,
-        classes = "govuk-label--m",
-        content = Text("Enter total debt amount without interest (leave blank for £1,234.53)")
-    ),
-    classes = "govuk-input--width-5",
-    spellcheck = Some(false),
-    prefix = Some(PrefixOrSuffix(
-        content = Text("£")
-    )),
-    errorMessage = form.error("payeDebtTotalAmount").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
-        content = Text(e.message)
-    )),
-    value = form.data.get("payeDebtTotalAmount"),
-    hint = Some(Hint(content = Text(s"Enter an amount between £1 and ${appConfig.PolicyParameters.EPAYE.maxAmountOfDebt.gdsFormatInPounds} for PAYE.")))
-))
-
-@govukInput(Input(
-    id = "payeTaxReference",
-    name = "payeTaxReference",
-    label = Label(
-        isPageHeading = false,
-        classes = "govuk-label--m",
-        content = Text("Enter a PAYE tax reference")
-    ),
-    classes = "govuk-input--width-10",
-    spellcheck = Some(false),
-    value = form.data.get("payeTaxReference"),
-    hint = Some(Hint(content = Text("PAYE format NNNLLNNNNN, e.g. 864FZ00049. If left empty, it will be a random one.")))
-))
-
-@govukCheckboxes(Checkboxes(
-    fieldset = Some(Fieldset(
-        legend = Some(Legend(
-            content = Text("Eligibility failures"),
-            classes = "govuk-fieldset__legend--m",
-            isPageHeading = false
-        ))
-    )),
-    idPrefix = Some("eligibilityErrors"),
-    name = "eligibilityErrors[]",
-    items = eligibilityErrorCheckboxes,
-    classes = "govuk-checkboxes--small"
-))
-
-@govukRadios(Radios(
-    fieldset = Some(Fieldset(
-        legend = Some(Legend(
-            content = Text("Entry origins"),
-            classes = "govuk-fieldset__legend--m",
-            isPageHeading = false
-        ))
-    )),
-    idPrefix = Some("origin"),
-    name = "origin",
-    errorMessage = form.error("origin").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
-        content = Text(e.message)
-    )),
-    items = Seq(
-        RadioItem(
-            content = Text("GOV.UK"),
-            value = Some(Origins.Epaye.GovUk.entryName),
-            hint = Some(Hint(content = Text("If you cannot pay your tax bill on time")))
-        ),
-        RadioItem(
-            content = Text("Business Tax Account"),
-            value = Some(Origins.Epaye.Bta.entryName),
-            hint = Some(Hint(content = Text("Set up a payment plan if you cannot pay in full")))
-        ),
-        RadioItem(
-            content = Text("Detached Url"),
-            value = Some(Origins.Epaye.DetachedUrl.entryName)
-        )
-    ),
-    classes = "govuk-radios--small"
-))
-}
-
-@vatContent = {
-
-@govukInput(Input(
-    id = "vatDebtTotalAmount",
-    name = "vatDebtTotalAmount",
-    label = Label(
-        isPageHeading = false,
-        classes = "govuk-label--m",
-        content = Text("Enter total debt amount without interest (leave blank for £1,234.53)")
-    ),
-    classes = "govuk-input--width-5",
-    spellcheck = Some(false),
-    prefix = Some(PrefixOrSuffix(
-        content = Text("£")
-    )),
-    errorMessage = form.error("vatDebtTotalAmount").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
-        content = Text(e.message)
-    )),
-    value = form.data.get("vatDebtTotalAmount"),
-    hint = Some(Hint(content = Text(s"Enter an amount between £1 and ${appConfig.PolicyParameters.VAT.maxAmountOfDebt.gdsFormatInPounds} for VAT.")))
-))
-
-@govukInput(Input(
-    id = "vatTaxReference",
-    name = "vatTaxReference",
-    label = Label(
-        isPageHeading = false,
-        classes = "govuk-label--m",
-        content = Text("Enter a VAT tax reference")
-    ),
-    classes = "govuk-input--width-10",
-    spellcheck = Some(false),
-    value = form.data.get("vatTaxReference"),
-    hint = Some(Hint(content = Text("VAT format NNNNNNNNN, e.g. 101747001. If left empty, it will be a random one.")))
-))
-
-@govukCheckboxes(Checkboxes(
-    fieldset = Some(Fieldset(
-        legend = Some(Legend(
-            content = Text("Eligibility failures"),
-            classes = "govuk-fieldset__legend--m",
-            isPageHeading = false
-        ))
-    )),
-    idPrefix = Some("eligibilityErrors"),
-    name = "eligibilityErrors[]",
-    items = eligibilityErrorCheckboxes,
-    classes = "govuk-checkboxes--small"
-))
-
-@govukRadios(Radios(
-    fieldset = Some(Fieldset(
-        legend = Some(Legend(
-            content = Text("Entry origins"),
-            classes = "govuk-fieldset__legend--m",
-            isPageHeading = false
-        ))
-    )),
-    idPrefix = Some("origin"),
-    name = "origin",
-    errorMessage = form.error("origin").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
-        content = Text(e.message)
-    )),
-    items = Seq(
-        RadioItem(
-            content = Text("GOV.UK"),
-            value = Some(Origins.Vat.GovUk.entryName),
-            hint = Some(Hint(content = Text("If you cannot pay your tax bill on time")))
-        ),
-        RadioItem(
-            content = Text("Business Tax Account"),
-            value = Some(Origins.Vat.Bta.entryName),
-            hint = Some(Hint(content = Text("Set up a payment plan if you cannot pay in full")))
-        ),
-        RadioItem(
-            content = Text("Detached Url"),
-            value = Some(Origins.Vat.DetachedUrl.entryName)
-        )
-    ),
-    classes = "govuk-radios--small"
-))
-
-}
-
 @interestAmountContent = {
 @govukInput(Input(
     id = "interestAmount",
@@ -304,6 +137,190 @@
 ))
 }
 
+@payeContent = {
+@formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneySubmit) {
+
+    <input type="hidden" name="taxRegime" value="Epaye">
+    @signInAsContent
+    @enrolmentsContent
+
+    @govukInput(Input(
+        id = "payeDebtTotalAmount",
+        name = "payeDebtTotalAmount",
+        label = Label(
+            isPageHeading = false,
+            classes = "govuk-label--m",
+            content = Text("Enter total debt amount without interest (leave blank for £1,234.53)")
+        ),
+        classes = "govuk-input--width-5",
+        spellcheck = Some(false),
+        prefix = Some(PrefixOrSuffix(
+            content = Text("£")
+        )),
+        errorMessage = form.error("payeDebtTotalAmount").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
+            content = Text(e.message)
+        )),
+        value = form.data.get("payeDebtTotalAmount"),
+        hint = Some(Hint(content = Text(s"Enter an amount between £1 and ${appConfig.PolicyParameters.EPAYE.maxAmountOfDebt.gdsFormatInPounds} for PAYE.")))
+    ))
+
+    @interestAmountContent
+
+    @govukInput(Input(
+        id = "payeTaxReference",
+        name = "payeTaxReference",
+        label = Label(
+            isPageHeading = false,
+            classes = "govuk-label--m",
+            content = Text("Enter a PAYE tax reference")
+        ),
+        classes = "govuk-input--width-10",
+        spellcheck = Some(false),
+        value = form.data.get("payeTaxReference"),
+        hint = Some(Hint(content = Text("PAYE format NNNLLNNNNN, e.g. 864FZ00049. If left empty, it will be a random one.")))
+    ))
+
+    @govukCheckboxes(Checkboxes(
+        fieldset = Some(Fieldset(
+            legend = Some(Legend(
+                content = Text("Eligibility failures"),
+                classes = "govuk-fieldset__legend--m",
+                isPageHeading = false
+            ))
+        )),
+        idPrefix = Some("eligibilityErrors"),
+        name = "eligibilityErrors[]",
+        items = eligibilityErrorCheckboxes,
+        classes = "govuk-checkboxes--small"
+    ))
+
+    @govukRadios(Radios(
+        fieldset = Some(Fieldset(
+            legend = Some(Legend(
+                content = Text("Entry origins"),
+                classes = "govuk-fieldset__legend--m",
+                isPageHeading = false
+            ))
+        )),
+        idPrefix = Some("origin"),
+        name = "origin",
+        errorMessage = form.error("origin").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
+            content = Text(e.message)
+        )),
+        items = Seq(
+            RadioItem(
+                content = Text("GOV.UK"),
+                value = Some(Origins.Epaye.GovUk.entryName),
+                hint = Some(Hint(content = Text("If you cannot pay your tax bill on time")))
+            ),
+            RadioItem(
+                content = Text("Business Tax Account"),
+                value = Some(Origins.Epaye.Bta.entryName),
+                hint = Some(Hint(content = Text("Set up a payment plan if you cannot pay in full")))
+            ),
+            RadioItem(
+                content = Text("Detached Url"),
+                value = Some(Origins.Epaye.DetachedUrl.entryName)
+            )
+        ),
+        classes = "govuk-radios--small"
+    ))
+    @govukButton(Button(content = Text("Start now")))
+}
+}
+
+@vatContent = {
+@formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneySubmit) {
+    <input type="hidden" name="taxRegime" value="Vat">
+    @signInAsContent
+    @enrolmentsContent
+
+    @govukInput(Input(
+        id = "vatDebtTotalAmount",
+        name = "vatDebtTotalAmount",
+        label = Label(
+            isPageHeading = false,
+            classes = "govuk-label--m",
+            content = Text("Enter total debt amount without interest (leave blank for £1,234.53)")
+        ),
+        classes = "govuk-input--width-5",
+        spellcheck = Some(false),
+        prefix = Some(PrefixOrSuffix(
+            content = Text("£")
+        )),
+        errorMessage = form.error("vatDebtTotalAmount").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
+            content = Text(e.message)
+        )),
+        value = form.data.get("vatDebtTotalAmount"),
+        hint = Some(Hint(content = Text(s"Enter an amount between £1 and ${appConfig.PolicyParameters.VAT.maxAmountOfDebt.gdsFormatInPounds} for VAT.")))
+    ))
+
+    @interestAmountContent
+
+    @govukInput(Input(
+        id = "vatTaxReference",
+        name = "vatTaxReference",
+        label = Label(
+            isPageHeading = false,
+            classes = "govuk-label--m",
+            content = Text("Enter a VAT tax reference")
+        ),
+        classes = "govuk-input--width-10",
+        spellcheck = Some(false),
+        value = form.data.get("vatTaxReference"),
+        hint = Some(Hint(content = Text("VAT format NNNNNNNNN, e.g. 101747001. If left empty, it will be a random one.")))
+    ))
+
+    @govukCheckboxes(Checkboxes(
+        fieldset = Some(Fieldset(
+            legend = Some(Legend(
+                content = Text("Eligibility failures"),
+                classes = "govuk-fieldset__legend--m",
+                isPageHeading = false
+            ))
+        )),
+        idPrefix = Some("eligibilityErrors"),
+        name = "eligibilityErrors[]",
+        items = eligibilityErrorCheckboxes,
+        classes = "govuk-checkboxes--small"
+    ))
+
+    @govukRadios(Radios(
+        fieldset = Some(Fieldset(
+            legend = Some(Legend(
+                content = Text("Entry origins"),
+                classes = "govuk-fieldset__legend--m",
+                isPageHeading = false
+            ))
+        )),
+        idPrefix = Some("origin"),
+        name = "origin",
+        errorMessage = form.error("origin").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
+            content = Text(e.message)
+        )),
+        items = Seq(
+            RadioItem(
+                content = Text("GOV.UK"),
+                value = Some(Origins.Vat.GovUk.entryName),
+                hint = Some(Hint(content = Text("If you cannot pay your tax bill on time")))
+            ),
+            RadioItem(
+                content = Text("Business Tax Account"),
+                value = Some(Origins.Vat.Bta.entryName),
+                hint = Some(Hint(content = Text("Set up a payment plan if you cannot pay in full")))
+            ),
+            RadioItem(
+                content = Text("Detached Url"),
+                value = Some(Origins.Vat.DetachedUrl.entryName)
+            )
+        ),
+        classes = "govuk-radios--small"
+    ))
+    @govukButton(Button(content = Text("Start now")))
+}
+}
+
+
 @testOnlyLayout(pageTitle = Some(title)) {
     @if(form.errors.nonEmpty) {
         @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
@@ -318,31 +335,25 @@
 
     <h1 class="govuk-heading-xl">@title</h1>
     <p class="govuk-body">Set up journeys and emulate entry point behaviours.</p>
-    @formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneySubmit) {
 
-        @signInAsContent
-        @enrolmentsContent
-        @interestAmountContent
-
-        @govukTabs(Tabs(
-            items = Seq(
-                TabItem(
-                    id = Some("paye"),
-                    label = "PAYE",
-                    panel = TabPanel(
-                        content = HtmlContent(payeContent)
-                    )
-                ),
-                TabItem(
-                    id = Some("vat"),
-                    label = "VAT",
-                    panel = TabPanel(
+    @govukTabs(Tabs(
+        items = Seq(
+            TabItem(
+                id = Some("paye"),
+                label = "PAYE",
+                panel = TabPanel(
+                    content = HtmlContent(payeContent)
+                )
+            ),
+            TabItem(
+                id = Some("vat"),
+                label = "VAT",
+                panel = TabPanel(
                     content = HtmlContent(vatContent)
-                    )
                 )
             )
-        ))
-        @govukButton(Button(content = Text("Start now")))
-    }
+        )
+    ))
+
 
 }

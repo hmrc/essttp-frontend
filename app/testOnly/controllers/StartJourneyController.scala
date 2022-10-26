@@ -66,26 +66,15 @@ class StartJourneyController @Inject() (
   val startJourneySubmit: Action[AnyContent] = as.default.async { implicit request =>
     StartJourneyForm.form(appConfig.PolicyParameters.EPAYE.maxAmountOfDebt, appConfig.PolicyParameters.VAT.maxAmountOfDebt).bindFromRequest()
       .fold(
-        formWithErrors => {
-          import cats.syntax.eq._
-          val form = formWithErrors.copy(errors = formWithErrors.errors.map(e =>
-            if (e.key === "payeDebtTotalAmount") {
-              e.withMessage(StartJourneyController.amountInputErrorMessage(e.message, appConfig.PolicyParameters.EPAYE.maxAmountOfDebt, "PAYE")
-                .getOrElse(sys.error(s"Could not find error message for '${e.message}' for debtTotalAmount ")))
-            } else if (e.key === "vatDebtTotalAmount") {
-              e.withMessage(StartJourneyController.amountInputErrorMessage(e.message, appConfig.PolicyParameters.VAT.maxAmountOfDebt, "VAT")
-                .getOrElse(sys.error(s"Could not find error message for '${e.message}' for debtTotalAmount ")))
-            } else {
-              e
-            }))
-          Future.successful(Ok(testOnlyStartPage(form)))
-        },
-
+        formWithErrors =>
+          Future.successful(Ok(testOnlyStartPage(formWithErrors))),
         startJourney
       )
   }
 
   private def startJourney(startJourneyForm: StartJourneyForm): Future[Result] = {
+    println(s"Got $startJourneyForm\n\n\n")
+
     implicit val hc: HeaderCarrier = HeaderCarrier()
     for {
       _ <- essttpStubConnector.primeStubs(makeEligibilityCheckResult(startJourneyForm))
@@ -137,12 +126,8 @@ object StartJourneyController {
 
   private def makeEligibilityCheckResult(form: StartJourneyForm): EligibilityCheckResult = {
 
-    val debtAmountFromForm: DebtTotalAmount =
-      DebtTotalAmount(AmountInPence(
-        form.payeDebtTotalAmount.getOrElse {
-          form.vatDebtTotalAmount.getOrElse(BigDecimal(1234.53))
-        }
-      ))
+    val debtAmountFromForm: AmountInPence =
+      AmountInPence(form.debtTotalAmount)
 
     val interestAmount: AmountInPence = AmountInPence(form.interestAmount.getOrElse(BigDecimal(0)))
 
@@ -152,7 +137,7 @@ object StartJourneyController {
       chargeReference      = ChargeReference(form.empRef.value),
       mainTrans            = MainTrans("mainTrans"),
       subTrans             = SubTrans("subTrans"),
-      outstandingAmount    = OutstandingAmount(debtAmountFromForm.value),
+      outstandingAmount    = OutstandingAmount(debtAmountFromForm),
       interestStartDate    = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
       dueDate              = DueDate(LocalDate.parse("2017-03-07")),
       accruedInterest      = AccruedInterest(interestAmount),
@@ -173,7 +158,7 @@ object StartJourneyController {
       ChargeTypeAssessment(
         TaxPeriodFrom("2020-08-13"),
         TaxPeriodTo("2020-08-14"),
-        DebtTotalAmount(debtAmountFromForm.value + interestAmount),
+        DebtTotalAmount(debtAmountFromForm + interestAmount),
         List(charges)
       )
     )
