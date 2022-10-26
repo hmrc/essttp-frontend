@@ -71,8 +71,6 @@ object StartJourneyForm {
     val interestAmountMapping: Mapping[Option[BigDecimal]] =
       optional(Forms.of(amountOfMoneyFormatter(_ < 0, _ => false)))
 
-    //    val taxRefMapping: Mapping[Option[String]] = optional(Forms.text)
-
     val taxRegimeFormatter: Formatter[TaxRegime] = EnumFormatter.format(
       enum                    = TaxRegime,
       errorMessageIfMissing   = "Tax regime not found: missing",
@@ -129,8 +127,12 @@ object StartJourneyForm {
             taxRef
           }
 
-        // we don't actually need the unbind, but because we've created a Formatter, we need to declare one...
-        override def unbind(key: String, value: TaxId): Map[String, String] = ???
+        override def unbind(key: String, value: TaxId): Map[String, String] = {
+          value match {
+            case EmpRef(value) => Map(payeTaxReferenceKey -> value)
+            case Vrn(value)    => Map(vatTaxReferenceKey -> value)
+          }
+        }
       }
 
     Form(
