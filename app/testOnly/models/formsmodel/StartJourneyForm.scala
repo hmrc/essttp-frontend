@@ -117,15 +117,16 @@ object StartJourneyForm {
               case TaxRegime.Epaye => payeTaxReferenceKey -> RandomDataGenerator.nextEpayeRefs()(Random)._3
               case TaxRegime.Vat   => vatTaxReferenceKey -> RandomDataGenerator.nextVrn()(Random)
             }
-            val dataWithDefaultValue: String = {
-              if (data.get(taxReferenceKey).exists(_.nonEmpty)) data
-              else data.updated(taxReferenceKey, defaultTaxRef.value)
-            }.getOrElse(taxReferenceKey, defaultTaxRef.value)
+            val taxId: Option[TaxId] =
+              data.get(taxReferenceKey)
+                .filter(_.nonEmpty).map { someTaxRef: String =>
+                  taxRegime match {
+                    case TaxRegime.Epaye => EmpRef(someTaxRef)
+                    case TaxRegime.Vat   => Vrn(someTaxRef)
+                  }
+                }
 
-            taxRegime match {
-              case TaxRegime.Epaye => EmpRef(dataWithDefaultValue)
-              case TaxRegime.Vat   => Vrn(dataWithDefaultValue)
-            }
+            taxId.getOrElse(defaultTaxRef)
           }
 
         override def unbind(key: String, value: TaxId): Map[String, String] = {
