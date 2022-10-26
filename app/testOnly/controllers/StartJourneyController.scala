@@ -214,11 +214,4 @@ object StartJourneyController {
     )
   }
 
-  def amountInputErrorMessage(key: String, maxAmountOfDebt: AmountInPence, regimeInfo: String): Option[String] = key match {
-    case "error.required"                    => Some("Total debt field cannot be empty")
-    case "error.pattern"                     => Some("Total debt must be an amount of money")
-    case "error.tooSmall" | "error.tooLarge" => Some(s"Total debt for $regimeInfo must be between £1 and ${maxAmountOfDebt.gdsFormatInPounds}")
-    case _                                   => None
-  }
-
 }
