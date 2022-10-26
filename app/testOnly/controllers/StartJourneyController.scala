@@ -144,7 +144,7 @@ object StartJourneyController {
     val charges: Charges = Charges(
       chargeType           = ChargeType("InYearRTICharge-Tax"),
       mainType             = MainType("InYearRTICharge(FPS)"),
-      chargeReference      = ChargeReference(form.empRef.value),
+      chargeReference      = ChargeReference(form.taxReference.value),
       mainTrans            = MainTrans("mainTrans"),
       subTrans             = SubTrans("subTrans"),
       outstandingAmount    = OutstandingAmount(debtAmountFromForm),
@@ -194,11 +194,11 @@ object StartJourneyController {
       identification              = List(
         Identification(
           idType  = IdType("EMPREF"),
-          idValue = IdValue(form.empRef.value)
+          idValue = IdValue(form.taxReference.value)
         ),
         Identification(
           idType  = IdType("BROCS"),
-          idValue = IdValue(form.empRef.value)
+          idValue = IdValue(form.taxReference.value)
         )
       ),
       customerPostcodes           = List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate("2022-01-01"))),

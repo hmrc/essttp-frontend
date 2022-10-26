@@ -17,9 +17,8 @@
 package testOnly.models.formsmodel
 
 import cats.syntax.either._
-
 import essttp.journey.model.{Origin, Origins}
-import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
+import essttp.rootmodel.TaxId
 import essttp.rootmodel.{AmountInPence, EmpRef, TaxRegime, Vrn}
 import models.MoneyUtil.{amountOfMoneyFormatter, formatAmountOfMoneyWithoutPoundSign}
 import models.{EligibilityError, EligibilityErrors, Language}
@@ -39,19 +38,9 @@ final case class StartJourneyForm(
     eligibilityErrors: Seq[EligibilityError],
     debtTotalAmount:   BigDecimal,
     interestAmount:    Option[BigDecimal],
-    payeTaxReference:  Option[String],
-    vatTaxReference:   Option[String],
+    taxReference:      TaxId,
     taxRegime:         TaxRegime
-) {
-  val (taxOfficeNumber: TaxOfficeNumber, taxOfficeReference: TaxOfficeReference, empRef: EmpRef) = {
-    payeTaxReference.fold(RandomDataGenerator.nextEpayeRefs()(Random)) { someTaxRef =>
-      val ton = TaxOfficeNumber(someTaxRef.take(3))
-      val tor = TaxOfficeReference(someTaxRef.drop(3))
-      (ton, tor, EmpRef.makeEmpRef(ton, tor))
-    }
-  }
-  val vrn: Vrn = vatTaxReference.fold(RandomDataGenerator.nextVrn()(Random))(Vrn(_))
-}
+)
 
 object StartJourneyForm {
 
@@ -60,6 +49,8 @@ object StartJourneyForm {
     val taxRegimeKey: String = "taxRegime"
     val payeDebtTotalAmountKey: String = "payeDebtTotalAmount"
     val vatDebtTotalAmountKey: String = "vatDebtTotalAmount"
+    val payeTaxReferenceKey: String = "payeTaxReference"
+    val vatTaxReferenceKey: String = "vatTaxReference"
 
     val signInMapping: Mapping[SignInAs] = Forms.of(EnumFormatter.format(
       enum                    = SignInAs,
@@ -80,7 +71,7 @@ object StartJourneyForm {
     val interestAmountMapping: Mapping[Option[BigDecimal]] =
       optional(Forms.of(amountOfMoneyFormatter(_ < 0, _ => false)))
 
-    val taxRefMapping: Mapping[Option[String]] = optional(Forms.text)
+    //    val taxRefMapping: Mapping[Option[String]] = optional(Forms.text)
 
     val taxRegimeFormatter: Formatter[TaxRegime] = EnumFormatter.format(
       enum                    = TaxRegime,
@@ -109,7 +100,7 @@ object StartJourneyForm {
                   case "error.pattern"  => "Total debt amount must be a number"
                   case "error.required" => "Total debt amount not found"
                   case "error.tooLarge" => s"Total debt amount must be below ${maxAmount.gdsFormatInPounds}"
-                  case "error.tooSmall" => s"Total debt amount mustbe above ${minAmount.gdsFormatInPounds}"
+                  case "error.tooSmall" => s"Total debt amount must be above ${minAmount.gdsFormatInPounds}"
                   case other            => other
                 }
                 FormError(e.key, mappedMesage)
@@ -120,6 +111,28 @@ object StartJourneyForm {
           Map(key -> formatAmountOfMoneyWithoutPoundSign(value))
       }
 
+    val taxReferenceFormat: Formatter[TaxId] =
+      new Formatter[TaxId] {
+        override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], TaxId] =
+          taxRegimeFormatter.bind(taxRegimeKey, data).map{ taxRegime =>
+            val (taxReferenceKey, defaultTaxRef): (String, TaxId) = taxRegime match {
+              case TaxRegime.Epaye => payeTaxReferenceKey -> RandomDataGenerator.nextEpayeRefs()(Random)._3
+              case TaxRegime.Vat   => vatTaxReferenceKey -> RandomDataGenerator.nextVrn()(Random)
+            }
+            val dataWithDefaultValue: Map[String, String] =
+              if (data.get(taxReferenceKey).exists(_.nonEmpty)) data else data.updated(taxReferenceKey, defaultTaxRef.value)
+
+            val taxRef: TaxId = taxRegime match {
+              case TaxRegime.Epaye => EmpRef(dataWithDefaultValue.getOrElse(taxReferenceKey, defaultTaxRef.value))
+              case TaxRegime.Vat   => Vrn(dataWithDefaultValue.getOrElse(taxReferenceKey, defaultTaxRef.value))
+            }
+            taxRef
+          }
+
+        // we don't actually need the unbind, but because we've created a Formatter, we need to declare one...
+        override def unbind(key: String, value: TaxId): Map[String, String] = ???
+      }
+
     Form(
       mapping(
         "signInAs" -> signInMapping,
@@ -128,8 +141,7 @@ object StartJourneyForm {
         "eligibilityErrors" -> seq(enumeratum.Forms.enum(EligibilityErrors)),
         "" -> Forms.of(debtTotalAmountFormat),
         "interestAmount" -> interestAmountMapping,
-        "payeTaxReference" -> taxRefMapping,
-        "vatTaxReference" -> taxRefMapping,
+        "" -> Forms.of(taxReferenceFormat),
         taxRegimeKey -> Forms.of(taxRegimeFormatter)
       )(StartJourneyForm.apply)(StartJourneyForm.unapply)
     )

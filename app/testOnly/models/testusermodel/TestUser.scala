@@ -16,6 +16,8 @@
 
 package testOnly.models.testusermodel
 
+import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
+import essttp.rootmodel.Vrn
 import testOnly.models.formsmodel.{Enrolments, SignInAs, StartJourneyForm}
 import uk.gov.hmrc.auth.core.{AffinityGroup, ConfidenceLevel}
 
@@ -49,8 +51,8 @@ object TestUser {
     val maybeEpayeEnrolment: StartJourneyForm => Option[EpayeEnrolment] = { form =>
       if (form.enrolments.contains(Enrolments.Epaye)) {
         Some(EpayeEnrolment(
-          taxOfficeNumber    = form.taxOfficeNumber,
-          taxOfficeReference = form.taxOfficeReference,
+          taxOfficeNumber    = TaxOfficeNumber(form.taxReference.value.take(3)),
+          taxOfficeReference = TaxOfficeReference(form.taxReference.value.drop(3)),
           enrolmentStatus    = EnrolmentStatus.Activated //TODO: read this from the form
         ))
       } else {
@@ -59,7 +61,7 @@ object TestUser {
     }
 
     val maybeVatEnrolment: StartJourneyForm => Option[VatEnrolment] = { form =>
-      if (form.enrolments.contains(Enrolments.Vat)) Some(VatEnrolment(form.vrn, EnrolmentStatus.Activated))
+      if (form.enrolments.contains(Enrolments.Vat)) Some(VatEnrolment(Vrn(form.taxReference.value), EnrolmentStatus.Activated))
       else None
     }
 
