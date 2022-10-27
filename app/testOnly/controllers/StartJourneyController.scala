@@ -18,7 +18,7 @@ package testOnly.controllers
 
 import _root_.actions.Actions
 import _root_.essttp.rootmodel.ttp._
-import _root_.testOnly.views.html.{IAmBtaPage, TestOnlyStartPage}
+import _root_.testOnly.views.html.{IAmBtaPage, IAmEPAYEPage, TestOnlyStartPage}
 import config.AppConfig
 import essttp.journey.JourneyConnector
 import essttp.journey.model.{Origins, SjRequest}
@@ -52,6 +52,7 @@ class StartJourneyController @Inject() (
     journeyConnector:    JourneyConnector,
     loginService:        AuthLoginApiService,
     iAmBtaPage:          IAmBtaPage,
+    iAmEpayePage:        IAmEPAYEPage,
     requestSupport:      RequestSupport
 )(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
@@ -80,12 +81,13 @@ class StartJourneyController @Inject() (
       maybeTestUser = TestUser.makeTestUser(startJourneyForm)
       session <- maybeTestUser.map(testUser => loginService.logIn(testUser)).getOrElse(Future.successful(Session.emptyCookie))
       redirect: Result = startJourneyForm.origin match {
-        case Origins.Epaye.Bta         => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.showBtaPage)
-        case Origins.Epaye.GovUk       => Redirect("https://github.com/hmrc/essttp-frontend#emulate-start-journey-from-gov-uk")
-        case Origins.Epaye.DetachedUrl => Redirect(_root_.controllers.routes.GovUkController.startEpayeJourney.url)
-        case Origins.Vat.Bta           => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.showBtaPage)
-        case Origins.Vat.GovUk         => Redirect("https://github.com/hmrc/essttp-frontend#emulate-start-journey-from-gov-uk")
-        case Origins.Vat.DetachedUrl   => Redirect(_root_.controllers.routes.GovUkController.startVatJourney.url)
+        case Origins.Epaye.Bta          => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.showBtaPage)
+        case Origins.Epaye.EpayeService => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.showEpayePage)
+        case Origins.Epaye.GovUk        => Redirect("https://github.com/hmrc/essttp-frontend#emulate-start-journey-from-gov-uk")
+        case Origins.Epaye.DetachedUrl  => Redirect(_root_.controllers.routes.GovUkController.startEpayeJourney.url)
+        case Origins.Vat.Bta            => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.showBtaPage)
+        case Origins.Vat.GovUk          => Redirect("https://github.com/hmrc/essttp-frontend#emulate-start-journey-from-gov-uk")
+        case Origins.Vat.DetachedUrl    => Redirect(_root_.controllers.routes.GovUkController.startVatJourney.url)
       }
     } yield redirect.withSession(session)
   }
@@ -102,6 +104,17 @@ class StartJourneyController @Inject() (
   }
 
   /**
+   * Pretends being a EPAYE service page
+   */
+  val showEpayePage: Action[AnyContent] = as.default { implicit request =>
+    if (hc.sessionId.isEmpty) {
+      Ok("Missing session id")
+    } else {
+      Ok(iAmEpayePage())
+    }
+  }
+
+  /**
    * Pretends for testing purposes that journey started from Bta
    */
   val startJourneyEpayeBta: Action[AnyContent] = as.default.async { implicit request =>
@@ -111,6 +124,19 @@ class StartJourneyController @Inject() (
       journeyConnector.Epaye.startJourneyBta(SjRequest.Epaye.Simple(
         returnUrl = ReturnUrl(routes.StartJourneyController.showBtaPage.url + "?return-page"),
         backUrl   = BackUrl(routes.StartJourneyController.showBtaPage.url + "?starting-page")
+      )).map(sjResponse => Redirect(sjResponse.nextUrl.value))
+    }
+  }
+  /**
+   * Pretends for testing purposes that journey started from EPAYE service
+   */
+  val startJourneyEpayeEpaye: Action[AnyContent] = as.default.async { implicit request =>
+    if (hc.sessionId.isEmpty) {
+      Future.successful(Ok("Missing session id"))
+    } else {
+      journeyConnector.Epaye.startJourneyEpayeService(SjRequest.Epaye.Simple(
+        returnUrl = ReturnUrl(routes.StartJourneyController.showEpayePage.url + "?return-page"),
+        backUrl   = BackUrl(routes.StartJourneyController.showEpayePage.url + "?starting-page")
       )).map(sjResponse => Redirect(sjResponse.nextUrl.value))
     }
   }
