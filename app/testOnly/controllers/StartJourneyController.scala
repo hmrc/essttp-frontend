@@ -135,8 +135,8 @@ class StartJourneyController @Inject() (
       Future.successful(Ok("Missing session id"))
     } else {
       journeyConnector.Epaye.startJourneyEpayeService(SjRequest.Epaye.Simple(
-        returnUrl = ReturnUrl(routes.StartJourneyController.showBtaPage.url + "?return-page"),
-        backUrl   = BackUrl(routes.StartJourneyController.showBtaPage.url + "?starting-page")
+        returnUrl = ReturnUrl(routes.StartJourneyController.showEpayePage.url + "?return-page"),
+        backUrl   = BackUrl(routes.StartJourneyController.showEpayePage.url + "?starting-page")
       )).map(sjResponse => Redirect(sjResponse.nextUrl.value))
     }
   }
@@ -146,8 +146,8 @@ class StartJourneyController @Inject() (
       Future.successful(Ok("Missing session id"))
     } else {
       journeyConnector.Vat.startJourneyBta(SjRequest.Vat.Simple(
-        returnUrl = ReturnUrl(routes.StartJourneyController.showEpayePage.url + "?return-page"),
-        backUrl   = BackUrl(routes.StartJourneyController.showEpayePage.url + "?starting-page")
+        returnUrl = ReturnUrl(routes.StartJourneyController.showBtaPage.url + "?return-page"),
+        backUrl   = BackUrl(routes.StartJourneyController.showBtaPage.url + "?starting-page")
       )).map(sjResponse => Redirect(sjResponse.nextUrl.value))
     }
   }
