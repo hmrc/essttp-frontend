@@ -20,14 +20,17 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.rootmodel.Email
 import models.GGCredId
+import models.emailverification.EmailVerificationStatusResponse.EmailStatus
 import models.emailverification.RequestEmailVerificationResponse
-import play.api.http.Status.CREATED
+import play.api.http.Status.{CREATED, OK}
 import play.api.libs.json.Json
 import testsupport.testdata.PageUrls
 
 object EmailVerificationStub {
 
-  val requestVerificationUrl: String = "/email-verification/verify-email"
+  private val requestVerificationUrl: String = "/email-verification/verify-email"
+
+  private def getVerificationStatusUrl(ggCredId: GGCredId): String = s"/email-verification/verification-status/${ggCredId.value}"
 
   type HttpStatus = Int
 
@@ -75,6 +78,33 @@ object EmailVerificationStub {
                |""".stripMargin
           )
         )
+    )
+
+  def getVerificationStatus(ggCredId: GGCredId, result: Either[HttpStatus, List[EmailStatus]]): StubMapping =
+    stubFor(
+      get(urlPathEqualTo(getVerificationStatusUrl(ggCredId)))
+        .willReturn{
+          result.fold(
+            status => aResponse().withStatus(status),
+            { success =>
+              val emailsJson = success.map(emailStatus =>
+                s"""{
+                   |  "emailAddress": "${emailStatus.emailAddress}",
+                   |  "verified": ${emailStatus.verified},
+                   |  "locked": ${emailStatus.locked}
+                   |}
+                   |""".stripMargin)
+              val body = Json.parse(
+                s"""
+                   |{
+                   |  "emails": [ ${emailsJson.mkString(",")} ]
+                   |}
+                   |""".stripMargin
+              )
+              aResponse().withStatus(OK).withBody(Json.prettyPrint(body))
+            }
+          )
+        }
     )
 
 }

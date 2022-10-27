@@ -16,6 +16,7 @@
 
 package testsupport.testdata
 
+import essttp.emailverification.EmailVerificationStatus
 import essttp.rootmodel.DayOfMonth
 import uk.gov.hmrc.crypto.Encrypter
 
@@ -49,7 +50,10 @@ object JourneyInfo {
   def directDebitDetailsNotAccountHolder(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo(encrypter)
   def emailAddressRequired(isEmailAddressRequired: Boolean): JourneyInfoAsJson = TdJsonBodies.isEmailAddressRequiredJourneyInfo(isEmailAddressRequired)
   def emailToBeVerified(email: String, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.emailAddressSelectedToBeVerified(email, encrypter)
-  def emailVerificationAnswers: JourneyInfoAsJson = TdJsonBodies.emailVerificationAnswers
+  def emailVerificationStatus(status: EmailVerificationStatus): JourneyInfoAsJson = TdJsonBodies.emailVerificationStatus(status)
+  def emailVerificationAnswersNoEmailRequired: JourneyInfoAsJson = TdJsonBodies.emailVerificationAnswersNoEmailJourney
+  def emailVerificationAnswersEmailRequired(email: String, status: EmailVerificationStatus, encrypter: Encrypter): JourneyInfoAsJson =
+    TdJsonBodies.emailVerificationAnswersEmailRequired(email, status, encrypter)
   val arrangementSubmitted: JourneyInfoAsJson = TdJsonBodies.arrangementResponseJourneyInfo()
   /** * **/
 
@@ -134,15 +138,18 @@ object JourneyInfo {
   def selectedEmailToBeVerified(email: String, encrypter: Encrypter): List[JourneyInfoAsJson] =
     emailToBeVerified(email, encrypter) :: agreedTermsAndConditions(isEmailAddressRequired = true, encrypter)
 
+  def emailVerificationComplete(email: String, status: EmailVerificationStatus, encrypter: Encrypter): List[JourneyInfoAsJson] =
+    emailVerificationStatus(status) :: emailVerificationAnswersEmailRequired(email, status, encrypter) :: selectedEmailToBeVerified(email, encrypter)
+
   def emailVerificationAnswers(isEmailAddressRequired: Boolean, encrypter: Encrypter): List[JourneyInfoAsJson] =
-    emailVerificationAnswers :: agreedTermsAndConditions(isEmailAddressRequired, encrypter)
+    emailVerificationAnswersNoEmailRequired :: agreedTermsAndConditions(isEmailAddressRequired, encrypter)
 
   def submittedArrangementWithUpfrontPayment(encrypter: Encrypter): List[JourneyInfoAsJson] =
     arrangementSubmitted :: emailVerificationAnswers(isEmailAddressRequired = false, encrypter)
 
   //used in final page test
   def submittedArrangementNoUpfrontPayment(encrypter: Encrypter): List[JourneyInfoAsJson] =
-    arrangementSubmitted :: emailVerificationAnswers :: emailAddressRequired(isEmailAddressRequired = false) :: directDebitDetails(encrypter) ::
+    arrangementSubmitted :: emailVerificationAnswersNoEmailRequired :: emailAddressRequired(isEmailAddressRequired = false) :: directDebitDetails(encrypter) ::
       detailsAboutBankAccountBusiness(isAccountHolder = true) :: selectedPlan :: affordableQuotes ::
       upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: monthlyPaymentAmount ::
       dayOfMonth() :: startDates :: cannotPayUpfront :: eligibilityCheckedEligible(encrypter)

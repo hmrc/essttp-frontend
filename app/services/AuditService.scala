@@ -21,11 +21,12 @@ import cats.syntax.eq._
 import essttp.bars.model.BarsVerifyStatusResponse
 import essttp.crypto.CryptoFormat
 import essttp.journey.model.Journey.Stages._
-import essttp.journey.model.Journey.{AfterEnteredDetailsAboutBankAccount, Stages}
+import essttp.journey.model.Journey.{AfterEligibilityChecked, AfterEnteredDetailsAboutBankAccount}
 import essttp.journey.model.Origin
 import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount}
 import essttp.rootmodel.ttp.EligibilityCheckResult
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
+import io.scalaland.chimney.dsl.TransformerOps
 import models.audit.bars._
 import models.audit.eligibility.{EligibilityCheckAuditDetail, EligibilityResult, EnrollmentReasons}
 import models.audit.paymentplansetup.PaymentPlanSetUpAuditDetail
@@ -75,7 +76,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
     audit(toBarsCheckAuditDetail(journey, bankDetails, typeOfBankAccount, result, verifyStatusResponse))
 
   def auditPaymentPlanSetUp(
-      journey:         AgreedTermsAndConditions,
+      journey:         Either[AgreedTermsAndConditions, EmailVerificationComplete],
       responseFromTtp: Either[HttpException, ArrangementResponse]
   )(implicit authenticatedJourneyRequest: AuthenticatedJourneyRequest[_], headerCarrier: HeaderCarrier): Unit = {
     audit(toPaymentPlanSetupAuditDetail(journey, responseFromTtp))
@@ -158,14 +159,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       result:               Either[BarsError, VerifyResponse],
       verifyStatusResponse: BarsVerifyStatusResponse
   ): BarsCheckAuditDetail = {
-    val eligibilityCheckResult = journey match {
-      case j: EnteredDetailsAboutBankAccount     => j.eligibilityCheckResult
-      case j: Stages.EnteredDirectDebitDetails   => j.eligibilityCheckResult
-      case j: Stages.ConfirmedDirectDebitDetails => j.eligibilityCheckResult
-      case j: Stages.AgreedTermsAndConditions    => j.eligibilityCheckResult
-      case j: Stages.SelectedEmailToBeVerified   => j.eligibilityCheckResult
-      case j: Stages.SubmittedArrangement        => j.eligibilityCheckResult
-    }
+    val eligibilityCheckResult = journey.into[AfterEligibilityChecked].transform.eligibilityCheckResult
 
     BarsCheckAuditDetail(
       journey.taxRegime.toString,
@@ -191,20 +185,29 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
   }
 
   private def toPaymentPlanSetupAuditDetail(
-      journey:         AgreedTermsAndConditions,
+      journey:         Either[AgreedTermsAndConditions, EmailVerificationComplete],
       responseFromTtp: Either[HttpException, ArrangementResponse]
   )(implicit r: AuthenticatedJourneyRequest[_]): PaymentPlanSetUpAuditDetail = {
     val maybeArrangementResponse: Option[ArrangementResponse] = responseFromTtp.toOption
     val status: Int = responseFromTtp.fold(_.responseCode, _ => Status.ACCEPTED)
+
+    val directDebitDetails = journey.fold(_.directDebitDetails, _.directDebitDetails)
+    val selectedPaymentPlan = journey.fold(_.selectedPaymentPlan, _.selectedPaymentPlan)
+    val dayOfMonth = journey.fold(_.dayOfMonth, _.dayOfMonth)
+    val origin = journey.fold(_.origin, _.origin)
+    val taxRegime = journey.fold(_.taxRegime, _.taxRegime)
+    val eligibilityCheckResult = journey.fold(_.eligibilityCheckResult, _.eligibilityCheckResult)
+    val correlationId = journey.fold(_.correlationId, _.correlationId)
+
     PaymentPlanSetUpAuditDetail(
-      bankDetails            = journey.directDebitDetails,
-      schedule               = Schedule.createSchedule(journey.selectedPaymentPlan, journey.dayOfMonth),
+      bankDetails            = directDebitDetails,
+      schedule               = Schedule.createSchedule(selectedPaymentPlan, dayOfMonth),
       status                 = if (Status.isSuccessful(status)) "successfully sent to TTP" else "failed",
       failedSubmissionReason = status,
-      origin                 = toAuditString(journey.origin),
-      taxType                = journey.taxRegime.toString,
-      taxDetail              = toTaxDetail(journey.eligibilityCheckResult),
-      correlationId          = journey.correlationId,
+      origin                 = toAuditString(origin),
+      taxType                = taxRegime.toString,
+      taxDetail              = toTaxDetail(eligibilityCheckResult),
+      correlationId          = correlationId,
       ppReferenceNo          = maybeArrangementResponse.map(_.customerReference.value).getOrElse("N/A"),
       authProviderId         = r.ggCredId.value
     )
