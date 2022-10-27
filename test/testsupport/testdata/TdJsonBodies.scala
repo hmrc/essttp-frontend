@@ -48,6 +48,7 @@ object TdJsonBodies {
          |  "nextUrl": "http://localhost:19001/set-up-a-payment-plan?traceId=33678917",
          |  "journeyId": "${TdAll.journeyId.value}"
          |}""".stripMargin
+    val epaye: String = bta
     val govUk: String = bta
     val detachedUrl: String = bta
   }

@@ -17,8 +17,10 @@ POST /set-up-a-payment-plan/test-only/start-journey   testOnly.controllers.Start
 GET  /set-up-a-payment-plan/test-only/show-journey    testOnly.controllers.DebugJourneyController.showJourney
 
 GET  /set-up-a-payment-plan/test-only/bta-page        testOnly.controllers.StartJourneyController.showBtaPage
+GET  /set-up-a-payment-plan/test-only/epaye-page      testOnly.controllers.StartJourneyController.showEpayePage
 
 GET /set-up-a-payment-plan/test-only/email-verification-passcodes testOnly.controllers.EmailController.emailVerificationPasscodes
 
 #Pretends that that journey starts from Bta
 GET  /set-up-a-payment-plan/test-only/start-journey-epaye-bta   testOnly.controllers.StartJourneyController.startJourneyEpayeBta
+GET  /set-up-a-payment-plan/test-only/start-journey-epaye-epaye testOnly.controllers.StartJourneyController.startJourneyEpayeEpaye

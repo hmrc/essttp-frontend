@@ -83,6 +83,7 @@ object EssttpBackend {
 
   object StartJourney {
     private val startJourneyBtaEpayeUrl = "/essttp-backend/epaye/bta/journey/start"
+    private val startJourneyEpayeEpayeUrl = "/essttp-backend/epaye/epaye/journey/start"
     private val startJourneyGovUkEpayeUrl = "/essttp-backend/epaye/gov-uk/journey/start"
     private val startJourneyDetachedEpayeUrl = "/essttp-backend/epaye/detached-url/journey/start"
     private val startJourneyBtaVatUrl = "/essttp-backend/vat/bta/journey/start"
@@ -92,6 +93,7 @@ object EssttpBackend {
     def startJourneyInBackend(origin: Origin): StubMapping = {
       val (url, expectedRequestBody, responseBody): (String, String, String) = origin match {
         case Origins.Epaye.Bta         => (startJourneyBtaEpayeUrl, TdJsonBodies.StartJourneyRequestBodies.simple, TdJsonBodies.StartJourneyResponses.bta)
+        case Origins.Epaye.EPAYE       => (startJourneyEpayeEpayeUrl, TdJsonBodies.StartJourneyRequestBodies.simple, TdJsonBodies.StartJourneyResponses.epaye)
         case Origins.Epaye.GovUk       => (startJourneyGovUkEpayeUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.govUk)
         case Origins.Epaye.DetachedUrl => (startJourneyDetachedEpayeUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.detachedUrl)
         case Origins.Vat.Bta           => (startJourneyBtaVatUrl, TdJsonBodies.StartJourneyRequestBodies.simple, TdJsonBodies.StartJourneyResponses.bta)
