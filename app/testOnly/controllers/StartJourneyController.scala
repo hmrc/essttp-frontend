@@ -60,24 +60,15 @@ class StartJourneyController @Inject() (
   import requestSupport._
 
   val startJourneyGet: Action[AnyContent] = as.default { implicit request =>
-    Ok(testOnlyStartPage(StartJourneyForm.form(appConfig.PolicyParameters.EPAYE.maxAmountOfDebt)))
+    Ok(testOnlyStartPage(StartJourneyForm.form(appConfig.PolicyParameters.EPAYE.maxAmountOfDebt, appConfig.PolicyParameters.VAT.maxAmountOfDebt)))
   }
 
   val startJourneySubmit: Action[AnyContent] = as.default.async { implicit request =>
-    StartJourneyForm.form(appConfig.PolicyParameters.EPAYE.maxAmountOfDebt).bindFromRequest()
+    StartJourneyForm.form(appConfig.PolicyParameters.EPAYE.maxAmountOfDebt, appConfig.PolicyParameters.VAT.maxAmountOfDebt)
+      .bindFromRequest()
       .fold(
-        formWithErrors => {
-          import cats.syntax.eq._
-          val form = formWithErrors.copy(errors = formWithErrors.errors.map(e =>
-            if (e.key === "debtTotalAmount") {
-              e.withMessage(StartJourneyController.amountInputErrorMessage(e.message, appConfig.PolicyParameters.EPAYE.maxAmountOfDebt)
-                .getOrElse(sys.error(s"Could not find error message for '${e.message}' for debtTotalAmount ")))
-            } else {
-              e
-            }))
-          Future.successful(Ok(testOnlyStartPage(form)))
-        },
-
+        formWithErrors =>
+          Future.successful(Ok(testOnlyStartPage(formWithErrors))),
         startJourney
       )
   }
@@ -120,7 +111,18 @@ class StartJourneyController @Inject() (
       journeyConnector.Epaye.startJourneyBta(SjRequest.Epaye.Simple(
         returnUrl = ReturnUrl(routes.StartJourneyController.showBtaPage.url + "?return-page"),
         backUrl   = BackUrl(routes.StartJourneyController.showBtaPage.url + "?starting-page")
-      )).map(x => Redirect(x.nextUrl.value))
+      )).map(sjResponse => Redirect(sjResponse.nextUrl.value))
+    }
+  }
+
+  val startJourneyVatBta: Action[AnyContent] = as.default.async { implicit request =>
+    if (hc.sessionId.isEmpty) {
+      Future.successful(Ok("Missing session id"))
+    } else {
+      journeyConnector.Vat.startJourneyBta(SjRequest.Vat.Simple(
+        returnUrl = ReturnUrl(routes.StartJourneyController.showBtaPage.url + "?return-page"),
+        backUrl   = BackUrl(routes.StartJourneyController.showBtaPage.url + "?starting-page")
+      )).map(sjResponse => Redirect(sjResponse.nextUrl.value))
     }
   }
 }
@@ -134,16 +136,18 @@ object StartJourneyController {
 
   private def makeEligibilityCheckResult(form: StartJourneyForm): EligibilityCheckResult = {
 
-    val debtAmountFromForm: DebtTotalAmount = DebtTotalAmount(AmountInPence(form.debtTotalAmount))
+    val debtAmountFromForm: AmountInPence =
+      AmountInPence(form.debtTotalAmount)
+
     val interestAmount: AmountInPence = AmountInPence(form.interestAmount.getOrElse(BigDecimal(0)))
 
     val charges: Charges = Charges(
       chargeType           = ChargeType("InYearRTICharge-Tax"),
       mainType             = MainType("InYearRTICharge(FPS)"),
-      chargeReference      = ChargeReference(form.empRef.value),
+      chargeReference      = ChargeReference(form.taxReference.value),
       mainTrans            = MainTrans("mainTrans"),
       subTrans             = SubTrans("subTrans"),
-      outstandingAmount    = OutstandingAmount(debtAmountFromForm.value),
+      outstandingAmount    = OutstandingAmount(debtAmountFromForm),
       interestStartDate    = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
       dueDate              = DueDate(LocalDate.parse("2017-03-07")),
       accruedInterest      = AccruedInterest(interestAmount),
@@ -164,7 +168,7 @@ object StartJourneyController {
       ChargeTypeAssessment(
         TaxPeriodFrom("2020-08-13"),
         TaxPeriodTo("2020-08-14"),
-        DebtTotalAmount(debtAmountFromForm.value + interestAmount),
+        DebtTotalAmount(debtAmountFromForm + interestAmount),
         List(charges)
       )
     )
@@ -190,11 +194,11 @@ object StartJourneyController {
       identification              = List(
         Identification(
           idType  = IdType("EMPREF"),
-          idValue = IdValue(form.empRef.value)
+          idValue = IdValue(form.taxReference.value)
         ),
         Identification(
           idType  = IdType("BROCS"),
-          idValue = IdValue(form.empRef.value)
+          idValue = IdValue(form.taxReference.value)
         )
       ),
       customerPostcodes           = List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate("2022-01-01"))),
@@ -208,13 +212,6 @@ object StartJourneyController {
       customerDetails             = None,
       regimeDigitalCorrespondence = None
     )
-  }
-
-  def amountInputErrorMessage(key: String, maxAmountOfDebt: AmountInPence): Option[String] = key match {
-    case "error.required"                    => Some("Total debt field cannot be empty")
-    case "error.pattern"                     => Some("Total debt must be an amount of money")
-    case "error.tooSmall" | "error.tooLarge" => Some(s"Total debt for PAYE must be between £1 and £${maxAmountOfDebt.gdsFormatInPounds}")
-    case _                                   => None
   }
 
 }

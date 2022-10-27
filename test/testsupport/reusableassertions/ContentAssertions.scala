@@ -17,6 +17,7 @@
 package testsupport.reusableassertions
 
 import controllers.routes
+import essttp.rootmodel.TaxRegime
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 import org.scalatest.Assertion
@@ -60,19 +61,25 @@ object ContentAssertions extends RichMatchers {
       expectedSubmitUrl:           Option[String],
       signedIn:                    Boolean        = true,
       hasFormError:                Boolean        = false,
-      shouldH1BeSameAsServiceName: Boolean        = false
+      shouldH1BeSameAsServiceName: Boolean        = false,
+      regimeBeingTested:           TaxRegime      = TaxRegime.Epaye
   ): Unit = {
     val titlePrefix = if (hasFormError) "Error: " else ""
 
-    if (shouldH1BeSameAsServiceName) {
-      expectedH1 shouldBe TdAll.expectedServiceNamePaye
-      page.title() shouldBe s"$titlePrefix$expectedH1 - GOV.UK"
-    } else {
-      expectedH1 shouldNot be(TdAll.expectedServiceNamePaye)
-      page.title() shouldBe s"$titlePrefix$expectedH1 - ${TdAll.expectedServiceNamePaye} - GOV.UK"
+    val regimeServiceName = regimeBeingTested match {
+      case TaxRegime.Epaye => TdAll.expectedServiceNamePaye
+      case TaxRegime.Vat   => TdAll.expectedServiceNameVat
     }
 
-    page.select(".hmrc-header__service-name").text() shouldBe TdAll.expectedServiceNamePaye
+    if (shouldH1BeSameAsServiceName) {
+      expectedH1 shouldBe regimeServiceName
+      page.title() shouldBe s"$titlePrefix$expectedH1 - GOV.UK"
+    } else {
+      expectedH1 shouldNot be(regimeServiceName)
+      page.title() shouldBe s"$titlePrefix$expectedH1 - $regimeServiceName - GOV.UK"
+    }
+
+    page.select(".hmrc-header__service-name").text() shouldBe regimeServiceName
 
     page.select("h1").text() shouldBe expectedH1
     ContentAssertions.languageToggleExists(page)

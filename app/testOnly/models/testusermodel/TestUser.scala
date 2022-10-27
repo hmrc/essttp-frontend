@@ -16,6 +16,8 @@
 
 package testOnly.models.testusermodel
 
+import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
+import essttp.rootmodel.Vrn
 import testOnly.models.formsmodel.{Enrolments, SignInAs, StartJourneyForm}
 import uk.gov.hmrc.auth.core.{AffinityGroup, ConfidenceLevel}
 
@@ -27,9 +29,9 @@ import scala.util.Random
  * log user in with defined enrolments.
  */
 final case class TestUser(
-    nino:           Option[Nino],
-    epayeEnrolment: Option[EpayeEnrolment],
-    //TODO vat enrolment
+    nino:            Option[Nino],
+    epayeEnrolment:  Option[EpayeEnrolment],
+    vatEnrolment:    Option[VatEnrolment],
     authorityId:     AuthorityId,
     affinityGroup:   AffinityGroup,
     confidenceLevel: ConfidenceLevel
@@ -49,8 +51,8 @@ object TestUser {
     val maybeEpayeEnrolment: StartJourneyForm => Option[EpayeEnrolment] = { form =>
       if (form.enrolments.contains(Enrolments.Epaye)) {
         Some(EpayeEnrolment(
-          taxOfficeNumber    = form.taxOfficeNumber,
-          taxOfficeReference = form.taxOfficeReference,
+          taxOfficeNumber    = TaxOfficeNumber(form.taxReference.value.take(3)),
+          taxOfficeReference = TaxOfficeReference(form.taxReference.value.drop(3)),
           enrolmentStatus    = EnrolmentStatus.Activated //TODO: read this from the form
         ))
       } else {
@@ -58,10 +60,16 @@ object TestUser {
       }
     }
 
+    val maybeVatEnrolment: StartJourneyForm => Option[VatEnrolment] = { form =>
+      if (form.enrolments.contains(Enrolments.Vat)) Some(VatEnrolment(Vrn(form.taxReference.value), EnrolmentStatus.Activated))
+      else None
+    }
+
     maybeAffinityGroup.map { affinityGroup: AffinityGroup =>
       TestUser(
         nino            = None, //TODO: read this from the form, populate if individual
         epayeEnrolment  = maybeEpayeEnrolment(form),
+        vatEnrolment    = maybeVatEnrolment(form),
         authorityId     = RandomDataGenerator.nextAuthorityId(),
         affinityGroup   = affinityGroup,
         confidenceLevel = ConfidenceLevel.L50 //TODO: read this from the form

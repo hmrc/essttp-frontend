@@ -16,6 +16,7 @@
 
 package controllers
 
+import essttp.rootmodel.TaxRegime
 import messages.Messages
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -82,7 +83,8 @@ class LandingPageControllerSpec extends ItSpec {
         shouldBackLinkBePresent     = false,
         expectedSubmitUrl           = None,
         signedIn                    = false,
-        shouldH1BeSameAsServiceName = true
+        shouldH1BeSameAsServiceName = true,
+        regimeBeingTested           = TaxRegime.Vat
       )
 
       val lists = doc.select(".govuk-list").asScala.toList
