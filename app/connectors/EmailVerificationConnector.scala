@@ -18,7 +18,8 @@ package connectors
 
 import com.google.inject.{Inject, Singleton}
 import config.AppConfig
-import models.emailverification.RequestEmailVerificationRequest
+import models.GGCredId
+import models.emailverification.{EmailVerificationStatusResponse, RequestEmailVerificationRequest}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 
@@ -29,7 +30,13 @@ class EmailVerificationConnector @Inject() (appConfig: AppConfig, httpClient: Ht
 
   private val requestVerificationUrl: String = appConfig.BaseUrl.emailVerificationUrl + "/email-verification/verify-email"
 
+  private def getVerificationStatusUrl(ggCredId: GGCredId): String =
+    appConfig.BaseUrl.emailVerificationUrl + s"/email-verification/verification-status/${ggCredId.value}"
+
   def requestEmailVerification(emailVerificationRequest: RequestEmailVerificationRequest)(implicit hc: HeaderCarrier): Future[HttpResponse] =
     httpClient.POST[RequestEmailVerificationRequest, HttpResponse](requestVerificationUrl, emailVerificationRequest)
+
+  def getVerificationStatus(ggCredId: GGCredId)(implicit hc: HeaderCarrier): Future[EmailVerificationStatusResponse] =
+    httpClient.GET[EmailVerificationStatusResponse](getVerificationStatusUrl(ggCredId))
 
 }

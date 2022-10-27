@@ -19,6 +19,7 @@ package testsupport.stubs
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.crypto.CryptoFormat
+import essttp.emailverification.EmailVerificationStatus
 import essttp.journey.model.{JourneyId, Origin, Origins}
 import essttp.rootmodel.bank.DetailsAboutBankAccount
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
@@ -461,6 +462,23 @@ object EssttpBackend {
     )(jsonBody: String = JourneyJsonTemplates.`Selected email to be verified`(email, encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
 
+  }
+
+  object EmailVerificationStatus {
+    def updateEmailVerificationStatusUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-email-verification-status"
+
+    def stubEmailVerificationStatus(journeyId: JourneyId): StubMapping =
+      WireMockHelpers.stubForPostNoResponseBody(updateEmailVerificationStatusUrl(journeyId))
+
+    def verifyEmailVerificationStatusRequest(journeyId: JourneyId, status: EmailVerificationStatus): Unit =
+      WireMockHelpers.verifyWithBodyParse(updateEmailVerificationStatusUrl(journeyId), status)
+
+    def findJourney(
+        email:     String,
+        status:    EmailVerificationStatus,
+        encrypter: Encrypter
+    )(jsonBody: String = JourneyJsonTemplates.`Email verification complete`(email, status, encrypter)): StubMapping =
+      findByLatestSessionId(jsonBody)
   }
 
   object SubmitArrangement {

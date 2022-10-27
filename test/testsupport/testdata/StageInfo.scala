@@ -42,5 +42,7 @@ object StageInfo {
   val agreedTermsAndConditionsEmailAddressRequired: StageInfo = StageInfo("AgreedTermsAndConditions", "EmailAddressRequired")
   val agreedTermsAndConditionsEmailAddressNotRequired: StageInfo = StageInfo("AgreedTermsAndConditions", "EmailAddressNotRequired")
   val selectedEmailToBeVerified: StageInfo = StageInfo("SelectedEmailToBeVerified", "EmailChosen")
+  val emailVerificationSuccess: StageInfo = StageInfo("EmailVerificationComplete", "VerificationSuccess")
+  val emailVerificationLocked: StageInfo = StageInfo("EmailVerificationComplete", "Locked")
   val submittedArrangement: StageInfo = StageInfo("SubmittedArrangement", "Submitted")
 }

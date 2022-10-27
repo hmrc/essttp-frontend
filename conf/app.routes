@@ -78,6 +78,8 @@ GET    /email-verification                                  controllers.EmailCon
 GET    /tried-to-confirm-email-too-many-times               controllers.EmailController.tooManyEmailAddresses
 
 GET    /email-callback                                      controllers.EmailController.emailCallback
+GET    /email-verification-code-entered-too-many-times      controllers.EmailController.tooManyPasscodeAttempts
+GET    /email-confirmed                                     controllers.EmailController.emailAddressConfirmed
 
 GET    /submit-arrangement                                  controllers.SubmitArrangementController.submitArrangement
 

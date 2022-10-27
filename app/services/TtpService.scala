@@ -29,6 +29,7 @@ import essttp.rootmodel.ttp.affordablequotes._
 import essttp.rootmodel.ttp.arrangement._
 import essttp.rootmodel.{AmountInPence, EmpRef, TaxRegime, UpfrontPaymentAmount, Vrn}
 import essttp.utils.Errors
+import io.scalaland.chimney.dsl.TransformerOps
 import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.HttpException
@@ -79,45 +80,24 @@ class TtpService @Inject() (
     ttpConnector.callEligibilityApi(eligibilityRequest, journey.correlationId)
   }
 
-  def determineAffordability(journey: Journey.AfterUpfrontPaymentAnswers)(implicit requestHeader: RequestHeader): Future[InstalmentAmounts] = {
-    val j = journey match {
-      case j1: Journey.Stages.RetrievedExtremeDates          => j1
-      case j1: Journey.Stages.RetrievedAffordabilityResult   => j1
-      case j1: Journey.Stages.EnteredMonthlyPaymentAmount    => j1
-      case j1: Journey.Stages.EnteredDayOfMonth              => j1
-      case j1: Journey.Stages.RetrievedStartDates            => j1
-      case j1: Journey.Stages.RetrievedAffordableQuotes      => j1
-      case j1: Journey.Stages.ChosenPaymentPlan              => j1
-      case j1: Journey.Stages.CheckedPaymentPlan             => j1
-      case j1: Journey.Stages.EnteredDetailsAboutBankAccount => j1
-      case j1: Journey.Stages.EnteredDirectDebitDetails      => j1
-      case j1: Journey.Stages.ConfirmedDirectDebitDetails    => j1
-      case j1: Journey.Stages.AgreedTermsAndConditions       => j1
-      case j1: Journey.Stages.SelectedEmailToBeVerified      => j1
-      case j1: Journey.Stages.SubmittedArrangement           => j1
-    }
-    val upfrontPaymentAmount: Option[UpfrontPaymentAmount] = TtpService.deriveUpfrontPaymentAmount(j.upfrontPaymentAnswers)
-    val eligibilityCheckResult: EligibilityCheckResult = j.eligibilityCheckResult
-    val instalmentAmountRequest: InstalmentAmountRequest = TtpService.buildInstalmentRequest(upfrontPaymentAmount, eligibilityCheckResult, j.extremeDatesResponse)
+  def determineAffordability(journey: Journey.AfterUpfrontPaymentAnswers, eligibilityCheckResult: EligibilityCheckResult)(implicit requestHeader: RequestHeader): Future[InstalmentAmounts] = {
+    val extremeDatesResponse = journey.into[Journey.AfterExtremeDatesResponse].transform.extremeDatesResponse
+    val upfrontPaymentAmount: Option[UpfrontPaymentAmount] = TtpService.deriveUpfrontPaymentAmount(journey.upfrontPaymentAnswers)
+    val instalmentAmountRequest: InstalmentAmountRequest = TtpService.buildInstalmentRequest(upfrontPaymentAmount, eligibilityCheckResult, extremeDatesResponse)
 
     ttpConnector.callAffordabilityApi(instalmentAmountRequest, journey.correlationId)
   }
 
-  def determineAffordableQuotes(journey: Journey.AfterStartDatesResponse)(implicit requestHeader: RequestHeader): Future[AffordableQuotesResponse] = {
-    val j = journey match {
-      case j1: Journey.Stages.RetrievedStartDates            => j1
-      case j1: Journey.Stages.RetrievedAffordableQuotes      => j1
-      case j1: Journey.Stages.ChosenPaymentPlan              => j1
-      case j1: Journey.Stages.CheckedPaymentPlan             => j1
-      case j1: Journey.Stages.EnteredDetailsAboutBankAccount => j1
-      case j1: Journey.Stages.EnteredDirectDebitDetails      => j1
-      case j1: Journey.Stages.ConfirmedDirectDebitDetails    => j1
-      case j1: Journey.Stages.AgreedTermsAndConditions       => j1
-      case j1: Journey.Stages.SelectedEmailToBeVerified      => j1
-      case j1: Journey.Stages.SubmittedArrangement           => j1
-    }
-    val initialPaymentAmount: Option[UpfrontPaymentAmount] = TtpService.deriveUpfrontPaymentAmount(j.upfrontPaymentAnswers)
-    val debtItemCharges = j.eligibilityCheckResult.chargeTypeAssessment
+  def determineAffordableQuotes(
+      journey:                Journey.AfterStartDatesResponse,
+      eligibilityCheckResult: EligibilityCheckResult
+  )(implicit requestHeader: RequestHeader): Future[AffordableQuotesResponse] = {
+    val upfrontPaymentAnswers = journey.into[Journey.AfterUpfrontPaymentAnswers].transform.upfrontPaymentAnswers
+    val initialPaymentAmount: Option[UpfrontPaymentAmount] = TtpService.deriveUpfrontPaymentAmount(upfrontPaymentAnswers)
+    val monthlyPaymentAmount = journey.into[Journey.AfterEnteredMonthlyPaymentAmount].transform.monthlyPaymentAmount
+    val startDatesResponse = journey.into[Journey.AfterStartDatesResponse].transform.startDatesResponse
+
+    val debtItemCharges = eligibilityCheckResult.chargeTypeAssessment
       .flatMap(_.charges)
       .map { charge: Charges =>
         DebtItemCharge(
@@ -132,57 +112,62 @@ class TtpService @Inject() (
 
     val affordableQuotesRequest: AffordableQuotesRequest = AffordableQuotesRequest(
       channelIdentifier           = ChannelIdentifiers.eSSTTP,
-      paymentPlanAffordableAmount = PaymentPlanAffordableAmount(j.monthlyPaymentAmount.value),
+      paymentPlanAffordableAmount = PaymentPlanAffordableAmount(monthlyPaymentAmount.value),
       paymentPlanFrequency        = PaymentPlanFrequencies.Monthly,
       paymentPlanMaxLength        = TtpService.paymentPlanMaxLength,
       paymentPlanMinLength        = TtpService.paymentPlanMinLength,
-      accruedDebtInterest         = AccruedDebtInterest(TtpService.calculateCumulativeInterest(j.eligibilityCheckResult)),
-      paymentPlanStartDate        = j.startDatesResponse.instalmentStartDate,
-      initialPaymentDate          = j.startDatesResponse.initialPaymentDate,
+      accruedDebtInterest         = AccruedDebtInterest(TtpService.calculateCumulativeInterest(eligibilityCheckResult)),
+      paymentPlanStartDate        = startDatesResponse.instalmentStartDate,
+      initialPaymentDate          = startDatesResponse.initialPaymentDate,
       initialPaymentAmount        = initialPaymentAmount,
       debtItemCharges             = debtItemCharges,
-      customerPostcodes           = j.eligibilityCheckResult.customerPostcodes
+      customerPostcodes           = eligibilityCheckResult.customerPostcodes
     )
 
     ttpConnector.callAffordableQuotesApi(affordableQuotesRequest, journey.correlationId)
   }
 
   def submitArrangement(
-      journey: Journey.Stages.AgreedTermsAndConditions
+      journey: Either[Journey.Stages.AgreedTermsAndConditions, Journey.Stages.EmailVerificationComplete]
   )(
       implicit
       authenticatedJourneyRequest: AuthenticatedJourneyRequest[_]
   ): Future[ArrangementResponse] = {
 
-    val regimeType: RegimeType = journey.taxRegime match {
+    val regimeType: RegimeType = journey.fold(_.taxRegime, _.taxRegime) match {
       case TaxRegime.Epaye => RegimeType.`PAYE`
       case TaxRegime.Vat   => RegimeType.`VAT`
     }
+    val eligibilityCheckResult = journey.fold(_.eligibilityCheckResult, _.eligibilityCheckResult)
+    val directDebitDetails = journey.fold(_.directDebitDetails, _.directDebitDetails)
+    val selectedPaymentPlan = journey.fold(_.selectedPaymentPlan, _.selectedPaymentPlan)
+    val correlationId = journey.fold(_.correlationId, _.correlationId)
+
     val arrangementRequest: ArrangementRequest = ArrangementRequest(
       channelIdentifier      = ChannelIdentifiers.eSSTTP,
       regimeType             = regimeType,
       regimePaymentFrequency = PaymentPlanFrequencies.Monthly,
       arrangementAgreedDate  = ArrangementAgreedDate(LocalDate.now(ZoneOffset.of("Z")).toString),
-      identification         = journey.eligibilityCheckResult.identification,
+      identification         = eligibilityCheckResult.identification,
       directDebitInstruction = DirectDebitInstruction(
-        sortCode        = journey.directDebitDetails.sortCode,
-        accountNumber   = journey.directDebitDetails.accountNumber,
-        accountName     = journey.directDebitDetails.name,
+        sortCode        = directDebitDetails.sortCode,
+        accountNumber   = directDebitDetails.accountNumber,
+        accountName     = directDebitDetails.name,
         paperAuddisFlag = PaperAuddisFlag(false)
       ),
       paymentPlan            = EnactPaymentPlan(
-        planDuration         = journey.selectedPaymentPlan.planDuration,
+        planDuration         = selectedPaymentPlan.planDuration,
         paymentPlanFrequency = PaymentPlanFrequencies.Monthly,
-        numberOfInstalments  = journey.selectedPaymentPlan.numberOfInstalments,
-        totalDebt            = journey.selectedPaymentPlan.totalDebt,
-        totalDebtIncInt      = journey.selectedPaymentPlan.totalDebtIncInt,
-        planInterest         = journey.selectedPaymentPlan.planInterest,
-        collections          = journey.selectedPaymentPlan.collections,
-        instalments          = journey.selectedPaymentPlan.instalments
+        numberOfInstalments  = selectedPaymentPlan.numberOfInstalments,
+        totalDebt            = selectedPaymentPlan.totalDebt,
+        totalDebtIncInt      = selectedPaymentPlan.totalDebtIncInt,
+        planInterest         = selectedPaymentPlan.planInterest,
+        collections          = selectedPaymentPlan.collections,
+        instalments          = selectedPaymentPlan.instalments
       )
     )
 
-    ttpConnector.callArrangementApi(arrangementRequest, journey.correlationId)
+    ttpConnector.callArrangementApi(arrangementRequest, correlationId)
       .map { response: ArrangementResponse =>
         auditService.auditPaymentPlanSetUp(journey, Right(response))
         response

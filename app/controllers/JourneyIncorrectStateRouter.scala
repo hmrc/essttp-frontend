@@ -17,6 +17,7 @@
 package controllers
 
 import controllers.pagerouters.EligibilityRouter
+import essttp.emailverification.EmailVerificationStatus
 import essttp.journey.model.Journey
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{Request, Result}
@@ -55,7 +56,13 @@ object JourneyIncorrectStateRouter {
         if (j.isEmailAddressRequired) routes.EmailController.whichEmailDoYouWantToUse
         else routes.PaymentPlanSetUpController.paymentPlanSetUp
       case _: Journey.Stages.SelectedEmailToBeVerified => routes.EmailController.whichEmailDoYouWantToUse
-      case _: Journey.Stages.SubmittedArrangement      => routes.PaymentPlanSetUpController.paymentPlanSetUp
+      case j: Journey.Stages.EmailVerificationComplete =>
+        j.emailVerificationStatus match {
+          case EmailVerificationStatus.Verified => routes.PaymentPlanSetUpController.paymentPlanSetUp
+          case EmailVerificationStatus.Locked   => routes.EmailController.tooManyPasscodeAttempts
+        }
+
+      case _: Journey.Stages.SubmittedArrangement => routes.PaymentPlanSetUpController.paymentPlanSetUp
     }
 
     JourneyLogger.error(
