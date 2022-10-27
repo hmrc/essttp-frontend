@@ -20,6 +20,7 @@ import _root_.actions.Actions
 import controllers.JourneyFinalStateCheck.finalStateCheckF
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import essttp.journey.model.Journey
+import essttp.rootmodel.ttp.EligibilityCheckResult
 import play.api.mvc._
 import services.{JourneyService, TtpService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -41,13 +42,16 @@ class DetermineAffordabilityController @Inject() (
   val determineAffordability: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     request.journey match {
       case j: Journey.BeforeUpfrontPaymentAnswers => logErrorAndRouteToDefaultPageF(j)
-      case j: Journey.AfterUpfrontPaymentAnswers  => finalStateCheckF(j, determineAffordabilityAndUpdateJourney(j))
+      case j: Journey.AfterUpfrontPaymentAnswers  => finalStateCheckF(j, determineAffordabilityAndUpdateJourney(j, request.eligibilityCheckResult))
     }
   }
 
-  def determineAffordabilityAndUpdateJourney(journey: Journey.AfterUpfrontPaymentAnswers)(implicit request: Request[_]): Future[Result] = {
+  def determineAffordabilityAndUpdateJourney(
+      journey:                Journey.AfterUpfrontPaymentAnswers,
+      eligibilityCheckResult: EligibilityCheckResult
+  )(implicit request: Request[_]): Future[Result] = {
     for {
-      instalmentAmounts <- ttpService.determineAffordability(journey)
+      instalmentAmounts <- ttpService.determineAffordability(journey, eligibilityCheckResult)
       _ <- journeyService.updateAffordabilityResult(journey.id, instalmentAmounts)
     } yield Redirect(routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount.url)
   }

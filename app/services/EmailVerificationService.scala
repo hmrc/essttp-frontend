@@ -23,11 +23,12 @@ import com.google.inject.{Inject, Singleton}
 import config.AppConfig
 import connectors.EmailVerificationConnector
 import controllers.routes
+import essttp.emailverification.EmailVerificationStatus
 import essttp.rootmodel.Email
 import messages.Messages
 import models.emailverification.RequestEmailVerificationRequest.EmailDetails
 import models.emailverification.{RequestEmailVerificationRequest, RequestEmailVerificationResponse}
-import play.api.http.Status.{CREATED, INTERNAL_SERVER_ERROR, UNAUTHORIZED}
+import play.api.http.Status.{CREATED, INTERNAL_SERVER_ERROR, NOT_FOUND, UNAUTHORIZED}
 import play.api.libs.json.{Json, Reads}
 import requests.RequestSupport
 import uk.gov.hmrc.hmrcfrontend.config.ContactFrontendConfig
@@ -69,6 +70,26 @@ class EmailVerificationService @Inject() (
       }
     }.recover {
       case u: UpstreamErrorResponse if u.statusCode === UNAUTHORIZED => RequestEmailVerificationResponse.LockedOut
+    }
+
+  def getVerificationStatus(emailAddress: Email)(implicit r: EligibleJourneyRequest[_], hc: HeaderCarrier): Future[EmailVerificationStatus] =
+    connector.getVerificationStatus(r.ggCredId).map{ statusResponse =>
+      statusResponse.emails.find(_.emailAddress === emailAddress.value.decryptedValue) match {
+        case None =>
+          throw UpstreamErrorResponse("Verification status not found for email address", NOT_FOUND)
+
+        case Some(status) =>
+          (status.verified, status.locked) match {
+            case (true, false) =>
+              EmailVerificationStatus.Verified
+            case (false, true) =>
+              EmailVerificationStatus.Locked
+            case _ =>
+              throw UpstreamErrorResponse(s"Got unexpected combination of verified=${status.verified} and " +
+                s"locked=${status.locked} in email verification status response", INTERNAL_SERVER_ERROR)
+          }
+      }
+
     }
 
   private def emailVerificationRequest(emailAddress: Email)(implicit r: EligibleJourneyRequest[_]): RequestEmailVerificationRequest = {

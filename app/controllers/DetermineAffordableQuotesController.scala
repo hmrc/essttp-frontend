@@ -20,6 +20,7 @@ import _root_.actions.Actions
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import controllers.JourneyFinalStateCheck.finalStateCheckF
 import essttp.journey.model.Journey
+import essttp.rootmodel.ttp.EligibilityCheckResult
 import play.api.mvc._
 import services.{JourneyService, TtpService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -41,13 +42,16 @@ class DetermineAffordableQuotesController @Inject() (
   val retrieveAffordableQuotes: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     request.journey match {
       case j: Journey.BeforeStartDatesResponse => logErrorAndRouteToDefaultPageF(j)
-      case j: Journey.AfterStartDatesResponse  => finalStateCheckF(j, determineAffordableQuotesAndUpdateJourney(j))
+      case j: Journey.AfterStartDatesResponse  => finalStateCheckF(j, determineAffordableQuotesAndUpdateJourney(j, request.eligibilityCheckResult))
     }
   }
 
-  def determineAffordableQuotesAndUpdateJourney(journey: Journey.AfterStartDatesResponse)(implicit request: Request[_]): Future[Result] = {
+  def determineAffordableQuotesAndUpdateJourney(
+      journey:                Journey.AfterStartDatesResponse,
+      eligibilityCheckResult: EligibilityCheckResult
+  )(implicit request: Request[_]): Future[Result] = {
     for {
-      affordableQuotes <- ttpService.determineAffordableQuotes(journey)
+      affordableQuotes <- ttpService.determineAffordableQuotes(journey, eligibilityCheckResult)
       _ <- journeyService.updateAffordableQuotes(journey.id, affordableQuotes)
     } yield Redirect(routes.InstalmentsController.instalmentOptions.url)
   }

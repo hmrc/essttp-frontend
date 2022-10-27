@@ -16,10 +16,12 @@
 
 package controllers
 
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.crypto.CryptoFormat
+import essttp.emailverification.EmailVerificationStatus
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
-import play.api.mvc.Result
+import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
@@ -37,22 +39,37 @@ class SubmitArrangementControllerSpec extends ItSpec {
   "GET /submit-arrangement should" - {
 
     "trigger call to ttp enact arrangement api, send an audit event and also update backend" in {
-      stubCommonActions()
-      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto)()
-      EssttpBackend.SubmitArrangement.stubUpdateSubmitArrangement(TdAll.journeyId)
-      Ttp.EnactArrangement.stubEnactArrangement()
+      List(
+        "T&C's accepted, no email required" -> (
+          () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto)()
+        ),
+        "email verification success" -> (
+          () => EssttpBackend.EmailVerificationStatus.findJourney(
+            "bobross@joyofpainting.com",
+            EmailVerificationStatus.Verified,
+            testCrypto
+          )()
+        )
+      ).foreach{
+          case (journeyDescription, journeyStubMapping) =>
+            withClue(s"For journey $journeyDescription: "){
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+              stubCommonActions()
+              journeyStubMapping()
+              EssttpBackend.SubmitArrangement.stubUpdateSubmitArrangement(TdAll.journeyId)
+              Ttp.EnactArrangement.stubEnactArrangement()
 
-      val result: Future[Result] = controller.submitArrangement(fakeRequest)
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.confirmationUrl)
+              val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
-      Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(CryptoFormat.NoOpCryptoFormat)
-      AuditConnectorStub.verifyEventAudited(
-        "PlanSetUp",
-        Json.parse(
-          s"""
+              val result: Future[Result] = controller.submitArrangement(fakeRequest)
+              status(result) shouldBe Status.SEE_OTHER
+              redirectLocation(result) shouldBe Some(PageUrls.confirmationUrl)
+
+              Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(CryptoFormat.NoOpCryptoFormat)
+              AuditConnectorStub.verifyEventAudited(
+                "PlanSetUp",
+                Json.parse(
+                  s"""
              |{
              |	"bankDetails": {
              |		"name": "Bob Ross",
@@ -90,9 +107,63 @@ class SubmitArrangementControllerSpec extends ItSpec {
              |	"authProviderId": "authId-999"
              |}
              |""".stripMargin
-        ).as[JsObject]
-      )
-      EssttpBackend.SubmitArrangement.verifyUpdateSubmitArrangementRequest(TdAll.journeyId, TdAll.arrangementResponse)
+                ).as[JsObject]
+              )
+              EssttpBackend.SubmitArrangement.verifyUpdateSubmitArrangementRequest(TdAll.journeyId, TdAll.arrangementResponse)
+            }
+        }
+    }
+
+    "not allow journeys when" - {
+
+        def test(
+            journeyStubMapping:       () => StubMapping,
+            expectedRedirectLocation: Call
+        ) = {
+
+          stubCommonActions()
+          journeyStubMapping()
+
+          val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+          val result = controller.submitArrangement(fakeRequest)
+
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(expectedRedirectLocation.url)
+        }
+
+      "T&C's have not been agreed yet" in {
+        test(
+          () => EssttpBackend.CanPayUpfront.findJourney(testCrypto)(),
+          routes.UpfrontPaymentController.upfrontPaymentAmount
+        )
+      }
+
+      "T&C's have just been agreed but an email is required" in {
+        test(
+          () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, testCrypto)(),
+          routes.EmailController.whichEmailDoYouWantToUse
+        )
+      }
+
+      "the user has just selected and email address" in {
+        test(
+          () => EssttpBackend.SelectEmail.findJourney("email@test.com", testCrypto)(),
+          routes.EmailController.whichEmailDoYouWantToUse
+        )
+      }
+
+      "there is an email verification status of locked" in {
+        test(
+          () => EssttpBackend.EmailVerificationStatus.findJourney(
+            "bobross@joyofpainting.com",
+            EmailVerificationStatus.Locked,
+            testCrypto
+          )(),
+          routes.EmailController.tooManyPasscodeAttempts
+        )
+
+      }
+
     }
 
     "should not update backend if call to ttp enact arrangement api fails (anything other than a 202 response)" in {

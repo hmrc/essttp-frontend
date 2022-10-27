@@ -16,8 +16,10 @@
 
 package controllers
 
+import essttp.emailverification.EmailVerificationStatus
 import essttp.rootmodel.Email
 import models.GGCredId
+import models.emailverification.EmailVerificationStatusResponse.EmailStatus
 import models.emailverification.RequestEmailVerificationResponse
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
@@ -299,6 +301,110 @@ class EmailControllerSpec extends ItSpec {
         "en",
         urlPrefix
       )
+    }
+
+  }
+
+  "GET /email-callback should" - {
+
+    val email: Email = Email(SensitiveString("email@domain.com"))
+
+    val ggCredId: GGCredId = GGCredId("authId-999")
+
+    val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+    "not allow journeys where an email has not been selected" in {
+      stubCommonActions()
+      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto)()
+
+      val result = controller.emailCallback(fakeRequest)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.EmailController.whichEmailDoYouWantToUse.url)
+    }
+
+    "redirect to the email address confirmed page if the email address has successfully been verified" in {
+      stubCommonActions()
+      EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)()
+      EmailVerificationStub.getVerificationStatus(
+        ggCredId,
+        Right(List(EmailStatus(email.value.decryptedValue, verified = true, locked = false)))
+      )
+      EssttpBackend.EmailVerificationStatus.stubEmailVerificationStatus(TdAll.journeyId)
+
+      val result = controller.emailCallback(fakeRequest)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.EmailController.emailAddressConfirmed.url)
+
+      EssttpBackend.EmailVerificationStatus.verifyEmailVerificationStatusRequest(
+        TdAll.journeyId, EmailVerificationStatus.Verified
+      )
+    }
+
+    "redirect to the too many passcodes page if the email address has been locked" in {
+      stubCommonActions()
+      EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)()
+      EmailVerificationStub.getVerificationStatus(
+        ggCredId,
+        Right(List(EmailStatus(email.value.decryptedValue, verified = false, locked = true)))
+      )
+      EssttpBackend.EmailVerificationStatus.stubEmailVerificationStatus(TdAll.journeyId)
+
+      val result = controller.emailCallback(fakeRequest)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.EmailController.tooManyPasscodeAttempts.url)
+
+      EssttpBackend.EmailVerificationStatus.verifyEmailVerificationStatusRequest(
+        TdAll.journeyId, EmailVerificationStatus.Locked
+      )
+    }
+
+    "show an error page when" - {
+
+      "a 404 response is given by the email-verification service indicating that no records could be found" in {
+        stubCommonActions()
+        EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)()
+        EmailVerificationStub.getVerificationStatus(
+          ggCredId,
+          Left(NOT_FOUND)
+        )
+
+        an[Exception] shouldBe thrownBy(controller.emailCallback(fakeRequest).futureValue)
+      }
+
+      "an invalid combination of 'verified' and 'locked' is found in the email-verification response" in {
+        List(
+          true -> true,
+          false -> false
+        ).foreach{
+            case (verified, locked) =>
+              withClue(s"For verified=$verified and locked=$locked: "){
+                stubCommonActions()
+                EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)()
+                EmailVerificationStub.getVerificationStatus(
+                  ggCredId,
+                  Right(List(EmailStatus(email.value.decryptedValue, verified = verified, locked = locked)))
+                )
+
+                an[Exception] shouldBe thrownBy(controller.emailCallback(fakeRequest).futureValue)
+              }
+          }
+      }
+
+      "the email address the user has selected can't be found in the email-verification response" in {
+        stubCommonActions()
+        EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)()
+        EmailVerificationStub.getVerificationStatus(
+          ggCredId,
+          Right(List(EmailStatus("another@email.com", verified = true, locked = false)))
+        )
+
+        an[Exception] shouldBe thrownBy(controller.emailCallback(fakeRequest).futureValue)
+
+      }
+
     }
 
   }

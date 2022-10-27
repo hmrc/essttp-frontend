@@ -22,6 +22,7 @@ import essttp.rootmodel.CanPayUpfront
 import essttp.rootmodel.dates.InitialPayment
 import essttp.rootmodel.dates.extremedates.{ExtremeDatesRequest, ExtremeDatesResponse}
 import essttp.rootmodel.dates.startdates.{PreferredDayOfMonth, StartDatesRequest, StartDatesResponse}
+import io.scalaland.chimney.dsl.TransformerOps
 import play.api.mvc.RequestHeader
 
 import javax.inject.{Inject, Singleton}
@@ -34,19 +35,8 @@ class DatesService @Inject() (datesApiConnector: DatesApiConnector) {
 
   def startDates(journey: Journey.AfterEnteredDayOfMonth)(implicit request: RequestHeader): Future[StartDatesResponse] = {
     val dayOfMonth: PreferredDayOfMonth = PreferredDayOfMonth(journey.dayOfMonth.value)
-    val initialPayment: InitialPayment = journey match {
-      case j: Journey.Epaye.EnteredDayOfMonth              => DatesService.deriveInitialPayment(j.upfrontPaymentAnswers)
-      case j: Journey.Epaye.RetrievedStartDates            => DatesService.deriveInitialPayment(j.upfrontPaymentAnswers)
-      case j: Journey.Epaye.RetrievedAffordableQuotes      => DatesService.deriveInitialPayment(j.upfrontPaymentAnswers)
-      case j: Journey.Epaye.ChosenPaymentPlan              => DatesService.deriveInitialPayment(j.upfrontPaymentAnswers)
-      case j: Journey.Epaye.CheckedPaymentPlan             => DatesService.deriveInitialPayment(j.upfrontPaymentAnswers)
-      case j: Journey.Epaye.EnteredDetailsAboutBankAccount => DatesService.deriveInitialPayment(j.upfrontPaymentAnswers)
-      case j: Journey.Epaye.EnteredDirectDebitDetails      => DatesService.deriveInitialPayment(j.upfrontPaymentAnswers)
-      case j: Journey.Epaye.ConfirmedDirectDebitDetails    => DatesService.deriveInitialPayment(j.upfrontPaymentAnswers)
-      case j: Journey.Epaye.AgreedTermsAndConditions       => DatesService.deriveInitialPayment(j.upfrontPaymentAnswers)
-      case j: Journey.Epaye.SelectedEmailToBeVerified      => DatesService.deriveInitialPayment(j.upfrontPaymentAnswers)
-      case j: Journey.Epaye.SubmittedArrangement           => DatesService.deriveInitialPayment(j.upfrontPaymentAnswers)
-    }
+    val upfrontPaymentAnswers = journey.into[Journey.AfterUpfrontPaymentAnswers].transform.upfrontPaymentAnswers
+    val initialPayment = DatesService.deriveInitialPayment(upfrontPaymentAnswers)
     val startDatesRequest: StartDatesRequest = StartDatesRequest(initialPayment, dayOfMonth)
     datesApiConnector.startDates(startDatesRequest)
   }
