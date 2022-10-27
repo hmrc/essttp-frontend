@@ -221,6 +221,11 @@
             RadioItem(
                 content = Text("Detached Url"),
                 value = Some(Origins.Epaye.DetachedUrl.entryName)
+            ),
+            RadioItem(
+                content = Text("EPAYE"),
+                value = Some(Origins.Epaye.EpayeService.entryName),
+                hint = Some(Hint(content = Text("From the EPAYE service")))
             )
         ),
         classes = "govuk-radios--small"
