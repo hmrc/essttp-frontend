@@ -16,6 +16,7 @@
 
 package controllers
 
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.emailverification.EmailVerificationStatus
 import essttp.rootmodel.Email
 import models.GGCredId
@@ -26,7 +27,7 @@ import org.jsoup.nodes.{Document, Element}
 import org.jsoup.select.Elements
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.http.Status
-import play.api.mvc.{Cookie, Result}
+import play.api.mvc.{Call, Cookie, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
@@ -405,6 +406,75 @@ class EmailControllerSpec extends ItSpec {
 
       }
 
+    }
+
+  }
+
+  "GET /email-confirmed should" - {
+
+    val email: Email = Email(SensitiveString("email@test.com"))
+
+    "not allow journey when" - {
+
+        def test(
+            journeyStubMapping:       () => StubMapping,
+            expectedRedirectLocation: Call
+        ) = {
+          stubCommonActions()
+          journeyStubMapping()
+
+          val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+          val result = controller.emailAddressConfirmed(fakeRequest)
+
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(expectedRedirectLocation.url)
+        }
+
+      "an email verification result has not been obtained yet" in {
+        test(
+          () => EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)(),
+          routes.EmailController.whichEmailDoYouWantToUse
+        )
+      }
+
+      "an arrangement has already been submitted" in {
+        test(
+          () => EssttpBackend.SubmitArrangement.findJourney(testCrypto)(),
+          routes.PaymentPlanSetUpController.paymentPlanSetUp
+        )
+      }
+
+      "an email verification result has been obtained but it is locked" in {
+        test(
+          () => EssttpBackend.EmailVerificationStatus.findJourney(email.value.decryptedValue, EmailVerificationStatus.Locked, testCrypto)(),
+          routes.EmailController.tooManyPasscodeAttempts
+        )
+      }
+
+    }
+
+    "display the page when the email address has successully been verified" in {
+      stubCommonActions()
+      EssttpBackend.EmailVerificationStatus.findJourney(email.value.decryptedValue, EmailVerificationStatus.Verified, testCrypto)()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result = controller.emailAddressConfirmed(fakeRequest)
+      status(result) shouldBe OK
+
+      val doc = Jsoup.parse(contentAsString(result))
+
+      ContentAssertions.commonPageChecks(
+        doc,
+        "Email address confirmed",
+        shouldBackLinkBePresent = false,
+        expectedSubmitUrl       = None
+      )
+
+      val paragraphs = doc.select(".govuk-body").asScala.toList
+      paragraphs.size shouldBe 3
+      paragraphs(0).html() shouldBe s"The email address <strong>${email.value.decryptedValue}</strong> has been confirmed."
+
+      doc.select(".govuk-button").attr("href") shouldBe routes.SubmitArrangementController.submitArrangement.url
     }
 
   }
