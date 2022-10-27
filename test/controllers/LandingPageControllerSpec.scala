@@ -16,6 +16,7 @@
 
 package controllers
 
+import essttp.journey.model.Origins
 import essttp.rootmodel.TaxRegime
 import messages.Messages
 import org.jsoup.Jsoup
@@ -25,6 +26,8 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
+import testsupport.stubs.EssttpBackend
+import testsupport.testdata.JourneyJsonTemplates
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
@@ -36,6 +39,7 @@ class LandingPageControllerSpec extends ItSpec {
 
   "GET /" - {
     "return 200 and the PAYE landing page" in {
+      EssttpBackend.StartJourney.findJourney()
       val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.landingPage(fakeRequest)
 
@@ -65,12 +69,13 @@ class LandingPageControllerSpec extends ItSpec {
 
       val button = doc.select(".govuk-button")
       button.attr("href") shouldBe routes.DetermineTaxIdController.determineTaxId.url
-      button.text() shouldBe Messages.Epaye.`Start now`.english
+      button.text() shouldBe Messages.`Start now`.english
     }
   }
 
   "GET /vat-payment-plan" - {
     "return 200 and the VAT landing page" in {
+      EssttpBackend.StartJourney.findJourney(jsonBody = JourneyJsonTemplates.Started(Origins.Vat.DetachedUrl))
       val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.vatLandingPage(fakeRequest)
 
@@ -101,7 +106,7 @@ class LandingPageControllerSpec extends ItSpec {
 
       val button = doc.select(".govuk-button")
       button.attr("href") shouldBe routes.DetermineTaxIdController.determineTaxId.url
-      button.text() shouldBe Messages.Vat.`Start now`.english
+      button.text() shouldBe Messages.`Start now`.english
     }
   }
 }

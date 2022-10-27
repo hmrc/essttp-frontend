@@ -76,6 +76,11 @@ object Messages {
     welsh   = "."
   )
 
+  val `Start now`: Message = Message(
+    english = "Start now",
+    welsh   = "Dechrau nawr"
+  )
+
   object YourBill {
 
     val to: Message = Message(
@@ -137,6 +142,11 @@ object Messages {
           english = "Set up a VAT payment plan",
         )
     }
+
+    val `Set up a payment plan`: Message = Message(
+      english = "Set up a payment plan",
+      welsh   = "Trefnu cynllun talu"
+    )
 
     val beta: Message = Message(
       english = "beta",
@@ -392,11 +402,6 @@ object Messages {
       welsh   = "yn gallu awdurdodi Debyd Uniongyrchol"
     )
 
-    val `Start now`: Message = Message(
-      english = "Start now",
-      welsh   = "Dechrau nawr"
-    )
-
     val `You must keep up to date with your payments...`: Message = Message(
       english = "You must keep up to date with your payments. HMRC may ask you to pay the total outstanding amount if you do not. HMRC intend this as a one-off payment plan to give you extra support.",
       welsh   = "Mae’n rhaid i chi sicrhau eich bod yn gwneud eich taliadau mewn pryd. Mae’n bosibl y bydd CThEF yn gofyn i chi dalu’r cyfanswm sydd heb ei dalu os na fyddwch yn gwneud eich taliadau mewn pryd. Bwriad CThEF yw bod hwn yn gynllun talu untro i roi cymorth ychwanegol i chi."
@@ -418,10 +423,10 @@ object Messages {
       english = "You are eligible to set up an online payment plan if:",
       welsh   = "Rydych yn gymwys i drefnu cynllun talu ar-lein os:"
     )
-    def `you plan to pay the debt off within the next 6 months or less`(maxPlanDuration: Int): Message = Message(
+    def `you plan to pay the debt off within the next ... months or less`(maxPlanDuration: Int): Message = Message(
       english = s"you plan to pay the debt off within the next $maxPlanDuration months or less"
     )
-    def `you owe £20,000 or less`(maxAmountOfDebt: AmountInPence): Message = Message(
+    def `you owe ... or less`(maxAmountOfDebt: AmountInPence): Message = Message(
       english = s"you owe ${maxAmountOfDebt.gdsFormatInPounds} or less"
     )
     val `you do not have any other payment plans or debts with HMRC`: Message = Message(
@@ -430,7 +435,7 @@ object Messages {
     val `your tax returns are up to date`: Message = Message(
       english = "your tax returns are up to date"
     )
-    def `You can use this service within 28 days of the overdue payment deadline.`(maxAgeOfDebtInDays: Int): Message = Message(
+    def `You can use this service within ... days of the overdue payment deadline.`(maxAgeOfDebtInDays: Int): Message = Message(
       english = s"You can use this service within $maxAgeOfDebtInDays days of the overdue payment deadline."
     )
     val `If you have a Customer Compliance Manager...`: Message = Message(
@@ -461,11 +466,8 @@ object Messages {
       english = "payment on account customers"
     )
     val `You must keep up to date with your payments...`: Message = Message(
-      english = "You must keep up to date with your payments. HMRC may ask you to pay the total outstanding amount if you do not. HMRC intend this as a one-off payment plan to give you extra support."
-    )
-    val `Start now`: Message = Message(
-      english = "Start now",
-      welsh   = "Dechrau nawr"
+      english = "You must keep up to date with your payments. HMRC may ask you to pay the total outstanding amount if you do not. HMRC intend this as a one-off payment plan to give you extra support.",
+      welsh   = "Mae’n rhaid i chi sicrhau eich bod yn gwneud eich taliadau mewn pryd. Mae’n bosibl y bydd CThEF yn gofyn i chi dalu’r cyfanswm sydd heb ei dalu os na fyddwch yn gwneud eich taliadau mewn pryd. Bwriad CThEF yw bod hwn yn gynllun talu untro i roi cymorth ychwanegol i chi."
     )
   }
 
