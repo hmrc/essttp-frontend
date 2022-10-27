@@ -21,6 +21,7 @@ import cats.implicits.catsSyntaxEq
 import controllers.EmailController.{ChooseEmailForm, chooseEmailForm}
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.{logErrorAndRouteToDefaultPage, logErrorAndRouteToDefaultPageF}
+import essttp.emailverification.EmailVerificationStatus
 import essttp.journey.model.Journey
 import essttp.rootmodel.Email
 import essttp.utils.Errors
@@ -118,12 +119,37 @@ class EmailController @Inject() (
 
   }
 
-  val emailCallback: Action[AnyContent] = as.eligibleJourneyAction { _ =>
-    Ok("this is a placeholder for the email-callback endpoint")
+  val emailCallback: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
+    request.journey match {
+      case j: Journey.BeforeEmailAddressSelectedToBeVerified =>
+        logErrorAndRouteToDefaultPageF(j)
+
+      case j: Journey.AfterArrangementSubmitted =>
+        logErrorAndRouteToDefaultPageF(j)
+
+      case j: Journey.AfterEmailAddressSelectedToBeVerified =>
+        for {
+          status <- emailVerificationService.getVerificationStatus(j.emailToBeVerified)
+          _ <- journeyService.updateEmailVerificationStatus(j.journeyId, status)
+        } yield status match {
+          case EmailVerificationStatus.Verified =>
+            Redirect(routes.EmailController.emailAddressConfirmed)
+          case EmailVerificationStatus.Locked =>
+            Redirect(routes.EmailController.tooManyPasscodeAttempts)
+        }
+    }
   }
 
   val tooManyEmailAddresses: Action[AnyContent] = as.eligibleJourneyAction { _ =>
     Ok("this is a placeholder for the too-many-email-addresses endpoint")
+  }
+
+  val tooManyPasscodeAttempts: Action[AnyContent] = as.eligibleJourneyAction { _ =>
+    Ok("this is a placeholder for the too-many-passcode-attempts page")
+  }
+
+  val emailAddressConfirmed: Action[AnyContent] = as.eligibleJourneyAction { _ =>
+    Ok("this is a placeholder for the email confirmed page")
   }
 
 }

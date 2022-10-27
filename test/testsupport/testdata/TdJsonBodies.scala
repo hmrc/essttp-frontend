@@ -16,6 +16,7 @@
 
 package testsupport.testdata
 
+import essttp.emailverification.EmailVerificationStatus
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.ttp.{EligibilityPass, EligibilityRules}
 import essttp.rootmodel.{DayOfMonth, UpfrontPaymentAmount}
@@ -461,8 +462,25 @@ object TdJsonBodies {
   def emailAddressSelectedToBeVerified(email: String, encrypter: Encrypter): String =
     s""""emailToBeVerified": "${encryptString(email, encrypter)}""""
 
-  def emailVerificationAnswers: String =
+  def emailVerificationStatus(status: EmailVerificationStatus): String = {
+    val statusString = status match {
+      case EmailVerificationStatus.Verified => "Verified"
+      case EmailVerificationStatus.Locked   => "Locked"
+    }
+
+    s""" "emailVerificationStatus": { "$statusString": {} }"""
+  }
+
+  def emailVerificationAnswersNoEmailJourney: String =
     s""""emailVerificationAnswers" : { "NoEmailJourney": {}}"""
+
+  def emailVerificationAnswersEmailRequired(email: String, status: EmailVerificationStatus, encrypter: Encrypter): String =
+    s""""emailVerificationAnswers" : {
+       |  "EmailVerified": {
+       |     "email" : "${encryptString(email, encrypter)}",
+       |     ${emailVerificationStatus(status)}
+       |  }
+       |}""".stripMargin
 
   def arrangementResponseJourneyInfo(): String =
     s"""
