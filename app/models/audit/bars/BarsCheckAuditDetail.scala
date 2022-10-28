@@ -20,6 +20,7 @@ import models.audit.{AuditDetail, TaxDetail}
 import play.api.libs.json.{Json, OWrites}
 
 final case class BarsCheckAuditDetail(
+    origin:     String,
     taxType:    String,
     taxDetail:  TaxDetail,
     request:    BarsAuditRequest,

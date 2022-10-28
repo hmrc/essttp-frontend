@@ -162,6 +162,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
     val eligibilityCheckResult = journey.into[AfterEligibilityChecked].transform.eligibilityCheckResult
 
     BarsCheckAuditDetail(
+      toAuditString(journey.origin),
       journey.taxRegime.toString,
       toTaxDetail(eligibilityCheckResult),
       BarsAuditRequest(
