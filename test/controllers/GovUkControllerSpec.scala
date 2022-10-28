@@ -76,7 +76,7 @@ class GovUkControllerSpec extends ItSpec {
 
       val result: Future[Result] = controller.startEpayeJourney(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some("http://localhost:19001/set-up-a-payment-plan?traceId=33678917")
+      redirectLocation(result) shouldBe Some("http://localhost:19001/set-up-a-payment-plan/epaye-payment-plan")
       EssttpBackend.StartJourney.verifyStartJourneyEpayeDetached()
     }
   }
@@ -109,7 +109,7 @@ class GovUkControllerSpec extends ItSpec {
 
       val result: Future[Result] = controller.startVatJourney(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some("http://localhost:19001/set-up-a-payment-plan?traceId=33678917")
+      redirectLocation(result) shouldBe Some("http://localhost:19001/set-up-a-payment-plan/vat-payment-plan")
       EssttpBackend.StartJourney.verifyStartJourneyVatDetached()
     }
   }

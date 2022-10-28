@@ -37,7 +37,7 @@ class LandingPageControllerSpec extends ItSpec {
 
   private val controller: LandingController = app.injector.instanceOf[LandingController]
 
-  "GET /" - {
+  "GET /epaye-payment-plan" - {
     "return 200 and the PAYE landing page" in {
       EssttpBackend.StartJourney.findJourney()
       val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -53,7 +53,7 @@ class LandingPageControllerSpec extends ItSpec {
         expectedSubmitUrl           = None,
         signedIn                    = false,
         shouldH1BeSameAsServiceName = true,
-        regimeBeingTested = None
+        regimeBeingTested           = Some(TaxRegime.Epaye)
       )
 
       val lists = doc.select(".govuk-list").asScala.toList

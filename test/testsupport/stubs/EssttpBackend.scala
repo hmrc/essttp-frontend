@@ -28,7 +28,7 @@ import essttp.rootmodel.ttp.EligibilityCheckResult
 import essttp.rootmodel.ttp.affordability.InstalmentAmounts
 import essttp.rootmodel.ttp.affordablequotes.{AffordableQuotesResponse, PaymentPlan}
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
-import essttp.rootmodel.{CanPayUpfront, DayOfMonth, Email, IsEmailAddressRequired, MonthlyPaymentAmount, TaxId, UpfrontPaymentAmount}
+import essttp.rootmodel.{CanPayUpfront, DayOfMonth, Email, IsEmailAddressRequired, MonthlyPaymentAmount, TaxId, TaxRegime, UpfrontPaymentAmount}
 import play.api.libs.json.Json
 import testsupport.stubs.WireMockHelpers._
 import testsupport.testdata.{JourneyJsonTemplates, TdAll, TdJsonBodies}
@@ -81,7 +81,7 @@ object EssttpBackend {
     private def stubPost(url: String, responseJson: String, status: Int = OK): StubMapping =
       stubForPostWithRequestBodyMatching(url, "$.taxId", responseJson, status)
   }
-  StartJourney
+
   object StartJourney {
     private val startJourneyBtaEpayeUrl = "/essttp-backend/epaye/bta/journey/start"
     private val startJourneyEpayeEpayeServiceUrl = "/essttp-backend/epaye/epaye-service/journey/start"
@@ -93,13 +93,13 @@ object EssttpBackend {
 
     def startJourneyInBackend(origin: Origin): StubMapping = {
       val (url, expectedRequestBody, responseBody): (String, String, String) = origin match {
-        case Origins.Epaye.Bta          => (startJourneyBtaEpayeUrl, TdJsonBodies.StartJourneyRequestBodies.simple, TdJsonBodies.StartJourneyResponses.bta)
-        case Origins.Epaye.EpayeService => (startJourneyEpayeEpayeServiceUrl, TdJsonBodies.StartJourneyRequestBodies.simple, TdJsonBodies.StartJourneyResponses.epaye)
-        case Origins.Epaye.GovUk        => (startJourneyGovUkEpayeUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.govUk)
-        case Origins.Epaye.DetachedUrl  => (startJourneyDetachedEpayeUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.detachedUrl)
-        case Origins.Vat.Bta            => (startJourneyBtaVatUrl, TdJsonBodies.StartJourneyRequestBodies.simple, TdJsonBodies.StartJourneyResponses.bta)
-        case Origins.Vat.GovUk          => (startJourneyGovUkVatUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.govUk)
-        case Origins.Vat.DetachedUrl    => (startJourneyDetachedVatUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.detachedUrl)
+        case Origins.Epaye.Bta          => (startJourneyBtaEpayeUrl, TdJsonBodies.StartJourneyRequestBodies.simple, TdJsonBodies.StartJourneyResponses.bta(TaxRegime.Epaye))
+        case Origins.Epaye.EpayeService => (startJourneyEpayeEpayeServiceUrl, TdJsonBodies.StartJourneyRequestBodies.simple, TdJsonBodies.StartJourneyResponses.epaye(TaxRegime.Epaye))
+        case Origins.Epaye.GovUk        => (startJourneyGovUkEpayeUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.govUk(TaxRegime.Epaye))
+        case Origins.Epaye.DetachedUrl  => (startJourneyDetachedEpayeUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.detachedUrl(TaxRegime.Epaye))
+        case Origins.Vat.Bta            => (startJourneyBtaVatUrl, TdJsonBodies.StartJourneyRequestBodies.simple, TdJsonBodies.StartJourneyResponses.bta(TaxRegime.Vat))
+        case Origins.Vat.GovUk          => (startJourneyGovUkVatUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.govUk(TaxRegime.Vat))
+        case Origins.Vat.DetachedUrl    => (startJourneyDetachedVatUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.detachedUrl(TaxRegime.Vat))
       }
       stubFor(
         post(urlPathEqualTo(url))
