@@ -59,16 +59,17 @@ object ContentAssertions extends RichMatchers {
       expectedH1:                  String,
       shouldBackLinkBePresent:     Boolean,
       expectedSubmitUrl:           Option[String],
-      signedIn:                    Boolean        = true,
-      hasFormError:                Boolean        = false,
-      shouldH1BeSameAsServiceName: Boolean        = false,
-      regimeBeingTested:           TaxRegime      = TaxRegime.Epaye
+      signedIn:                    Boolean           = true,
+      hasFormError:                Boolean           = false,
+      shouldH1BeSameAsServiceName: Boolean           = false,
+      regimeBeingTested:           Option[TaxRegime] = Some(TaxRegime.Epaye)
   ): Unit = {
     val titlePrefix = if (hasFormError) "Error: " else ""
 
     val regimeServiceName = regimeBeingTested match {
-      case TaxRegime.Epaye => TdAll.expectedServiceNamePaye
-      case TaxRegime.Vat   => TdAll.expectedServiceNameVat
+      case Some(TaxRegime.Epaye) => TdAll.expectedServiceNamePaye
+      case Some(TaxRegime.Vat)   => TdAll.expectedServiceNameVat
+      case None                  => TdAll.expectedServiceNameGeneric
     }
 
     if (shouldH1BeSameAsServiceName) {

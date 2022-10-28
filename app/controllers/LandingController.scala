@@ -36,6 +36,10 @@ class LandingController @Inject() (
     Ok(views.epayeLanding())
   }
 
+  val epayeLandingPage: Action[AnyContent] = as.default { implicit request =>
+    Ok(views.epayeLanding())
+  }
+
   val vatLandingPage: Action[AnyContent] = as.default { implicit request =>
     Ok(views.vatLanding())
   }

@@ -10,7 +10,7 @@ GET    /sign-out                                            controllers.SignOutC
 GET    /do-you-want-to-give-feedback                        controllers.SignOutController.doYouWantToGiveFeedback
 POST   /do-you-want-to-give-feedback                        controllers.SignOutController.doYouWantToGiveFeedbackSubmit
 
-GET    /epaye-payment-plan                                  controllers.LandingController.landingPage
+GET    /epaye-payment-plan                                  controllers.LandingController.epayeLandingPage
 GET    /vat-payment-plan                                    controllers.LandingController.vatLandingPage
 
 GET    /govuk/epaye/start                                   controllers.GovUkController.startEpayeJourney

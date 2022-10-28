@@ -81,7 +81,7 @@ object EssttpBackend {
     private def stubPost(url: String, responseJson: String, status: Int = OK): StubMapping =
       stubForPostWithRequestBodyMatching(url, "$.taxId", responseJson, status)
   }
-
+  StartJourney
   object StartJourney {
     private val startJourneyBtaEpayeUrl = "/essttp-backend/epaye/bta/journey/start"
     private val startJourneyEpayeEpayeServiceUrl = "/essttp-backend/epaye/epaye-service/journey/start"

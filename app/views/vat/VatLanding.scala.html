@@ -39,7 +39,8 @@
 
 @layout(
     pageTitle = Some(title),
-    showBackLink = false
+    showBackLink = false,
+    fallBackTaxRegime = Some(TaxRegime.Vat)
 ) {
     <h1 class="govuk-heading-xl">@title</h1>
     <p class="govuk-body">@{Messages.Vat.`The payment plan covers all appropriate overdue amounts...`.show}</p>

@@ -81,11 +81,11 @@ class StartJourneyController @Inject() (
       maybeTestUser = TestUser.makeTestUser(startJourneyForm)
       session <- maybeTestUser.map(testUser => loginService.logIn(testUser)).getOrElse(Future.successful(Session.emptyCookie))
       redirect: Result = startJourneyForm.origin match {
-        case Origins.Epaye.Bta          => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.showBtaPage)
+        case Origins.Epaye.Bta          => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.showBtaEpayePage)
         case Origins.Epaye.EpayeService => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.showEpayePage)
         case Origins.Epaye.GovUk        => Redirect("https://github.com/hmrc/essttp-frontend#emulate-start-journey-from-gov-uk")
         case Origins.Epaye.DetachedUrl  => Redirect(_root_.controllers.routes.GovUkController.startEpayeJourney.url)
-        case Origins.Vat.Bta            => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.showBtaPage)
+        case Origins.Vat.Bta            => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.showBtaVatPage)
         case Origins.Vat.GovUk          => Redirect("https://github.com/hmrc/essttp-frontend#emulate-start-journey-from-gov-uk")
         case Origins.Vat.DetachedUrl    => Redirect(_root_.controllers.routes.GovUkController.startVatJourney.url)
       }
@@ -93,16 +93,25 @@ class StartJourneyController @Inject() (
   }
 
   /**
-   * Pretends being a Bta page
+   * Pretends being a BtaEpaye page
    */
-  val showBtaPage: Action[AnyContent] = as.default { implicit request =>
+  val showBtaEpayePage: Action[AnyContent] = as.default { implicit request =>
     if (hc.sessionId.isEmpty) {
       Ok("Missing session id")
     } else {
-      Ok(iAmBtaPage())
+      Ok(iAmBtaPage(_root_.testOnly.controllers.routes.StartJourneyController.startJourneyEpayeBta.url))
     }
   }
-
+  /**
+   * Pretends being a BtaVat page
+   */
+  val showBtaVatPage: Action[AnyContent] = as.default { implicit request =>
+    if (hc.sessionId.isEmpty) {
+      Ok("Missing session id")
+    } else {
+      Ok(iAmBtaPage(_root_.testOnly.controllers.routes.StartJourneyController.startJourneyVatBta.url))
+    }
+  }
   /**
    * Pretends being a EPAYE service page
    */
@@ -122,8 +131,8 @@ class StartJourneyController @Inject() (
       Future.successful(Ok("Missing session id"))
     } else {
       journeyConnector.Epaye.startJourneyBta(SjRequest.Epaye.Simple(
-        returnUrl = ReturnUrl(routes.StartJourneyController.showBtaPage.url + "?return-page"),
-        backUrl   = BackUrl(routes.StartJourneyController.showBtaPage.url + "?starting-page")
+        returnUrl = ReturnUrl(routes.StartJourneyController.showBtaEpayePage.url + "?return-page"),
+        backUrl   = BackUrl(routes.StartJourneyController.showBtaEpayePage.url + "?starting-page")
       )).map(sjResponse => Redirect(sjResponse.nextUrl.value))
     }
   }
@@ -146,9 +155,10 @@ class StartJourneyController @Inject() (
       Future.successful(Ok("Missing session id"))
     } else {
       journeyConnector.Vat.startJourneyBta(SjRequest.Vat.Simple(
-        returnUrl = ReturnUrl(routes.StartJourneyController.showBtaPage.url + "?return-page"),
-        backUrl   = BackUrl(routes.StartJourneyController.showBtaPage.url + "?starting-page")
+        returnUrl = ReturnUrl(routes.StartJourneyController.showBtaVatPage.url + "?return-page"),
+        backUrl   = BackUrl(routes.StartJourneyController.showBtaVatPage.url + "?starting-page")
       )).map(sjResponse => Redirect(sjResponse.nextUrl.value))
+      //        Redirect(_root_.controllers.routes.LandingController.vatLandingPage))
     }
   }
 }
