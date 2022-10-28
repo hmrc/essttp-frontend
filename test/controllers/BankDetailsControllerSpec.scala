@@ -463,6 +463,7 @@ class BankDetailsControllerSpec extends ItSpec {
              |    "employerRef": "864FZ00049"
              |  },
              |  "taxType": "Epaye",
+             |  "origin": "Bta",
              |  "request": {
              |    "account": {
              |       "accountType": "personal",
@@ -607,6 +608,7 @@ class BankDetailsControllerSpec extends ItSpec {
              |    "employerRef": "864FZ00049"
              |  },
              |  "taxType": "Epaye",
+             |  "origin": "Bta",
              |  "request": {
              |    "account": {
              |       "accountType": "${typeOfAccount.entryName.toLowerCase(Locale.UK)}",
