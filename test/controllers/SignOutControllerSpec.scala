@@ -60,7 +60,8 @@ class SignOutControllerSpec extends ItSpec {
         expectedH1              = "For your security, we signed you out",
         shouldBackLinkBePresent = false,
         expectedSubmitUrl       = None,
-        signedIn                = false
+        signedIn                = false,
+        regimeBeingTested       = None
       )
     }
   }
@@ -98,7 +99,6 @@ class SignOutControllerSpec extends ItSpec {
 
     "display the page" in {
       val fakeRequest = FakeRequest()
-
       val result: Future[Result] = controller.doYouWantToGiveFeedback(fakeRequest)
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
@@ -109,7 +109,8 @@ class SignOutControllerSpec extends ItSpec {
         expectedH1              = "Do you want to give feedback on this service?",
         shouldBackLinkBePresent = false,
         expectedSubmitUrl       = Some(routes.SignOutController.doYouWantToGiveFeedbackSubmit.url),
-        signedIn                = false
+        signedIn                = false,
+        regimeBeingTested       = None
       )
 
       checkDoYouWantToGiveFeedbackContent(doc)
@@ -123,7 +124,6 @@ class SignOutControllerSpec extends ItSpec {
           formData: (String, String)*
       )(expectedErrorMessage: String): Unit = {
         val fakeRequest = FakeRequest().withMethod("POST").withFormUrlEncodedBody(formData: _*)
-
         val result: Future[Result] = controller.doYouWantToGiveFeedbackSubmit(fakeRequest)
         val pageContent: String = contentAsString(result)
         val doc: Document = Jsoup.parse(pageContent)
@@ -135,7 +135,8 @@ class SignOutControllerSpec extends ItSpec {
           shouldBackLinkBePresent = false,
           expectedSubmitUrl       = Some(routes.SignOutController.doYouWantToGiveFeedbackSubmit.url),
           hasFormError            = true,
-          signedIn                = false
+          signedIn                = false,
+          regimeBeingTested       = None
         )
 
         checkDoYouWantToGiveFeedbackContent(doc)

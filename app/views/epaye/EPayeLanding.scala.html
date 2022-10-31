@@ -21,6 +21,7 @@
 @import messages.Messages
 @import requests.RequestSupport
 @import play.api.mvc.Request
+@import essttp.rootmodel.TaxRegime
 
 @this(
   layout: Layout,
@@ -37,7 +38,8 @@
 
 @layout(
   pageTitle = Some(title),
-  showBackLink = false
+  showBackLink = false,
+  fallBackTaxRegime = Some(TaxRegime.Epaye)
 ) {
   <h1 class="govuk-heading-xl">@title</h1>
   <p class="govuk-body">@{Messages.Epaye.`You can use this service to pay overdue payments...`.show}</p>
@@ -67,7 +69,7 @@
 
   @govukButton(Button(
     href = Some(routes.DetermineTaxIdController.determineTaxId.url),
-    content = Text(Messages.Epaye.`Start now`.show)
+    content = Text(Messages.`Start now`.show)
   ))
 
 }

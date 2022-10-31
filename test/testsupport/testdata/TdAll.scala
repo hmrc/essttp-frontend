@@ -37,6 +37,8 @@ import java.util.UUID
 object TdAll {
 
   val expectedServiceNamePaye: String = "Set up an Employers’ PAYE payment plan"
+  val expectedServiceNameVat: String = "Set up a VAT payment plan"
+  val expectedServiceNameGeneric: String = "Set up a payment plan"
   val journeyId: JourneyId = JourneyId("6284fcd33c00003d6b1f3903")
   val correlationId: CorrelationId = CorrelationId(UUID.fromString("8d89a98b-0b26-4ab2-8114-f7c7c81c3059"))
 

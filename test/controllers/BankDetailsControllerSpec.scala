@@ -985,7 +985,8 @@ class BankDetailsControllerSpec extends ItSpec {
         doc,
         expectedH1              = BarsLockoutPage.expectedH1,
         shouldBackLinkBePresent = false,
-        expectedSubmitUrl       = None
+        expectedSubmitUrl       = None,
+        regimeBeingTested       = None
       )
 
       val paragraphs = doc.select("p.govuk-body").asScala.toList

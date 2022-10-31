@@ -2,6 +2,7 @@
 
 ->     /hmrc-frontend                                       hmrcfrontend.Routes
 
+#todo we need to put the interstitial page here.
 GET    /                                                    controllers.LandingController.landingPage
 # start journey endpoint for gov-uk (this is the link on gov-uk pages pointint to our application)
 
@@ -9,6 +10,8 @@ GET    /sign-out                                            controllers.SignOutC
 GET    /do-you-want-to-give-feedback                        controllers.SignOutController.doYouWantToGiveFeedback
 POST   /do-you-want-to-give-feedback                        controllers.SignOutController.doYouWantToGiveFeedbackSubmit
 
+GET    /epaye-payment-plan                                  controllers.LandingController.epayeLandingPage
+GET    /vat-payment-plan                                    controllers.LandingController.vatLandingPage
 
 GET    /govuk/epaye/start                                   controllers.GovUkController.startEpayeJourney
 GET    /govuk/vat/start                                     controllers.GovUkController.startVatJourney

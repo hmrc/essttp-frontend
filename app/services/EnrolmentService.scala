@@ -48,11 +48,10 @@ class EnrolmentService @Inject() (journeyService: JourneyService, auditService: 
         )(journeyService.UpdateTaxRef.updateEpayeTaxId(journey.id, _))
 
       case TaxRegime.Vat =>
-        // TODO: update BE when VAT is implemented
         handleTaxRegime[Vrn](
           EnrolmentDef.Vat.findEnrolmentValues(enrolments),
           journey
-        )(_ => Future.successful(()))
+        )(journeyService.UpdateTaxRef.updateVatTaxId(journey.id, _))
     }
   }
 
