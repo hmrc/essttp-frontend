@@ -911,6 +911,11 @@ object Messages {
         s"sortCode.${otherBarsError.formError.message}" -> `Enter a valid combination of bank account number and sort code`
       )
     }
+
+    val `Bank details`: Message = Message(
+      english = "Bank details",
+      welsh = "Manylion banc"
+    )
   }
 
   object CheckBankDetails {
