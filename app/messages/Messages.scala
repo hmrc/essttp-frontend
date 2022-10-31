@@ -16,7 +16,7 @@
 
 package messages
 
-import essttp.rootmodel.{AmountInPence, TaxRegime}
+import essttp.rootmodel.{AmountInPence, Email, TaxRegime}
 import models.forms.BankDetailsForm._
 
 object Messages {
@@ -1020,7 +1020,7 @@ object Messages {
     )
   }
 
-  object Email {
+  object SelectEmail {
     val `Which email do you want to use?`: Message = Message(
       english = "Which email do you want to use?"
     )
@@ -1058,6 +1058,26 @@ object Messages {
           english = "Enter your email address in the correct format, like name@example.com"
         )
     }
+  }
+
+  object EmailConfirmed {
+
+    val `Email address confirmed`: Message = Message(
+      english = "Email address confirmed"
+    )
+
+    def `The email address ... has been confirmed`(email: Email): Message = Message(
+      english = s"The email address <strong>${email.value.decryptedValue}</strong> has been confirmed."
+    )
+
+    val `We'll only use this address to contact you about your payment plan`: Message = Message(
+      english = "We’ll only use this address to contact you about your payment plan."
+    )
+
+    val `Your email has not been updated in other government services`: Message = Message(
+      english = "Your email has not been updated in other government services."
+    )
+
   }
 
   object NotSoleSignatory {

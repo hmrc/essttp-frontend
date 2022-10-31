@@ -25,6 +25,7 @@ import essttp.emailverification.EmailVerificationStatus
 import essttp.journey.model.Journey
 import essttp.rootmodel.Email
 import essttp.utils.Errors
+import io.scalaland.chimney.dsl.TransformerOps
 import models.emailverification.RequestEmailVerificationResponse
 import play.api.data.Form
 import play.api.mvc._
@@ -148,8 +149,23 @@ class EmailController @Inject() (
     Ok("this is a placeholder for the too-many-passcode-attempts page")
   }
 
-  val emailAddressConfirmed: Action[AnyContent] = as.eligibleJourneyAction { _ =>
-    Ok("this is a placeholder for the email confirmed page")
+  val emailAddressConfirmed: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    request.journey match {
+      case j: Journey.BeforeEmailAddressVerificationResult =>
+        logErrorAndRouteToDefaultPage(j)
+
+      case j: Journey.AfterArrangementSubmitted =>
+        logErrorAndRouteToDefaultPage(j)
+
+      case j: Journey.AfterEmailAddressVerificationResult =>
+        j.emailVerificationStatus match {
+          case EmailVerificationStatus.Verified =>
+            Ok(views.emailAddressConfirmed(j.into[Journey.AfterEmailAddressSelectedToBeVerified].transform.emailToBeVerified))
+
+          case EmailVerificationStatus.Locked =>
+            logErrorAndRouteToDefaultPage(j)
+        }
+    }
   }
 
 }
