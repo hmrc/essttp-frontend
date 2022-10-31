@@ -162,6 +162,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
     val eligibilityCheckResult = journey.into[AfterEligibilityChecked].transform.eligibilityCheckResult
 
     BarsCheckAuditDetail(
+      toAuditString(journey.origin),
       journey.taxRegime.toString,
       toTaxDetail(eligibilityCheckResult),
       BarsAuditRequest(
@@ -179,8 +180,8 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       BarsVerifyDetails(
         verifyStatusResponse.attempts.value,
         verifyStatusResponse.lockoutExpiryDateTime.map(_.toString)
-      )
-
+      ),
+      correlationId = journey.correlationId.value.toString
     )
   }
 

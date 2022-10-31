@@ -19,7 +19,7 @@ package testsupport.testdata
 import essttp.emailverification.EmailVerificationStatus
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.ttp.{EligibilityPass, EligibilityRules}
-import essttp.rootmodel.{DayOfMonth, UpfrontPaymentAmount}
+import essttp.rootmodel.{DayOfMonth, TaxRegime, UpfrontPaymentAmount}
 import testsupport.testdata.JourneyInfo.JourneyInfoAsJson
 import uk.gov.hmrc.crypto.{Encrypter, PlainText}
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
@@ -44,14 +44,20 @@ object TdJsonBodies {
   }
 
   object StartJourneyResponses {
-    val bta: String =
+    def bta(taxRegime: TaxRegime): String = {
+      val relativeUrl = taxRegime match {
+        case TaxRegime.Epaye => "/epaye-payment-plan"
+        case TaxRegime.Vat   => "/vat-payment-plan"
+      }
       s"""{
-         |  "nextUrl": "http://localhost:19001/set-up-a-payment-plan?traceId=33678917",
+         |  "nextUrl": "http://localhost:19001/set-up-a-payment-plan$relativeUrl",
          |  "journeyId": "${TdAll.journeyId.value}"
          |}""".stripMargin
-    val epaye: String = bta
-    val govUk: String = bta
-    val detachedUrl: String = bta
+    }
+
+    def epaye(taxRegime: TaxRegime): String = bta(taxRegime)
+    def govUk(taxRegime: TaxRegime): String = bta(taxRegime)
+    def detachedUrl(taxRegime: TaxRegime): String = bta(taxRegime)
   }
 
   def createJourneyJson(stageInfo: StageInfo, journeyInfo: List[String], origin: Origin = Origins.Epaye.Bta): String = {

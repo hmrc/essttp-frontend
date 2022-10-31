@@ -463,6 +463,7 @@ class BankDetailsControllerSpec extends ItSpec {
              |    "employerRef": "864FZ00049"
              |  },
              |  "taxType": "Epaye",
+             |  "origin": "Bta",
              |  "request": {
              |    "account": {
              |       "accountType": "personal",
@@ -477,7 +478,8 @@ class BankDetailsControllerSpec extends ItSpec {
              |  },
              |  "barsVerify": {
              |    "unsuccessfulAttempts" : 1
-             |  }
+             |  },
+             |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059"
              |}
             """.stripMargin
         ).as[JsObject]
@@ -607,6 +609,7 @@ class BankDetailsControllerSpec extends ItSpec {
              |    "employerRef": "864FZ00049"
              |  },
              |  "taxType": "Epaye",
+             |  "origin": "Bta",
              |  "request": {
              |    "account": {
              |       "accountType": "${typeOfAccount.entryName.toLowerCase(Locale.UK)}",
@@ -619,7 +622,8 @@ class BankDetailsControllerSpec extends ItSpec {
              |   "isBankAccountValid": $isBankAccountValid,
              |   "barsResponse":  $barsResponseJson
              |  },
-             |  $barsVerifyJsonString
+             |  $barsVerifyJsonString,
+             |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059"
              |}
             """.stripMargin
         ).as[JsObject]
@@ -983,7 +987,8 @@ class BankDetailsControllerSpec extends ItSpec {
         doc,
         expectedH1              = BarsLockoutPage.expectedH1,
         shouldBackLinkBePresent = false,
-        expectedSubmitUrl       = None
+        expectedSubmitUrl       = None,
+        regimeBeingTested       = None
       )
 
       val paragraphs = doc.select("p.govuk-body").asScala.toList

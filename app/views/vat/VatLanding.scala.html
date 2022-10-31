@@ -1,0 +1,79 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import config.AppConfig
+@import controllers.routes
+@import views.html.templates.Layout
+@import messages.Messages
+@import requests.RequestSupport
+@import play.api.mvc.Request
+@import essttp.rootmodel.TaxRegime
+
+@this(
+        layout: Layout,
+        govukButton: GovukButton,
+        requestSupport: RequestSupport,
+        appConfig: AppConfig,
+        insetText: GovukInsetText
+)
+
+@()(implicit request: Request[_])
+
+@import requestSupport._
+
+@title= @{Messages.Vat.`Set up a VAT payment plan`.show}
+
+@layout(
+    pageTitle = Some(title),
+    showBackLink = false,
+    fallBackTaxRegime = Some(TaxRegime.Vat)
+) {
+    <h1 class="govuk-heading-xl">@title</h1>
+    <p class="govuk-body">@{Messages.Vat.`The payment plan covers all appropriate overdue amounts...`.show}</p>
+    <h2 class="govuk-heading-m">@{Messages.Vat.`Who can use this service`.show}</h2>
+    <p class="govuk-body">@{Messages.Vat.`You are eligible to set up an online payment plan if:`.show}</p>
+    <ul class="govuk-list govuk-list--bullet">
+        <li>@{Messages.Vat.`you plan to pay the debt off within the next ... months or less`(appConfig.PolicyParameters.VAT.maxPlanDurationInMonths).show}</li>
+        <li>@{Messages.Vat.`you owe ... or less`(appConfig.PolicyParameters.VAT.maxAmountOfDebt).show}</li>
+        <li>@{Messages.Vat.`you do not have any other payment plans or debts with HMRC`.show}</li>
+        <li>@{Messages.Vat.`your tax returns are up to date`.show}</li>
+    </ul>
+    <p class="govuk-body">@{Messages.Vat.`You can use this service within ... days of the overdue payment deadline.`(appConfig.PolicyParameters.VAT.maxAgeOfDebtInDays).show}</p>
+
+    @insetText(InsetText(content = Text(Messages.Vat.`If you have a Customer Compliance Manager...`.show)))
+
+    <h2 class="govuk-heading-m">@{Messages.Vat.`Before you start`.show}</h2>
+    <p class="govuk-body">@{Messages.Vat.`You must be:`.show}</p>
+    <ul class="govuk-list govuk-list--bullet">
+        <li>@{Messages.Vat.`a named account holder for the UK bank account you intend to use`.show}</li>
+        <li>@{Messages.Vat.`able to authorise a Direct Debit`.show}</li>
+    </ul>
+
+    <h2 class="govuk-heading-m">@{Messages.Vat.`Who cannot use this service:`.show}</h2>
+    <ul class="govuk-list govuk-list--bullet">
+        <li>@{Messages.Vat.`cash accounting customers`.show}</li>
+        <li>@{Messages.Vat.`annual accounting scheme members`.show}</li>
+        <li>@{Messages.Vat.`payment on account customers`.show}</li>
+    </ul>
+
+    <p class="govuk-body">@{Messages.Vat.`You must keep up to date with your payments...`.show}</p>
+
+    @govukButton(Button(
+        href = Some(routes.DetermineTaxIdController.determineTaxId.url),
+        content = Text(Messages.`Start now`.show)
+    ))
+}

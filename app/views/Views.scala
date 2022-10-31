@@ -18,6 +18,9 @@ package views
 
 import views.html.epaye.EPayeLanding
 import views.html.epaye.ineligible.{Ineligible, NotEnrolled}
+import views.html.vat.VatLanding
+import views.html.epaye.EPayeLanding
+import views.html.epaye.ineligible.{Ineligible, NotEnrolled}
 import views.html.vat.NotVatRegistered
 import views.html._
 import views.partials.Partials
@@ -26,6 +29,7 @@ import javax.inject.Inject
 
 class Views @Inject() (
     val epayeLanding:                     EPayeLanding,
+    val vatLanding:                       VatLanding,
     val yourBillIs:                       YourBillIs,
     val notEnrolled:                      NotEnrolled,
     val notVatRegistered:                 NotVatRegistered,
@@ -38,12 +42,13 @@ class Views @Inject() (
     val paymentDayPage:                   PaymentDay,
     val instalmentOptionsPage:            InstalmentOptions,
     val enterDetailsAboutBankAccountPage: EnterDetailsAboutBankAccountPage,
+    val cannotSetupDirectDebitPage:       NotSoleSignatoryPage,
     val enterBankDetailsPage:             EnterBankDetails,
     val bankDetailsSummary:               BankDetailsSummary,
     val barsLockout:                      BarsLockout,
     val termsAndConditions:               TermsAndConditions,
     val chooseEmailPage:                  ChooseEmailPage,
-    val cannotSetupDirectDebitPage:       NotSoleSignatoryPage,
+    val emailAddressConfirmed:            EmailAddressConfirmed,
     val paymentPlanSetUpPage:             PaymentPlanSetUpPage,
     val printSummaryPage:                 PrintSummaryPage,
     val missingInfoPage:                  MissingInformation,

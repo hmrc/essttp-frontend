@@ -16,6 +16,8 @@
 
 package controllers
 
+import essttp.journey.model.Origins
+import essttp.rootmodel.TaxRegime
 import messages.Messages
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -24,6 +26,8 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
+import testsupport.stubs.EssttpBackend
+import testsupport.testdata.JourneyJsonTemplates
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
@@ -33,8 +37,9 @@ class LandingPageControllerSpec extends ItSpec {
 
   private val controller: LandingController = app.injector.instanceOf[LandingController]
 
-  "GET /" - {
+  "GET /epaye-payment-plan" - {
     "return 200 and the PAYE landing page" in {
+      EssttpBackend.StartJourney.findJourney()
       val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.landingPage(fakeRequest)
 
@@ -47,7 +52,8 @@ class LandingPageControllerSpec extends ItSpec {
         shouldBackLinkBePresent     = false,
         expectedSubmitUrl           = None,
         signedIn                    = false,
-        shouldH1BeSameAsServiceName = true
+        shouldH1BeSameAsServiceName = true,
+        regimeBeingTested           = Some(TaxRegime.Epaye)
       )
 
       val lists = doc.select(".govuk-list").asScala.toList
@@ -64,7 +70,44 @@ class LandingPageControllerSpec extends ItSpec {
 
       val button = doc.select(".govuk-button")
       button.attr("href") shouldBe routes.DetermineTaxIdController.determineTaxId.url
-      button.text() shouldBe Messages.Epaye.`Start now`.english
+      button.text() shouldBe Messages.`Start now`.english
+    }
+  }
+
+  "GET /vat-payment-plan" - {
+    "return 200 and the VAT landing page" in {
+      EssttpBackend.StartJourney.findJourney(jsonBody = JourneyJsonTemplates.Started(Origins.Vat.DetachedUrl))
+      val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.vatLandingPage(fakeRequest)
+
+      RequestAssertions.assertGetRequestOk(result)
+      val doc: Document = Jsoup.parse(contentAsString(result))
+
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1                  = "Set up a VAT payment plan",
+        shouldBackLinkBePresent     = false,
+        expectedSubmitUrl           = None,
+        signedIn                    = false,
+        shouldH1BeSameAsServiceName = true,
+        regimeBeingTested           = Some(TaxRegime.Vat)
+      )
+
+      val lists = doc.select(".govuk-list").asScala.toList
+      lists.size shouldBe 3
+
+      val firstListBullets = lists(0).select("li").asScala.toList
+      firstListBullets.size shouldBe 4
+
+      firstListBullets(0).text() shouldBe "you plan to pay the debt off within the next 6 months or less"
+      firstListBullets(1).text() shouldBe "you owe £20,000 or less"
+
+      val paragraphs = doc.select("p.govuk-body").asScala.toList
+      paragraphs(2).text() shouldBe "You can use this service within 28 days of the overdue payment deadline."
+
+      val button = doc.select(".govuk-button")
+      button.attr("href") shouldBe routes.DetermineTaxIdController.determineTaxId.url
+      button.text() shouldBe Messages.`Start now`.english
     }
   }
 }

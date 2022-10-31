@@ -51,7 +51,8 @@
   additionalScripts: Option[Html] = None,
   showBackLink: Boolean = true,
   hasErrors: Boolean = false,
-  showSignOutOverride: Option[Boolean] = None
+  showSignOutOverride: Option[Boolean] = None,
+  fallBackTaxRegime: Option[TaxRegime] = None
 )(
   contentBlock: Html)(implicit
   request: Request[_]
@@ -110,7 +111,10 @@
     @serviceName = @{
         (request: AnyRef) match {
           case r: AuthenticatedJourneyRequest[_] => Messages.ServicePhase.serviceName(r.journey.taxRegime).show
-          case _ => Messages.ServicePhase.serviceName(TaxRegime.Epaye).show
+          case _ => fallBackTaxRegime match {
+              case Some(regime) => Messages.ServicePhase.serviceName(regime).show
+              case None => Messages.ServicePhase.`Set up a payment plan`.show
+          }
 //            commented out for now until we work out something better to make it derive based on tax type - we need more endpoints...
 //          case other =>
 //              sys.error(s"Expected JourneyRequest for non-test-only page but got ${other.getClass.getSimpleName}")

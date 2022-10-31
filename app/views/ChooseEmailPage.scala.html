@@ -45,7 +45,7 @@
 }
 
 @title = @{
-    Messages.Email.`Which email do you want to use?`.show
+    Messages.SelectEmail.`Which email do you want to use?`.show
 }
 
 @conditionalHtml = @{
@@ -54,10 +54,10 @@
         name = newEmailKey,
         inputType = "email",
         classes = "govuk-input--width-30",
-        hint = Some(Hint(content = Text(Messages.Email.`For example, myname@sample.com`.show))),
+        hint = Some(Hint(content = Text(Messages.SelectEmail.`For example, myname@sample.com`.show))),
         spellcheck = Some(false),
         errorMessage = form.error(newEmailKey).map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
-            content = Text(Messages.Email.getError(s"${e.key}.${e.message}").show)
+            content = Text(Messages.SelectEmail.getError(s"${e.key}.${e.message}").show)
         )),
         value = form(newEmailKey).value
     ))
@@ -69,7 +69,7 @@
             ErrorSummary(errorList = form.errors.map(e =>
                 ErrorLink(
                     href = Some(s"#${e.key}"),
-                    content = Text(Messages.Email.getError(s"${e.key}.${e.message}").show)
+                    content = Text(Messages.SelectEmail.getError(s"${e.key}.${e.message}").show)
                 )
             ),
                 title = Text(Messages.`There is a problem`.show))
@@ -94,13 +94,13 @@
                     checked = form.value.exists(_.differentEmail.isEmpty),
                 ),
                 RadioItem(
-                    content = Text(Messages.Email.`A new email address`.show),
+                    content = Text(Messages.SelectEmail.`A new email address`.show),
                     value = Some("new"),
                     conditionalHtml = Some(conditionalHtml),
                     checked = form.value.exists(_.differentEmail.isDefined) || form.error(newEmailKey).isDefined,
                 )
             ),
-            errorMessage = form.error(key).map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(content = Text(Messages.Email.getError(s"${e.key}.${e.message}").show)))
+            errorMessage = form.error(key).map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(content = Text(Messages.SelectEmail.getError(s"${e.key}.${e.message}").show)))
         ))
         @govukButton(Button(content = Text(Messages.continue.show), attributes = Map("id" -> "continue")))
     }

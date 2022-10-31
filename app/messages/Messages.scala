@@ -16,7 +16,7 @@
 
 package messages
 
-import essttp.rootmodel.{AmountInPence, TaxRegime}
+import essttp.rootmodel.{AmountInPence, Email, TaxRegime}
 import models.forms.BankDetailsForm._
 
 object Messages {
@@ -74,6 +74,11 @@ object Messages {
   val `full stop`: Message = Message(
     english = ".",
     welsh   = "."
+  )
+
+  val `Start now`: Message = Message(
+    english = "Start now",
+    welsh   = "Dechrau nawr"
   )
 
   object YourBill {
@@ -137,6 +142,11 @@ object Messages {
           english = "Set up a VAT payment plan",
         )
     }
+
+    val `Set up a payment plan`: Message = Message(
+      english = "Set up a payment plan",
+      welsh   = "Trefnu cynllun talu"
+    )
 
     val beta: Message = Message(
       english = "beta",
@@ -406,16 +416,73 @@ object Messages {
       welsh   = "yn gallu awdurdodi Debyd Uniongyrchol"
     )
 
-    val `Start now`: Message = Message(
-      english = "Start now",
-      welsh   = "Dechrau nawr"
-    )
-
     val `You must keep up to date with your payments...`: Message = Message(
       english = "You must keep up to date with your payments. HMRC may ask you to pay the total outstanding amount if you do not. HMRC intend this as a one-off payment plan to give you extra support.",
       welsh   = "Mae’n rhaid i chi sicrhau eich bod yn gwneud eich taliadau mewn pryd. Mae’n bosibl y bydd CThEF yn gofyn i chi dalu’r cyfanswm sydd heb ei dalu os na fyddwch yn gwneud eich taliadau mewn pryd. Bwriad CThEF yw bod hwn yn gynllun talu untro i roi cymorth ychwanegol i chi."
     )
 
+  }
+
+  object Vat {
+    val `Set up a VAT payment plan`: Message = Message(
+      english = "Set up a VAT payment plan"
+    )
+    val `The payment plan covers all appropriate overdue amounts...`: Message = Message(
+      english = "The payment plan covers all appropriate overdue amounts, surcharges, penalties and interest. The payments you make may incur interest."
+    )
+    val `Who can use this service`: Message = Message(
+      english = "Who can use this service"
+    )
+    val `You are eligible to set up an online payment plan if:`: Message = Message(
+      english = "You are eligible to set up an online payment plan if:",
+      welsh   = "Rydych yn gymwys i drefnu cynllun talu ar-lein os:"
+    )
+    def `you plan to pay the debt off within the next ... months or less`(maxPlanDuration: Int): Message = Message(
+      english = s"you plan to pay the debt off within the next $maxPlanDuration months or less"
+    )
+    def `you owe ... or less`(maxAmountOfDebt: AmountInPence): Message = Message(
+      english = s"you owe ${maxAmountOfDebt.gdsFormatInPounds} or less"
+    )
+    val `you do not have any other payment plans or debts with HMRC`: Message = Message(
+      english = "you do not have any other payment plans or debts with HMRC"
+    )
+    val `your tax returns are up to date`: Message = Message(
+      english = "your tax returns are up to date"
+    )
+    def `You can use this service within ... days of the overdue payment deadline.`(maxAgeOfDebtInDays: Int): Message = Message(
+      english = s"You can use this service within $maxAgeOfDebtInDays days of the overdue payment deadline."
+    )
+    val `If you have a Customer Compliance Manager...`: Message = Message(
+      english = "If you have a Customer Compliance Manager, consider discussing your needs with them before using this service."
+    )
+    val `Before you start`: Message = Message(
+      english = "Before you start"
+    )
+    val `You must be:`: Message = Message(
+      english = "You must be:"
+    )
+    val `a named account holder for the UK bank account you intend to use`: Message = Message(
+      english = "a named account holder for the UK bank account you intend to use"
+    )
+    val `able to authorise a Direct Debit`: Message = Message(
+      english = "able to authorise a Direct Debit"
+    )
+    val `Who cannot use this service:`: Message = Message(
+      english = "Who cannot use this service:"
+    )
+    val `cash accounting customers`: Message = Message(
+      english = "cash accounting customers"
+    )
+    val `annual accounting scheme members`: Message = Message(
+      english = "annual accounting scheme members"
+    )
+    val `payment on account customers`: Message = Message(
+      english = "payment on account customers"
+    )
+    val `You must keep up to date with your payments...`: Message = Message(
+      english = "You must keep up to date with your payments. HMRC may ask you to pay the total outstanding amount if you do not. HMRC intend this as a one-off payment plan to give you extra support.",
+      welsh   = "Mae’n rhaid i chi sicrhau eich bod yn gwneud eich taliadau mewn pryd. Mae’n bosibl y bydd CThEF yn gofyn i chi dalu’r cyfanswm sydd heb ei dalu os na fyddwch yn gwneud eich taliadau mewn pryd. Bwriad CThEF yw bod hwn yn gynllun talu untro i roi cymorth ychwanegol i chi."
+    )
   }
 
   object UpfrontPaymentAmount {
@@ -967,7 +1034,7 @@ object Messages {
     )
   }
 
-  object Email {
+  object SelectEmail {
     val `Which email do you want to use?`: Message = Message(
       english = "Which email do you want to use?"
     )
@@ -1005,6 +1072,26 @@ object Messages {
           english = "Enter your email address in the correct format, like name@example.com"
         )
     }
+  }
+
+  object EmailConfirmed {
+
+    val `Email address confirmed`: Message = Message(
+      english = "Email address confirmed"
+    )
+
+    def `The email address ... has been confirmed`(email: Email): Message = Message(
+      english = s"The email address <strong>${email.value.decryptedValue}</strong> has been confirmed."
+    )
+
+    val `We'll only use this address to contact you about your payment plan`: Message = Message(
+      english = "We’ll only use this address to contact you about your payment plan."
+    )
+
+    val `Your email has not been updated in other government services`: Message = Message(
+      english = "Your email has not been updated in other government services."
+    )
+
   }
 
   object NotSoleSignatory {
