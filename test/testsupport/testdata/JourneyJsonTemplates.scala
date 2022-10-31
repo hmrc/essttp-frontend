@@ -29,9 +29,10 @@ object JourneyJsonTemplates {
     origin
   )
 
-  val `Computed Tax Id`: String = TdJsonBodies.createJourneyJson(
+  def `Computed Tax Id`(origin: Origin = Origins.Epaye.Bta, taxReference: String = "864FZ00049"): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.computedTaxId,
-    journeyInfo = JourneyInfo.taxIdDetermined
+    journeyInfo = JourneyInfo.taxIdDetermined(taxReference),
+    origin
   )
 
   def `Eligibility Checked - Eligible`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(

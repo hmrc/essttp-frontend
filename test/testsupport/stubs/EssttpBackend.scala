@@ -131,7 +131,7 @@ object EssttpBackend {
   }
 
   object DetermineTaxId {
-    def findJourney(jsonBody: String = JourneyJsonTemplates.`Computed Tax Id`): StubMapping = findByLatestSessionId(jsonBody)
+    def findJourney(jsonBody: String = JourneyJsonTemplates.`Computed Tax Id`()): StubMapping = findByLatestSessionId(jsonBody)
 
     def updateTaxIdUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-tax-id"
 

@@ -1,0 +1,81 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import play.api.mvc.Request
+@import requests.RequestSupport
+@import messages.Messages
+@import config.AppConfig
+@import play.twirl.api.Html
+
+@this(
+        layout: views.html.templates.Layout,
+        govukDetails: GovukDetails,
+        appConfig: AppConfig,
+        requestSupport: RequestSupport
+)
+
+@()(implicit request: Request[_])
+
+@import requestSupport._
+
+@extraSupportHtml = {
+    <p class="govuk-body">
+    @{Html(Messages.NotEligible.extraSupportLink(appConfig.Urls.extraSupportUrl).show)}
+    </p>
+    <p class="govuk-body">
+    @{Html(Messages.NotEligible.relayLink(appConfig.Urls.relayUrl).show)}
+    </p>
+    <p class="govuk-body">
+    @{Html(Messages.NotEligible.`If you are outside the UK...`.show)}
+    </p>
+}
+@layout(pageTitle = Some(Messages.EnrolmentMissing.`You are not registered`.show), showBackLink = false) {
+    <h1 class="govuk-heading-xl">
+    @{Messages.EnrolmentMissing.`You are not registered`.show}
+    </h1>
+    <p class="govuk-body">
+        @{Messages.EnrolmentMissing.`You are not eligible for an online payment plan because you need to register for VAT Online.`.show}
+        <a href="@{appConfig.Urls.enrolForVatUrl}" class="govuk-link" id="how-to-enrol-link">@{Messages.EnrolmentMissing.`Find out how to register.`.show}</a>@{Messages.`full stop`.show}
+    </p>
+    <div class="common-eligibility">
+        <p class="govuk-body">
+        @{Html(Messages.NotEligible.`If you need to speak to an adviser call us...`.show)}
+        </p>
+        @govukDetails(Details(
+            summary = Text(Messages.NotEligible.`If you cannot use speech recognition software`.show),
+            content = HtmlContent(extraSupportHtml)
+        ))
+        <p class="govuk-body govuk-!-font-weight-bold">
+        @{Messages.NotEligible.`Before you call, make sure you have:`.show}
+        </p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li>@{Messages.NotEligible.`your VAT number. This is 9 characters, for example, 1233456789`.show}</li>
+            <li>@{Messages.NotEligible.`your bank details`.show}</li>
+        </ul>
+        <p class="govuk-body govuk-!-font-weight-bold">
+        @{Messages.NotEligible.`We're likely to ask:`.show}
+        </p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li>@{Messages.NotEligible.`what you've done to try to pay the bill`.show}</li>
+            <li>@{Messages.NotEligible.`if you can pay some of the bill now`.show}</li>
+        </ul>
+
+        <p class="govuk-body">
+        @{Messages.NotEligible.`Our opening times are Monday to Friday: 8am to 6pm`.show}
+        </p>
+    </div>
+}

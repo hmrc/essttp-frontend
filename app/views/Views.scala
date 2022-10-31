@@ -16,8 +16,9 @@
 
 package views
 
-import views.html.EPaye.EPayeLanding
-import views.html.EPaye.ineligible.{Ineligible, NotEnrolled}
+import views.html.epaye.EPayeLanding
+import views.html.epaye.ineligible.{Ineligible, NotEnrolled}
+import views.html.vat.NotVatRegistered
 import views.html._
 import views.partials.Partials
 
@@ -27,6 +28,7 @@ class Views @Inject() (
     val epayeLanding:                     EPayeLanding,
     val yourBillIs:                       YourBillIs,
     val notEnrolled:                      NotEnrolled,
+    val notVatRegistered:                 NotVatRegistered,
     val ineligible:                       Ineligible,
     val partials:                         Partials,
     val canYouMakeAnUpFrontPayment:       CanYouMakeAnUpfrontPayment,

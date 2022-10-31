@@ -17,7 +17,8 @@
 package controllers
 
 import actions.EnrolmentDef
-import essttp.rootmodel.EmpRef
+import essttp.journey.model.Origins
+import essttp.rootmodel.{EmpRef, Vrn}
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeRequest
@@ -25,7 +26,7 @@ import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend}
-import testsupport.testdata.TdAll
+import testsupport.testdata.{JourneyJsonTemplates, TdAll}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 import uk.gov.hmrc.http.SessionKeys
 
@@ -169,6 +170,81 @@ class DetermineTaxIdControllerSpec extends ItSpec {
         )
       }
 
+    }
+
+    "for VAT when" - {
+      "the tax id has already been determined" in {
+        stubCommonActions(authAllEnrolments = Some(Set(TdAll.vatEnrolment)))
+        EssttpBackend.DetermineTaxId.findJourney(JourneyJsonTemplates.`Computed Tax Id`(origin       = Origins.Vat.Bta, taxReference = "101747001"))
+
+        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+        val result = controller.determineTaxId()(fakeRequest)
+
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.DetermineEligibilityController.determineEligibility.url)
+      }
+
+      "the relevant enrolment is found with the necessary identifiers and the enrolment is active" in {
+        val enrolments =
+          Set(
+            enrolment(EnrolmentDef.Vat.`HMRC-MTD-VAT`.enrolmentKey, activated = true)(
+              EnrolmentDef.Vat.`HMRC-MTD-VAT`.identifierKey -> "Ref"
+            )
+          )
+
+        stubCommonActions(authAllEnrolments = Some(enrolments))
+        EssttpBackend.StartJourney.findJourney(jsonBody = JourneyJsonTemplates.Started(Origins.Vat.Bta))
+        EssttpBackend.DetermineTaxId.stubUpdateTaxId(TdAll.journeyId)
+
+        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+        val result = controller.determineTaxId()(fakeRequest)
+
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.DetermineEligibilityController.determineEligibility.url)
+
+        EssttpBackend.DetermineTaxId.verifyTaxIdRequest(TdAll.journeyId, Vrn("Ref"))
+      }
+
+      "the relevant enrolment is found but the correct identifiers could not be found" in {
+        val enrolments = Set(enrolment(EnrolmentDef.Vat.`HMRC-MTD-VAT`.enrolmentKey, activated = false)())
+        stubCommonActions(authAllEnrolments = Some(enrolments))
+        EssttpBackend.StartJourney.findJourney(jsonBody = JourneyJsonTemplates.Started(Origins.Vat.GovUk))
+        EssttpBackend.DetermineTaxId.stubUpdateTaxId(TdAll.journeyId)
+
+        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+        a[RuntimeException] shouldBe thrownBy(await(controller.determineTaxId()(fakeRequest)))
+      }
+
+      "the relevant enrolment is not found" in {
+        stubCommonActions(authAllEnrolments = Some(Set.empty))
+        EssttpBackend.StartJourney.findJourney(jsonBody = JourneyJsonTemplates.Started(Origins.Vat.GovUk))
+
+        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+        val result = controller.determineTaxId()(fakeRequest)
+
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.NotEnrolledController.notVatRegistered.url)
+        AuditConnectorStub.verifyEventAudited(
+          "EligibilityCheck",
+          Json.parse(
+            s"""
+               |{
+               |  "eligibilityResult" : "ineligible",
+               |  "enrollmentReasons": "not enrolled",
+               |  "noEligibilityReasons": 0,
+               |  "eligibilityReasons" : [  ],
+               |  "origin": "GovUk",
+               |  "taxType": "Vat",
+               |  "taxDetail": { },
+               |  "authProviderId": "authId-999",
+               |  "chargeTypeAssessment" : []
+               |}
+               |""".
+              stripMargin
+          ).as[JsObject]
+        )
+      }
     }
   }
 }
