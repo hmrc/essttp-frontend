@@ -478,7 +478,8 @@ class BankDetailsControllerSpec extends ItSpec {
              |  },
              |  "barsVerify": {
              |    "unsuccessfulAttempts" : 1
-             |  }
+             |  },
+             |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059"
              |}
             """.stripMargin
         ).as[JsObject]
@@ -621,7 +622,8 @@ class BankDetailsControllerSpec extends ItSpec {
              |   "isBankAccountValid": $isBankAccountValid,
              |   "barsResponse":  $barsResponseJson
              |  },
-             |  $barsVerifyJsonString
+             |  $barsVerifyJsonString,
+             |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059"
              |}
             """.stripMargin
         ).as[JsObject]

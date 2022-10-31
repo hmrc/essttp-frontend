@@ -20,12 +20,13 @@ import models.audit.{AuditDetail, TaxDetail}
 import play.api.libs.json.{Json, OWrites}
 
 final case class BarsCheckAuditDetail(
-    origin:     String,
-    taxType:    String,
-    taxDetail:  TaxDetail,
-    request:    BarsAuditRequest,
-    response:   BarsAuditResponse,
-    barsVerify: BarsVerifyDetails
+    origin:        String,
+    taxType:       String,
+    taxDetail:     TaxDetail,
+    request:       BarsAuditRequest,
+    response:      BarsAuditResponse,
+    barsVerify:    BarsVerifyDetails,
+    correlationId: String
 ) extends AuditDetail {
 
   override val auditType: String = "BarsCheck"
