@@ -180,8 +180,8 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       BarsVerifyDetails(
         verifyStatusResponse.attempts.value,
         verifyStatusResponse.lockoutExpiryDateTime.map(_.toString)
-      )
-
+      ),
+      correlationId = journey.correlationId.value.toString
     )
   }
 
