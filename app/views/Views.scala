@@ -16,13 +16,10 @@
 
 package views
 
-import views.html.epaye.EPayeLanding
-import views.html.epaye.ineligible.{Ineligible, NotEnrolled}
-import views.html.vat.VatLanding
-import views.html.epaye.EPayeLanding
-import views.html.epaye.ineligible.{Ineligible, NotEnrolled}
-import views.html.vat.NotVatRegistered
 import views.html._
+import views.html.epaye.EPayeLanding
+import views.html.epaye.ineligible.{Ineligible, NotEnrolled}
+import views.html.vat.{NotVatRegistered, VatLanding}
 import views.partials.Partials
 
 import javax.inject.Inject
