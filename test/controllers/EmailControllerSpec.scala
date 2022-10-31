@@ -410,7 +410,7 @@ class EmailControllerSpec extends ItSpec {
 
   }
 
-  "GET /email-confirmed should" - {
+  "GET /email-address-confirmed should" - {
 
     val email: Email = Email(SensitiveString("email@test.com"))
 
