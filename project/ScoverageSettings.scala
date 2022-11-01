@@ -19,7 +19,7 @@ object ScoverageSettings {
     Seq(
       ScoverageKeys.coverageExcludedPackages := """.*.Reverse.*;.*.javascript.*;testOnly.*;.*viewmodels.govuk;.*Reverse.*""",
       ScoverageKeys.coverageExcludedFiles := excludedFiles,
-      ScoverageKeys.coverageMinimumStmtTotal := 80,
+      ScoverageKeys.coverageMinimumStmtTotal := 90,
       ScoverageKeys.coverageFailOnMinimum := true,
       ScoverageKeys.coverageHighlighting := true
     )
