@@ -54,21 +54,24 @@ class SignOutController @Inject() (
   }
 
   def doYouWantToGiveFeedback: Action[AnyContent] = Action { implicit request =>
-    Ok(views.doYouWantToGiveFeedbackPage(GiveFeedbackForm.form))
+    val taxRegimeString: String = request.session.get(SignOutController.feedbackRegimeKey).getOrElse("NA")
+    val maybeFallbackTaxRegime: Option[TaxRegime] = TaxRegime.withNameInsensitiveOption(taxRegimeString)
+    Ok(views.doYouWantToGiveFeedbackPage(GiveFeedbackForm.form, maybeFallbackTaxRegime))
   }
 
   def doYouWantToGiveFeedbackSubmit: Action[AnyContent] = Action { implicit request =>
+    val taxRegimeString: Option[String] = request.session.get(SignOutController.feedbackRegimeKey)
     GiveFeedbackForm.form.bindFromRequest()
       .fold(
-        formWithErrors => Ok(views.doYouWantToGiveFeedbackPage(formWithErrors)), {
+        formWithErrors =>
+          Ok(views.doYouWantToGiveFeedbackPage(formWithErrors, TaxRegime.withNameInsensitiveOption(taxRegimeString.getOrElse("NA")))), {
           case GiveFeedbackFormValue.Yes =>
-            val taxRegimeString = request.session.get(SignOutController.feedbackRegimeKey).getOrElse(
-              sys.error("Could not find tax regime in cookie session")
-            )
-            TaxRegime.withNameInsensitive(taxRegimeString) match {
-              case TaxRegime.Epaye => Redirect(routes.SignOutController.exitSurveyPaye).withNewSession
-              case TaxRegime.Vat   => sys.error("Sign out survey not implemented for VAT yet")
-            }
+            TaxRegime.withNameInsensitive(
+              taxRegimeString.getOrElse(sys.error("Could not find tax regime in cookie session"))
+            ) match {
+                case TaxRegime.Epaye => Redirect(routes.SignOutController.exitSurveyPaye).withNewSession
+                case TaxRegime.Vat   => sys.error("Sign out survey not implemented for VAT yet")
+              }
 
           case GiveFeedbackFormValue.No =>
             Redirect(appConfig.Urls.govUkUrl).withNewSession
