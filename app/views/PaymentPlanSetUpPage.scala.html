@@ -70,12 +70,15 @@
     <p class="govuk-body">@{
         Messages.Confirmation.paymentInfo(hasUpfrontPayment = hasUpfrontPayment, nextPayment).show
     }</p>
+    <p class="govuk-body">@{
+        Messages.Confirmation.`Your tax account will be updated with your payment plan within 24 hours.`.show
+    }</p>
     <p class="govuk-body">
         <a href="@{
             routes.PaymentPlanSetUpController.printSummary.url
         }" class="govuk-link" id="print-plan-link">
         @{
-            Messages.Confirmation.`Print or save your plan`.show
+            Messages.Confirmation.`View your payment plan`.show
         }
         </a>
     </p>

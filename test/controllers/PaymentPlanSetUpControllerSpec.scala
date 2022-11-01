@@ -75,12 +75,13 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
         } else {
           paragraphs(1).text() shouldBe "Your next payment will be taken on 28th August 2022 or the next working day."
         }
-        paragraphs(2).text() shouldBe "Print or save your plan"
+        paragraphs(2).text() shouldBe "Your tax account will be updated with your payment plan within 24 hours."
+        paragraphs(3).text() shouldBe "View your payment plan"
 
         doc.select("#print-plan-link").attr("href") shouldBe PageUrls.printPlanUrl
 
         subheadings(1).text() shouldBe "If you need to change your payment plan"
-        paragraphs(3).text() shouldBe "Call the HMRC Helpline on 0300 123 1813."
+        paragraphs(4).text() shouldBe "Call the HMRC Helpline on 0300 123 1813."
 
         doc.select(".govuk-button").text() shouldBe "Go to tax account"
         ()
