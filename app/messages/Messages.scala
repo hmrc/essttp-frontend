@@ -196,6 +196,10 @@ object Messages {
       welsh   = "eich cyfeirnod Swyddfa Gyfrifon, sy’n 13 o gymeriadau o hyd, er enghraifft, 123PX00123456"
     )
 
+    val `your VAT number. This is 9 characters, for example, 1233456789`: Message = Message(
+      english = "your VAT number. This is 9 characters, for example, 1233456789"
+    )
+
     val `your bank details`: Message = Message(
       english = "your bank details",
       welsh   = "eich manylion banc"
@@ -292,6 +296,16 @@ object Messages {
     val `Find out how to enrol`: Message = Message(
       english = "Find out how to enrol",
       welsh   = "Dysgwch sut i ymrestru"
+    )
+
+    val `You are not registered`: Message = Message(
+      english = "You are not registered"
+    )
+    val `You are not eligible for an online payment plan because you need to register for VAT Online.`: Message = Message(
+      english = "You are not eligible for an online payment plan because you need to register for VAT Online."
+    )
+    val `Find out how to register.`: Message = Message(
+      english = "Find out how to register"
     )
 
   }

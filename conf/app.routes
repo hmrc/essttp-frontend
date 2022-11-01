@@ -21,6 +21,7 @@ GET    /determine-taxId                                     controllers.Determin
 GET    /determine-eligibility                               controllers.DetermineEligibilityController.determineEligibility
 
 GET    /not-enrolled                                        controllers.NotEnrolledController.notEnrolled
+GET    /not-vat-registered                                  controllers.NotEnrolledController.notVatRegistered
 
 GET    /not-eligible                                        controllers.IneligibleController.genericIneligiblePage
 GET    /debt-too-large                                      controllers.IneligibleController.debtTooLargePage

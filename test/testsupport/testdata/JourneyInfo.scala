@@ -24,7 +24,7 @@ object JourneyInfo {
   type JourneyInfoAsJson = String
 
   /** Represents small bits of json that get added to the journey at each stage **/
-  val taxId: JourneyInfoAsJson = TdJsonBodies.taxIdJourneyInfo()
+  def taxId(taxReference: String): JourneyInfoAsJson = TdJsonBodies.taxIdJourneyInfo(taxReference)
   def eligibilityCheckEligible(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(encrypter = encrypter)
   def ineligibleHasRls(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleHasRlsOnAddress, encrypter)
   def ineligibleMaxDebt(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleIsMoreThanMaxDebtAllowance, encrypter)
@@ -59,27 +59,27 @@ object JourneyInfo {
 
   /** accumulation of journey info, in essence it's up to stage X */
   val started: List[JourneyInfoAsJson] = List.empty
-  val taxIdDetermined: List[JourneyInfoAsJson] = taxId :: started
+  def taxIdDetermined(taxReference: String = "864FZ00049"): List[JourneyInfoAsJson] = taxId(taxReference) :: started
 
   def eligibilityCheckedEligible(encrypter: Encrypter): List[JourneyInfoAsJson] =
-    eligibilityCheckEligible(encrypter) :: taxIdDetermined
+    eligibilityCheckEligible(encrypter) :: taxIdDetermined()
 
   def eligibilityCheckedIneligibleHasRls(encrypter: Encrypter): List[JourneyInfoAsJson] =
-    ineligibleHasRls(encrypter) :: taxIdDetermined
+    ineligibleHasRls(encrypter) :: taxIdDetermined()
 
   def eligibilityCheckedIneligibleMaxDebt(encrypter: Encrypter): List[JourneyInfoAsJson] =
-    ineligibleMaxDebt(encrypter) :: taxIdDetermined
+    ineligibleMaxDebt(encrypter) :: taxIdDetermined()
   def eligibilityCheckedIneligibleExistingTtp(encrypter: Encrypter): List[JourneyInfoAsJson] =
-    ineligibleExistingTtp(encrypter) :: taxIdDetermined
+    ineligibleExistingTtp(encrypter) :: taxIdDetermined()
 
   def eligibilityCheckedIneligibleMaxDebtAge(encrypter: Encrypter): List[JourneyInfoAsJson] =
-    ineligibleMaxDebtAge(encrypter) :: taxIdDetermined
+    ineligibleMaxDebtAge(encrypter) :: taxIdDetermined()
 
   def eligibilityCheckedIneligibleMissingFiledReturns(encrypter: Encrypter): List[JourneyInfoAsJson] =
-    ineligibleMissingFiledReturns(encrypter) :: taxIdDetermined
+    ineligibleMissingFiledReturns(encrypter) :: taxIdDetermined()
 
   def eligibilityCheckedIneligibleMultipleReasons(encrypter: Encrypter): List[JourneyInfoAsJson] =
-    multipleIneligibleReasons(encrypter) :: taxIdDetermined
+    multipleIneligibleReasons(encrypter) :: taxIdDetermined()
 
   def answeredCanPayUpfrontYes(encrypter: Encrypter): List[JourneyInfoAsJson] =
     canPayUpfront :: eligibilityCheckedEligible(encrypter)

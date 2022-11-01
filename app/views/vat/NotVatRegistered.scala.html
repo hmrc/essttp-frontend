@@ -20,7 +20,6 @@
 @import messages.Messages
 @import config.AppConfig
 @import play.twirl.api.Html
-@import messages.Message
 
 @this(
         layout: views.html.templates.Layout,
@@ -29,79 +28,54 @@
         requestSupport: RequestSupport
 )
 
-@(
-  pageh1: Message = Messages.NotEligible.`Call us`,
-  leadingContent: Html)(implicit
-  request: Request[_])
+@()(implicit request: Request[_])
 
 @import requestSupport._
 
 @extraSupportHtml = {
     <p class="govuk-body">
-    @{
-        Html(Messages.NotEligible.extraSupportLink(appConfig.Urls.extraSupportUrl).show)
-    }
+    @{Html(Messages.NotEligible.extraSupportLink(appConfig.Urls.extraSupportUrl).show)}
     </p>
     <p class="govuk-body">
-    @{
-        Html(Messages.NotEligible.relayLink(appConfig.Urls.relayUrl).show)
-    }
+    @{Html(Messages.NotEligible.relayLink(appConfig.Urls.relayUrl).show)}
     </p>
     <p class="govuk-body">
-    @{
-        Html(Messages.NotEligible.`If you are outside the UK...`.show)
-    }
+    @{Html(Messages.NotEligible.`If you are outside the UK...`.show)}
     </p>
 }
-
-@layout(pageTitle = Some(pageh1.show), showBackLink = false) {
+@layout(pageTitle = Some(Messages.EnrolmentMissing.`You are not registered`.show), showBackLink = false) {
     <h1 class="govuk-heading-xl">
-    @{
-        pageh1.show
-    }
+    @{Messages.EnrolmentMissing.`You are not registered`.show}
     </h1>
-    @leadingContent
+    <p class="govuk-body">
+        @{Messages.EnrolmentMissing.`You are not eligible for an online payment plan because you need to register for VAT Online.`.show}
+        <a href="@{appConfig.Urls.enrolForVatUrl}" class="govuk-link" id="how-to-enrol-link">@{Messages.EnrolmentMissing.`Find out how to register.`.show}</a>@{Messages.`full stop`.show}
+    </p>
     <div id="common-eligibility">
         <p class="govuk-body">
-        @{
-            Html(Messages.NotEligible.`For further support you can contact the Payment Support Service on 0300 200 3835 to speak to an advisor.`.show)
-        }
+        @{Html(Messages.NotEligible.`If you need to speak to an adviser call us...`.show)}
         </p>
         @govukDetails(Details(
             summary = Text(Messages.NotEligible.`If you cannot use speech recognition software`.show),
             content = HtmlContent(extraSupportHtml)
         ))
         <p class="govuk-body govuk-!-font-weight-bold">
-        @{
-            Messages.NotEligible.`Before you call, make sure you have:`.show
-        }
+        @{Messages.NotEligible.`Before you call, make sure you have:`.show}
         </p>
         <ul class="govuk-list govuk-list--bullet">
-            <li>@{
-                Messages.NotEligible.`your Accounts Office reference...`.show
-            }</li>
-            <li>@{
-                Messages.NotEligible.`your bank details`.show
-            }</li>
+            <li>@{Messages.NotEligible.`your VAT number. This is 9 characters, for example, 1233456789`.show}</li>
+            <li>@{Messages.NotEligible.`your bank details`.show}</li>
         </ul>
         <p class="govuk-body govuk-!-font-weight-bold">
-        @{
-            Messages.NotEligible.`We're likely to ask:`.show
-        }
+        @{Messages.NotEligible.`We're likely to ask:`.show}
         </p>
         <ul class="govuk-list govuk-list--bullet">
-            <li>@{
-                Messages.NotEligible.`what you've done to try to pay the bill`.show
-            }</li>
-            <li>@{
-                Messages.NotEligible.`if you can pay some of the bill now`.show
-            }</li>
+            <li>@{Messages.NotEligible.`what you've done to try to pay the bill`.show}</li>
+            <li>@{Messages.NotEligible.`if you can pay some of the bill now`.show}</li>
         </ul>
 
         <p class="govuk-body">
-        @{
-            Messages.NotEligible.`Our opening times are Monday to Friday: 8am to 6pm`.show
-        }
+        @{Messages.NotEligible.`Our opening times are Monday to Friday: 8am to 6pm`.show}
         </p>
     </div>
 }

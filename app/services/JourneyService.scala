@@ -43,13 +43,13 @@ class JourneyService @Inject() (journeyConnector: JourneyConnector) extends Logg
     journeyConnector.updateEligibilityCheckResult(journeyId, eligibilityCheckResult)
 
   object UpdateTaxRef {
-    //epaye
+
     def updateEpayeTaxId(journeyId: JourneyId, empRef: EmpRef)(implicit requestHeader: RequestHeader): Future[Unit] =
       journeyConnector.updateTaxId(journeyId, empRef)
-    //vat
+
     def updateVatTaxId(journeyId: JourneyId, vrn: Vrn)(implicit requestHeader: RequestHeader): Future[Unit] =
       journeyConnector.updateTaxId(journeyId, vrn)
-    //others
+
   }
 
   def updateCanPayUpfront(journeyId: JourneyId, canPayUpfront: CanPayUpfront)(implicit requestHeader: RequestHeader): Future[Unit] =

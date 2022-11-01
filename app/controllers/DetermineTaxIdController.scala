@@ -34,6 +34,7 @@ package controllers
 
 import _root_.actions.Actions
 import essttp.journey.model.Journey
+import essttp.rootmodel.{TaxId, TaxRegime}
 import play.api.mvc._
 import services.EnrolmentService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -52,17 +53,20 @@ class DetermineTaxIdController @Inject() (
   with Logging {
 
   def determineTaxId(): Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
-    val maybeTaxId = request.journey match {
+    val (maybeTaxId, taxRegime): (Future[Option[TaxId]], TaxRegime) = request.journey match {
       case j: Journey.Stages.Started =>
-        enrolmentService.determineTaxIdAndUpdateJourney(j, request.enrolments)
+        enrolmentService.determineTaxIdAndUpdateJourney(j, request.enrolments) -> j.taxRegime
       case j: Journey.AfterComputedTaxId =>
         JourneyLogger.info("TaxId already determined, skipping.")
-        Future.successful(Some(j.taxId))
+        Future.successful(Some(j.taxId)) -> j.taxRegime
     }
 
     maybeTaxId.map {
       case Some(_) => Redirect(routes.DetermineEligibilityController.determineEligibility)
-      case None    => Redirect(routes.NotEnrolledController.notEnrolled)
+      case None => taxRegime match {
+        case TaxRegime.Epaye => Redirect(routes.NotEnrolledController.notEnrolled)
+        case TaxRegime.Vat   => Redirect(routes.NotEnrolledController.notVatRegistered)
+      }
     }
   }
 }

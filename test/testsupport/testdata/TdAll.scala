@@ -44,12 +44,22 @@ object TdAll {
 
   private val `IR-PAYE-TaxOfficeNumber`: EnrolmentDef = EnrolmentDef(enrolmentKey  = "IR-PAYE", identifierKey = "TaxOfficeNumber")
   private val `IR-PAYE-TaxOfficeReference`: EnrolmentDef = EnrolmentDef(enrolmentKey  = "IR-PAYE", identifierKey = "TaxOfficeReference")
+  private val `HMRC-MTD-VAT-Vrn`: EnrolmentDef = EnrolmentDef(enrolmentKey  = "HMRC-MTD-VAT", identifierKey = "VRN")
 
   val payeEnrolment: Enrolment = Enrolment(
     key               = "IR-PAYE",
     identifiers       = List(
       EnrolmentIdentifier(`IR-PAYE-TaxOfficeNumber`.identifierKey, "864"),
       EnrolmentIdentifier(`IR-PAYE-TaxOfficeReference`.identifierKey, "FZ00049")
+    ),
+    state             = "Activated",
+    delegatedAuthRule = None
+  )
+
+  val vatEnrolment: Enrolment = Enrolment(
+    key               = "HMRC-MTD-VAT",
+    identifiers       = List(
+      EnrolmentIdentifier(`HMRC-MTD-VAT-Vrn`.identifierKey, "101747001")
     ),
     state             = "Activated",
     delegatedAuthRule = None
