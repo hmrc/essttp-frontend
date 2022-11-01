@@ -54,13 +54,13 @@ class SignOutController @Inject() (
   }
 
   def doYouWantToGiveFeedback: Action[AnyContent] = Action { implicit request =>
-    val taxRegimeString: String = maybeTaxRegimeString(request)
+    val taxRegimeString: String = getTaxRegimeString(request)
     val maybeFallbackTaxRegime: Option[TaxRegime] = TaxRegime.withNameInsensitiveOption(taxRegimeString)
     Ok(views.doYouWantToGiveFeedbackPage(GiveFeedbackForm.form, maybeFallbackTaxRegime))
   }
 
   def doYouWantToGiveFeedbackSubmit: Action[AnyContent] = Action { implicit request =>
-    val taxRegimeString: String = maybeTaxRegimeString(request)
+    val taxRegimeString: String = getTaxRegimeString(request)
     GiveFeedbackForm.form.bindFromRequest()
       .fold(
         formWithErrors =>
@@ -81,7 +81,7 @@ class SignOutController @Inject() (
     Redirect(appConfig.ExitSurvey.payeExitSurveyUrl).withNewSession
   }
 
-  def maybeTaxRegimeString(request: MessagesRequest[_]): String =
+  def getTaxRegimeString(request: MessagesRequest[_]): String =
     request.session.get(SignOutController.feedbackRegimeKey)
       .getOrElse(sys.error("Could not find tax regime in cookie session"))
 }
