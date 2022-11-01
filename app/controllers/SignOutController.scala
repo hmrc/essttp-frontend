@@ -19,7 +19,7 @@ package controllers
 import actions.Actions
 import com.google.inject.{Inject, Singleton}
 import play.api.i18n.I18nSupport
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, MessagesRequest}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import config.AppConfig
@@ -54,17 +54,18 @@ class SignOutController @Inject() (
   }
 
   def doYouWantToGiveFeedback: Action[AnyContent] = Action { implicit request =>
-    Ok(views.doYouWantToGiveFeedbackPage(GiveFeedbackForm.form))
+    val taxRegimeString: String = getTaxRegimeString(request)
+    val maybeFallbackTaxRegime: Option[TaxRegime] = TaxRegime.withNameInsensitiveOption(taxRegimeString)
+    Ok(views.doYouWantToGiveFeedbackPage(GiveFeedbackForm.form, maybeFallbackTaxRegime))
   }
 
   def doYouWantToGiveFeedbackSubmit: Action[AnyContent] = Action { implicit request =>
+    val taxRegimeString: String = getTaxRegimeString(request)
     GiveFeedbackForm.form.bindFromRequest()
       .fold(
-        formWithErrors => Ok(views.doYouWantToGiveFeedbackPage(formWithErrors)), {
+        formWithErrors =>
+          Ok(views.doYouWantToGiveFeedbackPage(formWithErrors, TaxRegime.withNameInsensitiveOption(taxRegimeString))), {
           case GiveFeedbackFormValue.Yes =>
-            val taxRegimeString = request.session.get(SignOutController.feedbackRegimeKey).getOrElse(
-              sys.error("Could not find tax regime in cookie session")
-            )
             TaxRegime.withNameInsensitive(taxRegimeString) match {
               case TaxRegime.Epaye => Redirect(routes.SignOutController.exitSurveyPaye).withNewSession
               case TaxRegime.Vat   => sys.error("Sign out survey not implemented for VAT yet")
@@ -79,6 +80,10 @@ class SignOutController @Inject() (
   val exitSurveyPaye: Action[AnyContent] = Action { _ =>
     Redirect(appConfig.ExitSurvey.payeExitSurveyUrl).withNewSession
   }
+
+  def getTaxRegimeString(request: MessagesRequest[_]): String =
+    request.session.get(SignOutController.feedbackRegimeKey)
+      .getOrElse(sys.error("Could not find tax regime in cookie session"))
 }
 
 object SignOutController {

@@ -21,6 +21,7 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import controllers.routes
 @import models.enumsforforms.GiveFeedbackFormValue
+@import essttp.rootmodel.TaxRegime
 
 @this(
         layout: templates.Layout,
@@ -31,7 +32,7 @@
         requestSupport: RequestSupport
 )
 
-@(form: Form[GiveFeedbackFormValue])(implicit request: Request[_])
+@(form: Form[GiveFeedbackFormValue], maybeTaxRegime: Option[TaxRegime])(implicit request: Request[_])
 
 @import requestSupport._
 
@@ -43,7 +44,7 @@
     Messages.GiveFeedback.`Do you want to give feedback?`.show
 }
 
-@layout(pageTitle = Some(title), showBackLink = false, hasErrors = form.hasErrors) {
+@layout(pageTitle = Some(title), showBackLink = false, hasErrors = form.hasErrors, fallBackTaxRegime = maybeTaxRegime) {
     @if(form.errors.nonEmpty) {
         @govukErrorSummary(
             ErrorSummary(errorList = form.errors.map(e =>

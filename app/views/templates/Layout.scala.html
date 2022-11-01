@@ -23,6 +23,7 @@
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
 
 @import actionsmodel.AuthenticatedJourneyRequest
+@import actionsmodel.BarsLockedOutRequest
 @import essttp.rootmodel.TaxRegime
 @import play.api.mvc.Request
 @import play.twirl.api.Html
@@ -111,6 +112,7 @@
     @serviceName = @{
         (request: AnyRef) match {
           case r: AuthenticatedJourneyRequest[_] => Messages.ServicePhase.serviceName(r.journey.taxRegime).show
+          case r: BarsLockedOutRequest[_]        => Messages.ServicePhase.serviceName(r.journey.taxRegime).show
           case _ => fallBackTaxRegime match {
               case Some(regime) => Messages.ServicePhase.serviceName(regime).show
               case None => Messages.ServicePhase.`Set up a payment plan`.show

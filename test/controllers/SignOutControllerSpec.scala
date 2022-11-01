@@ -98,7 +98,7 @@ class SignOutControllerSpec extends ItSpec {
   "doYouWantToGiveFeedback should" - {
 
     "display the page" in {
-      val fakeRequest = FakeRequest()
+      val fakeRequest = FakeRequest().withSession(SignOutController.feedbackRegimeKey -> "Epaye")
       val result: Future[Result] = controller.doYouWantToGiveFeedback(fakeRequest)
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
@@ -109,8 +109,7 @@ class SignOutControllerSpec extends ItSpec {
         expectedH1              = "Do you want to give feedback on this service?",
         shouldBackLinkBePresent = false,
         expectedSubmitUrl       = Some(routes.SignOutController.doYouWantToGiveFeedbackSubmit.url),
-        signedIn                = false,
-        regimeBeingTested       = None
+        signedIn                = false
       )
 
       checkDoYouWantToGiveFeedbackContent(doc)
@@ -123,7 +122,7 @@ class SignOutControllerSpec extends ItSpec {
       def testFormError(
           formData: (String, String)*
       )(expectedErrorMessage: String): Unit = {
-        val fakeRequest = FakeRequest().withMethod("POST").withFormUrlEncodedBody(formData: _*)
+        val fakeRequest = FakeRequest().withMethod("POST").withFormUrlEncodedBody(formData: _*).withSession(SignOutController.feedbackRegimeKey -> "Epaye")
         val result: Future[Result] = controller.doYouWantToGiveFeedbackSubmit(fakeRequest)
         val pageContent: String = contentAsString(result)
         val doc: Document = Jsoup.parse(pageContent)
@@ -135,8 +134,7 @@ class SignOutControllerSpec extends ItSpec {
           shouldBackLinkBePresent = false,
           expectedSubmitUrl       = Some(routes.SignOutController.doYouWantToGiveFeedbackSubmit.url),
           hasFormError            = true,
-          signedIn                = false,
-          regimeBeingTested       = None
+          signedIn                = false
         )
 
         checkDoYouWantToGiveFeedbackContent(doc)
@@ -182,6 +180,7 @@ class SignOutControllerSpec extends ItSpec {
         FakeRequest()
           .withMethod("POST")
           .withFormUrlEncodedBody("DoYouWantToGiveFeedback" -> "No")
+          .withSession(SignOutController.feedbackRegimeKey -> "Epaye")
 
       val result: Future[Result] = controller.doYouWantToGiveFeedbackSubmit(fakeRequest)
       status(result) shouldBe SEE_OTHER
