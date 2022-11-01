@@ -16,6 +16,7 @@
 
 package controllers
 import essttp.journey.model.Origins
+import essttp.rootmodel.TaxRegime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
@@ -46,8 +47,7 @@ class NotEnrolledControllerSpec extends ItSpec {
         page,
         expectedH1              = "You are not enrolled",
         shouldBackLinkBePresent = false,
-        expectedSubmitUrl       = None,
-        regimeBeingTested       = None
+        expectedSubmitUrl       = None
       )
 
       page.select(".govuk-body").asScala.toList(0).text() shouldBe "You are not eligible for an online payment plan because you need to enrol for PAYE Online. Find out how to enrol."
@@ -95,7 +95,7 @@ class NotEnrolledControllerSpec extends ItSpec {
         expectedH1              = "You are not registered",
         shouldBackLinkBePresent = false,
         expectedSubmitUrl       = None,
-        regimeBeingTested       = None
+        regimeBeingTested       = Some(TaxRegime.Vat)
       )
 
       page.select(".govuk-body").asScala.toList(0).text() shouldBe "You are not eligible for an online payment plan because you need to register for VAT Online. Find out how to register."

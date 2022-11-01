@@ -31,11 +31,11 @@ class NotEnrolledController @Inject() (
     as:    Actions
 ) extends FrontendController(mcc) with Logging {
 
-  def notEnrolled: Action[AnyContent] = as.authenticatedAction { implicit request =>
+  def notEnrolled: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     Ok(views.notEnrolled())
   }
 
-  def notVatRegistered: Action[AnyContent] = as.authenticatedAction { implicit request =>
+  def notVatRegistered: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     Ok(views.notVatRegistered())
   }
 }
