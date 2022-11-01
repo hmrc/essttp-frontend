@@ -102,7 +102,7 @@
         @defining(sortCodeAndAccountNumberFormError) { formError  =>
             <fieldset class="govuk-fieldset" @if(formError.isDefined) {
                 aria-describedby="sort-code-and-account-number-error"}>
-                <legend class="govuk-label govuk-visually-hidden">@Messages.BankDetails.`Bank details`.show</legend>
+                <legend class="govuk-label govuk-visually-hidden">@{Messages.BankDetails.`Bank details`.show}</legend>
             <div class="form-field @formError.map { _ => govuk-form-group--error }">
                 @formError.map { error =>
                     <span class="govuk-error-message" id="sort-code-and-account-number-error">

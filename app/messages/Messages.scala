@@ -928,7 +928,7 @@ object Messages {
 
     val `Bank details`: Message = Message(
       english = "Bank details",
-      welsh = "Manylion banc"
+      welsh   = "Manylion banc"
     )
   }
 
