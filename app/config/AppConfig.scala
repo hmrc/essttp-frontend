@@ -33,10 +33,12 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val appName: String = config.get[String]("appName")
   val welshLanguageSupportEnabled: Boolean = config.get[Boolean]("features.welsh-language-support")
   val emailJourneyEnabled: Boolean = config.get[Boolean]("features.email-journey")
+  val vatEnabled: Boolean = config.get[Boolean]("features.vat")
   val authTimeoutSeconds: Int = config.get[FiniteDuration]("timeout-dialog.timeout").toSeconds.toInt
   val authTimeoutCountdownSeconds: Int = config.get[FiniteDuration]("timeout-dialog.countdown").toSeconds.toInt
   val accessibilityStatementPath: String = config.get[String]("accessibility-statement.service-path")
   val serviceIdentifierPAYE: String = "eSSTTP-PAYE"
+  val refererForGovUk: String = config.get[String]("refererForGovUk")
 
   object BaseUrl {
     val platformHost: Option[String] = config.getOptional[String]("platform.frontend.host")

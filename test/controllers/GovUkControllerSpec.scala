@@ -24,7 +24,6 @@ import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.EssttpBackend
-import testsupport.testdata.JourneyJsonTemplates
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
@@ -86,7 +85,7 @@ class GovUkControllerSpec extends ItSpec {
       val refererForGovUk = "https://www.gov.uk/"
       stubCommonActions()
       EssttpBackend.StartJourney.startJourneyVatGovUk
-      EssttpBackend.StartJourney.findJourney(jsonBody = JourneyJsonTemplates.Started(Origins.Vat.GovUk))
+      EssttpBackend.StartJourney.findJourney(Origins.Vat.GovUk)
 
       val fakeRequest = FakeRequest()
         .withAuthToken()
@@ -101,7 +100,7 @@ class GovUkControllerSpec extends ItSpec {
     "should start detached url journey and redirect to nextUrl when user is authenticated" in {
       stubCommonActions()
       EssttpBackend.StartJourney.startJourneyVatDetached
-      EssttpBackend.StartJourney.findJourney(jsonBody = JourneyJsonTemplates.Started(Origins.Vat.DetachedUrl))
+      EssttpBackend.StartJourney.findJourney(Origins.Vat.DetachedUrl)
 
       val fakeRequest = FakeRequest()
         .withAuthToken()
@@ -112,6 +111,24 @@ class GovUkControllerSpec extends ItSpec {
       redirectLocation(result) shouldBe Some("http://localhost:19001/set-up-a-payment-plan/vat-payment-plan")
       EssttpBackend.StartJourney.verifyStartJourneyVatDetached()
     }
+  }
+
+}
+
+class GovUkVatNotEnabledControllerSpec extends ItSpec {
+
+  override lazy val configOverrides: Map[String, Any] = Map("features.vat" -> false)
+
+  private val controller = app.injector.instanceOf[GovUkController]
+
+  "VAT start journey endpoint should return 501 (NOT IMPLEMENTED) when VAT is not enabled" in {
+    val fakeRequest = FakeRequest()
+      .withAuthToken()
+      .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+    val result: Future[Result] = controller.startVatJourney(fakeRequest)
+    status(result) shouldBe NOT_IMPLEMENTED
+
   }
 
 }

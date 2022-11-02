@@ -162,7 +162,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
       val result = controller.determineEligibility(fakeRequest)
 
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.landingPageUrl)
+      redirectLocation(result) shouldBe Some(PageUrls.epayeLandingPageUrl)
       EssttpBackend.EligibilityCheck.verifyNoneUpdateEligibilityRequest(TdAll.journeyId)
     }
   }

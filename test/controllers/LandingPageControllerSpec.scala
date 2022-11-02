@@ -27,7 +27,6 @@ import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.EssttpBackend
-import testsupport.testdata.JourneyJsonTemplates
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
@@ -41,7 +40,7 @@ class LandingPageControllerSpec extends ItSpec {
     "return 200 and the PAYE landing page" in {
       EssttpBackend.StartJourney.findJourney()
       val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val result: Future[Result] = controller.landingPage(fakeRequest)
+      val result: Future[Result] = controller.epayeLandingPage(fakeRequest)
 
       RequestAssertions.assertGetRequestOk(result)
       val doc: Document = Jsoup.parse(contentAsString(result))
@@ -76,7 +75,7 @@ class LandingPageControllerSpec extends ItSpec {
 
   "GET /vat-payment-plan" - {
     "return 200 and the VAT landing page" in {
-      EssttpBackend.StartJourney.findJourney(jsonBody = JourneyJsonTemplates.Started(Origins.Vat.DetachedUrl))
+      EssttpBackend.StartJourney.findJourney(Origins.Vat.DetachedUrl)
       val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.vatLandingPage(fakeRequest)
 
@@ -110,4 +109,21 @@ class LandingPageControllerSpec extends ItSpec {
       button.text() shouldBe Messages.`Start now`.english
     }
   }
+}
+
+class LandingPageVatNotEnabledControllerSpec extends ItSpec {
+
+  override lazy val configOverrides: Map[String, Any] = Map("features.vat" -> false)
+
+  private val controller = app.injector.instanceOf[LandingController]
+
+  "GET /vat-payment-plan should return 501 (NOT IMPLEMENTED) when VAT is not enabled" in {
+    val fakeRequest = FakeRequest()
+      .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+    val result: Future[Result] = controller.vatLandingPage(fakeRequest)
+    status(result) shouldBe NOT_IMPLEMENTED
+
+  }
+
 }

@@ -19,6 +19,7 @@ package controllers
 import controllers.pagerouters.EligibilityRouter
 import essttp.emailverification.EmailVerificationStatus
 import essttp.journey.model.Journey
+import essttp.rootmodel.TaxRegime
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{Request, Result}
 import util.JourneyLogger
@@ -31,7 +32,11 @@ object JourneyIncorrectStateRouter {
 
   def logErrorAndRouteToDefaultPage(journey: Journey)(implicit request: Request[_]): Result = {
     val redirectTo = journey match {
-      case _: Journey.Stages.Started            => routes.LandingController.landingPage
+      case j: Journey.Stages.Started =>
+        j.taxRegime match {
+          case TaxRegime.Epaye => routes.LandingController.epayeLandingPage
+          case TaxRegime.Vat   => routes.LandingController.vatLandingPage
+        }
       case _: Journey.Stages.ComputedTaxId      => routes.DetermineEligibilityController.determineEligibility
       case j: Journey.Stages.EligibilityChecked => EligibilityRouter.nextPage(j.eligibilityCheckResult)
       case j: Journey.Stages.AnsweredCanPayUpfront =>

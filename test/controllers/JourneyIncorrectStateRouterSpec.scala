@@ -17,6 +17,7 @@
 package controllers
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
+import essttp.journey.model.Origins
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.http.Status
 import play.api.test.FakeRequest
@@ -32,7 +33,8 @@ class JourneyIncorrectStateRouterSpec extends ItSpec {
   "When JourneyIncorrectStateRouter is triggered by journey being in wrong state" - {
     forAll(Table(
       ("Stage", "Journey wiremock response", "Expected Redirect Location"),
-      ("Stages.Started", () => EssttpBackend.StartJourney.findJourney(), PageUrls.landingPageUrl),
+      ("Stages.Started - EPAYE", () => EssttpBackend.StartJourney.findJourney(), PageUrls.epayeLandingPageUrl),
+      ("Stages.Started - VAT", () => EssttpBackend.StartJourney.findJourney(Origins.Vat.GovUk), PageUrls.vatLandingPageUrl),
       ("Stages.ComputedTaxId", () => EssttpBackend.DetermineTaxId.findJourney(), PageUrls.determineEligibilityUrl),
       ("Stages.EligibilityChecked", () => EssttpBackend.EligibilityCheck.findJourney(testCrypto)(), PageUrls.yourBillIsUrl), //check this
       ("Stages.EligibilityChecked", () => EssttpBackend.EligibilityCheck.findJourney(testCrypto)(
