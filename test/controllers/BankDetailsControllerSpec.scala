@@ -658,7 +658,7 @@ class BankDetailsControllerSpec extends ItSpec {
       private val sortCodeAndAccountNumberFieldError: List[(String, String)] =
         List("sort-code-and-account-number" -> "Enter a valid combination of bank account number and sort code")
 
-      private val nameFieldError: List[(String, String)] = List("name" -> "Enter a valid account name")
+      private val nameFieldError: List[(String, String)] = List("name" -> "Enter the name on the account as it appears on bank statements. Do not copy and paste it.")
 
       private val sortCodeFieldError: List[(String, String)] = List((
         "sortCode",
@@ -705,7 +705,7 @@ class BankDetailsControllerSpec extends ItSpec {
               case TypesOfBankAccount.Business => BarsStub.VerifyBusinessStub.nameDoesNotMatch()
             }
             (
-              List(("Enter a valid account name", "#name")),
+              List(("Enter the name on the account as it appears on bank statements. Do not copy and paste it.", "#name")),
               nameFieldError,
               VerifyJson.nameDoesNotMatch
             )
