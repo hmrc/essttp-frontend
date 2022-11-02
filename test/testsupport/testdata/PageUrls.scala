@@ -18,7 +18,8 @@ package testsupport.testdata
 
 object PageUrls {
   val serviceBaseUrl = "/set-up-a-payment-plan"
-  val landingPageUrl: String = serviceBaseUrl
+  val epayeLandingPageUrl: String = s"$serviceBaseUrl/epaye-payment-plan"
+  val vatLandingPageUrl: String = s"$serviceBaseUrl/vat-payment-plan"
   val govUkEpayeStartUrl: String = s"$serviceBaseUrl/govuk/epaye/start"
   val determineTaxIdUrl: String = s"$serviceBaseUrl/determine-taxId"
   val determineEligibilityUrl: String = s"$serviceBaseUrl/determine-eligibility"

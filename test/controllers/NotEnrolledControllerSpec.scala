@@ -25,7 +25,6 @@ import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.EssttpBackend
-import testsupport.testdata.JourneyJsonTemplates
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.jdk.CollectionConverters.collectionAsScalaIterableConverter
@@ -82,7 +81,7 @@ class NotEnrolledControllerSpec extends ItSpec {
   "GET /not-vat-registered should" - {
     "return the not vat registered page" in {
       stubCommonActions(authAllEnrolments = Some(Set.empty))
-      EssttpBackend.StartJourney.findJourney(jsonBody = JourneyJsonTemplates.Started(Origins.Vat.GovUk))
+      EssttpBackend.StartJourney.findJourney(Origins.Vat.GovUk)
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 

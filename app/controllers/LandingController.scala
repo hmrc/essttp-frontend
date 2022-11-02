@@ -17,6 +17,7 @@
 package controllers
 
 import _root_.actions.Actions
+import config.AppConfig
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
@@ -26,9 +27,10 @@ import javax.inject.{Inject, Singleton}
 
 @Singleton
 class LandingController @Inject() (
-    as:    Actions,
-    mcc:   MessagesControllerComponents,
-    views: Views
+    as:        Actions,
+    mcc:       MessagesControllerComponents,
+    views:     Views,
+    appConfig: AppConfig
 ) extends FrontendController(mcc)
   with Logging {
 
@@ -40,8 +42,13 @@ class LandingController @Inject() (
     Ok(views.epayeLanding())
   }
 
-  val vatLandingPage: Action[AnyContent] = as.default { implicit request =>
-    Ok(views.vatLanding())
-  }
+  val vatLandingPage: Action[AnyContent] =
+    if (appConfig.vatEnabled) {
+      as.default { implicit request =>
+        Ok(views.vatLanding())
+      }
+    } else {
+      as.default(_ => NotImplemented)
+    }
 
 }

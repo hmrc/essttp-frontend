@@ -193,7 +193,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
           )
 
         stubCommonActions(authAllEnrolments = Some(enrolments))
-        EssttpBackend.StartJourney.findJourney(jsonBody = JourneyJsonTemplates.Started(Origins.Vat.Bta))
+        EssttpBackend.StartJourney.findJourney(Origins.Vat.Bta)
         EssttpBackend.DetermineTaxId.stubUpdateTaxId(TdAll.journeyId)
 
         val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -208,7 +208,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
       "the relevant enrolment is found but the correct identifiers could not be found" in {
         val enrolments = Set(enrolment(EnrolmentDef.Vat.`HMRC-MTD-VAT`.enrolmentKey, activated = false)())
         stubCommonActions(authAllEnrolments = Some(enrolments))
-        EssttpBackend.StartJourney.findJourney(jsonBody = JourneyJsonTemplates.Started(Origins.Vat.GovUk))
+        EssttpBackend.StartJourney.findJourney(Origins.Vat.GovUk)
         EssttpBackend.DetermineTaxId.stubUpdateTaxId(TdAll.journeyId)
 
         val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -218,7 +218,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
 
       "the relevant enrolment is not found" in {
         stubCommonActions(authAllEnrolments = Some(Set.empty))
-        EssttpBackend.StartJourney.findJourney(jsonBody = JourneyJsonTemplates.Started(Origins.Vat.GovUk))
+        EssttpBackend.StartJourney.findJourney(Origins.Vat.GovUk)
 
         val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
         val result = controller.determineTaxId()(fakeRequest)

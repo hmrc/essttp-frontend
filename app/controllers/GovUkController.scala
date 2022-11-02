@@ -17,9 +17,9 @@
 package controllers
 
 import _root_.actions.Actions
+import config.AppConfig
 import essttp.journey.JourneyConnector
 import essttp.journey.model.SjRequest
-import play.api.Configuration
 import play.api.mvc._
 import play.mvc.Http.HeaderNames
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -32,10 +32,8 @@ class GovUkController @Inject() (
     cc:               MessagesControllerComponents,
     journeyConnector: JourneyConnector,
     as:               Actions,
-    config:           Configuration
+    appConfig:        AppConfig
 )(implicit ec: ExecutionContext) extends FrontendController(cc) {
-
-  val refererForGovUk: String = config.get[String]("refererForGovUk")
 
   def startEpayeJourney: Action[AnyContent] = as.authenticatedAction.async { implicit request =>
     val startJourneyRedirect: Future[Result] = {
@@ -51,25 +49,30 @@ class GovUkController @Inject() (
     startJourneyRedirect
   }
 
-  def startVatJourney: Action[AnyContent] = as.authenticatedAction.async { implicit request =>
-    val startJourneyRedirect: Future[Result] = {
-      // gov uk needs to skip landing page, we don't want to show guidance again.
-      if (isComingFromGovUk(request)) {
-        journeyConnector.Vat.startJourneyGovUk(SjRequest.Vat.Empty())
-          .map(_ => Redirect(routes.DetermineTaxIdController.determineTaxId.url))
-      } else {
-        journeyConnector.Vat.startJourneyDetachedUrl(SjRequest.Vat.Empty())
-          .map(r => Redirect(r.nextUrl.value))
+  def startVatJourney: Action[AnyContent] =
+    if (appConfig.vatEnabled) {
+      as.authenticatedAction.async { implicit request =>
+        val startJourneyRedirect: Future[Result] = {
+          // gov uk needs to skip landing page, we don't want to show guidance again.
+          if (isComingFromGovUk(request)) {
+            journeyConnector.Vat.startJourneyGovUk(SjRequest.Vat.Empty())
+              .map(_ => Redirect(routes.DetermineTaxIdController.determineTaxId.url))
+          } else {
+            journeyConnector.Vat.startJourneyDetachedUrl(SjRequest.Vat.Empty())
+              .map(r => Redirect(r.nextUrl.value))
+          }
+        }
+        startJourneyRedirect
       }
+    } else {
+      as.default(_ => NotImplemented)
     }
-    startJourneyRedirect
-  }
 
   /**
    * Based on the "Referrer" http header it determines
    * if the incoming request originated on the gov-uk pages.
    */
   def isComingFromGovUk(request: Request[_]): Boolean =
-    request.headers.get(HeaderNames.REFERER).exists(_.contains(refererForGovUk))
+    request.headers.get(HeaderNames.REFERER).exists(_.contains(appConfig.refererForGovUk))
 
 }

@@ -127,7 +127,8 @@ object EssttpBackend {
     def verifyStartJourneyVatGovUk(): Unit = verifyStartJourney(startJourneyGovUkVatUrl)
     def verifyStartJourneyVatDetached(): Unit = verifyStartJourney(startJourneyDetachedVatUrl)
 
-    def findJourney(jsonBody: String = JourneyJsonTemplates.Started()): StubMapping = findByLatestSessionId(jsonBody)
+    def findJourney(origin: Origin = Origins.Epaye.Bta): StubMapping =
+      findByLatestSessionId(JourneyJsonTemplates.Started(origin))
   }
 
   object DetermineTaxId {
