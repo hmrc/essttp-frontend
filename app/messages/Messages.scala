@@ -1189,7 +1189,7 @@ object Messages {
 
     val `Your tax account will be updated with your payment plan within 24 hours.`: Message = Message(
       english = "Your tax account will be updated with your payment plan within 24 hours.",
-      welsh   = "Bydd eich cyfrif treth yn cael ei ddiweddaru gyda'ch cynllun talu cyn pen 24 awr."
+      welsh   = "Bydd eich cyfrif treth yn cael ei ddiweddaru gyda’ch cynllun talu cyn pen 24 awr."
     )
 
     val `Print or save your plan`: Message = Message(
