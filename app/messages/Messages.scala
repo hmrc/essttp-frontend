@@ -590,6 +590,11 @@ object Messages {
       welsh   = "Faint y gallwch fforddio ei dalu bob mis?"
     )
 
+    def `The miminum payment you can make is ...`(min: AmountInPence): Message = Message(
+      english = s"The minimum payment you can make is ${min.gdsFormatInPounds}.",
+      welsh   = s"Yr isafswm y gallwch ei dalu yw ${min.gdsFormatInPounds}."
+    )
+
     def getHint(max: AmountInPence, min: AmountInPence): Message = Message(
       english = s"Enter an amount between ${min.gdsFormatInPounds} and ${max.gdsFormatInPounds}",
       welsh   = s"Nodwch swm sydd rhwng ${min.gdsFormatInPounds} a ${max.gdsFormatInPounds}"
