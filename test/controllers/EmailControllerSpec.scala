@@ -492,6 +492,35 @@ class EmailControllerSpec extends ItSpec {
 
   }
 
+  "GET /tried-to-confirm-email-too-many-times should" - {
+
+    "display the page" in {
+      stubCommonActions()
+      EssttpBackend.SelectEmail.findJourney("email@test.com", testCrypto)()
+
+      val result = controller.tooManyEmailAddresses(FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId"))
+      status(result) shouldBe OK
+
+      val doc = Jsoup.parse(contentAsString(result))
+
+      ContentAssertions.commonPageChecks(
+        doc,
+        "You have tried to confirm an email too many times",
+        shouldBackLinkBePresent = false,
+        expectedSubmitUrl       = None,
+      )
+
+      val paragraphs = doc.select("p.govuk-body").asScala.toList
+
+      paragraphs.size shouldBe 2
+
+      paragraphs(0).text() shouldBe "You have made too many attempts to confirm an email address."
+      paragraphs(1).select("a").text() shouldBe "Sign out"
+      paragraphs(1).select("a").attr("href") shouldBe routes.SignOutController.signOut.url
+    }
+
+  }
+
 }
 
 class EmailNonLocalControllerSpec extends ItSpec {
