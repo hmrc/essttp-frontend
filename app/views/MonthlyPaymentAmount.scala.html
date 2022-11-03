@@ -67,19 +67,19 @@
         ),
             title = Text(Messages.`There is a problem`.show)))
     }
+
+    <h1 class="govuk-heading-xl">@title</h1>
+    <p class="govuk-body">
+    @{Messages.MonthlyPaymentAmount.`The miminum payment you can make is ...`(minimumPayment).show}
+    </p>
+    @govukDetails(Details(
+        summary = Text(Messages.MonthlyPaymentAmount.`I can’t afford the minimum payment`.show),
+        content = HtmlContent(detailsContent)
+    ))
+
     @formWithCSRF(action = routes.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit) {
 
-        <h1 class="govuk-heading-xl">@title</h1>
-
-        <p class="govuk-body">
-            @{Messages.MonthlyPaymentAmount.`The miminum payment you can make is ...`(minimumPayment).show}
-        </p>
-
-        @govukDetails(Details(
-            summary = Text(Messages.MonthlyPaymentAmount.`I can’t afford the minimum payment`.show),
-            content = HtmlContent(detailsContent)
-        ))
-
+        <label for="@key">
         @govukInput(Input(
             id = key,
             name = key,
@@ -97,6 +97,7 @@
             )),
             value = form.data.get(key)
         ))
+        </label>
 
         @govukButton(Button(
             content = Text(Messages.continue.show),
