@@ -79,7 +79,7 @@
 
     @formWithCSRF(action = routes.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit) {
 
-        <label for="@key">
+
         @govukInput(Input(
             id = key,
             name = key,
@@ -87,6 +87,7 @@
                 content = Text(Messages.MonthlyPaymentAmount.getHint(maximumPayment, minimumPayment).show),
                 id = Some("HowMuchCanYouPayEachMonth-hint")
             )),
+            label = Label(content = Text(title), isPageHeading = false, classes = "govuk-visually-hidden"),
             classes = "govuk-input--width-5",
             spellcheck = Some(false),
             prefix = Some(PrefixOrSuffix(
@@ -97,7 +98,6 @@
             )),
             value = form.data.get(key)
         ))
-        </label>
 
         @govukButton(Button(
             content = Text(Messages.continue.show),
