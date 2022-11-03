@@ -74,8 +74,8 @@ object EligibilityErrors extends Enum[EligibilityError] {
       case EligibilityRules(false, false, false, false, false, false, true, false, false, Some(false), Some(false))  => Some(ChargesOverMaxDebtAge)
       case EligibilityRules(false, false, false, false, false, false, false, true, false, Some(false), Some(false))  => Some(IneligibleChargeTypes)
       case EligibilityRules(false, false, false, false, false, false, false, false, true, Some(false), Some(false))  => Some(MissingFiledReturns)
-      case EligibilityRules(false, false, false, false, false, false, false, false, true, Some(true), Some(false))   => Some(HasInvalidInterestSignals)
-      case EligibilityRules(false, false, false, false, false, false, false, false, true, Some(false), Some(true))   => Some(DmSpecialOfficeProcessingRequired)
+      case EligibilityRules(false, false, false, false, false, false, false, false, false, Some(true), Some(false))  => Some(HasInvalidInterestSignals)
+      case EligibilityRules(false, false, false, false, false, false, false, false, false, Some(false), Some(true))  => Some(DmSpecialOfficeProcessingRequired)
       case EligibilityRules(false, false, false, false, false, false, false, false, false, Some(false), Some(false)) => None //all false
     }
   }

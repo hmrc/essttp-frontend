@@ -17,10 +17,11 @@
 package controllers
 
 import actions.Actions
+import actionsmodel.AuthenticatedJourneyRequest
 import config.AppConfig
 import essttp.journey.model.SjRequest
 import messages.Messages
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.Views
@@ -35,8 +36,15 @@ class IneligibleController @Inject() (
     appConfig: AppConfig
 ) extends FrontendController(mcc) with Logging {
 
-  val genericIneligiblePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+  def genericIneligiblePage(implicit request: AuthenticatedJourneyRequest[AnyContent]): Result =
     Ok(views.partials.ineligibleTemplatePage(Messages.NotEligible.`Call us`, views.partials.genericIneligiblePartial()))
+
+  val payeGenericIneligiblePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    genericIneligiblePage
+  }
+
+  val vatGenericIneligiblePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    genericIneligiblePage
   }
 
   val debtTooLargePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>

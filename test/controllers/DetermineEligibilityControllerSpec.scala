@@ -34,14 +34,14 @@ class DetermineEligibilityControllerSpec extends ItSpec {
   "Determine eligibility endpoint should route user correctly and send an audit event" - {
     forAll(Table(
       ("Scenario flavour", "eligibility rules", "ineligibility reason audit string", "expected redirect"),
-      ("HasRlsOnAddress", TdAll.notEligibleHasRlsOnAddress, "hasRlsOnAddress", PageUrls.notEligibleUrl),
-      ("MarkedAsInsolvent", TdAll.notEligibleMarkedAsInsolvent, "markedAsInsolvent", PageUrls.notEligibleUrl),
-      ("IsLessThanMinDebtAllowance", TdAll.notEligibleIsLessThanMinDebtAllowance, "isLessThanMinDebtAllowance", PageUrls.notEligibleUrl),
+      ("HasRlsOnAddress", TdAll.notEligibleHasRlsOnAddress, "hasRlsOnAddress", PageUrls.payeNotEligibleUrl),
+      ("MarkedAsInsolvent", TdAll.notEligibleMarkedAsInsolvent, "markedAsInsolvent", PageUrls.payeNotEligibleUrl),
+      ("IsLessThanMinDebtAllowance", TdAll.notEligibleIsLessThanMinDebtAllowance, "isLessThanMinDebtAllowance", PageUrls.payeNotEligibleUrl),
       ("IsMoreThanMaxDebtAllowance", TdAll.notEligibleIsMoreThanMaxDebtAllowance, "isMoreThanMaxDebtAllowance", PageUrls.debtTooLargeUrl),
-      ("DisallowedChargeLockTypes", TdAll.notEligibleDisallowedChargeLockTypes, "disallowedChargeLockTypes", PageUrls.notEligibleUrl),
+      ("DisallowedChargeLockTypes", TdAll.notEligibleDisallowedChargeLockTypes, "disallowedChargeLockTypes", PageUrls.payeNotEligibleUrl),
       ("ExistingTTP", TdAll.notEligibleExistingTTP, "existingTTP", PageUrls.alreadyHaveAPaymentPlanUrl),
       ("ExceedsMaxDebtAge", TdAll.notEligibleExceedsMaxDebtAge, "chargesOverMaxDebtAge", PageUrls.debtTooOldUrl),
-      ("EligibleChargeType", TdAll.notEligibleEligibleChargeType, "ineligibleChargeTypes", PageUrls.notEligibleUrl),
+      ("EligibleChargeType", TdAll.notEligibleEligibleChargeType, "ineligibleChargeTypes", PageUrls.payeNotEligibleUrl),
       ("MissingFiledReturns", TdAll.notEligibleMissingFiledReturns, "missingFiledReturns", PageUrls.fileYourReturnUrl)
     )) {
       (sf: String, eligibilityRules: EligibilityRules, auditIneligibilityReason: String, expectedRedirect: String) =>

@@ -21,6 +21,8 @@
 @import config.AppConfig
 @import play.twirl.api.Html
 @import messages.Message
+@import actionsmodel.AuthenticatedJourneyRequest
+@import essttp.rootmodel.TaxRegime
 
 @this(
         layout: views.html.templates.Layout,
@@ -31,8 +33,8 @@
 
 @(
   pageh1: Message = Messages.NotEligible.`Call us`,
-  leadingContent: Html)(implicit
-  request: Request[_])
+  leadingContent: Html
+)(implicit request: AuthenticatedJourneyRequest[_])
 
 @import requestSupport._
 
@@ -78,7 +80,10 @@
         </p>
         <ul class="govuk-list govuk-list--bullet">
             <li>@{
-                Messages.NotEligible.`your Accounts Office reference...`.show
+                request.journey.taxRegime match {
+                    case TaxRegime.Epaye => Messages.NotEligible.`your Accounts Office reference...`.show
+                    case TaxRegime.Vat   => Messages.NotEligible.`your VAT number. This is 9 characters, for example, 1233456789`.show
+                }
             }</li>
             <li>@{
                 Messages.NotEligible.`your bank details`.show

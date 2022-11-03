@@ -221,8 +221,8 @@ object StartJourneyController {
         chargesOverMaxDebtAge             = containsError(ChargesOverMaxDebtAge),
         ineligibleChargeTypes             = containsError(IneligibleChargeTypes),
         missingFiledReturns               = containsError(MissingFiledReturns),
-        hasInvalidInterestSignals         = None,
-        dmSpecialOfficeProcessingRequired = None
+        hasInvalidInterestSignals         = Some(containsError(HasInvalidInterestSignals)),
+        dmSpecialOfficeProcessingRequired = Some(containsError(DmSpecialOfficeProcessingRequired))
       )
     }
     EligibilityCheckResult(

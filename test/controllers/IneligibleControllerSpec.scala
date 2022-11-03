@@ -16,17 +16,19 @@
 
 package controllers
 
+import essttp.journey.model.{Origin, Origins}
+import essttp.rootmodel.TaxRegime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalatest.Assertion
-import play.api.mvc.{AnyContentAsEmpty, Result}
+import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.ContentAssertions
 import testsupport.stubs.EssttpBackend
-import testsupport.testdata.JourneyJsonTemplates
+import testsupport.testdata.{JourneyJsonTemplates, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
@@ -35,14 +37,20 @@ import scala.jdk.CollectionConverters.collectionAsScalaIterableConverter
 class IneligibleControllerSpec extends ItSpec {
 
   private val controller: IneligibleController = app.injector.instanceOf[IneligibleController]
-  private val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+  private val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
   def pageContentAsDoc(result: Future[Result]): Document = Jsoup.parse(contentAsString(result))
 
   def assertIneligiblePageLeadingP1(page: Document, leadingP1: String): Assertion =
     page.select(".govuk-body").asScala.toList(0).text() shouldBe leadingP1
 
-  def assertCommonEligibilityContent(page: Document): Assertion = {
+  def assertCommonEligibilityContent(page: Document, taxRegime: TaxRegime): Assertion = {
+
+    val taxRegimeSpecificContent = taxRegime match {
+      case TaxRegime.Epaye => "your Accounts Office reference. This is 13 characters, for example, 123PX00123456"
+      case TaxRegime.Vat   => "your VAT number. This is 9 characters, for example, 1233456789"
+    }
+
     val commonEligibilityWrapper = page.select("#common-eligibility")
     val govukBodyElements = commonEligibilityWrapper.select(".govuk-body").asScala.toList
     govukBodyElements(0).text() shouldBe "For further support you can contact the Payment Support Service on 0300 200 3835 to speak to an advisor."
@@ -57,7 +65,7 @@ class IneligibleControllerSpec extends ItSpec {
     govukBodyElements(4).text() shouldBe "Before you call, make sure you have:"
     val bulletLists = commonEligibilityWrapper.select(".govuk-list").asScala.toList
     val beforeYouCallList = bulletLists(0).select("li").asScala.toList
-    beforeYouCallList(0).text() shouldBe "your Accounts Office reference. This is 13 characters, for example, 123PX00123456"
+    beforeYouCallList(0).text() shouldBe taxRegimeSpecificContent
     beforeYouCallList(1).text() shouldBe "your bank details"
 
     govukBodyElements(5).text() shouldBe "We’re likely to ask:"
@@ -70,25 +78,37 @@ class IneligibleControllerSpec extends ItSpec {
 
   "IneligibleController should display" - {
 
-    "Generic not eligible page correctly" in {
-      stubCommonActions()
-      EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(testCrypto))
+    Seq[(TaxRegime, Origin)]((TaxRegime.Epaye, Origins.Epaye.Bta), (TaxRegime.Vat, Origins.Vat.Bta))
+      .foreach {
+        case (taxRegime, origin) =>
+          s"${taxRegime.entryName} Generic not eligible page correctly" in {
+            val enrolments = taxRegime match {
+              case TaxRegime.Epaye => Some(Set(TdAll.payeEnrolment))
+              case TaxRegime.Vat   => Some(Set(TdAll.vatEnrolment))
+            }
+            stubCommonActions(authAllEnrolments = enrolments)
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - MultipleReasons`(testCrypto, origin))
 
-      val result: Future[Result] = controller.genericIneligiblePage(fakeRequest)
-      val page = pageContentAsDoc(result)
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.payeGenericIneligiblePage(fakeRequest)
+              case TaxRegime.Vat   => controller.vatGenericIneligiblePage(fakeRequest)
+            }
+            val page = pageContentAsDoc(result)
 
-      ContentAssertions.commonPageChecks(
-        page,
-        expectedH1              = "Call us",
-        shouldBackLinkBePresent = false,
-        expectedSubmitUrl       = None
-      )
-      assertIneligiblePageLeadingP1(
-        page      = page,
-        leadingP1 = "You are not eligible for an online payment plan. You may still be able to set up a payment plan over the phone."
-      )
-      assertCommonEligibilityContent(page)
-    }
+            ContentAssertions.commonPageChecks(
+              page,
+              expectedH1              = "Call us",
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime)
+            )
+            assertIneligiblePageLeadingP1(
+              page      = page,
+              leadingP1 = "You are not eligible for an online payment plan. You may still be able to set up a payment plan over the phone."
+            )
+            assertCommonEligibilityContent(page, taxRegime)
+          }
+      }
 
     "Debt too large ineligible page correctly" in {
       stubCommonActions()
@@ -107,7 +127,7 @@ class IneligibleControllerSpec extends ItSpec {
         page      = page,
         leadingP1 = "You must owe £15,000 or less to be eligible for a payment plan online. You may still be able to set up a plan over the phone."
       )
-      assertCommonEligibilityContent(page)
+      assertCommonEligibilityContent(page, TaxRegime.Epaye)
     }
 
     "Existing ttp ineligible page correctly" in {
@@ -127,7 +147,7 @@ class IneligibleControllerSpec extends ItSpec {
         page      = page,
         leadingP1 = "You can only have one payment plan at a time."
       )
-      assertCommonEligibilityContent(page)
+      assertCommonEligibilityContent(page, TaxRegime.Epaye)
     }
 
     "Debt too old ineligible page correctly" in {
@@ -147,7 +167,7 @@ class IneligibleControllerSpec extends ItSpec {
         page      = page,
         leadingP1 = "Your overdue amount must have a due date that is less than 35 days ago for you to be eligible for a payment plan online. You may still be able to set up a plan over the phone."
       )
-      assertCommonEligibilityContent(page)
+      assertCommonEligibilityContent(page, TaxRegime.Epaye)
     }
 
     "Returns not up to date ineligible page correctly" in {
@@ -168,7 +188,7 @@ class IneligibleControllerSpec extends ItSpec {
         leadingP1 = "To be eligible for a payment plan online, you need to be up to date with your PAYE for Employers returns. Once you have done this, you can return to this service."
       )
 
-      assertCommonEligibilityContent(page)
+      assertCommonEligibilityContent(page, TaxRegime.Epaye)
       page.select(".govuk-body").asScala.toList(1).text() shouldBe "Go to your tax account to file your tax return."
       page.select("#bta-link").attr("href") shouldBe "/set-up-a-payment-plan/test-only/bta-page?return-page"
     }

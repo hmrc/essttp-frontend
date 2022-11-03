@@ -19,7 +19,8 @@ GET    /determine-eligibility                               controllers.Determin
 GET    /not-enrolled                                        controllers.NotEnrolledController.notEnrolled
 GET    /not-vat-registered                                  controllers.NotEnrolledController.notVatRegistered
 
-GET    /not-eligible                                        controllers.IneligibleController.genericIneligiblePage
+GET    /not-eligible-epaye                                  controllers.IneligibleController.payeGenericIneligiblePage
+GET    /not-eligible-vat                                    controllers.IneligibleController.vatGenericIneligiblePage
 GET    /debt-too-large                                      controllers.IneligibleController.debtTooLargePage
 GET    /debt-too-old                                        controllers.IneligibleController.debtTooOldPage
 GET    /file-your-return                                    controllers.IneligibleController.fileYourReturnPage
