@@ -48,7 +48,7 @@ class ItSpec
 
   protected lazy val configOverrides: Map[String, Any] = Map()
 
-  val testCrypto: Encrypter with Decrypter = new AesCrypto {
+  implicit val testCrypto: Encrypter with Decrypter = new AesCrypto {
     override protected val encryptionKey: String = "P5xsJ9Nt+quxGZzB4DeLfw=="
   }
 

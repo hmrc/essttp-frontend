@@ -34,7 +34,7 @@ import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.{EmailVerificationStub, EssttpBackend}
-import testsupport.testdata.{PageUrls, TdAll}
+import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 import uk.gov.hmrc.http.SessionKeys
 
@@ -114,11 +114,14 @@ class EmailControllerSpec extends ItSpec {
   "POST /which-email-do-you-want-to-use should" - {
 
     "update backend with existing email" in {
+      val email: Email = Email(SensitiveString("bobross@joyOfPainting.com"))
+
       stubCommonActions()
       EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto)()
-      EssttpBackend.SelectEmail.stubUpdateSelectedEmail(TdAll.journeyId)
-
-      val email: Email = Email(SensitiveString("bobross@joyOfPainting.com"))
+      EssttpBackend.SelectEmail.stubUpdateSelectedEmail(
+        TdAll.journeyId,
+        JourneyJsonTemplates.`Selected email to be verified`(email.value.decryptedValue)
+      )
 
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -137,11 +140,14 @@ class EmailControllerSpec extends ItSpec {
     }
 
     "update backend with new email" in {
+      val email: Email = Email(SensitiveString("somenewemail@newemail.com"))
+
       stubCommonActions()
       EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto)()
-      EssttpBackend.SelectEmail.stubUpdateSelectedEmail(TdAll.journeyId)
-
-      val email: Email = Email(SensitiveString("somenewemail@newemail.com"))
+      EssttpBackend.SelectEmail.stubUpdateSelectedEmail(
+        TdAll.journeyId,
+        JourneyJsonTemplates.`Selected email to be verified`(email.value.decryptedValue)
+      )
 
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -326,12 +332,16 @@ class EmailControllerSpec extends ItSpec {
 
     "redirect to the email address confirmed page if the email address has successfully been verified" in {
       stubCommonActions()
+
       EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)()
       EmailVerificationStub.getVerificationStatus(
         ggCredId,
         Right(List(EmailStatus(email.value.decryptedValue, verified = true, locked = false)))
       )
-      EssttpBackend.EmailVerificationStatus.stubEmailVerificationStatus(TdAll.journeyId)
+      EssttpBackend.EmailVerificationStatus.stubEmailVerificationStatus(
+        TdAll.journeyId,
+        JourneyJsonTemplates.`Email verification complete`(email.value.decryptedValue, EmailVerificationStatus.Verified)
+      )
 
       val result = controller.emailCallback(fakeRequest)
 
@@ -350,7 +360,10 @@ class EmailControllerSpec extends ItSpec {
         ggCredId,
         Right(List(EmailStatus(email.value.decryptedValue, verified = false, locked = true)))
       )
-      EssttpBackend.EmailVerificationStatus.stubEmailVerificationStatus(TdAll.journeyId)
+      EssttpBackend.EmailVerificationStatus.stubEmailVerificationStatus(
+        TdAll.journeyId,
+        JourneyJsonTemplates.`Email verification complete`(email.value.decryptedValue, EmailVerificationStatus.Locked)
+      )
 
       val result = controller.emailCallback(fakeRequest)
 
@@ -433,7 +446,7 @@ class EmailControllerSpec extends ItSpec {
       "an email verification result has not been obtained yet" in {
         test(
           () => EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)(),
-          routes.EmailController.whichEmailDoYouWantToUse
+          routes.EmailController.requestVerification
         )
       }
 

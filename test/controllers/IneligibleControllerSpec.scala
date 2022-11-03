@@ -87,7 +87,7 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Vat   => Some(Set(TdAll.vatEnrolment))
             }
             stubCommonActions(authAllEnrolments = enrolments)
-            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - MultipleReasons`(testCrypto, origin))
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - MultipleReasons`(origin))
 
             val result: Future[Result] = taxRegime match {
               case TaxRegime.Epaye => controller.payeGenericIneligiblePage(fakeRequest)
@@ -112,7 +112,7 @@ class IneligibleControllerSpec extends ItSpec {
 
     "Debt too large ineligible page correctly" in {
       stubCommonActions()
-      EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(testCrypto))
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`)
 
       val result: Future[Result] = controller.debtTooLargePage(fakeRequest)
       val page = pageContentAsDoc(result)
@@ -132,7 +132,7 @@ class IneligibleControllerSpec extends ItSpec {
 
     "Existing ttp ineligible page correctly" in {
       stubCommonActions()
-      EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExistingTTP`(testCrypto))
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExistingTTP`)
 
       val result: Future[Result] = controller.alreadyHaveAPaymentPlanPage(fakeRequest)
       val page = pageContentAsDoc(result)
@@ -152,7 +152,7 @@ class IneligibleControllerSpec extends ItSpec {
 
     "Debt too old ineligible page correctly" in {
       stubCommonActions()
-      EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(testCrypto))
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`)
 
       val result: Future[Result] = controller.debtTooOldPage(fakeRequest)
       val page = pageContentAsDoc(result)
@@ -172,7 +172,7 @@ class IneligibleControllerSpec extends ItSpec {
 
     "Returns not up to date ineligible page correctly" in {
       stubCommonActions()
-      EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - MissingFiledReturns`(testCrypto))
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - MissingFiledReturns`)
 
       val result: Future[Result] = controller.fileYourReturnPage(fakeRequest)
       val page = pageContentAsDoc(result)

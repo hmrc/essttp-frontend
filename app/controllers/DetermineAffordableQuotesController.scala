@@ -52,8 +52,8 @@ class DetermineAffordableQuotesController @Inject() (
   )(implicit request: Request[_]): Future[Result] = {
     for {
       affordableQuotes <- ttpService.determineAffordableQuotes(journey, eligibilityCheckResult)
-      _ <- journeyService.updateAffordableQuotes(journey.id, affordableQuotes)
-    } yield Redirect(routes.InstalmentsController.instalmentOptions.url)
+      updatedJourney <- journeyService.updateAffordableQuotes(journey.id, affordableQuotes)
+    } yield Redirect(Routing.next(updatedJourney))
   }
 
 }

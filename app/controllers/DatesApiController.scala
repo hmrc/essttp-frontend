@@ -55,8 +55,8 @@ class DatesApiController @Inject() (
     val j = journey.merge
     for {
       extremeDatesResponse <- datesService.extremeDates(j)
-      _ <- journeyService.updateExtremeDatesResult(j.id, extremeDatesResponse)
-    } yield Redirect(routes.DetermineAffordabilityController.determineAffordability)
+      updatedJourney <- journeyService.updateExtremeDatesResult(j.id, extremeDatesResponse)
+    } yield Redirect(Routing.next(updatedJourney))
   }
 
   val retrieveStartDates: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
@@ -71,8 +71,8 @@ class DatesApiController @Inject() (
   )(implicit request: Request[_]): Future[Result] = {
     for {
       startDatesResponse <- datesService.startDates(journey)
-      _ <- journeyService.updateStartDates(journey.id, startDatesResponse)
-    } yield Redirect(routes.DetermineAffordableQuotesController.retrieveAffordableQuotes)
+      updatedJourney <- journeyService.updateStartDates(journey.id, startDatesResponse)
+    } yield Redirect(Routing.next(updatedJourney))
   }
 
 }

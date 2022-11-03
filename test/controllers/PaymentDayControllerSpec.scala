@@ -28,7 +28,7 @@ import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.EssttpBackend
-import testsupport.testdata.{PageUrls, TdAll}
+import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
@@ -124,7 +124,10 @@ class PaymentDayControllerSpec extends ItSpec {
     "should update journey with dayOfMonth and redirect to instalment page when 28th selected" in {
       stubCommonActions()
       EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto)()
-      EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(TdAll.journeyId)
+      EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(
+        TdAll.journeyId,
+        JourneyJsonTemplates.`Entered Day of Month`(DayOfMonth(28))
+      )
 
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -142,7 +145,10 @@ class PaymentDayControllerSpec extends ItSpec {
     "should update journey with dayOfMonth and redirect to instalment page when other day selected" in {
       stubCommonActions()
       EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto)()
-      EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(TdAll.journeyId)
+      EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(
+        TdAll.journeyId,
+        JourneyJsonTemplates.`Entered Day of Month`(DayOfMonth(1))
+      )
 
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -163,7 +169,10 @@ class PaymentDayControllerSpec extends ItSpec {
     "should update journey with dayOfMonth and redirect to instalment page when other day selected and 28 entered" in {
       stubCommonActions()
       EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto)()
-      EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(TdAll.journeyId)
+      EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(
+        TdAll.journeyId,
+        JourneyJsonTemplates.`Entered Day of Month`(DayOfMonth(28))
+      )
 
       val fakeRequest = FakeRequest(
         method = "POST",

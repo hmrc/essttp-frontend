@@ -24,7 +24,7 @@ import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.{EssttpBackend, Ttp}
-import testsupport.testdata.{PageUrls, TdAll}
+import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
@@ -37,7 +37,7 @@ class DetermineAffordabilityControllerSpec extends ItSpec {
     "trigger call to ttp microservice affordability endpoint and update backend" in {
       stubCommonActions()
       EssttpBackend.Dates.findJourneyExtremeDates(testCrypto)()
-      EssttpBackend.AffordabilityMinMaxApi.stubUpdateAffordability(TdAll.journeyId)
+      EssttpBackend.AffordabilityMinMaxApi.stubUpdateAffordability(TdAll.journeyId, JourneyJsonTemplates.`Retrieved Affordability`())
       Ttp.Affordability.stubRetrieveAffordability()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")

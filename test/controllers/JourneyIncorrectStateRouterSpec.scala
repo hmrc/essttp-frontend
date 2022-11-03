@@ -38,10 +38,10 @@ class JourneyIncorrectStateRouterSpec extends ItSpec {
       ("Stages.ComputedTaxId", () => EssttpBackend.DetermineTaxId.findJourney(), PageUrls.determineEligibilityUrl),
       ("Stages.EligibilityChecked", () => EssttpBackend.EligibilityCheck.findJourney(testCrypto)(), PageUrls.yourBillIsUrl), //check this
       ("Stages.EligibilityChecked - PAYE", () => EssttpBackend.EligibilityCheck.findJourney(testCrypto)(
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(testCrypto, Origins.Epaye.Bta)
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(Origins.Epaye.Bta)
       ), PageUrls.payeNotEligibleUrl),
       ("Stages.EligibilityChecked - VAT", () => EssttpBackend.EligibilityCheck.findJourney(testCrypto)(
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(testCrypto, Origins.Vat.Bta)
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(Origins.Vat.Bta)
       ), PageUrls.vatNotEligibleUrl),
       ("Stages.AnsweredCanPayUpfront - can pay upfront", () => EssttpBackend.CanPayUpfront.findJourney(testCrypto)(), PageUrls.howMuchCanYouPayUpfrontUrl),
       ("Stages.AnsweredCanPayUpfront - can't pay upfront",
@@ -59,7 +59,7 @@ class JourneyIncorrectStateRouterSpec extends ItSpec {
       ("Stages.CheckedPaymentPlan", () => EssttpBackend.HasCheckedPlan.findJourney(testCrypto)(), PageUrls.aboutYourBankAccountUrl),
       ("Stages.EnteredDetailsAboutBankAccount - is account holder", () => EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto)(), PageUrls.directDebitDetailsUrl),
       ("Stages.EnteredDetailsAboutBankAccount - is not account holder",
-        () => EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto)(JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = false, testCrypto)),
+        () => EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto)(JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = false)),
         PageUrls.cannotSetupDirectDebitOnlineUrl
       ),
       ("Stages.EnteredDirectDebitDetails", () => EssttpBackend.DirectDebitDetails.findJourney(testCrypto)(), PageUrls.checkDirectDebitDetailsUrl),

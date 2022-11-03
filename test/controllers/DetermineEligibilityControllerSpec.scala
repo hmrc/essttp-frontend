@@ -16,6 +16,7 @@
 
 package controllers
 
+import essttp.journey.model.Origins
 import essttp.rootmodel.ttp.EligibilityRules
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.http.Status
@@ -25,7 +26,7 @@ import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend, Ttp}
-import testsupport.testdata.{PageUrls, TdAll, TtpJsonResponses}
+import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll, TtpJsonResponses}
 import uk.gov.hmrc.http.SessionKeys
 
 class DetermineEligibilityControllerSpec extends ItSpec {
@@ -33,18 +34,27 @@ class DetermineEligibilityControllerSpec extends ItSpec {
 
   "Determine eligibility endpoint should route user correctly and send an audit event" - {
     forAll(Table(
-      ("Scenario flavour", "eligibility rules", "ineligibility reason audit string", "expected redirect"),
-      ("HasRlsOnAddress", TdAll.notEligibleHasRlsOnAddress, "hasRlsOnAddress", PageUrls.payeNotEligibleUrl),
-      ("MarkedAsInsolvent", TdAll.notEligibleMarkedAsInsolvent, "markedAsInsolvent", PageUrls.payeNotEligibleUrl),
-      ("IsLessThanMinDebtAllowance", TdAll.notEligibleIsLessThanMinDebtAllowance, "isLessThanMinDebtAllowance", PageUrls.payeNotEligibleUrl),
-      ("IsMoreThanMaxDebtAllowance", TdAll.notEligibleIsMoreThanMaxDebtAllowance, "isMoreThanMaxDebtAllowance", PageUrls.debtTooLargeUrl),
-      ("DisallowedChargeLockTypes", TdAll.notEligibleDisallowedChargeLockTypes, "disallowedChargeLockTypes", PageUrls.payeNotEligibleUrl),
-      ("ExistingTTP", TdAll.notEligibleExistingTTP, "existingTTP", PageUrls.alreadyHaveAPaymentPlanUrl),
-      ("ExceedsMaxDebtAge", TdAll.notEligibleExceedsMaxDebtAge, "chargesOverMaxDebtAge", PageUrls.debtTooOldUrl),
-      ("EligibleChargeType", TdAll.notEligibleEligibleChargeType, "ineligibleChargeTypes", PageUrls.payeNotEligibleUrl),
-      ("MissingFiledReturns", TdAll.notEligibleMissingFiledReturns, "missingFiledReturns", PageUrls.fileYourReturnUrl)
+      ("Scenario flavour", "eligibility rules", "ineligibility reason audit string", "expected redirect", "updated journey json"),
+      ("HasRlsOnAddress", TdAll.notEligibleHasRlsOnAddress, "hasRlsOnAddress", PageUrls.payeNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(Origins.Epaye.Bta)),
+      ("MarkedAsInsolvent", TdAll.notEligibleMarkedAsInsolvent, "markedAsInsolvent", PageUrls.payeNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - MarkedAsInsolvent`),
+      ("IsLessThanMinDebtAllowance", TdAll.notEligibleIsLessThanMinDebtAllowance, "isLessThanMinDebtAllowance", PageUrls.payeNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsLessThanMniDebtAllowance`),
+      ("IsMoreThanMaxDebtAllowance", TdAll.notEligibleIsMoreThanMaxDebtAllowance, "isMoreThanMaxDebtAllowance", PageUrls.debtTooLargeUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`),
+      ("DisallowedChargeLockTypes", TdAll.notEligibleDisallowedChargeLockTypes, "disallowedChargeLockTypes", PageUrls.payeNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - DisallowedChargeLockTypes`),
+      ("ExistingTTP", TdAll.notEligibleExistingTTP, "existingTTP", PageUrls.alreadyHaveAPaymentPlanUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExistingTTP`),
+      ("ExceedsMaxDebtAge", TdAll.notEligibleExceedsMaxDebtAge, "chargesOverMaxDebtAge", PageUrls.debtTooOldUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`),
+      ("EligibleChargeType", TdAll.notEligibleEligibleChargeType, "ineligibleChargeTypes", PageUrls.payeNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - EligibleChargeType`),
+      ("MissingFiledReturns", TdAll.notEligibleMissingFiledReturns, "missingFiledReturns", PageUrls.fileYourReturnUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - MissingFiledReturns`)
     )) {
-      (sf: String, eligibilityRules: EligibilityRules, auditIneligibilityReason: String, expectedRedirect: String) =>
+      (sf: String, eligibilityRules: EligibilityRules, auditIneligibilityReason: String, expectedRedirect: String, updatedJourneyJson: String) =>
         {
           s"Ineligible: [$sf] should redirect to $expectedRedirect" in {
             val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(TdAll.notEligibleEligibilityPass, eligibilityRules)
@@ -56,7 +66,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
             EssttpBackend.DetermineTaxId.findJourney()
             Ttp.Eligibility.stubRetrieveEligibility(TtpJsonResponses.ttpEligibilityCallJson(TdAll.notEligibleEligibilityPass, eligibilityRules))
             Ttp.Eligibility.stubRetrieveEligibility(eligibilityCheckResponseJson)
-            EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(TdAll.journeyId)
+            EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(TdAll.journeyId, updatedJourneyJson)
 
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result = controller.determineEligibility(fakeRequest)
@@ -105,13 +115,17 @@ class DetermineEligibilityControllerSpec extends ItSpec {
       stubCommonActions()
       EssttpBackend.DetermineTaxId.findJourney()
       Ttp.Eligibility.stubRetrieveEligibility(eligibilityCheckResponseJson)
-      EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(TdAll.journeyId)
+      EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(
+        TdAll.journeyId,
+        JourneyJsonTemplates.`Eligibility Checked - Eligible`
+      )
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.determineEligibility(fakeRequest)
 
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.yourBillIsUrl)
+
       Ttp.Eligibility.verifyTtpEligibilityRequests()
 
       EssttpBackend.EligibilityCheck.verifyUpdateEligibilityRequest(

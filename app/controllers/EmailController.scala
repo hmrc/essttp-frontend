@@ -95,7 +95,7 @@ class EmailController @Inject() (
               journeyId = request.journeyId,
               email     = emailAddress
             )
-            .map(_ => Redirect(routes.EmailController.requestVerification))
+            .map(updatedJourney => Redirect(Routing.next(updatedJourney)))
         }
       )
   }
@@ -131,13 +131,8 @@ class EmailController @Inject() (
       case j: Journey.AfterEmailAddressSelectedToBeVerified =>
         for {
           status <- emailVerificationService.getVerificationStatus(j.emailToBeVerified)
-          _ <- journeyService.updateEmailVerificationStatus(j.journeyId, status)
-        } yield status match {
-          case EmailVerificationStatus.Verified =>
-            Redirect(routes.EmailController.emailAddressConfirmed)
-          case EmailVerificationStatus.Locked =>
-            Redirect(routes.EmailController.tooManyPasscodeAttempts)
-        }
+          updatedJourney <- journeyService.updateEmailVerificationStatus(j.journeyId, status)
+        } yield Redirect(Routing.next(updatedJourney, allowSubmitArrangement = false))
     }
   }
 

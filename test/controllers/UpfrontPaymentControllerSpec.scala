@@ -87,7 +87,11 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     "should redirect to /how-much-can-you-pay-upfront when user chooses yes" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
-      EssttpBackend.CanPayUpfront.stubUpdateCanPayUpfront(TdAll.journeyId, canPayUpfrontScenario = true)
+      EssttpBackend.CanPayUpfront.stubUpdateCanPayUpfront(
+        TdAll.journeyId,
+        canPayUpfrontScenario = true,
+        JourneyJsonTemplates.`Answered Can Pay Upfront - Yes`
+      )
 
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -105,7 +109,11 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     "should redirect to /can-you-make-an-upfront-payment when user chooses no" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
-      EssttpBackend.CanPayUpfront.stubUpdateCanPayUpfront(TdAll.journeyId, canPayUpfrontScenario = false)
+      EssttpBackend.CanPayUpfront.stubUpdateCanPayUpfront(
+        TdAll.journeyId,
+        canPayUpfrontScenario = false,
+        JourneyJsonTemplates.`Answered Can Pay Upfront - No`
+      )
 
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -186,7 +194,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
     "should route the user to /retrieve-extreme-dates when they try to force browse without selecting 'Yes' on the previous page" in {
       stubCommonActions()
-      EssttpBackend.CanPayUpfront.findJourney(testCrypto)(JourneyJsonTemplates.`Answered Can Pay Upfront - No`(testCrypto))
+      EssttpBackend.CanPayUpfront.findJourney(testCrypto)(JourneyJsonTemplates.`Answered Can Pay Upfront - No`)
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.upfrontPaymentAmount(fakeRequest)
@@ -213,7 +221,10 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     "should redirect to /upfront-payment-summary when user enters a positive number, less than their total debt" in {
       stubCommonActions()
       EssttpBackend.CanPayUpfront.findJourney(testCrypto)()
-      EssttpBackend.UpfrontPaymentAmount.stubUpdateUpfrontPaymentAmount(TdAll.journeyId)
+      EssttpBackend.UpfrontPaymentAmount.stubUpdateUpfrontPaymentAmount(
+        TdAll.journeyId,
+        JourneyJsonTemplates.`Entered Upfront payment amount`
+      )
 
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -231,7 +242,10 @@ class UpfrontPaymentControllerSpec extends ItSpec {
     "should redirect to /upfront-payment-summary when user enters a positive number, at the upper limit" in {
       stubCommonActions()
       EssttpBackend.CanPayUpfront.findJourney(testCrypto)()
-      EssttpBackend.UpfrontPaymentAmount.stubUpdateUpfrontPaymentAmount(TdAll.journeyId)
+      EssttpBackend.UpfrontPaymentAmount.stubUpdateUpfrontPaymentAmount(
+        TdAll.journeyId,
+        JourneyJsonTemplates.`Entered Upfront payment amount`
+      )
 
       val fakeRequest = FakeRequest(
         method = "POST",
@@ -259,7 +273,10 @@ class UpfrontPaymentControllerSpec extends ItSpec {
         s"should allow for $sf" in {
           stubCommonActions()
           EssttpBackend.CanPayUpfront.findJourney(testCrypto)()
-          EssttpBackend.UpfrontPaymentAmount.stubUpdateUpfrontPaymentAmount(TdAll.journeyId)
+          EssttpBackend.UpfrontPaymentAmount.stubUpdateUpfrontPaymentAmount(
+            TdAll.journeyId,
+            JourneyJsonTemplates.`Entered Upfront payment amount`
+          )
 
           val fakeRequest = FakeRequest(
             method = "POST",
@@ -416,7 +433,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
           test({ () =>
             stubCommonActions()
             EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto)(
-              JourneyJsonTemplates.`Retrieved Affordability no upfront payment`(29997, testCrypto)
+              JourneyJsonTemplates.`Retrieved Affordability no upfront payment`(29997)
             )
             ()
           })

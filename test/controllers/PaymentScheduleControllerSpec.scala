@@ -132,7 +132,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
 
       "there is an upfrontPayment amount" in {
         test(
-          JourneyJsonTemplates.`Chosen Payment Plan`(encrypter = testCrypto)
+          JourneyJsonTemplates.`Chosen Payment Plan`()
         )(
             "Yes",
             Some("£123.12"),
@@ -147,7 +147,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
 
       "there is no upfrontPayment amount" in {
         test(
-          JourneyJsonTemplates.`Chosen Payment Plan`("""{ "NoUpfrontPayment" : { } }""", encrypter = testCrypto)
+          JourneyJsonTemplates.`Chosen Payment Plan`("""{ "NoUpfrontPayment" : { } }""")
         )(
             "No",
             None,
@@ -181,7 +181,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
       "has been updated successfully and send an audit event" in {
         stubCommonActions()
         EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto)()
-        EssttpBackend.HasCheckedPlan.stubUpdateHasCheckedPlan(TdAll.journeyId)
+        EssttpBackend.HasCheckedPlan.stubUpdateHasCheckedPlan(TdAll.journeyId, JourneyJsonTemplates.`Has Checked Payment Plan`)
 
         val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 

@@ -68,7 +68,7 @@ class PaymentScheduleController @Inject() (
           case _                                    => JourneyLogger.debug(s"Nothing to audit for stage: ${j.stage}")
         }
         journeyService.updateHasCheckedPaymentPlan(j.journeyId)
-          .map(_ => Redirect(routes.BankDetailsController.detailsAboutBankAccount))
+          .map(updatedJourney => Redirect(Routing.next(updatedJourney)))
     }
   }
 
