@@ -1104,6 +1104,18 @@ object Messages {
 
   }
 
+  object TooManyEmails {
+
+    val `You have tried to confirm an email too many times`: Message = Message(
+      english = "You have tried to confirm an email too many times"
+    )
+
+    val `You have made too many attempts to confirm an email address`: Message = Message(
+      english = "You have made too many attempts to confirm an email address."
+    )
+
+  }
+
   object NotSoleSignatory {
 
     val `You cannot set up a Direct Debit online`: Message = Message(

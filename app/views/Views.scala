@@ -46,6 +46,7 @@ class Views @Inject() (
     val termsAndConditions:               TermsAndConditions,
     val chooseEmailPage:                  ChooseEmailPage,
     val emailAddressConfirmed:            EmailAddressConfirmed,
+    val tooManyEmails:                    TooManyEmails,
     val paymentPlanSetUpPage:             PaymentPlanSetUpPage,
     val printSummaryPage:                 PrintSummaryPage,
     val missingInfoPage:                  MissingInformation,

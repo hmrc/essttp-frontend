@@ -136,8 +136,8 @@ class EmailController @Inject() (
     }
   }
 
-  val tooManyEmailAddresses: Action[AnyContent] = as.eligibleJourneyAction { _ =>
-    Ok("this is a placeholder for the too-many-email-addresses endpoint")
+  val tooManyEmailAddresses: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    Ok(views.tooManyEmails())
   }
 
   val tooManyPasscodeAttempts: Action[AnyContent] = as.eligibleJourneyAction { _ =>
