@@ -23,7 +23,7 @@ import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.{EssttpBackend, EssttpDates}
-import testsupport.testdata.{PageUrls, TdAll}
+import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
@@ -37,7 +37,7 @@ class DatesApiControllerSpec extends ItSpec {
       stubCommonActions()
       EssttpBackend.UpfrontPaymentAmount.findJourney(testCrypto)()
       EssttpDates.stubExtremeDatesCall()
-      EssttpBackend.Dates.stubUpdateExtremeDates(TdAll.journeyId)
+      EssttpBackend.Dates.stubUpdateExtremeDates(TdAll.journeyId, JourneyJsonTemplates.`Retrieved Extreme Dates Response`)
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.retrieveExtremeDates(fakeRequest)
@@ -48,12 +48,13 @@ class DatesApiControllerSpec extends ItSpec {
       EssttpDates.verifyExtremeDates(TdAll.extremeDatesRequest(initialPayment = true))
     }
   }
+
   "GET /retrieve-start-dates" - {
     "trigger call to essttp-dates microservice start dates endpoint and update backend" in {
       stubCommonActions()
       EssttpBackend.DayOfMonth.findJourney(TdAll.dayOfMonth(), testCrypto)()
       EssttpDates.stubStartDatesCall()
-      EssttpBackend.Dates.stubUpdateStartDates(TdAll.journeyId)
+      EssttpBackend.Dates.stubUpdateStartDates(TdAll.journeyId, JourneyJsonTemplates.`Retrieved Start Dates`)
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.retrieveStartDates(fakeRequest)

@@ -27,7 +27,7 @@ import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend, Ttp}
-import testsupport.testdata.{PageUrls, TdAll}
+import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.http.{SessionKeys, UpstreamErrorResponse}
 
 import scala.concurrent.Future
@@ -56,7 +56,10 @@ class SubmitArrangementControllerSpec extends ItSpec {
 
               stubCommonActions()
               journeyStubMapping()
-              EssttpBackend.SubmitArrangement.stubUpdateSubmitArrangement(TdAll.journeyId)
+              EssttpBackend.SubmitArrangement.stubUpdateSubmitArrangement(
+                TdAll.journeyId,
+                JourneyJsonTemplates.`Arrangement Submitted - with upfront payment`
+              )
               Ttp.EnactArrangement.stubEnactArrangement()
 
               val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -145,10 +148,10 @@ class SubmitArrangementControllerSpec extends ItSpec {
         )
       }
 
-      "the user has just selected and email address" in {
+      "the user has just selected an email address" in {
         test(
           () => EssttpBackend.SelectEmail.findJourney("email@test.com", testCrypto)(),
-          routes.EmailController.whichEmailDoYouWantToUse
+          routes.EmailController.requestVerification
         )
       }
 

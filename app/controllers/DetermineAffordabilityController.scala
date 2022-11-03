@@ -52,8 +52,8 @@ class DetermineAffordabilityController @Inject() (
   )(implicit request: Request[_]): Future[Result] = {
     for {
       instalmentAmounts <- ttpService.determineAffordability(journey, eligibilityCheckResult)
-      _ <- journeyService.updateAffordabilityResult(journey.id, instalmentAmounts)
-    } yield Redirect(routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount.url)
+      updatedJourney <- journeyService.updateAffordabilityResult(journey.id, instalmentAmounts)
+    } yield Redirect(Routing.next(updatedJourney))
   }
 
 }

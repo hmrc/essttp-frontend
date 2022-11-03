@@ -67,8 +67,8 @@ class SubmitArrangementController @Inject() (
   )(implicit request: AuthenticatedJourneyRequest[_]): Future[Result] = {
     for {
       arrangementResponse <- ttpService.submitArrangement(journey)
-      _ <- journeyService.updateArrangementResponse(journey.fold(_.id, _.id), arrangementResponse)
-    } yield Redirect(routes.PaymentPlanSetUpController.paymentPlanSetUp)
+      updatedJourney <- journeyService.updateArrangementResponse(journey.fold(_.id, _.id), arrangementResponse)
+    } yield Redirect(Routing.next(updatedJourney))
   }
 
 }

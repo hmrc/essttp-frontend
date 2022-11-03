@@ -58,7 +58,7 @@ class EnrolmentService @Inject() (journeyService: JourneyService, auditService: 
   private def handleTaxRegime[ID <: TaxId](
       idResult: EnrolmentDefResult[ID],
       journey:  Journey.Stages.Started
-  )(update: ID => Future[Unit])(implicit r: AuthenticatedJourneyRequest[_], hc: HeaderCarrier): Future[Option[ID]] = {
+  )(update: ID => Future[Journey])(implicit r: AuthenticatedJourneyRequest[_], hc: HeaderCarrier): Future[Option[ID]] = {
     idResult match {
       case Success(id) =>
         update(id).map(_ => Some(id))

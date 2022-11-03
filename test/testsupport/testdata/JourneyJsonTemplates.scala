@@ -41,89 +41,114 @@ object JourneyJsonTemplates {
     origin
   )
 
-  def `Eligibility Checked - Ineligible - HasRlsOnAddress`(encrypter: Encrypter, origin: Origin): String = TdJsonBodies.createJourneyJson(
+  def `Eligibility Checked - Eligible`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.eligibilityCheckedEligible,
+    journeyInfo = JourneyInfo.eligibilityCheckedEligible(encrypter)
+  )
+
+  def `Eligibility Checked - Ineligible - HasRlsOnAddress`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleHasRls(encrypter),
     origin      = origin
   )
 
-  def `Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Eligibility Checked - Ineligible - MarkedAsInsolvent`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.eligibilityCheckedIneligible,
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleHasRls(encrypter)
+  )
+
+  def `Eligibility Checked - Ineligible - IsLessThanMniDebtAllowance`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.eligibilityCheckedIneligible,
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMinDebt(encrypter)
+  )
+
+  def `Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMaxDebt(encrypter)
   )
 
-  def `Eligibility Checked - Ineligible - ExistingTTP`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Eligibility Checked - Ineligible - DisallowedChargeLockTypes`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.eligibilityCheckedIneligible,
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleDisallowedCharge(encrypter)
+  )
+
+  def `Eligibility Checked - Ineligible - ExistingTTP`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleExistingTtp(encrypter)
   )
 
-  def `Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMaxDebtAge(encrypter)
   )
 
-  def `Eligibility Checked - Ineligible - MissingFiledReturns`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Eligibility Checked - Ineligible - EligibleChargeType`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.eligibilityCheckedIneligible,
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleChargeType(encrypter)
+  )
+
+  def `Eligibility Checked - Ineligible - MissingFiledReturns`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMissingFiledReturns(encrypter)
   )
 
-  def `Eligibility Checked - Ineligible - MultipleReasons`(encrypter: Encrypter, origin: Origin = Origins.Epaye.Bta): String = TdJsonBodies.createJourneyJson(
+  def `Eligibility Checked - Ineligible - MultipleReasons`(origin: Origin = Origins.Epaye.Bta)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMultipleReasons(encrypter),
     origin      = origin
   )
 
-  def `Answered Can Pay Upfront - Yes`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Answered Can Pay Upfront - Yes`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.answeredCanPayUpfrontYes,
     journeyInfo = JourneyInfo.answeredCanPayUpfrontYes(encrypter)
   )
 
-  def `Answered Can Pay Upfront - No`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Answered Can Pay Upfront - No`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.answeredCanPayUpfrontNo,
     journeyInfo = JourneyInfo.answeredCanPayUpfrontNo(encrypter)
   )
 
-  def `Entered Upfront payment amount`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Entered Upfront payment amount`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.enteredUpfrontPaymentAmount,
     journeyInfo = JourneyInfo.answeredUpfrontPaymentAmount(encrypter)
   )
 
-  def `Retrieved Extreme Dates Response`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Retrieved Extreme Dates Response`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.retrievedExtremeDates,
     journeyInfo = JourneyInfo.retrievedExtremeDates(encrypter)
   )
 
-  def `Retrieved Affordability`(minimumInstalmentAmount: Int = 29997, encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Retrieved Affordability`(minimumInstalmentAmount: Int = 29997)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.retrievedAffordabilityResult,
     journeyInfo = JourneyInfo.retrievedAffordabilityResult(minimumInstalmentAmount, encrypter)
   )
 
-  def `Retrieved Affordability no upfront payment`(minimumInstalmentAmount: Int = 29997, encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Retrieved Affordability no upfront payment`(minimumInstalmentAmount: Int = 29997)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.retrievedAffordabilityResult,
     journeyInfo = JourneyInfo.retrievedAffordabilityResultNoUpfrontPayment(minimumInstalmentAmount, encrypter)
   )
 
-  def `Entered Monthly Payment Amount`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Entered Monthly Payment Amount`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.enteredMonthlyPaymentAmount,
     journeyInfo = JourneyInfo.enteredMonthlyPaymentAmount(encrypter)
   )
 
-  def `Entered Day of Month`(dayOfMonth: DayOfMonth, encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Entered Day of Month`(dayOfMonth: DayOfMonth)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.enteredDayOfMonth,
     journeyInfo = JourneyInfo.enteredDayOfMonth(dayOfMonth, encrypter)
   )
 
-  def `Retrieved Start Dates`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Retrieved Start Dates`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.retrievedStartDates,
     journeyInfo = JourneyInfo.retrievedStartDates(encrypter)
   )
 
-  def `Retrieved Affordable Quotes`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Retrieved Affordable Quotes`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.retrievedAffordableQuotes,
     journeyInfo = JourneyInfo.retrievedAffordableQuotes(encrypter)
   )
 
-  def `Chosen Payment Plan`(upfrontPaymentAmountJsonString: String = """{"DeclaredUpfrontPayment": {"amount": 12312}}""", encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Chosen Payment Plan`(upfrontPaymentAmountJsonString: String = """{"DeclaredUpfrontPayment": {"amount": 12312}}""")(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.chosenPaymentPlan,
     journeyInfo = List(
       TdJsonBodies.taxIdJourneyInfo(),
@@ -139,42 +164,42 @@ object JourneyJsonTemplates {
     )
   )
 
-  def `Has Checked Payment Plan`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Has Checked Payment Plan`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.hasCheckedPaymentPlan,
     journeyInfo = JourneyInfo.hasCheckedPaymentPlan(encrypter)
   )
 
-  def `Entered Details About Bank Account - Business`(isAccountHolder: Boolean, encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Entered Details About Bank Account - Business`(isAccountHolder: Boolean)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = if (isAccountHolder) StageInfo.enteredDetailsAboutBankAccount else StageInfo.enteredDetailsAboutBankAccountNotAccountHolder,
     journeyInfo = JourneyInfo.enteredDetailsAboutBankAccountBusiness(isAccountHolder, encrypter)
   )
 
-  def `Entered Details About Bank Account - Personal`(isAccountHolder: Boolean, encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Entered Details About Bank Account - Personal`(isAccountHolder: Boolean)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = if (isAccountHolder) StageInfo.enteredDetailsAboutBankAccountPersonal else StageInfo.enteredDetailsAboutBankAccountNotAccountHolder,
     journeyInfo = JourneyInfo.enteredDetailsAboutBankAccountPersonal(isAccountHolder, encrypter)
   )
 
-  def `Entered Direct Debit Details`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Entered Direct Debit Details`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.enteredDirectDebitDetails,
     journeyInfo = JourneyInfo.enteredDirectDebitDetails(encrypter)
   )
 
-  def `Confirmed Direct Debit Details`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Confirmed Direct Debit Details`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.confirmedDirectDebitDetails,
     journeyInfo = JourneyInfo.confirmedDirectDebitDetails(encrypter)
   )
 
-  def `Agreed Terms and Conditions`(isEmailAddresRequired: Boolean, encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Agreed Terms and Conditions`(isEmailAddresRequired: Boolean)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = if (isEmailAddresRequired) StageInfo.agreedTermsAndConditionsEmailAddressRequired else StageInfo.agreedTermsAndConditionsEmailAddressNotRequired,
     journeyInfo = JourneyInfo.agreedTermsAndConditions(isEmailAddresRequired, encrypter)
   )
 
-  def `Selected email to be verified`(email: String, encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Selected email to be verified`(email: String)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.selectedEmailToBeVerified,
     journeyInfo = JourneyInfo.selectedEmailToBeVerified(email, encrypter)
   )
 
-  def `Email verification complete`(email: String, status: EmailVerificationStatus, encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Email verification complete`(email: String, status: EmailVerificationStatus)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = status match {
       case EmailVerificationStatus.Verified => StageInfo.emailVerificationSuccess
       case EmailVerificationStatus.Locked   => StageInfo.emailVerificationLocked
@@ -182,12 +207,12 @@ object JourneyJsonTemplates {
     journeyInfo = JourneyInfo.emailVerificationComplete(email, status, encrypter)
   )
 
-  def `Arrangement Submitted - with upfront payment`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Arrangement Submitted - with upfront payment`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.submittedArrangement,
     journeyInfo = JourneyInfo.submittedArrangementWithUpfrontPayment(encrypter)
   )
 
-  def `Arrangement Submitted - No upfront payment`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Arrangement Submitted - No upfront payment`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.submittedArrangement,
     journeyInfo = JourneyInfo.submittedArrangementNoUpfrontPayment(encrypter)
   )

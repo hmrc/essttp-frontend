@@ -93,15 +93,8 @@ class BankDetailsController @Inject() (
                 TypeOfAccountFormValue.typeOfBankAccountFromFormValue(detailsAboutBankAccountForm.typeOfAccount),
                 detailsAboutBankAccountForm.isSoleSignatory.asBoolean
               )
-            ).map{ _ =>
-                val redirectTo = detailsAboutBankAccountForm.isSoleSignatory match {
-                  case IsSoleSignatoryFormValue.No =>
-                    routes.BankDetailsController.cannotSetupDirectDebitOnlinePage
-
-                  case IsSoleSignatoryFormValue.Yes =>
-                    routes.BankDetailsController.enterBankDetails
-                }
-                Redirect(redirectTo)
+            ).map{ updatedJourney =>
+                Redirect(Routing.next(updatedJourney))
               }
       )
   }
@@ -223,8 +216,8 @@ class BankDetailsController @Inject() (
       _ =>
         journeyService
           .updateDirectDebitDetails(request.journeyId, directDebitDetails)
-          .map { _ =>
-            Redirect(routes.BankDetailsController.checkBankDetails)
+          .map { updatedJourney =>
+            Redirect(Routing.next(updatedJourney))
           }
     )
   }

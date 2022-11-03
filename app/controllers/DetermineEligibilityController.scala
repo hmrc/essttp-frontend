@@ -74,8 +74,8 @@ class DetermineEligibilityController @Inject() (
     for {
       eligibilityCheckResult <- ttpService.determineEligibility(journey)
       _ = auditService.auditEligibilityCheck(journey, eligibilityCheckResult)
-      _ <- journeyService.updateEligibilityCheckResult(journey.id, eligibilityCheckResult)
-    } yield Redirect(EligibilityRouter.nextPage(eligibilityCheckResult, journey.taxRegime))
+      updatedJourney <- journeyService.updateEligibilityCheckResult(journey.id, eligibilityCheckResult)
+    } yield Redirect(Routing.next(updatedJourney))
   }
 
 }

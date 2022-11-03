@@ -24,7 +24,7 @@ import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.{EssttpBackend, Ttp}
-import testsupport.testdata.{PageUrls, TdAll}
+import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
@@ -38,7 +38,7 @@ class DetermineAffordableQuotesControllerSpec extends ItSpec {
       stubCommonActions()
       EssttpBackend.Dates.findJourneyStartDates(testCrypto)()
       Ttp.AffordableQuotes.stubRetrieveAffordableQuotes()
-      EssttpBackend.AffordableQuotes.stubUpdateAffordableQuotes(TdAll.journeyId)
+      EssttpBackend.AffordableQuotes.stubUpdateAffordableQuotes(TdAll.journeyId, JourneyJsonTemplates.`Retrieved Affordable Quotes`)
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.retrieveAffordableQuotes(fakeRequest)

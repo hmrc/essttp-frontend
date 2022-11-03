@@ -27,7 +27,7 @@ import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.EssttpBackend
-import testsupport.testdata.{PageUrls, TdAll}
+import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
@@ -92,7 +92,10 @@ class TermsAndConditionsControllerSpec extends ItSpec {
     "redirect the user to the email journey if it is enabled and update backend" in {
       stubCommonActions()
       EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto)()
-      EssttpBackend.TermsAndConditions.stubUpdateAgreedTermsAndConditions(TdAll.journeyId)
+      EssttpBackend.TermsAndConditions.stubUpdateAgreedTermsAndConditions(
+        TdAll.journeyId,
+        JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = true)
+      )
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
@@ -116,7 +119,10 @@ class TermsAndConditionsControllerEmailDisabledSpec extends ItSpec {
     "redirect the user to the submit arrangement endpoint if the email journey is enabled and update backend" in {
       stubCommonActions()
       EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto)()
-      EssttpBackend.TermsAndConditions.stubUpdateAgreedTermsAndConditions(TdAll.journeyId)
+      EssttpBackend.TermsAndConditions.stubUpdateAgreedTermsAndConditions(
+        TdAll.journeyId,
+        JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = false)
+      )
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 

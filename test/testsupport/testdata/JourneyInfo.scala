@@ -27,9 +27,13 @@ object JourneyInfo {
   def taxId(taxReference: String): JourneyInfoAsJson = TdJsonBodies.taxIdJourneyInfo(taxReference)
   def eligibilityCheckEligible(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(encrypter = encrypter)
   def ineligibleHasRls(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleHasRlsOnAddress, encrypter)
+  def ineligibleMarkedAsInsolvent(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleMarkedAsInsolvent, encrypter)
+  def ineligibleMinDebt(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleIsLessThanMinDebtAllowance, encrypter)
   def ineligibleMaxDebt(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleIsMoreThanMaxDebtAllowance, encrypter)
+  def ineligibleDisallowedCharge(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleDisallowedChargeLockTypes, encrypter)
   def ineligibleExistingTtp(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleExistingTTP, encrypter)
   def ineligibleMaxDebtAge(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleExceedsMaxDebtAge, encrypter)
+  def ineligibleChargeType(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleEligibleChargeType, encrypter)
   def ineligibleMissingFiledReturns(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleMissingFiledReturns, encrypter)
   def multipleIneligibleReasons(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleHasRlsOnAddress.copy(markedAsInsolvent = true), encrypter)
   val canPayUpfront: JourneyInfoAsJson = TdJsonBodies.canPayUpfrontJourneyInfo(true)
@@ -67,13 +71,26 @@ object JourneyInfo {
   def eligibilityCheckedIneligibleHasRls(encrypter: Encrypter): List[JourneyInfoAsJson] =
     ineligibleHasRls(encrypter) :: taxIdDetermined()
 
+  def eligibilityCheckedMarkedAsInsolvent(encrypter: Encrypter): List[JourneyInfoAsJson] =
+    ineligibleMarkedAsInsolvent(encrypter) :: taxIdDetermined()
+
+  def eligibilityCheckedIneligibleMinDebt(encrypter: Encrypter): List[JourneyInfoAsJson] =
+    ineligibleMinDebt(encrypter) :: taxIdDetermined()
+
   def eligibilityCheckedIneligibleMaxDebt(encrypter: Encrypter): List[JourneyInfoAsJson] =
     ineligibleMaxDebt(encrypter) :: taxIdDetermined()
+
+  def eligibilityCheckedIneligibleDisallowedCharge(encrypter: Encrypter): List[JourneyInfoAsJson] =
+    ineligibleDisallowedCharge(encrypter) :: taxIdDetermined()
+
   def eligibilityCheckedIneligibleExistingTtp(encrypter: Encrypter): List[JourneyInfoAsJson] =
     ineligibleExistingTtp(encrypter) :: taxIdDetermined()
 
   def eligibilityCheckedIneligibleMaxDebtAge(encrypter: Encrypter): List[JourneyInfoAsJson] =
     ineligibleMaxDebtAge(encrypter) :: taxIdDetermined()
+
+  def eligibilityCheckedIneligibleChargeType(encrypter: Encrypter): List[JourneyInfoAsJson] =
+    ineligibleChargeType(encrypter) :: taxIdDetermined()
 
   def eligibilityCheckedIneligibleMissingFiledReturns(encrypter: Encrypter): List[JourneyInfoAsJson] =
     ineligibleMissingFiledReturns(encrypter) :: taxIdDetermined()

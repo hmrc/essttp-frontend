@@ -136,8 +136,8 @@ object EssttpBackend {
 
     def updateTaxIdUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-tax-id"
 
-    def stubUpdateTaxId(journeyId: JourneyId): StubMapping =
-      WireMockHelpers.stubForPostNoResponseBody(updateTaxIdUrl(journeyId))
+    def stubUpdateTaxId(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(updateTaxIdUrl(journeyId), updatedJourneyJson)
 
     def verifyTaxIdRequest(journeyId: JourneyId, taxId: TaxId): Unit =
       verify(
@@ -149,8 +149,11 @@ object EssttpBackend {
   object EligibilityCheck {
     def updateEligibilityResultUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-eligibility-result"
 
-    def stubUpdateEligibilityResult(journeyId: JourneyId): StubMapping =
-      WireMockHelpers.stubForPostNoResponseBody(updateEligibilityResultUrl(journeyId))
+    def stubUpdateEligibilityResult(journeyId: JourneyId, responseBodyJson: String): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(
+        updateEligibilityResultUrl(journeyId),
+        responseBodyJson
+      )
 
     def verifyUpdateEligibilityRequest(
         journeyId:                      JourneyId,
@@ -168,13 +171,14 @@ object EssttpBackend {
   object CanPayUpfront {
     def updateCanPayUpfrontUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-can-pay-upfront"
 
-    def stubUpdateCanPayUpfront(journeyId: JourneyId, canPayUpfrontScenario: Boolean): StubMapping =
+    def stubUpdateCanPayUpfront(journeyId: JourneyId, canPayUpfrontScenario: Boolean, updatedJourneyJson: String): StubMapping =
       stubFor(
         post(urlPathEqualTo(updateCanPayUpfrontUrl(journeyId)))
           .withRequestBody(equalTo(canPayUpfrontScenario.toString))
           .willReturn(
             aResponse()
               .withStatus(OK)
+              .withBody(updatedJourneyJson)
           )
       )
 
@@ -193,8 +197,8 @@ object EssttpBackend {
   object UpfrontPaymentAmount {
     def updateUpfrontPaymentAmountUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-upfront-payment-amount"
 
-    def stubUpdateUpfrontPaymentAmount(journeyId: JourneyId): StubMapping =
-      WireMockHelpers.stubForPostNoResponseBody(updateUpfrontPaymentAmountUrl(journeyId))
+    def stubUpdateUpfrontPaymentAmount(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(updateUpfrontPaymentAmountUrl(journeyId), updatedJourneyJson)
 
     def verifyUpdateUpfrontPaymentAmountRequest(journeyId: JourneyId, expectedUpfrontPaymentAmount: UpfrontPaymentAmount): Unit =
       WireMockHelpers.verifyWithBodyParse(updateUpfrontPaymentAmountUrl(journeyId), expectedUpfrontPaymentAmount)(essttp.rootmodel.UpfrontPaymentAmount.format)
@@ -214,11 +218,11 @@ object EssttpBackend {
 
     def updateStartDatesUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-start-dates"
 
-    def stubUpdateExtremeDates(journeyId: JourneyId): StubMapping =
-      WireMockHelpers.stubForPostNoResponseBody(updateExtremeDatesUrl(journeyId))
+    def stubUpdateExtremeDates(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(updateExtremeDatesUrl(journeyId), updatedJourneyJson)
 
-    def stubUpdateStartDates(journeyId: JourneyId): StubMapping =
-      WireMockHelpers.stubForPostNoResponseBody(updateStartDatesUrl(journeyId))
+    def stubUpdateStartDates(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(updateStartDatesUrl(journeyId), updatedJourneyJson)
 
     def verifyUpdateExtremeDates(journeyId: JourneyId, expectedExtremeDatesResponse: ExtremeDatesResponse): Unit =
       WireMockHelpers.verifyWithBodyParse(updateExtremeDatesUrl(journeyId), expectedExtremeDatesResponse)(ExtremeDatesResponse.format)
@@ -246,13 +250,13 @@ object EssttpBackend {
   }
 
   object AffordabilityMinMaxApi {
-    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Retrieved Affordability`(encrypter = encrypter)): StubMapping =
+    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Retrieved Affordability`()(encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
 
     def updateAffordabilityUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-affordability-result"
 
-    def stubUpdateAffordability(journeyId: JourneyId): StubMapping =
-      WireMockHelpers.stubForPostNoResponseBody(updateAffordabilityUrl(journeyId))
+    def stubUpdateAffordability(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(updateAffordabilityUrl(journeyId), updatedJourneyJson)
 
     def verifyUpdateAffordabilityRequest(journeyId: JourneyId, expectedInstalmentAmounts: InstalmentAmounts): Unit =
       WireMockHelpers.verifyWithBodyParse(updateAffordabilityUrl(journeyId), expectedInstalmentAmounts)(InstalmentAmounts.format)
@@ -267,8 +271,8 @@ object EssttpBackend {
   object MonthlyPaymentAmount {
     def monthlyPaymentAmountUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-monthly-payment-amount"
 
-    def stubUpdateMonthlyPaymentAmount(journeyId: JourneyId): StubMapping =
-      WireMockHelpers.stubForPostNoResponseBody(monthlyPaymentAmountUrl(journeyId))
+    def stubUpdateMonthlyPaymentAmount(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(monthlyPaymentAmountUrl(journeyId), updatedJourneyJson)
 
     def verifyUpdateMonthlyPaymentAmountRequest(journeyId: JourneyId, expectedMonthlyPaymentAmount: MonthlyPaymentAmount): Unit =
       WireMockHelpers.verifyWithBodyParse(monthlyPaymentAmountUrl(journeyId), expectedMonthlyPaymentAmount)(essttp.rootmodel.MonthlyPaymentAmount.format)
@@ -285,8 +289,8 @@ object EssttpBackend {
   object DayOfMonth {
     def dayOfMonthUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-day-of-month"
 
-    def stubUpdateDayOfMonth(journeyId: JourneyId): StubMapping =
-      WireMockHelpers.stubForPostNoResponseBody(dayOfMonthUrl(journeyId))
+    def stubUpdateDayOfMonth(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(dayOfMonthUrl(journeyId), updatedJourneyJson)
 
     def verifyUpdateDayOfMonthRequest(journeyId: JourneyId, dayOfMonth: DayOfMonth = TdAll.dayOfMonth()): Unit =
       verify(
@@ -302,15 +306,15 @@ object EssttpBackend {
     def findJourney(
         dayOfMonth: DayOfMonth,
         encrypter:  Encrypter
-    )(jsonBody: String = JourneyJsonTemplates.`Entered Day of Month`(dayOfMonth, encrypter)): StubMapping =
+    )(jsonBody: String = JourneyJsonTemplates.`Entered Day of Month`(dayOfMonth)(encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
   }
 
   object AffordableQuotes {
     def affordableQuotesUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-affordable-quotes"
 
-    def stubUpdateAffordableQuotes(journeyId: JourneyId): StubMapping =
-      WireMockHelpers.stubForPostNoResponseBody(affordableQuotesUrl(journeyId))
+    def stubUpdateAffordableQuotes(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(affordableQuotesUrl(journeyId), updatedJourneyJson)
 
     def verifyUpdateAffordableQuotesRequest(journeyId: JourneyId): Unit =
       WireMockHelpers.verifyWithBodyParse(affordableQuotesUrl(journeyId))(AffordableQuotesResponse.format)
@@ -327,8 +331,8 @@ object EssttpBackend {
   object SelectedPaymentPlan {
     def selectedPlanUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-selected-plan"
 
-    def stubUpdateSelectedPlan(journeyId: JourneyId): StubMapping =
-      WireMockHelpers.stubForPostNoResponseBody(selectedPlanUrl(journeyId))
+    def stubUpdateSelectedPlan(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(selectedPlanUrl(journeyId), updatedJourneyJson)
 
     def verifyUpdateSelectedPlanRequest(journeyId: JourneyId): Unit =
       WireMockHelpers.verifyWithBodyParse(selectedPlanUrl(journeyId))(PaymentPlan.format)
@@ -341,9 +345,8 @@ object EssttpBackend {
 
     def findJourney(encrypter: Encrypter)(
         jsonBody: String = JourneyJsonTemplates.`Chosen Payment Plan`(
-          upfrontPaymentAmountJsonString = """{"DeclaredUpfrontPayment": {"amount": 200}}""",
-          encrypter                      = encrypter
-        )
+          upfrontPaymentAmountJsonString = """{"DeclaredUpfrontPayment": {"amount": 200}}"""
+        )(encrypter)
     ): StubMapping =
       findByLatestSessionId(jsonBody)
   }
@@ -351,8 +354,8 @@ object EssttpBackend {
   object HasCheckedPlan {
     def hasCheckedPlanUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-has-checked-plan"
 
-    def stubUpdateHasCheckedPlan(journeyId: JourneyId): StubMapping =
-      WireMockHelpers.stubForPostNoResponseBody(hasCheckedPlanUrl(journeyId))
+    def stubUpdateHasCheckedPlan(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(hasCheckedPlanUrl(journeyId), updatedJourneyJson)
 
     def verifyUpdateHasCheckedPlanRequest(journeyId: JourneyId): Unit =
       verify(
@@ -365,8 +368,8 @@ object EssttpBackend {
   object EnteredDetailsAboutBankAccount {
     def enterDetailsAboutBankAccountUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-details-about-bank-account"
 
-    def stubUpdateEnteredDetailsAboutBankAccount(journeyId: JourneyId): StubMapping =
-      WireMockHelpers.stubForPostNoResponseBody(enterDetailsAboutBankAccountUrl(journeyId))
+    def stubUpdateEnteredDetailsAboutBankAccount(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(enterDetailsAboutBankAccountUrl(journeyId), updatedJourneyJson)
 
     def verifyUpdateEnteredDetailsAboutBankAccountRequest(journeyId: JourneyId, expectedDetailsAboutBankAccount: DetailsAboutBankAccount): Unit =
       WireMockHelpers.verifyWithBodyParse(enterDetailsAboutBankAccountUrl(journeyId), expectedDetailsAboutBankAccount)(DetailsAboutBankAccount.format)
@@ -377,7 +380,7 @@ object EssttpBackend {
     def findJourney(
         encrypter: Encrypter
     )(
-        jsonBody: String = JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = true, encrypter)
+        jsonBody: String = JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = true)(encrypter)
     ): StubMapping =
       findByLatestSessionId(jsonBody)
   }
@@ -385,8 +388,8 @@ object EssttpBackend {
   object DirectDebitDetails {
     def directDebitDetailsUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-direct-debit-details"
 
-    def stubUpdateDirectDebitDetails(journeyId: JourneyId): StubMapping =
-      WireMockHelpers.stubForPostNoResponseBody(directDebitDetailsUrl(journeyId))
+    def stubUpdateDirectDebitDetails(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(directDebitDetailsUrl(journeyId), updatedJourneyJson)
 
     def verifyUpdateDirectDebitDetailsRequest(
         journeyId:                  JourneyId,
@@ -407,8 +410,8 @@ object EssttpBackend {
   object ConfirmedDirectDebitDetails {
     def confirmDirectDebitDetailsUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-has-confirmed-direct-debit-details"
 
-    def stubUpdateConfirmDirectDebitDetails(journeyId: JourneyId): StubMapping =
-      WireMockHelpers.stubForPostNoResponseBody(confirmDirectDebitDetailsUrl(journeyId))
+    def stubUpdateConfirmDirectDebitDetails(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(confirmDirectDebitDetailsUrl(journeyId), updatedJourneyJson)
 
     def verifyUpdateConfirmDirectDebitDetailsRequest(journeyId: JourneyId): Unit =
       verify(
@@ -427,8 +430,8 @@ object EssttpBackend {
   object TermsAndConditions {
     def agreedTermsAndConditionsUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-has-agreed-terms-and-conditions"
 
-    def stubUpdateAgreedTermsAndConditions(journeyId: JourneyId): StubMapping =
-      WireMockHelpers.stubForPostNoResponseBody(agreedTermsAndConditionsUrl(journeyId))
+    def stubUpdateAgreedTermsAndConditions(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(agreedTermsAndConditionsUrl(journeyId), updatedJourneyJson)
 
     def verifyUpdateAgreedTermsAndConditionsRequest(journeyId: JourneyId, isEmailAddressRequired: IsEmailAddressRequired): Unit =
       WireMockHelpers.verifyWithBodyParse(
@@ -445,15 +448,15 @@ object EssttpBackend {
     def findJourney(
         isEmailAddressRequired: Boolean,
         encrypter:              Encrypter
-    )(jsonBody: String = JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddressRequired, encrypter)): StubMapping =
+    )(jsonBody: String = JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddressRequired)(encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
   }
 
   object SelectEmail {
     def selectEmailUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-chosen-email"
 
-    def stubUpdateSelectedEmail(journeyId: JourneyId): StubMapping =
-      WireMockHelpers.stubForPostNoResponseBody(selectEmailUrl(journeyId))
+    def stubUpdateSelectedEmail(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(selectEmailUrl(journeyId), updatedJourneyJson)
 
     def verifyUpdateSelectedEmailRequest(journeyId: JourneyId, email: Email)(implicit cryptoFormat: CryptoFormat): Unit =
       WireMockHelpers.verifyWithBodyParse(selectEmailUrl(journeyId), email)
@@ -464,7 +467,7 @@ object EssttpBackend {
     def findJourney(
         email:     String,
         encrypter: Encrypter
-    )(jsonBody: String = JourneyJsonTemplates.`Selected email to be verified`(email, encrypter)): StubMapping =
+    )(jsonBody: String = JourneyJsonTemplates.`Selected email to be verified`(email)(encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
 
   }
@@ -472,8 +475,8 @@ object EssttpBackend {
   object EmailVerificationStatus {
     def updateEmailVerificationStatusUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-email-verification-status"
 
-    def stubEmailVerificationStatus(journeyId: JourneyId): StubMapping =
-      WireMockHelpers.stubForPostNoResponseBody(updateEmailVerificationStatusUrl(journeyId))
+    def stubEmailVerificationStatus(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(updateEmailVerificationStatusUrl(journeyId), updatedJourneyJson)
 
     def verifyEmailVerificationStatusRequest(journeyId: JourneyId, status: EmailVerificationStatus): Unit =
       WireMockHelpers.verifyWithBodyParse(updateEmailVerificationStatusUrl(journeyId), status)
@@ -482,15 +485,15 @@ object EssttpBackend {
         email:     String,
         status:    EmailVerificationStatus,
         encrypter: Encrypter
-    )(jsonBody: String = JourneyJsonTemplates.`Email verification complete`(email, status, encrypter)): StubMapping =
+    )(jsonBody: String = JourneyJsonTemplates.`Email verification complete`(email, status)(encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
   }
 
   object SubmitArrangement {
     def submitArrangementUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-arrangement"
 
-    def stubUpdateSubmitArrangement(journeyId: JourneyId): StubMapping =
-      WireMockHelpers.stubForPostNoResponseBody(submitArrangementUrl(journeyId))
+    def stubUpdateSubmitArrangement(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(submitArrangementUrl(journeyId), updatedJourneyJson)
 
     def verifyUpdateSubmitArrangementRequest(journeyId: JourneyId, expectedArrangementResponse: ArrangementResponse): Unit =
       WireMockHelpers.verifyWithBodyParse(submitArrangementUrl(journeyId), expectedArrangementResponse)

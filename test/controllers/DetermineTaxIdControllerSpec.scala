@@ -63,7 +63,10 @@ class DetermineTaxIdControllerSpec extends ItSpec {
 
         stubCommonActions(authAllEnrolments = Some(enrolments))
         EssttpBackend.StartJourney.findJourney()
-        EssttpBackend.DetermineTaxId.stubUpdateTaxId(TdAll.journeyId)
+        EssttpBackend.DetermineTaxId.stubUpdateTaxId(
+          TdAll.journeyId,
+          JourneyJsonTemplates.`Computed Tax Id`(origin       = Origins.Epaye.Bta, taxReference = "NumberRef")
+        )
 
         val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
         val result = controller.determineTaxId()(fakeRequest)
@@ -131,7 +134,10 @@ class DetermineTaxIdControllerSpec extends ItSpec {
         ).foreach { e =>
             stubCommonActions(authAllEnrolments = Some(Set(e)))
             EssttpBackend.StartJourney.findJourney()
-            EssttpBackend.DetermineTaxId.stubUpdateTaxId(TdAll.journeyId)
+            EssttpBackend.DetermineTaxId.stubUpdateTaxId(
+              TdAll.journeyId,
+              JourneyJsonTemplates.`Computed Tax Id`(origin       = Origins.Epaye.Bta, taxReference = "NumberRef")
+            )
 
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
@@ -194,7 +200,10 @@ class DetermineTaxIdControllerSpec extends ItSpec {
 
         stubCommonActions(authAllEnrolments = Some(enrolments))
         EssttpBackend.StartJourney.findJourney(Origins.Vat.Bta)
-        EssttpBackend.DetermineTaxId.stubUpdateTaxId(TdAll.journeyId)
+        EssttpBackend.DetermineTaxId.stubUpdateTaxId(
+          TdAll.journeyId,
+          JourneyJsonTemplates.`Computed Tax Id`(origin       = Origins.Vat.Bta, taxReference = "Ref")
+        )
 
         val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
         val result = controller.determineTaxId()(fakeRequest)
@@ -209,7 +218,6 @@ class DetermineTaxIdControllerSpec extends ItSpec {
         val enrolments = Set(enrolment(EnrolmentDef.Vat.`HMRC-MTD-VAT`.enrolmentKey, activated = false)())
         stubCommonActions(authAllEnrolments = Some(enrolments))
         EssttpBackend.StartJourney.findJourney(Origins.Vat.GovUk)
-        EssttpBackend.DetermineTaxId.stubUpdateTaxId(TdAll.journeyId)
 
         val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 

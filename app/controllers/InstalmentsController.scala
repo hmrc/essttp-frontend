@@ -91,7 +91,7 @@ class InstalmentsController @Inject() (
 
           maybePaymentPlan.fold[Future[Result]](Errors.throwBadRequestExceptionF("There was no payment plan"))(plan =>
             journeyService.updateChosenPaymentPlan(request.journeyId, plan)
-              .map(_ => Redirect(routes.PaymentScheduleController.checkPaymentSchedule)))
+              .map(updatedJourney => Redirect(Routing.next(updatedJourney))))
       })
   }
 

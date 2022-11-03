@@ -77,14 +77,8 @@ class UpfrontPaymentController @Inject() (
         formWithErrors => Future.successful(Ok(views.canYouMakeAnUpFrontPayment(formWithErrors))),
         (canPayUpfrontForm: CanPayUpfrontFormValue) => {
           val canPayUpfront: CanPayUpfront = canPayUpfrontForm.asCanPayUpfront
-          val pageToRedirectTo: Call =
-            if (canPayUpfront.value) {
-              UpfrontPaymentController.upfrontPaymentAmountCall
-            } else {
-              routes.DatesApiController.retrieveExtremeDates
-            }
           journeyService.updateCanPayUpfront(request.journeyId, canPayUpfront)
-            .map(_ => Redirect(pageToRedirectTo.url))
+            .map(updatedJourney => Redirect(Routing.next(updatedJourney)))
         }
       )
   }
@@ -156,7 +150,7 @@ class UpfrontPaymentController @Inject() (
           //amount in pence case class apply method converts big decimal to pennies
           val amountInPence: AmountInPence = AmountInPence(validForm)
           journeyService.updateUpfrontPaymentAmount(request.journeyId, UpfrontPaymentAmount(amountInPence))
-            .map(_ => Redirect(routes.UpfrontPaymentController.upfrontPaymentSummary.url))
+            .map(updatedJourney => Redirect(Routing.next(updatedJourney)))
         }
       )
   }

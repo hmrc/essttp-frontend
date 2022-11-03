@@ -56,12 +56,7 @@ class TermsAndConditionsController @Inject() (
 
         journeyService
           .updateAgreedTermsAndConditions(request.journeyId, IsEmailAddressRequired(isEmailAddressRequired))
-          .map { _ =>
-            val redirectTo =
-              if (appConfig.emailJourneyEnabled) routes.EmailController.whichEmailDoYouWantToUse
-              else routes.SubmitArrangementController.submitArrangement
-            Redirect(redirectTo)
-          }
+          .map { updatedJourney => Redirect(Routing.next(updatedJourney)) }
     }
   }
 
