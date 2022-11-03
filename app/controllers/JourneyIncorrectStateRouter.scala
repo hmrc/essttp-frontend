@@ -38,7 +38,7 @@ object JourneyIncorrectStateRouter {
           case TaxRegime.Vat   => routes.LandingController.vatLandingPage
         }
       case _: Journey.Stages.ComputedTaxId      => routes.DetermineEligibilityController.determineEligibility
-      case j: Journey.Stages.EligibilityChecked => EligibilityRouter.nextPage(j.eligibilityCheckResult)
+      case j: Journey.Stages.EligibilityChecked => EligibilityRouter.nextPage(j.eligibilityCheckResult, j.taxRegime)
       case j: Journey.Stages.AnsweredCanPayUpfront =>
         if (j.canPayUpfront.value) routes.UpfrontPaymentController.upfrontPaymentAmount
         else routes.DatesApiController.retrieveExtremeDates

@@ -26,23 +26,25 @@ object JourneyJsonTemplates {
   def Started(origin: Origin = Origins.Epaye.Bta): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.started,
     journeyInfo = JourneyInfo.started,
-    origin
+    origin      = origin
   )
 
   def `Computed Tax Id`(origin: Origin = Origins.Epaye.Bta, taxReference: String = "864FZ00049"): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.computedTaxId,
     journeyInfo = JourneyInfo.taxIdDetermined(taxReference),
+    origin      = origin
+  )
+
+  def `Eligibility Checked - Eligible`(encrypter: Encrypter, origin: Origin = Origins.Epaye.Bta): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.eligibilityCheckedEligible,
+    journeyInfo = JourneyInfo.eligibilityCheckedEligible(encrypter),
     origin
   )
 
-  def `Eligibility Checked - Eligible`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
-    stageInfo   = StageInfo.eligibilityCheckedEligible,
-    journeyInfo = JourneyInfo.eligibilityCheckedEligible(encrypter)
-  )
-
-  def `Eligibility Checked - Ineligible - HasRlsOnAddress`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Eligibility Checked - Ineligible - HasRlsOnAddress`(encrypter: Encrypter, origin: Origin): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
-    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleHasRls(encrypter)
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleHasRls(encrypter),
+    origin      = origin
   )
 
   def `Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
@@ -65,9 +67,10 @@ object JourneyJsonTemplates {
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMissingFiledReturns(encrypter)
   )
 
-  def `Eligibility Checked - Ineligible - MultipleReasons`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Eligibility Checked - Ineligible - MultipleReasons`(encrypter: Encrypter, origin: Origin = Origins.Epaye.Bta): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
-    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMultipleReasons(encrypter)
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMultipleReasons(encrypter),
+    origin      = origin
   )
 
   def `Answered Can Pay Upfront - Yes`(encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(

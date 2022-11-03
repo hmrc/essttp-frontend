@@ -37,9 +37,12 @@ class JourneyIncorrectStateRouterSpec extends ItSpec {
       ("Stages.Started - VAT", () => EssttpBackend.StartJourney.findJourney(Origins.Vat.GovUk), PageUrls.vatLandingPageUrl),
       ("Stages.ComputedTaxId", () => EssttpBackend.DetermineTaxId.findJourney(), PageUrls.determineEligibilityUrl),
       ("Stages.EligibilityChecked", () => EssttpBackend.EligibilityCheck.findJourney(testCrypto)(), PageUrls.yourBillIsUrl), //check this
-      ("Stages.EligibilityChecked", () => EssttpBackend.EligibilityCheck.findJourney(testCrypto)(
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(testCrypto)
-      ), PageUrls.notEligibleUrl),
+      ("Stages.EligibilityChecked - PAYE", () => EssttpBackend.EligibilityCheck.findJourney(testCrypto)(
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(testCrypto, Origins.Epaye.Bta)
+      ), PageUrls.payeNotEligibleUrl),
+      ("Stages.EligibilityChecked - VAT", () => EssttpBackend.EligibilityCheck.findJourney(testCrypto)(
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(testCrypto, Origins.Vat.Bta)
+      ), PageUrls.vatNotEligibleUrl),
       ("Stages.AnsweredCanPayUpfront - can pay upfront", () => EssttpBackend.CanPayUpfront.findJourney(testCrypto)(), PageUrls.howMuchCanYouPayUpfrontUrl),
       ("Stages.AnsweredCanPayUpfront - can't pay upfront",
         () => EssttpBackend.CanPayUpfront.findJourney(testCrypto)(JourneyJsonTemplates.`Answered Can Pay Upfront - No`(testCrypto)),

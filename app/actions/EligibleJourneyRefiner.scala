@@ -53,7 +53,7 @@ class EligibleJourneyRefiner @Inject() (ec: ExecutionContext) extends ActionRefi
             )
           )
         } else {
-          Left(Redirect(EligibilityRouter.nextPage(j.eligibilityCheckResult)))
+          Left(Redirect(EligibilityRouter.nextPage(j.eligibilityCheckResult, j.taxRegime)))
         }
     }
     Future.successful(result)
