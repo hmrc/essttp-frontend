@@ -39,16 +39,22 @@ class IneligibleController @Inject() (
   def genericIneligiblePage(implicit request: AuthenticatedJourneyRequest[AnyContent]): Result =
     Ok(views.partials.ineligibleTemplatePage(Messages.NotEligible.`Call us`, views.partials.genericIneligiblePartial()))
 
-  val payeGenericIneligiblePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    genericIneligiblePage
+  val payeGenericIneligiblePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericIneligiblePage }
+
+  val vatGenericIneligiblePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericIneligiblePage }
+
+  val epayeDebtTooLargePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    Ok(views.partials.ineligibleTemplatePage(
+      Messages.NotEligible.`Call us`,
+      views.partials.debtTooLargePartial(appConfig.PolicyParameters.EPAYE.maxAmountOfDebt)
+    ))
   }
 
-  val vatGenericIneligiblePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    genericIneligiblePage
-  }
-
-  val debtTooLargePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    Ok(views.partials.ineligibleTemplatePage(Messages.NotEligible.`Call us`, views.partials.debtTooLargePartial()))
+  val vatDebtTooLargePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    Ok(views.partials.ineligibleTemplatePage(
+      Messages.NotEligible.`Call us`,
+      views.partials.debtTooLargePartial(appConfig.PolicyParameters.VAT.maxAmountOfDebt)
+    ))
   }
 
   val debtTooOldPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>

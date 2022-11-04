@@ -14,24 +14,22 @@
  * limitations under the License.
  *@
 
-@import config.AppConfig
-
 @import play.api.mvc.Request
 @import requests.RequestSupport
 @import messages.Messages
 @import play.twirl.api.Html
+@import essttp.rootmodel.AmountInPence
 
 @this(
-        requestSupport: RequestSupport,
-        appConfig: AppConfig
+        requestSupport: RequestSupport
 )
 
-@()(implicit request: Request[_])
+@(maxAmountOfDebt: AmountInPence)(implicit request: Request[_])
 
 @import requestSupport._
 
 <p class="govuk-body">
 @{
-    Html(Messages.NotEligible.`You must owe ... or less to be eligible...`(appConfig.PolicyParameters.EPAYE.maxAmountOfDebt).show)
+    Html(Messages.NotEligible.`You must owe ... or less to be eligible...`(maxAmountOfDebt).show)
 }
 </p>
