@@ -146,10 +146,22 @@ class IneligibleControllerSpec extends ItSpec {
           s"${taxRegime.entryName} Debt too old ineligible page correctly" in {
             stubCommonActions()
             EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(origin))
+          s"${taxRegime.entryName} Existing ttp ineligible page correctly" in {
+            val enrolments = taxRegime match {
+              case TaxRegime.Epaye => Some(Set(TdAll.payeEnrolment))
+              case TaxRegime.Vat   => Some(Set(TdAll.vatEnrolment))
+            }
+            stubCommonActions(authAllEnrolments = enrolments)
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExistingTTP`(origin))
 
             val result: Future[Result] = taxRegime match {
               case TaxRegime.Epaye => controller.epayeDebtTooOldPage(fakeRequest)
               case TaxRegime.Vat   => controller.vatDebtTooOldPage(fakeRequest)
+            }
+            val page = pageContentAsDoc(result)
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.epayeAlreadyHaveAPaymentPlanPage(fakeRequest)
+              case TaxRegime.Vat   => controller.vatAlreadyHaveAPaymentPlanPage(fakeRequest)
             }
             val page = pageContentAsDoc(result)
 
@@ -171,23 +183,37 @@ class IneligibleControllerSpec extends ItSpec {
             assertCommonEligibilityContent(page, taxRegime)
           }
       }
+            ContentAssertions.commonPageChecks(
+              page,
+              expectedH1              = "You already have a payment plan with HMRC",
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime)
+            )
+            assertIneligiblePageLeadingP1(
+              page      = page,
+              leadingP1 = "You can only have one payment plan at a time."
+            )
+            assertCommonEligibilityContent(page, taxRegime)
+          }
+      }
 
-    "Existing ttp ineligible page correctly" in {
+    "Debt too old ineligible page correctly" in {
       stubCommonActions()
-      EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExistingTTP`)
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`)
 
-      val result: Future[Result] = controller.alreadyHaveAPaymentPlanPage(fakeRequest)
+      val result: Future[Result] = controller.debtTooOldPage(fakeRequest)
       val page = pageContentAsDoc(result)
 
       ContentAssertions.commonPageChecks(
         page,
-        expectedH1              = "You already have a payment plan with HMRC",
+        expectedH1              = "Call us",
         shouldBackLinkBePresent = false,
         expectedSubmitUrl       = None
       )
       assertIneligiblePageLeadingP1(
         page      = page,
-        leadingP1 = "You can only have one payment plan at a time."
+        leadingP1 = "Your overdue amount must have a due date that is less than 35 days ago for you to be eligible for a payment plan online. You may still be able to set up a plan over the phone."
       )
       assertCommonEligibilityContent(page, TaxRegime.Epaye)
     }
