@@ -57,8 +57,10 @@ class DetermineEligibilityControllerSpec extends ItSpec {
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(Origins.Vat.Bta)),
       ("EligibleChargeType", TdAll.notEligibleEligibleChargeType, "ineligibleChargeTypes", PageUrls.payeNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - EligibleChargeType`),
-      ("MissingFiledReturns", TdAll.notEligibleMissingFiledReturns, "missingFiledReturns", PageUrls.fileYourReturnUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - MissingFiledReturns`)
+      ("MissingFiledReturns - EPAYE", TdAll.notEligibleMissingFiledReturns, "missingFiledReturns", PageUrls.epayeFileYourReturnUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - MissingFiledReturns`(Origins.Epaye.Bta)),
+      ("MissingFiledReturns - VAT", TdAll.notEligibleMissingFiledReturns, "missingFiledReturns", PageUrls.vatFileYourReturnUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - MissingFiledReturns`(Origins.Vat.Bta))
     )) {
       (sf: String, eligibilityRules: EligibilityRules, auditIneligibilityReason: String, expectedRedirect: String, updatedJourneyJson: String) =>
         {

@@ -168,6 +168,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
                |  "taxType": "Epaye",
                |  "taxDetail": { },
                |  "authProviderId": "authId-999",
+               |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
                |  "chargeTypeAssessment" : []
                |}
                |""".
