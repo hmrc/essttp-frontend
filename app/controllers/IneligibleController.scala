@@ -37,7 +37,10 @@ class IneligibleController @Inject() (
 ) extends FrontendController(mcc) with Logging {
 
   def genericIneligiblePage(implicit request: AuthenticatedJourneyRequest[AnyContent]): Result =
-    Ok(views.partials.ineligibleTemplatePage(Messages.NotEligible.`Call us`, views.partials.genericIneligiblePartial()))
+    Ok(views.partials.ineligibleTemplatePage(
+      pageh1         = Messages.NotEligible.`Call us`,
+      leadingContent = views.partials.genericIneligiblePartial()
+    ))
 
   val payeGenericIneligiblePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericIneligiblePage }
 
@@ -45,20 +48,30 @@ class IneligibleController @Inject() (
 
   val epayeDebtTooLargePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     Ok(views.partials.ineligibleTemplatePage(
-      Messages.NotEligible.`Call us`,
-      views.partials.debtTooLargePartial(appConfig.PolicyParameters.EPAYE.maxAmountOfDebt)
+      pageh1         = Messages.NotEligible.`Call us`,
+      leadingContent = views.partials.debtTooLargePartial(appConfig.PolicyParameters.EPAYE.maxAmountOfDebt)
     ))
   }
 
   val vatDebtTooLargePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     Ok(views.partials.ineligibleTemplatePage(
-      Messages.NotEligible.`Call us`,
-      views.partials.debtTooLargePartial(appConfig.PolicyParameters.VAT.maxAmountOfDebt)
+      pageh1         = Messages.NotEligible.`Call us`,
+      leadingContent = views.partials.debtTooLargePartial(appConfig.PolicyParameters.VAT.maxAmountOfDebt)
     ))
   }
 
-  val debtTooOldPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    Ok(views.partials.ineligibleTemplatePage(Messages.NotEligible.`Call us`, views.partials.debtTooOldPartial()))
+  val epayeDebtTooOldPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    Ok(views.partials.ineligibleTemplatePage(
+      pageh1         = Messages.NotEligible.`Call us`,
+      leadingContent = views.partials.debtTooOldPartial(appConfig.PolicyParameters.EPAYE.maxAgeOfDebtInDays)
+    ))
+  }
+
+  val vatDebtTooOldPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    Ok(views.partials.ineligibleTemplatePage(
+      pageh1         = Messages.NotEligible.`Call us`,
+      leadingContent = views.partials.debtTooOldPartial(appConfig.PolicyParameters.VAT.maxAgeOfDebtInDays)
+    ))
   }
 
   val fileYourReturnPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>

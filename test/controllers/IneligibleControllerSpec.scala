@@ -142,6 +142,34 @@ class IneligibleControllerSpec extends ItSpec {
             )
             assertCommonEligibilityContent(page, taxRegime)
           }
+
+          s"${taxRegime.entryName} Debt too old ineligible page correctly" in {
+            stubCommonActions()
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(origin))
+
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.epayeDebtTooOldPage(fakeRequest)
+              case TaxRegime.Vat   => controller.vatDebtTooOldPage(fakeRequest)
+            }
+            val page = pageContentAsDoc(result)
+
+            ContentAssertions.commonPageChecks(
+              page,
+              expectedH1              = "Call us",
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime)
+            )
+            val expectedNumberOfDays = taxRegime match {
+              case TaxRegime.Epaye => "35"
+              case TaxRegime.Vat   => "28"
+            }
+            assertIneligiblePageLeadingP1(
+              page      = page,
+              leadingP1 = s"Your overdue amount must have a due date that is less than $expectedNumberOfDays days ago for you to be eligible for a payment plan online. You may still be able to set up a plan over the phone."
+            )
+            assertCommonEligibilityContent(page, taxRegime)
+          }
       }
 
     "Existing ttp ineligible page correctly" in {
@@ -160,26 +188,6 @@ class IneligibleControllerSpec extends ItSpec {
       assertIneligiblePageLeadingP1(
         page      = page,
         leadingP1 = "You can only have one payment plan at a time."
-      )
-      assertCommonEligibilityContent(page, TaxRegime.Epaye)
-    }
-
-    "Debt too old ineligible page correctly" in {
-      stubCommonActions()
-      EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`)
-
-      val result: Future[Result] = controller.debtTooOldPage(fakeRequest)
-      val page = pageContentAsDoc(result)
-
-      ContentAssertions.commonPageChecks(
-        page,
-        expectedH1              = "Call us",
-        shouldBackLinkBePresent = false,
-        expectedSubmitUrl       = None
-      )
-      assertIneligiblePageLeadingP1(
-        page      = page,
-        leadingP1 = "Your overdue amount must have a due date that is less than 35 days ago for you to be eligible for a payment plan online. You may still be able to set up a plan over the phone."
       )
       assertCommonEligibilityContent(page, TaxRegime.Epaye)
     }

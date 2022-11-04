@@ -38,7 +38,7 @@ object EligibilityRouter {
         case Some(IsMoreThanMaxDebtAllowance)        => whichDebtTooLargePage(taxRegime)
         case Some(DisallowedChargeLockTypes)         => whichGenericEligibilityPage(taxRegime)
         case Some(ExistingTtp)                       => routes.IneligibleController.alreadyHaveAPaymentPlanPage
-        case Some(ChargesOverMaxDebtAge)             => routes.IneligibleController.debtTooOldPage
+        case Some(ChargesOverMaxDebtAge)             => whichDebtTooOldPage(taxRegime)
         case Some(IneligibleChargeTypes)             => whichGenericEligibilityPage(taxRegime)
         case Some(MissingFiledReturns)               => routes.IneligibleController.fileYourReturnPage
         case Some(HasInvalidInterestSignals)         => whichGenericEligibilityPage(taxRegime)
@@ -58,6 +58,11 @@ object EligibilityRouter {
   def whichDebtTooLargePage(taxRegime: TaxRegime): Call = taxRegime match {
     case TaxRegime.Epaye => routes.IneligibleController.epayeDebtTooLargePage
     case TaxRegime.Vat   => routes.IneligibleController.vatDebtTooLargePage
+  }
+
+  def whichDebtTooOldPage(taxRegime: TaxRegime): Call = taxRegime match {
+    case TaxRegime.Epaye => routes.IneligibleController.epayeDebtTooOldPage
+    case TaxRegime.Vat   => routes.IneligibleController.vatDebtTooOldPage
   }
 
 }
