@@ -23,7 +23,8 @@ GET    /not-eligible-epaye                                  controllers.Ineligib
 GET    /not-eligible-vat                                    controllers.IneligibleController.vatGenericIneligiblePage
 GET    /debt-too-large-epaye                                controllers.IneligibleController.epayeDebtTooLargePage
 GET    /debt-too-large-vat                                  controllers.IneligibleController.vatDebtTooLargePage
-GET    /debt-too-old                                        controllers.IneligibleController.debtTooOldPage
+GET    /debt-too-old-epaye                                  controllers.IneligibleController.epayeDebtTooOldPage
+GET    /debt-too-old-vat                                    controllers.IneligibleController.vatDebtTooOldPage
 GET    /file-your-return                                    controllers.IneligibleController.fileYourReturnPage
 GET    /already-have-a-payment-plan-epaye                   controllers.IneligibleController.epayeAlreadyHaveAPaymentPlanPage
 GET    /already-have-a-payment-plan-vat                     controllers.IneligibleController.vatAlreadyHaveAPaymentPlanPage
