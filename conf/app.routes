@@ -25,7 +25,8 @@ GET    /debt-too-large-epaye                                controllers.Ineligib
 GET    /debt-too-large-vat                                  controllers.IneligibleController.vatDebtTooLargePage
 GET    /debt-too-old                                        controllers.IneligibleController.debtTooOldPage
 GET    /file-your-return                                    controllers.IneligibleController.fileYourReturnPage
-GET    /already-have-a-payment-plan                         controllers.IneligibleController.alreadyHaveAPaymentPlanPage
+GET    /already-have-a-payment-plan-epaye                   controllers.IneligibleController.epayeAlreadyHaveAPaymentPlanPage
+GET    /already-have-a-payment-plan-vat                     controllers.IneligibleController.vatAlreadyHaveAPaymentPlanPage
 
 GET    /your-bill                                           controllers.YourBillController.yourBill
 POST   /your-bill                                           controllers.YourBillController.yourBillSubmit
