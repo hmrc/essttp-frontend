@@ -73,9 +73,10 @@ object JourneyJsonTemplates {
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleDisallowedCharge(encrypter)
   )
 
-  def `Eligibility Checked - Ineligible - ExistingTTP`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Eligibility Checked - Ineligible - ExistingTTP`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
-    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleExistingTtp(encrypter)
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleExistingTtp(encrypter),
+    origin      = origin
   )
 
   def `Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(

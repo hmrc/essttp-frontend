@@ -142,27 +142,34 @@ class IneligibleControllerSpec extends ItSpec {
             )
             assertCommonEligibilityContent(page, taxRegime)
           }
+          s"${taxRegime.entryName} Existing ttp ineligible page correctly" in {
+            val enrolments = taxRegime match {
+              case TaxRegime.Epaye => Some(Set(TdAll.payeEnrolment))
+              case TaxRegime.Vat   => Some(Set(TdAll.vatEnrolment))
+            }
+            stubCommonActions(authAllEnrolments = enrolments)
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExistingTTP`(origin))
+
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.epayeAlreadyHaveAPaymentPlanPage(fakeRequest)
+              case TaxRegime.Vat   => controller.vatAlreadyHaveAPaymentPlanPage(fakeRequest)
+            }
+            val page = pageContentAsDoc(result)
+
+            ContentAssertions.commonPageChecks(
+              page,
+              expectedH1              = "You already have a payment plan with HMRC",
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime)
+            )
+            assertIneligiblePageLeadingP1(
+              page      = page,
+              leadingP1 = "You can only have one payment plan at a time."
+            )
+            assertCommonEligibilityContent(page, taxRegime)
+          }
       }
-
-    "Existing ttp ineligible page correctly" in {
-      stubCommonActions()
-      EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExistingTTP`)
-
-      val result: Future[Result] = controller.alreadyHaveAPaymentPlanPage(fakeRequest)
-      val page = pageContentAsDoc(result)
-
-      ContentAssertions.commonPageChecks(
-        page,
-        expectedH1              = "You already have a payment plan with HMRC",
-        shouldBackLinkBePresent = false,
-        expectedSubmitUrl       = None
-      )
-      assertIneligiblePageLeadingP1(
-        page      = page,
-        leadingP1 = "You can only have one payment plan at a time."
-      )
-      assertCommonEligibilityContent(page, TaxRegime.Epaye)
-    }
 
     "Debt too old ineligible page correctly" in {
       stubCommonActions()
