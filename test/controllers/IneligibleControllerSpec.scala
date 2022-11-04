@@ -108,27 +108,41 @@ class IneligibleControllerSpec extends ItSpec {
             )
             assertCommonEligibilityContent(page, taxRegime)
           }
+
+          s"${taxRegime.entryName} Debt too large ineligible page correctly" in {
+            val enrolments = taxRegime match {
+              case TaxRegime.Epaye => Some(Set(TdAll.payeEnrolment))
+              case TaxRegime.Vat   => Some(Set(TdAll.vatEnrolment))
+            }
+            stubCommonActions(authAllEnrolments = enrolments)
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(origin))
+
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.epayeDebtTooLargePage(fakeRequest)
+              case TaxRegime.Vat   => controller.vatDebtTooLargePage(fakeRequest)
+            }
+            val page = pageContentAsDoc(result)
+
+            ContentAssertions.commonPageChecks(
+              page,
+              expectedH1              = "Call us",
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime)
+            )
+
+            val expectedAmount = taxRegime match {
+              case TaxRegime.Epaye => "£15,000"
+              case TaxRegime.Vat   => "£20,000"
+            }
+
+            assertIneligiblePageLeadingP1(
+              page      = page,
+              leadingP1 = s"You must owe $expectedAmount or less to be eligible for a payment plan online. You may still be able to set up a plan over the phone."
+            )
+            assertCommonEligibilityContent(page, taxRegime)
+          }
       }
-
-    "Debt too large ineligible page correctly" in {
-      stubCommonActions()
-      EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`)
-
-      val result: Future[Result] = controller.debtTooLargePage(fakeRequest)
-      val page = pageContentAsDoc(result)
-
-      ContentAssertions.commonPageChecks(
-        page,
-        expectedH1              = "Call us",
-        shouldBackLinkBePresent = false,
-        expectedSubmitUrl       = None
-      )
-      assertIneligiblePageLeadingP1(
-        page      = page,
-        leadingP1 = "You must owe £15,000 or less to be eligible for a payment plan online. You may still be able to set up a plan over the phone."
-      )
-      assertCommonEligibilityContent(page, TaxRegime.Epaye)
-    }
 
     "Existing ttp ineligible page correctly" in {
       stubCommonActions()
