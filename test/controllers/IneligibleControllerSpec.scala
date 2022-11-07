@@ -48,7 +48,7 @@ class IneligibleControllerSpec extends ItSpec {
 
     val taxRegimeSpecificContent = taxRegime match {
       case TaxRegime.Epaye => "your Accounts Office reference. This is 13 characters, for example, 123PX00123456"
-      case TaxRegime.Vat   => "your VAT number. This is 9 characters, for example, 1233456789"
+      case TaxRegime.Vat   => "your VAT number. This is 9 characters, for example, 123456789"
     }
 
     val commonEligibilityWrapper = page.select("#common-eligibility")
