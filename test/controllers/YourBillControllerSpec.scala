@@ -16,6 +16,8 @@
 
 package controllers
 
+import essttp.journey.model.Origins
+import essttp.rootmodel.TaxRegime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalatest.prop.TableDrivenPropertyChecks._
@@ -38,9 +40,9 @@ class YourBillControllerSpec extends ItSpec {
   private val controller: YourBillController = app.injector.instanceOf[YourBillController]
 
   "GET /your-bill should" - {
-    "return you bill page" in {
+    "return you bill page for EPAYE" in {
       stubCommonActions()
-      EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Epaye.Bta)()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
@@ -56,12 +58,32 @@ class YourBillControllerSpec extends ItSpec {
         expectedSubmitUrl       = Some(routes.YourBillController.yourBillSubmit.url)
       )
     }
+
+    "return you bill page for VAT" in {
+      stubCommonActions()
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Vat.Bta)()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+      val result: Future[Result] = controller.yourBill(fakeRequest)
+      val pageContent: String = contentAsString(result)
+      val doc: Document = Jsoup.parse(pageContent)
+
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1              = "Your VAT bill is £3,000",
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl       = Some(routes.YourBillController.yourBillSubmit.url),
+        regimeBeingTested       = Some(TaxRegime.Vat)
+      )
+    }
   }
 
   "POST /your-bill should" - {
     "redirect to can you make an upfront payment question page" in {
       stubCommonActions()
-      EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Vat.Bta)()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 

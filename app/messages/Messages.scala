@@ -103,10 +103,19 @@ object Messages {
       welsh   = "(yn cynnwys llog a ychwanegwyd hyd yn hyn)"
     )
 
-    def yourBillIs(amount: AmountInPence): Message = Message(
-      english = s"Your PAYE bill is ${amount.gdsFormatInPounds}",
-      welsh   = s"Eich bil TWE yw ${amount.gdsFormatInPounds}"
-    )
+    def yourBillIs(amount: AmountInPence, taxRegime: TaxRegime): Message =
+      taxRegime match {
+        case TaxRegime.Epaye =>
+          Message(
+            english = s"Your PAYE bill is ${amount.gdsFormatInPounds}",
+            welsh   = s"Eich bil TWE yw ${amount.gdsFormatInPounds}"
+          )
+
+        case TaxRegime.Vat =>
+          Message(
+            english = s"Your VAT bill is ${amount.gdsFormatInPounds}"
+          )
+      }
 
     val `Overdue payments`: Message = Message(
       english = "Overdue payments",

@@ -17,6 +17,7 @@
 @import play.api.mvc.Request
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import controllers.routes
+@import essttp.rootmodel.TaxRegime
 @import views.html.templates.Layout
 @import views.html.epaye.components.OverduePaymentRow
 @import messages.Messages
@@ -31,11 +32,11 @@
   overduePaymentRow: OverduePaymentRow
 )
 
-@(overduePayments: OverDuePayments)(implicit request: Request[_])
+@(overduePayments: OverDuePayments, taxRegime: TaxRegime)(implicit request: Request[_])
 
 @import requestSupport._
 
-@title= @{Messages.YourBill.yourBillIs(overduePayments.total).show}
+@title= @{Messages.YourBill.yourBillIs(overduePayments.total, taxRegime).show}
 
 @layout(
   pageTitle = Some(title)

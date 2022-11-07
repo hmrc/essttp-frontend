@@ -48,9 +48,13 @@ class YourBillController @Inject() (
     }
   }
 
-  def displayPage(journey: Journey.AfterEligibilityChecked)(implicit request: Request[_]): Result = {
-    Ok(views.yourBillIs(YourBillController.overDuePayments(journey.eligibilityCheckResult)))
-  }
+  private def displayPage(journey: Journey.AfterEligibilityChecked)(implicit request: Request[_]): Result =
+    Ok(
+      views.yourBillIs(
+        YourBillController.overDuePayments(journey.eligibilityCheckResult),
+        journey.taxRegime
+      )
+    )
 
   val yourBillSubmit: Action[AnyContent] = as.eligibleJourneyAction { _ =>
     Redirect(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment)
