@@ -270,6 +270,14 @@ object Messages {
       welsh   = "I fod yn gymwys i drefnu cynllun talu ar-lein, mae’n rhaid i chi fod wedi cyflwyno’ch Ffurflenni Treth TWE Cyflogwyr. Pan fyddwch wedi gwneud hyn, gallwch ddychwelyd i’r gwasanaeth."
     )
 
+    val `To be eligible to set up a payment plan online, you need to be up to date with your returns. Once you have done this, you can return to the service.`: Message = Message(
+      english = "To be eligible to set up a payment plan online, you need to be up to date with your returns. Once you have done this, you can return to the service."
+    )
+
+    val `If you have recently filed your return, your account may take up to 72 hours to be updated before you can set up a payment plan.`: Message = Message(
+      english = "If you have recently filed your return, your account may take up to 72 hours to be updated before you can set up a payment plan."
+    )
+
     val `Go to your tax account`: Message = Message(
       english = "Go to your tax account",
       welsh   = "Ewch i’ch cyfrif treth"

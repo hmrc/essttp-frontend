@@ -90,9 +90,10 @@ object JourneyJsonTemplates {
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleChargeType(encrypter)
   )
 
-  def `Eligibility Checked - Ineligible - MissingFiledReturns`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Eligibility Checked - Ineligible - MissingFiledReturns`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
-    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMissingFiledReturns(encrypter)
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMissingFiledReturns(encrypter),
+    origin      = origin
   )
 
   def `Eligibility Checked - Ineligible - MultipleReasons`(origin: Origin = Origins.Epaye.Bta)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(

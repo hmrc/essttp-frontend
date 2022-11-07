@@ -74,18 +74,15 @@ class IneligibleController @Inject() (
     ))
   }
 
-  val fileYourReturnPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    val btaReturnUrl: String = request.journey.sjRequest match {
-      case SjRequest.Epaye.Simple(returnUrl, _) => returnUrl.value
-      case SjRequest.Epaye.Empty()              => s"${appConfig.Urls.businessTaxAccountUrl}"
-      case SjRequest.Vat.Simple(returnUrl, _)   => returnUrl.value
-      case SjRequest.Vat.Empty()                => s"${appConfig.Urls.businessTaxAccountUrl}"
-    }
+  def genericFileReturnPage(implicit request: AuthenticatedJourneyRequest[AnyContent]): Result =
     Ok(views.partials.ineligibleTemplatePage(
       pageh1         = Messages.NotEligible.`File your return to use this service`,
-      leadingContent = views.partials.returnsNotUpToDatePartial(btaReturnUrl)
+      leadingContent = views.partials.returnsNotUpToDatePartial(determineBtaReturnUrl, request.journey.taxRegime)
     ))
-  }
+
+  val epayeFileYourReturnPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericFileReturnPage }
+
+  val vatFileYourReturnPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericFileReturnPage }
 
   def genericAlreadyHaveAPaymentPlanPage(implicit request: AuthenticatedJourneyRequest[AnyContent]): Result =
     Ok(views.partials.ineligibleTemplatePage(Messages.NotEligible.`You already have a payment plan with HMRC`, views.partials.existingPaymentPlanPartial()))
@@ -95,5 +92,12 @@ class IneligibleController @Inject() (
   }
   val vatAlreadyHaveAPaymentPlanPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     genericAlreadyHaveAPaymentPlanPage
+  }
+
+  private def determineBtaReturnUrl(implicit request: AuthenticatedJourneyRequest[AnyContent]): String = request.journey.sjRequest match {
+    case SjRequest.Epaye.Simple(returnUrl, _) => returnUrl.value
+    case SjRequest.Epaye.Empty()              => s"${appConfig.Urls.businessTaxAccountUrl}"
+    case SjRequest.Vat.Simple(returnUrl, _)   => returnUrl.value
+    case SjRequest.Vat.Empty()                => s"${appConfig.Urls.businessTaxAccountUrl}"
   }
 }

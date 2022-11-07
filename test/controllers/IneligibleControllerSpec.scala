@@ -201,42 +201,47 @@ class IneligibleControllerSpec extends ItSpec {
               leadingP1 = "You can only have one payment plan at a time."
             )
             assertCommonEligibilityContent(page, taxRegime)
+          }
+
+          s"${taxRegime.entryName} Returns not up to date ineligible page correctly" in {
+            val enrolments = taxRegime match {
+              case TaxRegime.Epaye => Some(Set(TdAll.payeEnrolment))
+              case TaxRegime.Vat   => Some(Set(TdAll.vatEnrolment))
+            }
+            stubCommonActions(authAllEnrolments = enrolments)
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - MissingFiledReturns`(origin))
+
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.epayeFileYourReturnPage(fakeRequest)
+              case TaxRegime.Vat   => controller.vatFileYourReturnPage(fakeRequest)
+            }
+            val page = pageContentAsDoc(result)
+
             ContentAssertions.commonPageChecks(
               page,
-              expectedH1              = "You already have a payment plan with HMRC",
+              expectedH1              = "File your return to use this service",
               shouldBackLinkBePresent = false,
               expectedSubmitUrl       = None,
               regimeBeingTested       = Some(taxRegime)
             )
+
+            val expectedLeadingContent = taxRegime match {
+              case TaxRegime.Epaye => "To be eligible for a payment plan online, you need to be up to date with your PAYE for Employers returns. Once you have done this, you can return to this service."
+              case TaxRegime.Vat   => "To be eligible to set up a payment plan online, you need to be up to date with your returns. Once you have done this, you can return to the service."
+            }
+
             assertIneligiblePageLeadingP1(
               page      = page,
-              leadingP1 = "You can only have one payment plan at a time."
+              leadingP1 = expectedLeadingContent
             )
+
             assertCommonEligibilityContent(page, taxRegime)
+            page.select(".govuk-body").asScala.toList(1).text() shouldBe "Go to your tax account to file your tax return."
+            if (taxRegime === TaxRegime.Vat) {
+              page.select(".govuk-body").asScala.toList(2).text() shouldBe "If you have recently filed your return, your account may take up to 72 hours to be updated before you can set up a payment plan."
+            }
+            page.select("#bta-link").attr("href") shouldBe "/set-up-a-payment-plan/test-only/bta-page?return-page"
           }
       }
-    "Returns not up to date ineligible page correctly" in {
-      stubCommonActions()
-      EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - MissingFiledReturns`)
-
-      val result: Future[Result] = controller.fileYourReturnPage(fakeRequest)
-      val page = pageContentAsDoc(result)
-
-      ContentAssertions.commonPageChecks(
-        page,
-        expectedH1              = "File your return to use this service",
-        shouldBackLinkBePresent = false,
-        expectedSubmitUrl       = None
-      )
-      assertIneligiblePageLeadingP1(
-        page      = page,
-        leadingP1 = "To be eligible for a payment plan online, you need to be up to date with your PAYE for Employers returns. Once you have done this, you can return to this service."
-      )
-
-      assertCommonEligibilityContent(page, TaxRegime.Epaye)
-      page.select(".govuk-body").asScala.toList(1).text() shouldBe "Go to your tax account to file your tax return."
-      page.select("#bta-link").attr("href") shouldBe "/set-up-a-payment-plan/test-only/bta-page?return-page"
-    }
-
   }
 }

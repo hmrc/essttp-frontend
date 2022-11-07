@@ -18,22 +18,47 @@
 @import requests.RequestSupport
 @import messages.Messages
 @import play.twirl.api.Html
+@import essttp.rootmodel.TaxRegime
 
-@this(
-        requestSupport: RequestSupport
-)
+@this(requestSupport: RequestSupport)
 
-@(
-        btaLink: String
-)(implicit request: Request[_])
+@(btaLink: String, taxRegime: TaxRegime)(implicit request: Request[_])
 
 @import requestSupport._
 
-<p class="govuk-body">
-@{
-    Html(Messages.NotEligible.`To be eligible for a payment plan online, you need to be up to date with your PAYE for Employers returns...`.show)
+@commonParagraph = {
+    <p class="govuk-body">
+        <a href="@{btaLink}" class="govuk-link" id="bta-link">
+            @{Messages.NotEligible.`Go to your tax account`.show}
+        </a>@{Messages.NotEligible.`to file your tax return.`.show}
+    </p>
 }
-</p>
-<p class="govuk-body">
-    <a href="@{btaLink}" class="govuk-link" id="bta-link">@{Messages.NotEligible.`Go to your tax account`.show}</a>@{Messages.NotEligible.`to file your tax return.`.show}
-</p>
+
+@epayeContent = {
+    <p class="govuk-body">
+    @{
+        Html(Messages.NotEligible.`To be eligible for a payment plan online, you need to be up to date with your PAYE for Employers returns...`.show)
+    }
+    </p>
+
+    @commonParagraph
+}
+
+@vatContent = {
+    <p class="govuk-body">
+    @{Html(Messages.NotEligible.`To be eligible to set up a payment plan online, you need to be up to date with your returns. Once you have done this, you can return to the service.`.show)}
+    </p>
+
+    @commonParagraph
+
+    <p class="govuk-body">
+    @{Html(Messages.NotEligible.`If you have recently filed your return, your account may take up to 72 hours to be updated before you can set up a payment plan.`.show)}
+    </p>
+}
+
+@{
+    taxRegime match {
+        case TaxRegime.Epaye => epayeContent
+        case TaxRegime.Vat   => vatContent
+    }
+}
