@@ -56,6 +56,7 @@ object TdJsonBodies {
     }
 
     def epaye(taxRegime: TaxRegime): String = bta(taxRegime)
+    def vat(taxRegime: TaxRegime): String = bta(taxRegime)
     def govUk(taxRegime: TaxRegime): String = bta(taxRegime)
     def detachedUrl(taxRegime: TaxRegime): String = bta(taxRegime)
   }

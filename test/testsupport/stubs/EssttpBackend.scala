@@ -88,6 +88,7 @@ object EssttpBackend {
     private val startJourneyGovUkEpayeUrl = "/essttp-backend/epaye/gov-uk/journey/start"
     private val startJourneyDetachedEpayeUrl = "/essttp-backend/epaye/detached-url/journey/start"
     private val startJourneyBtaVatUrl = "/essttp-backend/vat/bta/journey/start"
+    private val startJourneyVatVatServiceUrl = "/essttp-backend/vat/vat-service/journey/start"
     private val startJourneyGovUkVatUrl = "/essttp-backend/vat/gov-uk/journey/start"
     private val startJourneyDetachedVatUrl = "/essttp-backend/vat/detached-url/journey/start"
 
@@ -98,6 +99,7 @@ object EssttpBackend {
         case Origins.Epaye.GovUk        => (startJourneyGovUkEpayeUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.govUk(TaxRegime.Epaye))
         case Origins.Epaye.DetachedUrl  => (startJourneyDetachedEpayeUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.detachedUrl(TaxRegime.Epaye))
         case Origins.Vat.Bta            => (startJourneyBtaVatUrl, TdJsonBodies.StartJourneyRequestBodies.simple, TdJsonBodies.StartJourneyResponses.bta(TaxRegime.Vat))
+        case Origins.Vat.VatService     => (startJourneyVatVatServiceUrl, TdJsonBodies.StartJourneyRequestBodies.simple, TdJsonBodies.StartJourneyResponses.vat(TaxRegime.Vat))
         case Origins.Vat.GovUk          => (startJourneyGovUkVatUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.govUk(TaxRegime.Vat))
         case Origins.Vat.DetachedUrl    => (startJourneyDetachedVatUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.detachedUrl(TaxRegime.Vat))
       }
@@ -115,6 +117,7 @@ object EssttpBackend {
     def startJourneyEpayeGovUk: StubMapping = startJourneyInBackend(Origins.Epaye.GovUk)
     def startJourneyEpayeDetached: StubMapping = startJourneyInBackend(Origins.Epaye.DetachedUrl)
     def startJourneyVatBta: StubMapping = startJourneyInBackend(Origins.Vat.Bta)
+    def startJourneyVatVatService: StubMapping = startJourneyInBackend(Origins.Vat.VatService)
     def startJourneyVatGovUk: StubMapping = startJourneyInBackend(Origins.Vat.GovUk)
     def startJourneyVatDetached: StubMapping = startJourneyInBackend(Origins.Vat.DetachedUrl)
 
@@ -124,6 +127,7 @@ object EssttpBackend {
     def verifyStartJourneyEpayeGovUk(): Unit = verifyStartJourney(startJourneyGovUkEpayeUrl)
     def verifyStartJourneyEpayeDetached(): Unit = verifyStartJourney(startJourneyDetachedEpayeUrl)
     def verifyStartJourneyVatBta(): Unit = verifyStartJourney(startJourneyBtaVatUrl)
+    def verifyStartJourneyVatVatService(): Unit = verifyStartJourney(startJourneyVatVatServiceUrl)
     def verifyStartJourneyVatGovUk(): Unit = verifyStartJourney(startJourneyGovUkVatUrl)
     def verifyStartJourneyVatDetached(): Unit = verifyStartJourney(startJourneyDetachedVatUrl)
 
