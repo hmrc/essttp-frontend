@@ -18,6 +18,7 @@ package controllers
 
 import actions.Actions
 import cats.implicits.catsSyntaxEq
+import config.AppConfig
 import controllers.EmailController.{ChooseEmailForm, chooseEmailForm}
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.{logErrorAndRouteToDefaultPage, logErrorAndRouteToDefaultPageF}
@@ -45,23 +46,34 @@ class EmailController @Inject() (
     mcc:                      MessagesControllerComponents,
     views:                    Views,
     emailVerificationService: EmailVerificationService,
-    journeyService:           JourneyService
+    journeyService:           JourneyService,
+    appConfig:                AppConfig
 )(implicit execution: ExecutionContext) extends FrontendController(mcc) with Logging {
 
   //todo get email from eligibilityCheckResponse by pattern matching, pass into chooseEmailPage -- it's not available in eligibilityCheckResponse yet
   val temporaryStaticEmail: SensitiveString = SensitiveString("bobross@joyOfPainting.com")
 
-  val whichEmailDoYouWantToUse: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
-    request.journey match {
-      case j: Journey.BeforeAgreedTermsAndConditions => logErrorAndRouteToDefaultPage(j)
-      case j: Journey.AfterAgreedTermsAndConditions =>
-        if (!j.isEmailAddressRequired) {
-          logErrorAndRouteToDefaultPage(j)
-        } else {
-          finalStateCheck(j, displayWhichEmailDoYouWantToUse(j))
-        }
+  private def withEmailEnabled(action: Action[AnyContent]): Action[AnyContent] =
+    if (!appConfig.emailJourneyEnabled) {
+      as.default{ _ => NotImplemented }
+    } else {
+      action
     }
-  }
+
+  val whichEmailDoYouWantToUse: Action[AnyContent] =
+    withEmailEnabled {
+      as.eligibleJourneyAction { implicit request =>
+        request.journey match {
+          case j: Journey.BeforeAgreedTermsAndConditions => logErrorAndRouteToDefaultPage(j)
+          case j: Journey.AfterAgreedTermsAndConditions =>
+            if (!j.isEmailAddressRequired) {
+              logErrorAndRouteToDefaultPage(j)
+            } else {
+              finalStateCheck(j, displayWhichEmailDoYouWantToUse(j))
+            }
+        }
+      }
+    }
 
   private def displayWhichEmailDoYouWantToUse(journey: Journey.AfterAgreedTermsAndConditions)(implicit request: Request[_]): Result = {
     val maybePrePopForm: Form[ChooseEmailForm] = journey match {
@@ -78,88 +90,101 @@ class EmailController @Inject() (
     Ok(views.chooseEmailPage(temporaryStaticEmail.decryptedValue, maybePrePopForm))
   }
 
-  val whichEmailDoYouWantToUseSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
-    EmailController.chooseEmailForm()
-      .bindFromRequest()
-      .fold(
-        formWithErrors => Future.successful(
-          Ok(views.chooseEmailPage(temporaryStaticEmail.decryptedValue, form = formWithErrors))
-        ),
-        (form: ChooseEmailForm) => {
-          val emailAddress: Email = form.differentEmail match {
-            case Some(email) => Email(SensitiveString(email))
-            case None        => Email(temporaryStaticEmail)
+  val whichEmailDoYouWantToUseSubmit: Action[AnyContent] =
+    withEmailEnabled {
+      as.eligibleJourneyAction.async { implicit request =>
+        EmailController.chooseEmailForm()
+          .bindFromRequest()
+          .fold(
+            formWithErrors => Future.successful(
+              Ok(views.chooseEmailPage(temporaryStaticEmail.decryptedValue, form = formWithErrors))
+            ),
+            (form: ChooseEmailForm) => {
+              val emailAddress: Email = form.differentEmail match {
+                case Some(email) => Email(SensitiveString(email))
+                case None        => Email(temporaryStaticEmail)
+              }
+              journeyService
+                .updateSelectedEmailToBeVerified(
+                  journeyId = request.journeyId,
+                  email     = emailAddress
+                )
+                .map(updatedJourney => Redirect(Routing.next(updatedJourney)))
+            }
+          )
+      }
+    }
+
+  val requestVerification: Action[AnyContent] = withEmailEnabled {
+    as.eligibleJourneyAction.async { implicit request =>
+      request.journey match {
+        case j: Journey.BeforeEmailAddressSelectedToBeVerified =>
+          logErrorAndRouteToDefaultPageF(j)
+
+        case j: Journey.AfterArrangementSubmitted =>
+          logErrorAndRouteToDefaultPageF(j)
+
+        case j: Journey.AfterEmailAddressSelectedToBeVerified =>
+          emailVerificationService.requestEmailVerification(j.emailToBeVerified).map {
+            case RequestEmailVerificationResponse.Success(redirectUri) =>
+              logger.info(s"Email verification journey successfully started. Redirecting to $redirectUri")
+              Redirect(redirectUri)
+            case RequestEmailVerificationResponse.LockedOut =>
+              Redirect(routes.EmailController.tooManyEmailAddresses)
           }
-          journeyService
-            .updateSelectedEmailToBeVerified(
-              journeyId = request.journeyId,
-              email     = emailAddress
-            )
-            .map(updatedJourney => Redirect(Routing.next(updatedJourney)))
-        }
-      )
-  }
+      }
 
-  val requestVerification: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
-    request.journey match {
-      case j: Journey.BeforeEmailAddressSelectedToBeVerified =>
-        logErrorAndRouteToDefaultPageF(j)
-
-      case j: Journey.AfterArrangementSubmitted =>
-        logErrorAndRouteToDefaultPageF(j)
-
-      case j: Journey.AfterEmailAddressSelectedToBeVerified =>
-        emailVerificationService.requestEmailVerification(j.emailToBeVerified).map {
-          case RequestEmailVerificationResponse.Success(redirectUri) =>
-            logger.info(s"Email verification journey successfully started. Redirecting to $redirectUri")
-            Redirect(redirectUri)
-          case RequestEmailVerificationResponse.LockedOut =>
-            Redirect(routes.EmailController.tooManyEmailAddresses)
-        }
-    }
-
-  }
-
-  val emailCallback: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
-    request.journey match {
-      case j: Journey.BeforeEmailAddressSelectedToBeVerified =>
-        logErrorAndRouteToDefaultPageF(j)
-
-      case j: Journey.AfterArrangementSubmitted =>
-        logErrorAndRouteToDefaultPageF(j)
-
-      case j: Journey.AfterEmailAddressSelectedToBeVerified =>
-        for {
-          status <- emailVerificationService.getVerificationStatus(j.emailToBeVerified)
-          updatedJourney <- journeyService.updateEmailVerificationStatus(j.journeyId, status)
-        } yield Redirect(Routing.next(updatedJourney, allowSubmitArrangement = false))
     }
   }
 
-  val tooManyEmailAddresses: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
-    Ok(views.tooManyEmails())
+  val emailCallback: Action[AnyContent] = withEmailEnabled {
+    as.eligibleJourneyAction.async { implicit request =>
+      request.journey match {
+        case j: Journey.BeforeEmailAddressSelectedToBeVerified =>
+          logErrorAndRouteToDefaultPageF(j)
+
+        case j: Journey.AfterArrangementSubmitted =>
+          logErrorAndRouteToDefaultPageF(j)
+
+        case j: Journey.AfterEmailAddressSelectedToBeVerified =>
+          for {
+            status <- emailVerificationService.getVerificationStatus(j.emailToBeVerified)
+            updatedJourney <- journeyService.updateEmailVerificationStatus(j.journeyId, status)
+          } yield Redirect(Routing.next(updatedJourney, allowSubmitArrangement = false))
+      }
+    }
   }
 
-  val tooManyPasscodeAttempts: Action[AnyContent] = as.eligibleJourneyAction { _ =>
-    Ok("this is a placeholder for the too-many-passcode-attempts page")
+  val tooManyEmailAddresses: Action[AnyContent] = withEmailEnabled {
+    as.eligibleJourneyAction { implicit request =>
+      Ok(views.tooManyEmails())
+    }
   }
 
-  val emailAddressConfirmed: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
-    request.journey match {
-      case j: Journey.BeforeEmailAddressVerificationResult =>
-        logErrorAndRouteToDefaultPage(j)
+  val tooManyPasscodeAttempts: Action[AnyContent] = withEmailEnabled {
+    as.eligibleJourneyAction { _ =>
+      Ok("this is a placeholder for the too-many-passcode-attempts page")
+    }
+  }
 
-      case j: Journey.AfterArrangementSubmitted =>
-        logErrorAndRouteToDefaultPage(j)
+  val emailAddressConfirmed: Action[AnyContent] = withEmailEnabled {
+    as.eligibleJourneyAction { implicit request =>
+      request.journey match {
+        case j: Journey.BeforeEmailAddressVerificationResult =>
+          logErrorAndRouteToDefaultPage(j)
 
-      case j: Journey.AfterEmailAddressVerificationResult =>
-        j.emailVerificationStatus match {
-          case EmailVerificationStatus.Verified =>
-            Ok(views.emailAddressConfirmed(j.into[Journey.AfterEmailAddressSelectedToBeVerified].transform.emailToBeVerified))
+        case j: Journey.AfterArrangementSubmitted =>
+          logErrorAndRouteToDefaultPage(j)
 
-          case EmailVerificationStatus.Locked =>
-            logErrorAndRouteToDefaultPage(j)
-        }
+        case j: Journey.AfterEmailAddressVerificationResult =>
+          j.emailVerificationStatus match {
+            case EmailVerificationStatus.Verified =>
+              Ok(views.emailAddressConfirmed(j.into[Journey.AfterEmailAddressSelectedToBeVerified].transform.emailToBeVerified))
+
+            case EmailVerificationStatus.Locked =>
+              logErrorAndRouteToDefaultPage(j)
+          }
+      }
     }
   }
 

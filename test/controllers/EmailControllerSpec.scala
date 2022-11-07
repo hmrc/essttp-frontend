@@ -523,6 +523,48 @@ class EmailControllerSpec extends ItSpec {
 
 }
 
+class EmailNotEnabledControllerSpec extends ItSpec {
+
+  private val controller = app.injector.instanceOf[EmailController]
+
+  override lazy val configOverrides: Map[String, Any] = Map(
+    "features.email-journey" -> false
+  )
+
+  "A 501 NotImplemented response should be returned by" - {
+
+    "GET /which-email-do-you-want-to-use" in {
+      status(controller.whichEmailDoYouWantToUse(FakeRequest())) shouldBe NOT_IMPLEMENTED
+    }
+
+    "POST /which-email-do-you-want-to-use" in {
+      status(controller.whichEmailDoYouWantToUseSubmit(FakeRequest())) shouldBe NOT_IMPLEMENTED
+    }
+
+    "GET /email-verification" in {
+      status(controller.requestVerification(FakeRequest())) shouldBe NOT_IMPLEMENTED
+    }
+
+    "GET /email-callback should" in {
+      status(controller.emailCallback(FakeRequest())) shouldBe NOT_IMPLEMENTED
+    }
+
+    "GET /email-address-confirmed" in {
+      status(controller.emailAddressConfirmed(FakeRequest())) shouldBe NOT_IMPLEMENTED
+    }
+
+    "GET /tried-to-confirm-email-too-many-times" in {
+      status(controller.tooManyEmailAddresses(FakeRequest())) shouldBe NOT_IMPLEMENTED
+    }
+
+    "GET /email-verification-code-entered-too-many-times" in {
+      status(controller.tooManyPasscodeAttempts(FakeRequest())) shouldBe NOT_IMPLEMENTED
+    }
+
+  }
+
+}
+
 class EmailNonLocalControllerSpec extends ItSpec {
 
   private val controller = app.injector.instanceOf[EmailController]
