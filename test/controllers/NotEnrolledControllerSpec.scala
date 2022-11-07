@@ -114,7 +114,7 @@ class NotEnrolledControllerSpec extends ItSpec {
 
       val bulletLists = commonEligibilityWrapper.select(".govuk-list").asScala.toList
       val beforeYouCallList = bulletLists(0).select("li").asScala.toList
-      beforeYouCallList(0).text() shouldBe "your VAT number. This is 9 characters, for example, 1233456789"
+      beforeYouCallList(0).text() shouldBe "your VAT number. This is 9 characters, for example, 123456789"
       beforeYouCallList(1).text() shouldBe "your bank details"
 
       govukBodyElements(5).text() shouldBe "We’re likely to ask:"

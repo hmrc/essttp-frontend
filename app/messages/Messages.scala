@@ -197,7 +197,7 @@ object Messages {
     )
 
     val `your VAT number. This is 9 characters, for example, 1233456789`: Message = Message(
-      english = "your VAT number. This is 9 characters, for example, 1233456789"
+      english = "your VAT number. This is 9 characters, for example, 123456789"
     )
 
     val `your bank details`: Message = Message(
