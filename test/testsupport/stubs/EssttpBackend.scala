@@ -168,8 +168,9 @@ object EssttpBackend {
     def verifyNoneUpdateEligibilityRequest(journeyId: JourneyId): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(updateEligibilityResultUrl(journeyId))))
 
-    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Eligibility Checked - Eligible`(encrypter)): StubMapping =
+    def findJourney(encrypter: Encrypter, origin: Origin = Origins.Epaye.Bta)(jsonBody: String = JourneyJsonTemplates.`Eligibility Checked - Eligible`(origin)(encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
+
   }
 
   object CanPayUpfront {

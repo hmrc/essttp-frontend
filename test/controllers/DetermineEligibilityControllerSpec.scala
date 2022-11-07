@@ -125,7 +125,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
       Ttp.Eligibility.stubRetrieveEligibility(eligibilityCheckResponseJson)
       EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(
         TdAll.journeyId,
-        JourneyJsonTemplates.`Eligibility Checked - Eligible`
+        JourneyJsonTemplates.`Eligibility Checked - Eligible`()
       )
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
