@@ -223,7 +223,7 @@
                 value = Some(Origins.Epaye.DetachedUrl.entryName)
             ),
             RadioItem(
-                content = Text("EPAYE"),
+                content = Text("EPAYE service"),
                 value = Some(Origins.Epaye.EpayeService.entryName),
                 hint = Some(Hint(content = Text("From the EPAYE service")))
             )
@@ -317,6 +317,10 @@
             RadioItem(
                 content = Text("Detached Url"),
                 value = Some(Origins.Vat.DetachedUrl.entryName)
+            ),
+            RadioItem(
+                content = Text("VAT service"),
+                value = Some(Origins.Vat.VatService.entryName)
             )
         ),
         classes = "govuk-radios--small"
