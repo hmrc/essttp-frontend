@@ -27,7 +27,6 @@ import essttp.rootmodel.{AmountInPence, BackUrl, ReturnUrl}
 import models.EligibilityErrors._
 import models.{EligibilityError, EligibilityErrors}
 import play.api.mvc._
-import play.twirl.api.HtmlFormat
 import requests.RequestSupport
 import testOnly.AuthLoginApiService
 import testOnly.connectors.EssttpStubConnector
@@ -95,34 +94,31 @@ class StartJourneyController @Inject() (
     } yield redirect.withSession(session)
   }
 
+  private def withSessionId(result: => Future[Result])(implicit request: Request[_]): Future[Result] =
+    if (hc.sessionId.isEmpty) Future.successful(Ok("Missing session id")) else result
+
   /** Pretends being a BtaEpaye page */
-  val showBtaEpayePage: Action[AnyContent] = as.default { implicit request =>
-    missingSessionOrTestPage(iAmBtaPage(_root_.testOnly.controllers.routes.StartJourneyController.startJourneyEpayeBta.url))
+  val showBtaEpayePage: Action[AnyContent] = as.default.async { implicit request =>
+    withSessionId(Future.successful(Ok(iAmBtaPage(_root_.testOnly.controllers.routes.StartJourneyController.startJourneyEpayeBta.url))))
   }
   /** Pretends being a BtaVat page */
-  val showBtaVatPage: Action[AnyContent] = as.default { implicit request =>
-    missingSessionOrTestPage(iAmBtaPage(_root_.testOnly.controllers.routes.StartJourneyController.startJourneyVatBta.url))
+  val showBtaVatPage: Action[AnyContent] = as.default.async { implicit request =>
+    withSessionId(Future.successful(Ok(iAmBtaPage(_root_.testOnly.controllers.routes.StartJourneyController.startJourneyVatBta.url))))
   }
   /** Pretends being a EPAYE service page */
-  val showEpayePage: Action[AnyContent] = as.default { implicit request =>
-    missingSessionOrTestPage(iAmEpayePage())
+  val showEpayePage: Action[AnyContent] = as.default.async { implicit request =>
+    withSessionId(Future.successful(Ok(iAmEpayePage())))
   }
   /** Pretends being a VAT service page */
-  val showVatPage: Action[AnyContent] = as.default { implicit request =>
-    missingSessionOrTestPage(iAmVatPage())
-  }
-
-  private def missingSessionOrTestPage(nextTestPage: HtmlFormat.Appendable)(implicit request: Request[_]): Result = {
-    if (hc.sessionId.isEmpty) Ok("Missing session id") else Ok(nextTestPage)
+  val showVatPage: Action[AnyContent] = as.default.async { implicit request =>
+    withSessionId(Future.successful(Ok(iAmVatPage())))
   }
 
   /**
    * Pretends for testing purposes that journey started from Bta
    */
   val startJourneyEpayeBta: Action[AnyContent] = as.default.async { implicit request =>
-    if (hc.sessionId.isEmpty) {
-      Future.successful(Ok("Missing session id"))
-    } else {
+    withSessionId {
       journeyConnector.Epaye.startJourneyBta(SjRequest.Epaye.Simple(
         returnUrl = ReturnUrl(routes.StartJourneyController.showBtaEpayePage.url + "?return-page"),
         backUrl   = BackUrl(routes.StartJourneyController.showBtaEpayePage.url + "?starting-page")
@@ -133,9 +129,7 @@ class StartJourneyController @Inject() (
    * Pretends for testing purposes that journey started from EPAYE service
    */
   val startJourneyEpayeEpaye: Action[AnyContent] = as.default.async { implicit request =>
-    if (hc.sessionId.isEmpty) {
-      Future.successful(Ok("Missing session id"))
-    } else {
+    withSessionId {
       journeyConnector.Epaye.startJourneyEpayeService(SjRequest.Epaye.Simple(
         returnUrl = ReturnUrl(routes.StartJourneyController.showEpayePage.url + "?return-page"),
         backUrl   = BackUrl(routes.StartJourneyController.showEpayePage.url + "?starting-page")
@@ -144,9 +138,7 @@ class StartJourneyController @Inject() (
   }
 
   val startJourneyVatBta: Action[AnyContent] = as.default.async { implicit request =>
-    if (hc.sessionId.isEmpty) {
-      Future.successful(Ok("Missing session id"))
-    } else {
+    withSessionId {
       journeyConnector.Vat.startJourneyBta(SjRequest.Vat.Simple(
         returnUrl = ReturnUrl(routes.StartJourneyController.showBtaVatPage.url + "?return-page"),
         backUrl   = BackUrl(routes.StartJourneyController.showBtaVatPage.url + "?starting-page")
@@ -155,9 +147,7 @@ class StartJourneyController @Inject() (
   }
 
   val startJourneyVatVatService: Action[AnyContent] = as.default.async { implicit request =>
-    if (hc.sessionId.isEmpty) {
-      Future.successful(Ok("Missing session id"))
-    } else {
+    withSessionId {
       journeyConnector.Vat.startJourneyVatService(SjRequest.Vat.Simple(
         returnUrl = ReturnUrl(routes.StartJourneyController.showVatPage.url + "?return-page"),
         backUrl   = BackUrl(routes.StartJourneyController.showVatPage.url + "?starting-page")
