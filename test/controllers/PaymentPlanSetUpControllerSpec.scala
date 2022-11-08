@@ -198,9 +198,9 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
       }
 
       def assertPrintLink(doc: Document): Assertion = {
-        val printlink = doc.select("#printLink")
-        printlink.text() shouldBe "Print or save your plan"
-        printlink.attr("href") shouldBe "#print-dialogue"
+        val printLink = doc.select("#printLink")
+        printLink.text() shouldBe "Print a copy of your payment plan"
+        printLink.attr("href") shouldBe "#print-dialogue"
       }
   }
 }
