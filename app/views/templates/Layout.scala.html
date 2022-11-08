@@ -91,9 +91,9 @@
             )),
             content = HtmlContent(Messages.ServicePhase.bannerText(appConfig.Urls.betaFeedbackUrl(request)).show)
         ))
-        @if(appConfig.welshLanguageSupportEnabled) {
-          @hmrcLanguageSelectHelper()
-        }
+
+        @hmrcLanguageSelectHelper()
+
         @if(showBackLink) {
             @govukBackLink(BackLink(href = "#", classes = "js-visible", content = Text(Messages.back.show)))
         }
