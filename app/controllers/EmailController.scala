@@ -162,8 +162,8 @@ class EmailController @Inject() (
   }
 
   val tooManyPasscodeAttempts: Action[AnyContent] = withEmailEnabled {
-    as.eligibleJourneyAction { _ =>
-      Ok("this is a placeholder for the too-many-passcode-attempts page")
+    as.eligibleJourneyAction { implicit request =>
+      Ok(views.tooManyPasscodes())
     }
   }
 
