@@ -1226,9 +1226,9 @@ object Messages {
       welsh   = "Bydd eich cyfrif treth yn cael ei ddiweddaru gyda’ch cynllun talu cyn pen 24 awr."
     )
 
-    val `Print or save your plan`: Message = Message(
-      english = "Print or save your plan",
-      welsh   = "Argraffu neu gadw’ch cynllun"
+    val `Print a copy of your payment plan`: Message = Message(
+      english = "Print a copy of your payment plan",
+      welsh   = "Argraffu copi o’ch cynllun talu"
     )
 
     val `View your payment plan`: Message = Message(
