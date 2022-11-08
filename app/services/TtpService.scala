@@ -17,11 +17,12 @@
 package services
 
 import actionsmodel.AuthenticatedJourneyRequest
+import cats.implicits.catsSyntaxEq
 import connectors.{CallEligibilityApiRequest, TtpConnector}
 import controllers.support.RequestSupport.hc
 import essttp.crypto.CryptoFormat
 import essttp.journey.model.Journey.Stages.ComputedTaxId
-import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
+import essttp.journey.model.{EmailVerificationAnswers, Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
 import essttp.rootmodel.ttp._
 import essttp.rootmodel.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
@@ -38,6 +39,7 @@ import uk.gov.hmrc.http.HttpException
 import util.JourneyLogger
 
 import java.time.{LocalDate, ZoneOffset}
+import java.util.Locale
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -246,15 +248,19 @@ object TtpService {
    * If new email entered on the screen which doesn't match the ETMP one - TEMP
    */
   private def deriveCustomerDetail(journey: Journey.Stages.EmailVerificationComplete): Option[List[CustomerDetail]] = {
-    val emailFromEligibilityResponse: Option[List[Option[String]]] =
-      journey.eligibilityCheckResult.customerDetails.map(customerDetails => customerDetails.map(_.emailAddress))
-    val maybeEmailSource: Option[EmailSource] = emailFromEligibilityResponse.fold[Option[EmailSource]](None){ nonEmptyFromEligibility =>
-      if (nonEmptyFromEligibility.contains(Some(journey.emailToBeVerified.value.decryptedValue))) Some(EmailSource.ETMP)
-      else Some(EmailSource.TEMP)
+    val etmpEmails: Option[List[CustomerDetail]] =
+      journey.eligibilityCheckResult.customerDetails.map(_.filter(_.emailSource.contains(EmailSource.ETMP)))
+
+    val emailThatsBeenVerified: String = journey.emailVerificationAnswers match {
+      case EmailVerificationAnswers.EmailVerified(email, _) => email.value.decryptedValue
+      case EmailVerificationAnswers.NoEmailJourney          => Errors.throwBadRequestException("There was no email when there should be.")
     }
-    maybeEmailSource.map { derivedSource =>
-      List(CustomerDetail(Some(journey.emailToBeVerified.value.decryptedValue), Some(derivedSource)))
-    }
+
+    val maybeEtmpEmail: Option[List[CustomerDetail]] =
+      etmpEmails.map(_.filter(_.emailAddress.map(_.toLowerCase(Locale.UK)) === Some(emailThatsBeenVerified.toLowerCase(Locale.UK))))
+
+    if (maybeEtmpEmail.isDefined) maybeEtmpEmail
+    else Some(List(CustomerDetail(Some(emailThatsBeenVerified), Some(EmailSource.TEMP))))
   }
 
 }

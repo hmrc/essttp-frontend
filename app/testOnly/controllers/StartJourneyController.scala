@@ -181,7 +181,9 @@ object StartJourneyController {
     val debtAmountFromForm: AmountInPence = AmountInPence(form.debtTotalAmount)
     val interestAmount: AmountInPence = AmountInPence(form.interestAmount.getOrElse(BigDecimal(0)))
 
-    val (maybeCustomerDetail, maybeRegimeDigitalCorrespondence) = makeEmailInfoIfEnabled(emailJourneyEnabled)
+    // hardcoding email for now, maybe we should move it into the form to make testing better for Darren
+    val (maybeCustomerDetail, maybeRegimeDigitalCorrespondence) =
+      Some(List(CustomerDetail(Some("bobross@joyofpainting.com"), Some(EmailSource.ETMP)))) -> Some(RegimeDigitalCorrespondence(true))
 
     val charges: Charges = Charges(
       chargeType           = ChargeType("InYearRTICharge-Tax"),
@@ -254,15 +256,6 @@ object StartJourneyController {
         Identification(IdType("BROCS"), IdValue(form.taxReference.value))
       )
       case TaxRegime.Vat => List(Identification(IdType("VRN"), IdValue(form.taxReference.value)))
-    }
-  }
-
-  def makeEmailInfoIfEnabled(emailJourneyEnabled: Boolean): (Option[List[CustomerDetail]], Option[RegimeDigitalCorrespondence]) = {
-    if (emailJourneyEnabled) {
-      // hardcoding email for now, maybe we should move it into the form to make testing better for Darren
-      Some(List(CustomerDetail(Some("bobross@joyofpainting.com"), Some(EmailSource.ETMP)))) -> Some(RegimeDigitalCorrespondence(true))
-    } else {
-      (None, None)
     }
   }
 
