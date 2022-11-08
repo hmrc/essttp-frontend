@@ -23,6 +23,7 @@ import config.AppConfig
 import essttp.journey.JourneyConnector
 import essttp.journey.model.{Origins, SjRequest}
 import essttp.rootmodel.ttp.affordablequotes.DueDate
+import essttp.rootmodel.ttp.eligibility.{CustomerDetail, EmailSource, RegimeDigitalCorrespondence}
 import essttp.rootmodel.{AmountInPence, BackUrl, ReturnUrl, TaxRegime}
 import models.EligibilityErrors._
 import models.{EligibilityError, EligibilityErrors}
@@ -177,10 +178,10 @@ object StartJourneyController {
 
   private def makeEligibilityCheckResult(form: StartJourneyForm): EligibilityCheckResult = {
 
-    val debtAmountFromForm: AmountInPence =
-      AmountInPence(form.debtTotalAmount)
-
+    val debtAmountFromForm: AmountInPence = AmountInPence(form.debtTotalAmount)
     val interestAmount: AmountInPence = AmountInPence(form.interestAmount.getOrElse(BigDecimal(0)))
+
+    val (maybeCustomerDetail, maybeRegimeDigitalCorrespondence) = makeEmailInfoIfEnabled(emailJourneyEnabled)
 
     val charges: Charges = Charges(
       chargeType           = ChargeType("InYearRTICharge-Tax"),
@@ -232,16 +233,7 @@ object StartJourneyController {
     }
     EligibilityCheckResult(
       processingDateTime          = ProcessingDateTime(LocalDate.now().toString),
-      identification              = List(
-        Identification(
-          idType  = IdType("EMPREF"),
-          idValue = IdValue(form.taxReference.value)
-        ),
-        Identification(
-          idType  = IdType("BROCS"),
-          idValue = IdValue(form.taxReference.value)
-        )
-      ),
+      identification              = makeIdentificationForTaxType(form),
       customerPostcodes           = List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate("2022-01-01"))),
       regimePaymentFrequency      = PaymentPlanFrequencies.Monthly,
       paymentPlanFrequency        = PaymentPlanFrequencies.Monthly,
@@ -250,9 +242,28 @@ object StartJourneyController {
       eligibilityStatus           = EligibilityStatus(EligibilityPass(eligibilityRules.isEligible)),
       eligibilityRules            = eligibilityRules,
       chargeTypeAssessment        = chargeTypeAssessments,
-      customerDetails             = None,
-      regimeDigitalCorrespondence = None
+      customerDetails             = maybeCustomerDetail,
+      regimeDigitalCorrespondence = maybeRegimeDigitalCorrespondence
     )
+  }
+
+  def makeIdentificationForTaxType(form: StartJourneyForm): List[Identification] = {
+    form.taxRegime match {
+      case TaxRegime.Epaye => List(
+        Identification(IdType("EMPREF"), IdValue(form.taxReference.value)),
+        Identification(IdType("BROCS"), IdValue(form.taxReference.value))
+      )
+      case TaxRegime.Vat => List(Identification(IdType("VRN"), IdValue(form.taxReference.value)))
+    }
+  }
+
+  def makeEmailInfoIfEnabled(emailJourneyEnabled: Boolean): (Option[List[CustomerDetail]], Option[RegimeDigitalCorrespondence]) = {
+    if (emailJourneyEnabled) {
+      // hardcoding email for now, maybe we should move it into the form to make testing better for Darren
+      Some(List(CustomerDetail(Some("bobross@joyofpainting.com"), Some(EmailSource.ETMP)))) -> Some(RegimeDigitalCorrespondence(true))
+    } else {
+      (None, None)
+    }
   }
 
 }

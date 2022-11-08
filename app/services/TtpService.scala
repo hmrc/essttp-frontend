@@ -27,11 +27,13 @@ import essttp.rootmodel.ttp._
 import essttp.rootmodel.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
 import essttp.rootmodel.ttp.affordablequotes._
 import essttp.rootmodel.ttp.arrangement._
+import essttp.rootmodel.ttp.eligibility.{CustomerDetail, EmailSource}
 import essttp.rootmodel.{AmountInPence, EmpRef, TaxRegime, UpfrontPaymentAmount, Vrn}
 import essttp.utils.Errors
 import io.scalaland.chimney.dsl.TransformerOps
 import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
+import services.TtpService.deriveCustomerDetail
 import uk.gov.hmrc.http.HttpException
 import util.JourneyLogger
 
@@ -142,20 +144,22 @@ class TtpService @Inject() (
     val directDebitDetails = journey.fold(_.directDebitDetails, _.directDebitDetails)
     val selectedPaymentPlan = journey.fold(_.selectedPaymentPlan, _.selectedPaymentPlan)
     val correlationId = journey.fold(_.correlationId, _.correlationId)
+    val regimeDigitalCorrespondence = journey.fold(_.eligibilityCheckResult.regimeDigitalCorrespondence, _.eligibilityCheckResult.regimeDigitalCorrespondence)
+    val customerDetail = journey.fold(_.eligibilityCheckResult.customerDetails, deriveCustomerDetail)
 
     val arrangementRequest: ArrangementRequest = ArrangementRequest(
-      channelIdentifier      = ChannelIdentifiers.eSSTTP,
-      regimeType             = regimeType,
-      regimePaymentFrequency = PaymentPlanFrequencies.Monthly,
-      arrangementAgreedDate  = ArrangementAgreedDate(LocalDate.now(ZoneOffset.of("Z")).toString),
-      identification         = eligibilityCheckResult.identification,
-      directDebitInstruction = DirectDebitInstruction(
+      channelIdentifier           = ChannelIdentifiers.eSSTTP,
+      regimeType                  = regimeType,
+      regimePaymentFrequency      = PaymentPlanFrequencies.Monthly,
+      arrangementAgreedDate       = ArrangementAgreedDate(LocalDate.now(ZoneOffset.of("Z")).toString),
+      identification              = eligibilityCheckResult.identification,
+      directDebitInstruction      = DirectDebitInstruction(
         sortCode        = directDebitDetails.sortCode,
         accountNumber   = directDebitDetails.accountNumber,
         accountName     = directDebitDetails.name,
         paperAuddisFlag = PaperAuddisFlag(false)
       ),
-      paymentPlan            = EnactPaymentPlan(
+      paymentPlan                 = EnactPaymentPlan(
         planDuration         = selectedPaymentPlan.planDuration,
         paymentPlanFrequency = PaymentPlanFrequencies.Monthly,
         numberOfInstalments  = selectedPaymentPlan.numberOfInstalments,
@@ -164,7 +168,9 @@ class TtpService @Inject() (
         planInterest         = selectedPaymentPlan.planInterest,
         collections          = selectedPaymentPlan.collections,
         instalments          = selectedPaymentPlan.instalments
-      )
+      ),
+      customerDetails             = customerDetail,
+      regimeDigitalCorrespondence = regimeDigitalCorrespondence
     )
 
     ttpConnector.callArrangementApi(arrangementRequest, correlationId)
@@ -234,4 +240,21 @@ object TtpService {
     case someAmount: UpfrontPaymentAnswers.DeclaredUpfrontPayment => Some(someAmount.amount)
     case UpfrontPaymentAnswers.NoUpfrontPayment                   => None
   }
+
+  /**
+   * If email matches the one from the eligibility API - ETMP
+   * If new email entered on the screen which doesn't match the ETMP one - TEMP
+   */
+  private def deriveCustomerDetail(journey: Journey.Stages.EmailVerificationComplete): Option[List[CustomerDetail]] = {
+    val emailFromEligibilityResponse: Option[List[Option[String]]] =
+      journey.eligibilityCheckResult.customerDetails.map(customerDetails => customerDetails.map(_.emailAddress))
+    val maybeEmailSource: Option[EmailSource] = emailFromEligibilityResponse.fold[Option[EmailSource]](None){ nonEmptyFromEligibility =>
+      if (nonEmptyFromEligibility.contains(Some(journey.emailToBeVerified.value.decryptedValue))) Some(EmailSource.ETMP)
+      else Some(EmailSource.TEMP)
+    }
+    maybeEmailSource.map { derivedSource =>
+      List(CustomerDetail(Some(journey.emailToBeVerified.value.decryptedValue), Some(derivedSource)))
+    }
+  }
+
 }
