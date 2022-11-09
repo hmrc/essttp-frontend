@@ -37,7 +37,6 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val authTimeoutCountdownSeconds: Int = config.get[FiniteDuration]("timeout-dialog.countdown").toSeconds.toInt
   val accessibilityStatementPath: String = config.get[String]("accessibility-statement.service-path")
   val serviceIdentifierPAYE: String = "eSSTTP-PAYE"
-  val refererForGovUk: String = config.get[String]("refererForGovUk")
 
   object BaseUrl {
     val platformHost: Option[String] = config.getOptional[String]("platform.frontend.host")

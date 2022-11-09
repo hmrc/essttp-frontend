@@ -34,10 +34,6 @@ class LandingController @Inject() (
 ) extends FrontendController(mcc)
   with Logging {
 
-  val landingPage: Action[AnyContent] = as.default { implicit request =>
-    Ok(views.epayeLanding())
-  }
-
   val epayeLandingPage: Action[AnyContent] = as.default { implicit request =>
     Ok(views.epayeLanding())
   }
