@@ -18,6 +18,7 @@ package testsupport.testdata
 
 object PageUrls {
   val serviceBaseUrl = "/set-up-a-payment-plan"
+  val whichTaxRegimeUrl: String = s"$serviceBaseUrl/which-tax"
   val epayeLandingPageUrl: String = s"$serviceBaseUrl/epaye-payment-plan"
   val vatLandingPageUrl: String = s"$serviceBaseUrl/vat-payment-plan"
   val govUkEpayeStartUrl: String = s"$serviceBaseUrl/govuk/epaye/start"
