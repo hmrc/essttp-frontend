@@ -27,6 +27,7 @@ import essttp.rootmodel.ttp.affordablequotes._
 import essttp.rootmodel.ttp._
 import essttp.rootmodel.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
 import essttp.rootmodel.ttp.arrangement._
+import essttp.rootmodel.ttp.eligibility.{CustomerDetail, EmailSource, RegimeDigitalCorrespondence}
 import essttp.rootmodel.{AmountInPence, CanPayUpfront, DayOfMonth, MonthlyPaymentAmount, UpfrontPaymentAmount}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
@@ -261,22 +262,25 @@ object TdAll {
   def directDebitDetails(name: String, sortCode: String, accountNumber: String): BankDetails =
     BankDetails(AccountName(SensitiveString(name)), SortCode(SensitiveString(sortCode)), AccountNumber(SensitiveString(accountNumber)))
 
-  val arrangementRequest: ArrangementRequest = ArrangementRequest(
-    channelIdentifier      = ChannelIdentifiers.eSSTTP,
-    regimeType             = RegimeType("PAYE"),
-    regimePaymentFrequency = PaymentPlanFrequencies.Monthly,
-    arrangementAgreedDate  = ArrangementAgreedDate(LocalDate.now(ZoneOffset.of("Z")).toString),
-    identification         = List(
+  def arrangementRequest(
+      customerDetails:             Option[List[CustomerDetail]],
+      regimeDigitalCorrespondence: Option[RegimeDigitalCorrespondence]
+  ): ArrangementRequest = ArrangementRequest(
+    channelIdentifier           = ChannelIdentifiers.eSSTTP,
+    regimeType                  = RegimeType("PAYE"),
+    regimePaymentFrequency      = PaymentPlanFrequencies.Monthly,
+    arrangementAgreedDate       = ArrangementAgreedDate(LocalDate.now(ZoneOffset.of("Z")).toString),
+    identification              = List(
       Identification(IdType("EMPREF"), IdValue("864FZ00049")),
       Identification(IdType("BROCS"), IdValue("123PA44545546"))
     ),
-    directDebitInstruction = DirectDebitInstruction(
+    directDebitInstruction      = DirectDebitInstruction(
       sortCode        = SortCode(SensitiveString("123456")),
       accountNumber   = AccountNumber(SensitiveString("12345678")),
       accountName     = AccountName(SensitiveString("Bob Ross")),
       paperAuddisFlag = PaperAuddisFlag(false)
     ),
-    paymentPlan            = EnactPaymentPlan(
+    paymentPlan                 = EnactPaymentPlan(
       planDuration         = PlanDuration(2),
       paymentPlanFrequency = PaymentPlanFrequencies.Monthly,
       numberOfInstalments  = NumberOfInstalments(2),
@@ -310,8 +314,16 @@ object TdAll {
           debtItemOriginalDueDate   = DebtItemOriginalDueDate(LocalDate.parse("2021-07-28"))
         )
       )
-    )
+    ),
+    customerDetails             = customerDetails,
+    regimeDigitalCorrespondence = regimeDigitalCorrespondence
   )
+
+  def customerDetail(email: String = "bobross@joyofpainting.com", source: EmailSource = EmailSource.ETMP): Option[List[CustomerDetail]] =
+    Some(List(CustomerDetail(Some(email), Some(source))))
+
+  val someRegimeDigitalCorrespondenceFalse: Option[RegimeDigitalCorrespondence] = Some(RegimeDigitalCorrespondence(false))
+  val someRegimeDigitalCorrespondenceTrue: Option[RegimeDigitalCorrespondence] = Some(RegimeDigitalCorrespondence(true))
 
   val arrangementResponse: ArrangementResponse = ArrangementResponse(ProcessingDateTime("2022-03-23T13:49:51.141Z"), CustomerReference("123PA44545546"))
 }

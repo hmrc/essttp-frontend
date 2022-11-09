@@ -23,6 +23,7 @@ import essttp.crypto.CryptoFormat
 import essttp.rootmodel.ttp.affordability.InstalmentAmountRequest
 import essttp.rootmodel.ttp.affordablequotes.AffordableQuotesRequest
 import essttp.rootmodel.ttp.arrangement.ArrangementRequest
+import essttp.rootmodel.ttp.eligibility.{CustomerDetail, RegimeDigitalCorrespondence}
 import play.api.http.Status
 import play.api.libs.json.Format
 import testsupport.testdata.{TdAll, TtpJsonResponses}
@@ -71,8 +72,14 @@ object Ttp {
         .willReturn(serviceUnavailable())
     )
 
-    def verifyTtpEnactArrangementRequest(implicit cryptoFormat: CryptoFormat): Unit =
-      ttpVerify(enactArrangementUrl, TdAll.arrangementRequest)(ArrangementRequest.format)
+    def verifyTtpEnactArrangementRequest(
+        customerDetails:             Option[List[CustomerDetail]],
+        regimeDigitalCorrespondence: Option[RegimeDigitalCorrespondence]
+    )(implicit cryptoFormat: CryptoFormat): Unit =
+      ttpVerify(
+        enactArrangementUrl,
+        TdAll.arrangementRequest(customerDetails, regimeDigitalCorrespondence)
+      )(ArrangementRequest.format)
   }
 
 }
