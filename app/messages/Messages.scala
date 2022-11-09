@@ -81,6 +81,26 @@ object Messages {
     welsh   = "Dechrau nawr"
   )
 
+  object WhichTaxRegime {
+
+    val `Which tax do you want to set up a payment plan for?`: Message = Message(
+      english = "Which tax do you want to set up a payment plan for?"
+    )
+
+    val EPAYE: Message = Message(
+      english = "Employers’ PAYE"
+    )
+
+    val VAT: Message = Message(
+      english = "VAT"
+    )
+
+    val `Select which tax you want to set up a payment plan for`: Message = Message(
+      english = "Select which tax you want to set up a payment plan for"
+    )
+
+  }
+
   object YourBill {
 
     val to: Message = Message(

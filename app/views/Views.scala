@@ -25,6 +25,7 @@ import views.partials.Partials
 import javax.inject.Inject
 
 class Views @Inject() (
+    val whichTaxRegime:                   WhichTaxRegime,
     val epayeLanding:                     EPayeLanding,
     val vatLanding:                       VatLanding,
     val yourBillIs:                       YourBillIs,

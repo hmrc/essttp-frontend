@@ -30,6 +30,13 @@ object EnrolmentDefResult {
 
   implicit class EnrolmentDefResultOps[T](private val e: EnrolmentDefResult[T]) extends AnyVal {
 
+    def isSuccess: Boolean = e match {
+      case Success(_)            => true
+      case Inactive()            => false
+      case EnrolmentNotFound()   => false
+      case IdentifierNotFound(_) => false
+    }
+
     def map[U](f: T => U): EnrolmentDefResult[U] = e match {
       case Success(t)            => Success(f(t))
       case Inactive()            => Inactive()

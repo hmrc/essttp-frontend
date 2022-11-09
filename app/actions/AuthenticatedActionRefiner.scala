@@ -19,6 +19,7 @@ package actions
 import actionsmodel.AuthenticatedRequest
 import com.google.inject.Inject
 import config.AppConfig
+import controllers.routes
 import models.GGCredId
 import play.api.Logger
 import play.api.mvc.Results.Redirect
@@ -67,11 +68,11 @@ class AuthenticatedActionRefiner @Inject() (
       }
   }
 
-  private def redirectToLoginPage(implicit request: Request[_]): Result = {
+  private lazy val redirectToLoginPage: Result = {
     val returnUrl =
-      if (request.uri.endsWith(controllers.routes.GovUkController.startEpayeJourney.url)) appConfig.Urls.epayeGovUkJourneyLoginContinueUrl
-      else if (request.uri.endsWith(controllers.routes.GovUkController.startVatJourney.url)) appConfig.Urls.vatGovUkJourneyLoginContinueUrl
-      else request.uri
+      if (appConfig.vatEnabled) { routes.WhichTaxRegimeController.whichTaxRegime.url }
+      else { routes.LandingController.epayeLandingPage.url }
+
     Redirect(
       appConfig.BaseUrl.gg,
       Map("continue" -> Seq(appConfig.BaseUrl.essttpFrontend + returnUrl), "origin" -> Seq("essttp-frontend"))
