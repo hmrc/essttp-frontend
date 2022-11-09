@@ -216,4 +216,8 @@ object JourneyJsonTemplates {
     journeyInfo = JourneyInfo.submittedArrangementNoUpfrontPayment(encrypter)
   )
 
+  def `Arrangement Submitted - with upfront payment and email`(email: String)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.submittedArrangement,
+    journeyInfo = JourneyInfo.submittedArrangementWithEmailParams(email, encrypter)
+  )
 }

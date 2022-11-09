@@ -19,6 +19,7 @@ package controllers
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.crypto.CryptoFormat
 import essttp.emailverification.EmailVerificationStatus
+import essttp.rootmodel.ttp.eligibility.EmailSource
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{Call, Result}
@@ -40,25 +41,47 @@ class SubmitArrangementControllerSpec extends ItSpec {
 
     "trigger call to ttp enact arrangement api, send an audit event and also update backend" in {
       List(
-        "T&C's accepted, no email required" -> (
-          () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto)()
+        (
+          "T&C's accepted, no email required",
+          () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto)(),
+          TdAll.customerDetail("bobross@joyofpainting.com", EmailSource.ETMP)
         ),
-        "email verification success" -> (
+        (
+          "email verification success - same email as ETMP",
           () => EssttpBackend.EmailVerificationStatus.findJourney(
             "bobross@joyofpainting.com",
             EmailVerificationStatus.Verified,
             testCrypto
-          )()
+          )(),
+          TdAll.customerDetail()
+        ),
+        (
+          "email verification success - new email",
+          () => EssttpBackend.EmailVerificationStatus.findJourney(
+            "grogu@mandalorian.com",
+            EmailVerificationStatus.Verified,
+            testCrypto
+          )(),
+          TdAll.customerDetail("grogu@mandalorian.com", EmailSource.TEMP)
+        ),
+        (
+          "email verification success - ETMP - same email with different casing",
+          () => EssttpBackend.EmailVerificationStatus.findJourney(
+            "BobRoss@joyofpainting.com",
+            EmailVerificationStatus.Verified,
+            testCrypto
+          )(),
+          TdAll.customerDetail("bobross@joyofpainting.com", EmailSource.ETMP)
         )
       ).foreach{
-          case (journeyDescription, journeyStubMapping) =>
+          case (journeyDescription, journeyStubMapping, expectedCustomerDetail) =>
             withClue(s"For journey $journeyDescription: "){
 
               stubCommonActions()
               journeyStubMapping()
               EssttpBackend.SubmitArrangement.stubUpdateSubmitArrangement(
                 TdAll.journeyId,
-                JourneyJsonTemplates.`Arrangement Submitted - with upfront payment`
+                JourneyJsonTemplates.`Arrangement Submitted - with upfront payment and email`("bobross@joyofpainting.com")
               )
               Ttp.EnactArrangement.stubEnactArrangement()
 
@@ -68,7 +91,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
               status(result) shouldBe Status.SEE_OTHER
               redirectLocation(result) shouldBe Some(PageUrls.confirmationUrl)
 
-              Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(CryptoFormat.NoOpCryptoFormat)
+              Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(expectedCustomerDetail, TdAll.someRegimeDigitalCorrespondenceTrue)(CryptoFormat.NoOpCryptoFormat)
               AuditConnectorStub.verifyEventAudited(
                 "PlanSetUp",
                 Json.parse(
@@ -178,7 +201,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
 
       val result = controller.submitArrangement(fakeRequest)
       assertThrows[UpstreamErrorResponse](await(result))
-      Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(CryptoFormat.NoOpCryptoFormat)
+      Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(TdAll.customerDetail(), TdAll.someRegimeDigitalCorrespondenceTrue)(CryptoFormat.NoOpCryptoFormat)
       EssttpBackend.SubmitArrangement.verifyNoneUpdateSubmitArrangementRequest(TdAll.journeyId)
     }
 

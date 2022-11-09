@@ -171,4 +171,14 @@ object JourneyInfo {
       upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: monthlyPaymentAmount ::
       dayOfMonth() :: startDates :: cannotPayUpfront :: eligibilityCheckedEligible(encrypter)
 
+  def submittedArrangementWithEmailParams(
+      email:     String,
+      encrypter: Encrypter
+  ): List[JourneyInfoAsJson] =
+    arrangementSubmitted :: emailVerificationAnswersEmailRequired(email, EmailVerificationStatus.Verified, encrypter) ::
+      emailAddressRequired(isEmailAddressRequired = true) :: directDebitDetails(encrypter) ::
+      detailsAboutBankAccountBusiness(isAccountHolder = true) :: selectedPlan :: affordableQuotes ::
+      upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: monthlyPaymentAmount ::
+      dayOfMonth() :: startDates :: cannotPayUpfront :: eligibilityCheckedEligible(encrypter)
+
 }

@@ -22,14 +22,14 @@ import connectors.{CallEligibilityApiRequest, TtpConnector}
 import controllers.support.RequestSupport.hc
 import essttp.crypto.CryptoFormat
 import essttp.journey.model.Journey.Stages.ComputedTaxId
-import essttp.journey.model.{EmailVerificationAnswers, Journey, UpfrontPaymentAnswers}
+import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
 import essttp.rootmodel.ttp._
 import essttp.rootmodel.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
 import essttp.rootmodel.ttp.affordablequotes._
 import essttp.rootmodel.ttp.arrangement._
 import essttp.rootmodel.ttp.eligibility.{CustomerDetail, EmailSource}
-import essttp.rootmodel.{AmountInPence, EmpRef, TaxRegime, UpfrontPaymentAmount, Vrn}
+import essttp.rootmodel._
 import essttp.utils.Errors
 import io.scalaland.chimney.dsl.TransformerOps
 import play.api.libs.json.Json
@@ -250,16 +250,11 @@ object TtpService {
   private def deriveCustomerDetail(journey: Journey.Stages.EmailVerificationComplete): Option[List[CustomerDetail]] = {
     val etmpEmails: Option[List[CustomerDetail]] =
       journey.eligibilityCheckResult.customerDetails.map(_.filter(_.emailSource.contains(EmailSource.ETMP)))
-
-    val emailThatsBeenVerified: String = journey.emailVerificationAnswers match {
-      case EmailVerificationAnswers.EmailVerified(email, _) => email.value.decryptedValue
-      case EmailVerificationAnswers.NoEmailJourney          => Errors.throwBadRequestException("There was no email when there should be.")
-    }
-
+    val emailThatsBeenVerified: String = journey.emailToBeVerified.value.decryptedValue
     val maybeEtmpEmail: Option[List[CustomerDetail]] =
       etmpEmails.map(_.filter(_.emailAddress.map(_.toLowerCase(Locale.UK)) === Some(emailThatsBeenVerified.toLowerCase(Locale.UK))))
 
-    if (maybeEtmpEmail.isDefined) maybeEtmpEmail
+    if (maybeEtmpEmail.fold(false)(_.nonEmpty)) maybeEtmpEmail
     else Some(List(CustomerDetail(Some(emailThatsBeenVerified), Some(EmailSource.TEMP))))
   }
 

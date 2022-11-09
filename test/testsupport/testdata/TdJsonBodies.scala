@@ -185,7 +185,12 @@ object TdJsonBodies {
       |         } ]
       |      } ]
       |    }
-      |  ]
+      |  ],
+      |  "customerDetails" : [ {
+      |    "emailAddress" : "bobross@joyofpainting.com",
+      |    "emailSource" : "ETMP"
+      |  } ],
+      |  "regimeDigitalCorrespondence" : true
       |}
       |""".stripMargin
   }
