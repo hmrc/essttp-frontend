@@ -10,7 +10,6 @@ object SbtUpdatesSettings {
     (Compile / compile) := ((Compile / compile) dependsOn dependencyUpdates).value,
     dependencyUpdatesFilter -= moduleFilter("org.scala-lang"),
     dependencyUpdatesFilter -= moduleFilter("com.typesafe.play"),
-    // ignore for now until work for VAT starts in this service
     dependencyUpdatesFilter -= moduleFilter("uk.gov.hmrc", "essttp-backend-cor-journey"),
     // later versions result in this error:
     // ---

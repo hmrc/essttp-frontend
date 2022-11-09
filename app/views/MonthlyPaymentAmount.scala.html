@@ -68,7 +68,7 @@
             title = Text(Messages.`There is a problem`.show)))
     }
 
-    <h1 class="govuk-heading-xl">@title</h1>
+<h1 class="govuk-label-wrapper"><label class="govuk-label govuk-label--xl" for="MonthlyPaymentAmount">@title</label></h1>
     <p class="govuk-body">
     @{Messages.MonthlyPaymentAmount.`The miminum payment you can make is ...`(minimumPayment).show}
     </p>
@@ -79,7 +79,6 @@
 
     @formWithCSRF(action = routes.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit) {
 
-
         @govukInput(Input(
             id = key,
             name = key,
@@ -87,7 +86,6 @@
                 content = Text(Messages.MonthlyPaymentAmount.getHint(maximumPayment, minimumPayment).show),
                 id = Some("HowMuchCanYouPayEachMonth-hint")
             )),
-            label = Label(content = Text(title), isPageHeading = false, classes = "govuk-visually-hidden"),
             classes = "govuk-input--width-5",
             spellcheck = Some(false),
             prefix = Some(PrefixOrSuffix(
