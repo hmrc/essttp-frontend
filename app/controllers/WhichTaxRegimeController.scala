@@ -55,14 +55,14 @@ class WhichTaxRegimeController @Inject() (
     }
   }
 
-  val whichTaxRegimeSubmit: Action[AnyContent] = withVatEnabled{
+  val whichTaxRegimeSubmit: Action[AnyContent] = withVatEnabled {
     as.authenticatedAction { implicit request =>
       TaxRegimeForm.form.bindFromRequest()
         .fold(
           formWithErrors => Ok(views.whichTaxRegime(formWithErrors)),
           {
-            case TaxRegime.Epaye => Redirect(routes.LandingController.epayeLandingPage)
-            case TaxRegime.Vat   => Redirect(routes.LandingController.vatLandingPage)
+            case TaxRegime.Epaye => Redirect(routes.StartJourneyController.startDetachedEpayeJourney)
+            case TaxRegime.Vat   => Redirect(routes.StartJourneyController.startDetachedVatJourney)
           }
         )
     }

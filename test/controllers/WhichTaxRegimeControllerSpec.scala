@@ -16,6 +16,7 @@
 
 package controllers
 
+import essttp.journey.model.Origins
 import org.jsoup.Jsoup
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -23,7 +24,7 @@ import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
-import testsupport.stubs.AuthStub
+import testsupport.stubs.{AuthStub, EssttpBackend}
 import testsupport.testdata.TdAll
 import uk.gov.hmrc.auth.core.retrieve.Credentials
 
@@ -122,22 +123,24 @@ class WhichTaxRegimeControllerSpec extends ItSpec {
       errorLink.attr("href") shouldBe "#WhichTaxRegime"
     }
 
-    "redirect to the EPAYE landing page if the user selects EPAYE" in {
+    "redirect to the start EPAYE journey endpoint if the user selects EPAYE" in {
       stubCommonActions()
+      EssttpBackend.StartJourney.startJourneyInBackend(Origins.Epaye.DetachedUrl)
 
       val request = fakeRequest.withFormUrlEncodedBody("WhichTaxRegime" -> "EPAYE")
       val result: Future[Result] = controller.whichTaxRegimeSubmit(request)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.LandingController.epayeLandingPage.url)
+      redirectLocation(result) shouldBe Some(routes.StartJourneyController.startDetachedEpayeJourney.url)
     }
 
-    "redirect to the VAT landing page if the user selects VAT" in {
+    "redirect to the start VAT journey endpoint if the user selects VAT" in {
       stubCommonActions()
+      EssttpBackend.StartJourney.startJourneyInBackend(Origins.Vat.DetachedUrl)
 
       val request = fakeRequest.withFormUrlEncodedBody("WhichTaxRegime" -> "VAT")
       val result: Future[Result] = controller.whichTaxRegimeSubmit(request)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.LandingController.vatLandingPage.url)
+      redirectLocation(result) shouldBe Some(routes.StartJourneyController.startDetachedVatJourney.url)
     }
 
   }

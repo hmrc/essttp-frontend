@@ -18,12 +18,12 @@ package testOnly.controllers
 
 import _root_.actions.Actions
 import _root_.essttp.rootmodel.ttp._
-import _root_.testOnly.views.html.{IAmBtaPage, IAmEPAYEPage, IAmVatPage, TestOnlyStartPage}
+import _root_.testOnly.views.html.{IAmBtaPage, IAmEPAYEPage, IAmGovUkPage, IAmVatPage, TestOnlyStartPage}
 import config.AppConfig
 import essttp.journey.JourneyConnector
 import essttp.journey.model.{Origins, SjRequest}
 import essttp.rootmodel.ttp.affordablequotes.DueDate
-import essttp.rootmodel.{AmountInPence, BackUrl, ReturnUrl}
+import essttp.rootmodel.{AmountInPence, BackUrl, ReturnUrl, TaxRegime}
 import models.EligibilityErrors._
 import models.{EligibilityError, EligibilityErrors}
 import play.api.mvc._
@@ -54,6 +54,7 @@ class StartJourneyController @Inject() (
     iAmBtaPage:          IAmBtaPage,
     iAmEpayePage:        IAmEPAYEPage,
     iAmVatPage:          IAmVatPage,
+    iAmGovUkPage:        IAmGovUkPage,
     requestSupport:      RequestSupport
 )(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
@@ -84,12 +85,12 @@ class StartJourneyController @Inject() (
       redirect: Result = startJourneyForm.origin match {
         case Origins.Epaye.Bta          => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.showBtaEpayePage)
         case Origins.Epaye.EpayeService => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.showEpayePage)
-        case Origins.Epaye.GovUk        => Redirect("https://github.com/hmrc/essttp-frontend#emulate-start-journey-from-gov-uk")
-        case Origins.Epaye.DetachedUrl  => Redirect(_root_.controllers.routes.GovUkController.startEpayeJourney.url)
+        case Origins.Epaye.GovUk        => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.showGovukEpayePage)
+        case Origins.Epaye.DetachedUrl  => Redirect(_root_.controllers.routes.StartJourneyController.startDetachedEpayeJourney.url)
         case Origins.Vat.Bta            => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.showBtaVatPage)
         case Origins.Vat.VatService     => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.showVatPage)
-        case Origins.Vat.GovUk          => Redirect("https://github.com/hmrc/essttp-frontend#emulate-start-journey-from-gov-uk")
-        case Origins.Vat.DetachedUrl    => Redirect(_root_.controllers.routes.GovUkController.startVatJourney.url)
+        case Origins.Vat.GovUk          => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.showGovukVatPage)
+        case Origins.Vat.DetachedUrl    => Redirect(_root_.controllers.routes.StartJourneyController.startDetachedVatJourney.url)
       }
     } yield redirect.withSession(session)
   }
@@ -101,9 +102,20 @@ class StartJourneyController @Inject() (
   val showBtaEpayePage: Action[AnyContent] = as.default.async { implicit request =>
     withSessionId(Future.successful(Ok(iAmBtaPage(_root_.testOnly.controllers.routes.StartJourneyController.startJourneyEpayeBta.url))))
   }
+
   /** Pretends being a BtaVat page */
   val showBtaVatPage: Action[AnyContent] = as.default.async { implicit request =>
     withSessionId(Future.successful(Ok(iAmBtaPage(_root_.testOnly.controllers.routes.StartJourneyController.startJourneyVatBta.url))))
+  }
+
+  /** Pretends being a Govuk Epaye page */
+  val showGovukEpayePage: Action[AnyContent] = as.default.async { implicit request =>
+    withSessionId(Future.successful(Ok(iAmGovUkPage(TaxRegime.Epaye))))
+  }
+
+  /** Pretends being a Govuk Vat page */
+  val showGovukVatPage: Action[AnyContent] = as.default.async { implicit request =>
+    withSessionId(Future.successful(Ok(iAmGovUkPage(TaxRegime.Vat))))
   }
   /** Pretends being a EPAYE service page */
   val showEpayePage: Action[AnyContent] = as.default.async { implicit request =>

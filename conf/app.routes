@@ -12,8 +12,11 @@ POST   /which-tax                                           controllers.WhichTax
 GET    /epaye-payment-plan                                  controllers.LandingController.epayeLandingPage
 GET    /vat-payment-plan                                    controllers.LandingController.vatLandingPage
 
-GET    /govuk/epaye/start                                   controllers.GovUkController.startEpayeJourney
-GET    /govuk/vat/start                                     controllers.GovUkController.startVatJourney
+GET    /epaye/start                                         controllers.StartJourneyController.startDetachedEpayeJourney
+GET    /vat/start                                           controllers.StartJourneyController.startDetachedVatJourney
+
+GET    /govuk/epaye/start                                   controllers.StartJourneyController.startGovukEpayeJourney
+GET    /govuk/vat/start                                     controllers.StartJourneyController.startGovukVatJourney
 
 GET    /determine-taxId                                     controllers.DetermineTaxIdController.determineTaxId
 
