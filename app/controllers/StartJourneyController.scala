@@ -19,13 +19,13 @@ package controllers
 import _root_.actions.Actions
 import config.AppConfig
 import essttp.journey.JourneyConnector
-import essttp.journey.model.SjRequest
+import essttp.journey.model.{SjRequest, SjResponse}
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext}
+import scala.concurrent.ExecutionContext
 
 @Singleton()
 class StartJourneyController @Inject() (
@@ -52,17 +52,27 @@ class StartJourneyController @Inject() (
 
   def startDetachedEpayeJourney: Action[AnyContent] = as.authenticatedAction.async { implicit request =>
     journeyConnector.Epaye.startJourneyDetachedUrl(SjRequest.Epaye.Empty())
-      .map(r => Redirect(r.nextUrl.value))
+      .map(redirectFromDetachedJourneyStarted)
   }
 
   def startDetachedVatJourney: Action[AnyContent] =
     if (appConfig.vatEnabled) {
       as.authenticatedAction.async { implicit request =>
         journeyConnector.Vat.startJourneyDetachedUrl(SjRequest.Vat.Empty())
-          .map(r => Redirect(r.nextUrl.value))
+          .map(redirectFromDetachedJourneyStarted)
       }
     } else {
       as.default(_ => NotImplemented)
     }
+
+  private def redirectFromDetachedJourneyStarted(sjResponse: SjResponse)(implicit r: Request[_]): Result = {
+    val next = if (r.session.get(LandingController.hasSeenLandingPageSessionKey).isEmpty) {
+      sjResponse.nextUrl.value
+    } else {
+      routes.DetermineTaxIdController.determineTaxId.url
+    }
+
+    Redirect(next).withSession(r.session - LandingController.hasSeenLandingPageSessionKey)
+  }
 
 }

@@ -68,7 +68,7 @@
   <p class="govuk-body">@{Messages.Epaye.`You must keep up to date with your payments...`.show}</p>
 
   @govukButton(Button(
-    href = Some(routes.DetermineTaxIdController.determineTaxId.url),
+    href = Some(routes.LandingController.epayeLandingPageContinue.url),
     content = Text(Messages.`Start now`.show)
   ))
 
