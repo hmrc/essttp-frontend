@@ -18,7 +18,7 @@ package controllers
 
 import _root_.actions.Actions
 import config.AppConfig
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.Views
@@ -46,5 +46,24 @@ class LandingController @Inject() (
     } else {
       as.default(_ => NotImplemented)
     }
+
+  val epayeLandingPageContinue: Action[AnyContent] = as.default { implicit request =>
+    redirectWithHasSeenLandingPage(routes.StartJourneyController.startDetachedEpayeJourney)
+  }
+
+  val vatLandingPageContinue: Action[AnyContent] = as.default { implicit request =>
+    redirectWithHasSeenLandingPage(routes.StartJourneyController.startDetachedVatJourney)
+  }
+
+  private def redirectWithHasSeenLandingPage(redirectTo: Call)(implicit r: Request[_]): Result =
+    Redirect(redirectTo).withSession(
+      r.session + (LandingController.hasSeenLandingPageSessionKey -> "true")
+    )
+
+}
+
+object LandingController {
+
+  val hasSeenLandingPageSessionKey: String = "ESSTTP_HAS_SEEN_LANDING"
 
 }

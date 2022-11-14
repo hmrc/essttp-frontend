@@ -45,6 +45,13 @@ class StartJourneyControllerSpec extends ItSpec {
       redirectLocation(result) shouldBe Some(routes.DetermineTaxIdController.determineTaxId.url)
       EssttpBackend.StartJourney.verifyStartJourneyEpayeGovUk()
     }
+
+    "should redirect to login with the correct continue url if the user is not logged in" in {
+      val result = controller.startGovukVatJourney(FakeRequest("GET", routes.StartJourneyController.startGovukEpayeJourney.url))
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some("http://localhost:9949/auth-login-stub/gg-sign-in?" +
+        "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fgovuk%2Fepaye%2Fstart&origin=essttp-frontend")
+    }
   }
 
   "GET /govuk/vat/start" - {
@@ -60,6 +67,13 @@ class StartJourneyControllerSpec extends ItSpec {
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.DetermineTaxIdController.determineTaxId.url)
       EssttpBackend.StartJourney.verifyStartJourneyVatGovUk()
+    }
+
+    "should redirect to login with the correct continue url if the user is not logged in" in {
+      val result = controller.startGovukVatJourney(FakeRequest("GET", routes.StartJourneyController.startGovukVatJourney.url))
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some("http://localhost:9949/auth-login-stub/gg-sign-in?" +
+        "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fgovuk%2Fvat%2Fstart&origin=essttp-frontend")
     }
   }
 
@@ -77,6 +91,29 @@ class StartJourneyControllerSpec extends ItSpec {
       redirectLocation(result) shouldBe Some("http://localhost:19001/set-up-a-payment-plan/epaye-payment-plan")
       EssttpBackend.StartJourney.verifyStartJourneyEpayeDetached()
     }
+
+    "should start a detached EPAYE journey and redirect if the user has already seen the landing page" in {
+      stubCommonActions()
+      EssttpBackend.StartJourney.startJourneyEpayeDetached
+
+      val fakeRequest = FakeRequest()
+        .withAuthToken()
+        .withSession(SessionKeys.sessionId -> "IamATestSessionId", LandingController.hasSeenLandingPageSessionKey -> "true")
+
+      val result: Future[Result] = controller.startDetachedEpayeJourney(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.DetermineTaxIdController.determineTaxId.url)
+      session(result).data.get(LandingController.hasSeenLandingPageSessionKey).isEmpty shouldBe true
+
+      EssttpBackend.StartJourney.verifyStartJourneyEpayeDetached()
+    }
+
+    "should redirect to login with the correct continue url if the user is not logged in" in {
+      val result = controller.startDetachedEpayeJourney(FakeRequest("GET", routes.StartJourneyController.startDetachedEpayeJourney.url))
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some("http://localhost:9949/auth-login-stub/gg-sign-in?" +
+        "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fepaye%2Fstart&origin=essttp-frontend")
+    }
   }
 
   "GET /vat/start" - {
@@ -92,6 +129,29 @@ class StartJourneyControllerSpec extends ItSpec {
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some("http://localhost:19001/set-up-a-payment-plan/vat-payment-plan")
       EssttpBackend.StartJourney.verifyStartJourneyVatDetached()
+    }
+
+    "should start a detached VAT journey and redirect if the user has already seen the landing page" in {
+      stubCommonActions()
+      EssttpBackend.StartJourney.startJourneyVatDetached
+
+      val fakeRequest = FakeRequest()
+        .withAuthToken()
+        .withSession(SessionKeys.sessionId -> "IamATestSessionId", LandingController.hasSeenLandingPageSessionKey -> "true")
+
+      val result: Future[Result] = controller.startDetachedVatJourney(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.DetermineTaxIdController.determineTaxId.url)
+      session(result).data.get(LandingController.hasSeenLandingPageSessionKey) shouldBe empty
+
+      EssttpBackend.StartJourney.verifyStartJourneyVatDetached()
+    }
+
+    "should redirect to login with the correct continue url if the user is not logged in" in {
+      val result = controller.startDetachedVatJourney(FakeRequest("GET", routes.StartJourneyController.startDetachedVatJourney.url))
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some("http://localhost:9949/auth-login-stub/gg-sign-in?" +
+        "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fvat%2Fstart&origin=essttp-frontend")
     }
   }
 

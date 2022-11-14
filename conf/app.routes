@@ -10,8 +10,12 @@ GET    /which-tax                                           controllers.WhichTax
 POST   /which-tax                                           controllers.WhichTaxRegimeController.whichTaxRegimeSubmit
 
 GET    /epaye-payment-plan                                  controllers.LandingController.epayeLandingPage
-GET    /vat-payment-plan                                    controllers.LandingController.vatLandingPage
+GET    /epaye-payment-plan-continue                         controllers.LandingController.epayeLandingPageContinue
 
+GET    /vat-payment-plan                                    controllers.LandingController.vatLandingPage
+GET    /vat-payment-plan-continue                           controllers.LandingController.vatLandingPageContinue
+
+# N.B. start endpoints should all end in /start
 GET    /epaye/start                                         controllers.StartJourneyController.startDetachedEpayeJourney
 GET    /vat/start                                           controllers.StartJourneyController.startDetachedVatJourney
 

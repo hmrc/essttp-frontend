@@ -61,17 +61,24 @@ class AuthenticatedActionRefiner @Inject() (
           }
 
       }.recover {
-        case _: NoActiveSession => Left(redirectToLoginPage)
+        case _: NoActiveSession => Left(redirectToLoginPage(request))
         case e: AuthorisationException =>
           logger.warn(s"Unauthorised because of ${e.reason}, please investigate why", e)
           Left(Redirect(controllers.routes.NotEnrolledController.notEnrolled))
       }
   }
 
-  private lazy val redirectToLoginPage: Result = {
+  private def redirectToLoginPage(request: Request[_]): Result = {
+    val isStartEndpoint = request.uri.endsWith("/start")
+
     val returnUrl =
-      if (appConfig.vatEnabled) { routes.WhichTaxRegimeController.whichTaxRegime.url }
-      else { routes.LandingController.epayeLandingPage.url }
+      if (isStartEndpoint) {
+        request.uri
+      } else if (appConfig.vatEnabled) {
+        routes.WhichTaxRegimeController.whichTaxRegime.url
+      } else {
+        routes.LandingController.epayeLandingPage.url
+      }
 
     Redirect(
       appConfig.BaseUrl.gg,

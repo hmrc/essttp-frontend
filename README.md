@@ -10,6 +10,8 @@ Current tax regimes supported:
 * PAYE
 * VAT (wip)
 
+N.B.: any start journey endpoints should end with `/start` in the url in order for the continueUrl if logging is required to be correct.
+
 ---
 
 ## Contents:

@@ -21,7 +21,7 @@ import essttp.rootmodel.TaxRegime
 import messages.Messages
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import play.api.mvc.Result
+import play.api.mvc.{Result, Session}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
@@ -68,8 +68,19 @@ class LandingPageControllerSpec extends ItSpec {
       paragraphs(2).text() shouldBe "You can use this service within 35 days of the overdue payment deadline."
 
       val button = doc.select(".govuk-button")
-      button.attr("href") shouldBe routes.DetermineTaxIdController.determineTaxId.url
+      button.attr("href") shouldBe routes.LandingController.epayeLandingPageContinue.url
       button.text() shouldBe Messages.`Start now`.english
+    }
+  }
+
+  "GET /epaye-payment-plan-continue" - {
+    "should redirect to start a detached journey with an updated session" in {
+      val existingSessionData = Map("a" -> "b")
+
+      val result = controller.epayeLandingPageContinue(FakeRequest().withSession(existingSessionData.toList: _*))
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.StartJourneyController.startDetachedEpayeJourney.url)
+      session(result) shouldBe Session(existingSessionData.updated(LandingController.hasSeenLandingPageSessionKey, "true"))
     }
   }
 
@@ -105,10 +116,22 @@ class LandingPageControllerSpec extends ItSpec {
       paragraphs(2).text() shouldBe "You can use this service within 28 days of the overdue payment deadline."
 
       val button = doc.select(".govuk-button")
-      button.attr("href") shouldBe routes.DetermineTaxIdController.determineTaxId.url
+      button.attr("href") shouldBe routes.LandingController.vatLandingPageContinue.url
       button.text() shouldBe Messages.`Start now`.english
     }
   }
+
+  "GET /vat-payment-plan-continue" - {
+    "should redirect to start a detached journey with an updated session" in {
+      val existingSessionData = Map("a" -> "b")
+
+      val result = controller.vatLandingPageContinue(FakeRequest().withSession(existingSessionData.toList: _*))
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.StartJourneyController.startDetachedVatJourney.url)
+      session(result) shouldBe Session(existingSessionData.updated(LandingController.hasSeenLandingPageSessionKey, "true"))
+    }
+  }
+
 }
 
 class LandingPageVatNotEnabledControllerSpec extends ItSpec {
