@@ -18,20 +18,23 @@ package controllers
 
 import _root_.actions.Actions
 import config.AppConfig
+import essttp.journey.JourneyConnector
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.Views
 
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class LandingController @Inject() (
-    as:        Actions,
-    mcc:       MessagesControllerComponents,
-    views:     Views,
-    appConfig: AppConfig
-) extends FrontendController(mcc)
+    as:               Actions,
+    journeyConnector: JourneyConnector,
+    mcc:              MessagesControllerComponents,
+    views:            Views,
+    appConfig:        AppConfig
+)(implicit ec: ExecutionContext) extends FrontendController(mcc)
   with Logging {
 
   val epayeLandingPage: Action[AnyContent] = as.default { implicit request =>
@@ -47,18 +50,24 @@ class LandingController @Inject() (
       as.default(_ => NotImplemented)
     }
 
-  val epayeLandingPageContinue: Action[AnyContent] = as.default { implicit request =>
-    redirectWithHasSeenLandingPage(routes.StartJourneyController.startDetachedEpayeJourney)
+  val epayeLandingPageContinue: Action[AnyContent] = as.authenticatedAction.async { implicit request =>
+    handleLandingPageContinue(routes.StartJourneyController.startDetachedEpayeJourney)
   }
 
-  val vatLandingPageContinue: Action[AnyContent] = as.default { implicit request =>
-    redirectWithHasSeenLandingPage(routes.StartJourneyController.startDetachedVatJourney)
+  val vatLandingPageContinue: Action[AnyContent] = as.authenticatedAction.async { implicit request =>
+    handleLandingPageContinue(routes.StartJourneyController.startDetachedVatJourney)
   }
 
-  private def redirectWithHasSeenLandingPage(redirectTo: Call)(implicit r: Request[_]): Result =
-    Redirect(redirectTo).withSession(
-      r.session + (LandingController.hasSeenLandingPageSessionKey -> "true")
-    )
+  private def handleLandingPageContinue(startDetachedJourney: Call)(implicit r: Request[_]): Future[Result] =
+    journeyConnector.findLatestJourneyBySessionId().map{
+      case None =>
+        Redirect(startDetachedJourney).withSession(
+          r.session + (LandingController.hasSeenLandingPageSessionKey -> "true")
+        )
+
+      case Some(_) =>
+        Redirect(routes.DetermineTaxIdController.determineTaxId)
+    }
 
 }
 

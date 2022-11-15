@@ -21,10 +21,11 @@ import essttp.rootmodel.TaxRegime
 import messages.Messages
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import play.api.mvc.{Result, Session}
+import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
+import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.EssttpBackend
 import uk.gov.hmrc.http.SessionKeys
@@ -74,13 +75,31 @@ class LandingPageControllerSpec extends ItSpec {
   }
 
   "GET /epaye-payment-plan-continue" - {
-    "should redirect to start a detached journey with an updated session" in {
-      val existingSessionData = Map("a" -> "b")
+    "should redirect to start a detached journey with an updated session if no existing journey is found" in {
+      val existingSessionData = Map(SessionKeys.sessionId -> "IamATestSessionId")
 
-      val result = controller.epayeLandingPageContinue(FakeRequest().withSession(existingSessionData.toList: _*))
+      stubCommonActions()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(existingSessionData.toList: _*)
+      val result = controller.epayeLandingPageContinue(fakeRequest)
+
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.StartJourneyController.startDetachedEpayeJourney.url)
-      session(result) shouldBe Session(existingSessionData.updated(LandingController.hasSeenLandingPageSessionKey, "true"))
+      session(result).data.get(LandingController.hasSeenLandingPageSessionKey) shouldBe Some("true")
+    }
+
+    "should redirect to determine tax id if an existing journey is found" in {
+      val existingSessionData = Map(SessionKeys.sessionId -> "IamATestSessionId")
+
+      stubCommonActions()
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(existingSessionData.toList: _*)
+      val result = controller.epayeLandingPageContinue(fakeRequest)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.DetermineTaxIdController.determineTaxId.url)
+      session(result).data.get(LandingController.hasSeenLandingPageSessionKey) shouldBe None
     }
   }
 
@@ -122,13 +141,31 @@ class LandingPageControllerSpec extends ItSpec {
   }
 
   "GET /vat-payment-plan-continue" - {
-    "should redirect to start a detached journey with an updated session" in {
-      val existingSessionData = Map("a" -> "b")
+    "should redirect to start a detached journey with an updated session if no existing journey is found" in {
+      val existingSessionData = Map(SessionKeys.sessionId -> "IamATestSessionId")
 
-      val result = controller.vatLandingPageContinue(FakeRequest().withSession(existingSessionData.toList: _*))
+      stubCommonActions()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(existingSessionData.toList: _*)
+      val result = controller.vatLandingPageContinue(fakeRequest)
+
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.StartJourneyController.startDetachedVatJourney.url)
-      session(result) shouldBe Session(existingSessionData.updated(LandingController.hasSeenLandingPageSessionKey, "true"))
+      session(result).data.get(LandingController.hasSeenLandingPageSessionKey) shouldBe Some("true")
+    }
+
+    "should redirect to determine tax id if an existing journey is found" in {
+      val existingSessionData = Map(SessionKeys.sessionId -> "IamATestSessionId")
+
+      stubCommonActions()
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(existingSessionData.toList: _*)
+      val result = controller.vatLandingPageContinue(fakeRequest)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.DetermineTaxIdController.determineTaxId.url)
+      session(result).data.get(LandingController.hasSeenLandingPageSessionKey) shouldBe None
     }
   }
 
