@@ -55,7 +55,13 @@
 
   <p class="govuk-body">@{Messages.TermsAndConditions.`I agree to the terms and conditions...`.show}</p>
 
-    @formWithCSRF(action = routes.TermsAndConditionsController.termsAndConditionsSubmit) {
-        @govukButton(Button(content = Text(Messages.TermsAndConditions.`Agree and continue`.show)))
+    @formWithCSRF(action = routes.TermsAndConditionsController.termsAndConditionsSubmit, Symbol("class") -> "prevent-multiple-submits") {
+        @govukButton(
+            Button(
+                content = Text(Messages.TermsAndConditions.`Agree and continue`.show),
+                preventDoubleClick = true,
+                classes = "disable-on-click"
+            )
+        )
     }
 }

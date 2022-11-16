@@ -20,13 +20,14 @@
 @import play.api.mvc.Request
 @import play.twirl.api.Html
 @import controllers.routes
-@import uk.gov.hmrc.govukfrontend.views.html.components.{Button, Text}
+@import uk.gov.hmrc.govukfrontend.views.html.components.{Button, FormWithCSRF, Text}
 @import uk.gov.hmrc.govukfrontend.views.html.components.GovukButton
 
 @this(
-layout: templates.Layout,
-govukButton: GovukButton,
-requestSupport: RequestSupport
+        layout: templates.Layout,
+        govukButton: GovukButton,
+        formWithCSRF: FormWithCSRF,
+        requestSupport: RequestSupport
 )
 
 @(email: Email)(implicit request: Request[_])
@@ -44,8 +45,14 @@ requestSupport: RequestSupport
     <p class="govuk-body">@{Messages.EmailConfirmed.`We'll only use this address to contact you about your payment plan`.show}</p>
     <p class="govuk-body">@{Messages.EmailConfirmed.`Your email has not been updated in other government services`.show}</p>
 
-    @govukButton(Button(
-        href = Some(routes.SubmitArrangementController.submitArrangement.url),
-        content = Text(Messages.continue.show)
-    ))
+    @formWithCSRF(action = routes.EmailController.emailAddressConfirmedSubmit, Symbol("class") -> "prevent-multiple-submits") {
+        @govukButton(
+            Button(
+                content = Text(Messages.continue.show),
+                preventDoubleClick = true,
+                classes = "disable-on-click"
+            )
+        )
+    }
+
 }
