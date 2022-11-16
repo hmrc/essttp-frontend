@@ -30,7 +30,6 @@ import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.EssttpBackend
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
-import uk.gov.hmrc.auth.core.Enrolment
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
@@ -45,15 +44,15 @@ class UpfrontPaymentControllerSpec extends ItSpec {
   private val expectedH1HowMuchCanYouPayUpfrontPage: String = "How much can you pay upfront?"
   private val expectedH1UpfrontSummaryPage: String = "Payment summary"
 
-  Seq[(String, Origin, Enrolment, TaxRegime)](
-    ("EPAYE", Origins.Epaye.Bta, TdAll.payeEnrolment, TaxRegime.Epaye),
-    ("VAT", Origins.Vat.Bta, TdAll.vatEnrolment, TaxRegime.Vat)
+  Seq[(String, Origin, TaxRegime)](
+    ("EPAYE", Origins.Epaye.Bta, TaxRegime.Epaye),
+    ("VAT", Origins.Vat.Bta, TaxRegime.Vat)
   ).foreach{
-      case (regime, origin, enrolment, taxRegime) =>
+      case (regime, origin, taxRegime) =>
         "GET /can-you-make-an-upfront-payment" - {
 
           s"[$regime journey] should return 200 and the can you make an upfront payment page" in {
-            stubCommonActions(Some(Set(enrolment)))
+            stubCommonActions()
             EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin)()
 
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -78,7 +77,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
           }
 
           s"[$regime journey] should prepopulate the form when user navigates back and they have a chosen way to pay in their journey" in {
-            stubCommonActions(Some(Set(enrolment)))
+            stubCommonActions()
             EssttpBackend.CanPayUpfront.findJourney(testCrypto, origin)()
 
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -94,7 +93,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
         "POST /can-you-make-an-upfront-payment" - {
 
           s"[$regime journey] should redirect to /how-much-can-you-pay-upfront when user chooses yes" in {
-            stubCommonActions(Some(Set(enrolment)))
+            stubCommonActions()
             EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin)()
             EssttpBackend.CanPayUpfront.stubUpdateCanPayUpfront(
               TdAll.journeyId,
@@ -116,7 +115,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
           }
 
           s"[$regime journey] should redirect to /can-you-make-an-upfront-payment when user chooses no" in {
-            stubCommonActions(Some(Set(enrolment)))
+            stubCommonActions()
             EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin)()
             EssttpBackend.CanPayUpfront.stubUpdateCanPayUpfront(
               TdAll.journeyId,
@@ -138,7 +137,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
           }
 
           s"[$regime journey] should redirect to /can-you-make-an-upfront-payment with error summary when no option is selected" in {
-            stubCommonActions(Some(Set(enrolment)))
+            stubCommonActions()
             EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin)()
 
             val fakeRequest = FakeRequest(
