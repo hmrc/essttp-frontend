@@ -45,7 +45,7 @@ class JourneyIncorrectStateRouterSpec extends ItSpec {
       ), PageUrls.vatNotEligibleUrl),
       ("Stages.AnsweredCanPayUpfront - can pay upfront", () => EssttpBackend.CanPayUpfront.findJourney(testCrypto)(), PageUrls.howMuchCanYouPayUpfrontUrl),
       ("Stages.AnsweredCanPayUpfront - can't pay upfront",
-        () => EssttpBackend.CanPayUpfront.findJourney(testCrypto)(JourneyJsonTemplates.`Answered Can Pay Upfront - No`(testCrypto)),
+        () => EssttpBackend.CanPayUpfront.findJourney(testCrypto)(JourneyJsonTemplates.`Answered Can Pay Upfront - No`(Origins.Epaye.Bta)(testCrypto)),
         PageUrls.retrievedExtremeDatesUrl
       ),
       ("Stages.EnteredUpfrontPaymentAmount", () => EssttpBackend.UpfrontPaymentAmount.findJourney(testCrypto)(), PageUrls.upfrontPaymentSummaryUrl),
