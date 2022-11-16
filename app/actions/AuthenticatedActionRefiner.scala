@@ -17,7 +17,7 @@
 package actions
 
 import actionsmodel.AuthenticatedRequest
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import config.AppConfig
 import controllers.routes
 import models.GGCredId
@@ -32,16 +32,15 @@ import uk.gov.hmrc.auth.core.{AuthConnector, AuthProviders, AuthorisationExcepti
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AuthenticatedActionRefiner @Inject() (
-    val authConnector: AuthConnector,
-    appConfig:         AppConfig,
-    cc:                MessagesControllerComponents
-)(
-    implicit
-    ec: ExecutionContext
-) extends ActionRefiner[Request, AuthenticatedRequest] with AuthorisedFunctions {
+trait AuthenticatedActionRefiner { this: ActionRefiner[Request, AuthenticatedRequest] with AuthorisedFunctions =>
+  val authConnector: AuthConnector
+  val appConfig: AppConfig
+  val cc: MessagesControllerComponents
+  def loginContinueToUrl(request: Request[_]): String
 
   private val logger = Logger(getClass)
+
+  private implicit val ec: ExecutionContext = cc.executionContext
 
   override protected def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
     implicit val r: Request[A] = request
@@ -68,24 +67,40 @@ class AuthenticatedActionRefiner @Inject() (
       }
   }
 
-  private def redirectToLoginPage(request: Request[_]): Result = {
-    val isStartEndpoint = request.uri.endsWith("/start")
-
-    val returnUrl =
-      if (isStartEndpoint) {
-        request.uri
-      } else if (appConfig.vatEnabled) {
-        routes.WhichTaxRegimeController.whichTaxRegime.url
-      } else {
-        routes.LandingController.epayeLandingPage.url
-      }
-
+  private def redirectToLoginPage(request: Request[_]): Result =
     Redirect(
       appConfig.BaseUrl.gg,
-      Map("continue" -> Seq(appConfig.BaseUrl.essttpFrontend + returnUrl), "origin" -> Seq("essttp-frontend"))
+      Map("continue" -> Seq(appConfig.BaseUrl.essttpFrontend + loginContinueToUrl(request)), "origin" -> Seq("essttp-frontend"))
     )
-  }
 
   override protected def executionContext: ExecutionContext = cc.executionContext
+
+}
+
+@Singleton
+class ContinueToLandingPagesAuthenticatedActionRefiner @Inject() (
+    val authConnector: AuthConnector,
+    val appConfig:     AppConfig,
+    val cc:            MessagesControllerComponents
+) extends ActionRefiner[Request, AuthenticatedRequest] with AuthorisedFunctions with AuthenticatedActionRefiner {
+
+  override def loginContinueToUrl(request: Request[_]): String =
+    if (appConfig.vatEnabled) {
+      routes.WhichTaxRegimeController.whichTaxRegime.url
+    } else {
+      routes.LandingController.epayeLandingPage.url
+    }
+
+}
+
+@Singleton
+class ContinueToSameEndpointAuthenticatedActionRefiner @Inject() (
+    val authConnector: AuthConnector,
+    val appConfig:     AppConfig,
+    val cc:            MessagesControllerComponents
+) extends ActionRefiner[Request, AuthenticatedRequest] with AuthorisedFunctions with AuthenticatedActionRefiner {
+
+  override def loginContinueToUrl(request: Request[_]): String =
+    request.uri
 
 }

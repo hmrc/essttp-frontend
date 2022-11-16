@@ -26,11 +26,11 @@ import testsupport.stubs.{AuthStub, EssttpBackend}
 import testsupport.testdata.PageUrls
 import uk.gov.hmrc.http.SessionKeys
 
-class AuthenticatedActionRefinerSpec extends ItSpec {
+class ContinueToLandingPagesAuthenticatedActionRefinerSpec extends ItSpec {
 
   val controller: DetermineTaxIdController = app.injector.instanceOf[DetermineTaxIdController]
 
-  "AuthenticatedActionRefiner" - {
+  "ContinueToLandingPagesAuthenticatedActionRefiner" - {
     "should return redirect to determine eligibility when tax id is already determined" in {
       AuthStub.authorise()
       EssttpBackend.DetermineTaxId.findJourney()
@@ -70,7 +70,7 @@ class AuthenticatedActionRefinerSpec extends ItSpec {
   }
 }
 
-class AuthenticatedActionRefinerVatDisabledSpec extends ItSpec {
+class ContinueToLandingPagesAuthenticatedActionRefinerVatDisabledSpec extends ItSpec {
 
   override lazy val configOverrides: Map[String, Any] = Map(
     "features.vat" -> false
@@ -78,7 +78,7 @@ class AuthenticatedActionRefinerVatDisabledSpec extends ItSpec {
 
   val controller: DetermineTaxIdController = app.injector.instanceOf[DetermineTaxIdController]
 
-  "AuthenticatedActionRefiner" - {
+  "ContinueToLandingPagesAuthenticatedActionRefinerSpec" - {
 
     "redirect to login page when user has no active session (i.e. no auth token)" in {
       AuthStub.authorise(None, None)

@@ -23,35 +23,40 @@ import javax.inject.{Inject, Singleton}
 
 @Singleton
 class Actions @Inject() (
-    actionBuilder:               DefaultActionBuilder,
-    authenticatedActionRefiner:  AuthenticatedActionRefiner,
-    getJourneyActionRefiner:     GetJourneyActionRefiner,
-    barsLockoutActionFilter:     BarsLockoutActionRefiner,
-    barsLockedOutJourneyRefiner: BarsLockedOutJourneyRefiner,
-    eligibleJourneyRefiner:      EligibleJourneyRefiner
+    actionBuilder:                                    DefaultActionBuilder,
+    continueToLandingPagesAuthenticatedActionRefiner: ContinueToLandingPagesAuthenticatedActionRefiner,
+    continueToSameEndpointAuthenticatedActionRefiner: ContinueToSameEndpointAuthenticatedActionRefiner,
+    getJourneyActionRefiner:                          GetJourneyActionRefiner,
+    barsLockoutActionFilter:                          BarsLockoutActionRefiner,
+    barsLockedOutJourneyRefiner:                      BarsLockedOutJourneyRefiner,
+    eligibleJourneyRefiner:                           EligibleJourneyRefiner
 ) {
 
   val default: ActionBuilder[Request, AnyContent] = actionBuilder
 
+  val continueToSameEndpointAuthenticatedJourneyAction: ActionBuilder[AuthenticatedRequest, AnyContent] =
+    actionBuilder
+      .andThen(continueToSameEndpointAuthenticatedActionRefiner)
+
   val authenticatedAction: ActionBuilder[AuthenticatedRequest, AnyContent] =
     actionBuilder
-      .andThen(authenticatedActionRefiner)
+      .andThen(continueToLandingPagesAuthenticatedActionRefiner)
 
   val authenticatedJourneyAction: ActionBuilder[AuthenticatedJourneyRequest, AnyContent] =
     actionBuilder
-      .andThen(authenticatedActionRefiner)
+      .andThen(continueToLandingPagesAuthenticatedActionRefiner)
       .andThen(getJourneyActionRefiner)
 
   val eligibleJourneyAction: ActionBuilder[EligibleJourneyRequest, AnyContent] =
     actionBuilder
-      .andThen(authenticatedActionRefiner)
+      .andThen(continueToLandingPagesAuthenticatedActionRefiner)
       .andThen(getJourneyActionRefiner)
       .andThen(barsLockoutActionFilter)
       .andThen(eligibleJourneyRefiner)
 
   val barsLockedOutJourneyAction: ActionBuilder[BarsLockedOutRequest, AnyContent] =
     actionBuilder
-      .andThen(authenticatedActionRefiner)
+      .andThen(continueToLandingPagesAuthenticatedActionRefiner)
       .andThen(getJourneyActionRefiner)
       .andThen(barsLockedOutJourneyRefiner)
 
