@@ -84,6 +84,8 @@ class TermsAndConditionsControllerSpec extends ItSpec {
 
       doc.select(".govuk-heading-m").text() shouldBe "Declaration"
       doc.select(".govuk-button").text() shouldBe "Agree and continue"
+
+      ContentAssertions.formSubmitShouldDisableSubmitButton(doc)
     }
   }
 

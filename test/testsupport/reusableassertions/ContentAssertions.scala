@@ -105,4 +105,14 @@ object ContentAssertions extends RichMatchers {
     val footerLinks = page.select(".govuk-footer__link").asScala.toList
     footerLinks(1).attr("href") should startWith("http://localhost:12346/accessibility-statement/set-up-a-payment-plan")
   }
+
+  def formSubmitShouldDisableSubmitButton(doc: Document): Unit = {
+    doc.select("form").hasClass("prevent-multiple-submits") shouldBe true
+
+    val button = doc.select("form > .govuk-button")
+    button.hasClass("disable-on-click") shouldBe true
+    button.attr("data-prevent-double-click") shouldBe "true"
+    ()
+  }
+
 }

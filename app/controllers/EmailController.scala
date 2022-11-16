@@ -17,6 +17,7 @@
 package controllers
 
 import actions.Actions
+import actionsmodel.EligibleJourneyRequest
 import cats.implicits.catsSyntaxEq
 import config.AppConfig
 import controllers.EmailController.{ChooseEmailForm, chooseEmailForm}
@@ -169,24 +170,33 @@ class EmailController @Inject() (
 
   val emailAddressConfirmed: Action[AnyContent] = withEmailEnabled {
     as.eligibleJourneyAction { implicit request =>
-      request.journey match {
-        case j: Journey.BeforeEmailAddressVerificationResult =>
-          logErrorAndRouteToDefaultPage(j)
-
-        case j: Journey.AfterArrangementSubmitted =>
-          logErrorAndRouteToDefaultPage(j)
-
-        case j: Journey.AfterEmailAddressVerificationResult =>
-          j.emailVerificationStatus match {
-            case EmailVerificationStatus.Verified =>
-              Ok(views.emailAddressConfirmed(j.into[Journey.AfterEmailAddressSelectedToBeVerified].transform.emailToBeVerified))
-
-            case EmailVerificationStatus.Locked =>
-              logErrorAndRouteToDefaultPage(j)
-          }
-      }
+      withEmailAddressVerified(journey =>
+        Ok(views.emailAddressConfirmed(journey.into[Journey.AfterEmailAddressSelectedToBeVerified].transform.emailToBeVerified)))
     }
   }
+
+  val emailAddressConfirmedSubmit: Action[AnyContent] = withEmailEnabled{
+    as.eligibleJourneyAction { implicit request =>
+      withEmailAddressVerified(_ => Redirect(routes.SubmitArrangementController.submitArrangement))
+    }
+  }
+
+  private def withEmailAddressVerified(f: Journey.AfterEmailAddressVerificationResult => Result)(implicit request: EligibleJourneyRequest[_]): Result =
+    request.journey match {
+      case j: Journey.BeforeEmailAddressVerificationResult => logErrorAndRouteToDefaultPage(j)
+
+      case j: Journey.AfterArrangementSubmitted =>
+        logErrorAndRouteToDefaultPage(j)
+
+      case j: Journey.AfterEmailAddressVerificationResult =>
+        j.emailVerificationStatus match {
+          case EmailVerificationStatus.Verified =>
+            f(j)
+
+          case EmailVerificationStatus.Locked =>
+            logErrorAndRouteToDefaultPage(j)
+        }
+    }
 
 }
 

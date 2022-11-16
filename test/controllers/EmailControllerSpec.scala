@@ -27,7 +27,7 @@ import org.jsoup.nodes.{Document, Element}
 import org.jsoup.select.Elements
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.http.Status
-import play.api.mvc.{Call, Cookie, Result}
+import play.api.mvc.{Action, AnyContent, Call, Cookie, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
@@ -425,48 +425,11 @@ class EmailControllerSpec extends ItSpec {
 
   "GET /email-address-confirmed should" - {
 
-    val email: Email = Email(SensitiveString("email@test.com"))
+    behave like requiresEmailAddressVerifiedBehaviour(controller.emailAddressConfirmed)
 
-    "not allow journey when" - {
+    "display the page when the email address has successfully been verified" in {
+      val email: Email = Email(SensitiveString("email@test.com"))
 
-        def test(
-            journeyStubMapping:       () => StubMapping,
-            expectedRedirectLocation: Call
-        ) = {
-          stubCommonActions()
-          journeyStubMapping()
-
-          val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-          val result = controller.emailAddressConfirmed(fakeRequest)
-
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(expectedRedirectLocation.url)
-        }
-
-      "an email verification result has not been obtained yet" in {
-        test(
-          () => EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)(),
-          routes.EmailController.requestVerification
-        )
-      }
-
-      "an arrangement has already been submitted" in {
-        test(
-          () => EssttpBackend.SubmitArrangement.findJourney(testCrypto)(),
-          routes.PaymentPlanSetUpController.paymentPlanSetUp
-        )
-      }
-
-      "an email verification result has been obtained but it is locked" in {
-        test(
-          () => EssttpBackend.EmailVerificationStatus.findJourney(email.value.decryptedValue, EmailVerificationStatus.Locked, testCrypto)(),
-          routes.EmailController.tooManyPasscodeAttempts
-        )
-      }
-
-    }
-
-    "display the page when the email address has successully been verified" in {
       stubCommonActions()
       EssttpBackend.EmailVerificationStatus.findJourney(email.value.decryptedValue, EmailVerificationStatus.Verified, testCrypto)()
 
@@ -480,16 +443,33 @@ class EmailControllerSpec extends ItSpec {
         doc,
         "Email address confirmed",
         shouldBackLinkBePresent = false,
-        expectedSubmitUrl       = None
+        expectedSubmitUrl       = Some(routes.EmailController.emailAddressConfirmedSubmit.url)
       )
 
       val paragraphs = doc.select(".govuk-body").asScala.toList
       paragraphs.size shouldBe 3
       paragraphs(0).html() shouldBe s"The email address <strong>${email.value.decryptedValue}</strong> has been confirmed."
 
-      doc.select(".govuk-button").attr("href") shouldBe routes.SubmitArrangementController.submitArrangement.url
+      ContentAssertions.formSubmitShouldDisableSubmitButton(doc)
     }
 
+  }
+
+  "POST /email-address-confirmed should" - {
+
+    behave like requiresEmailAddressVerifiedBehaviour(controller.emailAddressConfirmedSubmit)
+
+    "display the page when the email address has successfully been verified" in {
+      val email: Email = Email(SensitiveString("email@test.com"))
+
+      stubCommonActions()
+      EssttpBackend.EmailVerificationStatus.findJourney(email.value.decryptedValue, EmailVerificationStatus.Verified, testCrypto)()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result = controller.emailAddressConfirmedSubmit(fakeRequest)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.SubmitArrangementController.submitArrangement.url)
+    }
   }
 
   "GET /tried-to-confirm-email-too-many-times should" - {
@@ -548,6 +528,49 @@ class EmailControllerSpec extends ItSpec {
       paragraphs(1).select("a").attr("href") shouldBe routes.EmailController.whichEmailDoYouWantToUse.url
     }
 
+  }
+
+  private def requiresEmailAddressVerifiedBehaviour(action: Action[AnyContent]): Unit = {
+    val email: Email = Email(SensitiveString("email@test.com"))
+
+    "not allow journey when" - {
+
+        def test(
+            journeyStubMapping:       () => StubMapping,
+            expectedRedirectLocation: Call
+        ) = {
+          stubCommonActions()
+          journeyStubMapping()
+
+          val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+          val result = action(fakeRequest)
+
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(expectedRedirectLocation.url)
+        }
+
+      "an email verification result has not been obtained yet" in {
+        test(
+          () => EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)(),
+          routes.EmailController.requestVerification
+        )
+      }
+
+      "an arrangement has already been submitted" in {
+        test(
+          () => EssttpBackend.SubmitArrangement.findJourney(testCrypto)(),
+          routes.PaymentPlanSetUpController.paymentPlanSetUp
+        )
+      }
+
+      "an email verification result has been obtained but it is locked" in {
+        test(
+          () => EssttpBackend.EmailVerificationStatus.findJourney(email.value.decryptedValue, EmailVerificationStatus.Locked, testCrypto)(),
+          routes.EmailController.tooManyPasscodeAttempts
+        )
+      }
+
+    }
   }
 
 }
