@@ -3,7 +3,7 @@ resolvers += "hmrc-releases" at "https://artefacts.tax.service.gov.uk/artifactor
 resolvers += "Typesafe Releases" at "https://repo.typesafe.com/typesafe/releases/"
 resolvers += MavenRepository("HMRC-open-artefacts-maven2", "https://open.artefacts.tax.service.gov.uk/maven2")
 
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.16")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.18")
 
 addSbtPlugin("io.github.irundaia" % "sbt-sassify" % "1.5.2")
 
