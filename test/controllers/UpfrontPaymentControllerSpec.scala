@@ -16,7 +16,8 @@
 
 package controllers
 
-import essttp.rootmodel.AmountInPence
+import essttp.journey.model.{Origin, Origins}
+import essttp.rootmodel.{AmountInPence, TaxRegime}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import org.scalatest.prop.TableDrivenPropertyChecks._
@@ -43,121 +44,130 @@ class UpfrontPaymentControllerSpec extends ItSpec {
   private val expectedH1HowMuchCanYouPayUpfrontPage: String = "How much can you pay upfront?"
   private val expectedH1UpfrontSummaryPage: String = "Payment summary"
 
-  "GET /can-you-make-an-upfront-payment" - {
+  Seq[(String, Origin, TaxRegime)](
+    ("EPAYE", Origins.Epaye.Bta, TaxRegime.Epaye),
+    ("VAT", Origins.Vat.Bta, TaxRegime.Vat)
+  ).foreach{
+      case (regime, origin, taxRegime) =>
+        "GET /can-you-make-an-upfront-payment" - {
 
-    "should return 200 and the can you make an upfront payment page" in {
-      stubCommonActions()
-      EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
+          s"[$regime journey] should return 200 and the can you make an upfront payment page" in {
+            stubCommonActions()
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin)()
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
-      val result: Future[Result] = controller.canYouMakeAnUpfrontPayment(fakeRequest)
-      val pageContent: String = contentAsString(result)
-      val doc: Document = Jsoup.parse(pageContent)
+            val result: Future[Result] = controller.canYouMakeAnUpfrontPayment(fakeRequest)
+            val pageContent: String = contentAsString(result)
+            val doc: Document = Jsoup.parse(pageContent)
 
-      RequestAssertions.assertGetRequestOk(result)
-      ContentAssertions.commonPageChecks(
-        doc,
-        expectedH1              = expectedH1CanYouPayUpfrontPage,
-        shouldBackLinkBePresent = true,
-        expectedSubmitUrl       = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit.url)
-      )
-      val radioContent = doc.select(".govuk-radios__label").asScala.toList
-      radioContent(0).text() shouldBe "Yes"
-      radioContent(1).text() shouldBe "No"
+            RequestAssertions.assertGetRequestOk(result)
+            ContentAssertions.commonPageChecks(
+              doc,
+              expectedH1              = expectedH1CanYouPayUpfrontPage,
+              shouldBackLinkBePresent = true,
+              expectedSubmitUrl       = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit.url),
+              regimeBeingTested       = Some(taxRegime)
+            )
+            val radioContent = doc.select(".govuk-radios__label").asScala.toList
+            radioContent(0).text() shouldBe "Yes"
+            radioContent(1).text() shouldBe "No"
 
-      doc.select("#CanYouMakeAnUpFrontPayment-hint").text() shouldBe expectedPageHintCanPayUpfrontPage
+            doc.select("#CanYouMakeAnUpFrontPayment-hint").text() shouldBe expectedPageHintCanPayUpfrontPage
+          }
+
+          s"[$regime journey] should prepopulate the form when user navigates back and they have a chosen way to pay in their journey" in {
+            stubCommonActions()
+            EssttpBackend.CanPayUpfront.findJourney(testCrypto, origin)()
+
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+            val result: Future[Result] = controller.canYouMakeAnUpfrontPayment(fakeRequest)
+            val doc: Document = Jsoup.parse(contentAsString(result))
+
+            RequestAssertions.assertGetRequestOk(result)
+            doc.select(".govuk-radios__input[checked]").iterator().asScala.toList(0).`val`() shouldBe "Yes"
+          }
+        }
+
+        "POST /can-you-make-an-upfront-payment" - {
+
+          s"[$regime journey] should redirect to /how-much-can-you-pay-upfront when user chooses yes" in {
+            stubCommonActions()
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin)()
+            EssttpBackend.CanPayUpfront.stubUpdateCanPayUpfront(
+              TdAll.journeyId,
+              canPayUpfrontScenario = true,
+              JourneyJsonTemplates.`Answered Can Pay Upfront - Yes`(origin)
+            )
+
+            val fakeRequest = FakeRequest(
+              method = "POST",
+              path   = "/can-you-make-an-upfront-payment"
+            ).withAuthToken()
+              .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+              .withFormUrlEncodedBody(("CanYouMakeAnUpFrontPayment", "Yes"))
+
+            val result: Future[Result] = controller.canYouMakeAnUpfrontPaymentSubmit(fakeRequest)
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(PageUrls.howMuchCanYouPayUpfrontUrl)
+            EssttpBackend.CanPayUpfront.verifyUpdateCanPayUpfrontRequest(TdAll.journeyId, TdAll.canPayUpfront)
+          }
+
+          s"[$regime journey] should redirect to /can-you-make-an-upfront-payment when user chooses no" in {
+            stubCommonActions()
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin)()
+            EssttpBackend.CanPayUpfront.stubUpdateCanPayUpfront(
+              TdAll.journeyId,
+              canPayUpfrontScenario = false,
+              JourneyJsonTemplates.`Answered Can Pay Upfront - No`(origin)
+            )
+
+            val fakeRequest = FakeRequest(
+              method = "POST",
+              path   = "/can-you-make-an-upfront-payment"
+            ).withAuthToken()
+              .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+              .withFormUrlEncodedBody(("CanYouMakeAnUpFrontPayment", "No"))
+
+            val result: Future[Result] = controller.canYouMakeAnUpfrontPaymentSubmit(fakeRequest)
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(PageUrls.retrievedExtremeDatesUrl)
+            EssttpBackend.CanPayUpfront.verifyUpdateCanPayUpfrontRequest(TdAll.journeyId, TdAll.canNotPayUpfront)
+          }
+
+          s"[$regime journey] should redirect to /can-you-make-an-upfront-payment with error summary when no option is selected" in {
+            stubCommonActions()
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin)()
+
+            val fakeRequest = FakeRequest(
+              method = "POST",
+              path   = "/can-you-make-an-upfront-payment"
+            ).withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+            val result: Future[Result] = controller.canYouMakeAnUpfrontPaymentSubmit(fakeRequest)
+            val pageContent: String = contentAsString(result)
+            val doc: Document = Jsoup.parse(pageContent)
+
+            RequestAssertions.assertGetRequestOk(result)
+            ContentAssertions.commonPageChecks(
+              doc,
+              expectedH1              = expectedH1CanYouPayUpfrontPage,
+              expectedSubmitUrl       = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit.url),
+              shouldBackLinkBePresent = true,
+              hasFormError            = true,
+              regimeBeingTested       = Some(taxRegime)
+            )
+
+            doc.select("#CanYouMakeAnUpFrontPayment-hint").text() shouldBe expectedPageHintCanPayUpfrontPage
+            val errorSummary = doc.select(".govuk-error-summary")
+            val errorLink = errorSummary.select("a")
+            errorLink.text() shouldBe "Select yes if you can make an upfront payment"
+            errorLink.attr("href") shouldBe "#CanYouMakeAnUpFrontPayment"
+            EssttpBackend.CanPayUpfront.verifyNoneUpdateCanPayUpfrontRequest(TdAll.journeyId)
+          }
+        }
     }
-
-    "should prepopulate the form when user navigates back and they have a chosen way to pay in their journey" in {
-      stubCommonActions()
-      EssttpBackend.CanPayUpfront.findJourney(testCrypto)()
-
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
-      val result: Future[Result] = controller.canYouMakeAnUpfrontPayment(fakeRequest)
-      val doc: Document = Jsoup.parse(contentAsString(result))
-
-      RequestAssertions.assertGetRequestOk(result)
-      doc.select(".govuk-radios__input[checked]").iterator().asScala.toList(0).`val`() shouldBe "Yes"
-    }
-  }
-
-  "POST /can-you-make-an-upfront-payment" - {
-    "should redirect to /how-much-can-you-pay-upfront when user chooses yes" in {
-      stubCommonActions()
-      EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
-      EssttpBackend.CanPayUpfront.stubUpdateCanPayUpfront(
-        TdAll.journeyId,
-        canPayUpfrontScenario = true,
-        JourneyJsonTemplates.`Answered Can Pay Upfront - Yes`
-      )
-
-      val fakeRequest = FakeRequest(
-        method = "POST",
-        path   = "/can-you-make-an-upfront-payment"
-      ).withAuthToken()
-        .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-        .withFormUrlEncodedBody(("CanYouMakeAnUpFrontPayment", "Yes"))
-
-      val result: Future[Result] = controller.canYouMakeAnUpfrontPaymentSubmit(fakeRequest)
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.howMuchCanYouPayUpfrontUrl)
-      EssttpBackend.CanPayUpfront.verifyUpdateCanPayUpfrontRequest(TdAll.journeyId, TdAll.canPayUpfront)
-    }
-
-    "should redirect to /can-you-make-an-upfront-payment when user chooses no" in {
-      stubCommonActions()
-      EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
-      EssttpBackend.CanPayUpfront.stubUpdateCanPayUpfront(
-        TdAll.journeyId,
-        canPayUpfrontScenario = false,
-        JourneyJsonTemplates.`Answered Can Pay Upfront - No`
-      )
-
-      val fakeRequest = FakeRequest(
-        method = "POST",
-        path   = "/can-you-make-an-upfront-payment"
-      ).withAuthToken()
-        .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-        .withFormUrlEncodedBody(("CanYouMakeAnUpFrontPayment", "No"))
-
-      val result: Future[Result] = controller.canYouMakeAnUpfrontPaymentSubmit(fakeRequest)
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.retrievedExtremeDatesUrl)
-      EssttpBackend.CanPayUpfront.verifyUpdateCanPayUpfrontRequest(TdAll.journeyId, TdAll.canNotPayUpfront)
-    }
-
-    "should redirect to /can-you-make-an-upfront-payment with error summary when no option is selected" in {
-      stubCommonActions()
-      EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
-
-      val fakeRequest = FakeRequest(
-        method = "POST",
-        path   = "/can-you-make-an-upfront-payment"
-      ).withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
-      val result: Future[Result] = controller.canYouMakeAnUpfrontPaymentSubmit(fakeRequest)
-      val pageContent: String = contentAsString(result)
-      val doc: Document = Jsoup.parse(pageContent)
-
-      RequestAssertions.assertGetRequestOk(result)
-      ContentAssertions.commonPageChecks(
-        doc,
-        expectedH1              = expectedH1CanYouPayUpfrontPage,
-        expectedSubmitUrl       = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit.url),
-        shouldBackLinkBePresent = true,
-        hasFormError            = true
-      )
-
-      doc.select("#CanYouMakeAnUpFrontPayment-hint").text() shouldBe expectedPageHintCanPayUpfrontPage
-      val errorSummary = doc.select(".govuk-error-summary")
-      val errorLink = errorSummary.select("a")
-      errorLink.text() shouldBe "Select yes if you can make an upfront payment"
-      errorLink.attr("href") shouldBe "#CanYouMakeAnUpFrontPayment"
-      EssttpBackend.CanPayUpfront.verifyNoneUpdateCanPayUpfrontRequest(TdAll.journeyId)
-    }
-  }
 
   "GET /how-much-can-you-pay-upfront" - {
     "should return 200 and the how much can you pay upfront page" in {
@@ -194,7 +204,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
     "should route the user to /retrieve-extreme-dates when they try to force browse without selecting 'Yes' on the previous page" in {
       stubCommonActions()
-      EssttpBackend.CanPayUpfront.findJourney(testCrypto)(JourneyJsonTemplates.`Answered Can Pay Upfront - No`)
+      EssttpBackend.CanPayUpfront.findJourney(testCrypto)(JourneyJsonTemplates.`Answered Can Pay Upfront - No`(Origins.Epaye.Bta))
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.upfrontPaymentAmount(fakeRequest)

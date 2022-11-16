@@ -196,7 +196,7 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(updateCanPayUpfrontUrl(journeyId)))
       )
 
-    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Answered Can Pay Upfront - Yes`(encrypter)): StubMapping = findByLatestSessionId(jsonBody)
+    def findJourney(encrypter: Encrypter, origin: Origin = Origins.Epaye.Bta)(jsonBody: String = JourneyJsonTemplates.`Answered Can Pay Upfront - Yes`(origin)(encrypter)): StubMapping = findByLatestSessionId(jsonBody)
   }
 
   object UpfrontPaymentAmount {

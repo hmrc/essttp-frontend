@@ -92,16 +92,16 @@ class UpfrontPaymentController @Inject() (
         logErrorAndRouteToDefaultPage(j)
 
       case j: Journey.AfterAnsweredCanPayUpfront if j.canPayUpfront.userCanPayUpfront =>
-        finalStateCheck(j, displayUpfrontPageAmountPage(request.eligibilityCheckResult, Left(j)))
+        finalStateCheck(j, displayUpfrontPaymentAmountPage(request.eligibilityCheckResult, Left(j)))
 
       case j: Journey.AfterUpfrontPaymentAnswers =>
-        finalStateCheck(j, displayUpfrontPageAmountPage(request.eligibilityCheckResult, Right(j)))
+        finalStateCheck(j, displayUpfrontPaymentAmountPage(request.eligibilityCheckResult, Right(j)))
     }
   }
 
   private val minimumUpfrontPaymentAmount: AmountInPence = appConfig.PolicyParameters.minimumUpfrontPaymentAmountInPence
 
-  private def displayUpfrontPageAmountPage(
+  private def displayUpfrontPaymentAmountPage(
       eligibilityCheckResult: EligibilityCheckResult,
       journey:                Either[Journey.AfterAnsweredCanPayUpfront, Journey.AfterUpfrontPaymentAnswers]
   )(implicit request: Request[_]): Result = {

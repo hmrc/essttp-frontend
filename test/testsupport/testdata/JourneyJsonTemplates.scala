@@ -97,14 +97,16 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
-  def `Answered Can Pay Upfront - Yes`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Answered Can Pay Upfront - Yes`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.answeredCanPayUpfrontYes,
-    journeyInfo = JourneyInfo.answeredCanPayUpfrontYes(encrypter)
+    journeyInfo = JourneyInfo.answeredCanPayUpfrontYes(encrypter),
+    origin      = origin
   )
 
-  def `Answered Can Pay Upfront - No`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Answered Can Pay Upfront - No`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.answeredCanPayUpfrontNo,
-    journeyInfo = JourneyInfo.answeredCanPayUpfrontNo(encrypter)
+    journeyInfo = JourneyInfo.answeredCanPayUpfrontNo(encrypter),
+    origin      = origin
   )
 
   def `Entered Upfront payment amount`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
