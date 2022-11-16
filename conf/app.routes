@@ -15,7 +15,6 @@ GET    /epaye-payment-plan-continue                         controllers.LandingC
 GET    /vat-payment-plan                                    controllers.LandingController.vatLandingPage
 GET    /vat-payment-plan-continue                           controllers.LandingController.vatLandingPageContinue
 
-# N.B. start endpoints should all end in /start
 GET    /epaye/start                                         controllers.StartJourneyController.startDetachedEpayeJourney
 GET    /vat/start                                           controllers.StartJourneyController.startDetachedVatJourney
 

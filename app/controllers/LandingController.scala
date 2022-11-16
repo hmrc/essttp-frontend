@@ -50,11 +50,11 @@ class LandingController @Inject() (
       as.default(_ => NotImplemented)
     }
 
-  val epayeLandingPageContinue: Action[AnyContent] = as.authenticatedAction.async { implicit request =>
+  val epayeLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
     handleLandingPageContinue(routes.StartJourneyController.startDetachedEpayeJourney)
   }
 
-  val vatLandingPageContinue: Action[AnyContent] = as.authenticatedAction.async { implicit request =>
+  val vatLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
     handleLandingPageContinue(routes.StartJourneyController.startDetachedVatJourney)
   }
 

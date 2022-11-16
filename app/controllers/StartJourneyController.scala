@@ -35,14 +35,14 @@ class StartJourneyController @Inject() (
     appConfig:        AppConfig
 )(implicit ec: ExecutionContext) extends FrontendController(cc) with Logging {
 
-  def startGovukEpayeJourney: Action[AnyContent] = as.authenticatedAction.async { implicit request =>
+  def startGovukEpayeJourney: Action[AnyContent] = as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
     journeyConnector.Epaye.startJourneyGovUk(SjRequest.Epaye.Empty())
       .map(_ => Redirect(routes.DetermineTaxIdController.determineTaxId.url))
   }
 
   def startGovukVatJourney: Action[AnyContent] =
     if (appConfig.vatEnabled) {
-      as.authenticatedAction.async { implicit request =>
+      as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
         journeyConnector.Vat.startJourneyGovUk(SjRequest.Vat.Empty())
           .map(_ => Redirect(routes.DetermineTaxIdController.determineTaxId.url))
       }
@@ -50,14 +50,14 @@ class StartJourneyController @Inject() (
       as.default(_ => NotImplemented)
     }
 
-  def startDetachedEpayeJourney: Action[AnyContent] = as.authenticatedAction.async { implicit request =>
+  def startDetachedEpayeJourney: Action[AnyContent] = as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
     journeyConnector.Epaye.startJourneyDetachedUrl(SjRequest.Epaye.Empty())
       .map(redirectFromDetachedJourneyStarted)
   }
 
   def startDetachedVatJourney: Action[AnyContent] =
     if (appConfig.vatEnabled) {
-      as.authenticatedAction.async { implicit request =>
+      as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
         journeyConnector.Vat.startJourneyDetachedUrl(SjRequest.Vat.Empty())
           .map(redirectFromDetachedJourneyStarted)
       }

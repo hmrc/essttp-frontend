@@ -75,6 +75,15 @@ class LandingPageControllerSpec extends ItSpec {
   }
 
   "GET /epaye-payment-plan-continue" - {
+    "should redirect to the login page and continue to the same continue endpoint once login is successful " +
+      "if the user is not logged in" in {
+        val result = controller.epayeLandingPageContinue(FakeRequest("GET", routes.LandingController.epayeLandingPageContinue.url))
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some("http://localhost:9949/auth-login-stub/gg-sign-in?" +
+          "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fepaye-payment-plan-continue&origin=essttp-frontend")
+      }
+
     "should redirect to start a detached journey with an updated session if no existing journey is found" in {
       val existingSessionData = Map(SessionKeys.sessionId -> "IamATestSessionId")
 
@@ -141,6 +150,15 @@ class LandingPageControllerSpec extends ItSpec {
   }
 
   "GET /vat-payment-plan-continue" - {
+    "should redirect to the login page and continue to the same continue endpoint once login is successful " +
+      "if the user is not logged in" in {
+        val result = controller.vatLandingPageContinue(FakeRequest("GET", routes.LandingController.vatLandingPageContinue.url))
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some("http://localhost:9949/auth-login-stub/gg-sign-in?" +
+          "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fvat-payment-plan-continue&origin=essttp-frontend")
+      }
+
     "should redirect to start a detached journey with an updated session if no existing journey is found" in {
       val existingSessionData = Map(SessionKeys.sessionId -> "IamATestSessionId")
 
