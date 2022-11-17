@@ -21,6 +21,7 @@ import cats.implicits.catsSyntaxEq
 import connectors.{CallEligibilityApiRequest, TtpConnector}
 import controllers.support.RequestSupport.hc
 import essttp.crypto.CryptoFormat
+import essttp.journey.model.Journey.Stages
 import essttp.journey.model.Journey.Stages.ComputedTaxId
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
@@ -85,7 +86,23 @@ class TtpService @Inject() (
   }
 
   def determineAffordability(journey: Journey.AfterUpfrontPaymentAnswers, eligibilityCheckResult: EligibilityCheckResult)(implicit requestHeader: RequestHeader): Future[InstalmentAmounts] = {
-    val extremeDatesResponse = journey.into[Journey.AfterExtremeDatesResponse].transform.extremeDatesResponse
+    val extremeDatesResponse = journey match {
+      case j1: Stages.RetrievedExtremeDates          => j1.extremeDatesResponse
+      case j1: Stages.RetrievedAffordabilityResult   => j1.extremeDatesResponse
+      case j1: Stages.EnteredMonthlyPaymentAmount    => j1.extremeDatesResponse
+      case j1: Stages.EnteredDayOfMonth              => j1.extremeDatesResponse
+      case j1: Stages.RetrievedStartDates            => j1.extremeDatesResponse
+      case j1: Stages.RetrievedAffordableQuotes      => j1.extremeDatesResponse
+      case j1: Stages.ChosenPaymentPlan              => j1.extremeDatesResponse
+      case j1: Stages.CheckedPaymentPlan             => j1.extremeDatesResponse
+      case j1: Stages.EnteredDetailsAboutBankAccount => j1.extremeDatesResponse
+      case j1: Stages.EnteredDirectDebitDetails      => j1.extremeDatesResponse
+      case j1: Stages.ConfirmedDirectDebitDetails    => j1.extremeDatesResponse
+      case j1: Stages.AgreedTermsAndConditions       => j1.extremeDatesResponse
+      case j1: Stages.SelectedEmailToBeVerified      => j1.extremeDatesResponse
+      case j1: Stages.EmailVerificationComplete      => j1.extremeDatesResponse
+      case j1: Stages.SubmittedArrangement           => j1.extremeDatesResponse
+    }
     val upfrontPaymentAmount: Option[UpfrontPaymentAmount] = TtpService.deriveUpfrontPaymentAmount(journey.upfrontPaymentAnswers)
     val instalmentAmountRequest: InstalmentAmountRequest = TtpService.buildInstalmentRequest(upfrontPaymentAmount, eligibilityCheckResult, extremeDatesResponse)
 

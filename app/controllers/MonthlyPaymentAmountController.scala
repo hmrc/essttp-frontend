@@ -19,12 +19,12 @@ package controllers
 import _root_.actions.Actions
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
-import controllers.MonthlyPaymentAmountController.monthlyPaymentAmountForm
+import controllers.MonthlyPaymentAmountController.{monthlyPaymentAmountForm, upfrontPaymentAnswersFromJourney}
+import essttp.journey.model.Journey.Stages
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel.ttp.EligibilityCheckResult
 import essttp.rootmodel.{AmountInPence, MonthlyPaymentAmount}
 import essttp.utils.Errors
-import io.scalaland.chimney.dsl.TransformerOps
 import models.MoneyUtil._
 import play.api.data.Forms.mapping
 import play.api.data.{Form, Forms}
@@ -62,11 +62,11 @@ class MonthlyPaymentAmountController @Inject() (
   )(implicit request: Request[_]): Result = {
 
     val totalDebt = AmountInPence(eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum)
-    val upfrontPaymentAmount = journey.into[Journey.AfterUpfrontPaymentAnswers].transform.upfrontPaymentAnswers match {
+    val upfrontPaymentAmount = upfrontPaymentAnswersFromJourney(journey) match {
       case j1: UpfrontPaymentAnswers.DeclaredUpfrontPayment => j1.amount.value
       case UpfrontPaymentAnswers.NoUpfrontPayment           => AmountInPence.zero
     }
-    val instalmentAmounts = journey.into[Journey.AfterRetrievedAffordabilityResult].transform.instalmentAmounts
+    val instalmentAmounts = journey.instalmentAmounts
     val (roundedMin, roundedMax): (AmountInPence, AmountInPence) = MonthlyPaymentAmountController.roundingForMinMax(
       amountLeft    = totalDebt.-(upfrontPaymentAmount),
       minimumAmount = instalmentAmounts.minimumInstalmentAmount,
@@ -88,9 +88,8 @@ class MonthlyPaymentAmountController @Inject() (
     val (minMaxResponse, amountLeft) = request.journey match {
       case _: Journey.BeforeRetrievedAffordabilityResult => Errors.throwServerErrorException("We don't have the affordability api response...")
       case j: Journey.AfterRetrievedAffordabilityResult =>
-        val upfrontPaymentAnswers = j.into[Journey.AfterUpfrontPaymentAnswers].transform.upfrontPaymentAnswers
         val totalDebt: AmountInPence = AmountInPence(request.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum)
-        val upfrontPaymentAmount: AmountInPence = upfrontPaymentAnswers match {
+        val upfrontPaymentAmount: AmountInPence = upfrontPaymentAnswersFromJourney(j) match {
           case UpfrontPaymentAnswers.DeclaredUpfrontPayment(amount) => amount.value
           case UpfrontPaymentAnswers.NoUpfrontPayment               => AmountInPence.zero
         }
@@ -162,4 +161,23 @@ object MonthlyPaymentAmountController {
       key -> Forms.of(amountOfMoneyFormatter(minimumAmount.inPounds > _, maximumAmount.inPounds < _))
     )(identity)(Some(_))
   )
+
+  private def upfrontPaymentAnswersFromJourney(journey: Journey.AfterRetrievedAffordabilityResult): UpfrontPaymentAnswers = {
+    journey match {
+      case j: Stages.RetrievedAffordabilityResult   => j.upfrontPaymentAnswers
+      case j: Stages.EnteredMonthlyPaymentAmount    => j.upfrontPaymentAnswers
+      case j: Stages.EnteredDayOfMonth              => j.upfrontPaymentAnswers
+      case j: Stages.RetrievedStartDates            => j.upfrontPaymentAnswers
+      case j: Stages.RetrievedAffordableQuotes      => j.upfrontPaymentAnswers
+      case j: Stages.ChosenPaymentPlan              => j.upfrontPaymentAnswers
+      case j: Stages.CheckedPaymentPlan             => j.upfrontPaymentAnswers
+      case j: Stages.EnteredDetailsAboutBankAccount => j.upfrontPaymentAnswers
+      case j: Stages.EnteredDirectDebitDetails      => j.upfrontPaymentAnswers
+      case j: Stages.ConfirmedDirectDebitDetails    => j.upfrontPaymentAnswers
+      case j: Stages.AgreedTermsAndConditions       => j.upfrontPaymentAnswers
+      case j: Stages.SelectedEmailToBeVerified      => j.upfrontPaymentAnswers
+      case j: Stages.EmailVerificationComplete      => j.upfrontPaymentAnswers
+      case j: Stages.SubmittedArrangement           => j.upfrontPaymentAnswers
+    }
+  }
 }

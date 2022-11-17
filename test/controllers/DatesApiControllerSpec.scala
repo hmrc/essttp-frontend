@@ -16,6 +16,7 @@
 
 package controllers
 
+import essttp.journey.model.{Origin, Origins}
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -32,22 +33,28 @@ class DatesApiControllerSpec extends ItSpec {
 
   private val controller: DatesApiController = app.injector.instanceOf[DatesApiController]
 
-  "GET /retrieve-extreme-dates" - {
-    "trigger call to essttp-dates microservice extreme dates endpoint and update backend" in {
-      stubCommonActions()
-      EssttpBackend.UpfrontPaymentAmount.findJourney(testCrypto)()
-      EssttpDates.stubExtremeDatesCall()
-      EssttpBackend.Dates.stubUpdateExtremeDates(TdAll.journeyId, JourneyJsonTemplates.`Retrieved Extreme Dates Response`)
+  Seq[(String, Origin)](
+    ("EPAYE", Origins.Epaye.Bta),
+    ("VAT", Origins.Vat.Bta)
+  ).foreach {
+      case (regime, origin) =>
+        "GET /retrieve-extreme-dates" - {
+          s"[$regime journey] trigger call to essttp-dates microservice extreme dates endpoint and update backend" in {
+            stubCommonActions()
+            EssttpBackend.UpfrontPaymentAmount.findJourney(testCrypto, origin)()
+            EssttpDates.stubExtremeDatesCall()
+            EssttpBackend.Dates.stubUpdateExtremeDates(TdAll.journeyId, JourneyJsonTemplates.`Retrieved Extreme Dates Response`(origin))
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val result: Future[Result] = controller.retrieveExtremeDates(fakeRequest)
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+            val result: Future[Result] = controller.retrieveExtremeDates(fakeRequest)
 
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.determineAffordabilityUrl)
-      EssttpBackend.Dates.verifyUpdateExtremeDates(TdAll.journeyId, TdAll.extremeDatesResponse())
-      EssttpDates.verifyExtremeDates(TdAll.extremeDatesRequest(initialPayment = true))
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(PageUrls.determineAffordabilityUrl)
+            EssttpBackend.Dates.verifyUpdateExtremeDates(TdAll.journeyId, TdAll.extremeDatesResponse())
+            EssttpDates.verifyExtremeDates(TdAll.extremeDatesRequest(initialPayment = true))
+          }
+        }
     }
-  }
 
   "GET /retrieve-start-dates" - {
     "trigger call to essttp-dates microservice start dates endpoint and update backend" in {

@@ -16,6 +16,7 @@
 
 package controllers
 
+import essttp.journey.model.Origins
 import essttp.rootmodel.{AmountInPence, MonthlyPaymentAmount}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -99,7 +100,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
 
     "should display the minimum amount as £1 if the minimum amount is less than £1" in {
       stubCommonActions()
-      EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto)(JourneyJsonTemplates.`Retrieved Affordability`(1))
+      EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto)(JourneyJsonTemplates.`Retrieved Affordability`(Origins.Epaye.Bta, 1))
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.displayMonthlyPaymentAmount(fakeRequest)
