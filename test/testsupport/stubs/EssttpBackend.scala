@@ -214,7 +214,7 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(updateUpfrontPaymentAmountUrl(journeyId)))
       )
 
-    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Entered Upfront payment amount`(encrypter)): StubMapping =
+    def findJourney(encrypter: Encrypter, origin: Origin = Origins.Epaye.Bta)(jsonBody: String = JourneyJsonTemplates.`Entered Upfront payment amount`(origin)(encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
   }
 
@@ -247,7 +247,7 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(updateStartDatesUrl(journeyId)))
       )
 
-    def findJourneyExtremeDates(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Retrieved Extreme Dates Response`(encrypter)): StubMapping =
+    def findJourneyExtremeDates(encrypter: Encrypter, origin: Origin = Origins.Epaye.Bta)(jsonBody: String = JourneyJsonTemplates.`Retrieved Extreme Dates Response`(origin)(encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
 
     def findJourneyStartDates(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Retrieved Start Dates`(encrypter)): StubMapping =
@@ -255,7 +255,7 @@ object EssttpBackend {
   }
 
   object AffordabilityMinMaxApi {
-    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Retrieved Affordability`()(encrypter)): StubMapping =
+    def findJourney(encrypter: Encrypter, origin: Origin = Origins.Epaye.Bta)(jsonBody: String = JourneyJsonTemplates.`Retrieved Affordability`(origin)(encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
 
     def updateAffordabilityUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-affordability-result"

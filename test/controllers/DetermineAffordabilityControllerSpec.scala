@@ -17,6 +17,7 @@
 package controllers
 
 import essttp.crypto.CryptoFormat
+import essttp.journey.model.{Origin, Origins}
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -32,22 +33,26 @@ import scala.concurrent.Future
 class DetermineAffordabilityControllerSpec extends ItSpec {
 
   private val controller: DetermineAffordabilityController = app.injector.instanceOf[DetermineAffordabilityController]
+  Seq[(String, Origin)](
+    ("EPAYE", Origins.Epaye.Bta),
+    ("VAT", Origins.Vat.Bta)
+  ).foreach {
+      case (regime, origin) =>
+        "GET /determine-affordability" - {
+          s"[$regime journey] trigger call to ttp microservice affordability endpoint and update backend" in {
+            stubCommonActions()
+            EssttpBackend.Dates.findJourneyExtremeDates(testCrypto)()
+            EssttpBackend.AffordabilityMinMaxApi.stubUpdateAffordability(TdAll.journeyId, JourneyJsonTemplates.`Retrieved Affordability`(origin))
+            Ttp.Affordability.stubRetrieveAffordability()
 
-  "GET /determine-affordability" - {
-    "trigger call to ttp microservice affordability endpoint and update backend" in {
-      stubCommonActions()
-      EssttpBackend.Dates.findJourneyExtremeDates(testCrypto)()
-      EssttpBackend.AffordabilityMinMaxApi.stubUpdateAffordability(TdAll.journeyId, JourneyJsonTemplates.`Retrieved Affordability`())
-      Ttp.Affordability.stubRetrieveAffordability()
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+            val result: Future[Result] = controller.determineAffordability(fakeRequest)
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val result: Future[Result] = controller.determineAffordability(fakeRequest)
-
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.howMuchCanYouPayEachMonthUrl)
-      EssttpBackend.AffordabilityMinMaxApi.verifyUpdateAffordabilityRequest(TdAll.journeyId, TdAll.instalmentAmounts)
-      Ttp.Affordability.verifyTtpAffordabilityRequest(CryptoFormat.NoOpCryptoFormat)
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(PageUrls.howMuchCanYouPayEachMonthUrl)
+            EssttpBackend.AffordabilityMinMaxApi.verifyUpdateAffordabilityRequest(TdAll.journeyId, TdAll.instalmentAmounts)
+            Ttp.Affordability.verifyTtpAffordabilityRequest(CryptoFormat.NoOpCryptoFormat)
+          }
+        }
     }
-  }
-
 }

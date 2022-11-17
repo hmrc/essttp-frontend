@@ -109,24 +109,28 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
-  def `Entered Upfront payment amount`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Entered Upfront payment amount`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.enteredUpfrontPaymentAmount,
-    journeyInfo = JourneyInfo.answeredUpfrontPaymentAmount(encrypter)
+    journeyInfo = JourneyInfo.answeredUpfrontPaymentAmount(encrypter),
+    origin      = origin
   )
 
-  def `Retrieved Extreme Dates Response`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Retrieved Extreme Dates Response`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.retrievedExtremeDates,
-    journeyInfo = JourneyInfo.retrievedExtremeDates(encrypter)
+    journeyInfo = JourneyInfo.retrievedExtremeDates(encrypter),
+    origin      = origin
   )
 
-  def `Retrieved Affordability`(minimumInstalmentAmount: Int = 29997)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Retrieved Affordability`(origin: Origin, minimumInstalmentAmount: Int = 29997)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.retrievedAffordabilityResult,
-    journeyInfo = JourneyInfo.retrievedAffordabilityResult(minimumInstalmentAmount, encrypter)
+    journeyInfo = JourneyInfo.retrievedAffordabilityResult(minimumInstalmentAmount, encrypter),
+    origin      = origin
   )
 
-  def `Retrieved Affordability no upfront payment`(minimumInstalmentAmount: Int = 29997)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Retrieved Affordability no upfront payment`(origin: Origin, minimumInstalmentAmount: Int = 29997)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.retrievedAffordabilityResult,
-    journeyInfo = JourneyInfo.retrievedAffordabilityResultNoUpfrontPayment(minimumInstalmentAmount, encrypter)
+    journeyInfo = JourneyInfo.retrievedAffordabilityResultNoUpfrontPayment(minimumInstalmentAmount, encrypter),
+    origin      = origin
   )
 
   def `Entered Monthly Payment Amount`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(

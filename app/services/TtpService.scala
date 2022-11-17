@@ -84,8 +84,14 @@ class TtpService @Inject() (
     ttpConnector.callEligibilityApi(eligibilityRequest, journey.correlationId)
   }
 
-  def determineAffordability(journey: Journey.AfterUpfrontPaymentAnswers, eligibilityCheckResult: EligibilityCheckResult)(implicit requestHeader: RequestHeader): Future[InstalmentAmounts] = {
-    val extremeDatesResponse = journey.into[Journey.AfterExtremeDatesResponse].transform.extremeDatesResponse
+  def determineAffordability(
+      journey:                Journey.AfterUpfrontPaymentAnswers,
+      eligibilityCheckResult: EligibilityCheckResult
+  )(implicit requestHeader: RequestHeader): Future[InstalmentAmounts] = {
+    val extremeDatesResponse = journey match {
+      case j: Journey.AfterExtremeDatesResponse => j.extremeDatesResponse
+      case _                                    => Errors.throwServerErrorException("Trying to get extreme dates response for journey before they exist...")
+    }
     val upfrontPaymentAmount: Option[UpfrontPaymentAmount] = TtpService.deriveUpfrontPaymentAmount(journey.upfrontPaymentAnswers)
     val instalmentAmountRequest: InstalmentAmountRequest = TtpService.buildInstalmentRequest(upfrontPaymentAmount, eligibilityCheckResult, extremeDatesResponse)
 
