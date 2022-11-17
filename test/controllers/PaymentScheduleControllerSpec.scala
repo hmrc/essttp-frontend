@@ -17,6 +17,8 @@
 package controllers
 
 import controllers.PaymentScheduleControllerSpec.SummaryRow
+import essttp.journey.model.{Origin, Origins}
+import essttp.rootmodel.TaxRegime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import play.api.http.Status
@@ -37,198 +39,203 @@ import scala.concurrent.Future
 class PaymentScheduleControllerSpec extends ItSpec {
 
   private val controller: PaymentScheduleController = app.injector.instanceOf[PaymentScheduleController]
+  Seq[(String, Origin, TaxRegime)](
+    ("Epaye", Origins.Epaye.Bta, TaxRegime.Epaye),
+    ("Vat", Origins.Vat.Bta, TaxRegime.Vat)
+  ).foreach {
+      case (regime, origin, taxRegime) =>
+        s"GET ${routes.PaymentScheduleController.checkPaymentSchedule.url}" - {
 
-  s"GET ${routes.PaymentScheduleController.checkPaymentSchedule.url}" - {
+            def extractSummaryRows(elements: List[Element]): List[SummaryRow] = elements.map { e =>
+              SummaryRow(
+                e.select(".govuk-summary-list__key").text(),
+                e.select(".govuk-summary-list__value").text(),
+                e.select(".govuk-summary-list__actions > .govuk-link").attr("href")
+              )
+            }
 
-      def extractSummaryRows(elements: List[Element]): List[SummaryRow] = elements.map{ e =>
-        SummaryRow(
-          e.select(".govuk-summary-list__key").text(),
-          e.select(".govuk-summary-list__value").text(),
-          e.select(".govuk-summary-list__actions > .govuk-link").attr("href")
-        )
-      }
+            def testUpfrontPaymentSummaryRows(summary: Element)(canPayUpfrontValue: String, upfrontPaymentAmountValue: Option[String]) = {
+              val upfrontPaymentSummaryRows = summary.select(".govuk-summary-list__row").iterator().asScala.toList
 
-      def testUpfrontPaymentSummaryRows(summary: Element)(canPayUpfrontValue: String, upfrontPaymentAmountValue: Option[String]) = {
-        val upfrontPaymentSummaryRows = summary.select(".govuk-summary-list__row").iterator().asScala.toList
+              val canPayUpfrontRow = SummaryRow(
+                "Can you make an upfront payment?",
+                canPayUpfrontValue,
+                routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url
+              )
+              val upfrontPaymentAmountRow = upfrontPaymentAmountValue.map(amount =>
+                SummaryRow(
+                  "Taken within 10 working days",
+                  amount,
+                  routes.UpfrontPaymentController.upfrontPaymentAmount.url
+                ))
 
-        val canPayUpfrontRow = SummaryRow(
-          "Can you make an upfront payment?",
-          canPayUpfrontValue,
-          routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url
-        )
-        val upfrontPaymentAmountRow = upfrontPaymentAmountValue.map(amount =>
-          SummaryRow(
-            "Taken within 10 working days",
-            amount,
-            routes.UpfrontPaymentController.upfrontPaymentAmount.url
-          ))
+              val expectedSummaryRows = List(Some(canPayUpfrontRow), upfrontPaymentAmountRow).collect { case Some(s) => s }
 
-        val expectedSummaryRows = List(Some(canPayUpfrontRow), upfrontPaymentAmountRow).collect{ case Some(s) => s }
+              extractSummaryRows(upfrontPaymentSummaryRows) shouldBe expectedSummaryRows
+            }
 
-        extractSummaryRows(upfrontPaymentSummaryRows) shouldBe expectedSummaryRows
-      }
+            def testPaymentPlanRows(summary: Element)(
+                paymentDayValue:      String,
+                datesToAmountsValues: List[(String, String)],
+                totalToPayValue:      String
+            ) = {
+              val paymentPlanRows = summary.select(".govuk-summary-list__row").iterator().asScala.toList
 
-      def testPaymentPlanRows(summary: Element)(
-          paymentDayValue:      String,
-          datesToAmountsValues: List[(String, String)],
-          totalToPayValue:      String
-      ) = {
-        val paymentPlanRows = summary.select(".govuk-summary-list__row").iterator().asScala.toList
+              val paymentDayRow = SummaryRow(
+                "Payments collected on",
+                paymentDayValue,
+                routes.PaymentDayController.paymentDay.url
+              )
 
-        val paymentDayRow = SummaryRow(
-          "Payments collected on",
-          paymentDayValue,
-          routes.PaymentDayController.paymentDay.url
-        )
+              val paymentAmountRows = datesToAmountsValues.map {
+                case (date, amount) =>
+                  SummaryRow(
+                    date, amount, routes.InstalmentsController.instalmentOptions.url
+                  )
+              }
 
-        val paymentAmountRows = datesToAmountsValues.map{
-          case (date, amount) =>
-            SummaryRow(
-              date, amount, routes.InstalmentsController.instalmentOptions.url
-            )
+              val totalToPayRow = SummaryRow("Total to pay", totalToPayValue, "")
+
+              val expectedRows = paymentDayRow :: paymentAmountRows ::: List(totalToPayRow)
+
+              extractSummaryRows(paymentPlanRows) shouldBe expectedRows
+            }
+
+          s"[$regime journey] should return 200 and the can you make an upfront payment page when" - {
+
+              def test(
+                  journeyJsonBody: String
+              )(
+                  canPayUpfrontValue:        String,
+                  upfrontPaymentAmountValue: Option[String],
+                  paymentDayValue:           String,
+                  datesToAmountsValues:      List[(String, String)],
+                  totalToPayValue:           String
+              ) = {
+                stubCommonActions()
+                EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin)(journeyJsonBody)
+
+                val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+                val result: Future[Result] = controller.checkPaymentSchedule(fakeRequest)
+                val pageContent: String = contentAsString(result)
+                val doc: Document = Jsoup.parse(pageContent)
+
+                RequestAssertions.assertGetRequestOk(result)
+                ContentAssertions.commonPageChecks(
+                  doc,
+                  expectedH1              = "Check your payment plan",
+                  shouldBackLinkBePresent = true,
+                  expectedSubmitUrl       = Some(routes.PaymentScheduleController.checkPaymentScheduleSubmit.url),
+                  regimeBeingTested       = Some(taxRegime)
+                )
+
+                val summaries = doc.select(".govuk-summary-list").iterator().asScala.toList
+                summaries.size shouldBe 2
+
+                testUpfrontPaymentSummaryRows(summaries(0))(canPayUpfrontValue, upfrontPaymentAmountValue)
+                testPaymentPlanRows(summaries(1))(paymentDayValue, datesToAmountsValues, totalToPayValue)
+              }
+
+            s"[$regime journey] there is an upfrontPayment amount" in {
+              test(
+                JourneyJsonTemplates.`Chosen Payment Plan`(origin = origin)
+              )(
+                  "Yes",
+                  Some("£123.12"),
+                  "28th or next working day",
+                  List(
+                    "August 2022" -> "£555.73",
+                    "September 2022" -> "£555.73"
+                  ),
+                  "£1,111.47"
+                )
+            }
+
+            s"[$regime journey] there is no upfrontPayment amount" in {
+              test(
+                JourneyJsonTemplates.`Chosen Payment Plan`("""{ "NoUpfrontPayment" : { } }""", origin)
+              )(
+                  "No",
+                  None,
+                  "28th or next working day",
+                  List(
+                    "August 2022" -> "£555.73",
+                    "September 2022" -> "£555.73"
+                  ),
+                  "£1,111.47"
+                )
+            }
+          }
+
+          s"[$regime journey] redirect to the missing info page if no payment plan has been selected yet" in {
+            stubCommonActions()
+            EssttpBackend.AffordableQuotes.findJourney(testCrypto, origin)()
+
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+            val result: Future[Result] = controller.checkPaymentSchedule(fakeRequest)
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe Some(routes.MissingInfoController.missingInfo.url)
+
+          }
         }
 
-        val totalToPayRow = SummaryRow("Total to pay", totalToPayValue, "")
+        s"POST ${routes.PaymentScheduleController.checkPaymentScheduleSubmit.url}" - {
 
-        val expectedRows = paymentDayRow :: paymentAmountRows ::: List(totalToPayRow)
+          s"[$regime journey] should redirect to ${routes.BankDetailsController.detailsAboutBankAccount.url} if the journey " +
+            "has been updated successfully and send an audit event" in {
+              stubCommonActions()
+              EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, origin)()
+              EssttpBackend.HasCheckedPlan.stubUpdateHasCheckedPlan(TdAll.journeyId, JourneyJsonTemplates.`Has Checked Payment Plan`)
 
-        extractSummaryRows(paymentPlanRows) shouldBe expectedRows
-      }
+              val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
-    "should return 200 and the can you make an upfront payment page when" - {
+              val result: Future[Result] = controller.checkPaymentScheduleSubmit(fakeRequest)
+              status(result) shouldBe Status.SEE_OTHER
+              redirectLocation(result) shouldBe Some(routes.BankDetailsController.detailsAboutBankAccount.url)
+              EssttpBackend.HasCheckedPlan.verifyUpdateHasCheckedPlanRequest(TdAll.journeyId)
 
-        def test(
-            journeyJsonBody: String
-        )(
-            canPayUpfrontValue:        String,
-            upfrontPaymentAmountValue: Option[String],
-            paymentDayValue:           String,
-            datesToAmountsValues:      List[(String, String)],
-            totalToPayValue:           String
-        ) = {
-          stubCommonActions()
-          EssttpBackend.EligibilityCheck.findJourney(testCrypto)(journeyJsonBody)
-
-          val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
-          val result: Future[Result] = controller.checkPaymentSchedule(fakeRequest)
-          val pageContent: String = contentAsString(result)
-          val doc: Document = Jsoup.parse(pageContent)
-
-          RequestAssertions.assertGetRequestOk(result)
-          ContentAssertions.commonPageChecks(
-            doc,
-            expectedH1              = "Check your payment plan",
-            shouldBackLinkBePresent = true,
-            expectedSubmitUrl       = Some(routes.PaymentScheduleController.checkPaymentScheduleSubmit.url)
-          )
-
-          val summaries = doc.select(".govuk-summary-list").iterator().asScala.toList
-          summaries.size shouldBe 2
-
-          testUpfrontPaymentSummaryRows(summaries(0))(canPayUpfrontValue, upfrontPaymentAmountValue)
-          testPaymentPlanRows(summaries(1))(paymentDayValue, datesToAmountsValues, totalToPayValue)
-        }
-
-      "there is an upfrontPayment amount" in {
-        test(
-          JourneyJsonTemplates.`Chosen Payment Plan`()
-        )(
-            "Yes",
-            Some("£123.12"),
-            "28th or next working day",
-            List(
-              "August 2022" -> "£555.73",
-              "September 2022" -> "£555.73"
-            ),
-            "£1,111.47"
-          )
-      }
-
-      "there is no upfrontPayment amount" in {
-        test(
-          JourneyJsonTemplates.`Chosen Payment Plan`("""{ "NoUpfrontPayment" : { } }""")
-        )(
-            "No",
-            None,
-            "28th or next working day",
-            List(
-              "August 2022" -> "£555.73",
-              "September 2022" -> "£555.73"
-            ),
-            "£1,111.47"
-          )
-      }
-    }
-
-    "redirect to the missing info page if no payment plan has been selected yet" in {
-      stubCommonActions()
-      EssttpBackend.AffordableQuotes.findJourney(testCrypto)()
-
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
-      val result: Future[Result] = controller.checkPaymentSchedule(fakeRequest)
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.MissingInfoController.missingInfo.url)
-
-    }
-
-  }
-
-  s"POST ${routes.PaymentScheduleController.checkPaymentScheduleSubmit.url}" - {
-
-    s"should redirect to ${routes.BankDetailsController.detailsAboutBankAccount.url} if the journey " +
-      "has been updated successfully and send an audit event" in {
-        stubCommonActions()
-        EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto)()
-        EssttpBackend.HasCheckedPlan.stubUpdateHasCheckedPlan(TdAll.journeyId, JourneyJsonTemplates.`Has Checked Payment Plan`)
-
-        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
-        val result: Future[Result] = controller.checkPaymentScheduleSubmit(fakeRequest)
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.BankDetailsController.detailsAboutBankAccount.url)
-        EssttpBackend.HasCheckedPlan.verifyUpdateHasCheckedPlanRequest(TdAll.journeyId)
-
-        AuditConnectorStub.verifyEventAudited(
-          auditType  = "PlanDetails",
-          auditEvent = Json.parse(
-            s"""
-               |{
-               |        "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-               |        "origin": "Bta",
-               |        "schedule": {
-               |            "collectionDate": 28,
-               |            "collectionLengthCalendarMonths": 2,
-               |            "collections": [
-               |                {
-               |                    "amount": 555.70,
-               |                    "collectionNumber": 2,
-               |                    "paymentDate": "2022-09-28"
-               |                },
-               |                {
-               |                    "amount": 555.70,
-               |                    "collectionNumber": 1,
-               |                    "paymentDate": "2022-08-28"
-               |                }
-               |            ],
-               |            "initialPaymentAmount": 123.12,
-               |            "totalInterestCharged": 0.06,
-               |            "totalNoPayments": 3,
-               |            "totalPayable": 1111.47,
-               |            "totalPaymentWithoutInterest": 1111.41
-               |        },
-               |        "taxDetail": {
-               |            "accountsOfficeRef": "123PA44545546",
-               |            "employerRef": "864FZ00049"
-               |        },
-               |        "taxType": "Epaye"
-               |}
+              AuditConnectorStub.verifyEventAudited(
+                auditType  = "PlanDetails",
+                auditEvent = Json.parse(
+                  s"""
+                 |{
+                 |        "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+                 |        "origin": "Bta",
+                 |        "schedule": {
+                 |            "collectionDate": 28,
+                 |            "collectionLengthCalendarMonths": 2,
+                 |            "collections": [
+                 |                {
+                 |                    "amount": 555.70,
+                 |                    "collectionNumber": 2,
+                 |                    "paymentDate": "2022-09-28"
+                 |                },
+                 |                {
+                 |                    "amount": 555.70,
+                 |                    "collectionNumber": 1,
+                 |                    "paymentDate": "2022-08-28"
+                 |                }
+                 |            ],
+                 |            "initialPaymentAmount": 123.12,
+                 |            "totalInterestCharged": 0.06,
+                 |            "totalNoPayments": 3,
+                 |            "totalPayable": 1111.47,
+                 |            "totalPaymentWithoutInterest": 1111.41
+                 |        },
+                 |        "taxDetail": {
+                 |            "accountsOfficeRef": "123PA44545546",
+                 |            "employerRef": "864FZ00049"
+                 |        },
+                 |        "taxType": "$regime"
+                 |}
             """.stripMargin
-          ).as[JsObject]
-        )
-      }
-  }
+                ).as[JsObject]
+              )
+            }
+        }
+    }
 
 }
 

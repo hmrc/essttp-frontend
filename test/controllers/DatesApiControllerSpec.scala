@@ -39,7 +39,7 @@ class DatesApiControllerSpec extends ItSpec {
   ).foreach {
       case (regime, origin) =>
         "GET /retrieve-extreme-dates" - {
-          s"[$regime journey] trigger call to essttp-dates microservice extreme dates endpoint and update backend" in {
+          s"[$regime journey] should trigger call to essttp-dates microservice extreme dates endpoint and update backend" in {
             stubCommonActions()
             EssttpBackend.UpfrontPaymentAmount.findJourney(testCrypto, origin)()
             EssttpDates.stubExtremeDatesCall()
@@ -54,23 +54,23 @@ class DatesApiControllerSpec extends ItSpec {
             EssttpDates.verifyExtremeDates(TdAll.extremeDatesRequest(initialPayment = true))
           }
         }
+
+        "GET /retrieve-start-dates" - {
+          s"[$regime journey] should trigger call to essttp-dates microservice start dates endpoint and update backend" in {
+            stubCommonActions()
+            EssttpBackend.DayOfMonth.findJourney(TdAll.dayOfMonth(), testCrypto, origin)()
+            EssttpDates.stubStartDatesCall()
+            EssttpBackend.Dates.stubUpdateStartDates(TdAll.journeyId, JourneyJsonTemplates.`Retrieved Start Dates`(origin))
+
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+            val result: Future[Result] = controller.retrieveStartDates(fakeRequest)
+
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(PageUrls.determineAffordableQuotesUrl)
+            EssttpBackend.Dates.verifyUpdateStartDates(TdAll.journeyId, TdAll.startDatesResponse())
+            EssttpDates.verifyStartDates(TdAll.startDatesRequest(initialPayment = true, day = 28))
+          }
+        }
     }
-
-  "GET /retrieve-start-dates" - {
-    "trigger call to essttp-dates microservice start dates endpoint and update backend" in {
-      stubCommonActions()
-      EssttpBackend.DayOfMonth.findJourney(TdAll.dayOfMonth(), testCrypto)()
-      EssttpDates.stubStartDatesCall()
-      EssttpBackend.Dates.stubUpdateStartDates(TdAll.journeyId, JourneyJsonTemplates.`Retrieved Start Dates`)
-
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val result: Future[Result] = controller.retrieveStartDates(fakeRequest)
-
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.determineAffordableQuotesUrl)
-      EssttpBackend.Dates.verifyUpdateStartDates(TdAll.journeyId, TdAll.startDatesResponse())
-      EssttpDates.verifyStartDates(TdAll.startDatesRequest(initialPayment = true, day = 28))
-    }
-  }
 
 }

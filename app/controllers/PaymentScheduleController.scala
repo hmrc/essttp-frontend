@@ -18,8 +18,10 @@ package controllers
 
 import _root_.actions.Actions
 import controllers.JourneyFinalStateCheck.finalStateCheck
-import essttp.journey.model.Journey
-import io.scalaland.chimney.dsl.TransformerOps
+import controllers.PaymentScheduleController.{dayOfMonthFromJourney, upfrontPaymentAnswersFromJourney}
+import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
+import essttp.rootmodel.DayOfMonth
+import essttp.utils.Errors
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.{AuditService, JourneyService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -48,12 +50,14 @@ class PaymentScheduleController @Inject() (
         MissingInfoController.redirectToMissingInfoPage()
 
       case j: Journey.AfterSelectedPaymentPlan =>
-        val upfrontPaymentAnswers =
-          j.into[Journey.AfterUpfrontPaymentAnswers].transform.upfrontPaymentAnswers
-        val paymentDay =
-          j.into[Journey.AfterEnteredDayOfMonth].transform.dayOfMonth
-
-        finalStateCheck(j, Ok(paymentSchedulePage(upfrontPaymentAnswers, paymentDay, j.selectedPaymentPlan)))
+        finalStateCheck(
+          journey = j,
+          result  = Ok(paymentSchedulePage(
+            upfrontPaymentAnswers = upfrontPaymentAnswersFromJourney(j),
+            paymentDay            = dayOfMonthFromJourney(j),
+            paymentPlan           = j.selectedPaymentPlan
+          ))
+        )
     }
   }
 
@@ -72,5 +76,17 @@ class PaymentScheduleController @Inject() (
     }
   }
 
+}
+
+object PaymentScheduleController {
+  private def upfrontPaymentAnswersFromJourney(journey: Journey.AfterSelectedPaymentPlan): UpfrontPaymentAnswers = journey match {
+    case j: Journey.AfterUpfrontPaymentAnswers => j.upfrontPaymentAnswers
+    case _                                     => Errors.throwServerErrorException("Trying to get upfront payment answers for journey before they exist..")
+  }
+
+  private def dayOfMonthFromJourney(journey: Journey.AfterSelectedPaymentPlan): DayOfMonth = journey match {
+    case j: Journey.AfterEnteredDayOfMonth => j.dayOfMonth
+    case _                                 => Errors.throwServerErrorException("Trying to get day of month answer for journey before it exists..")
+  }
 }
 

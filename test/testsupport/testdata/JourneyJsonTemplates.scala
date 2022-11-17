@@ -133,27 +133,31 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
-  def `Entered Monthly Payment Amount`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Entered Monthly Payment Amount`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.enteredMonthlyPaymentAmount,
-    journeyInfo = JourneyInfo.enteredMonthlyPaymentAmount(encrypter)
+    journeyInfo = JourneyInfo.enteredMonthlyPaymentAmount(encrypter),
+    origin      = origin
   )
 
-  def `Entered Day of Month`(dayOfMonth: DayOfMonth)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Entered Day of Month`(dayOfMonth: DayOfMonth, origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.enteredDayOfMonth,
-    journeyInfo = JourneyInfo.enteredDayOfMonth(dayOfMonth, encrypter)
+    journeyInfo = JourneyInfo.enteredDayOfMonth(dayOfMonth, encrypter),
+    origin      = origin
   )
 
-  def `Retrieved Start Dates`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Retrieved Start Dates`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.retrievedStartDates,
-    journeyInfo = JourneyInfo.retrievedStartDates(encrypter)
+    journeyInfo = JourneyInfo.retrievedStartDates(encrypter),
+    origin      = origin
   )
 
-  def `Retrieved Affordable Quotes`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Retrieved Affordable Quotes`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.retrievedAffordableQuotes,
-    journeyInfo = JourneyInfo.retrievedAffordableQuotes(encrypter)
+    journeyInfo = JourneyInfo.retrievedAffordableQuotes(encrypter),
+    origin      = origin
   )
 
-  def `Chosen Payment Plan`(upfrontPaymentAmountJsonString: String = """{"DeclaredUpfrontPayment": {"amount": 12312}}""")(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Chosen Payment Plan`(upfrontPaymentAmountJsonString: String = """{"DeclaredUpfrontPayment": {"amount": 12312}}""", origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.chosenPaymentPlan,
     journeyInfo = List(
       TdJsonBodies.taxIdJourneyInfo(),
@@ -166,7 +170,8 @@ object JourneyJsonTemplates {
       TdJsonBodies.startDatesJourneyInfo,
       TdJsonBodies.affordableQuotesJourneyInfo,
       TdJsonBodies.selectedPlanJourneyInfo
-    )
+    ),
+    origin      = origin
   )
 
   def `Has Checked Payment Plan`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(

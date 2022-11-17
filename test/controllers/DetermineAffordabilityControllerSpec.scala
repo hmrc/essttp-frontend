@@ -41,7 +41,7 @@ class DetermineAffordabilityControllerSpec extends ItSpec {
         "GET /determine-affordability" - {
           s"[$regime journey] trigger call to ttp microservice affordability endpoint and update backend" in {
             stubCommonActions()
-            EssttpBackend.Dates.findJourneyExtremeDates(testCrypto)()
+            EssttpBackend.Dates.findJourneyExtremeDates(testCrypto, origin)()
             EssttpBackend.AffordabilityMinMaxApi.stubUpdateAffordability(TdAll.journeyId, JourneyJsonTemplates.`Retrieved Affordability`(origin))
             Ttp.Affordability.stubRetrieveAffordability()
 

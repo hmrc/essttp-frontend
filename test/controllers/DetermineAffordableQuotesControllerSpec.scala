@@ -17,6 +17,7 @@
 package controllers
 
 import essttp.crypto.CryptoFormat
+import essttp.journey.model.{Origin, Origins}
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -33,21 +34,26 @@ class DetermineAffordableQuotesControllerSpec extends ItSpec {
 
   private val controller: DetermineAffordableQuotesController = app.injector.instanceOf[DetermineAffordableQuotesController]
 
-  "GET /determine-affordable-quotes" - {
-    "trigger call to ttp microservice affordable quotes endpoint and update backend" in {
-      stubCommonActions()
-      EssttpBackend.Dates.findJourneyStartDates(testCrypto)()
-      Ttp.AffordableQuotes.stubRetrieveAffordableQuotes()
-      EssttpBackend.AffordableQuotes.stubUpdateAffordableQuotes(TdAll.journeyId, JourneyJsonTemplates.`Retrieved Affordable Quotes`)
+  Seq[(String, Origin)](
+    ("EPAYE", Origins.Epaye.Bta),
+    ("VAT", Origins.Vat.Bta)
+  ).foreach {
+      case (regime, origin) =>
+        "GET /determine-affordable-quotes" - {
+          s"[$regime journey] trigger call to ttp microservice affordable quotes endpoint and update backend" in {
+            stubCommonActions()
+            EssttpBackend.Dates.findJourneyStartDates(testCrypto, origin)()
+            Ttp.AffordableQuotes.stubRetrieveAffordableQuotes()
+            EssttpBackend.AffordableQuotes.stubUpdateAffordableQuotes(TdAll.journeyId, JourneyJsonTemplates.`Retrieved Affordable Quotes`(origin))
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val result: Future[Result] = controller.retrieveAffordableQuotes(fakeRequest)
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+            val result: Future[Result] = controller.retrieveAffordableQuotes(fakeRequest)
 
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.instalmentsUrl)
-      EssttpBackend.AffordableQuotes.verifyUpdateAffordableQuotesRequest(TdAll.journeyId)
-      Ttp.AffordableQuotes.verifyTtpAffordableQuotesRequest(CryptoFormat.NoOpCryptoFormat)
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(PageUrls.instalmentsUrl)
+            EssttpBackend.AffordableQuotes.verifyUpdateAffordableQuotesRequest(TdAll.journeyId)
+            Ttp.AffordableQuotes.verifyTtpAffordableQuotesRequest(CryptoFormat.NoOpCryptoFormat)
+          }
+        }
     }
-  }
-
 }

@@ -16,8 +16,8 @@
 
 package controllers
 
-import essttp.journey.model.Origins
-import essttp.rootmodel.{AmountInPence, MonthlyPaymentAmount}
+import essttp.journey.model.{Origin, Origins}
+import essttp.rootmodel.{AmountInPence, MonthlyPaymentAmount, TaxRegime}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalatest.prop.TableDrivenPropertyChecks.forAll
@@ -64,150 +64,158 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
     ()
   }
 
-  "GET /how-much-can-you-pay-each-month" - {
-    "should return 200 and the how much can you pay a month page" in {
-      stubCommonActions()
-      EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto)()
+  Seq[(String, Origin, TaxRegime)](
+    ("EPAYE", Origins.Epaye.Bta, TaxRegime.Epaye),
+    ("VAT", Origins.Vat.Bta, TaxRegime.Vat)
+  ).foreach {
+      case (regime, origin, taxRegime) =>
+        "GET /how-much-can-you-pay-each-month" - {
+          s"[$regime journey] should return 200 and the how much can you pay a month page" in {
+            stubCommonActions()
+            EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, origin)()
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val result: Future[Result] = controller.displayMonthlyPaymentAmount(fakeRequest)
-      val pageContent: String = contentAsString(result)
-      val doc: Document = Jsoup.parse(pageContent)
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+            val result: Future[Result] = controller.displayMonthlyPaymentAmount(fakeRequest)
+            val pageContent: String = contentAsString(result)
+            val doc: Document = Jsoup.parse(pageContent)
 
-      RequestAssertions.assertGetRequestOk(result)
-      ContentAssertions.commonPageChecks(
-        doc,
-        expectedH1              = expectedH1,
-        shouldBackLinkBePresent = true,
-        expectedSubmitUrl       = Some(routes.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit.url)
-      )
+            RequestAssertions.assertGetRequestOk(result)
+            ContentAssertions.commonPageChecks(
+              doc,
+              expectedH1              = expectedH1,
+              shouldBackLinkBePresent = true,
+              expectedSubmitUrl       = Some(routes.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit.url),
+              regimeBeingTested       = Some(taxRegime)
+            )
 
-      testMonthlyPaymentAmountContent(doc)
-    }
+            testMonthlyPaymentAmountContent(doc)
+          }
 
-    "should prepopulate the form when user navigates back and they have a monthly payment amount in their journey" in {
-      stubCommonActions()
-      EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto)()
+          s"[$regime journey] should prepopulate the form when user navigates back and they have a monthly payment amount in their journey" in {
+            stubCommonActions()
+            EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto, origin)()
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val result: Future[Result] = controller.displayMonthlyPaymentAmount(fakeRequest)
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+            val result: Future[Result] = controller.displayMonthlyPaymentAmount(fakeRequest)
 
-      RequestAssertions.assertGetRequestOk(result)
+            RequestAssertions.assertGetRequestOk(result)
 
-      val doc: Document = Jsoup.parse(contentAsString(result))
-      doc.select("#MonthlyPaymentAmount").`val`() shouldBe "300"
-    }
+            val doc: Document = Jsoup.parse(contentAsString(result))
+            doc.select("#MonthlyPaymentAmount").`val`() shouldBe "300"
+          }
 
-    "should display the minimum amount as £1 if the minimum amount is less than £1" in {
-      stubCommonActions()
-      EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto)(JourneyJsonTemplates.`Retrieved Affordability`(Origins.Epaye.Bta, 1))
+          s"[$regime journey] should display the minimum amount as £1 if the minimum amount is less than £1" in {
+            stubCommonActions()
+            EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, origin)(JourneyJsonTemplates.`Retrieved Affordability`(origin, 1))
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val result: Future[Result] = controller.displayMonthlyPaymentAmount(fakeRequest)
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+            val result: Future[Result] = controller.displayMonthlyPaymentAmount(fakeRequest)
 
-      RequestAssertions.assertGetRequestOk(result)
-      val doc: Document = Jsoup.parse(contentAsString(result))
-      doc.select("#MonthlyPaymentAmount-hint").text() shouldBe "Enter an amount between £1 and £880"
-    }
-  }
-
-  "POST /how-much-can-you-pay-each-month should" - {
-    "redirect to what day do you want to pay on when form is valid" in {
-      stubCommonActions()
-      EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto)()
-      EssttpBackend.MonthlyPaymentAmount.stubUpdateMonthlyPaymentAmount(
-        TdAll.journeyId,
-        JourneyJsonTemplates.`Entered Monthly Payment Amount`
-      )
-
-      val fakeRequest = FakeRequest(
-        method = "POST",
-        path   = "/how-much-can-you-pay-each-month"
-      ).withAuthToken()
-        .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-        .withFormUrlEncodedBody(("MonthlyPaymentAmount", "300"))
-
-      val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.whichDayDoYouWantToPayUrl)
-      EssttpBackend.MonthlyPaymentAmount.verifyUpdateMonthlyPaymentAmountRequest(TdAll.journeyId, TdAll.monthlyPaymentAmount)
-    }
-
-    forAll(
-      Table(
-        ("Scenario flavour", "form input", "expected amount of money"),
-        ("one decimal place", "300.1", AmountInPence(30010)),
-        ("two decimal places", "300.11", AmountInPence(30011)),
-        ("spaces", " 3 00 . 1  1  ", AmountInPence(30011)),
-        ("commas", "3,00", AmountInPence(30000)),
-        ("'£' symbols", "300", AmountInPence(30000))
-      )
-    ) { (sf: String, formInput: String, expectedAmount: AmountInPence) =>
-        s"should allow for $sf" in {
-          stubCommonActions()
-          EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto)()
-          EssttpBackend.MonthlyPaymentAmount.stubUpdateMonthlyPaymentAmount(
-            TdAll.journeyId,
-            JourneyJsonTemplates.`Entered Monthly Payment Amount`
-          )
-
-          val fakeRequest = FakeRequest(
-            method = "POST",
-            path   = "/how-much-can-you-pay-each-month"
-          ).withAuthToken()
-            .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-            .withFormUrlEncodedBody(("MonthlyPaymentAmount", formInput))
-
-          val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
-          status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(PageUrls.whichDayDoYouWantToPayUrl)
-          EssttpBackend.MonthlyPaymentAmount.verifyUpdateMonthlyPaymentAmountRequest(TdAll.journeyId, MonthlyPaymentAmount(expectedAmount))
+            RequestAssertions.assertGetRequestOk(result)
+            val doc: Document = Jsoup.parse(contentAsString(result))
+            doc.select("#MonthlyPaymentAmount-hint").text() shouldBe "Enter an amount between £1 and £880"
+          }
         }
-      }
 
-    forAll(
-      Table(
-        ("Scenario flavour", "form input", "expected error message"),
-        ("x > maximum value", "880.01", "How much you can afford to pay each month must be between £300 and £880"),
-        ("x < minimum value", "299.99", "How much you can afford to pay each month must be between £300 and £880"),
-        ("x = NaN", "one", "How much you can afford to pay each month must be an amount of money"),
-        ("x = null", "", "Enter how much you can afford to pay each month"),
-        ("scientific notation", "1e2", "How much you can afford to pay each month must be an amount of money"),
-        ("more than one decimal place", "1.123", "How much you can afford to pay each month must be an amount of money")
-      )
-    ) { (sf: String, formInput: String, errorMessage: String) =>
-        s"[$sf] should show the page with the correct error message when $formInput is submitted" in {
-          stubCommonActions()
-          EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto)()
+        "POST /how-much-can-you-pay-each-month should" - {
+          s"[$regime journey] redirect to what day do you want to pay on when form is valid" in {
+            stubCommonActions()
+            EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, origin)()
+            EssttpBackend.MonthlyPaymentAmount.stubUpdateMonthlyPaymentAmount(
+              TdAll.journeyId,
+              JourneyJsonTemplates.`Entered Monthly Payment Amount`(origin)
+            )
 
-          val fakeRequest = FakeRequest(
-            method = "POST",
-            path   = "/how-much-can-you-pay-each-month"
-          ).withAuthToken()
-            .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-            .withFormUrlEncodedBody(("MonthlyPaymentAmount", formInput))
+            val fakeRequest = FakeRequest(
+              method = "POST",
+              path   = "/how-much-can-you-pay-each-month"
+            ).withAuthToken()
+              .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+              .withFormUrlEncodedBody(("MonthlyPaymentAmount", "300"))
 
-          val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
-          val pageContent: String = contentAsString(result)
-          val doc: Document = Jsoup.parse(pageContent)
+            val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(PageUrls.whichDayDoYouWantToPayUrl)
+            EssttpBackend.MonthlyPaymentAmount.verifyUpdateMonthlyPaymentAmountRequest(TdAll.journeyId, TdAll.monthlyPaymentAmount)
+          }
 
-          RequestAssertions.assertGetRequestOk(result)
-          ContentAssertions.commonPageChecks(
-            doc,
-            expectedH1              = expectedH1,
-            shouldBackLinkBePresent = true,
-            expectedSubmitUrl       = Some(routes.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit.url),
-            hasFormError            = true
-          )
-          testMonthlyPaymentAmountContent(doc)
+          forAll(
+            Table(
+              ("Scenario flavour", "form input", "expected amount of money"),
+              ("one decimal place", "300.1", AmountInPence(30010)),
+              ("two decimal places", "300.11", AmountInPence(30011)),
+              ("spaces", " 3 00 . 1  1  ", AmountInPence(30011)),
+              ("commas", "3,00", AmountInPence(30000)),
+              ("'£' symbols", "300", AmountInPence(30000))
+            )
+          ) { (sf: String, formInput: String, expectedAmount: AmountInPence) =>
+              s"[$regime journey] should allow for $sf" in {
+                stubCommonActions()
+                EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, origin)()
+                EssttpBackend.MonthlyPaymentAmount.stubUpdateMonthlyPaymentAmount(
+                  TdAll.journeyId,
+                  JourneyJsonTemplates.`Entered Monthly Payment Amount`(origin)
+                )
 
-          val errorSummary = doc.select(".govuk-error-summary")
-          val errorLink = errorSummary.select("a")
-          errorLink.text() shouldBe errorMessage
-          errorLink.attr("href") shouldBe "#MonthlyPaymentAmount"
-          EssttpBackend.MonthlyPaymentAmount.verifyNoneUpdateMonthlyAmountRequest(TdAll.journeyId)
+                val fakeRequest = FakeRequest(
+                  method = "POST",
+                  path   = "/how-much-can-you-pay-each-month"
+                ).withAuthToken()
+                  .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+                  .withFormUrlEncodedBody(("MonthlyPaymentAmount", formInput))
+
+                val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
+                status(result) shouldBe Status.SEE_OTHER
+                redirectLocation(result) shouldBe Some(PageUrls.whichDayDoYouWantToPayUrl)
+                EssttpBackend.MonthlyPaymentAmount.verifyUpdateMonthlyPaymentAmountRequest(TdAll.journeyId, MonthlyPaymentAmount(expectedAmount))
+              }
+            }
+
+          forAll(
+            Table(
+              ("Scenario flavour", "form input", "expected error message"),
+              ("x > maximum value", "880.01", "How much you can afford to pay each month must be between £300 and £880"),
+              ("x < minimum value", "299.99", "How much you can afford to pay each month must be between £300 and £880"),
+              ("x = NaN", "one", "How much you can afford to pay each month must be an amount of money"),
+              ("x = null", "", "Enter how much you can afford to pay each month"),
+              ("scientific notation", "1e2", "How much you can afford to pay each month must be an amount of money"),
+              ("more than one decimal place", "1.123", "How much you can afford to pay each month must be an amount of money")
+            )
+          ) { (sf: String, formInput: String, errorMessage: String) =>
+              s"[$regime journey] [$sf] should show the page with the correct error message when $formInput is submitted" in {
+                stubCommonActions()
+                EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, origin)()
+
+                val fakeRequest = FakeRequest(
+                  method = "POST",
+                  path   = "/how-much-can-you-pay-each-month"
+                ).withAuthToken()
+                  .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+                  .withFormUrlEncodedBody(("MonthlyPaymentAmount", formInput))
+
+                val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
+                val pageContent: String = contentAsString(result)
+                val doc: Document = Jsoup.parse(pageContent)
+
+                RequestAssertions.assertGetRequestOk(result)
+                ContentAssertions.commonPageChecks(
+                  doc,
+                  expectedH1              = expectedH1,
+                  shouldBackLinkBePresent = true,
+                  expectedSubmitUrl       = Some(routes.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit.url),
+                  hasFormError            = true,
+                  regimeBeingTested       = Some(taxRegime)
+                )
+                testMonthlyPaymentAmountContent(doc)
+
+                val errorSummary = doc.select(".govuk-error-summary")
+                val errorLink = errorSummary.select("a")
+                errorLink.text() shouldBe errorMessage
+                errorLink.attr("href") shouldBe "#MonthlyPaymentAmount"
+                EssttpBackend.MonthlyPaymentAmount.verifyNoneUpdateMonthlyAmountRequest(TdAll.journeyId)
+              }
+            }
+
         }
-      }
-
-  }
+    }
 }
