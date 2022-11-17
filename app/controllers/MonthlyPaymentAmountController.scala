@@ -20,7 +20,6 @@ import _root_.actions.Actions
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import controllers.MonthlyPaymentAmountController.{monthlyPaymentAmountForm, upfrontPaymentAnswersFromJourney}
-import essttp.journey.model.Journey.Stages
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel.ttp.EligibilityCheckResult
 import essttp.rootmodel.{AmountInPence, MonthlyPaymentAmount}
@@ -163,21 +162,10 @@ object MonthlyPaymentAmountController {
   )
 
   private def upfrontPaymentAnswersFromJourney(journey: Journey.AfterRetrievedAffordabilityResult): UpfrontPaymentAnswers = {
+
     journey match {
-      case j: Stages.RetrievedAffordabilityResult   => j.upfrontPaymentAnswers
-      case j: Stages.EnteredMonthlyPaymentAmount    => j.upfrontPaymentAnswers
-      case j: Stages.EnteredDayOfMonth              => j.upfrontPaymentAnswers
-      case j: Stages.RetrievedStartDates            => j.upfrontPaymentAnswers
-      case j: Stages.RetrievedAffordableQuotes      => j.upfrontPaymentAnswers
-      case j: Stages.ChosenPaymentPlan              => j.upfrontPaymentAnswers
-      case j: Stages.CheckedPaymentPlan             => j.upfrontPaymentAnswers
-      case j: Stages.EnteredDetailsAboutBankAccount => j.upfrontPaymentAnswers
-      case j: Stages.EnteredDirectDebitDetails      => j.upfrontPaymentAnswers
-      case j: Stages.ConfirmedDirectDebitDetails    => j.upfrontPaymentAnswers
-      case j: Stages.AgreedTermsAndConditions       => j.upfrontPaymentAnswers
-      case j: Stages.SelectedEmailToBeVerified      => j.upfrontPaymentAnswers
-      case j: Stages.EmailVerificationComplete      => j.upfrontPaymentAnswers
-      case j: Stages.SubmittedArrangement           => j.upfrontPaymentAnswers
+      case j: Journey.AfterUpfrontPaymentAnswers => j.upfrontPaymentAnswers
+      case _                                     => Errors.throwServerErrorException("Trying to get upfront payment answers for journey before they exist...")
     }
   }
 }
