@@ -10,7 +10,7 @@ object SbtUpdatesSettings {
     (Compile / compile) := ((Compile / compile) dependsOn dependencyUpdates).value,
     dependencyUpdatesFilter -= moduleFilter("org.scala-lang"),
     dependencyUpdatesFilter -= moduleFilter("com.typesafe.play"),
-    // dependencyUpdatesFilter -= moduleFilter("uk.gov.hmrc", "essttp-backend-cor-journey"),
+    dependencyUpdatesFilter -= moduleFilter("uk.gov.hmrc", "essttp-backend-cor-journey"),
     // later versions result in this error:
     // ---
     // java.lang.UnsupportedClassVersionError: com/vladsch/flexmark/util/ast/Node has been

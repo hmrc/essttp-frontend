@@ -38,6 +38,7 @@ import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import controllers.JourneyFinalStateCheck.finalStateCheckF
 import controllers.pagerouters.EligibilityRouter
 import essttp.journey.model.Journey
+import essttp.rootmodel.ttp.EligibilityCheckResult
 import play.api.mvc._
 import services.{AuditService, JourneyService, TtpService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -71,11 +72,29 @@ class DetermineEligibilityController @Inject() (
   }
 
   def determineEligibilityAndUpdateJourney(journey: Journey.Stages.ComputedTaxId)(implicit r: AuthenticatedJourneyRequest[_]): Future[Result] = {
-    for {
-      eligibilityCheckResult <- ttpService.determineEligibility(journey)
-      _ = auditService.auditEligibilityCheck(journey, eligibilityCheckResult)
-      updatedJourney <- journeyService.updateEligibilityCheckResult(journey.id, eligibilityCheckResult)
-    } yield Redirect(Routing.next(updatedJourney))
+    /**
+     * TODO: return this function to whats in comment below, it's been changed to a disgusting hacky fix to cater for ETMP/IF errors downstream
+     * for {
+     * eligibilityCheckResult <- ttpService.determineEligibility(journey)
+     * _ = auditService.auditEligibilityCheck(journey, eligibilityCheckResult)
+     * updatedJourney <- journeyService.updateEligibilityCheckResult(journey.id, eligibilityCheckResult)
+     * } yield Redirect(Routing.next(updatedJourney))
+     */
+    val maybeEligibilityCheckResult: Future[Option[EligibilityCheckResult]] = for {
+      eligibilityCheckResult: Option[EligibilityCheckResult] <- ttpService.determineEligibility(journey)
+    } yield eligibilityCheckResult
+
+    maybeEligibilityCheckResult
+      .flatMap {
+        _.fold {
+          Future(Redirect(routes.IneligibleController.payeGenericIneligiblePage.url))
+        } { someResponse =>
+          for {
+            updatedJourney <- journeyService.updateEligibilityCheckResult(journey.id, someResponse)
+            _ = auditService.auditEligibilityCheck(journey, someResponse)
+          } yield Redirect(Routing.next(updatedJourney).url)
+        }
+      }
   }
 
 }
