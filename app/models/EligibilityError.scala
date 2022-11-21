@@ -55,6 +55,8 @@ object EligibilityErrors extends Enum[EligibilityError] {
 
   case object DmSpecialOfficeProcessingRequired extends EligibilityError
 
+  case object NoDueDatesReached extends EligibilityError
+
   case object MultipleReasons extends EligibilityError
 
   override val values: immutable.IndexedSeq[EligibilityError] = findValues
@@ -64,19 +66,20 @@ object EligibilityErrors extends Enum[EligibilityError] {
     val normalisedEligibilityRules: EligibilityRules = eligibilityRulesWithoutNone(eligibilityRules)
 
     normalisedEligibilityRules match {
-      case eligibilityRules if eligibilityRules.moreThanOneReasonForIneligibility                                    => Some(MultipleReasons)
-      case EligibilityRules(true, false, false, false, false, false, false, false, false, Some(false), Some(false))  => Some(HasRlsOnAddress)
-      case EligibilityRules(false, true, false, false, false, false, false, false, false, Some(false), Some(false))  => Some(MarkedAsInsolvent)
-      case EligibilityRules(false, false, true, false, false, false, false, false, false, Some(false), Some(false))  => Some(IsLessThanMinDebtAllowance)
-      case EligibilityRules(false, false, false, true, false, false, false, false, false, Some(false), Some(false))  => Some(IsMoreThanMaxDebtAllowance)
-      case EligibilityRules(false, false, false, false, true, false, false, false, false, Some(false), Some(false))  => Some(DisallowedChargeLockTypes)
-      case EligibilityRules(false, false, false, false, false, true, false, false, false, Some(false), Some(false))  => Some(ExistingTtp)
-      case EligibilityRules(false, false, false, false, false, false, true, false, false, Some(false), Some(false))  => Some(ChargesOverMaxDebtAge)
-      case EligibilityRules(false, false, false, false, false, false, false, true, false, Some(false), Some(false))  => Some(IneligibleChargeTypes)
-      case EligibilityRules(false, false, false, false, false, false, false, false, true, Some(false), Some(false))  => Some(MissingFiledReturns)
-      case EligibilityRules(false, false, false, false, false, false, false, false, false, Some(true), Some(false))  => Some(HasInvalidInterestSignals)
-      case EligibilityRules(false, false, false, false, false, false, false, false, false, Some(false), Some(true))  => Some(DmSpecialOfficeProcessingRequired)
-      case EligibilityRules(false, false, false, false, false, false, false, false, false, Some(false), Some(false)) => None //all false
+      case eligibilityRules if eligibilityRules.moreThanOneReasonForIneligibility => Some(MultipleReasons)
+      case EligibilityRules(true, _, _, _, _, _, _, _, _, _, _, _)                => Some(HasRlsOnAddress)
+      case EligibilityRules(_, true, _, _, _, _, _, _, _, _, _, _)                => Some(MarkedAsInsolvent)
+      case EligibilityRules(_, _, true, _, _, _, _, _, _, _, _, _)                => Some(IsLessThanMinDebtAllowance)
+      case EligibilityRules(_, _, _, true, _, _, _, _, _, _, _, _)                => Some(IsMoreThanMaxDebtAllowance)
+      case EligibilityRules(_, _, _, _, true, _, _, _, _, _, _, _)                => Some(DisallowedChargeLockTypes)
+      case EligibilityRules(_, _, _, _, _, true, _, _, _, _, _, _)                => Some(ExistingTtp)
+      case EligibilityRules(_, _, _, _, _, _, true, _, _, _, _, _)                => Some(ChargesOverMaxDebtAge)
+      case EligibilityRules(_, _, _, _, _, _, _, true, _, _, _, _)                => Some(IneligibleChargeTypes)
+      case EligibilityRules(_, _, _, _, _, _, _, _, true, _, _, _)                => Some(MissingFiledReturns)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, Some(true), _, _)          => Some(HasInvalidInterestSignals)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, Some(true), _)          => Some(DmSpecialOfficeProcessingRequired)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, Some(true))          => Some(NoDueDatesReached)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _)                   => None //all false
     }
   }
 

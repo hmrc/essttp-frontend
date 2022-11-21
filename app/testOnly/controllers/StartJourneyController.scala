@@ -205,7 +205,8 @@ object StartJourneyController {
             disallowedChargeLockType = DisallowedChargeLockType(false)
           )
         )
-      )
+      ),
+      dueDateNotReached    = Some(false)
     )
 
     val chargeTypeAssessments: List[ChargeTypeAssessment] = List(
@@ -230,22 +231,24 @@ object StartJourneyController {
         ineligibleChargeTypes             = containsError(IneligibleChargeTypes),
         missingFiledReturns               = containsError(MissingFiledReturns),
         hasInvalidInterestSignals         = Some(containsError(HasInvalidInterestSignals)),
-        dmSpecialOfficeProcessingRequired = Some(containsError(DmSpecialOfficeProcessingRequired))
+        dmSpecialOfficeProcessingRequired = Some(containsError(DmSpecialOfficeProcessingRequired)),
+        noDueDatesReached                 = Some(containsError(NoDueDatesReached))
       )
     }
     EligibilityCheckResult(
-      processingDateTime          = ProcessingDateTime(LocalDate.now().toString),
-      identification              = makeIdentificationForTaxType(form),
-      customerPostcodes           = List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate("2022-01-01"))),
-      regimePaymentFrequency      = PaymentPlanFrequencies.Monthly,
-      paymentPlanFrequency        = PaymentPlanFrequencies.Monthly,
-      paymentPlanMinLength        = PaymentPlanMinLength(1),
-      paymentPlanMaxLength        = PaymentPlanMaxLength(6),
-      eligibilityStatus           = EligibilityStatus(EligibilityPass(eligibilityRules.isEligible)),
-      eligibilityRules            = eligibilityRules,
-      chargeTypeAssessment        = chargeTypeAssessments,
-      customerDetails             = maybeCustomerDetail,
-      regimeDigitalCorrespondence = maybeRegimeDigitalCorrespondence
+      processingDateTime              = ProcessingDateTime(LocalDate.now().toString),
+      identification                  = makeIdentificationForTaxType(form),
+      customerPostcodes               = List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate("2022-01-01"))),
+      regimePaymentFrequency          = PaymentPlanFrequencies.Monthly,
+      paymentPlanFrequency            = PaymentPlanFrequencies.Monthly,
+      paymentPlanMinLength            = PaymentPlanMinLength(1),
+      paymentPlanMaxLength            = PaymentPlanMaxLength(6),
+      eligibilityStatus               = EligibilityStatus(EligibilityPass(eligibilityRules.isEligible)),
+      eligibilityRules                = eligibilityRules,
+      chargeTypeAssessment            = chargeTypeAssessments,
+      customerDetails                 = maybeCustomerDetail,
+      regimeDigitalCorrespondence     = maybeRegimeDigitalCorrespondence,
+      futureChargeLiabilitiesExcluded = Some(false)
     )
   }
 

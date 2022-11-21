@@ -23,16 +23,17 @@ import models.audit.{AuditDetail, TaxDetail}
 import play.api.libs.json._
 
 final case class EligibilityCheckAuditDetail(
-    eligibilityResult:    EligibilityResult,
-    enrollmentReasons:    Option[EnrollmentReasons],
-    noEligibilityReasons: Int,
-    eligibilityReasons:   List[String],
-    origin:               String,
-    taxType:              String,
-    taxDetail:            TaxDetail,
-    authProviderId:       String,
-    chargeTypeAssessment: List[ChargeTypeAssessment],
-    correlationId:        String
+    eligibilityResult:               EligibilityResult,
+    enrollmentReasons:               Option[EnrollmentReasons],
+    noEligibilityReasons:            Int,
+    eligibilityReasons:              List[String],
+    origin:                          String,
+    taxType:                         String,
+    taxDetail:                       TaxDetail,
+    authProviderId:                  String,
+    chargeTypeAssessment:            List[ChargeTypeAssessment],
+    correlationId:                   String,
+    futureChargeLiabilitiesExcluded: Option[Boolean]
 ) extends AuditDetail {
   val auditType: String = "EligibilityCheck"
 }
