@@ -187,7 +187,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
             "has been updated successfully and send an audit event" in {
               stubCommonActions()
               EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, origin)()
-              EssttpBackend.HasCheckedPlan.stubUpdateHasCheckedPlan(TdAll.journeyId, JourneyJsonTemplates.`Has Checked Payment Plan`)
+              EssttpBackend.HasCheckedPlan.stubUpdateHasCheckedPlan(TdAll.journeyId, JourneyJsonTemplates.`Has Checked Payment Plan`(origin))
 
               val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 

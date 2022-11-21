@@ -369,7 +369,7 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(hasCheckedPlanUrl(journeyId)))
       )
 
-    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Has Checked Payment Plan`(encrypter)): StubMapping = findByLatestSessionId(jsonBody)
+    def findJourney(encrypter: Encrypter, origin: Origin = Origins.Epaye.Bta)(jsonBody: String = JourneyJsonTemplates.`Has Checked Payment Plan`(origin)(encrypter)): StubMapping = findByLatestSessionId(jsonBody)
   }
 
   object EnteredDetailsAboutBankAccount {
@@ -385,9 +385,9 @@ object EssttpBackend {
       verify(exactly(0), postRequestedFor(urlPathEqualTo(enterDetailsAboutBankAccountUrl(journeyId))))
 
     def findJourney(
-        encrypter: Encrypter
+        encrypter: Encrypter, origin: Origin = Origins.Epaye.Bta
     )(
-        jsonBody: String = JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = true)(encrypter)
+        jsonBody: String = JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = true, origin)(encrypter)
     ): StubMapping =
       findByLatestSessionId(jsonBody)
   }

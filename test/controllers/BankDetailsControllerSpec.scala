@@ -17,6 +17,8 @@
 package controllers
 
 import controllers.BankDetailsControllerSpec.SummaryRow
+import essttp.journey.model.{Origin, Origins}
+import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.bank.{DetailsAboutBankAccount, TypeOfBankAccount, TypesOfBankAccount}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
@@ -128,181 +130,188 @@ class BankDetailsControllerSpec extends ItSpec {
       e.select(".govuk-summary-list__actions > .govuk-link").attr("href")
     )
   }
+  Seq[(String, Origin, TaxRegime)](
+    ("EPAYE", Origins.Epaye.Bta, TaxRegime.Epaye),
+    ("VAT", Origins.Vat.Bta, TaxRegime.Vat)
+  ).foreach {
+      case (regime, origin, taxRegime) =>
 
-  "GET /about-your-bank-account should" - {
+        "GET /about-your-bank-account should" - {
 
-    "return 200 and display the 'about your bank account' page" in {
-      stubCommonActions()
-      EssttpBackend.HasCheckedPlan.findJourney(testCrypto)()
-
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
-      val result: Future[Result] = controller.detailsAboutBankAccount(fakeRequest)
-      val pageContent: String = contentAsString(result)
-      val doc: Document = Jsoup.parse(pageContent)
-
-      RequestAssertions.assertGetRequestOk(result)
-      ContentAssertions.commonPageChecks(
-        doc,
-        expectedH1              = DetailsAboutBankAccountPage.expectedH1,
-        shouldBackLinkBePresent = true,
-        expectedSubmitUrl       = Some(routes.BankDetailsController.detailsAboutBankAccountSubmit.url)
-      )
-
-      val formGroups = doc.select(".govuk-form-group").asScala.toList
-      formGroups.size shouldBe 2
-
-      val typeOfAccountFormGroup = formGroups(0)
-      typeOfAccountFormGroup.select(".govuk-fieldset__legend").text() shouldBe DetailsAboutBankAccountPage.typeOfAccountHeading
-
-      val typeOfAccountRadioContent = typeOfAccountFormGroup.select(".govuk-radios__label").asScala.toList
-      typeOfAccountRadioContent.size shouldBe 2
-      typeOfAccountRadioContent(0).text() shouldBe DetailsAboutBankAccountPage.radioButtonContentBusiness
-      typeOfAccountRadioContent(1).text() shouldBe DetailsAboutBankAccountPage.radioButtonContentPersonal
-
-      val accountHolderFormGroup = formGroups(1)
-      accountHolderFormGroup.select(".govuk-fieldset__legend").text() shouldBe DetailsAboutBankAccountPage.accountHolderHeading
-
-      val accountHolderRadioContent = accountHolderFormGroup.select(".govuk-radios__label").asScala.toList
-      accountHolderRadioContent.size shouldBe 2
-      accountHolderRadioContent(0).text() shouldBe "Yes"
-      accountHolderRadioContent(1).text() shouldBe "No"
-
-      doc.select(".govuk-button").text() shouldBe DetailsAboutBankAccountPage.buttonContent
-    }
-
-    Seq(
-      ("Business", true, JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = true), 0, 0),
-      ("Business", false, JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = false), 0, 1),
-      ("Personal", true, JourneyJsonTemplates.`Entered Details About Bank Account - Personal`(isAccountHolder = true), 1, 0),
-      ("Personal", false, JourneyJsonTemplates.`Entered Details About Bank Account - Personal`(isAccountHolder = false), 1, 1)
-    ).foreach {
-        case (typeOfAccount, isAccountHolder, wiremockJson, accountTypeCheckedElementIndex, isAccountHolderCheckedElementIndex) =>
-          s"prepopulate the form when the user has a chosen $typeOfAccount bank account type and " +
-            s"isAccountHolder=$isAccountHolder in their journey" in {
-              stubCommonActions()
-              EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto)(wiremockJson)
-
-              val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
-              val result: Future[Result] = controller.detailsAboutBankAccount(fakeRequest)
-              val pageContent: String = contentAsString(result)
-              val doc: Document = Jsoup.parse(pageContent)
-
-              RequestAssertions.assertGetRequestOk(result)
-
-              val formGroups = doc.select(".govuk-form-group").asScala.toList
-              formGroups.size shouldBe 2
-
-              formGroups(0).select(".govuk-radios__input").asScala.toList(accountTypeCheckedElementIndex).hasAttr("checked") shouldBe true
-              formGroups(1).select(".govuk-radios__input").asScala.toList(isAccountHolderCheckedElementIndex).hasAttr("checked") shouldBe true
-            }
-      }
-  }
-
-  "POST /about-your-bank-account should" - {
-
-      def testRedirect(
-          formBody: (String, String)*
-      )(expectedRedirectUrl: String, expectedDetailsAboutBankAccount: DetailsAboutBankAccount) = {
-        val updatedJourneyJson =
-          expectedDetailsAboutBankAccount.typeOfBankAccount match {
-            case TypesOfBankAccount.Personal =>
-              JourneyJsonTemplates.`Entered Details About Bank Account - Personal`(expectedDetailsAboutBankAccount.isAccountHolder)
-            case TypesOfBankAccount.Business =>
-              JourneyJsonTemplates.`Entered Details About Bank Account - Business`(expectedDetailsAboutBankAccount.isAccountHolder)
-          }
-
-        stubCommonActions()
-        EssttpBackend.HasCheckedPlan.findJourney(testCrypto)()
-        EssttpBackend.EnteredDetailsAboutBankAccount.stubUpdateEnteredDetailsAboutBankAccount(TdAll.journeyId, updatedJourneyJson)
-
-        val fakeRequest = FakeRequest(
-          method = "POST",
-          path   = "/what-type-of-account-details-are-you-providing"
-        ).withAuthToken()
-          .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-          .withFormUrlEncodedBody(formBody: _*)
-
-        val result: Future[Result] = controller.detailsAboutBankAccountSubmit(fakeRequest)
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(expectedRedirectUrl)
-        EssttpBackend.EnteredDetailsAboutBankAccount.verifyUpdateEnteredDetailsAboutBankAccountRequest(TdAll.journeyId, expectedDetailsAboutBankAccount)
-
-      }
-
-    Seq("Business", "Personal").foreach { typeOfAccount =>
-      s"redirect to /set-up-direct-debit when valid form is submitted and the user is an account holder - $typeOfAccount" in {
-        testRedirect(
-          ("typeOfAccount", typeOfAccount),
-          ("isSoleSignatory", "Yes")
-        )(PageUrls.directDebitDetailsUrl, TdAll.detailsAboutBankAccount(typeOfAccount, isAccountHolder = true))
-      }
-    }
-
-    Seq("Business", "Personal").foreach { typeOfAccount =>
-      s"redirect to /set-up-direct-debit when valid form is submitted and the user is not an account holder - $typeOfAccount" in {
-        testRedirect(
-          ("typeOfAccount", typeOfAccount),
-          ("isSoleSignatory", "No")
-        )(PageUrls.cannotSetupDirectDebitOnlineUrl, TdAll.detailsAboutBankAccount(typeOfAccount, isAccountHolder = false))
-      }
-    }
-
-    Seq(
-      (
-        List(
-          ("typeOfAccount", ""),
-          ("isSoleSignatory", "Yes")
-        ),
-          List(
-            ("Select what type of account details you are providing", "#typeOfAccount")
-          ),
-            Some("isSoleSignatory")
-      ),
-      (
-        List(
-          ("typeOfAccount", "Personal"),
-          ("isSoleSignatory", "")
-        ),
-          List(
-            ("Select yes if you are the account holder", "#isSoleSignatory")
-          ),
-            Option("typeOfAccount-2")
-      ),
-      (
-        List(
-          ("typeOfAccount", ""),
-          ("isSoleSignatory", "")
-        ), List(
-            ("Select what type of account details you are providing", "#typeOfAccount"),
-            ("Select yes if you are the account holder", "#isSoleSignatory")
-          ),
-            None
-      )
-    ).foreach{
-        case (formData, expectedErrors, populatedRadioId) =>
-          s"show correct error messages when ${formData.filter(_._2.isEmpty).map(_._1).mkString("&")} is empty" in {
+          s"[$regime journey] return 200 and display the 'about your bank account' page" in {
             stubCommonActions()
-            EssttpBackend.HasCheckedPlan.findJourney(testCrypto)()
+            EssttpBackend.HasCheckedPlan.findJourney(testCrypto, origin)()
 
-            testFormError(controller.detailsAboutBankAccountSubmit)(formData: _*)(expectedErrors, { doc =>
-              val radioInputs = doc.select(".govuk-radios__input")
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
-              populatedRadioId match {
-                case Some(id) =>
-                  radioInputs.select(s"#$id").hasAttr("checked") shouldBe true
-                  radioInputs.select(s":not(#$id)").asScala.toList.foreach(_.hasAttr("checked") shouldBe false)
+            val result: Future[Result] = controller.detailsAboutBankAccount(fakeRequest)
+            val pageContent: String = contentAsString(result)
+            val doc: Document = Jsoup.parse(pageContent)
 
-                case None =>
-                  radioInputs.asScala.toList.foreach(_.hasAttr("checked") shouldBe false)
-              }
-            })
-            EssttpBackend.EnteredDetailsAboutBankAccount.verifyNoneUpdateEnteredDetailsAboutBankAccountRequest(TdAll.journeyId)
+            RequestAssertions.assertGetRequestOk(result)
+            ContentAssertions.commonPageChecks(
+              doc,
+              expectedH1              = DetailsAboutBankAccountPage.expectedH1,
+              shouldBackLinkBePresent = true,
+              expectedSubmitUrl       = Some(routes.BankDetailsController.detailsAboutBankAccountSubmit.url),
+              regimeBeingTested       = Some(taxRegime)
+            )
+
+            val formGroups = doc.select(".govuk-form-group").asScala.toList
+            formGroups.size shouldBe 2
+
+            val typeOfAccountFormGroup = formGroups(0)
+            typeOfAccountFormGroup.select(".govuk-fieldset__legend").text() shouldBe DetailsAboutBankAccountPage.typeOfAccountHeading
+
+            val typeOfAccountRadioContent = typeOfAccountFormGroup.select(".govuk-radios__label").asScala.toList
+            typeOfAccountRadioContent.size shouldBe 2
+            typeOfAccountRadioContent(0).text() shouldBe DetailsAboutBankAccountPage.radioButtonContentBusiness
+            typeOfAccountRadioContent(1).text() shouldBe DetailsAboutBankAccountPage.radioButtonContentPersonal
+
+            val accountHolderFormGroup = formGroups(1)
+            accountHolderFormGroup.select(".govuk-fieldset__legend").text() shouldBe DetailsAboutBankAccountPage.accountHolderHeading
+
+            val accountHolderRadioContent = accountHolderFormGroup.select(".govuk-radios__label").asScala.toList
+            accountHolderRadioContent.size shouldBe 2
+            accountHolderRadioContent(0).text() shouldBe "Yes"
+            accountHolderRadioContent(1).text() shouldBe "No"
+
+            doc.select(".govuk-button").text() shouldBe DetailsAboutBankAccountPage.buttonContent
           }
-      }
 
-  }
+          Seq(
+            ("Business", true, JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = true, origin), 0, 0),
+            ("Business", false, JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = false, origin), 0, 1),
+            ("Personal", true, JourneyJsonTemplates.`Entered Details About Bank Account - Personal`(isAccountHolder = true, origin), 1, 0),
+            ("Personal", false, JourneyJsonTemplates.`Entered Details About Bank Account - Personal`(isAccountHolder = false, origin), 1, 1)
+          ).foreach {
+              case (typeOfAccount, isAccountHolder, wiremockJson, accountTypeCheckedElementIndex, isAccountHolderCheckedElementIndex) =>
+                s"[$regime journey] prepopulate the form when the user has a chosen $typeOfAccount bank account type and " +
+                  s"isAccountHolder=$isAccountHolder in their journey" in {
+                    stubCommonActions()
+                    EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)(wiremockJson)
+
+                    val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+                    val result: Future[Result] = controller.detailsAboutBankAccount(fakeRequest)
+                    val pageContent: String = contentAsString(result)
+                    val doc: Document = Jsoup.parse(pageContent)
+
+                    RequestAssertions.assertGetRequestOk(result)
+
+                    val formGroups = doc.select(".govuk-form-group").asScala.toList
+                    formGroups.size shouldBe 2
+
+                    formGroups(0).select(".govuk-radios__input").asScala.toList(accountTypeCheckedElementIndex).hasAttr("checked") shouldBe true
+                    formGroups(1).select(".govuk-radios__input").asScala.toList(isAccountHolderCheckedElementIndex).hasAttr("checked") shouldBe true
+                  }
+            }
+        }
+
+        "POST /about-your-bank-account should" - {
+
+            def testRedirect(
+                formBody: (String, String)*
+            )(expectedRedirectUrl: String, expectedDetailsAboutBankAccount: DetailsAboutBankAccount) = {
+              val updatedJourneyJson =
+                expectedDetailsAboutBankAccount.typeOfBankAccount match {
+                  case TypesOfBankAccount.Personal =>
+                    JourneyJsonTemplates.`Entered Details About Bank Account - Personal`(expectedDetailsAboutBankAccount.isAccountHolder, origin)
+                  case TypesOfBankAccount.Business =>
+                    JourneyJsonTemplates.`Entered Details About Bank Account - Business`(expectedDetailsAboutBankAccount.isAccountHolder, origin)
+                }
+
+              stubCommonActions()
+              EssttpBackend.HasCheckedPlan.findJourney(testCrypto, origin)()
+              EssttpBackend.EnteredDetailsAboutBankAccount.stubUpdateEnteredDetailsAboutBankAccount(TdAll.journeyId, updatedJourneyJson)
+
+              val fakeRequest = FakeRequest(
+                method = "POST",
+                path   = "/what-type-of-account-details-are-you-providing"
+              ).withAuthToken()
+                .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+                .withFormUrlEncodedBody(formBody: _*)
+
+              val result: Future[Result] = controller.detailsAboutBankAccountSubmit(fakeRequest)
+              status(result) shouldBe Status.SEE_OTHER
+              redirectLocation(result) shouldBe Some(expectedRedirectUrl)
+              EssttpBackend.EnteredDetailsAboutBankAccount.verifyUpdateEnteredDetailsAboutBankAccountRequest(TdAll.journeyId, expectedDetailsAboutBankAccount)
+
+            }
+
+          Seq("Business", "Personal").foreach { typeOfAccount =>
+            s"[$regime journey] redirect to /set-up-direct-debit when valid form is submitted and the user is an account holder - $typeOfAccount" in {
+              testRedirect(
+                ("typeOfAccount", typeOfAccount),
+                ("isSoleSignatory", "Yes")
+              )(PageUrls.directDebitDetailsUrl, TdAll.detailsAboutBankAccount(typeOfAccount, isAccountHolder = true))
+            }
+          }
+
+          Seq("Business", "Personal").foreach { typeOfAccount =>
+            s"[$regime journey] redirect to /set-up-direct-debit when valid form is submitted and the user is not an account holder - $typeOfAccount" in {
+              testRedirect(
+                ("typeOfAccount", typeOfAccount),
+                ("isSoleSignatory", "No")
+              )(PageUrls.cannotSetupDirectDebitOnlineUrl, TdAll.detailsAboutBankAccount(typeOfAccount, isAccountHolder = false))
+            }
+          }
+
+          Seq(
+            (
+              List(
+                ("typeOfAccount", ""),
+                ("isSoleSignatory", "Yes")
+              ),
+                List(
+                  ("Select what type of account details you are providing", "#typeOfAccount")
+                ),
+                  Some("isSoleSignatory")
+            ),
+            (
+              List(
+                ("typeOfAccount", "Personal"),
+                ("isSoleSignatory", "")
+              ),
+                List(
+                  ("Select yes if you are the account holder", "#isSoleSignatory")
+                ),
+                  Option("typeOfAccount-2")
+            ),
+            (
+              List(
+                ("typeOfAccount", ""),
+                ("isSoleSignatory", "")
+              ), List(
+                  ("Select what type of account details you are providing", "#typeOfAccount"),
+                  ("Select yes if you are the account holder", "#isSoleSignatory")
+                ),
+                  None
+            )
+          ).foreach {
+              case (formData, expectedErrors, populatedRadioId) =>
+                s"[$regime journey] show correct error messages when ${formData.filter(_._2.isEmpty).map(_._1).mkString("&")} is empty" in {
+                  stubCommonActions()
+                  EssttpBackend.HasCheckedPlan.findJourney(testCrypto, origin)()
+
+                  testFormError(controller.detailsAboutBankAccountSubmit)(formData: _*)(expectedErrors, { doc =>
+                    val radioInputs = doc.select(".govuk-radios__input")
+
+                    populatedRadioId match {
+                      case Some(id) =>
+                        radioInputs.select(s"#$id").hasAttr("checked") shouldBe true
+                        radioInputs.select(s":not(#$id)").asScala.toList.foreach(_.hasAttr("checked") shouldBe false)
+
+                      case None =>
+                        radioInputs.asScala.toList.foreach(_.hasAttr("checked") shouldBe false)
+                    }
+                  })
+                  EssttpBackend.EnteredDetailsAboutBankAccount.verifyNoneUpdateEnteredDetailsAboutBankAccountRequest(TdAll.journeyId)
+                }
+            }
+
+        }
+    }
 
   "GET /set-up-direct-debit should" - {
 

@@ -20,13 +20,13 @@ import actionsmodel.AuthenticatedJourneyRequest
 import cats.syntax.eq._
 import essttp.bars.model.BarsVerifyStatusResponse
 import essttp.crypto.CryptoFormat
+import essttp.journey.model.Journey.AfterEnteredDetailsAboutBankAccount
 import essttp.journey.model.Journey.Stages._
-import essttp.journey.model.Journey.{AfterEligibilityChecked, AfterEnteredDetailsAboutBankAccount}
-import essttp.journey.model.Origin
+import essttp.journey.model.{Journey, Origin}
 import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount}
 import essttp.rootmodel.ttp.EligibilityCheckResult
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
-import io.scalaland.chimney.dsl.TransformerOps
+import essttp.utils.Errors
 import models.audit.bars._
 import models.audit.eligibility.{EligibilityCheckAuditDetail, EligibilityResult, EnrollmentReasons}
 import models.audit.paymentplansetup.PaymentPlanSetUpAuditDetail
@@ -159,7 +159,10 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       result:               Either[BarsError, VerifyResponse],
       verifyStatusResponse: BarsVerifyStatusResponse
   ): BarsCheckAuditDetail = {
-    val eligibilityCheckResult = journey.into[AfterEligibilityChecked].transform.eligibilityCheckResult
+    val eligibilityCheckResult = journey match {
+      case j: Journey.AfterEligibilityChecked => j.eligibilityCheckResult
+      case _                                  => Errors.throwServerErrorException("Trying to get eligibility check result for audit event, but they haven't been retrieved yet.")
+    }
 
     BarsCheckAuditDetail(
       toAuditString(journey.origin),
