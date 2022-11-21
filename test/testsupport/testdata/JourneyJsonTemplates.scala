@@ -180,19 +180,22 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
-  def `Has Checked Payment Plan`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Has Checked Payment Plan`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.hasCheckedPaymentPlan,
-    journeyInfo = JourneyInfo.hasCheckedPaymentPlan(encrypter)
+    journeyInfo = JourneyInfo.hasCheckedPaymentPlan(encrypter),
+    origin      = origin
   )
 
-  def `Entered Details About Bank Account - Business`(isAccountHolder: Boolean)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Entered Details About Bank Account - Business`(isAccountHolder: Boolean, origin: Origin = Origins.Epaye.Bta)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = if (isAccountHolder) StageInfo.enteredDetailsAboutBankAccount else StageInfo.enteredDetailsAboutBankAccountNotAccountHolder,
-    journeyInfo = JourneyInfo.enteredDetailsAboutBankAccountBusiness(isAccountHolder, encrypter)
+    journeyInfo = JourneyInfo.enteredDetailsAboutBankAccountBusiness(isAccountHolder, encrypter),
+    origin      = origin
   )
 
-  def `Entered Details About Bank Account - Personal`(isAccountHolder: Boolean)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Entered Details About Bank Account - Personal`(isAccountHolder: Boolean, origin: Origin = Origins.Epaye.Bta)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = if (isAccountHolder) StageInfo.enteredDetailsAboutBankAccountPersonal else StageInfo.enteredDetailsAboutBankAccountNotAccountHolder,
-    journeyInfo = JourneyInfo.enteredDetailsAboutBankAccountPersonal(isAccountHolder, encrypter)
+    journeyInfo = JourneyInfo.enteredDetailsAboutBankAccountPersonal(isAccountHolder, encrypter),
+    origin      = origin
   )
 
   def `Entered Direct Debit Details`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
