@@ -136,7 +136,8 @@ object TdJsonBodies {
       |    "existingTTP" : ${eligibilityRules.existingTTP},
       |    "chargesOverMaxDebtAge" : ${eligibilityRules.chargesOverMaxDebtAge},
       |    "ineligibleChargeTypes" : ${eligibilityRules.ineligibleChargeTypes},
-      |    "missingFiledReturns" : ${eligibilityRules.missingFiledReturns}
+      |    "missingFiledReturns" : ${eligibilityRules.missingFiledReturns},
+      |    "noDueDatesReached": ${eligibilityRules.noDueDatesReached.getOrElse(false)}
       |  },
       |  "chargeTypeAssessment" : [
       |    {
@@ -182,7 +183,8 @@ object TdJsonBodies {
       |            "lockType": "Payment",
       |            "lockReason": "Risk/Fraud",
       |            "disallowedChargeLockType": false
-      |         } ]
+      |         } ],
+      |         "dueDateNotReached": false
       |      } ]
       |    }
       |  ],

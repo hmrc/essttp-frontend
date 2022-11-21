@@ -99,16 +99,17 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       enrollmentReason: Either[EnrollmentReasons.NotEnrolled, EnrollmentReasons.InactiveEnrollment]
   )(implicit r: AuthenticatedJourneyRequest[_]): EligibilityCheckAuditDetail = {
     EligibilityCheckAuditDetail(
-      eligibilityResult    = EligibilityResult.Ineligible,
-      enrollmentReasons    = Some(enrollmentReason.merge),
-      noEligibilityReasons = 0,
-      eligibilityReasons   = List.empty,
-      origin               = toAuditString(journey.origin),
-      taxType              = journey.taxRegime.toString,
-      taxDetail            = TaxDetail(None, None, None, None, None, None),
-      authProviderId       = r.ggCredId.value,
-      chargeTypeAssessment = List.empty,
-      correlationId        = journey.correlationId.value.toString
+      eligibilityResult               = EligibilityResult.Ineligible,
+      enrollmentReasons               = Some(enrollmentReason.merge),
+      noEligibilityReasons            = 0,
+      eligibilityReasons              = List.empty,
+      origin                          = toAuditString(journey.origin),
+      taxType                         = journey.taxRegime.toString,
+      taxDetail                       = TaxDetail(None, None, None, None, None, None),
+      authProviderId                  = r.ggCredId.value,
+      chargeTypeAssessment            = List.empty,
+      correlationId                   = journey.correlationId.value.toString,
+      futureChargeLiabilitiesExcluded = None
     )
   }
 
@@ -125,20 +126,24 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
     val eligibilityReasons = {
       val reasons = eligibilityCheckResult.eligibilityRules.getClass.getDeclaredFields.map(_.getName)
       val values = eligibilityCheckResult.eligibilityRules.productIterator.to
-      (reasons zip values).toList.collect{ case (reason, true) => reason }
+      (reasons zip values).toList.collect{
+        case (reason, true)       => reason
+        case (reason, Some(true)) => reason
+      }
     }
 
     EligibilityCheckAuditDetail(
-      eligibilityResult    = eligibilityResult,
-      enrollmentReasons    = enrollmentReasons,
-      noEligibilityReasons = eligibilityReasons.size,
-      eligibilityReasons   = eligibilityReasons,
-      origin               = toAuditString(journey.origin),
-      taxType              = journey.taxRegime.toString,
-      taxDetail            = toTaxDetail(eligibilityCheckResult),
-      authProviderId       = r.ggCredId.value,
-      chargeTypeAssessment = eligibilityCheckResult.chargeTypeAssessment,
-      correlationId        = journey.correlationId.value.toString
+      eligibilityResult               = eligibilityResult,
+      enrollmentReasons               = enrollmentReasons,
+      noEligibilityReasons            = eligibilityReasons.size,
+      eligibilityReasons              = eligibilityReasons,
+      origin                          = toAuditString(journey.origin),
+      taxType                         = journey.taxRegime.toString,
+      taxDetail                       = toTaxDetail(eligibilityCheckResult),
+      authProviderId                  = r.ggCredId.value,
+      chargeTypeAssessment            = eligibilityCheckResult.chargeTypeAssessment,
+      correlationId                   = journey.correlationId.value.toString,
+      futureChargeLiabilitiesExcluded = eligibilityCheckResult.futureChargeLiabilitiesExcluded
     )
   }
 

@@ -50,7 +50,7 @@
 }
 @eligibilityErrorCheckboxes = @{
     EligibilityErrors.values
-            .filterNot(errorsToIgnore => errorsToIgnore === EligibilityErrors.MultipleReasons)
+            .filterNot(_ === EligibilityErrors.MultipleReasons)
             .map { error =>
         CheckboxItem(
             content = Text(error.entryName),
