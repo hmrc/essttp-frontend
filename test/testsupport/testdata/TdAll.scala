@@ -91,7 +91,8 @@ object TdAll {
     ineligibleChargeTypes             = false,
     missingFiledReturns               = false,
     hasInvalidInterestSignals         = None,
-    dmSpecialOfficeProcessingRequired = None
+    dmSpecialOfficeProcessingRequired = None,
+    noDueDatesReached                 = Some(false)
   )
   val notEligibleHasRlsOnAddress: EligibilityRules = eligibleEligibilityRules.copy(hasRlsOnAddress = true)
   val notEligibleMarkedAsInsolvent: EligibilityRules = eligibleEligibilityRules.copy(markedAsInsolvent = true)
@@ -102,6 +103,7 @@ object TdAll {
   val notEligibleExceedsMaxDebtAge: EligibilityRules = eligibleEligibilityRules.copy(chargesOverMaxDebtAge = true)
   val notEligibleEligibleChargeType: EligibilityRules = eligibleEligibilityRules.copy(ineligibleChargeTypes = true)
   val notEligibleMissingFiledReturns: EligibilityRules = eligibleEligibilityRules.copy(missingFiledReturns = true)
+  val notEligibleNoDueDatesReached: EligibilityRules = eligibleEligibilityRules.copy(noDueDatesReached = Some(true))
   val notEligibleMultipleReasons: EligibilityRules = eligibleEligibilityRules.copy(missingFiledReturns = true).copy(hasRlsOnAddress = true)
 
   val callEligibilityApiRequestEpaye: CallEligibilityApiRequest = CallEligibilityApiRequest(
@@ -113,19 +115,19 @@ object TdAll {
   )
 
   def eligibilityCheckResult(eligibilityPass: EligibilityPass, eligibilityRules: EligibilityRules): EligibilityCheckResult = EligibilityCheckResult(
-    processingDateTime          = ProcessingDateTime("2022-03-23T13:49:51.141Z"),
-    identification              = List(
+    processingDateTime              = ProcessingDateTime("2022-03-23T13:49:51.141Z"),
+    identification                  = List(
       Identification(IdType("EMPREF"), IdValue("864FZ00049")),
       Identification(IdType("BROCS"), IdValue("123PA44545546"))
     ),
-    customerPostcodes           = List(CustomerPostcode(customerPostcode, PostcodeDate("2022-01-31"))),
-    regimePaymentFrequency      = PaymentPlanFrequencies.Monthly,
-    paymentPlanFrequency        = PaymentPlanFrequencies.Monthly,
-    paymentPlanMinLength        = PaymentPlanMinLength(1),
-    paymentPlanMaxLength        = PaymentPlanMaxLength(6),
-    eligibilityStatus           = EligibilityStatus(eligibilityPass),
-    eligibilityRules            = eligibilityRules,
-    chargeTypeAssessment        = List(ChargeTypeAssessment(
+    customerPostcodes               = List(CustomerPostcode(customerPostcode, PostcodeDate("2022-01-31"))),
+    regimePaymentFrequency          = PaymentPlanFrequencies.Monthly,
+    paymentPlanFrequency            = PaymentPlanFrequencies.Monthly,
+    paymentPlanMinLength            = PaymentPlanMinLength(1),
+    paymentPlanMaxLength            = PaymentPlanMaxLength(6),
+    eligibilityStatus               = EligibilityStatus(eligibilityPass),
+    eligibilityRules                = eligibilityRules,
+    chargeTypeAssessment            = List(ChargeTypeAssessment(
       taxPeriodFrom   = TaxPeriodFrom("2020-08-13"),
       taxPeriodTo     = TaxPeriodTo("2020-08-14"),
       debtTotalAmount = DebtTotalAmount(AmountInPence(300000)),
@@ -143,11 +145,13 @@ object TdAll {
         chargeOverMaxDebtAge = ChargeOverMaxDebtAge(false),
         locks                = Some(
           List(Lock(LockType("Payment"), LockReason("Risk/Fraud"), DisallowedChargeLockType(false)))
-        )
+        ),
+        dueDateNotReached    = Some(false)
       ))
     )),
-    customerDetails             = None,
-    regimeDigitalCorrespondence = None
+    customerDetails                 = None,
+    regimeDigitalCorrespondence     = None,
+    futureChargeLiabilitiesExcluded = Some(false)
   )
 
   def dayOfMonth(day: Int = 28): DayOfMonth = DayOfMonth(day)
