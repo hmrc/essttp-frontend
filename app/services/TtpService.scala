@@ -23,15 +23,14 @@ import controllers.support.RequestSupport.hc
 import essttp.crypto.CryptoFormat
 import essttp.journey.model.Journey.Stages.ComputedTaxId
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
+import essttp.rootmodel._
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
 import essttp.rootmodel.ttp._
 import essttp.rootmodel.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
 import essttp.rootmodel.ttp.affordablequotes._
 import essttp.rootmodel.ttp.arrangement._
 import essttp.rootmodel.ttp.eligibility.{CustomerDetail, EmailSource}
-import essttp.rootmodel._
 import essttp.utils.Errors
-import io.scalaland.chimney.dsl.TransformerOps
 import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
 import services.TtpService.deriveCustomerDetail
@@ -114,10 +113,10 @@ class TtpService @Inject() (
       journey:                Journey.AfterStartDatesResponse,
       eligibilityCheckResult: EligibilityCheckResult
   )(implicit requestHeader: RequestHeader): Future[AffordableQuotesResponse] = {
-    val upfrontPaymentAnswers = journey.into[Journey.AfterUpfrontPaymentAnswers].transform.upfrontPaymentAnswers
+    val upfrontPaymentAnswers = TtpService.upfrontPaymentAnswersFromJourney(journey)
     val initialPaymentAmount: Option[UpfrontPaymentAmount] = TtpService.deriveUpfrontPaymentAmount(upfrontPaymentAnswers)
-    val monthlyPaymentAmount = journey.into[Journey.AfterEnteredMonthlyPaymentAmount].transform.monthlyPaymentAmount
-    val startDatesResponse = journey.into[Journey.AfterStartDatesResponse].transform.startDatesResponse
+    val monthlyPaymentAmount = TtpService.monthlyPaymentAmountFromJourney(journey)
+    val startDatesResponse = journey.startDatesResponse
 
     val debtItemCharges = eligibilityCheckResult.chargeTypeAssessment
       .flatMap(_.charges)
@@ -274,6 +273,16 @@ object TtpService {
 
     if (maybeEtmpEmail.fold(false)(_.nonEmpty)) maybeEtmpEmail
     else Some(List(CustomerDetail(Some(emailThatsBeenVerified), Some(EmailSource.TEMP))))
+  }
+
+  private def upfrontPaymentAnswersFromJourney(journey: Journey.AfterStartDatesResponse): UpfrontPaymentAnswers = journey match {
+    case j: Journey.AfterUpfrontPaymentAnswers => j.upfrontPaymentAnswers
+    case _                                     => Errors.throwServerErrorException("Trying to get upfront payment answers for journey before they exist..")
+  }
+
+  private def monthlyPaymentAmountFromJourney(journey: Journey.AfterStartDatesResponse): MonthlyPaymentAmount = journey match {
+    case j: Journey.AfterEnteredMonthlyPaymentAmount => j.monthlyPaymentAmount
+    case _ => Errors.throwServerErrorException("Trying to get monthly payment amount for journey before it exists..")
   }
 
 }

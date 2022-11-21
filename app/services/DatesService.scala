@@ -22,7 +22,7 @@ import essttp.rootmodel.CanPayUpfront
 import essttp.rootmodel.dates.InitialPayment
 import essttp.rootmodel.dates.extremedates.{ExtremeDatesRequest, ExtremeDatesResponse}
 import essttp.rootmodel.dates.startdates.{PreferredDayOfMonth, StartDatesRequest, StartDatesResponse}
-import io.scalaland.chimney.dsl.TransformerOps
+import essttp.utils.Errors
 import play.api.mvc.RequestHeader
 
 import javax.inject.{Inject, Singleton}
@@ -35,7 +35,7 @@ class DatesService @Inject() (datesApiConnector: DatesApiConnector) {
 
   def startDates(journey: Journey.AfterEnteredDayOfMonth)(implicit request: RequestHeader): Future[StartDatesResponse] = {
     val dayOfMonth: PreferredDayOfMonth = PreferredDayOfMonth(journey.dayOfMonth.value)
-    val upfrontPaymentAnswers = journey.into[Journey.AfterUpfrontPaymentAnswers].transform.upfrontPaymentAnswers
+    val upfrontPaymentAnswers = DatesService.upfrontPaymentAnswersFromJourney(journey)
     val initialPayment = DatesService.deriveInitialPayment(upfrontPaymentAnswers)
     val startDatesRequest: StartDatesRequest = StartDatesRequest(initialPayment, dayOfMonth)
     datesApiConnector.startDates(startDatesRequest)
@@ -52,8 +52,13 @@ class DatesService @Inject() (datesApiConnector: DatesApiConnector) {
 }
 
 object DatesService {
-  def deriveInitialPayment(upfrontPaymentAnswers: UpfrontPaymentAnswers): InitialPayment = upfrontPaymentAnswers match {
+  private def deriveInitialPayment(upfrontPaymentAnswers: UpfrontPaymentAnswers): InitialPayment = upfrontPaymentAnswers match {
     case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => InitialPayment(true)
     case UpfrontPaymentAnswers.NoUpfrontPayment          => InitialPayment(false)
+  }
+
+  private def upfrontPaymentAnswersFromJourney(journey: Journey.AfterEnteredDayOfMonth): UpfrontPaymentAnswers = journey match {
+    case j: Journey.AfterUpfrontPaymentAnswers => j.upfrontPaymentAnswers
+    case _                                     => Errors.throwServerErrorException("Trying to get upfront payment answers for journey before they exist..")
   }
 }
