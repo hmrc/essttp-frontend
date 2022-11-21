@@ -35,7 +35,7 @@ import io.scalaland.chimney.dsl.TransformerOps
 import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
 import services.TtpService.deriveCustomerDetail
-import uk.gov.hmrc.http.HttpException
+import uk.gov.hmrc.http.{HttpException, UpstreamErrorResponse}
 import util.JourneyLogger
 
 import java.time.{LocalDate, ZoneOffset}
@@ -54,7 +54,12 @@ class TtpService @Inject() (
 
   implicit val cryptoFormat: CryptoFormat = CryptoFormat.NoOpCryptoFormat
 
-  def determineEligibility(journey: ComputedTaxId)(implicit request: RequestHeader): Future[EligibilityCheckResult] = {
+  /**
+   * TODO: change this back to return Future[EligibilityCheckResult] with
+   * i.e.:     ttpConnector.callEligibilityApi(eligibilityRequest, journey.correlationId)
+   * no recover, once IF/ETMP have fixed their bugs...
+   */
+  def determineEligibility(journey: ComputedTaxId)(implicit request: RequestHeader): Future[Option[EligibilityCheckResult]] = {
     val eligibilityRequest: CallEligibilityApiRequest = journey match {
       case j: Journey.Epaye =>
         CallEligibilityApiRequest(
@@ -81,7 +86,14 @@ class TtpService @Inject() (
         )
     }
     JourneyLogger.debug("EligibilityRequest: " + Json.prettyPrint(Json.toJson(eligibilityRequest)))
-    ttpConnector.callEligibilityApi(eligibilityRequest, journey.correlationId)
+
+    ttpConnector
+      .callEligibilityApi(eligibilityRequest, journey.correlationId).map(Option.apply)
+      .recover {
+        case e: UpstreamErrorResponse =>
+          JourneyLogger.error(s"Upstream error from ttp, it might be the IF/ETMP issue. Returning None to redirect to call us page. ${e.message}")
+          None
+      }
   }
 
   def determineAffordability(

@@ -43,6 +43,9 @@ object Ttp {
     def stubRetrieveEligibility(jsonBody: String = TtpJsonResponses.ttpEligibilityCallJson()): StubMapping =
       WireMockHelpers.stubForPostWithResponseBody(eligibilityUrl, jsonBody)
 
+    def stubServiceUnavailableRetrieveEligibility(): StubMapping =
+      stubFor(post(urlPathEqualTo(eligibilityUrl)).willReturn(aResponse().withStatus(Status.SERVICE_UNAVAILABLE)))
+
     def verifyTtpEligibilityRequests(): Unit =
       ttpVerify(eligibilityUrl, TdAll.callEligibilityApiRequestEpaye)(CallEligibilityApiRequest.format)
   }

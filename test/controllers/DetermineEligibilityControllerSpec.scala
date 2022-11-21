@@ -187,5 +187,18 @@ class DetermineEligibilityControllerSpec extends ItSpec {
       redirectLocation(result) shouldBe Some(PageUrls.epayeLandingPageUrl)
       EssttpBackend.EligibilityCheck.verifyNoneUpdateEligibilityRequest(TdAll.journeyId)
     }
+
+    "Redirect to generic epaye call us page when ttp eligibility call returns any technical upstream error -- [SUPP-658]" in {
+      stubCommonActions()
+      EssttpBackend.DetermineTaxId.findJourney()
+      Ttp.Eligibility.stubServiceUnavailableRetrieveEligibility()
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result = controller.determineEligibility(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.payeNotEligibleUrl)
+      Ttp.Eligibility.verifyTtpEligibilityRequests()
+      EssttpBackend.EligibilityCheck.verifyNoneUpdateEligibilityRequest(TdAll.journeyId)
+      AuditConnectorStub.verifyNoAuditEvent()
+    }
   }
 }
