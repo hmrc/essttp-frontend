@@ -265,13 +265,13 @@ object TtpService {
    * If new email entered on the screen which doesn't match the ETMP one - TEMP
    */
   private def deriveCustomerDetail(journey: Journey.Stages.EmailVerificationComplete): Option[List[CustomerDetail]] = {
-    val etmpEmails: Option[List[CustomerDetail]] =
-      journey.eligibilityCheckResult.customerDetails.map(_.filter(_.emailSource.contains(EmailSource.ETMP)))
-    val emailThatsBeenVerified: String = journey.emailToBeVerified.value.decryptedValue
-    val maybeEtmpEmail: Option[List[CustomerDetail]] =
-      etmpEmails.map(_.filter(_.emailAddress.map(_.toLowerCase(Locale.UK)) === Some(emailThatsBeenVerified.toLowerCase(Locale.UK))))
+    val emailThatsBeenVerified: Email = journey.emailToBeVerified
+    val verifiedEmailIsEtmpEmail =
+      journey.eligibilityCheckResult.email.exists(
+        _.value.decryptedValue.toLowerCase(Locale.UK) === emailThatsBeenVerified.value.decryptedValue.toLowerCase(Locale.UK)
+      )
 
-    if (maybeEtmpEmail.fold(false)(_.nonEmpty)) maybeEtmpEmail
+    if (verifiedEmailIsEtmpEmail) Some(List(CustomerDetail(Some(emailThatsBeenVerified), Some(EmailSource.ETMP))))
     else Some(List(CustomerDetail(Some(emailThatsBeenVerified), Some(EmailSource.TEMP))))
   }
 

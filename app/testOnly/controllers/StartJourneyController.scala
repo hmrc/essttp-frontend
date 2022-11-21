@@ -24,7 +24,7 @@ import essttp.journey.JourneyConnector
 import essttp.journey.model.{Origins, SjRequest}
 import essttp.rootmodel.ttp.affordablequotes.DueDate
 import essttp.rootmodel.ttp.eligibility.{CustomerDetail, EmailSource, RegimeDigitalCorrespondence}
-import essttp.rootmodel.{AmountInPence, BackUrl, ReturnUrl, TaxRegime}
+import essttp.rootmodel.{AmountInPence, BackUrl, Email, ReturnUrl, TaxRegime}
 import models.EligibilityErrors._
 import models.{EligibilityError, EligibilityErrors}
 import play.api.mvc._
@@ -183,7 +183,7 @@ object StartJourneyController {
 
     // hardcoding email for now, maybe we should move it into the form to make testing better for Darren
     val (maybeCustomerDetail, maybeRegimeDigitalCorrespondence) =
-      Some(List(CustomerDetail(Some("bobross@joyofpainting.com"), Some(EmailSource.ETMP)))) -> Some(RegimeDigitalCorrespondence(true))
+      Some(List(CustomerDetail(Some(Email(SensitiveString("bobross@joyofpainting.com"))), Some(EmailSource.ETMP)))) -> Some(RegimeDigitalCorrespondence(true))
 
     val charges: Charges = Charges(
       chargeType           = ChargeType("InYearRTICharge-Tax"),

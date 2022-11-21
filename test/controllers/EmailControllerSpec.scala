@@ -27,10 +27,11 @@ import org.jsoup.nodes.{Document, Element}
 import org.jsoup.select.Elements
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.http.Status
+import play.api.libs.json.{JsArray, JsObject, Json}
 import play.api.mvc.{Action, AnyContent, Call, Cookie, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import testsupport.ItSpec
+import testsupport.{ItSpec, JsonUtils}
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.{EmailVerificationStub, EssttpBackend}
@@ -69,11 +70,11 @@ class EmailControllerSpec extends ItSpec {
       radios.size() shouldBe 2
 
       val radioButtons: List[Element] = radios.select(".govuk-radios__input").asScala.toList
-      radioButtons(0).`val` shouldBe "bobross@joyOfPainting.com"
+      radioButtons(0).`val` shouldBe "bobross@joyofpainting.com"
       radioButtons(1).`val` shouldBe "new"
 
       val radioLabels = radios.select(".govuk-radios__label").asScala.toList
-      radioLabels(0).text() shouldBe "bobross@joyOfPainting.com"
+      radioLabels(0).text() shouldBe "bobross@joyofpainting.com"
       radioLabels(1).text() shouldBe "A new email address"
 
       doc.select("#newEmailInput-hint").text() shouldBe "For example, myname@sample.com"
@@ -83,7 +84,7 @@ class EmailControllerSpec extends ItSpec {
     "should prepopulate the form correctly" - {
       "existing email" in {
         stubCommonActions()
-        EssttpBackend.SelectEmail.findJourney("bobross@joyOfPainting.com", encrypter = testCrypto)()
+        EssttpBackend.SelectEmail.findJourney("bobross@joyofpainting.com", encrypter = testCrypto)()
         val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
         val result: Future[Result] = controller.whichEmailDoYouWantToUse(fakeRequest)
         val doc: Document = Jsoup.parse(contentAsString(result))
@@ -109,12 +110,26 @@ class EmailControllerSpec extends ItSpec {
         doc.select("#newEmailInput").`val` shouldBe "somenewemail@newemail.com"
       }
     }
+
+    "throw an error if an email address cannot be found in the eligibility check response" in {
+      stubCommonActions()
+      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto)(
+        JsonUtils.replace(List("AgreedTermsAndConditions", "eligibilityCheckResult", "customerDetails"), JsArray())(
+          Json.parse(JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = true)).as[JsObject]
+        ).toString
+      )
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val error = intercept[Exception](controller.whichEmailDoYouWantToUse(fakeRequest).futureValue)
+      error.getMessage should endWith("Could not find email address in eligibility response.")
+    }
+
   }
 
   "POST /which-email-do-you-want-to-use should" - {
 
     "update backend with existing email" in {
-      val email: Email = Email(SensitiveString("bobross@joyOfPainting.com"))
+      val email: Email = Email(SensitiveString("bobross@joyofpainting.com"))
 
       stubCommonActions()
       EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto)()
@@ -203,6 +218,19 @@ class EmailControllerSpec extends ItSpec {
           errorLink.attr("href") shouldBe expectedErrorTarget
           EssttpBackend.SelectEmail.verifyNoneUpdateSelectedEmailRequest(TdAll.journeyId)
         }
+    }
+
+    "throw an error if an email address cannot be found in the eligibility check response" in {
+      stubCommonActions()
+      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto)(
+        JsonUtils.replace(List("AgreedTermsAndConditions", "eligibilityCheckResult", "customerDetails"), JsArray())(
+          Json.parse(JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = true)).as[JsObject]
+        ).toString
+      )
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val error = intercept[Exception](controller.whichEmailDoYouWantToUseSubmit(fakeRequest).futureValue)
+      error.getMessage should endWith("Could not find email address in eligibility response.")
     }
 
   }

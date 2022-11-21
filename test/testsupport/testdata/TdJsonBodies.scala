@@ -189,7 +189,7 @@ object TdJsonBodies {
       |    }
       |  ],
       |  "customerDetails" : [ {
-      |    "emailAddress" : "bobross@joyofpainting.com",
+      |    "emailAddress" : "${encryptString("bobross@joyofpainting.com", encrypter)}",
       |    "emailSource" : "ETMP"
       |  } ],
       |  "regimeDigitalCorrespondence" : true
