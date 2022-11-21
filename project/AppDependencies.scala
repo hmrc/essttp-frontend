@@ -8,7 +8,7 @@ object AppDependencies {
     "uk.gov.hmrc"       %% "play-conditional-form-mapping" % "1.12.0-play-28",
     "com.beachape"      %% "enumeratum-play"               % "1.7.0",
     "org.typelevel"     %% "cats-core"                     % "2.9.0",
-    "uk.gov.hmrc"       %% "essttp-backend-cor-journey"    % "1.83.0",
+    "uk.gov.hmrc"       %% "essttp-backend-cor-journey"    % "1.84.0",
     "uk.gov.hmrc"       %% "emailaddress"                  % "3.6.0"
   )
 
