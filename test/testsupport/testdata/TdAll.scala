@@ -28,7 +28,7 @@ import essttp.rootmodel.ttp._
 import essttp.rootmodel.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
 import essttp.rootmodel.ttp.arrangement._
 import essttp.rootmodel.ttp.eligibility.{CustomerDetail, EmailSource, RegimeDigitalCorrespondence}
-import essttp.rootmodel.{AmountInPence, CanPayUpfront, DayOfMonth, MonthlyPaymentAmount, UpfrontPaymentAmount}
+import essttp.rootmodel.{AmountInPence, CanPayUpfront, DayOfMonth, Email, MonthlyPaymentAmount, UpfrontPaymentAmount}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 
@@ -324,7 +324,7 @@ object TdAll {
   )
 
   def customerDetail(email: String = "bobross@joyofpainting.com", source: EmailSource = EmailSource.ETMP): Option[List[CustomerDetail]] =
-    Some(List(CustomerDetail(Some(email), Some(source))))
+    Some(List(CustomerDetail(Some(Email(SensitiveString(email))), Some(source))))
 
   val someRegimeDigitalCorrespondenceFalse: Option[RegimeDigitalCorrespondence] = Some(RegimeDigitalCorrespondence(false))
   val someRegimeDigitalCorrespondenceTrue: Option[RegimeDigitalCorrespondence] = Some(RegimeDigitalCorrespondence(true))

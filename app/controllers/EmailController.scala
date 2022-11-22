@@ -51,9 +51,6 @@ class EmailController @Inject() (
     appConfig:                AppConfig
 )(implicit execution: ExecutionContext) extends FrontendController(mcc) with Logging {
 
-  //todo get email from eligibilityCheckResponse by pattern matching, pass into chooseEmailPage -- it's not available in eligibilityCheckResponse yet
-  val temporaryStaticEmail: SensitiveString = SensitiveString("bobross@joyOfPainting.com")
-
   private def withEmailEnabled(action: Action[AnyContent]): Action[AnyContent] =
     if (!appConfig.emailJourneyEnabled) {
       as.default{ _ => NotImplemented }
@@ -64,55 +61,62 @@ class EmailController @Inject() (
   val whichEmailDoYouWantToUse: Action[AnyContent] =
     withEmailEnabled {
       as.eligibleJourneyAction { implicit request =>
-        request.journey match {
-          case j: Journey.BeforeAgreedTermsAndConditions => logErrorAndRouteToDefaultPage(j)
-          case j: Journey.AfterAgreedTermsAndConditions =>
-            if (!j.isEmailAddressRequired) {
-              logErrorAndRouteToDefaultPage(j)
-            } else {
-              finalStateCheck(j, displayWhichEmailDoYouWantToUse(j))
-            }
+        withEmailAddressFromEligibilityResponse { emailFromEligibilityResponse =>
+          request.journey match {
+            case j: Journey.BeforeAgreedTermsAndConditions => logErrorAndRouteToDefaultPage(j)
+            case j: Journey.AfterAgreedTermsAndConditions =>
+              if (!j.isEmailAddressRequired) {
+                logErrorAndRouteToDefaultPage(j)
+              } else {
+                finalStateCheck(j, displayWhichEmailDoYouWantToUse(j, emailFromEligibilityResponse))
+              }
+          }
         }
       }
     }
 
-  private def displayWhichEmailDoYouWantToUse(journey: Journey.AfterAgreedTermsAndConditions)(implicit request: Request[_]): Result = {
+  private def displayWhichEmailDoYouWantToUse(
+      journey:                      Journey.AfterAgreedTermsAndConditions,
+      emailFromEligibilityResponse: Email
+  )(implicit request: Request[_]): Result = {
     val maybePrePopForm: Form[ChooseEmailForm] = journey match {
       case _: Journey.BeforeEmailAddressSelectedToBeVerified => chooseEmailForm()
       case j: Journey.AfterEmailAddressSelectedToBeVerified =>
-        if (j.emailToBeVerified.value.decryptedValue === temporaryStaticEmail.decryptedValue) {
+        if (j.emailToBeVerified === emailFromEligibilityResponse) {
           chooseEmailForm().fill(ChooseEmailForm(j.emailToBeVerified.value.decryptedValue, None))
         } else {
-          chooseEmailForm().fill(ChooseEmailForm(temporaryStaticEmail.decryptedValue, Some(j.emailToBeVerified.value.decryptedValue)))
+          chooseEmailForm().fill(ChooseEmailForm(emailFromEligibilityResponse.value.decryptedValue, Some(j.emailToBeVerified.value.decryptedValue)))
         }
       case _: Journey.Stages.SubmittedArrangement =>
         Errors.throwServerErrorException("Can't render form for page when submission is submitted, this should never happen")
     }
-    Ok(views.chooseEmailPage(temporaryStaticEmail.decryptedValue, maybePrePopForm))
+    Ok(views.chooseEmailPage(emailFromEligibilityResponse.value.decryptedValue, maybePrePopForm))
   }
 
   val whichEmailDoYouWantToUseSubmit: Action[AnyContent] =
     withEmailEnabled {
       as.eligibleJourneyAction.async { implicit request =>
-        EmailController.chooseEmailForm()
-          .bindFromRequest()
-          .fold(
-            formWithErrors => Future.successful(
-              Ok(views.chooseEmailPage(temporaryStaticEmail.decryptedValue, form = formWithErrors))
-            ),
-            (form: ChooseEmailForm) => {
-              val emailAddress: Email = form.differentEmail match {
-                case Some(email) => Email(SensitiveString(email))
-                case None        => Email(temporaryStaticEmail)
+        withEmailAddressFromEligibilityResponse { emailFromEligibilityResponse =>
+          EmailController.chooseEmailForm()
+            .bindFromRequest()
+            .fold(
+              formWithErrors => Future.successful(
+                Ok(views.chooseEmailPage(emailFromEligibilityResponse.value.decryptedValue, formWithErrors))
+              ),
+              (form: ChooseEmailForm) => {
+                val emailAddress: Email = form.differentEmail match {
+                  case Some(email) => Email(SensitiveString(email))
+                  case None        => Email(emailFromEligibilityResponse.value)
+                }
+                journeyService
+                  .updateSelectedEmailToBeVerified(
+                    journeyId = request.journeyId,
+                    email     = emailAddress
+                  )
+                  .map(updatedJourney => Redirect(Routing.next(updatedJourney)))
               }
-              journeyService
-                .updateSelectedEmailToBeVerified(
-                  journeyId = request.journeyId,
-                  email     = emailAddress
-                )
-                .map(updatedJourney => Redirect(Routing.next(updatedJourney)))
-            }
-          )
+            )
+        }
       }
     }
 
@@ -197,6 +201,15 @@ class EmailController @Inject() (
             logErrorAndRouteToDefaultPage(j)
         }
     }
+
+  private def withEmailAddressFromEligibilityResponse(f: Email => Result)(implicit r: EligibleJourneyRequest[_]): Result =
+    f(emailFromEligibilityResponse(r))
+
+  private def withEmailAddressFromEligibilityResponse(f: Email => Future[Result])(implicit r: EligibleJourneyRequest[_]): Future[Result] =
+    f(emailFromEligibilityResponse(r))
+
+  private def emailFromEligibilityResponse(r: EligibleJourneyRequest[_]) =
+    r.eligibilityCheckResult.email.getOrElse(Errors.throwServerErrorException("Could not find email address in eligibility response"))
 
 }
 
