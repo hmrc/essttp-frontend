@@ -198,14 +198,16 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
-  def `Entered Direct Debit Details`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Entered Direct Debit Details`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.enteredDirectDebitDetails,
-    journeyInfo = JourneyInfo.enteredDirectDebitDetails(encrypter)
+    journeyInfo = JourneyInfo.enteredDirectDebitDetails(encrypter),
+    origin      = origin
   )
 
-  def `Confirmed Direct Debit Details`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Confirmed Direct Debit Details`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.confirmedDirectDebitDetails,
-    journeyInfo = JourneyInfo.confirmedDirectDebitDetails(encrypter)
+    journeyInfo = JourneyInfo.confirmedDirectDebitDetails(encrypter),
+    origin      = origin
   )
 
   def `Agreed Terms and Conditions`(isEmailAddresRequired: Boolean)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(

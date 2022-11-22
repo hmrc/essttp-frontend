@@ -16,6 +16,7 @@
 
 package controllers
 
+import essttp.journey.model.Origins
 import essttp.rootmodel.IsEmailAddressRequired
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -43,7 +44,7 @@ class TermsAndConditionsControllerSpec extends ItSpec {
   "GET /terms-and-conditions should" - {
     "return 200 and the terms and conditions page" in {
       stubCommonActions()
-      EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto)()
+      EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto, Origins.Epaye.Bta)()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.termsAndConditions(fakeRequest)
@@ -93,7 +94,7 @@ class TermsAndConditionsControllerSpec extends ItSpec {
 
     "redirect the user to the email journey if it is enabled and update backend" in {
       stubCommonActions()
-      EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto)()
+      EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto, Origins.Epaye.Bta)()
       EssttpBackend.TermsAndConditions.stubUpdateAgreedTermsAndConditions(
         TdAll.journeyId,
         JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = true)
@@ -120,7 +121,7 @@ class TermsAndConditionsControllerEmailDisabledSpec extends ItSpec {
 
     "redirect the user to the submit arrangement endpoint if the email journey is enabled and update backend" in {
       stubCommonActions()
-      EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto)()
+      EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto, Origins.Epaye.Bta)()
       EssttpBackend.TermsAndConditions.stubUpdateAgreedTermsAndConditions(
         TdAll.journeyId,
         JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = false)

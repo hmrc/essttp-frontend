@@ -385,7 +385,7 @@ object EssttpBackend {
       verify(exactly(0), postRequestedFor(urlPathEqualTo(enterDetailsAboutBankAccountUrl(journeyId))))
 
     def findJourney(
-        encrypter: Encrypter, origin: Origin = Origins.Epaye.Bta
+        encrypter: Encrypter, origin: Origin
     )(
         jsonBody: String = JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = true, origin)(encrypter)
     ): StubMapping =
@@ -410,7 +410,7 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(directDebitDetailsUrl(journeyId)))
       )
 
-    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Entered Direct Debit Details`(encrypter)): StubMapping =
+    def findJourney(encrypter: Encrypter, origin: Origin)(jsonBody: String = JourneyJsonTemplates.`Entered Direct Debit Details`(origin)(encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
   }
 
@@ -431,7 +431,7 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(confirmDirectDebitDetailsUrl(journeyId)))
       )
 
-    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Confirmed Direct Debit Details`(encrypter)): StubMapping = findByLatestSessionId(jsonBody)
+    def findJourney(encrypter: Encrypter, origin: Origin)(jsonBody: String = JourneyJsonTemplates.`Confirmed Direct Debit Details`(origin)(encrypter)): StubMapping = findByLatestSessionId(jsonBody)
   }
 
   object TermsAndConditions {
