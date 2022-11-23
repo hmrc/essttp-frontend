@@ -36,7 +36,6 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val authTimeoutSeconds: Int = config.get[FiniteDuration]("timeout-dialog.timeout").toSeconds.toInt
   val authTimeoutCountdownSeconds: Int = config.get[FiniteDuration]("timeout-dialog.countdown").toSeconds.toInt
   val accessibilityStatementPath: String = config.get[String]("accessibility-statement.service-path")
-  val serviceIdentifierPAYE: String = "eSSTTP-PAYE"
 
   object BaseUrl {
     val platformHost: Option[String] = config.getOptional[String]("platform.frontend.host")
@@ -76,7 +75,11 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   }
 
   object ExitSurvey {
-    val payeExitSurveyUrl: String = s"${BaseUrl.feedbackFrontend}/feedback/$serviceIdentifierPAYE"
+    private val baseUrl: String = s"${BaseUrl.feedbackFrontend}/feedback"
+
+    val payeExitSurveyUrl: String = s"$baseUrl/eSSTTP-PAYE"
+
+    val vatExitSurveyUrl: String = s"$baseUrl/eSSTTP-VAT"
   }
 
   object Crypto {
