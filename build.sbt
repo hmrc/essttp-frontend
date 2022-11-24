@@ -6,7 +6,7 @@ lazy val appName: String = "essttp-frontend"
 lazy val scalaCompilerOptions = Seq(
   "-Xfatal-warnings",
   "-Xlint:-missing-interpolator,_",
-  "-Yno-adapted-args",
+  "-Xlint:adapted-args",
   "-Ywarn-unused:implicits",
   "-Ywarn-unused:imports",
   "-Ywarn-unused:locals",
@@ -19,7 +19,6 @@ lazy val scalaCompilerOptions = Seq(
   "-feature",
   "-unchecked",
   "-language:implicitConversions",
-  "-Ypartial-unification", //required by cats,
   // required in place of silencer plugin
   "-Wconf:cat=unused-imports&src=html/.*:s",
   "-Wconf:src=routes/.*:s"
@@ -34,7 +33,7 @@ lazy val root = (project in file("."))
   .settings(majorVersion := 0)
   .settings(ThisBuild / useSuperShell:= false)
   .settings(
-    scalaVersion := "2.12.16",
+    scalaVersion := "2.13.8",
     name := appName,
     PlayKeys.playDefaultPort := 9215,
     scalacOptions ++= Seq("-feature"),

@@ -40,7 +40,7 @@ import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
-import scala.jdk.CollectionConverters.{asScalaIteratorConverter, iterableAsScalaIterableConverter}
+import scala.jdk.CollectionConverters.{IterableHasAsScala, IteratorHasAsScala}
 
 class EmailControllerSpec extends ItSpec {
 
@@ -422,7 +422,7 @@ class EmailControllerSpec extends ItSpec {
           false -> false
         ).foreach{
             case (verified, locked) =>
-              withClue(s"For verified=$verified and locked=$locked: "){
+              withClue(s"For verified=${verified.toString} and locked=${locked.toString}: "){
                 stubCommonActions()
                 EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)()
                 EmailVerificationStub.getVerificationStatus(

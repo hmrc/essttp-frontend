@@ -29,7 +29,7 @@ object MoneyUtil {
   }
 
   def formatAmountOfMoneyWithoutPoundSign(d: BigDecimal): String =
-    d.toString().replaceAllLiterally("£", "")
+    d.toString().replaceAll("£", "")
 
   def amountOfMoneyFormatter(
       isTooSmall: BigDecimal => Boolean,
@@ -61,7 +61,7 @@ object MoneyUtil {
             .leftMap((_: Throwable) =>
               if (s.isEmpty) FormError(key, "error.required") else FormError(key, "error.pattern"))
             .flatMap { d: BigDecimal =>
-              if (!(d * BigDecimal(100)).isWhole()) {
+              if (!(d * BigDecimal(100)).isWhole) {
                 Left(FormError(key, "error.pattern"))
               } else if (isTooSmall(d)) {
                 Left(FormError(key, "error.tooSmall"))

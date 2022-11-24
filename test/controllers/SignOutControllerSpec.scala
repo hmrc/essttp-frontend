@@ -31,7 +31,7 @@ import testsupport.stubs.EssttpBackend
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 class SignOutControllerSpec extends ItSpec {
 
@@ -100,7 +100,7 @@ class SignOutControllerSpec extends ItSpec {
 
     TaxRegime.values.foreach{ taxRegime =>
 
-      s"[taxRegime = $taxRegime] redirect to the doYouWantToGiveFeedback page after clearing the session and storing the tax regime in the cookie" in {
+      s"[taxRegime = ${taxRegime.toString}] redirect to the doYouWantToGiveFeedback page after clearing the session and storing the tax regime in the cookie" in {
         val origin: Origin = taxRegime match {
           case TaxRegime.Epaye => Origins.Epaye.Bta
           case TaxRegime.Vat   => Origins.Vat.Bta

@@ -125,19 +125,19 @@ object TdJsonBodies {
       |  "paymentPlanMinLength": 1,
       |  "paymentPlanMaxLength": 6,
       |  "eligibilityStatus" : {
-      |    "eligibilityPass" : ${eligibilityPass.value}
+      |    "eligibilityPass" : ${eligibilityPass.value.toString}
       |  },
       |  "eligibilityRules" : {
-      |    "hasRlsOnAddress" : ${eligibilityRules.hasRlsOnAddress},
-      |    "markedAsInsolvent" : ${eligibilityRules.markedAsInsolvent},
-      |    "isLessThanMinDebtAllowance" : ${eligibilityRules.isLessThanMinDebtAllowance},
-      |    "isMoreThanMaxDebtAllowance" : ${eligibilityRules.isMoreThanMaxDebtAllowance},
-      |    "disallowedChargeLockTypes" : ${eligibilityRules.disallowedChargeLockTypes},
-      |    "existingTTP" : ${eligibilityRules.existingTTP},
-      |    "chargesOverMaxDebtAge" : ${eligibilityRules.chargesOverMaxDebtAge},
-      |    "ineligibleChargeTypes" : ${eligibilityRules.ineligibleChargeTypes},
-      |    "missingFiledReturns" : ${eligibilityRules.missingFiledReturns},
-      |    "noDueDatesReached": ${eligibilityRules.noDueDatesReached.getOrElse(false)}
+      |    "hasRlsOnAddress" : ${eligibilityRules.hasRlsOnAddress.toString},
+      |    "markedAsInsolvent" : ${eligibilityRules.markedAsInsolvent.toString},
+      |    "isLessThanMinDebtAllowance" : ${eligibilityRules.isLessThanMinDebtAllowance.toString},
+      |    "isMoreThanMaxDebtAllowance" : ${eligibilityRules.isMoreThanMaxDebtAllowance.toString},
+      |    "disallowedChargeLockTypes" : ${eligibilityRules.disallowedChargeLockTypes.toString},
+      |    "existingTTP" : ${eligibilityRules.existingTTP.toString},
+      |    "chargesOverMaxDebtAge" : ${eligibilityRules.chargesOverMaxDebtAge.toString},
+      |    "ineligibleChargeTypes" : ${eligibilityRules.ineligibleChargeTypes.toString},
+      |    "missingFiledReturns" : ${eligibilityRules.missingFiledReturns.toString},
+      |    "noDueDatesReached": ${eligibilityRules.noDueDatesReached.getOrElse(false).toString}
       |  },
       |  "chargeTypeAssessment" : [
       |    {
@@ -197,9 +197,9 @@ object TdJsonBodies {
       |""".stripMargin
   }
 
-  def canPayUpfrontJourneyInfo(canPayUpfront: Boolean): String = s""""canPayUpfront": $canPayUpfront"""
+  def canPayUpfrontJourneyInfo(canPayUpfront: Boolean): String = s""""canPayUpfront": ${canPayUpfront.toString}"""
 
-  def upfrontPaymentAmountJourneyInfo(upfrontPaymentAmount: UpfrontPaymentAmount): String = s""""upfrontPaymentAmount": ${upfrontPaymentAmount.value.value}"""
+  def upfrontPaymentAmountJourneyInfo(upfrontPaymentAmount: UpfrontPaymentAmount): String = s""""upfrontPaymentAmount": ${upfrontPaymentAmount.value.value.toString}"""
 
   def upfrontPaymentAnswersJourneyInfo(upfrontPaymentAmountJsonString: String = """{"DeclaredUpfrontPayment": {"amount": 200}}"""): String =
     s""""upfrontPaymentAnswers" : $upfrontPaymentAmountJsonString"""
@@ -215,14 +215,14 @@ object TdJsonBodies {
   def affordabilityResultJourneyInfo(minimumInstalmentAmount: Int = 29997): String =
     s"""
        |"instalmentAmounts": {
-       |   "minimumInstalmentAmount": $minimumInstalmentAmount,
+       |   "minimumInstalmentAmount": ${minimumInstalmentAmount.toString},
        |   "maximumInstalmentAmount": 87944
        |}
        |""".stripMargin
 
   def monthlyPaymentAmountJourneyInfo: String = """"monthlyPaymentAmount": 30000"""
 
-  def dayOfMonthJourneyInfo(dayOfMonth: DayOfMonth): String = s""""dayOfMonth": ${dayOfMonth.value}"""
+  def dayOfMonthJourneyInfo(dayOfMonth: DayOfMonth): String = s""""dayOfMonth": ${dayOfMonth.value.toString}"""
 
   def startDatesJourneyInfo: String =
     s"""
@@ -459,7 +459,7 @@ object TdJsonBodies {
     s"""
        |"detailsAboutBankAccount": {
        |  "typeOfBankAccount" : "$typeOfAccount",
-       |  "isAccountHolder": $isAccountHolder
+       |  "isAccountHolder": ${isAccountHolder.toString}
        |}""".stripMargin
 
   def directDebitDetailsJourneyInfo(encrypter: Encrypter): String =
@@ -471,7 +471,7 @@ object TdJsonBodies {
        |}""".stripMargin
 
   def isEmailAddressRequiredJourneyInfo(isEmailAddressRequired: Boolean): String =
-    s""""isEmailAddressRequired": $isEmailAddressRequired"""
+    s""""isEmailAddressRequired": ${isEmailAddressRequired.toString}"""
 
   def emailAddressSelectedToBeVerified(email: String, encrypter: Encrypter): String =
     s""""emailToBeVerified": "${encryptString(email, encrypter)}""""

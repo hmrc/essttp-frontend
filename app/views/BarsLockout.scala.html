@@ -36,7 +36,7 @@
   val zonedDateTime = lockoutExpires.atZone(ZoneId.of("Europe/London"))
   val date = zonedDateTime.toLocalDate
   val time = zonedDateTime.toLocalTime
-  val dateString = s"${date.getDayOfMonth} ${DateMessages.monthName(date.getMonthValue).show} ${date.getYear}"
+  val dateString = s"${date.getDayOfMonth.toString} ${DateMessages.monthName(date.getMonthValue).show} ${date.getYear.toString}"
   val timeString = DateTimeFormatter.ofPattern("h:mma").format(time)
           .replaceAll("AM$", Messages.BankDetailsLockout.am.show)
           .replaceAll("PM$", Messages.BankDetailsLockout.pm.show)

@@ -49,19 +49,19 @@ object TtpJsonResponses {
        |  "paymentPlanMinLength": 1,
        |  "paymentPlanMaxLength": 6,
        |  "eligibilityStatus" : {
-       |    "eligibilityPass" : ${eligibilityPass.value}
+       |    "eligibilityPass" : ${eligibilityPass.value.toString}
        |  },
        |  "eligibilityRules" : {
-       |    "hasRlsOnAddress" : ${eligibilityRules.hasRlsOnAddress},
-       |    "markedAsInsolvent" : ${eligibilityRules.markedAsInsolvent},
-       |    "isLessThanMinDebtAllowance" : ${eligibilityRules.isLessThanMinDebtAllowance},
-       |    "isMoreThanMaxDebtAllowance" : ${eligibilityRules.isMoreThanMaxDebtAllowance},
-       |    "disallowedChargeLockTypes" : ${eligibilityRules.disallowedChargeLockTypes},
-       |    "existingTTP" : ${eligibilityRules.existingTTP},
-       |    "chargesOverMaxDebtAge" : ${eligibilityRules.chargesOverMaxDebtAge},
-       |    "ineligibleChargeTypes" : ${eligibilityRules.ineligibleChargeTypes},
-       |    "missingFiledReturns" : ${eligibilityRules.missingFiledReturns},
-       |    "noDueDatesReached": ${eligibilityRules.noDueDatesReached.getOrElse(false)}
+       |    "hasRlsOnAddress" : ${eligibilityRules.hasRlsOnAddress.toString},
+       |    "markedAsInsolvent" : ${eligibilityRules.markedAsInsolvent.toString},
+       |    "isLessThanMinDebtAllowance" : ${eligibilityRules.isLessThanMinDebtAllowance.toString},
+       |    "isMoreThanMaxDebtAllowance" : ${eligibilityRules.isMoreThanMaxDebtAllowance.toString},
+       |    "disallowedChargeLockTypes" : ${eligibilityRules.disallowedChargeLockTypes.toString},
+       |    "existingTTP" : ${eligibilityRules.existingTTP.toString},
+       |    "chargesOverMaxDebtAge" : ${eligibilityRules.chargesOverMaxDebtAge.toString},
+       |    "ineligibleChargeTypes" : ${eligibilityRules.ineligibleChargeTypes.toString},
+       |    "missingFiledReturns" : ${eligibilityRules.missingFiledReturns.toString},
+       |    "noDueDatesReached": ${eligibilityRules.noDueDatesReached.getOrElse(false).toString}
        |  },
        |  "chargeTypeAssessment" : [ {
        |    "taxPeriodFrom" : "2020-08-13",

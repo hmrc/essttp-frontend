@@ -51,7 +51,7 @@ object EligibilityCheckAuditDetail {
 
   private def penceToPounds(jsValue: JsValue): JsNumber = jsValue match {
     case j: JsNumber => JsNumber(j.value / 100)
-    case e           => throw new IllegalArgumentException(s"Expected JsNumber but got ${e.getClass}")
+    case e           => throw new IllegalArgumentException(s"Expected JsNumber but got ${e.getClass.toString}")
   }
 
   implicit class JsObjectStuff(private val jsObject: JsObject) extends AnyVal {
@@ -76,6 +76,7 @@ object EligibilityCheckAuditDetail {
               }
             case value if currentFieldName === fieldName => (currentFieldName, transformation(value))
             case value if currentFieldName =!= fieldName => (currentFieldName, value)
+            case value: JsValue                          => (currentFieldName, value)
           }
         }
 

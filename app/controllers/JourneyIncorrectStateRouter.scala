@@ -33,7 +33,7 @@ object JourneyIncorrectStateRouter {
     JourneyLogger.error(
       "Journey in incorrect state. " +
         "Please investigate why. " +
-        s"Sending user to the next page the user needs to provide an answer on: $redirectTo"
+        s"Sending user to the next page the user needs to provide an answer on: ${redirectTo.toString}"
     )
     Redirect(redirectTo)
   }

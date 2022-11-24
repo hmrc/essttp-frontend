@@ -45,7 +45,7 @@ class DatesApiConnector @Inject() (config: DatesApiConfig, httpClient: HttpClien
 
 final case class DatesApiConfig(baseUrl: String) {
   @Inject()
-  def this(config: ServicesConfig) {
+  def this(config: ServicesConfig) = {
     this(
       baseUrl = config.baseUrl("essttp-dates")
     )

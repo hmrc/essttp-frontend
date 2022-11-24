@@ -18,6 +18,7 @@ package services
 
 import cats.implicits.catsSyntaxEq
 import connectors.BarsConnector
+import essttp.utils.Errors
 import models.bars.request._
 import models.bars.response.ValidateResponse.validateFailure
 import models.bars.response._
@@ -52,7 +53,7 @@ class BarsService @Inject() (barsConnector: BarsConnector)(implicit ec: Executio
           httpResponse.json.validate[BarsErrorResponse] match {
             case JsSuccess(barsErrorResponse, _) if barsErrorResponse.code === "SORT_CODE_ON_DENY_LIST" =>
               SortCodeOnDenyList(barsErrorResponse)
-            case JsError(_) =>
+            case _ =>
               throw UpstreamErrorResponse(httpResponse.body, httpResponse.status)
           }
 
@@ -106,6 +107,7 @@ class BarsService @Inject() (barsConnector: BarsConnector)(implicit ec: Executio
       case accountNumberIsWellFormattedNo() => AccountNumberNotWellFormattedValidateResponse(response)
       case sortCodeIsPresentOnEiscdNo()     => SortCodeNotPresentOnEiscdValidateResponse(response)
       case sortCodeSupportsDirectDebitNo()  => SortCodeDoesNotSupportDirectDebitValidateResponse(response)
+      case ValidateResponse(_)              => Errors.throwServerErrorException("Fell into case ValidateResponse(_) in handleValidateErrorResponse. This should never happen, debug.")
     }
   }
 

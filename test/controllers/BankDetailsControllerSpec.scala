@@ -39,7 +39,7 @@ import uk.gov.hmrc.http.SessionKeys
 import java.time.{Instant, LocalDate, LocalDateTime, LocalTime, ZoneOffset}
 import java.util.Locale
 import scala.concurrent.Future
-import scala.jdk.CollectionConverters.{asScalaIteratorConverter, collectionAsScalaIterableConverter}
+import scala.jdk.CollectionConverters.{IterableHasAsScala, IteratorHasAsScala}
 
 class BankDetailsControllerSpec extends ItSpec {
 
@@ -203,7 +203,7 @@ class BankDetailsControllerSpec extends ItSpec {
           ).foreach {
               case (typeOfAccount, isAccountHolder, wiremockJson, accountTypeCheckedElementIndex, isAccountHolderCheckedElementIndex) =>
                 s"[$regime journey] prepopulate the form when the user has a chosen $typeOfAccount bank account type and " +
-                  s"isAccountHolder=$isAccountHolder in their journey" in {
+                  s"isAccountHolder=${isAccountHolder.toString} in their journey" in {
                     stubCommonActions()
                     EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)(wiremockJson)
 
@@ -611,7 +611,7 @@ class BankDetailsControllerSpec extends ItSpec {
               val barsVerifyJsonString =
                 s"""
             |"barsVerify": {
-            |  "unsuccessfulAttempts": $numberOfBarsVerifyAttempts${
+            |  "unsuccessfulAttempts": ${numberOfBarsVerifyAttempts.toString}${
                   barsVerifyLockoutTime.fold("")(t => s""","lockoutExpiryDateTime": "${t.toString}"""")
                 }
             |}
@@ -635,7 +635,7 @@ class BankDetailsControllerSpec extends ItSpec {
              |    }
              |  },
              |  "response": {
-             |   "isBankAccountValid": $isBankAccountValid,
+             |   "isBankAccountValid": ${isBankAccountValid.toString},
              |   "barsResponse":  $barsResponseJson
              |  },
              |  $barsVerifyJsonString,

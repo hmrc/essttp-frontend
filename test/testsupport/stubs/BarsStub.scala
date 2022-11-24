@@ -163,6 +163,6 @@ object BarsStub {
 
   private def getExpectedFormValue(field: String, formData: List[(String, String)]): String =
     formData.collectFirst{ case (x, value) if x == field => value }
-      .getOrElse(throw new Exception(s"Field: $field, not present in form: $formData"))
+      .getOrElse(throw new Exception(s"Field: $field, not present in form: ${formData.toString}"))
 
 }

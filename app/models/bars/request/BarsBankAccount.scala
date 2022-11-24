@@ -25,6 +25,7 @@ final case class BarsBankAccount(
 )
 
 object BarsBankAccount {
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   implicit val format: OFormat[BarsBankAccount] = Json.format
 
   def padded(sortCode: String, accountNumber: String): BarsBankAccount =

@@ -39,7 +39,7 @@ trait WireMockSupport extends BeforeAndAfterAll with BeforeAndAfterEach {
     logger.info("Stopping wire mock server - done")
   }
 
-  override def beforeEach() {
+  override def beforeEach(): Unit = {
     logger.info("Resetting wire mock server ...")
     WireMock.reset()
     logger.info("Resetting wire mock server - done")
@@ -49,5 +49,5 @@ trait WireMockSupport extends BeforeAndAfterAll with BeforeAndAfterEach {
 
 object WireMockSupport {
   val port = 11111
-  val baseUrl = BaseUrl(s"http://localhost:${WireMockSupport.port}")
+  val baseUrl = BaseUrl(s"http://localhost:${WireMockSupport.port.toString}")
 }

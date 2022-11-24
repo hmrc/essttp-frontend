@@ -265,8 +265,8 @@ object Messages {
     )
 
     def `Your overdue amount must have a due date that is less than ... days ago ...`(maxAgeOfDebtInDays: Int): Message = Message(
-      english = s"Your overdue amount must have a due date that is less than $maxAgeOfDebtInDays days ago for you to be eligible for a payment plan online. You may still be able to set up a plan over the phone.",
-      welsh   = s"Mae’n rhaid i’ch swm gorddyledus fod â dyddiad dyledus sy’n llai na $maxAgeOfDebtInDays diwrnod yn ôl er mwyn i chi fod yn gymwys ar gyfer cynllun talu ar-lein. Mae’n bosibl y gallwch drefnu cynllun dros y ffôn o hyd."
+      english = s"Your overdue amount must have a due date that is less than ${maxAgeOfDebtInDays.toString} days ago for you to be eligible for a payment plan online. You may still be able to set up a plan over the phone.",
+      welsh   = s"Mae’n rhaid i’ch swm gorddyledus fod â dyddiad dyledus sy’n llai na ${maxAgeOfDebtInDays.toString} diwrnod yn ôl er mwyn i chi fod yn gymwys ar gyfer cynllun talu ar-lein. Mae’n bosibl y gallwch drefnu cynllun dros y ffôn o hyd."
     )
 
     val `For further support you can contact the Payment Support Service on 0300 200 3835 to speak to an advisor.`: Message = Message(
@@ -384,8 +384,8 @@ object Messages {
     )
 
     def `you plan to pay the debt off within the next ... months or less`(maxPlanDurationInMonths: Int): Message = Message(
-      english = s"you plan to pay the debt off within the next $maxPlanDurationInMonths months or less",
-      welsh   = s"rydych yn bwriadu talu’r ddyled cyn pen y $maxPlanDurationInMonths mis nesaf"
+      english = s"you plan to pay the debt off within the next ${maxPlanDurationInMonths.toString} months or less",
+      welsh   = s"rydych yn bwriadu talu’r ddyled cyn pen y ${maxPlanDurationInMonths.toString} mis nesaf"
     )
 
     def `you owe ... or less`(maxAmountOfDebt: AmountInPence): Message = Message(
@@ -414,8 +414,8 @@ object Messages {
     )
 
     def `You can use this service within ... days of the overdue payment deadline.`(maxAgeOfDebtInDays: Int): Message = Message(
-      english = s"You can use this service within $maxAgeOfDebtInDays days of the overdue payment deadline.",
-      welsh   = s"Gallwch ddefnyddio’r gwasanaeth hwn cyn pen $maxAgeOfDebtInDays diwrnod o’r dyddiad cau gorddyledus ar gyfer talu."
+      english = s"You can use this service within ${maxAgeOfDebtInDays.toString} days of the overdue payment deadline.",
+      welsh   = s"Gallwch ddefnyddio’r gwasanaeth hwn cyn pen ${maxAgeOfDebtInDays.toString} diwrnod o’r dyddiad cau gorddyledus ar gyfer talu."
     )
 
     val `You can choose to pay:`: Message = Message(
@@ -475,7 +475,7 @@ object Messages {
       welsh   = "Rydych yn gymwys i drefnu cynllun talu ar-lein os:"
     )
     def `you plan to pay the debt off within the next ... months or less`(maxPlanDuration: Int): Message = Message(
-      english = s"you plan to pay the debt off within the next $maxPlanDuration months or less"
+      english = s"you plan to pay the debt off within the next ${maxPlanDuration.toString} months or less"
     )
     def `you owe ... or less`(maxAmountOfDebt: AmountInPence): Message = Message(
       english = s"you owe ${maxAmountOfDebt.gdsFormatInPounds} or less"
@@ -487,7 +487,7 @@ object Messages {
       english = "your tax returns are up to date"
     )
     def `You can use this service within ... days of the overdue payment deadline.`(maxAgeOfDebtInDays: Int): Message = Message(
-      english = s"You can use this service within $maxAgeOfDebtInDays days of the overdue payment deadline."
+      english = s"You can use this service within ${maxAgeOfDebtInDays.toString} days of the overdue payment deadline."
     )
     val `If you have a Customer Compliance Manager...`: Message = Message(
       english = "If you have a Customer Compliance Manager, consider discussing your needs with them before using this service."
@@ -740,8 +740,8 @@ object Messages {
     )
 
     private def getInstalmentOptionMoreThanOneMonth(numberOfMonths: Int, amount: AmountInPence): Message = Message(
-      english = s"$numberOfMonths months at ${amount.gdsFormatInPounds}",
-      welsh   = s"$numberOfMonths mis at ${amount.gdsFormatInPounds}"
+      english = s"${numberOfMonths.toString} months at ${amount.gdsFormatInPounds}",
+      welsh   = s"${numberOfMonths.toString} mis at ${amount.gdsFormatInPounds}"
     )
 
     def getInstalmentOption(numberOfMonths: Int, amount: AmountInPence): Message =
@@ -755,6 +755,11 @@ object Messages {
 
     def getError(key: String): Message = key match {
       case "error.required" =>
+        Message(
+          english = "Select how many months you want to pay over",
+          welsh   = "Dewiswch ateb ar gyfer dros sawl mis yr hoffech dalu"
+        )
+      case _ =>
         Message(
           english = "Select how many months you want to pay over",
           welsh   = "Dewiswch ateb ar gyfer dros sawl mis yr hoffech dalu"

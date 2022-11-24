@@ -88,11 +88,12 @@ class UpfrontPaymentController @Inject() (
       case j: Journey.BeforeAnsweredCanPayUpfront =>
         logErrorAndRouteToDefaultPage(j)
 
-      case j: Journey.AfterAnsweredCanPayUpfront if !j.canPayUpfront.userCanPayUpfront =>
-        logErrorAndRouteToDefaultPage(j)
-
-      case j: Journey.AfterAnsweredCanPayUpfront if j.canPayUpfront.userCanPayUpfront =>
-        finalStateCheck(j, displayUpfrontPaymentAmountPage(request.eligibilityCheckResult, Left(j)))
+      case j: Journey.AfterAnsweredCanPayUpfront =>
+        if (j.canPayUpfront.userCanPayUpfront) {
+          finalStateCheck(j, displayUpfrontPaymentAmountPage(request.eligibilityCheckResult, Left(j)))
+        } else {
+          logErrorAndRouteToDefaultPage(j)
+        }
 
       case j: Journey.AfterUpfrontPaymentAnswers =>
         finalStateCheck(j, displayUpfrontPaymentAmountPage(request.eligibilityCheckResult, Right(j)))

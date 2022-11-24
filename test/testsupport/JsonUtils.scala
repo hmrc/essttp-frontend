@@ -40,7 +40,7 @@ object JsonUtils {
               case Some(_) =>
                 tail match {
                   case Nil =>
-                    JsObject(j.value.updated(head, replaceWith))
+                    JsObject(j.value.toMap.updated(head, replaceWith))
                   case remainder =>
                     JsObject(j.value.map{
                       case (key, jsObject: JsObject) if (key === head) => key -> loop(remainder, jsObject)

@@ -3,6 +3,10 @@ resolvers += "hmrc-releases" at "https://artefacts.tax.service.gov.uk/artifactor
 resolvers += "Typesafe Releases" at "https://repo.typesafe.com/typesafe/releases/"
 resolvers += MavenRepository("HMRC-open-artefacts-maven2", "https://open.artefacts.tax.service.gov.uk/maven2")
 
+ThisBuild / libraryDependencySchemes ++= Seq(
+  "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
+)
+
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.18")
 
 addSbtPlugin("io.github.irundaia" % "sbt-sassify" % "1.5.2")
@@ -23,6 +27,6 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-uglify" % "2.0.0")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-digest" % "1.1.4")
 
-addSbtPlugin("org.wartremover" % "sbt-wartremover" % "3.0.5")
+addSbtPlugin("org.wartremover" % "sbt-wartremover" % "3.0.7")
 
 addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.6.3")

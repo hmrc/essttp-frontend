@@ -25,5 +25,6 @@ final case class InstalmentOption(
     interestPayment:      AmountInPence
 )
 object InstalmentOption {
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   implicit val format: Format[InstalmentOption] = Json.format
 }

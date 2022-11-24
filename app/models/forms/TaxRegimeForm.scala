@@ -28,7 +28,7 @@ object TaxRegimeForm {
   def form(implicit language: Language): Form[TaxRegime] = {
     val taxRegimeMapping: Mapping[TaxRegime] = Forms.of(
       EnumFormatter.format(
-        enum                    = TaxRegime,
+        `enum`                  = TaxRegime,
         errorMessageIfMissing   = Messages.WhichTaxRegime.`Select which tax you want to set up a payment plan for`.show,
         errorMessageIfEnumError = Messages.WhichTaxRegime.`Select which tax you want to set up a payment plan for`.show,
         insensitive             = true

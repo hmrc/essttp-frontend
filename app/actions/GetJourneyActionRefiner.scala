@@ -42,7 +42,7 @@ class GetJourneyActionRefiner @Inject() (journeyConnector: JourneyConnector, app
     } yield maybeJourney match {
       case Some(journey) => Right(new AuthenticatedJourneyRequest(request, request.enrolments, journey, request.ggCredId))
       case None =>
-        logger.error(s"No journey found for sessionId: [ ${hc.sessionId} ]")
+        logger.error(s"No journey found for sessionId: [ ${hc.sessionId.toString} ]")
         val redirectTo =
           if (appConfig.vatEnabled) {
             controllers.routes.WhichTaxRegimeController.whichTaxRegime

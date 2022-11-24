@@ -90,8 +90,8 @@ object EmailVerificationStub {
               val emailsJson = success.map(emailStatus =>
                 s"""{
                    |  "emailAddress": "${emailStatus.emailAddress}",
-                   |  "verified": ${emailStatus.verified},
-                   |  "locked": ${emailStatus.locked}
+                   |  "verified": ${emailStatus.verified.toString},
+                   |  "locked": ${emailStatus.locked.toString}
                    |}
                    |""".stripMargin)
               val body = Json.parse(

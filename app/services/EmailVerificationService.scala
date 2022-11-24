@@ -66,7 +66,7 @@ class EmailVerificationService @Inject() (
               }
           )
       } else {
-        throw UpstreamErrorResponse(s"Call to request email verification came back with unexpected status ${response.status}", response.status)
+        throw UpstreamErrorResponse(s"Call to request email verification came back with unexpected status ${response.status.toString}", response.status)
       }
     }.recover {
       case u: UpstreamErrorResponse if u.statusCode === UNAUTHORIZED => RequestEmailVerificationResponse.LockedOut
@@ -85,8 +85,8 @@ class EmailVerificationService @Inject() (
             case (false, true) =>
               EmailVerificationStatus.Locked
             case _ =>
-              throw UpstreamErrorResponse(s"Got unexpected combination of verified=${status.verified} and " +
-                s"locked=${status.locked} in email verification status response", INTERNAL_SERVER_ERROR)
+              throw UpstreamErrorResponse(s"Got unexpected combination of verified=${status.verified.toString} and " +
+                s"locked=${status.locked.toString} in email verification status response", INTERNAL_SERVER_ERROR)
           }
       }
 

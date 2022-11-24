@@ -53,17 +53,17 @@ object StartJourneyForm {
     val vatTaxReferenceKey: String = "vatTaxReference"
 
     val signInMapping: Mapping[SignInAs] = Forms.of(EnumFormatter.format(
-      enum                    = SignInAs,
+      `enum`                  = SignInAs,
       errorMessageIfMissing   = Messages.`Select how to be signed in`.show,
       errorMessageIfEnumError = Messages.`Select how to be signed in`.show
     ))
 
     val enrolmentsMapping: Mapping[Seq[Enrolment]] = seq(
-      Forms.of(EnumFormatter.format(enum = Enrolments))
+      Forms.of(EnumFormatter.format(`enum` = Enrolments))
     )
 
     val originMapping: FieldMapping[Origin] = Forms.of(EnumFormatter.format(
-      enum                    = Origins,
+      `enum`                  = Origins,
       errorMessageIfMissing   = Messages.`Select which origin the journey should start from`.show,
       errorMessageIfEnumError = Messages.`Select which origin the journey should start from`.show
     ))
@@ -72,7 +72,7 @@ object StartJourneyForm {
       optional(Forms.of(amountOfMoneyFormatter(_ < 0, _ => false)))
 
     val taxRegimeFormatter: Formatter[TaxRegime] = EnumFormatter.format(
-      enum                    = TaxRegime,
+      `enum`                  = TaxRegime,
       errorMessageIfMissing   = "Tax regime not found: missing",
       errorMessageIfEnumError = "Tax regime not found: enum error",
       insensitive             = true

@@ -27,6 +27,7 @@ object EmailVerificationStatusResponse {
 
   object EmailStatus {
 
+    @SuppressWarnings(Array("org.wartremover.warts.Any"))
     implicit val reads: Reads[EmailStatus] = Json.reads
 
   }

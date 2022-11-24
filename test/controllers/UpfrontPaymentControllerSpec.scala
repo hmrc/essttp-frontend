@@ -33,7 +33,7 @@ import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters.{IteratorHasAsScala, CollectionHasAsScala}
 
 class UpfrontPaymentControllerSpec extends ItSpec {
 

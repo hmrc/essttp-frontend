@@ -25,5 +25,6 @@ final case class OverduePayment(
 )
 
 object OverduePayment {
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   implicit val format: Format[OverduePayment] = Json.format[OverduePayment]
 }

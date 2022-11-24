@@ -27,7 +27,7 @@ import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.EssttpBackend
 import uk.gov.hmrc.http.SessionKeys
 
-import scala.jdk.CollectionConverters.collectionAsScalaIterableConverter
+import scala.jdk.CollectionConverters.IterableHasAsScala
 
 class NotEnrolledControllerSpec extends ItSpec {
   private val controller = app.injector.instanceOf[NotEnrolledController]

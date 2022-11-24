@@ -29,7 +29,7 @@ import testsupport.testdata.TdAll
 import uk.gov.hmrc.auth.core.retrieve.Credentials
 
 import scala.concurrent.Future
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 class WhichTaxRegimeControllerSpec extends ItSpec {
 

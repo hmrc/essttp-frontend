@@ -124,8 +124,8 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
     val enrollmentReasons =
       if (eligibilityCheckResult.isEligible) None else Some(EnrollmentReasons.DidNotPassEligibilityCheck())
     val eligibilityReasons = {
-      val reasons = eligibilityCheckResult.eligibilityRules.getClass.getDeclaredFields.map(_.getName)
-      val values = eligibilityCheckResult.eligibilityRules.productIterator.to
+      val reasons: Array[String] = eligibilityCheckResult.eligibilityRules.getClass.getDeclaredFields.map(_.getName)
+      val values = eligibilityCheckResult.eligibilityRules.productIterator.iterator
       (reasons zip values).toList.collect{
         case (reason, true)       => reason
         case (reason, Some(true)) => reason

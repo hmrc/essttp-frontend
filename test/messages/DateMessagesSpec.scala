@@ -70,9 +70,9 @@ class DateMessagesSpec extends UnitSpec {
           31 -> "31st",
         ).foreach{
             case (day, expectedString) =>
-              withClue(s"For day $day and expected string $expectedString: "){
+              withClue(s"For day ${day.toString} and expected string $expectedString: "){
                 val suffix = DateMessages.getSuffix(day)
-                s"$day$suffix" shouldBe expectedString
+                s"${day.toString}$suffix" shouldBe expectedString
               }
           }
       }
@@ -112,9 +112,9 @@ class DateMessagesSpec extends UnitSpec {
           31 -> "31ain",
         ).foreach{
             case (day, expectedString) =>
-              withClue(s"For day $day and expected string $expectedString: "){
-                val suffix = DateMessages.getSuffix(day)
-                s"$day$suffix" shouldBe expectedString
+              withClue(s"For day ${day.toString} and expected string $expectedString: "){
+                val suffix: String = DateMessages.getSuffix(day)
+                s"${day.toString}$suffix" shouldBe expectedString
               }
           }
       }

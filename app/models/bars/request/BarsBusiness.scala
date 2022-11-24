@@ -24,5 +24,6 @@ final case class BarsBusiness(
 )
 
 object BarsBusiness {
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   implicit val format: OFormat[BarsBusiness] = Json.format
 }
