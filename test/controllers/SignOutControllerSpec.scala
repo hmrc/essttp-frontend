@@ -17,6 +17,8 @@
 package controllers
 
 import config.AppConfig
+import essttp.journey.model.{Origin, Origins}
+import essttp.rootmodel.TaxRegime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.mvc.{Result, Session}
@@ -80,17 +82,41 @@ class SignOutControllerSpec extends ItSpec {
     }
   }
 
-  "signOut should" - {
-    "redirect to the doYouWantToGiveFeedback page after clearing the session and storing the tax regime in the cookie" in {
+  "exitSurveyVat should" - {
+    "redirect to feedback frontend with eSSTTP-VAT as the service identifier" in {
       stubCommonActions()
       EssttpBackend.SubmitArrangement.findJourney(testCrypto)()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
-      val result: Future[Result] = controller.signOut(fakeRequest)
+      val result: Future[Result] = controller.exitSurveyVat(fakeRequest)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.SignOutController.doYouWantToGiveFeedback.url)
-      session(result) shouldBe Session(Map(SignOutController.feedbackRegimeKey -> "Epaye"))
+      redirectLocation(result) shouldBe Some("http://localhost:9514/feedback/eSSTTP-VAT")
+      session(result) shouldBe Session(Map.empty)
+    }
+  }
+
+  "signOut should" - {
+
+    TaxRegime.values.foreach{ taxRegime =>
+
+      s"[taxRegime = $taxRegime] redirect to the doYouWantToGiveFeedback page after clearing the session and storing the tax regime in the cookie" in {
+        val origin: Origin = taxRegime match {
+          case TaxRegime.Epaye => Origins.Epaye.Bta
+          case TaxRegime.Vat   => Origins.Vat.Bta
+        }
+
+        stubCommonActions()
+        EssttpBackend.StartJourney.findJourney(origin)
+
+        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+        val result: Future[Result] = controller.signOut(fakeRequest)
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.SignOutController.doYouWantToGiveFeedback.url)
+        session(result) shouldBe Session(Map(SignOutController.feedbackRegimeKey -> taxRegime.entryName))
+      }
+
     }
 
   }
@@ -173,6 +199,18 @@ class SignOutControllerSpec extends ItSpec {
       val result: Future[Result] = controller.doYouWantToGiveFeedbackSubmit(fakeRequest)
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.SignOutController.exitSurveyPaye.url)
+    }
+
+    "redirect to the exitSurveyPaye endpoint if the user selects yes and the tax regime is Vat" in {
+      val fakeRequest =
+        FakeRequest()
+          .withMethod("POST")
+          .withFormUrlEncodedBody("DoYouWantToGiveFeedback" -> "Yes")
+          .withSession(SignOutController.feedbackRegimeKey -> "Vat")
+
+      val result: Future[Result] = controller.doYouWantToGiveFeedbackSubmit(fakeRequest)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.SignOutController.exitSurveyVat.url)
     }
 
     "redirect to govUk if the user selects no" in {

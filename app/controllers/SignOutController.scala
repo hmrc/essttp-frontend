@@ -66,10 +66,11 @@ class SignOutController @Inject() (
         formWithErrors =>
           Ok(views.doYouWantToGiveFeedbackPage(formWithErrors, TaxRegime.withNameInsensitiveOption(taxRegimeString))), {
           case GiveFeedbackFormValue.Yes =>
-            TaxRegime.withNameInsensitive(taxRegimeString) match {
-              case TaxRegime.Epaye => Redirect(routes.SignOutController.exitSurveyPaye).withNewSession
-              case TaxRegime.Vat   => sys.error("Sign out survey not implemented for VAT yet")
+            val redirectTo = TaxRegime.withNameInsensitive(taxRegimeString) match {
+              case TaxRegime.Epaye => routes.SignOutController.exitSurveyPaye
+              case TaxRegime.Vat   => routes.SignOutController.exitSurveyVat
             }
+            Redirect(redirectTo).withNewSession
 
           case GiveFeedbackFormValue.No =>
             Redirect(appConfig.Urls.govUkUrl).withNewSession
@@ -79,6 +80,10 @@ class SignOutController @Inject() (
 
   val exitSurveyPaye: Action[AnyContent] = Action { _ =>
     Redirect(appConfig.ExitSurvey.payeExitSurveyUrl).withNewSession
+  }
+
+  val exitSurveyVat: Action[AnyContent] = Action { _ =>
+    Redirect(appConfig.ExitSurvey.vatExitSurveyUrl).withNewSession
   }
 
   def getTaxRegimeString(request: MessagesRequest[_]): String =

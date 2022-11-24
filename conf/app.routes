@@ -104,6 +104,7 @@ GET    /assets/*file                                        controllers.Assets.v
 GET    /timed-out                                           controllers.SignOutController.signOutFromTimeout
 
 GET    /exit-survey/paye                                    controllers.SignOutController.exitSurveyPaye
+GET    /exit-survey/vat                                     controllers.SignOutController.exitSurveyVat
 
 GET    /information-missing                                 controllers.MissingInfoController.missingInfo
 GET    /determine-next                                      controllers.MissingInfoController.determineNextPage
