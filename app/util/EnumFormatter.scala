@@ -24,12 +24,12 @@ import play.api.data.format.Formatter
 object EnumFormatter {
 
   def format[A <: EnumEntry](
-      enum:                    Enum[A],
+      `enum`:                  Enum[A],
       errorMessageIfMissing:   String  = "missing input",
       errorMessageIfEnumError: String  = "invalid input",
       insensitive:             Boolean = false
   ): Formatter[A] = new Formatter[A] {
-    val delegate: Formatter[A] = enumeratum.Forms.format(enum, insensitive)
+    val delegate: Formatter[A] = enumeratum.Forms.format(`enum`, insensitive)
 
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], A] =
       delegate.bind(key, data).leftMap(_.map(updateMessages))

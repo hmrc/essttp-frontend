@@ -33,7 +33,7 @@ import testsupport.stubs.{AuditConnectorStub, EssttpBackend}
 import testsupport.testdata.{JourneyJsonTemplates, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters.IteratorHasAsScala
 import scala.concurrent.Future
 
 class PaymentScheduleControllerSpec extends ItSpec {

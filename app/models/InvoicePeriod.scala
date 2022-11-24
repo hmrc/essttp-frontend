@@ -28,5 +28,6 @@ final case class InvoicePeriod(
 )
 
 object InvoicePeriod {
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   implicit val format: Format[InvoicePeriod] = Json.format[InvoicePeriod]
 }

@@ -74,8 +74,8 @@
       )
     }
 
-    @Html(s"""<link rel="stylesheet" media="screen" href="${controllers.routes.Assets.versioned("stylesheets/application.css")}" ${CSPNonce.attr}>""")
-    @Html(s"""<link rel="stylesheet" media="print" href="${controllers.routes.Assets.versioned("stylesheets/print.css")}" ${CSPNonce.attr}>""")
+    @Html(s"""<link rel="stylesheet" media="screen" href="${controllers.routes.Assets.versioned("stylesheets/application.css").toString}" ${CSPNonce.attr.toString}>""")
+    @Html(s"""<link rel="stylesheet" media="print" href="${controllers.routes.Assets.versioned("stylesheets/print.css").toString}" ${CSPNonce.attr.toString}>""")
     }
 
     @scripts = {

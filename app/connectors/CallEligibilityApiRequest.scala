@@ -27,5 +27,6 @@ final case class CallEligibilityApiRequest(
 )
 
 object CallEligibilityApiRequest {
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   implicit val format: OFormat[CallEligibilityApiRequest] = Json.format[CallEligibilityApiRequest]
 }

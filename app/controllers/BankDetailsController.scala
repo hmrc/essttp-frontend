@@ -195,7 +195,7 @@ class BankDetailsController @Inject() (
     resp.fold(
       {
         case ThirdPartyError(resp) =>
-          throw new RuntimeException(s"BARS verify third-party error. BARS response: $resp")
+          throw new RuntimeException(s"BARS verify third-party error. BARS response: ${resp.toString}")
         case AccountNumberNotWellFormatted(_) | AccountNumberNotWellFormattedValidateResponse(_) =>
           enterBankDetailsPageWithBarsError(accountNumberNotWellFormatted)
         case SortCodeDoesNotSupportDirectDebit(_) | SortCodeDoesNotSupportDirectDebitValidateResponse(_) =>

@@ -52,7 +52,7 @@ object EssttpBackend {
 
   object BarsVerifyStatusStub {
     private def noLockoutBody(numberOfAttempts: Int) = s"""{
-                          |    "attempts": $numberOfAttempts
+                          |    "attempts": ${numberOfAttempts.toString}
                           |}""".stripMargin
 
     private def lockoutBody(expiry: Instant) = s"""{
@@ -299,7 +299,7 @@ object EssttpBackend {
 
     def verifyUpdateDayOfMonthRequest(journeyId: JourneyId, dayOfMonth: DayOfMonth = TdAll.dayOfMonth()): Unit =
       verify(
-        postRequestedFor(urlPathEqualTo(dayOfMonthUrl(journeyId))).withRequestBody(equalToJson(s"""${dayOfMonth.value}"""))
+        postRequestedFor(urlPathEqualTo(dayOfMonthUrl(journeyId))).withRequestBody(equalToJson(s"""${dayOfMonth.value.toString}"""))
       )
 
     def verifyNoneUpdateDayOfMonthRequest(journeyId: JourneyId): Unit =

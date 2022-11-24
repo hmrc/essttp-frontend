@@ -32,7 +32,7 @@ import testsupport.testdata.{JourneyJsonTemplates, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
-import scala.jdk.CollectionConverters.collectionAsScalaIterableConverter
+import scala.jdk.CollectionConverters.IterableHasAsScala
 
 class IneligibleControllerSpec extends ItSpec {
 

@@ -48,13 +48,13 @@ class AuthLoginApiService @Inject() (
       AuthToken(
         r
           .header(HeaderNames.AUTHORIZATION)
-          .getOrElse(throw new RuntimeException(s"missing 'AUTHORIZATION' header: $r"))
+          .getOrElse(throw new RuntimeException(s"missing 'AUTHORIZATION' header: ${r.toString()}"))
       ))
   }
 
   private def buildAuthenticatedSession(authToken: AuthToken) =
     Session(Map(
-      SessionKeys.sessionId -> s"session-$randomUUID",
+      SessionKeys.sessionId -> s"session-${randomUUID.toString}",
       SessionKeys.authToken -> authToken.value,
       SessionKeys.lastRequestTimestamp -> realClock.millis().toString
     ))

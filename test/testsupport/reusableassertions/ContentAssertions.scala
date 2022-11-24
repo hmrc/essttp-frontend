@@ -22,12 +22,11 @@ import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 import org.scalatest.Assertion
 import testsupport.RichMatchers
-
-import scala.jdk.CollectionConverters.iterableAsScalaIterableConverter
 import org.jsoup.nodes.Document
 import testsupport.testdata.TdAll
 
 import scala.annotation.nowarn
+import scala.jdk.CollectionConverters.IterableHasAsScala
 
 object ContentAssertions extends RichMatchers {
 

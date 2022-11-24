@@ -33,5 +33,6 @@ final case class BarsSubject(
 }
 
 object BarsSubject {
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   implicit val format: OFormat[BarsSubject] = Json.format
 }

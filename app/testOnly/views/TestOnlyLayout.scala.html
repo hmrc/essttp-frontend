@@ -54,7 +54,7 @@
 @head = {
 @headBlock.getOrElse(Html(""))
 
-@Html(s"""<link rel="stylesheet" media="all" href="${controllers.routes.Assets.versioned("stylesheets/application.css")}" ${CSPNonce.attr}>""")
+@Html(s"""<link rel="stylesheet" media="all" href="${controllers.routes.Assets.versioned("stylesheets/application.css").toString}" ${CSPNonce.attr.toString}>""")
 }
 
 @scripts = {

@@ -56,7 +56,7 @@ object BankDetailsForm {
 
   val sortCodeMapping: Mapping[SortCode] = nonEmptyText
     .transform[SortCode](
-      sortCode => SortCode(SensitiveString.apply(sortCode.replaceAllLiterally("-", "").replaceAll("\\s", ""))),
+      sortCode => SortCode(SensitiveString.apply(sortCode.replaceAll("-", "").replaceAll("\\s", ""))),
       _.value.decryptedValue
     ).verifying(sortCodeConstraint)
 

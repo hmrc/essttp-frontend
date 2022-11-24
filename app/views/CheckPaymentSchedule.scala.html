@@ -125,7 +125,7 @@
         if(index > (paymentPlan.collections.regularCollections.size - 2)) { "last-grouped-row" } else { "" }
       }",
       key = Key(
-         content = Text(s"${DateMessages.monthName(p.dueDate.value.getMonthValue).show} ${p.dueDate.value.getYear}"),
+         content = Text(s"${DateMessages.monthName(p.dueDate.value.getMonthValue).show} ${p.dueDate.value.getYear.toString}"),
         classes = s"govuk-!-width-one-half${if(index === 0) " govuk-!-padding-top-2" else ""}"
       ),
        value = Value(

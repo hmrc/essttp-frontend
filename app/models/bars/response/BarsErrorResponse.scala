@@ -21,5 +21,6 @@ import play.api.libs.json.{Json, OFormat}
 final case class BarsErrorResponse(code: String, desc: String)
 
 object BarsErrorResponse {
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   implicit val format: OFormat[BarsErrorResponse] = Json.format
 }

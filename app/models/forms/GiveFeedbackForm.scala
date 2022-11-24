@@ -26,7 +26,7 @@ import util.EnumFormatter
 object GiveFeedbackForm {
   def form(implicit language: Language): Form[GiveFeedbackFormValue] = {
     val giveFeedbackMapping: Mapping[GiveFeedbackFormValue] = Forms.of(EnumFormatter.format(
-      enum                    = GiveFeedbackFormValue,
+      `enum`                  = GiveFeedbackFormValue,
       errorMessageIfMissing   = Messages.GiveFeedback.`Select yes if you want to give feedback`.show,
       errorMessageIfEnumError = Messages.GiveFeedback.`Select yes if you want to give feedback`.show
     ))

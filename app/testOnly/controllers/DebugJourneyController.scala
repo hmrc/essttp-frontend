@@ -44,7 +44,7 @@ class DebugJourneyController @Inject() (
     } else {
       journeyConnector.findLatestJourneyBySessionId().map {
         case Some(j) => Ok(Json.prettyPrint(Json.toJson(j)))
-        case None    => NotFound(s"There is no journey with such sessionId ${hc.sessionId}")
+        case None    => NotFound(s"There is no journey with such sessionId ${hc.sessionId.toString}")
       }
     }
 

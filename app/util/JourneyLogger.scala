@@ -50,21 +50,21 @@ object JourneyLogger {
 
   private def context(implicit request: RequestHeader) = s"[context: ${request.method} ${request.path}] $sessionId $requestId $referer $deviceId"
 
-  private def sessionId(implicit request: RequestHeader) = s"[${hc.sessionId}]"
+  private def sessionId(implicit request: RequestHeader) = s"[${hc.sessionId.toString}]"
 
-  private def requestId(implicit request: RequestHeader) = s"[${hc.requestId}]"
+  private def requestId(implicit request: RequestHeader) = s"[${hc.requestId.toString}]"
 
   private def referer(implicit r: RequestHeader) = s"[Referer: ${r.headers.headers.find(_._1 === "Referer").map(_._2).getOrElse("")}]"
 
   private def deviceId(implicit r: RequestHeader) = s"[deviceId: ${r.cookies.find(_.name === CookieNames.deviceID).map(_.value).getOrElse("")}]"
 
-  private def origin(implicit r: JourneyRequest[_]) = s"[${r.journey.origin}]"
+  private def origin(implicit r: JourneyRequest[_]) = s"[${r.journey.origin.toString}]"
 
-  private def journeyId(implicit r: JourneyRequest[_]) = s"[${r.journey.id}]"
+  private def journeyId(implicit r: JourneyRequest[_]) = s"[${r.journey.id.toString}]"
 
-  private def taxRegime(implicit r: JourneyRequest[_]) = s"[${r.journey.taxRegime}]"
+  private def taxRegime(implicit r: JourneyRequest[_]) = s"[${r.journey.taxRegime.toString}]"
 
-  private def stage(implicit r: JourneyRequest[_]) = s"[${r.journey.stage}]"
+  private def stage(implicit r: JourneyRequest[_]) = s"[${r.journey.stage.toString}]"
 
   private def journeyName(implicit r: JourneyRequest[_]) = s"[${r.journey.name}]"
 

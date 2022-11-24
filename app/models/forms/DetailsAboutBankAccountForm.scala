@@ -29,7 +29,7 @@ object DetailsAboutBankAccountForm {
 
   def form(implicit language: Language): Form[DetailsAboutBankAccountForm] = {
     val typeOfAccountFormMapping: Mapping[TypeOfAccountFormValue] = Forms.of(EnumFormatter.format(
-      enum                    = TypeOfAccountFormValue,
+      `enum`                  = TypeOfAccountFormValue,
       errorMessageIfMissing   = Messages.AboutYourBankAccount.`Select what type of account details you are providing`.show,
       errorMessageIfEnumError = Messages.AboutYourBankAccount.`Select what type of account details you are providing`.show
     ))
@@ -42,7 +42,7 @@ object DetailsAboutBankAccountForm {
   }
 
   private def isSoleSignatoryFormMapping(implicit language: Language): Mapping[IsSoleSignatoryFormValue] = Forms.of(EnumFormatter.format(
-    enum                    = IsSoleSignatoryFormValue,
+    `enum`                  = IsSoleSignatoryFormValue,
     errorMessageIfMissing   = Messages.AboutYourBankAccount.`Select yes if you are the account holder`.show,
     errorMessageIfEnumError = Messages.AboutYourBankAccount.`Select yes if you are the account holder`.show
   ))

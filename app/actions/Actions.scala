@@ -34,19 +34,23 @@ class Actions @Inject() (
 
   val default: ActionBuilder[Request, AnyContent] = actionBuilder
 
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val continueToSameEndpointAuthenticatedJourneyAction: ActionBuilder[AuthenticatedRequest, AnyContent] =
     actionBuilder
       .andThen(continueToSameEndpointAuthenticatedActionRefiner)
 
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val authenticatedAction: ActionBuilder[AuthenticatedRequest, AnyContent] =
     actionBuilder
       .andThen(continueToLandingPagesAuthenticatedActionRefiner)
 
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val authenticatedJourneyAction: ActionBuilder[AuthenticatedJourneyRequest, AnyContent] =
     actionBuilder
       .andThen(continueToLandingPagesAuthenticatedActionRefiner)
       .andThen(getJourneyActionRefiner)
 
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val eligibleJourneyAction: ActionBuilder[EligibleJourneyRequest, AnyContent] =
     actionBuilder
       .andThen(continueToLandingPagesAuthenticatedActionRefiner)
@@ -54,6 +58,7 @@ class Actions @Inject() (
       .andThen(barsLockoutActionFilter)
       .andThen(eligibleJourneyRefiner)
 
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val barsLockedOutJourneyAction: ActionBuilder[BarsLockedOutRequest, AnyContent] =
     actionBuilder
       .andThen(continueToLandingPagesAuthenticatedActionRefiner)
