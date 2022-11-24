@@ -74,9 +74,9 @@ object EligibilityCheckAuditDetail {
               } else {
                 (currentFieldName, transformedJsArray)
               }
-            case value if currentFieldName === fieldName                         => (currentFieldName, transformation(value))
-            case value if currentFieldName =!= fieldName                         => (currentFieldName, value)
-            case value @ (JsNull | JsNumber(_) | JsString(_) | JsTrue | JsFalse) => (currentFieldName, value)
+            case value if currentFieldName === fieldName => (currentFieldName, transformation(value))
+            case value if currentFieldName =!= fieldName => (currentFieldName, value)
+            case value: JsValue                          => (currentFieldName, value)
           }
         }
 
