@@ -210,9 +210,10 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
-  def `Agreed Terms and Conditions`(isEmailAddresRequired: Boolean)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Agreed Terms and Conditions`(isEmailAddresRequired: Boolean, origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = if (isEmailAddresRequired) StageInfo.agreedTermsAndConditionsEmailAddressRequired else StageInfo.agreedTermsAndConditionsEmailAddressNotRequired,
-    journeyInfo = JourneyInfo.agreedTermsAndConditions(isEmailAddresRequired, encrypter)
+    journeyInfo = JourneyInfo.agreedTermsAndConditions(isEmailAddresRequired, encrypter),
+    origin      = origin
   )
 
   def `Selected email to be verified`(email: String)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(

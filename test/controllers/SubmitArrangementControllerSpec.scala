@@ -19,6 +19,7 @@ package controllers
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.crypto.CryptoFormat
 import essttp.emailverification.EmailVerificationStatus
+import essttp.journey.model.Origins
 import essttp.rootmodel.ttp.eligibility.EmailSource
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
@@ -43,7 +44,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
       List(
         (
           "T&C's accepted, no email required",
-          () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto)(),
+          () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto, origin = Origins.Epaye.Bta)(),
           TdAll.customerDetail("bobross@joyofpainting.com", EmailSource.ETMP)
         ),
         (
@@ -166,7 +167,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
 
       "T&C's have just been agreed but an email is required" in {
         test(
-          () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, testCrypto)(),
+          () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, testCrypto, origin = Origins.Epaye.Bta)(),
           routes.EmailController.whichEmailDoYouWantToUse
         )
       }
@@ -194,7 +195,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
 
     "should not update backend if call to ttp enact arrangement api fails (anything other than a 202 response)" in {
       stubCommonActions()
-      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto)()
+      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto, origin = Origins.Epaye.Bta)()
       Ttp.EnactArrangement.stubEnactArrangementFail()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
