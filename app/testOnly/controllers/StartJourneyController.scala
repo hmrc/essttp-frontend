@@ -23,7 +23,7 @@ import config.AppConfig
 import essttp.journey.JourneyConnector
 import essttp.journey.model.{Origins, SjRequest}
 import essttp.rootmodel.ttp.affordablequotes.DueDate
-import essttp.rootmodel.ttp.eligibility.{CustomerDetail, EmailSource, RegimeDigitalCorrespondence}
+import essttp.rootmodel.ttp.eligibility._
 import essttp.rootmodel.{AmountInPence, BackUrl, Email, ReturnUrl, TaxRegime}
 import models.EligibilityErrors._
 import models.{EligibilityError, EligibilityErrors}
@@ -206,7 +206,7 @@ object StartJourneyController {
           )
         )
       ),
-      dueDateNotReached    = Some(false)
+      dueDateNotReached    = false
     )
 
     val chargeTypeAssessments: List[ChargeTypeAssessment] = List(
@@ -232,7 +232,7 @@ object StartJourneyController {
         missingFiledReturns               = containsError(MissingFiledReturns),
         hasInvalidInterestSignals         = Some(containsError(HasInvalidInterestSignals)),
         dmSpecialOfficeProcessingRequired = Some(containsError(DmSpecialOfficeProcessingRequired)),
-        noDueDatesReached                 = Some(containsError(NoDueDatesReached))
+        noDueDatesReached                 = containsError(NoDueDatesReached)
       )
     }
     EligibilityCheckResult(
@@ -248,7 +248,7 @@ object StartJourneyController {
       chargeTypeAssessment            = chargeTypeAssessments,
       customerDetails                 = maybeCustomerDetail,
       regimeDigitalCorrespondence     = maybeRegimeDigitalCorrespondence,
-      futureChargeLiabilitiesExcluded = Some(false)
+      futureChargeLiabilitiesExcluded = false
     )
   }
 

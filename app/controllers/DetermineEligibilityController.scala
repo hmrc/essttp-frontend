@@ -38,7 +38,7 @@ import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import controllers.JourneyFinalStateCheck.finalStateCheckF
 import controllers.pagerouters.EligibilityRouter
 import essttp.journey.model.Journey
-import essttp.rootmodel.ttp.EligibilityCheckResult
+import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import play.api.mvc._
 import services.{AuditService, JourneyService, TtpService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController

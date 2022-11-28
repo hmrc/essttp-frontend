@@ -17,7 +17,7 @@
 package testOnly.connectors
 
 import essttp.crypto.CryptoFormat
-import essttp.rootmodel.ttp.EligibilityCheckResult
+import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import play.api.Configuration
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}

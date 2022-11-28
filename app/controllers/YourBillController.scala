@@ -20,7 +20,7 @@ import _root_.actions.Actions
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import essttp.journey.model.Journey
-import essttp.rootmodel.ttp.{ChargeTypeAssessment, Charges, EligibilityCheckResult}
+import essttp.rootmodel.ttp.eligibility.{ChargeTypeAssessment, Charges, EligibilityCheckResult}
 import essttp.rootmodel.AmountInPence
 import models.{InvoicePeriod, OverDuePayments, OverduePayment}
 import play.api.mvc._

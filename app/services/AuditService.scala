@@ -24,7 +24,7 @@ import essttp.journey.model.Journey.AfterEnteredDetailsAboutBankAccount
 import essttp.journey.model.Journey.Stages._
 import essttp.journey.model.{Journey, Origin}
 import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount}
-import essttp.rootmodel.ttp.EligibilityCheckResult
+import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
 import essttp.utils.Errors
 import models.audit.bars._
@@ -109,7 +109,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       authProviderId                  = r.ggCredId.value,
       chargeTypeAssessment            = List.empty,
       correlationId                   = journey.correlationId.value.toString,
-      futureChargeLiabilitiesExcluded = None
+      futureChargeLiabilitiesExcluded = false
     )
   }
 

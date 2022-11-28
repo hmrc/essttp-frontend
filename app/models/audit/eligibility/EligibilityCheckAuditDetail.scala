@@ -18,7 +18,7 @@ package models.audit.eligibility
 
 import cats.implicits.catsSyntaxEq
 import cats.instances.string._
-import essttp.rootmodel.ttp.ChargeTypeAssessment
+import essttp.rootmodel.ttp.eligibility.ChargeTypeAssessment
 import models.audit.{AuditDetail, TaxDetail}
 import play.api.libs.json._
 
@@ -33,7 +33,7 @@ final case class EligibilityCheckAuditDetail(
     authProviderId:                  String,
     chargeTypeAssessment:            List[ChargeTypeAssessment],
     correlationId:                   String,
-    futureChargeLiabilitiesExcluded: Option[Boolean]
+    futureChargeLiabilitiesExcluded: Boolean
 ) extends AuditDetail {
   val auditType: String = "EligibilityCheck"
 }
