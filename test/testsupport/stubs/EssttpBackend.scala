@@ -454,8 +454,9 @@ object EssttpBackend {
 
     def findJourney(
         isEmailAddressRequired: Boolean,
-        encrypter:              Encrypter
-    )(jsonBody: String = JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddressRequired)(encrypter)): StubMapping =
+        encrypter:              Encrypter,
+        origin:                 Origin
+    )(jsonBody: String = JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddressRequired, origin)(encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
   }
 

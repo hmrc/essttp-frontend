@@ -20,6 +20,7 @@
 @import play.api.mvc.Request
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import controllers.routes
+@import essttp.rootmodel.TaxRegime
 
 @this(
         layout: templates.Layout,
@@ -27,7 +28,7 @@
         formWithCSRF: FormWithCSRF,
         requestSupport: RequestSupport)
 
-@()(implicit request: Request[_])
+@(taxRegime: TaxRegime)(implicit request: Request[_])
 
 @import requestSupport._
 
@@ -49,7 +50,7 @@
 
   <p class="govuk-body">@{Messages.TermsAndConditions.`You can write to us...`.show}</p>
 
-  <p class="govuk-body">@{Html(Messages.TermsAndConditions.`HMRC Direct Debit Support Team VAT 2...`.show)}</p>
+  <p class="govuk-body">@{Html(Messages.TermsAndConditions.`HMRC address`(taxRegime).show)}</p>
 
   <h2 class="govuk-heading-m">@{Messages.TermsAndConditions.`Declaration`.show}</h2>
 

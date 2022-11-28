@@ -16,8 +16,8 @@
 
 package controllers
 
-import essttp.journey.model.Origins
-import essttp.rootmodel.IsEmailAddressRequired
+import essttp.journey.model.{Origin, Origins}
+import essttp.rootmodel.{IsEmailAddressRequired, TaxRegime}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.http.Status
@@ -41,73 +41,86 @@ class TermsAndConditionsControllerSpec extends ItSpec {
     val expectedH1: String = "Terms and conditions"
   }
 
-  "GET /terms-and-conditions should" - {
-    "return 200 and the terms and conditions page" in {
-      stubCommonActions()
-      EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto, Origins.Epaye.Bta)()
+  Seq[(String, Origin, TaxRegime)](
+    ("EPAYE", Origins.Epaye.Bta, TaxRegime.Epaye),
+    ("VAT", Origins.Vat.Bta, TaxRegime.Vat)
+  ).foreach {
+      case (regime, origin, taxRegime) =>
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val result: Future[Result] = controller.termsAndConditions(fakeRequest)
-      val pageContent: String = contentAsString(result)
-      val doc: Document = Jsoup.parse(pageContent)
+        "GET /terms-and-conditions should" - {
+          s"[$regime journey] return 200 and the terms and conditions page" in {
+            stubCommonActions()
+            EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto, origin)()
 
-      RequestAssertions.assertGetRequestOk(result)
-      ContentAssertions.commonPageChecks(
-        doc,
-        expectedH1              = TermsAndConditionsPage.expectedH1,
-        shouldBackLinkBePresent = true,
-        expectedSubmitUrl       = Some(routes.TermsAndConditionsController.termsAndConditionsSubmit.url)
-      )
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+            val result: Future[Result] = controller.termsAndConditions(fakeRequest)
+            val pageContent: String = contentAsString(result)
+            val doc: Document = Jsoup.parse(pageContent)
 
-      ContentAssertions.assertListOfContent(
-        elements = doc.select(".govuk-body")
-      )(
-          expectedContent = List(
-            "We can cancel this agreement if you:",
-            "If we cancel this agreement, you will need to pay the total amount you owe straight away.",
-            "We can use any refunds you might get to pay off your tax charges.",
-            "If your circumstances change and you can pay more or you can pay in full, you need to let us know.",
-            "You can write to us about your Direct Debit:",
-            "DM PAYE HM Revenue and Customs BX9 1EW United Kingdom",
-            "I agree to the terms and conditions of this payment plan. I confirm that this is the earliest I am able to settle this debt."
-          )
-        )
+            RequestAssertions.assertGetRequestOk(result)
+            ContentAssertions.commonPageChecks(
+              doc,
+              expectedH1              = TermsAndConditionsPage.expectedH1,
+              shouldBackLinkBePresent = true,
+              expectedSubmitUrl       = Some(routes.TermsAndConditionsController.termsAndConditionsSubmit.url),
+              regimeBeingTested       = Some(taxRegime)
+            )
 
-      ContentAssertions.assertListOfContent(
-        elements = doc.select(".govuk-list--bullet").select("li")
-      )(
-          expectedContent = List(
-            "pay late or miss a payment",
-            "pay another tax bill late",
-            "do not submit your future tax returns on time"
-          )
-        )
+            val taxRegimeAddress: String = taxRegime match {
+              case TaxRegime.Epaye => "DM PAYE HM Revenue and Customs BX9 1EW United Kingdom"
+              case TaxRegime.Vat   => "HMRC Direct Debit Support Team VAT 2 DMB 612 BX5 5AB United Kingdom"
+            }
 
-      doc.select(".govuk-heading-m").text() shouldBe "Declaration"
-      doc.select(".govuk-button").text() shouldBe "Agree and continue"
+            ContentAssertions.assertListOfContent(
+              elements = doc.select(".govuk-body")
+            )(
+                expectedContent = List(
+                  "We can cancel this agreement if you:",
+                  "If we cancel this agreement, you will need to pay the total amount you owe straight away.",
+                  "We can use any refunds you might get to pay off your tax charges.",
+                  "Contact HMRC on 0300 123 1813 if anything changes that you think affects your payment plan.",
+                  "You can write to us about your Direct Debit:",
+                  taxRegimeAddress,
+                  "I agree to the terms and conditions of this payment plan. I confirm that this is the earliest I am able to settle this debt."
+                )
+              )
 
-      ContentAssertions.formSubmitShouldDisableSubmitButton(doc)
+            ContentAssertions.assertListOfContent(
+              elements = doc.select(".govuk-list--bullet").select("li")
+            )(
+                expectedContent = List(
+                  "pay late or miss a payment",
+                  "pay another tax bill late",
+                  "do not submit your future tax returns on time"
+                )
+              )
+
+            doc.select(".govuk-heading-m").text() shouldBe "Declaration"
+            doc.select(".govuk-button").text() shouldBe "Agree and continue"
+
+            ContentAssertions.formSubmitShouldDisableSubmitButton(doc)
+          }
+        }
+
+        "POST /terms-and-conditions should" - {
+
+          s"[$regime journey] redirect the user to the email journey if it is enabled and update backend" in {
+            stubCommonActions()
+            EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto, origin)()
+            EssttpBackend.TermsAndConditions.stubUpdateAgreedTermsAndConditions(
+              TdAll.journeyId,
+              JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = true, origin)
+            )
+
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+            val result: Future[Result] = controller.termsAndConditionsSubmit(fakeRequest)
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(PageUrls.whichEmailDoYouWantToUseUrl)
+            EssttpBackend.TermsAndConditions.verifyUpdateAgreedTermsAndConditionsRequest(TdAll.journeyId, IsEmailAddressRequired(true))
+          }
+        }
     }
-  }
-
-  "POST /terms-and-conditions should" - {
-
-    "redirect the user to the email journey if it is enabled and update backend" in {
-      stubCommonActions()
-      EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto, Origins.Epaye.Bta)()
-      EssttpBackend.TermsAndConditions.stubUpdateAgreedTermsAndConditions(
-        TdAll.journeyId,
-        JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = true)
-      )
-
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
-      val result: Future[Result] = controller.termsAndConditionsSubmit(fakeRequest)
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.whichEmailDoYouWantToUseUrl)
-      EssttpBackend.TermsAndConditions.verifyUpdateAgreedTermsAndConditionsRequest(TdAll.journeyId, IsEmailAddressRequired(true))
-    }
-  }
 
 }
 
@@ -117,23 +130,30 @@ class TermsAndConditionsControllerEmailDisabledSpec extends ItSpec {
 
   val controller: TermsAndConditionsController = app.injector.instanceOf[TermsAndConditionsController]
 
-  "POST /terms-and-conditions should" - {
+  Seq[(String, Origin)](
+    ("EPAYE", Origins.Epaye.Bta),
+    ("VAT", Origins.Vat.Bta)
+  ).foreach {
+      case (regime, origin) =>
 
-    "redirect the user to the submit arrangement endpoint if the email journey is enabled and update backend" in {
-      stubCommonActions()
-      EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto, Origins.Epaye.Bta)()
-      EssttpBackend.TermsAndConditions.stubUpdateAgreedTermsAndConditions(
-        TdAll.journeyId,
-        JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = false)
-      )
+        "POST /terms-and-conditions should" - {
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+          s"[$regime journey] redirect the user to the submit arrangement endpoint if the email journey is enabled and update backend" in {
+            stubCommonActions()
+            EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto, origin)()
+            EssttpBackend.TermsAndConditions.stubUpdateAgreedTermsAndConditions(
+              TdAll.journeyId,
+              JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = false, origin = origin)
+            )
 
-      val result: Future[Result] = controller.termsAndConditionsSubmit(fakeRequest)
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.submitArrangementUrl)
-      EssttpBackend.TermsAndConditions.verifyUpdateAgreedTermsAndConditionsRequest(TdAll.journeyId, IsEmailAddressRequired(false))
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+            val result: Future[Result] = controller.termsAndConditionsSubmit(fakeRequest)
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(PageUrls.submitArrangementUrl)
+            EssttpBackend.TermsAndConditions.verifyUpdateAgreedTermsAndConditionsRequest(TdAll.journeyId, IsEmailAddressRequired(false))
+          }
+        }
     }
-  }
 
 }

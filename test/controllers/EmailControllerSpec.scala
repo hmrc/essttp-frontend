@@ -18,6 +18,7 @@ package controllers
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.emailverification.EmailVerificationStatus
+import essttp.journey.model.Origins
 import essttp.rootmodel.Email
 import models.GGCredId
 import models.emailverification.EmailVerificationStatusResponse.EmailStatus
@@ -52,7 +53,7 @@ class EmailControllerSpec extends ItSpec {
 
     "should return the which email do you want to use page" in {
       stubCommonActions()
-      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto)()
+      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin = Origins.Epaye.Bta)()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.whichEmailDoYouWantToUse(fakeRequest)
@@ -113,9 +114,9 @@ class EmailControllerSpec extends ItSpec {
 
     "throw an error if an email address cannot be found in the eligibility check response" in {
       stubCommonActions()
-      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto)(
+      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin = Origins.Epaye.Bta)(
         JsonUtils.replace(List("AgreedTermsAndConditions", "eligibilityCheckResult", "customerDetails"), JsArray())(
-          Json.parse(JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = true)).as[JsObject]
+          Json.parse(JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = true, origin = Origins.Epaye.Bta)).as[JsObject]
         ).toString
       )
 
@@ -132,7 +133,7 @@ class EmailControllerSpec extends ItSpec {
       val email: Email = Email(SensitiveString("bobross@joyofpainting.com"))
 
       stubCommonActions()
-      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto)()
+      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin = Origins.Epaye.Bta)()
       EssttpBackend.SelectEmail.stubUpdateSelectedEmail(
         TdAll.journeyId,
         JourneyJsonTemplates.`Selected email to be verified`(email.value.decryptedValue)
@@ -158,7 +159,7 @@ class EmailControllerSpec extends ItSpec {
       val email: Email = Email(SensitiveString("somenewemail@newemail.com"))
 
       stubCommonActions()
-      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto)()
+      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin = Origins.Epaye.Bta)()
       EssttpBackend.SelectEmail.stubUpdateSelectedEmail(
         TdAll.journeyId,
         JourneyJsonTemplates.`Selected email to be verified`(email.value.decryptedValue)
@@ -190,7 +191,7 @@ class EmailControllerSpec extends ItSpec {
       (scenario: String, inputValue: List[(String, String)], expectedErrorMessage: String, expectedErrorTarget: String) =>
         s"When input is: [ $scenario: [ ${inputValue.toString} ]] error message should be $expectedErrorMessage" in {
           stubCommonActions()
-          EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, testCrypto)()
+          EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, testCrypto, origin = Origins.Epaye.Bta)()
 
           val fakeRequest = FakeRequest(
             method = "POST",
@@ -222,9 +223,9 @@ class EmailControllerSpec extends ItSpec {
 
     "throw an error if an email address cannot be found in the eligibility check response" in {
       stubCommonActions()
-      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto)(
+      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin = Origins.Epaye.Bta)(
         JsonUtils.replace(List("AgreedTermsAndConditions", "eligibilityCheckResult", "customerDetails"), JsArray())(
-          Json.parse(JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = true)).as[JsObject]
+          Json.parse(JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = true, origin = Origins.Epaye.Bta)).as[JsObject]
         ).toString
       )
 
@@ -243,7 +244,7 @@ class EmailControllerSpec extends ItSpec {
 
     "not allow journeys where an email has not been selected" in {
       stubCommonActions()
-      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto)()
+      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin = Origins.Epaye.Bta)()
 
       val result = controller.requestVerification(fakeRequest)
 
@@ -350,7 +351,7 @@ class EmailControllerSpec extends ItSpec {
 
     "not allow journeys where an email has not been selected" in {
       stubCommonActions()
-      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto)()
+      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin = Origins.Epaye.Bta)()
 
       val result = controller.emailCallback(fakeRequest)
 

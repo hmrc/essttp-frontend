@@ -1056,8 +1056,8 @@ object Messages {
     )
 
     val `If your circumstances change...`: Message = Message(
-      english = "If your circumstances change and you can pay more or you can pay in full, you need to let us know.",
-      welsh   = "Os bydd eich amgylchiadau’n newid, a gallwch dalu mwy neu gallwch dalu’n llawn, mae’n rhaid i chi roi gwybod i ni."
+      english = "Contact HMRC on 0300 123 1813 if anything changes that you think affects your payment plan.",
+      welsh   = "Cysylltwch â CThEF ar 0300 200 1900 os oes unrhyw beth yn newid ac rydych o’r farn ei fod yn effeithio ar eich cynllun talu."
     )
 
     val `You can write to us...`: Message = Message(
@@ -1065,10 +1065,19 @@ object Messages {
       welsh   = "Gallwch ysgrifennu atom ynglŷn â’ch Debyd Uniongyrchol:"
     )
 
-    val `HMRC Direct Debit Support Team VAT 2...`: Message = Message(
-      english = "DM PAYE<br>HM Revenue and Customs<br>BX9 1EW<br>United Kingdom",
-      welsh   = "Gwasanaeth Cwsmeriaid Cymraeg CThEF<br>HMRC<br>BX9 1ST"
-    )
+    def `HMRC address`(taxRegime: TaxRegime): Message = {
+      taxRegime match {
+        case TaxRegime.Epaye =>
+          Message(
+            english = "DM PAYE<br>HM Revenue and Customs<br>BX9 1EW<br>United Kingdom",
+            welsh   = "Gwasanaeth Cwsmeriaid Cymraeg CThEF<br>HMRC<br>BX9 1ST"
+          )
+        case TaxRegime.Vat =>
+          Message(
+            english = "HMRC Direct Debit Support Team VAT 2<br>DMB 612<br>BX5 5AB<br>United Kingdom"
+          )
+      }
+    }
 
     val `Declaration`: Message = Message(
       english = "Declaration",
