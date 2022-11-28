@@ -18,7 +18,7 @@ package controllers.pagerouters
 
 import controllers.routes
 import essttp.rootmodel.TaxRegime
-import essttp.rootmodel.ttp.EligibilityCheckResult
+import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import models.EligibilityErrors
 import models.EligibilityErrors._
 import play.api.mvc.Call

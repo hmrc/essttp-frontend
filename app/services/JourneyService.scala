@@ -20,7 +20,7 @@ import com.google.inject.{Inject, Singleton}
 import essttp.emailverification.EmailVerificationStatus
 import essttp.journey.JourneyConnector
 import essttp.journey.model.{Journey, JourneyId}
-import essttp.rootmodel.ttp.EligibilityCheckResult
+import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import essttp.rootmodel.ttp.affordability.InstalmentAmounts
 import essttp.rootmodel.ttp.affordablequotes.{AffordableQuotesResponse, PaymentPlan}
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse

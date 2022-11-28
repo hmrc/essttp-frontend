@@ -17,7 +17,7 @@
 package controllers
 
 import essttp.journey.model.Origins
-import essttp.rootmodel.ttp.EligibilityRules
+import essttp.rootmodel.ttp.eligibility.EligibilityRules
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}

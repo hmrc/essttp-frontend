@@ -16,7 +16,7 @@
 
 package testsupport.testdata
 
-import essttp.rootmodel.ttp.{EligibilityRules, EligibilityPass}
+import essttp.rootmodel.ttp.eligibility.{EligibilityRules, EligibilityPass}
 
 object TtpJsonResponses {
 
@@ -61,7 +61,7 @@ object TtpJsonResponses {
        |    "chargesOverMaxDebtAge" : ${eligibilityRules.chargesOverMaxDebtAge.toString},
        |    "ineligibleChargeTypes" : ${eligibilityRules.ineligibleChargeTypes.toString},
        |    "missingFiledReturns" : ${eligibilityRules.missingFiledReturns.toString},
-       |    "noDueDatesReached": ${eligibilityRules.noDueDatesReached.getOrElse(false).toString}
+       |    "noDueDatesReached": ${eligibilityRules.noDueDatesReached.toString}
        |  },
        |  "chargeTypeAssessment" : [ {
        |    "taxPeriodFrom" : "2020-08-13",

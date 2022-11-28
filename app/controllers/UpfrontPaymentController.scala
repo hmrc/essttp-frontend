@@ -22,7 +22,7 @@ import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
 import essttp.journey.model.UpfrontPaymentAnswers.DeclaredUpfrontPayment
-import essttp.rootmodel.ttp.{DebtTotalAmount, EligibilityCheckResult}
+import essttp.rootmodel.ttp.eligibility.{DebtTotalAmount, EligibilityCheckResult}
 import essttp.rootmodel.{AmountInPence, CanPayUpfront, UpfrontPaymentAmount}
 import models.enumsforforms.CanPayUpfrontFormValue
 import models.forms.{CanPayUpfrontForm, UpfrontPaymentAmountForm}

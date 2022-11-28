@@ -20,7 +20,7 @@ import com.google.inject.{Inject, Singleton}
 import config.AppConfig
 import essttp.crypto.CryptoFormat
 import essttp.journey.model.CorrelationId
-import essttp.rootmodel.ttp.EligibilityCheckResult
+import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import essttp.rootmodel.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
 import essttp.rootmodel.ttp.affordablequotes.{AffordableQuotesRequest, AffordableQuotesResponse}
 import essttp.rootmodel.ttp.arrangement.{ArrangementRequest, ArrangementResponse}

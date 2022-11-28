@@ -18,7 +18,7 @@ package testsupport.testdata
 
 import essttp.emailverification.EmailVerificationStatus
 import essttp.journey.model.{Origin, Origins}
-import essttp.rootmodel.ttp.{EligibilityPass, EligibilityRules}
+import essttp.rootmodel.ttp.eligibility.{EligibilityPass, EligibilityRules}
 import essttp.rootmodel.{DayOfMonth, TaxRegime, UpfrontPaymentAmount}
 import testsupport.testdata.JourneyInfo.JourneyInfoAsJson
 import uk.gov.hmrc.crypto.{Encrypter, PlainText}
@@ -137,7 +137,7 @@ object TdJsonBodies {
       |    "chargesOverMaxDebtAge" : ${eligibilityRules.chargesOverMaxDebtAge.toString},
       |    "ineligibleChargeTypes" : ${eligibilityRules.ineligibleChargeTypes.toString},
       |    "missingFiledReturns" : ${eligibilityRules.missingFiledReturns.toString},
-      |    "noDueDatesReached": ${eligibilityRules.noDueDatesReached.getOrElse(false).toString}
+      |    "noDueDatesReached": ${eligibilityRules.noDueDatesReached.toString}
       |  },
       |  "chargeTypeAssessment" : [
       |    {
@@ -160,7 +160,8 @@ object TdJsonBodies {
       |            "lockType": "Payment",
       |            "lockReason": "Risk/Fraud",
       |            "disallowedChargeLockType": false
-      |         } ]
+      |         } ],
+      |         "dueDateNotReached": false
       |      } ]
       |    },
       |    {
@@ -192,7 +193,8 @@ object TdJsonBodies {
       |    "emailAddress" : "${encryptString("bobross@joyofpainting.com", encrypter)}",
       |    "emailSource" : "ETMP"
       |  } ],
-      |  "regimeDigitalCorrespondence" : true
+      |  "regimeDigitalCorrespondence": true,
+      |  "futureChargeLiabilitiesExcluded": false
       |}
       |""".stripMargin
   }

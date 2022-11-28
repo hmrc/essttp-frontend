@@ -21,7 +21,7 @@ import play.api.libs.functional.syntax._
 import enumeratum.Enum
 import play.api.libs.json.Format
 import cats.Eq
-import essttp.rootmodel.ttp.EligibilityRules
+import essttp.rootmodel.ttp.eligibility.EligibilityRules
 
 import scala.collection.immutable
 
@@ -78,7 +78,7 @@ object EligibilityErrors extends Enum[EligibilityError] {
       case EligibilityRules(_, _, _, _, _, _, _, _, true, _, _, _)                => Some(MissingFiledReturns)
       case EligibilityRules(_, _, _, _, _, _, _, _, _, Some(true), _, _)          => Some(HasInvalidInterestSignals)
       case EligibilityRules(_, _, _, _, _, _, _, _, _, _, Some(true), _)          => Some(DmSpecialOfficeProcessingRequired)
-      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, Some(true))          => Some(NoDueDatesReached)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, true)                => Some(NoDueDatesReached)
       case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _)                   => None //all false
     }
   }

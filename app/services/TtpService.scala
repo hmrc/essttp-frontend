@@ -26,6 +26,7 @@ import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel._
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
 import essttp.rootmodel.ttp._
+import essttp.rootmodel.ttp.eligibility._
 import essttp.rootmodel.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
 import essttp.rootmodel.ttp.affordablequotes._
 import essttp.rootmodel.ttp.arrangement._

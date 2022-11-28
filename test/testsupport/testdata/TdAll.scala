@@ -24,10 +24,10 @@ import essttp.rootmodel.dates.{InitialPayment, InitialPaymentDate}
 import essttp.rootmodel.dates.extremedates.{EarliestPaymentPlanStartDate, ExtremeDatesRequest, ExtremeDatesResponse, LatestPaymentPlanStartDate}
 import essttp.rootmodel.dates.startdates.{InstalmentStartDate, PreferredDayOfMonth, StartDatesRequest, StartDatesResponse}
 import essttp.rootmodel.ttp.affordablequotes._
+import essttp.rootmodel.ttp.eligibility._
 import essttp.rootmodel.ttp._
 import essttp.rootmodel.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
 import essttp.rootmodel.ttp.arrangement._
-import essttp.rootmodel.ttp.eligibility.{CustomerDetail, EmailSource, RegimeDigitalCorrespondence}
 import essttp.rootmodel.{AmountInPence, CanPayUpfront, DayOfMonth, Email, MonthlyPaymentAmount, UpfrontPaymentAmount}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
@@ -92,7 +92,7 @@ object TdAll {
     missingFiledReturns               = false,
     hasInvalidInterestSignals         = None,
     dmSpecialOfficeProcessingRequired = None,
-    noDueDatesReached                 = Some(false)
+    noDueDatesReached                 = false
   )
   val notEligibleHasRlsOnAddress: EligibilityRules = eligibleEligibilityRules.copy(hasRlsOnAddress = true)
   val notEligibleMarkedAsInsolvent: EligibilityRules = eligibleEligibilityRules.copy(markedAsInsolvent = true)
@@ -103,7 +103,7 @@ object TdAll {
   val notEligibleExceedsMaxDebtAge: EligibilityRules = eligibleEligibilityRules.copy(chargesOverMaxDebtAge = true)
   val notEligibleEligibleChargeType: EligibilityRules = eligibleEligibilityRules.copy(ineligibleChargeTypes = true)
   val notEligibleMissingFiledReturns: EligibilityRules = eligibleEligibilityRules.copy(missingFiledReturns = true)
-  val notEligibleNoDueDatesReached: EligibilityRules = eligibleEligibilityRules.copy(noDueDatesReached = Some(true))
+  val notEligibleNoDueDatesReached: EligibilityRules = eligibleEligibilityRules.copy(noDueDatesReached = true)
   val notEligibleMultipleReasons: EligibilityRules = eligibleEligibilityRules.copy(missingFiledReturns = true).copy(hasRlsOnAddress = true)
 
   val callEligibilityApiRequestEpaye: CallEligibilityApiRequest = CallEligibilityApiRequest(
@@ -146,12 +146,12 @@ object TdAll {
         locks                = Some(
           List(Lock(LockType("Payment"), LockReason("Risk/Fraud"), DisallowedChargeLockType(false)))
         ),
-        dueDateNotReached    = Some(false)
+        dueDateNotReached    = false
       ))
     )),
     customerDetails                 = None,
     regimeDigitalCorrespondence     = None,
-    futureChargeLiabilitiesExcluded = Some(false)
+    futureChargeLiabilitiesExcluded = false
   )
 
   def dayOfMonth(day: Int = 28): DayOfMonth = DayOfMonth(day)
