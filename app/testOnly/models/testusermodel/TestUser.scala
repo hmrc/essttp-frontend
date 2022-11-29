@@ -21,8 +21,6 @@ import essttp.rootmodel.Vrn
 import testOnly.models.formsmodel.{Enrolments, SignInAs, StartJourneyForm}
 import uk.gov.hmrc.auth.core.{AffinityGroup, ConfidenceLevel}
 
-import scala.util.Random
-
 /**
  * Definition of a test user.
  * We use that data to
@@ -38,8 +36,6 @@ final case class TestUser(
 )
 
 object TestUser {
-
-  private implicit val random: Random = Random
 
   def makeTestUser(form: StartJourneyForm): Option[TestUser] = {
     val maybeAffinityGroup: Option[AffinityGroup] = form.signInAs match {
