@@ -21,6 +21,7 @@ import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
 import essttp.rootmodel.{Email, EmpRef, Vrn}
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 
+import java.util.UUID
 import scala.annotation.tailrec
 import scala.util.Random
 
@@ -66,7 +67,7 @@ object RandomDataGenerator {
     generateVRN(firstDigit, secondDigit, thirdDigit, fourthDigit, None, sixthDigit, None)
   }
 
-  def nextAuthorityId()(implicit r: Random): AuthorityId = AuthorityId(s"authId-${nextNumber(4)}")
+  def nextAuthorityId(): AuthorityId = AuthorityId(s"authId-${UUID.randomUUID().toString}")
 
   def nextForename()(implicit r: Random): String = choose(
     "Sophia", "Emma", "Olivia", "Ava", "Mia", "Isabella", "Riley", "Aria", "Zoe", "Charlotte", "Lily", "Layla", "Amelia", "Emily", "Madelyn", "Aubrey", "Adalyn", "Madison", "Chloe", "Harper", "Abigail", "Aaliyah", "Avery", "Evelyn", "Kaylee", "Ella", "Ellie", "Scarlett", "Arianna", "Hailey", "Nora", "Addison", "Brooklyn", "Hannah", "Mila", "Leah", "Elizabeth", "Sarah", "Eliana", "Mackenzie", "Peyton", "Maria", "Grace", "Adeline", "Elena", "Anna", "Victoria", "Camilla", "Lillian",
