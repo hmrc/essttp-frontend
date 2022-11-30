@@ -47,6 +47,8 @@ object BankDetailsForm {
   val accountNameMapping: Mapping[AccountName] =
     nonEmptyText.transform[AccountName](name => AccountName(SensitiveString.apply(name)), _.value.decryptedValue).verifying(accountNameConstraint)
 
+  val allowedSeparators: Set[Char] = Set(' ', '-', '–', '−', '—')
+
   val sortCodeRegex: String = "^[0-9]{6}$"
   val sortCodeConstraint: Constraint[SortCode] =
     Constraint(sortCode =>
@@ -56,7 +58,7 @@ object BankDetailsForm {
 
   val sortCodeMapping: Mapping[SortCode] = nonEmptyText
     .transform[SortCode](
-      sortCode => SortCode(SensitiveString.apply(sortCode.replaceAll("-", "").replaceAll("\\s", ""))),
+      sortCode => SortCode(SensitiveString.apply(sortCode.filterNot(allowedSeparators.contains))),
       _.value.decryptedValue
     ).verifying(sortCodeConstraint)
 
@@ -70,7 +72,7 @@ object BankDetailsForm {
 
   val accountNumberMapping: Mapping[AccountNumber] = nonEmptyText
     .transform[AccountNumber](
-      accountNumber => AccountNumber(SensitiveString.apply(accountNumber.replaceAll("\\s", ""))),
+      accountNumber => AccountNumber(SensitiveString.apply(accountNumber.filterNot(allowedSeparators.contains))),
       _.value.decryptedValue
     ).verifying(accountNumberConstraint)
 
