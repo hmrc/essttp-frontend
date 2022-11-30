@@ -591,6 +591,79 @@ class BankDetailsControllerSpec extends ItSpec {
             AuditConnectorStub.verifyNoAuditEvent()
           }
 
+          s"[$regime journey] should strip out allowed separators" in {
+            stubCommonActions()
+            BarsStub.ValidateStub.success()
+            BarsStub.VerifyPersonalStub.success()
+            BarsVerifyStatusStub.update()
+            EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)(
+              JourneyJsonTemplates.`Entered Details About Bank Account - Personal`(isAccountHolder = true, origin)
+            )
+            EssttpBackend.DirectDebitDetails.stubUpdateDirectDebitDetails(TdAll.journeyId, JourneyJsonTemplates.`Entered Direct Debit Details`(origin))
+
+            val formDataWithUnallowedCharacters: List[(String, String)] = List(
+              ("name", "Bob Ross"),
+              ("sortCode", "1 2-3–4−5—6"),
+              ("accountNumber", "1-2–3−4—5678")
+            )
+            val fakeRequest: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
+              method = "POST",
+              path   = "/set-up-direct-debit"
+            ).withAuthToken()
+              .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+              .withFormUrlEncodedBody(formDataWithUnallowedCharacters: _*)
+
+            val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(PageUrls.checkDirectDebitDetailsUrl)
+
+            EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(
+              TdAll.journeyId,
+              TdAll.directDebitDetails("Bob Ross", "123456", "12345678")
+            )(testOperationCryptoFormat)
+
+            val expectedFormData: List[(String, String)] = List(
+              ("name", "Bob Ross"),
+              ("sortCode", "123456"),
+              ("accountNumber", "12345678")
+            )
+
+            BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(expectedFormData)
+            BarsVerifyStatusStub.ensureVerifyUpdateStatusIsNotCalled() // don't update verify count on BARs success
+
+            AuditConnectorStub.verifyEventAudited(
+              auditType  = "BarsCheck",
+              auditEvent = Json.parse(
+                s"""
+                   |{
+                   |  "taxDetail": {
+                   |    "accountsOfficeRef": "123PA44545546",
+                   |    "employerRef": "864FZ00049"
+                   |  },
+                   |  "taxType": "${taxRegime.toString}",
+                   |  "origin": "Bta",
+                   |  "request": {
+                   |    "account": {
+                   |       "accountType": "personal",
+                   |       "accountHolderName": "Bob Ross",
+                   |       "sortCode": "123456",
+                   |       "accountNumber": "12345678"
+                   |    }
+                   |  },
+                   |  "response": {
+                   |    "isBankAccountValid": true,
+                   |    "barsResponse":  ${VerifyJson.success}
+                   |  },
+                   |  "barsVerify": {
+                   |    "unsuccessfulAttempts" : 1
+                   |  },
+                   |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059"
+                   |}
+            """.stripMargin
+              ).as[JsObject]
+            )
+          }
+
           abstract class BarsErrorSetup(typeOfAccount: TypeOfBankAccount) {
             stubCommonActions()
             BarsVerifyStatusStub.update(numberOfAttempts = 2)
