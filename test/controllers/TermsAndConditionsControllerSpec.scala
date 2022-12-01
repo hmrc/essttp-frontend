@@ -104,7 +104,24 @@ class TermsAndConditionsControllerSpec extends ItSpec {
 
         "POST /terms-and-conditions should" - {
 
-          s"[$regime journey] redirect the user to the email journey if it is enabled and update backend" in {
+          s"[$regime journey] redirect the user to submit arrangement if regimeDigitalCorrespondence is false and update backend" in {
+            stubCommonActions()
+            EssttpBackend.ConfirmedDirectDebitDetails
+              .findJourney(testCrypto, origin)(JourneyJsonTemplates.`Confirmed Direct Debit Details - regimeDigitalCorrespondence flag`(origin, regimeDigitalCorrespondence = false)(testCrypto))
+            EssttpBackend.TermsAndConditions.stubUpdateAgreedTermsAndConditions(
+              TdAll.journeyId,
+              JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = false, origin)
+            )
+
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+            val result: Future[Result] = controller.termsAndConditionsSubmit(fakeRequest)
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(PageUrls.submitArrangementUrl)
+            EssttpBackend.TermsAndConditions.verifyUpdateAgreedTermsAndConditionsRequest(TdAll.journeyId, IsEmailAddressRequired(false))
+          }
+
+          s"[$regime journey] redirect the user to the email journey if regimeDigitalCorrespondence is enabled and update backend" in {
             stubCommonActions()
             EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto, origin)()
             EssttpBackend.TermsAndConditions.stubUpdateAgreedTermsAndConditions(
@@ -138,7 +155,7 @@ class TermsAndConditionsControllerEmailDisabledSpec extends ItSpec {
 
         "POST /terms-and-conditions should" - {
 
-          s"[$regime journey] redirect the user to the submit arrangement endpoint if the email journey is enabled and update backend" in {
+          s"[$regime journey] redirect the user to the submit arrangement endpoint if the our email journey feature flag is false and update backend" in {
             stubCommonActions()
             EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto, origin)()
             EssttpBackend.TermsAndConditions.stubUpdateAgreedTermsAndConditions(

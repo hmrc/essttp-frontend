@@ -137,6 +137,34 @@
 ))
 }
 
+@regimeDigitalCorrespondenceRadios = @{
+    govukRadios(Radios(
+        fieldset = Some(Fieldset(
+            legend = Some(Legend(
+                content = Text("Regime Digital Correspondence"),
+                classes = "govuk-fieldset__legend--m",
+                isPageHeading = false
+            ))
+        )),
+        idPrefix = Some("regimeDigitalCorrespondence"),
+        name = "regimeDigitalCorrespondence",
+        errorMessage = form.error("regimeDigitalCorrespondence").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
+            content = Text(e.message)
+        )),
+        items = Seq(
+            RadioItem(
+                content = Text("Yes"),
+                value = Some("true")
+            ),
+            RadioItem(
+                content = Text("No"),
+                value = Some("false")
+            )
+        ),
+        classes = "govuk-radios--small govuk-radios--inline"
+    ))
+}
+
 @payeContent = {
 @formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneySubmit) {
 
@@ -179,6 +207,8 @@
         value = form.data.get("payeTaxReference"),
         hint = Some(Hint(content = Text("PAYE format NNNLLNNNNN, e.g. 864FZ00049. If left empty, it will be a random one.")))
     ))
+
+    @regimeDigitalCorrespondenceRadios
 
     @govukCheckboxes(Checkboxes(
         fieldset = Some(Fieldset(
@@ -275,6 +305,8 @@
         value = form.data.get("vatTaxReference"),
         hint = Some(Hint(content = Text("VAT format NNNNNNNNN, e.g. 101747001. If left empty, it will be a random one.")))
     ))
+
+    @regimeDigitalCorrespondenceRadios
 
     @govukCheckboxes(Checkboxes(
         fieldset = Some(Fieldset(

@@ -20,7 +20,10 @@ import actions.Actions
 import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import essttp.journey.model.Journey
+import essttp.journey.model.Journey.Stages
 import essttp.rootmodel.IsEmailAddressRequired
+import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
+import essttp.utils.Errors
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -51,8 +54,14 @@ class TermsAndConditionsController @Inject() (
   val termsAndConditionsSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     request.journey match {
       case j: Journey.BeforeConfirmedDirectDebitDetails => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF(j)
-      case _: Journey.AfterConfirmedDirectDebitDetails =>
-        val isEmailAddressRequired = appConfig.emailJourneyEnabled
+      case j: Journey.AfterConfirmedDirectDebitDetails =>
+        val journeyEligibilityCheckResult: EligibilityCheckResult = j match {
+          case _: Stages.SubmittedArrangement =>
+            Errors.throwServerErrorException("Journey is in completed state, terms and conditions cannot be resubmitted.")
+          case j1: Journey.AfterEligibilityChecked => j1.eligibilityCheckResult
+        }
+
+        val isEmailAddressRequired = appConfig.emailJourneyEnabled && journeyEligibilityCheckResult.regimeDigitalCorrespondence.exists(_.value)
 
         journeyService
           .updateAgreedTermsAndConditions(request.journeyId, IsEmailAddressRequired(isEmailAddressRequired))

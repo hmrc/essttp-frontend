@@ -21,8 +21,8 @@ import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.ttp.eligibility.{EligibilityPass, EligibilityRules}
 import essttp.rootmodel.{DayOfMonth, TaxRegime, UpfrontPaymentAmount}
 import testsupport.testdata.JourneyInfo.JourneyInfoAsJson
-import uk.gov.hmrc.crypto.{Encrypter, PlainText}
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
+import uk.gov.hmrc.crypto.{Encrypter, PlainText}
 
 object TdJsonBodies {
 
@@ -97,10 +97,11 @@ object TdJsonBodies {
       |""".stripMargin
 
   def eligibilityCheckJourneyInfo(
-      eligibilityPass:  EligibilityPass  = TdAll.eligibleEligibilityPass,
-      eligibilityRules: EligibilityRules = TdAll.eligibleEligibilityRules,
-      taxRegime:        TaxRegime,
-      encrypter:        Encrypter
+      eligibilityPass:             EligibilityPass  = TdAll.eligibleEligibilityPass,
+      eligibilityRules:            EligibilityRules = TdAll.eligibleEligibilityRules,
+      taxRegime:                   TaxRegime,
+      encrypter:                   Encrypter,
+      regimeDigitalCorrespondence: Boolean          = true
   ): JourneyInfoAsJson =
     s"""
       |"eligibilityCheckResult" : {
@@ -185,7 +186,7 @@ object TdJsonBodies {
       |    "emailAddress" : "${encryptString("bobross@joyofpainting.com", encrypter)}",
       |    "emailSource" : "ETMP"
       |  } ],
-      |  "regimeDigitalCorrespondence": true,
+      |  "regimeDigitalCorrespondence": ${regimeDigitalCorrespondence.toString},
       |  "futureChargeLiabilitiesExcluded": false
       |}
       |""".stripMargin
