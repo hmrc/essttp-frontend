@@ -16,6 +16,7 @@
 
 package controllers
 
+import essttp.journey.model.Origins
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.http.Status
 import play.api.mvc.{Action, AnyContent}
@@ -53,7 +54,7 @@ class JourneyFinalStateCheckSpec extends ItSpec {
         {
           s"GET $scenario should redirect to ${PageUrls.confirmationUrl}" in {
             stubCommonActions()
-            EssttpBackend.SubmitArrangement.findJourney(testCrypto)()
+            EssttpBackend.SubmitArrangement.findJourney(Origins.Epaye.Bta, testCrypto)()
 
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 

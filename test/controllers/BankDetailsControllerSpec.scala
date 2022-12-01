@@ -474,10 +474,7 @@ class BankDetailsControllerSpec extends ItSpec {
               auditEvent = Json.parse(
                 s"""
              |{
-             |  "taxDetail": {
-             |    "accountsOfficeRef": "123PA44545546",
-             |    "employerRef": "864FZ00049"
-             |  },
+             |  "taxDetail": ${TdAll.taxDetailJsonString(taxRegime)},
              |  "taxType": "${taxRegime.toString}",
              |  "origin": "Bta",
              |  "request": {
@@ -636,10 +633,7 @@ class BankDetailsControllerSpec extends ItSpec {
               auditEvent = Json.parse(
                 s"""
                    |{
-                   |  "taxDetail": {
-                   |    "accountsOfficeRef": "123PA44545546",
-                   |    "employerRef": "864FZ00049"
-                   |  },
+                   |  "taxDetail": ${TdAll.taxDetailJsonString(taxRegime)},
                    |  "taxType": "${taxRegime.toString}",
                    |  "origin": "Bta",
                    |  "request": {
@@ -693,10 +687,7 @@ class BankDetailsControllerSpec extends ItSpec {
               Json.parse(
                 s"""
              |{
-             |  "taxDetail": {
-             |    "accountsOfficeRef": "123PA44545546",
-             |    "employerRef": "864FZ00049"
-             |  },
+             |  "taxDetail": ${TdAll.taxDetailJsonString(taxRegime)},
              |  "taxType": "${taxRegime.toString}",
              |  "origin": "Bta",
              |  "request": {
@@ -1063,7 +1054,7 @@ class BankDetailsControllerSpec extends ItSpec {
             ).toInstant(ZoneOffset.UTC)
 
             stubCommonActions(barsLockoutExpiry = Some(expiry))
-            EssttpBackend.DetermineTaxId.findJourney(JourneyJsonTemplates.`Computed Tax Id`(origin))
+            EssttpBackend.DetermineTaxId.findJourney(origin)(JourneyJsonTemplates.`Computed Tax Id`(origin))
 
             val request = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result: Future[Result] = controller.barsLockout(request)

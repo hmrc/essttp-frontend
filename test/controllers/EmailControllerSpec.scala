@@ -19,7 +19,7 @@ package controllers
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.emailverification.EmailVerificationStatus
 import essttp.journey.model.Origins
-import essttp.rootmodel.Email
+import essttp.rootmodel.{Email, TaxRegime}
 import models.GGCredId
 import models.emailverification.EmailVerificationStatusResponse.EmailStatus
 import models.emailverification.RequestEmailVerificationResponse
@@ -49,558 +49,580 @@ class EmailControllerSpec extends ItSpec {
 
   override lazy val configOverrides: Map[String, Any] = Map("features.email-journey" -> true)
 
-  "GET /which-email-do-you-want-to-use" - {
+  List(
+    TaxRegime.Epaye -> Origins.Epaye.Bta,
+    TaxRegime.Vat -> Origins.Vat.Bta
+  ).foreach {
+      case (taxRegime, origin) =>
 
-    "should return the which email do you want to use page" in {
-      stubCommonActions()
-      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin = Origins.Epaye.Bta)()
+        def requiresEmailAddressVerifiedBehaviour(action: Action[AnyContent]): Unit = {
+            val email: Email = Email(SensitiveString("email@test.com"))
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val result: Future[Result] = controller.whichEmailDoYouWantToUse(fakeRequest)
-      val doc: Document = Jsoup.parse(contentAsString(result))
+            "not allow journey when" - {
 
-      RequestAssertions.assertGetRequestOk(result)
-      ContentAssertions.commonPageChecks(
-        doc,
-        expectedH1              = "Which email do you want to use?",
-        shouldBackLinkBePresent = true,
-        expectedSubmitUrl       = Some(routes.EmailController.whichEmailDoYouWantToUse.url)
-      )
+                def test(
+                    journeyStubMapping:       () => StubMapping,
+                    expectedRedirectLocation: Call
+                ) = {
+                  stubCommonActions()
+                  journeyStubMapping()
 
-      val radios: Elements = doc.select(".govuk-radios__item")
-      radios.size() shouldBe 2
+                  val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+                  val result = action(fakeRequest)
 
-      val radioButtons: List[Element] = radios.select(".govuk-radios__input").asScala.toList
-      radioButtons(0).`val` shouldBe "bobross@joyofpainting.com"
-      radioButtons(1).`val` shouldBe "new"
+                  status(result) shouldBe SEE_OTHER
+                  redirectLocation(result) shouldBe Some(expectedRedirectLocation.url)
+                }
 
-      val radioLabels = radios.select(".govuk-radios__label").asScala.toList
-      radioLabels(0).text() shouldBe "bobross@joyofpainting.com"
-      radioLabels(1).text() shouldBe "A new email address"
+              "an email verification result has not been obtained yet" in {
+                test(
+                  () => EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto, origin)(),
+                  routes.EmailController.requestVerification
+                )
+              }
 
-      doc.select("#newEmailInput-hint").text() shouldBe "For example, myname@sample.com"
-      doc.select("#newEmailInput").attr("type") shouldBe "email"
-    }
+              "an arrangement has already been submitted" in {
+                test(
+                  () => EssttpBackend.SubmitArrangement.findJourney(Origins.Epaye.Bta, testCrypto)(),
+                  routes.PaymentPlanSetUpController.paymentPlanSetUp
+                )
+              }
 
-    "should prepopulate the form correctly" - {
-      "existing email" in {
-        stubCommonActions()
-        EssttpBackend.SelectEmail.findJourney("bobross@joyofpainting.com", encrypter = testCrypto)()
-        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-        val result: Future[Result] = controller.whichEmailDoYouWantToUse(fakeRequest)
-        val doc: Document = Jsoup.parse(contentAsString(result))
-        RequestAssertions.assertGetRequestOk(result)
-        val radioInputs = doc.select(".govuk-radios__input").iterator().asScala.toList
-        radioInputs.size shouldBe 2
-        radioInputs(0).hasAttr("checked") shouldBe true
-        radioInputs(1).hasAttr("checked") shouldBe false
-        doc.select("#newEmailInput").text() shouldBe ""
-      }
+              "an email verification result has been obtained but it is locked" in {
+                test(
+                  () => EssttpBackend.EmailVerificationStatus.findJourney(email.value.decryptedValue, EmailVerificationStatus.Locked, testCrypto, origin)(),
+                  routes.EmailController.tooManyPasscodeAttempts
+                )
+              }
 
-      "new email" in {
-        stubCommonActions()
-        EssttpBackend.SelectEmail.findJourney("somenewemail@newemail.com", encrypter = testCrypto)()
-        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-        val result: Future[Result] = controller.whichEmailDoYouWantToUse(fakeRequest)
-        val doc: Document = Jsoup.parse(contentAsString(result))
-        RequestAssertions.assertGetRequestOk(result)
-        val radioInputs = doc.select(".govuk-radios__input").iterator().asScala.toList
-        radioInputs.size shouldBe 2
-        radioInputs(0).hasAttr("checked") shouldBe false
-        radioInputs(1).hasAttr("checked") shouldBe true
-        doc.select("#newEmailInput").`val` shouldBe "somenewemail@newemail.com"
-      }
-    }
+            }
+          }
 
-    "throw an error if an email address cannot be found in the eligibility check response" in {
-      stubCommonActions()
-      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin = Origins.Epaye.Bta)(
-        JsonUtils.replace(List("AgreedTermsAndConditions", "eligibilityCheckResult", "customerDetails"), JsArray())(
-          Json.parse(JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = true, origin = Origins.Epaye.Bta)).as[JsObject]
-        ).toString
-      )
+        s"[taxRegime: ${taxRegime.toString}] GET /which-email-do-you-want-to-use" - {
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val error = intercept[Exception](controller.whichEmailDoYouWantToUse(fakeRequest).futureValue)
-      error.getMessage should endWith("Could not find email address in eligibility response.")
-    }
+          "should return the which email do you want to use page" in {
+            stubCommonActions()
+            EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin = origin)()
 
-  }
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+            val result: Future[Result] = controller.whichEmailDoYouWantToUse(fakeRequest)
+            val doc: Document = Jsoup.parse(contentAsString(result))
 
-  "POST /which-email-do-you-want-to-use should" - {
+            RequestAssertions.assertGetRequestOk(result)
+            ContentAssertions.commonPageChecks(
+              doc,
+              expectedH1              = "Which email do you want to use?",
+              shouldBackLinkBePresent = true,
+              expectedSubmitUrl       = Some(routes.EmailController.whichEmailDoYouWantToUse.url),
+              regimeBeingTested       = Some(taxRegime)
+            )
 
-    "update backend with existing email" in {
-      val email: Email = Email(SensitiveString("bobross@joyofpainting.com"))
+            val radios: Elements = doc.select(".govuk-radios__item")
+            radios.size() shouldBe 2
 
-      stubCommonActions()
-      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin = Origins.Epaye.Bta)()
-      EssttpBackend.SelectEmail.stubUpdateSelectedEmail(
-        TdAll.journeyId,
-        JourneyJsonTemplates.`Selected email to be verified`(email.value.decryptedValue)
-      )
+            val radioButtons: List[Element] = radios.select(".govuk-radios__input").asScala.toList
+            radioButtons(0).`val` shouldBe "bobross@joyofpainting.com"
+            radioButtons(1).`val` shouldBe "new"
 
-      val fakeRequest = FakeRequest(
-        method = "POST",
-        path   = "/which-email-do-you-want-to-use"
-      ).withAuthToken()
-        .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-        .withFormUrlEncodedBody(
-          ("selectAnEmailToUseRadio", email.value.decryptedValue),
-          ("newEmailInput", "")
-        )
+            val radioLabels = radios.select(".govuk-radios__label").asScala.toList
+            radioLabels(0).text() shouldBe "bobross@joyofpainting.com"
+            radioLabels(1).text() shouldBe "A new email address"
 
-      val result: Future[Result] = controller.whichEmailDoYouWantToUseSubmit(fakeRequest)
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.requestEmailVerificationUrl)
-      EssttpBackend.SelectEmail.verifyUpdateSelectedEmailRequest(TdAll.journeyId, email)(testOperationCryptoFormat)
-    }
+            doc.select("#newEmailInput-hint").text() shouldBe "For example, myname@sample.com"
+            doc.select("#newEmailInput").attr("type") shouldBe "email"
+          }
 
-    "update backend with new email" in {
-      val email: Email = Email(SensitiveString("somenewemail@newemail.com"))
+          "should prepopulate the form correctly" - {
+            "existing email" in {
+              stubCommonActions()
+              EssttpBackend.SelectEmail.findJourney("bobross@joyofpainting.com", testCrypto, origin)()
+              val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+              val result: Future[Result] = controller.whichEmailDoYouWantToUse(fakeRequest)
+              val doc: Document = Jsoup.parse(contentAsString(result))
+              RequestAssertions.assertGetRequestOk(result)
+              val radioInputs = doc.select(".govuk-radios__input").iterator().asScala.toList
+              radioInputs.size shouldBe 2
+              radioInputs(0).hasAttr("checked") shouldBe true
+              radioInputs(1).hasAttr("checked") shouldBe false
+              doc.select("#newEmailInput").text() shouldBe ""
+            }
 
-      stubCommonActions()
-      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin = Origins.Epaye.Bta)()
-      EssttpBackend.SelectEmail.stubUpdateSelectedEmail(
-        TdAll.journeyId,
-        JourneyJsonTemplates.`Selected email to be verified`(email.value.decryptedValue)
-      )
+            "new email" in {
+              stubCommonActions()
+              EssttpBackend.SelectEmail.findJourney("somenewemail@newemail.com", testCrypto, origin)()
+              val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+              val result: Future[Result] = controller.whichEmailDoYouWantToUse(fakeRequest)
+              val doc: Document = Jsoup.parse(contentAsString(result))
+              RequestAssertions.assertGetRequestOk(result)
+              val radioInputs = doc.select(".govuk-radios__input").iterator().asScala.toList
+              radioInputs.size shouldBe 2
+              radioInputs(0).hasAttr("checked") shouldBe false
+              radioInputs(1).hasAttr("checked") shouldBe true
+              doc.select("#newEmailInput").`val` shouldBe "somenewemail@newemail.com"
+            }
+          }
 
-      val fakeRequest = FakeRequest(
-        method = "POST",
-        path   = "/which-email-do-you-want-to-use"
-      ).withAuthToken()
-        .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-        .withFormUrlEncodedBody(
-          ("selectAnEmailToUseRadio", "new"),
-          ("newEmailInput", email.value.decryptedValue)
-        )
+          "throw an error if an email address cannot be found in the eligibility check response" in {
+            stubCommonActions()
+            EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin)(
+              JsonUtils.replace(List("AgreedTermsAndConditions", "eligibilityCheckResult", "customerDetails"), JsArray())(
+                Json.parse(JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = true, origin = Origins.Epaye.Bta)).as[JsObject]
+              ).toString
+            )
 
-      val result: Future[Result] = controller.whichEmailDoYouWantToUseSubmit(fakeRequest)
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.requestEmailVerificationUrl)
-      EssttpBackend.SelectEmail.verifyUpdateSelectedEmailRequest(TdAll.journeyId, email)(testOperationCryptoFormat)
-    }
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+            val error = intercept[Exception](controller.whichEmailDoYouWantToUse(fakeRequest).futureValue)
+            error.getMessage should endWith("Could not find email address in eligibility response.")
+          }
 
-    forAll(Table(
-      ("Input Scenario", "inputValue", "expected error message", "errorTarget"),
-      ("No option selected", List(("newEmailInput", "")), "Select which email address you want to use", "#selectAnEmailToUseRadio"),
-      ("Empty for new email", List(("selectAnEmailToUseRadio", "new"), ("newEmailInput", "")), "Enter your email address in the correct format, like name@example.com", "#newEmailInput"),
-      ("Invalid email format", List(("selectAnEmailToUseRadio", "new"), ("newEmailInput", "abc")), "Enter your email address in the correct format, like name@example.com", "#newEmailInput"),
-      ("Email too long (> 256 characters)", List(("selectAnEmailToUseRadio", "new"), ("newEmailInput", "a" * 257)), "Enter an email address with 256 characters or less", "#newEmailInput")
-    )) {
-      (scenario: String, inputValue: List[(String, String)], expectedErrorMessage: String, expectedErrorTarget: String) =>
-        s"When input is: [ $scenario: [ ${inputValue.toString} ]] error message should be $expectedErrorMessage" in {
-          stubCommonActions()
-          EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, testCrypto, origin = Origins.Epaye.Bta)()
-
-          val fakeRequest = FakeRequest(
-            method = "POST",
-            path   = "/which-day-do-you-want-to-pay-each-month"
-          ).withAuthToken()
-            .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-            .withFormUrlEncodedBody(inputValue: _*)
-
-          val result: Future[Result] = controller.whichEmailDoYouWantToUseSubmit(fakeRequest)
-          val pageContent: String = contentAsString(result)
-          val doc: Document = Jsoup.parse(pageContent)
-
-          RequestAssertions.assertGetRequestOk(result)
-          ContentAssertions.commonPageChecks(
-            doc,
-            expectedH1              = "Which email do you want to use?",
-            shouldBackLinkBePresent = true,
-            expectedSubmitUrl       = Some(routes.EmailController.whichEmailDoYouWantToUse.url),
-            hasFormError            = true
-          )
-
-          val errorSummary = doc.select(".govuk-error-summary")
-          val errorLink = errorSummary.select("a")
-          errorLink.text() shouldBe expectedErrorMessage
-          errorLink.attr("href") shouldBe expectedErrorTarget
-          EssttpBackend.SelectEmail.verifyNoneUpdateSelectedEmailRequest(TdAll.journeyId)
         }
-    }
 
-    "throw an error if an email address cannot be found in the eligibility check response" in {
-      stubCommonActions()
-      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin = Origins.Epaye.Bta)(
-        JsonUtils.replace(List("AgreedTermsAndConditions", "eligibilityCheckResult", "customerDetails"), JsArray())(
-          Json.parse(JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = true, origin = Origins.Epaye.Bta)).as[JsObject]
-        ).toString
-      )
+        s"[taxRegime: ${taxRegime.toString}] POST /which-email-do-you-want-to-use should" - {
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val error = intercept[Exception](controller.whichEmailDoYouWantToUseSubmit(fakeRequest).futureValue)
-      error.getMessage should endWith("Could not find email address in eligibility response.")
-    }
+          "update backend with existing email" in {
+            val email: Email = Email(SensitiveString("bobross@joyofpainting.com"))
 
-  }
+            stubCommonActions()
+            EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin)()
+            EssttpBackend.SelectEmail.stubUpdateSelectedEmail(
+              TdAll.journeyId,
+              JourneyJsonTemplates.`Selected email to be verified`(email.value.decryptedValue, origin)
+            )
 
-  "GET /email-verification should" - {
+            val fakeRequest = FakeRequest(
+              method = "POST",
+              path   = "/which-email-do-you-want-to-use"
+            ).withAuthToken()
+              .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+              .withFormUrlEncodedBody(
+                ("selectAnEmailToUseRadio", email.value.decryptedValue),
+                ("newEmailInput", "")
+              )
 
-    val email: Email = Email(SensitiveString("email@domain.com"))
-    val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-    val urlPrefix = "http://localhost:9215"
+            val result: Future[Result] = controller.whichEmailDoYouWantToUseSubmit(fakeRequest)
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(PageUrls.requestEmailVerificationUrl)
+            EssttpBackend.SelectEmail.verifyUpdateSelectedEmailRequest(TdAll.journeyId, email)(testOperationCryptoFormat)
+          }
 
-    "not allow journeys where an email has not been selected" in {
-      stubCommonActions()
-      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin = Origins.Epaye.Bta)()
+          "update backend with new email" in {
+            val email: Email = Email(SensitiveString("somenewemail@newemail.com"))
 
-      val result = controller.requestVerification(fakeRequest)
+            stubCommonActions()
+            EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin)()
+            EssttpBackend.SelectEmail.stubUpdateSelectedEmail(
+              TdAll.journeyId,
+              JourneyJsonTemplates.`Selected email to be verified`(email.value.decryptedValue, origin)
+            )
 
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.EmailController.whichEmailDoYouWantToUse.url)
-    }
+            val fakeRequest = FakeRequest(
+              method = "POST",
+              path   = "/which-email-do-you-want-to-use"
+            ).withAuthToken()
+              .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+              .withFormUrlEncodedBody(
+                ("selectAnEmailToUseRadio", "new"),
+                ("newEmailInput", email.value.decryptedValue)
+              )
 
-    "redirect to the given redirectUri if the call to request email verification is successful" in {
-      val redirectUri: String = "/redirect"
+            val result: Future[Result] = controller.whichEmailDoYouWantToUseSubmit(fakeRequest)
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(PageUrls.requestEmailVerificationUrl)
+            EssttpBackend.SelectEmail.verifyUpdateSelectedEmailRequest(TdAll.journeyId, email)(testOperationCryptoFormat)
+          }
 
-      stubCommonActions()
-      EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)()
-      EmailVerificationStub.requestEmailVerification(Right(RequestEmailVerificationResponse.Success(redirectUri)))
-
-      val result = controller.requestVerification(fakeRequest)
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"http://localhost:9890$redirectUri")
-
-      EmailVerificationStub.verifyRequestEmailVerification(
-        email,
-        GGCredId("authId-999"),
-        "http://localhost:12346/accessibility-statement/set-up-a-payment-plan",
-        "Set up an Employers’ PAYE payment plan",
-        "en",
-        urlPrefix
-      )
-    }
-
-    "maintain the redirectUri in the email verification response if the environment is local and the uri is absolute" in {
-      val redirectUri: String = "http:///host:12345/redirect"
-
-      stubCommonActions()
-      EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)()
-      EmailVerificationStub.requestEmailVerification(Right(RequestEmailVerificationResponse.Success(redirectUri)))
-
-      val result = controller.requestVerification(fakeRequest)
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(redirectUri)
-
-      EmailVerificationStub.verifyRequestEmailVerification(
-        email,
-        GGCredId("authId-999"),
-        "http://localhost:12346/accessibility-statement/set-up-a-payment-plan",
-        "Set up an Employers’ PAYE payment plan",
-        "en",
-        urlPrefix
-      )
-    }
-
-    "handle Welsh correctly" in {
-      val redirectUri: String = "http:///host:12345/redirect"
-      val fakeRequest =
-        FakeRequest()
-          .withAuthToken()
-          .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-          .withCookies(Cookie("PLAY_LANG", "cy"))
-
-      stubCommonActions()
-      EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)()
-      EmailVerificationStub.requestEmailVerification(Right(RequestEmailVerificationResponse.Success(redirectUri)))
-
-      val result = controller.requestVerification(fakeRequest)
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(redirectUri)
-
-      EmailVerificationStub.verifyRequestEmailVerification(
-        email,
-        GGCredId("authId-999"),
-        "http://localhost:12346/accessibility-statement/set-up-a-payment-plan",
-        "Trefnu cynllun talu ar gyfer TWE Cyflogwyr",
-        "cy",
-        urlPrefix
-      )
-    }
-
-    "redirect to the too-many-emails page if a 401 (UNAUTHORIZED) response is given by email-verification" in {
-      stubCommonActions()
-      EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)()
-      EmailVerificationStub.requestEmailVerification(Left(UNAUTHORIZED))
-
-      val result = controller.requestVerification(fakeRequest)
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.tooManyEmailAddressesUrl)
-
-      EmailVerificationStub.verifyRequestEmailVerification(
-        email,
-        GGCredId("authId-999"),
-        "http://localhost:12346/accessibility-statement/set-up-a-payment-plan",
-        "Set up an Employers’ PAYE payment plan",
-        "en",
-        urlPrefix
-      )
-    }
-
-  }
-
-  "GET /email-callback should" - {
-
-    val email: Email = Email(SensitiveString("email@domain.com"))
-
-    val ggCredId: GGCredId = GGCredId("authId-999")
-
-    val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
-    "not allow journeys where an email has not been selected" in {
-      stubCommonActions()
-      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin = Origins.Epaye.Bta)()
-
-      val result = controller.emailCallback(fakeRequest)
-
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.EmailController.whichEmailDoYouWantToUse.url)
-    }
-
-    "redirect to the email address confirmed page if the email address has successfully been verified" in {
-      stubCommonActions()
-
-      EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)()
-      EmailVerificationStub.getVerificationStatus(
-        ggCredId,
-        Right(List(EmailStatus(email.value.decryptedValue, verified = true, locked = false)))
-      )
-      EssttpBackend.EmailVerificationStatus.stubEmailVerificationStatus(
-        TdAll.journeyId,
-        JourneyJsonTemplates.`Email verification complete`(email.value.decryptedValue, EmailVerificationStatus.Verified)
-      )
-
-      val result = controller.emailCallback(fakeRequest)
-
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.EmailController.emailAddressConfirmed.url)
-
-      EssttpBackend.EmailVerificationStatus.verifyEmailVerificationStatusRequest(
-        TdAll.journeyId, EmailVerificationStatus.Verified
-      )
-    }
-
-    "redirect to the too many passcodes page if the email address has been locked" in {
-      stubCommonActions()
-      EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)()
-      EmailVerificationStub.getVerificationStatus(
-        ggCredId,
-        Right(List(EmailStatus(email.value.decryptedValue, verified = false, locked = true)))
-      )
-      EssttpBackend.EmailVerificationStatus.stubEmailVerificationStatus(
-        TdAll.journeyId,
-        JourneyJsonTemplates.`Email verification complete`(email.value.decryptedValue, EmailVerificationStatus.Locked)
-      )
-
-      val result = controller.emailCallback(fakeRequest)
-
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.EmailController.tooManyPasscodeAttempts.url)
-
-      EssttpBackend.EmailVerificationStatus.verifyEmailVerificationStatusRequest(
-        TdAll.journeyId, EmailVerificationStatus.Locked
-      )
-    }
-
-    "show an error page when" - {
-
-      "a 404 response is given by the email-verification service indicating that no records could be found" in {
-        stubCommonActions()
-        EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)()
-        EmailVerificationStub.getVerificationStatus(
-          ggCredId,
-          Left(NOT_FOUND)
-        )
-
-        an[Exception] shouldBe thrownBy(controller.emailCallback(fakeRequest).futureValue)
-      }
-
-      "an invalid combination of 'verified' and 'locked' is found in the email-verification response" in {
-        List(
-          true -> true,
-          false -> false
-        ).foreach{
-            case (verified, locked) =>
-              withClue(s"For verified=${verified.toString} and locked=${locked.toString}: "){
+          forAll(Table(
+            ("Input Scenario", "inputValue", "expected error message", "errorTarget"),
+            ("No option selected", List(("newEmailInput", "")), "Select which email address you want to use", "#selectAnEmailToUseRadio"),
+            ("Empty for new email", List(("selectAnEmailToUseRadio", "new"), ("newEmailInput", "")), "Enter your email address in the correct format, like name@example.com", "#newEmailInput"),
+            ("Invalid email format", List(("selectAnEmailToUseRadio", "new"), ("newEmailInput", "abc")), "Enter your email address in the correct format, like name@example.com", "#newEmailInput"),
+            ("Email too long (> 256 characters)", List(("selectAnEmailToUseRadio", "new"), ("newEmailInput", "a" * 257)), "Enter an email address with 256 characters or less", "#newEmailInput")
+          )) {
+            (scenario: String, inputValue: List[(String, String)], expectedErrorMessage: String, expectedErrorTarget: String) =>
+              s"When input is: [ $scenario: [ ${inputValue.toString} ]] error message should be $expectedErrorMessage" in {
                 stubCommonActions()
-                EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)()
-                EmailVerificationStub.getVerificationStatus(
-                  ggCredId,
-                  Right(List(EmailStatus(email.value.decryptedValue, verified = verified, locked = locked)))
+                EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, testCrypto, origin)()
+
+                val fakeRequest = FakeRequest(
+                  method = "POST",
+                  path   = "/which-day-do-you-want-to-pay-each-month"
+                ).withAuthToken()
+                  .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+                  .withFormUrlEncodedBody(inputValue: _*)
+
+                val result: Future[Result] = controller.whichEmailDoYouWantToUseSubmit(fakeRequest)
+                val pageContent: String = contentAsString(result)
+                val doc: Document = Jsoup.parse(pageContent)
+
+                RequestAssertions.assertGetRequestOk(result)
+                ContentAssertions.commonPageChecks(
+                  doc,
+                  expectedH1              = "Which email do you want to use?",
+                  shouldBackLinkBePresent = true,
+                  expectedSubmitUrl       = Some(routes.EmailController.whichEmailDoYouWantToUse.url),
+                  hasFormError            = true,
+                  regimeBeingTested       = Some(taxRegime)
                 )
 
-                an[Exception] shouldBe thrownBy(controller.emailCallback(fakeRequest).futureValue)
+                val errorSummary = doc.select(".govuk-error-summary")
+                val errorLink = errorSummary.select("a")
+                errorLink.text() shouldBe expectedErrorMessage
+                errorLink.attr("href") shouldBe expectedErrorTarget
+                EssttpBackend.SelectEmail.verifyNoneUpdateSelectedEmailRequest(TdAll.journeyId)
               }
           }
-      }
 
-      "the email address the user has selected can't be found in the email-verification response" in {
-        stubCommonActions()
-        EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)()
-        EmailVerificationStub.getVerificationStatus(
-          ggCredId,
-          Right(List(EmailStatus("another@email.com", verified = true, locked = false)))
-        )
+          "throw an error if an email address cannot be found in the eligibility check response" in {
+            stubCommonActions()
+            EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin)(
+              JsonUtils.replace(List("AgreedTermsAndConditions", "eligibilityCheckResult", "customerDetails"), JsArray())(
+                Json.parse(JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = true, origin = Origins.Epaye.Bta)).as[JsObject]
+              ).toString
+            )
 
-        an[Exception] shouldBe thrownBy(controller.emailCallback(fakeRequest).futureValue)
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+            val error = intercept[Exception](controller.whichEmailDoYouWantToUseSubmit(fakeRequest).futureValue)
+            error.getMessage should endWith("Could not find email address in eligibility response.")
+          }
 
-      }
-
-    }
-
-  }
-
-  "GET /email-address-confirmed should" - {
-
-    behave like requiresEmailAddressVerifiedBehaviour(controller.emailAddressConfirmed)
-
-    "display the page when the email address has successfully been verified" in {
-      val email: Email = Email(SensitiveString("email@test.com"))
-
-      stubCommonActions()
-      EssttpBackend.EmailVerificationStatus.findJourney(email.value.decryptedValue, EmailVerificationStatus.Verified, testCrypto)()
-
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val result = controller.emailAddressConfirmed(fakeRequest)
-      status(result) shouldBe OK
-
-      val doc = Jsoup.parse(contentAsString(result))
-
-      ContentAssertions.commonPageChecks(
-        doc,
-        "Email address confirmed",
-        shouldBackLinkBePresent = false,
-        expectedSubmitUrl       = Some(routes.EmailController.emailAddressConfirmedSubmit.url)
-      )
-
-      val paragraphs = doc.select(".govuk-body").asScala.toList
-      paragraphs.size shouldBe 3
-      paragraphs(0).html() shouldBe s"The email address <strong>${email.value.decryptedValue}</strong> has been confirmed."
-
-      ContentAssertions.formSubmitShouldDisableSubmitButton(doc)
-    }
-
-  }
-
-  "POST /email-address-confirmed should" - {
-
-    behave like requiresEmailAddressVerifiedBehaviour(controller.emailAddressConfirmedSubmit)
-
-    "display the page when the email address has successfully been verified" in {
-      val email: Email = Email(SensitiveString("email@test.com"))
-
-      stubCommonActions()
-      EssttpBackend.EmailVerificationStatus.findJourney(email.value.decryptedValue, EmailVerificationStatus.Verified, testCrypto)()
-
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val result = controller.emailAddressConfirmedSubmit(fakeRequest)
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.SubmitArrangementController.submitArrangement.url)
-    }
-  }
-
-  "GET /tried-to-confirm-email-too-many-times should" - {
-
-    "display the page" in {
-      stubCommonActions()
-      EssttpBackend.SelectEmail.findJourney("email@test.com", testCrypto)()
-
-      val result = controller.tooManyEmailAddresses(FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId"))
-      status(result) shouldBe OK
-
-      val doc = Jsoup.parse(contentAsString(result))
-
-      ContentAssertions.commonPageChecks(
-        doc,
-        "You have tried to confirm an email too many times",
-        shouldBackLinkBePresent = false,
-        expectedSubmitUrl       = None,
-      )
-
-      val paragraphs = doc.select("p.govuk-body").asScala.toList
-
-      paragraphs.size shouldBe 2
-
-      paragraphs(0).text() shouldBe "You have made too many attempts to confirm an email address."
-      paragraphs(1).select("a").text() shouldBe "Sign out"
-      paragraphs(1).select("a").attr("href") shouldBe routes.SignOutController.signOut.url
-    }
-
-  }
-
-  "GET /email-verification-code-entered-too-many-times should" - {
-
-    "display the page" in {
-      stubCommonActions()
-      EssttpBackend.SelectEmail.findJourney("email@test.com", testCrypto)()
-
-      val result = controller.tooManyPasscodeAttempts(FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId"))
-      status(result) shouldBe OK
-
-      val doc = Jsoup.parse(contentAsString(result))
-
-      ContentAssertions.commonPageChecks(
-        doc,
-        "Email verification code entered too many times",
-        shouldBackLinkBePresent = false,
-        expectedSubmitUrl       = None,
-      )
-
-      val paragraphs = doc.select("p.govuk-body").asScala.toList
-
-      paragraphs.size shouldBe 2
-
-      paragraphs(0).text() shouldBe "You have entered an email verification code too many times."
-      paragraphs(1).text() shouldBe "You can go back to enter a new email address."
-      paragraphs(1).select("a").attr("href") shouldBe routes.EmailController.whichEmailDoYouWantToUse.url
-    }
-
-  }
-
-  private def requiresEmailAddressVerifiedBehaviour(action: Action[AnyContent]): Unit = {
-    val email: Email = Email(SensitiveString("email@test.com"))
-
-    "not allow journey when" - {
-
-        def test(
-            journeyStubMapping:       () => StubMapping,
-            expectedRedirectLocation: Call
-        ) = {
-          stubCommonActions()
-          journeyStubMapping()
-
-          val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-          val result = action(fakeRequest)
-
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(expectedRedirectLocation.url)
         }
 
-      "an email verification result has not been obtained yet" in {
-        test(
-          () => EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)(),
-          routes.EmailController.requestVerification
-        )
-      }
+        s"[taxRegime: ${taxRegime.toString}] GET /email-verification should" - {
 
-      "an arrangement has already been submitted" in {
-        test(
-          () => EssttpBackend.SubmitArrangement.findJourney(testCrypto)(),
-          routes.PaymentPlanSetUpController.paymentPlanSetUp
-        )
-      }
+          val email: Email = Email(SensitiveString("email@domain.com"))
+          val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+          val urlPrefix = "http://localhost:9215"
 
-      "an email verification result has been obtained but it is locked" in {
-        test(
-          () => EssttpBackend.EmailVerificationStatus.findJourney(email.value.decryptedValue, EmailVerificationStatus.Locked, testCrypto)(),
-          routes.EmailController.tooManyPasscodeAttempts
-        )
-      }
+          val expectedPageTitle = taxRegime match {
+            case TaxRegime.Epaye => "Set up an Employers’ PAYE payment plan"
+            case TaxRegime.Vat   => "Set up a VAT payment plan"
+          }
+          val expectedPageTitleWelsh = taxRegime match {
+            case TaxRegime.Epaye => "Trefnu cynllun talu ar gyfer TWE Cyflogwyr"
+            case TaxRegime.Vat   => "Set up a VAT payment plan"
+          }
+
+          "not allow journeys where an email has not been selected" in {
+            stubCommonActions()
+            EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin)()
+
+            val result = controller.requestVerification(fakeRequest)
+
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe Some(routes.EmailController.whichEmailDoYouWantToUse.url)
+          }
+
+          "redirect to the given redirectUri if the call to request email verification is successful" in {
+            val redirectUri: String = "/redirect"
+
+            stubCommonActions()
+            EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto, origin)()
+            EmailVerificationStub.requestEmailVerification(Right(RequestEmailVerificationResponse.Success(redirectUri)))
+
+            val result = controller.requestVerification(fakeRequest)
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe Some(s"http://localhost:9890$redirectUri")
+
+            EmailVerificationStub.verifyRequestEmailVerification(
+              email,
+              GGCredId("authId-999"),
+              "http://localhost:12346/accessibility-statement/set-up-a-payment-plan",
+              expectedPageTitle,
+              "en",
+              urlPrefix
+            )
+          }
+
+          "maintain the redirectUri in the email verification response if the environment is local and the uri is absolute" in {
+            val redirectUri: String = "http:///host:12345/redirect"
+
+            stubCommonActions()
+            EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto, origin)()
+            EmailVerificationStub.requestEmailVerification(Right(RequestEmailVerificationResponse.Success(redirectUri)))
+
+            val result = controller.requestVerification(fakeRequest)
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe Some(redirectUri)
+
+            EmailVerificationStub.verifyRequestEmailVerification(
+              email,
+              GGCredId("authId-999"),
+              "http://localhost:12346/accessibility-statement/set-up-a-payment-plan",
+              expectedPageTitle,
+              "en",
+              urlPrefix
+            )
+          }
+
+          "handle Welsh correctly" in {
+            val redirectUri: String = "http:///host:12345/redirect"
+            val fakeRequest =
+              FakeRequest()
+                .withAuthToken()
+                .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+                .withCookies(Cookie("PLAY_LANG", "cy"))
+
+            stubCommonActions()
+            EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto, origin)()
+            EmailVerificationStub.requestEmailVerification(Right(RequestEmailVerificationResponse.Success(redirectUri)))
+
+            val result = controller.requestVerification(fakeRequest)
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe Some(redirectUri)
+
+            EmailVerificationStub.verifyRequestEmailVerification(
+              email,
+              GGCredId("authId-999"),
+              "http://localhost:12346/accessibility-statement/set-up-a-payment-plan",
+              expectedPageTitleWelsh,
+              "cy",
+              urlPrefix
+            )
+          }
+
+          "redirect to the too-many-emails page if a 401 (UNAUTHORIZED) response is given by email-verification" in {
+            stubCommonActions()
+            EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto, origin)()
+            EmailVerificationStub.requestEmailVerification(Left(UNAUTHORIZED))
+
+            val result = controller.requestVerification(fakeRequest)
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe Some(PageUrls.tooManyEmailAddressesUrl)
+
+            EmailVerificationStub.verifyRequestEmailVerification(
+              email,
+              GGCredId("authId-999"),
+              "http://localhost:12346/accessibility-statement/set-up-a-payment-plan",
+              expectedPageTitle,
+              "en",
+              urlPrefix
+            )
+          }
+
+        }
+
+        s"[taxRegime: ${taxRegime.toString}]GET /email-callback should" - {
+
+          val email: Email = Email(SensitiveString("email@domain.com"))
+
+          val ggCredId: GGCredId = GGCredId("authId-999")
+
+          val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+          "not allow journeys where an email has not been selected" in {
+            stubCommonActions()
+            EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin)()
+
+            val result = controller.emailCallback(fakeRequest)
+
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe Some(routes.EmailController.whichEmailDoYouWantToUse.url)
+          }
+
+          "redirect to the email address confirmed page if the email address has successfully been verified" in {
+            stubCommonActions()
+
+            EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto, origin)()
+            EmailVerificationStub.getVerificationStatus(
+              ggCredId,
+              Right(List(EmailStatus(email.value.decryptedValue, verified = true, locked = false)))
+            )
+            EssttpBackend.EmailVerificationStatus.stubEmailVerificationStatus(
+              TdAll.journeyId,
+              JourneyJsonTemplates.`Email verification complete`(email.value.decryptedValue, EmailVerificationStatus.Verified, origin)
+            )
+
+            val result = controller.emailCallback(fakeRequest)
+
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe Some(routes.EmailController.emailAddressConfirmed.url)
+
+            EssttpBackend.EmailVerificationStatus.verifyEmailVerificationStatusRequest(
+              TdAll.journeyId, EmailVerificationStatus.Verified
+            )
+          }
+
+          "redirect to the too many passcodes page if the email address has been locked" in {
+            stubCommonActions()
+            EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto, origin)()
+            EmailVerificationStub.getVerificationStatus(
+              ggCredId,
+              Right(List(EmailStatus(email.value.decryptedValue, verified = false, locked = true)))
+            )
+            EssttpBackend.EmailVerificationStatus.stubEmailVerificationStatus(
+              TdAll.journeyId,
+              JourneyJsonTemplates.`Email verification complete`(email.value.decryptedValue, EmailVerificationStatus.Locked, origin)
+            )
+
+            val result = controller.emailCallback(fakeRequest)
+
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe Some(routes.EmailController.tooManyPasscodeAttempts.url)
+
+            EssttpBackend.EmailVerificationStatus.verifyEmailVerificationStatusRequest(
+              TdAll.journeyId, EmailVerificationStatus.Locked
+            )
+          }
+
+          "show an error page when" - {
+
+            "a 404 response is given by the email-verification service indicating that no records could be found" in {
+              stubCommonActions()
+              EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto, origin)()
+              EmailVerificationStub.getVerificationStatus(
+                ggCredId,
+                Left(NOT_FOUND)
+              )
+
+              an[Exception] shouldBe thrownBy(controller.emailCallback(fakeRequest).futureValue)
+            }
+
+            "an invalid combination of 'verified' and 'locked' is found in the email-verification response" in {
+              List(
+                true -> true,
+                false -> false
+              ).foreach {
+                  case (verified, locked) =>
+                    withClue(s"For verified=${verified.toString} and locked=${locked.toString}: ") {
+                      stubCommonActions()
+                      EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto, origin)()
+                      EmailVerificationStub.getVerificationStatus(
+                        ggCredId,
+                        Right(List(EmailStatus(email.value.decryptedValue, verified = verified, locked = locked)))
+                      )
+
+                      an[Exception] shouldBe thrownBy(controller.emailCallback(fakeRequest).futureValue)
+                    }
+                }
+            }
+
+            "the email address the user has selected can't be found in the email-verification response" in {
+              stubCommonActions()
+              EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto, origin)()
+              EmailVerificationStub.getVerificationStatus(
+                ggCredId,
+                Right(List(EmailStatus("another@email.com", verified = true, locked = false)))
+              )
+
+              an[Exception] shouldBe thrownBy(controller.emailCallback(fakeRequest).futureValue)
+
+            }
+
+          }
+
+        }
+
+        s"[taxRegime: ${taxRegime.toString}] GET /email-address-confirmed should" - {
+
+          behave like requiresEmailAddressVerifiedBehaviour(controller.emailAddressConfirmed)
+
+          "display the page when the email address has successfully been verified" in {
+            val email: Email = Email(SensitiveString("email@test.com"))
+
+            stubCommonActions()
+            EssttpBackend.EmailVerificationStatus.findJourney(email.value.decryptedValue, EmailVerificationStatus.Verified, testCrypto, origin)()
+
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+            val result = controller.emailAddressConfirmed(fakeRequest)
+            status(result) shouldBe OK
+
+            val doc = Jsoup.parse(contentAsString(result))
+
+            ContentAssertions.commonPageChecks(
+              doc,
+              "Email address confirmed",
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = Some(routes.EmailController.emailAddressConfirmedSubmit.url),
+              regimeBeingTested       = Some(taxRegime)
+            )
+
+            val paragraphs = doc.select(".govuk-body").asScala.toList
+            paragraphs.size shouldBe 3
+            paragraphs(0).html() shouldBe s"The email address <strong>${email.value.decryptedValue}</strong> has been confirmed."
+
+            ContentAssertions.formSubmitShouldDisableSubmitButton(doc)
+          }
+
+        }
+
+        s"[taxRegime: ${taxRegime.toString}]  POST /email-address-confirmed should" - {
+
+          behave like requiresEmailAddressVerifiedBehaviour(controller.emailAddressConfirmedSubmit)
+
+          "display the page when the email address has successfully been verified" in {
+            val email: Email = Email(SensitiveString("email@test.com"))
+
+            stubCommonActions()
+            EssttpBackend.EmailVerificationStatus.findJourney(email.value.decryptedValue, EmailVerificationStatus.Verified, testCrypto, origin)()
+
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+            val result = controller.emailAddressConfirmedSubmit(fakeRequest)
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe Some(routes.SubmitArrangementController.submitArrangement.url)
+          }
+        }
+
+        s"[taxRegime: ${taxRegime.toString}] GET /tried-to-confirm-email-too-many-times should" - {
+
+          "display the page" in {
+            stubCommonActions()
+            EssttpBackend.SelectEmail.findJourney("email@test.com", testCrypto, origin)()
+
+            val result = controller.tooManyEmailAddresses(FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId"))
+            status(result) shouldBe OK
+
+            val doc = Jsoup.parse(contentAsString(result))
+
+            ContentAssertions.commonPageChecks(
+              doc,
+              "You have tried to confirm an email too many times",
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime)
+            )
+
+            val paragraphs = doc.select("p.govuk-body").asScala.toList
+
+            paragraphs.size shouldBe 2
+
+            paragraphs(0).text() shouldBe "You have made too many attempts to confirm an email address."
+            paragraphs(1).select("a").text() shouldBe "Sign out"
+            paragraphs(1).select("a").attr("href") shouldBe routes.SignOutController.signOut.url
+          }
+
+        }
+
+        s"[taxRegime: ${taxRegime.toString}] GET /email-verification-code-entered-too-many-times should" - {
+
+          "display the page" in {
+            stubCommonActions()
+            EssttpBackend.SelectEmail.findJourney("email@test.com", testCrypto, origin)()
+
+            val result = controller.tooManyPasscodeAttempts(FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId"))
+            status(result) shouldBe OK
+
+            val doc = Jsoup.parse(contentAsString(result))
+
+            ContentAssertions.commonPageChecks(
+              doc,
+              "Email verification code entered too many times",
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime)
+            )
+
+            val paragraphs = doc.select("p.govuk-body").asScala.toList
+
+            paragraphs.size shouldBe 2
+
+            paragraphs(0).text() shouldBe "You have entered an email verification code too many times."
+            paragraphs(1).text() shouldBe "You can go back to enter a new email address."
+            paragraphs(1).select("a").attr("href") shouldBe routes.EmailController.whichEmailDoYouWantToUse.url
+          }
+
+        }
 
     }
-  }
 
 }
 
@@ -663,7 +685,7 @@ class EmailNonLocalControllerSpec extends ItSpec {
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
       stubCommonActions()
-      EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto)()
+      EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto, Origins.Epaye.Bta)()
       EmailVerificationStub.requestEmailVerification(Right(RequestEmailVerificationResponse.Success(redirectUri)))
 
       val result = controller.requestVerification(fakeRequest)

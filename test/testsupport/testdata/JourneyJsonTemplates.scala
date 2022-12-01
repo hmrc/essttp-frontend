@@ -37,129 +37,133 @@ object JourneyJsonTemplates {
 
   def `Eligibility Checked - Eligible`(origin: Origin = Origins.Epaye.Bta)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedEligible,
-    journeyInfo = JourneyInfo.eligibilityCheckedEligible(encrypter),
+    journeyInfo = JourneyInfo.eligibilityCheckedEligible(origin.taxRegime, encrypter),
     origin
   )
 
   def `Eligibility Checked - Ineligible - HasRlsOnAddress`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
-    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleHasRls(encrypter),
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleHasRls(origin.taxRegime, encrypter),
     origin      = origin
   )
 
-  def `Eligibility Checked - Ineligible - MarkedAsInsolvent`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Eligibility Checked - Ineligible - MarkedAsInsolvent`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
-    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleHasRls(encrypter)
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleHasRls(origin.taxRegime, encrypter),
+    origin      = origin
   )
 
-  def `Eligibility Checked - Ineligible - IsLessThanMniDebtAllowance`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Eligibility Checked - Ineligible - IsLessThanMniDebtAllowance`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
-    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMinDebt(encrypter)
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMinDebt(origin.taxRegime, encrypter),
+    origin      = origin
   )
 
   def `Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
-    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMaxDebt(encrypter),
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMaxDebt(origin.taxRegime, encrypter),
     origin      = origin
   )
 
-  def `Eligibility Checked - Ineligible - DisallowedChargeLockTypes`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Eligibility Checked - Ineligible - DisallowedChargeLockTypes`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
-    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleDisallowedCharge(encrypter)
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleDisallowedCharge(origin.taxRegime, encrypter),
+    origin      = origin
   )
 
   def `Eligibility Checked - Ineligible - ExistingTTP`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
-    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleExistingTtp(encrypter),
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleExistingTtp(origin.taxRegime, encrypter),
     origin      = origin
   )
 
   def `Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
-    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMaxDebtAge(encrypter),
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMaxDebtAge(origin.taxRegime, encrypter),
     origin      = origin
   )
 
-  def `Eligibility Checked - Ineligible - EligibleChargeType`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Eligibility Checked - Ineligible - EligibleChargeType`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
-    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleChargeType(encrypter)
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleChargeType(origin.taxRegime, encrypter),
+    origin      = origin
   )
 
   def `Eligibility Checked - Ineligible - MissingFiledReturns`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
-    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMissingFiledReturns(encrypter),
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMissingFiledReturns(origin.taxRegime, encrypter),
     origin      = origin
   )
 
   def `Eligibility Checked - Ineligible - NoDueDatesReached`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
-    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleNoDueDatesReached(encrypter),
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleNoDueDatesReached(origin.taxRegime, encrypter),
     origin      = origin
   )
 
   def `Eligibility Checked - Ineligible - MultipleReasons`(origin: Origin = Origins.Epaye.Bta)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
-    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMultipleReasons(encrypter),
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMultipleReasons(origin.taxRegime, encrypter),
     origin      = origin
   )
 
   def `Answered Can Pay Upfront - Yes`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.answeredCanPayUpfrontYes,
-    journeyInfo = JourneyInfo.answeredCanPayUpfrontYes(encrypter),
+    journeyInfo = JourneyInfo.answeredCanPayUpfrontYes(origin.taxRegime, encrypter),
     origin      = origin
   )
 
   def `Answered Can Pay Upfront - No`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.answeredCanPayUpfrontNo,
-    journeyInfo = JourneyInfo.answeredCanPayUpfrontNo(encrypter),
+    journeyInfo = JourneyInfo.answeredCanPayUpfrontNo(origin.taxRegime, encrypter),
     origin      = origin
   )
 
   def `Entered Upfront payment amount`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.enteredUpfrontPaymentAmount,
-    journeyInfo = JourneyInfo.answeredUpfrontPaymentAmount(encrypter),
+    journeyInfo = JourneyInfo.answeredUpfrontPaymentAmount(origin.taxRegime, encrypter),
     origin      = origin
   )
 
   def `Retrieved Extreme Dates Response`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.retrievedExtremeDates,
-    journeyInfo = JourneyInfo.retrievedExtremeDates(encrypter),
+    journeyInfo = JourneyInfo.retrievedExtremeDates(origin.taxRegime, encrypter),
     origin      = origin
   )
 
   def `Retrieved Affordability`(origin: Origin, minimumInstalmentAmount: Int = 29997)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.retrievedAffordabilityResult,
-    journeyInfo = JourneyInfo.retrievedAffordabilityResult(minimumInstalmentAmount, encrypter),
+    journeyInfo = JourneyInfo.retrievedAffordabilityResult(minimumInstalmentAmount, origin.taxRegime, encrypter),
     origin      = origin
   )
 
   def `Retrieved Affordability no upfront payment`(origin: Origin, minimumInstalmentAmount: Int = 29997)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.retrievedAffordabilityResult,
-    journeyInfo = JourneyInfo.retrievedAffordabilityResultNoUpfrontPayment(minimumInstalmentAmount, encrypter),
+    journeyInfo = JourneyInfo.retrievedAffordabilityResultNoUpfrontPayment(minimumInstalmentAmount, origin.taxRegime, encrypter),
     origin      = origin
   )
 
   def `Entered Monthly Payment Amount`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.enteredMonthlyPaymentAmount,
-    journeyInfo = JourneyInfo.enteredMonthlyPaymentAmount(encrypter),
+    journeyInfo = JourneyInfo.enteredMonthlyPaymentAmount(origin.taxRegime, encrypter),
     origin      = origin
   )
 
   def `Entered Day of Month`(dayOfMonth: DayOfMonth, origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.enteredDayOfMonth,
-    journeyInfo = JourneyInfo.enteredDayOfMonth(dayOfMonth, encrypter),
+    journeyInfo = JourneyInfo.enteredDayOfMonth(dayOfMonth, origin.taxRegime, encrypter),
     origin      = origin
   )
 
   def `Retrieved Start Dates`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.retrievedStartDates,
-    journeyInfo = JourneyInfo.retrievedStartDates(encrypter),
+    journeyInfo = JourneyInfo.retrievedStartDates(origin.taxRegime, encrypter),
     origin      = origin
   )
 
   def `Retrieved Affordable Quotes`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.retrievedAffordableQuotes,
-    journeyInfo = JourneyInfo.retrievedAffordableQuotes(encrypter),
+    journeyInfo = JourneyInfo.retrievedAffordableQuotes(origin.taxRegime, encrypter),
     origin      = origin
   )
 
@@ -167,7 +171,7 @@ object JourneyJsonTemplates {
     stageInfo   = StageInfo.chosenPaymentPlan,
     journeyInfo = List(
       TdJsonBodies.taxIdJourneyInfo(),
-      TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.eligibleEligibilityPass, TdAll.eligibleEligibilityRules, encrypter),
+      TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.eligibleEligibilityPass, TdAll.eligibleEligibilityRules, origin.taxRegime, encrypter),
       TdJsonBodies.upfrontPaymentAnswersJourneyInfo(upfrontPaymentAmountJsonString),
       TdJsonBodies.extremeDatesJourneyInfo(),
       TdJsonBodies.affordabilityResultJourneyInfo(),
@@ -182,65 +186,70 @@ object JourneyJsonTemplates {
 
   def `Has Checked Payment Plan`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.hasCheckedPaymentPlan,
-    journeyInfo = JourneyInfo.hasCheckedPaymentPlan(encrypter),
+    journeyInfo = JourneyInfo.hasCheckedPaymentPlan(origin.taxRegime, encrypter),
     origin      = origin
   )
 
   def `Entered Details About Bank Account - Business`(isAccountHolder: Boolean, origin: Origin = Origins.Epaye.Bta)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = if (isAccountHolder) StageInfo.enteredDetailsAboutBankAccount else StageInfo.enteredDetailsAboutBankAccountNotAccountHolder,
-    journeyInfo = JourneyInfo.enteredDetailsAboutBankAccountBusiness(isAccountHolder, encrypter),
+    journeyInfo = JourneyInfo.enteredDetailsAboutBankAccountBusiness(isAccountHolder, origin.taxRegime, encrypter),
     origin      = origin
   )
 
   def `Entered Details About Bank Account - Personal`(isAccountHolder: Boolean, origin: Origin = Origins.Epaye.Bta)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = if (isAccountHolder) StageInfo.enteredDetailsAboutBankAccountPersonal else StageInfo.enteredDetailsAboutBankAccountNotAccountHolder,
-    journeyInfo = JourneyInfo.enteredDetailsAboutBankAccountPersonal(isAccountHolder, encrypter),
+    journeyInfo = JourneyInfo.enteredDetailsAboutBankAccountPersonal(isAccountHolder, origin.taxRegime, encrypter),
     origin      = origin
   )
 
   def `Entered Direct Debit Details`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.enteredDirectDebitDetails,
-    journeyInfo = JourneyInfo.enteredDirectDebitDetails(encrypter),
+    journeyInfo = JourneyInfo.enteredDirectDebitDetails(origin.taxRegime, encrypter),
     origin      = origin
   )
 
   def `Confirmed Direct Debit Details`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.confirmedDirectDebitDetails,
-    journeyInfo = JourneyInfo.confirmedDirectDebitDetails(encrypter),
+    journeyInfo = JourneyInfo.confirmedDirectDebitDetails(origin.taxRegime, encrypter),
     origin      = origin
   )
 
   def `Agreed Terms and Conditions`(isEmailAddresRequired: Boolean, origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = if (isEmailAddresRequired) StageInfo.agreedTermsAndConditionsEmailAddressRequired else StageInfo.agreedTermsAndConditionsEmailAddressNotRequired,
-    journeyInfo = JourneyInfo.agreedTermsAndConditions(isEmailAddresRequired, encrypter),
+    journeyInfo = JourneyInfo.agreedTermsAndConditions(isEmailAddresRequired, origin.taxRegime, encrypter),
     origin      = origin
   )
 
-  def `Selected email to be verified`(email: String)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Selected email to be verified`(email: String, origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.selectedEmailToBeVerified,
-    journeyInfo = JourneyInfo.selectedEmailToBeVerified(email, encrypter)
+    journeyInfo = JourneyInfo.selectedEmailToBeVerified(email, origin.taxRegime, encrypter),
+    origin      = origin
   )
 
-  def `Email verification complete`(email: String, status: EmailVerificationStatus)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Email verification complete`(email: String, status: EmailVerificationStatus, origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = status match {
       case EmailVerificationStatus.Verified => StageInfo.emailVerificationSuccess
       case EmailVerificationStatus.Locked   => StageInfo.emailVerificationLocked
     },
-    journeyInfo = JourneyInfo.emailVerificationComplete(email, status, encrypter)
+    journeyInfo = JourneyInfo.emailVerificationComplete(email, status, origin.taxRegime, encrypter),
+    origin      = origin
   )
 
-  def `Arrangement Submitted - with upfront payment`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Arrangement Submitted - with upfront payment`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.submittedArrangement,
-    journeyInfo = JourneyInfo.submittedArrangementWithUpfrontPayment(encrypter)
+    journeyInfo = JourneyInfo.submittedArrangementWithUpfrontPayment(origin.taxRegime, encrypter),
+    origin      = origin
   )
 
-  def `Arrangement Submitted - No upfront payment`(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Arrangement Submitted - No upfront payment`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.submittedArrangement,
-    journeyInfo = JourneyInfo.submittedArrangementNoUpfrontPayment(encrypter)
+    journeyInfo = JourneyInfo.submittedArrangementNoUpfrontPayment(origin.taxRegime, encrypter),
+    origin      = origin
   )
 
-  def `Arrangement Submitted - with upfront payment and email`(email: String)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Arrangement Submitted - with upfront payment and email`(email: String, origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.submittedArrangement,
-    journeyInfo = JourneyInfo.submittedArrangementWithEmailParams(email, encrypter)
+    journeyInfo = JourneyInfo.submittedArrangementWithEmailParams(email, origin.taxRegime, encrypter),
+    origin      = origin
   )
 }

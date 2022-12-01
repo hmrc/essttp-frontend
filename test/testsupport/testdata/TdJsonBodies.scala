@@ -99,21 +99,13 @@ object TdJsonBodies {
   def eligibilityCheckJourneyInfo(
       eligibilityPass:  EligibilityPass  = TdAll.eligibleEligibilityPass,
       eligibilityRules: EligibilityRules = TdAll.eligibleEligibilityRules,
+      taxRegime:        TaxRegime,
       encrypter:        Encrypter
-  ): JourneyInfoAsJson = {
+  ): JourneyInfoAsJson =
     s"""
       |"eligibilityCheckResult" : {
       |  "processingDateTime": "2022-03-23T13:49:51.141Z",
-      |  "identification": [
-      |    {
-      |      "idType": "EMPREF",
-      |      "idValue": "864FZ00049"
-      |    },
-      |    {
-      |      "idType": "BROCS",
-      |      "idValue": "123PA44545546"
-      |    }
-      |  ],
+      |  "identification": ${TdAll.identificationJsonString(taxRegime)},
       |  "customerPostcodes": [
       |        {
       |          "addressPostcode": "${encryptString("AA11AA", encrypter)}",
@@ -197,7 +189,6 @@ object TdJsonBodies {
       |  "futureChargeLiabilitiesExcluded": false
       |}
       |""".stripMargin
-  }
 
   def canPayUpfrontJourneyInfo(canPayUpfront: Boolean): String = s""""canPayUpfront": ${canPayUpfront.toString}"""
 
@@ -498,11 +489,16 @@ object TdJsonBodies {
        |  }
        |}""".stripMargin
 
-  def arrangementResponseJourneyInfo(): String =
+  def arrangementResponseJourneyInfo(taxRegime: TaxRegime): String = {
+    val customerReference = taxRegime match {
+      case TaxRegime.Epaye => "123PA44545546"
+      case TaxRegime.Vat   => "101747001"
+    }
     s"""
        |"arrangementResponse" : {
        |  "processingDateTime": "2022-03-23T13:49:51.141Z",
-       |  "customerReference": "123PA44545546"
+       |  "customerReference": "$customerReference"
        |}
        |""".stripMargin
+  }
 }

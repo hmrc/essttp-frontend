@@ -71,7 +71,7 @@ class SignOutControllerSpec extends ItSpec {
   "exitSurveyPaye should" - {
     "redirect to feedback frontend with eSSTTP-PAYE as the service identifier" in {
       stubCommonActions()
-      EssttpBackend.SubmitArrangement.findJourney(testCrypto)()
+      EssttpBackend.SubmitArrangement.findJourney(Origins.Epaye.Bta, testCrypto)()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
@@ -85,7 +85,7 @@ class SignOutControllerSpec extends ItSpec {
   "exitSurveyVat should" - {
     "redirect to feedback frontend with eSSTTP-VAT as the service identifier" in {
       stubCommonActions()
-      EssttpBackend.SubmitArrangement.findJourney(testCrypto)()
+      EssttpBackend.SubmitArrangement.findJourney(Origins.Epaye.Bta, testCrypto)()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 

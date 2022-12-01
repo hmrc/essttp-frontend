@@ -19,7 +19,8 @@ package controllers
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.crypto.CryptoFormat
 import essttp.emailverification.EmailVerificationStatus
-import essttp.journey.model.Origins
+import essttp.journey.model.{Origin, Origins}
+import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.ttp.eligibility.EmailSource
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
@@ -40,106 +41,122 @@ class SubmitArrangementControllerSpec extends ItSpec {
 
   "GET /submit-arrangement should" - {
 
-    "trigger call to ttp enact arrangement api, send an audit event and also update backend" in {
-      List(
-        (
-          "T&C's accepted, no email required",
-          () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto, origin = Origins.Epaye.Bta)(),
-          TdAll.customerDetail("bobross@joyofpainting.com", EmailSource.ETMP)
-        ),
-        (
-          "email verification success - same email as ETMP",
-          () => EssttpBackend.EmailVerificationStatus.findJourney(
-            "bobross@joyofpainting.com",
-            EmailVerificationStatus.Verified,
-            testCrypto
-          )(),
-          TdAll.customerDetail()
-        ),
-        (
-          "email verification success - new email",
-          () => EssttpBackend.EmailVerificationStatus.findJourney(
-            "grogu@mandalorian.com",
-            EmailVerificationStatus.Verified,
-            testCrypto
-          )(),
-          TdAll.customerDetail("grogu@mandalorian.com", EmailSource.TEMP)
-        ),
-        (
-          "email verification success - ETMP - same email with different casing",
-          () => EssttpBackend.EmailVerificationStatus.findJourney(
-            "BobRoss@joyofpainting.com",
-            EmailVerificationStatus.Verified,
-            testCrypto
-          )(),
-          TdAll.customerDetail("bobross@joyofpainting.com", EmailSource.ETMP)
-        )
-      ).foreach{
-          case (journeyDescription, journeyStubMapping, expectedCustomerDetail) =>
-            withClue(s"For journey $journeyDescription: "){
+    List[(TaxRegime, Origin)](
+      TaxRegime.Epaye -> Origins.Epaye.Bta,
+      TaxRegime.Vat -> Origins.Vat.Bta
+    ).foreach {
+        case (taxRegime, origin) =>
 
-              stubCommonActions()
-              journeyStubMapping()
-              EssttpBackend.SubmitArrangement.stubUpdateSubmitArrangement(
-                TdAll.journeyId,
-                JourneyJsonTemplates.`Arrangement Submitted - with upfront payment and email`("bobross@joyofpainting.com")
-              )
-              Ttp.EnactArrangement.stubEnactArrangement()
+          List(
+            (
+              "T&C's accepted, no email required",
+              () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto, origin)(),
+              TdAll.customerDetail("bobross@joyofpainting.com", EmailSource.ETMP)
+            ),
+            (
+              "email verification success - same email as ETMP",
+              () => EssttpBackend.EmailVerificationStatus.findJourney(
+                "bobross@joyofpainting.com",
+                EmailVerificationStatus.Verified,
+                testCrypto,
+                origin
+              )(),
+              TdAll.customerDetail()
+            ),
+            (
+              "email verification success - new email",
+              () => EssttpBackend.EmailVerificationStatus.findJourney(
+                "grogu@mandalorian.com",
+                EmailVerificationStatus.Verified,
+                testCrypto,
+                origin
+              )(),
+              TdAll.customerDetail("grogu@mandalorian.com", EmailSource.TEMP)
+            ),
+            (
+              "email verification success - ETMP - same email with different casing",
+              () => EssttpBackend.EmailVerificationStatus.findJourney(
+                "BobRoss@joyofpainting.com",
+                EmailVerificationStatus.Verified,
+                testCrypto,
+                origin
+              )(),
+              TdAll.customerDetail("bobross@joyofpainting.com", EmailSource.ETMP)
+            )
+          ).foreach {
+              case (journeyDescription, journeyStubMapping, expectedCustomerDetail) =>
+                s"[taxRegime: ${taxRegime.toString}] trigger call to ttp enact arrangement api, send an audit event " +
+                  s"and also update backend for $journeyDescription" in {
 
-              val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+                    stubCommonActions()
+                    journeyStubMapping()
+                    EssttpBackend.SubmitArrangement.stubUpdateSubmitArrangement(
+                      TdAll.journeyId,
+                      JourneyJsonTemplates.`Arrangement Submitted - with upfront payment and email`("bobross@joyofpainting.com", origin)
+                    )
+                    Ttp.EnactArrangement.stubEnactArrangement()
 
-              val result: Future[Result] = controller.submitArrangement(fakeRequest)
-              status(result) shouldBe Status.SEE_OTHER
-              redirectLocation(result) shouldBe Some(PageUrls.confirmationUrl)
+                    val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
-              Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(expectedCustomerDetail, TdAll.someRegimeDigitalCorrespondenceTrue)(CryptoFormat.NoOpCryptoFormat)
-              AuditConnectorStub.verifyEventAudited(
-                "PlanSetUp",
-                Json.parse(
-                  s"""
-             |{
-             |	"bankDetails": {
-             |		"name": "Bob Ross",
-             |		"sortCode": "123456",
-             |		"accountNumber": "12345678"
-             |	},
-             |	"schedule": {
-             |		"initialPaymentAmount": 123.12,
-             |		"collectionDate": 28,
-             |		"collectionLengthCalendarMonths": 2,
-             |		"collections": [{
-             |			"collectionNumber": 2,
-             |			"amount": 555.70,
-             |			"paymentDate": "2022-09-28"
-             |		}, {
-             |			"collectionNumber": 1,
-             |			"amount": 555.70,
-             |			"paymentDate": "2022-08-28"
-             |		}],
-             |		"totalNoPayments": 3,
-             |		"totalInterestCharged": 0.06,
-             |		"totalPayable": 1111.47,
-             |		"totalPaymentWithoutInterest": 1111.41
-             |	},
-             |	"status": "successfully sent to TTP",
-             |	"failedSubmissionReason": 202,
-             |	"origin": "Bta",
-             |	"taxType": "Epaye",
-             |	"taxDetail": {
-             |		"employerRef": "864FZ00049",
-             |		"accountsOfficeRef": "123PA44545546"
-             |	},
-             |	"correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-             |	"ppReferenceNo": "123PA44545546",
-             |	"authProviderId": "authId-999"
-             |}
-             |""".stripMargin
-                ).as[JsObject]
-              )
-              EssttpBackend.SubmitArrangement.verifyUpdateSubmitArrangementRequest(TdAll.journeyId, TdAll.arrangementResponse)
+                    val result: Future[Result] = controller.submitArrangement(fakeRequest)
+                    status(result) shouldBe Status.SEE_OTHER
+                    redirectLocation(result) shouldBe Some(PageUrls.confirmationUrl)
+
+                    Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(
+                      expectedCustomerDetail,
+                      TdAll.someRegimeDigitalCorrespondenceTrue,
+                      taxRegime
+                    )(CryptoFormat.NoOpCryptoFormat)
+
+                    val taxType = taxRegime match {
+                      case TaxRegime.Epaye => "Epaye"
+                      case TaxRegime.Vat   => "Vat"
+                    }
+
+                    AuditConnectorStub.verifyEventAudited(
+                      "PlanSetUp",
+                      Json.parse(
+                        s"""
+                     |{
+                     |	"bankDetails": {
+                     |		"name": "Bob Ross",
+                     |		"sortCode": "123456",
+                     |		"accountNumber": "12345678"
+                     |	},
+                     |	"schedule": {
+                     |		"initialPaymentAmount": 123.12,
+                     |		"collectionDate": 28,
+                     |		"collectionLengthCalendarMonths": 2,
+                     |		"collections": [{
+                     |			"collectionNumber": 2,
+                     |			"amount": 555.70,
+                     |			"paymentDate": "2022-09-28"
+                     |		}, {
+                     |			"collectionNumber": 1,
+                     |			"amount": 555.70,
+                     |			"paymentDate": "2022-08-28"
+                     |		}],
+                     |		"totalNoPayments": 3,
+                     |		"totalInterestCharged": 0.06,
+                     |		"totalPayable": 1111.47,
+                     |		"totalPaymentWithoutInterest": 1111.41
+                     |	},
+                     |	"status": "successfully sent to TTP",
+                     |	"failedSubmissionReason": 202,
+                     |	"origin": "Bta",
+                     |	"taxType": "$taxType",
+                     |	"taxDetail": ${TdAll.taxDetailJsonString(taxRegime)},
+                     |	"correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+                     |	"ppReferenceNo": "123PA44545546",
+                     |	"authProviderId": "authId-999"
+                     |}
+                     |""".stripMargin
+                      ).as[JsObject]
+                    )
+                    EssttpBackend.SubmitArrangement.verifyUpdateSubmitArrangementRequest(TdAll.journeyId, TdAll.arrangementResponse(taxRegime))
+                  }
             }
-        }
-    }
+      }
 
     "not allow journeys when" - {
 
@@ -167,14 +184,14 @@ class SubmitArrangementControllerSpec extends ItSpec {
 
       "T&C's have just been agreed but an email is required" in {
         test(
-          () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, testCrypto, origin = Origins.Epaye.Bta)(),
+          () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, testCrypto, Origins.Epaye.Bta)(),
           routes.EmailController.whichEmailDoYouWantToUse
         )
       }
 
       "the user has just selected an email address" in {
         test(
-          () => EssttpBackend.SelectEmail.findJourney("email@test.com", testCrypto)(),
+          () => EssttpBackend.SelectEmail.findJourney("email@test.com", testCrypto, Origins.Vat.GovUk)(),
           routes.EmailController.requestVerification
         )
       }
@@ -184,7 +201,8 @@ class SubmitArrangementControllerSpec extends ItSpec {
           () => EssttpBackend.EmailVerificationStatus.findJourney(
             "bobross@joyofpainting.com",
             EmailVerificationStatus.Locked,
-            testCrypto
+            testCrypto,
+            Origins.Vat.Bta
           )(),
           routes.EmailController.tooManyPasscodeAttempts
         )
@@ -202,7 +220,11 @@ class SubmitArrangementControllerSpec extends ItSpec {
 
       val result = controller.submitArrangement(fakeRequest)
       assertThrows[UpstreamErrorResponse](await(result))
-      Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(TdAll.customerDetail(), TdAll.someRegimeDigitalCorrespondenceTrue)(CryptoFormat.NoOpCryptoFormat)
+      Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(
+        TdAll.customerDetail(),
+        TdAll.someRegimeDigitalCorrespondenceTrue,
+        TaxRegime.Epaye
+      )(CryptoFormat.NoOpCryptoFormat)
       EssttpBackend.SubmitArrangement.verifyNoneUpdateSubmitArrangementRequest(TdAll.journeyId)
     }
 

@@ -16,7 +16,8 @@
 
 package controllers
 
-import essttp.journey.model.Origins
+import essttp.journey.model.{Origin, Origins}
+import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.ttp.eligibility.EligibilityRules
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.http.Status
@@ -34,50 +35,64 @@ class DetermineEligibilityControllerSpec extends ItSpec {
 
   "Determine eligibility endpoint should route user correctly and send an audit event" - {
     forAll(Table(
-      ("Scenario flavour", "eligibility rules", "ineligibility reason audit string", "expected redirect", "updated journey json"),
+      ("Scenario flavour", "eligibility rules", "ineligibility reason audit string", "expected redirect", "updated journey json", "tax regime"),
       ("HasRlsOnAddress", TdAll.notEligibleHasRlsOnAddress, "hasRlsOnAddress", PageUrls.payeNotEligibleUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(Origins.Epaye.Bta)),
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(Origins.Epaye.Bta),
+        Origins.Epaye.Bta),
       ("MarkedAsInsolvent", TdAll.notEligibleMarkedAsInsolvent, "markedAsInsolvent", PageUrls.payeNotEligibleUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - MarkedAsInsolvent`),
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - MarkedAsInsolvent`(Origins.Epaye.Bta),
+        Origins.Epaye.Bta),
       ("IsLessThanMinDebtAllowance", TdAll.notEligibleIsLessThanMinDebtAllowance, "isLessThanMinDebtAllowance", PageUrls.payeNotEligibleUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsLessThanMniDebtAllowance`),
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsLessThanMniDebtAllowance`(Origins.Epaye.Bta),
+        Origins.Epaye.Bta),
       ("IsMoreThanMaxDebtAllowance - EPAYE", TdAll.notEligibleIsMoreThanMaxDebtAllowance, "isMoreThanMaxDebtAllowance", PageUrls.epayeDebtTooLargeUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(Origins.Epaye.Bta)),
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(Origins.Epaye.Bta),
+        Origins.Epaye.Bta),
       ("IsMoreThanMaxDebtAllowance - VAT", TdAll.notEligibleIsMoreThanMaxDebtAllowance, "isMoreThanMaxDebtAllowance", PageUrls.vatDebtTooLargeUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(Origins.Vat.Bta)),
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(Origins.Vat.Bta),
+        Origins.Vat.Bta),
       ("DisallowedChargeLockTypes", TdAll.notEligibleDisallowedChargeLockTypes, "disallowedChargeLockTypes", PageUrls.payeNotEligibleUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - DisallowedChargeLockTypes`),
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - DisallowedChargeLockTypes`(Origins.Epaye.Bta),
+        Origins.Epaye.Bta),
       ("ExistingTTP - EPAYE", TdAll.notEligibleExistingTTP, "existingTTP", PageUrls.epayeAlreadyHaveAPaymentPlanUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExistingTTP`(Origins.Epaye.Bta)),
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExistingTTP`(Origins.Epaye.Bta),
+        Origins.Epaye.Bta),
       ("ExistingTTP - VAT", TdAll.notEligibleExistingTTP, "existingTTP", PageUrls.vatAlreadyHaveAPaymentPlanUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExistingTTP`(Origins.Vat.Bta)),
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExistingTTP`(Origins.Vat.Bta),
+        Origins.Vat.Bta),
       ("ExceedsMaxDebtAge - EPAYE", TdAll.notEligibleExceedsMaxDebtAge, "chargesOverMaxDebtAge", PageUrls.epayeDebtTooOldUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(Origins.Epaye.Bta)),
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(Origins.Epaye.Bta),
+        Origins.Epaye.Bta),
       ("ExceedsMaxDebtAge - VAT", TdAll.notEligibleExceedsMaxDebtAge, "chargesOverMaxDebtAge", PageUrls.vatDebtTooOldUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(Origins.Vat.Bta)),
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(Origins.Vat.Bta),
+        Origins.Vat.Bta),
       ("EligibleChargeType", TdAll.notEligibleEligibleChargeType, "ineligibleChargeTypes", PageUrls.payeNotEligibleUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - EligibleChargeType`),
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - EligibleChargeType`(Origins.Epaye.Bta),
+        Origins.Epaye.Bta),
       ("MissingFiledReturns - EPAYE", TdAll.notEligibleMissingFiledReturns, "missingFiledReturns", PageUrls.epayeFileYourReturnUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - MissingFiledReturns`(Origins.Epaye.Bta)),
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - MissingFiledReturns`(Origins.Epaye.Bta),
+        Origins.Epaye.Bta),
       ("MissingFiledReturns - VAT", TdAll.notEligibleMissingFiledReturns, "missingFiledReturns", PageUrls.vatFileYourReturnUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - MissingFiledReturns`(Origins.Vat.Bta)),
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - MissingFiledReturns`(Origins.Vat.Bta),
+        Origins.Vat.Bta),
       ("NoDueDatesReached - EPAYE", TdAll.notEligibleNoDueDatesReached, "noDueDatesReached", PageUrls.payeNotEligibleUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Epaye.Bta)),
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Epaye.Bta),
+        Origins.Epaye.Bta),
       ("NoDueDatesReached - VAT", TdAll.notEligibleNoDueDatesReached, "noDueDatesReached", PageUrls.vatNotEligibleUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Vat.Bta))
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Vat.Bta),
+        Origins.Vat.Bta)
     )) {
-      (sf: String, eligibilityRules: EligibilityRules, auditIneligibilityReason: String, expectedRedirect: String, updatedJourneyJson: String) =>
+      (sf: String, eligibilityRules: EligibilityRules, auditIneligibilityReason: String, expectedRedirect: String, updatedJourneyJson: String, origin: Origin) =>
         {
           s"Ineligible: [$sf] should redirect to $expectedRedirect" in {
-            val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(TdAll.notEligibleEligibilityPass, eligibilityRules)
+            val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(origin.taxRegime, TdAll.notEligibleEligibilityPass, eligibilityRules)
             // for audit event
             val eligibilityCheckResponseJsonAsPounds =
-              TtpJsonResponses.ttpEligibilityCallJson(TdAll.notEligibleEligibilityPass, eligibilityRules, poundsInsteadOfPence = true)
+              TtpJsonResponses.ttpEligibilityCallJson(origin.taxRegime, TdAll.notEligibleEligibilityPass, eligibilityRules, poundsInsteadOfPence = true)
 
             stubCommonActions()
-            EssttpBackend.DetermineTaxId.findJourney()
-            Ttp.Eligibility.stubRetrieveEligibility(TtpJsonResponses.ttpEligibilityCallJson(TdAll.notEligibleEligibilityPass, eligibilityRules))
-            Ttp.Eligibility.stubRetrieveEligibility(eligibilityCheckResponseJson)
+            EssttpBackend.DetermineTaxId.findJourney(origin)()
+            Ttp.Eligibility.stubRetrieveEligibility(origin.taxRegime)(eligibilityCheckResponseJson)
             EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(TdAll.journeyId, updatedJourneyJson)
 
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -85,12 +100,26 @@ class DetermineEligibilityControllerSpec extends ItSpec {
 
             status(result) shouldBe Status.SEE_OTHER
             redirectLocation(result) shouldBe Some(expectedRedirect)
-            Ttp.Eligibility.verifyTtpEligibilityRequests()
+            Ttp.Eligibility.verifyTtpEligibilityRequests(origin.taxRegime)
 
             EssttpBackend.EligibilityCheck.verifyUpdateEligibilityRequest(
               journeyId                      = TdAll.journeyId,
-              expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(TdAll.notEligibleEligibilityPass, eligibilityRules)
+              expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(TdAll.notEligibleEligibilityPass, eligibilityRules, origin.taxRegime)
             )(testOperationCryptoFormat)
+
+            val (expectedTaxType, expectedTaxDetailsJson) =
+              origin.taxRegime match {
+                case TaxRegime.Epaye =>
+                  (
+                    "Epaye",
+                    """{
+                      |    "employerRef": "864FZ00049",
+                      |    "accountsOfficeRef": "123PA44545546"
+                      |  }""".stripMargin
+                  )
+                case TaxRegime.Vat =>
+                  ("Vat", """{ "vrn": "101747001" }""")
+              }
 
             AuditConnectorStub.verifyEventAudited(
               "EligibilityCheck",
@@ -102,11 +131,8 @@ class DetermineEligibilityControllerSpec extends ItSpec {
                    |  "noEligibilityReasons": 1,
                    |  "eligibilityReasons" : [ "$auditIneligibilityReason" ],
                    |  "origin": "Bta",
-                   |  "taxType": "Epaye",
-                   |  "taxDetail": {
-                   |    "employerRef": "864FZ00049",
-                   |    "accountsOfficeRef": "123PA44545546"
-                   |  },
+                   |  "taxType": "$expectedTaxType",
+                   |  "taxDetail": $expectedTaxDetailsJson,
                    |  "authProviderId": "authId-999",
                    |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
                    |  "chargeTypeAssessment" :${(Json.parse(eligibilityCheckResponseJsonAsPounds).as[JsObject] \ "chargeTypeAssessment").get.toString},
@@ -121,13 +147,13 @@ class DetermineEligibilityControllerSpec extends ItSpec {
     }
 
     "Eligible: should redirect to your bill and send an audit event" in {
-      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson()
+      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(TaxRegime.Epaye)
       // for audit event
-      val eligibilityCheckResponseJsonAsPounds = TtpJsonResponses.ttpEligibilityCallJson(poundsInsteadOfPence = true)
+      val eligibilityCheckResponseJsonAsPounds = TtpJsonResponses.ttpEligibilityCallJson(TaxRegime.Epaye, poundsInsteadOfPence = true)
 
       stubCommonActions()
-      EssttpBackend.DetermineTaxId.findJourney()
-      Ttp.Eligibility.stubRetrieveEligibility(eligibilityCheckResponseJson)
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Epaye.Bta)()
+      Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Epaye)(eligibilityCheckResponseJson)
       EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(
         TdAll.journeyId,
         JourneyJsonTemplates.`Eligibility Checked - Eligible`()
@@ -139,11 +165,11 @@ class DetermineEligibilityControllerSpec extends ItSpec {
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.yourBillIsUrl)
 
-      Ttp.Eligibility.verifyTtpEligibilityRequests()
+      Ttp.Eligibility.verifyTtpEligibilityRequests(TaxRegime.Epaye)
 
       EssttpBackend.EligibilityCheck.verifyUpdateEligibilityRequest(
         journeyId                      = TdAll.journeyId,
-        expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(TdAll.eligibleEligibilityPass, TdAll.eligibleEligibilityRules)
+        expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(TdAll.eligibleEligibilityPass, TdAll.eligibleEligibilityRules, TaxRegime.Epaye)
       )(testOperationCryptoFormat)
 
       AuditConnectorStub.verifyEventAudited(
@@ -195,13 +221,13 @@ class DetermineEligibilityControllerSpec extends ItSpec {
 
     "Redirect to generic epaye call us page when ttp eligibility call returns any technical upstream error -- [SUPP-658]" in {
       stubCommonActions()
-      EssttpBackend.DetermineTaxId.findJourney()
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Epaye.Bta)()
       Ttp.Eligibility.stubServiceUnavailableRetrieveEligibility()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.determineEligibility(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.payeNotEligibleUrl)
-      Ttp.Eligibility.verifyTtpEligibilityRequests()
+      Ttp.Eligibility.verifyTtpEligibilityRequests(TaxRegime.Epaye)
       EssttpBackend.EligibilityCheck.verifyNoneUpdateEligibilityRequest(TdAll.journeyId)
       AuditConnectorStub.verifyNoAuditEvent()
     }

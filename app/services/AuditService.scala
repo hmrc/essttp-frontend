@@ -229,7 +229,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       taxOfficeRef      = None,
       employerRef       = getTaxId("EMPREF")(eligibilityCheckResult),
       accountsOfficeRef = getTaxId("BROCS")(eligibilityCheckResult),
-      vrn               = None
+      vrn               = getTaxId("VRN")(eligibilityCheckResult)
     )
 
   private def getTaxId(name: String)(eligibilityCheckResult: EligibilityCheckResult): Option[String] =

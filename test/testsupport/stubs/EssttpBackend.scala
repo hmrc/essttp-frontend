@@ -136,7 +136,13 @@ object EssttpBackend {
   }
 
   object DetermineTaxId {
-    def findJourney(jsonBody: String = JourneyJsonTemplates.`Computed Tax Id`()): StubMapping = findByLatestSessionId(jsonBody)
+    def findJourney(origin: Origin)(jsonBody: String = {
+                                      val taxReference = origin.taxRegime match {
+                                        case TaxRegime.Epaye=> "864FZ00049"
+                                        case TaxRegime.Vat=> "101747001"
+                                      }
+                                      JourneyJsonTemplates.`Computed Tax Id`(origin, taxReference)
+                                    }): StubMapping = findByLatestSessionId(jsonBody)
 
     def updateTaxIdUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-tax-id"
 
@@ -474,8 +480,9 @@ object EssttpBackend {
 
     def findJourney(
         email:     String,
-        encrypter: Encrypter
-    )(jsonBody: String = JourneyJsonTemplates.`Selected email to be verified`(email)(encrypter)): StubMapping =
+        encrypter: Encrypter,
+        origin:    Origin
+    )(jsonBody: String = JourneyJsonTemplates.`Selected email to be verified`(email, origin)(encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
 
   }
@@ -492,8 +499,9 @@ object EssttpBackend {
     def findJourney(
         email:     String,
         status:    EmailVerificationStatus,
-        encrypter: Encrypter
-    )(jsonBody: String = JourneyJsonTemplates.`Email verification complete`(email, status)(encrypter)): StubMapping =
+        encrypter: Encrypter,
+        origin:    Origin
+    )(jsonBody: String = JourneyJsonTemplates.`Email verification complete`(email, status, origin)(encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
   }
 
@@ -509,7 +517,7 @@ object EssttpBackend {
     def verifyNoneUpdateSubmitArrangementRequest(journeyId: JourneyId): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(submitArrangementUrl(journeyId))))
 
-    def findJourney(encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Arrangement Submitted - with upfront payment`(encrypter)): StubMapping =
+    def findJourney(origin: Origin, encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Arrangement Submitted - with upfront payment`(origin)(encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
   }
 
