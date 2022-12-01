@@ -61,7 +61,7 @@ class TermsAndConditionsController @Inject() (
           case j1: Journey.AfterEligibilityChecked => j1.eligibilityCheckResult
         }
 
-        val isEmailAddressRequired = appConfig.emailJourneyEnabled && journeyEligibilityCheckResult.regimeDigitalCorrespondence.fold(false)(_.value)
+        val isEmailAddressRequired = appConfig.emailJourneyEnabled && journeyEligibilityCheckResult.regimeDigitalCorrespondence.exists(_.value)
 
         journeyService
           .updateAgreedTermsAndConditions(request.journeyId, IsEmailAddressRequired(isEmailAddressRequired))
