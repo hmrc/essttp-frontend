@@ -35,7 +35,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
 
   "Determine eligibility endpoint should route user correctly and send an audit event" - {
     forAll(Table(
-      ("Scenario flavour", "eligibility rules", "ineligibility reason audit string", "expected redirect", "updated journey json", "tax regime"),
+      ("Scenario flavour", "eligibility rules", "ineligibility reason audit string", "expected redirect", "updated journey json", "origin"),
       ("HasRlsOnAddress", TdAll.notEligibleHasRlsOnAddress, "hasRlsOnAddress", PageUrls.payeNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(Origins.Epaye.Bta),
         Origins.Epaye.Bta),
