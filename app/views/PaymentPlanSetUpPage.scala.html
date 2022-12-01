@@ -19,6 +19,7 @@
 @import play.api.mvc.Request
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import essttp.rootmodel.ttp.affordablequotes.DueDate
+@import essttp.rootmodel.TaxRegime
 @import messages.DateMessages
 @import controllers.routes
 @import config.AppConfig
@@ -33,7 +34,8 @@
 @(
         customerPaymentReference: String,
         paymentDay: DueDate,
-        hasUpfrontPayment: Boolean
+        hasUpfrontPayment: Boolean,
+        taxRegime: TaxRegime
 )(
         implicit
         request: Request[_]
@@ -50,6 +52,13 @@
     val month: String = DateMessages.monthName(paymentDay.value.getMonth.getValue).show
     val year: String = paymentDay.value.getYear.toString
     s"$day $month $year"
+}
+
+@surveyUrl = @{
+    taxRegime match {
+        case TaxRegime.Epaye => routes.SignOutController.exitSurveyPaye.url
+        case TaxRegime.Vat => routes.SignOutController.exitSurveyVat.url
+    }
 }
 
 @layout(pageTitle = Some(title), showBackLink = false) {
@@ -103,7 +112,7 @@
     </p>
 
     <p class="govuk-body">
-      <a class="govuk-link" href="@{routes.SignOutController.exitSurveyPaye.url}">@{Messages.Confirmation.`What did you think of this service`.show}</a> @{Messages.Confirmation.`(takes 30 seconds)`.show}
+      <a class="govuk-link" href="@surveyUrl">@{Messages.Confirmation.`What did you think of this service`.show}</a> @{Messages.Confirmation.`(takes 30 seconds)`.show}
     </p>
 
 }

@@ -98,6 +98,13 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
             paragraphs(4).text() shouldBe "Call the HMRC Helpline on 0300 123 1813."
 
             doc.select(".govuk-button").text() shouldBe "Go to tax account"
+
+            val surveyLink = doc.select(".govuk-body > .govuk-link").asScala.toList(1)
+            surveyLink.parent().text() shouldBe "What did you think of this service? (takes 30 seconds)"
+            surveyLink.attr("href") shouldBe (taxRegime match {
+              case TaxRegime.Epaye => PageUrls.exitSurveyEpayeUrl
+              case TaxRegime.Vat   => PageUrls.exitSurveyVatUrl
+            })
             ()
           }
 
