@@ -60,7 +60,8 @@ class PaymentPlanSetUpController @Inject() (
       views.paymentPlanSetUpPage(
         customerPaymentReference = journey.arrangementResponse.customerReference.value,
         paymentDay               = firstPaymentDay,
-        hasUpfrontPayment        = hasUpfrontPayment
+        hasUpfrontPayment        = hasUpfrontPayment,
+        taxRegime                = journey.taxRegime
       )
     )
   }

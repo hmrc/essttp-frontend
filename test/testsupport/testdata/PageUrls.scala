@@ -59,4 +59,6 @@ object PageUrls {
   val submitArrangementUrl: String = s"$serviceBaseUrl/submit-arrangement"
   val confirmationUrl: String = s"$serviceBaseUrl/payment-plan-set-up"
   val printPlanUrl: String = s"$serviceBaseUrl/payment-plan-print-summary"
+  val exitSurveyEpayeUrl: String = s"$serviceBaseUrl/exit-survey/paye"
+  val exitSurveyVatUrl: String = s"$serviceBaseUrl/exit-survey/vat"
 }
