@@ -87,14 +87,13 @@ class SubmitArrangementControllerSpec extends ItSpec {
               case (journeyDescription, journeyStubMapping, expectedCustomerDetail) =>
                 s"[taxRegime: ${taxRegime.toString}] trigger call to ttp enact arrangement api, send an audit event " +
                   s"and also update backend for $journeyDescription" in {
-
                     stubCommonActions()
                     journeyStubMapping()
                     EssttpBackend.SubmitArrangement.stubUpdateSubmitArrangement(
                       TdAll.journeyId,
                       JourneyJsonTemplates.`Arrangement Submitted - with upfront payment and email`("bobross@joyofpainting.com", origin)
                     )
-                    Ttp.EnactArrangement.stubEnactArrangement()
+                    Ttp.EnactArrangement.stubEnactArrangement(taxRegime)()
 
                     val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
@@ -147,7 +146,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
                      |	"taxType": "$taxType",
                      |	"taxDetail": ${TdAll.taxDetailJsonString(taxRegime)},
                      |	"correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-                     |	"ppReferenceNo": "123PA44545546",
+                     |	"ppReferenceNo": "${TdAll.customerReference(taxRegime).value}",
                      |	"authProviderId": "authId-999"
                      |}
                      |""".stripMargin

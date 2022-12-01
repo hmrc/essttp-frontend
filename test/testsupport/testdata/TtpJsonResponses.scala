@@ -264,11 +264,11 @@ object TtpJsonResponses {
       |}
       |""".stripMargin
 
-  def ttpEnactArrangementResponseJson(): String =
+  def ttpEnactArrangementResponseJson(taxRegime: TaxRegime): String =
     s"""
        |{
        |  "processingDateTime": "2022-03-23T13:49:51.141Z",
-       |  "customerReference": "123PA44545546"
+       |  "customerReference": "${TdAll.customerReference(taxRegime).value}"
        |}
        |""".stripMargin
 

@@ -377,11 +377,11 @@ object TdAll {
   val someRegimeDigitalCorrespondenceFalse: Option[RegimeDigitalCorrespondence] = Some(RegimeDigitalCorrespondence(false))
   val someRegimeDigitalCorrespondenceTrue: Option[RegimeDigitalCorrespondence] = Some(RegimeDigitalCorrespondence(true))
 
-  def arrangementResponse(taxRegime: TaxRegime): ArrangementResponse = {
-    val customerReference = taxRegime match {
-      case TaxRegime.Epaye => CustomerReference("123PA44545546")
-      case TaxRegime.Vat   => CustomerReference("123PA44545546")
-    }
-    ArrangementResponse(ProcessingDateTime("2022-03-23T13:49:51.141Z"), customerReference)
+  def customerReference(taxRegime: TaxRegime) = taxRegime match {
+    case TaxRegime.Epaye => CustomerReference("123PA44545546")
+    case TaxRegime.Vat   => CustomerReference("101747001")
   }
+
+  def arrangementResponse(taxRegime: TaxRegime): ArrangementResponse =
+    ArrangementResponse(ProcessingDateTime("2022-03-23T13:49:51.141Z"), customerReference(taxRegime))
 }

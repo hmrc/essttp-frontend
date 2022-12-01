@@ -73,7 +73,7 @@ object Ttp {
   }
 
   object EnactArrangement {
-    def stubEnactArrangement(jsonBody: String = TtpJsonResponses.ttpEnactArrangementResponseJson()): StubMapping =
+    def stubEnactArrangement(taxRegime: TaxRegime)(jsonBody: String = TtpJsonResponses.ttpEnactArrangementResponseJson(taxRegime)): StubMapping =
       WireMockHelpers.stubForPostWithResponseBody(enactArrangementUrl, jsonBody, Status.CREATED)
 
     def stubEnactArrangementFail(): StubMapping = stubFor(
