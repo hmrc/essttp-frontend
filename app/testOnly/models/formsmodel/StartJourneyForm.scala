@@ -22,7 +22,7 @@ import essttp.rootmodel.TaxId
 import essttp.rootmodel.{AmountInPence, EmpRef, TaxRegime, Vrn}
 import models.MoneyUtil.{amountOfMoneyFormatter, formatAmountOfMoneyWithoutPoundSign}
 import models.{EligibilityError, EligibilityErrors, Language}
-import play.api.data.Forms.{mapping, optional, seq}
+import play.api.data.Forms.{boolean, mapping, optional, seq}
 import play.api.data._
 import play.api.data.format.Formatter
 import testOnly.messages.Messages
@@ -32,14 +32,15 @@ import util.EnumFormatter
 import scala.util.Random
 
 final case class StartJourneyForm(
-    signInAs:          SignInAs,
-    enrolments:        Seq[Enrolment],
-    origin:            Origin,
-    eligibilityErrors: Seq[EligibilityError],
-    debtTotalAmount:   BigDecimal,
-    interestAmount:    Option[BigDecimal],
-    taxReference:      TaxId,
-    taxRegime:         TaxRegime
+    signInAs:                    SignInAs,
+    enrolments:                  Seq[Enrolment],
+    origin:                      Origin,
+    eligibilityErrors:           Seq[EligibilityError],
+    debtTotalAmount:             BigDecimal,
+    interestAmount:              Option[BigDecimal],
+    taxReference:                TaxId,
+    taxRegime:                   TaxRegime,
+    regimeDigitalCorrespondence: Boolean
 )
 
 object StartJourneyForm {
@@ -146,7 +147,8 @@ object StartJourneyForm {
         "" -> Forms.of(debtTotalAmountFormat),
         "interestAmount" -> interestAmountMapping,
         "" -> Forms.of(taxReferenceFormat),
-        taxRegimeKey -> Forms.of(taxRegimeFormatter)
+        taxRegimeKey -> Forms.of(taxRegimeFormatter),
+        "regimeDigitalCorrespondence" -> boolean
       )(StartJourneyForm.apply)(StartJourneyForm.unapply)
     )
   }

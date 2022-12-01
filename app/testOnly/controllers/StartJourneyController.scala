@@ -183,7 +183,8 @@ object StartJourneyController {
 
     // hardcoding email for now, maybe we should move it into the form to make testing better for Darren
     val (maybeCustomerDetail, maybeRegimeDigitalCorrespondence) =
-      Some(List(CustomerDetail(Some(Email(SensitiveString("bobross@joyofpainting.com"))), Some(EmailSource.ETMP)))) -> Some(RegimeDigitalCorrespondence(true))
+      Some(List(CustomerDetail(Some(Email(SensitiveString("bobross@joyofpainting.com"))), Some(EmailSource.ETMP)))) ->
+        Some(RegimeDigitalCorrespondence(form.regimeDigitalCorrespondence))
 
     val charges: Charges = Charges(
       chargeType           = ChargeType("InYearRTICharge-Tax"),

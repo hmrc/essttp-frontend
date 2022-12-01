@@ -214,6 +214,12 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
+  def `Confirmed Direct Debit Details - regimeDigitalCorrespondence flag`(origin: Origin, regimeDigitalCorrespondence: Boolean)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.confirmedDirectDebitDetails,
+    journeyInfo = JourneyInfo.confirmedDdDetailsWithRegimeDigitalCorrespondance(regimeDigitalCorrespondence, origin.taxRegime, encrypter),
+    origin      = origin
+  )
+
   def `Agreed Terms and Conditions`(isEmailAddresRequired: Boolean, origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = if (isEmailAddresRequired) StageInfo.agreedTermsAndConditionsEmailAddressRequired else StageInfo.agreedTermsAndConditionsEmailAddressNotRequired,
     journeyInfo = JourneyInfo.agreedTermsAndConditions(isEmailAddresRequired, origin.taxRegime, encrypter),
