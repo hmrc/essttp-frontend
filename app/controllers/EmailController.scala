@@ -25,9 +25,9 @@ import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.{logErrorAndRouteToDefaultPage, logErrorAndRouteToDefaultPageF}
 import essttp.emailverification.EmailVerificationStatus
 import essttp.journey.model.Journey
+import essttp.journey.model.Journey.AfterEmailAddressSelectedToBeVerified
 import essttp.rootmodel.Email
 import essttp.utils.Errors
-import io.scalaland.chimney.dsl.TransformerOps
 import models.emailverification.RequestEmailVerificationResponse
 import play.api.data.Form
 import play.api.mvc._
@@ -174,8 +174,12 @@ class EmailController @Inject() (
 
   val emailAddressConfirmed: Action[AnyContent] = withEmailEnabled {
     as.eligibleJourneyAction { implicit request =>
-      withEmailAddressVerified(journey =>
-        Ok(views.emailAddressConfirmed(journey.into[Journey.AfterEmailAddressSelectedToBeVerified].transform.emailToBeVerified)))
+      withEmailAddressVerified{ journey =>
+        val email = journey match {
+          case j: AfterEmailAddressSelectedToBeVerified => j.emailToBeVerified
+        }
+        Ok(views.emailAddressConfirmed(email))
+      }
     }
   }
 

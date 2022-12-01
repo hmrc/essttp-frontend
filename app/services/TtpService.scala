@@ -267,13 +267,19 @@ object TtpService {
    */
   private def deriveCustomerDetail(journey: Journey.Stages.EmailVerificationComplete): Option[List[CustomerDetail]] = {
     val emailThatsBeenVerified: Email = journey.emailToBeVerified
-    val verifiedEmailIsEtmpEmail =
-      journey.eligibilityCheckResult.email.exists(
-        _.value.decryptedValue.toLowerCase(Locale.UK) === emailThatsBeenVerified.value.decryptedValue.toLowerCase(Locale.UK)
-      )
+    val customerDetail = journey.eligibilityCheckResult.email match {
+      case None =>
+        CustomerDetail(Some(emailThatsBeenVerified), Some(EmailSource.TEMP))
 
-    if (verifiedEmailIsEtmpEmail) Some(List(CustomerDetail(Some(emailThatsBeenVerified), Some(EmailSource.ETMP))))
-    else Some(List(CustomerDetail(Some(emailThatsBeenVerified), Some(EmailSource.TEMP))))
+      case Some(etmpEmail) =>
+        if (etmpEmail.value.decryptedValue.toLowerCase(Locale.UK) === emailThatsBeenVerified.value.decryptedValue.toLowerCase(Locale.UK)) {
+          CustomerDetail(Some(etmpEmail), Some(EmailSource.ETMP))
+        } else {
+          CustomerDetail(Some(emailThatsBeenVerified), Some(EmailSource.TEMP))
+        }
+    }
+
+    Some(List(customerDetail))
   }
 
   private def upfrontPaymentAnswersFromJourney(journey: Journey.AfterStartDatesResponse): UpfrontPaymentAnswers = journey match {

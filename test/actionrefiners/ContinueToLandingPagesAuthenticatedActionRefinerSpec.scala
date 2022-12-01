@@ -17,6 +17,7 @@
 package actionrefiners
 
 import controllers.DetermineTaxIdController
+import essttp.journey.model.Origins
 import play.api.http.Status
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -33,7 +34,7 @@ class ContinueToLandingPagesAuthenticatedActionRefinerSpec extends ItSpec {
   "ContinueToLandingPagesAuthenticatedActionRefiner" - {
     "should return redirect to determine eligibility when tax id is already determined" in {
       AuthStub.authorise()
-      EssttpBackend.DetermineTaxId.findJourney()
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Epaye.Bta)()
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.determineTaxId()(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
@@ -51,7 +52,7 @@ class ContinueToLandingPagesAuthenticatedActionRefinerSpec extends ItSpec {
 
     "redirect to login page when user has no active session (i.e. no auth token)" in {
       AuthStub.authorise(None, None)
-      EssttpBackend.DetermineTaxId.findJourney()
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Epaye.Bta)()
       val fakeRequest = FakeRequest()
       val result = controller.determineTaxId()(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
@@ -82,7 +83,7 @@ class ContinueToLandingPagesAuthenticatedActionRefinerVatDisabledSpec extends It
 
     "redirect to login page when user has no active session (i.e. no auth token)" in {
       AuthStub.authorise(None, None)
-      EssttpBackend.DetermineTaxId.findJourney()
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Epaye.Bta)()
       val fakeRequest = FakeRequest()
       val result = controller.determineTaxId()(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER

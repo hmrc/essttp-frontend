@@ -35,7 +35,7 @@ class JourneyIncorrectStateRouterSpec extends ItSpec {
       ("Stage", "Journey wiremock response", "Expected Redirect Location"),
       ("Stages.Started - EPAYE", () => EssttpBackend.StartJourney.findJourney(), PageUrls.epayeLandingPageUrl),
       ("Stages.Started - VAT", () => EssttpBackend.StartJourney.findJourney(Origins.Vat.GovUk), PageUrls.vatLandingPageUrl),
-      ("Stages.ComputedTaxId", () => EssttpBackend.DetermineTaxId.findJourney(), PageUrls.determineEligibilityUrl),
+      ("Stages.ComputedTaxId", () => EssttpBackend.DetermineTaxId.findJourney(Origins.Epaye.Bta)(), PageUrls.determineEligibilityUrl),
       ("Stages.EligibilityChecked", () => EssttpBackend.EligibilityCheck.findJourney(testCrypto)(), PageUrls.yourBillIsUrl), //check this
       ("Stages.EligibilityChecked - PAYE", () => EssttpBackend.EligibilityCheck.findJourney(testCrypto)(
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(Origins.Epaye.Bta)
@@ -65,7 +65,7 @@ class JourneyIncorrectStateRouterSpec extends ItSpec {
       ("Stages.EnteredDirectDebitDetails", () => EssttpBackend.DirectDebitDetails.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.checkDirectDebitDetailsUrl),
       ("Stages.ConfirmedDirectDebitDetails", () => EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.termsAndConditionsUrl),
       ("Stages.ConfirmedDirectDebitDetails", () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, testCrypto, Origins.Epaye.Bta)(), PageUrls.whichEmailDoYouWantToUseUrl),
-      ("Stages.SubmittedArrangement", () => EssttpBackend.SubmitArrangement.findJourney(testCrypto)(), PageUrls.confirmationUrl)
+      ("Stages.SubmittedArrangement", () => EssttpBackend.SubmitArrangement.findJourney(Origins.Epaye.Bta, testCrypto)(), PageUrls.confirmationUrl)
     )) {
       (scenario: String, journeyState: () => StubMapping, expectedRedirectUrl: String) =>
         {

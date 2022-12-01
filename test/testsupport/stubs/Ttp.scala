@@ -20,6 +20,7 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import connectors.CallEligibilityApiRequest
 import essttp.crypto.CryptoFormat
+import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.ttp.affordability.InstalmentAmountRequest
 import essttp.rootmodel.ttp.affordablequotes.AffordableQuotesRequest
 import essttp.rootmodel.ttp.arrangement.ArrangementRequest
@@ -40,14 +41,19 @@ object Ttp {
     WireMockHelpers.verifyWithBodyParse(url, ttpCorrelationIdHeader, expectedPayload)
 
   object Eligibility {
-    def stubRetrieveEligibility(jsonBody: String = TtpJsonResponses.ttpEligibilityCallJson()): StubMapping =
+    def stubRetrieveEligibility(taxRegime: TaxRegime)(jsonBody: String = TtpJsonResponses.ttpEligibilityCallJson(taxRegime)): StubMapping =
       WireMockHelpers.stubForPostWithResponseBody(eligibilityUrl, jsonBody)
 
     def stubServiceUnavailableRetrieveEligibility(): StubMapping =
       stubFor(post(urlPathEqualTo(eligibilityUrl)).willReturn(aResponse().withStatus(Status.SERVICE_UNAVAILABLE)))
 
-    def verifyTtpEligibilityRequests(): Unit =
-      ttpVerify(eligibilityUrl, TdAll.callEligibilityApiRequestEpaye)(CallEligibilityApiRequest.format)
+    def verifyTtpEligibilityRequests(taxRegime: TaxRegime): Unit = {
+      val request = taxRegime match {
+        case TaxRegime.Epaye => TdAll.callEligibilityApiRequestEpaye
+        case TaxRegime.Vat   => TdAll.callEligibilityApiRequestVat
+      }
+      ttpVerify(eligibilityUrl, request)(CallEligibilityApiRequest.format)
+    }
   }
 
   object Affordability {
@@ -67,7 +73,7 @@ object Ttp {
   }
 
   object EnactArrangement {
-    def stubEnactArrangement(jsonBody: String = TtpJsonResponses.ttpEnactArrangementResponseJson()): StubMapping =
+    def stubEnactArrangement(taxRegime: TaxRegime)(jsonBody: String = TtpJsonResponses.ttpEnactArrangementResponseJson(taxRegime)): StubMapping =
       WireMockHelpers.stubForPostWithResponseBody(enactArrangementUrl, jsonBody, Status.CREATED)
 
     def stubEnactArrangementFail(): StubMapping = stubFor(
@@ -77,11 +83,12 @@ object Ttp {
 
     def verifyTtpEnactArrangementRequest(
         customerDetails:             Option[List[CustomerDetail]],
-        regimeDigitalCorrespondence: Option[RegimeDigitalCorrespondence]
+        regimeDigitalCorrespondence: Option[RegimeDigitalCorrespondence],
+        taxRegime:                   TaxRegime
     )(implicit cryptoFormat: CryptoFormat): Unit =
       ttpVerify(
         enactArrangementUrl,
-        TdAll.arrangementRequest(customerDetails, regimeDigitalCorrespondence)
+        TdAll.arrangementRequest(customerDetails, regimeDigitalCorrespondence, taxRegime)
       )(ArrangementRequest.format)
   }
 

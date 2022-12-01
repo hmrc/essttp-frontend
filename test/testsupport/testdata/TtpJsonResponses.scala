@@ -16,11 +16,13 @@
 
 package testsupport.testdata
 
-import essttp.rootmodel.ttp.eligibility.{EligibilityRules, EligibilityPass}
+import essttp.rootmodel.TaxRegime
+import essttp.rootmodel.ttp.eligibility.{EligibilityPass, EligibilityRules}
 
 object TtpJsonResponses {
 
   def ttpEligibilityCallJson(
+      taxRegime:            TaxRegime,
       eligibilityPass:      EligibilityPass  = TdAll.eligibleEligibilityPass,
       eligibilityRules:     EligibilityRules = TdAll.eligibleEligibilityRules,
       poundsInsteadOfPence: Boolean          = false
@@ -28,16 +30,7 @@ object TtpJsonResponses {
     s"""
        |{
        |  "processingDateTime": "2022-03-23T13:49:51.141Z",
-       |  "identification": [
-       |    {
-       |      "idType": "EMPREF",
-       |      "idValue": "864FZ00049"
-       |    },
-       |    {
-       |      "idType": "BROCS",
-       |      "idValue": "123PA44545546"
-       |    }
-       |  ],
+       |  "identification": ${TdAll.identificationJsonString(taxRegime)},
        |  "customerPostcodes": [
        |        {
        |          "addressPostcode": "AA11AA",
@@ -271,11 +264,11 @@ object TtpJsonResponses {
       |}
       |""".stripMargin
 
-  def ttpEnactArrangementResponseJson(): String =
+  def ttpEnactArrangementResponseJson(taxRegime: TaxRegime): String =
     s"""
        |{
        |  "processingDateTime": "2022-03-23T13:49:51.141Z",
-       |  "customerReference": "123PA44545546"
+       |  "customerReference": "${TdAll.customerReference(taxRegime).value}"
        |}
        |""".stripMargin
 

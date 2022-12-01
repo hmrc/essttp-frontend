@@ -43,7 +43,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
 
       "the tax id has already been determined" in {
         stubCommonActions()
-        EssttpBackend.DetermineTaxId.findJourney()
+        EssttpBackend.DetermineTaxId.findJourney(Origins.Epaye.Bta)()
 
         val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
         val result = controller.determineTaxId()(fakeRequest)
@@ -182,7 +182,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
     "for VAT when" - {
       "the tax id has already been determined" in {
         stubCommonActions(authAllEnrolments = Some(Set(TdAll.vatEnrolment)))
-        EssttpBackend.DetermineTaxId.findJourney(JourneyJsonTemplates.`Computed Tax Id`(origin       = Origins.Vat.Bta, taxReference = "101747001"))
+        EssttpBackend.DetermineTaxId.findJourney(Origins.Vat.Bta)(JourneyJsonTemplates.`Computed Tax Id`(Origins.Vat.Bta, "101747001"))
 
         val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
         val result = controller.determineTaxId()(fakeRequest)

@@ -18,7 +18,6 @@ package controllers
 
 import controllers.PaymentScheduleControllerSpec.SummaryRow
 import essttp.journey.model.{Origin, Origins}
-import essttp.rootmodel.TaxRegime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import play.api.http.Status
@@ -39,11 +38,11 @@ import scala.concurrent.Future
 class PaymentScheduleControllerSpec extends ItSpec {
 
   private val controller: PaymentScheduleController = app.injector.instanceOf[PaymentScheduleController]
-  Seq[(String, Origin, TaxRegime)](
-    ("Epaye", Origins.Epaye.Bta, TaxRegime.Epaye),
-    ("Vat", Origins.Vat.Bta, TaxRegime.Vat)
+  Seq[(String, Origin)](
+    ("Epaye", Origins.Epaye.Bta),
+    ("Vat", Origins.Vat.Bta)
   ).foreach {
-      case (regime, origin, taxRegime) =>
+      case (regime, origin) =>
         s"GET ${routes.PaymentScheduleController.checkPaymentSchedule.url}" - {
 
             def extractSummaryRows(elements: List[Element]): List[SummaryRow] = elements.map { e =>
@@ -127,7 +126,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
                   expectedH1              = "Check your payment plan",
                   shouldBackLinkBePresent = true,
                   expectedSubmitUrl       = Some(routes.PaymentScheduleController.checkPaymentScheduleSubmit.url),
-                  regimeBeingTested       = Some(taxRegime)
+                  regimeBeingTested       = Some(origin.taxRegime)
                 )
 
                 val summaries = doc.select(".govuk-summary-list").iterator().asScala.toList
@@ -224,10 +223,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
                  |            "totalPayable": 1111.47,
                  |            "totalPaymentWithoutInterest": 1111.41
                  |        },
-                 |        "taxDetail": {
-                 |            "accountsOfficeRef": "123PA44545546",
-                 |            "employerRef": "864FZ00049"
-                 |        },
+                 |        "taxDetail": ${TdAll.taxDetailJsonString(origin.taxRegime)},
                  |        "taxType": "$regime"
                  |}
             """.stripMargin

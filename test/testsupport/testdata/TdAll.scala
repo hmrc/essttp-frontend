@@ -28,7 +28,8 @@ import essttp.rootmodel.ttp.eligibility._
 import essttp.rootmodel.ttp._
 import essttp.rootmodel.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
 import essttp.rootmodel.ttp.arrangement._
-import essttp.rootmodel.{AmountInPence, CanPayUpfront, DayOfMonth, Email, MonthlyPaymentAmount, UpfrontPaymentAmount}
+import essttp.rootmodel.{AmountInPence, CanPayUpfront, DayOfMonth, Email, MonthlyPaymentAmount, TaxRegime, UpfrontPaymentAmount}
+import play.api.libs.json.Json
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 
@@ -114,45 +115,88 @@ object TdAll {
     returnFinancialAssessment = true
   )
 
-  def eligibilityCheckResult(eligibilityPass: EligibilityPass, eligibilityRules: EligibilityRules): EligibilityCheckResult = EligibilityCheckResult(
-    processingDateTime              = ProcessingDateTime("2022-03-23T13:49:51.141Z"),
-    identification                  = List(
-      Identification(IdType("EMPREF"), IdValue("864FZ00049")),
-      Identification(IdType("BROCS"), IdValue("123PA44545546"))
-    ),
-    customerPostcodes               = List(CustomerPostcode(customerPostcode, PostcodeDate("2022-01-31"))),
-    regimePaymentFrequency          = PaymentPlanFrequencies.Monthly,
-    paymentPlanFrequency            = PaymentPlanFrequencies.Monthly,
-    paymentPlanMinLength            = PaymentPlanMinLength(1),
-    paymentPlanMaxLength            = PaymentPlanMaxLength(6),
-    eligibilityStatus               = EligibilityStatus(eligibilityPass),
-    eligibilityRules                = eligibilityRules,
-    chargeTypeAssessment            = List(ChargeTypeAssessment(
-      taxPeriodFrom   = TaxPeriodFrom("2020-08-13"),
-      taxPeriodTo     = TaxPeriodTo("2020-08-14"),
-      debtTotalAmount = DebtTotalAmount(AmountInPence(300000)),
-      charges         = List(Charges(
-        chargeType           = ChargeType("InYearRTICharge-Tax"),
-        mainType             = MainType("InYearRTICharge(FPS)"),
-        chargeReference      = ChargeReference("A00000000001"),
-        mainTrans            = MainTrans("mainTrans"),
-        subTrans             = SubTrans("subTrans"),
-        outstandingAmount    = OutstandingAmount(AmountInPence(100000)),
-        interestStartDate    = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
-        dueDate              = DueDate(LocalDate.parse("2017-03-07")),
-        accruedInterest      = AccruedInterest(AmountInPence(1597)),
-        ineligibleChargeType = IneligibleChargeType(false),
-        chargeOverMaxDebtAge = ChargeOverMaxDebtAge(false),
-        locks                = Some(
-          List(Lock(LockType("Payment"), LockReason("Risk/Fraud"), DisallowedChargeLockType(false)))
-        ),
-        dueDateNotReached    = false
-      ))
-    )),
-    customerDetails                 = None,
-    regimeDigitalCorrespondence     = None,
-    futureChargeLiabilitiesExcluded = false
+  val callEligibilityApiRequestVat: CallEligibilityApiRequest = CallEligibilityApiRequest(
+    channelIdentifier         = "eSSTTP",
+    idType                    = "VRN",
+    idValue                   = "101747001",
+    regimeType                = "VATC",
+    returnFinancialAssessment = true
   )
+
+  def identification(taxRegime: TaxRegime): List[Identification] = Json.parse(identificationJsonString(taxRegime)).as[List[Identification]]
+
+  def identificationJsonString(taxRegime: TaxRegime): String = taxRegime match {
+    case TaxRegime.Epaye =>
+      """[
+        |    {
+        |      "idType": "EMPREF",
+        |      "idValue": "864FZ00049"
+        |    },
+        |    {
+        |      "idType": "BROCS",
+        |      "idValue": "123PA44545546"
+        |    }
+        |  ]""".stripMargin
+
+    case TaxRegime.Vat =>
+      """[
+        |    {
+        |      "idType": "VRN",
+        |      "idValue": "101747001"
+        |    }
+        |  ]""".stripMargin
+  }
+
+  def taxDetailJsonString(taxRegime: TaxRegime): String = taxRegime match {
+    case TaxRegime.Epaye =>
+      """{
+        |		"employerRef": "864FZ00049",
+        |		"accountsOfficeRef": "123PA44545546"
+        |	}""".stripMargin
+
+    case TaxRegime.Vat =>
+      """{ "vrn": "101747001" }"""
+  }
+
+  def eligibilityCheckResult(eligibilityPass: EligibilityPass, eligibilityRules: EligibilityRules, taxRegime: TaxRegime): EligibilityCheckResult = {
+
+    EligibilityCheckResult(
+      processingDateTime              = ProcessingDateTime("2022-03-23T13:49:51.141Z"),
+      identification                  = identification(taxRegime),
+      customerPostcodes               = List(CustomerPostcode(customerPostcode, PostcodeDate("2022-01-31"))),
+      regimePaymentFrequency          = PaymentPlanFrequencies.Monthly,
+      paymentPlanFrequency            = PaymentPlanFrequencies.Monthly,
+      paymentPlanMinLength            = PaymentPlanMinLength(1),
+      paymentPlanMaxLength            = PaymentPlanMaxLength(6),
+      eligibilityStatus               = EligibilityStatus(eligibilityPass),
+      eligibilityRules                = eligibilityRules,
+      chargeTypeAssessment            = List(ChargeTypeAssessment(
+        taxPeriodFrom   = TaxPeriodFrom("2020-08-13"),
+        taxPeriodTo     = TaxPeriodTo("2020-08-14"),
+        debtTotalAmount = DebtTotalAmount(AmountInPence(300000)),
+        charges         = List(Charges(
+          chargeType           = ChargeType("InYearRTICharge-Tax"),
+          mainType             = MainType("InYearRTICharge(FPS)"),
+          chargeReference      = ChargeReference("A00000000001"),
+          mainTrans            = MainTrans("mainTrans"),
+          subTrans             = SubTrans("subTrans"),
+          outstandingAmount    = OutstandingAmount(AmountInPence(100000)),
+          interestStartDate    = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
+          dueDate              = DueDate(LocalDate.parse("2017-03-07")),
+          accruedInterest      = AccruedInterest(AmountInPence(1597)),
+          ineligibleChargeType = IneligibleChargeType(false),
+          chargeOverMaxDebtAge = ChargeOverMaxDebtAge(false),
+          locks                = Some(
+            List(Lock(LockType("Payment"), LockReason("Risk/Fraud"), DisallowedChargeLockType(false)))
+          ),
+          dueDateNotReached    = false
+        ))
+      )),
+      customerDetails                 = None,
+      regimeDigitalCorrespondence     = None,
+      futureChargeLiabilitiesExcluded = false
+    )
+  }
 
   def dayOfMonth(day: Int = 28): DayOfMonth = DayOfMonth(day)
 
@@ -268,60 +312,64 @@ object TdAll {
 
   def arrangementRequest(
       customerDetails:             Option[List[CustomerDetail]],
-      regimeDigitalCorrespondence: Option[RegimeDigitalCorrespondence]
-  ): ArrangementRequest = ArrangementRequest(
-    channelIdentifier           = ChannelIdentifiers.eSSTTP,
-    regimeType                  = RegimeType("PAYE"),
-    regimePaymentFrequency      = PaymentPlanFrequencies.Monthly,
-    arrangementAgreedDate       = ArrangementAgreedDate(LocalDate.now(ZoneOffset.of("Z")).toString),
-    identification              = List(
-      Identification(IdType("EMPREF"), IdValue("864FZ00049")),
-      Identification(IdType("BROCS"), IdValue("123PA44545546"))
-    ),
-    directDebitInstruction      = DirectDebitInstruction(
-      sortCode        = SortCode(SensitiveString("123456")),
-      accountNumber   = AccountNumber(SensitiveString("12345678")),
-      accountName     = AccountName(SensitiveString("Bob Ross")),
-      paperAuddisFlag = PaperAuddisFlag(false)
-    ),
-    paymentPlan                 = EnactPaymentPlan(
-      planDuration         = PlanDuration(2),
-      paymentPlanFrequency = PaymentPlanFrequencies.Monthly,
-      numberOfInstalments  = NumberOfInstalments(2),
-      totalDebt            = TotalDebt(AmountInPence(111141)),
-      totalDebtIncInt      = TotalDebtIncludingInterest(AmountInPence(111147)),
-      planInterest         = PlanInterest(AmountInPence(6)),
-      collections          = Collection(
-        initialCollection  = Some(InitialCollection(dueDate   = DueDate(LocalDate.parse("2022-07-03")), amountDue = AmountDue(AmountInPence(12312)))),
-        regularCollections = List(
-          RegularCollection(dueDate   = DueDate(LocalDate.parse("2022-09-28")), amountDue = AmountDue(AmountInPence(55573))),
-          RegularCollection(dueDate   = DueDate(LocalDate.parse("2022-08-28")), amountDue = AmountDue(AmountInPence(55573)))
+      regimeDigitalCorrespondence: Option[RegimeDigitalCorrespondence],
+      taxRegime:                   TaxRegime
+  ): ArrangementRequest = {
+    val regimeType = taxRegime match {
+      case TaxRegime.Epaye => RegimeType("PAYE")
+      case TaxRegime.Vat   => RegimeType("VATC")
+    }
+    ArrangementRequest(
+      channelIdentifier           = ChannelIdentifiers.eSSTTP,
+      regimeType                  = regimeType,
+      regimePaymentFrequency      = PaymentPlanFrequencies.Monthly,
+      arrangementAgreedDate       = ArrangementAgreedDate(LocalDate.now(ZoneOffset.of("Z")).toString),
+      identification              = identification(taxRegime),
+      directDebitInstruction      = DirectDebitInstruction(
+        sortCode        = SortCode(SensitiveString("123456")),
+        accountNumber   = AccountNumber(SensitiveString("12345678")),
+        accountName     = AccountName(SensitiveString("Bob Ross")),
+        paperAuddisFlag = PaperAuddisFlag(false)
+      ),
+      paymentPlan                 = EnactPaymentPlan(
+        planDuration         = PlanDuration(2),
+        paymentPlanFrequency = PaymentPlanFrequencies.Monthly,
+        numberOfInstalments  = NumberOfInstalments(2),
+        totalDebt            = TotalDebt(AmountInPence(111141)),
+        totalDebtIncInt      = TotalDebtIncludingInterest(AmountInPence(111147)),
+        planInterest         = PlanInterest(AmountInPence(6)),
+        collections          = Collection(
+          initialCollection  = Some(InitialCollection(dueDate   = DueDate(LocalDate.parse("2022-07-03")), amountDue = AmountDue(AmountInPence(12312)))),
+          regularCollections = List(
+            RegularCollection(dueDate   = DueDate(LocalDate.parse("2022-09-28")), amountDue = AmountDue(AmountInPence(55573))),
+            RegularCollection(dueDate   = DueDate(LocalDate.parse("2022-08-28")), amountDue = AmountDue(AmountInPence(55573)))
+          )
+        ),
+        instalments          = List(
+          Instalment(
+            instalmentNumber          = InstalmentNumber(2),
+            dueDate                   = DueDate(LocalDate.parse("2022-09-28")),
+            instalmentInterestAccrued = InterestAccrued(AmountInPence(3)),
+            instalmentBalance         = InstalmentBalance(AmountInPence(55571)),
+            debtItemChargeId          = ChargeReference("A00000000001"),
+            amountDue                 = AmountDue(AmountInPence(55570)),
+            debtItemOriginalDueDate   = DebtItemOriginalDueDate(LocalDate.parse("2021-07-28"))
+          ),
+          Instalment(
+            instalmentNumber          = InstalmentNumber(1),
+            dueDate                   = DueDate(LocalDate.parse("2022-08-28")),
+            instalmentInterestAccrued = InterestAccrued(AmountInPence(3)),
+            instalmentBalance         = InstalmentBalance(AmountInPence(111141)),
+            debtItemChargeId          = ChargeReference("A00000000001"),
+            amountDue                 = AmountDue(AmountInPence(55570)),
+            debtItemOriginalDueDate   = DebtItemOriginalDueDate(LocalDate.parse("2021-07-28"))
+          )
         )
       ),
-      instalments          = List(
-        Instalment(
-          instalmentNumber          = InstalmentNumber(2),
-          dueDate                   = DueDate(LocalDate.parse("2022-09-28")),
-          instalmentInterestAccrued = InterestAccrued(AmountInPence(3)),
-          instalmentBalance         = InstalmentBalance(AmountInPence(55571)),
-          debtItemChargeId          = ChargeReference("A00000000001"),
-          amountDue                 = AmountDue(AmountInPence(55570)),
-          debtItemOriginalDueDate   = DebtItemOriginalDueDate(LocalDate.parse("2021-07-28"))
-        ),
-        Instalment(
-          instalmentNumber          = InstalmentNumber(1),
-          dueDate                   = DueDate(LocalDate.parse("2022-08-28")),
-          instalmentInterestAccrued = InterestAccrued(AmountInPence(3)),
-          instalmentBalance         = InstalmentBalance(AmountInPence(111141)),
-          debtItemChargeId          = ChargeReference("A00000000001"),
-          amountDue                 = AmountDue(AmountInPence(55570)),
-          debtItemOriginalDueDate   = DebtItemOriginalDueDate(LocalDate.parse("2021-07-28"))
-        )
-      )
-    ),
-    customerDetails             = customerDetails,
-    regimeDigitalCorrespondence = regimeDigitalCorrespondence
-  )
+      customerDetails             = customerDetails,
+      regimeDigitalCorrespondence = regimeDigitalCorrespondence
+    )
+  }
 
   def customerDetail(email: String = "bobross@joyofpainting.com", source: EmailSource = EmailSource.ETMP): Option[List[CustomerDetail]] =
     Some(List(CustomerDetail(Some(Email(SensitiveString(email))), Some(source))))
@@ -329,5 +377,11 @@ object TdAll {
   val someRegimeDigitalCorrespondenceFalse: Option[RegimeDigitalCorrespondence] = Some(RegimeDigitalCorrespondence(false))
   val someRegimeDigitalCorrespondenceTrue: Option[RegimeDigitalCorrespondence] = Some(RegimeDigitalCorrespondence(true))
 
-  val arrangementResponse: ArrangementResponse = ArrangementResponse(ProcessingDateTime("2022-03-23T13:49:51.141Z"), CustomerReference("123PA44545546"))
+  def customerReference(taxRegime: TaxRegime) = taxRegime match {
+    case TaxRegime.Epaye => CustomerReference("123PA44545546")
+    case TaxRegime.Vat   => CustomerReference("101747001")
+  }
+
+  def arrangementResponse(taxRegime: TaxRegime): ArrangementResponse =
+    ArrangementResponse(ProcessingDateTime("2022-03-23T13:49:51.141Z"), customerReference(taxRegime))
 }

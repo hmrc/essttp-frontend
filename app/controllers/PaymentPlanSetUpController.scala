@@ -40,29 +40,25 @@ class PaymentPlanSetUpController @Inject() (
 
   val paymentPlanSetUp: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
-      case j: Journey.BeforeArrangementSubmitted => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
-      case j: Journey.AfterArrangementSubmitted  => displayConfirmationPage(j)
+      case j: Journey.BeforeArrangementSubmitted  => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
+      case j: Journey.Stages.SubmittedArrangement => displayConfirmationPage(j)
     }
   }
 
-  def displayConfirmationPage(journey: Journey.AfterArrangementSubmitted)(implicit request: Request[_]): Result = {
-    val journeyInfo = journey match {
-      case j: Journey.Epaye.SubmittedArrangement => j
-    }
-
-    val firstPaymentDay = journeyInfo.selectedPaymentPlan.collections.regularCollections
+  def displayConfirmationPage(journey: Journey.Stages.SubmittedArrangement)(implicit request: Request[_]): Result = {
+    val firstPaymentDay = journey.selectedPaymentPlan.collections.regularCollections
       .sortBy(_.dueDate.value)
       .headOption.getOrElse(Errors.throwServerErrorException("There are no regular collection dates, this should never happen..."))
       .dueDate
 
-    val hasUpfrontPayment: Boolean = journeyInfo.upfrontPaymentAnswers match {
+    val hasUpfrontPayment: Boolean = journey.upfrontPaymentAnswers match {
       case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => true
       case UpfrontPaymentAnswers.NoUpfrontPayment          => false
     }
 
     Ok(
       views.paymentPlanSetUpPage(
-        customerPaymentReference = journeyInfo.arrangementResponse.customerReference.value,
+        customerPaymentReference = journey.arrangementResponse.customerReference.value,
         paymentDay               = firstPaymentDay,
         hasUpfrontPayment        = hasUpfrontPayment
       )
@@ -72,7 +68,7 @@ class PaymentPlanSetUpController @Inject() (
   val printSummary: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
       case j: Journey.BeforeArrangementSubmitted => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
-      case j: Journey.Epaye.SubmittedArrangement =>
+      case j: Journey.Stages.SubmittedArrangement =>
         Ok(views.printSummaryPage(
           paymentReference     = j.arrangementResponse.customerReference.value,
           upfrontPaymentAmount = PaymentPlanSetUpController.deriveUpfrontPaymentFromAnswers(j.upfrontPaymentAnswers),
