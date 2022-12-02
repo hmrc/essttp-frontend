@@ -1266,6 +1266,10 @@ object Messages {
       welsh   = "Bydd CThEM yn anfon llythyr atoch cyn pen 5 diwrnod gyda’ch dyddiadau talu."
     )
 
+    val `We will send a secure message with payment due dates to your business tax account inbox within 24 hours.`: Message = Message(
+      english = "We will send a secure message with payment due dates to your business tax account inbox within 24 hours."
+    )
+
     def paymentInfo(hasUpfrontPayment: Boolean, paymentDate: String): Message = Message(
       english = s"${if (hasUpfrontPayment) "Your upfront payment will be taken within 10 working days. " else ""}Your next payment will be taken on $paymentDate or the next working day.",
       welsh   = s"${if (hasUpfrontPayment) "Caiff eich taliad ymlaen llaw ei gymryd cyn pen 10 diwrnod gwaith. " else ""}Caiff eich taliad nesaf ei gymryd ar $paymentDate neu’r diwrnod gwaith nesaf."

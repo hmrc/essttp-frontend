@@ -61,7 +61,7 @@ object Routing {
     case j: Journey.Stages.AgreedTermsAndConditions =>
       if (j.isEmailAddressRequired) routes.EmailController.whichEmailDoYouWantToUse
       else if (allowSubmitArrangement) routes.SubmitArrangementController.submitArrangement
-      else routes.PaymentPlanSetUpController.paymentPlanSetUp
+      else SubmitArrangementController.whichPaymentPlanSetupPage(j.taxRegime)
 
     case _: Journey.Stages.SelectedEmailToBeVerified =>
       routes.EmailController.requestVerification
@@ -74,8 +74,8 @@ object Routing {
         case EmailVerificationStatus.Locked => routes.EmailController.tooManyPasscodeAttempts
       }
 
-    case _: Journey.Stages.SubmittedArrangement =>
-      routes.PaymentPlanSetUpController.paymentPlanSetUp
+    case j: Journey.Stages.SubmittedArrangement =>
+      SubmitArrangementController.whichPaymentPlanSetupPage(j.taxRegime)
   }
 
 }

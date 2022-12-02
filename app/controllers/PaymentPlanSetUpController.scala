@@ -17,6 +17,8 @@
 package controllers
 
 import _root_.actions.Actions
+import actionsmodel.EligibleJourneyRequest
+import essttp.journey.model.Journey.Stages
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel.AmountInPence
 import essttp.utils.Errors
@@ -38,10 +40,18 @@ class PaymentPlanSetUpController @Inject() (
 
   implicit val localDateOrdering: Ordering[LocalDate] = _ compareTo _
 
-  val paymentPlanSetUp: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+  val epayePaymentPlanSetUp: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    paymentPlanSetup(request)
+  }
+
+  val vatPaymentPlanSetUp: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    paymentPlanSetup(request)
+  }
+
+  private def paymentPlanSetup(request: EligibleJourneyRequest[AnyContent])(implicit eligibleJourneyRequest: EligibleJourneyRequest[_]): Result = {
     request.journey match {
-      case j: Journey.BeforeArrangementSubmitted  => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
-      case j: Journey.Stages.SubmittedArrangement => displayConfirmationPage(j)
+      case j: Journey.BeforeArrangementSubmitted => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
+      case j: Stages.SubmittedArrangement        => displayConfirmationPage(j)
     }
   }
 
@@ -56,12 +66,15 @@ class PaymentPlanSetUpController @Inject() (
       case UpfrontPaymentAnswers.NoUpfrontPayment          => false
     }
 
+    val regimeDigitalCorrespondence: Boolean = journey.eligibilityCheckResult.regimeDigitalCorrespondence.exists(_.value)
+
     Ok(
       views.paymentPlanSetUpPage(
-        customerPaymentReference = journey.arrangementResponse.customerReference.value,
-        paymentDay               = firstPaymentDay,
-        hasUpfrontPayment        = hasUpfrontPayment,
-        taxRegime                = journey.taxRegime
+        customerPaymentReference    = journey.arrangementResponse.customerReference.value,
+        paymentDay                  = firstPaymentDay,
+        hasUpfrontPayment           = hasUpfrontPayment,
+        taxRegime                   = journey.taxRegime,
+        regimeDigitalCorrespondence = regimeDigitalCorrespondence
       )
     )
   }
