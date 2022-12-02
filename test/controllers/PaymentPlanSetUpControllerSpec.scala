@@ -57,7 +57,10 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
 
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
-            val result: Future[Result] = controller.paymentPlanSetUp(fakeRequest)
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.epayePaymentPlanSetUp(fakeRequest)
+              case TaxRegime.Vat   => controller.vatPaymentPlanSetUp(fakeRequest)
+            }
             val pageContent: String = contentAsString(result)
             val doc: Document = Jsoup.parse(pageContent)
 
@@ -83,19 +86,20 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
 
             subheadings(0).text() shouldBe "What happens next"
             paragraphs(0).text() shouldBe "HMRC will send you a letter within 5 working days with your payment dates."
+            paragraphs(1).text() shouldBe "We will send a secure message with payment due dates to your business tax account inbox within 24 hours."
 
             if (hasUpfrontPayment) {
-              paragraphs(1).text() shouldBe "Your upfront payment will be taken within 10 working days. Your next payment will be taken on 28th August 2022 or the next working day."
+              paragraphs(2).text() shouldBe "Your upfront payment will be taken within 10 working days. Your next payment will be taken on 28th August 2022 or the next working day."
             } else {
-              paragraphs(1).text() shouldBe "Your next payment will be taken on 28th August 2022 or the next working day."
+              paragraphs(2).text() shouldBe "Your next payment will be taken on 28th August 2022 or the next working day."
             }
-            paragraphs(2).text() shouldBe "Your tax account will be updated with your payment plan within 24 hours."
-            paragraphs(3).text() shouldBe "View your payment plan"
+            paragraphs(3).text() shouldBe "Your tax account will be updated with your payment plan within 24 hours."
+            paragraphs(4).text() shouldBe "View your payment plan"
 
             doc.select("#print-plan-link").attr("href") shouldBe PageUrls.printPlanUrl
 
             subheadings(1).text() shouldBe "If you need to change your payment plan"
-            paragraphs(4).text() shouldBe "Call the HMRC Helpline on 0300 123 1813."
+            paragraphs(5).text() shouldBe "Call the HMRC Helpline on 0300 123 1813."
 
             doc.select(".govuk-button").text() shouldBe "Go to tax account"
 

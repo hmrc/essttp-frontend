@@ -99,7 +99,10 @@ class SubmitArrangementControllerSpec extends ItSpec {
 
                     val result: Future[Result] = controller.submitArrangement(fakeRequest)
                     status(result) shouldBe Status.SEE_OTHER
-                    redirectLocation(result) shouldBe Some(PageUrls.confirmationUrl)
+                    redirectLocation(result) shouldBe Some(taxRegime match {
+                      case TaxRegime.Epaye => PageUrls.epayeConfirmationUrl
+                      case TaxRegime.Vat   => PageUrls.vatConfirmationUrl
+                    })
 
                     Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(
                       expectedCustomerDetail,

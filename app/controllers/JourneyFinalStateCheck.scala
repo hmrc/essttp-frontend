@@ -20,6 +20,7 @@ import cats.Eq
 import cats.implicits.catsSyntaxEq
 import essttp.journey.model.Stage.AfterSubmittedArrangement
 import essttp.journey.model.{Journey, Stage}
+import essttp.rootmodel.TaxRegime
 import play.api.mvc.{Request, Result}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.RequestHeader
@@ -35,12 +36,12 @@ object JourneyFinalStateCheck {
   private def logMessage(implicit requestHeader: RequestHeader): Unit =
     JourneyLogger.info("User tried to force browser to a page in the journey, but they have finished their journey. Redirecting to confirmation page")
 
-  private val confirmationRedirect: Result = Redirect(routes.PaymentPlanSetUpController.paymentPlanSetUp)
+  private def confirmationRedirect(taxRegime: TaxRegime): Result = Redirect(SubmitArrangementController.whichPaymentPlanSetupPage(taxRegime))
 
   def finalStateCheckF(journey: Journey, result: => Future[Result])(implicit request: Request[_]): Future[Result] = {
     if (endStateConditional(journey)) {
       logMessage
-      Future.successful(confirmationRedirect)
+      Future.successful(confirmationRedirect(journey.taxRegime))
     } else {
       result
     }
@@ -49,7 +50,7 @@ object JourneyFinalStateCheck {
   def finalStateCheck(journey: Journey, result: => Result)(implicit request: Request[_]): Result = {
     if (endStateConditional(journey)) {
       logMessage
-      confirmationRedirect
+      confirmationRedirect(journey.taxRegime)
     } else {
       result
     }

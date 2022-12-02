@@ -52,7 +52,7 @@ class JourneyFinalStateCheckSpec extends ItSpec {
     )) {
       (scenario: String, action: Action[AnyContent]) =>
         {
-          s"GET $scenario should redirect to ${PageUrls.confirmationUrl}" in {
+          s"GET $scenario should redirect to ${PageUrls.epayeConfirmationUrl}" in {
             stubCommonActions()
             EssttpBackend.SubmitArrangement.findJourney(Origins.Epaye.Bta, testCrypto)()
 
@@ -60,7 +60,7 @@ class JourneyFinalStateCheckSpec extends ItSpec {
 
             val result = action(fakeRequest)
             status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(PageUrls.confirmationUrl)
+            redirectLocation(result) shouldBe Some(PageUrls.epayeConfirmationUrl)
           }
         }
     }

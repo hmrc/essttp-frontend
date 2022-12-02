@@ -83,8 +83,11 @@ class EmailControllerSpec extends ItSpec {
 
               "an arrangement has already been submitted" in {
                 test(
-                  () => EssttpBackend.SubmitArrangement.findJourney(Origins.Epaye.Bta, testCrypto)(),
-                  routes.PaymentPlanSetUpController.paymentPlanSetUp
+                  () => EssttpBackend.SubmitArrangement.findJourney(origin, testCrypto)(),
+                  taxRegime match {
+                    case TaxRegime.Epaye => routes.PaymentPlanSetUpController.epayePaymentPlanSetUp
+                    case TaxRegime.Vat   => routes.PaymentPlanSetUpController.vatPaymentPlanSetUp
+                  }
                 )
               }
 

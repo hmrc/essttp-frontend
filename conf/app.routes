@@ -96,7 +96,8 @@ POST   /email-address-confirmed                             controllers.EmailCon
 
 GET    /submit-arrangement                                  controllers.SubmitArrangementController.submitArrangement
 
-GET    /payment-plan-set-up                                 controllers.PaymentPlanSetUpController.paymentPlanSetUp
+GET    /epaye-payment-plan-set-up                           controllers.PaymentPlanSetUpController.epayePaymentPlanSetUp
+GET    /vat-payment-plan-set-up                             controllers.PaymentPlanSetUpController.vatPaymentPlanSetUp
 GET    /payment-plan-print-summary                          controllers.PaymentPlanSetUpController.printSummary
 
 GET    /assets/*file                                        controllers.Assets.versioned(path="/public", file: Asset)

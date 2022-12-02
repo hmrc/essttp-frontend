@@ -35,7 +35,8 @@
         customerPaymentReference: String,
         paymentDay: DueDate,
         hasUpfrontPayment: Boolean,
-        taxRegime: TaxRegime
+        taxRegime: TaxRegime,
+        regimeDigitalCorrespondence: Boolean
 )(
         implicit
         request: Request[_]
@@ -76,6 +77,13 @@
     <p class="govuk-body">@{
         Messages.Confirmation.`HMRC will send you a letter within 5 working days with your payment dates.`.show
     }</p>
+
+    @{if(regimeDigitalCorrespondence) {
+        <p class="govuk-body">
+            {Messages.Confirmation.`We will send a secure message with payment due dates to your business tax account inbox within 24 hours.`.show}
+        </p>
+    }}
+
     <p class="govuk-body">@{
         Messages.Confirmation.paymentInfo(hasUpfrontPayment = hasUpfrontPayment, nextPayment).show
     }</p>

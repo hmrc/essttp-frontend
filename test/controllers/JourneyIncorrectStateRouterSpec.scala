@@ -65,7 +65,7 @@ class JourneyIncorrectStateRouterSpec extends ItSpec {
       ("Stages.EnteredDirectDebitDetails", () => EssttpBackend.DirectDebitDetails.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.checkDirectDebitDetailsUrl),
       ("Stages.ConfirmedDirectDebitDetails", () => EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.termsAndConditionsUrl),
       ("Stages.ConfirmedDirectDebitDetails", () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, testCrypto, Origins.Epaye.Bta)(), PageUrls.whichEmailDoYouWantToUseUrl),
-      ("Stages.SubmittedArrangement", () => EssttpBackend.SubmitArrangement.findJourney(Origins.Epaye.Bta, testCrypto)(), PageUrls.confirmationUrl)
+      ("Stages.SubmittedArrangement", () => EssttpBackend.SubmitArrangement.findJourney(Origins.Epaye.Bta, testCrypto)(), PageUrls.epayeConfirmationUrl)
     )) {
       (scenario: String, journeyState: () => StubMapping, expectedRedirectUrl: String) =>
         {

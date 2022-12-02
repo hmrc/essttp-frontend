@@ -21,6 +21,7 @@ import actionsmodel.AuthenticatedJourneyRequest
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import essttp.emailverification.EmailVerificationStatus
 import essttp.journey.model.Journey
+import essttp.rootmodel.TaxRegime
 import play.api.mvc._
 import services.{JourneyService, TtpService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -56,9 +57,9 @@ class SubmitArrangementController @Inject() (
           case EmailVerificationStatus.Locked   => logErrorAndRouteToDefaultPageF(j)
         }
 
-      case _: Journey.AfterArrangementSubmitted =>
+      case j: Journey.AfterArrangementSubmitted =>
         JourneyLogger.info("Already submitted arrangement to ttp, showing user the success page")
-        Future.successful(Redirect(routes.PaymentPlanSetUpController.paymentPlanSetUp))
+        Future.successful(Redirect(SubmitArrangementController.whichPaymentPlanSetupPage(j.taxRegime)))
     }
   }
 
@@ -71,4 +72,11 @@ class SubmitArrangementController @Inject() (
     } yield Redirect(Routing.next(updatedJourney))
   }
 
+}
+
+object SubmitArrangementController {
+  def whichPaymentPlanSetupPage(taxRegime: TaxRegime): Call = taxRegime match {
+    case TaxRegime.Epaye => routes.PaymentPlanSetUpController.epayePaymentPlanSetUp
+    case TaxRegime.Vat   => routes.PaymentPlanSetUpController.vatPaymentPlanSetUp
+  }
 }
