@@ -14,21 +14,19 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.govukfrontend.views.html.components._
-@import play.api.mvc.Request
 @import requests.RequestSupport
 @import messages.Messages
 @import config.AppConfig
 @import play.twirl.api.Html
 @import messages.Message
 @import actionsmodel.AuthenticatedJourneyRequest
-@import essttp.rootmodel.TaxRegime
+@import views.html.partials.CommonIneligibilityPartial
 
 @this(
         layout: views.html.templates.Layout,
-        govukDetails: GovukDetails,
         appConfig: AppConfig,
-        requestSupport: RequestSupport
+        requestSupport: RequestSupport,
+        commonIneligibilityPartial: CommonIneligibilityPartial
 )
 
 @(
@@ -38,24 +36,6 @@
 
 @import requestSupport._
 
-@extraSupportHtml = {
-    <p class="govuk-body">
-    @{
-        Html(Messages.NotEligible.extraSupportLink(appConfig.Urls.extraSupportUrl).show)
-    }
-    </p>
-    <p class="govuk-body">
-    @{
-        Html(Messages.NotEligible.relayLink(appConfig.Urls.relayUrl).show)
-    }
-    </p>
-    <p class="govuk-body">
-    @{
-        Html(Messages.NotEligible.`If you are outside the UK...`.show)
-    }
-    </p>
-}
-
 @layout(pageTitle = Some(pageh1.show), showBackLink = false) {
     <h1 class="govuk-heading-xl">
     @{
@@ -63,50 +43,6 @@
     }
     </h1>
     @leadingContent
-    <div id="common-eligibility">
-        <p class="govuk-body">
-        @{
-            Html(Messages.NotEligible.`For further support you can contact the Payment Support Service on 0300 200 3835 to speak to an advisor.`.show)
-        }
-        </p>
-        @govukDetails(Details(
-            summary = Text(Messages.NotEligible.`If you cannot use speech recognition software`.show),
-            content = HtmlContent(extraSupportHtml)
-        ))
-        <p class="govuk-body govuk-!-font-weight-bold">
-        @{
-            Messages.NotEligible.`Before you call, make sure you have:`.show
-        }
-        </p>
-        <ul class="govuk-list govuk-list--bullet">
-            <li>@{
-                request.journey.taxRegime match {
-                    case TaxRegime.Epaye => Messages.NotEligible.`your Accounts Office reference...`.show
-                    case TaxRegime.Vat   => Messages.NotEligible.`your VAT number. This is 9 characters, for example, 1233456789`.show
-                }
-            }</li>
-            <li>@{
-                Messages.NotEligible.`your bank details`.show
-            }</li>
-        </ul>
-        <p class="govuk-body govuk-!-font-weight-bold">
-        @{
-            Messages.NotEligible.`We're likely to ask:`.show
-        }
-        </p>
-        <ul class="govuk-list govuk-list--bullet">
-            <li>@{
-                Messages.NotEligible.`what you've done to try to pay the bill`.show
-            }</li>
-            <li>@{
-                Messages.NotEligible.`if you can pay some of the bill now`.show
-            }</li>
-        </ul>
 
-        <p class="govuk-body">
-        @{
-            Messages.NotEligible.`Our opening times are Monday to Friday: 8am to 6pm`.show
-        }
-        </p>
-    </div>
+    @commonIneligibilityPartial(request.journey.taxRegime, appConfig)
 }

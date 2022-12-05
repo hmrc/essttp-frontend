@@ -1,0 +1,58 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.AppConfig
+@import essttp.rootmodel.TaxRegime
+@import play.api.mvc.Request
+@import requests.RequestSupport
+@import messages.Messages
+@import play.twirl.api.Html
+
+@this(requestSupport: RequestSupport)
+
+@(taxRegime: TaxRegime, appConfig: AppConfig)(implicit request: Request[_])
+
+@import requestSupport._
+
+<div id="common-eligibility">
+
+   <p class="govuk-body">@{Html(Messages.NotEligible.`For further support you can contact the Payment Support Service on 0300 200 3835 to speak to an advisor.`.show)}</p>
+
+  <h2 class="govuk-heading-m">@{Messages.NotEligible.`If you need extra support`.show}</h2>
+  <p class="govuk-body">@{Html(Messages.NotEligible.`Find out the different ways to deal with HMRC...`(appConfig.Urls.extraSupportUrl).show)}</p>
+  <p class="govuk-body">@{Html(Messages.NotEligible.`You can also use Relay UK...`(appConfig.Urls.relayUrl).show)}</p>
+  <p class="govuk-body">@{Html(Messages.NotEligible.`If you are outside the UK...`.show)}</p>
+
+  <h2 class="govuk-heading-m">@{Messages.NotEligible.`Before you call, make sure you have:`.show}</h2>
+  <ul class="govuk-list govuk-list--bullet">
+      <li>@{
+        taxRegime match {
+          case TaxRegime.Epaye => Messages.NotEligible.`your Accounts Office reference...`.show
+          case TaxRegime.Vat   => Messages.NotEligible.`your VAT number. This is 9 characters, for example, 1233456789`.show
+        }
+      }
+      <li>@{Messages.NotEligible.`your bank details`.show}</li>
+  </ul>
+
+  <h2 class="govuk-heading-m">@{Messages.NotEligible.`We're likely to ask:`.show}</h2>
+  <ul class="govuk-list govuk-list--bullet">
+      <li>@{Messages.NotEligible.`what you've done to try to pay the bill`.show}</li>
+      <li>@{Messages.NotEligible.`if you can pay some of the bill now`.show}</li>
+  </ul>
+
+  <p class="govuk-body">@{Messages.NotEligible.`Our opening times are Monday to Friday: 8am to 6pm`.show}</p>
+
+</div>
