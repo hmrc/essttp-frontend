@@ -35,7 +35,8 @@ object JsonUtils {
           case head :: tail =>
             j.value.get(head) match {
               case None =>
-                sys.error(s"Could not find value for field $head in path ${fieldPath.mkString(".")}")
+                sys.error(s"Could not find value for field $head in path ${fieldPath.mkString(".")}. " +
+                  s"Found fields [${j.value.keys.mkString(", ")}]")
 
               case Some(_) =>
                 tail match {

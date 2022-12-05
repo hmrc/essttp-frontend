@@ -21,10 +21,11 @@ import essttp.rootmodel.{IsEmailAddressRequired, TaxRegime}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.http.Status
+import play.api.libs.json.{JsBoolean, JsObject, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import testsupport.ItSpec
+import testsupport.{ItSpec, JsonUtils}
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.EssttpBackend
@@ -48,58 +49,90 @@ class TermsAndConditionsControllerSpec extends ItSpec {
       case (regime, origin, taxRegime) =>
 
         "GET /terms-and-conditions should" - {
-          s"[$regime journey] return 200 and the terms and conditions page" in {
-            stubCommonActions()
-            EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto, origin)()
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-            val result: Future[Result] = controller.termsAndConditions(fakeRequest)
-            val pageContent: String = contentAsString(result)
-            val doc: Document = Jsoup.parse(pageContent)
+            def test(stubActions: () => Unit)(extraContentChecks: Document => Unit): Unit = {
+              stubActions()
 
-            RequestAssertions.assertGetRequestOk(result)
-            ContentAssertions.commonPageChecks(
-              doc,
-              expectedH1              = TermsAndConditionsPage.expectedH1,
-              shouldBackLinkBePresent = true,
-              expectedSubmitUrl       = Some(routes.TermsAndConditionsController.termsAndConditionsSubmit.url),
-              regimeBeingTested       = Some(taxRegime)
-            )
+              val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+              val result: Future[Result] = controller.termsAndConditions(fakeRequest)
+              val pageContent: String = contentAsString(result)
+              val doc: Document = Jsoup.parse(pageContent)
 
-            val taxRegimeAddress: String = taxRegime match {
-              case TaxRegime.Epaye => "DM PAYE HM Revenue and Customs BX9 1EW United Kingdom"
-              case TaxRegime.Vat   => "HMRC Direct Debit Support Team VAT 2 DMB 612 BX5 5AB United Kingdom"
+              RequestAssertions.assertGetRequestOk(result)
+
+              ContentAssertions.commonPageChecks(
+                doc,
+                expectedH1              = TermsAndConditionsPage.expectedH1,
+                shouldBackLinkBePresent = true,
+                expectedSubmitUrl       = Some(routes.TermsAndConditionsController.termsAndConditionsSubmit.url),
+                regimeBeingTested       = Some(taxRegime)
+              )
+
+              val taxRegimeAddress: String = taxRegime match {
+                case TaxRegime.Epaye => "DM PAYE HM Revenue and Customs BX9 1EW United Kingdom"
+                case TaxRegime.Vat   => "HMRC Direct Debit Support Team VAT 2 DMB 612 BX5 5AB United Kingdom"
+              }
+
+              ContentAssertions.assertListOfContent(
+                elements = doc.select(".govuk-body")
+              )(
+                  expectedContent = List(
+                    "We can cancel this agreement if you:",
+                    "If we cancel this agreement, you will need to pay the total amount you owe straight away.",
+                    "We can use any refunds you might get to pay off your tax charges.",
+                    "Contact HMRC on 0300 123 1813 if anything changes that you think affects your payment plan.",
+                    "You can write to us about your Direct Debit:",
+                    taxRegimeAddress,
+                    "I agree to the terms and conditions of this payment plan. I confirm that this is the earliest I am able to settle this debt."
+                  )
+                )
+
+              ContentAssertions.assertListOfContent(
+                elements = doc.select(".govuk-list--bullet").select("li")
+              )(
+                  expectedContent = List(
+                    "pay late or miss a payment",
+                    "pay another tax bill late",
+                    "do not submit your future tax returns on time"
+                  )
+                )
+
+              doc.select(".govuk-heading-m").text() shouldBe "Declaration"
+              doc.select(".govuk-button").text() shouldBe "Agree and continue"
+
+              extraContentChecks(doc)
             }
 
-            ContentAssertions.assertListOfContent(
-              elements = doc.select(".govuk-body")
-            )(
-                expectedContent = List(
-                  "We can cancel this agreement if you:",
-                  "If we cancel this agreement, you will need to pay the total amount you owe straight away.",
-                  "We can use any refunds you might get to pay off your tax charges.",
-                  "Contact HMRC on 0300 123 1813 if anything changes that you think affects your payment plan.",
-                  "You can write to us about your Direct Debit:",
-                  taxRegimeAddress,
-                  "I agree to the terms and conditions of this payment plan. I confirm that this is the earliest I am able to settle this debt."
-                )
-              )
+          s"[$regime journey] return 200 and the terms and conditions page when an email address is required" in {
+            test { () =>
+              stubCommonActions()
+              EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto, origin)()
+              ()
+            }{ doc =>
+              doc.select("form").hasClass("prevent-multiple-submits") shouldBe false
 
-            ContentAssertions.assertListOfContent(
-              elements = doc.select(".govuk-list--bullet").select("li")
-            )(
-                expectedContent = List(
-                  "pay late or miss a payment",
-                  "pay another tax bill late",
-                  "do not submit your future tax returns on time"
-                )
-              )
-
-            doc.select(".govuk-heading-m").text() shouldBe "Declaration"
-            doc.select(".govuk-button").text() shouldBe "Agree and continue"
-
-            ContentAssertions.formSubmitShouldDisableSubmitButton(doc)
+              val button = doc.select("form > .govuk-button")
+              button.hasClass("disable-on-click") shouldBe false
+              button.hasAttr("data-prevent-double-click") shouldBe false
+              ()
+            }
           }
+
+          s"[$regime journey] return 200 and the terms and conditions page when an email address is not required" in {
+            test { () =>
+              stubCommonActions()
+              EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto, origin)(
+                JsonUtils.replace(
+                  List("ConfirmedDirectDebitDetails", "eligibilityCheckResult", "regimeDigitalCorrespondence"),
+                  JsBoolean(false)
+                )(
+                    Json.parse(JourneyJsonTemplates.`Confirmed Direct Debit Details`(origin)).as[JsObject]
+                  ).toString
+              )
+              ()
+            }(ContentAssertions.formSubmitShouldDisableSubmitButton)
+          }
+
         }
 
         "POST /terms-and-conditions should" - {

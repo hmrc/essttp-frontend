@@ -17,13 +17,11 @@
 package controllers
 
 import actions.Actions
+import actionsmodel.EligibleJourneyRequest
 import config.AppConfig
-import controllers.JourneyFinalStateCheck.finalStateCheck
+import controllers.JourneyFinalStateCheck.{finalStateCheck, finalStateCheckF}
 import essttp.journey.model.Journey
-import essttp.journey.model.Journey.Stages
 import essttp.rootmodel.IsEmailAddressRequired
-import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
-import essttp.utils.Errors
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -47,7 +45,7 @@ class TermsAndConditionsController @Inject() (
   val termsAndConditions: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
       case j: Journey.BeforeConfirmedDirectDebitDetails => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
-      case j: Journey.AfterConfirmedDirectDebitDetails  => finalStateCheck(j, Ok(views.termsAndConditions(j.taxRegime)))
+      case j: Journey.AfterConfirmedDirectDebitDetails  => finalStateCheck(j, Ok(views.termsAndConditions(j.taxRegime, isEmailAddressRequired(request))))
     }
   }
 
@@ -55,18 +53,16 @@ class TermsAndConditionsController @Inject() (
     request.journey match {
       case j: Journey.BeforeConfirmedDirectDebitDetails => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF(j)
       case j: Journey.AfterConfirmedDirectDebitDetails =>
-        val journeyEligibilityCheckResult: EligibilityCheckResult = j match {
-          case _: Stages.SubmittedArrangement =>
-            Errors.throwServerErrorException("Journey is in completed state, terms and conditions cannot be resubmitted.")
-          case j1: Journey.AfterEligibilityChecked => j1.eligibilityCheckResult
-        }
-
-        val isEmailAddressRequired = appConfig.emailJourneyEnabled && journeyEligibilityCheckResult.regimeDigitalCorrespondence.exists(_.value)
-
-        journeyService
-          .updateAgreedTermsAndConditions(request.journeyId, IsEmailAddressRequired(isEmailAddressRequired))
-          .map { updatedJourney => Redirect(Routing.next(updatedJourney)) }
+        finalStateCheckF(
+          j,
+          journeyService
+            .updateAgreedTermsAndConditions(request.journeyId, IsEmailAddressRequired(isEmailAddressRequired(request)))
+            .map { updatedJourney => Redirect(Routing.next(updatedJourney)) }
+        )
     }
   }
+
+  private def isEmailAddressRequired(request: EligibleJourneyRequest[_]): Boolean =
+    appConfig.emailJourneyEnabled && request.eligibilityCheckResult.regimeDigitalCorrespondence.exists(_.value)
 
 }

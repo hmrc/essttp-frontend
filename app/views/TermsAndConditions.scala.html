@@ -28,7 +28,7 @@
         formWithCSRF: FormWithCSRF,
         requestSupport: RequestSupport)
 
-@(taxRegime: TaxRegime)(implicit request: Request[_])
+@(taxRegime: TaxRegime, isEmailAddressRequired: Boolean)(implicit request: Request[_])
 
 @import requestSupport._
 
@@ -56,12 +56,14 @@
 
   <p class="govuk-body">@{Messages.TermsAndConditions.`I agree to the terms and conditions...`.show}</p>
 
-    @formWithCSRF(action = routes.TermsAndConditionsController.termsAndConditionsSubmit, Symbol("class") -> "prevent-multiple-submits") {
+    @formWithCSRF(
+        action = routes.TermsAndConditionsController.termsAndConditionsSubmit,
+        (if(isEmailAddressRequired) List.empty else List(Symbol("class") -> "prevent-multiple-submits")): _*) {
         @govukButton(
             Button(
                 content = Text(Messages.TermsAndConditions.`Agree and continue`.show),
-                preventDoubleClick = true,
-                classes = "disable-on-click"
+                preventDoubleClick = !isEmailAddressRequired,
+                classes = if(isEmailAddressRequired) "" else "disable-on-click"
             )
         )
     }
