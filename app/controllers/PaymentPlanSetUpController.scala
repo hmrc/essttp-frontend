@@ -18,11 +18,12 @@ package controllers
 
 import _root_.actions.Actions
 import actionsmodel.EligibleJourneyRequest
+import config.AppConfig
 import essttp.journey.model.Journey.Stages
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel.AmountInPence
 import essttp.utils.Errors
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.Views
@@ -32,9 +33,10 @@ import java.time.LocalDate
 
 @Singleton
 class PaymentPlanSetUpController @Inject() (
-    as:    Actions,
-    mcc:   MessagesControllerComponents,
-    views: Views
+    as:        Actions,
+    mcc:       MessagesControllerComponents,
+    views:     Views,
+    appConfig: AppConfig
 ) extends FrontendController(mcc)
   with Logging {
 
@@ -55,7 +57,7 @@ class PaymentPlanSetUpController @Inject() (
     }
   }
 
-  def displayConfirmationPage(journey: Journey.Stages.SubmittedArrangement)(implicit request: Request[_]): Result = {
+  def displayConfirmationPage(journey: Journey.Stages.SubmittedArrangement)(implicit request: EligibleJourneyRequest[_]): Result = {
     val firstPaymentDay = journey.selectedPaymentPlan.collections.regularCollections
       .sortBy(_.dueDate.value)
       .headOption.getOrElse(Errors.throwServerErrorException("There are no regular collection dates, this should never happen..."))
@@ -66,15 +68,13 @@ class PaymentPlanSetUpController @Inject() (
       case UpfrontPaymentAnswers.NoUpfrontPayment          => false
     }
 
-    val regimeDigitalCorrespondence: Boolean = journey.eligibilityCheckResult.regimeDigitalCorrespondence.exists(_.value)
-
     Ok(
       views.paymentPlanSetUpPage(
-        customerPaymentReference    = journey.arrangementResponse.customerReference.value,
-        paymentDay                  = firstPaymentDay,
-        hasUpfrontPayment           = hasUpfrontPayment,
-        taxRegime                   = journey.taxRegime,
-        regimeDigitalCorrespondence = regimeDigitalCorrespondence
+        customerPaymentReference = journey.arrangementResponse.customerReference.value,
+        paymentDay               = firstPaymentDay,
+        hasUpfrontPayment        = hasUpfrontPayment,
+        taxRegime                = journey.taxRegime,
+        wasEmailAddressRequired  = request.isEmailAddressRequired(appConfig)
       )
     )
   }

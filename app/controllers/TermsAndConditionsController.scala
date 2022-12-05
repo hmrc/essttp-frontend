@@ -17,7 +17,6 @@
 package controllers
 
 import actions.Actions
-import actionsmodel.EligibleJourneyRequest
 import config.AppConfig
 import controllers.JourneyFinalStateCheck.{finalStateCheck, finalStateCheckF}
 import essttp.journey.model.Journey
@@ -44,8 +43,11 @@ class TermsAndConditionsController @Inject() (
 
   val termsAndConditions: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
-      case j: Journey.BeforeConfirmedDirectDebitDetails => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
-      case j: Journey.AfterConfirmedDirectDebitDetails  => finalStateCheck(j, Ok(views.termsAndConditions(j.taxRegime, isEmailAddressRequired(request))))
+      case j: Journey.BeforeConfirmedDirectDebitDetails =>
+        JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
+
+      case j: Journey.AfterConfirmedDirectDebitDetails =>
+        finalStateCheck(j, Ok(views.termsAndConditions(j.taxRegime, request.isEmailAddressRequired(appConfig))))
     }
   }
 
@@ -56,13 +58,10 @@ class TermsAndConditionsController @Inject() (
         finalStateCheckF(
           j,
           journeyService
-            .updateAgreedTermsAndConditions(request.journeyId, IsEmailAddressRequired(isEmailAddressRequired(request)))
+            .updateAgreedTermsAndConditions(request.journeyId, IsEmailAddressRequired(request.isEmailAddressRequired(appConfig)))
             .map { updatedJourney => Redirect(Routing.next(updatedJourney)) }
         )
     }
   }
-
-  private def isEmailAddressRequired(request: EligibleJourneyRequest[_]): Boolean =
-    appConfig.emailJourneyEnabled && request.eligibilityCheckResult.regimeDigitalCorrespondence.exists(_.value)
 
 }
