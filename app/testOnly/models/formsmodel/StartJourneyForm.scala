@@ -143,7 +143,7 @@ object StartJourneyForm {
         "signInAs" -> signInMapping,
         "enrolments" -> enrolmentsMapping,
         "origin" -> originMapping,
-        "eligibilityErrors" -> seq(enumeratum.Forms.enum(EligibilityErrors)),
+        "eligibilityErrors" -> seq(enumeratum.Forms.enumMapping(EligibilityErrors)),
         "" -> Forms.of(debtTotalAmountFormat),
         "interestAmount" -> interestAmountMapping,
         "" -> Forms.of(taxReferenceFormat),

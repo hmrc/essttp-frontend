@@ -21,10 +21,11 @@ import essttp.rootmodel.TaxRegime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import org.scalatest.Assertion
+import play.api.libs.json.{JsBoolean, JsObject, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import testsupport.ItSpec
+import testsupport.{ItSpec, JsonUtils}
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.ContentAssertions.assertKeyAndValue
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
@@ -50,8 +51,9 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
       s"[taxRegime: ${taxRegime.toString}] GET /payment-plan-set-up should" - {
 
           def test(
-              stubActions:       () => Unit,
-              hasUpfrontPayment: Boolean
+              stubActions:            () => Unit,
+              hasUpfrontPayment:      Boolean,
+              isEmailAddressRequired: Boolean
           ): Unit = {
             stubActions()
 
@@ -86,20 +88,23 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
 
             subheadings(0).text() shouldBe "What happens next"
             paragraphs(0).text() shouldBe "HMRC will send you a letter within 5 working days with your payment dates."
-            paragraphs(1).text() shouldBe "We will send a secure message with payment due dates to your business tax account inbox within 24 hours."
+
+            if (isEmailAddressRequired) paragraphs(1).text() shouldBe "We will send a secure message with payment due dates to your business tax account inbox within 24 hours."
+
+            val emailParagraphOffset = if (isEmailAddressRequired) 0 else -1
 
             if (hasUpfrontPayment) {
-              paragraphs(2).text() shouldBe "Your upfront payment will be taken within 10 working days. Your next payment will be taken on 28th August 2022 or the next working day."
+              paragraphs(emailParagraphOffset + 2).text() shouldBe "Your upfront payment will be taken within 10 working days. Your next payment will be taken on 28th August 2022 or the next working day."
             } else {
-              paragraphs(2).text() shouldBe "Your next payment will be taken on 28th August 2022 or the next working day."
+              paragraphs(emailParagraphOffset + 2).text() shouldBe "Your next payment will be taken on 28th August 2022 or the next working day."
             }
-            paragraphs(3).text() shouldBe "Your tax account will be updated with your payment plan within 24 hours."
-            paragraphs(4).text() shouldBe "View your payment plan"
+            paragraphs(emailParagraphOffset + 3).text() shouldBe "Your tax account will be updated with your payment plan within 24 hours."
+            paragraphs(emailParagraphOffset + 4).text() shouldBe "View your payment plan"
 
             doc.select("#print-plan-link").attr("href") shouldBe PageUrls.printPlanUrl
 
             subheadings(1).text() shouldBe "If you need to change your payment plan"
-            paragraphs(5).text() shouldBe "Call the HMRC Helpline on 0300 123 1813."
+            paragraphs(emailParagraphOffset + 5).text() shouldBe "Call the HMRC Helpline on 0300 123 1813."
 
             doc.select(".govuk-button").text() shouldBe "Go to tax account"
 
@@ -119,7 +124,8 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
               EssttpBackend.SubmitArrangement.findJourney(origin, testCrypto)()
               ()
             },
-            hasUpfrontPayment = true
+            hasUpfrontPayment      = true,
+            isEmailAddressRequired = true
           )
         }
 
@@ -132,7 +138,27 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
               )
               ()
             },
-            hasUpfrontPayment = false
+            hasUpfrontPayment      = false,
+            isEmailAddressRequired = true
+          )
+        }
+
+        "return the confirmation page with correct content when an email address wasn't required" in {
+          test(
+            { () =>
+              stubCommonActions()
+              EssttpBackend.SubmitArrangement.findJourney(origin, testCrypto)(
+                JsonUtils.replace(
+                  List("SubmittedArrangement", "eligibilityCheckResult", "regimeDigitalCorrespondence"),
+                  JsBoolean(false)
+                )(
+                    Json.parse(JourneyJsonTemplates.`Arrangement Submitted - with upfront payment`(origin)).as[JsObject]
+                  ).toString
+              )
+              ()
+            },
+            hasUpfrontPayment      = true,
+            isEmailAddressRequired = false
           )
         }
       }
@@ -240,4 +266,81 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
           }
       }
     }
+}
+
+class PaymentPlanSetUpControllerEmailDisabledSpec extends ItSpec {
+
+  override lazy val configOverrides = Map("features.email-journey" -> false)
+
+  private val controller: PaymentPlanSetUpController = app.injector.instanceOf[PaymentPlanSetUpController]
+
+  "When email is disabled" - {
+
+    List(
+      Origins.Epaye.Bta,
+      Origins.Vat.Bta
+    ).foreach { origin =>
+        val taxRegime = origin.taxRegime
+
+        s"[taxRegime: ${taxRegime.toString}] GET /payment-plan-set-up should" - {
+
+            def test(
+                stubActions: () => Unit
+            ): Unit = {
+              stubActions()
+
+              val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+              val result: Future[Result] = taxRegime match {
+                case TaxRegime.Epaye => controller.epayePaymentPlanSetUp(fakeRequest)
+                case TaxRegime.Vat   => controller.vatPaymentPlanSetUp(fakeRequest)
+              }
+              val pageContent: String = contentAsString(result)
+              val doc: Document = Jsoup.parse(pageContent)
+
+              RequestAssertions.assertGetRequestOk(result)
+              ContentAssertions.commonPageChecks(
+                doc,
+                expectedH1              = "Your payment plan is set up",
+                shouldBackLinkBePresent = false,
+                expectedSubmitUrl       = None,
+                regimeBeingTested       = Some(taxRegime)
+              )
+
+              val subheadings = doc.select(".govuk-heading-m").asScala.toList
+              val paragraphs = doc.select(".govuk-body").asScala.toList
+
+              subheadings(0).text() shouldBe "What happens next"
+              paragraphs(0).text() shouldBe "HMRC will send you a letter within 5 working days with your payment dates."
+              paragraphs(1).text() shouldBe "Your upfront payment will be taken within 10 working days. Your next payment will be taken on 28th August 2022 or the next working day."
+              ()
+            }
+
+          "not display the email text when regimeDigitalCorrespondence=true" in {
+            test { () =>
+              stubCommonActions()
+              EssttpBackend.SubmitArrangement.findJourney(origin, testCrypto)()
+              ()
+            }
+          }
+
+          "not display the email text when regimeDigitalCorrespondence=false" in {
+            test { () =>
+              stubCommonActions()
+              EssttpBackend.SubmitArrangement.findJourney(origin, testCrypto)(
+                JsonUtils.replace(
+                  List("SubmittedArrangement", "eligibilityCheckResult", "regimeDigitalCorrespondence"),
+                  JsBoolean(false)
+                )(
+                    Json.parse(JourneyJsonTemplates.`Arrangement Submitted - with upfront payment`(origin)).as[JsObject]
+                  ).toString
+              )
+              ()
+            }
+          }
+
+        }
+      }
+  }
+
 }

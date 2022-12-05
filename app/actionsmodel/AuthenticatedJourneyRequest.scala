@@ -16,6 +16,7 @@
 
 package actionsmodel
 
+import config.AppConfig
 import essttp.bars.model.NumberOfBarsVerifyAttempts
 import essttp.journey.model.{Journey, JourneyId}
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
@@ -69,3 +70,14 @@ final class EligibleJourneyRequest[A](
     val numberOfBarsVerifyAttempts: NumberOfBarsVerifyAttempts,
     val eligibilityCheckResult:     EligibilityCheckResult
 ) extends AuthenticatedJourneyRequest[A](request, enrolments, journey, ggCredId)
+
+object EligibleJourneyRequest {
+
+  implicit class EligibleJourneyRequestOps[A](private val e: EligibleJourneyRequest[A]) extends AnyVal {
+
+    def isEmailAddressRequired(appConfig: AppConfig): Boolean =
+      appConfig.emailJourneyEnabled && e.eligibilityCheckResult.regimeDigitalCorrespondence.exists(_.value)
+
+  }
+
+}
