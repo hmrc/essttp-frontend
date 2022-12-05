@@ -114,4 +114,35 @@ object ContentAssertions extends RichMatchers {
     ()
   }
 
+  def commonIneligibilityTextCheck(doc: Document, taxRegime: TaxRegime) = {
+    val commonEligibilityWrapper = doc.select("#common-eligibility")
+    val govukBodyElements = commonEligibilityWrapper.select(".govuk-body").asScala.toList
+    govukBodyElements(0).text() shouldBe "For further support you can contact the Payment Support Service on 0300 200 3835 to speak to an advisor."
+
+    val subheadings = commonEligibilityWrapper.select("h2").asScala.toList
+
+    subheadings(0).text shouldBe "If you need extra support"
+    govukBodyElements(1).html() shouldBe "Find out the different ways to <a href=\"https://www.gov.uk/get-help-hmrc-extra-support\" class=\"govuk-link\">deal with HMRC if you need some help</a>."
+    govukBodyElements(2).html() shouldBe "You can also use <a href=\"https://www.relayuk.bt.com/\" class=\"govuk-link\">Relay UK</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>."
+    govukBodyElements(3).html() shouldBe "If you are outside the UK: <strong>+44 2890 538 192</strong>"
+
+    subheadings(1).text shouldBe "Before you call, make sure you have:"
+    val bulletLists = commonEligibilityWrapper.select(".govuk-list").asScala.toList
+    val beforeYouCallList = bulletLists(0).select("li").asScala.toList
+    beforeYouCallList(0).text() shouldBe (
+      taxRegime match {
+        case TaxRegime.Epaye => "your Accounts Office reference. This is 13 characters, for example, 123PX00123456"
+        case TaxRegime.Vat   => "your VAT number. This is 9 characters, for example, 123456789"
+      }
+    )
+    beforeYouCallList(1).text() shouldBe "your bank details"
+
+    subheadings(2).text() shouldBe "We’re likely to ask:"
+    val likelyToAskList = bulletLists(1).select("li").asScala.toList
+    likelyToAskList(0).text() shouldBe "what you’ve done to try to pay the bill"
+    likelyToAskList(1).text() shouldBe "if you can pay some of the bill now"
+
+    govukBodyElements(4).text() shouldBe "Our opening times are Monday to Friday: 8am to 6pm (we are closed on bank holidays)"
+  }
+
 }

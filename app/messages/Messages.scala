@@ -190,24 +190,24 @@ object Messages {
 
   object NotEligible {
 
-    val `If you need to speak to an adviser call us...`: Message = Message(
-      english = "If you need to speak to an adviser call us on <strong>0300 200 3835</strong> at the Business Support Service to talk about your payment options.",
-      welsh   = "Os oes angen i chi siarad ag ymgynghorydd, ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEF ar <strong>0300 200 1900</strong> i drafod eich opsiynau talu."
+    val `For further support you can contact the Payment Support Service on 0300 200 3835 to speak to an advisor.`: Message = Message(
+      english = "For further support you can contact the Payment Support Service on <strong>0300 200 3835</strong> to speak to an advisor.",
+      welsh   = "I gael cymorth pellach, gallwch gysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEM ar <strong>0300 200 1900</strong i siarad ag ymgynghorydd."
     )
 
-    val `If you cannot use speech recognition software`: Message = Message(
-      english = "If you cannot use speech recognition software",
-      welsh   = "Os na allwch ddefnyddio meddalwedd adnabod lleferydd"
+    val `If you need extra support`: Message = Message(
+      english = "If you need extra support",
+      welsh   = "Os oes angen cymorth ychwanegol arnoch chi"
     )
 
-    def extraSupportLink(link: String): Message = Message(
-      english = s"""Find out how to <a href="${link}" class="govuk-link">deal with HMRC if you need extra support</a>.""",
-      welsh   = s"""Dysgwch sut i <a href="${link}" class="govuk-link">ddelio â CThEM os oes angen cymorth ychwanegol arnoch</a>."""
+    def `Find out the different ways to deal with HMRC...`(link: String): Message = Message(
+      english = s"""Find out the different ways to <a href="$link" class="govuk-link">deal with HMRC if you need some help</a>.""",
+      welsh   = s"""Dysgwch am y ffyrdd gwahanol o <a href="$link" class="govuk-link">ddelio â CThEF os oes angen help arnoch chi</a>."""
     )
 
-    def relayLink(link: String): Message = Message(
-      english = s"""You can also use <a href="${link}" class="govuk-link">Relay UK</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>.""",
-      welsh   = s"""Gallwch hefyd defnyddio <a href="${link}" class="govuk-link">Relay UK</a> os na allwch glywed na siarad dros y ffôn: deialwch <strong>18001</strong> ac yna <strong>0345 300 3900</strong>."""
+    def `You can also use Relay UK...`(link: String): Message = Message(
+      english = s"""You can also use <a href="$link" class="govuk-link">Relay UK</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>.""",
+      welsh   = s"""Gallwch hefyd ddefnyddio <a href="$link" class="govuk-link">Relay UK</a> os na allwch glywed na siarad dros y ffôn: deialwch <strong>18001</strong> ac yna <strong>0345 300 3900</strong>. Sylwer – dim ond galwadau ffôn Saesneg eu hiaith y mae Relay UK yn gallu ymdrin â nhw."""
     )
 
     val `If you are outside the UK...`: Message = Message(
@@ -267,11 +267,6 @@ object Messages {
     def `Your overdue amount must have a due date that is less than ... days ago ...`(maxAgeOfDebtInDays: Int): Message = Message(
       english = s"Your overdue amount must have a due date that is less than ${maxAgeOfDebtInDays.toString} days ago for you to be eligible for a payment plan online. You may still be able to set up a plan over the phone.",
       welsh   = s"Mae’n rhaid i’ch swm gorddyledus fod â dyddiad dyledus sy’n llai na ${maxAgeOfDebtInDays.toString} diwrnod yn ôl er mwyn i chi fod yn gymwys ar gyfer cynllun talu ar-lein. Mae’n bosibl y gallwch drefnu cynllun dros y ffôn o hyd."
-    )
-
-    val `For further support you can contact the Payment Support Service on 0300 200 3835 to speak to an advisor.`: Message = Message(
-      english = "For further support you can contact the Payment Support Service on <strong>0300 200 3835</strong> to speak to an advisor.",
-      welsh   = "I gael cymorth pellach, gallwch gysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEM ar <strong>0300 200 1900</strong i siarad ag ymgynghorydd."
     )
 
     val `You already have a payment plan with HMRC`: Message = Message(

@@ -52,29 +52,7 @@ class NotEnrolledControllerSpec extends ItSpec {
       page.select(".govuk-body").asScala.toList(0).text() shouldBe "You are not eligible for an online payment plan because you need to enrol for PAYE Online. Find out how to enrol."
       page.select("#how-to-enrol-link").attr("href") shouldBe "https://www.gov.uk/paye-online/enrol"
 
-      val commonEligibilityWrapper = page.select("#common-eligibility")
-      val govukBodyElements = commonEligibilityWrapper.select(".govuk-body").asScala.toList
-      govukBodyElements(0).text() shouldBe "If you need to speak to an adviser call us on 0300 200 3835 at the Business Support Service to talk about your payment options."
-
-      val detailsReveal = commonEligibilityWrapper.select(".govuk-details")
-      detailsReveal.select(".govuk-details__summary-text").text() shouldBe "If you cannot use speech recognition software"
-      val detailsRevealText = detailsReveal.select(".govuk-details__text").select(".govuk-body").asScala.toList
-      detailsRevealText(0).html() shouldBe "Find out how to <a href=\"https://www.gov.uk/get-help-hmrc-extra-support\" class=\"govuk-link\">deal with HMRC if you need extra support</a>."
-      detailsRevealText(1).html() shouldBe "You can also use <a href=\"https://www.relayuk.bt.com/\" class=\"govuk-link\">Relay UK</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>."
-      detailsRevealText(2).html() shouldBe "If you are outside the UK: <strong>+44 2890 538 192</strong>"
-      govukBodyElements(4).text() shouldBe "Before you call, make sure you have:"
-
-      val bulletLists = commonEligibilityWrapper.select(".govuk-list").asScala.toList
-      val beforeYouCallList = bulletLists(0).select("li").asScala.toList
-      beforeYouCallList(0).text() shouldBe "your Accounts Office reference. This is 13 characters, for example, 123PX00123456"
-      beforeYouCallList(1).text() shouldBe "your bank details"
-
-      govukBodyElements(5).text() shouldBe "We’re likely to ask:"
-      val likelyToAskList = bulletLists(1).select("li").asScala.toList
-      likelyToAskList(0).text() shouldBe "what you’ve done to try to pay the bill"
-      likelyToAskList(1).text() shouldBe "if you can pay some of the bill now"
-
-      govukBodyElements(6).text() shouldBe "Our opening times are Monday to Friday: 8am to 6pm (we are closed on bank holidays)"
+      ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Epaye)
     }
   }
 
@@ -100,29 +78,7 @@ class NotEnrolledControllerSpec extends ItSpec {
       page.select(".govuk-body").asScala.toList(0).text() shouldBe "You are not eligible for an online payment plan because you need to register for VAT Online. Find out how to register."
       page.select("#how-to-enrol-link").attr("href") shouldBe "https://www.gov.uk/register-for-vat"
 
-      val commonEligibilityWrapper = page.select("#common-eligibility")
-      val govukBodyElements = commonEligibilityWrapper.select(".govuk-body").asScala.toList
-      govukBodyElements(0).text() shouldBe "If you need to speak to an adviser call us on 0300 200 3835 at the Business Support Service to talk about your payment options."
-
-      val detailsReveal = commonEligibilityWrapper.select(".govuk-details")
-      detailsReveal.select(".govuk-details__summary-text").text() shouldBe "If you cannot use speech recognition software"
-      val detailsRevealText = detailsReveal.select(".govuk-details__text").select(".govuk-body").asScala.toList
-      detailsRevealText(0).html() shouldBe "Find out how to <a href=\"https://www.gov.uk/get-help-hmrc-extra-support\" class=\"govuk-link\">deal with HMRC if you need extra support</a>."
-      detailsRevealText(1).html() shouldBe "You can also use <a href=\"https://www.relayuk.bt.com/\" class=\"govuk-link\">Relay UK</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>."
-      detailsRevealText(2).html() shouldBe "If you are outside the UK: <strong>+44 2890 538 192</strong>"
-      govukBodyElements(4).text() shouldBe "Before you call, make sure you have:"
-
-      val bulletLists = commonEligibilityWrapper.select(".govuk-list").asScala.toList
-      val beforeYouCallList = bulletLists(0).select("li").asScala.toList
-      beforeYouCallList(0).text() shouldBe "your VAT number. This is 9 characters, for example, 123456789"
-      beforeYouCallList(1).text() shouldBe "your bank details"
-
-      govukBodyElements(5).text() shouldBe "We’re likely to ask:"
-      val likelyToAskList = bulletLists(1).select("li").asScala.toList
-      likelyToAskList(0).text() shouldBe "what you’ve done to try to pay the bill"
-      likelyToAskList(1).text() shouldBe "if you can pay some of the bill now"
-
-      govukBodyElements(6).text() shouldBe "Our opening times are Monday to Friday: 8am to 6pm (we are closed on bank holidays)"
+      ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Vat)
     }
   }
 }

@@ -44,38 +44,6 @@ class IneligibleControllerSpec extends ItSpec {
   def assertIneligiblePageLeadingP1(page: Document, leadingP1: String): Assertion =
     page.select(".govuk-body").asScala.toList(0).text() shouldBe leadingP1
 
-  def assertCommonEligibilityContent(page: Document, taxRegime: TaxRegime): Assertion = {
-
-    val taxRegimeSpecificContent = taxRegime match {
-      case TaxRegime.Epaye => "your Accounts Office reference. This is 13 characters, for example, 123PX00123456"
-      case TaxRegime.Vat   => "your VAT number. This is 9 characters, for example, 123456789"
-    }
-
-    val commonEligibilityWrapper = page.select("#common-eligibility")
-    val govukBodyElements = commonEligibilityWrapper.select(".govuk-body").asScala.toList
-    govukBodyElements(0).text() shouldBe "For further support you can contact the Payment Support Service on 0300 200 3835 to speak to an advisor."
-
-    val detailsReveal = commonEligibilityWrapper.select(".govuk-details")
-    detailsReveal.select(".govuk-details__summary-text").text() shouldBe "If you cannot use speech recognition software"
-    val detailsRevealText = detailsReveal.select(".govuk-details__text").select(".govuk-body").asScala.toList
-    detailsRevealText(0).html() shouldBe "Find out how to <a href=\"https://www.gov.uk/get-help-hmrc-extra-support\" class=\"govuk-link\">deal with HMRC if you need extra support</a>."
-    detailsRevealText(1).html() shouldBe "You can also use <a href=\"https://www.relayuk.bt.com/\" class=\"govuk-link\">Relay UK</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>."
-    detailsRevealText(2).html() shouldBe "If you are outside the UK: <strong>+44 2890 538 192</strong>"
-
-    govukBodyElements(4).text() shouldBe "Before you call, make sure you have:"
-    val bulletLists = commonEligibilityWrapper.select(".govuk-list").asScala.toList
-    val beforeYouCallList = bulletLists(0).select("li").asScala.toList
-    beforeYouCallList(0).text() shouldBe taxRegimeSpecificContent
-    beforeYouCallList(1).text() shouldBe "your bank details"
-
-    govukBodyElements(5).text() shouldBe "We’re likely to ask:"
-    val likelyToAskList = bulletLists(1).select("li").asScala.toList
-    likelyToAskList(0).text() shouldBe "what you’ve done to try to pay the bill"
-    likelyToAskList(1).text() shouldBe "if you can pay some of the bill now"
-
-    govukBodyElements(6).text() shouldBe "Our opening times are Monday to Friday: 8am to 6pm (we are closed on bank holidays)"
-  }
-
   "IneligibleController should display" - {
 
     Seq[(TaxRegime, Origin)]((TaxRegime.Epaye, Origins.Epaye.Bta), (TaxRegime.Vat, Origins.Vat.Bta))
@@ -106,7 +74,7 @@ class IneligibleControllerSpec extends ItSpec {
               page      = page,
               leadingP1 = "You are not eligible for an online payment plan. You may still be able to set up a payment plan over the phone."
             )
-            assertCommonEligibilityContent(page, taxRegime)
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime)
           }
 
           s"${taxRegime.entryName} Debt too large ineligible page correctly" in {
@@ -140,7 +108,7 @@ class IneligibleControllerSpec extends ItSpec {
               page      = page,
               leadingP1 = s"You must owe $expectedAmount or less to be eligible for a payment plan online. You may still be able to set up a plan over the phone."
             )
-            assertCommonEligibilityContent(page, taxRegime)
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime)
           }
 
           s"${taxRegime.entryName} Debt too old ineligible page correctly" in {
@@ -173,7 +141,7 @@ class IneligibleControllerSpec extends ItSpec {
               page      = page,
               leadingP1 = s"Your overdue amount must have a due date that is less than $expectedNumberOfDays days ago for you to be eligible for a payment plan online. You may still be able to set up a plan over the phone."
             )
-            assertCommonEligibilityContent(page, taxRegime)
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime)
           }
 
           s"${taxRegime.entryName} Existing ttp ineligible page correctly" in {
@@ -200,7 +168,7 @@ class IneligibleControllerSpec extends ItSpec {
               page      = page,
               leadingP1 = "You can only have one payment plan at a time."
             )
-            assertCommonEligibilityContent(page, taxRegime)
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime)
           }
 
           s"${taxRegime.entryName} Returns not up to date ineligible page correctly" in {
@@ -235,7 +203,7 @@ class IneligibleControllerSpec extends ItSpec {
               leadingP1 = expectedLeadingContent
             )
 
-            assertCommonEligibilityContent(page, taxRegime)
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime)
             page.select(".govuk-body").asScala.toList(1).text() shouldBe "Go to your tax account to file your tax return."
             if (taxRegime === TaxRegime.Vat) {
               page.select(".govuk-body").asScala.toList(2).text() shouldBe "If you have recently filed your return, your account may take up to 72 hours to be updated before you can set up a payment plan."
