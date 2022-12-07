@@ -48,13 +48,15 @@
 @title = @{
     "Test only starter page"
 }
+
 @eligibilityErrorCheckboxes = @{
     EligibilityErrors.values
             .filterNot(_ === EligibilityErrors.MultipleReasons)
             .map { error =>
         CheckboxItem(
             content = Text(error.entryName),
-            value = error.entryName
+            value = error.entryName,
+            checked = form.data.exists(_._2 === error.entryName)
         )
     }
 }
@@ -73,11 +75,13 @@
         items = Seq(
             CheckboxItem(
                 content = Text("PAYE for Employers"),
-                value = Enrolments.Epaye.entryName
+                value = Enrolments.Epaye.entryName,
+                checked = form.data.exists(formFields => formFields._1.startsWith("enrolments") && formFields._2 === Enrolments.Epaye.entryName)
             ),
             CheckboxItem(
                 content = Text("VAT"),
-                value = Enrolments.Vat.entryName
+                value = Enrolments.Vat.entryName,
+                checked = form.data.exists(formFields => formFields._1.startsWith("enrolments") && formFields._2 === Enrolments.Vat.entryName)
             )
         ),
         classes = "govuk-checkboxes--small"
@@ -101,15 +105,18 @@
     items = Seq(
         RadioItem(
             content = Text("As an Organisation"),
-            value = Some(SignInAs.Organisation.entryName)
+            value = Some(SignInAs.Organisation.entryName),
+            checked = form.data.exists(_._2 === SignInAs.Organisation.entryName)
         ),
         RadioItem(
             content = Text("As an Individual"),
-            value = Some(SignInAs.Individual.entryName)
+            value = Some(SignInAs.Individual.entryName),
+            checked = form.data.exists(_._2 === SignInAs.Individual.entryName)
         ),
         RadioItem(
             content = Text("Not signed in"),
-            value = Some(SignInAs.NoSignIn.entryName)
+            value = Some(SignInAs.NoSignIn.entryName),
+            checked = form.data.exists(_._2 === SignInAs.NoSignIn.entryName)
         )
     ),
     classes = "govuk-radios--small"
@@ -241,21 +248,25 @@
             RadioItem(
                 content = Text("GOV.UK"),
                 value = Some(Origins.Epaye.GovUk.entryName),
-                hint = Some(Hint(content = Text("If you cannot pay your tax bill on time")))
+                hint = Some(Hint(content = Text("If you cannot pay your tax bill on time"))),
+                checked = form.data.exists(_._2 === Origins.Epaye.GovUk.entryName)
             ),
             RadioItem(
                 content = Text("Business Tax Account"),
                 value = Some(Origins.Epaye.Bta.entryName),
-                hint = Some(Hint(content = Text("Set up a payment plan if you cannot pay in full")))
+                hint = Some(Hint(content = Text("Set up a payment plan if you cannot pay in full"))),
+                checked = form.data.exists(_._2 === Origins.Epaye.Bta.entryName)
             ),
             RadioItem(
                 content = Text("Detached Url"),
-                value = Some(Origins.Epaye.DetachedUrl.entryName)
+                value = Some(Origins.Epaye.DetachedUrl.entryName),
+                checked = form.data.exists(_._2 === Origins.Epaye.DetachedUrl.entryName)
             ),
             RadioItem(
                 content = Text("EPAYE service"),
                 value = Some(Origins.Epaye.EpayeService.entryName),
-                hint = Some(Hint(content = Text("From the EPAYE service")))
+                hint = Some(Hint(content = Text("From the EPAYE service"))),
+                checked = form.data.exists(_._2 === Origins.Epaye.EpayeService.entryName)
             )
         ),
         classes = "govuk-radios--small"
@@ -339,20 +350,24 @@
             RadioItem(
                 content = Text("GOV.UK"),
                 value = Some(Origins.Vat.GovUk.entryName),
-                hint = Some(Hint(content = Text("If you cannot pay your tax bill on time")))
+                hint = Some(Hint(content = Text("If you cannot pay your tax bill on time"))),
+                checked = form.data.exists(_._2 === Origins.Vat.GovUk.entryName)
             ),
             RadioItem(
                 content = Text("Business Tax Account"),
                 value = Some(Origins.Vat.Bta.entryName),
-                hint = Some(Hint(content = Text("Set up a payment plan if you cannot pay in full")))
+                hint = Some(Hint(content = Text("Set up a payment plan if you cannot pay in full"))),
+                checked = form.data.exists(_._2 === Origins.Vat.Bta.entryName)
             ),
             RadioItem(
                 content = Text("Detached Url"),
-                value = Some(Origins.Vat.DetachedUrl.entryName)
+                value = Some(Origins.Vat.DetachedUrl.entryName),
+                checked = form.data.exists(_._2 === Origins.Vat.DetachedUrl.entryName)
             ),
             RadioItem(
                 content = Text("VAT service"),
-                value = Some(Origins.Vat.VatService.entryName)
+                value = Some(Origins.Vat.VatService.entryName),
+                checked = form.data.exists(_._2 === Origins.Vat.VatService.entryName)
             )
         ),
         classes = "govuk-radios--small"
@@ -361,6 +376,25 @@
 }
 }
 
+@epayeTab = @{
+        TabItem(
+            id = Some("paye"),
+            label = "PAYE",
+            panel = TabPanel(
+                content = HtmlContent(payeContent)
+            )
+        )
+}
+
+@vatTab = @{
+        TabItem(
+            id = Some("vat"),
+            label = "VAT",
+            panel = TabPanel(
+                content = HtmlContent(vatContent)
+            )
+        )
+}
 
 @testOnlyLayout(pageTitle = Some(title)) {
     @if(form.errors.nonEmpty) {
@@ -378,23 +412,9 @@
     <p class="govuk-body">Set up journeys and emulate entry point behaviours.</p>
 
     @govukTabs(Tabs(
-        items = Seq(
-            TabItem(
-                id = Some("paye"),
-                label = "PAYE",
-                panel = TabPanel(
-                    content = HtmlContent(payeContent)
-                )
-            ),
-            TabItem(
-                id = Some("vat"),
-                label = "VAT",
-                panel = TabPanel(
-                    content = HtmlContent(vatContent)
-                )
-            )
-        )
+        items =
+            if (form.data.exists(taxRegime => taxRegime._1 === "taxRegime" && taxRegime._2 == "Vat")) Seq(vatTab, epayeTab)
+            else Seq(epayeTab, vatTab)
     ))
-
 
 }
