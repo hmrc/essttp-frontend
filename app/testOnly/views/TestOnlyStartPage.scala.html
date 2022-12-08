@@ -376,28 +376,9 @@
 }
 }
 
-@epayeTab = @{
-        TabItem(
-            id = Some("paye"),
-            label = "PAYE",
-            panel = TabPanel(
-                content = HtmlContent(payeContent)
-            )
-        )
-}
-
-@vatTab = @{
-        TabItem(
-            id = Some("vat"),
-            label = "VAT",
-            panel = TabPanel(
-                content = HtmlContent(vatContent)
-            )
-        )
-}
-
 @testOnlyLayout(pageTitle = Some(title)) {
     @if(form.errors.nonEmpty) {
+        <input type="hidden" id="@{form.data("taxRegime")}Submitted" name="submittedRegime">
         @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
             ErrorLink(
                 href = Some(s"#${e.key}"),
@@ -407,14 +388,24 @@
         ))
     }
 
-
     <h1 class="govuk-heading-xl">@title</h1>
     <p class="govuk-body">Set up journeys and emulate entry point behaviours.</p>
 
-    @govukTabs(Tabs(
-        items =
-            if (form.data.exists(taxRegime => taxRegime._1 === "taxRegime" && taxRegime._2 == "Vat")) Seq(vatTab, epayeTab)
-            else Seq(epayeTab, vatTab)
-    ))
+    @govukTabs(Tabs(items = Seq(
+        TabItem(
+            id = Some("paye"),
+            label = "PAYE",
+            panel = TabPanel(
+                content = HtmlContent(payeContent)
+            )
+        ),
+        TabItem(
+            id = Some("vat"),
+            label = "VAT",
+            panel = TabPanel(
+                content = HtmlContent(vatContent)
+            )
+        )
+    )))
 
 }

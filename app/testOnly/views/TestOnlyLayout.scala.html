@@ -58,7 +58,8 @@
 }
 
 @scripts = {
-@scriptsBlock.getOrElse(Html(""))
+    @Html(s"""<script src="${controllers.routes.Assets.versioned("javascripts/tab-selector.js").toString}" ${CSPNonce.attr.toString}></script>""")
+    @scriptsBlock.getOrElse(Html(""))
 }
 
 @beforeContentBlock = {
