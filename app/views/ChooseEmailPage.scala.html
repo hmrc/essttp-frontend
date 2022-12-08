@@ -17,6 +17,7 @@
 @import messages.Messages
 @import requests.RequestSupport
 @import play.api.mvc.Request
+@import play.twirl.api.Html
 @import play.api.data.Form
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import controllers.routes
@@ -45,7 +46,7 @@
 }
 
 @title = @{
-    Messages.SelectEmail.`Which email do you want to use?`.show
+    Messages.EmailEntry.`Which email do you want to use?`.show
 }
 
 @conditionalHtml = @{
@@ -54,10 +55,10 @@
         name = newEmailKey,
         inputType = "email",
         classes = "govuk-input--width-30",
-        hint = Some(Hint(content = Text(Messages.SelectEmail.`For example, myname@sample.com`.show))),
+        hint = Some(Hint(content = Text(Messages.EmailEntry.`For example, myname@sample.com`.show))),
         spellcheck = Some(false),
         errorMessage = form.error(newEmailKey).map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
-            content = Text(Messages.SelectEmail.getError(s"${e.key}.${e.message}").show)
+            content = Text(Messages.EmailEntry.getError(s"${e.key}.${e.message}").show)
         )),
         value = form(newEmailKey).value
     ))
@@ -69,7 +70,7 @@
             ErrorSummary(errorList = form.errors.map(e =>
                 ErrorLink(
                     href = Some(s"#${e.key}"),
-                    content = Text(Messages.SelectEmail.getError(s"${e.key}.${e.message}").show)
+                    content = Text(Messages.EmailEntry.getError(s"${e.key}.${e.message}").show)
                 )
             ),
                 title = Text(Messages.`There is a problem`.show))
@@ -85,6 +86,7 @@
                     isPageHeading = true
                 ))
             )),
+          hint = Some(Hint(content = HtmlContent(Messages.EmailEntry.`We will use this email address to...`.show))),
             idPrefix = Some(key),
             name = key,
             items = Seq(
@@ -94,13 +96,13 @@
                     checked = form.value.exists(_.differentEmail.isEmpty),
                 ),
                 RadioItem(
-                    content = Text(Messages.SelectEmail.`A new email address`.show),
+                    content = Text(Messages.EmailEntry.`A new email address`.show),
                     value = Some("new"),
                     conditionalHtml = Some(conditionalHtml),
                     checked = form.value.exists(_.differentEmail.isDefined) || form.error(newEmailKey).isDefined,
                 )
             ),
-            errorMessage = form.error(key).map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(content = Text(Messages.SelectEmail.getError(s"${e.key}.${e.message}").show)))
+            errorMessage = form.error(key).map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(content = Text(Messages.EmailEntry.getError(s"${e.key}.${e.message}").show)))
         ))
         @govukButton(Button(content = Text(Messages.continue.show), attributes = Map("id" -> "continue")))
     }

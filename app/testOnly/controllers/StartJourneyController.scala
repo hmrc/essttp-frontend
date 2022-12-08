@@ -181,10 +181,11 @@ object StartJourneyController {
     val debtAmountFromForm: AmountInPence = AmountInPence(form.debtTotalAmount)
     val interestAmount: AmountInPence = AmountInPence(form.interestAmount.getOrElse(BigDecimal(0)))
 
-    // hardcoding email for now, maybe we should move it into the form to make testing better for Darren
-    val (maybeCustomerDetail, maybeRegimeDigitalCorrespondence) =
-      Some(List(CustomerDetail(Some(Email(SensitiveString("bobross@joyofpainting.com"))), Some(EmailSource.ETMP)))) ->
-        Some(RegimeDigitalCorrespondence(form.regimeDigitalCorrespondence))
+    val maybeCustomerDetail =
+      if (form.emailAddressPresent) Some(List(CustomerDetail(Some(Email(SensitiveString("bobross@joyofpainting.com"))), Some(EmailSource.ETMP))))
+      else Some(List.empty)
+
+    val maybeRegimeDigitalCorrespondence = Some(RegimeDigitalCorrespondence(form.regimeDigitalCorrespondence))
 
     val charges: Charges = Charges(
       chargeType           = ChargeType("InYearRTICharge-Tax"),

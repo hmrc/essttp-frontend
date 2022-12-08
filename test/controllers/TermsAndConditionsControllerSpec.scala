@@ -143,7 +143,7 @@ class TermsAndConditionsControllerSpec extends ItSpec {
               .findJourney(testCrypto, origin)(JourneyJsonTemplates.`Confirmed Direct Debit Details - regimeDigitalCorrespondence flag`(origin, regimeDigitalCorrespondence = false)(testCrypto))
             EssttpBackend.TermsAndConditions.stubUpdateAgreedTermsAndConditions(
               TdAll.journeyId,
-              JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = false, origin)
+              JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = false, origin, Some(TdAll.etmpEmail))
             )
 
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
@@ -154,21 +154,39 @@ class TermsAndConditionsControllerSpec extends ItSpec {
             EssttpBackend.TermsAndConditions.verifyUpdateAgreedTermsAndConditionsRequest(TdAll.journeyId, IsEmailAddressRequired(false))
           }
 
-          s"[$regime journey] redirect the user to the email journey if regimeDigitalCorrespondence is enabled and update backend" in {
-            stubCommonActions()
-            EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto, origin)()
-            EssttpBackend.TermsAndConditions.stubUpdateAgreedTermsAndConditions(
-              TdAll.journeyId,
-              JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = true, origin)
-            )
+          s"[$regime journey] redirect the user to the email journey if regimeDigitalCorrespondence is enabled and update backend" +
+            s" and there is an email address in the eligibility check result" in {
+              stubCommonActions()
+              EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto, origin)()
+              EssttpBackend.TermsAndConditions.stubUpdateAgreedTermsAndConditions(
+                TdAll.journeyId,
+                JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = true, origin, Some(TdAll.etmpEmail))
+              )
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+              val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
-            val result: Future[Result] = controller.termsAndConditionsSubmit(fakeRequest)
-            status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(PageUrls.whichEmailDoYouWantToUseUrl)
-            EssttpBackend.TermsAndConditions.verifyUpdateAgreedTermsAndConditionsRequest(TdAll.journeyId, IsEmailAddressRequired(true))
-          }
+              val result: Future[Result] = controller.termsAndConditionsSubmit(fakeRequest)
+              status(result) shouldBe Status.SEE_OTHER
+              redirectLocation(result) shouldBe Some(PageUrls.whichEmailDoYouWantToUseUrl)
+              EssttpBackend.TermsAndConditions.verifyUpdateAgreedTermsAndConditionsRequest(TdAll.journeyId, IsEmailAddressRequired(true))
+            }
+
+          s"[$regime journey] redirect the user to the email journey if regimeDigitalCorrespondence is enabled and update backend" +
+            s" and there is no an email address in the eligibility check result" in {
+              stubCommonActions()
+              EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto, origin)()
+              EssttpBackend.TermsAndConditions.stubUpdateAgreedTermsAndConditions(
+                TdAll.journeyId,
+                JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = true, origin, None)
+              )
+
+              val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+              val result: Future[Result] = controller.termsAndConditionsSubmit(fakeRequest)
+              status(result) shouldBe Status.SEE_OTHER
+              redirectLocation(result) shouldBe Some(PageUrls.enterEmailAddressUrl)
+              EssttpBackend.TermsAndConditions.verifyUpdateAgreedTermsAndConditionsRequest(TdAll.journeyId, IsEmailAddressRequired(true))
+            }
         }
     }
 
@@ -193,7 +211,7 @@ class TermsAndConditionsControllerEmailDisabledSpec extends ItSpec {
             EssttpBackend.ConfirmedDirectDebitDetails.findJourney(testCrypto, origin)()
             EssttpBackend.TermsAndConditions.stubUpdateAgreedTermsAndConditions(
               TdAll.journeyId,
-              JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = false, origin = origin)
+              JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = false, origin = origin, etmpEmail = Some(TdAll.etmpEmail))
             )
 
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")

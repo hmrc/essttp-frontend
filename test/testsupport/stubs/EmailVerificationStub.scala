@@ -24,7 +24,6 @@ import models.emailverification.EmailVerificationStatusResponse.EmailStatus
 import models.emailverification.RequestEmailVerificationResponse
 import play.api.http.Status.{CREATED, OK}
 import play.api.libs.json.Json
-import testsupport.testdata.PageUrls
 
 object EmailVerificationStub {
 
@@ -54,7 +53,8 @@ object EmailVerificationStub {
       expectedAccessibilityStatementUrl: String,
       expectedPageTitle:                 String,
       expectedLanguageCode:              String,
-      urlPrefix:                         String
+      urlPrefix:                         String,
+      backLocation:                      String
   ): Unit =
     verify(
       exactly(1),
@@ -68,10 +68,10 @@ object EmailVerificationStub {
                |  "deskproServiceName": "essttp-frontend",
                |  "accessibilityStatementUrl": "$expectedAccessibilityStatementUrl",
                |  "pageTitle": "$expectedPageTitle",
-               |  "backUrl": "$urlPrefix${PageUrls.whichEmailDoYouWantToUseUrl}",
+               |  "backUrl": "$urlPrefix$backLocation",
                |  "email": {
                |      "address": "${emailAddress.value.decryptedValue}",
-               |      "enterUrl": "$urlPrefix${PageUrls.whichEmailDoYouWantToUseUrl}"
+               |      "enterUrl": "$urlPrefix$backLocation"
                |  },
                |  "lang":"$expectedLanguageCode"
                |}

@@ -59,8 +59,10 @@ object Routing {
 
     // prevent accidentally submitting arrangement twice
     case j: Journey.Stages.AgreedTermsAndConditions =>
-      if (j.isEmailAddressRequired) routes.EmailController.whichEmailDoYouWantToUse
-      else if (allowSubmitArrangement) routes.SubmitArrangementController.submitArrangement
+      if (j.isEmailAddressRequired) {
+        if (j.eligibilityCheckResult.email.isDefined) routes.EmailController.whichEmailDoYouWantToUse
+        else routes.EmailController.enterEmail
+      } else if (allowSubmitArrangement) routes.SubmitArrangementController.submitArrangement
       else SubmitArrangementController.whichPaymentPlanSetupPage(j.taxRegime)
 
     case _: Journey.Stages.SelectedEmailToBeVerified =>

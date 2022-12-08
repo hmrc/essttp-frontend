@@ -25,6 +25,7 @@ import connectors.EmailVerificationConnector
 import controllers.routes
 import essttp.emailverification.EmailVerificationStatus
 import essttp.rootmodel.Email
+import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import messages.Messages
 import models.emailverification.RequestEmailVerificationRequest.EmailDetails
 import models.emailverification.{RequestEmailVerificationRequest, RequestEmailVerificationResponse}
@@ -102,8 +103,8 @@ class EmailVerificationService @Inject() (
       RequestEmailVerification.deskproServiceName,
       RequestEmailVerification.accessibilityStatementUrl,
       Messages.ServicePhase.serviceName(r.journey.taxRegime).show(language),
-      RequestEmailVerification.whichEmailUrl,
-      EmailDetails(emailAddress, RequestEmailVerification.whichEmailUrl),
+      RequestEmailVerification.emailEntryUrl(r.eligibilityCheckResult),
+      EmailDetails(emailAddress, RequestEmailVerification.emailEntryUrl(r.eligibilityCheckResult)),
       lang
     )
   }
@@ -118,7 +119,13 @@ class EmailVerificationService @Inject() (
       val u = s"/accessibility-statement${appConfig.accessibilityStatementPath}"
       if (isLocal) s"${appConfig.BaseUrl.accessibilityStatementFrontendUrl}$u" else u
     }
-    val whichEmailUrl: String = url(routes.EmailController.whichEmailDoYouWantToUse.url)
+    def emailEntryUrl(eligibilityCheckResult: EligibilityCheckResult): String =
+      url(
+        eligibilityCheckResult.email.fold(
+          routes.EmailController.enterEmail.url
+        )(_ =>
+            routes.EmailController.whichEmailDoYouWantToUse.url)
+      )
   }
 
 }

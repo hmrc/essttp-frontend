@@ -20,7 +20,7 @@ import actions.Actions
 import actionsmodel.EligibleJourneyRequest
 import cats.implicits.catsSyntaxEq
 import config.AppConfig
-import controllers.EmailController.{ChooseEmailForm, chooseEmailForm}
+import controllers.EmailController.{ChooseEmailForm, chooseEmailForm, enterEmailForm}
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.{logErrorAndRouteToDefaultPage, logErrorAndRouteToDefaultPageF}
 import essttp.emailverification.EmailVerificationStatus
@@ -119,6 +119,52 @@ class EmailController @Inject() (
         }
       }
     }
+
+  val enterEmail: Action[AnyContent] = {
+      def displayEnterEmailPage(journey: Journey.AfterAgreedTermsAndConditions)(implicit request: Request[_]): Result = {
+        val form: Form[Email] = journey match {
+          case _: Journey.BeforeEmailAddressSelectedToBeVerified => enterEmailForm
+          case j: Journey.AfterEmailAddressSelectedToBeVerified  => enterEmailForm.fill(j.emailToBeVerified)
+          case _: Journey.Stages.SubmittedArrangement =>
+            Errors.throwServerErrorException("Can't render form for page when submission is submitted, this should never happen")
+        }
+
+        Ok(views.enterEmailPage(form))
+      }
+
+    withEmailEnabled {
+      as.eligibleJourneyAction { implicit request =>
+        request.journey match {
+          case j: Journey.BeforeAgreedTermsAndConditions => logErrorAndRouteToDefaultPage(j)
+          case j: Journey.AfterAgreedTermsAndConditions =>
+            if (!j.isEmailAddressRequired) {
+              logErrorAndRouteToDefaultPage(j)
+            } else {
+              finalStateCheck(j, displayEnterEmailPage(j))
+            }
+        }
+      }
+    }
+  }
+
+  val enterEmailSubmit: Action[AnyContent] = withEmailEnabled {
+    as.eligibleJourneyAction.async { implicit request =>
+      EmailController.enterEmailForm
+        .bindFromRequest()
+        .fold(
+          formWithErrors => Future.successful(Ok(views.enterEmailPage(formWithErrors))),
+          email => {
+            journeyService
+              .updateSelectedEmailToBeVerified(
+                journeyId = request.journeyId,
+                email     = email
+              )
+              .map(updatedJourney => Redirect(Routing.next(updatedJourney)))
+          }
+        )
+
+    }
+  }
 
   val requestVerification: Action[AnyContent] = withEmailEnabled {
     as.eligibleJourneyAction.async { implicit request =>
@@ -240,5 +286,11 @@ object EmailController {
         else if (EmailAddress.isValid(email)) Valid
         else Invalid("error.invalidFormat"))
     )
+
+  val enterEmailForm: Form[Email] = Form(
+    mapping(
+      "newEmailInput" -> differentEmailAddressMapping
+    )(s => Email.apply(SensitiveString(s)))(Email.unapply(_).map(_.decryptedValue))
+  )
 
 }

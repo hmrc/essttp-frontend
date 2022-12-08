@@ -46,6 +46,7 @@ class Views @Inject() (
     val barsLockout:                      BarsLockout,
     val termsAndConditions:               TermsAndConditions,
     val chooseEmailPage:                  ChooseEmailPage,
+    val enterEmailPage:                   EnterEmailAddress,
     val emailAddressConfirmed:            EmailAddressConfirmed,
     val tooManyEmails:                    TooManyEmails,
     val tooManyPasscodes:                 TooManyPasscodes,

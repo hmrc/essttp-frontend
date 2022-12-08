@@ -50,8 +50,8 @@ class SubmitArrangementControllerSpec extends ItSpec {
           List(
             (
               "T&C's accepted, no email required",
-              () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto, origin)(),
-              TdAll.customerDetail("bobross@joyofpainting.com", EmailSource.ETMP)
+              () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto, origin, etmpEmail = Some(TdAll.etmpEmail))(),
+              TdAll.customerDetail(TdAll.etmpEmail, EmailSource.ETMP)
             ),
             (
               "email verification success - same email as ETMP",
@@ -186,7 +186,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
 
       "T&C's have just been agreed but an email is required" in {
         test(
-          () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, testCrypto, Origins.Epaye.Bta)(),
+          () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, testCrypto, Origins.Epaye.Bta, etmpEmail = Some(TdAll.etmpEmail))(),
           routes.EmailController.whichEmailDoYouWantToUse
         )
       }
@@ -215,7 +215,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
 
     "should not update backend if call to ttp enact arrangement api fails (anything other than a 202 response)" in {
       stubCommonActions()
-      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto, origin = Origins.Epaye.Bta)()
+      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto, origin = Origins.Epaye.Bta, etmpEmail = Some(TdAll.etmpEmail))()
       Ttp.EnactArrangement.stubEnactArrangementFail()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
