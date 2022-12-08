@@ -121,7 +121,7 @@ class EmailController @Inject() (
     }
 
   val enterEmail: Action[AnyContent] = {
-      def displayEnterEmailDoYouWantToUse(journey: Journey.AfterAgreedTermsAndConditions)(implicit request: Request[_]): Result = {
+      def displayEnterEmailPage(journey: Journey.AfterAgreedTermsAndConditions)(implicit request: Request[_]): Result = {
         val form: Form[Email] = journey match {
           case _: Journey.BeforeEmailAddressSelectedToBeVerified => enterEmailForm
           case j: Journey.AfterEmailAddressSelectedToBeVerified  => enterEmailForm.fill(j.emailToBeVerified)
@@ -140,7 +140,7 @@ class EmailController @Inject() (
             if (!j.isEmailAddressRequired) {
               logErrorAndRouteToDefaultPage(j)
             } else {
-              finalStateCheck(j, displayEnterEmailDoYouWantToUse(j))
+              finalStateCheck(j, displayEnterEmailPage(j))
             }
         }
       }
