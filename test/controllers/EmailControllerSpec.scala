@@ -28,11 +28,10 @@ import org.jsoup.nodes.{Document, Element}
 import org.jsoup.select.Elements
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.http.Status
-import play.api.libs.json.{JsArray, JsObject, Json}
 import play.api.mvc.{Action, AnyContent, Call, Cookie, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import testsupport.{ItSpec, JsonUtils}
+import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.{EmailVerificationStub, EssttpBackend}
@@ -105,7 +104,7 @@ class EmailControllerSpec extends ItSpec {
 
           "should return the which email do you want to use page" in {
             stubCommonActions()
-            EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin = origin)()
+            EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin = origin, etmpEmail = Some(TdAll.etmpEmail))()
 
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result: Future[Result] = controller.whichEmailDoYouWantToUse(fakeRequest)
@@ -119,6 +118,9 @@ class EmailControllerSpec extends ItSpec {
               expectedSubmitUrl       = Some(routes.EmailController.whichEmailDoYouWantToUse.url),
               regimeBeingTested       = Some(taxRegime)
             )
+
+            doc.select(".govuk-hint").first().html shouldBe "We will use this email address to send you information about your payment plan. " +
+              "It may take up to <strong>24 hours</strong> to receive notifications after you set up your plan."
 
             val radios: Elements = doc.select(".govuk-radios__item")
             radios.size() shouldBe 2
@@ -167,11 +169,7 @@ class EmailControllerSpec extends ItSpec {
 
           "throw an error if an email address cannot be found in the eligibility check response" in {
             stubCommonActions()
-            EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin)(
-              JsonUtils.replace(List("AgreedTermsAndConditions", "eligibilityCheckResult", "customerDetails"), JsArray())(
-                Json.parse(JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = true, origin = Origins.Epaye.Bta)).as[JsObject]
-              ).toString
-            )
+            EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin, etmpEmail = None)()
 
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val error = intercept[Exception](controller.whichEmailDoYouWantToUse(fakeRequest).futureValue)
@@ -186,7 +184,7 @@ class EmailControllerSpec extends ItSpec {
             val email: Email = Email(SensitiveString("bobross@joyofpainting.com"))
 
             stubCommonActions()
-            EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin)()
+            EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin, etmpEmail = Some(TdAll.etmpEmail))()
             EssttpBackend.SelectEmail.stubUpdateSelectedEmail(
               TdAll.journeyId,
               JourneyJsonTemplates.`Selected email to be verified`(email.value.decryptedValue, origin)
@@ -212,7 +210,7 @@ class EmailControllerSpec extends ItSpec {
             val email: Email = Email(SensitiveString("somenewemail@newemail.com"))
 
             stubCommonActions()
-            EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin)()
+            EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin, etmpEmail = Some(TdAll.etmpEmail))()
             EssttpBackend.SelectEmail.stubUpdateSelectedEmail(
               TdAll.journeyId,
               JourneyJsonTemplates.`Selected email to be verified`(email.value.decryptedValue, origin)
@@ -244,7 +242,7 @@ class EmailControllerSpec extends ItSpec {
             (scenario: String, inputValue: List[(String, String)], expectedErrorMessage: String, expectedErrorTarget: String) =>
               s"When input is: [ $scenario: [ ${inputValue.toString} ]] error message should be $expectedErrorMessage" in {
                 stubCommonActions()
-                EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, testCrypto, origin)()
+                EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, testCrypto, origin, etmpEmail = Some(TdAll.etmpEmail))()
 
                 val fakeRequest = FakeRequest(
                   method = "POST",
@@ -277,15 +275,118 @@ class EmailControllerSpec extends ItSpec {
 
           "throw an error if an email address cannot be found in the eligibility check response" in {
             stubCommonActions()
-            EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin)(
-              JsonUtils.replace(List("AgreedTermsAndConditions", "eligibilityCheckResult", "customerDetails"), JsArray())(
-                Json.parse(JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = true, origin = Origins.Epaye.Bta)).as[JsObject]
-              ).toString
-            )
+            EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin, etmpEmail = None)()
 
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val error = intercept[Exception](controller.whichEmailDoYouWantToUseSubmit(fakeRequest).futureValue)
             error.getMessage should endWith("Could not find email address in eligibility response.")
+          }
+
+        }
+
+        s"[taxRegime: ${taxRegime.toString}] GET /enter-your-email-address" - {
+
+          "should return the enter email page" in {
+            stubCommonActions()
+            EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin = origin, etmpEmail = None)()
+
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+            val result: Future[Result] = controller.enterEmail(fakeRequest)
+            val doc: Document = Jsoup.parse(contentAsString(result))
+
+            RequestAssertions.assertGetRequestOk(result)
+            ContentAssertions.commonPageChecks(
+              doc,
+              expectedH1              = "Enter your email address",
+              shouldBackLinkBePresent = true,
+              expectedSubmitUrl       = Some(routes.EmailController.enterEmailSubmit.url),
+              regimeBeingTested       = Some(taxRegime)
+            )
+
+            doc.select(".govuk-body").html shouldBe "We will use this email address to send you information about your payment plan. " +
+              "It may take up to <strong>24 hours</strong> to receive notifications after you set up your plan."
+
+            doc.select("#newEmailInput-hint").text() shouldBe "For example, myname@sample.com"
+            doc.select("#newEmailInput").attr("type") shouldBe "email"
+          }
+
+          "should prepopulate the form correctly" in {
+            stubCommonActions()
+            EssttpBackend.SelectEmail.findJourney("somenewemail@newemail.com", testCrypto, origin, etmpEmail = None)()
+
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+            val result: Future[Result] = controller.enterEmail(fakeRequest)
+
+            val doc: Document = Jsoup.parse(contentAsString(result))
+            RequestAssertions.assertGetRequestOk(result)
+
+            doc.select("#newEmailInput").`val` shouldBe "somenewemail@newemail.com"
+          }
+        }
+
+        s"[taxRegime: ${taxRegime.toString}] POST /enter-your-email-address should" - {
+
+          "update backend with given email" in {
+            val email: Email = Email(SensitiveString("somenewemail@newemail.com"))
+
+            stubCommonActions()
+            EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin, etmpEmail = None)()
+            EssttpBackend.SelectEmail.stubUpdateSelectedEmail(
+              TdAll.journeyId,
+              JourneyJsonTemplates.`Selected email to be verified`(email.value.decryptedValue, origin, etmpEmail = None)
+            )
+
+            val fakeRequest = FakeRequest(
+              method = "POST",
+              path   = "/which-email-do-you-want-to-use"
+            ).withAuthToken()
+              .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+              .withFormUrlEncodedBody(("newEmailInput", email.value.decryptedValue))
+
+            val result: Future[Result] = controller.enterEmailSubmit(fakeRequest)
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(PageUrls.requestEmailVerificationUrl)
+            EssttpBackend.SelectEmail.verifyUpdateSelectedEmailRequest(TdAll.journeyId, email)(testOperationCryptoFormat)
+          }
+
+          forAll(Table(
+            ("Input Scenario", "inputValue", "expected error message", "errorTarget"),
+            ("Empty email", "newEmailInput" -> "", "Enter your email address in the correct format, like name@example.com", "#newEmailInput"),
+            ("Invalid email format", "newEmailInput" -> "abc", "Enter your email address in the correct format, like name@example.com", "#newEmailInput"),
+            ("Email too long (> 256 characters)", "newEmailInput" -> "a" * 257, "Enter an email address with 256 characters or less", "#newEmailInput")
+          )) {
+            (scenario: String, inputValue: (String, String), expectedErrorMessage: String, expectedErrorTarget: String) =>
+              s"When input is: [ $scenario: [ ${inputValue.toString} ]] error message should be $expectedErrorMessage" in {
+                stubCommonActions()
+                EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, testCrypto, origin, etmpEmail = None)()
+
+                val fakeRequest = FakeRequest(
+                  method = "POST",
+                  path   = "/which-day-do-you-want-to-pay-each-month"
+                ).withAuthToken()
+                  .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+                  .withFormUrlEncodedBody(inputValue)
+
+                val result: Future[Result] = controller.enterEmailSubmit(fakeRequest)
+                val pageContent: String = contentAsString(result)
+                val doc: Document = Jsoup.parse(pageContent)
+
+                RequestAssertions.assertGetRequestOk(result)
+                ContentAssertions.commonPageChecks(
+                  doc,
+                  expectedH1              = "Enter your email address",
+                  shouldBackLinkBePresent = true,
+                  expectedSubmitUrl       = Some(routes.EmailController.enterEmailSubmit.url),
+                  hasFormError            = true,
+                  regimeBeingTested       = Some(taxRegime)
+                )
+
+                val errorSummary = doc.select(".govuk-error-summary")
+                val errorLink = errorSummary.select("a")
+                errorLink.text() shouldBe expectedErrorMessage
+                errorLink.attr("href") shouldBe expectedErrorTarget
+                EssttpBackend.SelectEmail.verifyNoneUpdateSelectedEmailRequest(TdAll.journeyId)
+              }
           }
 
         }
@@ -307,7 +408,7 @@ class EmailControllerSpec extends ItSpec {
 
           "not allow journeys where an email has not been selected" in {
             stubCommonActions()
-            EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin)()
+            EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin, etmpEmail = Some(TdAll.etmpEmail))()
 
             val result = controller.requestVerification(fakeRequest)
 
@@ -315,26 +416,51 @@ class EmailControllerSpec extends ItSpec {
             redirectLocation(result) shouldBe Some(routes.EmailController.whichEmailDoYouWantToUse.url)
           }
 
-          "redirect to the given redirectUri if the call to request email verification is successful" in {
-            val redirectUri: String = "/redirect"
+          "redirect to the given redirectUri if the call to request email verification is successful " +
+            "when there is an ETMP email present" in {
+              val redirectUri: String = "/redirect"
 
-            stubCommonActions()
-            EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto, origin)()
-            EmailVerificationStub.requestEmailVerification(Right(RequestEmailVerificationResponse.Success(redirectUri)))
+              stubCommonActions()
+              EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto, origin)()
+              EmailVerificationStub.requestEmailVerification(Right(RequestEmailVerificationResponse.Success(redirectUri)))
 
-            val result = controller.requestVerification(fakeRequest)
-            status(result) shouldBe SEE_OTHER
-            redirectLocation(result) shouldBe Some(s"http://localhost:9890$redirectUri")
+              val result = controller.requestVerification(fakeRequest)
+              status(result) shouldBe SEE_OTHER
+              redirectLocation(result) shouldBe Some(s"http://localhost:9890$redirectUri")
 
-            EmailVerificationStub.verifyRequestEmailVerification(
-              email,
-              GGCredId("authId-999"),
-              "http://localhost:12346/accessibility-statement/set-up-a-payment-plan",
-              expectedPageTitle,
-              "en",
-              urlPrefix
-            )
-          }
+              EmailVerificationStub.verifyRequestEmailVerification(
+                email,
+                GGCredId("authId-999"),
+                "http://localhost:12346/accessibility-statement/set-up-a-payment-plan",
+                expectedPageTitle,
+                "en",
+                urlPrefix,
+                PageUrls.whichEmailDoYouWantToUseUrl
+              )
+            }
+
+          "redirect to the given redirectUri if the call to request email verification is successful " +
+            "when there isn't an ETMP email present" in {
+              val redirectUri: String = "/redirect"
+
+              stubCommonActions()
+              EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto, origin, etmpEmail = None)()
+              EmailVerificationStub.requestEmailVerification(Right(RequestEmailVerificationResponse.Success(redirectUri)))
+
+              val result = controller.requestVerification(fakeRequest)
+              status(result) shouldBe SEE_OTHER
+              redirectLocation(result) shouldBe Some(s"http://localhost:9890$redirectUri")
+
+              EmailVerificationStub.verifyRequestEmailVerification(
+                email,
+                GGCredId("authId-999"),
+                "http://localhost:12346/accessibility-statement/set-up-a-payment-plan",
+                expectedPageTitle,
+                "en",
+                urlPrefix,
+                PageUrls.enterEmailAddressUrl
+              )
+            }
 
           "maintain the redirectUri in the email verification response if the environment is local and the uri is absolute" in {
             val redirectUri: String = "http:///host:12345/redirect"
@@ -353,7 +479,8 @@ class EmailControllerSpec extends ItSpec {
               "http://localhost:12346/accessibility-statement/set-up-a-payment-plan",
               expectedPageTitle,
               "en",
-              urlPrefix
+              urlPrefix,
+              PageUrls.whichEmailDoYouWantToUseUrl
             )
           }
 
@@ -379,7 +506,8 @@ class EmailControllerSpec extends ItSpec {
               "http://localhost:12346/accessibility-statement/set-up-a-payment-plan",
               expectedPageTitleWelsh,
               "cy",
-              urlPrefix
+              urlPrefix,
+              PageUrls.whichEmailDoYouWantToUseUrl
             )
           }
 
@@ -398,7 +526,8 @@ class EmailControllerSpec extends ItSpec {
               "http://localhost:12346/accessibility-statement/set-up-a-payment-plan",
               expectedPageTitle,
               "en",
-              urlPrefix
+              urlPrefix,
+              PageUrls.whichEmailDoYouWantToUseUrl
             )
           }
 
@@ -414,7 +543,7 @@ class EmailControllerSpec extends ItSpec {
 
           "not allow journeys where an email has not been selected" in {
             stubCommonActions()
-            EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin)()
+            EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin, etmpEmail = Some(TdAll.etmpEmail))()
 
             val result = controller.emailCallback(fakeRequest)
 
@@ -701,7 +830,8 @@ class EmailNonLocalControllerSpec extends ItSpec {
         "/accessibility-statement/set-up-a-payment-plan",
         "Set up an Employers’ PAYE payment plan",
         "en",
-        ""
+        "",
+        PageUrls.whichEmailDoYouWantToUseUrl
       )
     }
 

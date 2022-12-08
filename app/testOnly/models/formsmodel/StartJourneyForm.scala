@@ -40,7 +40,8 @@ final case class StartJourneyForm(
     interestAmount:              Option[BigDecimal],
     taxReference:                TaxId,
     taxRegime:                   TaxRegime,
-    regimeDigitalCorrespondence: Boolean
+    regimeDigitalCorrespondence: Boolean,
+    emailAddressPresent:         Boolean
 )
 
 object StartJourneyForm {
@@ -88,12 +89,11 @@ object StartJourneyForm {
               case TaxRegime.Vat   => vatMaxAmountOfDebt -> vatDebtTotalAmountKey
             }
             val minAmount = AmountInPence(100)
-            val dataWithDefaultValue = if (data.get(amountKey).exists(_.nonEmpty)) data else (data.updated(amountKey, "1234.53"))
 
             amountOfMoneyFormatter(
               isTooSmall = minAmount > AmountInPence(_),
               isTooLarge = AmountInPence(_) > maxAmount
-            ).bind(amountKey, dataWithDefaultValue).leftMap(errors =>
+            ).bind(amountKey, data).leftMap(errors =>
               errors.map { e =>
                 val mappedMesage = e.message match {
                   case "error.pattern"  => "Total debt amount must be a number"
@@ -138,6 +138,8 @@ object StartJourneyForm {
         }
       }
 
+    val optionalBooleanMappingDefaultTrue = optional(boolean).transform[Boolean](_.getOrElse(true), Some(_))
+
     Form(
       mapping(
         "signInAs" -> signInMapping,
@@ -148,7 +150,8 @@ object StartJourneyForm {
         "interestAmount" -> interestAmountMapping,
         "" -> Forms.of(taxReferenceFormat),
         taxRegimeKey -> Forms.of(taxRegimeFormatter),
-        "regimeDigitalCorrespondence" -> boolean
+        "regimeDigitalCorrespondence" -> optionalBooleanMappingDefaultTrue,
+        "emailAddressPresent" -> optionalBooleanMappingDefaultTrue
       )(StartJourneyForm.apply)(StartJourneyForm.unapply)
     )
   }

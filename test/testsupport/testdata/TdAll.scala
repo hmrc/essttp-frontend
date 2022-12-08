@@ -38,6 +38,7 @@ import java.util.UUID
 
 object TdAll {
 
+  val etmpEmail: String = "bobross@joyofpainting.com"
   val expectedServiceNamePaye: String = "Set up an Employers’ PAYE payment plan"
   val expectedServiceNameVat: String = "Set up a VAT payment plan"
   val expectedServiceNameGeneric: String = "Set up a payment plan"

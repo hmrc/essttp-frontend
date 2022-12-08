@@ -461,8 +461,9 @@ object EssttpBackend {
     def findJourney(
         isEmailAddressRequired: Boolean,
         encrypter:              Encrypter,
-        origin:                 Origin
-    )(jsonBody: String = JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddressRequired, origin)(encrypter)): StubMapping =
+        origin:                 Origin,
+        etmpEmail:              Option[String]
+    )(jsonBody: String = JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddressRequired, origin, etmpEmail)(encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
   }
 
@@ -481,8 +482,9 @@ object EssttpBackend {
     def findJourney(
         email:     String,
         encrypter: Encrypter,
-        origin:    Origin
-    )(jsonBody: String = JourneyJsonTemplates.`Selected email to be verified`(email, origin)(encrypter)): StubMapping =
+        origin:    Origin,
+        etmpEmail: Option[String] = Some(TdAll.etmpEmail)
+    )(jsonBody: String = JourneyJsonTemplates.`Selected email to be verified`(email, origin, etmpEmail)(encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
 
   }

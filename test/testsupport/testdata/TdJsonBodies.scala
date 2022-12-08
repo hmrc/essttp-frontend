@@ -101,7 +101,8 @@ object TdJsonBodies {
       eligibilityRules:            EligibilityRules = TdAll.eligibleEligibilityRules,
       taxRegime:                   TaxRegime,
       encrypter:                   Encrypter,
-      regimeDigitalCorrespondence: Boolean          = true
+      regimeDigitalCorrespondence: Boolean          = true,
+      email:                       Option[String]   = Some(TdAll.etmpEmail)
   ): JourneyInfoAsJson =
     s"""
       |"eligibilityCheckResult" : {
@@ -182,10 +183,7 @@ object TdJsonBodies {
       |      } ]
       |    }
       |  ],
-      |  "customerDetails" : [ {
-      |    "emailAddress" : "${encryptString("bobross@joyofpainting.com", encrypter)}",
-      |    "emailSource" : "ETMP"
-      |  } ],
+      |  "customerDetails" : [ ${email.fold(""){ e => s"""{ "emailAddress" : "${encryptString(e, encrypter)}", "emailSource" : "ETMP"}""" }} ],
       |  "regimeDigitalCorrespondence": ${regimeDigitalCorrespondence.toString},
       |  "futureChargeLiabilitiesExcluded": false
       |}

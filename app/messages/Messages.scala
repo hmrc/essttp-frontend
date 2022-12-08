@@ -1090,17 +1090,29 @@ object Messages {
     )
   }
 
-  object SelectEmail {
+  object EmailEntry {
     val `Which email do you want to use?`: Message = Message(
-      english = "Which email do you want to use?"
+      english = "Which email do you want to use?",
+      welsh   = "Pa e-bost rydych am ei ddefnyddio?"
+    )
+
+    val `Enter your email address`: Message = Message(
+      english = "Enter your email address"
+    )
+
+    val `We will use this email address to...`: Message = Message(
+      english = "We will use this email address to send you information about your payment plan. It may take up to <strong>24 hours</strong> to receive notifications after you set up your plan.",
+      welsh   = "Byddwn yn defnyddio’r cyfeiriad e-bost hwn er mwyn anfon gwybodaeth atoch am eich cynllun talu. Gallai gymryd <strong>hyd at 24 awr</strong> i gael hysbysiadau ar ôl i chi drefnu’ch cynllun."
     )
 
     val `A new email address`: Message = Message(
-      english = "A new email address"
+      english = "A new email address",
+      welsh   = "Cyfeiriad e-bost newydd"
     )
 
     val `For example, myname@sample.com`: Message = Message(
-      english = "For example, myname@sample.com"
+      english = "For example, myname@sample.com",
+      welsh   = "Er enghraifft, fyenw@enghraifft.cymru"
     )
 
     val `Select which email address you want to use`: Message = Message(

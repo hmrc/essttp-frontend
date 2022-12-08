@@ -84,6 +84,9 @@ POST   /terms-and-conditions                                controllers.TermsAnd
 GET    /which-email-do-you-want-to-use                      controllers.EmailController.whichEmailDoYouWantToUse
 POST   /which-email-do-you-want-to-use                      controllers.EmailController.whichEmailDoYouWantToUseSubmit
 
+GET    /enter-your-email-address                            controllers.EmailController.enterEmail
+POST   /enter-your-email-address                            controllers.EmailController.enterEmailSubmit
+
 GET    /email-verification                                  controllers.EmailController.requestVerification
 
 GET    /tried-to-confirm-email-too-many-times               controllers.EmailController.tooManyEmailAddresses

@@ -54,6 +54,7 @@ object PageUrls {
   val lockoutUrl: String = s"$serviceBaseUrl/lockout"
   val termsAndConditionsUrl: String = s"$serviceBaseUrl/terms-and-conditions"
   val whichEmailDoYouWantToUseUrl: String = s"$serviceBaseUrl/which-email-do-you-want-to-use"
+  val enterEmailAddressUrl: String = s"$serviceBaseUrl/enter-your-email-address"
   val requestEmailVerificationUrl: String = s"$serviceBaseUrl/email-verification"
   val tooManyEmailAddressesUrl: String = s"$serviceBaseUrl/tried-to-confirm-email-too-many-times"
   val submitArrangementUrl: String = s"$serviceBaseUrl/submit-arrangement"

@@ -106,17 +106,17 @@
         RadioItem(
             content = Text("As an Organisation"),
             value = Some(SignInAs.Organisation.entryName),
-            checked = form.data.exists(_._2 === SignInAs.Organisation.entryName)
+            checked = form.data.get("signInAs").fold(true)(_ === SignInAs.Organisation.entryName)
         ),
         RadioItem(
             content = Text("As an Individual"),
             value = Some(SignInAs.Individual.entryName),
-            checked = form.data.exists(_._2 === SignInAs.Individual.entryName)
+            checked = form.data.get("signInAs").fold(false)(_ === SignInAs.Individual.entryName)
         ),
         RadioItem(
             content = Text("Not signed in"),
             value = Some(SignInAs.NoSignIn.entryName),
-            checked = form.data.exists(_._2 === SignInAs.NoSignIn.entryName)
+            checked = form.data.get("signInAs").fold(false)(_ === SignInAs.NoSignIn.entryName)
         )
     ),
     classes = "govuk-radios--small"
@@ -130,7 +130,7 @@
     label = Label(
         isPageHeading = false,
         classes = "govuk-label--m",
-        content = Text("Enter interest amount (leave blank for 0)")
+        content = Text("Enter interest amount")
     ),
     classes = "govuk-input--width-5",
     spellcheck = Some(false),
@@ -140,7 +140,7 @@
     errorMessage = form.error("interestAmount").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
         content = Text(e.message)
     )),
-    value = form.data.get("interestAmount")
+    value = form.data.get("interestAmount").orElse(Some("0"))
 ))
 }
 
@@ -161,16 +161,49 @@
         items = Seq(
             RadioItem(
                 content = Text("Yes"),
-                value = Some("true")
+                value = Some("true"),
+                checked = form.data.get("regimeDigitalCorrespondence").fold(true)(_ === "true")
             ),
             RadioItem(
                 content = Text("No"),
-                value = Some("false")
+                value = Some("false"),
+                checked = form.data.get("regimeDigitalCorrespondence").fold(false)(_ === "false")
             )
         ),
         classes = "govuk-radios--small govuk-radios--inline"
     ))
 }
+
+@emailAddressPresentRadios = @{
+    govukRadios(Radios(
+        fieldset = Some(Fieldset(
+            legend = Some(Legend(
+                content = Text("ETMP email address present?"),
+                classes = "govuk-fieldset__legend--m",
+                isPageHeading = false
+            ))
+        )),
+        idPrefix = Some("emailAddressPresent"),
+        name = "emailAddressPresent",
+        errorMessage = form.error("emailAddressPresent").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
+            content = Text(e.message)
+        )),
+        items = Seq(
+            RadioItem(
+                content = Text("Yes"),
+                value = Some("true"),
+                checked = form.data.get("emailAddressPresent").fold(true)(_ === "true")
+            ),
+            RadioItem(
+                content = Text("No"),
+                value = Some("false"),
+                checked = form.data.get("emailAddressPresent").fold(false)(_ === "false")
+            )
+        ),
+        classes = "govuk-radios--small govuk-radios--inline"
+    ))
+}
+
 
 @payeContent = {
 @formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneySubmit) {
@@ -185,7 +218,7 @@
         label = Label(
             isPageHeading = false,
             classes = "govuk-label--m",
-            content = Text("Enter total debt amount without interest (leave blank for £1,234.53)")
+            content = Text("Enter total debt amount without interest")
         ),
         classes = "govuk-input--width-5",
         spellcheck = Some(false),
@@ -195,7 +228,7 @@
         errorMessage = form.error("payeDebtTotalAmount").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
             content = Text(e.message)
         )),
-        value = form.data.get("payeDebtTotalAmount"),
+        value = form.data.get("payeDebtTotalAmount").orElse(Some("10000")),
         hint = Some(Hint(content = Text(s"Enter an amount between £1 and ${appConfig.PolicyParameters.EPAYE.maxAmountOfDebt.gdsFormatInPounds} for PAYE.")))
     ))
 
@@ -216,6 +249,8 @@
     ))
 
     @regimeDigitalCorrespondenceRadios
+
+    @emailAddressPresentRadios
 
     @govukCheckboxes(Checkboxes(
         fieldset = Some(Fieldset(
@@ -287,7 +322,7 @@
         label = Label(
             isPageHeading = false,
             classes = "govuk-label--m",
-            content = Text("Enter total debt amount without interest (leave blank for £1,234.53)")
+            content = Text("Enter total debt amount without interest")
         ),
         classes = "govuk-input--width-5",
         spellcheck = Some(false),
@@ -297,7 +332,7 @@
         errorMessage = form.error("vatDebtTotalAmount").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
             content = Text(e.message)
         )),
-        value = form.data.get("vatDebtTotalAmount"),
+        value = form.data.get("vatDebtTotalAmount").orElse(Some("10000")),
         hint = Some(Hint(content = Text(s"Enter an amount between £1 and ${appConfig.PolicyParameters.VAT.maxAmountOfDebt.gdsFormatInPounds} for VAT.")))
     ))
 
@@ -318,6 +353,8 @@
     ))
 
     @regimeDigitalCorrespondenceRadios
+
+    @emailAddressPresentRadios
 
     @govukCheckboxes(Checkboxes(
         fieldset = Some(Fieldset(
