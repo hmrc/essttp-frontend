@@ -16,16 +16,15 @@
 
 @import requests.RequestSupport
 @import messages.Messages
-@import play.api.mvc.Request
+@import play.api.mvc.{Call, Request}
 @import play.twirl.api.Html
-@import controllers.routes
 
 @this(
         layout: templates.Layout,
         requestSupport: RequestSupport
 )
 
-@()(implicit request: Request[_])
+@(emailEntryCall: Call)(implicit request: Request[_])
 
 @import requestSupport._
 
@@ -41,7 +40,7 @@
 
     <p class="govuk-body">
     @{Html(
-        Messages.TooManyPasscodes.`You can go back to enter a new email address`(routes.EmailController.whichEmailDoYouWantToUse.url).show
+        Messages.TooManyPasscodes.`You can go back to enter a new email address`(emailEntryCall.url).show
     )}
     </p>
 }

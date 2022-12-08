@@ -726,30 +726,49 @@ class EmailControllerSpec extends ItSpec {
 
         s"[taxRegime: ${taxRegime.toString}] GET /email-verification-code-entered-too-many-times should" - {
 
-          "display the page" in {
-            stubCommonActions()
-            EssttpBackend.SelectEmail.findJourney("email@test.com", testCrypto, origin)()
+          "display the page when" - {
 
-            val result = controller.tooManyPasscodeAttempts(FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId"))
-            status(result) shouldBe OK
+              def test(stubActions: () => Unit)(expectedEmailEntryUrl: String): Unit = {
+                stubActions()
 
-            val doc = Jsoup.parse(contentAsString(result))
+                val result = controller.tooManyPasscodeAttempts(FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId"))
+                status(result) shouldBe OK
 
-            ContentAssertions.commonPageChecks(
-              doc,
-              "Email verification code entered too many times",
-              shouldBackLinkBePresent = false,
-              expectedSubmitUrl       = None,
-              regimeBeingTested       = Some(taxRegime)
-            )
+                val doc = Jsoup.parse(contentAsString(result))
 
-            val paragraphs = doc.select("p.govuk-body").asScala.toList
+                ContentAssertions.commonPageChecks(
+                  doc,
+                  "Email verification code entered too many times",
+                  shouldBackLinkBePresent = false,
+                  expectedSubmitUrl       = None,
+                  regimeBeingTested       = Some(taxRegime)
+                )
 
-            paragraphs.size shouldBe 2
+                val paragraphs = doc.select("p.govuk-body").asScala.toList
 
-            paragraphs(0).text() shouldBe "You have entered an email verification code too many times."
-            paragraphs(1).text() shouldBe "You can go back to enter a new email address."
-            paragraphs(1).select("a").attr("href") shouldBe routes.EmailController.whichEmailDoYouWantToUse.url
+                paragraphs.size shouldBe 2
+
+                paragraphs(0).text() shouldBe "You have entered an email verification code too many times."
+                paragraphs(1).text() shouldBe "You can go back to enter a new email address."
+                paragraphs(1).select("a").attr("href") shouldBe expectedEmailEntryUrl
+                ()
+              }
+
+            "there is an ETMP email" in {
+              test{ () =>
+                stubCommonActions()
+                EssttpBackend.SelectEmail.findJourney("email@test.com", testCrypto, origin)()
+                ()
+              }(routes.EmailController.whichEmailDoYouWantToUse.url)
+            }
+
+            "there is no ETMP email" in {
+              test{ () =>
+                stubCommonActions()
+                EssttpBackend.SelectEmail.findJourney("email@test.com", testCrypto, origin, etmpEmail = None)()
+                ()
+              }(routes.EmailController.enterEmail.url)
+            }
           }
 
         }
