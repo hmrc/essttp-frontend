@@ -22,6 +22,7 @@
 @import requests.RequestSupport
 @import models.EligibilityErrors
 @import essttp.journey.model.Origins
+@import essttp.rootmodel.TaxRegime
 @import testOnly.models.formsmodel.Enrolments
 @import testOnly.models.formsmodel.SignInAs
 @import cats.syntax.eq._
@@ -40,9 +41,8 @@
         appConfig: AppConfig
 )
 
-@(form: Form[StartJourneyForm])(implicit
-        request: Request[_]
-)
+
+@(form: Form[StartJourneyForm])(implicit request: Request[_])
 
 @import requestSupport._
 @title = @{
@@ -61,7 +61,7 @@
     }
 }
 
-@enrolmentsContent = @{
+@enrolmentsContent(taxRegime: TaxRegime) = @{
     govukCheckboxes(Checkboxes(
         fieldset = Some(Fieldset(
             legend = Some(Legend(
@@ -72,18 +72,26 @@
         )),
         idPrefix = Some("enrolments"),
         name = "enrolments[]",
-        items = Seq(
-            CheckboxItem(
-                content = Text("PAYE for Employers"),
-                value = Enrolments.Epaye.entryName,
-                checked = form.data.exists(formFields => formFields._1.startsWith("enrolments") && formFields._2 === Enrolments.Epaye.entryName)
-            ),
-            CheckboxItem(
-                content = Text("VAT"),
-                value = Enrolments.Vat.entryName,
-                checked = form.data.exists(formFields => formFields._1.startsWith("enrolments") && formFields._2 === Enrolments.Vat.entryName)
+        items = {
+            Seq(
+                CheckboxItem(
+                    content = Text("PAYE for Employers"),
+                    value = Enrolments.Epaye.entryName,
+                    checked = form.data.toList
+                            .filter(_._1.startsWith("enrolments"))
+                            .find(_._2 === Enrolments.Epaye.entryName)
+                            .fold(taxRegime.entryName === "Epaye")(_._2 === Enrolments.Epaye.entryName)
+                ),
+                CheckboxItem(
+                    content = Text("VAT"),
+                    value = Enrolments.Vat.entryName,
+                    checked = form.data.toList
+                            .filter(_._1.startsWith("enrolments"))
+                            .find(_._2 === Enrolments.Vat.entryName)
+                            .fold(taxRegime.entryName === "Vat")(_._2 === Enrolments.Vat.entryName)
+                )
             )
-        ),
+        },
         classes = "govuk-checkboxes--small"
     ))
 }
@@ -210,7 +218,7 @@
 
     <input type="hidden" name="taxRegime" value="Epaye">
     @signInAsContent
-    @enrolmentsContent
+    @enrolmentsContent(TaxRegime.Epaye)
 
     @govukInput(Input(
         id = "payeDebtTotalAmount",
@@ -314,7 +322,7 @@
 @formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneySubmit) {
     <input type="hidden" name="taxRegime" value="Vat">
     @signInAsContent
-    @enrolmentsContent
+    @enrolmentsContent(TaxRegime.Vat)
 
     @govukInput(Input(
         id = "vatDebtTotalAmount",
