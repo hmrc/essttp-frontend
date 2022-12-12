@@ -1101,7 +1101,7 @@ object Messages {
     )
 
     val `We will use this email address to...`: Message = Message(
-      english = "We will use this email address to send you information about your payment plan. It may take up to <strong>24 hours</strong> to receive notifications after you set up your plan.",
+      english = "We will use this email address to send you information about your payment plan. It may take <strong>up to 24 hours</strong> to receive notifications after you set up your plan.",
       welsh   = "Byddwn yn defnyddio’r cyfeiriad e-bost hwn er mwyn anfon gwybodaeth atoch am eich cynllun talu. Gallai gymryd <strong>hyd at 24 awr</strong> i gael hysbysiadau ar ôl i chi drefnu’ch cynllun."
     )
 
