@@ -854,6 +854,11 @@ object Messages {
       welsh   = "Y cyfanswm i’w dalu"
     )
 
+    val `How much you can afford to pay each month`: Message = Message(
+      english = "how much you can afford to pay each month",
+      welsh   = "faint y gallwch fforddio ei dalu bob mis"
+    )
+
   }
 
   object AboutYourBankAccount {

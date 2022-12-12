@@ -50,12 +50,17 @@ class PaymentScheduleController @Inject() (
         MissingInfoController.redirectToMissingInfoPage()
 
       case j: Journey.AfterSelectedPaymentPlan =>
+        val monthlyPaymentAmount = j match {
+          case j1: Journey.AfterEnteredMonthlyPaymentAmount => j1.monthlyPaymentAmount
+        }
+
         finalStateCheck(
           journey = j,
           result  = Ok(paymentSchedulePage(
-            upfrontPaymentAnswers = upfrontPaymentAnswersFromJourney(j),
-            paymentDay            = dayOfMonthFromJourney(j),
-            paymentPlan           = j.selectedPaymentPlan
+            upfrontPaymentAnswers          = upfrontPaymentAnswersFromJourney(j),
+            paymentDay                     = dayOfMonthFromJourney(j),
+            paymentPlan                    = j.selectedPaymentPlan,
+            affordableMonthlyPaymentAmount = monthlyPaymentAmount.value
           ))
         )
     }

@@ -62,7 +62,7 @@
         @govukButton(
             Button(
                 content = Text(Messages.TermsAndConditions.`Agree and continue`.show),
-                preventDoubleClick = !isEmailAddressRequired,
+                preventDoubleClick = if(isEmailAddressRequired) None else Some(true),
                 classes = if(isEmailAddressRequired) "" else "disable-on-click"
             )
         )
