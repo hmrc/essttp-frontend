@@ -120,7 +120,7 @@ class EmailControllerSpec extends ItSpec {
             )
 
             doc.select(".govuk-hint").first().html shouldBe "We will use this email address to send you information about your payment plan. " +
-              "It may take up to <strong>24 hours</strong> to receive notifications after you set up your plan."
+              "It may take <strong>up to 24 hours</strong> to receive notifications after you set up your plan."
 
             val radios: Elements = doc.select(".govuk-radios__item")
             radios.size() shouldBe 2
@@ -304,7 +304,7 @@ class EmailControllerSpec extends ItSpec {
             )
 
             doc.select(".govuk-body").html shouldBe "We will use this email address to send you information about your payment plan. " +
-              "It may take up to <strong>24 hours</strong> to receive notifications after you set up your plan."
+              "It may take <strong>up to 24 hours</strong> to receive notifications after you set up your plan."
 
             doc.select("#newEmailInput-hint").text() shouldBe "For example, myname@sample.com"
             doc.select("#newEmailInput").attr("type") shouldBe "email"
