@@ -403,7 +403,7 @@ class EmailControllerSpec extends ItSpec {
           }
           val expectedPageTitleWelsh = taxRegime match {
             case TaxRegime.Epaye => "Trefnu cynllun talu ar gyfer TWE Cyflogwyr"
-            case TaxRegime.Vat   => "Set up a VAT payment plan"
+            case TaxRegime.Vat   => "Trefnu cynllun talu TAW"
           }
 
           "not allow journeys where an email has not been selected" in {
