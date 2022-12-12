@@ -169,6 +169,7 @@ object Messages {
       case TaxRegime.Vat =>
         Message(
           english = "Set up a VAT payment plan",
+          welsh   = "Trefnu cynllun talu TAW"
         )
     }
 
@@ -192,7 +193,7 @@ object Messages {
 
     val `For further support you can contact the Payment Support Service on 0300 200 3835 to speak to an advisor.`: Message = Message(
       english = "For further support you can contact the Payment Support Service on <strong>0300 200 3835</strong> to speak to an advisor.",
-      welsh   = "I gael cymorth pellach, gallwch gysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEM ar <strong>0300 200 1900</strong i siarad ag ymgynghorydd."
+      welsh   = "I gael cymorth pellach, gallwch gysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEF ar <strong>0300 200 1900</strong i siarad ag ymgynghorydd."
     )
 
     val `If you need extra support`: Message = Message(
@@ -226,7 +227,8 @@ object Messages {
     )
 
     val `your VAT number. This is 9 characters, for example, 1233456789`: Message = Message(
-      english = "your VAT number. This is 9 characters, for example, 123456789"
+      english = "your VAT number. This is 9 characters, for example, 123456789",
+      welsh   = "eich rhif TAW. Mae hyn yn cynnwys 9 o gymeriadau, er enghraifft, 123456789"
     )
 
     val `your bank details`: Message = Message(
@@ -271,7 +273,7 @@ object Messages {
 
     val `You already have a payment plan with HMRC`: Message = Message(
       english = "You already have a payment plan with HMRC",
-      welsh   = "Mae eisoes gennych gynllun talu gyda CThEM"
+      welsh   = "Mae eisoes gennych gynllun talu gyda CThEF"
     )
 
     val `You can only have one payment plan at a time.`: Message = Message(
@@ -295,11 +297,13 @@ object Messages {
     )
 
     val `To be eligible to set up a payment plan online, you need to be up to date with your returns. Once you have done this, you can return to the service.`: Message = Message(
-      english = "To be eligible to set up a payment plan online, you need to be up to date with your returns. Once you have done this, you can return to the service."
+      english = "To be eligible to set up a payment plan online, you need to be up to date with your returns. Once you have done this, you can return to the service.",
+      welsh   = "I fod yn gymwys i drefnu cynllun talu ar-lein, mae’n rhaid i chi fod wedi cyflwyno’ch Ffurflen TAW. Pan fyddwch wedi gwneud hyn, gallwch ddychwelyd i’r gwasanaeth."
     )
 
     val `If you have recently filed your return, your account may take up to 72 hours to be updated before you can set up a payment plan.`: Message = Message(
-      english = "If you have recently filed your return, your account may take up to 72 hours to be updated before you can set up a payment plan."
+      english = "If you have recently filed your return, your account may take up to 72 hours to be updated before you can set up a payment plan.",
+      welsh   = "Os ydych chi wedi cyflwyno’ch Ffurflen Dreth yn ddiweddar, gallai gymryd hyd at 72 awr i’ch cyfrif gael ei ddiweddaru cyn i chi allu trefnu cynllun talu."
     )
 
     val `Go to your tax account`: Message = Message(
@@ -331,13 +335,16 @@ object Messages {
     )
 
     val `You are not registered`: Message = Message(
-      english = "You are not registered"
+      english = "You are not registered",
+      welsh   = "Dydych chi ddim wedi’ch cofrestru"
     )
     val `You are not eligible for an online payment plan because you need to register for VAT Online.`: Message = Message(
-      english = "You are not eligible for an online payment plan because you need to register for VAT Online."
+      english = "You are not eligible for an online payment plan because you need to register for VAT Online.",
+      welsh   = "Dydych chi ddim yn gymwys ar gyfer cynllun talu ar-lein oherwydd bod yn rhaid i chi gofrestru ar gyfer TAW ar-lein."
     )
     val `Find out how to register.`: Message = Message(
-      english = "Find out how to register"
+      english = "Find out how to register",
+      welsh   = "Dysgu sut i gofrestru"
     )
 
   }
@@ -390,7 +397,7 @@ object Messages {
 
     val `you do not have any other payment plans or debts with HMRC`: Message = Message(
       english = "you do not have any other payment plans or debts with HMRC",
-      welsh   = "nid oes gennych unrhyw gynlluniau talu na dyledion eraill gyda CThEM"
+      welsh   = "nid oes gennych unrhyw gynlluniau talu na dyledion eraill gyda CThEF"
     )
 
     val `your Employers’ PAYE submissions are up to date`: Message = Message(
@@ -457,59 +464,76 @@ object Messages {
 
   object Vat {
     val `Set up a VAT payment plan`: Message = Message(
-      english = "Set up a VAT payment plan"
+      english = "Set up a VAT payment plan",
+      welsh   = "Trefnu cynllun talu TAW"
     )
     val `The payment plan covers all appropriate overdue amounts...`: Message = Message(
-      english = "The payment plan covers all appropriate overdue amounts, surcharges, penalties and interest. The payments you make may incur interest."
+      english = "The payment plan covers all appropriate overdue amounts, surcharges, penalties and interest. The payments you make may incur interest.",
+      welsh   = "Mae’r cynllun talu’n cwmpasu pob gordal, cosb, llog a swm gorddyledus priodol. Efallai y codir llog ar y taliadau a wnewch."
     )
     val `Who can use this service`: Message = Message(
-      english = "Who can use this service"
+      english = "Who can use this service",
+      welsh   = "Pwy all ddefnyddio’r gwasanaeth hwn"
     )
     val `You are eligible to set up an online payment plan if:`: Message = Message(
       english = "You are eligible to set up an online payment plan if:",
       welsh   = "Rydych yn gymwys i drefnu cynllun talu ar-lein os:"
     )
     def `you plan to pay the debt off within the next ... months or less`(maxPlanDuration: Int): Message = Message(
-      english = s"you plan to pay the debt off within the next ${maxPlanDuration.toString} months or less"
+      english = s"you plan to pay the debt off within the next ${maxPlanDuration.toString} months or less",
+      welsh   = s"rydych chi’n bwriadu talu’r ddyled cyn pen y ${maxPlanDuration.toString} mis nesaf"
     )
     def `you owe ... or less`(maxAmountOfDebt: AmountInPence): Message = Message(
-      english = s"you owe ${maxAmountOfDebt.gdsFormatInPounds} or less"
+      english = s"you owe ${maxAmountOfDebt.gdsFormatInPounds} or less",
+      welsh   = s"mae arnoch chi ${maxAmountOfDebt.gdsFormatInPounds} neu lai"
     )
     val `you do not have any other payment plans or debts with HMRC`: Message = Message(
-      english = "you do not have any other payment plans or debts with HMRC"
+      english = "you do not have any other payment plans or debts with HMRC",
+      welsh   = "does gennych chi ddim cynlluniau talu na dyledion eraill gyda CThEF"
     )
     val `your tax returns are up to date`: Message = Message(
-      english = "your tax returns are up to date"
+      english = "your tax returns are up to date",
+      welsh   = "mae’ch Ffurflenni Treth yn gyfredol"
     )
     def `You can use this service within ... days of the overdue payment deadline.`(maxAgeOfDebtInDays: Int): Message = Message(
-      english = s"You can use this service within ${maxAgeOfDebtInDays.toString} days of the overdue payment deadline."
+      english = s"You can use this service within ${maxAgeOfDebtInDays.toString} days of the overdue payment deadline.",
+      welsh   = s"Gallwch chi ddefnyddio’r gwasanaeth hwn cyn pen ${maxAgeOfDebtInDays.toString} diwrnod i ddyddiad cau’r taliad hwyr."
     )
     val `If you have a Customer Compliance Manager...`: Message = Message(
-      english = "If you have a Customer Compliance Manager, consider discussing your needs with them before using this service."
+      english = "If you have a Customer Compliance Manager, consider discussing your needs with them before using this service.",
+      welsh   = "Os oes gennych chi reolwr cydymffurfiad cwsmeriaid, ystyriwch drafod eich anghenion ag ef cyn defnyddio’r gwasanaeth hwn."
     )
     val `Before you start`: Message = Message(
-      english = "Before you start"
+      english = "Before you start",
+      welsh   = "Cyn i chi ddechrau"
     )
     val `You must be:`: Message = Message(
-      english = "You must be:"
+      english = "You must be:",
+      welsh   = "Mae’n rhaid i chi fod:"
     )
     val `a named account holder for the UK bank account you intend to use`: Message = Message(
-      english = "a named account holder for the UK bank account you intend to use"
+      english = "a named account holder for the UK bank account you intend to use",
+      welsh   = "wedi’ch enwi’n ddeiliad y cyfrif ar gyfer y cyfrif banc yn y DU rydych yn bwriadu ei ddefnyddio"
     )
     val `able to authorise a Direct Debit`: Message = Message(
-      english = "able to authorise a Direct Debit"
+      english = "able to authorise a Direct Debit",
+      welsh   = "yn gallu awdurdodi Debyd Uniongyrchol"
     )
     val `Who cannot use this service:`: Message = Message(
-      english = "Who cannot use this service:"
+      english = "Who cannot use this service:",
+      welsh   = "Pwy sy’n methu defnyddio’r gwasanaeth hwn:"
     )
     val `cash accounting customers`: Message = Message(
-      english = "cash accounting customers"
+      english = "cash accounting customers",
+      welsh   = "cwsmeriaid cyfrifyddu arian parod"
     )
     val `annual accounting scheme members`: Message = Message(
-      english = "annual accounting scheme members"
+      english = "annual accounting scheme members",
+      welsh   = "aelodau o’r cynllun cyfrifyddu blynyddol"
     )
     val `payment on account customers`: Message = Message(
-      english = "payment on account customers"
+      english = "payment on account customers",
+      welsh   = "cwsmeriaid taliad ar gyfrif"
     )
     val `You must keep up to date with your payments...`: Message = Message(
       english = "You must keep up to date with your payments. HMRC may ask you to pay the total outstanding amount if you do not. HMRC intend this as a one-off payment plan to give you extra support.",
@@ -667,7 +691,7 @@ object Messages {
 
     val `We recommend you speak to an adviser...`: Message = Message(
       english = "We recommend you speak to an adviser on <strong>0300 200 3835</strong> at the Payment Support Service to talk about your payment options.",
-      welsh   = "Rydym yn argymell eich bod yn siarad ag ymgynghorydd ar <strong>0300 200 1900</strong> yng Ngwasanaeth Cwsmeriaid Cymraeg CThEM i drafod eich opsiynau talu."
+      welsh   = "Rydym yn argymell eich bod yn siarad ag ymgynghorydd ar <strong>0300 200 1900</strong> yng Ngwasanaeth Cwsmeriaid Cymraeg CThEF i drafod eich opsiynau talu."
     )
 
   }
@@ -1069,7 +1093,8 @@ object Messages {
           )
         case TaxRegime.Vat =>
           Message(
-            english = "HMRC Direct Debit Support Team VAT 2<br>DMB 612<br>BX5 5AB<br>United Kingdom"
+            english = "HMRC Direct Debit Support Team VAT 2<br>DMB 612<br>BX5 5AB<br>United Kingdom",
+            welsh   = "Gwasanaeth Cwsmeriaid Cymraeg CThEF <br>HMRC<br>BX9 1ST"
           )
       }
     }
@@ -1116,7 +1141,8 @@ object Messages {
     )
 
     val `Select which email address you want to use`: Message = Message(
-      english = "Select which email address you want to use"
+      english = "Select which email address you want to use",
+      welsh   = "Pa e-bost rydych am ei ddefnyddio?"
     )
 
     def getError(key: String): Message = key match {
@@ -1145,19 +1171,23 @@ object Messages {
   object EmailConfirmed {
 
     val `Email address confirmed`: Message = Message(
-      english = "Email address confirmed"
+      english = "Email address confirmed",
+      welsh   = "Cyfeiriad e-bost wedi’i gadarnhau"
     )
 
     def `The email address ... has been confirmed`(email: Email): Message = Message(
-      english = s"The email address <strong>${email.value.decryptedValue}</strong> has been confirmed."
+      english = s"The email address <strong>${email.value.decryptedValue}</strong> has been confirmed.",
+      welsh   = s"Mae’r cyfeiriad e-bost <strong>${email.value.decryptedValue}</strong> wedi’i gadarnhau."
     )
 
     val `We'll only use this address to contact you about your payment plan`: Message = Message(
-      english = "We’ll only use this address to contact you about your payment plan."
+      english = "We’ll only use this address to contact you about your payment plan.",
+      welsh   = "Byddwn yn defnyddio’r cyfeiriad hwn i gysylltu â chi ynghylch eich cyfrif cynllun talu."
     )
 
     val `Your email has not been updated in other government services`: Message = Message(
-      english = "Your email has not been updated in other government services."
+      english = "Your email has not been updated in other government services.",
+      welsh   = "Nid yw’ch e-bost wedi cael ei ddiweddaru ar gyfer gwasanaethau eraill y llywodraeth."
     )
 
   }
@@ -1165,11 +1195,13 @@ object Messages {
   object TooManyEmails {
 
     val `You have tried to confirm an email too many times`: Message = Message(
-      english = "You have tried to confirm an email too many times"
+      english = "You have tried to confirm an email too many times",
+      welsh   = "Rydych wedi ceisio cadarnhau cyfeiriad e-bost gormod o weithiau"
     )
 
     val `You have made too many attempts to confirm an email address`: Message = Message(
-      english = "You have made too many attempts to confirm an email address."
+      english = "You have made too many attempts to confirm an email address.",
+      welsh   = "Rydych chi wedi gwneud gormod o gynigion i gadarnhau cyfeiriad e-bost."
     )
 
   }
@@ -1177,15 +1209,18 @@ object Messages {
   object TooManyPasscodes {
 
     val `Email verification code entered too many times`: Message = Message(
-      english = "Email verification code entered too many times"
+      english = "Email verification code entered too many times",
+      welsh   = "Cod dilysu e-bost wedi’i nodi gormod o weithiau"
     )
 
     val `You have entered an email verification code too many times`: Message = Message(
-      english = "You have entered an email verification code too many times."
+      english = "You have entered an email verification code too many times.",
+      welsh   = "Rydych chi wedi nodi cod dilysu e-bost gormod o weithiau."
     )
 
     def `You can go back to enter a new email address`(link: String): Message = Message(
-      english = s"""You can <a class="govuk-link" href="$link">go back to enter a new email address</a>."""
+      english = s"""You can <a class="govuk-link" href="$link">go back to enter a new email address</a>.""",
+      welsh   = s"""Gallwch can <a class="govuk-link" href="$link">fynd yn ôl i nodi cyfeiriad e-bost newydd</a>."""
     )
 
   }
@@ -1270,11 +1305,12 @@ object Messages {
 
     val `HMRC will send you a letter within 5 working days with your payment dates.`: Message = Message(
       english = "HMRC will send you a letter within 5 working days with your payment dates.",
-      welsh   = "Bydd CThEM yn anfon llythyr atoch cyn pen 5 diwrnod gyda’ch dyddiadau talu."
+      welsh   = "Bydd CThEF yn anfon llythyr atoch cyn pen 5 diwrnod gyda’ch dyddiadau talu."
     )
 
     val `We will send a secure message with payment due dates to your business tax account inbox within 24 hours.`: Message = Message(
-      english = "We will send a secure message with payment due dates to your business tax account inbox within 24 hours."
+      english = "We will send a secure message with payment due dates to your business tax account inbox within 24 hours.",
+      welsh   = "Byddwn yn anfon neges ddiogel gyda dyddiadau cau ar gyfer talu i fewnflwch eich cyfrif treth busnes cyn pen 24 awr."
     )
 
     def paymentInfo(hasUpfrontPayment: Boolean, paymentDate: String): Message = Message(
@@ -1304,7 +1340,7 @@ object Messages {
 
     val `Call the HMRC Helpline on 0300 123 1813.`: Message = Message(
       english = "Call the HMRC Helpline on 0300 123 1813.",
-      welsh   = "Ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEM ar 0300 200 1900."
+      welsh   = "Ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEF ar 0300 200 1900."
     )
 
     val `Go to tax account`: Message = Message(
