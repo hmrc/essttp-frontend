@@ -47,7 +47,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
 
             def extractSummaryRows(elements: List[Element]): List[SummaryRow] = elements.map { e =>
               SummaryRow(
-                e.select(".govuk-summary-list__key").text(),
+                e.select(".govuk-summary-list__key").html(),
                 e.select(".govuk-summary-list__value").text(),
                 e.select(".govuk-summary-list__actions > .govuk-link").attr("href")
               )
@@ -63,7 +63,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
               )
               val upfrontPaymentAmountRow = upfrontPaymentAmountValue.map(amount =>
                 SummaryRow(
-                  "Taken within 10 working days",
+                  "Upfront payment<br><span class=\"govuk-body-s\">Taken within 10 working days</span>",
                   amount,
                   routes.UpfrontPaymentController.upfrontPaymentAmount.url
                 ))
@@ -74,11 +74,18 @@ class PaymentScheduleControllerSpec extends ItSpec {
             }
 
             def testPaymentPlanRows(summary: Element)(
-                paymentDayValue:      String,
-                datesToAmountsValues: List[(String, String)],
-                totalToPayValue:      String
+                affordableMonthlyPaymentAmount: String,
+                paymentDayValue:                String,
+                datesToAmountsValues:           List[(String, String)],
+                totalToPayValue:                String
             ) = {
               val paymentPlanRows = summary.select(".govuk-summary-list__row").iterator().asScala.toList
+
+              val monthlyPaymentAmountRow = SummaryRow(
+                "How much can you afford to pay each month?",
+                affordableMonthlyPaymentAmount,
+                routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount.url
+              )
 
               val paymentDayRow = SummaryRow(
                 "Payments collected on",
@@ -95,7 +102,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
 
               val totalToPayRow = SummaryRow("Total to pay", totalToPayValue, "")
 
-              val expectedRows = paymentDayRow :: paymentAmountRows ::: List(totalToPayRow)
+              val expectedRows = monthlyPaymentAmountRow :: paymentDayRow :: paymentAmountRows ::: List(totalToPayRow)
 
               extractSummaryRows(paymentPlanRows) shouldBe expectedRows
             }
@@ -133,7 +140,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
                 summaries.size shouldBe 2
 
                 testUpfrontPaymentSummaryRows(summaries(0))(canPayUpfrontValue, upfrontPaymentAmountValue)
-                testPaymentPlanRows(summaries(1))(paymentDayValue, datesToAmountsValues, totalToPayValue)
+                testPaymentPlanRows(summaries(1))("£300", paymentDayValue, datesToAmountsValues, totalToPayValue)
               }
 
             s"[$regime journey] there is an upfrontPayment amount" in {

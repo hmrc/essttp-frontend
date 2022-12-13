@@ -20,7 +20,7 @@
 @import play.twirl.api.Html
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import essttp.journey.model.UpfrontPaymentAnswers
-@import essttp.rootmodel.DayOfMonth
+@import essttp.rootmodel.{AmountInPence, DayOfMonth}
 @import essttp.rootmodel.ttp.affordablequotes.PaymentPlan
 @import controllers.routes
 @import messages.DateMessages
@@ -39,7 +39,8 @@
 @(
   upfrontPaymentAnswers: UpfrontPaymentAnswers,
   paymentDay: DayOfMonth,
-  paymentPlan: PaymentPlan
+  paymentPlan: PaymentPlan,
+  affordableMonthlyPaymentAmount: AmountInPence
 )(implicit request: Request[_], ord: Ordering[LocalDate])
 
 @import requestSupport._
@@ -73,10 +74,11 @@
       ))
     )
 
+
   val upfrontPaymentAmountRow = upfrontPaymentAmount.map{ amount =>
     SummaryListRow(
       key = Key(
-        content = HtmlContent(Html(Messages.PaymentSchedule.`Taken within 10 working days`.show)),
+        content = HtmlContent(Html(Messages.UpfrontPaymentSummary.`Upfront payment`.show)),
         classes = "govuk-!-width-one-half"
       ),
       value = Value(
@@ -95,6 +97,28 @@
   }
 
   canPayUpfrontRow :: upfrontPaymentAmountRow.toList
+}
+
+
+@montlyAmountRow = @{
+  SummaryListRow(
+    key = Key(
+      content = HtmlContent(Html(Messages.MonthlyPaymentAmount.`How much can you afford to pay each month?`.show)),
+      classes = "govuk-!-width-one-half"
+    ),
+    value = Value(
+      content = Text(affordableMonthlyPaymentAmount.gdsFormatInPounds)
+    ),
+    actions = Some(Actions(
+      items = Seq(
+        ActionItem(
+          href = routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount.url,
+          content = Text(Messages.change.show),
+          visuallyHiddenText = Some(Messages.PaymentSchedule.`How much you can afford to pay each month`.show)
+        )
+      )
+    ))
+  )
 }
 
 @paymentDayRow = @{
@@ -167,18 +191,14 @@
   </h1>
 
 
-  <h2 class="govuk-heading-l">
-    @{Messages.PaymentSchedule.`Upfront payment`.show}
-  </h2>
-
-  @govukSummaryList(SummaryList(rows = upfrontPaymentRows))
+  @govukSummaryList(SummaryList(rows = upfrontPaymentRows, classes = "govuk-!-margin-bottom-9"))
 
 
-  <h2 class="govuk-heading-l">
+  <h2 class="govuk-heading-m">
     @{Messages.PaymentSchedule.`Monthly payments`.show}
   </h2>
 
-    @govukSummaryList(SummaryList(rows = monthlyPaymentRows))
+  @govukSummaryList(SummaryList(rows = montlyAmountRow :: monthlyPaymentRows, classes = "govuk-!-margin-top-6"))
 
   @formWithCSRF(action = routes.PaymentScheduleController.checkPaymentScheduleSubmit) {
     @govukButton(Button(content = Text(Messages.continue.show)))
