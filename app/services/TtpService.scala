@@ -172,6 +172,7 @@ class TtpService @Inject() (
       regimeType                  = regimeType,
       regimePaymentFrequency      = PaymentPlanFrequencies.Monthly,
       arrangementAgreedDate       = ArrangementAgreedDate(LocalDate.now(ZoneOffset.of("Z")).toString),
+      lockFromDate                = LockFromDate(LocalDate.now(ZoneOffset.of("Z")).toString),
       identification              = eligibilityCheckResult.identification,
       directDebitInstruction      = DirectDebitInstruction(
         sortCode        = directDebitDetails.sortCode,
