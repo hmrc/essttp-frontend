@@ -325,6 +325,7 @@ object TdAll {
       regimeType                  = regimeType,
       regimePaymentFrequency      = PaymentPlanFrequencies.Monthly,
       arrangementAgreedDate       = ArrangementAgreedDate(LocalDate.now(ZoneOffset.of("Z")).toString),
+      lockFromDate                = LockFromDate(LocalDate.now(ZoneOffset.of("Z")).toString),
       identification              = identification(taxRegime),
       directDebitInstruction      = DirectDebitInstruction(
         sortCode        = SortCode(SensitiveString("123456")),
