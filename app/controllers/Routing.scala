@@ -17,7 +17,7 @@
 package controllers
 
 import controllers.pagerouters.EligibilityRouter
-import essttp.emailverification.EmailVerificationStatus
+import essttp.emailverification.EmailVerificationResult
 import essttp.journey.model.Journey
 import essttp.rootmodel.TaxRegime
 import play.api.mvc.Call
@@ -69,11 +69,11 @@ object Routing {
       routes.EmailController.requestVerification
 
     case j: Journey.Stages.EmailVerificationComplete =>
-      j.emailVerificationStatus match {
-        case EmailVerificationStatus.Verified =>
+      j.emailVerificationResult match {
+        case EmailVerificationResult.Verified =>
           if (allowSubmitArrangement) routes.SubmitArrangementController.submitArrangement
           else routes.EmailController.emailAddressConfirmed
-        case EmailVerificationStatus.Locked => routes.EmailController.tooManyPasscodeAttempts
+        case EmailVerificationResult.Locked => routes.EmailController.tooManyPasscodeAttempts
       }
 
     case j: Journey.Stages.SubmittedArrangement =>

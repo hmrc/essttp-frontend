@@ -16,7 +16,7 @@
 
 package testsupport.testdata
 
-import essttp.emailverification.EmailVerificationStatus
+import essttp.emailverification.EmailVerificationResult
 import essttp.rootmodel.{DayOfMonth, TaxRegime}
 import uk.gov.hmrc.crypto.Encrypter
 
@@ -56,9 +56,9 @@ object JourneyInfo {
   def directDebitDetailsNotAccountHolder(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo(encrypter)
   def emailAddressRequired(isEmailAddressRequired: Boolean): JourneyInfoAsJson = TdJsonBodies.isEmailAddressRequiredJourneyInfo(isEmailAddressRequired)
   def emailToBeVerified(email: String, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.emailAddressSelectedToBeVerified(email, encrypter)
-  def emailVerificationStatus(status: EmailVerificationStatus): JourneyInfoAsJson = TdJsonBodies.emailVerificationStatus(status)
+  def emailVerificationResult(result: EmailVerificationResult): JourneyInfoAsJson = TdJsonBodies.emailVerificationResult(result)
   def emailVerificationAnswersNoEmailRequired: JourneyInfoAsJson = TdJsonBodies.emailVerificationAnswersNoEmailJourney
-  def emailVerificationAnswersEmailRequired(email: String, status: EmailVerificationStatus, encrypter: Encrypter): JourneyInfoAsJson =
+  def emailVerificationAnswersEmailRequired(email: String, status: EmailVerificationResult, encrypter: Encrypter): JourneyInfoAsJson =
     TdJsonBodies.emailVerificationAnswersEmailRequired(email, status, encrypter)
   def arrangementSubmitted(taxRegime: TaxRegime): JourneyInfoAsJson = TdJsonBodies.arrangementResponseJourneyInfo(taxRegime)
   /** * **/
@@ -160,8 +160,8 @@ object JourneyInfo {
   def selectedEmailToBeVerified(email: String, taxRegime: TaxRegime, encrypter: Encrypter, etmpEmail: Option[String] = Some(TdAll.etmpEmail)): List[JourneyInfoAsJson] =
     emailToBeVerified(email, encrypter) :: agreedTermsAndConditions(isEmailAddressRequired = true, taxRegime, encrypter, etmpEmail)
 
-  def emailVerificationComplete(email: String, status: EmailVerificationStatus, taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
-    emailVerificationStatus(status) :: emailVerificationAnswersEmailRequired(email, status, encrypter) :: selectedEmailToBeVerified(email, taxRegime, encrypter)
+  def emailVerificationComplete(email: String, result: EmailVerificationResult, taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
+    emailVerificationResult(result) :: emailVerificationAnswersEmailRequired(email, result, encrypter) :: selectedEmailToBeVerified(email, taxRegime, encrypter)
 
   def emailVerificationAnswers(isEmailAddressRequired: Boolean, taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
     emailVerificationAnswersNoEmailRequired :: agreedTermsAndConditions(isEmailAddressRequired, taxRegime, encrypter)
@@ -181,7 +181,7 @@ object JourneyInfo {
       taxRegime: TaxRegime,
       encrypter: Encrypter
   ): List[JourneyInfoAsJson] =
-    arrangementSubmitted(taxRegime) :: emailVerificationAnswersEmailRequired(email, EmailVerificationStatus.Verified, encrypter) ::
+    arrangementSubmitted(taxRegime) :: emailVerificationAnswersEmailRequired(email, EmailVerificationResult.Verified, encrypter) ::
       emailAddressRequired(isEmailAddressRequired = true) :: directDebitDetails(encrypter) ::
       detailsAboutBankAccountBusiness(isAccountHolder = true) :: selectedPlan :: affordableQuotes ::
       upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: monthlyPaymentAmount ::

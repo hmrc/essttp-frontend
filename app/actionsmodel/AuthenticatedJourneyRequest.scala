@@ -19,8 +19,8 @@ package actionsmodel
 import config.AppConfig
 import essttp.bars.model.NumberOfBarsVerifyAttempts
 import essttp.journey.model.{Journey, JourneyId}
+import essttp.rootmodel.GGCredId
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
-import models.GGCredId
 import play.api.mvc._
 import uk.gov.hmrc.auth.core.Enrolments
 

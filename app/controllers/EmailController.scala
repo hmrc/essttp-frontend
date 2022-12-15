@@ -23,12 +23,11 @@ import config.AppConfig
 import controllers.EmailController.{ChooseEmailForm, chooseEmailForm, enterEmailForm}
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.{logErrorAndRouteToDefaultPage, logErrorAndRouteToDefaultPageF}
-import essttp.emailverification.EmailVerificationStatus
+import essttp.emailverification.{EmailVerificationResult, StartEmailVerificationJourneyResponse}
 import essttp.journey.model.Journey
 import essttp.journey.model.Journey.AfterEmailAddressSelectedToBeVerified
 import essttp.rootmodel.Email
 import essttp.utils.Errors
-import models.emailverification.RequestEmailVerificationResponse
 import play.api.data.Form
 import play.api.mvc._
 import services.{EmailVerificationService, JourneyService}
@@ -177,10 +176,10 @@ class EmailController @Inject() (
 
         case j: Journey.AfterEmailAddressSelectedToBeVerified =>
           emailVerificationService.requestEmailVerification(j.emailToBeVerified).map {
-            case RequestEmailVerificationResponse.Success(redirectUri) =>
+            case StartEmailVerificationJourneyResponse.Success(redirectUri) =>
               logger.info(s"Email verification journey successfully started. Redirecting to $redirectUri")
               Redirect(redirectUri)
-            case RequestEmailVerificationResponse.LockedOut =>
+            case StartEmailVerificationJourneyResponse.Locked =>
               Redirect(routes.EmailController.tooManyEmailAddresses)
           }
       }
@@ -199,8 +198,8 @@ class EmailController @Inject() (
 
         case j: Journey.AfterEmailAddressSelectedToBeVerified =>
           for {
-            status <- emailVerificationService.getVerificationStatus(j.emailToBeVerified)
-            updatedJourney <- journeyService.updateEmailVerificationStatus(j.journeyId, status)
+            status <- emailVerificationService.getEmailVerificationResult(j.emailToBeVerified)
+            updatedJourney <- journeyService.updateEmailVerificationResult(j.journeyId, status)
           } yield Redirect(Routing.next(updatedJourney, allowSubmitArrangement = false))
       }
     }
@@ -248,11 +247,11 @@ class EmailController @Inject() (
         logErrorAndRouteToDefaultPage(j)
 
       case j: Journey.AfterEmailAddressVerificationResult =>
-        j.emailVerificationStatus match {
-          case EmailVerificationStatus.Verified =>
+        j.emailVerificationResult match {
+          case EmailVerificationResult.Verified =>
             f(j)
 
-          case EmailVerificationStatus.Locked =>
+          case EmailVerificationResult.Locked =>
             logErrorAndRouteToDefaultPage(j)
         }
     }

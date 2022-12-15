@@ -39,6 +39,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
 
   object BaseUrl {
     val platformHost: Option[String] = config.getOptional[String]("platform.frontend.host")
+    val essttpBackendUrl: String = servicesConfig.baseUrl("essttp-backend")
     val essttpFrontend: String = platformHost.getOrElse(config.get[String]("baseUrl.essttp-frontend"))
     val essttpFrontendHost: String = new URL(essttpFrontend).getHost
     val contactFrontend: String = platformHost.getOrElse(config.get[String]("baseUrl.contact-frontend"))
@@ -49,7 +50,6 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     val timeToPayEligibilityUrl: String = servicesConfig.baseUrl("time-to-pay-eligibility")
     val barsUrl: String = servicesConfig.baseUrl("bank-account-reputation")
     val emailVerificationUrl: String = servicesConfig.baseUrl("email-verification")
-    val emailVerificationFrontendUrl: String = platformHost.getOrElse(config.get[String]("baseUrl.email-verification-frontend"))
     val accessibilityStatementFrontendUrl: String = platformHost.getOrElse(config.get[String]("baseUrl.accessibility-statement-frontend"))
   }
 

@@ -18,25 +18,31 @@ package connectors
 
 import com.google.inject.{Inject, Singleton}
 import config.AppConfig
-import models.GGCredId
-import models.emailverification.{EmailVerificationStatusResponse, RequestEmailVerificationRequest}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import essttp.crypto.CryptoFormat.OperationalCryptoFormat
+import essttp.emailverification._
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class EmailVerificationConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)(implicit ec: ExecutionContext) {
+class EmailVerificationConnector @Inject() (
+    appConfig:  AppConfig,
+    httpClient: HttpClient
+)(implicit ec: ExecutionContext, cryptoFormat: OperationalCryptoFormat) {
 
-  private val requestVerificationUrl: String = appConfig.BaseUrl.emailVerificationUrl + "/email-verification/verify-email"
+  private val startEmailVerificationJourneyUrl: String = appConfig.BaseUrl.essttpBackendUrl + "/essttp-backend/email-verification/start"
 
-  private def getVerificationStatusUrl(ggCredId: GGCredId): String =
-    appConfig.BaseUrl.emailVerificationUrl + s"/email-verification/verification-status/${ggCredId.value}"
+  private val getVerificationResultUrl: String = appConfig.BaseUrl.essttpBackendUrl + "/essttp-backend/email-verification/result"
 
-  def requestEmailVerification(emailVerificationRequest: RequestEmailVerificationRequest)(implicit hc: HeaderCarrier): Future[HttpResponse] =
-    httpClient.POST[RequestEmailVerificationRequest, HttpResponse](requestVerificationUrl, emailVerificationRequest)
+  def startEmailVerificationJourney(
+      emailVerificationRequest: StartEmailVerificationJourneyRequest
+  )(implicit hc: HeaderCarrier): Future[StartEmailVerificationJourneyResponse] =
+    httpClient.POST[StartEmailVerificationJourneyRequest, StartEmailVerificationJourneyResponse](
+      startEmailVerificationJourneyUrl, emailVerificationRequest
+    )
 
-  def getVerificationStatus(ggCredId: GGCredId)(implicit hc: HeaderCarrier): Future[EmailVerificationStatusResponse] =
-    httpClient.GET[EmailVerificationStatusResponse](getVerificationStatusUrl(ggCredId))
+  def getEmailVerificationResult(request: GetEmailVerificationResultRequest)(implicit hc: HeaderCarrier): Future[EmailVerificationResult] =
+    httpClient.POST[GetEmailVerificationResultRequest, EmailVerificationResult](getVerificationResultUrl, request)
 
 }

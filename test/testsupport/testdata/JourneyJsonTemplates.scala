@@ -16,7 +16,7 @@
 
 package testsupport.testdata
 
-import essttp.emailverification.EmailVerificationStatus
+import essttp.emailverification.EmailVerificationResult
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.DayOfMonth
 import uk.gov.hmrc.crypto.Encrypter
@@ -232,10 +232,10 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
-  def `Email verification complete`(email: String, status: EmailVerificationStatus, origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Email verification complete`(email: String, status: EmailVerificationResult, origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = status match {
-      case EmailVerificationStatus.Verified => StageInfo.emailVerificationSuccess
-      case EmailVerificationStatus.Locked   => StageInfo.emailVerificationLocked
+      case EmailVerificationResult.Verified => StageInfo.emailVerificationSuccess
+      case EmailVerificationResult.Locked   => StageInfo.emailVerificationLocked
     },
     journeyInfo = JourneyInfo.emailVerificationComplete(email, status, origin.taxRegime, encrypter),
     origin      = origin

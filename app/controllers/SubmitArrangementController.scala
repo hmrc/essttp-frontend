@@ -19,7 +19,7 @@ package controllers
 import _root_.actions.Actions
 import actionsmodel.AuthenticatedJourneyRequest
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
-import essttp.emailverification.EmailVerificationStatus
+import essttp.emailverification.EmailVerificationResult
 import essttp.journey.model.Journey
 import essttp.rootmodel.TaxRegime
 import play.api.mvc._
@@ -52,9 +52,9 @@ class SubmitArrangementController @Inject() (
         logErrorAndRouteToDefaultPageF(j)
 
       case j: Journey.Stages.EmailVerificationComplete =>
-        j.emailVerificationStatus match {
-          case EmailVerificationStatus.Verified => submitArrangementAndUpdateJourney(Right(j))
-          case EmailVerificationStatus.Locked   => logErrorAndRouteToDefaultPageF(j)
+        j.emailVerificationResult match {
+          case EmailVerificationResult.Verified => submitArrangementAndUpdateJourney(Right(j))
+          case EmailVerificationResult.Locked   => logErrorAndRouteToDefaultPageF(j)
         }
 
       case j: Journey.AfterArrangementSubmitted =>

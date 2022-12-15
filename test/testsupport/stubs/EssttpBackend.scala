@@ -19,7 +19,7 @@ package testsupport.stubs
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.crypto.CryptoFormat
-import essttp.emailverification.EmailVerificationStatus
+import essttp.emailverification.EmailVerificationResult
 import essttp.journey.model.{JourneyId, Origin, Origins}
 import essttp.rootmodel.bank.DetailsAboutBankAccount
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
@@ -489,18 +489,18 @@ object EssttpBackend {
 
   }
 
-  object EmailVerificationStatus {
-    def updateEmailVerificationStatusUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-email-verification-status"
+  object EmailVerificationResult {
+    def updateEmailVerificationResultUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-email-verification-status"
 
-    def stubEmailVerificationStatus(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
-      WireMockHelpers.stubForPostWithResponseBody(updateEmailVerificationStatusUrl(journeyId), updatedJourneyJson)
+    def stubEmailVerificationResult(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(updateEmailVerificationResultUrl(journeyId), updatedJourneyJson)
 
-    def verifyEmailVerificationStatusRequest(journeyId: JourneyId, status: EmailVerificationStatus): Unit =
-      WireMockHelpers.verifyWithBodyParse(updateEmailVerificationStatusUrl(journeyId), status)
+    def verifyEmailVerificationResultRequest(journeyId: JourneyId, status: EmailVerificationResult): Unit =
+      WireMockHelpers.verifyWithBodyParse(updateEmailVerificationResultUrl(journeyId), status)
 
     def findJourney(
         email:     String,
-        status:    EmailVerificationStatus,
+        status:    EmailVerificationResult,
         encrypter: Encrypter,
         origin:    Origin
     )(jsonBody: String = JourneyJsonTemplates.`Email verification complete`(email, status, origin)(encrypter)): StubMapping =

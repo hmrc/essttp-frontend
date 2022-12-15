@@ -17,13 +17,14 @@
 package testsupport.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock.{equalToJson, exactly, postRequestedFor, urlPathEqualTo, verify}
+import org.scalatest.concurrent.Eventually
 import play.api.libs.json.JsObject
 
-object AuditConnectorStub {
+object AuditConnectorStub extends Eventually {
 
   val auditUrl: String = "/write/audit"
 
-  def verifyEventAudited(auditType: String, auditEvent: JsObject): Unit = {
+  def verifyEventAudited(auditType: String, auditEvent: JsObject): Unit = eventually {
     verify(
       postRequestedFor(urlPathEqualTo(auditUrl))
         .withRequestBody(
