@@ -16,7 +16,7 @@
 
 package actionsmodel
 
-import models.GGCredId
+import essttp.rootmodel.GGCredId
 import play.api.mvc.{Request, WrappedRequest}
 import uk.gov.hmrc.auth.core.Enrolments
 

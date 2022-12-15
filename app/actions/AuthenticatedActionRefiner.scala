@@ -20,7 +20,7 @@ import actionsmodel.AuthenticatedRequest
 import com.google.inject.{Inject, Singleton}
 import config.AppConfig
 import controllers.routes
-import models.GGCredId
+import essttp.rootmodel.GGCredId
 import play.api.Logger
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Request, Result}

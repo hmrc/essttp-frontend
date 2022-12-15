@@ -17,27 +17,20 @@
 package services
 
 import actionsmodel.EligibleJourneyRequest
-import cats.syntax.eq._
-import cats.instances.int._
 import com.google.inject.{Inject, Singleton}
 import config.AppConfig
 import connectors.EmailVerificationConnector
 import controllers.routes
-import essttp.emailverification.EmailVerificationStatus
+import essttp.emailverification._
 import essttp.rootmodel.Email
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import messages.Messages
-import models.emailverification.RequestEmailVerificationRequest.EmailDetails
-import models.emailverification.{RequestEmailVerificationRequest, RequestEmailVerificationResponse}
-import play.api.http.Status.{CREATED, INTERNAL_SERVER_ERROR, NOT_FOUND, UNAUTHORIZED}
-import play.api.libs.json.{Json, Reads}
+
 import requests.RequestSupport
 import uk.gov.hmrc.hmrcfrontend.config.ContactFrontendConfig
-import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
-import util.HttpResponseUtils.HttpResponseOps
+import uk.gov.hmrc.http.HeaderCarrier
 
-import java.net.URI
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 @Singleton
 class EmailVerificationService @Inject() (
@@ -45,58 +38,22 @@ class EmailVerificationService @Inject() (
     appConfig:             AppConfig,
     contactFrontendConfig: ContactFrontendConfig,
     requestSupport:        RequestSupport
-)(implicit ec: ExecutionContext) {
+) {
 
   import requestSupport._
 
-  private implicit val requestEmailVerificationResponseSuccessReads: Reads[RequestEmailVerificationResponse.Success] = Json.reads
-
   private val isLocal: Boolean = appConfig.BaseUrl.platformHost.isEmpty
 
-  def requestEmailVerification(emailAddress: Email)(implicit r: EligibleJourneyRequest[_], hc: HeaderCarrier): Future[RequestEmailVerificationResponse] =
-    connector.requestEmailVerification(emailVerificationRequest(emailAddress)).map{ response =>
-      if (response.status === CREATED) {
-        response.parseJSON[RequestEmailVerificationResponse.Success]
-          .fold(
-            msg => throw UpstreamErrorResponse(msg, INTERNAL_SERVER_ERROR),
-            success =>
-              if (isLocal && !URI.create(success.redirectUri).isAbsolute) {
-                RequestEmailVerificationResponse.Success(s"${appConfig.BaseUrl.emailVerificationFrontendUrl}${success.redirectUri}")
-              } else {
-                success
-              }
-          )
-      } else {
-        throw UpstreamErrorResponse(s"Call to request email verification came back with unexpected status ${response.status.toString}", response.status)
-      }
-    }.recover {
-      case u: UpstreamErrorResponse if u.statusCode === UNAUTHORIZED => RequestEmailVerificationResponse.LockedOut
-    }
+  def requestEmailVerification(emailAddress: Email)(implicit r: EligibleJourneyRequest[_], hc: HeaderCarrier): Future[StartEmailVerificationJourneyResponse] =
+    connector.startEmailVerificationJourney(emailVerificationRequest(emailAddress))
 
-  def getVerificationStatus(emailAddress: Email)(implicit r: EligibleJourneyRequest[_], hc: HeaderCarrier): Future[EmailVerificationStatus] =
-    connector.getVerificationStatus(r.ggCredId).map{ statusResponse =>
-      statusResponse.emails.find(_.emailAddress === emailAddress.value.decryptedValue) match {
-        case None =>
-          throw UpstreamErrorResponse("Verification status not found for email address", NOT_FOUND)
+  def getEmailVerificationResult(emailAddress: Email)(implicit r: EligibleJourneyRequest[_], hc: HeaderCarrier): Future[EmailVerificationResult] =
+    connector.getEmailVerificationResult(GetEmailVerificationResultRequest(r.ggCredId, emailAddress))
 
-        case Some(status) =>
-          (status.verified, status.locked) match {
-            case (true, false) =>
-              EmailVerificationStatus.Verified
-            case (false, true) =>
-              EmailVerificationStatus.Locked
-            case _ =>
-              throw UpstreamErrorResponse(s"Got unexpected combination of verified=${status.verified.toString} and " +
-                s"locked=${status.locked.toString} in email verification status response", INTERNAL_SERVER_ERROR)
-          }
-      }
-
-    }
-
-  private def emailVerificationRequest(emailAddress: Email)(implicit r: EligibleJourneyRequest[_]): RequestEmailVerificationRequest = {
+  private def emailVerificationRequest(emailAddress: Email)(implicit r: EligibleJourneyRequest[_]): StartEmailVerificationJourneyRequest = {
     val lang = language(r.request)
 
-    RequestEmailVerificationRequest(
+    StartEmailVerificationJourneyRequest(
       r.ggCredId,
       RequestEmailVerification.continueUrl,
       RequestEmailVerification.origin,
@@ -104,8 +61,11 @@ class EmailVerificationService @Inject() (
       RequestEmailVerification.accessibilityStatementUrl,
       Messages.ServicePhase.serviceName(r.journey.taxRegime).show(language),
       RequestEmailVerification.emailEntryUrl(r.eligibilityCheckResult),
-      EmailDetails(emailAddress, RequestEmailVerification.emailEntryUrl(r.eligibilityCheckResult)),
-      lang
+      RequestEmailVerification.emailEntryUrl(r.eligibilityCheckResult),
+      emailAddress,
+      lang.code,
+      isLocal
+
     )
   }
 

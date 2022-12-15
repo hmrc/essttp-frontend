@@ -17,7 +17,7 @@
 package services
 
 import com.google.inject.{Inject, Singleton}
-import essttp.emailverification.EmailVerificationStatus
+import essttp.emailverification.EmailVerificationResult
 import essttp.journey.JourneyConnector
 import essttp.journey.model.{Journey, JourneyId}
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
@@ -100,8 +100,8 @@ class JourneyService @Inject() (journeyConnector: JourneyConnector) extends Logg
   def updateSelectedEmailToBeVerified(journeyId: JourneyId, email: Email)(implicit requestHeader: RequestHeader): Future[Journey] =
     journeyConnector.updateSelectedEmailToBeVerified(journeyId, email)
 
-  def updateEmailVerificationStatus(journeyId: JourneyId, emailVerificationStatus: EmailVerificationStatus)(implicit requestHeader: RequestHeader): Future[Journey] =
-    journeyConnector.updateEmailVerificationStatus(journeyId, emailVerificationStatus)
+  def updateEmailVerificationResult(journeyId: JourneyId, emailVerificationResult: EmailVerificationResult)(implicit requestHeader: RequestHeader): Future[Journey] =
+    journeyConnector.updateEmailVerificationResult(journeyId, emailVerificationResult)
 
   def updateArrangementResponse(journeyId: JourneyId, arrangementResponse: ArrangementResponse)(implicit requestHeader: RequestHeader): Future[Journey] =
     journeyConnector.updateArrangement(journeyId, arrangementResponse)

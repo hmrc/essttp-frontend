@@ -18,7 +18,7 @@ package controllers
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.crypto.CryptoFormat
-import essttp.emailverification.EmailVerificationStatus
+import essttp.emailverification.EmailVerificationResult
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.ttp.eligibility.EmailSource
@@ -55,9 +55,9 @@ class SubmitArrangementControllerSpec extends ItSpec {
             ),
             (
               "email verification success - same email as ETMP",
-              () => EssttpBackend.EmailVerificationStatus.findJourney(
+              () => EssttpBackend.EmailVerificationResult.findJourney(
                 "bobross@joyofpainting.com",
-                EmailVerificationStatus.Verified,
+                EmailVerificationResult.Verified,
                 testCrypto,
                 origin
               )(),
@@ -65,9 +65,9 @@ class SubmitArrangementControllerSpec extends ItSpec {
             ),
             (
               "email verification success - new email",
-              () => EssttpBackend.EmailVerificationStatus.findJourney(
+              () => EssttpBackend.EmailVerificationResult.findJourney(
                 "grogu@mandalorian.com",
-                EmailVerificationStatus.Verified,
+                EmailVerificationResult.Verified,
                 testCrypto,
                 origin
               )(),
@@ -75,9 +75,9 @@ class SubmitArrangementControllerSpec extends ItSpec {
             ),
             (
               "email verification success - ETMP - same email with different casing",
-              () => EssttpBackend.EmailVerificationStatus.findJourney(
+              () => EssttpBackend.EmailVerificationResult.findJourney(
                 "BobRoss@joyofpainting.com",
-                EmailVerificationStatus.Verified,
+                EmailVerificationResult.Verified,
                 testCrypto,
                 origin
               )(),
@@ -200,9 +200,9 @@ class SubmitArrangementControllerSpec extends ItSpec {
 
       "there is an email verification status of locked" in {
         test(
-          () => EssttpBackend.EmailVerificationStatus.findJourney(
+          () => EssttpBackend.EmailVerificationResult.findJourney(
             "bobross@joyofpainting.com",
-            EmailVerificationStatus.Locked,
+            EmailVerificationResult.Locked,
             testCrypto,
             Origins.Vat.Bta
           )(),
