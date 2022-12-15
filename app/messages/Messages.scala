@@ -84,19 +84,23 @@ object Messages {
   object WhichTaxRegime {
 
     val `Which tax do you want to set up a payment plan for?`: Message = Message(
-      english = "Which tax do you want to set up a payment plan for?"
+      english = "Which tax do you want to set up a payment plan for?",
+      welsh   = "Pa dreth rydych chi am sefydlu cynllun talu ar ei chyfer?"
     )
 
     val EPAYE: Message = Message(
-      english = "Employers’ PAYE"
+      english = "Employers’ PAYE",
+      welsh   = "TWE Cyflogwyr"
     )
 
     val VAT: Message = Message(
-      english = "VAT"
+      english = "VAT",
+      welsh   = "TAW"
     )
 
     val `Select which tax you want to set up a payment plan for`: Message = Message(
-      english = "Select which tax you want to set up a payment plan for"
+      english = "Select which tax you want to set up a payment plan for",
+      welsh   = "Dewiswch pa dreth rydych chi am sefydlu cynllun talu ar ei chyfer"
     )
 
   }
@@ -133,7 +137,8 @@ object Messages {
 
         case TaxRegime.Vat =>
           Message(
-            english = s"Your VAT bill is ${amount.gdsFormatInPounds}"
+            english = s"Your VAT bill is ${amount.gdsFormatInPounds}",
+            welsh   = s"Eich bil TAW yw ${amount.gdsFormatInPounds}"
           )
       }
 
@@ -1127,7 +1132,8 @@ object Messages {
     )
 
     val `Enter your email address`: Message = Message(
-      english = "Enter your email address"
+      english = "Enter your email address",
+      welsh   = "Nodwch eich cyfeiriad e-bost"
     )
 
     val `We will use this email address to...`: Message = Message(
@@ -1153,22 +1159,26 @@ object Messages {
     def getError(key: String): Message = key match {
       case "selectAnEmailToUseRadio.error.required" =>
         Message(
-          english = "Select which email address you want to use"
+          english = "Select which email address you want to use",
+          welsh   = "Dewiswch pa gyfeiriad e-bost rydych chi am ei ddefnyddio"
         )
 
       case "newEmailInput.error.required" =>
         Message(
-          english = "Enter your email address in the correct format, like name@example.com"
+          english = "Enter your email address in the correct format, like name@example.com",
+          welsh   = "Nodwch eich cyfeiriad e-bost yn y fformat cywir, megis enw@enghraifft.com"
         )
 
       case "newEmailInput.error.tooManyChar" =>
         Message(
-          english = "Enter an email address with 256 characters or less"
+          english = "Enter an email address with 256 characters or less",
+          welsh   = "Nodwch gyfeiriad e-bost gan ddefnyddio 256 o gymeriadau neu lai"
         )
 
       case "newEmailInput.error.invalidFormat" =>
         Message(
-          english = "Enter your email address in the correct format, like name@example.com"
+          english = "Enter your email address in the correct format, like name@example.com",
+          welsh   = "Nodwch eich cyfeiriad e-bost yn y fformat cywir, megis enw@enghraifft.com"
         )
     }
   }
