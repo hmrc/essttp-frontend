@@ -198,7 +198,7 @@ object Messages {
 
     val `For further support you can contact the Payment Support Service on 0300 200 3835 to speak to an advisor.`: Message = Message(
       english = "For further support you can contact the Payment Support Service on <strong>0300 200 3835</strong> to speak to an advisor.",
-      welsh   = "I gael cymorth pellach, gallwch gysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEF ar <strong>0300 200 1900</strong i siarad ag ymgynghorydd."
+      welsh   = "I gael cymorth pellach, gallwch gysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEF ar <strong>0300 200 1900</strong> i siarad ag ymgynghorydd."
     )
 
     val `If you need extra support`: Message = Message(
@@ -258,7 +258,7 @@ object Messages {
 
     val `Our opening times are Monday to Friday: 8am to 6pm`: Message = Message(
       english = "Our opening times are Monday to Friday: 8am to 6pm (we are closed on bank holidays)",
-      welsh   = "Ein horiau agor yw: Dydd Llun i ddydd Gwener: 8.30am tan 5pm (ar gau ar benwythnosau a gwyliau banc)"
+      welsh   = "Ein horiau agor yw: Dydd Llun i ddydd Gwener: 08:30 i 17:00 (rydym ar gau ar benwythnosau a gwyliau banc)"
     )
 
     val `Call us`: Message = Message(
@@ -268,7 +268,7 @@ object Messages {
 
     def `You must owe ... or less to be eligible...`(maxAmountOfDebt: AmountInPence): Message = Message(
       english = s"You must owe ${maxAmountOfDebt.gdsFormatInPounds} or less to be eligible for a payment plan online. You may still be able to set up a plan over the phone.",
-      welsh   = s"Mae’n rhaid bod arnoch ${maxAmountOfDebt.gdsFormatInPounds} neu lai i fod yn gymwys ar gyfer cynllun talu ar-lein. Mae’n bosibl y gallwch drefnu cynllun dros y ffôn o hyd."
+      welsh   = s"Dim ond os oes arnoch chi ${maxAmountOfDebt.gdsFormatInPounds} neu lai y gallwch chi fod yn gymwys ar gyfer cynllun talu ar-lein. Mae’n bosibl y gallwch drefnu cynllun dros y ffôn o hyd."
     )
 
     def `Your overdue amount must have a due date that is less than ... days ago ...`(maxAgeOfDebtInDays: Int): Message = Message(
@@ -278,7 +278,7 @@ object Messages {
 
     val `You already have a payment plan with HMRC`: Message = Message(
       english = "You already have a payment plan with HMRC",
-      welsh   = "Mae eisoes gennych gynllun talu gyda CThEF"
+      welsh   = "Mae gennych chi gynllun talu gyda CThEF yn barod"
     )
 
     val `You can only have one payment plan at a time.`: Message = Message(
@@ -288,7 +288,7 @@ object Messages {
 
     val `Generic ineligible message`: Message = Message(
       english = "You are not eligible for an online payment plan. You may still be able to set up a payment plan over the phone.",
-      welsh   = "Nid ydych yn gymwys ar gyfer cynllun talu ar-lein. Mae’n bosibl y byddwch yn dal i allu trefnu cynllun talu dros y ffôn."
+      welsh   = "Dydych chi ddim yn gymwys ar gyfer cynllun talu ar-lein. Mae’n bosibl y byddwch chi’n dal i allu trefnu cynllun talu dros y ffôn."
     )
 
     val `File your return to use this service`: Message = Message(
@@ -352,6 +352,11 @@ object Messages {
       welsh   = "Dysgu sut i gofrestru"
     )
 
+    val `If you need to speak to an adviser call us on 0300 200 3835 at the Business Support Service to talk about your payment options.`: Message = Message(
+      english = "If you need to speak to an adviser call us on <strong>0300 200 3835</strong> at the Business Support Service to talk about your payment options.",
+      welsh   = "Os oes angen i chi siarad ag ymgynghorydd, ffoniwch ni ar <strong>0300 200 1900</strong> yng Ngwasanaeth Cwsmeriaid Cymraeg CThEF i drafod eich opsiynau talu."
+    )
+
   }
 
   object UpfrontPayment {
@@ -387,7 +392,7 @@ object Messages {
 
     val `You are eligible to set up an online payment plan if:`: Message = Message(
       english = "You are eligible to set up an online payment plan if:",
-      welsh   = "Rydych yn gymwys i drefnu cynllun talu ar-lein os:"
+      welsh   = "Rydych chi’n gymwys i drefnu cynllun talu ar-lein os yw’r canlynol yn wir:"
     )
 
     def `you plan to pay the debt off within the next ... months or less`(maxPlanDurationInMonths: Int): Message = Message(
@@ -482,7 +487,7 @@ object Messages {
     )
     val `You are eligible to set up an online payment plan if:`: Message = Message(
       english = "You are eligible to set up an online payment plan if:",
-      welsh   = "Rydych yn gymwys i drefnu cynllun talu ar-lein os:"
+      welsh   = "Rydych chi’n gymwys i drefnu cynllun talu ar-lein os yw’r canlynol yn wir:"
     )
     def `you plan to pay the debt off within the next ... months or less`(maxPlanDuration: Int): Message = Message(
       english = s"you plan to pay the debt off within the next ${maxPlanDuration.toString} months or less",
@@ -1235,7 +1240,7 @@ object Messages {
 
     def `You can go back to enter a new email address`(link: String): Message = Message(
       english = s"""You can <a class="govuk-link" href="$link">go back to enter a new email address</a>.""",
-      welsh   = s"""Gallwch can <a class="govuk-link" href="$link">fynd yn ôl i nodi cyfeiriad e-bost newydd</a>."""
+      welsh   = s"""Gallwch <a class="govuk-link" href="$link">fynd yn ôl i nodi cyfeiriad e-bost newydd</a>."""
     )
 
   }
@@ -1318,9 +1323,9 @@ object Messages {
       welsh   = "Yr hyn sy’n digwydd nesaf"
     )
 
-    val `HMRC will send you a letter within 5 working days with your payment dates.`: Message = Message(
-      english = "HMRC will send you a letter within 5 working days with your payment dates.",
-      welsh   = "Bydd CThEF yn anfon llythyr atoch cyn pen 5 diwrnod gyda’ch dyddiadau talu."
+    val `We will send a letter by post confirming the set up of your Direct Debit instruction within 5 working days.`: Message = Message(
+      english = "We will send a letter by post confirming the set up of your Direct Debit instruction within 5 working days.",
+      welsh   = "Byddwn yn anfon llythyr drwy’r post cyn pen 5 diwrnod gwaith i gadarnhau bod eich cyfarwyddyd Debyd Uniongyrchol wedi’i drefnu."
     )
 
     val `We will send a secure message with payment due dates to your business tax account inbox within 24 hours.`: Message = Message(
