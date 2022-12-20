@@ -352,11 +352,6 @@ object Messages {
       welsh   = "Dysgu sut i gofrestru"
     )
 
-    val `If you need to speak to an adviser call us on 0300 200 3835 at the Business Support Service to talk about your payment options.`: Message = Message(
-      english = "If you need to speak to an adviser call us on <strong>0300 200 3835</strong> at the Business Support Service to talk about your payment options.",
-      welsh   = "Os oes angen i chi siarad ag ymgynghorydd, ffoniwch ni ar <strong>0300 200 1900</strong> yng Ngwasanaeth Cwsmeriaid Cymraeg CThEF i drafod eich opsiynau talu."
-    )
-
   }
 
   object UpfrontPayment {
@@ -1323,9 +1318,9 @@ object Messages {
       welsh   = "Yr hyn sy’n digwydd nesaf"
     )
 
-    val `We will send a letter by post confirming the set up of your Direct Debit instruction within 5 working days.`: Message = Message(
-      english = "We will send a letter by post confirming the set up of your Direct Debit instruction within 5 working days.",
-      welsh   = "Byddwn yn anfon llythyr drwy’r post cyn pen 5 diwrnod gwaith i gadarnhau bod eich cyfarwyddyd Debyd Uniongyrchol wedi’i drefnu."
+    val `HMRC will send you a letter within 5 working days with your payment dates.`: Message = Message(
+      english = "HMRC will send you a letter within 5 working days with your payment dates.",
+      welsh   = "Bydd CThEF yn anfon llythyr atoch cyn pen 5 diwrnod gyda’ch dyddiadau talu."
     )
 
     val `We will send a secure message with payment due dates to your business tax account inbox within 24 hours.`: Message = Message(

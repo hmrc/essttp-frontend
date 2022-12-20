@@ -20,7 +20,6 @@
 @import messages.Messages
 @import config.AppConfig
 @import views.html.partials.CommonIneligibilityPartial
-@import play.twirl.api.Html
 
 @this(
   layout: views.html.templates.Layout,
@@ -40,9 +39,6 @@
    <p class="govuk-body">
     @{Messages.EnrolmentMissing.`You are not eligible for an online payment...`.show}
     <a href="@{appConfig.Urls.enrolForPayeUrl}" class="govuk-link" id="how-to-enrol-link">@{Messages.EnrolmentMissing.`Find out how to enrol`.show}</a>@{Messages.`full stop`.show}
-   </p>
-   <p class="govuk-body">
-    @{Html(Messages.EnrolmentMissing.`If you need to speak to an adviser call us on 0300 200 3835 at the Business Support Service to talk about your payment options.`.show)}
    </p>
 
    @commonIneligibilityPartial(TaxRegime.Epaye, appConfig)

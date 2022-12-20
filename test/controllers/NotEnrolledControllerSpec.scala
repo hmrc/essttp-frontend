@@ -50,7 +50,6 @@ class NotEnrolledControllerSpec extends ItSpec {
       )
 
       page.select(".govuk-body").asScala.toList(0).text() shouldBe "You are not eligible for an online payment plan because you need to enrol for PAYE Online. Find out how to enrol."
-      page.select(".govuk-body").asScala.toList(1).text() shouldBe "If you need to speak to an adviser call us on 0300 200 3835 at the Business Support Service to talk about your payment options."
       page.select("#how-to-enrol-link").attr("href") shouldBe "https://www.gov.uk/paye-online/enrol"
 
       ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Epaye)
@@ -77,7 +76,6 @@ class NotEnrolledControllerSpec extends ItSpec {
       )
 
       page.select(".govuk-body").asScala.toList(0).text() shouldBe "You are not eligible for an online payment plan because you need to register for VAT Online. Find out how to register."
-      page.select(".govuk-body").asScala.toList(1).text() shouldBe "If you need to speak to an adviser call us on 0300 200 3835 at the Business Support Service to talk about your payment options."
       page.select("#how-to-enrol-link").attr("href") shouldBe "https://www.gov.uk/register-for-vat"
 
       ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Vat)

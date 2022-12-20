@@ -44,9 +44,6 @@ class IneligibleControllerSpec extends ItSpec {
   def assertIneligiblePageLeadingP1(page: Document, leadingP1: String): Assertion =
     page.select(".govuk-body").asScala.toList(0).text() shouldBe leadingP1
 
-  def assertIneligiblePageLeadingP2(page: Document, leadingP2: String): Assertion =
-    page.select(".govuk-body").asScala.toList(1).text() shouldBe leadingP2
-
   "IneligibleController should display" - {
 
     Seq[(TaxRegime, Origin)]((TaxRegime.Epaye, Origins.Epaye.Bta), (TaxRegime.Vat, Origins.Vat.Bta))
@@ -76,10 +73,6 @@ class IneligibleControllerSpec extends ItSpec {
             assertIneligiblePageLeadingP1(
               page      = page,
               leadingP1 = "You are not eligible for an online payment plan. You may still be able to set up a payment plan over the phone."
-            )
-            assertIneligiblePageLeadingP2(
-              page      = page,
-              leadingP2 = "For further support you can contact the Payment Support Service on 0300 200 3835 to speak to an advisor."
             )
             ContentAssertions.commonIneligibilityTextCheck(page, taxRegime)
           }
@@ -115,10 +108,6 @@ class IneligibleControllerSpec extends ItSpec {
               page      = page,
               leadingP1 = s"You must owe $expectedAmount or less to be eligible for a payment plan online. You may still be able to set up a plan over the phone."
             )
-            assertIneligiblePageLeadingP2(
-              page      = page,
-              leadingP2 = "For further support you can contact the Payment Support Service on 0300 200 3835 to speak to an advisor."
-            )
             ContentAssertions.commonIneligibilityTextCheck(page, taxRegime)
           }
 
@@ -152,10 +141,6 @@ class IneligibleControllerSpec extends ItSpec {
               page      = page,
               leadingP1 = s"Your overdue amount must have a due date that is less than $expectedNumberOfDays days ago for you to be eligible for a payment plan online. You may still be able to set up a plan over the phone."
             )
-            assertIneligiblePageLeadingP2(
-              page      = page,
-              leadingP2 = "For further support you can contact the Payment Support Service on 0300 200 3835 to speak to an advisor."
-            )
             ContentAssertions.commonIneligibilityTextCheck(page, taxRegime)
           }
 
@@ -182,10 +167,6 @@ class IneligibleControllerSpec extends ItSpec {
             assertIneligiblePageLeadingP1(
               page      = page,
               leadingP1 = "You can only have one payment plan at a time."
-            )
-            assertIneligiblePageLeadingP2(
-              page      = page,
-              leadingP2 = "For further support you can contact the Payment Support Service on 0300 200 3835 to speak to an advisor."
             )
             ContentAssertions.commonIneligibilityTextCheck(page, taxRegime)
           }
@@ -226,9 +207,6 @@ class IneligibleControllerSpec extends ItSpec {
             page.select(".govuk-body").asScala.toList(1).text() shouldBe "Go to your tax account to file your tax return."
             if (taxRegime === TaxRegime.Vat) {
               page.select(".govuk-body").asScala.toList(2).text() shouldBe "If you have recently filed your return, your account may take up to 72 hours to be updated before you can set up a payment plan."
-              page.select(".govuk-body").asScala.toList(3).text() shouldBe "For further support you can contact the Payment Support Service on 0300 200 3835 to speak to an advisor."
-            } else if (taxRegime === TaxRegime.Epaye) {
-              page.select(".govuk-body").asScala.toList(2).text() shouldBe "For further support you can contact the Payment Support Service on 0300 200 3835 to speak to an advisor."
             }
             page.select("#bta-link").attr("href") shouldBe "/set-up-a-payment-plan/test-only/bta-page?return-page"
           }

@@ -87,7 +87,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
             val paragraphs = doc.select(".govuk-body").asScala.toList
 
             subheadings(0).text() shouldBe "What happens next"
-            paragraphs(0).text() shouldBe "We will send a letter by post confirming the set up of your Direct Debit instruction within 5 working days."
+            paragraphs(0).text() shouldBe "HMRC will send you a letter within 5 working days with your payment dates."
 
             if (isEmailAddressRequired) paragraphs(1).text() shouldBe "We will send a secure message with payment due dates to your business tax account inbox within 24 hours."
 
@@ -311,7 +311,7 @@ class PaymentPlanSetUpControllerEmailDisabledSpec extends ItSpec {
               val paragraphs = doc.select(".govuk-body").asScala.toList
 
               subheadings(0).text() shouldBe "What happens next"
-              paragraphs(0).text() shouldBe "We will send a letter by post confirming the set up of your Direct Debit instruction within 5 working days."
+              paragraphs(0).text() shouldBe "HMRC will send you a letter within 5 working days with your payment dates."
               paragraphs(1).text() shouldBe "Your upfront payment will be taken within 10 working days. Your next payment will be taken on 28th August 2022 or the next working day."
               ()
             }
