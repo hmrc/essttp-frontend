@@ -19,7 +19,7 @@ package testsupport.stubs
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.crypto.CryptoFormat
-import essttp.emailverification.EmailVerificationResult
+import essttp.emailverification.{EmailVerificationResult, EmailVerificationState, EmailVerificationStateResultRequest, GetEmailVerificationResultRequest}
 import essttp.journey.model.{JourneyId, Origin, Origins}
 import essttp.rootmodel.bank.DetailsAboutBankAccount
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
@@ -31,7 +31,7 @@ import essttp.rootmodel.ttp.arrangement.ArrangementResponse
 import essttp.rootmodel.{CanPayUpfront, DayOfMonth, Email, IsEmailAddressRequired, MonthlyPaymentAmount, TaxId, TaxRegime, UpfrontPaymentAmount}
 import play.api.libs.json.Json
 import testsupport.stubs.WireMockHelpers._
-import testsupport.testdata.{JourneyJsonTemplates, TdAll, TdJsonBodies}
+import testsupport.testdata.{EmailVerificationStatusResponses, JourneyJsonTemplates, TdAll, TdJsonBodies}
 import play.api.http.Status._
 import uk.gov.hmrc.crypto.Encrypter
 
@@ -521,6 +521,34 @@ object EssttpBackend {
 
     def findJourney(origin: Origin, encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Arrangement Submitted - with upfront payment`(origin)(encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
+  }
+
+  object EmailVerificationState {
+    val verificationStateUrl = "/essttp-backend/email-verification/verification-state"
+    val verificationStateUpdateUrl = "/essttp-backend/email-verification/verification-state/update"
+    val verificationStateResultUpdateUrl = "/essttp-backend/email-verification/verification-state/result-update"
+
+    def stubVerificationState(emailVerificationState: EmailVerificationState): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(verificationStateUrl, EmailVerificationStatusResponses.emailVerificationStatusJson(emailVerificationState))
+
+    def stubVerificationStateUpdate(): StubMapping = WireMockHelpers.stubForPostNoResponseBody(verificationStateUpdateUrl)
+
+    def stubVerificationStateResultUpdate(): StubMapping = WireMockHelpers.stubForPostNoResponseBody(verificationStateResultUpdateUrl)
+
+    def verifyVerificationState(getEmailVerificationResultRequest: GetEmailVerificationResultRequest)(implicit cryptoFormat: CryptoFormat): Unit =
+      verifyWithBodyParse(verificationStateUrl, getEmailVerificationResultRequest)
+
+    def verifyVerificationStateUpdate(getEmailVerificationResultRequest: GetEmailVerificationResultRequest)(implicit cryptoFormat: CryptoFormat): Unit =
+      verifyWithBodyParse(verificationStateUpdateUrl, getEmailVerificationResultRequest)
+
+    def verifyVerificationStateResultUpdate(
+        emailVerificationStateResultRequest: EmailVerificationStateResultRequest
+    )(implicit cryptoFormat: CryptoFormat): Unit =
+      verifyWithBodyParse(verificationStateResultUpdateUrl, emailVerificationStateResultRequest)
+
+    def verifyNoneVerificationState(): Unit = verify(exactly(0), postRequestedFor(urlPathEqualTo(verificationStateUrl)))
+    def verifyNoneVerificationStateUpdate(): Unit = verify(exactly(0), postRequestedFor(urlPathEqualTo(verificationStateUpdateUrl)))
+    def verifyNoneVerificationStateResultUpdate(): Unit = verify(exactly(0), postRequestedFor(urlPathEqualTo(verificationStateResultUpdateUrl)))
   }
 
 }

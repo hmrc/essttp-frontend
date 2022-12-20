@@ -23,7 +23,7 @@ import config.AppConfig
 import controllers.EmailController.{ChooseEmailForm, chooseEmailForm, enterEmailForm}
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.{logErrorAndRouteToDefaultPage, logErrorAndRouteToDefaultPageF}
-import essttp.emailverification.{EmailVerificationResult, StartEmailVerificationJourneyResponse}
+import essttp.emailverification.{EmailVerificationResult, EmailVerificationState, StartEmailVerificationJourneyResponse}
 import essttp.journey.model.Journey
 import essttp.journey.model.Journey.AfterEmailAddressSelectedToBeVerified
 import essttp.rootmodel.Email
@@ -52,7 +52,7 @@ class EmailController @Inject() (
 
   private def withEmailEnabled(action: Action[AnyContent]): Action[AnyContent] =
     if (!appConfig.emailJourneyEnabled) {
-      as.default{ _ => NotImplemented }
+      as.default { _ => NotImplemented }
     } else {
       action
     }
@@ -107,12 +107,30 @@ class EmailController @Inject() (
                   case Some(email) => Email(SensitiveString(email))
                   case None        => Email(emailFromEligibilityResponse.value)
                 }
-                journeyService
-                  .updateSelectedEmailToBeVerified(
-                    journeyId = request.journeyId,
-                    email     = emailAddress
-                  )
-                  .map(updatedJourney => Redirect(Routing.next(updatedJourney)))
+
+                emailVerificationService.getEmailVerificationState(emailAddress).flatMap {
+                  case EmailVerificationState.OkToBeVerified =>
+                    emailVerificationService.updateEmailVerificationState(emailAddress)
+                      .flatMap{ _ =>
+                        journeyService.updateSelectedEmailToBeVerified(journeyId = request.journeyId, email = emailAddress)
+                          .map(updatedJourney => Redirect(Routing.next(updatedJourney)))
+                      }
+
+                  case EmailVerificationState.AlreadyVerified =>
+                    for {
+                      _ <- journeyService.updateSelectedEmailToBeVerified(request.journeyId, emailAddress)
+                      updatedJourney <- journeyService.updateEmailVerificationResult(request.journeyId, EmailVerificationResult.Verified)
+                    } yield Redirect(Routing.next(updatedJourney, allowSubmitArrangement = false))
+
+                  case EmailVerificationState.TooManyPasscodeAttempts =>
+                    Future.successful(Redirect(routes.EmailController.tooManyPasscodeJourneysStarted))
+                  case EmailVerificationState.TooManyPasscodeJourneysStarted =>
+                    Future.successful(Redirect(routes.EmailController.tooManyPasscodeAttempts))
+                  case EmailVerificationState.TooManyDifferentEmailAddresses =>
+                    Future.successful(Redirect(routes.EmailController.tooManyDifferentEmailAddresses))
+
+                }
+
               }
             )
         }
@@ -153,12 +171,31 @@ class EmailController @Inject() (
         .fold(
           formWithErrors => Future.successful(Ok(views.enterEmailPage(formWithErrors))),
           email => {
-            journeyService
-              .updateSelectedEmailToBeVerified(
-                journeyId = request.journeyId,
-                email     = email
-              )
-              .map(updatedJourney => Redirect(Routing.next(updatedJourney)))
+
+            emailVerificationService.getEmailVerificationState(email).flatMap {
+
+              case EmailVerificationState.AlreadyVerified =>
+                for {
+                  _ <- journeyService.updateSelectedEmailToBeVerified(request.journeyId, email)
+                  _ <- journeyService.updateEmailVerificationResult(request.journeyId, EmailVerificationResult.Verified)
+                } yield Redirect(routes.EmailController.emailAddressConfirmed)
+
+              case EmailVerificationState.OkToBeVerified =>
+                journeyService
+                  .updateSelectedEmailToBeVerified(
+                    journeyId = request.journeyId,
+                    email     = email
+                  )
+                  .map(updatedJourney => Redirect(Routing.next(updatedJourney)))
+
+              case EmailVerificationState.TooManyPasscodeAttempts =>
+                Future.successful(Redirect(routes.EmailController.tooManyPasscodeJourneysStarted))
+              case EmailVerificationState.TooManyPasscodeJourneysStarted =>
+                Future.successful(Redirect(routes.EmailController.tooManyPasscodeAttempts))
+              case EmailVerificationState.TooManyDifferentEmailAddresses =>
+                Future.successful(Redirect(routes.EmailController.tooManyDifferentEmailAddresses))
+            }
+
           }
         )
 
@@ -175,13 +212,27 @@ class EmailController @Inject() (
           logErrorAndRouteToDefaultPageF(j)
 
         case j: Journey.AfterEmailAddressSelectedToBeVerified =>
-          emailVerificationService.requestEmailVerification(j.emailToBeVerified).map {
-            case StartEmailVerificationJourneyResponse.Success(redirectUri) =>
-              logger.info(s"Email verification journey successfully started. Redirecting to $redirectUri")
-              Redirect(redirectUri)
-            case StartEmailVerificationJourneyResponse.Locked =>
-              Redirect(routes.EmailController.tooManyEmailAddresses)
-          }
+          emailVerificationService.getEmailVerificationState(j.emailToBeVerified)
+            .flatMap {
+              case EmailVerificationState.AlreadyVerified =>
+                Future.successful(Redirect(Routing.next(j, allowSubmitArrangement = false)))
+
+              case EmailVerificationState.OkToBeVerified =>
+                emailVerificationService.requestEmailVerification(j.emailToBeVerified).map {
+                  case StartEmailVerificationJourneyResponse.Success(redirectUri) =>
+                    logger.info(s"Email verification journey successfully started. Redirecting to $redirectUri")
+                    Redirect(redirectUri)
+                  case StartEmailVerificationJourneyResponse.Locked =>
+                    Redirect(routes.EmailController.tooManyEmailAddresses)
+                }
+
+              case EmailVerificationState.TooManyPasscodeJourneysStarted =>
+                Future.successful(Redirect(routes.EmailController.tooManyPasscodeJourneysStarted))
+              case EmailVerificationState.TooManyPasscodeAttempts =>
+                Future.successful(Redirect(routes.EmailController.tooManyPasscodeAttempts))
+              case EmailVerificationState.TooManyDifferentEmailAddresses =>
+                Future.successful(Redirect(routes.EmailController.tooManyDifferentEmailAddresses))
+            }
       }
 
     }
@@ -198,8 +249,9 @@ class EmailController @Inject() (
 
         case j: Journey.AfterEmailAddressSelectedToBeVerified =>
           for {
-            status <- emailVerificationService.getEmailVerificationResult(j.emailToBeVerified)
-            updatedJourney <- journeyService.updateEmailVerificationResult(j.journeyId, status)
+            verificationResult <- emailVerificationService.getEmailVerificationResult(j.emailToBeVerified)
+            _ <- emailVerificationService.updateEmailVerificationState(j.emailToBeVerified, verificationResult)
+            updatedJourney <- journeyService.updateEmailVerificationResult(j.journeyId, verificationResult)
           } yield Redirect(Routing.next(updatedJourney, allowSubmitArrangement = false))
       }
     }
@@ -222,9 +274,22 @@ class EmailController @Inject() (
     }
   }
 
+  val tooManyPasscodeJourneysStarted: Action[AnyContent] = withEmailEnabled {
+    as.eligibleJourneyAction { _ =>
+      Ok("Hi Darren, this is the too many passcode journeys started page...")
+    }
+  }
+
+  val tooManyDifferentEmailAddresses: Action[AnyContent] = withEmailEnabled {
+    as.eligibleJourneyAction { _ =>
+
+      Ok("Hi Darren, this is the too many different email addresses page...")
+    }
+  }
+
   val emailAddressConfirmed: Action[AnyContent] = withEmailEnabled {
     as.eligibleJourneyAction { implicit request =>
-      withEmailAddressVerified{ journey =>
+      withEmailAddressVerified { journey =>
         val email = journey match {
           case j: AfterEmailAddressSelectedToBeVerified => j.emailToBeVerified
         }
@@ -233,7 +298,7 @@ class EmailController @Inject() (
     }
   }
 
-  val emailAddressConfirmedSubmit: Action[AnyContent] = withEmailEnabled{
+  val emailAddressConfirmedSubmit: Action[AnyContent] = withEmailEnabled {
     as.eligibleJourneyAction { implicit request =>
       withEmailAddressVerified(_ => Redirect(routes.SubmitArrangementController.submitArrangement))
     }
@@ -262,12 +327,13 @@ class EmailController @Inject() (
   private def withEmailAddressFromEligibilityResponse(f: Email => Future[Result])(implicit r: EligibleJourneyRequest[_]): Future[Result] =
     f(emailFromEligibilityResponse(r))
 
-  private def emailFromEligibilityResponse(r: EligibleJourneyRequest[_]) =
+  private def emailFromEligibilityResponse(r: EligibleJourneyRequest[_]): Email =
     r.eligibilityCheckResult.email.getOrElse(Errors.throwServerErrorException("Could not find email address in eligibility response"))
 
 }
 
 object EmailController {
+
   import play.api.data.Forms.{mapping, nonEmptyText}
   import play.api.data.validation.{Constraint, Invalid, Valid}
   import play.api.data.{Form, Mapping}
