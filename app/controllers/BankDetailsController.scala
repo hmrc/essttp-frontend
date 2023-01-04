@@ -94,7 +94,7 @@ class BankDetailsController @Inject() (
                 detailsAboutBankAccountForm.isSoleSignatory.asBoolean
               )
             ).map{ updatedJourney =>
-                Redirect(Routing.next(updatedJourney))
+                Redirect(Routing.next(routes.BankDetailsController.detailsAboutBankAccount, updatedJourney))
               }
       )
   }
@@ -217,7 +217,7 @@ class BankDetailsController @Inject() (
         journeyService
           .updateDirectDebitDetails(request.journeyId, directDebitDetails)
           .map { updatedJourney =>
-            Redirect(Routing.next(updatedJourney))
+            Redirect(Routing.next(routes.BankDetailsController.enterBankDetails, updatedJourney))
           }
     )
   }
@@ -236,7 +236,7 @@ class BankDetailsController @Inject() (
       case j: Journey.AfterEnteredDirectDebitDetails =>
         journeyService
           .updateHasConfirmedDirectDebitDetails(j.journeyId)
-          .map(_ => Redirect(routes.TermsAndConditionsController.termsAndConditions))
+          .map(updatedJourney => Redirect(Routing.next(routes.BankDetailsController.checkBankDetails, updatedJourney)))
     }
   }
 

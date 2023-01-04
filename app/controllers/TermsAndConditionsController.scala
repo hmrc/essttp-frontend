@@ -59,7 +59,9 @@ class TermsAndConditionsController @Inject() (
           j,
           journeyService
             .updateAgreedTermsAndConditions(request.journeyId, IsEmailAddressRequired(request.isEmailAddressRequired(appConfig)))
-            .map { updatedJourney => Redirect(Routing.next(updatedJourney)) }
+            .map { updatedJourney =>
+              Redirect(Routing.next(routes.TermsAndConditionsController.termsAndConditions, updatedJourney))
+            }
         )
     }
   }

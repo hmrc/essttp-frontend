@@ -109,7 +109,8 @@ class MonthlyPaymentAmountController @Inject() (
         (validForm: BigDecimal) => {
           val monthlyPaymentAmount: MonthlyPaymentAmount = MonthlyPaymentAmount(AmountInPence(validForm))
           journeyService.updateMonthlyPaymentAmount(request.journeyId, monthlyPaymentAmount)
-            .map(updatedJourney => Redirect(Routing.next(updatedJourney)))
+            .map(updatedJourney =>
+              Redirect(Routing.next(routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount, updatedJourney)))
         }
       )
   }

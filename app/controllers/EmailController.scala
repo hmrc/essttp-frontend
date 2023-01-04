@@ -112,7 +112,8 @@ class EmailController @Inject() (
                     journeyId = request.journeyId,
                     email     = emailAddress
                   )
-                  .map(updatedJourney => Redirect(Routing.next(updatedJourney)))
+                  .map(updatedJourney =>
+                    Redirect(Routing.next(routes.EmailController.whichEmailDoYouWantToUse, updatedJourney)))
               }
             )
         }
@@ -158,7 +159,8 @@ class EmailController @Inject() (
                 journeyId = request.journeyId,
                 email     = email
               )
-              .map(updatedJourney => Redirect(Routing.next(updatedJourney)))
+              .map(updatedJourney =>
+                Redirect(Routing.next(routes.EmailController.enterEmail, updatedJourney)))
           }
         )
 
@@ -200,7 +202,7 @@ class EmailController @Inject() (
           for {
             status <- emailVerificationService.getEmailVerificationResult(j.emailToBeVerified)
             updatedJourney <- journeyService.updateEmailVerificationResult(j.journeyId, status)
-          } yield Redirect(Routing.next(updatedJourney, allowSubmitArrangement = false))
+          } yield Redirect(Routing.next(routes.EmailController.emailCallback, updatedJourney))
       }
     }
   }
@@ -235,7 +237,8 @@ class EmailController @Inject() (
 
   val emailAddressConfirmedSubmit: Action[AnyContent] = withEmailEnabled{
     as.eligibleJourneyAction { implicit request =>
-      withEmailAddressVerified(_ => Redirect(routes.SubmitArrangementController.submitArrangement))
+      withEmailAddressVerified(_ =>
+        Redirect(Routing.next(routes.EmailController.emailAddressConfirmed, request.journey)))
     }
   }
 

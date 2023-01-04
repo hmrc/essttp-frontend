@@ -81,7 +81,8 @@ class PaymentDayController @Inject() (
             case None           => DayOfMonth(form.paymentDay.toInt)
           }
           journeyService.updateDayOfMonth(request.journeyId, dayOfMonth)
-            .map(updatedJourney => Redirect(Routing.next(updatedJourney)))
+            .map(updatedJourney =>
+              Redirect(Routing.next(routes.PaymentDayController.paymentDay, updatedJourney)))
         }
       )
   }

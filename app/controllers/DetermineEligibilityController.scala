@@ -92,7 +92,7 @@ class DetermineEligibilityController @Inject() (
           for {
             updatedJourney <- journeyService.updateEligibilityCheckResult(journey.id, someResponse)
             _ = auditService.auditEligibilityCheck(journey, someResponse)
-          } yield Redirect(Routing.next(updatedJourney).url)
+          } yield Redirect(Routing.next(routes.DetermineEligibilityController.determineEligibility, updatedJourney))
         }
       }
   }

@@ -78,7 +78,8 @@ class UpfrontPaymentController @Inject() (
         (canPayUpfrontForm: CanPayUpfrontFormValue) => {
           val canPayUpfront: CanPayUpfront = canPayUpfrontForm.asCanPayUpfront
           journeyService.updateCanPayUpfront(request.journeyId, canPayUpfront)
-            .map(updatedJourney => Redirect(Routing.next(updatedJourney)))
+            .map(updatedJourney =>
+              Redirect(Routing.next(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment, updatedJourney)))
         }
       )
   }
@@ -151,7 +152,8 @@ class UpfrontPaymentController @Inject() (
           //amount in pence case class apply method converts big decimal to pennies
           val amountInPence: AmountInPence = AmountInPence(validForm)
           journeyService.updateUpfrontPaymentAmount(request.journeyId, UpfrontPaymentAmount(amountInPence))
-            .map(updatedJourney => Redirect(Routing.next(updatedJourney)))
+            .map(updatedJourney =>
+              Redirect(Routing.next(routes.UpfrontPaymentController.upfrontPaymentAmount, updatedJourney)))
         }
       )
   }
