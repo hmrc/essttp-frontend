@@ -18,11 +18,12 @@ package testsupport.reusableassertions
 
 import controllers.routes
 import essttp.rootmodel.TaxRegime
+import models.{Language, Languages}
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
-import org.scalatest.Assertion
 import testsupport.RichMatchers
 import org.jsoup.nodes.Document
+import org.scalatest.Assertion
 import testsupport.testdata.TdAll
 
 import scala.annotation.nowarn
@@ -41,15 +42,30 @@ object ContentAssertions extends RichMatchers {
     element.select(".govuk-summary-list__value").text() shouldBe keyValue._2
   }
 
-  def languageToggleExists(document: Document): Assertion = {
+  def languageToggleExists(document: Document, selectedLanguage: Language): Assertion = {
     val langToggleItems: List[Element] = document.select(".hmrc-language-select__list-item").asScala.toList
     langToggleItems.size shouldBe 2
-    langToggleItems.headOption.map(someToggleItem => someToggleItem.text()) shouldBe Some("English")
 
-    val welshOption = langToggleItems.drop(1).headOption
-    welshOption.map(_.select("a").attr("hreflang")) shouldBe Some("cy")
-    welshOption.map(_.select("span.govuk-visually-hidden").text()) shouldBe Some("Newid yr iaith ir Gymraeg")
-    welshOption.map(_.select("span[aria-hidden=true]").text()) shouldBe Some("Cymraeg")
+    val englishOption = langToggleItems(0)
+    val welshOption = langToggleItems(1)
+
+    selectedLanguage match {
+      case Languages.English =>
+        englishOption.text() shouldBe "English"
+
+        welshOption.select("a").attr("hreflang") shouldBe "cy"
+        welshOption.select("span.govuk-visually-hidden").text() shouldBe "Newid yr iaith ir Gymraeg"
+        welshOption.select("span[aria-hidden=true]").text() shouldBe "Cymraeg"
+
+      case Languages.Welsh =>
+        englishOption.select("a").attr("hreflang") shouldBe "en"
+        englishOption.select("span.govuk-visually-hidden").text() shouldBe "Change the language to English"
+        englishOption.select("span[aria-hidden=true]").text() shouldBe "English"
+
+        welshOption.text() shouldBe "Cymraeg"
+
+    }
+
   }
 
   @nowarn
@@ -61,15 +77,31 @@ object ContentAssertions extends RichMatchers {
       signedIn:                    Boolean           = true,
       hasFormError:                Boolean           = false,
       shouldH1BeSameAsServiceName: Boolean           = false,
-      regimeBeingTested:           Option[TaxRegime] = Some(TaxRegime.Epaye)
+      regimeBeingTested:           Option[TaxRegime] = Some(TaxRegime.Epaye),
+      language:                    Language          = Languages.English
   ): Unit = {
-    val titlePrefix = if (hasFormError) "Error: " else ""
+    val titlePrefix = if (hasFormError) {
+      language match {
+        case Languages.English => "Error: "
+        case Languages.Welsh   => "Gwall: "
+      }
+    } else ""
 
-    val regimeServiceName = regimeBeingTested match {
-      case Some(TaxRegime.Epaye) => TdAll.expectedServiceNamePaye
-      case Some(TaxRegime.Vat)   => TdAll.expectedServiceNameVat
-      case None                  => TdAll.expectedServiceNameGeneric
-    }
+    val regimeServiceName =
+      language match {
+        case Languages.English =>
+          regimeBeingTested match {
+            case Some(TaxRegime.Epaye) => TdAll.expectedServiceNamePayeEn
+            case Some(TaxRegime.Vat)   => TdAll.expectedServiceNameVatEn
+            case None                  => TdAll.expectedServiceNameGenericEn
+          }
+        case Languages.Welsh =>
+          regimeBeingTested match {
+            case Some(TaxRegime.Epaye) => TdAll.expectedServiceNamePayeCy
+            case Some(TaxRegime.Vat)   => TdAll.expectedServiceNameVatCy
+            case None                  => TdAll.expectedServiceNameGenericCy
+          }
+      }
 
     if (shouldH1BeSameAsServiceName) {
       expectedH1 shouldBe regimeServiceName
@@ -82,7 +114,7 @@ object ContentAssertions extends RichMatchers {
     page.select(".hmrc-header__service-name").text() shouldBe regimeServiceName
 
     page.select("h1").text() shouldBe expectedH1
-    ContentAssertions.languageToggleExists(page)
+    ContentAssertions.languageToggleExists(page, language)
 
     val signOutLink = page.select(".hmrc-sign-out-nav__link")
     if (signedIn) signOutLink.attr("href") shouldBe routes.SignOutController.signOut.url
@@ -92,8 +124,13 @@ object ContentAssertions extends RichMatchers {
     if (shouldBackLinkBePresent) backLink.hasClass("js-visible") shouldBe true
     else backLink.isEmpty shouldBe true
 
-    if (hasFormError)
-      page.select(".govuk-error-message > .govuk-visually-hidden").text shouldBe "Error:"
+    if (hasFormError) {
+      val expectedText = language match {
+        case Languages.English => "Error:"
+        case Languages.Welsh   => "Gwall:"
+      }
+      page.select(".govuk-error-message > .govuk-visually-hidden").text shouldBe expectedText
+    }
 
     val form = page.select("form")
     expectedSubmitUrl match {

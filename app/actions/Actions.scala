@@ -29,7 +29,8 @@ class Actions @Inject() (
     getJourneyActionRefiner:                          GetJourneyActionRefiner,
     barsLockoutActionFilter:                          BarsLockoutActionRefiner,
     barsLockedOutJourneyRefiner:                      BarsLockedOutJourneyRefiner,
-    eligibleJourneyRefiner:                           EligibleJourneyRefiner
+    eligibleJourneyRefiner:                           EligibleJourneyRefiner,
+    shutteringActionFilter:                           ShutteringActionFilter
 ) {
 
   val default: ActionBuilder[Request, AnyContent] = actionBuilder
@@ -49,12 +50,14 @@ class Actions @Inject() (
     actionBuilder
       .andThen(continueToLandingPagesAuthenticatedActionRefiner)
       .andThen(getJourneyActionRefiner)
+      .andThen(shutteringActionFilter)
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val eligibleJourneyAction: ActionBuilder[EligibleJourneyRequest, AnyContent] =
     actionBuilder
       .andThen(continueToLandingPagesAuthenticatedActionRefiner)
       .andThen(getJourneyActionRefiner)
+      .andThen(shutteringActionFilter)
       .andThen(barsLockoutActionFilter)
       .andThen(eligibleJourneyRefiner)
 
@@ -63,6 +66,7 @@ class Actions @Inject() (
     actionBuilder
       .andThen(continueToLandingPagesAuthenticatedActionRefiner)
       .andThen(getJourneyActionRefiner)
+      .andThen(shutteringActionFilter)
       .andThen(barsLockedOutJourneyRefiner)
 
 }

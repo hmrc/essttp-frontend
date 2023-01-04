@@ -68,6 +68,9 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     val extraSupportUrl: String = config.get[String]("govUkUrls.extraSupportUrl")
     val relayUrl: String = config.get[String]("govUkUrls.relayUrl")
     val businessTaxAccountUrl: String = s"${BaseUrl.businessTaxAccountFrontend}/business-account"
+    val businessPaymentSupportService: String = config.get[String]("govUkUrls.businessPaymentSupportService")
+    val welshLanguageHelplineForDebtManagement: String = config.get[String]("govUkUrls.welshLanguageHelplineForDebtManagement")
+
   }
 
   object TtpHeaders {
