@@ -139,6 +139,30 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
             EssttpBackend.MonthlyPaymentAmount.verifyUpdateMonthlyPaymentAmountRequest(TdAll.journeyId, TdAll.monthlyPaymentAmount)
           }
 
+          s"[$regime journey] should redirect to the specified url in session if the user came from a change link and did not change their answer" in {
+            val changeOriginUrl = "/abc"
+
+            stubCommonActions()
+            EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto, origin)()
+            EssttpBackend.MonthlyPaymentAmount.stubUpdateMonthlyPaymentAmount(
+              TdAll.journeyId,
+              JourneyJsonTemplates.`Entered Monthly Payment Amount`(origin)
+            )
+
+            val fakeRequest = FakeRequest(
+              method = "POST",
+              path   = "/how-much-can-you-pay-each-month"
+            ).withAuthToken()
+              .withSession(SessionKeys.sessionId -> "IamATestSessionId", Routing.clickedChangeFromSessionKey -> changeOriginUrl)
+              .withFormUrlEncodedBody(("MonthlyPaymentAmount", "300"))
+
+            val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(changeOriginUrl)
+            session(result).get(Routing.clickedChangeFromSessionKey) shouldBe None
+            EssttpBackend.MonthlyPaymentAmount.verifyUpdateMonthlyPaymentAmountRequest(TdAll.journeyId, TdAll.monthlyPaymentAmount)
+          }
+
           forAll(
             Table(
               ("Scenario flavour", "form input", "expected amount of money"),
@@ -218,4 +242,5 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
 
         }
     }
+
 }

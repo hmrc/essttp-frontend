@@ -53,11 +53,10 @@ class InstalmentsController @Inject() (
   }
 
   private def displayInstalmentOptionsPage(journey: Journey.AfterAffordableQuotesResponse)(implicit request: Request[_]): Future[Result] = {
-    val maybePrePopForm: Form[String] = journey match {
-      case j: Journey.AfterSelectedPaymentPlan =>
-        InstalmentsController.instalmentsForm().fill(j.selectedPaymentPlan.numberOfInstalments.value.toString)
-      case _ => InstalmentsController.instalmentsForm()
-    }
+    val maybePrePopForm: Form[String] =
+      existingSelectedPaymentPlan(journey).fold(InstalmentsController.instalmentsForm()){ plan =>
+        InstalmentsController.instalmentsForm().fill(plan.numberOfInstalments.value.toString)
+      }
     val instalmentOptions = InstalmentsController.retrieveInstalmentOptions(journey.affordableQuotesResponse.paymentPlans)
     Future.successful(
       Ok(views.instalmentOptionsPage(
@@ -65,6 +64,11 @@ class InstalmentsController @Inject() (
         options = instalmentOptions
       ))
     )
+  }
+
+  private def existingSelectedPaymentPlan(journey: Journey): Option[PaymentPlan] = journey match {
+    case j: Journey.AfterSelectedPaymentPlan => Some(j.selectedPaymentPlan)
+    case _                                   => None
   }
 
   val instalmentOptionsSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
@@ -91,7 +95,11 @@ class InstalmentsController @Inject() (
 
           maybePaymentPlan.fold[Future[Result]](Errors.throwBadRequestExceptionF("There was no payment plan"))(plan =>
             journeyService.updateChosenPaymentPlan(request.journeyId, plan)
-              .map(updatedJourney => Redirect(Routing.next(updatedJourney))))
+              .map(updatedJourney => Routing.redirectToNext(
+                routes.InstalmentsController.instalmentOptions,
+                updatedJourney,
+                existingSelectedPaymentPlan(request.journey).contains(plan)
+              )))
       })
   }
 

@@ -26,7 +26,7 @@
 @import messages.DateMessages
 @import cats.syntax.eq._
 @import java.time.LocalDate
-
+@import viewmodels.CheckPaymentPlanChangeLink
 
 @this(
   layout: templates.Layout,
@@ -66,7 +66,7 @@
       actions = Some(Actions(
         items = Seq(
           ActionItem(
-            href = routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url,
+            href = CheckPaymentPlanChangeLink.CanPayUpfront.changeLink.url,
             content = Text(Messages.change.show),
             visuallyHiddenText = Some(Messages.UpfrontPaymentSummary.`Change Payment`.show)
           )
@@ -87,7 +87,7 @@
       actions = Some(Actions(
         items = Seq(
           ActionItem(
-            href = routes.UpfrontPaymentController.upfrontPaymentAmount.url,
+            href = CheckPaymentPlanChangeLink.UpfrontPaymentAmount.changeLink.url,
             content = Text(Messages.change.show),
             visuallyHiddenText = Some(Messages.UpfrontPaymentSummary.`Upfront payment-visually-hidden-message`.show)
           )
@@ -112,7 +112,7 @@
     actions = Some(Actions(
       items = Seq(
         ActionItem(
-          href = routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount.url,
+          href = CheckPaymentPlanChangeLink.MonthlyPaymentAmount.changeLink.url,
           content = Text(Messages.change.show),
           visuallyHiddenText = Some(Messages.PaymentSchedule.`How much you can afford to pay each month`.show)
         )
@@ -133,7 +133,7 @@
     actions = Some(Actions(
       items = Seq(
         ActionItem(
-          href = routes.PaymentDayController.paymentDay.url,
+          href = CheckPaymentPlanChangeLink.PaymentDay.changeLink.url,
           content = Text(Messages.change.show),
           visuallyHiddenText = Some(Messages.PaymentSchedule.`payment day`.show)
         )
@@ -158,7 +158,7 @@
       actions = Some(Actions(
         items = Seq(
           ActionItem(
-            href = routes.InstalmentsController.instalmentOptions.url,
+            href = CheckPaymentPlanChangeLink.PaymentPlan.changeLink.url,
              classes = s"${if(index === 0) "" else "grouped-change"}",
             content = Text(Messages.change.show),
             visuallyHiddenText = Some(Messages.PaymentSchedule.`Change months duration`.show)

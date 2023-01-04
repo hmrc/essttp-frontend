@@ -54,18 +54,21 @@ class PaymentDayController @Inject() (
   }
 
   private def displayPaymentDayPage(journey: Journey.AfterEnteredMonthlyPaymentAmount)(implicit request: Request[_]): Result = {
-    val maybePrePopForm: Form[PaymentDayForm] = journey match {
-      case j: Journey.AfterEnteredDayOfMonth =>
-        if (j.dayOfMonth.value === 28) {
+    val maybePrePopForm: Form[PaymentDayForm] =
+      existingPaymentDay(journey).fold(paymentDayForm()){ day =>
+        if (day.value === 28) {
           paymentDayForm().fill(PaymentDayForm("28", None))
         } else {
-          paymentDayForm().fill(PaymentDayForm("", Some(j.dayOfMonth.value)))
+          paymentDayForm().fill(PaymentDayForm("", Some(day.value)))
         }
-      case _: Journey.BeforeEnteredDayOfMonth => paymentDayForm()
-    }
-    Ok(views.paymentDayPage(
-      form = maybePrePopForm
-    ))
+      }
+
+    Ok(views.paymentDayPage(maybePrePopForm))
+  }
+
+  private def existingPaymentDay(journey: Journey): Option[DayOfMonth] = journey match {
+    case j: Journey.AfterEnteredDayOfMonth  => Some(j.dayOfMonth)
+    case _: Journey.BeforeEnteredDayOfMonth => None
   }
 
   val paymentDaySubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
@@ -81,7 +84,12 @@ class PaymentDayController @Inject() (
             case None           => DayOfMonth(form.paymentDay.toInt)
           }
           journeyService.updateDayOfMonth(request.journeyId, dayOfMonth)
-            .map(updatedJourney => Redirect(Routing.next(updatedJourney)))
+            .map(updatedJourney =>
+              Routing.redirectToNext(
+                routes.PaymentDayController.paymentDay,
+                updatedJourney,
+                existingPaymentDay(request.journey).contains(dayOfMonth)
+              ))
         }
       )
   }
