@@ -32,6 +32,7 @@ import requests.RequestSupport
 import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
+import viewmodels.UpfrontPaymentSummaryChangeLink
 import views.Views
 
 import javax.inject.{Inject, Singleton}
@@ -56,18 +57,22 @@ class UpfrontPaymentController @Inject() (
   }
 
   private def displayCanYouPayUpfrontPage(journey: Journey)(implicit request: Request[_]): Result = {
-    val maybePrePoppedForm: Form[CanPayUpfrontFormValue] = journey match {
-      case _: Journey.BeforeAnsweredCanPayUpfront => CanPayUpfrontForm.form
-      case j: Journey.AfterAnsweredCanPayUpfront =>
-        CanPayUpfrontForm.form.fill(CanPayUpfrontFormValue.canPayUpfrontToFormValue(j.canPayUpfront))
-      case j: Journey.AfterUpfrontPaymentAnswers => j.upfrontPaymentAnswers match {
-        case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment =>
-          CanPayUpfrontForm.form.fill(CanPayUpfrontFormValue.canPayUpfrontToFormValue(CanPayUpfront(true)))
-        case UpfrontPaymentAnswers.NoUpfrontPayment =>
-          CanPayUpfrontForm.form.fill(CanPayUpfrontFormValue.canPayUpfrontToFormValue(CanPayUpfront(false)))
+    val maybePrePoppedForm: Form[CanPayUpfrontFormValue] =
+      existingCanYouPayUpfrontAnswer(journey).fold(CanPayUpfrontForm.form){ canPayUpfront =>
+        CanPayUpfrontForm.form.fill(CanPayUpfrontFormValue.canPayUpfrontToFormValue(canPayUpfront))
       }
-    }
+
     Ok(views.canYouMakeAnUpFrontPayment(maybePrePoppedForm))
+  }
+
+  private def existingCanYouPayUpfrontAnswer(journey: Journey): Option[CanPayUpfront] = journey match {
+    case _: Journey.BeforeAnsweredCanPayUpfront => None
+    case j: Journey.AfterAnsweredCanPayUpfront  => Some(j.canPayUpfront)
+    case j: Journey.AfterUpfrontPaymentAnswers =>
+      j.upfrontPaymentAnswers match {
+        case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => Some(CanPayUpfront(true))
+        case UpfrontPaymentAnswers.NoUpfrontPayment          => Some(CanPayUpfront(false))
+      }
   }
 
   val canYouMakeAnUpfrontPaymentSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
@@ -78,7 +83,12 @@ class UpfrontPaymentController @Inject() (
         (canPayUpfrontForm: CanPayUpfrontFormValue) => {
           val canPayUpfront: CanPayUpfront = canPayUpfrontForm.asCanPayUpfront
           journeyService.updateCanPayUpfront(request.journeyId, canPayUpfront)
-            .map(updatedJourney => Redirect(Routing.next(updatedJourney)))
+            .map(updatedJourney =>
+              Routing.redirectToNext(
+                routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment,
+                updatedJourney,
+                existingCanYouPayUpfrontAnswer(request.journey).contains(canPayUpfront)
+              ))
         }
       )
   }
@@ -109,27 +119,28 @@ class UpfrontPaymentController @Inject() (
     val debtTotalAmount: DebtTotalAmount = UpfrontPaymentController.determineTotalAmountToPayWithoutInterest(eligibilityCheckResult)
     val maximumUpfrontPaymentAmountInPence: AmountInPence = debtTotalAmount.value.-(minimumUpfrontPaymentAmount)
 
-    val maybePrePoppedForm: Form[BigDecimal] = journey.merge match {
-      case _: Journey.BeforeEnteredUpfrontPaymentAmount =>
-        UpfrontPaymentAmountForm.form(DebtTotalAmount(maximumUpfrontPaymentAmountInPence), minimumUpfrontPaymentAmount)
-
-      case j: Journey.AfterEnteredUpfrontPaymentAmount =>
-        UpfrontPaymentAmountForm.form(DebtTotalAmount(maximumUpfrontPaymentAmountInPence), minimumUpfrontPaymentAmount).fill(j.upfrontPaymentAmount.value.inPounds)
-
-      case j: Journey.AfterUpfrontPaymentAnswers =>
-        j.upfrontPaymentAnswers match {
-          case j1: UpfrontPaymentAnswers.DeclaredUpfrontPayment =>
-            UpfrontPaymentAmountForm.form(DebtTotalAmount(maximumUpfrontPaymentAmountInPence), minimumUpfrontPaymentAmount).fill(j1.amount.value.inPounds)
-
-          case UpfrontPaymentAnswers.NoUpfrontPayment =>
-            UpfrontPaymentAmountForm.form(DebtTotalAmount(maximumUpfrontPaymentAmountInPence), minimumUpfrontPaymentAmount)
-        }
+    val maybePrePoppedForm: Form[BigDecimal] = {
+      val form = UpfrontPaymentAmountForm.form(DebtTotalAmount(maximumUpfrontPaymentAmountInPence), minimumUpfrontPaymentAmount)
+      existingUpfrontPaymentAmount(journey.merge).fold(form){ amount =>
+        form.fill(amount.value.inPounds)
+      }
     }
+
     Ok(views.upfrontPaymentAmountPage(
       form           = maybePrePoppedForm,
       maximumPayment = maximumUpfrontPaymentAmountInPence,
       minimumPayment = minimumUpfrontPaymentAmount
     ))
+  }
+
+  private def existingUpfrontPaymentAmount(journey: Journey): Option[UpfrontPaymentAmount] = journey match {
+    case _: Journey.BeforeEnteredUpfrontPaymentAmount => None
+    case j: Journey.AfterEnteredUpfrontPaymentAmount  => Some(j.upfrontPaymentAmount)
+    case j: Journey.AfterUpfrontPaymentAnswers =>
+      j.upfrontPaymentAnswers match {
+        case j1: UpfrontPaymentAnswers.DeclaredUpfrontPayment => Some(j1.amount)
+        case UpfrontPaymentAnswers.NoUpfrontPayment           => None
+      }
   }
 
   val upfrontPaymentAmountSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
@@ -149,9 +160,14 @@ class UpfrontPaymentController @Inject() (
           )),
         (validForm: BigDecimal) => {
           //amount in pence case class apply method converts big decimal to pennies
-          val amountInPence: AmountInPence = AmountInPence(validForm)
-          journeyService.updateUpfrontPaymentAmount(request.journeyId, UpfrontPaymentAmount(amountInPence))
-            .map(updatedJourney => Redirect(Routing.next(updatedJourney)))
+          val upfrontPaymentAmount = UpfrontPaymentAmount(AmountInPence(validForm))
+          journeyService.updateUpfrontPaymentAmount(request.journeyId, upfrontPaymentAmount)
+            .map(updatedJourney =>
+              Routing.redirectToNext(
+                routes.UpfrontPaymentController.upfrontPaymentAmount,
+                updatedJourney,
+                existingUpfrontPaymentAmount(request.journey).contains(upfrontPaymentAmount)
+              ))
         }
       )
   }
@@ -187,6 +203,12 @@ class UpfrontPaymentController @Inject() (
       remainingAmountToPay = remainingAmountTest
     ))
   }
+
+  def changeFromUpfrontPaymentSummary(pageId: String): Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    Redirect(UpfrontPaymentSummaryChangeLink.withName(pageId).targetPage)
+      .addingToSession(Routing.clickedChangeFromSessionKey -> routes.UpfrontPaymentController.upfrontPaymentSummary.url)
+  }
+
 }
 
 object UpfrontPaymentController {

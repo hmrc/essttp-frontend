@@ -22,14 +22,14 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
-import play.api.mvc.Result
+import play.api.mvc.{Call, Result, Session}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend}
-import testsupport.testdata.{JourneyJsonTemplates, TdAll}
+import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.jdk.CollectionConverters.IteratorHasAsScala
@@ -59,13 +59,13 @@ class PaymentScheduleControllerSpec extends ItSpec {
               val canPayUpfrontRow = SummaryRow(
                 "Can you make an upfront payment?",
                 canPayUpfrontValue,
-                routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url
+                PageUrls.checkPaymentPlanChangeUrl("CanPayUpfront")
               )
               val upfrontPaymentAmountRow = upfrontPaymentAmountValue.map(amount =>
                 SummaryRow(
                   "Upfront payment<br><span class=\"govuk-body-s\">Taken within 10 working days</span>",
                   amount,
-                  routes.UpfrontPaymentController.upfrontPaymentAmount.url
+                  PageUrls.checkPaymentPlanChangeUrl("UpfrontPaymentAmount")
                 ))
 
               val expectedSummaryRows = List(Some(canPayUpfrontRow), upfrontPaymentAmountRow).collect { case Some(s) => s }
@@ -84,20 +84,18 @@ class PaymentScheduleControllerSpec extends ItSpec {
               val monthlyPaymentAmountRow = SummaryRow(
                 "How much can you afford to pay each month?",
                 affordableMonthlyPaymentAmount,
-                routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount.url
+                PageUrls.checkPaymentPlanChangeUrl("MonthlyPaymentAmount")
               )
 
               val paymentDayRow = SummaryRow(
                 "Payments collected on",
                 paymentDayValue,
-                routes.PaymentDayController.paymentDay.url
+                PageUrls.checkPaymentPlanChangeUrl("PaymentDay")
               )
 
               val paymentAmountRows = datesToAmountsValues.map {
                 case (date, amount) =>
-                  SummaryRow(
-                    date, amount, routes.InstalmentsController.instalmentOptions.url
-                  )
+                  SummaryRow(date, amount, PageUrls.checkPaymentPlanChangeUrl("PaymentPlan"))
               }
 
               val totalToPayRow = SummaryRow("Total to pay", totalToPayValue, "")
@@ -237,6 +235,60 @@ class PaymentScheduleControllerSpec extends ItSpec {
                 ).as[JsObject]
               )
             }
+        }
+
+        "GET /check-payment-plan/change" - {
+
+          val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+          s"[$regime journey] should redirect to the correct page and update the cookie session with the pageId" - {
+
+              def test(pageId: String, expectedRedirect: Call): Unit = {
+                stubCommonActions()
+                EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, origin)()
+
+                val expectedUpdatedSession = Session(
+                  fakeRequest.session.data.updated(Routing.clickedChangeFromSessionKey, routes.PaymentScheduleController.checkPaymentSchedule.url)
+                )
+                val result = controller.changeFromCheckPaymentSchedule(pageId)(fakeRequest)
+
+                status(result) shouldBe SEE_OTHER
+                redirectLocation(result) shouldBe Some(expectedRedirect.url)
+                session(result) shouldBe expectedUpdatedSession
+                ()
+              }
+
+            "CanPayUpfront" in {
+              test("CanPayUpfront", routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment)
+            }
+
+            "UpfrontPaymentAmount" in {
+              test("UpfrontPaymentAmount", routes.UpfrontPaymentController.upfrontPaymentAmount)
+            }
+
+            "MonthlyPaymentAmount" in {
+              test("MonthlyPaymentAmount", routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount)
+            }
+
+            "PaymentDay" in {
+              test("PaymentDay", routes.PaymentDayController.paymentDay)
+            }
+
+            "PaymentPlan" in {
+              test("PaymentPlan", routes.InstalmentsController.instalmentOptions)
+            }
+
+          }
+
+          s"[$regime journey] should return an error when the pageId is not recognised" in {
+            stubCommonActions()
+            EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, origin)()
+
+            a[NoSuchElementException] shouldBe thrownBy(
+              await(controller.changeFromCheckPaymentSchedule("abc")(fakeRequest))
+            )
+          }
+
         }
     }
 

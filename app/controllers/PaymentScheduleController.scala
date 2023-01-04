@@ -26,6 +26,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.{AuditService, JourneyService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.{JourneyLogger, Logging}
+import viewmodels.CheckPaymentPlanChangeLink
 import views.html.CheckPaymentSchedule
 
 import java.time.LocalDate
@@ -77,8 +78,14 @@ class PaymentScheduleController @Inject() (
           case _                                    => JourneyLogger.debug(s"Nothing to audit for stage: ${j.stage.toString}")
         }
         journeyService.updateHasCheckedPaymentPlan(j.journeyId)
-          .map(updatedJourney => Redirect(Routing.next(updatedJourney)))
+          .map(updatedJourney =>
+            Routing.redirectToNext(routes.PaymentScheduleController.checkPaymentSchedule, updatedJourney, submittedValueUnchanged = false))
     }
+  }
+
+  def changeFromCheckPaymentSchedule(pageId: String): Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    Redirect(CheckPaymentPlanChangeLink.withName(pageId).targetPage)
+      .addingToSession(Routing.clickedChangeFromSessionKey -> routes.PaymentScheduleController.checkPaymentSchedule.url)
   }
 
 }

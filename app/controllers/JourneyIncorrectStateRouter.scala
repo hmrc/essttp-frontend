@@ -28,7 +28,7 @@ object JourneyIncorrectStateRouter {
   def logErrorAndRouteToDefaultPageF(journey: Journey)(implicit request: Request[_]): Future[Result] = Future.successful(logErrorAndRouteToDefaultPage(journey))
 
   def logErrorAndRouteToDefaultPage(journey: Journey)(implicit request: Request[_]): Result = {
-    val redirectTo = Routing.next(journey, allowSubmitArrangement = false)
+    val redirectTo = Routing.latestPossiblePage(journey)
 
     JourneyLogger.error(
       "Journey in incorrect state. " +

@@ -56,7 +56,7 @@ class DatesApiController @Inject() (
     for {
       extremeDatesResponse <- datesService.extremeDates(j)
       updatedJourney <- journeyService.updateExtremeDatesResult(j.id, extremeDatesResponse)
-    } yield Redirect(Routing.next(updatedJourney))
+    } yield Routing.redirectToNext(routes.DatesApiController.retrieveExtremeDates, updatedJourney, submittedValueUnchanged = false)
   }
 
   val retrieveStartDates: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
@@ -72,7 +72,7 @@ class DatesApiController @Inject() (
     for {
       startDatesResponse <- datesService.startDates(journey)
       updatedJourney <- journeyService.updateStartDates(journey.id, startDatesResponse)
-    } yield Redirect(Routing.next(updatedJourney))
+    } yield Routing.redirectToNext(routes.DatesApiController.retrieveStartDates, updatedJourney, submittedValueUnchanged = false)
   }
 
 }

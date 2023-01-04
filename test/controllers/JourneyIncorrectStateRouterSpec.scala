@@ -55,7 +55,7 @@ class JourneyIncorrectStateRouterSpec extends ItSpec {
       ("Stages.EnteredDayOfMonth", () => EssttpBackend.DayOfMonth.findJourney(TdAll.dayOfMonth(), testCrypto, Origins.Epaye.Bta)(), PageUrls.retrieveStartDatesUrl),
       ("Stages.RetrievedStartDates", () => EssttpBackend.Dates.findJourneyStartDates(testCrypto, Origins.Epaye.Bta)(), PageUrls.determineAffordableQuotesUrl),
       ("Stages.RetrievedAffordableQuotes", () => EssttpBackend.AffordableQuotes.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.instalmentsUrl),
-      ("Stages.ChosenPaymentPlan", () => EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.instalmentScheduleUrl),
+      ("Stages.ChosenPaymentPlan", () => EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.checkPaymentPlanUrl),
       ("Stages.CheckedPaymentPlan", () => EssttpBackend.HasCheckedPlan.findJourney(testCrypto)(), PageUrls.aboutYourBankAccountUrl),
       ("Stages.EnteredDetailsAboutBankAccount - is account holder", () => EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.directDebitDetailsUrl),
       ("Stages.EnteredDetailsAboutBankAccount - is not account holder",

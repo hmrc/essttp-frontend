@@ -78,18 +78,23 @@ class EmailController @Inject() (
       journey:                      Journey.AfterAgreedTermsAndConditions,
       emailFromEligibilityResponse: Email
   )(implicit request: Request[_]): Result = {
-    val maybePrePopForm: Form[ChooseEmailForm] = journey match {
-      case _: Journey.BeforeEmailAddressSelectedToBeVerified => chooseEmailForm()
-      case j: Journey.AfterEmailAddressSelectedToBeVerified =>
-        if (j.emailToBeVerified === emailFromEligibilityResponse) {
-          chooseEmailForm().fill(ChooseEmailForm(j.emailToBeVerified.value.decryptedValue, None))
+    val maybePrePopForm: Form[ChooseEmailForm] = {
+      existingEmailToBeVerified(journey).fold(chooseEmailForm()){ existingEmail =>
+        if (existingEmail === emailFromEligibilityResponse) {
+          chooseEmailForm().fill(ChooseEmailForm(existingEmail.value.decryptedValue, None))
         } else {
-          chooseEmailForm().fill(ChooseEmailForm(emailFromEligibilityResponse.value.decryptedValue, Some(j.emailToBeVerified.value.decryptedValue)))
+          chooseEmailForm().fill(ChooseEmailForm(emailFromEligibilityResponse.value.decryptedValue, Some(existingEmail.value.decryptedValue)))
         }
-      case _: Journey.Stages.SubmittedArrangement =>
-        Errors.throwServerErrorException("Can't render form for page when submission is submitted, this should never happen")
+      }
     }
     Ok(views.chooseEmailPage(emailFromEligibilityResponse.value.decryptedValue, maybePrePopForm))
+  }
+
+  private def existingEmailToBeVerified(journey: Journey): Option[Email] = journey match {
+    case _: Journey.BeforeEmailAddressSelectedToBeVerified => None
+    case j: Journey.AfterEmailAddressSelectedToBeVerified  => Some(j.emailToBeVerified)
+    case _: Journey.Stages.SubmittedArrangement =>
+      Errors.throwServerErrorException("Shouldn't be trying to find email address in session when submission is submitted")
   }
 
   val whichEmailDoYouWantToUseSubmit: Action[AnyContent] =
@@ -112,7 +117,12 @@ class EmailController @Inject() (
                     journeyId = request.journeyId,
                     email     = emailAddress
                   )
-                  .map(updatedJourney => Redirect(Routing.next(updatedJourney)))
+                  .map(updatedJourney =>
+                    Routing.redirectToNext(
+                      routes.EmailController.whichEmailDoYouWantToUse,
+                      updatedJourney,
+                      existingEmailToBeVerified(request.journey).contains(emailAddress)
+                    ))
               }
             )
         }
@@ -158,7 +168,12 @@ class EmailController @Inject() (
                 journeyId = request.journeyId,
                 email     = email
               )
-              .map(updatedJourney => Redirect(Routing.next(updatedJourney)))
+              .map(updatedJourney =>
+                Routing.redirectToNext(
+                  routes.EmailController.enterEmail,
+                  updatedJourney,
+                  existingEmailToBeVerified(request.journey).contains(email)
+                ))
           }
         )
 
@@ -200,7 +215,7 @@ class EmailController @Inject() (
           for {
             status <- emailVerificationService.getEmailVerificationResult(j.emailToBeVerified)
             updatedJourney <- journeyService.updateEmailVerificationResult(j.journeyId, status)
-          } yield Redirect(Routing.next(updatedJourney, allowSubmitArrangement = false))
+          } yield Routing.redirectToNext(routes.EmailController.emailCallback, updatedJourney, submittedValueUnchanged = false)
       }
     }
   }
@@ -235,7 +250,8 @@ class EmailController @Inject() (
 
   val emailAddressConfirmedSubmit: Action[AnyContent] = withEmailEnabled{
     as.eligibleJourneyAction { implicit request =>
-      withEmailAddressVerified(_ => Redirect(routes.SubmitArrangementController.submitArrangement))
+      withEmailAddressVerified(_ =>
+        Routing.redirectToNext(routes.EmailController.emailAddressConfirmed, request.journey, submittedValueUnchanged = false))
     }
   }
 
