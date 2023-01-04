@@ -112,7 +112,7 @@ class EmailController @Inject() (
                   case Some(email) => Email(SensitiveString(email))
                   case None        => Email(emailFromEligibilityResponse.value)
                 }
-                val journey = request.journey match {
+                val emailVerificationResult: Option[EmailVerificationResult] = request.journey match {
                   case j: Journey.AfterEmailAddressVerificationResult => Some(j.emailVerificationResult)
                   case j: Journey.AfterEmailVerificationPhase => j.emailVerificationAnswers match {
                     case EmailVerificationAnswers.NoEmailJourney =>
@@ -122,7 +122,7 @@ class EmailController @Inject() (
                   case _: Journey.BeforeEmailAddressVerificationResult => None
                 }
 
-                journey.fold {
+                emailVerificationResult.fold {
                   journeyService.updateSelectedEmailToBeVerified(
                     journeyId = request.journeyId,
                     email     = emailAddress
@@ -134,7 +134,7 @@ class EmailController @Inject() (
                     ))
                 } {
                   case EmailVerificationResult.Verified => Future.successful(Redirect(routes.EmailController.emailAddressConfirmed))
-                  case EmailVerificationResult.Locked   => Future.successful(Redirect(Routing.next(request.journey)))
+                  case EmailVerificationResult.Locked   => Future.successful(Routing.redirectToNext(routes.EmailController.emailCallback, request.journey, false))
                 }
 
               }
@@ -177,7 +177,7 @@ class EmailController @Inject() (
         .fold(
           formWithErrors => Future.successful(Ok(views.enterEmailPage(formWithErrors))),
           email => {
-            val journey = request.journey match {
+            val emailVerificationResult: Option[EmailVerificationResult] = request.journey match {
               case j: Journey.AfterEmailAddressVerificationResult => Some(j.emailVerificationResult)
               case j: Journey.AfterEmailVerificationPhase => j.emailVerificationAnswers match {
                 case EmailVerificationAnswers.NoEmailJourney =>
@@ -187,7 +187,7 @@ class EmailController @Inject() (
               case _: Journey.BeforeEmailAddressVerificationResult => None
             }
 
-            journey.fold {
+            emailVerificationResult.fold {
               journeyService.updateSelectedEmailToBeVerified(
                 journeyId = request.journeyId,
                 email     = email
@@ -199,7 +199,7 @@ class EmailController @Inject() (
                 ))
             } {
               case EmailVerificationResult.Verified => Future.successful(Redirect(routes.EmailController.emailAddressConfirmed))
-              case EmailVerificationResult.Locked   => Future.successful(Redirect(Routing.next(request.journey)))
+              case EmailVerificationResult.Locked   => Future.successful(Routing.redirectToNext(routes.EmailController.emailCallback, request.journey, false))
             }
           }
         )
