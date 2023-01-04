@@ -53,7 +53,7 @@ class DetermineAffordableQuotesController @Inject() (
     for {
       affordableQuotes <- ttpService.determineAffordableQuotes(journey, eligibilityCheckResult)
       updatedJourney <- journeyService.updateAffordableQuotes(journey.id, affordableQuotes)
-    } yield Redirect(Routing.next(routes.DetermineAffordableQuotesController.retrieveAffordableQuotes, updatedJourney))
+    } yield Routing.redirectToNext(routes.DetermineAffordableQuotesController.retrieveAffordableQuotes, updatedJourney, submittedValueUnchanged = false)
   }
 
 }

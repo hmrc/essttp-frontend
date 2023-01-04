@@ -22,7 +22,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.http.Status
-import play.api.mvc.Result
+import play.api.mvc.{Call, Result, Session}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
@@ -33,7 +33,7 @@ import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
-import scala.jdk.CollectionConverters.{IteratorHasAsScala, CollectionHasAsScala}
+import scala.jdk.CollectionConverters.{CollectionHasAsScala, IteratorHasAsScala}
 
 class UpfrontPaymentControllerSpec extends ItSpec {
 
@@ -166,6 +166,32 @@ class UpfrontPaymentControllerSpec extends ItSpec {
             errorLink.attr("href") shouldBe "#CanYouMakeAnUpFrontPayment"
             EssttpBackend.CanPayUpfront.verifyNoneUpdateCanPayUpfrontRequest(TdAll.journeyId)
           }
+
+          s"[$regime journey] should redirect to the specified url in session if the user came from a change link and did not change their answer" in {
+            val changeOriginUrl = "/abc"
+
+            stubCommonActions()
+            EssttpBackend.UpfrontPaymentAmount.findJourney(testCrypto, origin)()
+            EssttpBackend.CanPayUpfront.stubUpdateCanPayUpfront(
+              TdAll.journeyId,
+              canPayUpfrontScenario = true,
+              JourneyJsonTemplates.`Answered Can Pay Upfront - Yes`(origin)
+            )
+
+            val fakeRequest = FakeRequest(
+              method = "POST",
+              path   = "/can-you-make-an-upfront-payment"
+            ).withAuthToken()
+              .withSession(SessionKeys.sessionId -> "IamATestSessionId", Routing.clickedChangeFromSessionKey -> changeOriginUrl)
+              .withFormUrlEncodedBody(("CanYouMakeAnUpFrontPayment", "Yes"))
+
+            val result: Future[Result] = controller.canYouMakeAnUpfrontPaymentSubmit(fakeRequest)
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(changeOriginUrl)
+            session(result).get(Routing.clickedChangeFromSessionKey) shouldBe None
+            EssttpBackend.CanPayUpfront.verifyUpdateCanPayUpfrontRequest(TdAll.journeyId, TdAll.canPayUpfront)
+          }
+
         }
 
         "GET /how-much-can-you-pay-upfront" - {
@@ -268,6 +294,30 @@ class UpfrontPaymentControllerSpec extends ItSpec {
             status(result) shouldBe Status.SEE_OTHER
             redirectLocation(result) shouldBe Some(PageUrls.upfrontPaymentSummaryUrl)
             EssttpBackend.UpfrontPaymentAmount.verifyUpdateUpfrontPaymentAmountRequest(TdAll.journeyId, TdAll.upfrontPaymentAmount(149900))
+          }
+
+          s"[$regime journey] should redirect to the specified url in session if the user came from a change link and did not change their answer" in {
+            val changeOriginUrl = "/abc"
+
+            stubCommonActions()
+            EssttpBackend.UpfrontPaymentAmount.findJourney(testCrypto, origin)()
+            EssttpBackend.UpfrontPaymentAmount.stubUpdateUpfrontPaymentAmount(
+              TdAll.journeyId,
+              JourneyJsonTemplates.`Entered Upfront payment amount`(origin)
+            )
+
+            val fakeRequest = FakeRequest(
+              method = "POST",
+              path   = "/how-much-can-you-pay-upfront"
+            ).withAuthToken()
+              .withSession(SessionKeys.sessionId -> "IamATestSessionId", Routing.clickedChangeFromSessionKey -> changeOriginUrl)
+              .withFormUrlEncodedBody(("UpfrontPaymentAmount", "10"))
+
+            val result: Future[Result] = controller.upfrontPaymentAmountSubmit(fakeRequest)
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(changeOriginUrl)
+            session(result).get(Routing.clickedChangeFromSessionKey) shouldBe None
+            EssttpBackend.UpfrontPaymentAmount.verifyUpdateUpfrontPaymentAmountRequest(TdAll.journeyId, TdAll.upfrontPaymentAmount(1000))
           }
 
           forAll(
@@ -387,8 +437,8 @@ class UpfrontPaymentControllerSpec extends ItSpec {
                 answer(rows(0)) shouldBe "Yes"
                 answer(rows(1)) shouldBe expectedUpfrontPaymentAmountString
                 answer(rows(2)) shouldBe expectedRemainingAmountString
-                changeUrl(rows(0)) shouldBe PageUrls.canYouMakeAnUpfrontPaymentUrl
-                changeUrl(rows(1)) shouldBe PageUrls.howMuchCanYouPayUpfrontUrl
+                changeUrl(rows(0)) shouldBe PageUrls.upfrontPaymentSummaryChangeUrl("CanPayUpfront")
+                changeUrl(rows(1)) shouldBe PageUrls.upfrontPaymentSummaryChangeUrl("UpfrontPaymentAmount")
 
                 val continueCta = doc.select("#continue")
                 continueCta.text() shouldBe "Continue"
@@ -456,5 +506,48 @@ class UpfrontPaymentControllerSpec extends ItSpec {
           }
 
         }
+
+        "GET /upfront-payment-summary/change" - {
+
+          val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+          s"[$regime journey] should redirect to the correct page and update the cookie session with the pageId" - {
+
+              def test(pageId: String, expectedRedirect: Call): Unit = {
+                stubCommonActions()
+                EssttpBackend.UpfrontPaymentAmount.findJourney(testCrypto, origin)()
+
+                val expectedUpdatedSession = Session(
+                  fakeRequest.session.data.updated(Routing.clickedChangeFromSessionKey, routes.UpfrontPaymentController.upfrontPaymentSummary.url)
+                )
+                val result = controller.changeFromUpfrontPaymentSummary(pageId)(fakeRequest)
+
+                status(result) shouldBe SEE_OTHER
+                redirectLocation(result) shouldBe Some(expectedRedirect.url)
+                session(result) shouldBe expectedUpdatedSession
+                ()
+              }
+
+            "CanPayUpfront" in {
+              test("CanPayUpfront", routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment)
+            }
+
+            "UpfrontPaymentAmount" in {
+              test("UpfrontPaymentAmount", routes.UpfrontPaymentController.upfrontPaymentAmount)
+            }
+
+          }
+
+          s"[$regime journey] should return an error when the pageId is not recognised" in {
+            stubCommonActions()
+            EssttpBackend.UpfrontPaymentAmount.findJourney(testCrypto, origin)()
+
+            a[NoSuchElementException] shouldBe thrownBy(
+              await(controller.changeFromUpfrontPaymentSummary("abc")(fakeRequest))
+            )
+          }
+
+        }
+
     }
 }

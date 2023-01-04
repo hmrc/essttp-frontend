@@ -53,7 +53,7 @@ class DetermineAffordabilityController @Inject() (
     for {
       instalmentAmounts <- ttpService.determineAffordability(journey, eligibilityCheckResult)
       updatedJourney <- journeyService.updateAffordabilityResult(journey.id, instalmentAmounts)
-    } yield Redirect(Routing.next(routes.DetermineAffordabilityController.determineAffordability, updatedJourney))
+    } yield Routing.redirectToNext(routes.DetermineAffordabilityController.determineAffordability, updatedJourney, submittedValueUnchanged = false)
   }
 
 }

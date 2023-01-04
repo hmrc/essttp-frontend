@@ -64,18 +64,25 @@ class BankDetailsController @Inject() (
       implicit
       request: Request[_]
   ): Result = {
-    val maybePrePoppedForm: Form[DetailsAboutBankAccountForm] = journey match {
-      case _: Journey.BeforeEnteredDetailsAboutBankAccount => DetailsAboutBankAccountForm.form
-      case j: Journey.AfterEnteredDetailsAboutBankAccount =>
+    val maybePrePoppedForm: Form[DetailsAboutBankAccountForm] =
+      existingDetailsFromBankAccount(journey).fold(DetailsAboutBankAccountForm.form)(d =>
         DetailsAboutBankAccountForm.form.fill(
           DetailsAboutBankAccountForm(
-            TypeOfAccountFormValue.typeOfBankAccountAsFormValue(j.detailsAboutBankAccount.typeOfBankAccount),
-            IsSoleSignatoryFormValue.booleanToIsSoleSignatoryFormValue(j.detailsAboutBankAccount.isAccountHolder)
+            TypeOfAccountFormValue.typeOfBankAccountAsFormValue(d.typeOfBankAccount),
+            IsSoleSignatoryFormValue.booleanToIsSoleSignatoryFormValue(d.isAccountHolder)
           )
-        )
-    }
-    Ok(views.enterDetailsAboutBankAccountPage(form = maybePrePoppedForm))
+        ))
+
+    Ok(views.enterDetailsAboutBankAccountPage(maybePrePoppedForm))
   }
+
+  private def existingDetailsFromBankAccount(journey: Journey): Option[DetailsAboutBankAccount] =
+    journey match {
+      case _: Journey.BeforeEnteredDetailsAboutBankAccount =>
+        None
+      case j: Journey.AfterEnteredDetailsAboutBankAccount =>
+        Some(DetailsAboutBankAccount(j.detailsAboutBankAccount.typeOfBankAccount, j.detailsAboutBankAccount.isAccountHolder))
+    }
 
   val detailsAboutBankAccountSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     DetailsAboutBankAccountForm.form
@@ -85,17 +92,20 @@ class BankDetailsController @Inject() (
           Future.successful(
             Ok(views.enterDetailsAboutBankAccountPage(formWithErrors))
           ),
-        (detailsAboutBankAccountForm: DetailsAboutBankAccountForm) =>
-          journeyService
-            .updateDetailsAboutBankAccount(
-              journeyId               = request.journeyId,
-              detailsAboutBankAccount = DetailsAboutBankAccount(
-                TypeOfAccountFormValue.typeOfBankAccountFromFormValue(detailsAboutBankAccountForm.typeOfAccount),
-                detailsAboutBankAccountForm.isSoleSignatory.asBoolean
+        { detailsAboutBankAccountForm: DetailsAboutBankAccountForm =>
+          val newDetailsAboutBankAccount = DetailsAboutBankAccount(
+            TypeOfAccountFormValue.typeOfBankAccountFromFormValue(detailsAboutBankAccountForm.typeOfAccount),
+            detailsAboutBankAccountForm.isSoleSignatory.asBoolean
+          )
+          journeyService.updateDetailsAboutBankAccount(request.journeyId, newDetailsAboutBankAccount)
+            .map { updatedJourney =>
+              Routing.redirectToNext(
+                routes.BankDetailsController.detailsAboutBankAccount,
+                updatedJourney,
+                existingDetailsFromBankAccount(request.journey).contains(newDetailsAboutBankAccount)
               )
-            ).map{ updatedJourney =>
-                Redirect(Routing.next(routes.BankDetailsController.detailsAboutBankAccount, updatedJourney))
-              }
+            }
+        }
       )
   }
 
@@ -217,7 +227,11 @@ class BankDetailsController @Inject() (
         journeyService
           .updateDirectDebitDetails(request.journeyId, directDebitDetails)
           .map { updatedJourney =>
-            Redirect(Routing.next(routes.BankDetailsController.enterBankDetails, updatedJourney))
+            Routing.redirectToNext(
+              routes.BankDetailsController.enterBankDetails,
+              updatedJourney,
+              currentDirectDebitDetails(request.journey).contains(directDebitDetails)
+            )
           }
     )
   }
@@ -236,7 +250,7 @@ class BankDetailsController @Inject() (
       case j: Journey.AfterEnteredDirectDebitDetails =>
         journeyService
           .updateHasConfirmedDirectDebitDetails(j.journeyId)
-          .map(updatedJourney => Redirect(Routing.next(routes.BankDetailsController.checkBankDetails, updatedJourney)))
+          .map(updatedJourney => Routing.redirectToNext(routes.BankDetailsController.checkBankDetails, updatedJourney, submittedValueUnchanged = false))
     }
   }
 

@@ -71,9 +71,9 @@ class MonthlyPaymentAmountController @Inject() (
       minimumAmount = instalmentAmounts.minimumInstalmentAmount,
       maximumAmount = instalmentAmounts.maximumInstalmentAmount
     )
-    val maybePrePoppedForm: Form[BigDecimal] = journey match {
-      case _: Journey.BeforeEnteredMonthlyPaymentAmount => monthlyPaymentAmountForm(roundedMin, roundedMax)
-      case j: Journey.AfterEnteredMonthlyPaymentAmount  => monthlyPaymentAmountForm(roundedMin, roundedMax).fill(j.monthlyPaymentAmount.value.inPounds)
+    val maybePrePoppedForm: Form[BigDecimal] = {
+      val form = monthlyPaymentAmountForm(roundedMin, roundedMax)
+      existingMonthlyPaymentAmount(journey).fold(form){ amount => form.fill(amount.value.inPounds) }
     }
 
     Ok(views.monthlyPaymentAmountPage(
@@ -81,6 +81,12 @@ class MonthlyPaymentAmountController @Inject() (
       maximumPayment = roundedMax,
       minimumPayment = roundedMin
     ))
+  }
+
+  private def existingMonthlyPaymentAmount(journey: Journey): Option[MonthlyPaymentAmount] = journey match {
+    case _: Journey.BeforeEnteredMonthlyPaymentAmount => None
+    case j: Journey.AfterEnteredMonthlyPaymentAmount  => Some(j.monthlyPaymentAmount)
+
   }
 
   val monthlyPaymentAmountSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
@@ -106,11 +112,15 @@ class MonthlyPaymentAmountController @Inject() (
             maximumPayment = roundedMax,
             minimumPayment = roundedMin
           ))),
-        (validForm: BigDecimal) => {
-          val monthlyPaymentAmount: MonthlyPaymentAmount = MonthlyPaymentAmount(AmountInPence(validForm))
+        (submittedValue: BigDecimal) => {
+          val monthlyPaymentAmount: MonthlyPaymentAmount = MonthlyPaymentAmount(AmountInPence(submittedValue))
           journeyService.updateMonthlyPaymentAmount(request.journeyId, monthlyPaymentAmount)
             .map(updatedJourney =>
-              Redirect(Routing.next(routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount, updatedJourney)))
+              Routing.redirectToNext(
+                routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount,
+                updatedJourney,
+                existingMonthlyPaymentAmount(request.journey).map(_.value.inPounds).contains(submittedValue)
+              ))
         }
       )
   }

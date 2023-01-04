@@ -129,7 +129,7 @@ class InstalmentsControllerSpec extends ItSpec {
 
             val result: Future[Result] = controller.instalmentOptionsSubmit(fakeRequest)
             status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(PageUrls.instalmentScheduleUrl)
+            redirectLocation(result) shouldBe Some(PageUrls.checkPaymentPlanUrl)
             EssttpBackend.SelectedPaymentPlan.verifyUpdateSelectedPlanRequest(TdAll.journeyId)
           }
 

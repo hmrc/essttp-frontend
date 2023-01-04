@@ -63,7 +63,7 @@ class DetermineTaxIdController @Inject() (
 
     maybeTaxId.map {
       case Some(_) =>
-        Redirect(Routing.next(routes.DetermineTaxIdController.determineTaxId, request.journey))
+        Routing.redirectToNext(routes.DetermineTaxIdController.determineTaxId, request.journey, submittedValueUnchanged = false)
 
       case None => taxRegime match {
         case TaxRegime.Epaye => Redirect(routes.NotEnrolledController.notEnrolled)

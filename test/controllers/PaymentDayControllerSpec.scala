@@ -198,6 +198,31 @@ class PaymentDayControllerSpec extends ItSpec {
             EssttpBackend.DayOfMonth.verifyUpdateDayOfMonthRequest(TdAll.journeyId)
           }
 
+          s"[$regime journey] should redirect to the specified url in session if the user came from a change link and did not change their answer" in {
+            val changeOriginUrl = "/abc"
+
+            stubCommonActions()
+            EssttpBackend.DayOfMonth.findJourney(DayOfMonth(28), testCrypto, origin)()
+            EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(
+              TdAll.journeyId,
+              JourneyJsonTemplates.`Entered Day of Month`(DayOfMonth(28), origin)
+            )
+
+            val fakeRequest = FakeRequest(
+              method = "POST",
+              path   = "/which-day-do-you-want-to-pay-each-month"
+            ).withAuthToken()
+              .withSession(SessionKeys.sessionId -> "IamATestSessionId", Routing.clickedChangeFromSessionKey -> changeOriginUrl)
+              .withFormUrlEncodedBody(("PaymentDay", "28"))
+
+            val result: Future[Result] = controller.paymentDaySubmit(fakeRequest)
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(changeOriginUrl)
+            session(result).get(Routing.clickedChangeFromSessionKey) shouldBe None
+
+            EssttpBackend.DayOfMonth.verifyUpdateDayOfMonthRequest(TdAll.journeyId)
+          }
+
           forAll(Table(
             ("Input Scenario", "inputValue", "expected error message"),
             ("No option selected", "", "Enter the day you want to pay each month"),

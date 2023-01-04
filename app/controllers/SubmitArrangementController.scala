@@ -69,7 +69,7 @@ class SubmitArrangementController @Inject() (
     for {
       arrangementResponse <- ttpService.submitArrangement(journey)
       updatedJourney <- journeyService.updateArrangementResponse(journey.fold(_.id, _.id), arrangementResponse)
-    } yield Redirect(Routing.next(routes.SubmitArrangementController.submitArrangement, updatedJourney))
+    } yield Routing.redirectToNext(routes.SubmitArrangementController.submitArrangement, updatedJourney, submittedValueUnchanged = false)
   }
 
 }
