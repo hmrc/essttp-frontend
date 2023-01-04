@@ -46,20 +46,8 @@ class EmailVerificationService @Inject() (
   def requestEmailVerification(emailAddress: Email)(implicit r: EligibleJourneyRequest[_], hc: HeaderCarrier): Future[StartEmailVerificationJourneyResponse] =
     connector.startEmailVerificationJourney(emailVerificationRequest(emailAddress))
 
-  def getEmailVerificationResult(emailAddress: Email)(implicit r: EligibleJourneyRequest[_], hc: HeaderCarrier): Future[EmailVerificationResult] =
+  def getEmailVerificationResult(emailAddress: Email)(implicit r: EligibleJourneyRequest[_], hc: HeaderCarrier): Future[EmailVerificationState] =
     connector.getEmailVerificationResult(GetEmailVerificationResultRequest(r.ggCredId, emailAddress))
-
-  def getEmailVerificationState(emailAddress: Email)(implicit r: EligibleJourneyRequest[_], hc: HeaderCarrier): Future[EmailVerificationState] =
-    connector.getEmailVerificationState(GetEmailVerificationResultRequest(r.ggCredId, emailAddress))
-
-  def updateEmailVerificationState(emailAddress: Email)(implicit r: EligibleJourneyRequest[_], hc: HeaderCarrier): Future[Unit] =
-    connector.updateEmailVerificationState(GetEmailVerificationResultRequest(r.ggCredId, emailAddress))
-
-  def updateEmailVerificationState(
-      email:                   Email,
-      emailVerificationResult: EmailVerificationResult
-  )(implicit r: EligibleJourneyRequest[_], hc: HeaderCarrier): Future[Unit] =
-    connector.updateEmailVerificationStateWithResult(emailVerificationStateResultRequest(email, emailVerificationResult))
 
   private def emailVerificationRequest(emailAddress: Email)(implicit r: EligibleJourneyRequest[_]): StartEmailVerificationJourneyRequest = {
     val lang = language(r.request)
@@ -79,15 +67,6 @@ class EmailVerificationService @Inject() (
 
     )
   }
-
-  private def emailVerificationStateResultRequest(
-      email:                   Email,
-      emailVerificationResult: EmailVerificationResult
-  )(implicit eligibleJourneyRequest: EligibleJourneyRequest[_]): EmailVerificationStateResultRequest =
-    EmailVerificationStateResultRequest(
-      getEmailVerificationResultRequest = GetEmailVerificationResultRequest(eligibleJourneyRequest.ggCredId, email),
-      emailVerificationResult           = emailVerificationResult
-    )
 
   object RequestEmailVerification {
     private def url(s: String): String = if (isLocal) s"${appConfig.BaseUrl.essttpFrontend}$s" else s

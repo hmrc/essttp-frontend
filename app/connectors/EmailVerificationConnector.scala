@@ -35,12 +35,6 @@ class EmailVerificationConnector @Inject() (
 
   private val getVerificationResultUrl: String = appConfig.BaseUrl.essttpBackendUrl + "/essttp-backend/email-verification/result"
 
-  private val getVerificationStateUrl: String = appConfig.BaseUrl.essttpBackendUrl + "/essttp-backend/email-verification/verification-state"
-
-  private val updateVerificationStateUrl: String = appConfig.BaseUrl.essttpBackendUrl + "/essttp-backend/email-verification/verification-state/update"
-
-  private val updateVerificationStateResultUrl: String = appConfig.BaseUrl.essttpBackendUrl + "/essttp-backend/email-verification/verification-state/result-update"
-
   def startEmailVerificationJourney(
       emailVerificationRequest: StartEmailVerificationJourneyRequest
   )(implicit hc: HeaderCarrier): Future[StartEmailVerificationJourneyResponse] =
@@ -48,16 +42,7 @@ class EmailVerificationConnector @Inject() (
       startEmailVerificationJourneyUrl, emailVerificationRequest
     )
 
-  def getEmailVerificationResult(request: GetEmailVerificationResultRequest)(implicit hc: HeaderCarrier): Future[EmailVerificationResult] =
-    httpClient.POST[GetEmailVerificationResultRequest, EmailVerificationResult](getVerificationResultUrl, request)
-
-  def getEmailVerificationState(request: GetEmailVerificationResultRequest)(implicit hc: HeaderCarrier): Future[EmailVerificationState] =
-    httpClient.POST[GetEmailVerificationResultRequest, EmailVerificationState](getVerificationStateUrl, request)
-
-  def updateEmailVerificationState(request: GetEmailVerificationResultRequest)(implicit hc: HeaderCarrier): Future[Unit] =
-    httpClient.POST[GetEmailVerificationResultRequest, Unit](updateVerificationStateUrl, request)
-
-  def updateEmailVerificationStateWithResult(request: EmailVerificationStateResultRequest)(implicit hc: HeaderCarrier): Future[Unit] =
-    httpClient.POST[EmailVerificationStateResultRequest, Unit](updateVerificationStateResultUrl, request)
+  def getEmailVerificationResult(request: GetEmailVerificationResultRequest)(implicit hc: HeaderCarrier): Future[EmailVerificationState] =
+    httpClient.POST[GetEmailVerificationResultRequest, EmailVerificationState](getVerificationResultUrl, request)
 
 }
