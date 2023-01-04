@@ -40,8 +40,8 @@ class InstalmentsControllerSpec extends ItSpec {
   private val controller: InstalmentsController = app.injector.instanceOf[InstalmentsController]
   private val expectedH1: String = "How many months do you want to pay over?"
   private def expectedPageTitle(taxRegime: TaxRegime): String = taxRegime match {
-    case TaxRegime.Epaye => s"$expectedH1 - ${TdAll.expectedServiceNamePaye} - GOV.UK"
-    case TaxRegime.Vat   => s"$expectedH1 - ${TdAll.expectedServiceNameVat} - GOV.UK"
+    case TaxRegime.Epaye => s"$expectedH1 - ${TdAll.expectedServiceNamePayeEn} - GOV.UK"
+    case TaxRegime.Vat   => s"$expectedH1 - ${TdAll.expectedServiceNameVatEn} - GOV.UK"
   }
   private val progressiveRevealContent: String = "How we calculate interest"
   private val progressiveRevealInnerContent1: String = "We only charge interest on overdue amounts."

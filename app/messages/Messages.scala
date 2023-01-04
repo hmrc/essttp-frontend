@@ -1422,5 +1422,24 @@ object Messages {
 
   }
 
+  object Shuttered {
+
+    val `Sorry the service is unavailable`: Message = Message(
+      english = "Sorry, the service is unavailable",
+      welsh   = "Mae’n ddrwg gennym – nid yw’r gwasanaeth ar gael"
+    )
+
+    val `You will be able to use the service later`: Message = Message(
+      english = "You will be able to use the service later.",
+      welsh   = "Byddwch yn gallu defnyddio’r gwasanaeth yn nes ymlaen."
+    )
+
+    def `You can contact the Payment Support Service...`(link: String): Message = Message(
+      english = s"""You can <a class="govuk-link" href="$link">contact the Payment Support Serivice</a> to set up a payment plan by phone.""",
+      welsh   = s"""Gallwch <a class="govuk-link" href="$link">gysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEF</a> er mwyn sefydlu cynllun talu dros y ffôn."""
+    )
+
+  }
+
 }
 

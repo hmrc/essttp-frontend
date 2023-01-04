@@ -39,9 +39,15 @@ import java.util.UUID
 object TdAll {
 
   val etmpEmail: String = "bobross@joyofpainting.com"
-  val expectedServiceNamePaye: String = "Set up an Employers’ PAYE payment plan"
-  val expectedServiceNameVat: String = "Set up a VAT payment plan"
-  val expectedServiceNameGeneric: String = "Set up a payment plan"
+
+  val expectedServiceNamePayeEn: String = "Set up an Employers’ PAYE payment plan"
+  val expectedServiceNameVatEn: String = "Set up a VAT payment plan"
+  val expectedServiceNameGenericEn: String = "Set up a payment plan"
+
+  val expectedServiceNamePayeCy: String = "Trefnu cynllun talu ar gyfer TWE Cyflogwyr"
+  val expectedServiceNameVatCy: String = "Trefnu cynllun talu TAW"
+  val expectedServiceNameGenericCy: String = "Trefnu cynllun talu"
+
   val journeyId: JourneyId = JourneyId("6284fcd33c00003d6b1f3903")
   val correlationId: CorrelationId = CorrelationId(UUID.fromString("8d89a98b-0b26-4ab2-8114-f7c7c81c3059"))
 
