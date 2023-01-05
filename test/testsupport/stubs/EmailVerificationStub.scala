@@ -18,7 +18,7 @@ package testsupport.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import essttp.emailverification.{EmailVerificationState, StartEmailVerificationJourneyResponse}
+import essttp.emailverification.{EmailVerificationResult, StartEmailVerificationJourneyResponse}
 import essttp.rootmodel.{Email, GGCredId}
 import play.api.http.Status.{CREATED, OK}
 import play.api.libs.json.Json
@@ -75,7 +75,7 @@ object EmailVerificationStub {
         )
     )
 
-  def getVerificationStatus(result: EmailVerificationState): StubMapping =
+  def getVerificationStatus(result: EmailVerificationResult): StubMapping =
     stubFor(
       post(urlPathEqualTo(getVerificationResultUrl))
         .willReturn{

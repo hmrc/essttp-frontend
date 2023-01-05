@@ -577,7 +577,7 @@ class EmailControllerSpec extends ItSpec {
             stubCommonActions()
 
             EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto, origin)()
-            EmailVerificationStub.getVerificationStatus(EmailVerificationState.AlreadyVerified)
+            EmailVerificationStub.getVerificationStatus(EmailVerificationResult.Verified)
             EssttpBackend.EmailVerificationResult.stubEmailVerificationResult(
               TdAll.journeyId,
               JourneyJsonTemplates.`Email verification complete`(email.value.decryptedValue, EmailVerificationResult.Verified, origin)
@@ -597,7 +597,7 @@ class EmailControllerSpec extends ItSpec {
           "redirect to the too many passcodes page if the email address has been locked" in {
             stubCommonActions()
             EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto, origin)()
-            EmailVerificationStub.getVerificationStatus(EmailVerificationState.TooManyPasscodeAttempts)
+            EmailVerificationStub.getVerificationStatus(EmailVerificationResult.Locked)
             EssttpBackend.EmailVerificationResult.stubEmailVerificationResult(
               TdAll.journeyId,
               JourneyJsonTemplates.`Email verification complete`(email.value.decryptedValue, EmailVerificationResult.Locked, origin)

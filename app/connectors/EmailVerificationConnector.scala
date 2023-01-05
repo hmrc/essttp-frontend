@@ -42,7 +42,7 @@ class EmailVerificationConnector @Inject() (
       startEmailVerificationJourneyUrl, emailVerificationRequest
     )
 
-  def getEmailVerificationResult(request: GetEmailVerificationResultRequest)(implicit hc: HeaderCarrier): Future[EmailVerificationState] =
-    httpClient.POST[GetEmailVerificationResultRequest, EmailVerificationState](getVerificationResultUrl, request)
+  def getEmailVerificationResult(request: GetEmailVerificationResultRequest)(implicit hc: HeaderCarrier): Future[EmailVerificationResult] =
+    httpClient.POST[GetEmailVerificationResultRequest, EmailVerificationResult](getVerificationResultUrl, request)
 
 }
