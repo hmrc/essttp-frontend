@@ -20,8 +20,9 @@ import config.AppConfig
 import controllers.{YourBillController, routes}
 import essttp.journey.model.Origins
 import essttp.rootmodel.TaxRegime
-import models.Languages
+import models.{Language, Languages}
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import play.api.http.Status
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -31,15 +32,48 @@ import testsupport.reusableassertions.ContentAssertions
 import testsupport.stubs.{AuthStub, EssttpBackend}
 import uk.gov.hmrc.http.SessionKeys
 
-class EpayeShutteringSpec extends ItSpec {
+trait ShutteringSpec { this: ItSpec =>
+
+  lazy val appConfig = app.injector.instanceOf[AppConfig]
+
+  lazy val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+  def assertShutteringPageContent(
+      doc:       Document,
+      taxRegime: Option[TaxRegime],
+      language:  Language
+  ): Unit = {
+
+    val (expectedH1, expectedLink) = language match {
+      case Languages.English =>
+        ("Sorry, the service is unavailable", appConfig.Urls.businessPaymentSupportService)
+      case Languages.Welsh =>
+        ("Mae’n ddrwg gennym – nid yw’r gwasanaeth ar gael", appConfig.Urls.welshLanguageHelplineForDebtManagement)
+    }
+
+    ContentAssertions.commonPageChecks(
+      doc,
+      expectedH1,
+      shouldBackLinkBePresent = false,
+      expectedSubmitUrl       = None,
+      regimeBeingTested       = taxRegime,
+      language                = language
+    )
+
+    val link = doc.select("p.govuk-body > a.govuk-link")
+    link.attr("href") shouldBe expectedLink
+    ()
+  }
+
+}
+
+class EpayeShutteringSpec extends ItSpec with ShutteringSpec {
 
   override lazy val configOverrides: Map[String, Any] = Map(
     "shuttering.shuttered-tax-regimes" -> List("epaye")
   )
 
   lazy val controller: YourBillController = app.injector.instanceOf[YourBillController]
-  lazy val appConfig = app.injector.instanceOf[AppConfig]
-  val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
   "When EPAYE is shuttered" - {
     "the shutter page should be shown when the tax regime in the journey is EPAYE" - {
@@ -52,16 +86,7 @@ class EpayeShutteringSpec extends ItSpec {
         status(result) shouldBe Status.OK
         val doc = Jsoup.parse(contentAsString(result))
 
-        ContentAssertions.commonPageChecks(
-          doc,
-          "Sorry, the service is unavailable",
-          shouldBackLinkBePresent = false,
-          expectedSubmitUrl       = None,
-          regimeBeingTested       = Some(TaxRegime.Epaye)
-        )
-
-        val link = doc.select("p.govuk-body > a.govuk-link")
-        link.attr("href") shouldBe appConfig.Urls.businessPaymentSupportService
+        assertShutteringPageContent(doc, Some(TaxRegime.Epaye), Languages.English)
       }
 
       "in welsh" in {
@@ -72,18 +97,7 @@ class EpayeShutteringSpec extends ItSpec {
         status(result) shouldBe Status.OK
         val doc = Jsoup.parse(contentAsString(result))
 
-        ContentAssertions.commonPageChecks(
-          doc,
-          "Mae’n ddrwg gennym – nid yw’r gwasanaeth ar gael",
-          shouldBackLinkBePresent = false,
-          expectedSubmitUrl       = None,
-          regimeBeingTested       = Some(TaxRegime.Epaye),
-          language                = Languages.Welsh
-        )
-
-        val link = doc.select("p.govuk-body > a.govuk-link")
-        link.attr("href") shouldBe appConfig.Urls.welshLanguageHelplineForDebtManagement
-
+        assertShutteringPageContent(doc, Some(TaxRegime.Epaye), Languages.Welsh)
       }
 
     }
@@ -108,15 +122,13 @@ class EpayeShutteringSpec extends ItSpec {
   }
 }
 
-class VatShutteringSpec extends ItSpec {
+class VatShutteringSpec extends ItSpec with ShutteringSpec {
 
   override lazy val configOverrides: Map[String, Any] = Map(
     "shuttering.shuttered-tax-regimes" -> List("VAT")
   )
 
   lazy val controller: YourBillController = app.injector.instanceOf[YourBillController]
-  lazy val appConfig = app.injector.instanceOf[AppConfig]
-  val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
   "When VAT is shuttered" - {
     "the shutter page should be shown when the tax regime in the journey is EPAYE" - {
@@ -129,16 +141,7 @@ class VatShutteringSpec extends ItSpec {
         status(result) shouldBe Status.OK
         val doc = Jsoup.parse(contentAsString(result))
 
-        ContentAssertions.commonPageChecks(
-          doc,
-          "Sorry, the service is unavailable",
-          shouldBackLinkBePresent = false,
-          expectedSubmitUrl       = None,
-          regimeBeingTested       = Some(TaxRegime.Vat)
-        )
-
-        val link = doc.select("p.govuk-body > a.govuk-link")
-        link.attr("href") shouldBe appConfig.Urls.businessPaymentSupportService
+        assertShutteringPageContent(doc, Some(TaxRegime.Vat), Languages.English)
       }
 
       "in welsh" in {
@@ -149,18 +152,7 @@ class VatShutteringSpec extends ItSpec {
         status(result) shouldBe Status.OK
         val doc = Jsoup.parse(contentAsString(result))
 
-        ContentAssertions.commonPageChecks(
-          doc,
-          "Mae’n ddrwg gennym – nid yw’r gwasanaeth ar gael",
-          shouldBackLinkBePresent = false,
-          expectedSubmitUrl       = None,
-          regimeBeingTested       = Some(TaxRegime.Vat),
-          language                = Languages.Welsh
-        )
-
-        val link = doc.select("p.govuk-body > a.govuk-link")
-        link.attr("href") shouldBe appConfig.Urls.welshLanguageHelplineForDebtManagement
-
+        assertShutteringPageContent(doc, Some(TaxRegime.Vat), Languages.Welsh)
       }
 
     }
