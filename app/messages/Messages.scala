@@ -1405,7 +1405,7 @@ object Messages {
     )
 
     def `You can contact the Payment Support Service...`(link: String): Message = Message(
-      english = s"""You can <a class="govuk-link" href="$link">contact the Payment Support Serivice</a> to set up a payment plan by phone.""",
+      english = s"""You can <a class="govuk-link" href="$link">contact the Payment Support Service</a> to set up a payment plan by phone.""",
       welsh   = s"""Gallwch <a class="govuk-link" href="$link">gysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEF</a> er mwyn sefydlu cynllun talu dros y ffôn."""
     )
 
