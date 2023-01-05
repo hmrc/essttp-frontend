@@ -25,7 +25,6 @@ import essttp.emailverification._
 import essttp.rootmodel.Email
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import messages.Messages
-
 import requests.RequestSupport
 import uk.gov.hmrc.hmrcfrontend.config.ContactFrontendConfig
 import uk.gov.hmrc.http.HeaderCarrier

@@ -24,15 +24,15 @@ import essttp.journey.model.{JourneyId, Origin, Origins}
 import essttp.rootmodel.bank.DetailsAboutBankAccount
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
 import essttp.rootmodel.dates.startdates.StartDatesResponse
-import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import essttp.rootmodel.ttp.affordability.InstalmentAmounts
 import essttp.rootmodel.ttp.affordablequotes.{AffordableQuotesResponse, PaymentPlan}
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
-import essttp.rootmodel.{CanPayUpfront, DayOfMonth, Email, IsEmailAddressRequired, MonthlyPaymentAmount, TaxId, TaxRegime, UpfrontPaymentAmount}
+import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
+import essttp.rootmodel._
+import play.api.http.Status._
 import play.api.libs.json.Json
 import testsupport.stubs.WireMockHelpers._
 import testsupport.testdata.{JourneyJsonTemplates, TdAll, TdJsonBodies}
-import play.api.http.Status._
 import uk.gov.hmrc.crypto.Encrypter
 
 import java.time.Instant
@@ -522,5 +522,4 @@ object EssttpBackend {
     def findJourney(origin: Origin, encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Arrangement Submitted - with upfront payment`(origin)(encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
   }
-
 }
