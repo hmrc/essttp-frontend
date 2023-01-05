@@ -220,12 +220,8 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
             val hint = doc.select(".govuk-hint")
             val hintParagraphs = hint.select("p.govuk-body").asScala.toList
-            hintParagraphs.size shouldBe 2
+            hintParagraphs.size shouldBe 1
             hintParagraphs(0).text shouldBe "Enter an amount between £1 and £1,499"
-            hintParagraphs(1).text shouldBe "Your monthly payments will be lower if you make an upfront payment. " +
-              "This payment will be taken from your bank account within 10 working days."
-
-            doc.select(".govuk-details__summary").text shouldBe "How we calculate interest"
           }
 
           s"[$regime journey] should route the user to /retrieve-extreme-dates when they try to force browse without selecting 'Yes' on the previous page" in {

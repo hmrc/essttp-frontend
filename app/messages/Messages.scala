@@ -583,31 +583,6 @@ object Messages {
       welsh   = s"Nodwch swm sydd rhwng ${min.gdsFormatInPounds} a ${max.gdsFormatInPounds}"
     )
 
-    val `Your monthly payments will be lower if...`: Message = Message(
-      english = "Your monthly payments will be lower if you make an upfront payment. This payment will be taken from your bank account within 10 working days.",
-      welsh   = "Bydd eich taliadau misol yn is os gallwch wneud taliad ymlaen llaw. Caiff y taliad hwn ei gymryd o’ch cyfrif banc cyn pen 10 diwrnod gwaith."
-    )
-
-    val `How we calculate interest`: Message = Message(
-      english = "How we calculate interest",
-      welsh   = " Sut rydym yn cyfrifo llog"
-    )
-
-    val `We only charge interest on overdue amounts.`: Message = Message(
-      english = "We only charge interest on overdue amounts.",
-      welsh   = "Rydym yn codi llog ar symiau hwyr yn unig."
-    )
-
-    val `We charge the Bank of England base rate plus....`: Message = Message(
-      english = "We charge the Bank of England base rate plus 2.5%, calculated as simple interest.",
-      welsh   = "Rydym yn codi cyfradd sylfaenol Banc Lloegr ynghyd â 2.5%, a gyfrifir fel llog syml."
-    )
-
-    val `If the interest rate changes during your plan...`: Message = Message(
-      english = "If the interest rate changes during your plan, your monthly payments will not change. If we need to, we’ll settle the difference at the end of the plan.",
-      welsh   = "Os bydd y gyfradd llog yn newid yn ystod eich cynllun, ni fydd eich taliadau misol yn newid. Os bydd angen, byddwn yn setlo’r gwahaniaeth ar ddiwedd y cynllun."
-    )
-
   }
 
   object UpfrontPaymentSummary {
