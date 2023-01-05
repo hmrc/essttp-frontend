@@ -19,6 +19,7 @@ package controllers
 import _root_.actions.Actions
 import config.AppConfig
 import essttp.journey.JourneyConnector
+import essttp.rootmodel.TaxRegime
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
@@ -37,25 +38,33 @@ class LandingController @Inject() (
 )(implicit ec: ExecutionContext) extends FrontendController(mcc)
   with Logging {
 
-  val epayeLandingPage: Action[AnyContent] = as.default { implicit request =>
-    Ok(views.epayeLanding())
+  val epayeLandingPage: Action[AnyContent] = as.default.async { implicit request =>
+    checkNotShuttered(TaxRegime.Epaye){
+      Future.successful(Ok(views.epayeLanding()))
+    }
   }
 
   val vatLandingPage: Action[AnyContent] =
     if (appConfig.vatEnabled) {
-      as.default { implicit request =>
-        Ok(views.vatLanding())
+      as.default.async { implicit request =>
+        checkNotShuttered(TaxRegime.Vat) {
+          Future.successful(Ok(views.vatLanding()))
+        }
       }
     } else {
       as.default(_ => NotImplemented)
     }
 
   val epayeLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
-    handleLandingPageContinue(routes.StartJourneyController.startDetachedEpayeJourney)
+    checkNotShuttered(TaxRegime.Epaye) {
+      handleLandingPageContinue(routes.StartJourneyController.startDetachedEpayeJourney)
+    }
   }
 
   val vatLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
-    handleLandingPageContinue(routes.StartJourneyController.startDetachedVatJourney)
+    checkNotShuttered(TaxRegime.Vat) {
+      handleLandingPageContinue(routes.StartJourneyController.startDetachedVatJourney)
+    }
   }
 
   private def handleLandingPageContinue(startDetachedJourney: Call)(implicit r: Request[_]): Future[Result] =
@@ -68,6 +77,9 @@ class LandingController @Inject() (
       case Some(_) =>
         Redirect(routes.DetermineTaxIdController.determineTaxId)
     }
+
+  private def checkNotShuttered(taxRegime: TaxRegime)(f: => Future[Result])(implicit request: Request[_]): Future[Result] =
+    if (appConfig.shutteredTaxRegimes.contains(taxRegime)) Future.successful(Ok(views.shuttered())) else f
 
 }
 

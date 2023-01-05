@@ -18,26 +18,21 @@ package actions
 
 import actionsmodel.AuthenticatedJourneyRequest
 import com.google.inject.{Inject, Singleton}
-import com.typesafe.config.Config
+import config.AppConfig
 import play.api.Logging
 import play.api.mvc.{ActionFilter, Result, Results}
 
 import scala.concurrent.{ExecutionContext, Future}
-import configs.syntax._
-import essttp.rootmodel.TaxRegime
 import views.Views
 
 @Singleton
 class ShutteringActionFilter @Inject() (
-    config: Config,
-    views:  Views
+    appConfig: AppConfig,
+    views:     Views
 )(implicit ec: ExecutionContext) extends ActionFilter[AuthenticatedJourneyRequest] with Logging with Results {
 
-  val shutteredTaxRegime: List[TaxRegime] =
-    config.get[List[String]]("shuttering.shuttered-tax-regimes").value.map(TaxRegime.withNameInsensitive)
-
   override protected def filter[A](request: AuthenticatedJourneyRequest[A]): Future[Option[Result]] = {
-    val result = if (shutteredTaxRegime.contains(request.journey.taxRegime)) Some(Ok(views.shuttered()(request))) else None
+    val result = if (appConfig.shutteredTaxRegimes.contains(request.journey.taxRegime)) Some(Ok(views.shuttered()(request))) else None
     Future.successful(result)
   }
 

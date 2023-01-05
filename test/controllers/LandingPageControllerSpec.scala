@@ -16,9 +16,11 @@
 
 package controllers
 
+import actionrefiners.ShutteringSpec
 import essttp.journey.model.Origins
 import essttp.rootmodel.TaxRegime
 import messages.Messages
+import models.Languages
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.mvc.Result
@@ -27,7 +29,7 @@ import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
-import testsupport.stubs.EssttpBackend
+import testsupport.stubs.{AuthStub, EssttpBackend}
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
@@ -202,6 +204,45 @@ class LandingPageVatNotEnabledControllerSpec extends ItSpec {
     val result: Future[Result] = controller.vatLandingPage(fakeRequest)
     status(result) shouldBe NOT_IMPLEMENTED
 
+  }
+
+}
+
+class LandingPageShutteringControllerSpec extends ItSpec with ShutteringSpec {
+
+  override lazy val configOverrides: Map[String, Any] = Map(
+    "shuttering.shuttered-tax-regimes" -> List("epaye", "vat")
+  )
+
+  private val controller = app.injector.instanceOf[LandingController]
+
+  "When shuttering is enabled the shutter page should show for" - {
+
+      def test(result: Future[Result]): Unit = {
+        RequestAssertions.assertGetRequestOk(result)
+        val doc: Document = Jsoup.parse(contentAsString(result))
+        assertShutteringPageContent(doc, None, Languages.English)
+      }
+
+    "GET /epaye-payment-plan" in {
+      test(controller.epayeLandingPage(fakeRequest))
+    }
+
+    "GET /epaye-payment-plan-continue" in {
+      AuthStub.authorise()
+
+      test(controller.epayeLandingPageContinue(fakeRequest))
+    }
+
+    "GET /vat-payment-plan" in {
+      test(controller.vatLandingPage(fakeRequest))
+    }
+
+    "GET /vat-payment-plan-continue" in {
+      AuthStub.authorise()
+
+      test(controller.vatLandingPageContinue(fakeRequest))
+    }
   }
 
 }
