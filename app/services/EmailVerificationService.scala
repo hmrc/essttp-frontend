@@ -47,7 +47,7 @@ class EmailVerificationService @Inject() (
     connector.startEmailVerificationJourney(emailVerificationRequest(emailAddress))
 
   def getEmailVerificationResult(emailAddress: Email)(implicit r: EligibleJourneyRequest[_], hc: HeaderCarrier): Future[EmailVerificationResult] =
-    connector.getEmailVerificationResult(GetEmailVerificationResultRequest(r.ggCredId, emailAddress)) //todo jake return result instead of state
+    connector.getEmailVerificationResult(GetEmailVerificationResultRequest(r.ggCredId, emailAddress))
 
   private def emailVerificationRequest(emailAddress: Email)(implicit r: EligibleJourneyRequest[_]): StartEmailVerificationJourneyRequest = {
     val lang = language(r.request)
