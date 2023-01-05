@@ -184,9 +184,8 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
           )
 
           val subheadings = doc.select(".govuk-heading-m").asScala.toList
-          subheadings.size shouldBe 2
-          subheadings(0).text() shouldBe "Upfront payment"
-          subheadings(1).text() shouldBe "Monthly payments"
+          subheadings.size shouldBe 1
+          subheadings(0).text() shouldBe "Monthly payments"
 
           val allSummaryLists = doc.select(".govuk-summary-list").asScala.toList
           val paymentReferenceSummaryListRows = allSummaryLists(0).select(".govuk-summary-list__row").asScala.toList
@@ -225,9 +224,8 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
           )
 
           val subheadings = doc.select(".govuk-heading-m").asScala.toList
-          subheadings.size shouldBe 2
-          subheadings(0).text() shouldBe "Upfront payment"
-          subheadings(1).text() shouldBe "Monthly payments"
+          subheadings.size shouldBe 1
+          subheadings(0).text() shouldBe "Monthly payments"
 
           val allSummaryLists = doc.select(".govuk-summary-list").asScala.toList
           val paymentReferenceSummaryListRows = allSummaryLists(0).select(".govuk-summary-list__row").asScala.toList
