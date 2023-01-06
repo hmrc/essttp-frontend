@@ -794,11 +794,6 @@ object Messages {
       welsh   = "Gwirio’ch cynllun talu"
     )
 
-    val `Taken within 10 working days`: Message = Message(
-      english = "Taken within 10 working days",
-      welsh   = "I’w gymryd cyn pen 10 diwrnod gwaith"
-    )
-
     val `Monthly payments`: Message = Message(
       english = "Monthly payments",
       welsh   = "Taliadau misol"
