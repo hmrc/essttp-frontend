@@ -37,7 +37,7 @@ class EmailVerificationConnector @Inject() (
 
   private val getVerificationResultUrl: String = appConfig.BaseUrl.essttpBackendUrl + "/essttp-backend/email-verification/result"
 
-  private val getLockoutCreatedAtUrl: String = appConfig.BaseUrl.essttpBackendUrl + "/essttp-backend/email-verification/earliest-created-at"
+  private val getEarliestCreatedAtUrl: String = appConfig.BaseUrl.essttpBackendUrl + "/essttp-backend/email-verification/earliest-created-at"
 
   def startEmailVerificationJourney(
       emailVerificationRequest: StartEmailVerificationJourneyRequest
@@ -49,7 +49,7 @@ class EmailVerificationConnector @Inject() (
   def getEmailVerificationResult(request: GetEmailVerificationResultRequest)(implicit hc: HeaderCarrier): Future[EmailVerificationResult] =
     httpClient.POST[GetEmailVerificationResultRequest, EmailVerificationResult](getVerificationResultUrl, request)
 
-  def getLockoutCreatedAt(credId: GGCredId)(implicit hc: HeaderCarrier): Future[LocalDateTime] =
-    httpClient.POST[GGCredId, LocalDateTime](getLockoutCreatedAtUrl, credId)
+  def getEarliestCreatedAt(credId: GGCredId)(implicit hc: HeaderCarrier): Future[LocalDateTime] =
+    httpClient.POST[GGCredId, LocalDateTime](getEarliestCreatedAtUrl, credId)
 
 }
