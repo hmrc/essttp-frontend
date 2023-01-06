@@ -196,7 +196,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
 
           upfrontPaymentSummaryListRows.size shouldBe 2
           assertKeyAndValue(upfrontPaymentSummaryListRows(0), ("Can you make an upfront payment?", "Yes"))
-          assertKeyAndValue(upfrontPaymentSummaryListRows(1), ("Taken within 10 working days", "£2"))
+          assertKeyAndValue(upfrontPaymentSummaryListRows(1), ("Upfront payment Taken within 10 working days", "£2"))
 
           assertMonthlyPaymentSummaryList(monthlyPaymentSummaryListRows)
           assertPrintLink(doc)
