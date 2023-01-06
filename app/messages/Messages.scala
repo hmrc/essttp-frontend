@@ -1172,7 +1172,7 @@ object Messages {
 
   }
 
-  object TooManyEmails {
+  object TooManyPasscodeJourneys {
 
     val `You have tried to confirm an email too many times`: Message = Message(
       english = "You have tried to confirm an email too many times",
@@ -1201,6 +1201,25 @@ object Messages {
     def `You can go back to enter a new email address`(link: String): Message = Message(
       english = s"""You can <a class="govuk-link" href="$link">go back to enter a new email address</a>.""",
       welsh   = s"""Gallwch <a class="govuk-link" href="$link">fynd yn ôl i nodi cyfeiriad e-bost newydd</a>."""
+    )
+
+  }
+
+  object TooManyEmails {
+
+    val `You have tried to verify too many email addresses`: Message = Message(
+      english = "You have tried to verify too many email addresses",
+      welsh   = "Rydych wedi ceisio dilysu gormod o gyfeiriadau e-bost"
+    )
+
+    def `You have been locked out because you have tried to verify too many email addresses`(dateAndTime: String): Message = Message(
+      english = s"""You have been locked out because you have tried to verify too many email addresses. Please try again on <strong>$dateAndTime</strong>.""",
+      welsh   = s"""Rydych chi wedi cael eich cloi allan oherwydd eich bod wedi ceisio dilysu gormod o gyfeiriadau e-bost. Rhowch gynnig arall arni ar <strong>$dateAndTime</strong>"""
+    )
+
+    val `at`: Message = Message(
+      english = "at",
+      welsh   = "am"
     )
 
   }

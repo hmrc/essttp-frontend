@@ -666,13 +666,13 @@ class EmailControllerSpec extends ItSpec {
           }
         }
 
-        s"[taxRegime: ${taxRegime.toString}] GET /tried-to-confirm-email-too-many-times should" - {
+        s"[taxRegime: ${taxRegime.toString}] GET /email-verification-too-many-passcodes should" - {
 
           "display the page" in {
             stubCommonActions()
             EssttpBackend.SelectEmail.findJourney("email@test.com", testCrypto, origin)()
 
-            val result = controller.tooManyEmailAddresses(FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId"))
+            val result = controller.tooManyPasscodeJourneysStarted(FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId"))
             status(result) shouldBe OK
 
             val doc = Jsoup.parse(contentAsString(result))
@@ -745,6 +745,36 @@ class EmailControllerSpec extends ItSpec {
 
         }
 
+        s"[taxRegime: ${taxRegime.toString}] GET /email-verification-too-many-addresses should" - {
+
+          "display the page" in {
+            stubCommonActions()
+            EssttpBackend.SelectEmail.findJourney("email@test.com", testCrypto, origin)()
+            EmailVerificationStub.getLockoutCreatedAt
+
+            val result = controller.tooManyDifferentEmailAddresses(FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId"))
+            status(result) shouldBe OK
+
+            val doc = Jsoup.parse(contentAsString(result))
+
+            ContentAssertions.commonPageChecks(
+              doc,
+              "You have tried to verify too many email addresses",
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime)
+            )
+
+            val paragraphs = doc.select("p.govuk-body").asScala.toList
+
+            paragraphs.size shouldBe 2
+
+            paragraphs(0).html() shouldBe "You have been locked out because you have tried to verify too many email addresses. Please try again on <strong>7 January 2023 at 11:13am</strong>."
+            paragraphs(1).select("a").text() shouldBe "Sign out"
+            paragraphs(1).select("a").attr("href") shouldBe routes.SignOutController.signOut.url
+          }
+        }
+
     }
 
 }
@@ -779,8 +809,12 @@ class EmailNotEnabledControllerSpec extends ItSpec {
       status(controller.emailAddressConfirmed(FakeRequest())) shouldBe NOT_IMPLEMENTED
     }
 
-    "GET /tried-to-confirm-email-too-many-times" in {
-      status(controller.tooManyEmailAddresses(FakeRequest())) shouldBe NOT_IMPLEMENTED
+    "GET /email-verification-too-many-passcodes" in {
+      status(controller.tooManyPasscodeJourneysStarted(FakeRequest())) shouldBe NOT_IMPLEMENTED
+    }
+
+    "GET /email-verification-too-many-addresses" in {
+      status(controller.tooManyDifferentEmailAddresses(FakeRequest())) shouldBe NOT_IMPLEMENTED
     }
 
     "GET /email-verification-code-entered-too-many-times" in {

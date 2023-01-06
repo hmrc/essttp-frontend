@@ -18,23 +18,36 @@
 @import messages.Messages
 @import play.api.mvc.Request
 @import controllers.routes
+@import play.twirl.api.Html
+@import java.time.LocalDateTime
+@import messages.DateMessages
+@import java.time.format.DateTimeFormatter
+@import java.util.Locale
 
 @this(
-        layout: templates.Layout,
+        layout: views.html.templates.Layout,
         requestSupport: RequestSupport
 )
 
-@()(implicit request: Request[_])
+@(localDateTime: LocalDateTime)(implicit request: Request[_])
 
 @import requestSupport._
 
-@title = @{Messages.TooManyEmails.`You have tried to confirm an email too many times`.show}
+@lockOutExpiryTimeString = @{
+    val dateString = s"${localDateTime.getDayOfMonth.toString} ${DateMessages.monthName(localDateTime.getMonthValue).show} ${localDateTime.getYear.toString}"
+    val timeString = localDateTime.format(DateTimeFormatter.ofPattern("hh:mm a")).toLowerCase(Locale.UK).replace(" ", "")
+    s"$dateString ${Messages.TooManyEmails.`at`.show} $timeString"
+}
+
+@title = @{Messages.TooManyEmails.`You have tried to verify too many email addresses`.show}
 
 @layout(pageTitle = Some(title), showBackLink = false) {
 
     <h1 class="govuk-heading-xl">@title</h1>
 
-    <p class="govuk-body">@{Messages.TooManyEmails.`You have made too many attempts to confirm an email address`.show}</p>
+    <p class="govuk-body">@{
+        Html(Messages.TooManyEmails.`You have been locked out because you have tried to verify too many email addresses`(lockOutExpiryTimeString).show)
+    }</p>
 
     <p class="govuk-body">
         <a href="@{routes.SignOutController.signOut}">@{Messages.`Sign out`.show}</a>

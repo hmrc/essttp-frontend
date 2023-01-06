@@ -29,6 +29,7 @@ import requests.RequestSupport
 import uk.gov.hmrc.hmrcfrontend.config.ContactFrontendConfig
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.LocalDateTime
 import scala.concurrent.Future
 
 @Singleton
@@ -48,6 +49,9 @@ class EmailVerificationService @Inject() (
 
   def getEmailVerificationResult(emailAddress: Email)(implicit r: EligibleJourneyRequest[_], hc: HeaderCarrier): Future[EmailVerificationResult] =
     connector.getEmailVerificationResult(GetEmailVerificationResultRequest(r.ggCredId, emailAddress))
+
+  def getLockoutCreatedAt()(implicit request: EligibleJourneyRequest[_], hc: HeaderCarrier): Future[LocalDateTime] =
+    connector.getLockoutCreatedAt(request.ggCredId)
 
   private def emailVerificationRequest(emailAddress: Email)(implicit r: EligibleJourneyRequest[_]): StartEmailVerificationJourneyRequest = {
     val lang = language(r.request)

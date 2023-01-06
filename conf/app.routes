@@ -91,12 +91,11 @@ POST   /enter-your-email-address                            controllers.EmailCon
 
 GET    /email-verification                                  controllers.EmailController.requestVerification
 
-GET    /tried-to-confirm-email-too-many-times               controllers.EmailController.tooManyEmailAddresses
-GET    /too-many-passcodes                                  controllers.EmailController.tooManyPasscodeJourneysStarted
-GET    /too-many-email-addresses                            controllers.EmailController.tooManyDifferentEmailAddresses
+GET    /email-verification-code-entered-too-many-times      controllers.EmailController.tooManyPasscodeAttempts
+GET    /email-verification-too-many-passcodes               controllers.EmailController.tooManyPasscodeJourneysStarted
+GET    /email-verification-too-many-addresses               controllers.EmailController.tooManyDifferentEmailAddresses
 
 GET    /email-callback                                      controllers.EmailController.emailCallback
-GET    /email-verification-code-entered-too-many-times      controllers.EmailController.tooManyPasscodeAttempts
 
 GET    /email-address-confirmed                             controllers.EmailController.emailAddressConfirmed
 POST   /email-address-confirmed                             controllers.EmailController.emailAddressConfirmedSubmit
