@@ -25,11 +25,15 @@ import play.api.libs.json.Json
 import testsupport.testdata.TdJsonBodies
 import uk.gov.hmrc.crypto.Encrypter
 
+import java.time.LocalDateTime
+
 object EmailVerificationStub {
 
   private val startVerificationJourneyUrl: String = "/essttp-backend/email-verification/start"
 
   private val getVerificationResultUrl: String = s"/essttp-backend/email-verification/result"
+
+  private val getLockoutCreatedAtUrl = "/essttp-backend/email-verification/earliest-created-at"
 
   type HttpStatus = Int
 
@@ -101,5 +105,12 @@ object EmailVerificationStub {
           )
         )
     )
+
+  def getLockoutCreatedAt: StubMapping = stubFor(
+    post(urlPathEqualTo(getLockoutCreatedAtUrl))
+      .willReturn(
+        aResponse().withStatus(OK).withBody(Json.prettyPrint(Json.toJson(LocalDateTime.of(2023, 1, 7, 11, 13))))
+      )
+  )
 
 }

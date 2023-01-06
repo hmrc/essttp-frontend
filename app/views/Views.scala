@@ -20,6 +20,7 @@ import views.html._
 import views.html.epaye.EPayeLanding
 import views.html.epaye.ineligible.{Ineligible, NotEnrolled}
 import views.html.vat.{NotVatRegistered, VatLanding}
+import views.html.emailerrors._
 import views.partials.Partials
 
 import javax.inject.Inject
@@ -50,6 +51,7 @@ class Views @Inject() (
     val emailAddressConfirmed:            EmailAddressConfirmed,
     val tooManyEmails:                    TooManyEmails,
     val tooManyPasscodes:                 TooManyPasscodes,
+    val tooManyPasscodeJourneysStarted:   TooManyPasscodeJourneysStarted,
     val paymentPlanSetUpPage:             PaymentPlanSetUpPage,
     val printSummaryPage:                 PrintSummaryPage,
     val missingInfoPage:                  MissingInformation,

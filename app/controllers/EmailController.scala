@@ -24,8 +24,8 @@ import controllers.EmailController.{ChooseEmailForm, chooseEmailForm, enterEmail
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.{logErrorAndRouteToDefaultPage, logErrorAndRouteToDefaultPageF}
 import essttp.emailverification.{EmailVerificationResult, EmailVerificationState, StartEmailVerificationJourneyResponse}
-import essttp.journey.model.{EmailVerificationAnswers, Journey}
 import essttp.journey.model.Journey.AfterEmailAddressSelectedToBeVerified
+import essttp.journey.model.{EmailVerificationAnswers, Journey}
 import essttp.rootmodel.Email
 import essttp.utils.Errors
 import play.api.data.Form
@@ -244,12 +244,6 @@ class EmailController @Inject() (
     }
   }
 
-  val tooManyEmailAddresses: Action[AnyContent] = withEmailEnabled {
-    as.eligibleJourneyAction { implicit request =>
-      Ok(views.tooManyEmails())
-    }
-  }
-
   val tooManyPasscodeAttempts: Action[AnyContent] = withEmailEnabled {
     as.eligibleJourneyAction { implicit request =>
       val emailEntryEndpoint = request.eligibilityCheckResult.email.fold(
@@ -262,15 +256,15 @@ class EmailController @Inject() (
   }
 
   val tooManyPasscodeJourneysStarted: Action[AnyContent] = withEmailEnabled {
-    as.eligibleJourneyAction { _ =>
-      Ok("Hi Darren, this is the too many passcode journeys started page...")
+    as.eligibleJourneyAction { implicit request =>
+      Ok(views.tooManyPasscodeJourneysStarted())
     }
   }
 
   val tooManyDifferentEmailAddresses: Action[AnyContent] = withEmailEnabled {
-    as.eligibleJourneyAction { _ =>
-
-      Ok("Hi Darren, this is the too many different email addresses page...")
+    as.eligibleJourneyAction.async { implicit request =>
+      emailVerificationService.getLockoutCreatedAt()
+        .map(dateTime => Ok(views.tooManyEmails(dateTime)))
     }
   }
 

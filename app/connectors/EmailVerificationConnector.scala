@@ -20,9 +20,11 @@ import com.google.inject.{Inject, Singleton}
 import config.AppConfig
 import essttp.crypto.CryptoFormat.OperationalCryptoFormat
 import essttp.emailverification._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import essttp.rootmodel.GGCredId
 import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 
+import java.time.LocalDateTime
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -35,6 +37,8 @@ class EmailVerificationConnector @Inject() (
 
   private val getVerificationResultUrl: String = appConfig.BaseUrl.essttpBackendUrl + "/essttp-backend/email-verification/result"
 
+  private val getEarliestCreatedAtUrl: String = appConfig.BaseUrl.essttpBackendUrl + "/essttp-backend/email-verification/earliest-created-at"
+
   def startEmailVerificationJourney(
       emailVerificationRequest: StartEmailVerificationJourneyRequest
   )(implicit hc: HeaderCarrier): Future[StartEmailVerificationJourneyResponse] =
@@ -44,5 +48,8 @@ class EmailVerificationConnector @Inject() (
 
   def getEmailVerificationResult(request: GetEmailVerificationResultRequest)(implicit hc: HeaderCarrier): Future[EmailVerificationResult] =
     httpClient.POST[GetEmailVerificationResultRequest, EmailVerificationResult](getVerificationResultUrl, request)
+
+  def getEarliestCreatedAt(credId: GGCredId)(implicit hc: HeaderCarrier): Future[LocalDateTime] =
+    httpClient.POST[GGCredId, LocalDateTime](getEarliestCreatedAtUrl, credId)
 
 }
