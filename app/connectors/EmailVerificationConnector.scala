@@ -37,7 +37,7 @@ class EmailVerificationConnector @Inject() (
 
   private val getVerificationResultUrl: String = appConfig.BaseUrl.essttpBackendUrl + "/essttp-backend/email-verification/result"
 
-  private val getLockoutCreatedAtUrl: String = appConfig.BaseUrl.essttpBackendUrl + "/essttp-backend/email-verification/lockout-created-at"
+  private val getLockoutCreatedAtUrl: String = appConfig.BaseUrl.essttpBackendUrl + "/essttp-backend/email-verification/earliest-created-at"
 
   def startEmailVerificationJourney(
       emailVerificationRequest: StartEmailVerificationJourneyRequest

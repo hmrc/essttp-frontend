@@ -33,7 +33,7 @@ object EmailVerificationStub {
 
   private val getVerificationResultUrl: String = s"/essttp-backend/email-verification/result"
 
-  private val getLockoutCreatedAtUrl = "/essttp-backend/email-verification/lockout-created-at"
+  private val getLockoutCreatedAtUrl = "/essttp-backend/email-verification/earliest-created-at"
 
   type HttpStatus = Int
 
