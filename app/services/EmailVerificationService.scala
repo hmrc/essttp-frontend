@@ -53,6 +53,8 @@ class EmailVerificationService @Inject() (
   def getLockoutCreatedAt()(implicit request: EligibleJourneyRequest[_], hc: HeaderCarrier): Future[LocalDateTime] =
     connector.getEarliestCreatedAt(request.ggCredId)
 
+  def createdAtPlusOneDay(createdAt: LocalDateTime): LocalDateTime = createdAt.plusDays(1)
+
   private def emailVerificationRequest(emailAddress: Email)(implicit r: EligibleJourneyRequest[_]): StartEmailVerificationJourneyRequest = {
     val lang = language(r.request)
 
