@@ -769,7 +769,7 @@ class EmailControllerSpec extends ItSpec {
 
             paragraphs.size shouldBe 2
 
-            paragraphs(0).html() shouldBe "You have been locked out because you have tried to verify too many email addresses. Please try again on <strong>7 January 2023 at 11:13am</strong>."
+            paragraphs(0).html() shouldBe "You have been locked out because you have tried to verify too many email addresses. Please try again on <strong>8 January 2023 at 11:13am</strong>."
             paragraphs(1).select("a").text() shouldBe "Sign out"
             paragraphs(1).select("a").attr("href") shouldBe routes.SignOutController.signOut.url
           }

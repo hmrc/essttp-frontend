@@ -264,6 +264,7 @@ class EmailController @Inject() (
   val tooManyDifferentEmailAddresses: Action[AnyContent] = withEmailEnabled {
     as.eligibleJourneyAction.async { implicit request =>
       emailVerificationService.getLockoutCreatedAt()
+        .map(emailVerificationService.createdAtPlusOneDay)
         .map(dateTime => Ok(views.tooManyEmails(dateTime)))
     }
   }
