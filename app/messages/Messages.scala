@@ -296,13 +296,13 @@ object Messages {
       welsh   = "Cyflwynwch eich Ffurflen Dreth i ddefnyddio’r gwasanaeth hwn"
     )
 
-    val `To be eligible for a payment plan online, you need to be up to date with your PAYE for Employers returns...`: Message = Message(
-      english = "To be eligible for a payment plan online, you need to be up to date with your PAYE for Employers returns. Once you have done this, you can return to this service.",
+    val `To be eligible to set up a payment plan online, you need to be up to date with your Employers PAYE returns...`: Message = Message(
+      english = "To be eligible to set up a payment plan online, you need to be up to date with your Employers’ PAYE returns. Once you have done this, you can return to the service.",
       welsh   = "I fod yn gymwys i drefnu cynllun talu ar-lein, mae’n rhaid i chi fod wedi cyflwyno’ch Ffurflenni Treth TWE Cyflogwyr. Pan fyddwch wedi gwneud hyn, gallwch ddychwelyd i’r gwasanaeth."
     )
 
-    val `To be eligible to set up a payment plan online, you need to be up to date with your returns. Once you have done this, you can return to the service.`: Message = Message(
-      english = "To be eligible to set up a payment plan online, you need to be up to date with your returns. Once you have done this, you can return to the service.",
+    val `To be eligible to set up a payment plan online, you need to have filed your VAT returns. Once you have done this, you can return to the service.`: Message = Message(
+      english = "To be eligible to set up a payment plan online, you need to have filed your VAT returns. Once you have done this, you can return to the service.",
       welsh   = "I fod yn gymwys i drefnu cynllun talu ar-lein, mae’n rhaid i chi fod wedi cyflwyno’ch Ffurflen TAW. Pan fyddwch wedi gwneud hyn, gallwch ddychwelyd i’r gwasanaeth."
     )
 
@@ -1050,8 +1050,8 @@ object Messages {
     )
 
     val `If your circumstances change...`: Message = Message(
-      english = "Contact HMRC on 0300 123 1813 if anything changes that you think affects your payment plan.",
-      welsh   = "Cysylltwch â CThEF ar 0300 200 1900 os oes unrhyw beth yn newid ac rydych o’r farn ei fod yn effeithio ar eich cynllun talu."
+      english = "Contact HMRC on <strong>0300 123 1813</strong> if anything changes that you think affects your payment plan.",
+      welsh   = "Cysylltwch â CThEF ar <strong>0300 200 1900</strong> os oes unrhyw beth yn newid ac rydych o’r farn ei fod yn effeithio ar eich cynllun talu."
     )
 
     val `You can write to us...`: Message = Message(
