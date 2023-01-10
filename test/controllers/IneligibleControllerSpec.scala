@@ -194,8 +194,8 @@ class IneligibleControllerSpec extends ItSpec {
             )
 
             val expectedLeadingContent = taxRegime match {
-              case TaxRegime.Epaye => "To be eligible for a payment plan online, you need to be up to date with your PAYE for Employers returns. Once you have done this, you can return to this service."
-              case TaxRegime.Vat   => "To be eligible to set up a payment plan online, you need to be up to date with your returns. Once you have done this, you can return to the service."
+              case TaxRegime.Epaye => "To be eligible to set up a payment plan online, you need to be up to date with your Employers’ PAYE returns. Once you have done this, you can return to the service."
+              case TaxRegime.Vat   => "To be eligible to set up a payment plan online, you need to have filed your VAT returns. Once you have done this, you can return to the service."
             }
 
             assertIneligiblePageLeadingP1(
