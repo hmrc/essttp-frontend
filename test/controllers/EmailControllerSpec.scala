@@ -229,28 +229,6 @@ class EmailControllerSpec extends ItSpec {
             EssttpBackend.SelectEmail.verifyUpdateSelectedEmailRequest(TdAll.journeyId, email)(testOperationCryptoFormat)
           }
 
-          "redirect to email-address-confirmed when resubmitting an already confirmed email" in {
-            val email: Email = Email(SensitiveString("bobross@joyofpainting.com"))
-            stubCommonActions()
-            EssttpBackend.EmailVerificationResult.findJourney(email.value.decryptedValue, EmailVerificationResult.Verified, testCrypto, origin)()
-            EmailVerificationStub.requestEmailVerification(StartEmailVerificationJourneyResponse.AlreadyVerified)
-
-            val fakeRequest = FakeRequest(
-              method = "POST",
-              path   = "/which-email-do-you-want-to-use"
-            ).withAuthToken()
-              .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-              .withFormUrlEncodedBody(
-                ("selectAnEmailToUseRadio", email.value.decryptedValue),
-                ("newEmailInput", "")
-              )
-
-            val result: Future[Result] = controller.whichEmailDoYouWantToUseSubmit(fakeRequest)
-            status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(PageUrls.emailAddressConfirmedUrl)
-            EssttpBackend.SelectEmail.verifyNoneUpdateSelectedEmailRequest(TdAll.journeyId)
-          }
-
           forAll(Table(
             ("Input Scenario", "inputValue", "expected error message", "errorTarget"),
             ("No option selected", List(("newEmailInput", "")), "Select which email address you want to use", "#selectAnEmailToUseRadio"),
@@ -553,6 +531,25 @@ class EmailControllerSpec extends ItSpec {
             status(result) shouldBe SEE_OTHER
             redirectLocation(result) shouldBe Some(PageUrls.tooManyPasscodeAttemptsUrl)
           }
+
+          "redirect to email-address-confirmed when the email address has already been confirmed" in {
+            stubCommonActions()
+            EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto, origin)()
+            EmailVerificationStub.requestEmailVerification(StartEmailVerificationJourneyResponse.Error(EmailVerificationState.AlreadyVerified))
+            EssttpBackend.EmailVerificationResult.stubUpdateEmailVerificationResult(
+              TdAll.journeyId,
+              JourneyJsonTemplates.`Email verification complete`(email.value.decryptedValue, EmailVerificationResult.Verified, origin)
+            )
+
+            val result: Future[Result] = controller.requestVerification(fakeRequest)
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(PageUrls.emailAddressConfirmedUrl)
+
+            EssttpBackend.EmailVerificationResult.verifyUpdateEmailVerificationResultRequest(
+              TdAll.journeyId, EmailVerificationResult.Verified
+            )
+
+          }
         }
 
         s"[taxRegime: ${taxRegime.toString}]GET /email-callback should" - {
@@ -578,7 +575,7 @@ class EmailControllerSpec extends ItSpec {
 
             EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto, origin)()
             EmailVerificationStub.getVerificationStatus(EmailVerificationResult.Verified)
-            EssttpBackend.EmailVerificationResult.stubEmailVerificationResult(
+            EssttpBackend.EmailVerificationResult.stubUpdateEmailVerificationResult(
               TdAll.journeyId,
               JourneyJsonTemplates.`Email verification complete`(email.value.decryptedValue, EmailVerificationResult.Verified, origin)
             )
@@ -588,7 +585,7 @@ class EmailControllerSpec extends ItSpec {
             status(result) shouldBe SEE_OTHER
             redirectLocation(result) shouldBe Some(routes.EmailController.emailAddressConfirmed.url)
 
-            EssttpBackend.EmailVerificationResult.verifyEmailVerificationResultRequest(
+            EssttpBackend.EmailVerificationResult.verifyUpdateEmailVerificationResultRequest(
               TdAll.journeyId, EmailVerificationResult.Verified
             )
             EmailVerificationStub.verifyGetEmailVerificationResult(email, ggCredId, testCrypto)
@@ -598,7 +595,7 @@ class EmailControllerSpec extends ItSpec {
             stubCommonActions()
             EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto, origin)()
             EmailVerificationStub.getVerificationStatus(EmailVerificationResult.Locked)
-            EssttpBackend.EmailVerificationResult.stubEmailVerificationResult(
+            EssttpBackend.EmailVerificationResult.stubUpdateEmailVerificationResult(
               TdAll.journeyId,
               JourneyJsonTemplates.`Email verification complete`(email.value.decryptedValue, EmailVerificationResult.Locked, origin)
             )
@@ -609,7 +606,7 @@ class EmailControllerSpec extends ItSpec {
             redirectLocation(result) shouldBe Some(routes.EmailController.tooManyPasscodeAttempts.url)
 
             EmailVerificationStub.verifyGetEmailVerificationResult(email, ggCredId, testCrypto)
-            EssttpBackend.EmailVerificationResult.verifyEmailVerificationResultRequest(
+            EssttpBackend.EmailVerificationResult.verifyUpdateEmailVerificationResultRequest(
               TdAll.journeyId, EmailVerificationResult.Locked
             )
           }

@@ -89,9 +89,7 @@ class BankDetailsController @Inject() (
       .bindFromRequest()
       .fold(
         formWithErrors =>
-          Future.successful(
-            Ok(views.enterDetailsAboutBankAccountPage(formWithErrors))
-          ),
+          Ok(views.enterDetailsAboutBankAccountPage(formWithErrors)),
         { detailsAboutBankAccountForm: DetailsAboutBankAccountForm =>
           val newDetailsAboutBankAccount = DetailsAboutBankAccount(
             TypeOfAccountFormValue.typeOfBankAccountFromFormValue(detailsAboutBankAccountForm.typeOfAccount),
@@ -144,18 +142,15 @@ class BankDetailsController @Inject() (
   val enterBankDetailsSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     request.journey match {
       case j: BeforeEnteredDetailsAboutBankAccount =>
-        Future.successful(JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j))
+        JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
 
       case j: AfterEnteredDetailsAboutBankAccount =>
         if (!j.detailsAboutBankAccount.isAccountHolder) {
-          Future.successful(JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j))
+          JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
         } else {
           val formFromRequest = BankDetailsForm.form.bindFromRequest()
           formFromRequest.fold(
-            formWithErrors =>
-              Future.successful(
-                Ok(views.enterBankDetailsPage(formWithErrors))
-              ),
+            formWithErrors => Ok(views.enterBankDetailsPage(formWithErrors)),
             (bankDetailsForm: BankDetailsForm) => {
               val directDebitDetails: BankDetails =
                 BankDetails(
@@ -167,7 +162,7 @@ class BankDetailsController @Inject() (
               currentDirectDebitDetails(request.journey) match {
                 case Some(current) if directDebitDetails === current =>
                   // nothing changed so don't call BARs and don't update journey
-                  Future.successful(Redirect(routes.BankDetailsController.checkBankDetails))
+                  Redirect(routes.BankDetailsController.checkBankDetails)
                 case _ =>
                   barsService
                     .verifyBankDetails(directDebitDetails, j.detailsAboutBankAccount.typeOfBankAccount, j)
@@ -190,16 +185,14 @@ class BankDetailsController @Inject() (
       implicit
       request: AuthenticatedJourneyRequest[_]
   ): Future[Result] = {
-      def enterBankDetailsPageWithBarsError(error: FormErrorWithFieldMessageOverrides): Future[Result] = {
-        Future.successful(
-          Ok(
-            views.enterBankDetailsPage(
-              form                  = form.withError(error.formError),
-              errorMessageOverrides = error.fieldMessageOverrides
-            )
+      def enterBankDetailsPageWithBarsError(error: FormErrorWithFieldMessageOverrides): Future[Result] =
+        Ok(
+          views.enterBankDetailsPage(
+            form                  = form.withError(error.formError),
+            errorMessageOverrides = error.fieldMessageOverrides
           )
+
         )
-      }
 
     import models.forms.BankDetailsForm._
     resp.fold(
@@ -221,7 +214,7 @@ class BankDetailsController @Inject() (
         case OtherBarsError(_) =>
           enterBankDetailsPageWithBarsError(otherBarsError)
         case TooManyAttempts(_, _) =>
-          Future.successful(Redirect(routes.BankDetailsController.barsLockout))
+          Redirect(routes.BankDetailsController.barsLockout)
       },
       _ =>
         journeyService

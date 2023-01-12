@@ -34,7 +34,7 @@ import util.Logging
 import views.Views
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class MonthlyPaymentAmountController @Inject() (
@@ -107,11 +107,11 @@ class MonthlyPaymentAmountController @Inject() (
       .bindFromRequest()
       .fold(
         formWithErrors =>
-          Future.successful(Ok(views.monthlyPaymentAmountPage(
+          Ok(views.monthlyPaymentAmountPage(
             form           = formWithErrors,
             maximumPayment = roundedMax,
             minimumPayment = roundedMin
-          ))),
+          )),
         (submittedValue: BigDecimal) => {
           val monthlyPaymentAmount: MonthlyPaymentAmount = MonthlyPaymentAmount(AmountInPence(submittedValue))
           journeyService.updateMonthlyPaymentAmount(request.journeyId, monthlyPaymentAmount)

@@ -31,7 +31,7 @@ import views.html.CheckPaymentSchedule
 
 import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class PaymentScheduleController @Inject() (
@@ -70,7 +70,7 @@ class PaymentScheduleController @Inject() (
   val checkPaymentScheduleSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     request.journey match {
       case _: Journey.BeforeSelectedPaymentPlan =>
-        Future.successful(MissingInfoController.redirectToMissingInfoPage())
+        MissingInfoController.redirectToMissingInfoPage()
 
       case j: Journey.AfterSelectedPaymentPlan =>
         j match {

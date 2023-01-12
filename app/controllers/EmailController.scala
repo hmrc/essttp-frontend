@@ -25,7 +25,7 @@ import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.{logErrorAndRouteToDefaultPage, logErrorAndRouteToDefaultPageF}
 import essttp.emailverification.{EmailVerificationResult, EmailVerificationState, StartEmailVerificationJourneyResponse}
 import essttp.journey.model.Journey.AfterEmailAddressSelectedToBeVerified
-import essttp.journey.model.{EmailVerificationAnswers, Journey}
+import essttp.journey.model.Journey
 import essttp.rootmodel.Email
 import essttp.utils.Errors
 import play.api.data.Form
@@ -97,47 +97,29 @@ class EmailController @Inject() (
       Errors.throwServerErrorException("Shouldn't be trying to find email address in session when submission is submitted")
   }
 
-  def checkIfAlreadyVerified(journey: Journey, emailSubmitted: Email): Option[EmailVerificationResult] = journey match {
-    case j: Journey.AfterEmailVerificationPhase => j.emailVerificationAnswers match {
-      case EmailVerificationAnswers.NoEmailJourney =>
-        Errors.throwServerErrorException("We should not be submitting when there is no email journey.")
-      case EmailVerificationAnswers.EmailVerified(email, emailVerificationResult) =>
-        if (email === emailSubmitted) Some(emailVerificationResult)
-        else None
-    }
-    case _: Journey.BeforeEmailAddressVerificationResult => None
-  }
-
   val whichEmailDoYouWantToUseSubmit: Action[AnyContent] =
     withEmailEnabled {
       as.eligibleJourneyAction.async { implicit request =>
         withEmailAddressFromEligibilityResponse { emailFromEligibilityResponse =>
           EmailController.chooseEmailForm()
             .bindFromRequest()
-            .fold(
-              formWithErrors => Future.successful(
-                Ok(views.chooseEmailPage(emailFromEligibilityResponse.value.decryptedValue, formWithErrors))
-              ),
+            .fold[Future[Result]](
+              formWithErrors => Ok(views.chooseEmailPage(emailFromEligibilityResponse.value.decryptedValue, formWithErrors)),
               (form: ChooseEmailForm) => {
                 val emailAddress: Email = form.differentEmail match {
                   case Some(email) => Email(SensitiveString(email))
                   case None        => Email(emailFromEligibilityResponse.value)
                 }
-                checkIfAlreadyVerified(request.journey, emailAddress).fold {
-                  journeyService.updateSelectedEmailToBeVerified(
-                    journeyId = request.journeyId,
-                    email     = emailAddress
-                  ).map(updatedJourney =>
-                    Routing.redirectToNext(
-                      routes.EmailController.whichEmailDoYouWantToUse,
-                      updatedJourney,
-                      existingEmailToBeVerified(request.journey).contains(emailAddress)
-                    ))
-                } {
-                  case EmailVerificationResult.Verified => Future.successful(Redirect(routes.EmailController.emailAddressConfirmed))
-                  case EmailVerificationResult.Locked   => Future.successful(Routing.redirectToNext(routes.EmailController.emailCallback, request.journey, false))
-                }
 
+                journeyService.updateSelectedEmailToBeVerified(
+                  journeyId = request.journeyId,
+                  email     = emailAddress
+                ).map(updatedJourney =>
+                  Routing.redirectToNext(
+                    routes.EmailController.whichEmailDoYouWantToUse,
+                    updatedJourney,
+                    existingEmailToBeVerified(request.journey).contains(emailAddress)
+                  ))
               }
             )
         }
@@ -176,22 +158,17 @@ class EmailController @Inject() (
       EmailController.enterEmailForm
         .bindFromRequest()
         .fold(
-          formWithErrors => Future.successful(Ok(views.enterEmailPage(formWithErrors))),
+          formWithErrors => Ok(views.enterEmailPage(formWithErrors)),
           email => {
-            checkIfAlreadyVerified(request.journey, email).fold {
-              journeyService.updateSelectedEmailToBeVerified(
-                journeyId = request.journeyId,
-                email     = email
-              ).map(updatedJourney =>
-                Routing.redirectToNext(
-                  routes.EmailController.enterEmail,
-                  updatedJourney,
-                  existingEmailToBeVerified(request.journey).contains(email)
-                ))
-            } {
-              case EmailVerificationResult.Verified => Future.successful(Redirect(routes.EmailController.emailAddressConfirmed))
-              case EmailVerificationResult.Locked   => Future.successful(Routing.redirectToNext(routes.EmailController.emailCallback, request.journey, false))
-            }
+            journeyService.updateSelectedEmailToBeVerified(
+              journeyId = request.journeyId,
+              email     = email
+            ).map(updatedJourney =>
+              Routing.redirectToNext(
+                routes.EmailController.enterEmail,
+                updatedJourney,
+                existingEmailToBeVerified(request.journey).contains(email)
+              ))
           }
         )
 
@@ -208,17 +185,24 @@ class EmailController @Inject() (
           logErrorAndRouteToDefaultPageF(j)
 
         case j: Journey.AfterEmailAddressSelectedToBeVerified =>
-          emailVerificationService.requestEmailVerification(j.emailToBeVerified).map {
+          emailVerificationService.requestEmailVerification(j.emailToBeVerified).flatMap {
             case StartEmailVerificationJourneyResponse.Success(redirectUri) =>
               logger.info(s"Email verification journey successfully started. Redirecting to $redirectUri")
               Redirect(redirectUri)
-            case StartEmailVerificationJourneyResponse.AlreadyVerified => Redirect(routes.EmailController.emailAddressConfirmed)
             case StartEmailVerificationJourneyResponse.Error(reason) => reason match {
-              case EmailVerificationState.TooManyPasscodeAttempts        => Redirect(routes.EmailController.tooManyPasscodeAttempts)
-              case EmailVerificationState.TooManyPasscodeJourneysStarted => Redirect(routes.EmailController.tooManyPasscodeJourneysStarted)
-              case EmailVerificationState.TooManyDifferentEmailAddresses => Redirect(routes.EmailController.tooManyDifferentEmailAddresses)
+              case EmailVerificationState.TooManyPasscodeAttempts =>
+                Redirect(routes.EmailController.tooManyPasscodeAttempts)
+              case EmailVerificationState.TooManyPasscodeJourneysStarted =>
+                Redirect(routes.EmailController.tooManyPasscodeJourneysStarted)
+              case EmailVerificationState.TooManyDifferentEmailAddresses =>
+                Redirect(routes.EmailController.tooManyDifferentEmailAddresses)
               case EmailVerificationState.AlreadyVerified =>
-                Errors.throwServerErrorException("Fallen into case wiith AlreadyVerified, this should never happen.")
+                journeyService.updateEmailVerificationResult(
+                  j.journeyId,
+                  EmailVerificationResult.Verified
+                ).map(
+                    _ => Redirect(routes.EmailController.emailAddressConfirmed)
+                  )
             }
           }
       }

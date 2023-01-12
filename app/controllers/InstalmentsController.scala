@@ -58,12 +58,7 @@ class InstalmentsController @Inject() (
         InstalmentsController.instalmentsForm().fill(plan.numberOfInstalments.value.toString)
       }
     val instalmentOptions = InstalmentsController.retrieveInstalmentOptions(journey.affordableQuotesResponse.paymentPlans)
-    Future.successful(
-      Ok(views.instalmentOptionsPage(
-        form    = maybePrePopForm,
-        options = instalmentOptions
-      ))
-    )
+    Ok(views.instalmentOptionsPage(maybePrePopForm, instalmentOptions))
   }
 
   private def existingSelectedPaymentPlan(journey: Journey): Option[PaymentPlan] = journey match {
@@ -82,25 +77,22 @@ class InstalmentsController @Inject() (
 
     instalmentsForm()
       .bindFromRequest()
-      .fold({
-        formWithErrors =>
-          Future.successful(Ok(views.instalmentOptionsPage(
-            form    = formWithErrors,
-            options = instalmentOptions
-          )))
-      }, {
-        (option: String) =>
-          val maybePaymentPlan: Option[PaymentPlan] =
-            journey.affordableQuotesResponse.paymentPlans.find(_.collections.regularCollections.length === option.toInt)
+      .fold(
+        formWithErrors => Ok(views.instalmentOptionsPage(formWithErrors, instalmentOptions)),
+        {
+          (option: String) =>
+            val maybePaymentPlan: Option[PaymentPlan] =
+              journey.affordableQuotesResponse.paymentPlans.find(_.collections.regularCollections.length === option.toInt)
 
-          maybePaymentPlan.fold[Future[Result]](Errors.throwBadRequestExceptionF("There was no payment plan"))(plan =>
-            journeyService.updateChosenPaymentPlan(request.journeyId, plan)
-              .map(updatedJourney => Routing.redirectToNext(
-                routes.InstalmentsController.instalmentOptions,
-                updatedJourney,
-                existingSelectedPaymentPlan(request.journey).contains(plan)
-              )))
-      })
+            maybePaymentPlan.fold[Future[Result]](Errors.throwBadRequestExceptionF("There was no payment plan"))(plan =>
+              journeyService.updateChosenPaymentPlan(request.journeyId, plan)
+                .map(updatedJourney => Routing.redirectToNext(
+                  routes.InstalmentsController.instalmentOptions,
+                  updatedJourney,
+                  existingSelectedPaymentPlan(request.journey).contains(plan)
+                )))
+        }
+      )
   }
 
 }

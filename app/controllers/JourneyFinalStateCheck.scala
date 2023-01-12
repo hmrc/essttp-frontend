@@ -41,7 +41,7 @@ object JourneyFinalStateCheck {
   def finalStateCheckF(journey: Journey, result: => Future[Result])(implicit request: Request[_]): Future[Result] = {
     if (endStateConditional(journey)) {
       logMessage
-      Future.successful(confirmationRedirect(journey.taxRegime))
+      confirmationRedirect(journey.taxRegime)
     } else {
       result
     }
