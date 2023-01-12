@@ -36,7 +36,7 @@ import viewmodels.UpfrontPaymentSummaryChangeLink
 import views.Views
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class UpfrontPaymentController @Inject() (
@@ -79,8 +79,8 @@ class UpfrontPaymentController @Inject() (
     CanPayUpfrontForm.form
       .bindFromRequest()
       .fold(
-        formWithErrors => Future.successful(Ok(views.canYouMakeAnUpFrontPayment(formWithErrors))),
-        (canPayUpfrontForm: CanPayUpfrontFormValue) => {
+        formWithErrors => Ok(views.canYouMakeAnUpFrontPayment(formWithErrors)),
+        { canPayUpfrontForm: CanPayUpfrontFormValue =>
           val canPayUpfront: CanPayUpfront = canPayUpfrontForm.asCanPayUpfront
           journeyService.updateCanPayUpfront(request.journeyId, canPayUpfront)
             .map(updatedJourney =>
@@ -151,13 +151,13 @@ class UpfrontPaymentController @Inject() (
       .bindFromRequest()
       .fold(
         (formWithErrors: Form[BigDecimal]) =>
-          Future.successful(Ok(
+          Ok(
             views.upfrontPaymentAmountPage(
               form           = formWithErrors,
               maximumPayment = maximumUpfrontPaymentAmountInPence,
               minimumPayment = minimumUpfrontPaymentAmount
             )
-          )),
+          ),
         (validForm: BigDecimal) => {
           //amount in pence case class apply method converts big decimal to pennies
           val upfrontPaymentAmount = UpfrontPaymentAmount(AmountInPence(validForm))

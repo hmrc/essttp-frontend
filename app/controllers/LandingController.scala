@@ -40,7 +40,7 @@ class LandingController @Inject() (
 
   val epayeLandingPage: Action[AnyContent] = as.default.async { implicit request =>
     checkNotShuttered(TaxRegime.Epaye){
-      Future.successful(Ok(views.epayeLanding()))
+      Ok(views.epayeLanding())
     }
   }
 
@@ -48,7 +48,7 @@ class LandingController @Inject() (
     if (appConfig.vatEnabled) {
       as.default.async { implicit request =>
         checkNotShuttered(TaxRegime.Vat) {
-          Future.successful(Ok(views.vatLanding()))
+          Ok(views.vatLanding())
         }
       }
     } else {

@@ -59,7 +59,7 @@ class SubmitArrangementController @Inject() (
 
       case j: Journey.AfterArrangementSubmitted =>
         JourneyLogger.info("Already submitted arrangement to ttp, showing user the success page")
-        Future.successful(Redirect(SubmitArrangementController.whichPaymentPlanSetupPage(j.taxRegime)))
+        Redirect(SubmitArrangementController.whichPaymentPlanSetupPage(j.taxRegime))
     }
   }
 

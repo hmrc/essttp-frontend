@@ -45,7 +45,7 @@ class DatesApiController @Inject() (
       case j: Journey.Stages.AnsweredCanPayUpfront       => getExtremeDatesAndUpdateJourney(Right(j))
       case j: Journey.AfterExtremeDatesResponse =>
         JourneyLogger.info("ExtremeDates already determined, skipping.") // we will want to update the journey perhaps?
-        finalStateCheckF(j, Future.successful(Redirect(routes.DetermineAffordabilityController.determineAffordability)))
+        finalStateCheckF(j, Redirect(routes.DetermineAffordabilityController.determineAffordability))
     }
   }
 

@@ -492,10 +492,10 @@ object EssttpBackend {
   object EmailVerificationResult {
     def updateEmailVerificationResultUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-email-verification-status"
 
-    def stubEmailVerificationResult(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
+    def stubUpdateEmailVerificationResult(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
       WireMockHelpers.stubForPostWithResponseBody(updateEmailVerificationResultUrl(journeyId), updatedJourneyJson)
 
-    def verifyEmailVerificationResultRequest(journeyId: JourneyId, status: EmailVerificationResult): Unit =
+    def verifyUpdateEmailVerificationResultRequest(journeyId: JourneyId, status: EmailVerificationResult): Unit =
       WireMockHelpers.verifyWithBodyParse(updateEmailVerificationResultUrl(journeyId), status)
 
     def findJourney(

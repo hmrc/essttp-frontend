@@ -33,7 +33,7 @@ import util.Logging
 import views.Views
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.util.Try
 
 @Singleton
@@ -75,9 +75,7 @@ class PaymentDayController @Inject() (
     paymentDayForm()
       .bindFromRequest()
       .fold(
-        formWithErrors => Future.successful(
-          Ok(views.paymentDayPage(form = formWithErrors))
-        ),
+        formWithErrors => Ok(views.paymentDayPage(form = formWithErrors)),
         (form: PaymentDayForm) => {
           val dayOfMonth: DayOfMonth = form.differentDay match {
             case Some(otherDay) => DayOfMonth(otherDay)

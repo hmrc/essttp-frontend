@@ -65,7 +65,7 @@ class DetermineEligibilityController @Inject() (
       case j: Journey.AfterEligibilityChecked =>
         val proposedResult = {
           JourneyLogger.info("Eligibility already determined, skipping.")
-          Future.successful(Redirect(EligibilityRouter.nextPage(j.eligibilityCheckResult, j.taxRegime)))
+          Redirect(EligibilityRouter.nextPage(j.eligibilityCheckResult, j.taxRegime))
         }
         finalStateCheckF(j, proposedResult)
     }
