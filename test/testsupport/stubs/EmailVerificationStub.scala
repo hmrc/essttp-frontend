@@ -19,6 +19,7 @@ package testsupport.stubs
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.emailverification.{EmailVerificationResult, StartEmailVerificationJourneyResponse}
+import essttp.journey.model.JourneyId
 import essttp.rootmodel.{Email, GGCredId}
 import play.api.http.Status.{CREATED, OK}
 import play.api.libs.json.Json
@@ -29,17 +30,17 @@ import java.time.LocalDateTime
 
 object EmailVerificationStub {
 
-  private val startVerificationJourneyUrl: String = "/essttp-backend/email-verification/start"
+  private def startVerificationJourneyUrl(journeyId: JourneyId): String = s"/essttp-backend/email-verification/${journeyId.value}/start"
 
-  private val getVerificationResultUrl: String = s"/essttp-backend/email-verification/result"
+  private def getVerificationResultUrl(journeyId: JourneyId): String = s"/essttp-backend/email-verification/${journeyId.value}/result"
 
   private val getLockoutCreatedAtUrl = "/essttp-backend/email-verification/earliest-created-at"
 
   type HttpStatus = Int
 
-  def requestEmailVerification(result: StartEmailVerificationJourneyResponse): StubMapping =
+  def requestEmailVerification(result: StartEmailVerificationJourneyResponse)(journeyId: JourneyId): StubMapping =
     stubFor(
-      post(urlPathEqualTo(startVerificationJourneyUrl))
+      post(urlPathEqualTo(startVerificationJourneyUrl(journeyId)))
         .willReturn(
           aResponse().withStatus(CREATED).withBody(Json.prettyPrint(Json.toJson(result)))
         )
@@ -55,10 +56,10 @@ object EmailVerificationStub {
       backLocation:                      String,
       isLocal:                           Boolean,
       encrypter:                         Encrypter
-  ): Unit =
+  )(journeyId: JourneyId): Unit =
     verify(
       exactly(1),
-      postRequestedFor(urlPathEqualTo(startVerificationJourneyUrl))
+      postRequestedFor(urlPathEqualTo(startVerificationJourneyUrl(journeyId)))
         .withRequestBody(
           equalToJson(
             s"""{
@@ -79,9 +80,9 @@ object EmailVerificationStub {
         )
     )
 
-  def getVerificationStatus(result: EmailVerificationResult): StubMapping =
+  def getVerificationStatus(result: EmailVerificationResult)(journeyId: JourneyId): StubMapping =
     stubFor(
-      post(urlPathEqualTo(getVerificationResultUrl))
+      post(urlPathEqualTo(getVerificationResultUrl(journeyId)))
         .willReturn{
           aResponse().withStatus(OK).withBody(Json.prettyPrint(Json.toJson(result)))
         }
@@ -91,10 +92,10 @@ object EmailVerificationStub {
       emailAddress: Email,
       ggCredId:     GGCredId,
       encrypter:    Encrypter
-  ): Unit =
+  )(journeyId: JourneyId): Unit =
     verify(
       exactly(1),
-      postRequestedFor(urlPathEqualTo(getVerificationResultUrl))
+      postRequestedFor(urlPathEqualTo(getVerificationResultUrl(journeyId)))
         .withRequestBody(
           equalToJson(
             s"""{

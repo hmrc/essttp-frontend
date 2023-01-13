@@ -18,21 +18,26 @@ package models.audit.paymentplansetup
 
 import essttp.crypto.CryptoFormat
 import essttp.journey.model.CorrelationId
+import essttp.rootmodel.Email
 import essttp.rootmodel.bank.BankDetails
+import essttp.rootmodel.ttp.eligibility.{EmailSource, RegimeDigitalCorrespondence}
 import models.audit.{AuditDetail, Schedule, TaxDetail}
 import play.api.libs.json.{Json, OWrites}
 
 final case class PaymentPlanSetUpAuditDetail(
-    bankDetails:            BankDetails,
-    schedule:               Schedule,
-    status:                 String,
-    failedSubmissionReason: Int,
-    origin:                 String,
-    taxType:                String,
-    taxDetail:              TaxDetail,
-    correlationId:          CorrelationId,
-    ppReferenceNo:          String,
-    authProviderId:         String
+    bankDetails:                 BankDetails,
+    schedule:                    Schedule,
+    status:                      String,
+    failedSubmissionReason:      Int,
+    origin:                      String,
+    taxType:                     String,
+    taxDetail:                   TaxDetail,
+    correlationId:               CorrelationId,
+    ppReferenceNo:               String,
+    authProviderId:              String,
+    regimeDigitalCorrespondence: Option[RegimeDigitalCorrespondence],
+    emailAddress:                Option[Email],
+    emailSource:                 Option[EmailSource]
 ) extends AuditDetail {
   val auditType: String = "PlanSetUp"
 }

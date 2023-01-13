@@ -18,7 +18,7 @@ package controllers
 
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.TaxRegime
-import essttp.rootmodel.ttp.eligibility.EligibilityRules
+import essttp.rootmodel.ttp.eligibility.{EligibilityRules, RegimeDigitalCorrespondence}
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
@@ -104,7 +104,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
 
             EssttpBackend.EligibilityCheck.verifyUpdateEligibilityRequest(
               journeyId                      = TdAll.journeyId,
-              expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(TdAll.notEligibleEligibilityPass, eligibilityRules, origin.taxRegime)
+              expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(TdAll.notEligibleEligibilityPass, eligibilityRules, origin.taxRegime, None)
             )(testOperationCryptoFormat)
 
             val (expectedTaxType, expectedTaxDetailsJson) =
@@ -147,9 +147,9 @@ class DetermineEligibilityControllerSpec extends ItSpec {
     }
 
     "Eligible: should redirect to your bill and send an audit event" in {
-      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(TaxRegime.Epaye)
+      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(TaxRegime.Epaye, regimeDigitalCorrespondence = true)
       // for audit event
-      val eligibilityCheckResponseJsonAsPounds = TtpJsonResponses.ttpEligibilityCallJson(TaxRegime.Epaye, poundsInsteadOfPence = true)
+      val eligibilityCheckResponseJsonAsPounds = TtpJsonResponses.ttpEligibilityCallJson(TaxRegime.Epaye, poundsInsteadOfPence = true, regimeDigitalCorrespondence = true)
 
       stubCommonActions()
       EssttpBackend.DetermineTaxId.findJourney(Origins.Epaye.Bta)()
@@ -169,7 +169,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
 
       EssttpBackend.EligibilityCheck.verifyUpdateEligibilityRequest(
         journeyId                      = TdAll.journeyId,
-        expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(TdAll.eligibleEligibilityPass, TdAll.eligibleEligibilityRules, TaxRegime.Epaye)
+        expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(TdAll.eligibleEligibilityPass, TdAll.eligibleEligibilityRules, TaxRegime.Epaye, Some(RegimeDigitalCorrespondence(true)))
       )(testOperationCryptoFormat)
 
       AuditConnectorStub.verifyEventAudited(
@@ -187,6 +187,8 @@ class DetermineEligibilityControllerSpec extends ItSpec {
              |  },
              |  "authProviderId": "authId-999",
              |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+             |  "regimeDigitalCorrespondence": true,
+             |  "futureChargeLiabilitiesExcluded": false,
              |  "chargeTypeAssessment" : ${(Json.parse(eligibilityCheckResponseJsonAsPounds).as[JsObject] \ "chargeTypeAssessment").get.toString}
              |}
              |""".

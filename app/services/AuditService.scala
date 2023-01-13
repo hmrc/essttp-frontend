@@ -22,9 +22,10 @@ import essttp.bars.model.BarsVerifyStatusResponse
 import essttp.crypto.CryptoFormat
 import essttp.journey.model.Journey.AfterEnteredDetailsAboutBankAccount
 import essttp.journey.model.Journey.Stages._
-import essttp.journey.model.{Journey, Origin}
+import essttp.journey.model.{EmailVerificationAnswers, Journey, Origin}
+import essttp.rootmodel.Email
 import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount}
-import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
+import essttp.rootmodel.ttp.eligibility.{EligibilityCheckResult, EmailSource}
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
 import essttp.utils.Errors
 import models.audit.bars._
@@ -62,7 +63,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
     audit(toEligibilityCheck(journey, enrollmentReason))
 
   def auditPaymentPlanBeforeSubmission(
-      journey: ChosenPaymentPlan
+      journey: Either[ChosenPaymentPlan, EmailVerificationComplete]
   )(implicit headerCarrier: HeaderCarrier): Unit =
     audit(toPaymentPlanBeforeSubmissionAuditDetail(journey))
 
@@ -109,7 +110,8 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       authProviderId                  = r.ggCredId.value,
       chargeTypeAssessment            = List.empty,
       correlationId                   = journey.correlationId.value.toString,
-      futureChargeLiabilitiesExcluded = false
+      futureChargeLiabilitiesExcluded = None,
+      regimeDigitalCorrespondence     = None
     )
   }
 
@@ -143,17 +145,31 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       authProviderId                  = r.ggCredId.value,
       chargeTypeAssessment            = eligibilityCheckResult.chargeTypeAssessment,
       correlationId                   = journey.correlationId.value.toString,
-      futureChargeLiabilitiesExcluded = eligibilityCheckResult.futureChargeLiabilitiesExcluded
+      futureChargeLiabilitiesExcluded = Some(eligibilityCheckResult.futureChargeLiabilitiesExcluded),
+      regimeDigitalCorrespondence     = eligibilityCheckResult.regimeDigitalCorrespondence.map(_.value)
     )
   }
 
-  private def toPaymentPlanBeforeSubmissionAuditDetail(journey: ChosenPaymentPlan): PaymentPlanBeforeSubmissionAuditDetail = {
+  private def toPaymentPlanBeforeSubmissionAuditDetail(journey: Either[ChosenPaymentPlan, EmailVerificationComplete]): PaymentPlanBeforeSubmissionAuditDetail = {
+
+    val correlationId = journey.fold(_.correlationId, _.correlationId)
+    val origin = journey.fold(_.origin, _.origin)
+    val taxRegime = journey.fold(_.taxRegime, _.taxRegime)
+    val eligibilityCheckResult = journey.fold(_.eligibilityCheckResult, _.eligibilityCheckResult)
+    val selectedPaymentPlan = journey.fold(_.selectedPaymentPlan, _.selectedPaymentPlan)
+    val dayOfMonth = journey.fold(_.dayOfMonth, _.dayOfMonth)
+
+    val (maybeEmail, maybeEmailSource) = journey.fold(_ => (None, None), toEmailInfo)
+
     PaymentPlanBeforeSubmissionAuditDetail(
-      schedule      = Schedule.createSchedule(journey.selectedPaymentPlan, journey.dayOfMonth),
-      correlationId = journey.correlationId,
-      origin        = toAuditString(journey.origin),
-      taxType       = journey.taxRegime.toString,
-      taxDetail     = toTaxDetail(journey.eligibilityCheckResult)
+      schedule                    = Schedule.createSchedule(selectedPaymentPlan, dayOfMonth),
+      correlationId               = correlationId,
+      origin                      = toAuditString(origin),
+      taxType                     = taxRegime.toString,
+      taxDetail                   = toTaxDetail(eligibilityCheckResult),
+      regimeDigitalCorrespondence = eligibilityCheckResult.regimeDigitalCorrespondence,
+      emailAddress                = maybeEmail,
+      emailSource                 = maybeEmailSource
     )
   }
 
@@ -207,18 +223,22 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
     val taxRegime = journey.fold(_.taxRegime, _.taxRegime)
     val eligibilityCheckResult = journey.fold(_.eligibilityCheckResult, _.eligibilityCheckResult)
     val correlationId = journey.fold(_.correlationId, _.correlationId)
+    val (maybeEmail, maybeEmailSource) = journey.fold(_ => (None, None), toEmailInfo)
 
     PaymentPlanSetUpAuditDetail(
-      bankDetails            = directDebitDetails,
-      schedule               = Schedule.createSchedule(selectedPaymentPlan, dayOfMonth),
-      status                 = if (Status.isSuccessful(status)) "successfully sent to TTP" else "failed",
-      failedSubmissionReason = status,
-      origin                 = toAuditString(origin),
-      taxType                = taxRegime.toString,
-      taxDetail              = toTaxDetail(eligibilityCheckResult),
-      correlationId          = correlationId,
-      ppReferenceNo          = maybeArrangementResponse.map(_.customerReference.value).getOrElse("N/A"),
-      authProviderId         = r.ggCredId.value
+      bankDetails                 = directDebitDetails,
+      schedule                    = Schedule.createSchedule(selectedPaymentPlan, dayOfMonth),
+      status                      = if (Status.isSuccessful(status)) "successfully sent to TTP" else "failed",
+      failedSubmissionReason      = status,
+      origin                      = toAuditString(origin),
+      taxType                     = taxRegime.toString,
+      taxDetail                   = toTaxDetail(eligibilityCheckResult),
+      correlationId               = correlationId,
+      ppReferenceNo               = maybeArrangementResponse.map(_.customerReference.value).getOrElse("N/A"),
+      authProviderId              = r.ggCredId.value,
+      regimeDigitalCorrespondence = eligibilityCheckResult.regimeDigitalCorrespondence,
+      emailAddress                = maybeEmail,
+      emailSource                 = maybeEmailSource
     )
   }
 
@@ -231,6 +251,19 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       accountsOfficeRef = getTaxId("BROCS")(eligibilityCheckResult),
       vrn               = getTaxId("VRN")(eligibilityCheckResult)
     )
+
+  private def toEmailInfo(journey: EmailVerificationComplete): (Option[Email], Option[EmailSource]) = {
+    val emailFromEligibility: Option[Email] = journey.eligibilityCheckResult.email
+    journey.emailVerificationAnswers match {
+      case EmailVerificationAnswers.NoEmailJourney => None -> None
+      case EmailVerificationAnswers.EmailVerified(email, _) =>
+        if (emailFromEligibility.map(_.value.decryptedValue.toLowerCase(Locale.UK)).contains(email.value.decryptedValue.toLowerCase(Locale.UK))) {
+          Some(email) -> Some(EmailSource.ETMP)
+        } else {
+          Some(email) -> Some(EmailSource.TEMP)
+        }
+    }
+  }
 
   private def getTaxId(name: String)(eligibilityCheckResult: EligibilityCheckResult): Option[String] =
     eligibilityCheckResult.identification.find(_.idType.value === name).map(_.idValue.value)

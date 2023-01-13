@@ -22,10 +22,11 @@ import essttp.rootmodel.ttp.eligibility.{EligibilityPass, EligibilityRules}
 object TtpJsonResponses {
 
   def ttpEligibilityCallJson(
-      taxRegime:            TaxRegime,
-      eligibilityPass:      EligibilityPass  = TdAll.eligibleEligibilityPass,
-      eligibilityRules:     EligibilityRules = TdAll.eligibleEligibilityRules,
-      poundsInsteadOfPence: Boolean          = false
+      taxRegime:                   TaxRegime,
+      eligibilityPass:             EligibilityPass  = TdAll.eligibleEligibilityPass,
+      eligibilityRules:            EligibilityRules = TdAll.eligibleEligibilityRules,
+      poundsInsteadOfPence:        Boolean          = false,
+      regimeDigitalCorrespondence: Boolean          = false
   ): String = {
     s"""
        |{
@@ -80,6 +81,7 @@ object TtpJsonResponses {
        |       "dueDateNotReached": false
        |    } ]
        |  } ],
+       |  ${if (regimeDigitalCorrespondence) { s""""regimeDigitalCorrespondence":true,""" } else ""}
        |  "futureChargeLiabilitiesExcluded": false
        |}
        |""".stripMargin

@@ -30,7 +30,7 @@ import essttp.rootmodel.Email
 import essttp.utils.Errors
 import play.api.data.Form
 import play.api.mvc._
-import services.{EmailVerificationService, JourneyService}
+import services.{AuditService, EmailVerificationService, JourneyService}
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 import uk.gov.hmrc.emailaddress.EmailAddress
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -47,7 +47,8 @@ class EmailController @Inject() (
     views:                    Views,
     emailVerificationService: EmailVerificationService,
     journeyService:           JourneyService,
-    appConfig:                AppConfig
+    appConfig:                AppConfig,
+    auditService:             AuditService
 )(implicit execution: ExecutionContext) extends FrontendController(mcc) with Logging {
 
   private def withEmailEnabled(action: Action[AnyContent]): Action[AnyContent] =
@@ -266,6 +267,11 @@ class EmailController @Inject() (
 
   val emailAddressConfirmedSubmit: Action[AnyContent] = withEmailEnabled {
     as.eligibleJourneyAction { implicit request =>
+      request.journey match {
+        case _: Journey.BeforeEmailAddressVerificationResult   => ()
+        case journey: Journey.Stages.EmailVerificationComplete => auditService.auditPaymentPlanBeforeSubmission(Right(journey))
+        case _: Journey.AfterAgreedTermsAndConditions          => ()
+      }
       withEmailAddressVerified(_ =>
         Routing.redirectToNext(routes.EmailController.emailAddressConfirmed, request.journey, submittedValueUnchanged = false))
     }

@@ -17,6 +17,7 @@
 package controllers
 
 import _root_.actions.Actions
+import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.PaymentScheduleController.{dayOfMonthFromJourney, upfrontPaymentAnswersFromJourney}
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
@@ -39,7 +40,8 @@ class PaymentScheduleController @Inject() (
     mcc:                 MessagesControllerComponents,
     paymentSchedulePage: CheckPaymentSchedule,
     journeyService:      JourneyService,
-    auditService:        AuditService
+    auditService:        AuditService,
+    appConfig:           AppConfig
 )(implicit ec: ExecutionContext) extends FrontendController(mcc)
   with Logging {
 
@@ -74,8 +76,10 @@ class PaymentScheduleController @Inject() (
 
       case j: Journey.AfterSelectedPaymentPlan =>
         j match {
-          case j1: Journey.Stages.ChosenPaymentPlan => auditService.auditPaymentPlanBeforeSubmission(j1)
-          case _                                    => JourneyLogger.debug(s"Nothing to audit for stage: ${j.stage.toString}")
+          case j1: Journey.Stages.ChosenPaymentPlan if !request.isEmailAddressRequired(appConfig) =>
+            auditService.auditPaymentPlanBeforeSubmission(Left(j1))
+          case _ =>
+            JourneyLogger.debug(s"Nothing to audit for stage: ${j.stage.toString}")
         }
         journeyService.updateHasCheckedPaymentPlan(j.journeyId)
           .map(updatedJourney =>
