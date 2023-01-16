@@ -105,9 +105,6 @@ class SubmitArrangementControllerSpec extends ItSpec {
                       case TaxRegime.Vat   => PageUrls.vatConfirmationUrl
                     })
 
-                    //                  val customerEmail: Option[String] = expectedEmail.map(_.toLowerCase(Locale.UK))
-                    //                  val customerEmailSource: Option[EmailSource] = expectedEmailSource
-
                     Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(
                       TdAll.customerDetail(expectedEmail.getOrElse(TdAll.etmpEmail).toLowerCase(Locale.UK), expectedEmailSource.getOrElse(EmailSource.ETMP)),
                       TdAll.someRegimeDigitalCorrespondenceTrue,
