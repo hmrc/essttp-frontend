@@ -63,7 +63,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
     audit(toEligibilityCheck(journey, enrollmentReason))
 
   def auditPaymentPlanBeforeSubmission(
-      journey: Either[ChosenPaymentPlan, EmailVerificationComplete]
+      journey: ChosenPaymentPlan
   )(implicit headerCarrier: HeaderCarrier): Unit =
     audit(toPaymentPlanBeforeSubmissionAuditDetail(journey))
 
@@ -150,26 +150,14 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
     )
   }
 
-  private def toPaymentPlanBeforeSubmissionAuditDetail(journey: Either[ChosenPaymentPlan, EmailVerificationComplete]): PaymentPlanBeforeSubmissionAuditDetail = {
-
-    val correlationId = journey.fold(_.correlationId, _.correlationId)
-    val origin = journey.fold(_.origin, _.origin)
-    val taxRegime = journey.fold(_.taxRegime, _.taxRegime)
-    val eligibilityCheckResult = journey.fold(_.eligibilityCheckResult, _.eligibilityCheckResult)
-    val selectedPaymentPlan = journey.fold(_.selectedPaymentPlan, _.selectedPaymentPlan)
-    val dayOfMonth = journey.fold(_.dayOfMonth, _.dayOfMonth)
-
-    val (maybeEmail, maybeEmailSource) = journey.fold(_ => (None, None), toEmailInfo)
-
+  private def toPaymentPlanBeforeSubmissionAuditDetail(journey: ChosenPaymentPlan): PaymentPlanBeforeSubmissionAuditDetail = {
     PaymentPlanBeforeSubmissionAuditDetail(
-      schedule                    = Schedule.createSchedule(selectedPaymentPlan, dayOfMonth),
-      correlationId               = correlationId,
-      origin                      = toAuditString(origin),
-      taxType                     = taxRegime.toString,
-      taxDetail                   = toTaxDetail(eligibilityCheckResult),
-      regimeDigitalCorrespondence = eligibilityCheckResult.regimeDigitalCorrespondence,
-      emailAddress                = maybeEmail,
-      emailSource                 = maybeEmailSource
+      schedule                    = Schedule.createSchedule(journey.selectedPaymentPlan, journey.dayOfMonth),
+      correlationId               = journey.correlationId,
+      origin                      = toAuditString(journey.origin),
+      taxType                     = journey.taxRegime.toString,
+      taxDetail                   = toTaxDetail(journey.eligibilityCheckResult),
+      regimeDigitalCorrespondence = journey.eligibilityCheckResult.regimeDigitalCorrespondence
     )
   }
 

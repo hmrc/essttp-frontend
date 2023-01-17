@@ -25,14 +25,13 @@ import org.jsoup.nodes.{Document, Element}
 import org.jsoup.select.Elements
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.http.Status
-import play.api.libs.json.{JsObject, Json}
 import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
-import testsupport.stubs.{AuditConnectorStub, EmailVerificationStub, EssttpBackend}
+import testsupport.stubs.{EmailVerificationStub, EssttpBackend}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 import uk.gov.hmrc.http.SessionKeys
@@ -656,7 +655,7 @@ class EmailControllerSpec extends ItSpec {
             ("email@test.com", "TEMP")
           ).foreach {
               case (emailAddress, emailSource) =>
-                s"redirect to submitArrangement and audit PaymentPlanBeforeSubmissionAuditDetail with emailSource: $emailSource, when email address has successfully been verified" in {
+                s"redirect to submitArrangement with emailSource: $emailSource, when email address has successfully been verified" in {
                   val email: Email = Email(SensitiveString(emailAddress))
 
                   stubCommonActions()
@@ -666,43 +665,6 @@ class EmailControllerSpec extends ItSpec {
                   val result = controller.emailAddressConfirmedSubmit(fakeRequest)
                   status(result) shouldBe SEE_OTHER
                   redirectLocation(result) shouldBe Some(routes.SubmitArrangementController.submitArrangement.url)
-                  AuditConnectorStub.verifyEventAudited(
-                    auditType  = "PlanDetails",
-                    auditEvent = Json.parse(
-                      s"""
-                     |{
-                     |        "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-                     |        "origin": "Bta",
-                     |        "schedule": {
-                     |            "collectionDate": 28,
-                     |            "collectionLengthCalendarMonths": 2,
-                     |            "collections": [
-                     |                {
-                     |                    "amount": 555.70,
-                     |                    "collectionNumber": 2,
-                     |                    "paymentDate": "2022-09-28"
-                     |                },
-                     |                {
-                     |                    "amount": 555.70,
-                     |                    "collectionNumber": 1,
-                     |                    "paymentDate": "2022-08-28"
-                     |                }
-                     |            ],
-                     |            "initialPaymentAmount": 123.12,
-                     |            "totalInterestCharged": 0.06,
-                     |            "totalNoPayments": 3,
-                     |            "totalPayable": 1111.47,
-                     |            "totalPaymentWithoutInterest": 1111.41
-                     |        },
-                     |        "taxDetail": ${TdAll.taxDetailJsonString(origin.taxRegime)},
-                     |        "taxType": "${origin.taxRegime.toString}",
-                     |        "regimeDigitalCorrespondence" : true,
-                     |        "emailAddress" : "${email.value.decryptedValue}",
-                     |        "emailSource" : "$emailSource"
-                     |}
-            """.stripMargin
-                    ).as[JsObject]
-                  )
                 }
             }
         }

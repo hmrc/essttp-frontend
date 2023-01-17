@@ -188,7 +188,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
         s"POST ${routes.PaymentScheduleController.checkPaymentScheduleSubmit.url}" - {
 
           s"[$regime journey] should redirect to ${routes.BankDetailsController.detailsAboutBankAccount.url} if the journey " +
-            "has been updated successfully and send an audit event if email journey is not enabled (i.e. !request.isEmailAddressRequired)" in {
+            "has been updated successfully and send an audit event" in {
               stubCommonActions()
               EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, origin)(
                 JourneyJsonTemplates.`Chosen Payment Plan`(
@@ -240,27 +240,6 @@ class PaymentScheduleControllerSpec extends ItSpec {
             """.stripMargin
                 ).as[JsObject]
               )
-            }
-
-          s"[$regime journey] should redirect to ${routes.BankDetailsController.detailsAboutBankAccount.url} if the journey " +
-            "has been updated successfully and NOT send audit event if email journey is enabled (i.e. request.isEmailAddressRequired)" in {
-              stubCommonActions()
-              EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, origin)(
-                JourneyJsonTemplates.`Chosen Payment Plan`(
-                  upfrontPaymentAmountJsonString = """{"DeclaredUpfrontPayment": {"amount": 200}}""",
-                  origin                         = origin
-                )
-              )
-              EssttpBackend.HasCheckedPlan.stubUpdateHasCheckedPlan(TdAll.journeyId, JourneyJsonTemplates.`Has Checked Payment Plan`(origin))
-
-              val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
-              val result: Future[Result] = controller.checkPaymentScheduleSubmit(fakeRequest)
-              status(result) shouldBe Status.SEE_OTHER
-              redirectLocation(result) shouldBe Some(routes.BankDetailsController.detailsAboutBankAccount.url)
-              EssttpBackend.HasCheckedPlan.verifyUpdateHasCheckedPlanRequest(TdAll.journeyId)
-
-              AuditConnectorStub.verifyNoAuditEvent()
             }
         }
 

@@ -16,10 +16,8 @@
 
 package models.audit.planbeforesubmission
 
-import essttp.crypto.CryptoFormat
 import essttp.journey.model.CorrelationId
-import essttp.rootmodel.Email
-import essttp.rootmodel.ttp.eligibility.{EmailSource, RegimeDigitalCorrespondence}
+import essttp.rootmodel.ttp.eligibility.RegimeDigitalCorrespondence
 import models.audit.{AuditDetail, Schedule, TaxDetail}
 import play.api.libs.json.{Json, OWrites}
 
@@ -29,13 +27,11 @@ final case class PaymentPlanBeforeSubmissionAuditDetail(
     origin:                      String,
     taxType:                     String,
     taxDetail:                   TaxDetail,
-    regimeDigitalCorrespondence: Option[RegimeDigitalCorrespondence],
-    emailAddress:                Option[Email],
-    emailSource:                 Option[EmailSource]
+    regimeDigitalCorrespondence: Option[RegimeDigitalCorrespondence]
 ) extends AuditDetail {
   val auditType: String = "PlanDetails"
 }
 
 object PaymentPlanBeforeSubmissionAuditDetail {
-  implicit def writes(implicit cryptoFormat: CryptoFormat): OWrites[PaymentPlanBeforeSubmissionAuditDetail] = Json.writes
+  implicit val writes: OWrites[PaymentPlanBeforeSubmissionAuditDetail] = Json.writes
 }
