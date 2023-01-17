@@ -17,15 +17,17 @@
 package models.audit.planbeforesubmission
 
 import essttp.journey.model.CorrelationId
+import essttp.rootmodel.ttp.eligibility.RegimeDigitalCorrespondence
 import models.audit.{AuditDetail, Schedule, TaxDetail}
 import play.api.libs.json.{Json, OWrites}
 
 final case class PaymentPlanBeforeSubmissionAuditDetail(
-    schedule:      Schedule,
-    correlationId: CorrelationId,
-    origin:        String,
-    taxType:       String,
-    taxDetail:     TaxDetail
+    schedule:                    Schedule,
+    correlationId:               CorrelationId,
+    origin:                      String,
+    taxType:                     String,
+    taxDetail:                   TaxDetail,
+    regimeDigitalCorrespondence: Option[RegimeDigitalCorrespondence]
 ) extends AuditDetail {
   val auditType: String = "PlanDetails"
 }

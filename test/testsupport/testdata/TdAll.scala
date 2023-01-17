@@ -165,7 +165,12 @@ object TdAll {
       """{ "vrn": "101747001" }"""
   }
 
-  def eligibilityCheckResult(eligibilityPass: EligibilityPass, eligibilityRules: EligibilityRules, taxRegime: TaxRegime): EligibilityCheckResult = {
+  def eligibilityCheckResult(
+      eligibilityPass:             EligibilityPass,
+      eligibilityRules:            EligibilityRules,
+      taxRegime:                   TaxRegime,
+      regimeDigitalCorrespondence: Option[RegimeDigitalCorrespondence]
+  ): EligibilityCheckResult = {
 
     EligibilityCheckResult(
       processingDateTime              = ProcessingDateTime("2022-03-23T13:49:51.141Z"),
@@ -200,7 +205,7 @@ object TdAll {
         ))
       )),
       customerDetails                 = None,
-      regimeDigitalCorrespondence     = None,
+      regimeDigitalCorrespondence     = regimeDigitalCorrespondence,
       futureChargeLiabilitiesExcluded = false
     )
   }

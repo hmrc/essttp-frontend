@@ -33,6 +33,7 @@ import testsupport.stubs.{AuditConnectorStub, EssttpBackend, Ttp}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.http.{SessionKeys, UpstreamErrorResponse}
 
+import java.util.Locale
 import scala.concurrent.Future
 
 class SubmitArrangementControllerSpec extends ItSpec {
@@ -51,7 +52,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
             (
               "T&C's accepted, no email required",
               () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto, origin, etmpEmail = Some(TdAll.etmpEmail))(),
-              TdAll.customerDetail(TdAll.etmpEmail, EmailSource.ETMP)
+              None, None
             ),
             (
               "email verification success - same email as ETMP",
@@ -61,7 +62,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
                 testCrypto,
                 origin
               )(),
-              TdAll.customerDetail()
+              Some("bobross@joyofpainting.com"), Some(EmailSource.ETMP)
             ),
             (
               "email verification success - new email",
@@ -71,7 +72,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
                 testCrypto,
                 origin
               )(),
-              TdAll.customerDetail("grogu@mandalorian.com", EmailSource.TEMP)
+              Some("grogu@mandalorian.com"), Some(EmailSource.TEMP)
             ),
             (
               "email verification success - ETMP - same email with different casing",
@@ -81,10 +82,10 @@ class SubmitArrangementControllerSpec extends ItSpec {
                 testCrypto,
                 origin
               )(),
-              TdAll.customerDetail("bobross@joyofpainting.com", EmailSource.ETMP)
+              Some("BobRoss@joyofpainting.com"), Some(EmailSource.ETMP)
             )
           ).foreach {
-              case (journeyDescription, journeyStubMapping, expectedCustomerDetail) =>
+              case (journeyDescription, journeyStubMapping, expectedEmail, expectedEmailSource) =>
                 s"[taxRegime: ${taxRegime.toString}] trigger call to ttp enact arrangement api, send an audit event " +
                   s"and also update backend for $journeyDescription" in {
                     stubCommonActions()
@@ -105,7 +106,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
                     })
 
                     Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(
-                      expectedCustomerDetail,
+                      TdAll.customerDetail(expectedEmail.getOrElse(TdAll.etmpEmail).toLowerCase(Locale.UK), expectedEmailSource.getOrElse(EmailSource.ETMP)),
                       TdAll.someRegimeDigitalCorrespondenceTrue,
                       taxRegime
                     )(CryptoFormat.NoOpCryptoFormat)
@@ -150,7 +151,10 @@ class SubmitArrangementControllerSpec extends ItSpec {
                      |	"taxDetail": ${TdAll.taxDetailJsonString(taxRegime)},
                      |	"correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
                      |	"ppReferenceNo": "${TdAll.customerReference(taxRegime).value}",
-                     |	"authProviderId": "authId-999"
+                     |	"authProviderId": "authId-999",
+                     |  ${expectedEmail.fold("")(email => s""" "emailAddress":"$email", """)}
+                     |  ${expectedEmailSource.fold("")(source => s""" "emailSource":"${source.value}", """)}
+                     |  "regimeDigitalCorrespondence": true
                      |}
                      |""".stripMargin
                       ).as[JsObject]

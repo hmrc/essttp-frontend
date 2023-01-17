@@ -16,6 +16,7 @@
 
 package connectors
 
+import actionsmodel.EligibleJourneyRequest
 import com.google.inject.{Inject, Singleton}
 import config.AppConfig
 import essttp.crypto.CryptoFormat.OperationalCryptoFormat
@@ -33,21 +34,25 @@ class EmailVerificationConnector @Inject() (
     httpClient: HttpClient
 )(implicit ec: ExecutionContext, cryptoFormat: OperationalCryptoFormat) {
 
-  private val startEmailVerificationJourneyUrl: String = appConfig.BaseUrl.essttpBackendUrl + "/essttp-backend/email-verification/start"
+  private val emailVerificationJourneyBaseUrl: String = appConfig.BaseUrl.essttpBackendUrl + "/essttp-backend/email-verification"
 
-  private val getVerificationResultUrl: String = appConfig.BaseUrl.essttpBackendUrl + "/essttp-backend/email-verification/result"
-
-  private val getEarliestCreatedAtUrl: String = appConfig.BaseUrl.essttpBackendUrl + "/essttp-backend/email-verification/earliest-created-at"
+  private val getEarliestCreatedAtUrl: String = emailVerificationJourneyBaseUrl + "/earliest-created-at"
 
   def startEmailVerificationJourney(
       emailVerificationRequest: StartEmailVerificationJourneyRequest
-  )(implicit hc: HeaderCarrier): Future[StartEmailVerificationJourneyResponse] =
+  )(implicit hc: HeaderCarrier, eligibleJourneyRequest: EligibleJourneyRequest[_]): Future[StartEmailVerificationJourneyResponse] =
     httpClient.POST[StartEmailVerificationJourneyRequest, StartEmailVerificationJourneyResponse](
-      startEmailVerificationJourneyUrl, emailVerificationRequest
+      url  = s"$emailVerificationJourneyBaseUrl/${eligibleJourneyRequest.journeyId.value}/start",
+      body = emailVerificationRequest
     )
 
-  def getEmailVerificationResult(request: GetEmailVerificationResultRequest)(implicit hc: HeaderCarrier): Future[EmailVerificationResult] =
-    httpClient.POST[GetEmailVerificationResultRequest, EmailVerificationResult](getVerificationResultUrl, request)
+  def getEmailVerificationResult(
+      request: GetEmailVerificationResultRequest
+  )(implicit hc: HeaderCarrier, eligibleJourneyRequest: EligibleJourneyRequest[_]): Future[EmailVerificationResult] =
+    httpClient.POST[GetEmailVerificationResultRequest, EmailVerificationResult](
+      url  = s"$emailVerificationJourneyBaseUrl/${eligibleJourneyRequest.journeyId.value}/result",
+      body = request
+    )
 
   def getEarliestCreatedAt(credId: GGCredId)(implicit hc: HeaderCarrier): Future[LocalDateTime] =
     httpClient.POST[GGCredId, LocalDateTime](getEarliestCreatedAtUrl, credId)

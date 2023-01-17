@@ -24,8 +24,8 @@ import controllers.EmailController.{ChooseEmailForm, chooseEmailForm, enterEmail
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.{logErrorAndRouteToDefaultPage, logErrorAndRouteToDefaultPageF}
 import essttp.emailverification.{EmailVerificationResult, EmailVerificationState, StartEmailVerificationJourneyResponse}
-import essttp.journey.model.Journey.AfterEmailAddressSelectedToBeVerified
 import essttp.journey.model.Journey
+import essttp.journey.model.Journey.AfterEmailAddressSelectedToBeVerified
 import essttp.rootmodel.Email
 import essttp.utils.Errors
 import play.api.data.Form

@@ -33,7 +33,8 @@ final case class EligibilityCheckAuditDetail(
     authProviderId:                  String,
     chargeTypeAssessment:            List[ChargeTypeAssessment],
     correlationId:                   String,
-    futureChargeLiabilitiesExcluded: Boolean
+    futureChargeLiabilitiesExcluded: Option[Boolean],
+    regimeDigitalCorrespondence:     Option[Boolean]
 ) extends AuditDetail {
   val auditType: String = "EligibilityCheck"
 }
