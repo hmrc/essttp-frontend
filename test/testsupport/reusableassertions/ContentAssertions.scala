@@ -78,7 +78,8 @@ object ContentAssertions extends RichMatchers {
       hasFormError:                Boolean           = false,
       shouldH1BeSameAsServiceName: Boolean           = false,
       regimeBeingTested:           Option[TaxRegime] = Some(TaxRegime.Epaye),
-      language:                    Language          = Languages.English
+      language:                    Language          = Languages.English,
+      shouldServiceNameBeInHeader: Boolean           = true
   ): Unit = {
     val titlePrefix = if (hasFormError) {
       language match {
@@ -111,7 +112,7 @@ object ContentAssertions extends RichMatchers {
       page.title() shouldBe s"$titlePrefix$expectedH1 - $regimeServiceName - GOV.UK"
     }
 
-    page.select(".hmrc-header__service-name").text() shouldBe regimeServiceName
+    page.select(".hmrc-header__service-name").text() shouldBe (if (shouldServiceNameBeInHeader) regimeServiceName else "")
 
     page.select("h1").text() shouldBe expectedH1
     ContentAssertions.languageToggleExists(page, language)

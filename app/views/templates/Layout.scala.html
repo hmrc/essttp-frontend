@@ -53,7 +53,8 @@
   showBackLink: Boolean = true,
   hasErrors: Boolean = false,
   showSignOutOverride: Option[Boolean] = None,
-  fallBackTaxRegime: Option[TaxRegime] = None
+  fallBackTaxRegime: Option[TaxRegime] = None,
+  showServiceNameInHeader: Boolean = true
 )(
   contentBlock: Html)(implicit
   request: Request[_]
@@ -118,9 +119,6 @@
               case Some(regime) => Messages.ServicePhase.serviceName(regime).show
               case None => Messages.ServicePhase.`Set up a payment plan`.show
           }
-//            commented out for now until we work out something better to make it derive based on tax type - we need more endpoints...
-//          case other =>
-//              sys.error(s"Expected JourneyRequest for non-test-only page but got ${other.getClass.getSimpleName}")
       }
     }
 
@@ -131,10 +129,17 @@
   @govTitle = @{serviceNameAndTitle + " - GOV.UK"}
   @documentTitle = @{if(hasErrors) { s"${Messages.error.show} $govTitle" } else { govTitle }}
 
+ @header = @{
+     hmrcStandardHeader(
+         serviceName = if(showServiceNameInHeader) Some(serviceName) else None,
+         signOutUrl = if(showSignOut) Some(routes.SignOutController.signOut.url) else None
+     )
+ }
+
   @govukLayout(
     pageTitle = Some(documentTitle),
     headBlock = Some(hmrcHead(headBlock = Some(head), nonce = CSPNonce.get)),
-    headerBlock = Some(hmrcStandardHeader(serviceName = Some(serviceName), signOutUrl = if(showSignOut) Some(routes.SignOutController.signOut.url) else None)),
+    headerBlock = Some(header),
     scriptsBlock = Some(hmrcScripts(scriptsBlock = Some(scripts), nonce = CSPNonce.get)),
     beforeContentBlock = Some(beforeContentBlock),
     footerBlock = Some(hmrcStandardFooter())
