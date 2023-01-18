@@ -55,7 +55,8 @@ class LandingPageControllerSpec extends ItSpec {
         expectedSubmitUrl           = None,
         signedIn                    = false,
         shouldH1BeSameAsServiceName = true,
-        regimeBeingTested           = Some(TaxRegime.Epaye)
+        regimeBeingTested           = Some(TaxRegime.Epaye),
+        shouldServiceNameBeInHeader = false
       )
 
       val lists = doc.select(".govuk-list").asScala.toList
@@ -130,7 +131,8 @@ class LandingPageControllerSpec extends ItSpec {
         expectedSubmitUrl           = None,
         signedIn                    = false,
         shouldH1BeSameAsServiceName = true,
-        regimeBeingTested           = Some(TaxRegime.Vat)
+        regimeBeingTested           = Some(TaxRegime.Vat),
+        shouldServiceNameBeInHeader = false
       )
 
       val lists = doc.select(".govuk-list").asScala.toList

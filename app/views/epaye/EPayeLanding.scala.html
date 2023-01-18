@@ -39,7 +39,8 @@
 @layout(
   pageTitle = Some(title),
   showBackLink = false,
-  fallBackTaxRegime = Some(TaxRegime.Epaye)
+  fallBackTaxRegime = Some(TaxRegime.Epaye),
+  showServiceNameInHeader = false
 ) {
   <h1 class="govuk-heading-xl">@title</h1>
   <p class="govuk-body">@{Messages.Epaye.`You can use this service to pay overdue payments...`.show}</p>
