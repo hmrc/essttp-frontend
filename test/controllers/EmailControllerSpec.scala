@@ -671,30 +671,36 @@ class EmailControllerSpec extends ItSpec {
 
         s"[taxRegime: ${taxRegime.toString}] GET /email-verification-too-many-passcodes should" - {
 
-          "display the page" in {
-            stubCommonActions()
-            EssttpBackend.SelectEmail.findJourney("email@test.com", testCrypto, origin)()
+          Seq(
+            (routes.EmailController.whichEmailDoYouWantToUse.url, Some(TdAll.etmpEmail)),
+            (routes.EmailController.enterEmail.url, None)
+          ).foreach {
+              case (expectedLink, emailInEtmp) =>
+                s"display the page with email link to $expectedLink when email is ${emailInEtmp.toString}" in {
+                  stubCommonActions()
+                  EssttpBackend.SelectEmail.findJourney("email@test.com", testCrypto, origin, emailInEtmp)()
 
-            val result = controller.tooManyPasscodeJourneysStarted(FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId"))
-            status(result) shouldBe OK
+                  val result = controller.tooManyPasscodeJourneysStarted(FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId"))
+                  status(result) shouldBe OK
 
-            val doc = Jsoup.parse(contentAsString(result))
+                  val doc = Jsoup.parse(contentAsString(result))
 
-            ContentAssertions.commonPageChecks(
-              doc,
-              "You have tried to verify an email address too many times",
-              shouldBackLinkBePresent = false,
-              expectedSubmitUrl       = None,
-              regimeBeingTested       = Some(taxRegime)
-            )
+                  ContentAssertions.commonPageChecks(
+                    doc,
+                    "You have tried to verify an email address too many times",
+                    shouldBackLinkBePresent = false,
+                    expectedSubmitUrl       = None,
+                    regimeBeingTested       = Some(taxRegime)
+                  )
 
-            val paragraphs = doc.select("p.govuk-body").asScala.toList
+                  val paragraphs = doc.select("p.govuk-body").asScala.toList
 
-            paragraphs.size shouldBe 2
+                  paragraphs.size shouldBe 2
 
-            paragraphs(0).text() shouldBe "You have tried to verify email@test.com too many times."
-            paragraphs(1).html() shouldBe s"""You will need to <a href="${controllers.routes.EmailController.enterEmail.url}" class="govuk-link">verify a different email address</a>."""
-          }
+                  paragraphs(0).html() shouldBe "You have tried to verify <strong>email@test.com</strong> too many times."
+                  paragraphs(1).html() shouldBe s"""You will need to <a href="$expectedLink" class="govuk-link">verify a different email address</a>."""
+                }
+            }
 
         }
 
