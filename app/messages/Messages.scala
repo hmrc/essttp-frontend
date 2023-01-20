@@ -1176,17 +1176,17 @@ object Messages {
 
     val `You have tried to verify an email address too many times`: Message = Message(
       english = "You have tried to verify an email address too many times",
-      welsh   = "ADD_ME"
+      welsh   = "ADD_ME_SUPP-709"
     )
 
     def `You have tried to verify <EMAIL> too many times.`(email: String): Message = Message(
       english = s"You have tried to verify $email too many times.",
-      welsh   = "ADD_ME"
+      welsh   = "ADD_ME_SUPP-709"
     )
 
     def `You will need to verify a new email address.`(link: String): Message = Message(
       english = s"""You will need to <a href="$link" class="govuk-link">verify a different email address</a>.""",
-      welsh   = "ADD_ME"
+      welsh   = "ADD_ME_SUPP-709"
     )
 
   }
