@@ -682,7 +682,7 @@ class EmailControllerSpec extends ItSpec {
 
             ContentAssertions.commonPageChecks(
               doc,
-              "You have tried to confirm an email too many times",
+              "You have tried to verify an email address too many times",
               shouldBackLinkBePresent = false,
               expectedSubmitUrl       = None,
               regimeBeingTested       = Some(taxRegime)
@@ -692,9 +692,8 @@ class EmailControllerSpec extends ItSpec {
 
             paragraphs.size shouldBe 2
 
-            paragraphs(0).text() shouldBe "You have made too many attempts to confirm an email address."
-            paragraphs(1).select("a").text() shouldBe "Sign out"
-            paragraphs(1).select("a").attr("href") shouldBe routes.SignOutController.signOut.url
+            paragraphs(0).text() shouldBe "You have tried to verify email@test.com too many times."
+            paragraphs(1).html() shouldBe s"""You will need to <a href="${controllers.routes.EmailController.enterEmail.url}" class="govuk-link">verify a different email address</a>."""
           }
 
         }

@@ -241,7 +241,12 @@ class EmailController @Inject() (
 
   val tooManyPasscodeJourneysStarted: Action[AnyContent] = withEmailEnabled {
     as.eligibleJourneyAction { implicit request =>
-      Ok(views.tooManyPasscodeJourneysStarted())
+      val email: Email = request.journey match {
+        case _: Journey.BeforeEmailAddressSelectedToBeVerified => Errors.throwServerErrorException("Trying to get email before one has been entered.")
+        case j: Journey.AfterEmailAddressSelectedToBeVerified  => j.emailToBeVerified
+        case _: Journey.Stages.SubmittedArrangement            => Errors.throwServerErrorException("Journey is in finished state.")
+      }
+      Ok(views.tooManyPasscodeJourneysStarted(email.value.decryptedValue))
     }
   }
 
