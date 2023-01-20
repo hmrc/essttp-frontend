@@ -17,7 +17,6 @@
 @import requests.RequestSupport
 @import messages.Messages
 @import play.api.mvc.Request
-@import controllers.routes
 @import play.twirl.api.Html
 
 @this(
@@ -25,7 +24,7 @@
         requestSupport: RequestSupport
 )
 
-@(email: String)(implicit request: Request[_])
+@(email: String, newEmailLink: String)(implicit request: Request[_])
 
 @import requestSupport._
 
@@ -35,9 +34,9 @@
 
     <h1 class="govuk-heading-xl">@title</h1>
 
-    <p class="govuk-body">@{Messages.TooManyPasscodeJourneys.`You have tried to verify <EMAIL> too many times.`(email).show}</p>
+    <p class="govuk-body">@{Html(Messages.TooManyPasscodeJourneys.`You have tried to verify <EMAIL> too many times.`(email).show)}</p>
 
     <p class="govuk-body">
-        @{Html(Messages.TooManyPasscodeJourneys.`You will need to verify a new email address.`(routes.EmailController.enterEmail.url).show)}
+        @{Html(Messages.TooManyPasscodeJourneys.`You will need to verify a new email address.`(newEmailLink).show)}
     </p>
 }

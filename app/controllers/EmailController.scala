@@ -246,7 +246,10 @@ class EmailController @Inject() (
         case j: Journey.AfterEmailAddressSelectedToBeVerified  => j.emailToBeVerified
         case _: Journey.Stages.SubmittedArrangement            => Errors.throwServerErrorException("Journey is in finished state.")
       }
-      Ok(views.tooManyPasscodeJourneysStarted(email.value.decryptedValue))
+      Ok(views.tooManyPasscodeJourneysStarted(
+        email        = email.value.decryptedValue,
+        newEmailLink = request.eligibilityCheckResult.email.fold(routes.EmailController.enterEmail.url)(_ => routes.EmailController.whichEmailDoYouWantToUse.url)
+      ))
     }
   }
 

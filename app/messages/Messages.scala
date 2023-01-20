@@ -1180,7 +1180,7 @@ object Messages {
     )
 
     def `You have tried to verify <EMAIL> too many times.`(email: String): Message = Message(
-      english = s"You have tried to verify $email too many times.",
+      english = s"You have tried to verify <strong>$email</strong> too many times.",
       welsh   = "ADD_ME_SUPP-709"
     )
 
