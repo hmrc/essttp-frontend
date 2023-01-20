@@ -18,25 +18,26 @@
 @import messages.Messages
 @import play.api.mvc.Request
 @import controllers.routes
+@import play.twirl.api.Html
 
 @this(
         layout: views.html.templates.Layout,
         requestSupport: RequestSupport
 )
 
-@()(implicit request: Request[_])
+@(email: String)(implicit request: Request[_])
 
 @import requestSupport._
 
-@title = @{Messages.TooManyPasscodeJourneys.`You have tried to confirm an email too many times`.show}
+@title = @{Messages.TooManyPasscodeJourneys.`You have tried to verify an email address too many times`.show}
 
 @layout(pageTitle = Some(title), showBackLink = false) {
 
     <h1 class="govuk-heading-xl">@title</h1>
 
-    <p class="govuk-body">@{Messages.TooManyPasscodeJourneys.`You have made too many attempts to confirm an email address`.show}</p>
+    <p class="govuk-body">@{Messages.TooManyPasscodeJourneys.`You have tried to verify <EMAIL> too many times.`(email).show}</p>
 
     <p class="govuk-body">
-        <a href="@{routes.SignOutController.signOut}">@{Messages.`Sign out`.show}</a>
+        @{Html(Messages.TooManyPasscodeJourneys.`You will need to verify a new email address.`(routes.EmailController.enterEmail.url).show)}
     </p>
 }
