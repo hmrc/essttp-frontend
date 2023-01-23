@@ -1219,7 +1219,7 @@ object Messages {
 
     def `You have been locked out because you have tried to verify too many email addresses`(dateAndTime: String): Message = Message(
       english = s"""You have been locked out because you have tried to verify too many email addresses. Please try again on <strong>$dateAndTime</strong>.""",
-      welsh   = s"""Rydych chi wedi cael eich cloi allan oherwydd eich bod wedi ceisio dilysu gormod o gyfeiriadau e-bost. Rhowch gynnig arall arni ar <strong>$dateAndTime</strong>"""
+      welsh   = s"""Rydych chi wedi cael eich cloi allan oherwydd eich bod wedi ceisio dilysu gormod o gyfeiriadau e-bost. Rhowch gynnig arall arni ar <strong>$dateAndTime</strong>."""
     )
 
     val `at`: Message = Message(
@@ -1309,7 +1309,7 @@ object Messages {
 
     val `HMRC will send you a letter within 5 working days with your payment dates.`: Message = Message(
       english = "HMRC will send you a letter within 5 working days with your payment dates.",
-      welsh   = "Bydd CThEF yn anfon llythyr atoch cyn pen 5 diwrnod gyda’ch dyddiadau talu."
+      welsh   = "Bydd CThEF yn anfon llythyr atoch cyn pen 5 diwrnod gwaith gyda’ch dyddiadau talu."
     )
 
     val `We will send a secure message with payment due dates to your business tax account inbox within 24 hours.`: Message = Message(
