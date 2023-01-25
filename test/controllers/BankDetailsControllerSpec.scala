@@ -84,7 +84,7 @@ class BankDetailsControllerSpec extends ItSpec {
       "You need a named account holder or someone with authorisation to set up a Direct Debit."
     val paragraphContent2: String =
       "If you are not the account holder or you wish to set up a Direct Debit with a multi-signature account, we recommend " +
-        "you speak to an adviser on 0300 200 3835 at the Payment Support Service. You must ensure all account holders are " +
+        "you speak to an adviser on 0300 123 1813 at the Payment Support Service. You must ensure all account holders are " +
         "present when calling."
     val buttonContent: String = "Go to tax account"
   }
@@ -1074,7 +1074,7 @@ class BankDetailsControllerSpec extends ItSpec {
             val paragraphs = doc.select("p.govuk-body").asScala.toList
             paragraphs(0).text() shouldBe s"You’ll need to wait until 30 September 2020, 3:59pm before trying to confirm your bank details again."
             paragraphs(1).text() shouldBe "You may still be able to set up a payment plan over the phone."
-            paragraphs(2).text() shouldBe "For further support you can contact the Payment Support Service on 0300 200 3835 to speak to an adviser."
+            paragraphs(2).text() shouldBe "For further support you can contact the Payment Support Service on 0300 123 1813 to speak to an adviser."
           }
         }
 
