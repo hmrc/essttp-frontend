@@ -1181,7 +1181,7 @@ object Messages {
 
     def `You have tried to verify <EMAIL> too many times.`(email: String): Message = Message(
       english = s"You have tried to verify <strong>$email</strong> too many times.",
-      welsh   = "Rydych wedi ceisio dilysu <strong>$email</strong> gormod o weithiau."
+      welsh   = s"Rydych wedi ceisio dilysu <strong>$email</strong> gormod o weithiau."
     )
 
     def `You will need to verify a new email address.`(link: String): Message = Message(
