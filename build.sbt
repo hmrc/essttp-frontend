@@ -32,16 +32,17 @@ lazy val root = (project in file("."))
   .settings(majorVersion := 0)
   .settings(ThisBuild / useSuperShell:= false)
   .settings(
-    scalaVersion := "2.13.8",
+    scalaVersion := "2.13.10",
     name := appName,
     PlayKeys.playDefaultPort := 9215,
     scalacOptions ++= Seq("-feature"),
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
+    libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always,
     libraryDependencies += ws,
     retrieveManaged := false,
     update / evictionWarningOptions :=
       EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
-   pipelineStages := Seq(digest),
+    pipelineStages := Seq(digest),
     scalacOptions ++= scalaCompilerOptions
   )
   .settings(
