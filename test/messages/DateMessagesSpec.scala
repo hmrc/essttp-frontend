@@ -67,7 +67,7 @@ class DateMessagesSpec extends UnitSpec {
           28 -> "28th",
           29 -> "29th",
           30 -> "30th",
-          31 -> "31st",
+          31 -> "31st"
         ).foreach{
             case (day, expectedString) =>
               withClue(s"For day ${day.toString} and expected string $expectedString: "){
@@ -109,7 +109,7 @@ class DateMessagesSpec extends UnitSpec {
           28 -> "28ain",
           29 -> "29ain",
           30 -> "30ain",
-          31 -> "31ain",
+          31 -> "31ain"
         ).foreach{
             case (day, expectedString) =>
               withClue(s"For day ${day.toString} and expected string $expectedString: "){

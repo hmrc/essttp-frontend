@@ -155,7 +155,7 @@ object ContentAssertions extends RichMatchers {
   def commonIneligibilityTextCheck(doc: Document, taxRegime: TaxRegime) = {
     val commonEligibilityWrapper = doc.select("#common-eligibility")
     val govukBodyElements = commonEligibilityWrapper.select(".govuk-body").asScala.toList
-    govukBodyElements(0).text() shouldBe "For further support you can contact the Payment Support Service on 0300 123 1813 to speak to an advisor."
+    govukBodyElements(0).html() shouldBe "For further support, you can contact us on <strong>0300 123 1813</strong> to speak to an adviser."
 
     val subheadings = commonEligibilityWrapper.select("h2").asScala.toList
 

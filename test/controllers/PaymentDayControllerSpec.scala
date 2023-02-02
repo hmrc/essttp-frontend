@@ -229,7 +229,7 @@ class PaymentDayControllerSpec extends ItSpec {
             ("Non number", "first", "The day you want to pay must be a number"),
             ("Less than 1", "0", "The day you want to pay must be between 1 and 28"),
             ("Greater than 28", "29", "The day you want to pay must be between 1 and 28"),
-            ("Decimal", "1.8", "The day you want to pay must be a number"),
+            ("Decimal", "1.8", "The day you want to pay must be a number")
           )) {
             (scenario: String, inputValue: String, expectedErrorMessage: String) =>
               s"[$regime journey] When input is: [ $scenario: [ $inputValue ]] error message should be $expectedErrorMessage" in {

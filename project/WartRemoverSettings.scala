@@ -29,9 +29,9 @@ object WartRemoverSettings {
       ),
       wartremoverExcluded ++= (
         (baseDirectory.value ** "*.sc").get ++
-          (Compile / routes).value
-        ),
-      Compile / doc / wartremoverErrors := Seq(),
+        (Compile / routes).value
+      ),
+      Compile / doc / wartremoverErrors := Seq()
     )
 
 }

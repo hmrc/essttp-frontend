@@ -196,8 +196,8 @@ object Messages {
 
   object NotEligible {
 
-    val `For further support you can contact the Payment Support Service on 0300 123 1813 to speak to an advisor.`: Message = Message(
-      english = "For further support you can contact the Payment Support Service on <strong>0300 123 1813</strong> to speak to an advisor.",
+    val `For further support, you can contact us on 0300 123 1813 to speak to an advisor.`: Message = Message(
+      english = "For further support, you can contact us on <strong>0300 123 1813</strong> to speak to an adviser.",
       welsh   = "I gael cymorth pellach, gallwch gysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEF ar <strong>0300 200 1900</strong> i siarad ag ymgynghorydd."
     )
 
