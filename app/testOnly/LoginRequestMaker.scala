@@ -64,7 +64,7 @@ object LoginRequestMaker {
       Json.obj(
         "key" -> "TaxOfficeReference",
         "value" -> epayeEnrolment.taxOfficeReference.value
-      ),
+      )
     ),
     "state" -> epayeEnrolment.enrolmentStatus.toString
   )
@@ -75,7 +75,7 @@ object LoginRequestMaker {
       Json.obj(
         "key" -> "VRN",
         "value" -> vatEnrolment.vrn.value
-      ),
+      )
     ),
     "state" -> vatEnrolment.enrolmentStatus.toString
   )

@@ -93,13 +93,13 @@
                 RadioItem(
                     content = Text(userEmail),
                     value = Some(userEmail),
-                    checked = form.value.exists(_.differentEmail.isEmpty),
+                    checked = form.value.exists(_.differentEmail.isEmpty)
                 ),
                 RadioItem(
                     content = Text(Messages.EmailEntry.`A new email address`.show),
                     value = Some("new"),
                     conditionalHtml = Some(conditionalHtml),
-                    checked = form.value.exists(_.differentEmail.isDefined) || form.error(newEmailKey).isDefined,
+                    checked = form.value.exists(_.differentEmail.isDefined) || form.error(newEmailKey).isDefined
                 )
             ),
             errorMessage = form.error(key).map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(content = Text(Messages.EmailEntry.getError(s"${e.key}.${e.message}").show)))
