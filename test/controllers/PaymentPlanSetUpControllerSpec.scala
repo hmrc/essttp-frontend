@@ -106,7 +106,9 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
             subheadings(1).text() shouldBe "If you need to change your payment plan"
             paragraphs(emailParagraphOffset + 5).text() shouldBe "Call the HMRC Helpline on 0300 123 1813."
 
-            doc.select(".govuk-button").text() shouldBe "Go to tax account"
+            val continueButton = doc.select(".govuk-button")
+            continueButton.text() shouldBe "Go to tax account"
+            continueButton.attr("role") shouldBe "button"
 
             val surveyLink = doc.select(".govuk-body > .govuk-link").asScala.toList(1)
             surveyLink.parent().text() shouldBe "What did you think of this service? (takes 30 seconds)"
