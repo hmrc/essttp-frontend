@@ -38,6 +38,7 @@ import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import controllers.JourneyFinalStateCheck.finalStateCheckF
 import controllers.pagerouters.EligibilityRouter
 import essttp.journey.model.Journey
+import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import play.api.mvc._
 import services.{AuditService, JourneyService, TtpService}
@@ -87,7 +88,11 @@ class DetermineEligibilityController @Inject() (
     maybeEligibilityCheckResult
       .flatMap {
         _.fold {
-          Future(Redirect(routes.IneligibleController.payeGenericIneligiblePage.url))
+          val redirect = journey.taxRegime match {
+            case TaxRegime.Epaye => routes.IneligibleController.payeGenericIneligiblePage.url
+            case TaxRegime.Vat   => routes.IneligibleController.vatGenericIneligiblePage.url
+          }
+          toFuture(Redirect(redirect))
         } { someResponse =>
           for {
             updatedJourney <- journeyService.updateEligibilityCheckResult(journey.id, someResponse)

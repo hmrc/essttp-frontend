@@ -221,17 +221,35 @@ class DetermineEligibilityControllerSpec extends ItSpec {
       EssttpBackend.EligibilityCheck.verifyNoneUpdateEligibilityRequest(TdAll.journeyId)
     }
 
-    "Redirect to generic epaye call us page when ttp eligibility call returns any technical upstream error -- [SUPP-658]" in {
-      stubCommonActions()
-      EssttpBackend.DetermineTaxId.findJourney(Origins.Epaye.Bta)()
-      Ttp.Eligibility.stubServiceUnavailableRetrieveEligibility()
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val result = controller.determineEligibility(fakeRequest)
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.payeNotEligibleUrl)
-      Ttp.Eligibility.verifyTtpEligibilityRequests(TaxRegime.Epaye)
-      EssttpBackend.EligibilityCheck.verifyNoneUpdateEligibilityRequest(TdAll.journeyId)
-      AuditConnectorStub.verifyNoAuditEvent()
-    }
+    "Redirect to generic epaye call us page when ttp eligibility call returns any technical upstream error " +
+      "if the tax regime is epaye -- [SUPP-658]" in {
+        stubCommonActions()
+        EssttpBackend.DetermineTaxId.findJourney(Origins.Epaye.Bta)()
+        Ttp.Eligibility.stubServiceUnavailableRetrieveEligibility()
+        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+        val result = controller.determineEligibility(fakeRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(PageUrls.payeNotEligibleUrl)
+        Ttp.Eligibility.verifyTtpEligibilityRequests(TaxRegime.Epaye)
+        EssttpBackend.EligibilityCheck.verifyNoneUpdateEligibilityRequest(TdAll.journeyId)
+        AuditConnectorStub.verifyNoAuditEvent()
+      }
+
+    "Redirect to generic vat call us page when ttp eligibility call returns any technical upstream error " +
+      "if the tax tegime is vat -- [SUPP-718]" in {
+        stubCommonActions()
+        EssttpBackend.DetermineTaxId.findJourney(Origins.Vat.Bta)()
+        Ttp.Eligibility.stubServiceUnavailableRetrieveEligibility()
+
+        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+        val result = controller.determineEligibility(fakeRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(PageUrls.vatNotEligibleUrl)
+
+        Ttp.Eligibility.verifyTtpEligibilityRequests(TaxRegime.Vat)
+        EssttpBackend.EligibilityCheck.verifyNoneUpdateEligibilityRequest(TdAll.journeyId)
+        AuditConnectorStub.verifyNoAuditEvent()
+      }
+
   }
 }
