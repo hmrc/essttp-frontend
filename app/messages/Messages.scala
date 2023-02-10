@@ -194,12 +194,7 @@ object Messages {
     )
   }
 
-  object NotEligible {
-
-    val `For further support, you can contact us on 0300 123 1813 to speak to an advisor.`: Message = Message(
-      english = "For further support, you can contact us on <strong>0300 123 1813</strong> to speak to an adviser.",
-      welsh   = "I gael cymorth pellach, gallwch gysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEF ar <strong>0300 200 1900</strong> i siarad ag ymgynghorydd."
-    )
+  object ExtraSupport {
 
     val `If you need extra support`: Message = Message(
       english = "If you need extra support",
@@ -219,6 +214,15 @@ object Messages {
     val `If you are outside the UK...`: Message = Message(
       english = "If you are outside the UK: <strong>+44 2890 538 192</strong>",
       welsh   = "Os ydych y tu allan i’r DU: <strong>+44 300 200 1900</strong>"
+    )
+
+  }
+
+  object NotEligible {
+
+    val `For further support, you can contact us on 0300 123 1813 to speak to an advisor.`: Message = Message(
+      english = "For further support, you can contact us on <strong>0300 123 1813</strong> to speak to an adviser.",
+      welsh   = "I gael cymorth pellach, gallwch gysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEF ar <strong>0300 200 1900</strong> i siarad ag ymgynghorydd."
     )
 
     val `Before you call, make sure you have:`: Message = Message(
@@ -670,8 +674,8 @@ object Messages {
     )
 
     val `We recommend you speak to an adviser...`: Message = Message(
-      english = "We recommend you speak to an adviser on <strong>0300 123 1813</strong> at the Payment Support Service to talk about your payment options.",
-      welsh   = "Rydym yn argymell eich bod yn siarad ag ymgynghorydd ar <strong>0300 200 1900</strong> yng Ngwasanaeth Cwsmeriaid Cymraeg CThEF i drafod eich opsiynau talu."
+      english = "We recommend you speak to an adviser on <strong>0300 123 1813</strong> to talk about your payment options.",
+      welsh   = "Rydym yn argymell eich bod yn siarad ag ymgynghorydd am eich opsiynau talu. Ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEF ar <strong>0300 200 1900</strong>."
     )
 
   }
@@ -1243,11 +1247,11 @@ object Messages {
 
     val `If you are not the account holder...`: Message = Message(
       english = "If you are not the account holder or you wish to set up a Direct Debit with a multi-signature account, we " +
-        "recommend you speak to an adviser on <strong>0300 123 1813</strong> at the Payment Support Service. You must ensure all account " +
+        "recommend you speak to an adviser on <strong>0300 123 1813</strong>. You must ensure all account " +
         "holders are present when calling.",
       welsh   = "Os nad chi yw deiliad y cyfrif, neu os ydych yn dymuno trefnu Debyd Uniongyrchol gyda chyfrif aml-lofnod, rydym " +
-        "yn argymell eich bod yn siarad ag ymgynghorydd ar <strong>0300 200 1900</strong> yn y Gwasanaeth Cwsmeriaid Cymraeg. Rhaid i chi sicrhau " +
-        "bod holl ddeiliaid y cyfrif yn bresennol wrth ffonio."
+        "yn argymell eich bod yn siarad ag ymgynghorydd ar <strong>0300 200 1900</strong>. Rhaid i chi sicrhau " +
+        "bod holl ddeiliaid y cyfrif yn bresennol pan fyddwch yn ffonio."
     )
 
     val `Go to tax account`: Message = Message(
@@ -1275,8 +1279,8 @@ object Messages {
     )
 
     val `For further support you can contact the Payment Support Service...`: Message = Message(
-      english = "For further support you can contact the Payment Support Service on <strong>0300 123 1813</strong> to speak to an adviser.",
-      welsh   = "I gael cymorth pellach, gallwch gysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEF ar <strong>0300 200 1900</strong> a siarad ag ymgynghorydd."
+      english = "For further support you can contact us on <strong>0300 123 1813</strong> to speak to an adviser.",
+      welsh   = "I gael cymorth pellach, gallwch gysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEF ar <strong>0300 200 1900</strong> i siarad ag ymgynghorydd."
     )
 
     val am: Message = Message(

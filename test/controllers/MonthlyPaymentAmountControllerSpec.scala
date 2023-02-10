@@ -45,7 +45,7 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
   private val progressiveRevealInnerContent1: String =
     "You may still be able to set up a payment plan over the phone, but you are not eligible for an online payment plan."
   private val progressiveRevealInnerContent2: String =
-    "We recommend you speak to an adviser on 0300 123 1813 at the Payment Support Service to talk about your payment options."
+    "We recommend you speak to an adviser on 0300 123 1813 to talk about your payment options."
 
   def testMonthlyPaymentAmountContent(doc: Document): Unit = {
     doc.select("#MonthlyPaymentAmount-hint").text() shouldBe expectedPageHint

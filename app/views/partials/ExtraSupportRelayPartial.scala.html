@@ -14,34 +14,18 @@
  * limitations under the License.
  *@
 
+@import config.AppConfig
+@import play.api.mvc.Request
 @import requests.RequestSupport
 @import messages.Messages
-@import config.AppConfig
 @import play.twirl.api.Html
-@import messages.Message
-@import actionsmodel.AuthenticatedJourneyRequest
-@import views.html.partials.CommonIneligibilityPartial
 
-@this(
-        layout: views.html.templates.Layout,
-        requestSupport: RequestSupport,
-        commonIneligibilityPartial: CommonIneligibilityPartial
-)
+@this(requestSupport: RequestSupport, appConfig: AppConfig)
 
-@(
-  pageh1: Message = Messages.NotEligible.`Call us`,
-  leadingContent: Html
-)(implicit request: AuthenticatedJourneyRequest[_])
-
+@()(implicit request: Request[_])
 @import requestSupport._
 
-@layout(pageTitle = Some(pageh1.show), showBackLink = false) {
-    <h1 class="govuk-heading-xl">
-    @{
-        pageh1.show
-    }
-    </h1>
-    @leadingContent
-
-    @commonIneligibilityPartial(request.journey.taxRegime)
-}
+<h2 class="govuk-heading-m">@{Messages.ExtraSupport.`If you need extra support`.show}</h2>
+<p class="govuk-body">@{Html(Messages.ExtraSupport.`Find out the different ways to deal with HMRC...`(appConfig.Urls.extraSupportUrl).show)}</p>
+<p class="govuk-body">@{Html(Messages.ExtraSupport.`You can also use Relay UK...`(appConfig.Urls.relayUrl).show)}</p>
+<p class="govuk-body">@{Html(Messages.ExtraSupport.`If you are outside the UK...`.show)}</p>

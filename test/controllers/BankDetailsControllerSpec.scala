@@ -84,7 +84,7 @@ class BankDetailsControllerSpec extends ItSpec {
       "You need a named account holder or someone with authorisation to set up a Direct Debit."
     val paragraphContent2: String =
       "If you are not the account holder or you wish to set up a Direct Debit with a multi-signature account, we recommend " +
-        "you speak to an adviser on 0300 123 1813 at the Payment Support Service. You must ensure all account holders are " +
+        "you speak to an adviser on 0300 123 1813. You must ensure all account holders are " +
         "present when calling."
     val buttonContent: String = "Go to tax account"
   }
@@ -1074,7 +1074,12 @@ class BankDetailsControllerSpec extends ItSpec {
             val paragraphs = doc.select("p.govuk-body").asScala.toList
             paragraphs(0).text() shouldBe s"You’ll need to wait until 30 September 2020, 3:59pm before trying to confirm your bank details again."
             paragraphs(1).text() shouldBe "You may still be able to set up a payment plan over the phone."
-            paragraphs(2).text() shouldBe "For further support you can contact the Payment Support Service on 0300 123 1813 to speak to an adviser."
+            paragraphs(2).text() shouldBe "For further support you can contact us on 0300 123 1813 to speak to an adviser."
+
+            doc.select("h2").asScala.toList(0).text() shouldBe "If you need extra support"
+            paragraphs(3).html() shouldBe "Find out the different ways to <a href=\"https://www.gov.uk/get-help-hmrc-extra-support\" class=\"govuk-link\">deal with HMRC if you need some help</a>."
+            paragraphs(4).html() shouldBe "You can also use <a href=\"https://www.relayuk.bt.com/\" class=\"govuk-link\">Relay UK</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>."
+            paragraphs(5).html() shouldBe "If you are outside the UK: <strong>+44 2890 538 192</strong>"
           }
         }
 
@@ -1164,10 +1169,15 @@ class BankDetailsControllerSpec extends ItSpec {
             )
 
             val paragraphs = doc.select(".govuk-body").asScala.toList
-            paragraphs.size shouldBe 2
+            paragraphs.size shouldBe 5
 
             paragraphs(0).text() shouldBe CannotSetupDirectDebitPage.paragraphContent1
             paragraphs(1).text() shouldBe CannotSetupDirectDebitPage.paragraphContent2
+
+            doc.select("h2").asScala.toList(0).text() shouldBe "If you need extra support"
+            paragraphs(2).html() shouldBe "Find out the different ways to <a href=\"https://www.gov.uk/get-help-hmrc-extra-support\" class=\"govuk-link\">deal with HMRC if you need some help</a>."
+            paragraphs(3).html() shouldBe "You can also use <a href=\"https://www.relayuk.bt.com/\" class=\"govuk-link\">Relay UK</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>."
+            paragraphs(4).html() shouldBe "If you are outside the UK: <strong>+44 2890 538 192</strong>"
 
             val cta = doc.select(".govuk-button")
             cta.text() shouldBe CannotSetupDirectDebitPage.buttonContent

@@ -22,10 +22,12 @@
 @import play.api.mvc.Request
 @import play.twirl.api.Html
 @import requests.RequestSupport
+@import partials.ExtraSupportRelayPartial
 
 @this(
         layout: templates.Layout,
-        requestSupport: RequestSupport
+        requestSupport: RequestSupport,
+        extraSupportRelayPartial: ExtraSupportRelayPartial
 )
 
 @(lockoutExpires: Instant)(implicit request: Request[_])
@@ -51,4 +53,5 @@
   <p class="govuk-body">@{Messages.BankDetailsLockout.waitUntil(expiryTimeString).show}</p>
   <p class="govuk-body">@{Messages.BankDetailsLockout.`You may still be able to set up a payment plan over the phone.`.show}</p>
   <p class="govuk-body">@{Html(Messages.BankDetailsLockout.`For further support you can contact the Payment Support Service...`.show)}</p>
+    @extraSupportRelayPartial()
 }
