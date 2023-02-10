@@ -20,10 +20,11 @@
 @import requests.RequestSupport
 @import messages.Messages
 @import play.twirl.api.Html
+@import views.html.partials.ExtraSupportRelayPartial
 
-@this(requestSupport: RequestSupport)
+@this(requestSupport: RequestSupport, extraSupportRelayPartial: ExtraSupportRelayPartial)
 
-@(taxRegime: TaxRegime, appConfig: AppConfig)(implicit request: Request[_])
+@(taxRegime: TaxRegime)(implicit request: Request[_])
 
 @import requestSupport._
 
@@ -31,10 +32,7 @@
 
    <p class="govuk-body">@{Html(Messages.NotEligible.`For further support, you can contact us on 0300 123 1813 to speak to an advisor.`.show)}</p>
 
-  <h2 class="govuk-heading-m">@{Messages.NotEligible.`If you need extra support`.show}</h2>
-  <p class="govuk-body">@{Html(Messages.NotEligible.`Find out the different ways to deal with HMRC...`(appConfig.Urls.extraSupportUrl).show)}</p>
-  <p class="govuk-body">@{Html(Messages.NotEligible.`You can also use Relay UK...`(appConfig.Urls.relayUrl).show)}</p>
-  <p class="govuk-body">@{Html(Messages.NotEligible.`If you are outside the UK...`.show)}</p>
+    @extraSupportRelayPartial()
 
   <h2 class="govuk-heading-m">@{Messages.NotEligible.`Before you call, make sure you have:`.show}</h2>
   <ul class="govuk-list govuk-list--bullet">

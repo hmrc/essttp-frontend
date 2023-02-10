@@ -19,14 +19,15 @@
 @import play.api.mvc.Request
 @import play.twirl.api.Html
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-@import controllers.routes
 @import config.AppConfig
+@import views.html.partials.ExtraSupportRelayPartial
 
 @this(
         layout: templates.Layout,
         govukButton: GovukButton,
         requestSupport: RequestSupport,
-        appConfig: AppConfig
+        appConfig: AppConfig,
+        extraSupportRelayPartial: ExtraSupportRelayPartial
 )
 
 @()(implicit request: Request[_])
@@ -45,6 +46,8 @@
     <p class="govuk-body">@{
         Html(Messages.NotSoleSignatory.`If you are not the account holder...`.show)
     }</p>
+
+    @extraSupportRelayPartial()
 
     @govukButton(Button(
         href = Some(appConfig.Urls.businessTaxAccountUrl),

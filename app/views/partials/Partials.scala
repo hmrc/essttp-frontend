@@ -27,5 +27,6 @@ class Partials @Inject() (
     val debtTooLargePartial:        DebtTooLargePartial,
     val debtTooOldPartial:          DebtTooOldPartial,
     val existingPaymentPlanPartial: ExistingPaymentPlanPartial,
-    val returnsNotUpToDatePartial:  ReturnsNotUpToDatePartial
+    val returnsNotUpToDatePartial:  ReturnsNotUpToDatePartial,
+    val extraSupportRelayPartial:   ExtraSupportRelayPartial
 )
