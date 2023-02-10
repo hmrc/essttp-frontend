@@ -96,7 +96,7 @@ class BankDetailsControllerSpec extends ItSpec {
   trait SubmitSuccessSetup {
     stubCommonActions()
     val formData: List[(String, String)] = List(
-      ("name", "Bob Ross"),
+      ("name", TdAll.testAccountName),
       ("sortCode", "123456"),
       ("accountNumber", "12345678")
     )
@@ -393,7 +393,7 @@ class BankDetailsControllerSpec extends ItSpec {
             )
             RequestAssertions.assertGetRequestOk(result)
 
-            doc.select(EnterDirectDebitDetailsPage.accountNameFieldId).`val`() shouldBe "Bob Ross"
+            doc.select(EnterDirectDebitDetailsPage.accountNameFieldId).`val`() shouldBe TdAll.testAccountName
             doc.select(EnterDirectDebitDetailsPage.sortCodeFieldId).`val`() shouldBe "123456"
             doc.select(EnterDirectDebitDetailsPage.accountNumberFieldId).`val`() shouldBe "12345678"
           }
@@ -420,7 +420,7 @@ class BankDetailsControllerSpec extends ItSpec {
             )(formData: (String, String)*)(
                 textAndHrefContent: List[(String, String)],
                 fieldErrors:        Seq[(String, String)]  = Seq.empty
-            ) = {
+            ): Unit = {
                 def assertFieldsPopulated(doc: Document, form: Seq[(String, String)], fieldErrors: Seq[(String, String)]): Unit = {
                   doc.select(EnterDirectDebitDetailsPage.accountNameFieldId).`val`() shouldBe getExpectedFormValue("name", form)
                   doc.select(EnterDirectDebitDetailsPage.sortCodeFieldId).`val`() shouldBe getExpectedFormValue("sortCode", form)
@@ -463,7 +463,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
             EssttpBackend.DirectDebitDetails.verifyUpdateDirectDebitDetailsRequest(
               TdAll.journeyId,
-              TdAll.directDebitDetails("Bob Ross", "123456", "12345678")
+              TdAll.directDebitDetails(TdAll.testAccountName, "123456", "12345678")
             )(testOperationCryptoFormat)
 
             BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
@@ -480,7 +480,7 @@ class BankDetailsControllerSpec extends ItSpec {
              |  "request": {
              |    "account": {
              |       "accountType": "personal",
-             |       "accountHolderName": "Bob Ross",
+             |       "accountHolderName": "${TdAll.testAccountName}",
              |       "sortCode": "123456",
              |       "accountNumber": "12345678"
              |    }
@@ -551,22 +551,35 @@ class BankDetailsControllerSpec extends ItSpec {
             AuditConnectorStub.verifyNoAuditEvent()
           }
 
-          s"[$regime journey] show correct error message when account name is more than 70 characters" in {
-            stubCommonActions()
-            EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)()
+          s"[$regime journey] show correct error message when account name doesn't match regex" in {
 
-            val formData: List[(String, String)] = List(
-              ("name", "a" * 71),
-              ("sortCode", "123456"),
-              ("accountNumber", "12345678")
-            )
-            val expectedContentAndHref: List[(String, String)] = List(
-              ("Name on the account must be 70 characters or less", EnterDirectDebitDetailsPage.accountNameFieldId)
+            val badRegexMatchError = "Check the name on the account is correct. Call 0300 123 1813 if it contains any characters that are not letters."
+            val nameTooLongError = "Name on the account must be 39 characters or less"
+
+            val inputAndExpectedError = List[(String, String)](
+              "a" * 40 -> nameTooLongError,
+              "ab@c" -> badRegexMatchError,
+              "mr!fail" -> badRegexMatchError,
+              "?questionmarksarentallowed" -> badRegexMatchError,
+              "\"speechmarksarentallowed" -> badRegexMatchError,
+              "numb3rs arent all0wed" -> badRegexMatchError
             )
 
-            testBankDetailsFormError(controller.enterBankDetailsSubmit)(formData: _*)(expectedContentAndHref)
-            EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
-            AuditConnectorStub.verifyNoAuditEvent()
+            inputAndExpectedError.foreach { case (accountName, errorMessage) =>
+              stubCommonActions()
+              EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)()
+              val formData: List[(String, String)] = List(
+                ("name", accountName),
+                ("sortCode", "123456"),
+                ("accountNumber", "12345678")
+              )
+              val expectedContentAndHref: List[(String, String)] = List(
+                (errorMessage, EnterDirectDebitDetailsPage.accountNameFieldId)
+              )
+              testBankDetailsFormError(controller.enterBankDetailsSubmit)(formData: _*)(expectedContentAndHref)
+              EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+              AuditConnectorStub.verifyNoAuditEvent()
+            }
           }
 
           s"[$regime journey] show correct error messages when submitted sort code and account number are more than 6 and 8 digits respectively" in {
@@ -1111,7 +1124,7 @@ class BankDetailsControllerSpec extends ItSpec {
             changeLinks.foreach(_.attr("href") shouldBe routes.BankDetailsController.enterBankDetails.url)
 
             val expectedAccountNameRow =
-              SummaryRow("Account name", "Bob Ross", routes.BankDetailsController.enterBankDetails.url)
+              SummaryRow("Account name", TdAll.testAccountName, routes.BankDetailsController.enterBankDetails.url)
             val expectedSortCodeRow = SummaryRow("Sort code", "123456", routes.BankDetailsController.enterBankDetails.url)
             val expectedAccountNumberRow =
               SummaryRow("Account number", "12345678", routes.BankDetailsController.enterBankDetails.url)

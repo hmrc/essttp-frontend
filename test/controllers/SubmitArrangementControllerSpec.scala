@@ -122,7 +122,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
                         s"""
                      |{
                      |	"bankDetails": {
-                     |		"name": "Bob Ross",
+                     |		"name": "${TdAll.testAccountName}",
                      |		"sortCode": "123456",
                      |		"accountNumber": "12345678"
                      |	},

@@ -322,6 +322,9 @@ object TdAll {
   def directDebitDetails(name: String, sortCode: String, accountNumber: String): BankDetails =
     BankDetails(AccountName(SensitiveString(name)), SortCode(SensitiveString(sortCode)), AccountNumber(SensitiveString(accountNumber)))
 
+  //string including & ' / which are the allowed symbols according to IF
+  val testAccountName = "Mr. Bob Ross &'/ With Symbols"
+
   def arrangementRequest(
       customerDetails:             Option[List[CustomerDetail]],
       regimeDigitalCorrespondence: Option[RegimeDigitalCorrespondence],
@@ -340,7 +343,7 @@ object TdAll {
       directDebitInstruction      = DirectDebitInstruction(
         sortCode        = SortCode(SensitiveString("123456")),
         accountNumber   = AccountNumber(SensitiveString("12345678")),
-        accountName     = AccountName(SensitiveString("Bob Ross")),
+        accountName     = AccountName(SensitiveString(testAccountName)),
         paperAuddisFlag = PaperAuddisFlag(false)
       ),
       paymentPlan                 = EnactPaymentPlan(
