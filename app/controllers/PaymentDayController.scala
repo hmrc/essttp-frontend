@@ -136,7 +136,7 @@ object PaymentDayController {
           data: Map[String, String]
       ): Either[Seq[FormError], Int] = {
         val result =
-          readValue(key, data, _.toInt)
+          readValue(key, data, _.replaceAll(" ", "").toInt)
             .flatMap(validateDayOfMonth)
         result.leftMap(Seq(_))
       }

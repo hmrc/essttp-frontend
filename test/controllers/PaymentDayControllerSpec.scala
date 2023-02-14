@@ -174,6 +174,30 @@ class PaymentDayControllerSpec extends ItSpec {
             EssttpBackend.DayOfMonth.verifyUpdateDayOfMonthRequest(TdAll.journeyId, TdAll.dayOfMonth(1))
           }
 
+          s"[$regime journey] should allow for other days with spaces added to be submitted" in {
+            stubCommonActions()
+            EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto, origin)()
+            EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(
+              TdAll.journeyId,
+              JourneyJsonTemplates.`Entered Day of Month`(DayOfMonth(12), origin)
+            )
+
+            val fakeRequest = FakeRequest(
+              method = "POST",
+              path   = "/which-day-do-you-want-to-pay-each-month"
+            ).withAuthToken()
+              .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+              .withFormUrlEncodedBody(
+                ("PaymentDay", "other"),
+                ("DifferentDay", "1 2")
+              )
+
+            val result: Future[Result] = controller.paymentDaySubmit(fakeRequest)
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(PageUrls.retrieveStartDatesUrl)
+            EssttpBackend.DayOfMonth.verifyUpdateDayOfMonthRequest(TdAll.journeyId, TdAll.dayOfMonth(12))
+          }
+
           s"[$regime journey] should update journey with dayOfMonth and redirect to instalment page when other day selected and 28 entered" in {
             stubCommonActions()
             EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto, origin)()
