@@ -1,15 +1,14 @@
 // ==UserScript==
 // @name         ESSTTP quick journey
 // @namespace    http://tampermonkey.net/
-// @version      15.19
+// @version      1.0
 // @description
 // @author       achung
 // @match        http*://*/set-up-a-payment-plan*
-// @include      http*://*/email-verification*
+// @match        http*://*/email-verification*
+// @downloadURL  https://raw.githubusercontent.com/hmrc/essttp-frontend/main/tampermonkey/quickJourney.js
 // @updateURL    https://raw.githubusercontent.com/hmrc/essttp-frontend/main/tampermonkey/quickJourney.js
 // ==/UserScript==
-
-/*eslint no-undef: "error"*/
 
 (function() {
     'use strict'
