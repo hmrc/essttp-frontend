@@ -924,7 +924,7 @@ object Messages {
         ),
         "name.error.pattern" -> Message(
           english = "Check the name on the account is correct. Call 0300 123 1813 if it contains any characters that are not letters.",
-          welsh   = "Mae’n rhaid i’r enw ar y cyfrif gynnwys dim ond llythrennau, collnodau, bylchau a chysylltnodau"
+          welsh   = "Gwiriwch fod yr enw sydd ar y cyfrif yn gywir. Ffoniwch 0300 200 1900 os yw’n cynnwys unrhyw gymeriadau nad ydynt yn llythrennau."
         ),
         "name.error.maxlength" -> Message(
           english = "Name on the account must be 39 characters or less",
