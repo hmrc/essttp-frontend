@@ -3,7 +3,7 @@
 ---
 
 This repository contains the frontend microservice for eSSTTP (Enhanced Self Service Time To Pay). 
-It is built using Scala (2.12) and the Play framework (2.8). We use linting tools such as WartRemover and Sclariform.
+It is built using Scala (2.13) and the Play framework (2.8). We use linting tools such as WartRemover and Sclariform.
 This microservice allows users to set up an arrangement and recurring direct debit to repay any debts they may have with HMRC.
 
 Current tax regimes supported:
@@ -18,6 +18,7 @@ Current tax regimes supported:
 * [Running tests](https://github.com/hmrc/essttp-frontend#running-tests)
 * [Accessing the service](https://github.com/hmrc/essttp-frontend#accessing-the-service)
 * [Bars stub data](https://github.com/hmrc/essttp-frontend#bars-stub-data)
+* [Navigating through quickly with Tampermonkey](https://github.com/hmrc/essttp-frontend#navigating-through-quickly-with-tampermonkey)
 
 ---
 
@@ -41,7 +42,9 @@ To run a specific spec, run `sbt 'testOnly *<SpecName>'`, e.g. `sbt 'testOnly *L
 
 ### Accessing the service
 
-The standard entry point for the service is https://www.tax.service.gov.uk/set-up-a-payment-plan
+The standard entry point for the service is to call the appropriate start endpoint in [essttp-backend](https://github.com/hmrc/essttp-backend)
+and redirect to the given `nextUrl` in the response. The `nextUrl` will point to the appropriate landing page in
+this service.
 
 However, you will need a valid government gateway account and various other data in ETMP to actually be a valid user.
 
@@ -71,6 +74,15 @@ to get the desired behaviour (e.g. `Teddy Dickson and 207102 and 44344655` to su
 | 309696    | 44311611       | any                  | sortCodeIsPresentOnEISCD - NO     | any          |
 
 see here for more BARs stub data https://github.com/hmrc/bank-account-reputation-stub
+
+### Navigating through quickly with Tampermonkey
+A script has been created to be used with [Tampermonkey](https://www.tampermonkey.net/) to enable fast navigation through 
+the service to make testing easier. To make use of it, install the Tampermonkey browser extension on your browser and
+then install [this script](https://raw.githubusercontent.com/hmrc/essttp-frontend/main/tampermonkey/quickJourney.js). After
+installation, a green "Quick submit" button will be visible near the top-left of each page in the service. Clicking this 
+button will autocomplete the inputs on the page (including the test-only start page) and automatically click the continue 
+button on that page.
+
 
 ---
 
