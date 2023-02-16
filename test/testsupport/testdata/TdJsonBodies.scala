@@ -457,7 +457,7 @@ object TdJsonBodies {
   def directDebitDetailsJourneyInfo(encrypter: Encrypter): String =
     s"""
        |"directDebitDetails" : {
-       |  "name" : "${encryptString("Bob Ross", encrypter)}",
+       |  "name" : "${encryptString(TdAll.testAccountName, encrypter)}",
        |  "sortCode" : "${encryptString("123456", encrypter)}",
        |  "accountNumber" : "${encryptString("12345678", encrypter)}"
        |}""".stripMargin

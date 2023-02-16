@@ -39,11 +39,11 @@ object BankDetailsForm {
       )(BankDetailsForm.apply)(BankDetailsForm.unapply)
     )
 
-  val accountNameConstraint: Constraint[AccountName] = {
-    Constraint(accountName =>
-      if (accountName.value.decryptedValue.length <= 70) Valid
-      else Invalid("error.maxlength"))
-  }
+  val accountNameConstraint: Constraint[AccountName] = Constraint(accountName =>
+    if (accountName.value.decryptedValue.matches("^[a-zA-Z ''.&\\/]{1,39}$")) Valid
+    else if (accountName.value.decryptedValue.length > 39) Invalid("error.maxlength")
+    else Invalid("error.pattern"))
+
   val accountNameMapping: Mapping[AccountName] =
     nonEmptyText.transform[AccountName](name => AccountName(SensitiveString.apply(name)), _.value.decryptedValue).verifying(accountNameConstraint)
 
