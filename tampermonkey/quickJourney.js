@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ESSTTP quick journey
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      2.0
 // @description
 // @author       achung
 // @match        http*://*/set-up-a-payment-plan*
@@ -89,7 +89,8 @@ const testOnlyStartPage = () => {
 }
 
 const landingPage = () => {
-    if (currentPageIs('/set-up-a-payment-plan/epaye-payment-plan')) {
+    if (currentPageIs('/set-up-a-payment-plan/epaye-payment-plan') ||
+        currentPageIs('/set-up-a-payment-plan/vat-payment-plan')) {
         clickContinue()
     }
 }
@@ -183,6 +184,13 @@ const whichEmail = () => {
     }
 }
 
+const enterEmail = () => {
+    if (currentPageIs('/set-up-a-payment-plan/enter-your-email-address')) {
+        document.getElementById('newEmailInput').value = 'email@test.com'
+        clickContinue()
+    }
+}
+
 const enterPasscode = () => {
     if (currentPageIs('/email-verification/journey*')) {
         document.getElementById('passcode').value = getPasscode()
@@ -214,6 +222,7 @@ function continueJourney() {
     checkDirectDebit()
     termsAndConditions()
     whichEmail()
+    enterEmail()
     enterPasscode()
     emailAddressConfirmed()
 }
