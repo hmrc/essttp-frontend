@@ -75,6 +75,8 @@ to get the desired behaviour (e.g. `Teddy Dickson and 207102 and 44344655` to su
 
 see here for more BARs stub data https://github.com/hmrc/bank-account-reputation-stub
 
+---
+
 ### Navigating through quickly with Tampermonkey
 A script has been created to be used with [Tampermonkey](https://www.tampermonkey.net/) to enable fast navigation through 
 the service to make testing easier. To make use of it, install the Tampermonkey browser extension on your browser and
