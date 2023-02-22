@@ -38,15 +38,16 @@ import scala.jdk.CollectionConverters.{IterableHasAsScala, IteratorHasAsScala}
 
 class InstalmentsControllerSpec extends ItSpec {
   private val controller: InstalmentsController = app.injector.instanceOf[InstalmentsController]
-  private val expectedH1: String = "How many months do you want to pay over?"
+  private val expectedH1: String = "Payment Plan"
+  private val expectedLegend: String = "How many months do you want to pay over?"
   private def expectedPageTitle(taxRegime: TaxRegime): String = taxRegime match {
     case TaxRegime.Epaye => s"$expectedH1 - ${TdAll.expectedServiceNamePayeEn} - GOV.UK"
     case TaxRegime.Vat   => s"$expectedH1 - ${TdAll.expectedServiceNameVatEn} - GOV.UK"
   }
-  private val progressiveRevealContent: String = "How we calculate interest"
-  private val progressiveRevealInnerContent1: String = "We only charge interest on overdue amounts."
-  private val progressiveRevealInnerContent2: String = "We charge the Bank of England base rate plus 2.5%, calculated as simple interest."
-  private val progressiveRevealInnerContent3: String =
+  private val expectedH2: String = "How we calculate interest"
+  private val expectedP1: String = "We only charge interest on overdue amounts."
+  private val expectedP2: String = "We charge the Bank of England base rate plus 2.5%, calculated as simple interest."
+  private val expectedP3: String =
     "If the interest rate changes during your plan, your monthly payments will not change. If we need to, we’ll settle the difference at the end of the plan."
 
   Seq[(String, Origin, TaxRegime)](
@@ -75,6 +76,8 @@ class InstalmentsControllerSpec extends ItSpec {
               regimeBeingTested       = Some(taxRegime)
             )
 
+            doc.select(".govuk-fieldset__legend").text() shouldBe expectedLegend
+
             val radioButtonGroup = doc.select(".govuk-radios")
             val individualButtons = radioButtonGroup.select(".govuk-radios__item").asScala.toSeq
             individualButtons.size shouldBe 3
@@ -88,11 +91,11 @@ class InstalmentsControllerSpec extends ItSpec {
             individualButtons(2).select(".govuk-radios__label").text() shouldBe "4 months at £277.88"
             individualButtons(2).select(".govuk-radios__hint").text() shouldBe "Estimated total interest of £0.12"
 
-            doc.select(".govuk-details__summary-text").text() shouldBe progressiveRevealContent
-            val progressiveRevealSubContent = doc.select(".govuk-details__text").select(".govuk-body").asScala.toSeq
-            progressiveRevealSubContent(0).text() shouldBe progressiveRevealInnerContent1
-            progressiveRevealSubContent(1).text() shouldBe progressiveRevealInnerContent2
-            progressiveRevealSubContent(2).text() shouldBe progressiveRevealInnerContent3
+            doc.select("h2.govuk-heading-m").text() shouldBe expectedH2
+            val paragraphs = doc.select("p.govuk-body").asScala.toSeq
+            paragraphs(0).text() shouldBe expectedP1
+            paragraphs(1).text() shouldBe expectedP2
+            paragraphs(2).text() shouldBe expectedP3
             doc.select(".govuk-button").text().trim shouldBe "Continue"
           }
 

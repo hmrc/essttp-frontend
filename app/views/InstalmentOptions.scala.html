@@ -28,7 +28,6 @@
         govukRadios: GovukRadios,
         formWithCSRF: FormWithCSRF,
         govukErrorSummary: GovukErrorSummary,
-        govukDetails: GovukDetails,
         requestSupport: RequestSupport
 )
 
@@ -40,7 +39,7 @@
     "Instalments"
 }
 @title = @{
-    Messages.Instalments.`How many months do you want to pay over?`.show
+    Messages.Instalments.`Payment Plan`.show
 }
 @radioOptions = @{
     options.zipWithIndex.map { case (option: InstalmentOption, _: Int) => RadioItem(
@@ -51,17 +50,6 @@
         )),
         checked = form.data.values.toList.contains(option.numberOfMonths.toString)
     )}
-}
-@detailsContent = {
-    <p class="govuk-body">@{
-        Messages.Instalments.`We only charge interest on overdue amounts`.show
-    }</p>
-    <p class="govuk-body">@{
-        Messages.Instalments.`We charge the Bank of England base rate`.show
-    }</p>
-    <p class="govuk-body">@{
-        Messages.Instalments.`If interest rates change`.show
-    }</p>
 }
 
 @layout(pageTitle = Some(title), hasErrors = form.hasErrors) {
@@ -74,13 +62,27 @@
         ),
             title = Text(Messages.`There is a problem`.show)))
     }
+    <h1 class="govuk-heading-xl">@title</h1>
+
+    <h2 class="govuk-heading-m">@{Messages.Instalments.`How we calculate interest`.show}</h2>
+
+    <p class="govuk-body">@{
+        Messages.Instalments.`We only charge interest on overdue amounts`.show
+    }</p>
+    <p class="govuk-body">@{
+        Messages.Instalments.`We charge the Bank of England base rate`.show
+    }</p>
+    <p class="govuk-body">@{
+        Messages.Instalments.`If interest rates change`.show
+    }</p>
+
     @formWithCSRF(action = routes.InstalmentsController.instalmentOptionsSubmit) {
         @govukRadios(Radios(
             fieldset = Some(Fieldset(
                 legend = Some(Legend(
-                    content = Text(title),
-                    classes = "govuk-fieldset__legend--xl",
-                    isPageHeading = true
+                    content = Text(Messages.Instalments.`How many months do you want to pay over?`.show),
+                    classes = "govuk-fieldset__legend--m",
+                    isPageHeading = false
                 ))
             )),
             idPrefix = Some(key),
@@ -91,10 +93,7 @@
             ))
         ))
 
-        @govukDetails(Details(
-            summary = Text(Messages.Instalments.`How we calculate interest`.show),
-            content = HtmlContent(detailsContent)
-        ))
+
 
         @govukButton(Button(content = Text(Messages.continue.show)))
     }

@@ -565,20 +565,21 @@ class BankDetailsControllerSpec extends ItSpec {
               "numb3rs arent all0wed" -> badRegexMatchError
             )
 
-            inputAndExpectedError.foreach { case (accountName, errorMessage) =>
-              stubCommonActions()
-              EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)()
-              val formData: List[(String, String)] = List(
-                ("name", accountName),
-                ("sortCode", "123456"),
-                ("accountNumber", "12345678")
-              )
-              val expectedContentAndHref: List[(String, String)] = List(
-                (errorMessage, EnterDirectDebitDetailsPage.accountNameFieldId)
-              )
-              testBankDetailsFormError(controller.enterBankDetailsSubmit)(formData: _*)(expectedContentAndHref)
-              EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
-              AuditConnectorStub.verifyNoAuditEvent()
+            inputAndExpectedError.foreach {
+              case (accountName, errorMessage) =>
+                stubCommonActions()
+                EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)()
+                val formData: List[(String, String)] = List(
+                  ("name", accountName),
+                  ("sortCode", "123456"),
+                  ("accountNumber", "12345678")
+                )
+                val expectedContentAndHref: List[(String, String)] = List(
+                  (errorMessage, EnterDirectDebitDetailsPage.accountNameFieldId)
+                )
+                testBankDetailsFormError(controller.enterBankDetailsSubmit)(formData: _*)(expectedContentAndHref)
+                EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+                AuditConnectorStub.verifyNoAuditEvent()
             }
           }
 
