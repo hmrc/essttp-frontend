@@ -16,17 +16,15 @@
 
 package config
 
-import essttp.rootmodel.{AmountInPence, TaxRegime}
-
 import configs.syntax._
-
-import javax.inject.{Inject, Singleton}
-import play.api.{ConfigLoader, Configuration}
+import essttp.rootmodel.{AmountInPence, TaxRegime}
 import play.api.mvc.RequestHeader
+import play.api.{ConfigLoader, Configuration}
 import uk.gov.hmrc.play.bootstrap.binders.SafeRedirectUrl
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.net.URL
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.duration.FiniteDuration
 
 @Singleton
@@ -35,6 +33,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val appName: String = config.get[String]("appName")
   val emailJourneyEnabled: Boolean = config.get[Boolean]("features.email-journey")
   val vatEnabled: Boolean = config.get[Boolean]("features.vat")
+  val useRegexConstraintOnBarsNameField: Boolean = config.get[Boolean]("features.use-regex-constraint-bars-form")
   val authTimeoutSeconds: Int = config.get[FiniteDuration]("timeout-dialog.timeout").toSeconds.toInt
   val authTimeoutCountdownSeconds: Int = config.get[FiniteDuration]("timeout-dialog.countdown").toSeconds.toInt
   val accessibilityStatementPath: String = config.get[String]("accessibility-statement.service-path")
