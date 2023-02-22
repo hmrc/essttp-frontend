@@ -926,6 +926,10 @@ object Messages {
           english = "Check the name on the account is correct. Call 0300 123 1813 if it contains any characters that are not letters.",
           welsh   = "Gwiriwch fod yr enw sydd ar y cyfrif yn gywir. Ffoniwch 0300 200 1900 os yw’n cynnwys unrhyw gymeriadau nad ydynt yn llythrennau."
         ),
+        "name.error.maxlength-70" -> Message(
+          english = "Name on the account must be 70 characters or less",
+          welsh   = "Mae’n rhaid i’r enw sydd ar y cyfrif fod yn 70 o gymeriadau neu lai"
+        ),
         "name.error.maxlength" -> Message(
           english = "Name on the account must be 39 characters or less",
           welsh   = "Mae’n rhaid i’r enw sydd ar y cyfrif fod yn 39 o gymeriadau neu lai"
