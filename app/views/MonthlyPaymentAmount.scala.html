@@ -46,7 +46,7 @@
     "MonthlyPaymentAmount"
 }
 @title = @{
-    Messages.MonthlyPaymentAmount.`How much can you afford to pay each month?`.show
+    Messages.MonthlyPaymentAmount.`Monthly Payments`.show
 }
 @detailsContent = {
     <p class="govuk-body">@{
@@ -68,10 +68,12 @@
             title = Text(Messages.`There is a problem`.show)))
     }
 
-<h1 class="govuk-label-wrapper"><label class="govuk-label govuk-label--xl" for="MonthlyPaymentAmount">@title</label></h1>
+    <h1 class="govuk-heading-xl">@title</h1>
+
     <p class="govuk-body">
-    @{Messages.MonthlyPaymentAmount.`The miminum payment you can make is ...`(minimumPayment).show}
+      @{Messages.MonthlyPaymentAmount.`The miminum payment you can make is ...`(minimumPayment).show}
     </p>
+
     @govukDetails(Details(
         summary = Text(Messages.MonthlyPaymentAmount.`I can’t afford the minimum payment`.show),
         content = HtmlContent(detailsContent)
@@ -94,7 +96,13 @@
             errorMessage = form.error(key).map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
                 content = Text(Messages.MonthlyPaymentAmount.getError(e.message, maximumPayment, minimumPayment).show)
             )),
-            value = form.data.get(key)
+            value = form.data.get(key),
+            label = Label(
+                isPageHeading = false,
+                content = Text(Messages.MonthlyPaymentAmount.`How much can you afford to pay each month?`.show),
+                forAttr = Some(key),
+                classes = "govuk-label--m"
+            )
         ))
 
         @govukButton(Button(

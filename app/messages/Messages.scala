@@ -625,6 +625,11 @@ object Messages {
 
   object MonthlyPaymentAmount {
 
+    val `Monthly Payments`: Message = Message(
+      english = "Monthly Payments",
+      welsh   = "Taliadau misol"
+    )
+
     val `How much can you afford to pay each month?`: Message = Message(
       english = "How much can you afford to pay each month?",
       welsh   = "Faint y gallwch fforddio ei dalu bob mis?"
@@ -731,6 +736,11 @@ object Messages {
   }
 
   object Instalments {
+
+    val `Payment Plan`: Message = Message(
+      english = "Payment Plan",
+      welsh   = "Cynllun talu"
+    )
 
     val `How many months do you want to pay over?`: Message = Message(
       english = "How many months do you want to pay over?",
