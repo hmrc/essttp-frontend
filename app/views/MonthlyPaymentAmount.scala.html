@@ -46,7 +46,7 @@
     "MonthlyPaymentAmount"
 }
 @title = @{
-    Messages.MonthlyPaymentAmount.`Monthly Payments`.show
+    Messages.MonthlyPaymentAmount.`Monthly payments`.show
 }
 @detailsContent = {
     <p class="govuk-body">@{
@@ -75,7 +75,7 @@
     </p>
 
     @govukDetails(Details(
-        summary = Text(Messages.MonthlyPaymentAmount.`I can’t afford the minimum payment`.show),
+        summary = Text(Messages.MonthlyPaymentAmount.`I cannot afford the minimum payment`.show),
         content = HtmlContent(detailsContent)
     ))
 

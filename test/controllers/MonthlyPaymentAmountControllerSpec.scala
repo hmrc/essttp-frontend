@@ -39,10 +39,10 @@ import scala.jdk.CollectionConverters.IterableHasAsScala
 class MonthlyPaymentAmountControllerSpec extends ItSpec {
 
   private val controller: MonthlyPaymentAmountController = app.injector.instanceOf[MonthlyPaymentAmountController]
-  private val expectedH1: String = "Monthly Payments"
+  private val expectedH1: String = "Monthly payments"
   private val expectedLabel: String = "How much can you afford to pay each month?"
   private val expectedPageHint: String = "Enter an amount between £300 and £880"
-  private val progressiveRevealContent: String = "I can’t afford the minimum payment"
+  private val progressiveRevealContent: String = "I cannot afford the minimum payment"
   private val progressiveRevealInnerContent1: String =
     "You may still be able to set up a payment plan over the phone, but you are not eligible for an online payment plan."
   private val progressiveRevealInnerContent2: String =
