@@ -625,8 +625,8 @@ object Messages {
 
   object MonthlyPaymentAmount {
 
-    val `Monthly Payments`: Message = Message(
-      english = "Monthly Payments",
+    val `Monthly payments`: Message = Message(
+      english = "Monthly payments",
       welsh   = "Taliadau misol"
     )
 
@@ -668,8 +668,8 @@ object Messages {
       }
     }
 
-    val `I can’t afford the minimum payment`: Message = Message(
-      english = "I can’t afford the minimum payment",
+    val `I cannot afford the minimum payment`: Message = Message(
+      english = "I cannot afford the minimum payment",
       welsh   = "Dydw i ddim yn gallu fforddio talu’r isafswm taliad"
     )
 
