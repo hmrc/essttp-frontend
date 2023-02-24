@@ -38,7 +38,7 @@ import scala.jdk.CollectionConverters.{IterableHasAsScala, IteratorHasAsScala}
 
 class InstalmentsControllerSpec extends ItSpec {
   private val controller: InstalmentsController = app.injector.instanceOf[InstalmentsController]
-  private val expectedH1: String = "Payment Plan"
+  private val expectedH1: String = "Select a payment plan"
   private val expectedLegend: String = "How many months do you want to pay over?"
   private def expectedPageTitle(taxRegime: TaxRegime): String = taxRegime match {
     case TaxRegime.Epaye => s"$expectedH1 - ${TdAll.expectedServiceNamePayeEn} - GOV.UK"

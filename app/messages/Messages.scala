@@ -670,7 +670,7 @@ object Messages {
 
     val `I cannot afford the minimum payment`: Message = Message(
       english = "I cannot afford the minimum payment",
-      welsh   = "Dydw i ddim yn gallu fforddio talu’r isafswm taliad"
+      welsh   = "Nid wyf yn gallu fforddio’r taliad isaf"
     )
 
     val `You may still be able to set up a payment plan...`: Message = Message(
@@ -737,9 +737,9 @@ object Messages {
 
   object Instalments {
 
-    val `Payment Plan`: Message = Message(
-      english = "Payment Plan",
-      welsh   = "Cynllun talu"
+    val `Select a payment plan`: Message = Message(
+      english = "Select a payment plan",
+      welsh   = "Dewiswch gynllun talu"
     )
 
     val `How many months do you want to pay over?`: Message = Message(
