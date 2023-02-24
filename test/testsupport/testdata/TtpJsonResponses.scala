@@ -56,6 +56,7 @@ object TtpJsonResponses {
        |    "ineligibleChargeTypes" : ${eligibilityRules.ineligibleChargeTypes.toString},
        |    "missingFiledReturns" : ${eligibilityRules.missingFiledReturns.toString},
        |    "noDueDatesReached": ${eligibilityRules.noDueDatesReached.toString}
+       |    ${optionalEligibilityResponsesJson(eligibilityRules)}
        |  },
        |  "chargeTypeAssessment" : [ {
        |    "taxPeriodFrom" : "2020-08-13",
@@ -85,6 +86,20 @@ object TtpJsonResponses {
        |  "futureChargeLiabilitiesExcluded": false
        |}
        |""".stripMargin
+  }
+
+  def optionalEligibilityResponsesJson(eligibilityRules: EligibilityRules): String = {
+    val maybeHasInvalidInterestSignals =
+      if (eligibilityRules.hasInvalidInterestSignals.isDefined) s""", "hasInvalidInterestSignals": ${eligibilityRules.hasInvalidInterestSignals.getOrElse(false).toString}"""
+      else ""
+    val maybeDmSpecialOfficeProcessingRequired =
+      if (eligibilityRules.dmSpecialOfficeProcessingRequired.isDefined) s""", "dmSpecialOfficeProcessingRequired": ${eligibilityRules.dmSpecialOfficeProcessingRequired.getOrElse(false).toString}"""
+      else ""
+    val maybeCannotFindLockReason =
+      if (eligibilityRules.cannotFindLockReason.isDefined) s""", "cannotFindLockReason": ${eligibilityRules.cannotFindLockReason.getOrElse(false).toString}"""
+      else ""
+
+    maybeHasInvalidInterestSignals ++ maybeDmSpecialOfficeProcessingRequired ++ maybeCannotFindLockReason
   }
 
   def ttpAffordabilityResponseJson(): String = {

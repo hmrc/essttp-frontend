@@ -80,7 +80,22 @@ class DetermineEligibilityControllerSpec extends ItSpec {
         Origins.Epaye.Bta),
       ("NoDueDatesReached - VAT", TdAll.notEligibleNoDueDatesReached, "noDueDatesReached", PageUrls.vatNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Vat.Bta),
-        Origins.Vat.Bta)
+        Origins.Vat.Bta),
+
+      ("HasInvalidInterestSignals - EPAYE", TdAll.notEligibleHasInvalidInterestSignals, "hasInvalidInterestSignals", PageUrls.payeNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasInvalidInterestSignals`(Origins.Epaye.Bta), Origins.Epaye.Bta),
+      ("HasInvalidInterestSignals - VAT", TdAll.notEligibleHasInvalidInterestSignals, "hasInvalidInterestSignals", PageUrls.vatNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasInvalidInterestSignals`(Origins.Vat.Bta), Origins.Vat.Bta),
+
+      ("DmSpecialOfficeProcessingRequired - EPAYE", TdAll.notEligibleDmSpecialOfficeProcessingRequired, "dmSpecialOfficeProcessingRequired", PageUrls.payeNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - DmSpecialOfficeProcessingRequired`(Origins.Epaye.Bta), Origins.Epaye.Bta),
+      ("DmSpecialOfficeProcessingRequired - VAT", TdAll.notEligibleDmSpecialOfficeProcessingRequired, "dmSpecialOfficeProcessingRequired", PageUrls.vatNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - DmSpecialOfficeProcessingRequired`(Origins.Vat.Bta), Origins.Vat.Bta),
+
+      ("CannotFindLockReason - EPAYE", TdAll.notEligibleCannotFindLockReason, "cannotFindLockReason", PageUrls.payeNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - CannotFindLockReason`(Origins.Epaye.Bta), Origins.Epaye.Bta),
+      ("CannotFindLockReason - VAT", TdAll.notEligibleCannotFindLockReason, "cannotFindLockReason", PageUrls.vatNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - CannotFindLockReason`(Origins.Vat.Bta), Origins.Vat.Bta)
     )) {
       (sf: String, eligibilityRules: EligibilityRules, auditIneligibilityReason: String, expectedRedirect: String, updatedJourneyJson: String, origin: Origin) =>
         {

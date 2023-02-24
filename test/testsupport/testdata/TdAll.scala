@@ -100,7 +100,8 @@ object TdAll {
     missingFiledReturns               = false,
     hasInvalidInterestSignals         = None,
     dmSpecialOfficeProcessingRequired = None,
-    noDueDatesReached                 = false
+    noDueDatesReached                 = false,
+    cannotFindLockReason              = None
   )
   val notEligibleHasRlsOnAddress: EligibilityRules = eligibleEligibilityRules.copy(hasRlsOnAddress = true)
   val notEligibleMarkedAsInsolvent: EligibilityRules = eligibleEligibilityRules.copy(markedAsInsolvent = true)
@@ -112,6 +113,9 @@ object TdAll {
   val notEligibleEligibleChargeType: EligibilityRules = eligibleEligibilityRules.copy(ineligibleChargeTypes = true)
   val notEligibleMissingFiledReturns: EligibilityRules = eligibleEligibilityRules.copy(missingFiledReturns = true)
   val notEligibleNoDueDatesReached: EligibilityRules = eligibleEligibilityRules.copy(noDueDatesReached = true)
+  val notEligibleHasInvalidInterestSignals: EligibilityRules = eligibleEligibilityRules.copy(hasInvalidInterestSignals = Some(true))
+  val notEligibleDmSpecialOfficeProcessingRequired: EligibilityRules = eligibleEligibilityRules.copy(dmSpecialOfficeProcessingRequired = Some(true))
+  val notEligibleCannotFindLockReason: EligibilityRules = eligibleEligibilityRules.copy(cannotFindLockReason = Some(true))
   val notEligibleMultipleReasons: EligibilityRules = eligibleEligibilityRules.copy(missingFiledReturns = true).copy(hasRlsOnAddress = true)
 
   val callEligibilityApiRequestEpaye: CallEligibilityApiRequest = CallEligibilityApiRequest(
