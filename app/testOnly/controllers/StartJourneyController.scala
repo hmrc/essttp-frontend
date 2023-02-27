@@ -234,7 +234,8 @@ object StartJourneyController {
         missingFiledReturns               = containsError(MissingFiledReturns),
         hasInvalidInterestSignals         = Some(containsError(HasInvalidInterestSignals)),
         dmSpecialOfficeProcessingRequired = Some(containsError(DmSpecialOfficeProcessingRequired)),
-        noDueDatesReached                 = containsError(NoDueDatesReached)
+        noDueDatesReached                 = containsError(NoDueDatesReached),
+        cannotFindLockReason              = Some(containsError(CannotFindLockReason))
       )
     }
     EligibilityCheckResult(

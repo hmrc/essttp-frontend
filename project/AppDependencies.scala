@@ -3,16 +3,16 @@ import play.core.PlayVersion
 
 object AppDependencies {
 
-  val bootstrapVersion = "7.13.0"
+  val bootstrapVersion = "7.14.0"
 
   val compile: Seq[ModuleID] = Seq(
     // format: OFF
     "uk.gov.hmrc"       %% "bootstrap-frontend-play-28"    % bootstrapVersion,
-    "uk.gov.hmrc"       %% "play-frontend-hmrc"            % "6.6.0-play-28",
+    "uk.gov.hmrc"       %% "play-frontend-hmrc"            % "6.7.0-play-28",
     "uk.gov.hmrc"       %% "play-conditional-form-mapping" % "1.12.0-play-28",
     "com.beachape"      %% "enumeratum-play"               % "1.7.2",
     "org.typelevel"     %% "cats-core"                     % "2.9.0",
-    "uk.gov.hmrc"       %% "essttp-backend-cor-journey"    % "1.102.0",
+    "uk.gov.hmrc"       %% "essttp-backend-cor-journey"    % "1.104.0",
     "uk.gov.hmrc"       %% "emailaddress"                  % "3.7.0"
   // format: ON
   )

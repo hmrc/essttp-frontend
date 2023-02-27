@@ -101,6 +101,24 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
+  def `Eligibility Checked - Ineligible - HasInvalidInterestSignals`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.eligibilityCheckedIneligible,
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleHasInvalidInterestSignals(origin.taxRegime, encrypter),
+    origin      = origin
+  )
+
+  def `Eligibility Checked - Ineligible - DmSpecialOfficeProcessingRequired`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.eligibilityCheckedIneligible,
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleDmSpecialOfficeProcessingRequired(origin.taxRegime, encrypter),
+    origin      = origin
+  )
+
+  def `Eligibility Checked - Ineligible - CannotFindLockReason`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.eligibilityCheckedIneligible,
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleCannotFindLockReason(origin.taxRegime, encrypter),
+    origin      = origin
+  )
+
   def `Eligibility Checked - Ineligible - MultipleReasons`(origin: Origin = Origins.Epaye.Bta)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMultipleReasons(origin.taxRegime, encrypter),

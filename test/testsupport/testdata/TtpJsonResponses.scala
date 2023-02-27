@@ -56,6 +56,9 @@ object TtpJsonResponses {
        |    "ineligibleChargeTypes" : ${eligibilityRules.ineligibleChargeTypes.toString},
        |    "missingFiledReturns" : ${eligibilityRules.missingFiledReturns.toString},
        |    "noDueDatesReached": ${eligibilityRules.noDueDatesReached.toString}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.hasInvalidInterestSignals, "hasInvalidInterestSignals")}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.dmSpecialOfficeProcessingRequired, "dmSpecialOfficeProcessingRequired")}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.cannotFindLockReason, "cannotFindLockReason")}
        |  },
        |  "chargeTypeAssessment" : [ {
        |    "taxPeriodFrom" : "2020-08-13",
@@ -86,6 +89,9 @@ object TtpJsonResponses {
        |}
        |""".stripMargin
   }
+
+  def optionalEligibilityResponsesJson(flag: Option[Boolean], flagName: String): String =
+    flag.fold(""){ f => s""",  "$flagName": ${f.toString} """ }
 
   def ttpAffordabilityResponseJson(): String = {
     s"""

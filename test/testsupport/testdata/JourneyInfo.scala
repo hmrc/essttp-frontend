@@ -37,6 +37,9 @@ object JourneyInfo {
   def ineligibleChargeType(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleEligibleChargeType, taxRegime, encrypter)
   def ineligibleMissingFiledReturns(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleMissingFiledReturns, taxRegime, encrypter)
   def ineligibleNoDueDatesReached(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleNoDueDatesReached, taxRegime, encrypter)
+  def ineligibleHasInvalidInterestSignals(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleHasInvalidInterestSignals, taxRegime, encrypter)
+  def ineligibleDmSpecialOfficeProcessingRequired(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleDmSpecialOfficeProcessingRequired, taxRegime, encrypter)
+  def ineligibleCannotFindLockResponse(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleCannotFindLockReason, taxRegime, encrypter)
   def multipleIneligibleReasons(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleHasRlsOnAddress.copy(markedAsInsolvent = true), taxRegime, encrypter)
   val canPayUpfront: JourneyInfoAsJson = TdJsonBodies.canPayUpfrontJourneyInfo(true)
   val cannotPayUpfront: JourneyInfoAsJson = TdJsonBodies.canPayUpfrontJourneyInfo(false)
@@ -99,6 +102,15 @@ object JourneyInfo {
 
   def eligibilityCheckedIneligibleNoDueDatesReached(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
     ineligibleNoDueDatesReached(taxRegime, encrypter) :: taxIdDetermined()
+
+  def eligibilityCheckedIneligibleHasInvalidInterestSignals(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
+    ineligibleHasInvalidInterestSignals(taxRegime, encrypter) :: taxIdDetermined()
+
+  def eligibilityCheckedIneligibleDmSpecialOfficeProcessingRequired(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
+    ineligibleDmSpecialOfficeProcessingRequired(taxRegime, encrypter) :: taxIdDetermined()
+
+  def eligibilityCheckedIneligibleCannotFindLockReason(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
+    ineligibleCannotFindLockResponse(taxRegime, encrypter) :: taxIdDetermined()
 
   def eligibilityCheckedIneligibleMultipleReasons(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
     multipleIneligibleReasons(taxRegime, encrypter) :: taxIdDetermined()
