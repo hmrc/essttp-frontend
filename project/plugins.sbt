@@ -5,7 +5,7 @@ resolvers += MavenRepository("HMRC-open-artefacts-maven2", "https://open.artefac
 
 ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
 
-addSbtPlugin("com.typesafe.play"   %  "sbt-plugin"            % "2.8.18")
+addSbtPlugin("com.typesafe.play"   %  "sbt-plugin"            % "2.8.19")
 addSbtPlugin("io.github.irundaia"  %  "sbt-sassify"           % "1.5.2")
 addSbtPlugin("org.scalariform"     %  "sbt-scalariform"       % "1.8.3")
 addSbtPlugin("org.scalastyle"      %% "scalastyle-sbt-plugin" % "1.0.0")
