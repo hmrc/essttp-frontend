@@ -56,7 +56,9 @@ object TtpJsonResponses {
        |    "ineligibleChargeTypes" : ${eligibilityRules.ineligibleChargeTypes.toString},
        |    "missingFiledReturns" : ${eligibilityRules.missingFiledReturns.toString},
        |    "noDueDatesReached": ${eligibilityRules.noDueDatesReached.toString}
-       |    ${optionalEligibilityResponsesJson(eligibilityRules)}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.hasInvalidInterestSignals, "hasInvalidInterestSignals")}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.dmSpecialOfficeProcessingRequired, "dmSpecialOfficeProcessingRequired")}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.cannotFindLockReason, "cannotFindLockReason")}
        |  },
        |  "chargeTypeAssessment" : [ {
        |    "taxPeriodFrom" : "2020-08-13",
@@ -88,19 +90,8 @@ object TtpJsonResponses {
        |""".stripMargin
   }
 
-  def optionalEligibilityResponsesJson(eligibilityRules: EligibilityRules): String = {
-    val maybeHasInvalidInterestSignals =
-      if (eligibilityRules.hasInvalidInterestSignals.isDefined) s""", "hasInvalidInterestSignals": ${eligibilityRules.hasInvalidInterestSignals.getOrElse(false).toString}"""
-      else ""
-    val maybeDmSpecialOfficeProcessingRequired =
-      if (eligibilityRules.dmSpecialOfficeProcessingRequired.isDefined) s""", "dmSpecialOfficeProcessingRequired": ${eligibilityRules.dmSpecialOfficeProcessingRequired.getOrElse(false).toString}"""
-      else ""
-    val maybeCannotFindLockReason =
-      if (eligibilityRules.cannotFindLockReason.isDefined) s""", "cannotFindLockReason": ${eligibilityRules.cannotFindLockReason.getOrElse(false).toString}"""
-      else ""
-
-    maybeHasInvalidInterestSignals ++ maybeDmSpecialOfficeProcessingRequired ++ maybeCannotFindLockReason
-  }
+  def optionalEligibilityResponsesJson(flag: Option[Boolean], flagName: String): String =
+    flag.fold(""){ f => s""",  "$flagName": ${f.toString} """ }
 
   def ttpAffordabilityResponseJson(): String = {
     s"""

@@ -3,7 +3,7 @@ import play.core.PlayVersion
 
 object AppDependencies {
 
-  val bootstrapVersion = "7.13.0"
+  val bootstrapVersion = "7.14.0"
 
   val compile: Seq[ModuleID] = Seq(
     // format: OFF
