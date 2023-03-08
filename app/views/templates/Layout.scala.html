@@ -61,91 +61,103 @@
   request: Request[_]
 )
 
-  @import requestSupport._
-  @showSignOut = @{ showSignOutOverride.getOrElse(RequestSupport.isLoggedIn) }
+@import requestSupport._
+@showSignOut = @{ showSignOutOverride.getOrElse(RequestSupport.isLoggedIn) }
 
-  @head = {
-    @headBlock.getOrElse(Html(""))
-    @if(showSignOut) {
-      @hmrcTimeoutDialogHelper(
-        title = Some(Messages.TimeOut.`You’re about to be signed out`.show),
-        signOutUrl = appConfig.Urls.signOutUrl,
-        timeoutUrl = Some(routes.SignOutController.signOutFromTimeout.url),
-        countdown = Some(appConfig.authTimeoutCountdownSeconds),
-        timeout = Some(appConfig.authTimeoutSeconds)
-      )
-    }
+@head = {
+  @headBlock.getOrElse(Html(""))
+  @if(showSignOut) {
+    @hmrcTimeoutDialogHelper(
+      title = Some(Messages.TimeOut.`You’re about to be signed out`.show),
+      signOutUrl = appConfig.Urls.signOutUrl,
+      timeoutUrl = Some(routes.SignOutController.signOutFromTimeout.url),
+      countdown = Some(appConfig.authTimeoutCountdownSeconds),
+      timeout = Some(appConfig.authTimeoutSeconds)
+    )
+  }
 
-    @Html(s"""<link rel="stylesheet" media="screen" href="${controllers.routes.Assets.versioned("stylesheets/application.css").toString}" ${CSPNonce.attr.toString}>""")
-    @Html(s"""<link rel="stylesheet" media="print" href="${controllers.routes.Assets.versioned("stylesheets/print.css").toString}" ${CSPNonce.attr.toString}>""")
-    }
+  @Html(s"""<link rel="stylesheet" media="screen" href="${controllers.routes.Assets.versioned("stylesheets/application.css").toString}" ${CSPNonce.attr.toString}>""")
+  @Html(s"""<link rel="stylesheet" media="print" href="${controllers.routes.Assets.versioned("stylesheets/print.css").toString}" ${CSPNonce.attr.toString}>""")
+}
 
-    @scripts = {
-       @if(showBackLink){ <script src="@{controllers.routes.Assets.versioned("javascripts/back-link.js")}" @{CSPNonce.attr}></script> }
-       <script src="@{controllers.routes.Assets.versioned("javascripts/prevent-multiple-form-submits.js")}" @{CSPNonce.attr}></script>
-       @additionalScripts.getOrElse(Html(""))
-    }
+@scripts = {
+  @if(showBackLink){
+      <script src="@{controllers.routes.Assets.versioned("javascripts/back-link.js")}" @{CSPNonce.attr}></script>
+  }
+  <script src="@{controllers.routes.Assets.versioned("javascripts/prevent-multiple-form-submits.js")}" @{CSPNonce.attr}></script>
+  @additionalScripts.getOrElse(Html(""))
+}
 
 @beforeContentBlock = {
+  <div class="govuk-!-display-none-print">
+    @govukPhaseBanner(PhaseBanner(
+        tag = Some(Tag(
+            content = Text(Messages.ServicePhase.beta.show)
+        )),
+        content = HtmlContent(Messages.ServicePhase.bannerText(appConfig.Urls.betaFeedbackUrl(request)).show)
+    ))
+
+   @hmrcLanguageSelectHelper()
+
+   @{
+       if(showBackLink) {
+           backLinkUrlOverride.fold(
+               govukBackLink(BackLink(href = "#", classes = "js-visible", content = Text(Messages.back.show)))
+           )(url => govukBackLink(BackLink(href = url, content = Text(Messages.back.show))))
+       }
+   }
+  </div>
+}
+
+@content = {
+    <div class="govuk-!-margin-bottom-6">
+      @contentBlock
+    </div>
+
     <div class="govuk-!-display-none-print">
-        @govukPhaseBanner(PhaseBanner(
-            tag = Some(Tag(
-                content = Text(Messages.ServicePhase.beta.show)
-            )),
-            content = HtmlContent(Messages.ServicePhase.bannerText(appConfig.Urls.betaFeedbackUrl(request)).show)
-        ))
-
-        @hmrcLanguageSelectHelper()
-
-        @{
-            if(showBackLink) {
-                backLinkUrlOverride.fold(
-                    govukBackLink(BackLink(href = "#", classes = "js-visible", content = Text(Messages.back.show)))
-                )(url => govukBackLink(BackLink(href = url, content = Text(Messages.back.show))))
-            }
-        }
+      @hmrcReportTechnicalIssueHelper()
     </div>
 }
 
-    @content = {
-      <div class="govuk-!-margin-bottom-6">
-      @contentBlock
-      </div>
-      <div class="govuk-!-display-none-print">
-        @hmrcReportTechnicalIssueHelper()
-      </div>
-  }
-
-    @serviceName = @{
-        (request: AnyRef) match {
-          case r: AuthenticatedJourneyRequest[_] => Messages.ServicePhase.serviceName(r.journey.taxRegime).show
-          case r: BarsLockedOutRequest[_]        => Messages.ServicePhase.serviceName(r.journey.taxRegime).show
-          case _ => fallBackTaxRegime match {
-              case Some(regime) => Messages.ServicePhase.serviceName(regime).show
-              case None => Messages.ServicePhase.`Set up a payment plan`.show
-          }
-      }
+@taxRegime = @{
+    (request: AnyRef) match {
+        case r: AuthenticatedJourneyRequest[_] => Some(r.journey.taxRegime)
+        case r: BarsLockedOutRequest[_] => Some(r.journey.taxRegime)
+        case _ => fallBackTaxRegime
     }
+}
 
-  @serviceNameAndTitle = @{
-      pageTitle.fold(serviceName)(t => if(t === serviceName) t else  s"$t - $serviceName")
-  }
+@serviceName = @{
+    taxRegime.fold(Messages.ServicePhase.`Set up a payment plan`.show)(Messages.ServicePhase.serviceName(_).show)
+}
 
-  @govTitle = @{serviceNameAndTitle + " - GOV.UK"}
-  @documentTitle = @{if(hasErrors) { s"${Messages.error.show} $govTitle" } else { govTitle }}
+@serviceUrl = @{
+    taxRegime.map {
+        case TaxRegime.Epaye => routes.LandingController.epayeLandingPage.url
+        case TaxRegime.Vat => routes.LandingController.vatLandingPage.url
+    }
+}
 
- @header = @{
+@serviceNameAndTitle = @{
+    pageTitle.fold(serviceName)(t => if(t === serviceName) t else  s"$t - $serviceName")
+}
+
+@govTitle = @{serviceNameAndTitle + " - GOV.UK"}
+@documentTitle = @{if(hasErrors) { s"${Messages.error.show} $govTitle" } else { govTitle }}
+
+@header = @{
      hmrcStandardHeader(
          serviceName = if(showServiceNameInHeader) Some(serviceName) else None,
+         serviceUrl = serviceUrl,
          signOutUrl = if(showSignOut) Some(routes.SignOutController.signOut.url) else None
      )
  }
 
-  @govukLayout(
+@govukLayout(
     pageTitle = Some(documentTitle),
     headBlock = Some(hmrcHead(headBlock = Some(head), nonce = CSPNonce.get)),
     headerBlock = Some(header),
     scriptsBlock = Some(hmrcScripts(scriptsBlock = Some(scripts), nonce = CSPNonce.get)),
     beforeContentBlock = Some(beforeContentBlock),
     footerBlock = Some(hmrcStandardFooter())
-  )(content)
+ )(content)
