@@ -14,21 +14,21 @@
  * limitations under the License.
  *@
 
-@import play.api.mvc.Request
 @import requests.RequestSupport
 @import messages.Messages
 @import play.twirl.api.Html
+@import actionsmodel.AuthenticatedJourneyRequest
 
 @this(
         requestSupport: RequestSupport
 )
 
-@(maxAgeOfDebtInDays: Int)(implicit request: Request[_])
+@(maxAgeOfDebtInDays: Int)(implicit request: AuthenticatedJourneyRequest[_])
 
 @import requestSupport._
 
 <p class="govuk-body">
 @{
-    Html(Messages.NotEligible.`Your overdue amount must have a due date that is less than ... days ago ...`(maxAgeOfDebtInDays).show)
+    Html(Messages.NotEligible.`You cannot set up ...  debt too old`(request.journey.taxRegime, maxAgeOfDebtInDays).show)
 }
 </p>

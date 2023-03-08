@@ -260,24 +260,31 @@ object Messages {
       welsh   = "a allwch dalu rhywfaint o’r bil nawr"
     )
 
-    val `Our opening times are Monday to Friday: 8am to 6pm`: Message = Message(
-      english = "Our opening times are Monday to Friday: 8am to 6pm (we are closed on bank holidays)",
-      welsh   = "Ein horiau agor yw: Dydd Llun i ddydd Gwener: 08:30 i 17:00 (rydym ar gau ar benwythnosau a gwyliau banc)"
+    val `Our opening times are Monday to Friday, 8am to 6pm. We are closed on weekends and bank holidays.`: Message = Message(
+      english = "Our opening times are Monday to Friday, 8am to 6pm. We are closed on weekends and bank holidays.",
+      welsh   = "ADD_WELSH"
     )
 
-    val `Call us`: Message = Message(
-      english = "Call us",
-      welsh   = "Ffoniwch ni"
+    val `Call us about a payment plan`: Message = Message(
+      english = "Call us about a payment plan",
+      welsh   = "ADD_WELSH"
     )
 
-    def `You must owe ... or less to be eligible...`(maxAmountOfDebt: AmountInPence): Message = Message(
-      english = s"You must owe ${maxAmountOfDebt.gdsFormatInPounds} or less to be eligible for a payment plan online. You may still be able to set up a plan over the phone.",
-      welsh   = s"Dim ond os oes arnoch chi ${maxAmountOfDebt.gdsFormatInPounds} neu lai y gallwch chi fod yn gymwys ar gyfer cynllun talu ar-lein. Mae’n bosibl y gallwch drefnu cynllun dros y ffôn o hyd."
-    )
+    def taxSpecificContent(taxRegime: TaxRegime): String = taxRegime match {
+      case TaxRegime.Epaye => "an Employers’ PAYE"
+      case TaxRegime.Vat   => "a VAT"
+    }
 
-    def `Your overdue amount must have a due date that is less than ... days ago ...`(maxAgeOfDebtInDays: Int): Message = Message(
-      english = s"Your overdue amount must have a due date that is less than ${maxAgeOfDebtInDays.toString} days ago for you to be eligible for a payment plan online. You may still be able to set up a plan over the phone.",
-      welsh   = s"Mae’n rhaid i’ch swm gorddyledus fod â dyddiad dyledus sy’n llai na ${maxAgeOfDebtInDays.toString} diwrnod yn ôl er mwyn i chi fod yn gymwys ar gyfer cynllun talu ar-lein. Mae’n bosibl y gallwch drefnu cynllun dros y ffôn o hyd."
+    def `You cannot set up ... debt too large`(taxRegime: TaxRegime, maxAmountOfDebt: AmountInPence): Message = {
+      Message(
+        english = s"You cannot set up ${taxSpecificContent(taxRegime)} payment plan online because you owe more than ${maxAmountOfDebt.gdsFormatInPounds}.",
+        welsh   = s"ADD_WELSH"
+      )
+    }
+
+    def `You cannot set up ...  debt too old`(taxRegime: TaxRegime, maxAgeOfDebtInDays: Int): Message = Message(
+      english = s"You cannot set up ${taxSpecificContent(taxRegime)} payment plan online because your payment deadline was over ${maxAgeOfDebtInDays.toString} days ago.",
+      welsh   = s"ADD_WELSH"
     )
 
     val `You already have a payment plan with HMRC`: Message = Message(
@@ -290,9 +297,9 @@ object Messages {
       welsh   = "Dim ond un cynllun talu y gallwch ei gael ar y tro."
     )
 
-    val `Generic ineligible message`: Message = Message(
-      english = "You are not eligible for an online payment plan. You may still be able to set up a payment plan over the phone.",
-      welsh   = "Dydych chi ddim yn gymwys ar gyfer cynllun talu ar-lein. Mae’n bosibl y byddwch chi’n dal i allu trefnu cynllun talu dros y ffôn."
+    def `Generic ineligible message`(taxRegime: TaxRegime): Message = Message(
+      english = s"You are not eligible to set up ${taxSpecificContent(taxRegime)} payment plan online.",
+      welsh   = "ADD_WELSH"
     )
 
     val `File your return to use this service`: Message = Message(
@@ -324,6 +331,12 @@ object Messages {
       english = " to file your tax return.",
       welsh   = " er mwyn cyflwyno’ch Ffurflen Dreth."
     )
+
+    val `Call us on 0300 123 1813 as you may be able to set up a plan over the phone`: Message = Message(
+      english = "Call us on <strong>0300 123 1813</strong> as you may be able to set up a plan over the phone.",
+      welsh   = "ADD_WELSH"
+    )
+
   }
 
   object EnrolmentMissing {
