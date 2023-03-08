@@ -113,7 +113,16 @@ object ContentAssertions extends RichMatchers {
       page.title() shouldBe s"$titlePrefix$expectedH1 - $regimeServiceName - GOV.UK"
     }
 
-    page.select(".hmrc-header__service-name").text() shouldBe (if (shouldServiceNameBeInHeader) regimeServiceName else "")
+    val serviceName = page.select(".hmrc-header__service-name")
+
+    serviceName.is("a") shouldBe regimeBeingTested.isDefined && shouldServiceNameBeInHeader
+    serviceName.text() shouldBe (if (shouldServiceNameBeInHeader) regimeServiceName else "")
+    serviceName.attr("href") shouldBe (if (shouldServiceNameBeInHeader) regimeBeingTested match {
+      case Some(TaxRegime.Epaye) => routes.LandingController.epayeLandingPage.url
+      case Some(TaxRegime.Vat)   => routes.LandingController.vatLandingPage.url
+      case None                  => ""
+    }
+    else "")
 
     page.select("h1").text() shouldBe expectedH1
     ContentAssertions.languageToggleExists(page, language)
