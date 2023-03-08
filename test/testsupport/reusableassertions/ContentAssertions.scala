@@ -79,7 +79,8 @@ object ContentAssertions extends RichMatchers {
       shouldH1BeSameAsServiceName: Boolean           = false,
       regimeBeingTested:           Option[TaxRegime] = Some(TaxRegime.Epaye),
       language:                    Language          = Languages.English,
-      shouldServiceNameBeInHeader: Boolean           = true
+      shouldServiceNameBeInHeader: Boolean           = true,
+      backLinkUrlOverride:         Option[String]    = None
   ): Unit = {
     val titlePrefix = if (hasFormError) {
       language match {
@@ -122,8 +123,16 @@ object ContentAssertions extends RichMatchers {
     else signOutLink.isEmpty shouldBe true
 
     val backLink = page.select(".govuk-back-link")
-    if (shouldBackLinkBePresent) backLink.hasClass("js-visible") shouldBe true
-    else backLink.isEmpty shouldBe true
+    if (shouldBackLinkBePresent) {
+      backLinkUrlOverride match {
+        case Some(url) =>
+          backLink.hasClass("js-visible") shouldBe false
+          backLink.attr("href") shouldBe url
+        case None =>
+          backLink.hasClass("js-visible") shouldBe true
+          backLink.attr("href") shouldBe "#"
+      }
+    } else backLink.isEmpty shouldBe true
 
     if (hasFormError) {
       val expectedText = language match {

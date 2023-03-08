@@ -64,7 +64,11 @@
     ))
 }
 
-@layout(pageTitle = Some(title), hasErrors = form.hasErrors) {
+@layout(
+    pageTitle = Some(title),
+    hasErrors = form.hasErrors,
+    backLinkUrlOverride = Some(routes.TermsAndConditionsController.termsAndConditions.url)
+) {
     @if(form.errors.nonEmpty) {
         @govukErrorSummary(
             ErrorSummary(errorList = form.errors.map(e =>

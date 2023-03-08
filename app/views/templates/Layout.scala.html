@@ -51,6 +51,7 @@
   headBlock: Option[Html] = None,
   additionalScripts: Option[Html] = None,
   showBackLink: Boolean = true,
+  backLinkUrlOverride: Option[String] = None,
   hasErrors: Boolean = false,
   showSignOutOverride: Option[Boolean] = None,
   fallBackTaxRegime: Option[TaxRegime] = None,
@@ -96,8 +97,12 @@
 
         @hmrcLanguageSelectHelper()
 
-        @if(showBackLink) {
-            @govukBackLink(BackLink(href = "#", classes = "js-visible", content = Text(Messages.back.show)))
+        @{
+            if(showBackLink) {
+                backLinkUrlOverride.fold(
+                    govukBackLink(BackLink(href = "#", classes = "js-visible", content = Text(Messages.back.show)))
+                )(url => govukBackLink(BackLink(href = url, content = Text(Messages.back.show))))
+            }
         }
     </div>
 }

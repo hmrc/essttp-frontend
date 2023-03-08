@@ -113,7 +113,8 @@ class EmailControllerSpec extends ItSpec {
               expectedH1              = "Which email do you want to use?",
               shouldBackLinkBePresent = true,
               expectedSubmitUrl       = Some(routes.EmailController.whichEmailDoYouWantToUse.url),
-              regimeBeingTested       = Some(taxRegime)
+              regimeBeingTested       = Some(taxRegime),
+              backLinkUrlOverride     = Some(routes.TermsAndConditionsController.termsAndConditions.url)
             )
 
             doc.select(".govuk-hint").first().html shouldBe "We will use this email address to send you information about your payment plan. " +
@@ -138,8 +139,10 @@ class EmailControllerSpec extends ItSpec {
             "existing email" in {
               stubCommonActions()
               EssttpBackend.SelectEmail.findJourney("bobross@joyofpainting.com", testCrypto, origin)()
+
               val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
               val result: Future[Result] = controller.whichEmailDoYouWantToUse(fakeRequest)
+
               val doc: Document = Jsoup.parse(contentAsString(result))
               RequestAssertions.assertGetRequestOk(result)
               val radioInputs = doc.select(".govuk-radios__input").iterator().asScala.toList
@@ -152,8 +155,10 @@ class EmailControllerSpec extends ItSpec {
             "new email" in {
               stubCommonActions()
               EssttpBackend.SelectEmail.findJourney("somenewemail@newemail.com", testCrypto, origin)()
+
               val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
               val result: Future[Result] = controller.whichEmailDoYouWantToUse(fakeRequest)
+
               val doc: Document = Jsoup.parse(contentAsString(result))
               RequestAssertions.assertGetRequestOk(result)
               val radioInputs = doc.select(".govuk-radios__input").iterator().asScala.toList
@@ -259,7 +264,8 @@ class EmailControllerSpec extends ItSpec {
                   shouldBackLinkBePresent = true,
                   expectedSubmitUrl       = Some(routes.EmailController.whichEmailDoYouWantToUse.url),
                   hasFormError            = true,
-                  regimeBeingTested       = Some(taxRegime)
+                  regimeBeingTested       = Some(taxRegime),
+                  backLinkUrlOverride     = Some(routes.TermsAndConditionsController.termsAndConditions.url)
                 )
 
                 val errorSummary = doc.select(".govuk-error-summary")
@@ -297,7 +303,8 @@ class EmailControllerSpec extends ItSpec {
               expectedH1              = "Enter your email address",
               shouldBackLinkBePresent = true,
               expectedSubmitUrl       = Some(routes.EmailController.enterEmailSubmit.url),
-              regimeBeingTested       = Some(taxRegime)
+              regimeBeingTested       = Some(taxRegime),
+              backLinkUrlOverride     = Some(routes.TermsAndConditionsController.termsAndConditions.url)
             )
 
             doc.select(".govuk-body").html shouldBe "We will use this email address to send you information about your payment plan. " +
@@ -375,7 +382,8 @@ class EmailControllerSpec extends ItSpec {
                   shouldBackLinkBePresent = true,
                   expectedSubmitUrl       = Some(routes.EmailController.enterEmailSubmit.url),
                   hasFormError            = true,
-                  regimeBeingTested       = Some(taxRegime)
+                  regimeBeingTested       = Some(taxRegime),
+                  backLinkUrlOverride     = Some(routes.TermsAndConditionsController.termsAndConditions.url)
                 )
 
                 val errorSummary = doc.select(".govuk-error-summary")
