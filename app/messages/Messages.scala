@@ -271,17 +271,17 @@ object Messages {
     )
 
     def `You cannot set up ... debt too large`(taxRegime: TaxRegime, maxAmountOfDebt: AmountInPence): Message = taxRegime match {
-        case TaxRegime.Epaye =>
-          Message(
-            english = s"You cannot set up an Employers’ PAYE payment plan online because you owe more than ${maxAmountOfDebt.gdsFormatInPounds}.",
-            welsh   = s"Ni allwch drefnu cynllun talu TAW ar-lein oherwydd mae arnoch dros ${maxAmountOfDebt.gdsFormatInPounds}."
-          )
-        case TaxRegime.Vat =>
-          Message(
-            english = s"You cannot set up a VAT payment plan online because you owe more than ${maxAmountOfDebt.gdsFormatInPounds}.",
-            welsh   = s"Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein oherwydd mae arnoch dros ${maxAmountOfDebt.gdsFormatInPounds}."
-          )
-      }
+      case TaxRegime.Epaye =>
+        Message(
+          english = s"You cannot set up an Employers’ PAYE payment plan online because you owe more than ${maxAmountOfDebt.gdsFormatInPounds}.",
+          welsh   = s"Ni allwch drefnu cynllun talu TAW ar-lein oherwydd mae arnoch dros ${maxAmountOfDebt.gdsFormatInPounds}."
+        )
+      case TaxRegime.Vat =>
+        Message(
+          english = s"You cannot set up a VAT payment plan online because you owe more than ${maxAmountOfDebt.gdsFormatInPounds}.",
+          welsh   = s"Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein oherwydd mae arnoch dros ${maxAmountOfDebt.gdsFormatInPounds}."
+        )
+    }
 
     def `You cannot set up ...  debt too old`(taxRegime: TaxRegime, maxAgeOfDebtInDays: Int): Message = taxRegime match {
       case TaxRegime.Epaye =>
@@ -309,7 +309,7 @@ object Messages {
     def `Generic ineligible message`(taxRegime: TaxRegime): Message = taxRegime match {
       case TaxRegime.Epaye =>
         Message(
-          english = s"You are not eligible to set up an Employers' PAYE payment plan online.",
+          english = s"You are not eligible to set up an Employers’ PAYE payment plan online.",
           welsh   = "Nid ydych yn gymwys i drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein."
         )
       case TaxRegime.Vat =>
