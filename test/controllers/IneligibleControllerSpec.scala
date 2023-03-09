@@ -62,17 +62,21 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Vat   => controller.vatGenericIneligiblePage(fakeRequest)
             }
             val page = pageContentAsDoc(result)
+            val expectedLeadingP1 = taxRegime match {
+              case TaxRegime.Epaye => "You are not eligible to set up an Employers’ PAYE payment plan online."
+              case TaxRegime.Vat   => "You are not eligible to set up a VAT payment plan online."
+            }
 
             ContentAssertions.commonPageChecks(
               page,
-              expectedH1              = "Call us",
+              expectedH1              = "Call us about a payment plan",
               shouldBackLinkBePresent = false,
               expectedSubmitUrl       = None,
               regimeBeingTested       = Some(taxRegime)
             )
             assertIneligiblePageLeadingP1(
               page      = page,
-              leadingP1 = "You are not eligible for an online payment plan. You may still be able to set up a payment plan over the phone."
+              leadingP1 = expectedLeadingP1
             )
             ContentAssertions.commonIneligibilityTextCheck(page, taxRegime)
           }
@@ -93,20 +97,20 @@ class IneligibleControllerSpec extends ItSpec {
 
             ContentAssertions.commonPageChecks(
               page,
-              expectedH1              = "Call us",
+              expectedH1              = "Call us about a payment plan",
               shouldBackLinkBePresent = false,
               expectedSubmitUrl       = None,
               regimeBeingTested       = Some(taxRegime)
             )
 
-            val expectedAmount = taxRegime match {
-              case TaxRegime.Epaye => "£15,000"
-              case TaxRegime.Vat   => "£20,000"
+            val expectedLeadingP1 = taxRegime match {
+              case TaxRegime.Epaye => "You cannot set up an Employers’ PAYE payment plan online because you owe more than £15,000."
+              case TaxRegime.Vat   => "You cannot set up a VAT payment plan online because you owe more than £20,000."
             }
 
             assertIneligiblePageLeadingP1(
               page      = page,
-              leadingP1 = s"You must owe $expectedAmount or less to be eligible for a payment plan online. You may still be able to set up a plan over the phone."
+              leadingP1 = expectedLeadingP1
             )
             ContentAssertions.commonIneligibilityTextCheck(page, taxRegime)
           }
@@ -128,18 +132,18 @@ class IneligibleControllerSpec extends ItSpec {
 
             ContentAssertions.commonPageChecks(
               page,
-              expectedH1              = "Call us",
+              expectedH1              = "Call us about a payment plan",
               shouldBackLinkBePresent = false,
               expectedSubmitUrl       = None,
               regimeBeingTested       = Some(taxRegime)
             )
-            val expectedNumberOfDays = taxRegime match {
-              case TaxRegime.Epaye => "35"
-              case TaxRegime.Vat   => "28"
+            val expectedLeadingP1 = taxRegime match {
+              case TaxRegime.Epaye => "You cannot set up an Employers’ PAYE payment plan online because your payment deadline was over 35 days ago."
+              case TaxRegime.Vat   => "You cannot set up a VAT payment plan online because your payment deadline was over 28 days ago."
             }
             assertIneligiblePageLeadingP1(
               page      = page,
-              leadingP1 = s"Your overdue amount must have a due date that is less than $expectedNumberOfDays days ago for you to be eligible for a payment plan online. You may still be able to set up a plan over the phone."
+              leadingP1 = expectedLeadingP1
             )
             ContentAssertions.commonIneligibilityTextCheck(page, taxRegime)
           }
