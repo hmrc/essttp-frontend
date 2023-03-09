@@ -262,30 +262,39 @@ object Messages {
 
     val `Our opening times are Monday to Friday, 8am to 6pm. We are closed on weekends and bank holidays.`: Message = Message(
       english = "Our opening times are Monday to Friday, 8am to 6pm. We are closed on weekends and bank holidays.",
-      welsh   = "ADD_WELSH"
+      welsh   = "Ein horiau agor yw Dydd Llun i Ddydd Gwener, 08:30 i 17:00. Rydym ar gau ar benwythnosau a gwyliau banc."
     )
 
     val `Call us about a payment plan`: Message = Message(
       english = "Call us about a payment plan",
-      welsh   = "ADD_WELSH"
+      welsh   = "Ffoniwch ni ynghylch cynllun talu"
     )
 
-    def taxSpecificContent(taxRegime: TaxRegime): String = taxRegime match {
-      case TaxRegime.Epaye => "an Employers’ PAYE"
-      case TaxRegime.Vat   => "a VAT"
-    }
+    def `You cannot set up ... debt too large`(taxRegime: TaxRegime, maxAmountOfDebt: AmountInPence): Message = taxRegime match {
+        case TaxRegime.Epaye =>
+          Message(
+            english = s"You cannot set up an Employers’ PAYE payment plan online because you owe more than ${maxAmountOfDebt.gdsFormatInPounds}.",
+            welsh   = s"Ni allwch drefnu cynllun talu TAW ar-lein oherwydd mae arnoch dros ${maxAmountOfDebt.gdsFormatInPounds}."
+          )
+        case TaxRegime.Vat =>
+          Message(
+            english = s"You cannot set up a VAT payment plan online because you owe more than ${maxAmountOfDebt.gdsFormatInPounds}.",
+            welsh   = s"Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein oherwydd mae arnoch dros ${maxAmountOfDebt.gdsFormatInPounds}."
+          )
+      }
 
-    def `You cannot set up ... debt too large`(taxRegime: TaxRegime, maxAmountOfDebt: AmountInPence): Message = {
-      Message(
-        english = s"You cannot set up ${taxSpecificContent(taxRegime)} payment plan online because you owe more than ${maxAmountOfDebt.gdsFormatInPounds}.",
-        welsh   = s"ADD_WELSH"
-      )
+    def `You cannot set up ...  debt too old`(taxRegime: TaxRegime, maxAgeOfDebtInDays: Int): Message = taxRegime match {
+      case TaxRegime.Epaye =>
+        Message(
+          english = s"You cannot set up an Employers’ PAYE payment plan online because your payment deadline was over ${maxAgeOfDebtInDays.toString} days ago.",
+          welsh   = s"Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros ${maxAgeOfDebtInDays.toString} diwrnod yn ôl."
+        )
+      case TaxRegime.Vat =>
+        Message(
+          english = s"You cannot set up a VAT payment plan online because your payment deadline was over ${maxAgeOfDebtInDays.toString} days ago.",
+          welsh   = s"Ni allwch drefnu cynllun talu TAW ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros ${maxAgeOfDebtInDays.toString} wythnos yn ôl."
+        )
     }
-
-    def `You cannot set up ...  debt too old`(taxRegime: TaxRegime, maxAgeOfDebtInDays: Int): Message = Message(
-      english = s"You cannot set up ${taxSpecificContent(taxRegime)} payment plan online because your payment deadline was over ${maxAgeOfDebtInDays.toString} days ago.",
-      welsh   = s"ADD_WELSH"
-    )
 
     val `You already have a payment plan with HMRC`: Message = Message(
       english = "You already have a payment plan with HMRC",
@@ -297,10 +306,18 @@ object Messages {
       welsh   = "Dim ond un cynllun talu y gallwch ei gael ar y tro."
     )
 
-    def `Generic ineligible message`(taxRegime: TaxRegime): Message = Message(
-      english = s"You are not eligible to set up ${taxSpecificContent(taxRegime)} payment plan online.",
-      welsh   = "ADD_WELSH"
-    )
+    def `Generic ineligible message`(taxRegime: TaxRegime): Message = taxRegime match {
+      case TaxRegime.Epaye =>
+        Message(
+          english = s"You are not eligible to set up an Employers' PAYE payment plan online.",
+          welsh   = "Nid ydych yn gymwys i drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein."
+        )
+      case TaxRegime.Vat =>
+        Message(
+          english = s"You are not eligible to set up a VAT payment plan online.",
+          welsh   = "Nid ydych yn gymwys i drefnu cynllun talu TAW ar-lein."
+        )
+    }
 
     val `File your return to use this service`: Message = Message(
       english = "File your return to use this service",
@@ -334,7 +351,7 @@ object Messages {
 
     val `Call us on 0300 123 1813 as you may be able to set up a plan over the phone`: Message = Message(
       english = "Call us on <strong>0300 123 1813</strong> as you may be able to set up a plan over the phone.",
-      welsh   = "ADD_WELSH"
+      welsh   = "Ffoniwch ni ar <strong>0300 200 1900</strong> oherwydd mae’n bosibl y gallwch drefnu cynllun dros y ffôn."
     )
 
   }
