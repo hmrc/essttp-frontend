@@ -81,7 +81,7 @@
 }
 
 @scripts = {
-  @if(showBackLink){
+  @if(showBackLink && backLinkUrlOverride.isEmpty){
       <script src="@{controllers.routes.Assets.versioned("javascripts/back-link.js")}" @{CSPNonce.attr}></script>
   }
   <script src="@{controllers.routes.Assets.versioned("javascripts/prevent-multiple-form-submits.js")}" @{CSPNonce.attr}></script>
