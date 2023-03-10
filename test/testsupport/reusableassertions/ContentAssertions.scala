@@ -143,6 +143,10 @@ object ContentAssertions extends RichMatchers {
       }
     } else backLink.isEmpty shouldBe true
 
+    val backLinkJavascript = page.select("script[src=\"/set-up-a-payment-plan/assets/javascripts/back-link.js\"]")
+    if (shouldBackLinkBePresent && backLinkUrlOverride.isEmpty) backLinkJavascript.isEmpty shouldBe false
+    else backLinkJavascript.isEmpty shouldBe true
+
     if (hasFormError) {
       val expectedText = language match {
         case Languages.English => "Error:"
