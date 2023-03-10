@@ -265,6 +265,11 @@ object Messages {
       welsh   = "Ein horiau agor yw Dydd Llun i Ddydd Gwener, 08:30 i 17:00. Rydym ar gau ar benwythnosau a gwyliau banc."
     )
 
+    val `Our opening times are Monday to Friday: 8am to 6pm`: Message = Message(
+      english = "Our opening times are Monday to Friday: 8am to 6pm (we are closed on bank holidays)",
+      welsh   = "Ein horiau agor yw: Dydd Llun i ddydd Gwener: 08:30 i 17:00 (rydym ar gau ar benwythnosau a gwyliau banc)"
+    )
+
     val `Call us about a payment plan`: Message = Message(
       english = "Call us about a payment plan",
       welsh   = "Ffoniwch ni ynghylch cynllun talu"

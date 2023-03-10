@@ -41,5 +41,5 @@ commonIneligibilityPartial: CommonIneligibilityPartial
         <a href="@{appConfig.Urls.enrolForVatUrl}" class="govuk-link" id="how-to-enrol-link">@{Messages.EnrolmentMissing.`Find out how to register.`.show}</a>@{Messages.`full stop`.show}
     </p>
 
-    @commonIneligibilityPartial(TaxRegime.Vat)
+    @commonIneligibilityPartial(taxRegime = TaxRegime.Vat, isNormalIneligiblePage = false)
 }
