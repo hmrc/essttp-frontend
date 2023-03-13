@@ -18,10 +18,10 @@
 @import requests.RequestSupport
 @import play.api.mvc.Request
 @import play.api.data.Form
+@import play.twirl.api.Html
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import controllers.routes
 @import essttp.rootmodel.AmountInPence
-@import play.twirl.api.Html
 
 @this(
         layout: templates.Layout,
@@ -49,12 +49,7 @@
     Messages.MonthlyPaymentAmount.`Monthly payments`.show
 }
 @detailsContent = {
-    <p class="govuk-body">@{
-        Messages.MonthlyPaymentAmount.`You may still be able to set up a payment plan...`.show
-    }</p>
-    <p class="govuk-body">@{
-        Html(Messages.MonthlyPaymentAmount.`We recommend you speak to an adviser...`.show)
-    }</p>
+    <p class="govuk-body">@{Html(Messages.MonthlyPaymentAmount.`You may still be able to set up a payment plan...`.show)}</p>
 }
 
 @layout(pageTitle = Some(title), hasErrors = form.hasErrors) {

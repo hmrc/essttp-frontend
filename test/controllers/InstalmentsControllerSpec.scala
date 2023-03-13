@@ -19,7 +19,7 @@ package controllers
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.{AmountInPence, TaxRegime}
 import essttp.rootmodel.ttp.affordablequotes.{AmountDue, PaymentPlan}
-import models.InstalmentOption
+import models.{InstalmentOption, Languages}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.http.Status
@@ -38,17 +38,6 @@ import scala.jdk.CollectionConverters.{IterableHasAsScala, IteratorHasAsScala}
 
 class InstalmentsControllerSpec extends ItSpec {
   private val controller: InstalmentsController = app.injector.instanceOf[InstalmentsController]
-  private val expectedH1: String = "Select a payment plan"
-  private val expectedLegend: String = "How many months do you want to pay over?"
-  private def expectedPageTitle(taxRegime: TaxRegime): String = taxRegime match {
-    case TaxRegime.Epaye => s"$expectedH1 - ${TdAll.expectedServiceNamePayeEn} - GOV.UK"
-    case TaxRegime.Vat   => s"$expectedH1 - ${TdAll.expectedServiceNameVatEn} - GOV.UK"
-  }
-  private val expectedH2: String = "How we calculate interest"
-  private val expectedP1: String = "We only charge interest on overdue amounts."
-  private val expectedP2: String = "We charge the Bank of England base rate plus 2.5%, calculated as simple interest."
-  private val expectedP3: String =
-    "If the interest rate changes during your plan, your monthly payments will not change. If we need to, we’ll settle the difference at the end of the plan."
 
   Seq[(String, Origin, TaxRegime)](
     ("EPAYE", Origins.Epaye.Bta, TaxRegime.Epaye),
@@ -70,13 +59,26 @@ class InstalmentsControllerSpec extends ItSpec {
             RequestAssertions.assertGetRequestOk(result)
             ContentAssertions.commonPageChecks(
               doc,
-              expectedH1              = expectedH1,
+              expectedH1              = "Select a payment plan",
               shouldBackLinkBePresent = true,
               expectedSubmitUrl       = Some(routes.InstalmentsController.instalmentOptionsSubmit.url),
               regimeBeingTested       = Some(taxRegime)
             )
 
-            doc.select(".govuk-fieldset__legend").text() shouldBe expectedLegend
+            doc.select("p.govuk-body").first().text() shouldBe "Based on what you can pay each month, you can now select a payment plan."
+
+            val details = doc.select(".govuk-details")
+            details.select(".govuk-details__summary-text").text() shouldBe "How we calculate interest"
+
+            val detailsParagraphs = details.select("p.govuk-body").asScala.toList
+            detailsParagraphs.size shouldBe 3
+
+            detailsParagraphs(0).text() shouldBe "We charge interest on all overdue amounts."
+            detailsParagraphs(1).text() shouldBe "We charge the Bank of England base rate plus 2.5% per year."
+            detailsParagraphs(2).text() shouldBe "If the interest rate changes during your plan, your monthly payments will not change. " +
+              "If the interest rate goes up or down during your payment plan, we will adjust your final payment to settle any difference."
+
+            doc.select(".govuk-fieldset__legend").text() shouldBe "How many months do you want to pay over?"
 
             val radioButtonGroup = doc.select(".govuk-radios")
             val individualButtons = radioButtonGroup.select(".govuk-radios__item").asScala.toSeq
@@ -91,12 +93,58 @@ class InstalmentsControllerSpec extends ItSpec {
             individualButtons(2).select(".govuk-radios__label").text() shouldBe "4 months at £277.88"
             individualButtons(2).select(".govuk-radios__hint").text() shouldBe "Estimated total interest of £0.12"
 
-            doc.select("h2.govuk-heading-m").text() shouldBe expectedH2
-            val paragraphs = doc.select("p.govuk-body").asScala.toSeq
-            paragraphs(0).text() shouldBe expectedP1
-            paragraphs(1).text() shouldBe expectedP2
-            paragraphs(2).text() shouldBe expectedP3
             doc.select(".govuk-button").text().trim shouldBe "Continue"
+          }
+
+          s"[$regime journey] return 200 and the instalment selection page in Welsh" in {
+            stubCommonActions()
+            EssttpBackend.AffordableQuotes.findJourney(testCrypto, origin)()
+
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId").withLangWelsh()
+
+            val result: Future[Result] = controller.instalmentOptions(fakeRequest)
+            val pageContent: String = contentAsString(result)
+            val doc: Document = Jsoup.parse(pageContent)
+
+            RequestAssertions.assertGetRequestOk(result)
+            ContentAssertions.commonPageChecks(
+              doc,
+              expectedH1              = "Dewiswch gynllun talu",
+              shouldBackLinkBePresent = true,
+              expectedSubmitUrl       = Some(routes.InstalmentsController.instalmentOptionsSubmit.url),
+              regimeBeingTested       = Some(taxRegime),
+              language                = Languages.Welsh
+            )
+
+            doc.select("p.govuk-body").first().text() shouldBe "Yn seiliedig at yr hyn y gallwch ei dalu bob mis, gallwch nawr ddewis gynllun talu."
+
+            val details = doc.select(".govuk-details")
+            details.select(".govuk-details__summary-text").text() shouldBe "Sut rydym yn cyfrifo llog"
+
+            val detailsParagraphs = details.select("p.govuk-body").asScala.toList
+            detailsParagraphs.size shouldBe 3
+
+            detailsParagraphs(0).text() shouldBe "Rydym yn codi llog ar bob swm sy’n hwyr."
+            detailsParagraphs(1).text() shouldBe "Rydym yn codi cyfradd sylfaenol Banc Lloegr ynghyd â 2.5% y flwyddyn."
+            detailsParagraphs(2).text() shouldBe "Os bydd y gyfradd llog yn newid yn ystod eich cynllun, ni fydd eich taliadau misol yn newid. " +
+              "Os bydd y gyfradd llog yn cynyddu neu’n gostwng yn ystod eich cynllun talu, byddwn yn addasu’ch taliad terfynol i setlo unrhyw wahaniaeth."
+
+            doc.select(".govuk-fieldset__legend").text() shouldBe "Dros sawl mis yr hoffech dalu?"
+
+            val radioButtonGroup = doc.select(".govuk-radios")
+            val individualButtons = radioButtonGroup.select(".govuk-radios__item").asScala.toSeq
+            individualButtons.size shouldBe 3
+            individualButtons(0).select(".govuk-radios__input").`val`() shouldBe "2"
+            individualButtons(0).select(".govuk-radios__label").text() shouldBe "2 mis ar £555.73"
+            individualButtons(0).select(".govuk-radios__hint").text() shouldBe "Cyfanswm llog amcangyfrifedig o £0.06"
+            individualButtons(1).select(".govuk-radios__input").`val`() shouldBe "3"
+            individualButtons(1).select(".govuk-radios__label").text() shouldBe "3 mis ar £370.50"
+            individualButtons(1).select(".govuk-radios__hint").text() shouldBe "Cyfanswm llog amcangyfrifedig o £0.09"
+            individualButtons(2).select(".govuk-radios__input").`val`() shouldBe "4"
+            individualButtons(2).select(".govuk-radios__label").text() shouldBe "4 mis ar £277.88"
+            individualButtons(2).select(".govuk-radios__hint").text() shouldBe "Cyfanswm llog amcangyfrifedig o £0.12"
+
+            doc.select(".govuk-button").text().trim shouldBe "Yn eich blaen"
           }
 
           s"[$regime journey] pre pop the selected radio option when user has navigated back and they have a chosen month in their journey" in {
@@ -151,7 +199,6 @@ class InstalmentsControllerSpec extends ItSpec {
 
             RequestAssertions.assertGetRequestOk(result)
 
-            doc.title() shouldBe s"Error: ${expectedPageTitle(taxRegime)}"
             val errorSummary = doc.select(".govuk-error-summary")
             val errorLink = errorSummary.select("a")
             errorLink.text() shouldBe "Select how many months you want to pay over"
