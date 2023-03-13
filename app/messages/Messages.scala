@@ -704,13 +704,8 @@ object Messages {
     )
 
     val `You may still be able to set up a payment plan...`: Message = Message(
-      english = "You may still be able to set up a payment plan over the phone, but you are not eligible for an online payment plan.",
-      welsh   = "Mae’n bosibl y gallwch drefnu cynllun talu dros y ffôn o hyd, ond nid ydych yn gymwys i gael cynllun talu ar-lein."
-    )
-
-    val `We recommend you speak to an adviser...`: Message = Message(
-      english = "We recommend you speak to an adviser on <strong>0300 123 1813</strong> to talk about your payment options.",
-      welsh   = "Rydym yn argymell eich bod yn siarad ag ymgynghorydd am eich opsiynau talu. Ffoniwch Wasanaeth Cwsmeriaid Cymraeg CThEF ar <strong>0300 200 1900</strong>."
+      english = "You may still be able to set up a payment plan over the phone. Call us on <strong>0300 123 1813</strong> to speak to an adviser.",
+      welsh   = "Mae’n bosibl y byddwch chi’n dal i allu trefnu cynllun talu dros y ffôn. Ffoniwch ni ar <strong>0300 200 1900</strong> i siarad ag ymgynghorydd."
     )
 
   }
@@ -772,6 +767,33 @@ object Messages {
       welsh   = "Dewiswch gynllun talu"
     )
 
+    val `Based on what you can pay each month, you can now select a payment plan.`: Message = Message(
+      english = "Based on what you can pay each month, you can now select a payment plan.",
+      welsh   = "Yn seiliedig at yr hyn y gallwch ei dalu bob mis, gallwch nawr ddewis gynllun talu."
+    )
+
+    val `How we calculate interest`: Message = Message(
+      english = "How we calculate interest",
+      welsh   = "Sut rydym yn cyfrifo llog"
+    )
+
+    val `We charge interest on all overdue amounts`: Message = Message(
+      english = "We charge interest on all overdue amounts.",
+      welsh   = "Rydym yn codi llog ar bob swm sy’n hwyr."
+    )
+
+    val `We charge the Bank of England base rate plus 2.5% per year`: Message = Message(
+      english = "We charge the <strong>Bank of England base rate plus 2.5%</strong> per year.",
+      welsh   = "Rydym yn codi <strong>cyfradd sylfaenol Banc Lloegr ynghyd â 2.5%</strong> y flwyddyn."
+    )
+
+    val `If interest rates change...`: Message = Message(
+      english = "If the interest rate changes during your plan, your monthly payments will not change. " +
+        "If the interest rate goes up or down during your payment plan, we will adjust your final payment to settle any difference.",
+      welsh   = "Os bydd y gyfradd llog yn newid yn ystod eich cynllun, ni fydd eich taliadau misol yn newid. " +
+        "Os bydd y gyfradd llog yn cynyddu neu’n gostwng yn ystod eich cynllun talu, byddwn yn addasu’ch taliad terfynol i setlo unrhyw wahaniaeth."
+    )
+
     val `How many months do you want to pay over?`: Message = Message(
       english = "How many months do you want to pay over?",
       welsh   = "Dros sawl mis yr hoffech dalu?"
@@ -779,12 +801,12 @@ object Messages {
 
     private def getInstalmentOptionOneMonth(amount: AmountInPence): Message = Message(
       english = s"1 month at ${amount.gdsFormatInPounds}",
-      welsh   = s"1 mis at ${amount.gdsFormatInPounds}"
+      welsh   = s"1 mis ar ${amount.gdsFormatInPounds}"
     )
 
     private def getInstalmentOptionMoreThanOneMonth(numberOfMonths: Int, amount: AmountInPence): Message = Message(
       english = s"${numberOfMonths.toString} months at ${amount.gdsFormatInPounds}",
-      welsh   = s"${numberOfMonths.toString} mis at ${amount.gdsFormatInPounds}"
+      welsh   = s"${numberOfMonths.toString} mis ar ${amount.gdsFormatInPounds}"
     )
 
     def getInstalmentOption(numberOfMonths: Int, amount: AmountInPence): Message =
@@ -808,26 +830,6 @@ object Messages {
           welsh   = "Dewiswch ateb ar gyfer dros sawl mis yr hoffech dalu"
         )
     }
-
-    val `How we calculate interest`: Message = Message(
-      english = "How we calculate interest",
-      welsh   = "Sut rydym yn cyfrifo llog"
-    )
-
-    val `We only charge interest on overdue amounts`: Message = Message(
-      english = "We only charge interest on overdue amounts.",
-      welsh   = "Rydym yn codi llog ar symiau hwyr yn unig."
-    )
-
-    val `We charge the Bank of England base rate`: Message = Message(
-      english = "We charge the Bank of England base rate plus 2.5%, calculated as simple interest.",
-      welsh   = "Rydym yn codi cyfradd sylfaenol Banc Lloegr ynghyd â 2.5%, a gyfrifir fel llog syml."
-    )
-
-    val `If interest rates change`: Message = Message(
-      english = "If the interest rate changes during your plan, your monthly payments will not change. If we need to, we’ll settle the difference at the end of the plan.",
-      welsh   = "Os bydd y gyfradd llog yn newid yn ystod eich cynllun, ni fydd eich taliadau misol yn newid. Os bydd angen, byddwn yn setlo’r gwahaniaeth ar ddiwedd y cynllun."
-    )
 
   }
 

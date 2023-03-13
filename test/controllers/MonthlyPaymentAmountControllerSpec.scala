@@ -18,6 +18,7 @@ package controllers
 
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.{AmountInPence, MonthlyPaymentAmount, TaxRegime}
+import models.Languages
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalatest.prop.TableDrivenPropertyChecks.forAll
@@ -40,32 +41,6 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
 
   private val controller: MonthlyPaymentAmountController = app.injector.instanceOf[MonthlyPaymentAmountController]
   private val expectedH1: String = "Monthly payments"
-  private val expectedLabel: String = "How much can you afford to pay each month?"
-  private val expectedPageHint: String = "Enter an amount between £300 and £880"
-  private val progressiveRevealContent: String = "I cannot afford the minimum payment"
-  private val progressiveRevealInnerContent1: String =
-    "You may still be able to set up a payment plan over the phone, but you are not eligible for an online payment plan."
-  private val progressiveRevealInnerContent2: String =
-    "We recommend you speak to an adviser on 0300 123 1813 to talk about your payment options."
-
-  def testMonthlyPaymentAmountContent(doc: Document): Unit = {
-    doc.select("#MonthlyPaymentAmount-hint").text() shouldBe expectedPageHint
-    doc.select("#MonthlyPaymentAmount").size() shouldBe 1
-
-    val poundSymbol = doc.select(".govuk-input__prefix")
-    poundSymbol.size() shouldBe 1
-    poundSymbol.text() shouldBe "£"
-
-    doc.select(".govuk-details__summary-text").text() shouldBe progressiveRevealContent
-    val progressiveRevealSubContent = doc.select(".govuk-details__text").select(".govuk-body").asScala.toSeq
-    progressiveRevealSubContent(0).text() shouldBe progressiveRevealInnerContent1
-    progressiveRevealSubContent(1).text() shouldBe progressiveRevealInnerContent2
-
-    doc.select(".govuk-label").text() shouldBe expectedLabel
-
-    doc.select("#continue").text() should include("Continue")
-    ()
-  }
 
   Seq[(String, Origin, TaxRegime)](
     ("EPAYE", Origins.Epaye.Bta, TaxRegime.Epaye),
@@ -91,7 +66,57 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
               regimeBeingTested       = Some(taxRegime)
             )
 
-            testMonthlyPaymentAmountContent(doc)
+            doc.select("p.govuk-body").first().text() shouldBe "The minimum payment you can make is £300."
+
+            doc.select(".govuk-details__summary-text").text() shouldBe "I cannot afford the minimum payment"
+            val progressiveRevealSubContent = doc.select(".govuk-details__text").select(".govuk-body").asScala.toSeq
+            progressiveRevealSubContent.size shouldBe 1
+            progressiveRevealSubContent(0).text() shouldBe "You may still be able to set up a payment plan over the phone. " +
+              "Call us on 0300 123 1813 to speak to an adviser."
+
+            doc.select(".govuk-label").text() shouldBe "How much can you afford to pay each month?"
+            doc.select("#MonthlyPaymentAmount-hint").text() shouldBe "Enter an amount between £300 and £880"
+            doc.select("#MonthlyPaymentAmount").size() shouldBe 1
+
+            val poundSymbol = doc.select(".govuk-input__prefix")
+            poundSymbol.size() shouldBe 1
+            poundSymbol.text() shouldBe "£"
+
+            doc.select("#continue").text() should include("Continue")
+          }
+
+          s"[$regime journey] should return 200 and the how much can you pay a month page in Welsh" in {
+            stubCommonActions()
+            EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, origin)()
+
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId").withLangWelsh()
+            val result: Future[Result] = controller.displayMonthlyPaymentAmount(fakeRequest)
+            val pageContent: String = contentAsString(result)
+            val doc: Document = Jsoup.parse(pageContent)
+
+            RequestAssertions.assertGetRequestOk(result)
+            ContentAssertions.commonPageChecks(
+              doc,
+              expectedH1              = "Taliadau misol",
+              shouldBackLinkBePresent = true,
+              expectedSubmitUrl       = Some(routes.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit.url),
+              regimeBeingTested       = Some(taxRegime),
+              language                = Languages.Welsh
+            )
+
+            doc.select("p.govuk-body").first().text() shouldBe "Yr isafswm y gallwch ei dalu yw £300."
+
+            doc.select(".govuk-details__summary-text").text() shouldBe "Nid wyf yn gallu fforddio’r taliad isaf"
+            val progressiveRevealSubContent = doc.select(".govuk-details__text").select(".govuk-body").asScala.toSeq
+            progressiveRevealSubContent.size shouldBe 1
+            progressiveRevealSubContent(0).text() shouldBe "Mae’n bosibl y byddwch chi’n dal i allu trefnu cynllun talu dros y ffôn. " +
+              "Ffoniwch ni ar 0300 200 1900 i siarad ag ymgynghorydd."
+
+            doc.select(".govuk-label").text() shouldBe "Faint y gallwch fforddio ei dalu bob mis?"
+            doc.select("#MonthlyPaymentAmount-hint").text() shouldBe "Nodwch swm sydd rhwng £300 a £880"
+            doc.select("#MonthlyPaymentAmount").size() shouldBe 1
+
+            doc.select("#continue").text() should include("Yn eich blaen")
           }
 
           s"[$regime journey] should prepopulate the form when user navigates back and they have a monthly payment amount in their journey" in {
@@ -233,7 +258,6 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
                   hasFormError            = true,
                   regimeBeingTested       = Some(taxRegime)
                 )
-                testMonthlyPaymentAmountContent(doc)
 
                 val errorSummary = doc.select(".govuk-error-summary")
                 val errorLink = errorSummary.select("a")

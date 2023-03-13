@@ -18,6 +18,7 @@
 @import requests.RequestSupport
 @import play.api.mvc.Request
 @import play.api.data.Form
+@import play.twirl.api.Html
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import controllers.routes
 @import models.InstalmentOption
@@ -28,6 +29,7 @@
         govukRadios: GovukRadios,
         formWithCSRF: FormWithCSRF,
         govukErrorSummary: GovukErrorSummary,
+        govukDetails: GovukDetails,
         requestSupport: RequestSupport
 )
 
@@ -52,6 +54,12 @@
     )}
 }
 
+@detailsContent = {
+  <p class="govuk-body">@{Messages.Instalments.`We charge interest on all overdue amounts`.show}</p>
+  <p class="govuk-body">@{Html(Messages.Instalments.`We charge the Bank of England base rate plus 2.5% per year`.show)}</p>
+  <p class="govuk-body">@{Messages.Instalments.`If interest rates change...`.show}</p>
+}
+
 @layout(pageTitle = Some(title), hasErrors = form.hasErrors) {
     @if(form.errors.nonEmpty) {
         @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
@@ -64,17 +72,14 @@
     }
     <h1 class="govuk-heading-xl">@title</h1>
 
-    <h2 class="govuk-heading-m">@{Messages.Instalments.`How we calculate interest`.show}</h2>
+    <p class="govuk-body">@{Messages.Instalments.`Based on what you can pay each month, you can now select a payment plan.`.show}</p>
 
-    <p class="govuk-body">@{
-        Messages.Instalments.`We only charge interest on overdue amounts`.show
-    }</p>
-    <p class="govuk-body">@{
-        Messages.Instalments.`We charge the Bank of England base rate`.show
-    }</p>
-    <p class="govuk-body">@{
-        Messages.Instalments.`If interest rates change`.show
-    }</p>
+    @govukDetails(
+      Details(
+        summary = Text(Messages.Instalments.`How we calculate interest`.show),
+          content = HtmlContent(detailsContent)
+      )
+    )
 
     @formWithCSRF(action = routes.InstalmentsController.instalmentOptionsSubmit) {
         @govukRadios(Radios(
