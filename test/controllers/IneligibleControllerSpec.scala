@@ -18,6 +18,7 @@ package controllers
 
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.TaxRegime
+import models.Languages
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalatest.Assertion
@@ -44,7 +45,7 @@ class IneligibleControllerSpec extends ItSpec {
   def assertIneligiblePageLeadingP1(page: Document, leadingP1: String): Assertion =
     page.select(".govuk-body").asScala.toList(0).text() shouldBe leadingP1
 
-  "IneligibleController should display" - {
+  "IneligibleController should display in English" - {
 
     Seq[(TaxRegime, Origin)]((TaxRegime.Epaye, Origins.Epaye.Bta), (TaxRegime.Vat, Origins.Vat.Bta))
       .foreach {
@@ -78,7 +79,7 @@ class IneligibleControllerSpec extends ItSpec {
               page      = page,
               leadingP1 = expectedLeadingP1
             )
-            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime)
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English)
           }
 
           s"${taxRegime.entryName} Debt too large ineligible page correctly" in {
@@ -112,7 +113,7 @@ class IneligibleControllerSpec extends ItSpec {
               page      = page,
               leadingP1 = expectedLeadingP1
             )
-            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime)
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English)
           }
 
           s"${taxRegime.entryName} Debt too old ineligible page correctly" in {
@@ -145,7 +146,7 @@ class IneligibleControllerSpec extends ItSpec {
               page      = page,
               leadingP1 = expectedLeadingP1
             )
-            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime)
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English)
           }
 
           s"${taxRegime.entryName} Existing ttp ineligible page correctly" in {
@@ -172,7 +173,7 @@ class IneligibleControllerSpec extends ItSpec {
               page      = page,
               leadingP1 = "You can only have one payment plan at a time."
             )
-            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime)
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English)
           }
 
           s"${taxRegime.entryName} Returns not up to date ineligible page correctly" in {
@@ -207,11 +208,185 @@ class IneligibleControllerSpec extends ItSpec {
               leadingP1 = expectedLeadingContent
             )
 
-            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime)
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English)
             page.select(".govuk-body").asScala.toList(1).text() shouldBe "Go to your tax account to file your tax return."
-            if (taxRegime === TaxRegime.Vat) {
-              page.select(".govuk-body").asScala.toList(2).text() shouldBe "If you have recently filed your return, your account may take up to 72 hours to be updated before you can set up a payment plan."
+            page.select(".govuk-body").asScala.toList(2).text() shouldBe "If you have recently filed your return, your account may take up to 72 hours to be updated before you can set up a payment plan."
+            page.select("#bta-link").attr("href") shouldBe "/set-up-a-payment-plan/test-only/bta-page?return-page"
+          }
+      }
+  }
+
+  "IneligibleController should display in Welsh" - {
+
+    Seq[(TaxRegime, Origin)]((TaxRegime.Epaye, Origins.Epaye.Bta), (TaxRegime.Vat, Origins.Vat.Bta))
+      .foreach {
+        case (taxRegime, origin) =>
+          s"${taxRegime.entryName} Generic not eligible page correctly" in {
+            val enrolments = taxRegime match {
+              case TaxRegime.Epaye => Some(Set(TdAll.payeEnrolment))
+              case TaxRegime.Vat   => Some(Set(TdAll.vatEnrolment))
             }
+            stubCommonActions(authAllEnrolments = enrolments)
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - MultipleReasons`(origin))
+
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.payeGenericIneligiblePage(fakeRequest.withLangWelsh())
+              case TaxRegime.Vat   => controller.vatGenericIneligiblePage(fakeRequest.withLangWelsh())
+            }
+            val page = pageContentAsDoc(result)
+            val expectedLeadingP1 = taxRegime match {
+              case TaxRegime.Epaye => "Nid ydych yn gymwys i drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein."
+              case TaxRegime.Vat   => "Nid ydych yn gymwys i drefnu cynllun talu TAW ar-lein."
+            }
+
+            ContentAssertions.commonPageChecks(
+              page,
+              expectedH1              = "Ffoniwch ni ynghylch cynllun talu",
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime),
+              language                = Languages.Welsh
+            )
+            assertIneligiblePageLeadingP1(
+              page      = page,
+              leadingP1 = expectedLeadingP1
+            )
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.Welsh)
+          }
+
+          s"${taxRegime.entryName} Debt too large ineligible page correctly" in {
+            val enrolments = taxRegime match {
+              case TaxRegime.Epaye => Some(Set(TdAll.payeEnrolment))
+              case TaxRegime.Vat   => Some(Set(TdAll.vatEnrolment))
+            }
+            stubCommonActions(authAllEnrolments = enrolments)
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(origin))
+
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.epayeDebtTooLargePage(fakeRequest.withLangWelsh())
+              case TaxRegime.Vat   => controller.vatDebtTooLargePage(fakeRequest.withLangWelsh())
+            }
+            val page = pageContentAsDoc(result)
+
+            ContentAssertions.commonPageChecks(
+              page,
+              expectedH1              = "Ffoniwch ni ynghylch cynllun talu",
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime),
+              language                = Languages.Welsh
+            )
+
+            val expectedLeadingP1 = taxRegime match {
+              case TaxRegime.Epaye => "Ni allwch drefnu cynllun talu TAW ar-lein oherwydd mae arnoch dros £15,000."
+              case TaxRegime.Vat   => "Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein oherwydd mae arnoch dros £20,000."
+            }
+
+            assertIneligiblePageLeadingP1(
+              page      = page,
+              leadingP1 = expectedLeadingP1
+            )
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.Welsh)
+          }
+
+          s"${taxRegime.entryName} Debt too old ineligible page correctly" in {
+            val enrolments = taxRegime match {
+              case TaxRegime.Epaye => Some(Set(TdAll.payeEnrolment))
+              case TaxRegime.Vat   => Some(Set(TdAll.vatEnrolment))
+            }
+            stubCommonActions(authAllEnrolments = enrolments)
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(origin))
+
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.epayeDebtTooOldPage(fakeRequest.withLangWelsh())
+              case TaxRegime.Vat   => controller.vatDebtTooOldPage(fakeRequest.withLangWelsh())
+            }
+
+            val page = pageContentAsDoc(result)
+
+            ContentAssertions.commonPageChecks(
+              page,
+              expectedH1              = "Ffoniwch ni ynghylch cynllun talu",
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime),
+              language                = Languages.Welsh
+            )
+            val expectedLeadingP1 = taxRegime match {
+              case TaxRegime.Epaye => "Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros 35 diwrnod yn ôl."
+              case TaxRegime.Vat   => "Ni allwch drefnu cynllun talu TAW ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros 28 wythnos yn ôl."
+            }
+            assertIneligiblePageLeadingP1(
+              page      = page,
+              leadingP1 = expectedLeadingP1
+            )
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.Welsh)
+          }
+
+          s"${taxRegime.entryName} Existing ttp ineligible page correctly" in {
+            val enrolments = taxRegime match {
+              case TaxRegime.Epaye => Some(Set(TdAll.payeEnrolment))
+              case TaxRegime.Vat   => Some(Set(TdAll.vatEnrolment))
+            }
+            stubCommonActions(authAllEnrolments = enrolments)
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExistingTTP`(origin))
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.epayeAlreadyHaveAPaymentPlanPage(fakeRequest.withLangWelsh())
+              case TaxRegime.Vat   => controller.vatAlreadyHaveAPaymentPlanPage(fakeRequest.withLangWelsh())
+            }
+            val page = pageContentAsDoc(result)
+
+            ContentAssertions.commonPageChecks(
+              page,
+              expectedH1              = "Mae gennych chi gynllun talu gyda CThEF yn barod",
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime),
+              language                = Languages.Welsh
+            )
+            assertIneligiblePageLeadingP1(
+              page      = page,
+              leadingP1 = "Dim ond un cynllun talu y gallwch ei gael ar y tro."
+            )
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.Welsh)
+          }
+
+          s"${taxRegime.entryName} Returns not up to date ineligible page correctly" in {
+            val enrolments = taxRegime match {
+              case TaxRegime.Epaye => Some(Set(TdAll.payeEnrolment))
+              case TaxRegime.Vat   => Some(Set(TdAll.vatEnrolment))
+            }
+            stubCommonActions(authAllEnrolments = enrolments)
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - MissingFiledReturns`(origin))
+
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.epayeFileYourReturnPage(fakeRequest.withLangWelsh())
+              case TaxRegime.Vat   => controller.vatFileYourReturnPage(fakeRequest.withLangWelsh())
+            }
+            val page = pageContentAsDoc(result)
+
+            ContentAssertions.commonPageChecks(
+              page,
+              expectedH1              = "Cyflwynwch eich Ffurflen Dreth i ddefnyddio’r gwasanaeth hwn",
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime),
+              language                = Languages.Welsh
+            )
+
+            val expectedLeadingContent = taxRegime match {
+              case TaxRegime.Epaye => "I fod yn gymwys i drefnu cynllun talu ar-lein, mae’n rhaid i chi fod wedi cyflwyno’ch Ffurflenni Treth TWE Cyflogwyr. Pan fyddwch wedi gwneud hyn, gallwch ddychwelyd i’r gwasanaeth."
+              case TaxRegime.Vat   => "I fod yn gymwys i drefnu cynllun talu ar-lein, mae’n rhaid i chi fod wedi cyflwyno’ch Ffurflen TAW. Pan fyddwch wedi gwneud hyn, gallwch ddychwelyd i’r gwasanaeth."
+            }
+
+            assertIneligiblePageLeadingP1(
+              page      = page,
+              leadingP1 = expectedLeadingContent
+            )
+
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.Welsh)
+            page.select(".govuk-body").asScala.toList(1).text() shouldBe "Ewch i’ch cyfrif treth er mwyn cyflwyno’ch Ffurflen Dreth."
+            page.select(".govuk-body").asScala.toList(2).text() shouldBe "Os ydych chi wedi cyflwyno’ch Ffurflen Dreth yn ddiweddar, gallai gymryd hyd at 72 awr i’ch cyfrif gael ei ddiweddaru cyn i chi allu trefnu cynllun talu."
             page.select("#bta-link").attr("href") shouldBe "/set-up-a-payment-plan/test-only/bta-page?return-page"
           }
       }

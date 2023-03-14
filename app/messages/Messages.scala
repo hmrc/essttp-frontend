@@ -377,10 +377,12 @@ object Messages {
       english = "You are not registered",
       welsh   = "Dydych chi ddim wedi’ch cofrestru"
     )
+
     val `You are not eligible for an online payment plan because you need to register for VAT Online.`: Message = Message(
       english = "You are not eligible for an online payment plan because you need to register for VAT Online.",
       welsh   = "Dydych chi ddim yn gymwys ar gyfer cynllun talu ar-lein oherwydd bod yn rhaid i chi gofrestru ar gyfer TAW ar-lein."
     )
+
     val `Find out how to register.`: Message = Message(
       english = "Find out how to register",
       welsh   = "Dysgu sut i gofrestru"
