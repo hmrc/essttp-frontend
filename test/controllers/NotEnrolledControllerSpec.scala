@@ -17,6 +17,7 @@
 package controllers
 import essttp.journey.model.Origins
 import essttp.rootmodel.TaxRegime
+import models.Languages
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
@@ -32,7 +33,7 @@ import scala.jdk.CollectionConverters.IterableHasAsScala
 class NotEnrolledControllerSpec extends ItSpec {
   private val controller = app.injector.instanceOf[NotEnrolledController]
   "GET /not-enrolled should" - {
-    "return the not enrolled page" in {
+    "return the not enrolled page in English" in {
       stubCommonActions(authAllEnrolments = Some(Set.empty))
       EssttpBackend.StartJourney.findJourney()
 
@@ -52,12 +53,36 @@ class NotEnrolledControllerSpec extends ItSpec {
       page.select(".govuk-body").asScala.toList(0).text() shouldBe "You are not eligible for an online payment plan because you need to enrol for PAYE Online. Find out how to enrol."
       page.select("#how-to-enrol-link").attr("href") shouldBe "https://www.gov.uk/paye-online/enrol"
 
-      ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Epaye)
+      ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Epaye, Languages.English)
+    }
+
+    "return the not enrolled page in Welsh" in {
+      stubCommonActions(authAllEnrolments = Some(Set.empty))
+      EssttpBackend.StartJourney.findJourney()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+      val result = controller.notEnrolled(fakeRequest.withLangWelsh())
+      val page: Document = Jsoup.parse(contentAsString(result))
+
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        page,
+        expectedH1              = "Nid ydych wedi cofrestru",
+        shouldBackLinkBePresent = false,
+        expectedSubmitUrl       = None,
+        language                = Languages.Welsh
+      )
+
+      page.select(".govuk-body").asScala.toList(0).text() shouldBe "Nid ydych yn gymwys ar gyfer cynllun talu ar-lein oherwydd bod yn rhaid i chi gofrestru ar gyfer TWE ar-lein. Dysgwch sut i gofrestru. Dysgwch sut i ymrestru."
+      page.select("#how-to-enrol-link").attr("href") shouldBe "https://www.gov.uk/paye-online/enrol"
+
+      ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Epaye, Languages.Welsh)
     }
   }
 
   "GET /not-vat-registered should" - {
-    "return the not vat registered page" in {
+    "return the not vat registered page in English" in {
       stubCommonActions(authAllEnrolments = Some(Set.empty))
       EssttpBackend.StartJourney.findJourney(Origins.Vat.GovUk)
 
@@ -78,7 +103,32 @@ class NotEnrolledControllerSpec extends ItSpec {
       page.select(".govuk-body").asScala.toList(0).text() shouldBe "You are not eligible for an online payment plan because you need to register for VAT Online. Find out how to register."
       page.select("#how-to-enrol-link").attr("href") shouldBe "https://www.gov.uk/register-for-vat"
 
-      ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Vat)
+      ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Vat, Languages.English)
+    }
+
+    "return the not vat registered page in Welsh" in {
+      stubCommonActions(authAllEnrolments = Some(Set.empty))
+      EssttpBackend.StartJourney.findJourney(Origins.Vat.GovUk)
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+      val result = controller.notVatRegistered(fakeRequest.withLangWelsh())
+      val page: Document = Jsoup.parse(contentAsString(result))
+
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        page,
+        expectedH1              = "Dydych chi ddim wedi’ch cofrestru",
+        shouldBackLinkBePresent = false,
+        expectedSubmitUrl       = None,
+        regimeBeingTested       = Some(TaxRegime.Vat),
+        language                = Languages.Welsh
+      )
+
+      page.select(".govuk-body").asScala.toList(0).text() shouldBe "Dydych chi ddim yn gymwys ar gyfer cynllun talu ar-lein oherwydd bod yn rhaid i chi gofrestru ar gyfer TAW ar-lein. Dysgu sut i gofrestru."
+      page.select("#how-to-enrol-link").attr("href") shouldBe "https://www.gov.uk/register-for-vat"
+
+      ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Vat, Languages.Welsh)
     }
   }
 }

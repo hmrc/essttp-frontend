@@ -36,11 +36,7 @@
 @import requestSupport._
 
 @layout(pageTitle = Some(pageh1.show), showBackLink = false) {
-    <h1 class="govuk-heading-xl">
-    @{
-        pageh1.show
-    }
-    </h1>
+    <h1 class="govuk-heading-xl">@{pageh1.show}</h1>
     @leadingContent
 
     @commonIneligibilityPartial(request.journey.taxRegime)
