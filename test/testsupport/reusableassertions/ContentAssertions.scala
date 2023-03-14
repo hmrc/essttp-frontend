@@ -174,70 +174,101 @@ object ContentAssertions extends RichMatchers {
     ()
   }
 
+  def welshOrEnglish(language: Language, expectedEnglish: String, expectedWelsh: String): String = {
+    language match {
+      case Languages.English => expectedEnglish
+      case Languages.Welsh   => expectedWelsh
+    }
+  }
+
   def commonIneligibilityTextCheck(doc: Document, taxRegime: TaxRegime, language: Language) = {
     val commonEligibilityWrapper = doc.select("#common-eligibility")
     val govukBodyElements = commonEligibilityWrapper.select(".govuk-body").asScala.toList
     govukBodyElements(0).html() shouldBe {
-      if (language === Languages.English) "Call us on <strong>0300 123 1813</strong> as you may be able to set up a plan over the phone."
-      else "Ffoniwch ni ar <strong>0300 200 1900</strong> oherwydd mae’n bosibl y gallwch drefnu cynllun dros y ffôn."
+      language match {
+        case Languages.English => "Call us on <strong>0300 123 1813</strong> as you may be able to set up a plan over the phone."
+        case Languages.Welsh   => "Ffoniwch ni ar <strong>0300 200 1900</strong> oherwydd mae’n bosibl y gallwch drefnu cynllun dros y ffôn."
+      }
     }
     govukBodyElements(1).html() shouldBe {
-      if (language === Languages.English) "Our opening times are Monday to Friday, 8am to 6pm. We are closed on weekends and bank holidays."
-      else "Ein horiau agor yw Dydd Llun i Ddydd Gwener, 08:30 i 17:00. Rydym ar gau ar benwythnosau a gwyliau banc."
+      language match {
+        case Languages.English => "Our opening times are Monday to Friday, 8am to 6pm. We are closed on weekends and bank holidays."
+        case Languages.Welsh   => "Ein horiau agor yw Dydd Llun i Ddydd Gwener, 08:30 i 17:00. Rydym ar gau ar benwythnosau a gwyliau banc."
+      }
     }
 
     val subheadings = commonEligibilityWrapper.select("h2").asScala.toList
 
     subheadings(0).text shouldBe {
-      if (language === Languages.English) "If you need extra support"
-      else "Os oes angen cymorth ychwanegol arnoch chi"
+      language match {
+        case Languages.English => "If you need extra support"
+        case Languages.Welsh   => "Os oes angen cymorth ychwanegol arnoch chi"
+      }
     }
     govukBodyElements(2).html() shouldBe {
-      if (language === Languages.English) "Find out the different ways to <a href=\"https://www.gov.uk/get-help-hmrc-extra-support\" class=\"govuk-link\">deal with HMRC if you need some help</a>."
-      else "Dysgwch am y ffyrdd gwahanol o <a href=\"https://www.gov.uk/get-help-hmrc-extra-support\" class=\"govuk-link\">ddelio â CThEF os oes angen help arnoch chi</a>."
+      language match {
+        case Languages.English => "Find out the different ways to <a href=\"https://www.gov.uk/get-help-hmrc-extra-support\" class=\"govuk-link\">deal with HMRC if you need some help</a>."
+        case Languages.Welsh   => "Dysgwch am y ffyrdd gwahanol o <a href=\"https://www.gov.uk/get-help-hmrc-extra-support\" class=\"govuk-link\">ddelio â CThEF os oes angen help arnoch chi</a>."
+      }
     }
     govukBodyElements(3).html() shouldBe {
-      if (language === Languages.English) "You can also use <a href=\"https://www.relayuk.bt.com/\" class=\"govuk-link\">Relay UK</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>."
-      else "Gallwch hefyd ddefnyddio <a href=\"https://www.relayuk.bt.com/\" class=\"govuk-link\">Relay UK</a> os na allwch glywed na siarad dros y ffôn: deialwch <strong>18001</strong> ac yna <strong>0345 300 3900</strong>. Sylwer – dim ond galwadau ffôn Saesneg eu hiaith y mae Relay UK yn gallu ymdrin â nhw."
+      language match {
+        case Languages.English => "You can also use <a href=\"https://www.relayuk.bt.com/\" class=\"govuk-link\">Relay UK</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>."
+        case Languages.Welsh   => "Gallwch hefyd ddefnyddio <a href=\"https://www.relayuk.bt.com/\" class=\"govuk-link\">Relay UK</a> os na allwch glywed na siarad dros y ffôn: deialwch <strong>18001</strong> ac yna <strong>0345 300 3900</strong>. Sylwer – dim ond galwadau ffôn Saesneg eu hiaith y mae Relay UK yn gallu ymdrin â nhw."
+      }
     }
     govukBodyElements(4).html() shouldBe {
-      if (language === Languages.English) "If you are outside the UK: <strong>+44 2890 538 192</strong>"
-      else "Os ydych y tu allan i’r DU: <strong>+44 300 200 1900</strong>"
+      language match {
+        case Languages.English => "If you are outside the UK: <strong>+44 2890 538 192</strong>"
+        case Languages.Welsh   => "Os ydych y tu allan i’r DU: <strong>+44 300 200 1900</strong>"
+      }
     }
 
     subheadings(1).text shouldBe {
-      if (language === Languages.English) "Before you call, make sure you have:"
-      else "Cyn i chi ffonio, sicrhewch fod gennych y canlynol:"
+      language match {
+        case Languages.English => "Before you call, make sure you have:"
+        case Languages.Welsh   => "Cyn i chi ffonio, sicrhewch fod gennych y canlynol:"
+      }
     }
     val bulletLists = commonEligibilityWrapper.select(".govuk-list").asScala.toList
     val beforeYouCallList = bulletLists(0).select("li").asScala.toList
     beforeYouCallList(0).text() shouldBe (
       taxRegime match {
-        case TaxRegime.Epaye =>
-          if (language === Languages.English) "your Accounts Office reference. This is 13 characters, for example, 123PX00123456"
-          else "eich cyfeirnod Swyddfa Gyfrifon, sy’n 13 o gymeriadau o hyd, er enghraifft, 123PX00123456"
-        case TaxRegime.Vat =>
-          if (language === Languages.English) "your VAT number. This is 9 characters, for example, 123456789"
-          else "eich rhif TAW. Mae hyn yn cynnwys 9 o gymeriadau, er enghraifft, 123456789"
+        case TaxRegime.Epaye => language match {
+          case Languages.English => "your Accounts Office reference. This is 13 characters, for example, 123PX00123456"
+          case Languages.Welsh   => "eich cyfeirnod Swyddfa Gyfrifon, sy’n 13 o gymeriadau o hyd, er enghraifft, 123PX00123456"
+        }
+        case TaxRegime.Vat => language match {
+          case Languages.English => "your VAT number. This is 9 characters, for example, 123456789"
+          case Languages.Welsh   => "eich rhif TAW. Mae hyn yn cynnwys 9 o gymeriadau, er enghraifft, 123456789"
+        }
       }
     )
     beforeYouCallList(1).text() shouldBe {
-      if (language === Languages.English) "your bank details"
-      else "eich manylion banc"
+      language match {
+        case Languages.English => "your bank details"
+        case Languages.Welsh   => "eich manylion banc"
+      }
     }
 
     subheadings(2).text() shouldBe {
-      if (language === Languages.English) "We’re likely to ask:"
-      else "Rydym yn debygol o ofyn:"
+      language match {
+        case Languages.English => "We’re likely to ask:"
+        case Languages.Welsh   => "Rydym yn debygol o ofyn:"
+      }
     }
     val likelyToAskList = bulletLists(1).select("li").asScala.toList
     likelyToAskList(0).text() shouldBe {
-      if (language === Languages.English) "what you’ve done to try to pay the bill"
-      else "beth rydych wedi’i wneud i geisio talu’r bil"
+      language match {
+        case Languages.English => "what you’ve done to try to pay the bill"
+        case Languages.Welsh   => "beth rydych wedi’i wneud i geisio talu’r bil"
+      }
     }
     likelyToAskList(1).text() shouldBe {
-      if (language === Languages.English) "if you can pay some of the bill now"
-      else "a allwch dalu rhywfaint o’r bil nawr"
+      language match {
+        case Languages.English => "if you can pay some of the bill now"
+        case Languages.Welsh   => "a allwch dalu rhywfaint o’r bil nawr"
+      }
     }
   }
 
