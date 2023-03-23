@@ -169,9 +169,15 @@ class IneligibleControllerSpec extends ItSpec {
               expectedSubmitUrl       = None,
               regimeBeingTested       = Some(taxRegime)
             )
+
+            val expectedP1 = taxRegime match {
+              case TaxRegime.Epaye => "You cannot set up an Employers’ PAYE payment plan online."
+              case TaxRegime.Vat   => "You cannot set up a VAT payment plan online."
+            }
+
             assertIneligiblePageLeadingP1(
               page      = page,
-              leadingP1 = "You can only have one payment plan at a time."
+              leadingP1 = expectedP1
             )
             ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English)
           }
@@ -344,9 +350,15 @@ class IneligibleControllerSpec extends ItSpec {
               regimeBeingTested       = Some(taxRegime),
               language                = Languages.Welsh
             )
+
+            val expectedP1 = taxRegime match {
+              case TaxRegime.Epaye => "Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein."
+              case TaxRegime.Vat   => "Ni allwch drefnu cynllun talu TAW ar-lein."
+            }
+
             assertIneligiblePageLeadingP1(
               page      = page,
-              leadingP1 = "Dim ond un cynllun talu y gallwch ei gael ar y tro."
+              leadingP1 = expectedP1
             )
             ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.Welsh)
           }

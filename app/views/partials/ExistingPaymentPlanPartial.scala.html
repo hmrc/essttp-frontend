@@ -15,20 +15,25 @@
  *@
 
 @import play.api.mvc.Request
+@import play.twirl.api.Html
+@import essttp.rootmodel.TaxRegime
 @import requests.RequestSupport
 @import messages.Messages
-@import play.twirl.api.Html
 
 @this(
-        requestSupport: RequestSupport
+requestSupport: RequestSupport
 )
 
-@()(implicit request: Request[_])
+@(taxRegime: TaxRegime)(implicit request: Request[_])
 
 @import requestSupport._
 
 <p class="govuk-body">
 @{
-    Html(Messages.NotEligible.`You can only have one payment plan at a time.`.show)
+  val message = taxRegime match {
+   case TaxRegime.Epaye => Messages.NotEligible.`You cannot set up an Employers' PAYE payment plan online`
+   case TaxRegime.Vat => Messages.NotEligible.`You cannot set up a VAT payment plan online.`
+  }
+ Html(message.show)
 }
 </p>

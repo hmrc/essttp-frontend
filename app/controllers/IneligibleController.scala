@@ -85,7 +85,12 @@ class IneligibleController @Inject() (
   val vatFileYourReturnPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericFileReturnPage }
 
   def genericAlreadyHaveAPaymentPlanPage(implicit request: AuthenticatedJourneyRequest[AnyContent]): Result =
-    Ok(views.partials.ineligibleTemplatePage(Messages.NotEligible.`You already have a payment plan with HMRC`, views.partials.existingPaymentPlanPartial()))
+    Ok(
+      views.partials.ineligibleTemplatePage(
+        Messages.NotEligible.`You already have a payment plan with HMRC`,
+        views.partials.existingPaymentPlanPartial(request.journey.taxRegime)
+      )
+    )
 
   val epayeAlreadyHaveAPaymentPlanPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     genericAlreadyHaveAPaymentPlanPage

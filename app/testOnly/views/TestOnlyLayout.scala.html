@@ -99,9 +99,9 @@
 
 @govukLayout(
     pageTitle = Some(documentTitle),
-    headBlock = Some(hmrcHead(headBlock = Some(head), nonce = CSPNonce.get)),
+    headBlock = Some(hmrcHead(headBlock = Some(head))),
     headerBlock = Some(hmrcStandardHeader(serviceName = Some(serviceName), signOutUrl = if(showSignOut) Some(appConfig.Urls.signOutUrl) else None)),
-    scriptsBlock = Some(hmrcScripts(scriptsBlock = Some(scripts), nonce = CSPNonce.get)),
+    scriptsBlock = Some(hmrcScripts(scriptsBlock = Some(scripts))),
     beforeContentBlock = Some(beforeContentBlock),
     footerBlock = Some(hmrcStandardFooter())
 )(content)

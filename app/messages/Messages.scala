@@ -301,9 +301,14 @@ object Messages {
       welsh   = "Mae gennych chi gynllun talu gyda CThEF yn barod"
     )
 
-    val `You can only have one payment plan at a time.`: Message = Message(
-      english = "You can only have one payment plan at a time.",
-      welsh   = "Dim ond un cynllun talu y gallwch ei gael ar y tro."
+    val `You cannot set up an Employers' PAYE payment plan online`: Message = Message(
+      english = "You cannot set up an Employers’ PAYE payment plan online.",
+      welsh   = "Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein."
+    )
+
+    val `You cannot set up a VAT payment plan online.`: Message = Message(
+      english = "You cannot set up a VAT payment plan online.",
+      welsh   = "Ni allwch drefnu cynllun talu TAW ar-lein."
     )
 
     def `Generic ineligible message`(taxRegime: TaxRegime): Message = taxRegime match {
