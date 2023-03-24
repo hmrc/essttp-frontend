@@ -16,10 +16,10 @@
 
 package testsupport.testdata
 
-import essttp.emailverification.EmailVerificationResult
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.ttp.eligibility.{EligibilityPass, EligibilityRules}
 import essttp.rootmodel.{DayOfMonth, TaxRegime, UpfrontPaymentAmount}
+import paymentsEmailVerification.models.EmailVerificationResult
 import testsupport.testdata.JourneyInfo.JourneyInfoAsJson
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 import uk.gov.hmrc.crypto.{Encrypter, PlainText}

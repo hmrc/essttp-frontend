@@ -17,11 +17,11 @@
 package controllers
 
 import controllers.pagerouters.EligibilityRouter
-import essttp.emailverification.EmailVerificationResult
 import essttp.journey.model.{EmailVerificationAnswers, Journey, UpfrontPaymentAnswers}
 import essttp.journey.model.Journey._
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import essttp.rootmodel.{CanPayUpfront, IsEmailAddressRequired, TaxRegime}
+import paymentsEmailVerification.models.EmailVerificationResult
 import play.api.http.Status.INTERNAL_SERVER_ERROR
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{Call, Request, Result}
@@ -30,7 +30,7 @@ import uk.gov.hmrc.http.UpstreamErrorResponse
 object Routing {
 
   // session key to indicate someone has just clicked a change link from a CYA page
-  val clickedChangeFromSessionKey: String = "esstppClickedChangeFrom"
+  val clickedChangeFromSessionKey: String = "essttpClickedChangeFrom"
 
   def redirectToNext(current: Call, journey: Journey, submittedValueUnchanged: Boolean)(implicit request: Request[_]): Result = {
     val journeyRoutes: Map[Call, () => Call] = Map(

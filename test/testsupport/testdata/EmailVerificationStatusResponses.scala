@@ -16,7 +16,7 @@
 
 package testsupport.testdata
 
-import essttp.emailverification.EmailVerificationState
+import paymentsEmailVerification.models.EmailVerificationState
 
 object EmailVerificationStatusResponses {
 

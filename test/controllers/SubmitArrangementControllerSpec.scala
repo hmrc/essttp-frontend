@@ -18,10 +18,10 @@ package controllers
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.crypto.CryptoFormat
-import essttp.emailverification.EmailVerificationResult
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.ttp.eligibility.EmailSource
+import paymentsEmailVerification.models.EmailVerificationResult
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{Call, Result}

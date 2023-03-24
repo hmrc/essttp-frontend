@@ -17,7 +17,6 @@
 package services
 
 import com.google.inject.{Inject, Singleton}
-import essttp.emailverification.EmailVerificationResult
 import essttp.journey.JourneyConnector
 import essttp.journey.model.{Journey, JourneyId}
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
@@ -28,6 +27,7 @@ import essttp.rootmodel.bank.{BankDetails, DetailsAboutBankAccount}
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
 import essttp.rootmodel.dates.startdates.StartDatesResponse
 import essttp.rootmodel.{CanPayUpfront, DayOfMonth, Email, EmpRef, IsEmailAddressRequired, MonthlyPaymentAmount, UpfrontPaymentAmount, Vrn}
+import paymentsEmailVerification.models.EmailVerificationResult
 import play.api.mvc.RequestHeader
 import util.Logging
 

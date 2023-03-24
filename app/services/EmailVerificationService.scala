@@ -19,58 +19,80 @@ package services
 import actionsmodel.EligibleJourneyRequest
 import com.google.inject.{Inject, Singleton}
 import config.AppConfig
-import connectors.EmailVerificationConnector
+import paymentsEmailVerification.connectors.PaymentsEmailVerificationConnector
 import controllers.routes
-import essttp.emailverification._
 import essttp.rootmodel.Email
+import paymentsEmailVerification.models.api.GetEmailVerificationResultRequest
+import paymentsEmailVerification.models.EmailVerificationResult
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import messages.Messages
+import paymentsEmailVerification.models.api.{GetEarliestCreatedAtTimeResponse, StartEmailVerificationJourneyRequest, StartEmailVerificationJourneyResponse}
 import requests.RequestSupport
 import uk.gov.hmrc.hmrcfrontend.config.ContactFrontendConfig
 import uk.gov.hmrc.http.HeaderCarrier
 
-import java.time.LocalDateTime
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class EmailVerificationService @Inject() (
-    connector:             EmailVerificationConnector,
-    appConfig:             AppConfig,
-    contactFrontendConfig: ContactFrontendConfig,
-    requestSupport:        RequestSupport
+    paymentsEmailVerificationConnector: PaymentsEmailVerificationConnector,
+    appConfig:                          AppConfig,
+    contactFrontendConfig:              ContactFrontendConfig,
+    requestSupport:                     RequestSupport,
+    auditService:                       AuditService
 ) {
 
   import requestSupport._
 
   private val isLocal: Boolean = appConfig.BaseUrl.platformHost.isEmpty
 
-  def requestEmailVerification(emailAddress: Email)(implicit r: EligibleJourneyRequest[_], hc: HeaderCarrier): Future[StartEmailVerificationJourneyResponse] =
-    connector.startEmailVerificationJourney(emailVerificationRequest(emailAddress))
+  def requestEmailVerification(emailAddress: Email)(
+      implicit
+      r: EligibleJourneyRequest[_], hc: HeaderCarrier, executionContext: ExecutionContext
+  ): Future[StartEmailVerificationJourneyResponse] = {
+    for {
+      startResponse <- paymentsEmailVerificationConnector.startEmailVerification(emailVerificationRequest(emailAddress))
+      _ = auditService.auditEmailVerificationRequested(
+        journey  = r.journey,
+        ggCredId = r.ggCredId,
+        email    = emailAddress,
+        result   = auditResultFromStartEmailVerificationJourneyResponse(startResponse)
+      )
+    } yield startResponse
+  }
 
-  def getEmailVerificationResult(emailAddress: Email)(implicit r: EligibleJourneyRequest[_], hc: HeaderCarrier): Future[EmailVerificationResult] =
-    connector.getEmailVerificationResult(GetEmailVerificationResultRequest(r.ggCredId, emailAddress))
+  def getEmailVerificationResult(emailAddress: Email)(
+      implicit
+      r: EligibleJourneyRequest[_], hc: HeaderCarrier, executionContext: ExecutionContext
+  ): Future[EmailVerificationResult] =
+    for {
+      verificationResult <- paymentsEmailVerificationConnector.getEmailVerificationResult(
+        GetEmailVerificationResultRequest(paymentsEmailVerification.models.Email(emailAddress.value.decryptedValue))
+      )
+      _ = auditService.auditEmailVerificationResult(
+        journey  = r.journey,
+        ggCredId = r.ggCredId,
+        email    = emailAddress,
+        verificationResult
+      )
+    } yield verificationResult
 
-  def getLockoutCreatedAt()(implicit request: EligibleJourneyRequest[_], hc: HeaderCarrier): Future[LocalDateTime] =
-    connector.getEarliestCreatedAt(request.ggCredId)
-
-  def createdAtPlusOneDay(createdAt: LocalDateTime): LocalDateTime = createdAt.plusDays(1)
+  def getLockoutCreatedAt()(implicit headerCarrier: HeaderCarrier): Future[GetEarliestCreatedAtTimeResponse] =
+    paymentsEmailVerificationConnector.getEarliestCreatedAtTime()
 
   private def emailVerificationRequest(emailAddress: Email)(implicit r: EligibleJourneyRequest[_]): StartEmailVerificationJourneyRequest = {
     val lang = language(r.request)
 
     StartEmailVerificationJourneyRequest(
-      r.ggCredId,
-      RequestEmailVerification.continueUrl,
-      RequestEmailVerification.origin,
-      RequestEmailVerification.deskproServiceName,
-      RequestEmailVerification.accessibilityStatementUrl,
-      Messages.ServicePhase.serviceName(r.journey.taxRegime).show(language),
-      RequestEmailVerification.emailEntryUrl(r.eligibilityCheckResult),
-      RequestEmailVerification.emailEntryUrl(r.eligibilityCheckResult),
-      emailAddress,
-      lang.code,
-      isLocal
-
+      continueUrl               = RequestEmailVerification.continueUrl,
+      origin                    = RequestEmailVerification.origin,
+      deskproServiceName        = RequestEmailVerification.deskproServiceName,
+      accessibilityStatementUrl = RequestEmailVerification.accessibilityStatementUrl,
+      pageTitle                 = Messages.ServicePhase.serviceName(r.journey.taxRegime).show(language),
+      backUrl                   = RequestEmailVerification.emailEntryUrl(r.eligibilityCheckResult),
+      enterEmailUrl             = RequestEmailVerification.emailEntryUrl(r.eligibilityCheckResult),
+      email                     = paymentsEmailVerification.models.Email(emailAddress.value.decryptedValue),
+      lang                      = lang.code
     )
   }
 
@@ -84,13 +106,15 @@ class EmailVerificationService @Inject() (
       val u = s"/accessibility-statement${appConfig.accessibilityStatementPath}"
       if (isLocal) s"${appConfig.BaseUrl.accessibilityStatementFrontendUrl}$u" else u
     }
+
     def emailEntryUrl(eligibilityCheckResult: EligibilityCheckResult): String =
-      url(
-        eligibilityCheckResult.email.fold(
-          routes.EmailController.enterEmail.url
-        )(_ =>
-            routes.EmailController.whichEmailDoYouWantToUse.url)
-      )
+      url(eligibilityCheckResult.email.fold(routes.EmailController.enterEmail.url)(_ => routes.EmailController.whichEmailDoYouWantToUse.url))
   }
+
+  private def auditResultFromStartEmailVerificationJourneyResponse(startEmailVerificationJourneyResponse: StartEmailVerificationJourneyResponse): String =
+    startEmailVerificationJourneyResponse match {
+      case StartEmailVerificationJourneyResponse.Success(_)    => "Started"
+      case StartEmailVerificationJourneyResponse.Error(reason) => reason.entryName
+    }
 
 }

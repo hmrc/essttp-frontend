@@ -23,11 +23,12 @@ import config.AppConfig
 import controllers.EmailController.{ChooseEmailForm, chooseEmailForm, enterEmailForm}
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.{logErrorAndRouteToDefaultPage, logErrorAndRouteToDefaultPageF}
-import essttp.emailverification.{EmailVerificationResult, EmailVerificationState, StartEmailVerificationJourneyResponse}
 import essttp.journey.model.Journey
 import essttp.journey.model.Journey.AfterEmailAddressSelectedToBeVerified
 import essttp.rootmodel.Email
 import essttp.utils.Errors
+import paymentsEmailVerification.models.{EmailVerificationResult, EmailVerificationState}
+import paymentsEmailVerification.models.api.StartEmailVerificationJourneyResponse
 import play.api.data.Form
 import play.api.mvc._
 import services.{EmailVerificationService, JourneyService}
@@ -255,9 +256,11 @@ class EmailController @Inject() (
 
   val tooManyDifferentEmailAddresses: Action[AnyContent] = withEmailEnabled {
     as.eligibleJourneyAction.async { implicit request =>
-      emailVerificationService.getLockoutCreatedAt()
-        .map(emailVerificationService.createdAtPlusOneDay)
-        .map(dateTime => Ok(views.tooManyEmails(dateTime)))
+      emailVerificationService.getLockoutCreatedAt().map {
+        _.earliestCreatedAtTime.fold(Errors.throwServerErrorException("Could not find earliest created at time")){
+          dateTime => Ok(views.tooManyEmails(dateTime.plusDays(1L)))
+        }
+      }
     }
   }
 

@@ -16,8 +16,8 @@
 
 package testsupport.testdata
 
-import essttp.emailverification.EmailVerificationResult
 import essttp.rootmodel.{DayOfMonth, TaxRegime}
+import paymentsEmailVerification.models.EmailVerificationResult
 import uk.gov.hmrc.crypto.Encrypter
 
 object JourneyInfo {
