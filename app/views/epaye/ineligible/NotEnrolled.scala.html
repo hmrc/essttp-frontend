@@ -16,6 +16,7 @@
 
 @import essttp.rootmodel.TaxRegime
 @import play.api.mvc.Request
+@import play.twirl.api.Html
 @import requests.RequestSupport
 @import messages.Messages
 @import config.AppConfig
@@ -32,13 +33,12 @@
 
 @import requestSupport._
 
-@layout(pageTitle = Some(Messages.EnrolmentMissing.`You are not enrolled`.show), showBackLink = false) {
+@layout(pageTitle = Some(Messages.EnrolmentMissing.`Enrol for PAYE Online to use this service`.show), showBackLink = false) {
    <h1 class="govuk-heading-xl">
-    @{Messages.EnrolmentMissing.`You are not enrolled`.show}
+    @{Messages.EnrolmentMissing.`Enrol for PAYE Online to use this service`.show}
    </h1>
    <p class="govuk-body">
-    @{Messages.EnrolmentMissing.`You are not eligible for an online payment...`.show}
-    <a href="@{appConfig.Urls.enrolForPayeUrl}" class="govuk-link" id="how-to-enrol-link">@{Messages.EnrolmentMissing.`Find out how to enrol`.show}</a>@{Messages.`full stop`.show}
+    @{Html(Messages.EnrolmentMissing.`You must enrol for PAYE Online before you can set up an Employers’ PAYE payment plan.`(appConfig.Urls.enrolForPayeUrl).show)}
    </p>
 
    @commonIneligibilityPartial(TaxRegime.Epaye)
