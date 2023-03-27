@@ -13,8 +13,7 @@ object AppDependencies {
     "com.beachape"      %% "enumeratum-play"                 % "1.7.2",
     "org.typelevel"     %% "cats-core"                       % "2.9.0",
     "uk.gov.hmrc"       %% "essttp-backend-cor-journey"      % "1.105.0",
-    "uk.gov.hmrc"       %% "emailaddress"                    % "3.7.0",
-    "uk.gov.hmrc"       %% "payments-email-verification-cor" % "0.2.0",
+    "uk.gov.hmrc"       %% "emailaddress"                    % "3.7.0"
   // format: ON
   )
 
