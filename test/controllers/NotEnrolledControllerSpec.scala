@@ -31,8 +31,11 @@ import uk.gov.hmrc.http.SessionKeys
 import scala.jdk.CollectionConverters.IterableHasAsScala
 
 class NotEnrolledControllerSpec extends ItSpec {
+
   private val controller = app.injector.instanceOf[NotEnrolledController]
+
   "GET /not-enrolled should" - {
+
     "return the not enrolled page in English" in {
       stubCommonActions(authAllEnrolments = Some(Set.empty))
       EssttpBackend.StartJourney.findJourney()
@@ -45,14 +48,12 @@ class NotEnrolledControllerSpec extends ItSpec {
       RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.commonPageChecks(
         page,
-        expectedH1              = "You are not enrolled",
+        expectedH1              = "Enrol for PAYE Online to use this service",
         shouldBackLinkBePresent = false,
         expectedSubmitUrl       = None
       )
 
-      page.select(".govuk-body").asScala.toList(0).text() shouldBe "You are not eligible for an online payment plan because you need to enrol for PAYE Online. Find out how to enrol."
-      page.select("#how-to-enrol-link").attr("href") shouldBe "https://www.gov.uk/paye-online/enrol"
-
+      page.select(".govuk-body").asScala.toList(0).html() shouldBe s"""You must <a href="https://www.gov.uk/paye-online/enrol" class="govuk-link">enrol for PAYE Online</a> before you can set up an Employers’ PAYE payment plan."""
       ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Epaye, Languages.English)
     }
 
@@ -68,20 +69,20 @@ class NotEnrolledControllerSpec extends ItSpec {
       RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.commonPageChecks(
         page,
-        expectedH1              = "Nid ydych wedi cofrestru",
+        expectedH1              = "Ymrestru ar gyfer TWE Ar-lein er mwyn defnyddio’r gwasanaeth hwn",
         shouldBackLinkBePresent = false,
         expectedSubmitUrl       = None,
         language                = Languages.Welsh
       )
 
-      page.select(".govuk-body").asScala.toList(0).text() shouldBe "Nid ydych yn gymwys ar gyfer cynllun talu ar-lein oherwydd bod yn rhaid i chi gofrestru ar gyfer TWE ar-lein. Dysgwch sut i gofrestru. Dysgwch sut i ymrestru."
-      page.select("#how-to-enrol-link").attr("href") shouldBe "https://www.gov.uk/paye-online/enrol"
-
+      page.select(".govuk-body").asScala.toList(0).html() shouldBe s"""Mae’n rhaid i chi <a href="https://www.gov.uk/paye-online/enrol" class="govuk-link">ymrestru ar gyfer TWE Ar-lein</a> cyn i chi allu trefnu cynllun talu ar gyfer TWE y Cyflogwr."""
       ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Epaye, Languages.Welsh)
     }
+
   }
 
   "GET /not-vat-registered should" - {
+
     "return the not vat registered page in English" in {
       stubCommonActions(authAllEnrolments = Some(Set.empty))
       EssttpBackend.StartJourney.findJourney(Origins.Vat.GovUk)
@@ -94,15 +95,13 @@ class NotEnrolledControllerSpec extends ItSpec {
       RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.commonPageChecks(
         page,
-        expectedH1              = "You are not registered",
+        expectedH1              = "Register for VAT online to use this service",
         shouldBackLinkBePresent = false,
         expectedSubmitUrl       = None,
         regimeBeingTested       = Some(TaxRegime.Vat)
       )
 
-      page.select(".govuk-body").asScala.toList(0).text() shouldBe "You are not eligible for an online payment plan because you need to register for VAT Online. Find out how to register."
-      page.select("#how-to-enrol-link").attr("href") shouldBe "https://www.gov.uk/register-for-vat"
-
+      page.select(".govuk-body").asScala.toList(0).html() shouldBe s"""You must <a href="https://www.gov.uk/register-for-vat" class="govuk-link">register for VAT online</a> before you can set up a VAT payment plan."""
       ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Vat, Languages.English)
     }
 
@@ -118,17 +117,16 @@ class NotEnrolledControllerSpec extends ItSpec {
       RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.commonPageChecks(
         page,
-        expectedH1              = "Dydych chi ddim wedi’ch cofrestru",
+        expectedH1              = "Cofrestru ar gyfer TAW ar-lein er mwyn defnyddio’r gwasanaeth hwn",
         shouldBackLinkBePresent = false,
         expectedSubmitUrl       = None,
         regimeBeingTested       = Some(TaxRegime.Vat),
         language                = Languages.Welsh
       )
 
-      page.select(".govuk-body").asScala.toList(0).text() shouldBe "Dydych chi ddim yn gymwys ar gyfer cynllun talu ar-lein oherwydd bod yn rhaid i chi gofrestru ar gyfer TAW ar-lein. Dysgu sut i gofrestru."
-      page.select("#how-to-enrol-link").attr("href") shouldBe "https://www.gov.uk/register-for-vat"
-
+      page.select(".govuk-body").asScala.toList(0).html() shouldBe s"""Mae’n rhaid i chi <a href="https://www.gov.uk/register-for-vat" class="govuk-link">gofrestru ar gyfer TAW ar-lein</a> cyn i chi allu trefnu cynllun talu ar gyfer TAW."""
       ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Vat, Languages.Welsh)
     }
+
   }
 }

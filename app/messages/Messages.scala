@@ -363,34 +363,24 @@ object Messages {
 
   object EnrolmentMissing {
 
-    val `You are not enrolled`: Message = Message(
-      english = "You are not enrolled",
-      welsh   = "Nid ydych wedi cofrestru"
+    val `Enrol for PAYE Online to use this service`: Message = Message(
+      english = "Enrol for PAYE Online to use this service",
+      welsh   = "Ymrestru ar gyfer TWE Ar-lein er mwyn defnyddio’r gwasanaeth hwn"
     )
 
-    val `You are not eligible for an online payment...`: Message = Message(
-      english = "You are not eligible for an online payment plan because you need to enrol for PAYE Online.",
-      welsh   = "Nid ydych yn gymwys ar gyfer cynllun talu ar-lein oherwydd bod yn rhaid i chi gofrestru ar gyfer TWE ar-lein. Dysgwch sut i gofrestru."
+    def `You must enrol for PAYE Online before you can set up an Employers’ PAYE payment plan.`(payeLink: String): Message = Message(
+      english = s"""You must <a href="$payeLink" class="govuk-link">enrol for PAYE Online</a> before you can set up an Employers’ PAYE payment plan.""",
+      welsh   = s"""Mae’n rhaid i chi <a href="$payeLink" class="govuk-link">ymrestru ar gyfer TWE Ar-lein</a> cyn i chi allu trefnu cynllun talu ar gyfer TWE y Cyflogwr."""
     )
 
-    val `Find out how to enrol`: Message = Message(
-      english = "Find out how to enrol",
-      welsh   = "Dysgwch sut i ymrestru"
+    val `Register for VAT online to use this service`: Message = Message(
+      english = "Register for VAT online to use this service",
+      welsh   = "Cofrestru ar gyfer TAW ar-lein er mwyn defnyddio’r gwasanaeth hwn"
     )
 
-    val `You are not registered`: Message = Message(
-      english = "You are not registered",
-      welsh   = "Dydych chi ddim wedi’ch cofrestru"
-    )
-
-    val `You are not eligible for an online payment plan because you need to register for VAT Online.`: Message = Message(
-      english = "You are not eligible for an online payment plan because you need to register for VAT Online.",
-      welsh   = "Dydych chi ddim yn gymwys ar gyfer cynllun talu ar-lein oherwydd bod yn rhaid i chi gofrestru ar gyfer TAW ar-lein."
-    )
-
-    val `Find out how to register.`: Message = Message(
-      english = "Find out how to register",
-      welsh   = "Dysgu sut i gofrestru"
+    def `You must register for VAT online before you can set up a VAT payment plan.`(vatLink: String): Message = Message(
+      english = s"""You must <a href="$vatLink" class="govuk-link">register for VAT online</a> before you can set up a VAT payment plan.""",
+      welsh   = s"""Mae’n rhaid i chi <a href="$vatLink" class="govuk-link">gofrestru ar gyfer TAW ar-lein</a> cyn i chi allu trefnu cynllun talu ar gyfer TAW."""
     )
 
   }
