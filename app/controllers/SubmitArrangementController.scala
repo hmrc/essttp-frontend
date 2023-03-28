@@ -19,9 +19,9 @@ package controllers
 import _root_.actions.Actions
 import actionsmodel.AuthenticatedJourneyRequest
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
-import essttp.emailverification.EmailVerificationResult
 import essttp.journey.model.Journey
 import essttp.rootmodel.TaxRegime
+import paymentsEmailVerification.models.EmailVerificationResult
 import play.api.mvc._
 import services.{JourneyService, TtpService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController

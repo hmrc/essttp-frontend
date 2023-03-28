@@ -403,4 +403,9 @@ object TdAll {
 
   def arrangementResponse(taxRegime: TaxRegime): ArrangementResponse =
     ArrangementResponse(ProcessingDateTime("2022-03-23T13:49:51.141Z"), customerReference(taxRegime))
+
+  def taxDetailForAuditEvent(taxRegime: TaxRegime): String = taxRegime match {
+    case TaxRegime.Epaye => """"employerRef": "864FZ00049", "accountsOfficeRef": "123PA44545546""""
+    case TaxRegime.Vat   => """"vrn": "101747001""""
+  }
 }

@@ -19,7 +19,6 @@ package testsupport.stubs
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.crypto.CryptoFormat
-import essttp.emailverification.EmailVerificationResult
 import essttp.journey.model.{JourneyId, Origin, Origins}
 import essttp.rootmodel.bank.DetailsAboutBankAccount
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
@@ -29,6 +28,7 @@ import essttp.rootmodel.ttp.affordablequotes.{AffordableQuotesResponse, PaymentP
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import essttp.rootmodel._
+import paymentsEmailVerification.models.EmailVerificationResult
 import play.api.http.Status._
 import play.api.libs.json.Json
 import testsupport.stubs.WireMockHelpers._

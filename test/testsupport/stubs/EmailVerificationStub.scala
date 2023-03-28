@@ -18,29 +18,25 @@ package testsupport.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import essttp.emailverification.{EmailVerificationResult, StartEmailVerificationJourneyResponse}
-import essttp.journey.model.JourneyId
-import essttp.rootmodel.{Email, GGCredId}
+import essttp.rootmodel.Email
+import paymentsEmailVerification.models.EmailVerificationResult
+import paymentsEmailVerification.models.api.StartEmailVerificationJourneyResponse
 import play.api.http.Status.{CREATED, OK}
-import play.api.libs.json.Json
-import testsupport.testdata.TdJsonBodies
-import uk.gov.hmrc.crypto.Encrypter
+import play.api.libs.json.{JsValue, Json}
 
 import java.time.LocalDateTime
 
 object EmailVerificationStub {
 
-  private def startVerificationJourneyUrl(journeyId: JourneyId): String = s"/essttp-backend/email-verification/${journeyId.value}/start"
-
-  private def getVerificationResultUrl(journeyId: JourneyId): String = s"/essttp-backend/email-verification/${journeyId.value}/result"
-
-  private val getLockoutCreatedAtUrl = "/essttp-backend/email-verification/earliest-created-at"
+  private val startVerificationJourneyUrl: String = "/payments-email-verification/start"
+  private val getVerificationResultUrl: String = "/payments-email-verification/status"
+  private val getLockoutCreatedAtUrl = "/payments-email-verification/earliest-created-at"
 
   type HttpStatus = Int
 
-  def requestEmailVerification(result: StartEmailVerificationJourneyResponse)(journeyId: JourneyId): StubMapping =
+  def requestEmailVerification(result: StartEmailVerificationJourneyResponse): StubMapping =
     stubFor(
-      post(urlPathEqualTo(startVerificationJourneyUrl(journeyId)))
+      post(urlPathEqualTo(startVerificationJourneyUrl))
         .willReturn(
           aResponse().withStatus(CREATED).withBody(Json.prettyPrint(Json.toJson(result)))
         )
@@ -48,22 +44,18 @@ object EmailVerificationStub {
 
   def verifyRequestEmailVerification(
       emailAddress:                      Email,
-      ggCredId:                          GGCredId,
       expectedAccessibilityStatementUrl: String,
       expectedPageTitle:                 String,
       expectedLanguageCode:              String,
       urlPrefix:                         String,
-      backLocation:                      String,
-      isLocal:                           Boolean,
-      encrypter:                         Encrypter
-  )(journeyId: JourneyId): Unit =
+      backLocation:                      String
+  ): Unit =
     verify(
       exactly(1),
-      postRequestedFor(urlPathEqualTo(startVerificationJourneyUrl(journeyId)))
+      postRequestedFor(urlPathEqualTo(startVerificationJourneyUrl))
         .withRequestBody(
           equalToJson(
             s"""{
-               |  "credId": "${ggCredId.value}",
                |  "continueUrl": "$urlPrefix/set-up-a-payment-plan/email-callback",
                |  "origin": "essttp-frontend",
                |  "deskproServiceName": "essttp-frontend",
@@ -71,46 +63,47 @@ object EmailVerificationStub {
                |  "pageTitle": "$expectedPageTitle",
                |  "backUrl": "$urlPrefix$backLocation",
                |  "enterEmailUrl": "$urlPrefix$backLocation",
-               |  "email": "${TdJsonBodies.encryptString(emailAddress.value.decryptedValue, encrypter)}",
-               |  "lang":"$expectedLanguageCode",
-               |  "isLocal": ${isLocal.toString}
+               |  "email": "${emailAddress.value.decryptedValue}",
+               |  "lang":"$expectedLanguageCode"
                |}
                |""".stripMargin
           )
         )
     )
 
-  def getVerificationStatus(result: EmailVerificationResult)(journeyId: JourneyId): StubMapping =
+  def getVerificationStatus(result: EmailVerificationResult): StubMapping =
     stubFor(
-      post(urlPathEqualTo(getVerificationResultUrl(journeyId)))
+      post(urlPathEqualTo(getVerificationResultUrl))
         .willReturn{
           aResponse().withStatus(OK).withBody(Json.prettyPrint(Json.toJson(result)))
         }
     )
 
   def verifyGetEmailVerificationResult(
-      emailAddress: Email,
-      ggCredId:     GGCredId,
-      encrypter:    Encrypter
-  )(journeyId: JourneyId): Unit =
+      emailAddress: Email
+  ): Unit =
     verify(
       exactly(1),
-      postRequestedFor(urlPathEqualTo(getVerificationResultUrl(journeyId)))
+      postRequestedFor(urlPathEqualTo(getVerificationResultUrl))
         .withRequestBody(
           equalToJson(
             s"""{
-               |  "credId": "${ggCredId.value}",
-               |  "email": "${TdJsonBodies.encryptString(emailAddress.value.decryptedValue, encrypter)}"
+               |  "email": "${emailAddress.value.decryptedValue}"
                |}
                |""".stripMargin
           )
         )
     )
 
-  def getLockoutCreatedAt: StubMapping = stubFor(
-    post(urlPathEqualTo(getLockoutCreatedAtUrl))
+  def getLockoutCreatedAt(dateTime: Option[LocalDateTime]): StubMapping = stubFor(
+    get(urlPathEqualTo(getLockoutCreatedAtUrl))
       .willReturn(
-        aResponse().withStatus(OK).withBody(Json.prettyPrint(Json.toJson(LocalDateTime.of(2023, 1, 7, 11, 13))))
+        aResponse().withStatus(OK).withBody(
+          Json.prettyPrint(dateTime.fold[JsValue](
+            Json.parse("{}")
+          )(d =>
+              Json.parse(s"""{ "earliestCreatedAtTime": ${Json.toJson(d).toString}  } """)))
+        )
       )
   )
 

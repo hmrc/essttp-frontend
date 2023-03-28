@@ -23,17 +23,19 @@ import essttp.crypto.CryptoFormat
 import essttp.journey.model.Journey.AfterEnteredDetailsAboutBankAccount
 import essttp.journey.model.Journey.Stages._
 import essttp.journey.model.{EmailVerificationAnswers, Journey, Origin}
-import essttp.rootmodel.Email
+import essttp.rootmodel.{Email, GGCredId}
 import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount}
 import essttp.rootmodel.ttp.eligibility.{EligibilityCheckResult, EmailSource}
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
 import essttp.utils.Errors
 import models.audit.bars._
 import models.audit.eligibility.{EligibilityCheckAuditDetail, EligibilityResult, EnrollmentReasons}
+import models.audit.emailverification.{EmailVerificationRequestedAuditDetail, EmailVerificationResultAuditDetail}
 import models.audit.paymentplansetup.PaymentPlanSetUpAuditDetail
 import models.audit.planbeforesubmission.PaymentPlanBeforeSubmissionAuditDetail
 import models.audit.{AuditDetail, Schedule, TaxDetail}
 import models.bars.response.{BarsError, VerifyResponse}
+import paymentsEmailVerification.models.EmailVerificationResult
 import play.api.http.Status
 import play.api.libs.json._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
@@ -49,6 +51,18 @@ import scala.concurrent.ExecutionContext
 class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: ExecutionContext) {
 
   implicit val cryptoFormat: CryptoFormat = CryptoFormat.NoOpCryptoFormat
+
+  private def audit[A <: AuditDetail: Writes](a: A)(implicit hc: HeaderCarrier): Unit = {
+    val _ = auditConnector.sendExtendedEvent(
+      ExtendedDataEvent(
+        auditSource = auditSource,
+        auditType   = a.auditType,
+        eventId     = UUID.randomUUID().toString,
+        tags        = hc.toAuditTags(),
+        detail      = Json.toJson(a)
+      )
+    )
+  }
 
   def auditEligibilityCheck(
       journey:  ComputedTaxId,
@@ -76,23 +90,19 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
   )(implicit hc: HeaderCarrier): Unit =
     audit(toBarsCheckAuditDetail(journey, bankDetails, typeOfBankAccount, result, verifyStatusResponse))
 
+  def auditEmailVerificationRequested(journey: Journey, ggCredId: GGCredId, email: Email, result: String)(implicit headerCarrier: HeaderCarrier): Unit =
+    audit(toEmailVerificationRequested(journey, ggCredId, email, result))
+
+  def auditEmailVerificationResult(
+      journey: Journey, ggCredId: GGCredId, email: Email, result: EmailVerificationResult
+  )(implicit headerCarrier: HeaderCarrier): Unit =
+    audit(toEmailVerificationResult(journey, ggCredId, email: Email, result))
+
   def auditPaymentPlanSetUp(
       journey:         Either[AgreedTermsAndConditions, EmailVerificationComplete],
       responseFromTtp: Either[HttpException, ArrangementResponse]
   )(implicit authenticatedJourneyRequest: AuthenticatedJourneyRequest[_], headerCarrier: HeaderCarrier): Unit = {
     audit(toPaymentPlanSetupAuditDetail(journey, responseFromTtp))
-  }
-
-  private def audit[A <: AuditDetail: Writes](a: A)(implicit hc: HeaderCarrier): Unit = {
-    val _ = auditConnector.sendExtendedEvent(
-      ExtendedDataEvent(
-        auditSource = auditSource,
-        auditType   = a.auditType,
-        eventId     = UUID.randomUUID().toString,
-        tags        = hc.toAuditTags(),
-        detail      = Json.toJson(a)
-      )
-    )
   }
 
   private def toEligibilityCheck(
@@ -230,6 +240,49 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
     )
   }
 
+  private def toEmailVerificationRequested(
+      journey:  Journey,
+      ggCredId: GGCredId,
+      email:    Email,
+      result:   String
+  ): EmailVerificationRequestedAuditDetail = {
+    EmailVerificationRequestedAuditDetail(
+      origin         = toAuditString(journey.origin),
+      taxType        = journey.taxRegime.toString,
+      taxDetail      = toTaxDetail(toEligibilityCheckResult(journey)),
+      correlationId  = journey.correlationId,
+      emailAddress   = paymentsEmailVerification.models.Email(email.value.decryptedValue),
+      emailSource    = deriveEmailSource(journey, email),
+      result         = result,
+      authProviderId = ggCredId.value
+    )
+  }
+
+  private def toEmailVerificationResult(
+      journey:  Journey,
+      ggCredId: GGCredId,
+      email:    Email,
+      result:   EmailVerificationResult
+  ): EmailVerificationResultAuditDetail = {
+    EmailVerificationResultAuditDetail(
+      origin         = toAuditString(journey.origin),
+      taxType        = journey.taxRegime.toString,
+      taxDetail      = toTaxDetail(toEligibilityCheckResult(journey)),
+      correlationId  = journey.correlationId,
+      emailAddress   = email,
+      emailSource    = deriveEmailSource(journey, email),
+      result         = result match {
+        case EmailVerificationResult.Verified => "Success"
+        case EmailVerificationResult.Locked   => "Failed"
+      },
+      failureReason  = result match {
+        case EmailVerificationResult.Verified => None
+        case EmailVerificationResult.Locked   => Some("TooManyPasscodeAttempts")
+      },
+      authProviderId = ggCredId.value
+    )
+  }
+
   private def toTaxDetail(eligibilityCheckResult: EligibilityCheckResult): TaxDetail =
     TaxDetail(
       utr               = None,
@@ -255,6 +308,20 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
 
   private def getTaxId(name: String)(eligibilityCheckResult: EligibilityCheckResult): Option[String] =
     eligibilityCheckResult.identification.find(_.idType.value === name).map(_.idValue.value)
+
+  private def deriveEmailSource(journey: Journey, email: Email): EmailSource = {
+    val emailFromEligibility = toEligibilityCheckResult(journey).email
+    if (emailFromEligibility.map(_.value.decryptedValue.toLowerCase(Locale.UK)).contains(email.value.decryptedValue.toLowerCase(Locale.UK))) {
+      EmailSource.ETMP
+    } else {
+      EmailSource.TEMP
+    }
+  }
+
+  private def toEligibilityCheckResult(journey: Journey) = journey match {
+    case j: Journey.AfterEligibilityChecked => j.eligibilityCheckResult
+    case _                                  => Errors.throwServerErrorException("Trying to get eligibility check result for audit event, but it hasn't been retrieved yet.")
+  }
 
   private def toAuditString(origin: Origin) =
     origin.toString.split('.').lastOption.getOrElse(origin.toString)

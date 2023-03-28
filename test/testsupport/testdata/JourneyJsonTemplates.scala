@@ -16,9 +16,9 @@
 
 package testsupport.testdata
 
-import essttp.emailverification.EmailVerificationResult
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.DayOfMonth
+import paymentsEmailVerification.models.EmailVerificationResult
 import uk.gov.hmrc.crypto.Encrypter
 
 object JourneyJsonTemplates {

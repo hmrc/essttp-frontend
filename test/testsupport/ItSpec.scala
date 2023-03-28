@@ -63,6 +63,7 @@ class ItSpec
     "microservice.services.essttp-dates.port" -> WireMockSupport.port,
     "microservice.services.bank-account-reputation.port" -> WireMockSupport.port,
     "microservice.services.email-verification.port" -> WireMockSupport.port,
+    "microservice.services.payments-email-verification.port" -> WireMockSupport.port,
     "auditing.consumer.baseUri.port" -> WireMockSupport.port,
     "journeyVariables.minimumUpfrontPaymentAmountInPence" -> 100L,
     "auditing.enabled" -> true,
