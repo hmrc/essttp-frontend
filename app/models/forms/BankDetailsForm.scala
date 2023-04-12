@@ -30,31 +30,30 @@ final case class BankDetailsForm(
 )
 
 object BankDetailsForm {
-  def form(useRegexNameConstraint: Boolean): Form[BankDetailsForm] =
-    Form(
-      mapping(
-        "name" -> accountNameMapping(useRegexNameConstraint),
-        "sortCode" -> sortCodeMapping,
-        "accountNumber" -> accountNumberMapping
-      )(BankDetailsForm.apply)(BankDetailsForm.unapply)
-    )
 
-  val accountNameConstraintRegex: Constraint[AccountName] = Constraint(accountName =>
-    if (accountName.value.decryptedValue.matches("^[a-zA-Z ''.&\\/]{1,39}$")) Valid
-    else if (accountName.value.decryptedValue.length > 39) Invalid("error.maxlength")
-    else Invalid("error.pattern"))
+  private val accountNameMinLength: Int = 2
+  private val accountNameMaxLength: Int = 39
+  private val accountNameAllowedSpecialCharacters: Set[Char] =
+    Set(' ', '&', '@', '(', ')', '!', ':', ',', '+', '`', '-', '\\', '\'', '.', '/', '^')
 
-  val accountNameConstraintSimple: Constraint[AccountName] = Constraint(accountName =>
-    if (accountName.value.decryptedValue.length <= 70) Valid
-    else Invalid("error.maxlength-70"))
+  val accountNameConstraintRegex: Constraint[AccountName] = Constraint { encryptedAccountName =>
+    val accountName = encryptedAccountName.value.decryptedValue.filter(!_.isControl).trim
 
-  def accountNameConstraint(useRegexNameConstraint: Boolean): Constraint[AccountName] = {
-    if (useRegexNameConstraint) accountNameConstraintRegex
-    else accountNameConstraintSimple
+    if (accountName.isEmpty) Invalid("error.required")
+    else if (accountName.length < accountNameMinLength) Invalid("error.minLength")
+    else if (accountName.length > accountNameMaxLength) Invalid("error.maxLength")
+    else {
+      val disallowedCharacters = accountName.filterNot(
+        c => c.isLetter || c.isDigit || accountNameAllowedSpecialCharacters.contains(c)
+      ).toList.distinct
+
+      if (disallowedCharacters.nonEmpty) Invalid("error.disallowedCharacters", disallowedCharacters: _*)
+      else Valid
+    }
   }
 
-  def accountNameMapping(useRegexNameConstraint: Boolean): Mapping[AccountName] =
-    nonEmptyText.transform[AccountName](name => AccountName(SensitiveString.apply(name)), _.value.decryptedValue).verifying(accountNameConstraint(useRegexNameConstraint))
+  val accountNameMapping: Mapping[AccountName] =
+    nonEmptyText.transform[AccountName](name => AccountName(SensitiveString.apply(name)), _.value.decryptedValue).verifying(accountNameConstraintRegex)
 
   val allowedSeparators: Set[Char] = Set(' ', '-', '–', '−', '—')
 
@@ -122,6 +121,15 @@ object BankDetailsForm {
     FormErrorWithFieldMessageOverrides(
       formError             = FormError("sortCode", "sortCode.verify.otherError"),
       fieldMessageOverrides = sortCodeAndAccountNumberOverrides
+    )
+
+  val form: Form[BankDetailsForm] =
+    Form(
+      mapping(
+        "name" -> accountNameMapping,
+        "sortCode" -> sortCodeMapping,
+        "accountNumber" -> accountNumberMapping
+      )(BankDetailsForm.apply)(BankDetailsForm.unapply)
     )
 
 }

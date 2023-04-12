@@ -33,7 +33,6 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val appName: String = config.get[String]("appName")
   val emailJourneyEnabled: Boolean = config.get[Boolean]("features.email-journey")
   val vatEnabled: Boolean = config.get[Boolean]("features.vat")
-  val useRegexConstraintOnBarsNameField: Boolean = config.get[Boolean]("features.use-regex-constraint-bars-form")
   val authTimeoutSeconds: Int = config.get[FiniteDuration]("timeout-dialog.timeout").toSeconds.toInt
   val authTimeoutCountdownSeconds: Int = config.get[FiniteDuration]("timeout-dialog.countdown").toSeconds.toInt
   val accessibilityStatementPath: String = config.get[String]("accessibility-statement.service-path")

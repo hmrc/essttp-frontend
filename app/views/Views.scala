@@ -16,6 +16,7 @@
 
 package views
 
+import play.api.data.FormError
 import views.html._
 import views.html.epaye.EPayeLanding
 import views.html.epaye.ineligible.{Ineligible, NotEnrolled}
@@ -59,3 +60,10 @@ class Views @Inject() (
     val doYouWantToGiveFeedbackPage:      DoYouWantToGiveFeedback,
     val shuttered:                        shuttering.Shuttered
 )
+
+object Views {
+
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  def formErrorArgsStringList(e: FormError): List[String] = e.args.toList.map(_.toString)
+
+}

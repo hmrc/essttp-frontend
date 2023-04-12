@@ -23,6 +23,7 @@
 @import models.forms.BankDetailsForm
 @import play.twirl.api.TwirlFeatureImports.defining
 @import cats.syntax.eq._
+@import views.Views
 
 @this(
         layout: templates.Layout,
@@ -62,7 +63,7 @@
     } else {
         (form.error(key))
                 .map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
-            content = Text(Messages.BankDetails.errors(s"$key.${e.message}").show)
+            content = Text(Messages.BankDetails.errors(s"$key.${e.message}")(Views.formErrorArgsStringList(e)).show)
         ))
     }
 }
@@ -75,7 +76,7 @@
         @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
             ErrorLink(
                 href = Some(s"#${e.key}"),
-                content = Text(Messages.BankDetails.errors(s"${e.key}.${e.message}").show)
+                content = Text(Messages.BankDetails.errors(s"${e.key}.${e.message}")(Views.formErrorArgsStringList(e)).show)
             )
         ),
             title = Text(Messages.`There is a problem`.show)))
@@ -107,7 +108,7 @@
                 @formError.map { error =>
                     <span class="govuk-error-message" id="sort-code-and-account-number-error">
                         <span class="govuk-visually-hidden">@Messages.error.show</span>
-                        @Messages.BankDetails.errors(s"sortCode.${error.message}").show
+                        @Messages.BankDetails.errors(s"sortCode.${error.message}")(Views.formErrorArgsStringList(error)).show
                     </span>
                 }
 
