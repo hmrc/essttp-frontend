@@ -30,6 +30,7 @@ final case class BankDetailsForm(
 )
 
 object BankDetailsForm {
+
   def form(useRegexNameConstraint: Boolean): Form[BankDetailsForm] =
     Form(
       mapping(
@@ -39,10 +40,27 @@ object BankDetailsForm {
       )(BankDetailsForm.apply)(BankDetailsForm.unapply)
     )
 
-  val accountNameConstraintRegex: Constraint[AccountName] = Constraint(accountName =>
-    if (accountName.value.decryptedValue.matches("^[a-zA-Z ''.&\\/]{1,39}$")) Valid
-    else if (accountName.value.decryptedValue.length > 39) Invalid("error.maxlength")
-    else Invalid("error.pattern"))
+  private val accountNameMinLength: Int = 2
+  private val accountNameMaxLength: Int = 39
+  private val accountNameAllowedSpecialCharacters: Set[Char] =
+    Set(' ', '&', '@', '(', ')', '!', ':', ',', '+', '`', '-', '\\', '\'', '.', '/', '^')
+
+  val accountNameConstraintRegex: Constraint[AccountName] = Constraint { encryptedAccountName =>
+    val accountName = encryptedAccountName.value.decryptedValue.filter(!_.isControl).trim
+
+    if (accountName.isEmpty) Invalid("error.required")
+    else if (accountName.length < accountNameMinLength) Invalid("error.minLength")
+    else if (accountName.length > accountNameMaxLength) Invalid("error.maxLength")
+    else {
+      val disallowedCharacters = accountName.filterNot(
+        c => c.isLetter || c.isDigit || accountNameAllowedSpecialCharacters.contains(c)
+      ).toList.distinct
+
+      if (disallowedCharacters.nonEmpty) Invalid("error.disallowedCharacters", disallowedCharacters: _*)
+      else Valid
+    }
+
+  }
 
   val accountNameConstraintSimple: Constraint[AccountName] = Constraint(accountName =>
     if (accountName.value.decryptedValue.length <= 70) Valid

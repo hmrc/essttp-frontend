@@ -19,6 +19,8 @@ package messages
 import essttp.rootmodel.{AmountInPence, Email, TaxRegime}
 import models.forms.BankDetailsForm._
 
+import scala.annotation.tailrec
+
 object Messages {
 
   val continue: Message = Message(
@@ -950,41 +952,83 @@ object Messages {
       welsh   = "Mae’n rhaid iddo fod rhwng 6 ac 8 digid o hyd"
     )
 
-    val errors: Map[String, Message] = {
-      val `Enter a valid combination of bank account number and sort code`: Message = Message(
-        english = "Enter a valid combination of bank account number and sort code",
-        welsh   = "Nodwch gyfuniad dilys o rif cyfrif banc a chod didoli"
+    /**
+     * Separate given list with commas until the last two items which are separated by the given `lastSeparator`, e.g.
+     * {{{
+     *   commaSeparateList(List("a"), "or")           = "a"
+     *   commaSeparateList(List("a", "b"), "or")      = "a or b"
+     *   commaSeparateList(List("a", "b", "c"), "or") = "a, b or c"
+     * }}}
+     */
+    private def commaSeparateList(list: List[String], lastSeparator: String): String = {
+        @tailrec
+        def loop(l: List[String], acc: String): String = l match {
+          case Nil      => ""
+
+          case c :: Nil => c
+
+          case c1 :: c2 :: Nil =>
+            if (acc.isEmpty) s"$c1 $lastSeparator $c2"
+            else s"$acc, $c1 $lastSeparator $c2"
+
+          case head :: tail =>
+            if (acc.isEmpty) loop(tail, head)
+            else loop(tail, s"$acc, $head")
+        }
+      loop(list, "")
+    }
+
+    private val nameErrors: Map[String, (List[String] => Message)] =
+      Map(
+        "name.error.required" -> { _ =>
+          Message(
+            english = "Enter the name on the account",
+            welsh   = "Nodwch yr enw sydd ar y cyfrif"
+          )
+        },
+        "name.error.disallowedCharacters" -> { disallowedCharacters =>
+          Message(
+            english = s"Name on the account must not contain ${commaSeparateList(disallowedCharacters, "or")}",
+            welsh   = s"Mae’n rhaid i’r enw sydd ar y cyfrif peidio â chynnwys ${commaSeparateList(disallowedCharacters, "neu")}",
+          )
+        },
+        "name.error.maxlength-70" -> { _ =>
+          Message(
+            english = "Name on the account must be 70 characters or less",
+            welsh   = "Mae’n rhaid i’r enw sydd ar y cyfrif fod yn 70 o gymeriadau neu lai"
+          )
+        },
+        "name.error.maxLength" -> { _ =>
+          Message(
+            english = "Name on the account must be between 2 and 39 characters",
+            welsh   = "Mae’n rhaid i’r enw ar y cyfrif fod rhwng 2 a 39 o gymeriadau"
+          )
+        },
+        "name.error.minLength" -> { _ =>
+          Message(
+            english = "Name on the account must be between 2 and 39 characters",
+            welsh   = "Mae’n rhaid i’r enw ar y cyfrif fod rhwng 2 a 39 o gymeriadau"
+          )
+        }
       )
 
+    private val sortCoderErrors: Map[String, Message] = Map(
+      "sortCode.error.required" -> Message(
+        english = "Enter sort code",
+        welsh   = "Nodwch god didoli"
+      ),
+      "sortCode.error.nonNumeric" -> Message(
+        english = "Sort code must be a number",
+        welsh   = "Mae’n rhaid i’r cod didoli fod yn rhif"
+      ),
+      "sortCode.error.invalid" -> Message(
+        english = "Sort code must be 6 digits",
+        welsh   = "Mae’n rhaid i’r cod didoli fod yn 6 digid"
+      )
+    )
+
+    private val accountNumberErrors: Map[String, Message] =
       Map(
-        "name.error.required" -> Message(
-          english = "Enter the name on the account",
-          welsh   = "Nodwch yr enw sydd ar y cyfrif"
-        ),
-        "name.error.pattern" -> Message(
-          english = "Check the name on the account is correct. Call 0300 123 1813 if it contains any characters that are not letters.",
-          welsh   = "Gwiriwch fod yr enw sydd ar y cyfrif yn gywir. Ffoniwch 0300 200 1900 os yw’n cynnwys unrhyw gymeriadau nad ydynt yn llythrennau."
-        ),
-        "name.error.maxlength-70" -> Message(
-          english = "Name on the account must be 70 characters or less",
-          welsh   = "Mae’n rhaid i’r enw sydd ar y cyfrif fod yn 70 o gymeriadau neu lai"
-        ),
-        "name.error.maxlength" -> Message(
-          english = "Name on the account must be 39 characters or less",
-          welsh   = "Mae’n rhaid i’r enw sydd ar y cyfrif fod yn 39 o gymeriadau neu lai"
-        ),
-        "sortCode.error.required" -> Message(
-          english = "Enter sort code",
-          welsh   = "Nodwch god didoli"
-        ),
-        "sortCode.error.nonNumeric" -> Message(
-          english = "Sort code must be a number",
-          welsh   = "Mae’n rhaid i’r cod didoli fod yn rhif"
-        ),
-        "sortCode.error.invalid" -> Message(
-          english = "Sort code must be 6 digits",
-          welsh   = "Mae’n rhaid i’r cod didoli fod yn 6 digid"
-        ),
         "accountNumber.error.required" -> Message(
           english = "Enter account number",
           welsh   = "Nodwch rif y cyfrif"
@@ -996,7 +1040,16 @@ object Messages {
         "accountNumber.error.invalid" -> Message(
           english = "Account number must be between 6 and 8 digits",
           welsh   = "Mae’n rhaid i rif y cyfrif fod rhwng 6 ac 8 digid"
-        ),
+        )
+      )
+
+    private val barsErrors: Map[String, Message] = {
+      val `Enter a valid combination of bank account number and sort code`: Message = Message(
+        english = "Enter a valid combination of bank account number and sort code",
+        welsh   = "Nodwch gyfuniad dilys o rif cyfrif banc a chod didoli"
+      )
+
+      Map(
         s"sortCode.${accountNumberNotWellFormatted.formError.message}" -> `Enter a valid combination of bank account number and sort code`,
         s"sortCodeXXX.${accountNumberNotWellFormatted.formError.message}" -> `Enter a valid combination of bank account number and sort code`,
         s"sortCode.${sortCodeNotPresentOnEiscd.formError.message}" -> `Enter a valid combination of bank account number and sort code`,
@@ -1012,6 +1065,12 @@ object Messages {
         s"sortCode.${sortCodeOnDenyList.formError.message}" -> `Enter a valid combination of bank account number and sort code`,
         s"sortCode.${otherBarsError.formError.message}" -> `Enter a valid combination of bank account number and sort code`
       )
+    }
+
+    val errors: Map[String, (List[String] => Message)] = {
+      nameErrors ++ (
+        sortCoderErrors ++ accountNumberErrors ++ barsErrors
+      ).map { case (k, v) => k -> { _: List[String] => v } }
     }
 
     val `Bank details`: Message = Message(

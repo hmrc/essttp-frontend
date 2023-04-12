@@ -54,7 +54,7 @@ class ItSpec
 
   val testOperationCryptoFormat: OperationalCryptoFormat = OperationalCryptoFormat(testCrypto)
 
-  @SuppressWarnings(Array("org.wartremover.Warts.Any"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   protected lazy val configMap: Map[String, Any] = Map[String, Any](
     "microservice.services.auth.port" -> WireMockSupport.port,
     "microservice.services.essttp-backend.port" -> WireMockSupport.port,
