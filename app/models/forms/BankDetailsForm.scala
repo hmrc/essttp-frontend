@@ -31,15 +31,6 @@ final case class BankDetailsForm(
 
 object BankDetailsForm {
 
-  def form(useRegexNameConstraint: Boolean): Form[BankDetailsForm] =
-    Form(
-      mapping(
-        "name" -> accountNameMapping(useRegexNameConstraint),
-        "sortCode" -> sortCodeMapping,
-        "accountNumber" -> accountNumberMapping
-      )(BankDetailsForm.apply)(BankDetailsForm.unapply)
-    )
-
   private val accountNameMinLength: Int = 2
   private val accountNameMaxLength: Int = 39
   private val accountNameAllowedSpecialCharacters: Set[Char] =
@@ -59,20 +50,10 @@ object BankDetailsForm {
       if (disallowedCharacters.nonEmpty) Invalid("error.disallowedCharacters", disallowedCharacters: _*)
       else Valid
     }
-
   }
 
-  val accountNameConstraintSimple: Constraint[AccountName] = Constraint(accountName =>
-    if (accountName.value.decryptedValue.length <= 70) Valid
-    else Invalid("error.maxlength-70"))
-
-  def accountNameConstraint(useRegexNameConstraint: Boolean): Constraint[AccountName] = {
-    if (useRegexNameConstraint) accountNameConstraintRegex
-    else accountNameConstraintSimple
-  }
-
-  def accountNameMapping(useRegexNameConstraint: Boolean): Mapping[AccountName] =
-    nonEmptyText.transform[AccountName](name => AccountName(SensitiveString.apply(name)), _.value.decryptedValue).verifying(accountNameConstraint(useRegexNameConstraint))
+  val accountNameMapping: Mapping[AccountName] =
+    nonEmptyText.transform[AccountName](name => AccountName(SensitiveString.apply(name)), _.value.decryptedValue).verifying(accountNameConstraintRegex)
 
   val allowedSeparators: Set[Char] = Set(' ', '-', '–', '−', '—')
 
@@ -140,6 +121,15 @@ object BankDetailsForm {
     FormErrorWithFieldMessageOverrides(
       formError             = FormError("sortCode", "sortCode.verify.otherError"),
       fieldMessageOverrides = sortCodeAndAccountNumberOverrides
+    )
+
+  val form: Form[BankDetailsForm] =
+    Form(
+      mapping(
+        "name" -> accountNameMapping,
+        "sortCode" -> sortCodeMapping,
+        "accountNumber" -> accountNumberMapping
+      )(BankDetailsForm.apply)(BankDetailsForm.unapply)
     )
 
 }

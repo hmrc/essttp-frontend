@@ -550,56 +550,116 @@ class BankDetailsControllerSpec extends ItSpec {
             AuditConnectorStub.verifyNoAuditEvent()
           }
 
-          //todo remove this test when we no longer have ff for account name constraint
-          s"[$regime journey] show correct error message when account name is more than 70 characters" in {
-            stubCommonActions()
-            EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)()
+          s"[$regime journey] show correct error message when account name doesn't match regex" in {
+              def testBankDetailsFormError(
+                  action: Action[AnyContent]
+              )(formData: (String, String)*)(
+                  textAndHrefContent: List[(String, String)],
+                  fieldErrors:        Seq[(String, String)]  = Seq.empty
+              ): Unit = {
+                  def assertFieldsPopulated(doc: Document, form: Seq[(String, String)], fieldErrors: Seq[(String, String)]): Unit = {
+                    doc.select(EnterDirectDebitDetailsPage.accountNameFieldId).`val`() shouldBe getExpectedFormValue("name", form)
+                    doc.select(EnterDirectDebitDetailsPage.sortCodeFieldId).`val`() shouldBe getExpectedFormValue("sortCode", form)
+                    doc.select(EnterDirectDebitDetailsPage.accountNumberFieldId).`val`() shouldBe getExpectedFormValue("accountNumber", form)
 
-            val formData: List[(String, String)] = List(
-              ("name", "a" * 71),
-              ("sortCode", "123456"),
-              ("accountNumber", "12345678")
-            )
-            val expectedContentAndHref: List[(String, String)] = List(
-              ("Name on the account must be 70 characters or less", EnterDirectDebitDetailsPage.accountNameFieldId)
-            )
+                    fieldErrors.foreach {
+                      case (field, errorMessage) =>
+                        doc.getElementById(s"$field-error").text.trim shouldBe s"Error: $errorMessage"
+                    }
+                  }
 
-            testBankDetailsFormError(controller.enterBankDetailsSubmit)(formData: _*)(expectedContentAndHref)
-            EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
-            AuditConnectorStub.verifyNoAuditEvent()
-          }
+                testFormError(action)(formData: _*)(textAndHrefContent, assertFieldsPopulated(_, formData, fieldErrors))
+              }
 
-          //todo un-ignore this test when we no longer have ff for account name constraint
-          s"[$regime journey] show correct error message when account name doesn't match regex" ignore {
-
-            val badRegexMatchError = "Check the name on the account is correct. Call 0300 123 1813 if it contains any characters that are not letters."
-            val nameTooLongError = "Name on the account must be 39 characters or less"
+            val nameTooShortError = "Name on the account must be between 2 and 39 characters"
+            val nameTooLongError = "Name on the account must be between 2 and 39 characters"
 
             val inputAndExpectedError = List[(String, String)](
+              "" -> "Enter the name on the account",
+              "a" -> nameTooShortError,
               "a" * 40 -> nameTooLongError,
-              "ab@c" -> badRegexMatchError,
-              "mr!fail" -> badRegexMatchError,
-              "?questionmarksarentallowed" -> badRegexMatchError,
-              "\"speechmarksarentallowed" -> badRegexMatchError,
-              "numb3rs arent all0wed" -> badRegexMatchError
+              "ab£2" -> "Name on the account must not contain £",
+              "a$$b£c" -> "Name on the account must not contain $ or £",
+              "a?$$b£c?" -> "Name on the account must not contain ?, $ or £",
+              "a?$$b£c=?" -> "Name on the account must not contain ?, $, £ or ="
             )
 
             inputAndExpectedError.foreach {
               case (accountName, errorMessage) =>
+                withClue(s"For accountName $accountName: ") {
+                  stubCommonActions()
+                  EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)()
+                  val formData: List[(String, String)] = List(
+                    ("name", accountName),
+                    ("sortCode", "123456"),
+                    ("accountNumber", "12345678")
+                  )
+                  val expectedContentAndHref: List[(String, String)] = List(
+                    (errorMessage, EnterDirectDebitDetailsPage.accountNameFieldId)
+                  )
+                  testBankDetailsFormError(controller.enterBankDetailsSubmit)(formData: _*)(expectedContentAndHref)
+                  EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+                  AuditConnectorStub.verifyNoAuditEvent()
+                }
+            }
+          }
+
+          s"[$regime journey] must allow" - {
+
+              def testIsAllowed(accountName: String) = {
                 stubCommonActions()
-                EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)()
-                val formData: List[(String, String)] = List(
+                BarsStub.ValidateStub.success()
+                BarsStub.VerifyPersonalStub.success()
+                BarsVerifyStatusStub.update()
+                EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)(
+                  JourneyJsonTemplates.`Entered Details About Bank Account - Personal`(isAccountHolder = true, origin)
+                )
+                EssttpBackend.DirectDebitDetails.stubUpdateDirectDebitDetails(TdAll.journeyId, JourneyJsonTemplates.`Entered Direct Debit Details`(origin))
+
+                val formDataWithUnallowedCharacters: List[(String, String)] = List(
                   ("name", accountName),
                   ("sortCode", "123456"),
                   ("accountNumber", "12345678")
                 )
-                val expectedContentAndHref: List[(String, String)] = List(
-                  (errorMessage, EnterDirectDebitDetailsPage.accountNameFieldId)
-                )
-                testBankDetailsFormError(controller.enterBankDetailsSubmit)(formData: _*)(expectedContentAndHref)
-                EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
-                AuditConnectorStub.verifyNoAuditEvent()
-            }
+                val fakeRequest: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
+                  method = "POST",
+                  path   = "/set-up-direct-debit"
+                ).withAuthToken()
+                  .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+                  .withFormUrlEncodedBody(formDataWithUnallowedCharacters: _*)
+
+                val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
+                status(result) shouldBe Status.SEE_OTHER
+                redirectLocation(result) shouldBe Some(PageUrls.checkDirectDebitDetailsUrl)
+              }
+
+            List(
+              "account names with 2 characters" -> "a1",
+              "account names with 39 characters" -> "a" * 39,
+              "whitespace" -> "a 1",
+              "ampersands &" -> "a&1",
+              "'at' symbols @" -> "a@1",
+              "left brackets" -> "a(1",
+              "right brackets" -> "a)1",
+              "exclamation marks !" -> "a!1",
+              "colons :" -> "a:1",
+              "commas ," -> "a,1",
+              "plus-signs +" -> "a+1",
+              "back-ticks `" -> "a`1",
+              "hyphens -" -> "a-1",
+              "back slashes \\" -> "a\\1",
+              "single quotes '" -> "a'1",
+              "fullstops ." -> "a.1",
+              "forward slashes /" -> "a/1",
+              "carets ^" -> "a^1",
+              "line breaks" -> "a\nb",
+              "back spaces" -> "a\bb",
+              "tab spaces" -> "a\tb",
+              "carriage returns" -> "a\rb"
+            ).foreach{
+                case (description, value) =>
+                  description in { testIsAllowed(value) }
+              }
           }
 
           s"[$regime journey] show correct error messages when submitted sort code and account number are more than 6 and 8 digits respectively" in {
@@ -1223,177 +1283,4 @@ class BankDetailsControllerSpec extends ItSpec {
 
 object BankDetailsControllerSpec {
   final case class SummaryRow(question: String, answer: String, changeLink: String)
-}
-
-//todo remove this spec and un-ignore controllers/BankDetailsControllerSpec.scala:574 test
-class BankDetailsWithFeatureFlagSpec extends ItSpec {
-
-  override lazy val configOverrides: Map[String, Any] = Map(
-    "features.use-regex-constraint-bars-form" -> true
-  )
-
-  private val controller = app.injector.instanceOf[BankDetailsController]
-
-  object EnterDirectDebitDetailsPage {
-    val expectedH1: String = "Set up Direct Debit"
-    val accountNameContent: String = "Name on the account"
-    val accountNameFieldId: String = "#name"
-    val sortCodeContent: String = "Sort code"
-    val sortCodeHintContent: String = "Must be 6 digits long"
-    val sortCodeFieldId: String = "#sortCode"
-    val accountNumberContent: String = "Account number"
-    val accountNumberHintContent: String = "Must be between 6 and 8 digits long"
-    val accountNumberFieldId: String = "#accountNumber"
-  }
-
-  private def getExpectedFormValue(field: String, formData: Seq[(String, String)]): String =
-    formData.collectFirst { case (x, value) if x == field => value }.getOrElse("")
-
-  def testFormError(action: Action[AnyContent])(formData: (String, String)*)(
-      textAndHrefContent: List[(String, String)],
-      additionalChecks:   Document => Unit
-  ): Unit = {
-    val fakeRequest = FakeRequest()
-      .withMethod("POST")
-      .withAuthToken()
-      .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      .withFormUrlEncodedBody(formData: _*)
-
-    val result: Future[Result] = action(fakeRequest)
-
-    RequestAssertions.assertGetRequestOk(result)
-
-    val pageContent: String = contentAsString(result)
-    val doc: Document = Jsoup.parse(pageContent)
-
-    val errorSummary = doc.select(".govuk-error-summary__list")
-    val errorLinks = errorSummary.select("a").asScala.toList
-    errorLinks.zip(textAndHrefContent).foreach { testData: (Element, (String, String)) =>
-      testData._1.text() shouldBe testData._2._1
-      testData._1.attr("href") shouldBe testData._2._2
-    }
-
-    additionalChecks(doc)
-  }
-
-  def testBankDetailsFormError(
-      action: Action[AnyContent]
-  )(formData: (String, String)*)(
-      textAndHrefContent: List[(String, String)],
-      fieldErrors:        Seq[(String, String)]  = Seq.empty
-  ): Unit = {
-      def assertFieldsPopulated(doc: Document, form: Seq[(String, String)], fieldErrors: Seq[(String, String)]): Unit = {
-        doc.select(EnterDirectDebitDetailsPage.accountNameFieldId).`val`() shouldBe getExpectedFormValue("name", form)
-        doc.select(EnterDirectDebitDetailsPage.sortCodeFieldId).`val`() shouldBe getExpectedFormValue("sortCode", form)
-        doc.select(EnterDirectDebitDetailsPage.accountNumberFieldId).`val`() shouldBe getExpectedFormValue("accountNumber", form)
-
-        fieldErrors.foreach {
-          case (field, errorMessage) =>
-            doc.getElementById(s"$field-error").text.trim shouldBe s"Error: $errorMessage"
-        }
-      }
-
-    testFormError(action)(formData: _*)(textAndHrefContent, assertFieldsPopulated(_, formData, fieldErrors))
-  }
-
-  Seq[(String, Origin)](
-    ("EPAYE", Origins.Epaye.Bta),
-    ("VAT", Origins.Vat.Bta)
-  ).foreach {
-      case (regime, origin) =>
-        s"[$regime journey] show correct error message when account name doesn't match regex and features.use-regex-constraint-bars-form is true" in {
-
-          val nameTooShortError = "Name on the account must be between 2 and 39 characters"
-          val nameTooLongError = "Name on the account must be between 2 and 39 characters"
-
-          val inputAndExpectedError = List[(String, String)](
-            "" -> "Enter the name on the account",
-            "a" -> nameTooShortError,
-            "a" * 40 -> nameTooLongError,
-            "ab£2" -> "Name on the account must not contain £",
-            "a$$b£c" -> "Name on the account must not contain $ or £",
-            "a?$$b£c?" -> "Name on the account must not contain ?, $ or £",
-            "a?$$b£c=?" -> "Name on the account must not contain ?, $, £ or ="
-          )
-
-          inputAndExpectedError.foreach {
-            case (accountName, errorMessage) =>
-              withClue(s"For accountName $accountName: ") {
-                stubCommonActions()
-                EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)()
-                val formData: List[(String, String)] = List(
-                  ("name", accountName),
-                  ("sortCode", "123456"),
-                  ("accountNumber", "12345678")
-                )
-                val expectedContentAndHref: List[(String, String)] = List(
-                  (errorMessage, EnterDirectDebitDetailsPage.accountNameFieldId)
-                )
-                testBankDetailsFormError(controller.enterBankDetailsSubmit)(formData: _*)(expectedContentAndHref)
-                EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
-                AuditConnectorStub.verifyNoAuditEvent()
-              }
-          }
-        }
-
-          def testIsAllowed(accountName: String) = {
-            stubCommonActions()
-            BarsStub.ValidateStub.success()
-            BarsStub.VerifyPersonalStub.success()
-            BarsVerifyStatusStub.update()
-            EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)(
-              JourneyJsonTemplates.`Entered Details About Bank Account - Personal`(isAccountHolder = true, origin)
-            )
-            EssttpBackend.DirectDebitDetails.stubUpdateDirectDebitDetails(TdAll.journeyId, JourneyJsonTemplates.`Entered Direct Debit Details`(origin))
-
-            val formDataWithUnallowedCharacters: List[(String, String)] = List(
-              ("name", accountName),
-              ("sortCode", "123456"),
-              ("accountNumber", "12345678")
-            )
-            val fakeRequest: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
-              method = "POST",
-              path   = "/set-up-direct-debit"
-            ).withAuthToken()
-              .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-              .withFormUrlEncodedBody(formDataWithUnallowedCharacters: _*)
-
-            val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
-            status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(PageUrls.checkDirectDebitDetailsUrl)
-          }
-
-        s"[$regime journey] must allow" - {
-
-          List(
-            "account names with 2 characters" -> "a1",
-            "account names with 39 characters" -> "a" * 39,
-            "whitespace" -> "a 1",
-            "ampersands &" -> "a&1",
-            "'at' symbols @" -> "a@1",
-            "left brackets" -> "a(1",
-            "right brackets" -> "a)1",
-            "exclamation marks !" -> "a!1",
-            "colons :" -> "a:1",
-            "commas ," -> "a,1",
-            "plus-signs +" -> "a+1",
-            "back-ticks `" -> "a`1",
-            "hyphens -" -> "a-1",
-            "back slashes \\" -> "a\\1",
-            "single quotes '" -> "a'1",
-            "fullstops ." -> "a.1",
-            "forward slashes /" -> "a/1",
-            "carets ^" -> "a^1",
-            "line breaks" -> "a\nb",
-            "back spaces" -> "a\bb",
-            "tab spaces" -> "a\tb",
-            "carriage returns" -> "a\rb"
-          ).foreach{
-              case (description, value) =>
-                description in { testIsAllowed(value) }
-            }
-        }
-
-    }
-
 }

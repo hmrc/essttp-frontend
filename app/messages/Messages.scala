@@ -992,12 +992,6 @@ object Messages {
             welsh   = s"Mae’n rhaid i’r enw sydd ar y cyfrif peidio â chynnwys ${commaSeparateList(disallowedCharacters, "neu")}",
           )
         },
-        "name.error.maxlength-70" -> { _ =>
-          Message(
-            english = "Name on the account must be 70 characters or less",
-            welsh   = "Mae’n rhaid i’r enw sydd ar y cyfrif fod yn 70 o gymeriadau neu lai"
-          )
-        },
         "name.error.maxLength" -> { _ =>
           Message(
             english = "Name on the account must be between 2 and 39 characters",

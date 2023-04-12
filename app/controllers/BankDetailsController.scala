@@ -19,7 +19,6 @@ package controllers
 import actions.Actions
 import actionsmodel.AuthenticatedJourneyRequest
 import cats.syntax.eq._
-import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import essttp.journey.model.Journey
 import essttp.journey.model.Journey.{AfterEnteredDetailsAboutBankAccount, BeforeEnteredDetailsAboutBankAccount}
@@ -46,8 +45,7 @@ class BankDetailsController @Inject() (
     mcc:            MessagesControllerComponents,
     requestSupport: RequestSupport,
     journeyService: JourneyService,
-    barsService:    EssttpBarsService,
-    appConfig:      AppConfig
+    barsService:    EssttpBarsService
 )(
     implicit
     executionContext: ExecutionContext
@@ -123,8 +121,8 @@ class BankDetailsController @Inject() (
       request: Request[_]
   ): Result = {
     val maybePrePoppedForm: Form[BankDetailsForm] = currentDirectDebitDetails(journey)
-      .fold(BankDetailsForm.form(appConfig.useRegexConstraintOnBarsNameField)) { directDebitDetails =>
-        BankDetailsForm.form(appConfig.useRegexConstraintOnBarsNameField).fill(
+      .fold(BankDetailsForm.form){ directDebitDetails =>
+        BankDetailsForm.form.fill(
           BankDetailsForm(
             name          = directDebitDetails.name,
             sortCode      = directDebitDetails.sortCode,
@@ -150,7 +148,7 @@ class BankDetailsController @Inject() (
         if (!j.detailsAboutBankAccount.isAccountHolder) {
           JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
         } else {
-          val formFromRequest = BankDetailsForm.form(appConfig.useRegexConstraintOnBarsNameField).bindFromRequest()
+          val formFromRequest = BankDetailsForm.form.bindFromRequest()
           formFromRequest.fold(
             formWithErrors => Ok(views.enterBankDetailsPage(formWithErrors)),
             (bankDetailsForm: BankDetailsForm) => {
