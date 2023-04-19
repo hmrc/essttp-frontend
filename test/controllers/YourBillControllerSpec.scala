@@ -34,6 +34,7 @@ import uk.gov.hmrc.http.SessionKeys
 
 import java.time.LocalDate
 import scala.concurrent.Future
+import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 class YourBillControllerSpec extends ItSpec {
 
@@ -57,6 +58,15 @@ class YourBillControllerSpec extends ItSpec {
         shouldBackLinkBePresent = true,
         expectedSubmitUrl       = Some(routes.YourBillController.yourBillSubmit.url)
       )
+
+      val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
+      tableRows.size shouldBe 2
+
+      tableRows(0).select(".govuk-summary-list__key").text() shouldBe "13 Aug to 14 Aug (month 5) Bill due 7 March 2017"
+      tableRows(0).select(".govuk-summary-list__value").text() shouldBe "£1,000 (includes interest added to date)"
+
+      tableRows(1).select(".govuk-summary-list__key").text() shouldBe "13 Jul to 14 Jul (month 4) Bill due 7 February 2017"
+      tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£2,000 (includes interest added to date)"
     }
 
     "return you bill page for VAT" in {
@@ -77,6 +87,15 @@ class YourBillControllerSpec extends ItSpec {
         expectedSubmitUrl       = Some(routes.YourBillController.yourBillSubmit.url),
         regimeBeingTested       = Some(TaxRegime.Vat)
       )
+
+      val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
+      tableRows.size shouldBe 2
+
+      tableRows(0).select(".govuk-summary-list__key").text() shouldBe "13 August to 14 August 2020 Bill due 7 March 2017"
+      tableRows(0).select(".govuk-summary-list__value").text() shouldBe "£1,000 (includes interest added to date)"
+
+      tableRows(1).select(".govuk-summary-list__key").text() shouldBe "13 July to 14 July 2020 Bill due 7 February 2017"
+      tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£2,000 (includes interest added to date)"
     }
   }
 
