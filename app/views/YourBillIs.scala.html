@@ -19,17 +19,17 @@
 @import controllers.routes
 @import essttp.rootmodel.TaxRegime
 @import views.html.templates.Layout
-@import views.html.OverduePaymentRow
+@import views.html.partials.OverduePaymentRow
 @import messages.Messages
 @import requests.RequestSupport
 @import models.OverDuePayments
 
 @this(
-  layout: Layout,
-  govukButton: GovukButton,
-  formWithCSRF: FormWithCSRF,
-  requestSupport: RequestSupport,
-  overduePaymentRow: OverduePaymentRow
+layout: Layout,
+govukButton: GovukButton,
+formWithCSRF: FormWithCSRF,
+requestSupport: RequestSupport,
+overduePaymentRow: OverduePaymentRow
 )
 
 @(overduePayments: OverDuePayments, taxRegime: TaxRegime)(implicit request: Request[_])
