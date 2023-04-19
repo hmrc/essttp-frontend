@@ -18,21 +18,31 @@
 @import models.OverduePayment
 @import play.api.mvc.Request
 @import requests.RequestSupport
+@import essttp.rootmodel.TaxRegime
 @import java.time.LocalDate
 
 @this(requestSupport: RequestSupport)
 
-@(payment: OverduePayment)(implicit request: Request[_])
+@(payment: OverduePayment, taxRegime: TaxRegime)(implicit request: Request[_])
 
 @import requestSupport._
 
-@invoicePeriodDate(date: LocalDate) = @{s"${date.getDayOfMonth.toString} ${DateMessages.shortMonthName(date.getMonthValue).show}"}
+@invoicePeriodDateShortMonth(date: LocalDate) = @{s"${date.getDayOfMonth.toString} ${DateMessages.shortMonthName(date.getMonthValue).show}"}
+@invoicePeriodDateLongMonth(date: LocalDate) = @{s"${date.getDayOfMonth.toString} ${DateMessages.monthName(date.getMonthValue).show}"}
+
 @invoicePeriodString = @{
-    s"${invoicePeriodDate(payment.invoicePeriod.start)} " +
-            s"${Messages.YourBill.to.show} ${invoicePeriodDate(payment.invoicePeriod.end)} " +
-            s"(${Messages.YourBill.month.show} " +
-            s"${payment.invoicePeriod.monthNumber.toString})"
+
+    taxRegime match {
+        case TaxRegime.Epaye =>
+            s"${invoicePeriodDateShortMonth(payment.invoicePeriod.start)} " +
+                    s"${Messages.YourBill.to.show} ${invoicePeriodDateShortMonth(payment.invoicePeriod.end)} " +
+                    s"(${Messages.YourBill.month.show} ${payment.invoicePeriod.monthNumber.toString})"
+        case TaxRegime.Vat =>
+            s"${invoicePeriodDateLongMonth(payment.invoicePeriod.start)} " +
+                    s"${Messages.YourBill.to.show} ${invoicePeriodDateLongMonth(payment.invoicePeriod.end)} ${payment.invoicePeriod.end.getYear.toString}"
+    }
 }
+
 @govDateFormat(date: LocalDate) = @{s"${date.getDayOfMonth.toString} ${DateMessages.monthName(date.getMonthValue).show} ${date.getYear.toString}"}
 
 <div class="govuk-summary-list__row">
