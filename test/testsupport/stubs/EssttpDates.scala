@@ -22,8 +22,8 @@ import essttp.rootmodel.dates.startdates.StartDatesRequest
 import testsupport.testdata.TdEssttpDatesBodies
 
 object EssttpDates {
-  private val startDatesUrl: String = "/essttp-dates/start-dates"
-  private val extremeDatesUrl: String = "/essttp-dates/extreme-dates"
+  private val startDatesUrl: String = "/essttp-backend/start-dates"
+  private val extremeDatesUrl: String = "/essttp-backend/extreme-dates"
 
   def verifyStartDates(expectedStartDatesRequest: StartDatesRequest): Unit =
     WireMockHelpers.verifyWithBodyParse(startDatesUrl, expectedStartDatesRequest)(StartDatesRequest.format)
