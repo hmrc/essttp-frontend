@@ -75,8 +75,8 @@ class InstalmentsControllerSpec extends ItSpec {
 
             detailsParagraphs(0).text() shouldBe "We charge interest on all overdue amounts."
             detailsParagraphs(1).text() shouldBe "We charge the Bank of England base rate plus 2.5% per year."
-            detailsParagraphs(2).text() shouldBe "If the interest rate changes during your plan, your monthly payments will not change. " +
-              "If the interest rate goes up or down during your payment plan, we will adjust your final payment to settle any difference."
+            detailsParagraphs(2).text() shouldBe "If the interest rate changes during your payment plan, you may need to settle any difference at the end. " +
+              "We will contact you if this is the case."
 
             doc.select(".govuk-fieldset__legend").text() shouldBe "How many months do you want to pay over?"
 
@@ -126,8 +126,8 @@ class InstalmentsControllerSpec extends ItSpec {
 
             detailsParagraphs(0).text() shouldBe "Rydym yn codi llog ar bob swm sy’n hwyr."
             detailsParagraphs(1).text() shouldBe "Rydym yn codi cyfradd sylfaenol Banc Lloegr ynghyd â 2.5% y flwyddyn."
-            detailsParagraphs(2).text() shouldBe "Os bydd y gyfradd llog yn newid yn ystod eich cynllun, ni fydd eich taliadau misol yn newid. " +
-              "Os bydd y gyfradd llog yn cynyddu neu’n gostwng yn ystod eich cynllun talu, byddwn yn addasu’ch taliad terfynol i setlo unrhyw wahaniaeth."
+            detailsParagraphs(2).text() shouldBe "Os bydd y gyfradd llog yn newid yn ystod eich cynllun talu, efallai bydd yn rhaid i chi setlo unrhyw wahaniaeth ar y diwedd. " +
+              "Byddwn yn cysylltu â chi os yw hyn yn wir."
 
             doc.select(".govuk-fieldset__legend").text() shouldBe "Dros sawl mis yr hoffech dalu?"
 
