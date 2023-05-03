@@ -787,10 +787,10 @@ object Messages {
     )
 
     val `If interest rates change...`: Message = Message(
-      english = "If the interest rate changes during your plan, your monthly payments will not change. " +
-        "If the interest rate goes up or down during your payment plan, we will adjust your final payment to settle any difference.",
-      welsh   = "Os bydd y gyfradd llog yn newid yn ystod eich cynllun, ni fydd eich taliadau misol yn newid. " +
-        "Os bydd y gyfradd llog yn cynyddu neu’n gostwng yn ystod eich cynllun talu, byddwn yn addasu’ch taliad terfynol i setlo unrhyw wahaniaeth."
+      english = "If the interest rate changes during your payment plan, you may need to settle any difference at the end. " +
+        "We will contact you if this is the case.",
+      welsh   = "Os bydd y gyfradd llog yn newid yn ystod eich cynllun talu, efallai bydd yn rhaid i chi setlo unrhyw wahaniaeth ar y diwedd. " +
+        "Byddwn yn cysylltu â chi os yw hyn yn wir."
     )
 
     val `How many months do you want to pay over?`: Message = Message(
