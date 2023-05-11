@@ -86,6 +86,8 @@ class TtpService @Inject() (
         )
     }
     JourneyLogger.debug("EligibilityRequest: " + Json.prettyPrint(Json.toJson(eligibilityRequest)))
+    // below log message used by Kibana dashboard.
+    JourneyLogger.info(s"TTP eligibility check being made for ${journey.taxRegime.toString}")
 
     ttpConnector
       .callEligibilityApi(eligibilityRequest, journey.correlationId).map(Option.apply)
