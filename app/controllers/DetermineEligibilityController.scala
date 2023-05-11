@@ -93,10 +93,12 @@ class DetermineEligibilityController @Inject() (
             case TaxRegime.Vat   => routes.IneligibleController.vatGenericIneligiblePage.url
           }
           toFuture(Redirect(redirect))
-        } { someResponse =>
+        } { eligibilityCheckResult =>
           for {
-            updatedJourney <- journeyService.updateEligibilityCheckResult(journey.id, someResponse)
-            _ = auditService.auditEligibilityCheck(journey, someResponse)
+            updatedJourney <- journeyService.updateEligibilityCheckResult(journey.id, eligibilityCheckResult)
+            _ = auditService.auditEligibilityCheck(journey, eligibilityCheckResult)
+            // below log message used by Kibana dashboard.
+            _ = if (eligibilityCheckResult.isEligible) JourneyLogger.info(s"Eligible journey being started for ${journey.taxRegime.toString}")
           } yield Routing.redirectToNext(routes.DetermineEligibilityController.determineEligibility, updatedJourney, submittedValueUnchanged = false)
         }
       }
