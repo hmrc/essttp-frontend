@@ -93,7 +93,7 @@ class TtpService @Inject() (
       .callEligibilityApi(eligibilityRequest, journey.correlationId).map(Option.apply)
       .recover {
         case e: UpstreamErrorResponse =>
-          JourneyLogger.error(s"Upstream error from ttp, it might be the IF/ETMP issue. Returning None to redirect to call us page. ${e.message}")
+          JourneyLogger.error(s"Upstream error from ttp, it might be the IF/ETMP issue. Returning None to redirect to call us page. TaxType: ${journey.taxRegime.toString}. ${e.message}")
           None
       }
   }
@@ -202,6 +202,7 @@ class TtpService @Inject() (
       }.recover {
         case httpException: HttpException =>
           auditService.auditPaymentPlanSetUp(journey, Left(httpException))
+          JourneyLogger.info(s"Error calling EnactArrangement API for TaxType: ${journey.fold(_.taxRegime, _.taxRegime).toString}")
           Errors.throwServerErrorException(httpException.message)
       }
   }
