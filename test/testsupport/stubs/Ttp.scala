@@ -84,11 +84,12 @@ object Ttp {
     def verifyTtpEnactArrangementRequest(
         customerDetails:             Option[List[CustomerDetail]],
         regimeDigitalCorrespondence: Option[RegimeDigitalCorrespondence],
-        taxRegime:                   TaxRegime
+        taxRegime:                   TaxRegime,
+        accountNumber:               String                              = "12345678"
     )(implicit cryptoFormat: CryptoFormat): Unit =
       ttpVerify(
         enactArrangementUrl,
-        TdAll.arrangementRequest(customerDetails, regimeDigitalCorrespondence, taxRegime)
+        TdAll.arrangementRequest(customerDetails, regimeDigitalCorrespondence, taxRegime, accountNumber)
       )(ArrangementRequest.format)
   }
 

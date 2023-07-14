@@ -20,7 +20,7 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.crypto.CryptoFormat
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.TaxRegime
-import essttp.rootmodel.ttp.eligibility.EmailSource
+import essttp.rootmodel.ttp.eligibility.{CustomerDetail, EmailSource}
 import paymentsEmailVerification.models.EmailVerificationResult
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
@@ -215,6 +215,70 @@ class SubmitArrangementControllerSpec extends ItSpec {
 
       }
 
+    }
+
+    "left pad account number when sending to TTP if account number is less than 8 characters" in {
+      val (taxRegime, origin) = TaxRegime.Epaye -> Origins.Epaye.Bta
+      stubCommonActions()
+      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto, origin, None)(JourneyJsonTemplates.`Agreed Terms and Conditions - padded account number`(false, origin, None))
+      EssttpBackend.SubmitArrangement.stubUpdateSubmitArrangement(TdAll.journeyId, JourneyJsonTemplates.`Arrangement Submitted - padded account number`(origin))
+      Ttp.EnactArrangement.stubEnactArrangement(taxRegime)()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+      val result: Future[Result] = controller.submitArrangement(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.epayeConfirmationUrl)
+
+      Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(
+        Some(List.empty[CustomerDetail]),
+        TdAll.someRegimeDigitalCorrespondenceTrue,
+        taxRegime,
+        "00345678"
+      )(CryptoFormat.NoOpCryptoFormat)
+
+      AuditConnectorStub.verifyEventAudited(
+        "PlanSetUp",
+        Json.parse(
+          s"""
+             |{
+             |	"bankDetails": {
+             |		"name": "${TdAll.testAccountName}",
+             |		"sortCode": "123456",
+             |		"accountNumber": "345678"
+             |	},
+             |	"schedule": {
+             |		"initialPaymentAmount": 123.12,
+             |		"collectionDate": 28,
+             |		"collectionLengthCalendarMonths": 2,
+             |		"collections": [{
+             |			"collectionNumber": 2,
+             |			"amount": 555.70,
+             |			"paymentDate": "2022-09-28"
+             |		}, {
+             |			"collectionNumber": 1,
+             |			"amount": 555.70,
+             |			"paymentDate": "2022-08-28"
+             |		}],
+             |		"totalNoPayments": 3,
+             |		"totalInterestCharged": 0.06,
+             |		"totalPayable": 1111.47,
+             |		"totalPaymentWithoutInterest": 1111.41
+             |	},
+             |	"status": "successfully sent to TTP",
+             |	"failedSubmissionReason": 202,
+             |	"origin": "Bta",
+             |	"taxType": "Epaye",
+             |	"taxDetail": ${TdAll.taxDetailJsonString(taxRegime)},
+             |	"correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+             |	"ppReferenceNo": "${TdAll.customerReference(taxRegime).value}",
+             |	"authProviderId": "authId-999",
+             |  "regimeDigitalCorrespondence": true
+             |}
+             |""".stripMargin
+        ).as[JsObject]
+      )
+      EssttpBackend.SubmitArrangement.verifyUpdateSubmitArrangementRequest(TdAll.journeyId, TdAll.arrangementResponse(taxRegime))
     }
 
     "should not update backend if call to ttp enact arrangement api fails (anything other than a 202 response)" in {
