@@ -43,7 +43,8 @@ lazy val root = (project in file("."))
     update / evictionWarningOptions :=
       EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
     pipelineStages := Seq(digest),
-    scalacOptions ++= scalaCompilerOptions
+    scalacOptions ++= scalaCompilerOptions,
+    (Compile / doc / sources) := Seq.empty
   )
   .settings(
     commands += Command.command("runTestOnly") { state =>
