@@ -45,6 +45,7 @@ object EligibilityRouter {
         case Some(DmSpecialOfficeProcessingRequired) => whichGenericEligibilityPage(taxRegime)
         case Some(NoDueDatesReached)                 => whichGenericEligibilityPage(taxRegime)
         case Some(CannotFindLockReason)              => whichGenericEligibilityPage(taxRegime)
+        case Some(CreditsNotAllowed)                 => whichGenericEligibilityPage(taxRegime)
       }
     }
   }
