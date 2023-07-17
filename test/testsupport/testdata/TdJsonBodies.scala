@@ -462,6 +462,14 @@ object TdJsonBodies {
        |  "accountNumber" : "${encryptString("12345678", encrypter)}"
        |}""".stripMargin
 
+  def paddedDirectDebitDetailsJourneyInfo(encrypter: Encrypter): String =
+    s"""
+       |"directDebitDetails" : {
+       |  "name" : "${encryptString(TdAll.testAccountName, encrypter)}",
+       |  "sortCode" : "${encryptString("123456", encrypter)}",
+       |  "accountNumber" : "${encryptString("345678", encrypter)}"
+       |}""".stripMargin
+
   def isEmailAddressRequiredJourneyInfo(isEmailAddressRequired: Boolean): String =
     s""""isEmailAddressRequired": ${isEmailAddressRequired.toString}"""
 

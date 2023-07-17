@@ -244,6 +244,12 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
+  def `Agreed Terms and Conditions - padded account number`(isEmailAddresRequired: Boolean, origin: Origin, etmpEmail: Option[String])(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.agreedTermsAndConditionsEmailAddressNotRequired,
+    journeyInfo = JourneyInfo.`agreedTermsAndConditions - padded account number`(isEmailAddresRequired, origin.taxRegime, encrypter, etmpEmail),
+    origin      = origin
+  )
+
   def `Selected email to be verified`(email: String, origin: Origin, etmpEmail: Option[String] = Some(TdAll.etmpEmail))(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.selectedEmailToBeVerified,
     journeyInfo = JourneyInfo.selectedEmailToBeVerified(email, origin.taxRegime, encrypter, etmpEmail),
@@ -274,6 +280,12 @@ object JourneyJsonTemplates {
   def `Arrangement Submitted - with upfront payment and email`(email: String, origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.submittedArrangement,
     journeyInfo = JourneyInfo.submittedArrangementWithEmailParams(email, origin.taxRegime, encrypter),
+    origin      = origin
+  )
+
+  def `Arrangement Submitted - padded account number`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.submittedArrangement,
+    journeyInfo = JourneyInfo.submittedArrangementPaddedAccountNumber(origin.taxRegime, encrypter),
     origin      = origin
   )
 }

@@ -332,7 +332,8 @@ object TdAll {
   def arrangementRequest(
       customerDetails:             Option[List[CustomerDetail]],
       regimeDigitalCorrespondence: Option[RegimeDigitalCorrespondence],
-      taxRegime:                   TaxRegime
+      taxRegime:                   TaxRegime,
+      accountNumber:               String                              = "12345678"
   ): ArrangementRequest = {
     val regimeType = taxRegime match {
       case TaxRegime.Epaye => RegimeType("PAYE")
@@ -346,7 +347,7 @@ object TdAll {
       identification              = identification(taxRegime),
       directDebitInstruction      = DirectDebitInstruction(
         sortCode        = SortCode(SensitiveString("123456")),
-        accountNumber   = AccountNumber(SensitiveString("12345678")),
+        accountNumber   = AccountNumber(SensitiveString(accountNumber)),
         accountName     = AccountName(SensitiveString(testAccountName)),
         paperAuddisFlag = PaperAuddisFlag(false)
       ),

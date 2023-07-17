@@ -24,17 +24,18 @@ import essttp.crypto.CryptoFormat
 import essttp.journey.model.Journey.Stages.ComputedTaxId
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel._
+import essttp.rootmodel.bank.AccountNumber
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
 import essttp.rootmodel.ttp._
-import essttp.rootmodel.ttp.eligibility._
 import essttp.rootmodel.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
 import essttp.rootmodel.ttp.affordablequotes._
 import essttp.rootmodel.ttp.arrangement._
-import essttp.rootmodel.ttp.eligibility.{CustomerDetail, EmailSource}
+import essttp.rootmodel.ttp.eligibility._
 import essttp.utils.Errors
 import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
-import services.TtpService.deriveCustomerDetail
+import services.TtpService.{deriveCustomerDetail, padLeftWithZeros}
+import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 import uk.gov.hmrc.http.{HttpException, UpstreamErrorResponse}
 import util.JourneyLogger
 
@@ -163,11 +164,13 @@ class TtpService @Inject() (
       case TaxRegime.Vat   => RegimeType.`VAT`
     }
     val eligibilityCheckResult = journey.fold(_.eligibilityCheckResult, _.eligibilityCheckResult)
-    val directDebitDetails = journey.fold(_.directDebitDetails, _.directDebitDetails)
     val selectedPaymentPlan = journey.fold(_.selectedPaymentPlan, _.selectedPaymentPlan)
     val correlationId = journey.fold(_.correlationId, _.correlationId)
     val regimeDigitalCorrespondence = journey.fold(_.eligibilityCheckResult.regimeDigitalCorrespondence, _.eligibilityCheckResult.regimeDigitalCorrespondence)
     val customerDetail = journey.fold(_.eligibilityCheckResult.customerDetails, deriveCustomerDetail)
+
+    val directDebitDetails = journey.fold(_.directDebitDetails, _.directDebitDetails)
+    val accountNumberPaddedWithZero: AccountNumber = directDebitDetails.accountNumber.copy(SensitiveString(padLeftWithZeros(directDebitDetails.accountNumber.value.decryptedValue)))
 
     val arrangementRequest: ArrangementRequest = ArrangementRequest(
       channelIdentifier           = ChannelIdentifiers.eSSTTP,
@@ -177,7 +180,7 @@ class TtpService @Inject() (
       identification              = eligibilityCheckResult.identification,
       directDebitInstruction      = DirectDebitInstruction(
         sortCode        = directDebitDetails.sortCode,
-        accountNumber   = directDebitDetails.accountNumber,
+        accountNumber   = accountNumberPaddedWithZero,
         accountName     = directDebitDetails.name,
         paperAuddisFlag = PaperAuddisFlag(false)
       ),
@@ -294,5 +297,11 @@ object TtpService {
     case j: Journey.AfterEnteredMonthlyPaymentAmount => j.monthlyPaymentAmount
     case _ => Errors.throwServerErrorException("Trying to get monthly payment amount for journey before it exists..")
   }
+
+  // account number needs to be length 8 when sent to TTP, we pad with zeros if it's less
+  private def padLeftWithZeros(str: String): String = str
+    .reverse
+    .padTo(8, '0')
+    .reverse
 
 }
