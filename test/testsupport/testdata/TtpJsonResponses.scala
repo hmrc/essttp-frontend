@@ -59,6 +59,7 @@ object TtpJsonResponses {
        |  ${optionalEligibilityResponsesJson(eligibilityRules.hasInvalidInterestSignals, "hasInvalidInterestSignals")}
        |  ${optionalEligibilityResponsesJson(eligibilityRules.dmSpecialOfficeProcessingRequired, "dmSpecialOfficeProcessingRequired")}
        |  ${optionalEligibilityResponsesJson(eligibilityRules.cannotFindLockReason, "cannotFindLockReason")}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.creditsNotAllowed, "creditsNotAllowed")}
        |  },
        |  "chargeTypeAssessment" : [ {
        |    "taxPeriodFrom" : "2020-08-13",
