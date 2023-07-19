@@ -17,7 +17,9 @@
 package services
 
 import actionsmodel.AuthenticatedJourneyRequest
+import cats.Eq
 import cats.implicits.catsSyntaxEq
+import config.AppConfig
 import connectors.{CallEligibilityApiRequest, TtpConnector}
 import controllers.support.RequestSupport.hc
 import essttp.crypto.CryptoFormat
@@ -50,42 +52,21 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class TtpService @Inject() (
     ttpConnector: TtpConnector,
-    auditService: AuditService
+    auditService: AuditService,
+    appConfig:    AppConfig
 )(implicit executionContext: ExecutionContext) {
 
   implicit val cryptoFormat: CryptoFormat = CryptoFormat.NoOpCryptoFormat
+  implicit val eq: Eq[TaxRegime] = Eq.fromUniversalEquals
 
   /**
    * TODO: change this back to return Future[EligibilityCheckResult] with
    * i.e.:     ttpConnector.callEligibilityApi(eligibilityRequest, journey.correlationId)
    * no recover, once IF/ETMP have fixed their bugs...
+   * todo remove/update this comment as part of OPS-10724
    */
   def determineEligibility(journey: ComputedTaxId)(implicit request: RequestHeader): Future[Option[EligibilityCheckResult]] = {
-    val eligibilityRequest: CallEligibilityApiRequest = journey match {
-      case j: Journey.Epaye =>
-        CallEligibilityApiRequest(
-          channelIdentifier         = EligibilityRequestDefaults.essttpChannelIdentifier,
-          idType                    = EligibilityRequestDefaults.Epaye.idType,
-          idValue                   = j.taxId match {
-            case empRef: EmpRef => empRef.value
-            case other          => sys.error(s"Expected EmpRef but found ${other.getClass.getSimpleName}")
-          },
-          regimeType                = EligibilityRequestDefaults.Epaye.regimeType,
-          returnFinancialAssessment = true
-        )
-
-      case j: Journey.Vat =>
-        CallEligibilityApiRequest(
-          channelIdentifier         = EligibilityRequestDefaults.essttpChannelIdentifier,
-          idType                    = EligibilityRequestDefaults.Vat.idType,
-          idValue                   = j.taxId match {
-            case vrn: Vrn => vrn.value
-            case other    => sys.error(s"Expected Vrn but found ${other.getClass.getSimpleName}")
-          },
-          regimeType                = EligibilityRequestDefaults.Vat.regimeType,
-          returnFinancialAssessment = true
-        )
-    }
+    val eligibilityRequest: CallEligibilityApiRequest = TtpService.buildEligibilityRequest(journey)
     JourneyLogger.debug("EligibilityRequest: " + Json.prettyPrint(Json.toJson(eligibilityRequest)))
     // below log message used by Kibana dashboard.
     JourneyLogger.info(s"TTP eligibility check being made for ${journey.taxRegime.toString}")
@@ -93,8 +74,12 @@ class TtpService @Inject() (
     ttpConnector
       .callEligibilityApi(eligibilityRequest, journey.correlationId).map(Option.apply)
       .recover {
-        case e: UpstreamErrorResponse =>
+        //todo remove this case as part of OPS-10724, along with ff
+        case e: UpstreamErrorResponse if !appConfig.use422ErrorHandling =>
           JourneyLogger.error(s"Upstream error from ttp, it might be the IF/ETMP issue. Returning None to redirect to call us page. TaxType: ${journey.taxRegime.toString}. ${e.message}")
+          None
+        case e: UpstreamErrorResponse if e.statusCode === 422 && journey.taxRegime === TaxRegime.Vat =>
+          JourneyLogger.error(s"De-registered VAT user error - 422 Error Code from TTP")
           None
       }
   }
@@ -212,6 +197,33 @@ class TtpService @Inject() (
 }
 
 object TtpService {
+
+  private def buildEligibilityRequest(journey: ComputedTaxId): CallEligibilityApiRequest = journey match {
+    case j: Journey.Epaye =>
+      CallEligibilityApiRequest(
+        channelIdentifier         = EligibilityRequestDefaults.essttpChannelIdentifier,
+        idType                    = EligibilityRequestDefaults.Epaye.idType,
+        idValue                   = j.taxId match {
+          case empRef: EmpRef => empRef.value
+          case other          => sys.error(s"Expected EmpRef but found ${other.getClass.getSimpleName}")
+        },
+        regimeType                = EligibilityRequestDefaults.Epaye.regimeType,
+        returnFinancialAssessment = true
+      )
+
+    case j: Journey.Vat =>
+      CallEligibilityApiRequest(
+        channelIdentifier         = EligibilityRequestDefaults.essttpChannelIdentifier,
+        idType                    = EligibilityRequestDefaults.Vat.idType,
+        idValue                   = j.taxId match {
+          case vrn: Vrn => vrn.value
+          case other    => sys.error(s"Expected Vrn but found ${other.getClass.getSimpleName}")
+        },
+        regimeType                = EligibilityRequestDefaults.Vat.regimeType,
+        returnFinancialAssessment = true
+      )
+  }
+
   // these are technically hard coded, may change per tax type? I don't want to put in config so I've put them here...
   private val paymentPlanMaxLength: PaymentPlanMaxLength = PaymentPlanMaxLength(6)
   private val paymentPlanMinLength: PaymentPlanMinLength = PaymentPlanMinLength(1)

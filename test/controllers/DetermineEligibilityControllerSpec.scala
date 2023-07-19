@@ -241,35 +241,77 @@ class DetermineEligibilityControllerSpec extends ItSpec {
       EssttpBackend.EligibilityCheck.verifyNoneUpdateEligibilityRequest(TdAll.journeyId)
     }
 
-    "Redirect to generic epaye call us page when ttp eligibility call returns any technical upstream error " +
-      "if the tax regime is epaye -- [SUPP-658]" in {
+    "throw an error when ttp eligibility call returns a 422 response if the tax regime is paye" in {
+      stubCommonActions()
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Epaye.Bta)()
+      Ttp.Eligibility.stub422RetrieveEligibility()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val error = intercept[Exception](controller.determineEligibility(fakeRequest).futureValue)
+      error.getMessage shouldBe "The future returned an exception of type: uk.gov.hmrc.http.Upstream4xxResponse, with message: POST of 'http://localhost:11111/debts/time-to-pay/eligibility' returned 422. Response body: ''."
+
+      Ttp.Eligibility.verifyTtpEligibilityRequests(TaxRegime.Epaye)
+      EssttpBackend.EligibilityCheck.verifyNoneUpdateEligibilityRequest(TdAll.journeyId)
+      AuditConnectorStub.verifyNoAuditEvent()
+    }
+
+    List(Origins.Epaye.Bta -> TaxRegime.Epaye, Origins.Vat.Bta -> TaxRegime.Vat).foreach {
+      case (origin, taxRegime) =>
+        s"[${taxRegime.entryName}] throw an error when ttp eligibility call returns a legitimate error (not a 422)" in {
+          stubCommonActions()
+          EssttpBackend.DetermineTaxId.findJourney(origin)()
+          Ttp.Eligibility.stubServiceUnavailableRetrieveEligibility()
+
+          val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+          val error = intercept[Exception](controller.determineEligibility(fakeRequest).futureValue)
+          error.getMessage should include("The future returned an exception of type: uk.gov.hmrc.http.Upstream5xxResponse")
+
+          Ttp.Eligibility.verifyTtpEligibilityRequests(taxRegime)
+          EssttpBackend.EligibilityCheck.verifyNoneUpdateEligibilityRequest(TdAll.journeyId)
+          AuditConnectorStub.verifyNoAuditEvent()
+        }
+    }
+
+    "Redirect to generic vat call us page when ttp eligibility call returns a 422 response if the tax regime is vat" in {
+      stubCommonActions()
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Vat.Bta)()
+      Ttp.Eligibility.stub422RetrieveEligibility()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result = controller.determineEligibility(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.vatNotEligibleUrl)
+
+      Ttp.Eligibility.verifyTtpEligibilityRequests(TaxRegime.Vat)
+      EssttpBackend.EligibilityCheck.verifyNoneUpdateEligibilityRequest(TdAll.journeyId)
+      AuditConnectorStub.verifyNoAuditEvent()
+    }
+
+  }
+}
+
+class DetermineEligibilityControllerFfSpec extends ItSpec {
+  override lazy val configOverrides: Map[String, Any] = Map("features.enable-422-error-logic" -> false)
+  private val controller: DetermineEligibilityController = app.injector.instanceOf[DetermineEligibilityController]
+  //todo remove this test as part of OPS-10724
+  List(Origins.Epaye.Bta -> TaxRegime.Epaye, Origins.Vat.Bta -> TaxRegime.Vat).foreach {
+    case (origin, taxRegime) =>
+      s"[${taxRegime.entryName}] recover from any error thrown by TTP while feature flag is false (legacy behaviour)" in {
         stubCommonActions()
-        EssttpBackend.DetermineTaxId.findJourney(Origins.Epaye.Bta)()
+        EssttpBackend.DetermineTaxId.findJourney(origin)()
         Ttp.Eligibility.stubServiceUnavailableRetrieveEligibility()
+
         val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
         val result = controller.determineEligibility(fakeRequest)
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(PageUrls.payeNotEligibleUrl)
-        Ttp.Eligibility.verifyTtpEligibilityRequests(TaxRegime.Epaye)
+        redirectLocation(result) shouldBe Some(taxRegime match {
+          case TaxRegime.Epaye => PageUrls.payeNotEligibleUrl
+          case TaxRegime.Vat   => PageUrls.vatNotEligibleUrl
+        })
+
+        Ttp.Eligibility.verifyTtpEligibilityRequests(taxRegime)
         EssttpBackend.EligibilityCheck.verifyNoneUpdateEligibilityRequest(TdAll.journeyId)
         AuditConnectorStub.verifyNoAuditEvent()
       }
-
-    "Redirect to generic vat call us page when ttp eligibility call returns any technical upstream error " +
-      "if the tax tegime is vat -- [SUPP-718]" in {
-        stubCommonActions()
-        EssttpBackend.DetermineTaxId.findJourney(Origins.Vat.Bta)()
-        Ttp.Eligibility.stubServiceUnavailableRetrieveEligibility()
-
-        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-        val result = controller.determineEligibility(fakeRequest)
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(PageUrls.vatNotEligibleUrl)
-
-        Ttp.Eligibility.verifyTtpEligibilityRequests(TaxRegime.Vat)
-        EssttpBackend.EligibilityCheck.verifyNoneUpdateEligibilityRequest(TdAll.journeyId)
-        AuditConnectorStub.verifyNoAuditEvent()
-      }
-
   }
 }

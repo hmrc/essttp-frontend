@@ -47,6 +47,9 @@ object Ttp {
     def stubServiceUnavailableRetrieveEligibility(): StubMapping =
       stubFor(post(urlPathEqualTo(eligibilityUrl)).willReturn(aResponse().withStatus(Status.SERVICE_UNAVAILABLE)))
 
+    def stub422RetrieveEligibility(): StubMapping =
+      stubFor(post(urlPathEqualTo(eligibilityUrl)).willReturn(aResponse().withStatus(Status.UNPROCESSABLE_ENTITY)))
+
     def verifyTtpEligibilityRequests(taxRegime: TaxRegime): Unit = {
       val request = taxRegime match {
         case TaxRegime.Epaye => TdAll.callEligibilityApiRequestEpaye

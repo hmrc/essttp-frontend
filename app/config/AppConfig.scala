@@ -33,6 +33,8 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val appName: String = config.get[String]("appName")
   val emailJourneyEnabled: Boolean = config.get[Boolean]("features.email-journey")
   val vatEnabled: Boolean = config.get[Boolean]("features.vat")
+  //todo remove this as part of OPS-10724
+  val use422ErrorHandling: Boolean = config.get[Boolean]("features.enable-422-error-logic")
   val authTimeoutSeconds: Int = config.get[FiniteDuration]("timeout-dialog.timeout").toSeconds.toInt
   val authTimeoutCountdownSeconds: Int = config.get[FiniteDuration]("timeout-dialog.countdown").toSeconds.toInt
   val accessibilityStatementPath: String = config.get[String]("accessibility-statement.service-path")
