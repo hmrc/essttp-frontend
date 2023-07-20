@@ -16,8 +16,7 @@
 
 package controllers
 
-import config.AppConfig
-import essttp.journey.model.{Origin, Origins}
+import essttp.journey.model.Origins
 import essttp.rootmodel.TaxRegime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -31,21 +30,10 @@ import testsupport.stubs.EssttpBackend
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
-import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 class SignOutControllerSpec extends ItSpec {
 
   private val controller: SignOutController = app.injector.instanceOf[SignOutController]
-  private val appConfig = app.injector.instanceOf[AppConfig]
-
-  private def checkDoYouWantToGiveFeedbackContent(doc: Document): Unit = {
-    val radioContent = doc.select(".govuk-radios__label").asScala.toList
-    radioContent(0).text() shouldBe "Yes"
-    radioContent(1).text() shouldBe "No"
-
-    doc.select("#DoYouWantToGiveFeedback-hint").text() shouldBe "If you select no, you will be directed to GOV.UK."
-    ()
-  }
 
   "signOutFromTimeout should" - {
 
@@ -97,134 +85,23 @@ class SignOutControllerSpec extends ItSpec {
   }
 
   "signOut should" - {
-
-    TaxRegime.values.foreach{ taxRegime =>
-
-      s"[taxRegime = ${taxRegime.toString}] redirect to the doYouWantToGiveFeedback page after clearing the session and storing the tax regime in the cookie" in {
-        val origin: Origin = taxRegime match {
-          case TaxRegime.Epaye => Origins.Epaye.Bta
-          case TaxRegime.Vat   => Origins.Vat.Bta
+    TaxRegime.values.foreach { taxRegime =>
+      s"[taxRegime = ${taxRegime.toString}] redirect to the tax regime specific exist survey route with no sessionId" in {
+        val (origin, expectedRedirectLocation) = taxRegime match {
+          case TaxRegime.Epaye => Origins.Epaye.Bta -> "/set-up-a-payment-plan/exit-survey/paye"
+          case TaxRegime.Vat   => Origins.Vat.Bta -> "/set-up-a-payment-plan/exit-survey/vat"
         }
 
         stubCommonActions()
         EssttpBackend.StartJourney.findJourney(origin)
 
         val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
         val result: Future[Result] = controller.signOut(fakeRequest)
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.SignOutController.doYouWantToGiveFeedback.url)
-        session(result) shouldBe Session(Map(SignOutController.feedbackRegimeKey -> taxRegime.entryName))
+        redirectLocation(result) shouldBe Some(expectedRedirectLocation)
+        session(result) shouldBe Session(Map.empty)
       }
-
     }
-
-  }
-
-  "doYouWantToGiveFeedback should" - {
-
-    "display the page" in {
-      val fakeRequest = FakeRequest().withSession(SignOutController.feedbackRegimeKey -> "Epaye")
-      val result: Future[Result] = controller.doYouWantToGiveFeedback(fakeRequest)
-      val pageContent: String = contentAsString(result)
-      val doc: Document = Jsoup.parse(pageContent)
-
-      RequestAssertions.assertGetRequestOk(result)
-      ContentAssertions.commonPageChecks(
-        doc,
-        expectedH1              = "Do you want to give feedback on this service?",
-        shouldBackLinkBePresent = false,
-        expectedSubmitUrl       = Some(routes.SignOutController.doYouWantToGiveFeedbackSubmit.url),
-        signedIn                = false
-      )
-
-      checkDoYouWantToGiveFeedbackContent(doc)
-    }
-
-  }
-
-  "doYouWantToGiveFeedbackSubmit should" - {
-
-      def testFormError(
-          formData: (String, String)*
-      )(expectedErrorMessage: String): Unit = {
-        val fakeRequest = FakeRequest().withMethod("POST").withFormUrlEncodedBody(formData: _*).withSession(SignOutController.feedbackRegimeKey -> "Epaye")
-        val result: Future[Result] = controller.doYouWantToGiveFeedbackSubmit(fakeRequest)
-        val pageContent: String = contentAsString(result)
-        val doc: Document = Jsoup.parse(pageContent)
-
-        RequestAssertions.assertGetRequestOk(result)
-        ContentAssertions.commonPageChecks(
-          doc,
-          expectedH1              = "Do you want to give feedback on this service?",
-          shouldBackLinkBePresent = false,
-          expectedSubmitUrl       = Some(routes.SignOutController.doYouWantToGiveFeedbackSubmit.url),
-          hasFormError            = true,
-          signedIn                = false
-        )
-
-        checkDoYouWantToGiveFeedbackContent(doc)
-
-        val errorSummary = doc.select(".govuk-error-summary")
-        val errorLink = errorSummary.select("a")
-        errorLink.text() shouldBe expectedErrorMessage
-        errorLink.attr("href") shouldBe "#DoYouWantToGiveFeedback"
-        ()
-      }
-
-    "return a form error when nothing is submitted" in {
-      testFormError()("Select yes if you want to give feedback on this service")
-    }
-
-    "return a form error when the value submitted is not recognised" in {
-      testFormError("DoYouWantToGiveFeedback" -> "2")("Select yes if you want to give feedback on this service")
-    }
-
-    "throw an exception is the user selects yes but no taxRegime can be found in the cookie session" in {
-      val fakeRequest =
-        FakeRequest()
-          .withMethod("POST")
-          .withFormUrlEncodedBody("DoYouWantToGiveFeedback" -> "Yes")
-
-      an[Exception] shouldBe thrownBy(await(controller.doYouWantToGiveFeedbackSubmit(fakeRequest)))
-    }
-
-    "redirect to the exitSurveyPaye endpoint if the user selects yes and the tax regime is EPAYE" in {
-      val fakeRequest =
-        FakeRequest()
-          .withMethod("POST")
-          .withFormUrlEncodedBody("DoYouWantToGiveFeedback" -> "Yes")
-          .withSession(SignOutController.feedbackRegimeKey -> "Epaye")
-
-      val result: Future[Result] = controller.doYouWantToGiveFeedbackSubmit(fakeRequest)
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.SignOutController.exitSurveyPaye.url)
-    }
-
-    "redirect to the exitSurveyPaye endpoint if the user selects yes and the tax regime is Vat" in {
-      val fakeRequest =
-        FakeRequest()
-          .withMethod("POST")
-          .withFormUrlEncodedBody("DoYouWantToGiveFeedback" -> "Yes")
-          .withSession(SignOutController.feedbackRegimeKey -> "Vat")
-
-      val result: Future[Result] = controller.doYouWantToGiveFeedbackSubmit(fakeRequest)
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.SignOutController.exitSurveyVat.url)
-    }
-
-    "redirect to govUk if the user selects no" in {
-      val fakeRequest =
-        FakeRequest()
-          .withMethod("POST")
-          .withFormUrlEncodedBody("DoYouWantToGiveFeedback" -> "No")
-          .withSession(SignOutController.feedbackRegimeKey -> "Epaye")
-
-      val result: Future[Result] = controller.doYouWantToGiveFeedbackSubmit(fakeRequest)
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(appConfig.Urls.govUkUrl)
-    }
-
   }
 
 }
