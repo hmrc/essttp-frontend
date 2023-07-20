@@ -3,8 +3,6 @@
 ->     /hmrc-frontend                                       hmrcfrontend.Routes
 
 GET    /sign-out                                            controllers.SignOutController.signOut
-GET    /do-you-want-to-give-feedback                        controllers.SignOutController.doYouWantToGiveFeedback
-POST   /do-you-want-to-give-feedback                        controllers.SignOutController.doYouWantToGiveFeedbackSubmit
 
 GET    /which-tax                                           controllers.WhichTaxRegimeController.whichTaxRegime
 POST   /which-tax                                           controllers.WhichTaxRegimeController.whichTaxRegimeSubmit

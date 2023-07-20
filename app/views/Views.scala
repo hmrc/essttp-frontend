@@ -57,7 +57,6 @@ class Views @Inject() (
     val printSummaryPage:                 PrintSummaryPage,
     val missingInfoPage:                  MissingInformation,
     val timedOutPage:                     TimedOut,
-    val doYouWantToGiveFeedbackPage:      DoYouWantToGiveFeedback,
     val shuttered:                        shuttering.Shuttered
 )
 
