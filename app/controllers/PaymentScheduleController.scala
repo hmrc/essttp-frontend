@@ -17,6 +17,7 @@
 package controllers
 
 import _root_.actions.Actions
+import actionsmodel.EligibleJourneyRequest
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.PaymentScheduleController.{dayOfMonthFromJourney, upfrontPaymentAnswersFromJourney}
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
@@ -45,7 +46,7 @@ class PaymentScheduleController @Inject() (
 
   implicit val localDateOrdering: Ordering[LocalDate] = _ compareTo _
 
-  val checkPaymentSchedule: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+  val checkPaymentSchedule: Action[AnyContent] = as.eligibleJourneyAction { implicit request: EligibleJourneyRequest[_] =>
     request.journey match {
       case _: Journey.BeforeSelectedPaymentPlan =>
         MissingInfoController.redirectToMissingInfoPage()

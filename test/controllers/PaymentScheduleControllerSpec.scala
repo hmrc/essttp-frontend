@@ -139,6 +139,14 @@ class PaymentScheduleControllerSpec extends ItSpec {
 
                 testUpfrontPaymentSummaryRows(summaries(0))(canPayUpfrontValue, upfrontPaymentAmountValue)
                 testPaymentPlanRows(summaries(1))("£300", paymentDayValue, datesToAmountsValues, totalToPayValue)
+
+                doc.select("#existing-dd-warning").select("strong").text() shouldBe {
+                  regime match {
+                    case "Epaye" => "Warning If you already have a Direct Debit for Employers’ PAYE, contact your bank to stop the next payment being collected. This will prevent you from being charged twice."
+                    case "Vat"   => "Warning If you already have a Direct Debit for VAT, contact your bank to stop the next payment being collected. This will prevent you from being charged twice."
+                    case tt      => throw new MatchError(s"Unknown tax type: $tt")
+                  }
+                }
               }
 
             s"[$regime journey] there is an upfrontPayment amount" in {
