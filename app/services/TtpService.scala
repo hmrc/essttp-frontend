@@ -19,7 +19,6 @@ package services
 import actionsmodel.AuthenticatedJourneyRequest
 import cats.Eq
 import cats.implicits.catsSyntaxEq
-import config.AppConfig
 import connectors.{CallEligibilityApiRequest, TtpConnector}
 import controllers.support.RequestSupport.hc
 import essttp.crypto.CryptoFormat
@@ -52,19 +51,12 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class TtpService @Inject() (
     ttpConnector: TtpConnector,
-    auditService: AuditService,
-    appConfig:    AppConfig
+    auditService: AuditService
 )(implicit executionContext: ExecutionContext) {
 
   implicit val cryptoFormat: CryptoFormat = CryptoFormat.NoOpCryptoFormat
   implicit val eq: Eq[TaxRegime] = Eq.fromUniversalEquals
 
-  /**
-   * TODO: change this back to return Future[EligibilityCheckResult] with
-   * i.e.:     ttpConnector.callEligibilityApi(eligibilityRequest, journey.correlationId)
-   * no recover, once IF/ETMP have fixed their bugs...
-   * todo remove/update this comment as part of OPS-10724
-   */
   def determineEligibility(journey: ComputedTaxId)(implicit request: RequestHeader): Future[Option[EligibilityCheckResult]] = {
     val eligibilityRequest: CallEligibilityApiRequest = TtpService.buildEligibilityRequest(journey)
     JourneyLogger.debug("EligibilityRequest: " + Json.prettyPrint(Json.toJson(eligibilityRequest)))
@@ -74,12 +66,9 @@ class TtpService @Inject() (
     ttpConnector
       .callEligibilityApi(eligibilityRequest, journey.correlationId).map(Option.apply)
       .recover {
-        //todo remove this case as part of OPS-10724, along with ff
-        case e: UpstreamErrorResponse if !appConfig.use422ErrorHandling =>
-          JourneyLogger.error(s"Upstream error from ttp, it might be the IF/ETMP issue. Returning None to redirect to call us page. TaxType: ${journey.taxRegime.toString}. ${e.message}")
-          None
-        case e: UpstreamErrorResponse if e.statusCode === 422 && journey.taxRegime === TaxRegime.Vat =>
-          JourneyLogger.error(s"De-registered VAT user error - 422 Error Code from TTP")
+        // 422 is a case where ttp thinks user is deregistered, so they should be sent to ineligible, otherwise we should error as usual.
+        case e: UpstreamErrorResponse if e.statusCode === 422 =>
+          JourneyLogger.info("422 Error Code from TTP, suggesting de-registered user")
           None
       }
   }

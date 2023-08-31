@@ -27,7 +27,7 @@ object AppDependencies {
     "uk.gov.hmrc"             %% "bootstrap-test-play-28"  % bootstrapVersion,
     "org.scalacheck"          %% "scalacheck"              % "1.17.0",
     "com.vladsch.flexmark"    %  "flexmark-all"            % "0.62.2",
-    "com.github.tomakehurst"  %  "wiremock-standalone"     % "2.27.2"
+    "com.github.tomakehurst"  %  "wiremock-standalone"     % "3.0.0"
   // format: ON
   ).map(_ % Test)
 }
