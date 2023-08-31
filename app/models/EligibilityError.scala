@@ -61,6 +61,8 @@ object EligibilityErrors extends Enum[EligibilityError] {
 
   case object CreditsNotAllowed extends EligibilityError
 
+  case object IsMoreThanMaxPaymentReference extends EligibilityError
+
   case object MultipleReasons extends EligibilityError
 
   override val values: immutable.IndexedSeq[EligibilityError] = findValues
@@ -71,21 +73,22 @@ object EligibilityErrors extends Enum[EligibilityError] {
 
     normalisedEligibilityRules match {
       case eligibilityRules if eligibilityRules.moreThanOneReasonForIneligibility => Some(MultipleReasons)
-      case EligibilityRules(true, _, _, _, _, _, _, _, _, _, _, _, _, _)          => Some(HasRlsOnAddress)
-      case EligibilityRules(_, true, _, _, _, _, _, _, _, _, _, _, _, _)          => Some(MarkedAsInsolvent)
-      case EligibilityRules(_, _, true, _, _, _, _, _, _, _, _, _, _, _)          => Some(IsLessThanMinDebtAllowance)
-      case EligibilityRules(_, _, _, true, _, _, _, _, _, _, _, _, _, _)          => Some(IsMoreThanMaxDebtAllowance)
-      case EligibilityRules(_, _, _, _, true, _, _, _, _, _, _, _, _, _)          => Some(DisallowedChargeLockTypes)
-      case EligibilityRules(_, _, _, _, _, true, _, _, _, _, _, _, _, _)          => Some(ExistingTtp)
-      case EligibilityRules(_, _, _, _, _, _, true, _, _, _, _, _, _, _)          => Some(ChargesOverMaxDebtAge)
-      case EligibilityRules(_, _, _, _, _, _, _, true, _, _, _, _, _, _)          => Some(IneligibleChargeTypes)
-      case EligibilityRules(_, _, _, _, _, _, _, _, true, _, _, _, _, _)          => Some(MissingFiledReturns)
-      case EligibilityRules(_, _, _, _, _, _, _, _, _, Some(true), _, _, _, _)    => Some(HasInvalidInterestSignals)
-      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, Some(true), _, _, _)    => Some(DmSpecialOfficeProcessingRequired)
-      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, true, _, _)          => Some(NoDueDatesReached)
-      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, Some(true), _)    => Some(CannotFindLockReason)
-      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, _, Some(true))    => Some(CannotFindLockReason)
-      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, _, _)             => None //all false
+      case EligibilityRules(true, _, _, _, _, _, _, _, _, _, _, _, _, _, _)       => Some(HasRlsOnAddress)
+      case EligibilityRules(_, true, _, _, _, _, _, _, _, _, _, _, _, _, _)       => Some(MarkedAsInsolvent)
+      case EligibilityRules(_, _, true, _, _, _, _, _, _, _, _, _, _, _, _)       => Some(IsLessThanMinDebtAllowance)
+      case EligibilityRules(_, _, _, true, _, _, _, _, _, _, _, _, _, _, _)       => Some(IsMoreThanMaxDebtAllowance)
+      case EligibilityRules(_, _, _, _, true, _, _, _, _, _, _, _, _, _, _)       => Some(DisallowedChargeLockTypes)
+      case EligibilityRules(_, _, _, _, _, true, _, _, _, _, _, _, _, _, _)       => Some(ExistingTtp)
+      case EligibilityRules(_, _, _, _, _, _, true, _, _, _, _, _, _, _, _)       => Some(ChargesOverMaxDebtAge)
+      case EligibilityRules(_, _, _, _, _, _, _, true, _, _, _, _, _, _, _)       => Some(IneligibleChargeTypes)
+      case EligibilityRules(_, _, _, _, _, _, _, _, true, _, _, _, _, _, _)       => Some(MissingFiledReturns)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, Some(true), _, _, _, _, _) => Some(HasInvalidInterestSignals)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, Some(true), _, _, _, _) => Some(DmSpecialOfficeProcessingRequired)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, true, _, _, _)       => Some(NoDueDatesReached)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, Some(true), _, _) => Some(CannotFindLockReason)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, _, Some(true), _) => Some(CannotFindLockReason)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, _, _, Some(true)) => Some(IsMoreThanMaxPaymentReference)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _)          => None //all false
     }
   }
 

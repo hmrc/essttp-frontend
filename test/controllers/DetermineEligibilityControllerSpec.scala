@@ -100,7 +100,12 @@ class DetermineEligibilityControllerSpec extends ItSpec {
       ("CreditsNotAllowed - EPAYE", TdAll.notEligibleCreditsNotAllowed, "creditsNotAllowed", PageUrls.payeNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - CreditsNotAllowed`(Origins.Epaye.Bta), Origins.Epaye.Bta),
       ("CreditsNotAllowed - VAT", TdAll.notEligibleCreditsNotAllowed, "creditsNotAllowed", PageUrls.vatNotEligibleUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - CreditsNotAllowed`(Origins.Vat.Bta), Origins.Vat.Bta)
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - CreditsNotAllowed`(Origins.Vat.Bta), Origins.Vat.Bta),
+
+      ("IsMoreThanMaxPaymentReference - EPAYE", TdAll.notEligibleIsMoreThanMaxPaymentReference, "isMoreThanMaxPaymentReference", PageUrls.payeNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxPaymentReference`(Origins.Epaye.Bta), Origins.Epaye.Bta),
+      ("IsMoreThanMaxPaymentReference - VAT", TdAll.notEligibleIsMoreThanMaxPaymentReference, "isMoreThanMaxPaymentReference", PageUrls.vatNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxPaymentReference`(Origins.Vat.Bta), Origins.Vat.Bta)
     )) {
       (sf: String, eligibilityRules: EligibilityRules, auditIneligibilityReason: String, expectedRedirect: String, updatedJourneyJson: String, origin: Origin) =>
         {

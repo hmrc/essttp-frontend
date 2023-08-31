@@ -236,7 +236,8 @@ object StartJourneyController {
         dmSpecialOfficeProcessingRequired = Some(containsError(DmSpecialOfficeProcessingRequired)),
         noDueDatesReached                 = containsError(NoDueDatesReached),
         cannotFindLockReason              = Some(containsError(CannotFindLockReason)),
-        creditsNotAllowed                 = Some(containsError(CreditsNotAllowed))
+        creditsNotAllowed                 = Some(containsError(CreditsNotAllowed)),
+        isMoreThanMaxPaymentReference     = Some(containsError(IsMoreThanMaxPaymentReference))
       )
     }
     EligibilityCheckResult(

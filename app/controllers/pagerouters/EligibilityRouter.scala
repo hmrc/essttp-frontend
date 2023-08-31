@@ -46,6 +46,7 @@ object EligibilityRouter {
         case Some(NoDueDatesReached)                 => whichGenericEligibilityPage(taxRegime)
         case Some(CannotFindLockReason)              => whichGenericEligibilityPage(taxRegime)
         case Some(CreditsNotAllowed)                 => whichGenericEligibilityPage(taxRegime)
+        case Some(IsMoreThanMaxPaymentReference)     => whichGenericEligibilityPage(taxRegime)
       }
     }
   }
