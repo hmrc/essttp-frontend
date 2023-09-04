@@ -53,7 +53,7 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
-  def `Eligibility Checked - Ineligible - IsLessThanMniDebtAllowance`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Eligibility Checked - Ineligible - IsLessThanMinDebtAllowance`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMinDebt(origin.taxRegime, encrypter),
     origin      = origin

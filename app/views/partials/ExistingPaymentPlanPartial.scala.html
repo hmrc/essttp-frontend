@@ -20,9 +20,7 @@
 @import requests.RequestSupport
 @import messages.Messages
 
-@this(
-requestSupport: RequestSupport
-)
+@this(requestSupport: RequestSupport)
 
 @(taxRegime: TaxRegime)(implicit request: Request[_])
 
@@ -37,3 +35,5 @@ requestSupport: RequestSupport
  Html(message.show)
 }
 </p>
+
+ <p id="call-us-content" class="govuk-body">@{Html(Messages.NotEligible.`Call us on 0300 123 1813 as you may be able to set up a plan over the phone`.show)}</p>

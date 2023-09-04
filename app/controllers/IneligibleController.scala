@@ -60,6 +60,20 @@ class IneligibleController @Inject() (
     ))
   }
 
+  val epayeDebtTooSmallPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    Ok(views.partials.ineligibleTemplatePage(
+      pageh1         = Messages.NotEligible.`You cannot use this service`,
+      leadingContent = views.partials.debtTooSmallPartial(appConfig.PolicyParameters.EPAYE.govukPayLink)
+    ))
+  }
+
+  val vatDebtTooSmallPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    Ok(views.partials.ineligibleTemplatePage(
+      pageh1         = Messages.NotEligible.`You cannot use this service`,
+      leadingContent = views.partials.debtTooSmallPartial(appConfig.PolicyParameters.VAT.govukPayLink)
+    ))
+  }
+
   val epayeDebtTooOldPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     Ok(views.partials.ineligibleTemplatePage(
       pageh1         = Messages.NotEligible.`Call us about a payment plan`,

@@ -30,6 +30,9 @@ GET    /not-eligible-epaye                                  controllers.Ineligib
 GET    /not-eligible-vat                                    controllers.IneligibleController.vatGenericIneligiblePage
 GET    /debt-too-large-epaye                                controllers.IneligibleController.epayeDebtTooLargePage
 GET    /debt-too-large-vat                                  controllers.IneligibleController.vatDebtTooLargePage
+GET    /debt-too-small-epaye                                controllers.IneligibleController.epayeDebtTooSmallPage
+GET    /debt-too-small-vat                                  controllers.IneligibleController.vatDebtTooSmallPage
+GET    /debt-too-large-vat                                  controllers.IneligibleController.vatDebtTooLargePage
 GET    /debt-too-old-epaye                                  controllers.IneligibleController.epayeDebtTooOldPage
 GET    /debt-too-old-vat                                    controllers.IneligibleController.vatDebtTooOldPage
 GET    /file-your-return                                    controllers.IneligibleController.epayeFileYourReturnPage

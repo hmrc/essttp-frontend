@@ -40,6 +40,9 @@ commonIneligibilityPartial: CommonIneligibilityPartial
     <p class="govuk-body">
         @{Html(Messages.EnrolmentMissing.`You must register for VAT online before you can set up a VAT payment plan.`(appConfig.Urls.enrolForVatUrl).show)}
     </p>
+    <p id="call-us-content" class="govuk-body">
+        @{Html(Messages.NotEligible.`Call us on 0300 123 1813 as you may be able to set up a plan over the phone`.show)}
+    </p>
 
     @commonIneligibilityPartial(TaxRegime.Vat)
 }

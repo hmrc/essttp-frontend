@@ -34,7 +34,7 @@ object EligibilityRouter {
         case None                                    => whichGenericEligibilityPage(taxRegime)
         case Some(HasRlsOnAddress)                   => whichGenericEligibilityPage(taxRegime)
         case Some(MarkedAsInsolvent)                 => whichGenericEligibilityPage(taxRegime)
-        case Some(IsLessThanMinDebtAllowance)        => whichGenericEligibilityPage(taxRegime)
+        case Some(IsLessThanMinDebtAllowance)        => whichDebtTooSmallPage(taxRegime)
         case Some(IsMoreThanMaxDebtAllowance)        => whichDebtTooLargePage(taxRegime)
         case Some(DisallowedChargeLockTypes)         => whichGenericEligibilityPage(taxRegime)
         case Some(ChargesOverMaxDebtAge)             => whichDebtTooOldPage(taxRegime)
@@ -62,6 +62,11 @@ object EligibilityRouter {
   def whichDebtTooLargePage(taxRegime: TaxRegime): Call = taxRegime match {
     case TaxRegime.Epaye => routes.IneligibleController.epayeDebtTooLargePage
     case TaxRegime.Vat   => routes.IneligibleController.vatDebtTooLargePage
+  }
+
+  def whichDebtTooSmallPage(taxRegime: TaxRegime): Call = taxRegime match {
+    case TaxRegime.Epaye => routes.IneligibleController.epayeDebtTooSmallPage
+    case TaxRegime.Vat   => routes.IneligibleController.vatDebtTooSmallPage
   }
 
   def whichExistingPlanPage(taxRegime: TaxRegime): Call = taxRegime match {

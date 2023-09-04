@@ -285,6 +285,41 @@ object Messages {
         )
     }
 
+    val `You cannot use this service`: Message = Message(
+      english = "You cannot use this service",
+      welsh   = "Ni allwch ddefnyddio’r gwasanaeth hwn"
+    )
+
+    def `You cannot set up ... debt too small`(taxRegime: TaxRegime): Message = taxRegime match {
+      case TaxRegime.Epaye =>
+        Message(
+          english = "You cannot set up an Employers’ PAYE payment plan online because your bill is too small.",
+          welsh   = "Ni allwch drefnu cynllun talu ar gyfer TWE y Cyflogwr ar-lein oherwydd bod eich bil yn rhy fach."
+        )
+      case TaxRegime.Vat =>
+        Message(
+          english = "You cannot set up a VAT payment plan online because your bill is too small.",
+          welsh   = "Ni allwch drefnu cynllun talu TAW ar-lein oherwydd bod eich bil yn rhy fach."
+        )
+    }
+    def `You need to pay your ... bill in full. Go to GOV.UK to make a payment today.`(taxRegime: TaxRegime, link: String): Message = taxRegime match {
+      case TaxRegime.Epaye =>
+        Message(
+          english = s"""You need to pay your PAYE bill in full. Go to <a class="govuk-link" href="$link">GOV.UK</a> to make a payment today.""",
+          welsh   = s"""Mae angen i chi dalu’ch bil TWE yn llawn. Ewch i <a class="govuk-link" href="$link">GOV.UK</a> i wneud taliad heddiw."""
+        )
+      case TaxRegime.Vat =>
+        Message(
+          english = s"""You need to pay your VAT bill in full. Go to <a class="govuk-link" href="$link">GOV.UK</a> to make a payment today.""",
+          welsh   = s"""Mae angen i chi dalu’ch bil TAW yn llawn. Ewch i <a class="govuk-link" href="$link">GOV.UK</a> i wneud taliad heddiw."""
+        )
+    }
+
+    def `Call us on 0300 123 1813 if you are having difficulty making a payment online.`: Message = Message(
+      english = "Call us on <strong>0300 123 1813</strong> if you are having difficulty making a payment online.",
+      welsh   = "Os ydych yn cael anawsterau wrth dalu ar-lein, ffoniwch ni ar <strong>0300 200 1900</strong>."
+    )
+
     def `You cannot set up ...  debt too old`(taxRegime: TaxRegime, maxAgeOfDebtInDays: Int): Message = taxRegime match {
       case TaxRegime.Epaye =>
         Message(
