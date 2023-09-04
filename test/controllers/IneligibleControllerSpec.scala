@@ -371,7 +371,7 @@ class IneligibleControllerSpec extends ItSpec {
             val leadingParagraphs = page.select(".govuk-body").asScala.toList
             leadingParagraphs(0).html() shouldBe expectedParagraph1
             leadingParagraphs(1).html() shouldBe expectedParagraph2
-            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English, callUsContentWelsh = callUsContentWelsh)
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.Welsh, callUsContentWelsh = callUsContentWelsh)
           }
 
           s"${taxRegime.entryName} Debt too old ineligible page correctly" in {
