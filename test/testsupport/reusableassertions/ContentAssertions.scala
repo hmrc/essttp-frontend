@@ -181,16 +181,30 @@ object ContentAssertions extends RichMatchers {
     }
   }
 
-  def commonIneligibilityTextCheck(doc: Document, taxRegime: TaxRegime, language: Language) = {
-    val commonEligibilityWrapper = doc.select("#common-eligibility")
-    val govukBodyElements = commonEligibilityWrapper.select(".govuk-body").asScala.toList
-    govukBodyElements(0).html() shouldBe {
+  val (defaultCallUsContentEnglish, defaultCallUsContentWelsh) =
+    "Call us on <strong>0300 123 1813</strong> as you may be able to set up a plan over the phone." ->
+      "Ffoniwch ni ar <strong>0300 200 1900</strong> oherwydd mae’n bosibl y gallwch drefnu cynllun dros y ffôn."
+
+  def commonIneligibilityTextCheck(
+      doc:                  Document,
+      taxRegime:            TaxRegime,
+      language:             Language,
+      callUsContentEnglish: String    = ContentAssertions.defaultCallUsContentEnglish,
+      callUsContentWelsh:   String    = ContentAssertions.defaultCallUsContentWelsh
+  ): Assertion = {
+
+    val callUsContentFromDoc = doc.select("#call-us-content")
+    callUsContentFromDoc.html() shouldBe {
       language match {
-        case Languages.English => "Call us on <strong>0300 123 1813</strong> as you may be able to set up a plan over the phone."
-        case Languages.Welsh   => "Ffoniwch ni ar <strong>0300 200 1900</strong> oherwydd mae’n bosibl y gallwch drefnu cynllun dros y ffôn."
+        case Languages.English => callUsContentEnglish
+        case Languages.Welsh   => callUsContentWelsh
       }
     }
-    govukBodyElements(1).html() shouldBe {
+
+    val commonEligibilityWrapper = doc.select("#common-eligibility")
+    val govukBodyElements = commonEligibilityWrapper.select(".govuk-body").asScala.toList
+
+    govukBodyElements(0).html() shouldBe {
       language match {
         case Languages.English => "Our opening times are Monday to Friday, 8am to 6pm. We are closed on weekends and bank holidays."
         case Languages.Welsh   => "Ein horiau agor yw Dydd Llun i Ddydd Gwener, 08:30 i 17:00. Rydym ar gau ar benwythnosau a gwyliau banc."
@@ -205,19 +219,19 @@ object ContentAssertions extends RichMatchers {
         case Languages.Welsh   => "Os oes angen cymorth ychwanegol arnoch chi"
       }
     }
-    govukBodyElements(2).html() shouldBe {
+    govukBodyElements(1).html() shouldBe {
       language match {
         case Languages.English => "Find out the different ways to <a href=\"https://www.gov.uk/get-help-hmrc-extra-support\" class=\"govuk-link\">deal with HMRC if you need some help</a>."
         case Languages.Welsh   => "Dysgwch am y ffyrdd gwahanol o <a href=\"https://www.gov.uk/get-help-hmrc-extra-support\" class=\"govuk-link\">ddelio â CThEF os oes angen help arnoch chi</a>."
       }
     }
-    govukBodyElements(3).html() shouldBe {
+    govukBodyElements(2).html() shouldBe {
       language match {
         case Languages.English => "You can also use <a href=\"https://www.relayuk.bt.com/\" class=\"govuk-link\">Relay UK</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>."
         case Languages.Welsh   => "Gallwch hefyd ddefnyddio <a href=\"https://www.relayuk.bt.com/\" class=\"govuk-link\">Relay UK</a> os na allwch glywed na siarad dros y ffôn: deialwch <strong>18001</strong> ac yna <strong>0345 300 3900</strong>. Sylwer – dim ond galwadau ffôn Saesneg eu hiaith y mae Relay UK yn gallu ymdrin â nhw."
       }
     }
-    govukBodyElements(4).html() shouldBe {
+    govukBodyElements(3).html() shouldBe {
       language match {
         case Languages.English => "If you are outside the UK: <strong>+44 2890 538 192</strong>"
         case Languages.Welsh   => "Os ydych y tu allan i’r DU: <strong>+44 300 200 1900</strong>"

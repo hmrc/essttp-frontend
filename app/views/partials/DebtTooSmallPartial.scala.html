@@ -17,20 +17,27 @@
 @import requests.RequestSupport
 @import messages.Messages
 @import play.twirl.api.Html
+@import essttp.rootmodel.AmountInPence
 @import actionsmodel.AuthenticatedJourneyRequest
 
-@this(
-        requestSupport: RequestSupport
-)
+@this(requestSupport: RequestSupport)
 
-@()(implicit request: AuthenticatedJourneyRequest[_])
+@(govUkPaymentLink: String)(implicit request: AuthenticatedJourneyRequest[_])
 
 @import requestSupport._
 
 <p class="govuk-body">
 @{
-    Html(Messages.NotEligible.`Generic ineligible message`(request.journey.taxRegime).show)
+    Html(Messages.NotEligible.`You cannot set up ... debt too small`(request.journey.taxRegime).show)
 }
 </p>
-
-<p id="call-us-content" class="govuk-body">@{Html(Messages.NotEligible.`Call us on 0300 123 1813 as you may be able to set up a plan over the phone`.show)}</p>
+<p class="govuk-body">
+@{
+    Html(Messages.NotEligible.`You need to pay your ... bill in full. Go to GOV.UK to make a payment today.`(request.journey.taxRegime, govUkPaymentLink).show)
+}
+</p>
+<p id="call-us-content" class="govuk-body">
+@{
+    Html(Messages.NotEligible.`Call us on 0300 123 1813 if you are having difficulty making a payment online.`.show)
+}
+</p>

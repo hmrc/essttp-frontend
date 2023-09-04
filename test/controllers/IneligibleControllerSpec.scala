@@ -116,6 +116,45 @@ class IneligibleControllerSpec extends ItSpec {
             ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English)
           }
 
+          s"${taxRegime.entryName} Debt too small ineligible page correctly" in {
+            val enrolments = taxRegime match {
+              case TaxRegime.Epaye => Some(Set(TdAll.payeEnrolment))
+              case TaxRegime.Vat   => Some(Set(TdAll.vatEnrolment))
+            }
+            stubCommonActions(authAllEnrolments = enrolments)
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsLessThanMinDebtAllowance`(origin))
+
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.epayeDebtTooSmallPage(fakeRequest)
+              case TaxRegime.Vat   => controller.vatDebtTooSmallPage(fakeRequest)
+            }
+            val page = pageContentAsDoc(result)
+
+            ContentAssertions.commonPageChecks(
+              page,
+              expectedH1              = "You cannot use this service",
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime)
+            )
+
+            val (expectedParagraph1, expectedParagraph2) = taxRegime match {
+              case TaxRegime.Epaye =>
+                "You cannot set up an Employers’ PAYE payment plan online because your bill is too small." ->
+                  "You need to pay your PAYE bill in full. Go to <a class=\"govuk-link\" href=\"https://www.gov.uk/pay-paye-tax\">GOV.UK</a> to make a payment today."
+              case TaxRegime.Vat =>
+                "You cannot set up a VAT payment plan online because your bill is too small." ->
+                  "You need to pay your VAT bill in full. Go to <a class=\"govuk-link\" href=\"https://www.gov.uk/pay-vat\">GOV.UK</a> to make a payment today."
+            }
+
+            val callUsContentEnglish = "Call us on <strong>0300 123 1813</strong> if you are having difficulty making a payment online."
+
+            val leadingParagraphs = page.select(".govuk-body").asScala.toList
+            leadingParagraphs(0).html() shouldBe expectedParagraph1
+            leadingParagraphs(1).html() shouldBe expectedParagraph2
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English, callUsContentEnglish)
+          }
+
           s"${taxRegime.entryName} Debt too old ineligible page correctly" in {
             val enrolments = taxRegime match {
               case TaxRegime.Epaye => Some(Set(TdAll.payeEnrolment))
@@ -293,6 +332,46 @@ class IneligibleControllerSpec extends ItSpec {
               leadingP1 = expectedLeadingP1
             )
             ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.Welsh)
+          }
+
+          s"${taxRegime.entryName} Debt too small ineligible page correctly" in {
+            val enrolments = taxRegime match {
+              case TaxRegime.Epaye => Some(Set(TdAll.payeEnrolment))
+              case TaxRegime.Vat   => Some(Set(TdAll.vatEnrolment))
+            }
+            stubCommonActions(authAllEnrolments = enrolments)
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsLessThanMinDebtAllowance`(origin))
+
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.epayeDebtTooSmallPage(fakeRequest.withLangWelsh())
+              case TaxRegime.Vat   => controller.vatDebtTooSmallPage(fakeRequest.withLangWelsh())
+            }
+            val page = pageContentAsDoc(result)
+
+            ContentAssertions.commonPageChecks(
+              page,
+              expectedH1              = "Ni allwch ddefnyddio’r gwasanaeth hwn",
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime),
+              language                = Languages.Welsh
+            )
+
+            val (expectedParagraph1, expectedParagraph2) = taxRegime match {
+              case TaxRegime.Epaye =>
+                "Ni allwch drefnu cynllun talu ar gyfer TWE y Cyflogwr ar-lein oherwydd bod eich bil yn rhy fach." ->
+                  "Mae angen i chi dalu’ch bil TWE yn llawn. Ewch i <a class=\"govuk-link\" href=\"https://www.gov.uk/pay-paye-tax\">GOV.UK</a> i wneud taliad heddiw."
+              case TaxRegime.Vat =>
+                "Ni allwch drefnu cynllun talu TAW ar-lein oherwydd bod eich bil yn rhy fach." ->
+                  "Mae angen i chi dalu’ch bil TAW yn llawn. Ewch i <a class=\"govuk-link\" href=\"https://www.gov.uk/pay-vat\">GOV.UK</a> i wneud taliad heddiw."
+            }
+
+            val callUsContentWelsh = "Os ydych yn cael anawsterau wrth dalu ar-lein, ffoniwch ni ar <strong>0300 200 1900</strong>."
+
+            val leadingParagraphs = page.select(".govuk-body").asScala.toList
+            leadingParagraphs(0).html() shouldBe expectedParagraph1
+            leadingParagraphs(1).html() shouldBe expectedParagraph2
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English, callUsContentWelsh = callUsContentWelsh)
           }
 
           s"${taxRegime.entryName} Debt too old ineligible page correctly" in {

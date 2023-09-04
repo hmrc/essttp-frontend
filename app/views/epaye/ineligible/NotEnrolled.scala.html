@@ -40,6 +40,9 @@
    <p class="govuk-body">
     @{Html(Messages.EnrolmentMissing.`You must enrol for PAYE Online before you can set up an Employers’ PAYE payment plan.`(appConfig.Urls.enrolForPayeUrl).show)}
    </p>
+   <p id="call-us-content" class="govuk-body">
+    @{Html(Messages.NotEligible.`Call us on 0300 123 1813 as you may be able to set up a plan over the phone`.show)}
+   </p>
 
    @commonIneligibilityPartial(TaxRegime.Epaye)
 }
