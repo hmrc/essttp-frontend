@@ -18,6 +18,7 @@ package configs
 
 import config.AppConfig
 import essttp.rootmodel.AmountInPence
+import play.api.test.FakeRequest
 import testsupport.ItSpec
 
 class ConfigSpec extends ItSpec {
@@ -48,6 +49,8 @@ class ConfigSpec extends ItSpec {
       ("Urls.extraSupportUrl", config.Urls.extraSupportUrl, "https://www.gov.uk/get-help-hmrc-extra-support"),
       ("Urls.relayUrl", config.Urls.relayUrl, "https://www.relayuk.bt.com/"),
 
+      ("Urls.betaFeedbackUrl", config.Urls.betaFeedbackUrl(FakeRequest("GET", "/blah")), "http://localhost:9250/contact/beta-feedback?service=essttp-frontend&backUrl=http://localhost:9215/blah"),
+
       ("Ttp.headers.correlationId", config.TtpHeaders.correlationId, "CorrelationId"),
 
       ("ExitSurvey.payeExitSurveyUrl", config.ExitSurvey.payeExitSurveyUrl, "http://localhost:9514/feedback/eSSTTP-PAYE"),
@@ -55,9 +58,12 @@ class ConfigSpec extends ItSpec {
       ("PolicyParameters.minimumUpfrontPaymentAmountInPence", config.PolicyParameters.minimumUpfrontPaymentAmountInPence, AmountInPence(100L)),
       ("PolicyParameters.InterestRates.baseRate", config.PolicyParameters.InterestRates.baseRate, 1.0),
       ("PolicyParameters.InterestRates.hmrcRate", config.PolicyParameters.InterestRates.hmrcRate, 2.5),
-      ("PolicyParameters.EPAYE.maxAmountOfDebt", config.PolicyParameters.EPAYE.maxAmountOfDebt, AmountInPence(15000 * 100)),
-      ("PolicyParameters.EPAYE.maxPlanDurationInMonths", config.PolicyParameters.EPAYE.maxPlanDurationInMonths, 6),
-      ("PolicyParameters.EPAYE.maxAgeOfDebtInDays", config.PolicyParameters.EPAYE.maxAgeOfDebtInDays, 35)
+      ("PolicyParameters.EPAYE.maxAmountOfDebt", config.PolicyParameters.EPAYE.maxAmountOfDebt, AmountInPence(50000 * 100)),
+      ("PolicyParameters.EPAYE.maxPlanDurationInMonths", config.PolicyParameters.EPAYE.maxPlanDurationInMonths, 12),
+      ("PolicyParameters.EPAYE.maxAgeOfDebtNumericalValue", config.PolicyParameters.EPAYE.maxAgeOfDebtNumberValue, 5),
+      ("PolicyParameters.VAT.maxAmountOfDebt", config.PolicyParameters.VAT.maxAmountOfDebt, AmountInPence(20000 * 100)),
+      ("PolicyParameters.VAT.maxPlanDurationInMonths", config.PolicyParameters.VAT.maxPlanDurationInMonths, 6),
+      ("PolicyParameters.VAT.maxAgeOfDebtNumericalValue", config.PolicyParameters.VAT.maxAgeOfDebtNumberValue, 28)
 
     )
     configsToTest.foreach { (configData: (String, Any, Any)) =>

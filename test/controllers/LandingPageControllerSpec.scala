@@ -65,11 +65,12 @@ class LandingPageControllerSpec extends ItSpec {
       val firstListBullets = lists(0).select("li").asScala.toList
       firstListBullets.size shouldBe 6
 
-      firstListBullets(0).text() shouldBe "you plan to pay the debt off within the next 6 months or less"
-      firstListBullets(1).text() shouldBe "you owe £15,000 or less"
-
-      val paragraphs = doc.select("p.govuk-body").asScala.toList
-      paragraphs(2).text() shouldBe "You can use this service within 35 days of the overdue payment deadline."
+      firstListBullets(0).text() shouldBe "you plan to pay the debt off within the next 12 months or less"
+      firstListBullets(1).text() shouldBe "you owe £50,000 or less"
+      firstListBullets(2).text() shouldBe "your debts are 5 years old or less"
+      firstListBullets(3).text() shouldBe "your Employers’ PAYE submissions are up to date"
+      firstListBullets(4).text() shouldBe "your Construction Industry Scheme (CIS) returns are up to date (if applicable)"
+      firstListBullets(5).text() shouldBe "you do not have any payment plans or debts with HMRC"
 
       val button = doc.select(".govuk-button")
       button.attr("href") shouldBe routes.LandingController.epayeLandingPageContinue.url

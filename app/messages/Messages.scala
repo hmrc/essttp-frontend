@@ -320,17 +320,15 @@ object Messages {
       welsh   = "Os ydych yn cael anawsterau wrth dalu ar-lein, ffoniwch ni ar <strong>0300 200 1900</strong>."
     )
 
-    def `You cannot set up ...  debt too old`(taxRegime: TaxRegime, maxAgeOfDebtInDays: Int): Message = taxRegime match {
-      case TaxRegime.Epaye =>
-        Message(
-          english = s"You cannot set up an Employers’ PAYE payment plan online because your payment deadline was over ${maxAgeOfDebtInDays.toString} days ago.",
-          welsh   = s"Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros ${maxAgeOfDebtInDays.toString} diwrnod yn ôl."
-        )
-      case TaxRegime.Vat =>
-        Message(
-          english = s"You cannot set up a VAT payment plan online because your payment deadline was over ${maxAgeOfDebtInDays.toString} days ago.",
-          welsh   = s"Ni allwch drefnu cynllun talu TAW ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros ${maxAgeOfDebtInDays.toString} wythnos yn ôl."
-        )
+    def `You cannot set up ... debt too old`(taxRegime: TaxRegime, ageOfDebtNumber: Int): Message = taxRegime match {
+      case TaxRegime.Epaye => Message(
+        english = s"You cannot set up an Employers’ PAYE payment plan online because your payment deadline was over ${ageOfDebtNumber.toString} years ago.",
+        welsh   = s"Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros ${ageOfDebtNumber.toString} mlynedd yn ôl."
+      )
+      case TaxRegime.Vat => Message(
+        english = s"You cannot set up a VAT payment plan online because your payment deadline was over ${ageOfDebtNumber.toString} days ago.",
+        welsh   = s"Ni allwch drefnu cynllun talu TAW ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros ${ageOfDebtNumber.toString} wythnos yn ôl."
+      )
     }
 
     val `You already have a payment plan with HMRC`: Message = Message(
@@ -468,9 +466,14 @@ object Messages {
       welsh   = s"mae arnoch ${maxAmountOfDebt.gdsFormatInPounds} neu lai"
     )
 
-    val `you do not have any other payment plans or debts with HMRC`: Message = Message(
-      english = "you do not have any other payment plans or debts with HMRC",
-      welsh   = "nid oes gennych unrhyw gynlluniau talu na dyledion eraill gyda CThEF"
+    val `your debts are 5 years old or less`: Message = Message(
+      english = "your debts are 5 years old or less",
+      welsh   = "mae eich dyledion yn 5 oed neu lai"
+    )
+
+    val `you do not have any payment plans or debts with HMRC`: Message = Message(
+      english = "you do not have any payment plans or debts with HMRC",
+      welsh   = "does gennych chi ddim cynlluniau talu na dyledion gyda CThEF"
     )
 
     val `your Employers’ PAYE submissions are up to date`: Message = Message(
@@ -481,16 +484,6 @@ object Messages {
     val `your Construction Industry Scheme (CIS) returns are up to date`: Message = Message(
       english = "your Construction Industry Scheme (CIS) returns are up to date (if applicable)",
       welsh   = "mae’ch datganiadau ar gyfer Cynllun y Diwydiant Adeiladu (CIS) yn gyfredol (os yw’n berthnasol)"
-    )
-
-    val `you have no outstanding penalties`: Message = Message(
-      english = "you have no outstanding penalties",
-      welsh   = "nid oes gennych unrhyw gosbau sy’n ddyledus"
-    )
-
-    def `You can use this service within ... days of the overdue payment deadline.`(maxAgeOfDebtInDays: Int): Message = Message(
-      english = s"You can use this service within ${maxAgeOfDebtInDays.toString} days of the overdue payment deadline.",
-      welsh   = s"Gallwch ddefnyddio’r gwasanaeth hwn cyn pen ${maxAgeOfDebtInDays.toString} diwrnod o’r dyddiad cau gorddyledus ar gyfer talu."
     )
 
     val `You can choose to pay:`: Message = Message(
