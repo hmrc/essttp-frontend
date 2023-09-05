@@ -286,5 +286,36 @@ class DetermineEligibilityControllerSpec extends ItSpec {
         }
     }
 
+    "VAT user with a debt below the minimum amount and debt too old should be redirected to generic ineligible page" in {
+      val eligibilityRules = TdAll.notEligibleIsLessThanMinDebtAllowance.copy(chargesOverMaxDebtAge = true)
+      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(TaxRegime.Vat, TdAll.notEligibleEligibilityPass, eligibilityRules)
+
+      Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Vat)(eligibilityCheckResponseJson)
+      stubCommonActions()
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Vat.Bta)()
+      EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(TdAll.journeyId, JourneyJsonTemplates.`Eligibility Checked - Ineligible - MultipleReasons - debt too low and old`(Origins.Vat.Bta))
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result = controller.determineEligibility(fakeRequest)
+
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.vatNotEligibleUrl)
+    }
+
+    "EPAYE user with a debt below the minimum amount and debt too old should be redirected to debt too low ineligible page" in {
+      val eligibilityRules = TdAll.notEligibleIsLessThanMinDebtAllowance.copy(chargesOverMaxDebtAge = true)
+      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(TaxRegime.Epaye, TdAll.notEligibleEligibilityPass, eligibilityRules)
+
+      Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Epaye)(eligibilityCheckResponseJson)
+      stubCommonActions()
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Epaye.Bta)()
+      EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(TdAll.journeyId, JourneyJsonTemplates.`Eligibility Checked - Ineligible - MultipleReasons - debt too low and old`())
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result = controller.determineEligibility(fakeRequest)
+
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.epayeDebtTooSmallUrl)
+    }
   }
 }
