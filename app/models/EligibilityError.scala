@@ -92,7 +92,7 @@ object EligibilityErrors extends Enum[EligibilityError] {
     }
   }
 
-  def eligibilityRulesWithoutNone(eligibilityRules: EligibilityRules): EligibilityRules = {
+  private def eligibilityRulesWithoutNone(eligibilityRules: EligibilityRules): EligibilityRules = {
     val hasInvalidInterestSignalsAsSomeBoolean =
       eligibilityRules.hasInvalidInterestSignals.fold(Some(false))(isDefined => Some(isDefined))
     val dmSpecialOfficeProcessingRequiredAsSomeBoolean =

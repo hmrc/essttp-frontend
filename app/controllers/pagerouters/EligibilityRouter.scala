@@ -19,8 +19,8 @@ package controllers.pagerouters
 import controllers.routes
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
-import models.EligibilityErrors
 import models.EligibilityErrors._
+import models.{EligibilityError, EligibilityErrors}
 import play.api.mvc.Call
 
 object EligibilityRouter {
@@ -30,7 +30,8 @@ object EligibilityRouter {
       routes.YourBillController.yourBill
     } else {
       EligibilityErrors.toEligibilityError(eligibilityResult.eligibilityRules) match {
-        case Some(MultipleReasons)                   => whichGenericEligibilityPage(taxRegime)
+        case ee @ Some(MultipleReasons) =>
+          determineWhetherToGoToDebtTooSmall(ee, eligibilityResult.eligibilityRules.isLessThanMinDebtAllowance, taxRegime)
         case None                                    => whichGenericEligibilityPage(taxRegime)
         case Some(HasRlsOnAddress)                   => whichGenericEligibilityPage(taxRegime)
         case Some(MarkedAsInsolvent)                 => whichGenericEligibilityPage(taxRegime)
@@ -54,34 +55,43 @@ object EligibilityRouter {
   /**
    * To be used when there are more than one 'flavour' of a lockout page. Design want them to have different urls.
    */
-  def whichGenericEligibilityPage(taxRegime: TaxRegime): Call = taxRegime match {
+  private def whichGenericEligibilityPage(taxRegime: TaxRegime): Call = taxRegime match {
     case TaxRegime.Epaye => routes.IneligibleController.payeGenericIneligiblePage
     case TaxRegime.Vat   => routes.IneligibleController.vatGenericIneligiblePage
   }
 
-  def whichDebtTooLargePage(taxRegime: TaxRegime): Call = taxRegime match {
+  private def whichDebtTooLargePage(taxRegime: TaxRegime): Call = taxRegime match {
     case TaxRegime.Epaye => routes.IneligibleController.epayeDebtTooLargePage
     case TaxRegime.Vat   => routes.IneligibleController.vatDebtTooLargePage
   }
 
-  def whichDebtTooSmallPage(taxRegime: TaxRegime): Call = taxRegime match {
+  private def whichDebtTooSmallPage(taxRegime: TaxRegime): Call = taxRegime match {
     case TaxRegime.Epaye => routes.IneligibleController.epayeDebtTooSmallPage
     case TaxRegime.Vat   => routes.IneligibleController.vatDebtTooSmallPage
   }
 
-  def whichExistingPlanPage(taxRegime: TaxRegime): Call = taxRegime match {
+  private def whichExistingPlanPage(taxRegime: TaxRegime): Call = taxRegime match {
     case TaxRegime.Epaye => routes.IneligibleController.epayeAlreadyHaveAPaymentPlanPage
     case TaxRegime.Vat   => routes.IneligibleController.vatAlreadyHaveAPaymentPlanPage
   }
 
-  def whichDebtTooOldPage(taxRegime: TaxRegime): Call = taxRegime match {
+  private def whichDebtTooOldPage(taxRegime: TaxRegime): Call = taxRegime match {
     case TaxRegime.Epaye => routes.IneligibleController.epayeDebtTooOldPage
     case TaxRegime.Vat   => routes.IneligibleController.vatDebtTooOldPage
   }
 
-  def whichFileYourReturnsPage(taxRegime: TaxRegime): Call = taxRegime match {
+  private def whichFileYourReturnsPage(taxRegime: TaxRegime): Call = taxRegime match {
     case TaxRegime.Epaye => routes.IneligibleController.epayeFileYourReturnPage
     case TaxRegime.Vat   => routes.IneligibleController.vatFileYourReturnPage
   }
 
+  //requirement from business that if multiple reasons exist but any of them are isLessThanMinDebtAllowance, go to debt too small page (PAYE only).
+  private def determineWhetherToGoToDebtTooSmall(
+      maybeEligibilityError:      Option[EligibilityError],
+      isLessThanMinDebtAllowance: Boolean,
+      taxRegime:                  TaxRegime
+  ): Call = (maybeEligibilityError, isLessThanMinDebtAllowance, taxRegime) match {
+    case (Some(MultipleReasons), true, TaxRegime.Epaye) => whichDebtTooSmallPage(taxRegime)
+    case _ => whichGenericEligibilityPage(taxRegime)
+  }
 }
