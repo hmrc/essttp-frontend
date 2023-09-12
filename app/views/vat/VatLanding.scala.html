@@ -53,7 +53,7 @@
         <li>@{Messages.Vat.`you do not have any other payment plans or debts with HMRC`.show}</li>
         <li>@{Messages.Vat.`your tax returns are up to date`.show}</li>
     </ul>
-    <p class="govuk-body">@{Messages.Vat.`You can use this service within ... days of the overdue payment deadline.`(appConfig.PolicyParameters.VAT.maxAgeOfDebtNumberValue).show}</p>
+    <p class="govuk-body">@{Messages.Vat.`You can use this service within ... days of the overdue payment deadline.`(appConfig.PolicyParameters.VAT.maxAgeOfDebtInDays).show}</p>
 
     @insetText(InsetText(content = Text(Messages.Vat.`If you have a Customer Compliance Manager...`.show)))
 

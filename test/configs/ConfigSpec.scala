@@ -60,10 +60,10 @@ class ConfigSpec extends ItSpec {
       ("PolicyParameters.InterestRates.hmrcRate", config.PolicyParameters.InterestRates.hmrcRate, 2.5),
       ("PolicyParameters.EPAYE.maxAmountOfDebt", config.PolicyParameters.EPAYE.maxAmountOfDebt, AmountInPence(50000 * 100)),
       ("PolicyParameters.EPAYE.maxPlanDurationInMonths", config.PolicyParameters.EPAYE.maxPlanDurationInMonths, 12),
-      ("PolicyParameters.EPAYE.maxAgeOfDebtNumericalValue", config.PolicyParameters.EPAYE.maxAgeOfDebtNumberValue, 5),
+      ("PolicyParameters.EPAYE.maxAgeOfDebtInYears", config.PolicyParameters.EPAYE.maxAgeOfDebtInYears, 5),
       ("PolicyParameters.VAT.maxAmountOfDebt", config.PolicyParameters.VAT.maxAmountOfDebt, AmountInPence(20000 * 100)),
       ("PolicyParameters.VAT.maxPlanDurationInMonths", config.PolicyParameters.VAT.maxPlanDurationInMonths, 6),
-      ("PolicyParameters.VAT.maxAgeOfDebtNumericalValue", config.PolicyParameters.VAT.maxAgeOfDebtNumberValue, 28)
+      ("PolicyParameters.VAT.maxAgeOfDebtInDays", config.PolicyParameters.VAT.maxAgeOfDebtInDays, 28)
 
     )
     configsToTest.foreach { (configData: (String, Any, Any)) =>

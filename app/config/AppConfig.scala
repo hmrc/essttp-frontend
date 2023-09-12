@@ -106,7 +106,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
 
       val maxAmountOfDebt: AmountInPence = AmountInPence(getParam[Long]("max-amount-of-debt-in-pounds") * 100L)
       val maxPlanDurationInMonths: Int = getParam[Int]("max-plan-duration-in-months")
-      val maxAgeOfDebtNumberValue: Int = getParam[Int]("max-age-of-debt-numerical-value")
+      val maxAgeOfDebtInYears: Int = getParam[Int]("max-age-of-debt-in-years")
       val govukPayLink: String = getParam[String]("govuk-pay-link")
     }
 
@@ -115,7 +115,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
 
       val maxAmountOfDebt: AmountInPence = AmountInPence(getParam[Long]("max-amount-of-debt-in-pounds") * 100L)
       val maxPlanDurationInMonths: Int = getParam[Int]("max-plan-duration-in-months")
-      val maxAgeOfDebtNumberValue: Int = getParam[Int]("max-age-of-debt-numerical-value")
+      val maxAgeOfDebtInDays: Int = getParam[Int]("max-age-of-debt-in-days")
       val govukPayLink: String = getParam[String]("govuk-pay-link")
     }
   }
