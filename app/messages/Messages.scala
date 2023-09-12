@@ -320,14 +320,16 @@ object Messages {
       welsh   = "Os ydych yn cael anawsterau wrth dalu ar-lein, ffoniwch ni ar <strong>0300 200 1900</strong>."
     )
 
-    def `You cannot set up ... debt too old`(taxRegime: TaxRegime, ageOfDebtNumber: Int): Message = taxRegime match {
+    def `You cannot set up ... debt too old`(taxRegime: TaxRegime, ageOfDebtInYearsOrDays: Int): Message = taxRegime match {
+      //months
       case TaxRegime.Epaye => Message(
-        english = s"You cannot set up an Employers’ PAYE payment plan online because your payment deadline was over ${ageOfDebtNumber.toString} years ago.",
-        welsh   = s"Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros ${ageOfDebtNumber.toString} mlynedd yn ôl."
+        english = s"You cannot set up an Employers’ PAYE payment plan online because your payment deadline was over ${ageOfDebtInYearsOrDays.toString} years ago.",
+        welsh   = s"Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros ${ageOfDebtInYearsOrDays.toString} mlynedd yn ôl."
       )
+      //days (for now)
       case TaxRegime.Vat => Message(
-        english = s"You cannot set up a VAT payment plan online because your payment deadline was over ${ageOfDebtNumber.toString} days ago.",
-        welsh   = s"Ni allwch drefnu cynllun talu TAW ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros ${ageOfDebtNumber.toString} wythnos yn ôl."
+        english = s"You cannot set up a VAT payment plan online because your payment deadline was over ${ageOfDebtInYearsOrDays.toString} days ago.",
+        welsh   = s"Ni allwch drefnu cynllun talu TAW ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros ${ageOfDebtInYearsOrDays.toString} wythnos yn ôl."
       )
     }
 

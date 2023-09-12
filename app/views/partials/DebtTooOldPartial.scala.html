@@ -23,13 +23,13 @@
         requestSupport: RequestSupport
 )
 
-@(ageOfDebtNumber: Int)(implicit request: AuthenticatedJourneyRequest[_])
+@(ageOfDebtInYearsOrMonths: Int)(implicit request: AuthenticatedJourneyRequest[_])
 
 @import requestSupport._
 
 <p class="govuk-body">
 @{
-    Html(Messages.NotEligible.`You cannot set up ... debt too old`(request.journey.taxRegime, ageOfDebtNumber).show)
+    Html(Messages.NotEligible.`You cannot set up ... debt too old`(request.journey.taxRegime, ageOfDebtInYearsOrMonths).show)
 }
 </p>
 
