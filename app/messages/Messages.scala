@@ -468,9 +468,9 @@ object Messages {
       welsh   = s"mae arnoch ${maxAmountOfDebt.gdsFormatInPounds} neu lai"
     )
 
-    val `your debts are 5 years old or less`: Message = Message(
-      english = "your debts are 5 years old or less",
-      welsh   = "mae eich dyledion yn 5 oed neu lai"
+    def `your debts are ... years old or less`(maxDebtAgeInYears: Int): Message = Message(
+      english = s"your debts are ${maxDebtAgeInYears.toString} years old or less",
+      welsh   = s"mae eich dyledion yn ${maxDebtAgeInYears.toString} oed neu lai"
     )
 
     val `you do not have any payment plans or debts with HMRC`: Message = Message(

@@ -48,7 +48,7 @@
   <ul class="govuk-list govuk-list--bullet">
     <li>@{Messages.Epaye.`you plan to pay the debt off within the next ... months or less`(appConfig.PolicyParameters.EPAYE.maxPlanDurationInMonths).show}</li>
     <li>@{Messages.Epaye.`you owe ... or less`(appConfig.PolicyParameters.EPAYE.maxAmountOfDebt).show}</li>
-    <li>@{Messages.Epaye.`your debts are 5 years old or less`.show}</li>
+    <li>@{Messages.Epaye.`your debts are ... years old or less`(appConfig.PolicyParameters.EPAYE.maxAgeOfDebtInYears).show}</li>
     <li>@{Messages.Epaye.`your Employers’ PAYE submissions are up to date`.show}</li>
     <li>@{Messages.Epaye.`your Construction Industry Scheme (CIS) returns are up to date`.show}</li>
     <li>@{Messages.Epaye.`you do not have any payment plans or debts with HMRC`.show}</li>
