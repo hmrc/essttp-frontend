@@ -20,7 +20,6 @@ import configs.syntax._
 import essttp.rootmodel.{AmountInPence, TaxRegime}
 import play.api.mvc.RequestHeader
 import play.api.{ConfigLoader, Configuration}
-import uk.gov.hmrc.play.bootstrap.binders.SafeRedirectUrl
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.net.URL
@@ -59,10 +58,12 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     val loginUrl: String = BaseUrl.gg
     val signOutUrl: String = config.get[String]("baseUrl.sign-out")
 
-    def betaFeedbackUrl(implicit request: RequestHeader): String =
+    def betaFeedbackUrl(implicit request: RequestHeader): String = {
+      import uk.gov.hmrc.http.StringContextOps
       s"${BaseUrl.contactFrontend}/contact/beta-feedback?" +
         s"service=$appName&" +
-        s"backUrl=${SafeRedirectUrl(BaseUrl.essttpFrontend + request.uri).encodedUrl}"
+        s"backUrl=${url"${BaseUrl.essttpFrontend + request.uri}".toString}"
+    }
 
     val govUkUrl: String = config.get[String]("govUkUrls.govUk")
     val enrolForPayeUrl: String = config.get[String]("govUkUrls.enrolPayeUrl")
@@ -105,7 +106,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
 
       val maxAmountOfDebt: AmountInPence = AmountInPence(getParam[Long]("max-amount-of-debt-in-pounds") * 100L)
       val maxPlanDurationInMonths: Int = getParam[Int]("max-plan-duration-in-months")
-      val maxAgeOfDebtInDays: Int = getParam[Int]("max-age-of-debt-in-days")
+      val maxAgeOfDebtInYears: Int = getParam[Int]("max-age-of-debt-in-years")
       val govukPayLink: String = getParam[String]("govuk-pay-link")
     }
 

@@ -105,7 +105,7 @@ class IneligibleControllerSpec extends ItSpec {
             )
 
             val expectedLeadingP1 = taxRegime match {
-              case TaxRegime.Epaye => "You cannot set up an Employers’ PAYE payment plan online because you owe more than £15,000."
+              case TaxRegime.Epaye => "You cannot set up an Employers’ PAYE payment plan online because you owe more than £50,000."
               case TaxRegime.Vat   => "You cannot set up a VAT payment plan online because you owe more than £20,000."
             }
 
@@ -178,7 +178,7 @@ class IneligibleControllerSpec extends ItSpec {
               regimeBeingTested       = Some(taxRegime)
             )
             val expectedLeadingP1 = taxRegime match {
-              case TaxRegime.Epaye => "You cannot set up an Employers’ PAYE payment plan online because your payment deadline was over 35 days ago."
+              case TaxRegime.Epaye => "You cannot set up an Employers’ PAYE payment plan online because your payment deadline was over 5 years ago."
               case TaxRegime.Vat   => "You cannot set up a VAT payment plan online because your payment deadline was over 28 days ago."
             }
             assertIneligiblePageLeadingP1(
@@ -323,7 +323,7 @@ class IneligibleControllerSpec extends ItSpec {
             )
 
             val expectedLeadingP1 = taxRegime match {
-              case TaxRegime.Epaye => "Ni allwch drefnu cynllun talu TAW ar-lein oherwydd mae arnoch dros £15,000."
+              case TaxRegime.Epaye => "Ni allwch drefnu cynllun talu TAW ar-lein oherwydd mae arnoch dros £50,000."
               case TaxRegime.Vat   => "Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein oherwydd mae arnoch dros £20,000."
             }
 
@@ -398,7 +398,7 @@ class IneligibleControllerSpec extends ItSpec {
               language                = Languages.Welsh
             )
             val expectedLeadingP1 = taxRegime match {
-              case TaxRegime.Epaye => "Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros 35 diwrnod yn ôl."
+              case TaxRegime.Epaye => "Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros 5 mlynedd yn ôl."
               case TaxRegime.Vat   => "Ni allwch drefnu cynllun talu TAW ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros 28 wythnos yn ôl."
             }
             assertIneligiblePageLeadingP1(

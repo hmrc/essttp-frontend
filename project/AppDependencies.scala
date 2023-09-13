@@ -3,7 +3,7 @@ import play.core.PlayVersion
 
 object AppDependencies {
 
-  val bootstrapVersion = "7.21.0"
+  val bootstrapVersion = "7.22.0"
 
   val compile: Seq[ModuleID] = Seq(
     // format: OFF
@@ -19,7 +19,7 @@ object AppDependencies {
 
   val test: Seq[ModuleID] = Seq(
     // format: OFF
-    "org.scalatest"           %% "scalatest"               % "3.2.16",
+    "org.scalatest"           %% "scalatest"               % "3.2.17",
     "org.scalatestplus"       %% "scalacheck-1-15"         % "3.2.11.0",
     "org.scalatestplus.play"  %% "scalatestplus-play"      % "5.1.0",
     "org.pegdown"             %  "pegdown"                 % "1.6.0",
