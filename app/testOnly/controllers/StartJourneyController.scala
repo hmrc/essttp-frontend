@@ -80,7 +80,7 @@ class StartJourneyController @Inject() (
   private def startJourney(startJourneyForm: StartJourneyForm): Future[Result] = {
     implicit val hc: HeaderCarrier = HeaderCarrier()
     for {
-      _ <- essttpStubConnector.primeStubs(makeEligibilityCheckResult(startJourneyForm))
+      _ <- essttpStubConnector.primeStubs(makeEligibilityCheckResult(startJourneyForm)(appConfig))
       maybeTestUser = TestUser.makeTestUser(startJourneyForm)
       session <- maybeTestUser.map(testUser => loginService.logIn(testUser)).getOrElse(Future.successful(Session.emptyCookie))
       redirect: Result = startJourneyForm.origin match {
@@ -176,7 +176,7 @@ object StartJourneyController {
     case "Individual"   => uk.gov.hmrc.auth.core.AffinityGroup.Individual
   }
 
-  private def makeEligibilityCheckResult(form: StartJourneyForm): EligibilityCheckResult = {
+  private def makeEligibilityCheckResult(form: StartJourneyForm)(appConfig: AppConfig): EligibilityCheckResult = {
 
     val debtAmountFromForm: AmountInPence = AmountInPence(form.debtTotalAmount)
     val interestAmount: AmountInPence = AmountInPence(form.interestAmount.getOrElse(BigDecimal(0)))
@@ -220,6 +220,11 @@ object StartJourneyController {
       )
     )
 
+    val planMaxLengthFromConfig: Int = form.taxRegime match {
+      case TaxRegime.Epaye => appConfig.PolicyParameters.EPAYE.maxPlanDurationInMonths
+      case TaxRegime.Vat   => appConfig.PolicyParameters.VAT.maxPlanDurationInMonths
+    }
+
     val containsError: EligibilityError => Boolean = (ee: EligibilityError) => form.eligibilityErrors.contains(ee)
     val eligibilityRules: EligibilityRules = {
       EligibilityRules(
@@ -247,7 +252,7 @@ object StartJourneyController {
       regimePaymentFrequency          = PaymentPlanFrequencies.Monthly,
       paymentPlanFrequency            = PaymentPlanFrequencies.Monthly,
       paymentPlanMinLength            = PaymentPlanMinLength(1),
-      paymentPlanMaxLength            = PaymentPlanMaxLength(6),
+      paymentPlanMaxLength            = PaymentPlanMaxLength(planMaxLengthFromConfig),
       eligibilityStatus               = EligibilityStatus(EligibilityPass(eligibilityRules.isEligible)),
       eligibilityRules                = eligibilityRules,
       chargeTypeAssessment            = chargeTypeAssessments,

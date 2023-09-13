@@ -266,36 +266,42 @@ object TdAll {
     customerPostcodes            = List(CustomerPostcode(customerPostcode, PostcodeDate("2022-01-31")))
   )
 
-  val affordableQuotesRequest: AffordableQuotesRequest = AffordableQuotesRequest(
-    channelIdentifier           = ChannelIdentifiers.eSSTTP,
-    paymentPlanFrequency        = PaymentPlanFrequencies.Monthly,
-    paymentPlanMinLength        = PaymentPlanMinLength(1),
-    paymentPlanMaxLength        = PaymentPlanMaxLength(6),
-    initialPaymentDate          = Some(InitialPaymentDate(LocalDate.parse("2022-07-03"))),
-    initialPaymentAmount        = Some(UpfrontPaymentAmount(AmountInPence(200))),
-    accruedDebtInterest         = AccruedDebtInterest(AmountInPence(3194)),
-    debtItemCharges             = List(
-      DebtItemCharge(
-        OutstandingDebtAmount(AmountInPence(50000)),
-        mainTrans               = MainTrans("mainTrans"),
-        subTrans                = SubTrans("subTrans"),
-        debtItemChargeId        = ChargeReference("A00000000001"),
-        interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
-        debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-03-07"))
+  def affordableQuotesRequest(taxRegime: TaxRegime): AffordableQuotesRequest = {
+    val expectedPaymentPlanMaxLength = taxRegime match {
+      case TaxRegime.Epaye => PaymentPlanMaxLength(12)
+      case TaxRegime.Vat   => PaymentPlanMaxLength(6)
+    }
+    AffordableQuotesRequest(
+      channelIdentifier           = ChannelIdentifiers.eSSTTP,
+      paymentPlanFrequency        = PaymentPlanFrequencies.Monthly,
+      paymentPlanMinLength        = PaymentPlanMinLength(1),
+      paymentPlanMaxLength        = expectedPaymentPlanMaxLength,
+      initialPaymentDate          = Some(InitialPaymentDate(LocalDate.parse("2022-07-03"))),
+      initialPaymentAmount        = Some(UpfrontPaymentAmount(AmountInPence(200))),
+      accruedDebtInterest         = AccruedDebtInterest(AmountInPence(3194)),
+      debtItemCharges             = List(
+        DebtItemCharge(
+          OutstandingDebtAmount(AmountInPence(50000)),
+          mainTrans               = MainTrans("mainTrans"),
+          subTrans                = SubTrans("subTrans"),
+          debtItemChargeId        = ChargeReference("A00000000001"),
+          interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
+          debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-03-07"))
+        ),
+        DebtItemCharge(
+          OutstandingDebtAmount(AmountInPence(100000)),
+          mainTrans               = MainTrans("mainTrans"),
+          subTrans                = SubTrans("subTrans"),
+          debtItemChargeId        = ChargeReference("A00000000002"),
+          interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-02-07"))),
+          debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-02-07"))
+        )
       ),
-      DebtItemCharge(
-        OutstandingDebtAmount(AmountInPence(100000)),
-        mainTrans               = MainTrans("mainTrans"),
-        subTrans                = SubTrans("subTrans"),
-        debtItemChargeId        = ChargeReference("A00000000002"),
-        interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-02-07"))),
-        debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-02-07"))
-      )
-    ),
-    customerPostcodes           = List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate("2022-01-31"))),
-    paymentPlanAffordableAmount = PaymentPlanAffordableAmount(AmountInPence(30000)),
-    paymentPlanStartDate        = InstalmentStartDate(LocalDate.parse("2022-07-28"))
-  )
+      customerPostcodes           = List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate("2022-01-31"))),
+      paymentPlanAffordableAmount = PaymentPlanAffordableAmount(AmountInPence(30000)),
+      paymentPlanStartDate        = InstalmentStartDate(LocalDate.parse("2022-07-28"))
+    )
+  }
 
   val instalmentAmounts: InstalmentAmounts = InstalmentAmounts(AmountInPence(33333), AmountInPence(100000))
   val monthlyPaymentAmount: MonthlyPaymentAmount = MonthlyPaymentAmount(AmountInPence(30000))
