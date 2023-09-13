@@ -52,7 +52,7 @@ class DetermineAffordableQuotesControllerSpec extends ItSpec {
             status(result) shouldBe Status.SEE_OTHER
             redirectLocation(result) shouldBe Some(PageUrls.instalmentsUrl)
             EssttpBackend.AffordableQuotes.verifyUpdateAffordableQuotesRequest(TdAll.journeyId)
-            Ttp.AffordableQuotes.verifyTtpAffordableQuotesRequest(CryptoFormat.NoOpCryptoFormat)
+            Ttp.AffordableQuotes.verifyTtpAffordableQuotesRequest(origin.taxRegime)(CryptoFormat.NoOpCryptoFormat)
           }
         }
     }

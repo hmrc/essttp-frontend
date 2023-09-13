@@ -19,6 +19,7 @@ package services
 import actionsmodel.AuthenticatedJourneyRequest
 import cats.Eq
 import cats.implicits.catsSyntaxEq
+import config.AppConfig
 import connectors.{CallEligibilityApiRequest, TtpConnector}
 import controllers.support.RequestSupport.hc
 import essttp.crypto.CryptoFormat
@@ -51,7 +52,8 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class TtpService @Inject() (
     ttpConnector: TtpConnector,
-    auditService: AuditService
+    auditService: AuditService,
+    appConfig:    AppConfig
 )(implicit executionContext: ExecutionContext) {
 
   implicit val cryptoFormat: CryptoFormat = CryptoFormat.NoOpCryptoFormat
@@ -109,11 +111,19 @@ class TtpService @Inject() (
         )
       }
 
+    val paymentPlanMaxLengthForRegime: PaymentPlanMaxLength = {
+      val planLengthFromConfig: Int = journey.taxRegime match {
+        case TaxRegime.Epaye => appConfig.PolicyParameters.EPAYE.maxPlanDurationInMonths
+        case TaxRegime.Vat   => appConfig.PolicyParameters.VAT.maxPlanDurationInMonths
+      }
+      PaymentPlanMaxLength(planLengthFromConfig)
+    }
+
     val affordableQuotesRequest: AffordableQuotesRequest = AffordableQuotesRequest(
       channelIdentifier           = ChannelIdentifiers.eSSTTP,
       paymentPlanAffordableAmount = PaymentPlanAffordableAmount(monthlyPaymentAmount.value),
       paymentPlanFrequency        = PaymentPlanFrequencies.Monthly,
-      paymentPlanMaxLength        = TtpService.paymentPlanMaxLength,
+      paymentPlanMaxLength        = paymentPlanMaxLengthForRegime,
       paymentPlanMinLength        = TtpService.paymentPlanMinLength,
       accruedDebtInterest         = AccruedDebtInterest(TtpService.calculateCumulativeInterest(eligibilityCheckResult)),
       paymentPlanStartDate        = startDatesResponse.instalmentStartDate,
@@ -214,7 +224,6 @@ object TtpService {
   }
 
   // these are technically hard coded, may change per tax type? I don't want to put in config so I've put them here...
-  private val paymentPlanMaxLength: PaymentPlanMaxLength = PaymentPlanMaxLength(6)
   private val paymentPlanMinLength: PaymentPlanMinLength = PaymentPlanMinLength(1)
 
   private def buildInstalmentRequest(
