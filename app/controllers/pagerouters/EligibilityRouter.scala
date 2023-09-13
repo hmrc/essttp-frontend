@@ -85,13 +85,13 @@ object EligibilityRouter {
     case TaxRegime.Vat   => routes.IneligibleController.vatFileYourReturnPage
   }
 
-  //requirement from business that if multiple reasons exist but any of them are isLessThanMinDebtAllowance, go to debt too small page (PAYE only).
+  //requirement from business that if multiple reasons exist but any of them are isLessThanMinDebtAllowance, go to debt too small page
   private def determineWhetherToGoToDebtTooSmall(
       maybeEligibilityError:      Option[EligibilityError],
       isLessThanMinDebtAllowance: Boolean,
       taxRegime:                  TaxRegime
   ): Call = (maybeEligibilityError, isLessThanMinDebtAllowance, taxRegime) match {
-    case (Some(MultipleReasons), true, TaxRegime.Epaye) => whichDebtTooSmallPage(taxRegime)
-    case _ => whichGenericEligibilityPage(taxRegime)
+    case (Some(MultipleReasons), true, _) => whichDebtTooSmallPage(taxRegime)
+    case _                                => whichGenericEligibilityPage(taxRegime)
   }
 }

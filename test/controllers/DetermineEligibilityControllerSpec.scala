@@ -299,7 +299,7 @@ class DetermineEligibilityControllerSpec extends ItSpec {
       val result = controller.determineEligibility(fakeRequest)
 
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.vatNotEligibleUrl)
+      redirectLocation(result) shouldBe Some(PageUrls.vatDebtTooSmallUrl)
     }
 
     "EPAYE user with a debt below the minimum amount and debt too old should be redirected to debt too low ineligible page" in {
