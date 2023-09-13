@@ -321,7 +321,7 @@ object Messages {
     )
 
     def `You cannot set up ... debt too old`(taxRegime: TaxRegime, ageOfDebtInYearsOrDays: Int): Message = taxRegime match {
-      //months
+      //years
       case TaxRegime.Epaye => Message(
         english = s"You cannot set up an Employers’ PAYE payment plan online because your payment deadline was over ${ageOfDebtInYearsOrDays.toString} years ago.",
         welsh   = s"Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros ${ageOfDebtInYearsOrDays.toString} mlynedd yn ôl."
