@@ -285,6 +285,17 @@ object Messages {
         )
     }
 
+    def `Pay your ... bill in full`(taxRegime: TaxRegime): Message = {
+      val (taxSpecificContentEnglish, taxSpecificContentWelsh) = taxRegime match {
+        case TaxRegime.Epaye => "PAYE" -> "TWE"
+        case TaxRegime.Vat   => "VAT" -> "TAW"
+      }
+      Message(
+        english = s"Pay your $taxSpecificContentEnglish bill in full",
+        welsh   = s"Talu’ch bil $taxSpecificContentWelsh yn llawn"
+      )
+    }
+
     val `You cannot use this service`: Message = Message(
       english = "You cannot use this service",
       welsh   = "Ni allwch ddefnyddio’r gwasanaeth hwn"
@@ -302,16 +313,16 @@ object Messages {
           welsh   = "Ni allwch drefnu cynllun talu TAW ar-lein oherwydd bod eich bil yn rhy fach."
         )
     }
-    def `You need to pay your ... bill in full. Go to GOV.UK to make a payment today.`(taxRegime: TaxRegime, link: String): Message = taxRegime match {
+    def `Make a payment online to cover your ... bill in full.`(taxRegime: TaxRegime, link: String): Message = taxRegime match {
       case TaxRegime.Epaye =>
         Message(
-          english = s"""You need to pay your PAYE bill in full. Go to <a class="govuk-link" href="$link">GOV.UK</a> to make a payment today.""",
-          welsh   = s"""Mae angen i chi dalu’ch bil TWE yn llawn. Ewch i <a class="govuk-link" href="$link">GOV.UK</a> i wneud taliad heddiw."""
+          english = s"""<a class="govuk-link" href="$link">Make a payment online</a> to cover your PAYE bill in full.""",
+          welsh   = s"""<a class="govuk-link" href="$link">Gwnewch daliad ar-lein</a> i dalu’ch bil TWE yn llawn.""".stripMargin
         )
       case TaxRegime.Vat =>
         Message(
-          english = s"""You need to pay your VAT bill in full. Go to <a class="govuk-link" href="$link">GOV.UK</a> to make a payment today.""",
-          welsh   = s"""Mae angen i chi dalu’ch bil TAW yn llawn. Ewch i <a class="govuk-link" href="$link">GOV.UK</a> i wneud taliad heddiw."""
+          english = s"""<a class="govuk-link" href="$link">Make a payment online</a> to cover your VAT bill in full.""",
+          welsh   = s"""<a class="govuk-link" href="$link">Gwnewch daliad ar-lein</a> i dalu’ch bil TAW yn llawn.""".stripMargin
         )
     }
 
