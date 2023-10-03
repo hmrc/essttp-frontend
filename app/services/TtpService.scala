@@ -156,6 +156,17 @@ class TtpService @Inject() (
     val directDebitDetails = journey.fold(_.directDebitDetails, _.directDebitDetails)
     val accountNumberPaddedWithZero: AccountNumber = directDebitDetails.accountNumber.copy(SensitiveString(padLeftWithZeros(directDebitDetails.accountNumber.value.decryptedValue)))
 
+    val debtItemCarges: List[DebtItemCharges] = eligibilityCheckResult.chargeTypeAssessment
+      .flatMap(_.charges)
+      .map { charge: Charges =>
+        DebtItemCharges(
+          outstandingDebtAmount   = OutstandingDebtAmount(charge.outstandingAmount.value),
+          debtItemChargeId        = charge.chargeReference,
+          debtItemOriginalDueDate = DebtItemOriginalDueDate(charge.dueDate.value),
+          accruedInterest         = charge.accruedInterest
+        )
+      }
+
     val arrangementRequest: ArrangementRequest = ArrangementRequest(
       channelIdentifier           = ChannelIdentifiers.eSSTTP,
       regimeType                  = regimeType,
@@ -176,7 +187,8 @@ class TtpService @Inject() (
         totalDebtIncInt      = selectedPaymentPlan.totalDebtIncInt,
         planInterest         = selectedPaymentPlan.planInterest,
         collections          = selectedPaymentPlan.collections,
-        instalments          = selectedPaymentPlan.instalments
+        instalments          = selectedPaymentPlan.instalments,
+        debtItemCharges      = debtItemCarges
       ),
       customerDetails             = customerDetail,
       regimeDigitalCorrespondence = regimeDigitalCorrespondence
