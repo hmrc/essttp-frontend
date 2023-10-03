@@ -22,7 +22,7 @@
 
 @this(requestSupport: RequestSupport)
 
-@(govUkPaymentLink: String)(implicit request: AuthenticatedJourneyRequest[_])
+@(makeAPaymentOnlineLink: String)(implicit request: AuthenticatedJourneyRequest[_])
 
 @import requestSupport._
 
@@ -33,7 +33,7 @@
 </p>
 <p class="govuk-body">
 @{
-    Html(Messages.NotEligible.`You need to pay your ... bill in full. Go to GOV.UK to make a payment today.`(request.journey.taxRegime, govUkPaymentLink).show)
+    Html(Messages.NotEligible.`Make a payment online to cover your ... bill in full.`(request.journey.taxRegime, makeAPaymentOnlineLink).show)
 }
 </p>
 <p id="call-us-content" class="govuk-body">

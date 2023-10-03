@@ -130,9 +130,14 @@ class IneligibleControllerSpec extends ItSpec {
             }
             val page = pageContentAsDoc(result)
 
+            val expectedH1 = taxRegime match {
+              case TaxRegime.Epaye => "Pay your PAYE bill in full"
+              case TaxRegime.Vat   => "Pay your VAT bill in full"
+            }
+
             ContentAssertions.commonPageChecks(
               page,
-              expectedH1              = "You cannot use this service",
+              expectedH1              = expectedH1,
               shouldBackLinkBePresent = false,
               expectedSubmitUrl       = None,
               regimeBeingTested       = Some(taxRegime)
@@ -141,10 +146,10 @@ class IneligibleControllerSpec extends ItSpec {
             val (expectedParagraph1, expectedParagraph2) = taxRegime match {
               case TaxRegime.Epaye =>
                 "You cannot set up an Employers’ PAYE payment plan online because your bill is too small." ->
-                  "You need to pay your PAYE bill in full. Go to <a class=\"govuk-link\" href=\"https://www.gov.uk/pay-paye-tax\">GOV.UK</a> to make a payment today."
+                  "<a class=\"govuk-link\" href=\"https://tax.service.gov.uk/business-account/epaye/overdue-payments\">Make a payment online</a> to cover your PAYE bill in full."
               case TaxRegime.Vat =>
                 "You cannot set up a VAT payment plan online because your bill is too small." ->
-                  "You need to pay your VAT bill in full. Go to <a class=\"govuk-link\" href=\"https://www.gov.uk/pay-vat\">GOV.UK</a> to make a payment today."
+                  "<a class=\"govuk-link\" href=\"https://tax.service.gov.uk/vat-through-software/what-you-owe\">Make a payment online</a> to cover your VAT bill in full."
             }
 
             val callUsContentEnglish = "Call us on <strong>0300 123 1813</strong> if you are having difficulty making a payment online."
@@ -348,9 +353,14 @@ class IneligibleControllerSpec extends ItSpec {
             }
             val page = pageContentAsDoc(result)
 
+            val expectedH1 = taxRegime match {
+              case TaxRegime.Epaye => "Talu’ch bil TWE yn llawn"
+              case TaxRegime.Vat   => "Talu’ch bil TAW yn llawn"
+            }
+
             ContentAssertions.commonPageChecks(
               page,
-              expectedH1              = "Ni allwch ddefnyddio’r gwasanaeth hwn",
+              expectedH1              = expectedH1,
               shouldBackLinkBePresent = false,
               expectedSubmitUrl       = None,
               regimeBeingTested       = Some(taxRegime),
@@ -360,10 +370,10 @@ class IneligibleControllerSpec extends ItSpec {
             val (expectedParagraph1, expectedParagraph2) = taxRegime match {
               case TaxRegime.Epaye =>
                 "Ni allwch drefnu cynllun talu ar gyfer TWE y Cyflogwr ar-lein oherwydd bod eich bil yn rhy fach." ->
-                  "Mae angen i chi dalu’ch bil TWE yn llawn. Ewch i <a class=\"govuk-link\" href=\"https://www.gov.uk/pay-paye-tax\">GOV.UK</a> i wneud taliad heddiw."
+                  "<a class=\"govuk-link\" href=\"https://tax.service.gov.uk/business-account/epaye/overdue-payments\">Gwnewch daliad ar-lein</a> i dalu’ch bil TWE yn llawn."
               case TaxRegime.Vat =>
                 "Ni allwch drefnu cynllun talu TAW ar-lein oherwydd bod eich bil yn rhy fach." ->
-                  "Mae angen i chi dalu’ch bil TAW yn llawn. Ewch i <a class=\"govuk-link\" href=\"https://www.gov.uk/pay-vat\">GOV.UK</a> i wneud taliad heddiw."
+                  "<a class=\"govuk-link\" href=\"https://tax.service.gov.uk/vat-through-software/what-you-owe\">Gwnewch daliad ar-lein</a> i dalu’ch bil TAW yn llawn."
             }
 
             val callUsContentWelsh = "Os ydych yn cael anawsterau wrth dalu ar-lein, ffoniwch ni ar <strong>0300 200 1900</strong>."
