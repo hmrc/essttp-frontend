@@ -394,6 +394,20 @@ object TdAll {
             amountDue                 = AmountDue(AmountInPence(55570)),
             debtItemOriginalDueDate   = DebtItemOriginalDueDate(LocalDate.parse("2021-07-28"))
           )
+        ),
+        debtItemCharges      = List(
+          DebtItemCharges(
+            outstandingDebtAmount   = OutstandingDebtAmount(AmountInPence(50000)),
+            debtItemChargeId        = ChargeReference("A00000000001"),
+            debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-03-07")),
+            accruedInterest         = AccruedInterest(AmountInPence(1597))
+          ),
+          DebtItemCharges(
+            outstandingDebtAmount   = OutstandingDebtAmount(AmountInPence(100000)),
+            debtItemChargeId        = ChargeReference("A00000000002"),
+            debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-02-07")),
+            accruedInterest         = AccruedInterest(AmountInPence(1597))
+          )
         )
       ),
       customerDetails             = customerDetails,
