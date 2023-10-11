@@ -1,6 +1,6 @@
 import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import sbt.Def
-import scalariform.formatter.preferences._
+import scalariform.formatter.preferences.*
 
 object ScalariformSettings {
 
