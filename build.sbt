@@ -40,7 +40,7 @@ lazy val root = (project in file("."))
     libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always,
     libraryDependencies += ws,
     retrieveManaged := false,
-    update / evictionWarningOptions :=
+    (update / evictionWarningOptions) :=
       EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
     pipelineStages := Seq(digest),
     scalacOptions ++= scalaCompilerOptions,
@@ -56,13 +56,13 @@ lazy val root = (project in file("."))
     }
   )
   .settings(TwirlKeys.templateImports := Seq.empty)
-  .settings(ScalariformSettings.scalariformSettings: _*)
-  .settings(WartRemoverSettings.wartRemoverSettings: _*)
-  .settings(ScoverageSettings.scoverageSettings: _*)
+  .settings(ScalariformSettings.scalariformSettings *)
+  .settings(WartRemoverSettings.wartRemoverSettings *)
+  .settings(ScoverageSettings.scoverageSettings *)
   .settings(
-    Compile / doc / scalacOptions := Seq() //this will allow to have warnings in `doc` task
+    (Compile / doc / scalacOptions) := Seq() //this will allow to have warnings in `doc` task
   )
-  .settings(SbtUpdatesSettings.sbtUpdatesSettings: _*)
+  .settings(SbtUpdatesSettings.sbtUpdatesSettings *)
 
 //Hint: Uncomment below lines if you want to work on both projects in tandem from intellj
 //  .dependsOn(cor)
