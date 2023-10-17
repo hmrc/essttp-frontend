@@ -16,7 +16,6 @@
 
 package models.bars.request
 
-import org.apache.commons.lang3.StringUtils
 import play.api.libs.json.{OFormat, Json}
 
 final case class BarsBankAccount(
@@ -32,8 +31,11 @@ object BarsBankAccount {
     BarsBankAccount(sortCode, leftPad(accountNumber))
 
   private val minimumLength = 8
-  private val padStr = "0"
+  private val padStr = '0'
   private def leftPad(accountNumber: String): String =
-    StringUtils.leftPad(accountNumber, minimumLength, padStr)
+    accountNumber
+      .reverse
+      .padTo(minimumLength, padStr)
+      .reverse
 
 }
