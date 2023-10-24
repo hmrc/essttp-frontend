@@ -105,6 +105,8 @@ class TtpService @Inject() (
           outstandingDebtAmount   = OutstandingDebtAmount(charge.outstandingAmount.value),
           mainTrans               = charge.mainTrans,
           subTrans                = charge.subTrans,
+          isInterestBearingCharge = charge.isInterestBearingCharge,
+          useChargeReference      = charge.useChargeReference,
           debtItemChargeId        = charge.chargeReference,
           interestStartDate       = charge.interestStartDate,
           debtItemOriginalDueDate = DebtItemOriginalDueDate(charge.dueDate.value)
@@ -256,6 +258,8 @@ object TtpService {
             outstandingDebtAmount   = OutstandingDebtAmount(charge.outstandingAmount.value),
             mainTrans               = charge.mainTrans,
             subTrans                = charge.subTrans,
+            isInterestBearingCharge = charge.isInterestBearingCharge,
+            useChargeReference      = charge.useChargeReference,
             debtItemChargeId        = charge.chargeReference,
             interestStartDate       = charge.interestStartDate,
             debtItemOriginalDueDate = DebtItemOriginalDueDate(charge.dueDate.value)

@@ -188,18 +188,18 @@ object StartJourneyController {
     val maybeRegimeDigitalCorrespondence = Some(RegimeDigitalCorrespondence(form.regimeDigitalCorrespondence))
 
     val charges: Charges = Charges(
-      chargeType           = ChargeType("InYearRTICharge-Tax"),
-      mainType             = MainType("InYearRTICharge(FPS)"),
-      chargeReference      = ChargeReference(form.taxReference.value),
-      mainTrans            = MainTrans("mainTrans"),
-      subTrans             = SubTrans("subTrans"),
-      outstandingAmount    = OutstandingAmount(debtAmountFromForm),
-      interestStartDate    = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
-      dueDate              = DueDate(LocalDate.parse("2017-03-07")),
-      accruedInterest      = AccruedInterest(interestAmount),
-      ineligibleChargeType = IneligibleChargeType(false),
-      chargeOverMaxDebtAge = ChargeOverMaxDebtAge(false),
-      locks                = Some(
+      chargeType              = ChargeType("InYearRTICharge-Tax"),
+      mainType                = MainType("InYearRTICharge(FPS)"),
+      chargeReference         = ChargeReference(form.taxReference.value),
+      mainTrans               = MainTrans("mainTrans"),
+      subTrans                = SubTrans("subTrans"),
+      outstandingAmount       = OutstandingAmount(debtAmountFromForm),
+      interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
+      dueDate                 = DueDate(LocalDate.parse("2017-03-07")),
+      accruedInterest         = AccruedInterest(interestAmount),
+      ineligibleChargeType    = IneligibleChargeType(false),
+      chargeOverMaxDebtAge    = ChargeOverMaxDebtAge(false),
+      locks                   = Some(
         List(
           Lock(
             lockType                 = LockType("Payment"),
@@ -208,7 +208,9 @@ object StartJourneyController {
           )
         )
       ),
-      dueDateNotReached    = false
+      dueDateNotReached       = false,
+      isInterestBearingCharge = None,
+      useChargeReference      = None
     )
 
     val chargeTypeAssessments: List[ChargeTypeAssessment] = List(

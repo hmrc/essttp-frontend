@@ -22,12 +22,25 @@ import essttp.rootmodel.ttp.eligibility.{EligibilityPass, EligibilityRules}
 object TtpJsonResponses {
 
   def ttpEligibilityCallJson(
-      taxRegime:                   TaxRegime,
-      eligibilityPass:             EligibilityPass  = TdAll.eligibleEligibilityPass,
-      eligibilityRules:            EligibilityRules = TdAll.eligibleEligibilityRules,
-      poundsInsteadOfPence:        Boolean          = false,
-      regimeDigitalCorrespondence: Boolean          = false
+      taxRegime:                          TaxRegime,
+      eligibilityPass:                    EligibilityPass  = TdAll.eligibleEligibilityPass,
+      eligibilityRules:                   EligibilityRules = TdAll.eligibleEligibilityRules,
+      poundsInsteadOfPence:               Boolean          = false,
+      regimeDigitalCorrespondence:        Boolean          = false,
+      maybeChargeIsInterestBearingCharge: Option[Boolean]  = None,
+      maybeChargeUseChargeReference:      Option[Boolean]  = None
   ): String = {
+
+    val isInterestBearingCharge = maybeChargeIsInterestBearingCharge match {
+      case Some(bool) => s""""isInterestBearingCharge":${bool.toString},"""
+      case None       => ""
+    }
+
+    val useChargeReference = maybeChargeUseChargeReference match {
+      case Some(bool) => s""""useChargeReference":${bool.toString},"""
+      case None       => ""
+    }
+
     s"""
        |{
        |  "processingDateTime": "2022-03-23T13:49:51.141Z",
@@ -78,12 +91,14 @@ object TtpJsonResponses {
        |      "accruedInterest" : ${if (poundsInsteadOfPence) "15.97" else "1597"},
        |      "ineligibleChargeType": false,
        |      "chargeOverMaxDebtAge": false,
-       |      "locks": [ {
+       |       "dueDateNotReached": false,
+       |       $isInterestBearingCharge
+       |       $useChargeReference
+       |       "locks": [ {
        |          "lockType": "Payment",
        |          "lockReason": "Risk/Fraud",
        |          "disallowedChargeLockType": false
-       |       } ],
-       |       "dueDateNotReached": false
+       |       } ]
        |    } ]
        |  } ],
        |  ${if (regimeDigitalCorrespondence) { s""""regimeDigitalCorrespondence":true,""" } else ""}
