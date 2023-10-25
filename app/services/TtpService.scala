@@ -165,7 +165,9 @@ class TtpService @Inject() (
           outstandingDebtAmount   = OutstandingDebtAmount(charge.outstandingAmount.value),
           debtItemChargeId        = charge.chargeReference,
           debtItemOriginalDueDate = DebtItemOriginalDueDate(charge.dueDate.value),
-          accruedInterest         = charge.accruedInterest
+          accruedInterest         = charge.accruedInterest,
+          isInterestBearingCharge = charge.isInterestBearingCharge,
+          useChargeReference      = charge.useChargeReference
         )
       }
 

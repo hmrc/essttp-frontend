@@ -97,24 +97,24 @@ object TdJsonBodies {
       |""".stripMargin
 
   def eligibilityCheckJourneyInfo(
-                                   eligibilityPass:             EligibilityPass  = TdAll.eligibleEligibilityPass,
-                                   eligibilityRules:            EligibilityRules = TdAll.eligibleEligibilityRules,
-                                   taxRegime:                   TaxRegime,
-                                   encrypter:                   Encrypter,
-                                   regimeDigitalCorrespondence: Boolean          = true,
-                                   email:                       Option[String]   = Some(TdAll.etmpEmail),
-                                   maybeChargeIsInterestBearingCharge: Option[Boolean] = None,
-                                   maybeChargeUseChargeReference: Option[Boolean] = None
+      eligibilityPass:                    EligibilityPass  = TdAll.eligibleEligibilityPass,
+      eligibilityRules:                   EligibilityRules = TdAll.eligibleEligibilityRules,
+      taxRegime:                          TaxRegime,
+      encrypter:                          Encrypter,
+      regimeDigitalCorrespondence:        Boolean          = true,
+      email:                              Option[String]   = Some(TdAll.etmpEmail),
+      maybeChargeIsInterestBearingCharge: Option[Boolean]  = None,
+      maybeChargeUseChargeReference:      Option[Boolean]  = None
   ): JourneyInfoAsJson = {
 
     val isInterestBearingChargeValue = maybeChargeIsInterestBearingCharge match {
       case Some(bool) => s""""isInterestBearingCharge":${bool.toString},"""
-      case None => ""
+      case None       => ""
     }
 
     val useChargeReferenceValue = maybeChargeUseChargeReference match {
       case Some(bool) => s""""useChargeReference":${bool.toString},"""
-      case None => ""
+      case None       => ""
     }
 
     s"""
