@@ -97,13 +97,26 @@ object TdJsonBodies {
       |""".stripMargin
 
   def eligibilityCheckJourneyInfo(
-      eligibilityPass:             EligibilityPass  = TdAll.eligibleEligibilityPass,
-      eligibilityRules:            EligibilityRules = TdAll.eligibleEligibilityRules,
-      taxRegime:                   TaxRegime,
-      encrypter:                   Encrypter,
-      regimeDigitalCorrespondence: Boolean          = true,
-      email:                       Option[String]   = Some(TdAll.etmpEmail)
-  ): JourneyInfoAsJson =
+                                   eligibilityPass:             EligibilityPass  = TdAll.eligibleEligibilityPass,
+                                   eligibilityRules:            EligibilityRules = TdAll.eligibleEligibilityRules,
+                                   taxRegime:                   TaxRegime,
+                                   encrypter:                   Encrypter,
+                                   regimeDigitalCorrespondence: Boolean          = true,
+                                   email:                       Option[String]   = Some(TdAll.etmpEmail),
+                                   maybeChargeIsInterestBearingCharge: Option[Boolean] = None,
+                                   maybeChargeUseChargeReference: Option[Boolean] = None
+  ): JourneyInfoAsJson = {
+
+    val isInterestBearingChargeValue = maybeChargeIsInterestBearingCharge match {
+      case Some(bool) => s""""isInterestBearingCharge":${bool.toString},"""
+      case None => ""
+    }
+
+    val useChargeReferenceValue = maybeChargeUseChargeReference match {
+      case Some(bool) => s""""useChargeReference":${bool.toString},"""
+      case None => ""
+    }
+
     s"""
       |"eligibilityCheckResult" : {
       |  "processingDateTime": "2022-03-23T13:49:51.141Z",
@@ -150,12 +163,15 @@ object TdJsonBodies {
       |        "accruedInterest" : 1597,
       |        "ineligibleChargeType": false,
       |        "chargeOverMaxDebtAge": false,
-      |        "locks": [ {
+
+      |         "dueDateNotReached": false,
+      |         $isInterestBearingChargeValue
+      |         $useChargeReferenceValue
+      |         "locks": [ {
       |            "lockType": "Payment",
       |            "lockReason": "Risk/Fraud",
       |            "disallowedChargeLockType": false
-      |         } ],
-      |         "dueDateNotReached": false
+      |         } ]
       |      } ]
       |    },
       |    {
@@ -174,12 +190,14 @@ object TdJsonBodies {
       |        "accruedInterest" : 1597,
       |        "ineligibleChargeType": false,
       |        "chargeOverMaxDebtAge": false,
-      |        "locks": [ {
+      |         "dueDateNotReached": false,
+      |         $isInterestBearingChargeValue
+      |         $useChargeReferenceValue
+      |         "locks": [ {
       |            "lockType": "Payment",
       |            "lockReason": "Risk/Fraud",
       |            "disallowedChargeLockType": false
-      |         } ],
-      |         "dueDateNotReached": false
+      |         } ]
       |      } ]
       |    }
       |  ],
@@ -188,6 +206,7 @@ object TdJsonBodies {
       |  "futureChargeLiabilitiesExcluded": false
       |}
       |""".stripMargin
+  }
 
   def canPayUpfrontJourneyInfo(canPayUpfront: Boolean): String = s""""canPayUpfront": ${canPayUpfront.toString}"""
 

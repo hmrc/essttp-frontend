@@ -31,12 +31,12 @@ object TtpJsonResponses {
       maybeChargeUseChargeReference:      Option[Boolean]  = None
   ): String = {
 
-    val isInterestBearingCharge = maybeChargeIsInterestBearingCharge match {
+    val isInterestBearingChargeValue = maybeChargeIsInterestBearingCharge match {
       case Some(bool) => s""""isInterestBearingCharge":${bool.toString},"""
       case None       => ""
     }
 
-    val useChargeReference = maybeChargeUseChargeReference match {
+    val useChargeReferenceValue = maybeChargeUseChargeReference match {
       case Some(bool) => s""""useChargeReference":${bool.toString},"""
       case None       => ""
     }
@@ -92,8 +92,8 @@ object TtpJsonResponses {
        |      "ineligibleChargeType": false,
        |      "chargeOverMaxDebtAge": false,
        |       "dueDateNotReached": false,
-       |       $isInterestBearingCharge
-       |       $useChargeReference
+       |       $isInterestBearingChargeValue
+       |       $useChargeReferenceValue
        |       "locks": [ {
        |          "lockType": "Payment",
        |          "lockReason": "Risk/Fraud",
