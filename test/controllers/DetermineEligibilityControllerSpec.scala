@@ -24,13 +24,13 @@ import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import testsupport.ItSpec
+import testsupport.{CombinationsHelper, ItSpec}
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend, Ttp}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll, TtpJsonResponses}
 import uk.gov.hmrc.http.SessionKeys
 
-class DetermineEligibilityControllerSpec extends ItSpec {
+class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper {
   private val controller: DetermineEligibilityController = app.injector.instanceOf[DetermineEligibilityController]
 
   "Determine eligibility endpoint should route user correctly and send an audit event" - {
@@ -175,20 +175,26 @@ class DetermineEligibilityControllerSpec extends ItSpec {
     }
 
     "Eligible: should redirect to your bill and send an audit event" - {
-      val setOfOptions = List(Some(true), Some(false), None)
-      val allCombinationOfOptions = for {
-        a <- setOfOptions
-        b <- setOfOptions
-      } yield (a, b)
-
-      allCombinationOfOptions.foreach(combo => {
+      allCombinationOfTwoBooleanOptions.foreach(combo => {
         val maybeChargeIsInterestBearingCharge = combo._1
         val maybeChargeUseChargeReference = combo._2
-        s"where 'isInterestBearingCharge' field is ${maybeChargeIsInterestBearingCharge.toString} and 'useChargeReference' is ${maybeChargeUseChargeReference.toString}" in {
+        s"where 'isInterestBearingCharge' field is ${maybeChargeIsInterestBearingCharge.toString} " +
+          s"and 'useChargeReference' is ${maybeChargeUseChargeReference.toString}" in {
 
-          val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(TaxRegime.Epaye, regimeDigitalCorrespondence = true, maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge, maybeChargeUseChargeReference = maybeChargeUseChargeReference)
+          val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
+            TaxRegime.Epaye,
+            regimeDigitalCorrespondence = true,
+            maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge,
+            maybeChargeUseChargeReference = maybeChargeUseChargeReference
+          )
           // for audit event
-          val eligibilityCheckResponseJsonAsPounds = TtpJsonResponses.ttpEligibilityCallJson(TaxRegime.Epaye, poundsInsteadOfPence = true, regimeDigitalCorrespondence = true, maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge, maybeChargeUseChargeReference = maybeChargeUseChargeReference)
+          val eligibilityCheckResponseJsonAsPounds = TtpJsonResponses.ttpEligibilityCallJson(
+            TaxRegime.Epaye,
+            poundsInsteadOfPence = true,
+            regimeDigitalCorrespondence = true,
+            maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge,
+            maybeChargeUseChargeReference = maybeChargeUseChargeReference
+          )
 
           stubCommonActions()
           EssttpBackend.DetermineTaxId.findJourney(Origins.Epaye.Bta)()
@@ -208,7 +214,14 @@ class DetermineEligibilityControllerSpec extends ItSpec {
 
           EssttpBackend.EligibilityCheck.verifyUpdateEligibilityRequest(
             journeyId                      = TdAll.journeyId,
-            expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(TdAll.eligibleEligibilityPass, TdAll.eligibleEligibilityRules, TaxRegime.Epaye, Some(RegimeDigitalCorrespondence(true)), maybeChargeIsInterestBearingCharge, maybeChargeUseChargeReference)
+            expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(
+              TdAll.eligibleEligibilityPass,
+              TdAll.eligibleEligibilityRules,
+              TaxRegime.Epaye,
+              Some(RegimeDigitalCorrespondence(true)),
+              maybeChargeIsInterestBearingCharge,
+              maybeChargeUseChargeReference
+            )
           )(testOperationCryptoFormat)
 
           AuditConnectorStub.verifyEventAudited(
