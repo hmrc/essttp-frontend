@@ -212,6 +212,42 @@
     ))
 }
 
+@optionalChargesFieldRadios(fieldName: String) = @{
+    govukRadios(Radios(
+        fieldset = Some(Fieldset(
+            legend = Some(Legend(
+                content = Text(s"Optional charges field: $fieldName"),
+                classes = "govuk-fieldset__legend--m",
+                isPageHeading = false
+            ))
+    )),
+    idPrefix = Some(fieldName),
+    name = fieldName,
+    errorMessage = form.error(fieldName).map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
+    content = Text(e.message)
+    )),
+    items = Seq(
+        RadioItem(
+            content = Text("True"),
+            value = Some("true"),
+            checked = form.data.get(fieldName).fold(false)(_ === "true")
+        ),
+        RadioItem(
+            content = Text("False"),
+            value = Some("false"),
+            checked = form.data.get(fieldName).fold(false)(_ === "false")
+        ),
+        RadioItem(
+            content = Text("None"),
+            value = None,
+            checked = form.data.get(fieldName).fold(true)(_ === "")
+        ),
+    ),
+    classes = "govuk-radios--small govuk-radios--inline",
+    hint = Some(Hint(content = Text("Selection will be applied to all charges")))
+    ))
+}
+
 
 @payeContent = {
 @formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneySubmit) {
@@ -273,6 +309,10 @@
         items = eligibilityErrorCheckboxes,
         classes = "govuk-checkboxes--small"
     ))
+
+    @optionalChargesFieldRadios("isInterestBearingCharge")
+
+    @optionalChargesFieldRadios("useChargeReference")
 
     @govukRadios(Radios(
         fieldset = Some(Fieldset(
@@ -377,6 +417,11 @@
         items = eligibilityErrorCheckboxes,
         classes = "govuk-checkboxes--small"
     ))
+
+
+    @optionalChargesFieldRadios("isInterestBearingCharge")
+
+    @optionalChargesFieldRadios("useChargeReference")
 
     @govukRadios(Radios(
         fieldset = Some(Fieldset(
