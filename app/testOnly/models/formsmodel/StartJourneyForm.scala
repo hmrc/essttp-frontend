@@ -64,8 +64,8 @@ object StartJourneyForm {
         taxRegimeKey -> Forms.of(taxRegimeFormatter),
         "regimeDigitalCorrespondence" -> optionalBooleanMappingDefaultTrue,
         "emailAddressPresent" -> optionalBooleanMappingDefaultTrue,
-        "isInterestBearingCharge" -> chargesOptionalFieldsMapping2,
-        "useChargeReference" -> chargesOptionalFieldsMapping2
+        "isInterestBearingCharge" -> chargesOptionalFieldsMapping,
+        "useChargeReference" -> chargesOptionalFieldsMapping
       )(StartJourneyForm.apply)(StartJourneyForm.unapply)
     )
   }
@@ -173,7 +173,7 @@ object StartJourneyForm {
     optional(boolean).transform[Boolean](_.getOrElse(true), Some(_))
   }
 
-  private val chargesOptionalFieldsMapping2: Mapping[Option[Boolean]] = {
+  private val chargesOptionalFieldsMapping: Mapping[Option[Boolean]] = {
     optional(boolean)
   }
 

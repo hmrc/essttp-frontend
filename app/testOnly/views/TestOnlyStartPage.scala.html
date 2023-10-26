@@ -25,7 +25,6 @@
 @import essttp.rootmodel.TaxRegime
 @import testOnly.models.formsmodel.Enrolments
 @import testOnly.models.formsmodel.SignInAs
-@import testOnly.models.formsmodel.BooleanOptionalFieldValue
 @import cats.syntax.eq._
 @import config.AppConfig
 
@@ -213,7 +212,7 @@
     ))
 }
 
-@optionalChargesFieldRadios(fieldName: String) = @{
+@chargesOptionalFieldRadios(fieldName: String) = @{
     govukRadios(Radios(
         fieldset = Some(Fieldset(
             legend = Some(Legend(
@@ -311,9 +310,9 @@
         classes = "govuk-checkboxes--small"
     ))
 
-    @optionalChargesFieldRadios("isInterestBearingCharge")
+    @chargesOptionalFieldRadios("isInterestBearingCharge")
 
-    @optionalChargesFieldRadios("useChargeReference")
+    @chargesOptionalFieldRadios("useChargeReference")
 
     @govukRadios(Radios(
         fieldset = Some(Fieldset(
@@ -420,9 +419,9 @@
     ))
 
 
-    @optionalChargesFieldRadios("isInterestBearingCharge")
+    @chargesOptionalFieldRadios("isInterestBearingCharge")
 
-    @optionalChargesFieldRadios("useChargeReference")
+    @chargesOptionalFieldRadios("useChargeReference")
 
     @govukRadios(Radios(
         fieldset = Some(Fieldset(
