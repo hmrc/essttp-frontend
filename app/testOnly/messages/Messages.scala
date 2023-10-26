@@ -22,5 +22,4 @@ object Messages {
 
   val `Select how to be signed in`: Message = Message(english = "Select how to be signed in")
   val `Select which origin the journey should start from`: Message = Message(english = "Select which origin the journey should start from")
-  val `Select whether to include optional charges value`: Message = Message(english = "Select whether to include optional charges value")
 }
