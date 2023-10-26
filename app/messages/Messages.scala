@@ -441,8 +441,8 @@ object Messages {
     )
 
     val `Your monthly payments will be lower if you ...`: Message = Message(
-      english = "Your monthly payments will be lower if you can make an upfront payment. This payment will be taken from your bank account within 10 working days.",
-      welsh   = "Bydd eich taliadau misol yn is os gallwch wneud taliad ymlaen llaw. Caiff y taliad hwn ei gymryd o’ch cyfrif banc cyn pen 10 diwrnod gwaith."
+      english = "Your monthly payments will be lower if you can make an upfront payment. This payment will be taken from your bank account within 6 working days.",
+      welsh   = "Bydd eich taliadau misol yn is os gallwch wneud taliad ymlaen llaw. Caiff y taliad hwn ei gymryd o’ch cyfrif banc cyn pen 6 diwrnod gwaith."
     )
 
     val `Select yes if you can make an upfront payment`: Message = Message(
@@ -672,8 +672,8 @@ object Messages {
     )
 
     val `Upfront payment`: Message = Message(
-      english = "Upfront payment<br><span class=\"govuk-body-s\">Taken within 10 working days</span>",
-      welsh   = "Taliad ymlaen llaw<br><span class=\"govuk-body-s\">I’w gymryd cyn pen 10 diwrnod gwaith</span>"
+      english = "Upfront payment<br><span class=\"govuk-body-s\">Taken within 6 working days</span>",
+      welsh   = "Taliad ymlaen llaw<br><span class=\"govuk-body-s\">I’w gymryd cyn pen 6 diwrnod gwaith</span>"
     )
 
     val `Upfront payment-visually-hidden-message`: Message = Message(
@@ -1470,8 +1470,8 @@ object Messages {
     )
 
     def paymentInfo(hasUpfrontPayment: Boolean, paymentDate: String): Message = Message(
-      english = s"${if (hasUpfrontPayment) "Your upfront payment will be taken within 10 working days. " else ""}Your next payment will be taken on $paymentDate or the next working day.",
-      welsh   = s"${if (hasUpfrontPayment) "Caiff eich taliad ymlaen llaw ei gymryd cyn pen 10 diwrnod gwaith. " else ""}Caiff eich taliad nesaf ei gymryd ar $paymentDate neu’r diwrnod gwaith nesaf."
+      english = s"${if (hasUpfrontPayment) "Your upfront payment will be taken within 6 working days. " else ""}Your next payment will be taken on $paymentDate or the next working day.",
+      welsh   = s"${if (hasUpfrontPayment) "Caiff eich taliad ymlaen llaw ei gymryd cyn pen 6 diwrnod gwaith. " else ""}Caiff eich taliad nesaf ei gymryd ar $paymentDate neu’r diwrnod gwaith nesaf."
     )
 
     val `Your tax account will be updated with your payment plan within 24 hours.`: Message = Message(

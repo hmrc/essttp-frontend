@@ -40,7 +40,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
   private val controller: UpfrontPaymentController = app.injector.instanceOf[UpfrontPaymentController]
   private val expectedH1CanYouPayUpfrontPage: String = "Can you make an upfront payment?"
   private val expectedPageHintCanPayUpfrontPage: String =
-    "Your monthly payments will be lower if you can make an upfront payment. This payment will be taken from your bank account within 10 working days."
+    "Your monthly payments will be lower if you can make an upfront payment. This payment will be taken from your bank account within 6 working days."
   private val expectedH1HowMuchCanYouPayUpfrontPage: String = "How much can you pay upfront?"
   private val expectedH1UpfrontSummaryPage: String = "Payment summary"
 
@@ -428,7 +428,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
                 val rows = doc.select(".govuk-summary-list__row").iterator().asScala.toList
                 question(rows(0)) shouldBe "Can you make an upfront payment?"
-                question(rows(1)) shouldBe "Upfront payment Taken within 10 working days"
+                question(rows(1)) shouldBe "Upfront payment Taken within 6 working days"
                 question(rows(2)) shouldBe "Remaining amount to pay"
                 answer(rows(0)) shouldBe "Yes"
                 answer(rows(1)) shouldBe expectedUpfrontPaymentAmountString
