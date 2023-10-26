@@ -78,7 +78,6 @@ class StartJourneyController @Inject() (
   }
 
   private def startJourney(startJourneyForm: StartJourneyForm): Future[Result] = {
-    println(s"DEBUG: StartJourneyForm - ${startJourneyForm.toString}")
     implicit val hc: HeaderCarrier = HeaderCarrier()
     for {
       _ <- essttpStubConnector.primeStubs(makeEligibilityCheckResult(startJourneyForm)(appConfig))
@@ -210,8 +209,8 @@ object StartJourneyController {
         )
       ),
       dueDateNotReached       = false,
-      isInterestBearingCharge = None,
-      useChargeReference      = None
+      isInterestBearingCharge = form.isInterestBearingCharge.map(IsInterestBearingCharge(_)),
+      useChargeReference      = form.useChargeReference.map(UseChargeReference(_))
     )
 
     val chargeTypeAssessments: List[ChargeTypeAssessment] = List(
