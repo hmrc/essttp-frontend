@@ -94,7 +94,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
             val emailParagraphOffset = if (isEmailAddressRequired) 0 else -1
 
             if (hasUpfrontPayment) {
-              paragraphs(emailParagraphOffset + 2).text() shouldBe "Your upfront payment will be taken within 10 working days. Your next payment will be taken on 28th August 2022 or the next working day."
+              paragraphs(emailParagraphOffset + 2).text() shouldBe "Your upfront payment will be taken within 6 working days. Your next payment will be taken on 28th August 2022 or the next working day."
             } else {
               paragraphs(emailParagraphOffset + 2).text() shouldBe "Your next payment will be taken on 28th August 2022 or the next working day."
             }
@@ -198,7 +198,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
 
           upfrontPaymentSummaryListRows.size shouldBe 2
           assertKeyAndValue(upfrontPaymentSummaryListRows(0), ("Can you make an upfront payment?", "Yes"))
-          assertKeyAndValue(upfrontPaymentSummaryListRows(1), ("Upfront payment Taken within 10 working days", "£2"))
+          assertKeyAndValue(upfrontPaymentSummaryListRows(1), ("Upfront payment Taken within 6 working days", "£2"))
 
           assertMonthlyPaymentSummaryList(monthlyPaymentSummaryListRows)
           assertPrintLink(doc)
@@ -312,7 +312,7 @@ class PaymentPlanSetUpControllerEmailDisabledSpec extends ItSpec {
 
               subheadings(0).text() shouldBe "What happens next"
               paragraphs(0).text() shouldBe "HMRC will send you a letter within 5 working days with your payment dates."
-              paragraphs(1).text() shouldBe "Your upfront payment will be taken within 10 working days. Your next payment will be taken on 28th August 2022 or the next working day."
+              paragraphs(1).text() shouldBe "Your upfront payment will be taken within 6 working days. Your next payment will be taken on 28th August 2022 or the next working day."
               ()
             }
 
