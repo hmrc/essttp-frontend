@@ -63,7 +63,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
               )
               val upfrontPaymentAmountRow = upfrontPaymentAmountValue.map(amount =>
                 SummaryRow(
-                  "Upfront payment\n<br><span class=\"govuk-body-s\">Taken within 10 working days</span>",
+                  "Upfront payment\n<br><span class=\"govuk-body-s\">Taken within 6 working days</span>",
                   amount,
                   PageUrls.checkPaymentPlanChangeUrl("UpfrontPaymentAmount")
                 ))
