@@ -25,8 +25,8 @@ object JourneyInfo {
 
   /** Represents small bits of json that get added to the journey at each stage **/
   def taxId(taxReference: String): JourneyInfoAsJson = TdJsonBodies.taxIdJourneyInfo(taxReference)
-  def eligibilityCheckEligible(taxRegime: TaxRegime, encrypter: Encrypter, regimeDigitalCorrespondence: Boolean, email: Option[String]): JourneyInfoAsJson =
-    TdJsonBodies.eligibilityCheckJourneyInfo(encrypter                   = encrypter, taxRegime = taxRegime, regimeDigitalCorrespondence = regimeDigitalCorrespondence, email = email)
+  def eligibilityCheckEligible(taxRegime: TaxRegime, encrypter: Encrypter, regimeDigitalCorrespondence: Boolean, email: Option[String], maybeChargeIsInterestBearingCharge: Option[Boolean], maybeChargeUseChargeReference: Option[Boolean]): JourneyInfoAsJson =
+    TdJsonBodies.eligibilityCheckJourneyInfo(encrypter                          = encrypter, taxRegime = taxRegime, regimeDigitalCorrespondence = regimeDigitalCorrespondence, email = email, maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge, maybeChargeUseChargeReference = maybeChargeUseChargeReference)
   def ineligibleHasRls(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleHasRlsOnAddress, taxRegime, encrypter)
   def ineligibleMarkedAsInsolvent(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleMarkedAsInsolvent, taxRegime, encrypter)
   def ineligibleMinDebt(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleIsLessThanMinDebtAllowance, taxRegime, encrypter)
@@ -74,8 +74,22 @@ object JourneyInfo {
   val started: List[JourneyInfoAsJson] = List.empty
   def taxIdDetermined(taxReference: String = "864FZ00049"): List[JourneyInfoAsJson] = taxId(taxReference) :: started
 
-  def eligibilityCheckedEligible(taxRegime: TaxRegime, encrypter: Encrypter, regimeDigitalCorrespondence: Boolean = true, etmpEmail: Option[String] = Some(TdAll.etmpEmail)): List[JourneyInfoAsJson] =
-    eligibilityCheckEligible(taxRegime, encrypter, regimeDigitalCorrespondence, etmpEmail) :: taxIdDetermined()
+  def eligibilityCheckedEligible(
+      taxRegime:                          TaxRegime,
+      encrypter:                          Encrypter,
+      regimeDigitalCorrespondence:        Boolean         = true,
+      etmpEmail:                          Option[String]  = Some(TdAll.etmpEmail),
+      maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true),
+      maybeChargeUseChargeReference:      Option[Boolean] = Some(true)
+  ): List[JourneyInfoAsJson] =
+    eligibilityCheckEligible(
+      taxRegime,
+      encrypter,
+      regimeDigitalCorrespondence,
+      etmpEmail,
+      maybeChargeIsInterestBearingCharge,
+      maybeChargeUseChargeReference
+    ) :: taxIdDetermined()
 
   def eligibilityCheckedIneligibleHasRls(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
     ineligibleHasRls(taxRegime, encrypter) :: taxIdDetermined()

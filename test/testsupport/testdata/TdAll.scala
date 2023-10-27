@@ -174,10 +174,12 @@ object TdAll {
   }
 
   def eligibilityCheckResult(
-      eligibilityPass:             EligibilityPass,
-      eligibilityRules:            EligibilityRules,
-      taxRegime:                   TaxRegime,
-      regimeDigitalCorrespondence: Option[RegimeDigitalCorrespondence]
+      eligibilityPass:               EligibilityPass,
+      eligibilityRules:              EligibilityRules,
+      taxRegime:                     TaxRegime,
+      regimeDigitalCorrespondence:   Option[RegimeDigitalCorrespondence],
+      chargeIsInterestBearingCharge: Option[Boolean]                     = None,
+      chargeUseChargeReference:      Option[Boolean]                     = None
   ): EligibilityCheckResult = {
 
     EligibilityCheckResult(
@@ -195,21 +197,23 @@ object TdAll {
         taxPeriodTo     = TaxPeriodTo("2020-08-14"),
         debtTotalAmount = DebtTotalAmount(AmountInPence(300000)),
         charges         = List(Charges(
-          chargeType           = ChargeType("InYearRTICharge-Tax"),
-          mainType             = MainType("InYearRTICharge(FPS)"),
-          chargeReference      = ChargeReference("A00000000001"),
-          mainTrans            = MainTrans("mainTrans"),
-          subTrans             = SubTrans("subTrans"),
-          outstandingAmount    = OutstandingAmount(AmountInPence(100000)),
-          interestStartDate    = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
-          dueDate              = DueDate(LocalDate.parse("2017-03-07")),
-          accruedInterest      = AccruedInterest(AmountInPence(1597)),
-          ineligibleChargeType = IneligibleChargeType(false),
-          chargeOverMaxDebtAge = ChargeOverMaxDebtAge(false),
-          locks                = Some(
+          chargeType              = ChargeType("InYearRTICharge-Tax"),
+          mainType                = MainType("InYearRTICharge(FPS)"),
+          chargeReference         = ChargeReference("A00000000001"),
+          mainTrans               = MainTrans("mainTrans"),
+          subTrans                = SubTrans("subTrans"),
+          outstandingAmount       = OutstandingAmount(AmountInPence(100000)),
+          interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
+          dueDate                 = DueDate(LocalDate.parse("2017-03-07")),
+          accruedInterest         = AccruedInterest(AmountInPence(1597)),
+          ineligibleChargeType    = IneligibleChargeType(false),
+          chargeOverMaxDebtAge    = ChargeOverMaxDebtAge(false),
+          locks                   = Some(
             List(Lock(LockType("Payment"), LockReason("Risk/Fraud"), DisallowedChargeLockType(false)))
           ),
-          dueDateNotReached    = false
+          dueDateNotReached       = false,
+          isInterestBearingCharge = chargeIsInterestBearingCharge.map(IsInterestBearingCharge(_)),
+          useChargeReference      = chargeUseChargeReference.map(UseChargeReference(_))
         ))
       )),
       customerDetails                 = None,
@@ -250,6 +254,8 @@ object TdAll {
         OutstandingDebtAmount(AmountInPence(50000)),
         mainTrans               = MainTrans("mainTrans"),
         subTrans                = SubTrans("subTrans"),
+        isInterestBearingCharge = Some(IsInterestBearingCharge(true)),
+        useChargeReference      = Some(UseChargeReference(true)),
         debtItemChargeId        = ChargeReference("A00000000001"),
         interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
         debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-03-07"))
@@ -258,6 +264,8 @@ object TdAll {
         OutstandingDebtAmount(AmountInPence(100000)),
         mainTrans               = MainTrans("mainTrans"),
         subTrans                = SubTrans("subTrans"),
+        isInterestBearingCharge = Some(IsInterestBearingCharge(true)),
+        useChargeReference      = Some(UseChargeReference(true)),
         debtItemChargeId        = ChargeReference("A00000000002"),
         interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-02-07"))),
         debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-02-07"))
@@ -284,6 +292,8 @@ object TdAll {
           OutstandingDebtAmount(AmountInPence(50000)),
           mainTrans               = MainTrans("mainTrans"),
           subTrans                = SubTrans("subTrans"),
+          isInterestBearingCharge = Some(IsInterestBearingCharge(true)),
+          useChargeReference      = Some(UseChargeReference(true)),
           debtItemChargeId        = ChargeReference("A00000000001"),
           interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
           debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-03-07"))
@@ -292,6 +302,8 @@ object TdAll {
           OutstandingDebtAmount(AmountInPence(100000)),
           mainTrans               = MainTrans("mainTrans"),
           subTrans                = SubTrans("subTrans"),
+          isInterestBearingCharge = Some(IsInterestBearingCharge(true)),
+          useChargeReference      = Some(UseChargeReference(true)),
           debtItemChargeId        = ChargeReference("A00000000002"),
           interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-02-07"))),
           debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-02-07"))
@@ -400,13 +412,17 @@ object TdAll {
             outstandingDebtAmount   = OutstandingDebtAmount(AmountInPence(50000)),
             debtItemChargeId        = ChargeReference("A00000000001"),
             debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-03-07")),
-            accruedInterest         = AccruedInterest(AmountInPence(1597))
+            accruedInterest         = AccruedInterest(AmountInPence(1597)),
+            isInterestBearingCharge = Some(IsInterestBearingCharge(true)),
+            useChargeReference      = Some(UseChargeReference(true))
           ),
           DebtItemCharges(
             outstandingDebtAmount   = OutstandingDebtAmount(AmountInPence(100000)),
             debtItemChargeId        = ChargeReference("A00000000002"),
             debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-02-07")),
-            accruedInterest         = AccruedInterest(AmountInPence(1597))
+            accruedInterest         = AccruedInterest(AmountInPence(1597)),
+            isInterestBearingCharge = Some(IsInterestBearingCharge(true)),
+            useChargeReference      = Some(UseChargeReference(true))
           )
         )
       ),

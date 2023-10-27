@@ -105,6 +105,8 @@ class TtpService @Inject() (
           outstandingDebtAmount   = OutstandingDebtAmount(charge.outstandingAmount.value),
           mainTrans               = charge.mainTrans,
           subTrans                = charge.subTrans,
+          isInterestBearingCharge = charge.isInterestBearingCharge,
+          useChargeReference      = charge.useChargeReference,
           debtItemChargeId        = charge.chargeReference,
           interestStartDate       = charge.interestStartDate,
           debtItemOriginalDueDate = DebtItemOriginalDueDate(charge.dueDate.value)
@@ -163,7 +165,9 @@ class TtpService @Inject() (
           outstandingDebtAmount   = OutstandingDebtAmount(charge.outstandingAmount.value),
           debtItemChargeId        = charge.chargeReference,
           debtItemOriginalDueDate = DebtItemOriginalDueDate(charge.dueDate.value),
-          accruedInterest         = charge.accruedInterest
+          accruedInterest         = charge.accruedInterest,
+          isInterestBearingCharge = charge.isInterestBearingCharge,
+          useChargeReference      = charge.useChargeReference
         )
       }
 
@@ -256,6 +260,8 @@ object TtpService {
             outstandingDebtAmount   = OutstandingDebtAmount(charge.outstandingAmount.value),
             mainTrans               = charge.mainTrans,
             subTrans                = charge.subTrans,
+            isInterestBearingCharge = charge.isInterestBearingCharge,
+            useChargeReference      = charge.useChargeReference,
             debtItemChargeId        = charge.chargeReference,
             interestStartDate       = charge.interestStartDate,
             debtItemOriginalDueDate = DebtItemOriginalDueDate(charge.dueDate.value)
