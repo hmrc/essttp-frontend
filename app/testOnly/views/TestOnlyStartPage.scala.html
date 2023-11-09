@@ -20,7 +20,7 @@
 @import testOnly.models.formsmodel.StartJourneyForm
 @import play.api.data.Form
 @import requests.RequestSupport
-@import models.EligibilityErrors
+@import models.{EligibilityError, EligibilityErrors}
 @import essttp.journey.model.Origins
 @import essttp.rootmodel.TaxRegime
 @import testOnly.models.formsmodel.Enrolments
@@ -49,16 +49,24 @@
     "Test only starter page"
 }
 
-@eligibilityErrorCheckboxes = @{
+@toCheckboxItem(eligibilityError: EligibilityError) = @{
+    CheckboxItem(
+    content = Text(eligibilityError.entryName),
+    value = eligibilityError.entryName,
+    checked = form.data.exists(_._2 === eligibilityError.entryName)
+    )
+}
+
+@epayeEligibilityErrorCheckboxes = @{
     EligibilityErrors.values
-            .filterNot(_ === EligibilityErrors.MultipleReasons)
-            .map { error =>
-        CheckboxItem(
-            content = Text(error.entryName),
-            value = error.entryName,
-            checked = form.data.exists(_._2 === error.entryName)
-        )
-    }
+      .filterNot(e => e === EligibilityErrors.MultipleReasons || e === EligibilityErrors.ChargesBeforeMaxAccountingDate)
+      .map(toCheckboxItem)
+}
+
+@vatEligibilityErrorCheckboxes = @{
+    EligibilityErrors.values
+      .filterNot(_ === EligibilityErrors.MultipleReasons)
+      .map(toCheckboxItem)
 }
 
 @enrolmentsContent(taxRegime: TaxRegime) = @{
@@ -306,7 +314,7 @@
         )),
         idPrefix = Some("eligibilityErrors"),
         name = "eligibilityErrors[]",
-        items = eligibilityErrorCheckboxes,
+        items = epayeEligibilityErrorCheckboxes,
         classes = "govuk-checkboxes--small"
     ))
 
@@ -414,7 +422,7 @@
         )),
         idPrefix = Some("eligibilityErrors"),
         name = "eligibilityErrors[]",
-        items = eligibilityErrorCheckboxes,
+        items = vatEligibilityErrorCheckboxes,
         classes = "govuk-checkboxes--small"
     ))
 

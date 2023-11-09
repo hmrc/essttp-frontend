@@ -108,7 +108,13 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       ("IsMoreThanMaxPaymentReference - EPAYE", TdAll.notEligibleIsMoreThanMaxPaymentReference, "isMoreThanMaxPaymentReference", PageUrls.payeNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxPaymentReference`(Origins.Epaye.Bta), Origins.Epaye.Bta),
       ("IsMoreThanMaxPaymentReference - VAT", TdAll.notEligibleIsMoreThanMaxPaymentReference, "isMoreThanMaxPaymentReference", PageUrls.vatNotEligibleUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxPaymentReference`(Origins.Vat.Bta), Origins.Vat.Bta)
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxPaymentReference`(Origins.Vat.Bta), Origins.Vat.Bta),
+      ("ChargesBeforeMaxAccountingDate - EPAYE", TdAll.notEligibleChargesBeforeMaxAccountingDate, "chargesBeforeMaxAccountingDate", PageUrls.epayeDebtTooOldUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - ChargesBeforeMaxAccountingDate`(Origins.Epaye.Bta),
+        Origins.Epaye.Bta),
+      ("ChargesBeforeMaxAccountingDate - VAT", TdAll.notEligibleChargesBeforeMaxAccountingDate, "chargesBeforeMaxAccountingDate", PageUrls.vatDebtTooOldUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - ChargesBeforeMaxAccountingDate`(Origins.Vat.Bta),
+        Origins.Vat.Bta),
     )) {
       (sf: String, eligibilityRules: EligibilityRules, auditIneligibilityReason: String, expectedRedirect: String, updatedJourneyJson: String, origin: Origin) =>
         {
@@ -313,7 +319,7 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
     }
 
     "VAT user with a debt below the minimum amount and debt too old should be redirected to generic ineligible page" in {
-      val eligibilityRules = TdAll.notEligibleIsLessThanMinDebtAllowance.copy(chargesOverMaxDebtAge = true)
+      val eligibilityRules = TdAll.notEligibleIsLessThanMinDebtAllowance.copy(chargesOverMaxDebtAge = Some(true))
       val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(TaxRegime.Vat, TdAll.notEligibleEligibilityPass, eligibilityRules)
 
       Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Vat)(eligibilityCheckResponseJson)
@@ -329,7 +335,7 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
     }
 
     "EPAYE user with a debt below the minimum amount and debt too old should be redirected to debt too low ineligible page" in {
-      val eligibilityRules = TdAll.notEligibleIsLessThanMinDebtAllowance.copy(chargesOverMaxDebtAge = true)
+      val eligibilityRules = TdAll.notEligibleIsLessThanMinDebtAllowance.copy(chargesOverMaxDebtAge = Some(true))
       val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(TaxRegime.Epaye, TdAll.notEligibleEligibilityPass, eligibilityRules)
 
       Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Epaye)(eligibilityCheckResponseJson)

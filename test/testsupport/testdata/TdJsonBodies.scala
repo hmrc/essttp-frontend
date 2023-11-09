@@ -141,10 +141,16 @@ object TdJsonBodies {
       |    "isMoreThanMaxDebtAllowance" : ${eligibilityRules.isMoreThanMaxDebtAllowance.toString},
       |    "disallowedChargeLockTypes" : ${eligibilityRules.disallowedChargeLockTypes.toString},
       |    "existingTTP" : ${eligibilityRules.existingTTP.toString},
-      |    "chargesOverMaxDebtAge" : ${eligibilityRules.chargesOverMaxDebtAge.toString},
+      |    "chargesOverMaxDebtAge" : ${eligibilityRules.chargesOverMaxDebtAge.getOrElse(false).toString},
       |    "ineligibleChargeTypes" : ${eligibilityRules.ineligibleChargeTypes.toString},
       |    "missingFiledReturns" : ${eligibilityRules.missingFiledReturns.toString},
-      |    "noDueDatesReached": ${eligibilityRules.noDueDatesReached.toString}
+      |    "hasInvalidInterestSignals": ${eligibilityRules.hasInvalidInterestSignals.getOrElse(false).toString},
+      |    "dmSpecialOfficeProcessingRequired": ${eligibilityRules.dmSpecialOfficeProcessingRequired.getOrElse(false).toString},
+      |    "noDueDatesReached": ${eligibilityRules.noDueDatesReached.toString},
+      |    "cannotFindLockReason": ${eligibilityRules.cannotFindLockReason.getOrElse(false).toString},
+      |    "creditsNotAllowed": ${eligibilityRules.creditsNotAllowed.getOrElse(false).toString},
+      |    "isMoreThanMaxPaymentReference": ${eligibilityRules.isMoreThanMaxPaymentReference.getOrElse(false).toString},
+      |    "chargesBeforeMaxAccountingDate": ${eligibilityRules.chargesBeforeMaxAccountingDate.getOrElse(false).toString}
       |  },
       |  "chargeTypeAssessment" : [
       |    {
