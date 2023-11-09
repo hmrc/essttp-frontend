@@ -95,7 +95,7 @@ object TdAll {
     isMoreThanMaxDebtAllowance        = false,
     disallowedChargeLockTypes         = false,
     existingTTP                       = false,
-    chargesOverMaxDebtAge             = false,
+    chargesOverMaxDebtAge             = None,
     ineligibleChargeTypes             = false,
     missingFiledReturns               = false,
     hasInvalidInterestSignals         = None,
@@ -103,7 +103,8 @@ object TdAll {
     noDueDatesReached                 = false,
     cannotFindLockReason              = None,
     creditsNotAllowed                 = None,
-    isMoreThanMaxPaymentReference     = None
+    isMoreThanMaxPaymentReference     = None,
+    chargesBeforeMaxAccountingDate    = None
   )
   val notEligibleHasRlsOnAddress: EligibilityRules = eligibleEligibilityRules.copy(hasRlsOnAddress = true)
   val notEligibleMarkedAsInsolvent: EligibilityRules = eligibleEligibilityRules.copy(markedAsInsolvent = true)
@@ -111,7 +112,7 @@ object TdAll {
   val notEligibleIsMoreThanMaxDebtAllowance: EligibilityRules = eligibleEligibilityRules.copy(isMoreThanMaxDebtAllowance = true)
   val notEligibleDisallowedChargeLockTypes: EligibilityRules = eligibleEligibilityRules.copy(disallowedChargeLockTypes = true)
   val notEligibleExistingTTP: EligibilityRules = eligibleEligibilityRules.copy(existingTTP = true)
-  val notEligibleExceedsMaxDebtAge: EligibilityRules = eligibleEligibilityRules.copy(chargesOverMaxDebtAge = true)
+  val notEligibleExceedsMaxDebtAge: EligibilityRules = eligibleEligibilityRules.copy(chargesOverMaxDebtAge = Some(true))
   val notEligibleEligibleChargeType: EligibilityRules = eligibleEligibilityRules.copy(ineligibleChargeTypes = true)
   val notEligibleMissingFiledReturns: EligibilityRules = eligibleEligibilityRules.copy(missingFiledReturns = true)
   val notEligibleNoDueDatesReached: EligibilityRules = eligibleEligibilityRules.copy(noDueDatesReached = true)
@@ -120,6 +121,7 @@ object TdAll {
   val notEligibleCannotFindLockReason: EligibilityRules = eligibleEligibilityRules.copy(cannotFindLockReason = Some(true))
   val notEligibleCreditsNotAllowed: EligibilityRules = eligibleEligibilityRules.copy(creditsNotAllowed = Some(true))
   val notEligibleIsMoreThanMaxPaymentReference: EligibilityRules = eligibleEligibilityRules.copy(isMoreThanMaxPaymentReference = Some(true))
+  val notEligibleChargesBeforeMaxAccountingDate: EligibilityRules = eligibleEligibilityRules.copy(chargesBeforeMaxAccountingDate = Some(true))
   val notEligibleMultipleReasons: EligibilityRules = eligibleEligibilityRules.copy(missingFiledReturns = true).copy(hasRlsOnAddress = true)
 
   val callEligibilityApiRequestEpaye: CallEligibilityApiRequest = CallEligibilityApiRequest(

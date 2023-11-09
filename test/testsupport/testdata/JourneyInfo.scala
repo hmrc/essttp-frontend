@@ -42,8 +42,9 @@ object JourneyInfo {
   def ineligibleCannotFindLockResponse(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleCannotFindLockReason, taxRegime, encrypter)
   def ineligibleCreditsNotAllowed(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleCreditsNotAllowed, taxRegime, encrypter)
   def ineligibleIsMoreThanMaxPaymentReference(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleIsMoreThanMaxPaymentReference, taxRegime, encrypter)
+  def ineligibleChargesBeforeMaxAccountingDate(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleChargesBeforeMaxAccountingDate, taxRegime, encrypter)
   def multipleIneligibleReasons(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleHasRlsOnAddress.copy(markedAsInsolvent = true), taxRegime, encrypter)
-  def multipleIneligibleReasonsDebtTooLowAndOld(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleIsLessThanMinDebtAllowance.copy(chargesOverMaxDebtAge = true), taxRegime, encrypter)
+  def multipleIneligibleReasonsDebtTooLowAndOld(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleIsLessThanMinDebtAllowance.copy(chargesOverMaxDebtAge = Some(true)), taxRegime, encrypter)
   val canPayUpfront: JourneyInfoAsJson = TdJsonBodies.canPayUpfrontJourneyInfo(true)
   val cannotPayUpfront: JourneyInfoAsJson = TdJsonBodies.canPayUpfrontJourneyInfo(false)
   val upfrontPaymentAmount: JourneyInfoAsJson = TdJsonBodies.upfrontPaymentAmountJourneyInfo(TdAll.upfrontPaymentAmount)
@@ -135,6 +136,12 @@ object JourneyInfo {
 
   def eligibilityCheckedIneligibleIsMoreThanMaxPaymentReference(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
     ineligibleIsMoreThanMaxPaymentReference(taxRegime, encrypter) :: taxIdDetermined()
+
+  def eligibilityCheckedChargesBeforeMaxAccountingDate(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
+    ineligibleChargesBeforeMaxAccountingDate(taxRegime, encrypter) :: taxIdDetermined()
+
+  def eligibilityCheckedIneligibleChargesBeforeMaxAccountingDate(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
+    ineligibleMaxDebtAge(taxRegime, encrypter) :: taxIdDetermined()
 
   def eligibilityCheckedIneligibleMultipleReasons(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
     multipleIneligibleReasons(taxRegime, encrypter) :: taxIdDetermined()

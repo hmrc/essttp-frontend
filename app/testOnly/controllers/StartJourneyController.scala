@@ -236,7 +236,7 @@ object StartJourneyController {
         isMoreThanMaxDebtAllowance        = containsError(IsMoreThanMaxDebtAllowance),
         disallowedChargeLockTypes         = containsError(EligibilityErrors.DisallowedChargeLockTypes),
         existingTTP                       = containsError(ExistingTtp),
-        chargesOverMaxDebtAge             = containsError(ChargesOverMaxDebtAge),
+        chargesOverMaxDebtAge             = Some(containsError(ChargesOverMaxDebtAge)),
         ineligibleChargeTypes             = containsError(IneligibleChargeTypes),
         missingFiledReturns               = containsError(MissingFiledReturns),
         hasInvalidInterestSignals         = Some(containsError(HasInvalidInterestSignals)),
@@ -244,7 +244,8 @@ object StartJourneyController {
         noDueDatesReached                 = containsError(NoDueDatesReached),
         cannotFindLockReason              = Some(containsError(CannotFindLockReason)),
         creditsNotAllowed                 = Some(containsError(CreditsNotAllowed)),
-        isMoreThanMaxPaymentReference     = Some(containsError(IsMoreThanMaxPaymentReference))
+        isMoreThanMaxPaymentReference     = Some(containsError(IsMoreThanMaxPaymentReference)),
+        chargesBeforeMaxAccountingDate    = Some(containsError(ChargesBeforeMaxAccountingDate))
       )
     }
     EligibilityCheckResult(

@@ -65,7 +65,6 @@ object TtpJsonResponses {
        |    "isMoreThanMaxDebtAllowance" : ${eligibilityRules.isMoreThanMaxDebtAllowance.toString},
        |    "disallowedChargeLockTypes" : ${eligibilityRules.disallowedChargeLockTypes.toString},
        |    "existingTTP" : ${eligibilityRules.existingTTP.toString},
-       |    "chargesOverMaxDebtAge" : ${eligibilityRules.chargesOverMaxDebtAge.toString},
        |    "ineligibleChargeTypes" : ${eligibilityRules.ineligibleChargeTypes.toString},
        |    "missingFiledReturns" : ${eligibilityRules.missingFiledReturns.toString},
        |    "noDueDatesReached": ${eligibilityRules.noDueDatesReached.toString}
@@ -74,6 +73,8 @@ object TtpJsonResponses {
        |  ${optionalEligibilityResponsesJson(eligibilityRules.cannotFindLockReason, "cannotFindLockReason")}
        |  ${optionalEligibilityResponsesJson(eligibilityRules.creditsNotAllowed, "creditsNotAllowed")}
        |  ${optionalEligibilityResponsesJson(eligibilityRules.isMoreThanMaxPaymentReference, "isMoreThanMaxPaymentReference")}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.chargesBeforeMaxAccountingDate, "chargesBeforeMaxAccountingDate")}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.chargesOverMaxDebtAge, "chargesOverMaxDebtAge")}
        |  },
        |  "chargeTypeAssessment" : [ {
        |    "taxPeriodFrom" : "2020-08-13",
