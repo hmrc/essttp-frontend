@@ -142,8 +142,8 @@ class LandingPageControllerSpec extends ItSpec {
       val firstListBullets = lists(0).select("li").asScala.toList
       firstListBullets.size shouldBe 4
 
-      firstListBullets(0).text() shouldBe "you plan to pay the debt off within the next 6 months or less"
-      firstListBullets(1).text() shouldBe "you owe £20,000 or less"
+      firstListBullets(0).text() shouldBe "you plan to pay the debt off within the next 12 months or less"
+      firstListBullets(1).text() shouldBe "you owe £50,000 or less"
 
       val paragraphs = doc.select("p.govuk-body").asScala.toList
       paragraphs(2).text() shouldBe "You can use this service within 28 days of the overdue payment deadline."
