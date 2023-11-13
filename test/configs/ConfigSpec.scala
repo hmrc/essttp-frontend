@@ -61,8 +61,8 @@ class ConfigSpec extends ItSpec {
       ("PolicyParameters.EPAYE.maxAmountOfDebt", config.PolicyParameters.EPAYE.maxAmountOfDebt, AmountInPence(50000 * 100)),
       ("PolicyParameters.EPAYE.maxPlanDurationInMonths", config.PolicyParameters.EPAYE.maxPlanDurationInMonths, 12),
       ("PolicyParameters.EPAYE.maxAgeOfDebtInYears", config.PolicyParameters.EPAYE.maxAgeOfDebtInYears, 5),
-      ("PolicyParameters.VAT.maxAmountOfDebt", config.PolicyParameters.VAT.maxAmountOfDebt, AmountInPence(20000 * 100)),
-      ("PolicyParameters.VAT.maxPlanDurationInMonths", config.PolicyParameters.VAT.maxPlanDurationInMonths, 6),
+      ("PolicyParameters.VAT.maxAmountOfDebt", config.PolicyParameters.VAT.maxAmountOfDebt, AmountInPence(50000 * 100)),
+      ("PolicyParameters.VAT.maxPlanDurationInMonths", config.PolicyParameters.VAT.maxPlanDurationInMonths, 12),
       ("PolicyParameters.VAT.maxAgeOfDebtInDays", config.PolicyParameters.VAT.maxAgeOfDebtInDays, 28)
 
     )

@@ -191,7 +191,7 @@ object TdAll {
       regimePaymentFrequency          = PaymentPlanFrequencies.Monthly,
       paymentPlanFrequency            = PaymentPlanFrequencies.Monthly,
       paymentPlanMinLength            = PaymentPlanMinLength(1),
-      paymentPlanMaxLength            = PaymentPlanMaxLength(6),
+      paymentPlanMaxLength            = PaymentPlanMaxLength(12),
       eligibilityStatus               = EligibilityStatus(eligibilityPass),
       eligibilityRules                = eligibilityRules,
       chargeTypeAssessment            = List(ChargeTypeAssessment(
@@ -245,7 +245,7 @@ object TdAll {
     channelIdentifier            = ChannelIdentifiers.eSSTTP,
     paymentPlanFrequency         = PaymentPlanFrequencies.Monthly,
     paymentPlanMinLength         = PaymentPlanMinLength(1),
-    paymentPlanMaxLength         = PaymentPlanMaxLength(6),
+    paymentPlanMaxLength         = PaymentPlanMaxLength(12),
     earliestPaymentPlanStartDate = EarliestPaymentPlanStartDate(LocalDate.parse("2022-07-14")),
     latestPaymentPlanStartDate   = LatestPaymentPlanStartDate(LocalDate.parse("2022-08-13")),
     initialPaymentDate           = Some(InitialPaymentDate(LocalDate.parse("2022-06-24"))),
@@ -279,7 +279,7 @@ object TdAll {
   def affordableQuotesRequest(taxRegime: TaxRegime): AffordableQuotesRequest = {
     val expectedPaymentPlanMaxLength = taxRegime match {
       case TaxRegime.Epaye => PaymentPlanMaxLength(12)
-      case TaxRegime.Vat   => PaymentPlanMaxLength(6)
+      case TaxRegime.Vat   => PaymentPlanMaxLength(12)
     }
     AffordableQuotesRequest(
       channelIdentifier           = ChannelIdentifiers.eSSTTP,

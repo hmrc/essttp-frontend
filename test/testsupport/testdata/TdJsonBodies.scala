@@ -130,7 +130,7 @@ object TdJsonBodies {
       |  "regimePaymentFrequency": "Monthly",
       |  "paymentPlanFrequency": "Monthly",
       |  "paymentPlanMinLength": 1,
-      |  "paymentPlanMaxLength": 6,
+      |  "paymentPlanMaxLength": 12,
       |  "eligibilityStatus" : {
       |    "eligibilityPass" : ${eligibilityPass.value.toString}
       |  },
