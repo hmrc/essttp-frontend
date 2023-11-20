@@ -28,7 +28,8 @@ object TtpJsonResponses {
       poundsInsteadOfPence:               Boolean          = false,
       regimeDigitalCorrespondence:        Boolean          = false,
       maybeChargeIsInterestBearingCharge: Option[Boolean]  = None,
-      maybeChargeUseChargeReference:      Option[Boolean]  = None
+      maybeChargeUseChargeReference:      Option[Boolean]  = None,
+      maybeChargeBeforeMaxAccountingDate: Option[Boolean]  = None
   ): String = {
 
     val isInterestBearingChargeValue = maybeChargeIsInterestBearingCharge match {
@@ -38,6 +39,11 @@ object TtpJsonResponses {
 
     val useChargeReferenceValue = maybeChargeUseChargeReference match {
       case Some(bool) => s""""useChargeReference":${bool.toString},"""
+      case None       => ""
+    }
+
+    val maybeChargeBeforeMaxAccountingDateValue = maybeChargeBeforeMaxAccountingDate match {
+      case Some(bool) => s""""chargeBeforeMaxAccountingDate":${bool.toString},"""
       case None       => ""
     }
 
@@ -91,10 +97,11 @@ object TtpJsonResponses {
        |      "dueDate" : "2017-03-07",
        |      "accruedInterest" : ${if (poundsInsteadOfPence) "15.97" else "1597"},
        |      "ineligibleChargeType": false,
-       |      "chargeOverMaxDebtAge": false,
+       |      "chargeOverMaxDebtAge": ${if (maybeChargeBeforeMaxAccountingDateValue.isEmpty) "false" else ""},
        |       "dueDateNotReached": false,
        |       $isInterestBearingChargeValue
        |       $useChargeReferenceValue
+       |       $maybeChargeBeforeMaxAccountingDateValue
        |       "locks": [ {
        |          "lockType": "Payment",
        |          "lockReason": "Risk/Fraud",

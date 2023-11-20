@@ -198,7 +198,7 @@ object StartJourneyController {
       dueDate                       = DueDate(LocalDate.parse("2017-03-07")),
       accruedInterest               = AccruedInterest(interestAmount),
       ineligibleChargeType          = IneligibleChargeType(false),
-      chargeOverMaxDebtAge          = Some(ChargeOverMaxDebtAge(false)),
+      chargeOverMaxDebtAge          = if (form.chargeBeforeMaxAccountingDate.isEmpty) Some(ChargeOverMaxDebtAge(false)) else None,
       locks                         = Some(
         List(
           Lock(
@@ -211,7 +211,7 @@ object StartJourneyController {
       dueDateNotReached             = false,
       isInterestBearingCharge       = form.isInterestBearingCharge.map(IsInterestBearingCharge(_)),
       useChargeReference            = form.useChargeReference.map(UseChargeReference(_)),
-      chargeBeforeMaxAccountingDate = None
+      chargeBeforeMaxAccountingDate = form.chargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_))
     )
 
     val chargeTypeAssessments: List[ChargeTypeAssessment] = List(

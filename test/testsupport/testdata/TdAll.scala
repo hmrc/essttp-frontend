@@ -176,12 +176,13 @@ object TdAll {
   }
 
   def eligibilityCheckResult(
-      eligibilityPass:               EligibilityPass,
-      eligibilityRules:              EligibilityRules,
-      taxRegime:                     TaxRegime,
-      regimeDigitalCorrespondence:   Option[RegimeDigitalCorrespondence],
-      chargeIsInterestBearingCharge: Option[Boolean]                     = None,
-      chargeUseChargeReference:      Option[Boolean]                     = None
+      eligibilityPass:                     EligibilityPass,
+      eligibilityRules:                    EligibilityRules,
+      taxRegime:                           TaxRegime,
+      regimeDigitalCorrespondence:         Option[RegimeDigitalCorrespondence],
+      chargeIsInterestBearingCharge:       Option[Boolean]                     = None,
+      chargeUseChargeReference:            Option[Boolean]                     = None,
+      chargeChargeBeforeMaxAccountingDate: Option[Boolean]                     = None
   ): EligibilityCheckResult = {
 
     EligibilityCheckResult(
@@ -216,7 +217,7 @@ object TdAll {
           dueDateNotReached             = false,
           isInterestBearingCharge       = chargeIsInterestBearingCharge.map(IsInterestBearingCharge(_)),
           useChargeReference            = chargeUseChargeReference.map(UseChargeReference(_)),
-          chargeBeforeMaxAccountingDate = None
+          chargeBeforeMaxAccountingDate = chargeChargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_))
         ))
       )),
       customerDetails                 = None,

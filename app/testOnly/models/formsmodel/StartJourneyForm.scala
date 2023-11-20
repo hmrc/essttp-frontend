@@ -32,18 +32,19 @@ import util.EnumFormatter
 import scala.util.Random
 
 final case class StartJourneyForm(
-    signInAs:                    SignInAs,
-    enrolments:                  Seq[Enrolment],
-    origin:                      Origin,
-    eligibilityErrors:           Seq[EligibilityError],
-    debtTotalAmount:             BigDecimal,
-    interestAmount:              Option[BigDecimal],
-    taxReference:                TaxId,
-    taxRegime:                   TaxRegime,
-    regimeDigitalCorrespondence: Boolean,
-    emailAddressPresent:         Boolean,
-    isInterestBearingCharge:     Option[Boolean],
-    useChargeReference:          Option[Boolean]
+    signInAs:                      SignInAs,
+    enrolments:                    Seq[Enrolment],
+    origin:                        Origin,
+    eligibilityErrors:             Seq[EligibilityError],
+    debtTotalAmount:               BigDecimal,
+    interestAmount:                Option[BigDecimal],
+    taxReference:                  TaxId,
+    taxRegime:                     TaxRegime,
+    regimeDigitalCorrespondence:   Boolean,
+    emailAddressPresent:           Boolean,
+    isInterestBearingCharge:       Option[Boolean],
+    useChargeReference:            Option[Boolean],
+    chargeBeforeMaxAccountingDate: Option[Boolean]
 )
 
 object StartJourneyForm {
@@ -65,7 +66,8 @@ object StartJourneyForm {
         "regimeDigitalCorrespondence" -> optionalBooleanMappingDefaultTrue,
         "emailAddressPresent" -> optionalBooleanMappingDefaultTrue,
         "isInterestBearingCharge" -> chargesOptionalFieldsMapping,
-        "useChargeReference" -> chargesOptionalFieldsMapping
+        "useChargeReference" -> chargesOptionalFieldsMapping,
+        "chargeBeforeMaxAccountingDate" -> chargesOptionalFieldsMapping
       )(StartJourneyForm.apply)(StartJourneyForm.unapply)
     )
   }
