@@ -554,29 +554,33 @@ object Messages {
       english = "Who can use this service",
       welsh   = "Pwy all ddefnyddio’r gwasanaeth hwn"
     )
-    val `You are eligible to set up an online payment plan if:`: Message = Message(
-      english = "You are eligible to set up an online payment plan if:",
-      welsh   = "Rydych chi’n gymwys i drefnu cynllun talu ar-lein os yw’r canlynol yn wir:"
+    val `You can set up a payment plan online if you:`: Message = Message(
+      english = "You can set up a payment plan online if you:",
+      welsh   = "You can set up a payment plan online if you:"
     )
-    def `you plan to pay the debt off within the next ... months or less`(maxPlanDuration: Int): Message = Message(
-      english = s"you plan to pay the debt off within the next ${maxPlanDuration.toString} months or less",
-      welsh   = s"rydych chi’n bwriadu talu’r ddyled cyn pen y ${maxPlanDuration.toString} mis nesaf"
+    def `owe ... or less`(maxAmountOfDebt: AmountInPence): Message = Message(
+      english = s"owe ${maxAmountOfDebt.gdsFormatInPounds} or less",
+      welsh   = s"owe ${maxAmountOfDebt.gdsFormatInPounds} or less"
     )
-    def `you owe ... or less`(maxAmountOfDebt: AmountInPence): Message = Message(
-      english = s"you owe ${maxAmountOfDebt.gdsFormatInPounds} or less",
-      welsh   = s"mae arnoch chi ${maxAmountOfDebt.gdsFormatInPounds} neu lai"
+    def `plan to pay the debt off within the next ... months`(maxPlanDuration: Int): Message = Message(
+      english = s"plan to pay the debt off within the next ${maxPlanDuration.toString} months",
+      welsh   = s"plan to pay the debt off within the next ${maxPlanDuration.toString} months"
     )
-    val `you do not have any other payment plans or debts with HMRC`: Message = Message(
-      english = "you do not have any other payment plans or debts with HMRC",
-      welsh   = "does gennych chi ddim cynlluniau talu na dyledion eraill gyda CThEF"
+    val `have a debt for an accounting period that started in 2023 or later`: Message = Message(
+      english = "have a debt for an accounting period that started in 2023 or later",
+      welsh   = "have a debt for an accounting period that started in 2023 or later"
     )
-    val `your tax returns are up to date`: Message = Message(
-      english = "your tax returns are up to date",
-      welsh   = "mae’ch Ffurflenni Treth yn gyfredol"
+    val `do not have any other payment plans or debts with HMRC`: Message = Message(
+      english = "do not have any other payment plans or debts with HMRC",
+      welsh   = "do not have any other payment plans or debts with HMRC"
     )
-    def `You can use this service within ... days of the overdue payment deadline.`(maxAgeOfDebtInDays: Int): Message = Message(
-      english = s"You can use this service within ${maxAgeOfDebtInDays.toString} days of the overdue payment deadline.",
-      welsh   = s"Gallwch chi ddefnyddio’r gwasanaeth hwn cyn pen ${maxAgeOfDebtInDays.toString} diwrnod i ddyddiad cau’r taliad hwyr."
+    val `have filed your tax returns`: Message = Message(
+      english = "have filed your tax returns",
+      welsh   = "have filed your tax returns"
+    )
+    val `have missed the deadline to pay a VAT bill`: Message = Message(
+      english = "have missed the deadline to pay a VAT bill",
+      welsh   = "have missed the deadline to pay a VAT bill"
     )
     val `If you have a Customer Compliance Manager...`: Message = Message(
       english = "If you have a Customer Compliance Manager, consider discussing your needs with them before using this service.",

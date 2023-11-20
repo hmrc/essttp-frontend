@@ -139,14 +139,18 @@ class LandingPageControllerSpec extends ItSpec {
       val lists = doc.select(".govuk-list").asScala.toList
       lists.size shouldBe 3
 
-      val firstListBullets = lists(0).select("li").asScala.toList
-      firstListBullets.size shouldBe 4
-
-      firstListBullets(0).text() shouldBe "you plan to pay the debt off within the next 12 months or less"
-      firstListBullets(1).text() shouldBe "you owe £50,000 or less"
-
       val paragraphs = doc.select("p.govuk-body").asScala.toList
-      paragraphs(2).text() shouldBe "You can use this service within 28 days of the overdue payment deadline."
+      paragraphs(1).text() shouldBe "You can set up a payment plan online if you:"
+
+      val firstListBullets = lists(0).select("li").asScala.toList
+      firstListBullets.size shouldBe 6
+
+      firstListBullets(0).text() shouldBe "owe £50,000 or less"
+      firstListBullets(1).text() shouldBe "plan to pay the debt off within the next 12 months"
+      firstListBullets(2).text() shouldBe "have a debt for an accounting period that started in 2023 or later"
+      firstListBullets(3).text() shouldBe "do not have any other payment plans or debts with HMRC"
+      firstListBullets(4).text() shouldBe "have filed your tax returns"
+      firstListBullets(5).text() shouldBe "have missed the deadline to pay a VAT bill"
 
       val button = doc.select(".govuk-button")
       button.attr("href") shouldBe routes.LandingController.vatLandingPageContinue.url
