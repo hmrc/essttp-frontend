@@ -556,7 +556,7 @@ object Messages {
     )
     val `You can set up a payment plan online if you:`: Message = Message(
       english = "You can set up a payment plan online if you:",
-      welsh   = "Gallwch fynd ar-lein i drefnu cynllun talu os yw’r canlynol yn wir::"
+      welsh   = "Gallwch fynd ar-lein i drefnu cynllun talu os yw’r canlynol yn wir:"
     )
     def `owe ... or less`(maxAmountOfDebt: AmountInPence): Message = Message(
       english = s"owe ${maxAmountOfDebt.gdsFormatInPounds} or less",
@@ -580,7 +580,7 @@ object Messages {
     )
     val `have missed the deadline to pay a VAT bill`: Message = Message(
       english = "have missed the deadline to pay a VAT bill",
-      welsh   = "\trydych wedi methu’r dyddiad cau i dalu bil TAW"
+      welsh   = "rydych wedi methu’r dyddiad cau i dalu bil TAW"
     )
     val `If you have a Customer Compliance Manager...`: Message = Message(
       english = "If you have a Customer Compliance Manager, consider discussing your needs with them before using this service.",
