@@ -42,7 +42,7 @@ object TtpJsonResponses {
       case None       => ""
     }
 
-    val maybeChargeBeforeMaxAccountingDateValue = maybeChargeBeforeMaxAccountingDate match {
+    val chargeBeforeMaxAccountingDateValue = maybeChargeBeforeMaxAccountingDate match {
       case Some(bool) => s""""chargeBeforeMaxAccountingDate":${bool.toString},"""
       case None       => ""
     }
@@ -97,11 +97,11 @@ object TtpJsonResponses {
        |      "dueDate" : "2017-03-07",
        |      "accruedInterest" : ${if (poundsInsteadOfPence) "15.97" else "1597"},
        |      "ineligibleChargeType": false,
-       |      "chargeOverMaxDebtAge": ${if (maybeChargeBeforeMaxAccountingDateValue.isEmpty) "false" else ""},
+       |      "chargeOverMaxDebtAge": false,
        |       "dueDateNotReached": false,
        |       $isInterestBearingChargeValue
        |       $useChargeReferenceValue
-       |       $maybeChargeBeforeMaxAccountingDateValue
+       |       $chargeBeforeMaxAccountingDateValue
        |       "locks": [ {
        |          "lockType": "Payment",
        |          "lockReason": "Risk/Fraud",
