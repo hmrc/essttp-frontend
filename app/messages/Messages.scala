@@ -556,31 +556,31 @@ object Messages {
     )
     val `You can set up a payment plan online if you:`: Message = Message(
       english = "You can set up a payment plan online if you:",
-      welsh   = "You can set up a payment plan online if you:"
+      welsh   = "Gallwch fynd ar-lein i drefnu cynllun talu os yw’r canlynol yn wir::"
     )
     def `owe ... or less`(maxAmountOfDebt: AmountInPence): Message = Message(
       english = s"owe ${maxAmountOfDebt.gdsFormatInPounds} or less",
-      welsh   = s"owe ${maxAmountOfDebt.gdsFormatInPounds} or less"
+      welsh   = s"mae arnoch ${maxAmountOfDebt.gdsFormatInPounds} neu lai"
     )
     def `plan to pay the debt off within the next ... months`(maxPlanDuration: Int): Message = Message(
       english = s"plan to pay the debt off within the next ${maxPlanDuration.toString} months",
-      welsh   = s"plan to pay the debt off within the next ${maxPlanDuration.toString} months"
+      welsh   = s"rydych yn bwriadu talu’ch dyled cyn pen y ${maxPlanDuration.toString} mis nesaf"
     )
     val `have a debt for an accounting period that started in 2023 or later`: Message = Message(
       english = "have a debt for an accounting period that started in 2023 or later",
-      welsh   = "have a debt for an accounting period that started in 2023 or later"
+      welsh   = "mae gennych ddyled am gyfnod cyfrifyddu a ddechreuodd yn 2023 neu’n hwyrach"
     )
     val `do not have any other payment plans or debts with HMRC`: Message = Message(
       english = "do not have any other payment plans or debts with HMRC",
-      welsh   = "do not have any other payment plans or debts with HMRC"
+      welsh   = "nid oes gennych unrhyw gynlluniau talu na dyledion eraill gyda CThEF"
     )
     val `have filed your tax returns`: Message = Message(
       english = "have filed your tax returns",
-      welsh   = "have filed your tax returns"
+      welsh   = "rydych wedi cyflwyno’ch Ffurflenni TAW"
     )
     val `have missed the deadline to pay a VAT bill`: Message = Message(
       english = "have missed the deadline to pay a VAT bill",
-      welsh   = "have missed the deadline to pay a VAT bill"
+      welsh   = "\trydych wedi methu’r dyddiad cau i dalu bil TAW"
     )
     val `If you have a Customer Compliance Manager...`: Message = Message(
       english = "If you have a Customer Compliance Manager, consider discussing your needs with them before using this service.",
