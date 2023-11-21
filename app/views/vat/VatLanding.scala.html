@@ -46,14 +46,15 @@
     <h1 class="govuk-heading-xl">@title</h1>
     <p class="govuk-body">@{Messages.Vat.`The payment plan covers all appropriate overdue amounts...`.show}</p>
     <h2 class="govuk-heading-m">@{Messages.Vat.`Who can use this service`.show}</h2>
-    <p class="govuk-body">@{Messages.Vat.`You are eligible to set up an online payment plan if:`.show}</p>
+    <p class="govuk-body">@{Messages.Vat.`You can set up a payment plan online if you:`.show}</p>
     <ul class="govuk-list govuk-list--bullet">
-        <li>@{Messages.Vat.`you plan to pay the debt off within the next ... months or less`(appConfig.PolicyParameters.VAT.maxPlanDurationInMonths).show}</li>
-        <li>@{Messages.Vat.`you owe ... or less`(appConfig.PolicyParameters.VAT.maxAmountOfDebt).show}</li>
-        <li>@{Messages.Vat.`you do not have any other payment plans or debts with HMRC`.show}</li>
-        <li>@{Messages.Vat.`your tax returns are up to date`.show}</li>
+        <li>@{Messages.Vat.`owe ... or less`(appConfig.PolicyParameters.VAT.maxAmountOfDebt).show}</li>
+        <li>@{Messages.Vat.`plan to pay the debt off within the next ... months`(appConfig.PolicyParameters.VAT.maxPlanDurationInMonths).show}</li>
+        <li>@{Messages.Vat.`have a debt for an accounting period that started in 2023 or later`.show}</li>
+        <li>@{Messages.Vat.`do not have any other payment plans or debts with HMRC`.show}</li>
+        <li>@{Messages.Vat.`have filed your tax returns`.show}</li>
+        <li>@{Messages.Vat.`have missed the deadline to pay a VAT bill`.show}</li>
     </ul>
-    <p class="govuk-body">@{Messages.Vat.`You can use this service within ... days of the overdue payment deadline.`(appConfig.PolicyParameters.VAT.maxAgeOfDebtInDays).show}</p>
 
     @insetText(InsetText(content = Text(Messages.Vat.`If you have a Customer Compliance Manager...`.show)))
 
