@@ -176,12 +176,13 @@ object TdAll {
   }
 
   def eligibilityCheckResult(
-      eligibilityPass:               EligibilityPass,
-      eligibilityRules:              EligibilityRules,
-      taxRegime:                     TaxRegime,
-      regimeDigitalCorrespondence:   Option[RegimeDigitalCorrespondence],
-      chargeIsInterestBearingCharge: Option[Boolean]                     = None,
-      chargeUseChargeReference:      Option[Boolean]                     = None
+      eligibilityPass:                     EligibilityPass,
+      eligibilityRules:                    EligibilityRules,
+      taxRegime:                           TaxRegime,
+      regimeDigitalCorrespondence:         Option[RegimeDigitalCorrespondence],
+      chargeIsInterestBearingCharge:       Option[Boolean]                     = None,
+      chargeUseChargeReference:            Option[Boolean]                     = None,
+      chargeChargeBeforeMaxAccountingDate: Option[Boolean]                     = None
   ): EligibilityCheckResult = {
 
     EligibilityCheckResult(
@@ -199,23 +200,24 @@ object TdAll {
         taxPeriodTo     = TaxPeriodTo("2020-08-14"),
         debtTotalAmount = DebtTotalAmount(AmountInPence(300000)),
         charges         = List(Charges(
-          chargeType              = ChargeType("InYearRTICharge-Tax"),
-          mainType                = MainType("InYearRTICharge(FPS)"),
-          chargeReference         = ChargeReference("A00000000001"),
-          mainTrans               = MainTrans("mainTrans"),
-          subTrans                = SubTrans("subTrans"),
-          outstandingAmount       = OutstandingAmount(AmountInPence(100000)),
-          interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
-          dueDate                 = DueDate(LocalDate.parse("2017-03-07")),
-          accruedInterest         = AccruedInterest(AmountInPence(1597)),
-          ineligibleChargeType    = IneligibleChargeType(false),
-          chargeOverMaxDebtAge    = ChargeOverMaxDebtAge(false),
-          locks                   = Some(
+          chargeType                    = ChargeType("InYearRTICharge-Tax"),
+          mainType                      = MainType("InYearRTICharge(FPS)"),
+          chargeReference               = ChargeReference("A00000000001"),
+          mainTrans                     = MainTrans("mainTrans"),
+          subTrans                      = SubTrans("subTrans"),
+          outstandingAmount             = OutstandingAmount(AmountInPence(100000)),
+          interestStartDate             = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
+          dueDate                       = DueDate(LocalDate.parse("2017-03-07")),
+          accruedInterest               = AccruedInterest(AmountInPence(1597)),
+          ineligibleChargeType          = IneligibleChargeType(false),
+          chargeOverMaxDebtAge          = Some(ChargeOverMaxDebtAge(false)),
+          locks                         = Some(
             List(Lock(LockType("Payment"), LockReason("Risk/Fraud"), DisallowedChargeLockType(false)))
           ),
-          dueDateNotReached       = false,
-          isInterestBearingCharge = chargeIsInterestBearingCharge.map(IsInterestBearingCharge(_)),
-          useChargeReference      = chargeUseChargeReference.map(UseChargeReference(_))
+          dueDateNotReached             = false,
+          isInterestBearingCharge       = chargeIsInterestBearingCharge.map(IsInterestBearingCharge(_)),
+          useChargeReference            = chargeUseChargeReference.map(UseChargeReference(_)),
+          chargeBeforeMaxAccountingDate = chargeChargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_))
         ))
       )),
       customerDetails                 = None,

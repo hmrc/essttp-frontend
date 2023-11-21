@@ -28,7 +28,8 @@ object TtpJsonResponses {
       poundsInsteadOfPence:               Boolean          = false,
       regimeDigitalCorrespondence:        Boolean          = false,
       maybeChargeIsInterestBearingCharge: Option[Boolean]  = None,
-      maybeChargeUseChargeReference:      Option[Boolean]  = None
+      maybeChargeUseChargeReference:      Option[Boolean]  = None,
+      maybeChargeBeforeMaxAccountingDate: Option[Boolean]  = None
   ): String = {
 
     val isInterestBearingChargeValue = maybeChargeIsInterestBearingCharge match {
@@ -38,6 +39,11 @@ object TtpJsonResponses {
 
     val useChargeReferenceValue = maybeChargeUseChargeReference match {
       case Some(bool) => s""""useChargeReference":${bool.toString},"""
+      case None       => ""
+    }
+
+    val chargeBeforeMaxAccountingDateValue = maybeChargeBeforeMaxAccountingDate match {
+      case Some(bool) => s""""chargeBeforeMaxAccountingDate":${bool.toString},"""
       case None       => ""
     }
 
@@ -95,6 +101,7 @@ object TtpJsonResponses {
        |       "dueDateNotReached": false,
        |       $isInterestBearingChargeValue
        |       $useChargeReferenceValue
+       |       $chargeBeforeMaxAccountingDateValue
        |       "locks": [ {
        |          "lockType": "Payment",
        |          "lockReason": "Risk/Fraud",

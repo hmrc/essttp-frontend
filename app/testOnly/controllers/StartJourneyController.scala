@@ -188,18 +188,18 @@ object StartJourneyController {
     val maybeRegimeDigitalCorrespondence = Some(RegimeDigitalCorrespondence(form.regimeDigitalCorrespondence))
 
     val charges: Charges = Charges(
-      chargeType              = ChargeType("InYearRTICharge-Tax"),
-      mainType                = MainType("InYearRTICharge(FPS)"),
-      chargeReference         = ChargeReference(form.taxReference.value),
-      mainTrans               = MainTrans("mainTrans"),
-      subTrans                = SubTrans("subTrans"),
-      outstandingAmount       = OutstandingAmount(debtAmountFromForm),
-      interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
-      dueDate                 = DueDate(LocalDate.parse("2017-03-07")),
-      accruedInterest         = AccruedInterest(interestAmount),
-      ineligibleChargeType    = IneligibleChargeType(false),
-      chargeOverMaxDebtAge    = ChargeOverMaxDebtAge(false),
-      locks                   = Some(
+      chargeType                    = ChargeType("InYearRTICharge-Tax"),
+      mainType                      = MainType("InYearRTICharge(FPS)"),
+      chargeReference               = ChargeReference(form.taxReference.value),
+      mainTrans                     = MainTrans("mainTrans"),
+      subTrans                      = SubTrans("subTrans"),
+      outstandingAmount             = OutstandingAmount(debtAmountFromForm),
+      interestStartDate             = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
+      dueDate                       = DueDate(LocalDate.parse("2017-03-07")),
+      accruedInterest               = AccruedInterest(interestAmount),
+      ineligibleChargeType          = IneligibleChargeType(false),
+      chargeOverMaxDebtAge          = if (form.chargeBeforeMaxAccountingDate.isEmpty) Some(ChargeOverMaxDebtAge(false)) else None,
+      locks                         = Some(
         List(
           Lock(
             lockType                 = LockType("Payment"),
@@ -208,9 +208,10 @@ object StartJourneyController {
           )
         )
       ),
-      dueDateNotReached       = false,
-      isInterestBearingCharge = form.isInterestBearingCharge.map(IsInterestBearingCharge(_)),
-      useChargeReference      = form.useChargeReference.map(UseChargeReference(_))
+      dueDateNotReached             = false,
+      isInterestBearingCharge       = form.isInterestBearingCharge.map(IsInterestBearingCharge(_)),
+      useChargeReference            = form.useChargeReference.map(UseChargeReference(_)),
+      chargeBeforeMaxAccountingDate = form.chargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_))
     )
 
     val chargeTypeAssessments: List[ChargeTypeAssessment] = List(

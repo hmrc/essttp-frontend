@@ -180,7 +180,7 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
         }
     }
 
-    "Eligible: should redirect to your bill and send an audit event" - {
+    "Eligible for Epaye: should redirect to your bill and send an audit event" - {
       allCombinationOfTwoBooleanOptions.foreach(combo => {
         val maybeChargeIsInterestBearingCharge = combo._1
         val maybeChargeUseChargeReference = combo._2
@@ -255,6 +255,71 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
             )
           }
       })
+    }
+
+    "Eligible for Vat: should redirect to your bill and send an audit event" in {
+      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
+        TaxRegime.Vat,
+        regimeDigitalCorrespondence        = true,
+        maybeChargeBeforeMaxAccountingDate = Some(true)
+      )
+      // for audit event
+      val eligibilityCheckResponseJsonAsPounds = TtpJsonResponses.ttpEligibilityCallJson(
+        TaxRegime.Vat,
+        poundsInsteadOfPence               = true,
+        regimeDigitalCorrespondence        = true,
+        maybeChargeBeforeMaxAccountingDate = Some(true)
+      )
+
+      stubCommonActions()
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Vat.Bta)()
+      Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Vat)(eligibilityCheckResponseJson)
+      EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(
+        TdAll.journeyId,
+        JourneyJsonTemplates.`Eligibility Checked - Eligible`()
+      )
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result = controller.determineEligibility(fakeRequest)
+
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.yourBillIsUrl)
+
+      Ttp.Eligibility.verifyTtpEligibilityRequests(TaxRegime.Vat)
+
+      EssttpBackend.EligibilityCheck.verifyUpdateEligibilityRequest(
+        journeyId                      = TdAll.journeyId,
+        expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(
+          TdAll.eligibleEligibilityPass,
+          TdAll.eligibleEligibilityRules,
+          TaxRegime.Vat,
+          Some(RegimeDigitalCorrespondence(true)),
+          chargeChargeBeforeMaxAccountingDate = Some(true)
+        )
+      )(testOperationCryptoFormat)
+
+      AuditConnectorStub.verifyEventAudited(
+        "EligibilityCheck",
+        Json.parse(
+          s"""
+           |{
+           |  "eligibilityResult" : "eligible",
+           |  "noEligibilityReasons": 0,
+           |  "origin": "Bta",
+           |  "taxType": "Vat",
+           |  "taxDetail": {
+           |    "vrn":"101747001"
+           |  },
+           |  "authProviderId": "authId-999",
+           |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+           |  "regimeDigitalCorrespondence": true,
+           |  "futureChargeLiabilitiesExcluded": false,
+           |  "chargeTypeAssessment" : ${(Json.parse(eligibilityCheckResponseJsonAsPounds).as[JsObject] \ "chargeTypeAssessment").get.toString}
+           |}
+           |""".
+            stripMargin
+        ).as[JsObject]
+      )
     }
 
     "Eligibility already determined should route user to your bill is and not update backend again" in {
