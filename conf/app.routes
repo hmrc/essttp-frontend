@@ -32,9 +32,9 @@ GET    /debt-too-large-epaye                                controllers.Ineligib
 GET    /debt-too-large-vat                                  controllers.IneligibleController.vatDebtTooLargePage
 GET    /debt-too-small-epaye                                controllers.IneligibleController.epayeDebtTooSmallPage
 GET    /debt-too-small-vat                                  controllers.IneligibleController.vatDebtTooSmallPage
-GET    /debt-too-large-vat                                  controllers.IneligibleController.vatDebtTooLargePage
 GET    /debt-too-old-epaye                                  controllers.IneligibleController.epayeDebtTooOldPage
 GET    /debt-too-old-vat                                    controllers.IneligibleController.vatDebtTooOldPage
+GET    /debt-before-accounting-date-vat                     controllers.IneligibleController.vatDebtBeforeAccountingDatePage
 GET    /file-your-return                                    controllers.IneligibleController.epayeFileYourReturnPage
 GET    /return-not-filed-vat                                controllers.IneligibleController.vatFileYourReturnPage
 GET    /already-have-a-payment-plan-epaye                   controllers.IneligibleController.epayeAlreadyHaveAPaymentPlanPage

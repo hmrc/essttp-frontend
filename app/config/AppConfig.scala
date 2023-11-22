@@ -23,6 +23,8 @@ import play.api.{ConfigLoader, Configuration}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.net.URL
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.duration.FiniteDuration
 
@@ -117,6 +119,11 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
       val maxPlanDurationInMonths: Int = getParam[Int]("max-plan-duration-in-months")
       val maxAgeOfDebtInDays: Int = getParam[Int]("max-age-of-debt-in-days")
       val payOnlineLink: String = getParam[String]("pay-online-link")
+      val vatAccountingPeriodStart: LocalDate = {
+        val string = getParam[String]("vat-accounting-period-start")
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        LocalDate.parse(string, formatter)
+      }
     }
   }
 
