@@ -18,7 +18,7 @@ package testOnly.controllers
 
 import _root_.actions.Actions
 import _root_.essttp.rootmodel.ttp._
-import _root_.testOnly.views.html.{IAmBtaPage, IAmEPAYEPage, IAmGovUkPage, IAmVatPage, TestOnlyStartPage}
+import _root_.testOnly.views.html._
 import config.AppConfig
 import essttp.journey.JourneyConnector
 import essttp.journey.model.{Origins, SjRequest}
@@ -55,6 +55,7 @@ class StartJourneyController @Inject() (
     iAmBtaPage:          IAmBtaPage,
     iAmEpayePage:        IAmEPAYEPage,
     iAmVatPage:          IAmVatPage,
+    iAmVatPenaltiesPage: IAmVatPenaltiesPage,
     iAmGovUkPage:        IAmGovUkPage,
     requestSupport:      RequestSupport
 )(implicit ec: ExecutionContext)
@@ -92,6 +93,7 @@ class StartJourneyController @Inject() (
         case Origins.Vat.VatService     => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.showVatPage)
         case Origins.Vat.GovUk          => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.showGovukVatPage)
         case Origins.Vat.DetachedUrl    => Redirect(_root_.controllers.routes.StartJourneyController.startDetachedVatJourney.url)
+        case Origins.Vat.VatPenalties   => Redirect(_root_.testOnly.controllers.routes.StartJourneyController.showVatPenaltiesPage)
       }
     } yield redirect.withSession(session)
   }
@@ -125,6 +127,10 @@ class StartJourneyController @Inject() (
   /** Pretends being a VAT service page */
   val showVatPage: Action[AnyContent] = as.default.async { implicit request =>
     withSessionId(Future.successful(Ok(iAmVatPage())))
+  }
+  /** Pretends being a VAT penalties page */
+  val showVatPenaltiesPage: Action[AnyContent] = as.default.async { implicit request =>
+    withSessionId(Future.successful(Ok(iAmVatPenaltiesPage())))
   }
 
   /**
@@ -167,6 +173,16 @@ class StartJourneyController @Inject() (
       )).map(sjResponse => Redirect(sjResponse.nextUrl.value))
     }
   }
+
+  val startJourneyVatVatPenalties: Action[AnyContent] = as.default.async { implicit request =>
+    withSessionId {
+      journeyConnector.Vat.startJourneyVatPenalties(SjRequest.Vat.Simple(
+        returnUrl = ReturnUrl(routes.StartJourneyController.showVatPenaltiesPage.url + "?return-page"),
+        backUrl   = BackUrl(routes.StartJourneyController.showVatPenaltiesPage.url + "?starting-page")
+      )).map(sjResponse => Redirect(sjResponse.nextUrl.value))
+    }
+  }
+
 }
 
 object StartJourneyController {
