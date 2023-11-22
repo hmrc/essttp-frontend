@@ -26,18 +26,15 @@
         requestSupport: RequestSupport
 )
 
-@(vatAccountingPeriodStart: String)(implicit request: AuthenticatedJourneyRequest[_])
+@(vatAccountingPeriodStart: LocalDate)(implicit request: AuthenticatedJourneyRequest[_])
 
 @import requestSupport._
 
 @accountingPeriodStart = @{
- val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
- val date = LocalDate.parse(vatAccountingPeriodStart, formatter)
-
- val dayOfMonth: Int = date.getDayOfMonth
+ val dayOfMonth: Int = vatAccountingPeriodStart.getDayOfMonth
  val day = s"${dayOfMonth.toString}"
- val month: String = DateMessages.monthName(date.getMonth.getValue).show
- val year: String = date.getYear.toString
+ val month: String = DateMessages.monthName(vatAccountingPeriodStart.getMonth.getValue).show
+ val year: String = vatAccountingPeriodStart.getYear.toString
  s"$day $month $year"
 }
 
