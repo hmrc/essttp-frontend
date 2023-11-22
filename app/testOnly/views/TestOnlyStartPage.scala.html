@@ -468,6 +468,11 @@
                 content = Text("VAT service"),
                 value = Some(Origins.Vat.VatService.entryName),
                 checked = form.data.exists(_._2 === Origins.Vat.VatService.entryName)
+            ),
+            RadioItem(
+                content = Text("VAT penalties"),
+                value = Some(Origins.Vat.VatPenalties.entryName),
+                checked = form.data.exists(_._2 === Origins.Vat.VatPenalties.entryName)
             )
         ),
         classes = "govuk-radios--small"

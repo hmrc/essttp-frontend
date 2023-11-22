@@ -44,7 +44,7 @@ object TdJsonBodies {
   }
 
   object StartJourneyResponses {
-    def bta(taxRegime: TaxRegime): String = {
+    def response(taxRegime: TaxRegime): String = {
       val relativeUrl = taxRegime match {
         case TaxRegime.Epaye => "/epaye-payment-plan"
         case TaxRegime.Vat   => "/vat-payment-plan"
@@ -55,10 +55,10 @@ object TdJsonBodies {
          |}""".stripMargin
     }
 
-    def epaye(taxRegime: TaxRegime): String = bta(taxRegime)
-    def vat(taxRegime: TaxRegime): String = bta(taxRegime)
-    def govUk(taxRegime: TaxRegime): String = bta(taxRegime)
-    def detachedUrl(taxRegime: TaxRegime): String = bta(taxRegime)
+    def epaye(taxRegime: TaxRegime): String = response(taxRegime)
+    def vat(taxRegime: TaxRegime): String = response(taxRegime)
+    def govUk(taxRegime: TaxRegime): String = response(taxRegime)
+    def detachedUrl(taxRegime: TaxRegime): String = response(taxRegime)
   }
 
   def createJourneyJson(stageInfo: StageInfo, journeyInfo: List[String], origin: Origin = Origins.Epaye.Bta): String = {
