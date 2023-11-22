@@ -255,7 +255,36 @@
     hint = Some(Hint(content = Text("Selection will be applied to all charges")))
     ))
 }
+@planMinLengthInput(defaultValue: Int) = {
+  @govukInput(Input(
+    id = "planMinLength",
+    name = "planMinLength",
+    label = Label(
+        isPageHeading = false,
+        classes = "govuk-label--m",
+        content = Text("Enter plan min length")
+    ),
+    classes = "govuk-input--width-10",
+    spellcheck = Some(false),
+    value = form.data.get("planMinLength").orElse(Some(defaultValue.toString))
+  ))
+}
 
+@planMaxLengthInput(defaultValue: Int) = {
+  @govukInput(Input(
+    id = "planMaxLength",
+    name = "planMaxLength",
+    label = Label(
+        isPageHeading = false,
+        classes = "govuk-label--m",
+        content = Text("Enter plan max length")
+    ),
+    classes = "govuk-input--width-10",
+    spellcheck = Some(false),
+    value = form.data.get("planMaxLength").orElse(Some(defaultValue.toString)),
+    hint = Some(Hint(content = Text(s"Default value is ${defaultValue.toString}")))
+  ))
+}
 
 @payeContent = {
 @formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneySubmit) {
@@ -321,6 +350,10 @@
     @chargesOptionalFieldRadios("isInterestBearingCharge")
 
     @chargesOptionalFieldRadios("useChargeReference")
+
+    @planMinLengthInput(1)
+
+    @planMaxLengthInput(appConfig.PolicyParameters.EPAYE.maxPlanDurationInMonths)
 
     @govukRadios(Radios(
         fieldset = Some(Fieldset(
@@ -432,6 +465,10 @@
     @chargesOptionalFieldRadios("useChargeReference")
 
     @chargesOptionalFieldRadios("chargeBeforeMaxAccountingDate")
+
+    @planMinLengthInput(1)
+
+    @planMaxLengthInput(appConfig.PolicyParameters.VAT.maxPlanDurationInMonths)
 
     @govukRadios(Radios(
         fieldset = Some(Fieldset(

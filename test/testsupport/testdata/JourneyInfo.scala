@@ -25,8 +25,28 @@ object JourneyInfo {
 
   /** Represents small bits of json that get added to the journey at each stage **/
   def taxId(taxReference: String): JourneyInfoAsJson = TdJsonBodies.taxIdJourneyInfo(taxReference)
-  def eligibilityCheckEligible(taxRegime: TaxRegime, encrypter: Encrypter, regimeDigitalCorrespondence: Boolean, email: Option[String], maybeChargeIsInterestBearingCharge: Option[Boolean], maybeChargeUseChargeReference: Option[Boolean]): JourneyInfoAsJson =
-    TdJsonBodies.eligibilityCheckJourneyInfo(encrypter                          = encrypter, taxRegime = taxRegime, regimeDigitalCorrespondence = regimeDigitalCorrespondence, email = email, maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge, maybeChargeUseChargeReference = maybeChargeUseChargeReference)
+  def eligibilityCheckEligible(
+      taxRegime:                          TaxRegime,
+      encrypter:                          Encrypter,
+      regimeDigitalCorrespondence:        Boolean,
+      email:                              Option[String],
+      maybeChargeIsInterestBearingCharge: Option[Boolean],
+      maybeChargeUseChargeReference:      Option[Boolean],
+      eligibilityMinPlanLength:           Int,
+      eligibilityMaxPlanLength:           Int
+
+  ): JourneyInfoAsJson =
+    TdJsonBodies.eligibilityCheckJourneyInfo(
+      encrypter                          = encrypter,
+      taxRegime                          = taxRegime,
+      regimeDigitalCorrespondence        = regimeDigitalCorrespondence,
+      email                              = email,
+      maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge,
+      maybeChargeUseChargeReference      = maybeChargeUseChargeReference,
+      eligibilityMinPlanLength           = eligibilityMinPlanLength,
+      eligibilityMaxPlanLength           = eligibilityMaxPlanLength
+    )
+
   def ineligibleHasRls(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleHasRlsOnAddress, taxRegime, encrypter)
   def ineligibleMarkedAsInsolvent(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleMarkedAsInsolvent, taxRegime, encrypter)
   def ineligibleMinDebt(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleIsLessThanMinDebtAllowance, taxRegime, encrypter)
@@ -81,7 +101,9 @@ object JourneyInfo {
       regimeDigitalCorrespondence:        Boolean         = true,
       etmpEmail:                          Option[String]  = Some(TdAll.etmpEmail),
       maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true),
-      maybeChargeUseChargeReference:      Option[Boolean] = Some(true)
+      maybeChargeUseChargeReference:      Option[Boolean] = Some(true),
+      eligibilityMinPlanLength:           Int             = 1,
+      eligibilityMaxPlanLength:           Int             = 12
   ): List[JourneyInfoAsJson] =
     eligibilityCheckEligible(
       taxRegime,
@@ -89,7 +111,9 @@ object JourneyInfo {
       regimeDigitalCorrespondence,
       etmpEmail,
       maybeChargeIsInterestBearingCharge,
-      maybeChargeUseChargeReference
+      maybeChargeUseChargeReference,
+      eligibilityMinPlanLength,
+      eligibilityMaxPlanLength
     ) :: taxIdDetermined()
 
   def eligibilityCheckedIneligibleHasRls(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
@@ -158,26 +182,70 @@ object JourneyInfo {
   def answeredUpfrontPaymentAmount(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
     upfrontPaymentAmount :: answeredCanPayUpfrontYes(taxRegime, encrypter)
 
-  def retrievedExtremeDates(taxRegime: TaxRegime, encrypter: Encrypter, etmpEmail: Option[String] = Some(TdAll.etmpEmail)): List[JourneyInfoAsJson] =
-    extremeDates :: upfrontPaymentAnswers :: eligibilityCheckedEligible(taxRegime, encrypter, etmpEmail = etmpEmail)
+  def retrievedExtremeDates(
+      taxRegime:                TaxRegime,
+      encrypter:                Encrypter,
+      etmpEmail:                Option[String] = Some(TdAll.etmpEmail),
+      eligibilityMinPlanLength: Int            = 1,
+      eligibilityMaxPlanLength: Int            = 12
+  ): List[JourneyInfoAsJson] =
+    extremeDates :: upfrontPaymentAnswers :: eligibilityCheckedEligible(
+      taxRegime,
+      encrypter,
+      etmpEmail                = etmpEmail,
+      eligibilityMinPlanLength = eligibilityMinPlanLength,
+      eligibilityMaxPlanLength = eligibilityMaxPlanLength
+    )
 
   def retrievedExtremeDatesNoUpfrontPayment(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
     extremeDates :: upfrontPaymentAnswersNoUpfrontPayment :: eligibilityCheckedEligible(taxRegime, encrypter)
 
-  def retrievedAffordabilityResult(minimumInstalmentAmount: Int = 29997, taxRegime: TaxRegime, encrypter: Encrypter, etmpEmail: Option[String] = Some(TdAll.etmpEmail)): List[JourneyInfoAsJson] =
-    affordableResult(minimumInstalmentAmount) :: retrievedExtremeDates(taxRegime, encrypter, etmpEmail)
+  def retrievedAffordabilityResult(
+      minimumInstalmentAmount:  Int            = 29997,
+      taxRegime:                TaxRegime,
+      encrypter:                Encrypter,
+      etmpEmail:                Option[String] = Some(TdAll.etmpEmail),
+      eligibilityMinPlanLength: Int            = 1,
+      eligibilityMaxPlanLength: Int            = 12
+  ): List[JourneyInfoAsJson] =
+    affordableResult(minimumInstalmentAmount) :: retrievedExtremeDates(taxRegime, encrypter, etmpEmail, eligibilityMinPlanLength, eligibilityMaxPlanLength)
 
   def retrievedAffordabilityResultNoUpfrontPayment(minimumInstalmentAmount: Int = 29997, taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
     affordableResult(minimumInstalmentAmount) :: retrievedExtremeDatesNoUpfrontPayment(taxRegime, encrypter)
 
-  def enteredMonthlyPaymentAmount(taxRegime: TaxRegime, encrypter: Encrypter, etmpEmail: Option[String] = Some(TdAll.etmpEmail)): List[JourneyInfoAsJson] =
-    monthlyPaymentAmount :: retrievedAffordabilityResult(taxRegime = taxRegime, encrypter = encrypter, etmpEmail = etmpEmail)
+  def enteredMonthlyPaymentAmount(
+      taxRegime:                TaxRegime,
+      encrypter:                Encrypter,
+      etmpEmail:                Option[String] = Some(TdAll.etmpEmail),
+      eligibilityMinPlanLength: Int            = 1,
+      eligibilityMaxPlanLength: Int            = 12
+  ): List[JourneyInfoAsJson] =
+    monthlyPaymentAmount :: retrievedAffordabilityResult(
+      taxRegime                = taxRegime,
+      encrypter                = encrypter,
+      etmpEmail                = etmpEmail,
+      eligibilityMinPlanLength = eligibilityMinPlanLength,
+      eligibilityMaxPlanLength = eligibilityMaxPlanLength
+    )
 
-  def enteredDayOfMonth(day: DayOfMonth, taxRegime: TaxRegime, encrypter: Encrypter, etmpEmail: Option[String] = Some(TdAll.etmpEmail)): List[JourneyInfoAsJson] =
-    dayOfMonth(day) :: enteredMonthlyPaymentAmount(taxRegime, encrypter, etmpEmail)
+  def enteredDayOfMonth(
+      day:                      DayOfMonth,
+      taxRegime:                TaxRegime,
+      encrypter:                Encrypter,
+      etmpEmail:                Option[String] = Some(TdAll.etmpEmail),
+      eligibilityMinPlanLength: Int            = 1,
+      eligibilityMaxPlanLength: Int            = 12
+  ): List[JourneyInfoAsJson] =
+    dayOfMonth(day) :: enteredMonthlyPaymentAmount(taxRegime, encrypter, etmpEmail, eligibilityMinPlanLength, eligibilityMaxPlanLength)
 
-  def retrievedStartDates(taxRegime: TaxRegime, encrypter: Encrypter, etmpEmail: Option[String] = Some(TdAll.etmpEmail)): List[JourneyInfoAsJson] =
-    startDates :: enteredDayOfMonth(TdAll.dayOfMonth(), taxRegime, encrypter, etmpEmail)
+  def retrievedStartDates(
+      taxRegime:                TaxRegime,
+      encrypter:                Encrypter,
+      etmpEmail:                Option[String] = Some(TdAll.etmpEmail),
+      eligibilityMinPlanLength: Int            = 1,
+      eligibilityMaxPlanLength: Int            = 12
+  ): List[JourneyInfoAsJson] =
+    startDates :: enteredDayOfMonth(TdAll.dayOfMonth(), taxRegime, encrypter, etmpEmail, eligibilityMinPlanLength, eligibilityMaxPlanLength)
 
   def retrievedAffordableQuotes(taxRegime: TaxRegime, encrypter: Encrypter, etmpEmail: Option[String] = Some(TdAll.etmpEmail)): List[JourneyInfoAsJson] =
     affordableQuotes :: retrievedStartDates(taxRegime, encrypter, etmpEmail)
