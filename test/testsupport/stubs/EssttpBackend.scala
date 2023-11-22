@@ -91,8 +91,12 @@ object EssttpBackend {
 
     def startJourneyInBackend(origin: Origin): StubMapping = {
       val (url, expectedRequestBody, responseBody): (String, String, String) = origin match {
+        case Origins.Epaye.GovUk =>
+          (startJourneyGovUkEpayeUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.govUk(TaxRegime.Epaye))
         case Origins.Epaye.DetachedUrl =>
           (startJourneyDetachedEpayeUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.detachedUrl(TaxRegime.Epaye))
+        case Origins.Vat.GovUk =>
+          (startJourneyGovUkVatUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.govUk(TaxRegime.Vat))
         case Origins.Vat.DetachedUrl =>
           (startJourneyDetachedVatUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.detachedUrl(TaxRegime.Vat))
         case other => throw new Exception(s"Origin ${other.toString} not handled")
