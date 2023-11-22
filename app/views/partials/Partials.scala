@@ -22,12 +22,13 @@ import views.html.partials._
 import javax.inject.Inject
 
 class Partials @Inject() (
-    val ineligibleTemplatePage:     Ineligible,
-    val genericIneligiblePartial:   GenericIneligiblePartial,
-    val debtTooLargePartial:        DebtTooLargePartial,
-    val debtTooSmallPartial:        DebtTooSmallPartial,
-    val debtTooOldPartial:          DebtTooOldPartial,
-    val existingPaymentPlanPartial: ExistingPaymentPlanPartial,
-    val returnsNotUpToDatePartial:  ReturnsNotUpToDatePartial,
-    val extraSupportRelayPartial:   ExtraSupportRelayPartial
+    val ineligibleTemplatePage:             Ineligible,
+    val genericIneligiblePartial:           GenericIneligiblePartial,
+    val debtTooLargePartial:                DebtTooLargePartial,
+    val debtTooSmallPartial:                DebtTooSmallPartial,
+    val debtTooOldPartial:                  DebtTooOldPartial,
+    val vatDebtBeforeAccountingDatePartial: VatDebtBeforeAccountingDatePartial,
+    val existingPaymentPlanPartial:         ExistingPaymentPlanPartial,
+    val returnsNotUpToDatePartial:          ReturnsNotUpToDatePartial,
+    val extraSupportRelayPartial:           ExtraSupportRelayPartial
 )

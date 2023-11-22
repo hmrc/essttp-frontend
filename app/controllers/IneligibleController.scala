@@ -88,6 +88,13 @@ class IneligibleController @Inject() (
     ))
   }
 
+  val vatDebtBeforeAccountingDatePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    Ok(views.partials.ineligibleTemplatePage(
+      pageh1         = Messages.NotEligible.`Call us about a payment plan`,
+      leadingContent = views.partials.vatDebtBeforeAccountingDatePartial(appConfig.PolicyParameters.VAT.vatAccountingPeriodStart)
+    ))
+  }
+
   def genericFileReturnPage(implicit request: AuthenticatedJourneyRequest[AnyContent]): Result =
     Ok(views.partials.ineligibleTemplatePage(
       pageh1         = Messages.NotEligible.`File your return to use this service`,

@@ -109,12 +109,9 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxPaymentReference`(Origins.Epaye.Bta), Origins.Epaye.Bta),
       ("IsMoreThanMaxPaymentReference - VAT", TdAll.notEligibleIsMoreThanMaxPaymentReference, "isMoreThanMaxPaymentReference", PageUrls.vatNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxPaymentReference`(Origins.Vat.Bta), Origins.Vat.Bta),
-      ("ChargesBeforeMaxAccountingDate - EPAYE", TdAll.notEligibleChargesBeforeMaxAccountingDate, "chargesBeforeMaxAccountingDate", PageUrls.epayeDebtTooOldUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - ChargesBeforeMaxAccountingDate`(Origins.Epaye.Bta),
-        Origins.Epaye.Bta),
-      ("ChargesBeforeMaxAccountingDate - VAT", TdAll.notEligibleChargesBeforeMaxAccountingDate, "chargesBeforeMaxAccountingDate", PageUrls.vatDebtTooOldUrl,
+      ("ChargesBeforeMaxAccountingDate - VAT", TdAll.notEligibleChargesBeforeMaxAccountingDate, "chargesBeforeMaxAccountingDate", PageUrls.vatDebtBeforeAccountingDateUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - ChargesBeforeMaxAccountingDate`(Origins.Vat.Bta),
-        Origins.Vat.Bta),
+        Origins.Vat.Bta)
     )) {
       (sf: String, eligibilityRules: EligibilityRules, auditIneligibilityReason: String, expectedRedirect: String, updatedJourneyJson: String, origin: Origin) =>
         {

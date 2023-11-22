@@ -344,6 +344,11 @@ object Messages {
       )
     }
 
+    def `You cannot set up ... accounting period that started before`(accountingPeriodStart: String): Message = Message(
+      english = s"You cannot set up a VAT payment plan online because your debt is for an accounting period that started before $accountingPeriodStart.",
+      welsh   = s"Ni allwch drefnu cynllun talu TAW ar-lein oherwydd bod eich dyled am gyfnod cyfrifyddu a ddechreuodd cyn $accountingPeriodStart."
+    )
+
     val `You already have a payment plan with HMRC`: Message = Message(
       english = "You already have a payment plan with HMRC",
       welsh   = "Mae gennych chi gynllun talu gyda CThEF yn barod"
