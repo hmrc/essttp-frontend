@@ -264,6 +264,32 @@ class IneligibleControllerSpec extends ItSpec {
             page.select("#bta-link").attr("href") shouldBe "/set-up-a-payment-plan/test-only/bta-page?return-page"
           }
       }
+
+    s"Vat Debt charges before max accounting date ineligible page correctly" in {
+      val enrolment = Some(Set(TdAll.vatEnrolment))
+
+      stubCommonActions(authAllEnrolments = enrolment)
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - BeforeMaxAccountingDate`(Origins.Vat.Bta))
+
+      val result: Future[Result] = controller.vatDebtBeforeAccountingDatePage(fakeRequest)
+
+      val page = pageContentAsDoc(result)
+
+      ContentAssertions.commonPageChecks(
+        page,
+        expectedH1              = "Call us about a payment plan",
+        shouldBackLinkBePresent = false,
+        expectedSubmitUrl       = None,
+        regimeBeingTested       = Some(TaxRegime.Vat)
+      )
+      val expectedLeadingP1 = "You cannot set up a VAT payment plan online because your debt is for an accounting period that started before 1 January 2023."
+
+      assertIneligiblePageLeadingP1(
+        page      = page,
+        leadingP1 = expectedLeadingP1
+      )
+      ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Vat, Languages.English)
+    }
   }
 
   "IneligibleController should display in Welsh" - {
@@ -491,5 +517,32 @@ class IneligibleControllerSpec extends ItSpec {
             page.select("#bta-link").attr("href") shouldBe "/set-up-a-payment-plan/test-only/bta-page?return-page"
           }
       }
+
+    s"Vat Debt charges before max accounting date ineligible page correctly" in {
+      val enrolment = Some(Set(TdAll.vatEnrolment))
+
+      stubCommonActions(authAllEnrolments = enrolment)
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - BeforeMaxAccountingDate`(Origins.Vat.Bta))
+
+      val result: Future[Result] = controller.vatDebtBeforeAccountingDatePage(fakeRequest.withLangWelsh())
+
+      val page = pageContentAsDoc(result)
+
+      ContentAssertions.commonPageChecks(
+        page,
+        expectedH1              = "Ffoniwch ni ynghylch cynllun talu",
+        shouldBackLinkBePresent = false,
+        expectedSubmitUrl       = None,
+        regimeBeingTested       = Some(TaxRegime.Vat),
+        language                = Languages.Welsh
+      )
+      val expectedLeadingP1 = "Ni allwch drefnu cynllun talu TAW ar-lein oherwydd bod eich dyled am gyfnod cyfrifyddu a ddechreuodd cyn 1 Ionawr 2023."
+
+      assertIneligiblePageLeadingP1(
+        page      = page,
+        leadingP1 = expectedLeadingP1
+      )
+      ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Vat, Languages.Welsh)
+    }
   }
 }

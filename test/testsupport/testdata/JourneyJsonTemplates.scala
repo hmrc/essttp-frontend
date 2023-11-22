@@ -83,6 +83,12 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
+  def `Eligibility Checked - Ineligible - BeforeMaxAccountingDate`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.eligibilityCheckedIneligible,
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMaxDebtAge(origin.taxRegime, encrypter),
+    origin      = origin
+  )
+
   def `Eligibility Checked - Ineligible - EligibleChargeType`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleChargeType(origin.taxRegime, encrypter),
