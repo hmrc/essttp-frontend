@@ -18,6 +18,7 @@ package controllers
 
 import essttp.crypto.CryptoFormat
 import essttp.journey.model.{Origin, Origins}
+import essttp.rootmodel.ttp.{PaymentPlanMaxLength, PaymentPlanMinLength}
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -41,8 +42,16 @@ class DetermineAffordableQuotesControllerSpec extends ItSpec {
       case (regime, origin) =>
         "GET /determine-affordable-quotes" - {
           s"[$regime journey] trigger call to ttp microservice affordable quotes endpoint and update backend" in {
+            val journeyJson =
+              JourneyJsonTemplates.`Retrieved Start Dates`(origin, eligibilityMinPlanLength = 2, eligibilityMaxPlanLength = 24)(testCrypto)
+
+            val expectedAffordableQuotesRequest = TdAll.affordableQuotesRequest(origin.taxRegime).copy(
+              paymentPlanMinLength = PaymentPlanMinLength(2),
+              paymentPlanMaxLength = PaymentPlanMaxLength(24)
+            )
+
             stubCommonActions()
-            EssttpBackend.Dates.findJourneyStartDates(testCrypto, origin)()
+            EssttpBackend.Dates.findJourneyStartDates(testCrypto, origin)(journeyJson)
             Ttp.AffordableQuotes.stubRetrieveAffordableQuotes()
             EssttpBackend.AffordableQuotes.stubUpdateAffordableQuotes(TdAll.journeyId, JourneyJsonTemplates.`Retrieved Affordable Quotes`(origin))
 
@@ -51,8 +60,8 @@ class DetermineAffordableQuotesControllerSpec extends ItSpec {
 
             status(result) shouldBe Status.SEE_OTHER
             redirectLocation(result) shouldBe Some(PageUrls.instalmentsUrl)
+            Ttp.AffordableQuotes.verifyTtpAffordableQuotesRequest(origin.taxRegime)(expectedAffordableQuotesRequest)(CryptoFormat.NoOpCryptoFormat)
             EssttpBackend.AffordableQuotes.verifyUpdateAffordableQuotesRequest(TdAll.journeyId)
-            Ttp.AffordableQuotes.verifyTtpAffordableQuotesRequest(origin.taxRegime)(CryptoFormat.NoOpCryptoFormat)
           }
         }
     }

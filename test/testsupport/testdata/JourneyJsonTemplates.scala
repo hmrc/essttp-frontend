@@ -197,9 +197,9 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
-  def `Retrieved Start Dates`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Retrieved Start Dates`(origin: Origin, eligibilityMinPlanLength: Int = 1, eligibilityMaxPlanLength: Int = 12)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.retrievedStartDates,
-    journeyInfo = JourneyInfo.retrievedStartDates(origin.taxRegime, encrypter),
+    journeyInfo = JourneyInfo.retrievedStartDates(origin.taxRegime, encrypter, eligibilityMinPlanLength = eligibilityMinPlanLength, eligibilityMaxPlanLength = eligibilityMaxPlanLength),
     origin      = origin
   )
 

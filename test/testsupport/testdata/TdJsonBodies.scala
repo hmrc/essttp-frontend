@@ -104,7 +104,9 @@ object TdJsonBodies {
       regimeDigitalCorrespondence:        Boolean          = true,
       email:                              Option[String]   = Some(TdAll.etmpEmail),
       maybeChargeIsInterestBearingCharge: Option[Boolean]  = None,
-      maybeChargeUseChargeReference:      Option[Boolean]  = None
+      maybeChargeUseChargeReference:      Option[Boolean]  = None,
+      eligibilityMinPlanLength:           Int              = 1,
+      eligibilityMaxPlanLength:           Int              = 12
   ): JourneyInfoAsJson = {
 
     val isInterestBearingChargeValue = maybeChargeIsInterestBearingCharge match {
@@ -129,8 +131,8 @@ object TdJsonBodies {
       |  ],
       |  "regimePaymentFrequency": "Monthly",
       |  "paymentPlanFrequency": "Monthly",
-      |  "paymentPlanMinLength": 1,
-      |  "paymentPlanMaxLength": 12,
+      |  "paymentPlanMinLength": ${eligibilityMinPlanLength.toString},
+      |  "paymentPlanMaxLength": ${eligibilityMaxPlanLength.toString},
       |  "eligibilityStatus" : {
       |    "eligibilityPass" : ${eligibilityPass.value.toString}
       |  },

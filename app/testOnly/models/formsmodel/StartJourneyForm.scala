@@ -22,7 +22,7 @@ import essttp.rootmodel.TaxId
 import essttp.rootmodel.{AmountInPence, EmpRef, TaxRegime, Vrn}
 import models.MoneyUtil.{amountOfMoneyFormatter, formatAmountOfMoneyWithoutPoundSign}
 import models.{EligibilityError, EligibilityErrors, Language}
-import play.api.data.Forms.{boolean, mapping, optional, seq}
+import play.api.data.Forms.{boolean, mapping, number, optional, seq}
 import play.api.data._
 import play.api.data.format.Formatter
 import testOnly.messages.Messages
@@ -44,7 +44,9 @@ final case class StartJourneyForm(
     emailAddressPresent:           Boolean,
     isInterestBearingCharge:       Option[Boolean],
     useChargeReference:            Option[Boolean],
-    chargeBeforeMaxAccountingDate: Option[Boolean]
+    chargeBeforeMaxAccountingDate: Option[Boolean],
+    planMinLength:                 Int,
+    planMaxLength:                 Int
 )
 
 object StartJourneyForm {
@@ -67,7 +69,9 @@ object StartJourneyForm {
         "emailAddressPresent" -> optionalBooleanMappingDefaultTrue,
         "isInterestBearingCharge" -> chargesOptionalFieldsMapping,
         "useChargeReference" -> chargesOptionalFieldsMapping,
-        "chargeBeforeMaxAccountingDate" -> chargesOptionalFieldsMapping
+        "chargeBeforeMaxAccountingDate" -> chargesOptionalFieldsMapping,
+        "planMinLength" -> number,
+        "planMaxLength" -> number
       )(StartJourneyForm.apply)(StartJourneyForm.unapply)
     )
   }

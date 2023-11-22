@@ -71,8 +71,10 @@ object Ttp {
     def stubRetrieveAffordableQuotes(jsonBody: String = TtpJsonResponses.ttpAffordableQuotesResponseJson()): StubMapping =
       WireMockHelpers.stubForPostWithResponseBody(affordableQuotesUrl, jsonBody)
 
-    def verifyTtpAffordableQuotesRequest(taxRegime: TaxRegime)(implicit cryptoFormat: CryptoFormat): Unit =
-      ttpVerify(affordableQuotesUrl, TdAll.affordableQuotesRequest(taxRegime))(AffordableQuotesRequest.format)
+    def verifyTtpAffordableQuotesRequest(taxRegime: TaxRegime)(
+        expectedRequest: AffordableQuotesRequest = TdAll.affordableQuotesRequest(taxRegime)
+    )(implicit cryptoFormat: CryptoFormat): Unit =
+      ttpVerify(affordableQuotesUrl, expectedRequest)(AffordableQuotesRequest.format)
   }
 
   object EnactArrangement {
