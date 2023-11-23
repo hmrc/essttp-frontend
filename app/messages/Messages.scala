@@ -567,8 +567,8 @@ object Messages {
       english = s"owe ${maxAmountOfDebt.gdsFormatInPounds} or less",
       welsh   = s"mae arnoch ${maxAmountOfDebt.gdsFormatInPounds} neu lai"
     )
-    def `plan to pay the debt off within the next ... months`(maxPlanDuration: Int): Message = Message(
-      english = s"plan to pay the debt off within the next ${maxPlanDuration.toString} months",
+    def `plan to pay your debt off within the next ... months`(maxPlanDuration: Int): Message = Message(
+      english = s"plan to pay your debt off within the next ${maxPlanDuration.toString} months",
       welsh   = s"rydych yn bwriadu talu’ch dyled cyn pen y ${maxPlanDuration.toString} mis nesaf"
     )
     val `have a debt for an accounting period that started in 2023 or later`: Message = Message(

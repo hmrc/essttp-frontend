@@ -146,7 +146,7 @@ class LandingPageControllerSpec extends ItSpec {
       firstListBullets.size shouldBe 6
 
       firstListBullets(0).text() shouldBe "owe £50,000 or less"
-      firstListBullets(1).text() shouldBe "plan to pay the debt off within the next 12 months"
+      firstListBullets(1).text() shouldBe "plan to pay your debt off within the next 12 months"
       firstListBullets(2).text() shouldBe "have a debt for an accounting period that started in 2023 or later"
       firstListBullets(3).text() shouldBe "do not have any other payment plans or debts with HMRC"
       firstListBullets(4).text() shouldBe "have filed your tax returns"
