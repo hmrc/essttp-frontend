@@ -44,19 +44,14 @@
 ) {
   <h1 class="govuk-heading-xl">@title</h1>
   <p class="govuk-body">@{Messages.Epaye.`You can use this service to pay overdue payments...`.show}</p>
-  <p class="govuk-body">@{Messages.Epaye.`You are eligible to set up an online payment plan if:`.show}</p>
+  <p class="govuk-body">@{Messages.Epaye.`You can set up a payment plan online if you:`.show}</p>
   <ul class="govuk-list govuk-list--bullet">
-    <li>@{Messages.Epaye.`you plan to pay the debt off within the next ... months or less`(appConfig.PolicyParameters.EPAYE.maxPlanDurationInMonths).show}</li>
-    <li>@{Messages.Epaye.`you owe ... or less`(appConfig.PolicyParameters.EPAYE.maxAmountOfDebt).show}</li>
-    <li>@{Messages.Epaye.`your debts are ... years old or less`(appConfig.PolicyParameters.EPAYE.maxAgeOfDebtInYears).show}</li>
-    <li>@{Messages.Epaye.`your Employers’ PAYE submissions are up to date`.show}</li>
-    <li>@{Messages.Epaye.`your Construction Industry Scheme (CIS) returns are up to date`.show}</li>
-    <li>@{Messages.Epaye.`you do not have any payment plans or debts with HMRC`.show}</li>
-  </ul>
-  <p class="govuk-body">@{Messages.Epaye.`You can choose to pay:`.show}</p>
-  <ul class="govuk-list govuk-list--bullet">
-    <li>@{Messages.Epaye.`part of the payment upfront and part in monthly instalments`.show}</li>
-    <li>@{Messages.Epaye.`monthly instalments only`.show}</li>
+    <li>@{Messages.Epaye.`owe ... or less`(appConfig.PolicyParameters.EPAYE.maxAmountOfDebt).show}</li>
+    <li>@{Messages.Epaye.`plan to pay your debt off within the next ... months`(appConfig.PolicyParameters.EPAYE.maxPlanDurationInMonths).show}</li>
+    <li>@{Messages.Epaye.`have debts that are ... years old or less`(appConfig.PolicyParameters.EPAYE.maxAgeOfDebtInYears).show}</li>
+    <li>@{Messages.Epaye.`do not have any other payment plans or debts with HMRC`.show}</li>
+    <li>@{Messages.Epaye.`have sent any Employers’ PAYE submissions and Construction Industry Scheme (CIS) returns that are due`.show}</li>
+    <li>@{Messages.Epaye.`have missed the deadline to pay a PAYE bill`.show}</li>
   </ul>
   <h2 class="govuk-heading-m">@{Messages.Epaye.`Before you start`.show}</h2>
   <p class="govuk-body">@{Messages.Epaye.`You must be:`.show}</p>

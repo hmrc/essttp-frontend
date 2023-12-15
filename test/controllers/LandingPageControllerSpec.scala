@@ -60,17 +60,21 @@ class LandingPageControllerSpec extends ItSpec {
       )
 
       val lists = doc.select(".govuk-list").asScala.toList
-      lists.size shouldBe 3
+      lists.size shouldBe 2
+
+      val paragraphs = doc.select("p.govuk-body").asScala.toList
+      paragraphs(0).text() shouldBe "You can use this service to pay overdue payments in instalments. The payments you make may incur interest."
+      paragraphs(1).text() shouldBe "You can set up a payment plan online if you:"
 
       val firstListBullets = lists(0).select("li").asScala.toList
       firstListBullets.size shouldBe 6
 
-      firstListBullets(0).text() shouldBe "you plan to pay the debt off within the next 12 months or less"
-      firstListBullets(1).text() shouldBe "you owe £50,000 or less"
-      firstListBullets(2).text() shouldBe "your debts are 5 years old or less"
-      firstListBullets(3).text() shouldBe "your Employers’ PAYE submissions are up to date"
-      firstListBullets(4).text() shouldBe "your Construction Industry Scheme (CIS) returns are up to date (if applicable)"
-      firstListBullets(5).text() shouldBe "you do not have any payment plans or debts with HMRC"
+      firstListBullets(0).text() shouldBe "owe £50,000 or less"
+      firstListBullets(1).text() shouldBe "plan to pay your debt off within the next 12 months"
+      firstListBullets(2).text() shouldBe "have debts that are 5 years old or less"
+      firstListBullets(3).text() shouldBe "do not have any other payment plans or debts with HMRC"
+      firstListBullets(4).text() shouldBe "have sent any Employers’ PAYE submissions and Construction Industry Scheme (CIS) returns that are due"
+      firstListBullets(5).text() shouldBe "have missed the deadline to pay a PAYE bill"
 
       val button = doc.select(".govuk-button")
       button.attr("href") shouldBe routes.LandingController.epayeLandingPageContinue.url
