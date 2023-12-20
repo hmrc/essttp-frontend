@@ -469,54 +469,39 @@ object Messages {
       welsh   = "Gallwch ddefnyddio’r gwasanaeth hwn i dalu taliadau hwyr fesul rhandaliad. Efallai y codir llog ar y taliadau a wnewch."
     )
 
-    val `You are eligible to set up an online payment plan if:`: Message = Message(
-      english = "You are eligible to set up an online payment plan if:",
-      welsh   = "Rydych chi’n gymwys i drefnu cynllun talu ar-lein os yw’r canlynol yn wir:"
+    val `You can set up a payment plan online if you:`: Message = Message(
+      english = "You can set up a payment plan online if you:",
+      welsh   = "Gallwch fynd ar-lein i drefnu cynllun talu os yw’r canlynol yn wir:"
     )
 
-    def `you plan to pay the debt off within the next ... months or less`(maxPlanDurationInMonths: Int): Message = Message(
-      english = s"you plan to pay the debt off within the next ${maxPlanDurationInMonths.toString} months or less",
-      welsh   = s"rydych yn bwriadu talu’r ddyled cyn pen y ${maxPlanDurationInMonths.toString} mis nesaf"
-    )
-
-    def `you owe ... or less`(maxAmountOfDebt: AmountInPence): Message = Message(
-      english = s"you owe ${maxAmountOfDebt.gdsFormatInPounds} or less",
+    def `owe ... or less`(maxAmountOfDebt: AmountInPence): Message = Message(
+      english = s"owe ${maxAmountOfDebt.gdsFormatInPounds} or less",
       welsh   = s"mae arnoch ${maxAmountOfDebt.gdsFormatInPounds} neu lai"
     )
 
-    def `your debts are ... years old or less`(maxDebtAgeInYears: Int): Message = Message(
-      english = s"your debts are ${maxDebtAgeInYears.toString} years old or less",
-      welsh   = s"mae eich dyledion yn ${maxDebtAgeInYears.toString} oed neu lai"
+    def `plan to pay your debt off within the next ... months`(maxPlanDurationInMonths: Int): Message = Message(
+      english = s"plan to pay your debt off within the next ${maxPlanDurationInMonths.toString} months",
+      welsh   = s"rydych yn bwriadu talu’ch dyled cyn pen y ${maxPlanDurationInMonths.toString} mis nesaf"
     )
 
-    val `you do not have any payment plans or debts with HMRC`: Message = Message(
-      english = "you do not have any payment plans or debts with HMRC",
-      welsh   = "does gennych chi ddim cynlluniau talu na dyledion gyda CThEF"
+    def `have debts that are ... years old or less`(maxDebtAgeInYears: Int): Message = Message(
+      english = s"have debts that are ${maxDebtAgeInYears.toString} years old or less",
+      welsh   = s"mae gennych ddyledion sy’n ${maxDebtAgeInYears.toString} blynedd oed neu lai"
     )
 
-    val `your Employers’ PAYE submissions are up to date`: Message = Message(
-      english = "your Employers’ PAYE submissions are up to date",
-      welsh   = "mae’ch cyflwyniadau TWE y Cyflogwr yn gyfredol"
+    val `do not have any other payment plans or debts with HMRC`: Message = Message(
+      english = "do not have any other payment plans or debts with HMRC",
+      welsh   = "nid oes gennych unrhyw gynlluniau talu na dyledion eraill gyda CThEF"
     )
 
-    val `your Construction Industry Scheme (CIS) returns are up to date`: Message = Message(
-      english = "your Construction Industry Scheme (CIS) returns are up to date (if applicable)",
-      welsh   = "mae’ch datganiadau ar gyfer Cynllun y Diwydiant Adeiladu (CIS) yn gyfredol (os yw’n berthnasol)"
+    val `have sent any Employers’ PAYE submissions and Construction Industry Scheme (CIS) returns that are due`: Message = Message(
+      english = "have sent any Employers’ PAYE submissions and Construction Industry Scheme (CIS) returns that are due",
+      welsh   = "rydych wedi anfon unrhyw gyflwyniadau TWE y Cyflogwr a datganiadau Cynllun y Diwydiant Adeiladu (CIS) erbyn y dyddiadau cau"
     )
 
-    val `You can choose to pay:`: Message = Message(
-      english = "You can choose to pay:",
-      welsh   = "Gallwch ddewis talu:"
-    )
-
-    val `part of the payment upfront and part in monthly instalments`: Message = Message(
-      english = "part of the payment upfront and part in monthly instalments",
-      welsh   = "rhan o’r taliad ymlaen llaw a rhan ohono fesul rhandaliad"
-    )
-
-    val `monthly instalments only`: Message = Message(
-      english = "monthly instalments only",
-      welsh   = "fesul rhandaliad misol yn unig"
+    val `have missed the deadline to pay a PAYE bill`: Message = Message(
+      english = "have missed the deadline to pay a PAYE bill",
+      welsh   = "rydych wedi methu’r dyddiad cau i dalu bil TWE"
     )
 
     val `Before you start`: Message = Message(
