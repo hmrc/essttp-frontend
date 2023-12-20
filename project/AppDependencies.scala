@@ -2,7 +2,7 @@ import sbt.*
 
 object AppDependencies {
 
-  val bootstrapVersion = "8.2.0"
+  val bootstrapVersion = "8.3.0"
 
   val compile: Seq[ModuleID] = Seq(
     // format: OFF
