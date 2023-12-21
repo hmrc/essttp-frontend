@@ -42,7 +42,7 @@ object LoginRequestMaker {
       "credId" -> credId,
       "affinityGroup" -> testUser.affinityGroup.toString,
       "confidenceLevel" -> testUser.confidenceLevel,
-      "credentialStrength" -> "weak",
+      "credentialStrength" -> "strong",
       "credentialRole" -> "User",
       "usersName" -> JsNull,
       "enrolments" -> enrolments,
