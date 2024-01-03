@@ -51,12 +51,13 @@ class LandingPageControllerSpec extends ItSpec {
       ContentAssertions.commonPageChecks(
         doc,
         expectedH1                  = "Set up an Employers’ PAYE payment plan",
-        shouldBackLinkBePresent     = false,
+        shouldBackLinkBePresent     = true,
         expectedSubmitUrl           = None,
         signedIn                    = false,
         shouldH1BeSameAsServiceName = true,
         regimeBeingTested           = Some(TaxRegime.Epaye),
-        shouldServiceNameBeInHeader = false
+        shouldServiceNameBeInHeader = false,
+        backLinkUrlOverride         = Some("/set-up-a-payment-plan/test-only/bta-page?starting-page")
       )
 
       val lists = doc.select(".govuk-list").asScala.toList
@@ -132,12 +133,13 @@ class LandingPageControllerSpec extends ItSpec {
       ContentAssertions.commonPageChecks(
         doc,
         expectedH1                  = "Set up a VAT payment plan",
-        shouldBackLinkBePresent     = false,
+        shouldBackLinkBePresent     = true,
         expectedSubmitUrl           = None,
         signedIn                    = false,
         shouldH1BeSameAsServiceName = true,
         regimeBeingTested           = Some(TaxRegime.Vat),
-        shouldServiceNameBeInHeader = false
+        shouldServiceNameBeInHeader = false,
+        backLinkUrlOverride         = Some("/set-up-a-payment-plan/test-only/bta-page?starting-page")
       )
 
       val lists = doc.select(".govuk-list").asScala.toList

@@ -19,11 +19,10 @@ package testsupport.reusableassertions
 import controllers.routes
 import essttp.rootmodel.TaxRegime
 import models.{Language, Languages}
-import org.jsoup.nodes.Element
+import org.jsoup.nodes.{Document, Element}
 import org.jsoup.select.Elements
-import testsupport.RichMatchers
-import org.jsoup.nodes.Document
 import org.scalatest.Assertion
+import testsupport.RichMatchers
 import testsupport.testdata.TdAll
 
 import scala.annotation.nowarn
