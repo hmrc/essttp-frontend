@@ -22,7 +22,7 @@ import play.api.mvc.RequestHeader
 import play.api.{ConfigLoader, Configuration}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import java.net.URL
+import java.net.URI
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Singleton}
@@ -43,7 +43,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     val platformHost: Option[String] = config.getOptional[String]("platform.frontend.host")
     val essttpBackendUrl: String = servicesConfig.baseUrl("essttp-backend")
     val essttpFrontend: String = platformHost.getOrElse(config.get[String]("baseUrl.essttp-frontend"))
-    val essttpFrontendHost: String = new URL(essttpFrontend).getHost
+    val essttpFrontendHost: String = new URI(essttpFrontend).toURL.getHost
     val contactFrontend: String = platformHost.getOrElse(config.get[String]("baseUrl.contact-frontend"))
     val feedbackFrontend: String = platformHost.getOrElse(config.get[String]("baseUrl.feedback-frontend"))
     val gg: String = config.get[String]("baseUrl.gg")

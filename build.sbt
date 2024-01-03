@@ -32,7 +32,7 @@ lazy val root = (project in file("."))
   .settings(majorVersion := 0)
   .settings(ThisBuild / useSuperShell:= false)
   .settings(
-    scalaVersion := "2.13.10",
+    scalaVersion := "2.13.12",
     name := appName,
     PlayKeys.playDefaultPort := 9215,
     scalacOptions ++= Seq("-feature"),

@@ -9,7 +9,7 @@ object SbtUpdatesSettings {
     dependencyUpdatesFailBuild := true,
     (Compile / compile) := ((Compile / compile) dependsOn dependencyUpdates).value,
     dependencyUpdatesFilter -= moduleFilter("org.scala-lang"),
-    dependencyUpdatesFilter -= moduleFilter("com.typesafe.play"),
+    dependencyUpdatesFilter -= moduleFilter("org.playframework"),
     // higher version of enumeratum breaks with java.lang.ClassCastException -Nov'23
     dependencyUpdatesFilter -= moduleFilter("com.beachape", "enumeratum-play"),
     // locked by version of play

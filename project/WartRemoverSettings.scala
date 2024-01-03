@@ -13,6 +13,7 @@ object WartRemoverSettings {
         Wart.ImplicitConversion,
         Wart.ImplicitParameter,
         Wart.Nothing,
+        Wart.Null,
         Wart.Overloading,
         Wart.SizeIs,
         Wart.SortedMaxMinOption,
@@ -25,7 +26,8 @@ object WartRemoverSettings {
         Wart.GlobalExecutionContext,
         Wart.Null,
         Wart.NonUnitStatements,
-        Wart.PublicInference
+        Wart.PublicInference,
+        Wart.SeqApply
       ),
       wartremoverExcluded ++= (
         (baseDirectory.value ** "*.sc").get ++
