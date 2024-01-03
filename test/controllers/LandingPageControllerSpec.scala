@@ -51,7 +51,7 @@ class LandingPageControllerSpec extends ItSpec {
       ContentAssertions.commonPageChecks(
         doc,
         expectedH1                  = "Set up an Employers’ PAYE payment plan",
-        shouldBackLinkBePresent     = false,
+        shouldBackLinkBePresent     = true,
         expectedSubmitUrl           = None,
         signedIn                    = false,
         shouldH1BeSameAsServiceName = true,
@@ -132,7 +132,7 @@ class LandingPageControllerSpec extends ItSpec {
       ContentAssertions.commonPageChecks(
         doc,
         expectedH1                  = "Set up a VAT payment plan",
-        shouldBackLinkBePresent     = false,
+        shouldBackLinkBePresent     = true,
         expectedSubmitUrl           = None,
         signedIn                    = false,
         shouldH1BeSameAsServiceName = true,

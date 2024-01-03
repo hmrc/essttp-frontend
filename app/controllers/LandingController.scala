@@ -39,8 +39,12 @@ class LandingController @Inject() (
   with Logging {
 
   val epayeLandingPage: Action[AnyContent] = as.default.async { implicit request =>
-    checkNotShuttered(TaxRegime.Epaye){
-      Ok(views.epayeLanding())
+    checkNotShuttered(TaxRegime.Epaye) {
+      journeyConnector.findLatestJourneyBySessionId().map {
+        maybeJourney =>
+          val maybeBackUrl = maybeJourney.flatMap(_.backUrl)
+          Ok(views.epayeLanding(maybeBackUrl))
+      }
     }
   }
 
@@ -48,7 +52,11 @@ class LandingController @Inject() (
     if (appConfig.vatEnabled) {
       as.default.async { implicit request =>
         checkNotShuttered(TaxRegime.Vat) {
-          Ok(views.vatLanding())
+          journeyConnector.findLatestJourneyBySessionId().map {
+            maybeJourney =>
+              val maybeBackUrl = maybeJourney.flatMap(_.backUrl)
+              Ok(views.vatLanding(maybeBackUrl))
+          }
         }
       }
     } else {

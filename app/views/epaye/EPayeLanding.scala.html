@@ -22,6 +22,7 @@
 @import requests.RequestSupport
 @import play.api.mvc.Request
 @import essttp.rootmodel.TaxRegime
+@import essttp.rootmodel.BackUrl
 
 @this(
   layout: Layout,
@@ -30,7 +31,7 @@
   appConfig: AppConfig
 )
 
-@()(implicit request: Request[_])
+@(backUrl: Option[BackUrl])(implicit request: Request[_])
 
 @import requestSupport._
 
@@ -38,7 +39,7 @@
 
 @layout(
   pageTitle = Some(title),
-  showBackLink = false,
+  backLinkUrlOverride = backUrl.map(_.value),
   fallBackTaxRegime = Some(TaxRegime.Epaye),
   showServiceNameInHeader = false
 ) {
