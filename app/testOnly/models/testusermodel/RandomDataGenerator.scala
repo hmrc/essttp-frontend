@@ -128,7 +128,7 @@ object RandomDataGenerator {
   def choose[T](s0: T, ss: T*)(implicit random: Random): T = {
     val choices = s0 :: ss.toList
     val choice = random.nextInt(choices.size)
-    choices(choice)
+    choices.lift(choice).getOrElse(throw new IndexOutOfBoundsException)
   }
 
   def chooseSeq[T](seq: Seq[T])(implicit random: Random): T = {
