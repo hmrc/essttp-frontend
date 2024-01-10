@@ -26,7 +26,7 @@ import essttp.rootmodel.ttp.arrangement.ArrangementResponse
 import essttp.rootmodel.bank.{BankDetails, DetailsAboutBankAccount}
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
 import essttp.rootmodel.dates.startdates.StartDatesResponse
-import essttp.rootmodel.{CanPayUpfront, DayOfMonth, Email, EmpRef, IsEmailAddressRequired, MonthlyPaymentAmount, UpfrontPaymentAmount, Vrn}
+import essttp.rootmodel.{CanPayUpfront, DayOfMonth, Email, EmpRef, IsEmailAddressRequired, MonthlyPaymentAmount, SaUtr, UpfrontPaymentAmount, Vrn}
 import paymentsEmailVerification.models.EmailVerificationResult
 import play.api.mvc.RequestHeader
 import util.Logging
@@ -49,6 +49,9 @@ class JourneyService @Inject() (journeyConnector: JourneyConnector) extends Logg
 
     def updateVatTaxId(journeyId: JourneyId, vrn: Vrn)(implicit requestHeader: RequestHeader): Future[Journey] =
       journeyConnector.updateTaxId(journeyId, vrn)
+
+    def updateSaTaxId(journeyId: JourneyId, saTaxId: SaUtr)(implicit requestHeader: RequestHeader): Future[Journey] =
+      journeyConnector.updateTaxId(journeyId, saTaxId)
 
   }
 

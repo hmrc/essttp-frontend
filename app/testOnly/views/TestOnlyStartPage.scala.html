@@ -69,6 +69,12 @@
       .map(toCheckboxItem)
 }
 
+@saEligibilityErrorCheckboxes = @{
+    EligibilityErrors.values
+    .filterNot(e => e === EligibilityErrors.MultipleReasons || e === EligibilityErrors.ChargesBeforeMaxAccountingDate)
+    .map(toCheckboxItem)
+}
+
 @enrolmentsContent(taxRegime: TaxRegime) = @{
     govukCheckboxes(Checkboxes(
         fieldset = Some(Fieldset(
@@ -97,6 +103,14 @@
                             .filter(_._1.startsWith("enrolments"))
                             .find(_._2 === Enrolments.Vat.entryName)
                             .fold(taxRegime.entryName === "Vat")(_._2 === Enrolments.Vat.entryName)
+                ),
+                CheckboxItem(
+                    content = Text("IR-SA"),
+                    value = Enrolments.IrSa.entryName,
+                    checked = form.data.toList
+                    .filter(_._1.startsWith("enrolments"))
+                    .find(_._2 === Enrolments.IrSa.entryName)
+                    .fold(taxRegime.entryName === "Sa")(_._2 === Enrolments.IrSa.entryName)
                 )
             )
         },
@@ -518,6 +532,121 @@
 }
 }
 
+@saContent = {
+@formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneySubmit) {
+
+    <input type="hidden" name="taxRegime" value="Sa">
+    @signInAsContent
+    @enrolmentsContent(TaxRegime.Sa)
+
+    @govukInput(Input(
+        id = "saDebtTotalAmount",
+        name = "saDebtTotalAmount",
+        label = Label(
+            isPageHeading = false,
+            classes = "govuk-label--m",
+            content = Text("Enter total debt amount without interest")
+        ),
+        classes = "govuk-input--width-5",
+        spellcheck = Some(false),
+        prefix = Some(PrefixOrSuffix(
+            content = Text("£")
+        )),
+        errorMessage = form.error("saDebtTotalAmount").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
+            content = Text(e.message)
+        )),
+        value = form.data.get("saDebtTotalAmount").orElse(Some("10000")),
+        hint = Some(Hint(content = Text(s"Enter an amount between £1 and ${appConfig.PolicyParameters.SA.maxAmountOfDebt.gdsFormatInPounds} for SA.")))
+    ))
+
+    @interestAmountContent
+
+    @govukInput(Input(
+        id = "saTaxReference",
+        name = "saTaxReference",
+        label = Label(
+            isPageHeading = false,
+            classes = "govuk-label--m",
+            content = Text("Enter an SA UTR")
+        ),
+        classes = "govuk-input--width-10",
+        spellcheck = Some(false),
+        value = form.data.get("saTaxReference"),
+        hint = Some(Hint(content = Text("SAUTR is 10 digits e.g. 1234567895. If left empty, it will be a random one.")))
+    ))
+
+    @regimeDigitalCorrespondenceRadios
+
+    @emailAddressPresentRadios
+
+    @govukCheckboxes(Checkboxes(
+        fieldset = Some(Fieldset(
+            legend = Some(Legend(
+                content = Text("Eligibility failures"),
+                classes = "govuk-fieldset__legend--m",
+                isPageHeading = false
+            ))
+        )),
+        idPrefix = Some("eligibilityErrors"),
+        name = "eligibilityErrors[]",
+        items = saEligibilityErrorCheckboxes,
+        classes = "govuk-checkboxes--small"
+    ))
+
+    @chargesOptionalFieldRadios("isInterestBearingCharge")
+
+    @chargesOptionalFieldRadios("useChargeReference")
+
+    @planMinLengthInput(1)
+
+    @planMaxLengthInput(appConfig.PolicyParameters.SA.maxPlanDurationInMonths)
+
+    @govukRadios(Radios(
+        fieldset = Some(Fieldset(
+            legend = Some(Legend(
+                content = Text("Entry origins"),
+                classes = "govuk-fieldset__legend--m",
+                isPageHeading = false
+            ))
+        )),
+        idPrefix = Some("origin"),
+        name = "origin",
+        errorMessage = form.error("origin").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
+            content = Text(e.message)
+        )),
+        items = Seq(
+            RadioItem(
+                content = Text("GOV.UK"),
+                value = Some(Origins.Sa.GovUk.entryName),
+                checked = form.data.exists(_._2 === Origins.Sa.GovUk.entryName)
+            ),
+            RadioItem(
+                content = Text("Business Tax Account"),
+                value = Some(Origins.Sa.Bta.entryName),
+                checked = form.data.exists(_._2 === Origins.Sa.Bta.entryName)
+            ),
+            RadioItem(
+                content = Text("Personal Tax Account"),
+                value = Some(Origins.Sa.Pta.entryName),
+                checked = form.data.exists(_._2 === Origins.Sa.Pta.entryName)
+            ),
+            RadioItem(
+                content = Text("Detached Url"),
+                value = Some(Origins.Sa.DetachedUrl.entryName),
+                checked = form.data.exists(_._2 === Origins.Sa.DetachedUrl.entryName)
+            ),
+            RadioItem(
+                content = Text("Mobile service"),
+                value = Some(Origins.Sa.Mobile.entryName),
+                checked = form.data.exists(_._2 === Origins.Sa.Mobile.entryName)
+            )
+        ),
+        classes = "govuk-radios--small"
+    ))
+    @govukButton(Button(content = Text("Start now")))
+}
+}
+
 @testOnlyLayout(pageTitle = Some(title)) {
     @if(form.errors.nonEmpty) {
         <input type="hidden" id="@{form.data("taxRegime")}Submitted" name="submittedRegime">
@@ -546,6 +675,13 @@
             label = "VAT",
             panel = TabPanel(
                 content = HtmlContent(vatContent)
+            )
+        ),
+        TabItem(
+            id = Some("sa"),
+            label = "SA",
+            panel = TabPanel(
+                content = HtmlContent(saContent)
             )
         )
     )))

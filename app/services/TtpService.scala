@@ -138,6 +138,7 @@ class TtpService @Inject() (
     val regimeType: RegimeType = journey.fold(_.taxRegime, _.taxRegime) match {
       case TaxRegime.Epaye => RegimeType.`PAYE`
       case TaxRegime.Vat   => RegimeType.`VAT`
+      case TaxRegime.Sa    => throw new NotImplementedError()
     }
     val eligibilityCheckResult = journey.fold(_.eligibilityCheckResult, _.eligibilityCheckResult)
     val selectedPaymentPlan = journey.fold(_.selectedPaymentPlan, _.selectedPaymentPlan)
@@ -227,6 +228,16 @@ object TtpService {
         regimeType                = EligibilityRequestDefaults.Vat.regimeType,
         returnFinancialAssessment = true
       )
+
+    case j: Journey.Sa =>
+      CallEligibilityApiRequest(
+        channelIdentifier         = EligibilityRequestDefaults.essttpChannelIdentifier,
+        idType                    = EligibilityRequestDefaults.Sa.idType,
+        idValue                   = j.taxId.value,
+        regimeType                = EligibilityRequestDefaults.Sa.regimeType,
+        returnFinancialAssessment = true
+      )
+
   }
 
   private def buildInstalmentRequest(

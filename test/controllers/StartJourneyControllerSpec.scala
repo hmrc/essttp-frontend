@@ -77,6 +77,29 @@ class StartJourneyControllerSpec extends ItSpec {
     }
   }
 
+  "GET /govuk/sa/start" - {
+    "should start a gov uk SA journey and redirect" in {
+      stubCommonActions()
+      EssttpBackend.StartJourney.startJourneySaGovUk
+
+      val fakeRequest = FakeRequest()
+        .withAuthToken()
+        .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+      val result: Future[Result] = controller.startGovukSaJourney(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.DetermineTaxIdController.determineTaxId.url)
+      EssttpBackend.StartJourney.verifyStartJourneySaGovUk()
+    }
+
+    "should redirect to login with the correct continue url if the user is not logged in" in {
+      val result = controller.startGovukSaJourney(FakeRequest("GET", routes.StartJourneyController.startGovukSaJourney.url))
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some("http://localhost:9949/auth-login-stub/gg-sign-in?" +
+        "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fgovuk%2Fsa%2Fstart&origin=essttp-frontend")
+    }
+  }
+
   "GET /epaye/start" - {
     "should start a detached EPAYE journey and redirect" in {
       stubCommonActions()
@@ -155,6 +178,45 @@ class StartJourneyControllerSpec extends ItSpec {
     }
   }
 
+  "GET /sa/start" - {
+    "should start a detached VAT journey and redirect" in {
+      stubCommonActions()
+      EssttpBackend.StartJourney.startJourneySaDetached
+
+      val fakeRequest = FakeRequest()
+        .withAuthToken()
+        .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+      val result: Future[Result] = controller.startDetachedSaJourney(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some("http://localhost:19001/set-up-a-payment-plan/sa-payment-plan")
+      EssttpBackend.StartJourney.verifyStartJourneySaDetached()
+    }
+
+    "should start a detached VAT journey and redirect if the user has already seen the landing page" in {
+      stubCommonActions()
+      EssttpBackend.StartJourney.startJourneySaDetached
+
+      val fakeRequest = FakeRequest()
+        .withAuthToken()
+        .withSession(SessionKeys.sessionId -> "IamATestSessionId", LandingController.hasSeenLandingPageSessionKey -> "true")
+
+      val result: Future[Result] = controller.startDetachedSaJourney(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.DetermineTaxIdController.determineTaxId.url)
+      session(result).data.get(LandingController.hasSeenLandingPageSessionKey) shouldBe empty
+
+      EssttpBackend.StartJourney.verifyStartJourneySaDetached()
+    }
+
+    "should redirect to login with the correct continue url if the user is not logged in" in {
+      val result = controller.startDetachedSaJourney(FakeRequest("GET", routes.StartJourneyController.startDetachedSaJourney.url))
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some("http://localhost:9949/auth-login-stub/gg-sign-in?" +
+        "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fsa%2Fstart&origin=essttp-frontend")
+    }
+  }
+
 }
 
 class GovUkVatNotEnabledControllerSpec extends ItSpec {
@@ -179,6 +241,34 @@ class GovUkVatNotEnabledControllerSpec extends ItSpec {
 
     val result: Future[Result] = controller.startDetachedVatJourney(fakeRequest)
     status(result) shouldBe NOT_IMPLEMENTED
+  }
+
+}
+
+class GovUkSaNotEnabledControllerSpec extends ItSpec {
+
+  override lazy val configOverrides: Map[String, Any] = Map("features.sa" -> false)
+
+  private val controller = app.injector.instanceOf[StartJourneyController]
+
+  "SA start govuk journey endpoint should redirect to the SA SUPP service when SA is not enabled" in {
+    val fakeRequest = FakeRequest()
+      .withAuthToken()
+      .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+    val result: Future[Result] = controller.startGovukSaJourney(fakeRequest)
+    status(result) shouldBe SEE_OTHER
+    redirectLocation(result) shouldBe Some("http://localhost:9063/pay-what-you-owe-in-instalments")
+  }
+
+  "SA start detached journey endpoint should redirect to the SA SUPP service when SA is not enabled" in {
+    val fakeRequest = FakeRequest()
+      .withAuthToken()
+      .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+    val result: Future[Result] = controller.startDetachedSaJourney(fakeRequest)
+    status(result) shouldBe SEE_OTHER
+    redirectLocation(result) shouldBe Some("http://localhost:9063/pay-what-you-owe-in-instalments")
   }
 
 }

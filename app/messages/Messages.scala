@@ -142,6 +142,12 @@ object Messages {
             english = s"Your VAT bill is ${amount.gdsFormatInPounds}",
             welsh   = s"Eich bil TAW yw ${amount.gdsFormatInPounds}"
           )
+
+        case TaxRegime.Sa =>
+          Message(
+            english = s"Your Self Assessment tax bill is ${amount.gdsFormatInPounds}",
+            welsh   = s"Mae’ch bil treth Hunanasesiad yn dod i gyfanswm o ${amount.gdsFormatInPounds}"
+          )
       }
 
     val `Overdue payments`: Message = Message(
@@ -177,6 +183,12 @@ object Messages {
         Message(
           english = "Set up a VAT payment plan",
           welsh   = "Trefnu cynllun talu TAW"
+        )
+
+      case TaxRegime.Sa =>
+        Message(
+          english = "Set up a Self Assessment payment plan",
+          welsh   = "Sefydlu cynllun talu ar gyfer Hunanasesiad"
         )
     }
 
@@ -283,12 +295,15 @@ object Messages {
           english = s"You cannot set up a VAT payment plan online because you owe more than ${maxAmountOfDebt.gdsFormatInPounds}.",
           welsh   = s"Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein oherwydd mae arnoch dros ${maxAmountOfDebt.gdsFormatInPounds}."
         )
+      case TaxRegime.Sa =>
+        throw new NotImplementedError()
     }
 
     def `Pay your ... bill in full`(taxRegime: TaxRegime): Message = {
       val (taxSpecificContentEnglish, taxSpecificContentWelsh) = taxRegime match {
         case TaxRegime.Epaye => "PAYE" -> "TWE"
         case TaxRegime.Vat   => "VAT" -> "TAW"
+        case TaxRegime.Sa    => throw new NotImplementedError()
       }
       Message(
         english = s"Pay your $taxSpecificContentEnglish bill in full",
@@ -312,7 +327,10 @@ object Messages {
           english = "You cannot set up a VAT payment plan online because your bill is too small.",
           welsh   = "Ni allwch drefnu cynllun talu TAW ar-lein oherwydd bod eich bil yn rhy fach."
         )
+      case TaxRegime.Sa =>
+        throw new NotImplementedError()
     }
+
     def `Make a payment online to cover your ... bill in full.`(taxRegime: TaxRegime, link: String): Message = taxRegime match {
       case TaxRegime.Epaye =>
         Message(
@@ -324,6 +342,8 @@ object Messages {
           english = s"""<a class="govuk-link" href="$link">Make a payment online</a> to cover your VAT bill in full.""",
           welsh   = s"""<a class="govuk-link" href="$link">Gwnewch daliad ar-lein</a> i dalu’ch bil TAW yn llawn.""".stripMargin
         )
+      case TaxRegime.Sa =>
+        throw new NotImplementedError()
     }
 
     def `Call us on 0300 123 1813 if you are having difficulty making a payment online.`: Message = Message(
@@ -342,6 +362,8 @@ object Messages {
         english = s"You cannot set up a VAT payment plan online because your payment deadline was over ${ageOfDebtInYearsOrDays.toString} days ago.",
         welsh   = s"Ni allwch drefnu cynllun talu TAW ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros ${ageOfDebtInYearsOrDays.toString} wythnos yn ôl."
       )
+      case TaxRegime.Sa =>
+        throw new NotImplementedError()
     }
 
     def `You cannot set up ... accounting period that started before`(accountingPeriodStart: String): Message = Message(
@@ -367,14 +389,16 @@ object Messages {
     def `Generic ineligible message`(taxRegime: TaxRegime): Message = taxRegime match {
       case TaxRegime.Epaye =>
         Message(
-          english = s"You are not eligible to set up an Employers’ PAYE payment plan online.",
+          english = "You are not eligible to set up an Employers’ PAYE payment plan online.",
           welsh   = "Nid ydych yn gymwys i drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein."
         )
       case TaxRegime.Vat =>
         Message(
-          english = s"You are not eligible to set up a VAT payment plan online.",
+          english = "You are not eligible to set up a VAT payment plan online.",
           welsh   = "Nid ydych yn gymwys i drefnu cynllun talu TAW ar-lein."
         )
+      case TaxRegime.Sa =>
+        throw new NotImplementedError()
     }
 
     val `File your return to use this service`: Message = Message(
@@ -913,6 +937,7 @@ object Messages {
       val (englishRegimeName, welshRegimeName) = taxRegime match {
         case TaxRegime.Epaye => "Employers’ PAYE" -> "TWE y Cyflogwyr"
         case TaxRegime.Vat   => "VAT" -> "TAW"
+        case TaxRegime.Sa    => throw new NotImplementedError()
       }
       Message(
         english = s"If you already have a Direct Debit for $englishRegimeName, contact your bank to stop the next payment being collected. This will prevent you from being charged twice.",
@@ -1217,6 +1242,9 @@ object Messages {
             english = "HMRC Direct Debit Support Team VAT 2<br>DMB 612<br>BX5 5AB<br>United Kingdom",
             welsh   = "Gwasanaeth Cwsmeriaid Cymraeg CThEF <br>HMRC<br>BX9 1ST"
           )
+        case TaxRegime.Sa =>
+          throw new NotImplementedError()
+
       }
     }
 

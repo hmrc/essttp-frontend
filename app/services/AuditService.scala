@@ -285,7 +285,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
 
   private def toTaxDetail(eligibilityCheckResult: EligibilityCheckResult): TaxDetail =
     TaxDetail(
-      utr               = None,
+      utr               = getTaxId("UTR")(eligibilityCheckResult),
       taxOfficeNo       = None,
       taxOfficeRef      = None,
       employerRef       = getTaxId("EMPREF")(eligibilityCheckResult),

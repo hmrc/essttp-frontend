@@ -17,7 +17,7 @@
 package testOnly
 
 import play.api.libs.json.{JsArray, JsNull, JsObject, Json}
-import testOnly.models.testusermodel.{EpayeEnrolment, TestUser, VatEnrolment}
+import testOnly.models.testusermodel.{EpayeEnrolment, IrSaEnrolment, TestUser, VatEnrolment}
 
 object LoginRequestMaker {
 
@@ -33,7 +33,8 @@ object LoginRequestMaker {
     val enrolments: JsArray = {
       val eList: Seq[JsObject] = List(
         testUser.epayeEnrolment.map(makeEpayeEnrolmentJson),
-        testUser.vatEnrolment.map(makeVatEnrolmentJson)
+        testUser.vatEnrolment.map(makeVatEnrolmentJson),
+        testUser.irSaEnrolment.map(makeIrSaEnrolmentJson),
       ).collect { case Some(e) => e }
       JsArray(eList)
     }
@@ -79,4 +80,16 @@ object LoginRequestMaker {
     ),
     "state" -> vatEnrolment.enrolmentStatus.toString
   )
+
+  private def makeIrSaEnrolmentJson(irSaEnrolment: IrSaEnrolment): JsObject = Json.obj(
+    "key" -> "IR-SA",
+    "identifiers" -> Json.arr(
+      Json.obj(
+        "key" -> "UTR",
+        "value" -> irSaEnrolment.saUtr.value
+      )
+    ),
+    "state" -> irSaEnrolment.enrolmentStatus.toString
+  )
+
 }

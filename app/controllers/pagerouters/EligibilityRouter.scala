@@ -59,31 +59,37 @@ object EligibilityRouter {
   private def whichGenericEligibilityPage(taxRegime: TaxRegime): Call = taxRegime match {
     case TaxRegime.Epaye => routes.IneligibleController.payeGenericIneligiblePage
     case TaxRegime.Vat   => routes.IneligibleController.vatGenericIneligiblePage
+    case TaxRegime.Sa    => throw new NotImplementedError()
   }
 
   private def whichDebtTooLargePage(taxRegime: TaxRegime): Call = taxRegime match {
     case TaxRegime.Epaye => routes.IneligibleController.epayeDebtTooLargePage
     case TaxRegime.Vat   => routes.IneligibleController.vatDebtTooLargePage
+    case TaxRegime.Sa    => throw new NotImplementedError()
   }
 
   private def whichDebtTooSmallPage(taxRegime: TaxRegime): Call = taxRegime match {
     case TaxRegime.Epaye => routes.IneligibleController.epayeDebtTooSmallPage
     case TaxRegime.Vat   => routes.IneligibleController.vatDebtTooSmallPage
+    case TaxRegime.Sa    => throw new NotImplementedError()
   }
 
   private def whichExistingPlanPage(taxRegime: TaxRegime): Call = taxRegime match {
     case TaxRegime.Epaye => routes.IneligibleController.epayeAlreadyHaveAPaymentPlanPage
     case TaxRegime.Vat   => routes.IneligibleController.vatAlreadyHaveAPaymentPlanPage
+    case TaxRegime.Sa    => throw new NotImplementedError()
   }
 
   private def whichDebtTooOldPage(taxRegime: TaxRegime): Call = taxRegime match {
     case TaxRegime.Epaye => routes.IneligibleController.epayeDebtTooOldPage
     case TaxRegime.Vat   => routes.IneligibleController.vatDebtTooOldPage
+    case TaxRegime.Sa    => throw new NotImplementedError()
   }
 
   private def whichFileYourReturnsPage(taxRegime: TaxRegime): Call = taxRegime match {
     case TaxRegime.Epaye => routes.IneligibleController.epayeFileYourReturnPage
     case TaxRegime.Vat   => routes.IneligibleController.vatFileYourReturnPage
+    case TaxRegime.Sa    => throw new NotImplementedError()
   }
 
   //requirement from business that if multiple reasons exist but any of them are isLessThanMinDebtAllowance, go to debt too small page

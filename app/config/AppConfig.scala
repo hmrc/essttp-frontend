@@ -34,6 +34,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val appName: String = config.get[String]("appName")
   val emailJourneyEnabled: Boolean = config.get[Boolean]("features.email-journey")
   val vatEnabled: Boolean = config.get[Boolean]("features.vat")
+  val saEnabled: Boolean = config.get[Boolean]("features.sa")
   val authTimeoutSeconds: Int = config.get[FiniteDuration]("timeout-dialog.timeout").toSeconds.toInt
   val authTimeoutCountdownSeconds: Int = config.get[FiniteDuration]("timeout-dialog.countdown").toSeconds.toInt
   val accessibilityStatementPath: String = config.get[String]("accessibility-statement.service-path")
@@ -75,7 +76,10 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     val businessTaxAccountUrl: String = s"${BaseUrl.businessTaxAccountFrontend}/business-account"
     val businessPaymentSupportService: String = config.get[String]("govUkUrls.businessPaymentSupportService")
     val welshLanguageHelplineForDebtManagement: String = config.get[String]("govUkUrls.welshLanguageHelplineForDebtManagement")
-
+    val saSuppUrl: String = {
+      val baseUrl = BaseUrl.platformHost.getOrElse("http://localhost:9063")
+      s"$baseUrl/pay-what-you-owe-in-instalments"
+    }
   }
 
   object TtpHeaders {
@@ -88,6 +92,8 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     val payeExitSurveyUrl: String = s"$baseUrl/eSSTTP-PAYE"
 
     val vatExitSurveyUrl: String = s"$baseUrl/eSSTTP-VAT"
+
+    val saExitSurveyUrl: String = s"$baseUrl/eSSTTP-SA"
   }
 
   object Crypto {
@@ -124,6 +130,13 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         LocalDate.parse(string, formatter)
       }
+    }
+
+    object SA {
+      private def getParam[A: ConfigLoader](path: String): A = config.get[A](s"policy-parameters.sa.$path")
+
+      val maxAmountOfDebt: AmountInPence = AmountInPence(getParam[Long]("max-amount-of-debt-in-pounds") * 100L)
+      val maxPlanDurationInMonths: Int = getParam[Int]("max-plan-duration-in-months")
     }
   }
 

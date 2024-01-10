@@ -64,6 +64,8 @@
     taxRegime match {
         case TaxRegime.Epaye => epayeContent
         case TaxRegime.Vat   => vatContent
+        case TaxRegime.Sa => throw new NotImplementedError()
+
     }
 }
 

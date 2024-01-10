@@ -18,8 +18,9 @@ package testOnly.models.testusermodel
 
 import cats.syntax.eq._
 import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
-import essttp.rootmodel.{Email, EmpRef, Vrn}
+import essttp.rootmodel.{Email, EmpRef, SaUtr, Vrn}
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
+import uk.gov.hmrc.domain.SaUtrGenerator
 
 import java.util.UUID
 import scala.annotation.tailrec
@@ -66,6 +67,9 @@ object RandomDataGenerator {
     val sixthDigit: Option[Int] = Some(4)
     generateVRN(firstDigit, secondDigit, thirdDigit, fourthDigit, None, sixthDigit, None)
   }
+
+  def nextSaUtr()(implicit r: Random): SaUtr =
+    SaUtr(new SaUtrGenerator(r).nextSaUtr.utr)
 
   def nextAuthorityId(): AuthorityId = AuthorityId(s"authId-${UUID.randomUUID().toString}")
 

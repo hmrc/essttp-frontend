@@ -103,6 +103,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
                     redirectLocation(result) shouldBe Some(taxRegime match {
                       case TaxRegime.Epaye => PageUrls.epayeConfirmationUrl
                       case TaxRegime.Vat   => PageUrls.vatConfirmationUrl
+                      case TaxRegime.Sa    => PageUrls.saConfirmationUrl
                     })
 
                     Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(
@@ -114,6 +115,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
                     val taxType = taxRegime match {
                       case TaxRegime.Epaye => "Epaye"
                       case TaxRegime.Vat   => "Vat"
+                      case TaxRegime.Sa    => "Sa"
                     }
 
                     AuditConnectorStub.verifyEventAudited(

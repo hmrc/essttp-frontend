@@ -42,10 +42,12 @@ object TdAll {
 
   val expectedServiceNamePayeEn: String = "Set up an Employers’ PAYE payment plan"
   val expectedServiceNameVatEn: String = "Set up a VAT payment plan"
+  val expectedServiceNameSaEn: String = "Set up a Self Assessment payment plan"
   val expectedServiceNameGenericEn: String = "Set up a payment plan"
 
   val expectedServiceNamePayeCy: String = "Trefnu cynllun talu ar gyfer TWE Cyflogwyr"
   val expectedServiceNameVatCy: String = "Trefnu cynllun talu TAW"
+  val expectedServiceNameSaCy: String = "Sefydlu cynllun talu ar gyfer Hunanasesiad"
   val expectedServiceNameGenericCy: String = "Trefnu cynllun talu"
 
   val journeyId: JourneyId = JourneyId("6284fcd33c00003d6b1f3903")
@@ -54,6 +56,7 @@ object TdAll {
   private val `IR-PAYE-TaxOfficeNumber`: EnrolmentDef = EnrolmentDef(enrolmentKey  = "IR-PAYE", identifierKey = "TaxOfficeNumber")
   private val `IR-PAYE-TaxOfficeReference`: EnrolmentDef = EnrolmentDef(enrolmentKey  = "IR-PAYE", identifierKey = "TaxOfficeReference")
   private val `HMRC-MTD-VAT-Vrn`: EnrolmentDef = EnrolmentDef(enrolmentKey  = "HMRC-MTD-VAT", identifierKey = "VRN")
+  private val `IR-SA`: EnrolmentDef = EnrolmentDef(enrolmentKey  = "IR-SA", identifierKey = "UTR")
 
   val payeEnrolment: Enrolment = Enrolment(
     key               = "IR-PAYE",
@@ -69,6 +72,15 @@ object TdAll {
     key               = "HMRC-MTD-VAT",
     identifiers       = List(
       EnrolmentIdentifier(`HMRC-MTD-VAT-Vrn`.identifierKey, "101747001")
+    ),
+    state             = "Activated",
+    delegatedAuthRule = None
+  )
+
+  val saEnrolment: Enrolment = Enrolment(
+    key               = "IR-SA",
+    identifiers       = List(
+      EnrolmentIdentifier(`IR-SA`.identifierKey, "1234567895"),
     ),
     state             = "Activated",
     delegatedAuthRule = None
@@ -140,6 +152,14 @@ object TdAll {
     returnFinancialAssessment = true
   )
 
+  val callEligibilityApiRequestSa: CallEligibilityApiRequest = CallEligibilityApiRequest(
+    channelIdentifier         = "eSSTTP",
+    idType                    = "UTR",
+    idValue                   = "1234567895",
+    regimeType                = "SA",
+    returnFinancialAssessment = true
+  )
+
   def identification(taxRegime: TaxRegime): List[Identification] = Json.parse(identificationJsonString(taxRegime)).as[List[Identification]]
 
   def identificationJsonString(taxRegime: TaxRegime): String = taxRegime match {
@@ -162,6 +182,14 @@ object TdAll {
         |      "idValue": "101747001"
         |    }
         |  ]""".stripMargin
+
+    case TaxRegime.Sa =>
+      """[
+        |    {
+        |      "idType": "UTR",
+        |      "idValue": "1234567895"
+        |    }
+        |  ]""".stripMargin
   }
 
   def taxDetailJsonString(taxRegime: TaxRegime): String = taxRegime match {
@@ -173,6 +201,9 @@ object TdAll {
 
     case TaxRegime.Vat =>
       """{ "vrn": "101747001" }"""
+
+    case TaxRegime.Sa =>
+      """{ "utr": "1234567895" }"""
   }
 
   def eligibilityCheckResult(
@@ -282,6 +313,7 @@ object TdAll {
     val expectedPaymentPlanMaxLength = taxRegime match {
       case TaxRegime.Epaye => PaymentPlanMaxLength(12)
       case TaxRegime.Vat   => PaymentPlanMaxLength(12)
+      case TaxRegime.Sa    => PaymentPlanMaxLength(12)
     }
     AffordableQuotesRequest(
       channelIdentifier           = ChannelIdentifiers.eSSTTP,
@@ -364,6 +396,7 @@ object TdAll {
     val regimeType = taxRegime match {
       case TaxRegime.Epaye => RegimeType("PAYE")
       case TaxRegime.Vat   => RegimeType("VATC")
+      case TaxRegime.Sa    => throw new NotImplementedError()
     }
     ArrangementRequest(
       channelIdentifier           = ChannelIdentifiers.eSSTTP,
@@ -444,6 +477,7 @@ object TdAll {
   def customerReference(taxRegime: TaxRegime) = taxRegime match {
     case TaxRegime.Epaye => CustomerReference("123PA44545546")
     case TaxRegime.Vat   => CustomerReference("101747001")
+    case TaxRegime.Sa    => CustomerReference("1234567895")
   }
 
   def arrangementResponse(taxRegime: TaxRegime): ArrangementResponse =
@@ -452,5 +486,6 @@ object TdAll {
   def taxDetailForAuditEvent(taxRegime: TaxRegime): String = taxRegime match {
     case TaxRegime.Epaye => """"employerRef": "864FZ00049", "accountsOfficeRef": "123PA44545546""""
     case TaxRegime.Vat   => """"vrn": "101747001""""
+    case TaxRegime.Sa    => """"utr": "1234567895""""
   }
 }

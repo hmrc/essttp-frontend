@@ -40,6 +40,7 @@
         taxRegime match {
           case TaxRegime.Epaye => Messages.NotEligible.`your Accounts Office reference...`.show
           case TaxRegime.Vat   => Messages.NotEligible.`your VAT number. This is 9 characters, for example, 1233456789`.show
+          case TaxRegime.Sa => throw new NotImplementedError()
         }
       }
       <li>@{Messages.NotEligible.`your bank details`.show}</li>

@@ -18,8 +18,7 @@ package testOnly.models.formsmodel
 
 import cats.syntax.either._
 import essttp.journey.model.{Origin, Origins}
-import essttp.rootmodel.TaxId
-import essttp.rootmodel.{AmountInPence, EmpRef, TaxRegime, Vrn}
+import essttp.rootmodel.{AmountInPence, EmpRef, SaUtr, TaxId, TaxRegime, Vrn}
 import models.MoneyUtil.{amountOfMoneyFormatter, formatAmountOfMoneyWithoutPoundSign}
 import models.{EligibilityError, EligibilityErrors, Language}
 import play.api.data.Forms.{boolean, mapping, number, optional, seq}
@@ -53,7 +52,8 @@ object StartJourneyForm {
 
   def form(
       payeMaxAmountOfDebt: AmountInPence,
-      vatMaxAmountOfDebt:  AmountInPence
+      vatMaxAmountOfDebt:  AmountInPence,
+      saMaxAmountOfDebt:   AmountInPence
   )(implicit language: Language): Form[StartJourneyForm] = {
     Form(
       mapping(
@@ -61,7 +61,7 @@ object StartJourneyForm {
         "enrolments" -> enrolmentsMapping,
         "origin" -> originMapping,
         "eligibilityErrors" -> seq(enumeratum.Forms.enumMapping(EligibilityErrors)),
-        "" -> Forms.of(debtTotalAmountFormat(payeMaxAmountOfDebt, vatMaxAmountOfDebt)),
+        "" -> Forms.of(debtTotalAmountFormat(payeMaxAmountOfDebt, vatMaxAmountOfDebt, saMaxAmountOfDebt)),
         "interestAmount" -> interestAmountMapping,
         "" -> Forms.of(taxReferenceFormat),
         taxRegimeKey -> Forms.of(taxRegimeFormatter),
@@ -77,10 +77,14 @@ object StartJourneyForm {
   }
 
   private val taxRegimeKey: String = "taxRegime"
+
   private val payeDebtTotalAmountKey: String = "payeDebtTotalAmount"
   private val vatDebtTotalAmountKey: String = "vatDebtTotalAmount"
+  private val saDebtTotalAmountKey: String = "saDebtTotalAmount"
+
   private val payeTaxReferenceKey: String = "payeTaxReference"
   private val vatTaxReferenceKey: String = "vatTaxReference"
+  private val saTaxReferenceKey: String = "saTaxReference"
 
   private def signInMapping(implicit language: Language): Mapping[SignInAs] = {
     Forms.of(EnumFormatter.format(
@@ -114,7 +118,8 @@ object StartJourneyForm {
 
   private def debtTotalAmountFormat(
       payeMaxAmountOfDebt: AmountInPence,
-      vatMaxAmountOfDebt:  AmountInPence
+      vatMaxAmountOfDebt:  AmountInPence,
+      saMaxAmountOfDebt:   AmountInPence
   ): Formatter[BigDecimal] = {
     new Formatter[BigDecimal] {
       override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], BigDecimal] =
@@ -122,6 +127,7 @@ object StartJourneyForm {
           val (maxAmount, amountKey) = taxRegime match {
             case TaxRegime.Epaye => payeMaxAmountOfDebt -> payeDebtTotalAmountKey
             case TaxRegime.Vat   => vatMaxAmountOfDebt -> vatDebtTotalAmountKey
+            case TaxRegime.Sa    => saMaxAmountOfDebt -> saDebtTotalAmountKey
           }
           val minAmount = AmountInPence(100)
 
@@ -153,23 +159,26 @@ object StartJourneyForm {
           val (taxReferenceKey, defaultTaxRef): (String, TaxId) = taxRegime match {
             case TaxRegime.Epaye => payeTaxReferenceKey -> RandomDataGenerator.nextEpayeRefs()(Random)._3
             case TaxRegime.Vat   => vatTaxReferenceKey -> RandomDataGenerator.nextVrn()(Random)
+            case TaxRegime.Sa    => saTaxReferenceKey -> RandomDataGenerator.nextSaUtr()(Random)
           }
-          val taxId: Option[TaxId] =
-            data.get(taxReferenceKey)
-              .filter(_.nonEmpty).map { someTaxRef: String =>
-                taxRegime match {
-                  case TaxRegime.Epaye => EmpRef(someTaxRef)
-                  case TaxRegime.Vat   => Vrn(someTaxRef)
-                }
-              }
 
-          taxId.getOrElse(defaultTaxRef)
+          data.get(taxReferenceKey)
+            .filter(_.nonEmpty)
+            .map[TaxId] { someTaxRef: String =>
+              taxRegime match {
+                case TaxRegime.Epaye => EmpRef(someTaxRef)
+                case TaxRegime.Vat   => Vrn(someTaxRef)
+                case TaxRegime.Sa    => SaUtr(someTaxRef)
+              }
+            }
+            .getOrElse(defaultTaxRef)
         }
 
       override def unbind(key: String, value: TaxId): Map[String, String] = {
         value match {
           case EmpRef(value) => Map(payeTaxReferenceKey -> value)
           case Vrn(value)    => Map(vatTaxReferenceKey -> value)
+          case SaUtr(value)  => Map(saTaxReferenceKey -> value)
         }
       }
     }

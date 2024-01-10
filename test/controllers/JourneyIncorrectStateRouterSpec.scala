@@ -35,6 +35,7 @@ class JourneyIncorrectStateRouterSpec extends ItSpec {
       ("Stage", "Journey wiremock response", "Expected Redirect Location"),
       ("Stages.Started - EPAYE", () => EssttpBackend.StartJourney.findJourney(), PageUrls.epayeLandingPageUrl),
       ("Stages.Started - VAT", () => EssttpBackend.StartJourney.findJourney(Origins.Vat.GovUk), PageUrls.vatLandingPageUrl),
+      ("Stages.Started - SA", () => EssttpBackend.StartJourney.findJourney(Origins.Sa.GovUk), PageUrls.saLandingPageUrl),
       ("Stages.ComputedTaxId", () => EssttpBackend.DetermineTaxId.findJourney(Origins.Epaye.Bta)(), PageUrls.determineEligibilityUrl),
       ("Stages.EligibilityChecked", () => EssttpBackend.EligibilityCheck.findJourney(testCrypto)(), PageUrls.yourBillIsUrl), //check this
       ("Stages.EligibilityChecked - PAYE", () => EssttpBackend.EligibilityCheck.findJourney(testCrypto)(

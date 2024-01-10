@@ -46,6 +46,8 @@ class IneligibleController @Inject() (
 
   val vatGenericIneligiblePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericIneligiblePage }
 
+  val saGenericIneligiblePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericIneligiblePage }
+
   val epayeDebtTooLargePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     Ok(views.partials.ineligibleTemplatePage(
       pageh1         = Messages.NotEligible.`Call us about a payment plan`,
@@ -125,5 +127,7 @@ class IneligibleController @Inject() (
     case SjRequest.Epaye.Empty()              => s"${appConfig.Urls.businessTaxAccountUrl}"
     case SjRequest.Vat.Simple(returnUrl, _)   => returnUrl.value
     case SjRequest.Vat.Empty()                => s"${appConfig.Urls.businessTaxAccountUrl}"
+    case SjRequest.Sa.Simple(returnUrl, _)    => returnUrl.value
+    case SjRequest.Sa.Empty()                 => throw new NotImplementedError()
   }
 }

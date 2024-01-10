@@ -163,6 +163,7 @@ object Routing {
       j.taxRegime match {
         case TaxRegime.Epaye => routes.LandingController.epayeLandingPage
         case TaxRegime.Vat   => routes.LandingController.vatLandingPage
+        case TaxRegime.Sa    => routes.LandingController.saLandingPage
       }
 
     case _: Journey.Stages.ComputedTaxId =>

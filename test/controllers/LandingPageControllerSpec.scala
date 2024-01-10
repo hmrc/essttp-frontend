@@ -202,6 +202,71 @@ class LandingPageControllerSpec extends ItSpec {
     }
   }
 
+  "GET /sa-payment-plan" - {
+    "return 200 and the SA landing page" in {
+      EssttpBackend.StartJourney.findJourney(origin = Origins.Sa.Bta)
+      val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.saLandingPage(fakeRequest)
+
+      RequestAssertions.assertGetRequestOk(result)
+      val doc: Document = Jsoup.parse(contentAsString(result))
+
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1                  = "Set up a Self Assessment payment plan",
+        shouldBackLinkBePresent     = true,
+        expectedSubmitUrl           = None,
+        signedIn                    = false,
+        shouldH1BeSameAsServiceName = true,
+        regimeBeingTested           = Some(TaxRegime.Sa),
+        shouldServiceNameBeInHeader = false,
+        backLinkUrlOverride         = Some("/set-up-a-payment-plan/test-only/bta-page?starting-page")
+      )
+
+      val button = doc.select(".govuk-button")
+      button.attr("href") shouldBe routes.LandingController.saLandingPageContinue.url
+      button.text() shouldBe Messages.`Start now`.english
+    }
+  }
+
+  "GET /sa-payment-plan-continue" - {
+    "should redirect to the login page and continue to the same continue endpoint once login is successful " +
+      "if the user is not logged in" in {
+        val result = controller.saLandingPageContinue(FakeRequest("GET", routes.LandingController.saLandingPageContinue.url))
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some("http://localhost:9949/auth-login-stub/gg-sign-in?" +
+          "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fsa-payment-plan-continue&origin=essttp-frontend")
+      }
+
+    "should redirect to start a detached journey with an updated session if no existing journey is found" in {
+      val existingSessionData = Map(SessionKeys.sessionId -> "IamATestSessionId")
+
+      stubCommonActions()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(existingSessionData.toList: _*)
+      val result = controller.saLandingPageContinue(fakeRequest)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.StartJourneyController.startDetachedSaJourney.url)
+      session(result).data.get(LandingController.hasSeenLandingPageSessionKey) shouldBe Some("true")
+    }
+
+    "should redirect to determine tax id if an existing journey is found" in {
+      val existingSessionData = Map(SessionKeys.sessionId -> "IamATestSessionId")
+
+      stubCommonActions()
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin = Origins.Sa.Bta)()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(existingSessionData.toList: _*)
+      val result = controller.saLandingPageContinue(fakeRequest)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.DetermineTaxIdController.determineTaxId.url)
+      session(result).data.get(LandingController.hasSeenLandingPageSessionKey) shouldBe None
+    }
+  }
+
 }
 
 class LandingPageVatNotEnabledControllerSpec extends ItSpec {
@@ -221,10 +286,28 @@ class LandingPageVatNotEnabledControllerSpec extends ItSpec {
 
 }
 
+class LandingPageSaNotEnabledControllerSpec extends ItSpec {
+
+  override lazy val configOverrides: Map[String, Any] = Map("features.sa" -> false)
+
+  private val controller = app.injector.instanceOf[LandingController]
+
+  "GET /sa-payment-plan should redirect to the SA SUPP service when SA is not enabled" in {
+    val fakeRequest = FakeRequest()
+      .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+    val result: Future[Result] = controller.saLandingPage(fakeRequest)
+    status(result) shouldBe SEE_OTHER
+    redirectLocation(result) shouldBe Some("http://localhost:9063/pay-what-you-owe-in-instalments")
+
+  }
+
+}
+
 class LandingPageShutteringControllerSpec extends ItSpec with ShutteringSpec {
 
   override lazy val configOverrides: Map[String, Any] = Map(
-    "shuttering.shuttered-tax-regimes" -> List("epaye", "vat")
+    "shuttering.shuttered-tax-regimes" -> List("epaye", "vat", "sa")
   )
 
   private val controller = app.injector.instanceOf[LandingController]
@@ -255,6 +338,16 @@ class LandingPageShutteringControllerSpec extends ItSpec with ShutteringSpec {
       AuthStub.authorise()
 
       test(controller.vatLandingPageContinue(fakeRequest))
+    }
+
+    "GET /sa-payment-plan" in {
+      test(controller.saLandingPage(fakeRequest))
+    }
+
+    "GET /sa-payment-plan-continue" in {
+      AuthStub.authorise()
+
+      test(controller.saLandingPageContinue(fakeRequest))
     }
   }
 

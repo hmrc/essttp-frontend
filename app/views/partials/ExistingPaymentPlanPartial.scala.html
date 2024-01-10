@@ -31,6 +31,7 @@
   val message = taxRegime match {
    case TaxRegime.Epaye => Messages.NotEligible.`You cannot set up an Employers' PAYE payment plan online`
    case TaxRegime.Vat => Messages.NotEligible.`You cannot set up a VAT payment plan online.`
+   case TaxRegime.Sa => throw new NotImplementedError()
   }
  Html(message.show)
 }

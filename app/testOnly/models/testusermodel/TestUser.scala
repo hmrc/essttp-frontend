@@ -17,7 +17,7 @@
 package testOnly.models.testusermodel
 
 import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
-import essttp.rootmodel.Vrn
+import essttp.rootmodel.{SaUtr, Vrn}
 import testOnly.models.formsmodel.{Enrolments, SignInAs, StartJourneyForm}
 import uk.gov.hmrc.auth.core.{AffinityGroup, ConfidenceLevel}
 
@@ -30,6 +30,7 @@ final case class TestUser(
     nino:            Option[Nino],
     epayeEnrolment:  Option[EpayeEnrolment],
     vatEnrolment:    Option[VatEnrolment],
+    irSaEnrolment:   Option[IrSaEnrolment],
     authorityId:     AuthorityId,
     affinityGroup:   AffinityGroup,
     confidenceLevel: ConfidenceLevel
@@ -61,11 +62,17 @@ object TestUser {
       else None
     }
 
+    val maybeIrSaEnrolment: StartJourneyForm => Option[IrSaEnrolment] = { form =>
+      if (form.enrolments.contains(Enrolments.IrSa)) Some(IrSaEnrolment(SaUtr(form.taxReference.value), EnrolmentStatus.Activated))
+      else None
+    }
+
     maybeAffinityGroup.map { affinityGroup: AffinityGroup =>
       TestUser(
         nino            = None, //TODO: read this from the form, populate if individual
         epayeEnrolment  = maybeEpayeEnrolment(form),
         vatEnrolment    = maybeVatEnrolment(form),
+        irSaEnrolment   = maybeIrSaEnrolment(form),
         authorityId     = RandomDataGenerator.nextAuthorityId(),
         affinityGroup   = affinityGroup,
         confidenceLevel = ConfidenceLevel.L50 //TODO: read this from the form

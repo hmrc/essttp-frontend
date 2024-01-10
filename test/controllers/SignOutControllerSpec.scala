@@ -84,12 +84,27 @@ class SignOutControllerSpec extends ItSpec {
     }
   }
 
+  "exitSurveySa should" - {
+    "redirect to feedback frontend with eSSTTP-SA as the service identifier" in {
+      stubCommonActions()
+      EssttpBackend.SubmitArrangement.findJourney(Origins.Sa.Bta, testCrypto)()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+      val result: Future[Result] = controller.exitSurveySa(fakeRequest)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some("http://localhost:9514/feedback/eSSTTP-SA")
+      session(result) shouldBe Session(Map.empty)
+    }
+  }
+
   "signOut should" - {
     TaxRegime.values.foreach { taxRegime =>
       s"[taxRegime = ${taxRegime.toString}] redirect to the tax regime specific exist survey route with no sessionId" in {
         val (origin, expectedRedirectLocation) = taxRegime match {
           case TaxRegime.Epaye => Origins.Epaye.Bta -> "/set-up-a-payment-plan/exit-survey/paye"
           case TaxRegime.Vat   => Origins.Vat.Bta -> "/set-up-a-payment-plan/exit-survey/vat"
+          case TaxRegime.Sa    => Origins.Sa.Bta -> "/set-up-a-payment-plan/exit-survey/sa"
         }
 
         stubCommonActions()
