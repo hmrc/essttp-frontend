@@ -50,7 +50,8 @@ class EmailControllerSpec extends ItSpec {
 
   List(
     TaxRegime.Epaye -> Origins.Epaye.Bta,
-    TaxRegime.Vat -> Origins.Vat.Bta
+    TaxRegime.Vat -> Origins.Vat.Bta,
+    TaxRegime.Sa -> Origins.Sa.Bta
   ).foreach {
       case (taxRegime, origin) =>
 
@@ -86,6 +87,7 @@ class EmailControllerSpec extends ItSpec {
                   taxRegime match {
                     case TaxRegime.Epaye => routes.PaymentPlanSetUpController.epayePaymentPlanSetUp
                     case TaxRegime.Vat   => routes.PaymentPlanSetUpController.vatPaymentPlanSetUp
+                    case TaxRegime.Sa    => routes.PaymentPlanSetUpController.saPaymentPlanSetUp
                   }
                 )
               }
@@ -408,10 +410,12 @@ class EmailControllerSpec extends ItSpec {
           val expectedPageTitle = taxRegime match {
             case TaxRegime.Epaye => "Set up an Employers’ PAYE payment plan"
             case TaxRegime.Vat   => "Set up a VAT payment plan"
+            case TaxRegime.Sa    => "Set up a Self Assessment payment plan"
           }
           val expectedPageTitleWelsh = taxRegime match {
             case TaxRegime.Epaye => "Trefnu cynllun talu ar gyfer TWE Cyflogwyr"
             case TaxRegime.Vat   => "Trefnu cynllun talu TAW"
+            case TaxRegime.Sa    => "Sefydlu cynllun talu ar gyfer Hunanasesiad"
           }
 
           "not allow journeys where an email has not been selected" in {

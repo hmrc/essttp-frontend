@@ -40,6 +40,11 @@
         case TaxRegime.Vat =>
             s"${invoicePeriodDateLongMonth(payment.invoicePeriod.start)} " +
                     s"${Messages.YourBill.to.show} ${invoicePeriodDateLongMonth(payment.invoicePeriod.end)} ${payment.invoicePeriod.end.getYear.toString}"
+        case TaxRegime.Sa =>
+            s"${invoicePeriodDateShortMonth(payment.invoicePeriod.start)} " +
+                    s"${Messages.YourBill.to.show} ${invoicePeriodDateShortMonth(payment.invoicePeriod.end)} " +
+                    s"(${Messages.YourBill.month.show} ${payment.invoicePeriod.monthNumber.toString})"
+
     }
 }
 

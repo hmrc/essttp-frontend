@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,30 +14,8 @@
  * limitations under the License.
  */
 
-package services
+package testOnly.models.testusermodel
 
-sealed trait EligibilityRequestDefaults {
-  def idType: String
-  def regimeType: String
-}
+import essttp.rootmodel.SaUtr
 
-object EligibilityRequestDefaults {
-
-  val essttpChannelIdentifier: String = "eSSTTP"
-
-  object Epaye extends EligibilityRequestDefaults {
-    val idType: String = "EMPREF"
-    val regimeType: String = "PAYE"
-  }
-
-  object Vat extends EligibilityRequestDefaults {
-    val idType: String = "VRN"
-    val regimeType: String = "VATC"
-  }
-
-  object Sa {
-    val idType: String = "UTR"
-    val regimeType: String = "SA"
-  }
-
-}
+final case class IrSaEnrolment(saUtr: SaUtr, enrolmentStatus: EnrolmentStatus)

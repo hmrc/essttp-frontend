@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,32 +12,32 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package services
+@import play.api.mvc.Request
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import essttp.rootmodel.TaxRegime
 
-sealed trait EligibilityRequestDefaults {
-  def idType: String
-  def regimeType: String
+@this(
+        testOnlyLayout: TestOnlyLayout,
+        govukButton: GovukButton
+)
+@(journeyStartUrl: String)(implicit
+        request: Request[_]
+)
+
+@title = @{
+    "I am PTA Page"
 }
 
-object EligibilityRequestDefaults {
+@testOnlyLayout(pageTitle = Some(title)) {
 
-  val essttpChannelIdentifier: String = "eSSTTP"
+    <h1 class="govuk-heading-xl">@title</h1>
+    <p class="govuk-body">Set up a payment plan if you cannot pay in full</p>
 
-  object Epaye extends EligibilityRequestDefaults {
-    val idType: String = "EMPREF"
-    val regimeType: String = "PAYE"
-  }
-
-  object Vat extends EligibilityRequestDefaults {
-    val idType: String = "VRN"
-    val regimeType: String = "VATC"
-  }
-
-  object Sa {
-    val idType: String = "UTR"
-    val regimeType: String = "SA"
-  }
+    @govukButton(Button(
+        href = Some(journeyStartUrl),
+        content = Text("Start now")
+      ))
 
 }

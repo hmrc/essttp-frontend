@@ -54,6 +54,7 @@ object Ttp {
       val request = taxRegime match {
         case TaxRegime.Epaye => TdAll.callEligibilityApiRequestEpaye
         case TaxRegime.Vat   => TdAll.callEligibilityApiRequestVat
+        case TaxRegime.Sa    => TdAll.callEligibilityApiRequestSa
       }
       ttpVerify(eligibilityUrl, request)(CallEligibilityApiRequest.format)
     }

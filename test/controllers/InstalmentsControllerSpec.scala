@@ -41,7 +41,8 @@ class InstalmentsControllerSpec extends ItSpec {
 
   Seq[(String, Origin, TaxRegime)](
     ("EPAYE", Origins.Epaye.Bta, TaxRegime.Epaye),
-    ("VAT", Origins.Vat.Bta, TaxRegime.Vat)
+    ("VAT", Origins.Vat.Bta, TaxRegime.Vat),
+    ("SA", Origins.Sa.Bta, TaxRegime.Sa)
   ).foreach {
       case (regime, origin, taxRegime) =>
 

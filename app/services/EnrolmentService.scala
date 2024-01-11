@@ -20,7 +20,7 @@ import actions.{EnrolmentDef, EnrolmentDefResult}
 import actions.EnrolmentDefResult.{EnrolmentNotFound, IdentifierNotFound, Inactive, Success}
 import actionsmodel.AuthenticatedJourneyRequest
 import essttp.journey.model.Journey
-import essttp.rootmodel.{EmpRef, TaxId, TaxRegime, Vrn}
+import essttp.rootmodel.{EmpRef, SaUtr, TaxId, TaxRegime, Vrn}
 import models.audit.eligibility.EnrollmentReasons
 import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.http.HeaderCarrier
@@ -52,6 +52,12 @@ class EnrolmentService @Inject() (journeyService: JourneyService, auditService: 
           EnrolmentDef.Vat.findEnrolmentValues(enrolments),
           journey
         )(journeyService.UpdateTaxRef.updateVatTaxId(journey.id, _))
+
+      case TaxRegime.Sa =>
+        handleTaxRegime[SaUtr](
+          EnrolmentDef.Sa.findEnrolmentValues(enrolments),
+          journey
+        )(journeyService.UpdateTaxRef.updateSaTaxId(journey.id, _))
     }
   }
 

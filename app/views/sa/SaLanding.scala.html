@@ -14,39 +14,37 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 @import controllers.routes
+@import views.html.templates.Layout
+@import messages.Messages
+@import requests.RequestSupport
 @import play.api.mvc.Request
 @import essttp.rootmodel.TaxRegime
-@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import essttp.rootmodel.BackUrl
 
 @this(
-testOnlyLayout: TestOnlyLayout,
-govukButton: GovukButton
-)
-@(taxRegime: TaxRegime)(implicit
-        request: Request[_]
+        layout: Layout,
+        govukButton: GovukButton,
+        requestSupport: RequestSupport
 )
 
-@title = @{
-    s"I am ${taxRegime.entryName} GOV.Uk Page"
-}
+@(backUrl: Option[BackUrl])(implicit request: Request[_])
 
-@redirectTo = @{
-    taxRegime match {
-        case TaxRegime.Epaye => routes.StartJourneyController.startGovukEpayeJourney
-        case TaxRegime.Vat => routes.StartJourneyController.startGovukVatJourney
-        case TaxRegime.Sa => routes.StartJourneyController.startGovukSaJourney
-    }
-}
+@import requestSupport._
 
-@testOnlyLayout(pageTitle = Some(title)) {
+@title= @{"Set up a Self Assessment payment plan"}
 
+@layout(
+    pageTitle = Some(title),
+    backLinkUrlOverride = backUrl.map(_.value),
+    fallBackTaxRegime = Some(TaxRegime.Sa),
+    showServiceNameInHeader = false
+) {
     <h1 class="govuk-heading-xl">@title</h1>
-    <p class="govuk-body">Set up a @{taxRegime.entryName} payment plan if you cannot pay in full</p>
 
     @govukButton(Button(
-        href = Some(redirectTo.url),
-        content = Text("Start now")
+        href = Some(routes.LandingController.saLandingPageContinue.url),
+        content = Text(Messages.`Start now`.show)
     ))
-
 }

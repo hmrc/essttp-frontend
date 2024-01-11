@@ -17,7 +17,7 @@
 package actions
 
 import actions.EnrolmentDefResult.{EnrolmentNotFound, IdentifierNotFound, Inactive, Success}
-import essttp.rootmodel.Vrn
+import essttp.rootmodel.{SaUtr, Vrn}
 import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
 import uk.gov.hmrc.auth.core.Enrolments
 
@@ -105,6 +105,14 @@ object EnrolmentDef {
 
   }
 
+  object Sa {
+
+    val `IR-SA`: EnrolmentDef = EnrolmentDef("IR-SA", "UTR")
+
+    def findEnrolmentValues(enrolments: Enrolments): EnrolmentDefResult[SaUtr] =
+      findMatchingEnrolmentsValues(enrolments, `IR-SA`).map(SaUtr(_))
+  }
+
   private def findMatchingEnrolmentsValues(enrolments: Enrolments, enrolmentDef: EnrolmentDef): EnrolmentDefResult[String] = {
     enrolments.enrolments.find(_.key.equalsIgnoreCase(enrolmentDef.enrolmentKey)) match {
       case Some(enrolment) =>
@@ -114,9 +122,10 @@ object EnrolmentDef {
           )(id =>
               if (enrolment.isActivated) EnrolmentDefResult.Success(id.value)
               else EnrolmentDefResult.Inactive())
-
       case None => EnrolmentDefResult.EnrolmentNotFound()
+
     }
   }
 
 }
+

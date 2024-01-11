@@ -35,7 +35,8 @@ class DetermineAffordabilityControllerSpec extends ItSpec {
   private val controller: DetermineAffordabilityController = app.injector.instanceOf[DetermineAffordabilityController]
   Seq[(String, Origin)](
     ("EPAYE", Origins.Epaye.Bta),
-    ("VAT", Origins.Vat.Bta)
+    ("VAT", Origins.Vat.Bta),
+    ("SA", Origins.Sa.Bta)
   ).foreach {
       case (regime, origin) =>
         "GET /determine-affordability" - {

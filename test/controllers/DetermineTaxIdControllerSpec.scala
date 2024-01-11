@@ -18,7 +18,7 @@ package controllers
 
 import actions.EnrolmentDef
 import essttp.journey.model.Origins
-import essttp.rootmodel.{EmpRef, Vrn}
+import essttp.rootmodel.{EmpRef, SaUtr, Vrn}
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeRequest
@@ -245,6 +245,84 @@ class DetermineTaxIdControllerSpec extends ItSpec {
                |  "eligibilityReasons" : [  ],
                |  "origin": "GovUk",
                |  "taxType": "Vat",
+               |  "taxDetail": { },
+               |  "authProviderId": "authId-999",
+               |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+               |  "chargeTypeAssessment" : []
+               |}
+               |""".
+              stripMargin
+          ).as[JsObject]
+        )
+      }
+    }
+
+    "for SA when" - {
+      "the tax id has already been determined" in {
+        stubCommonActions(authAllEnrolments = Some(Set(TdAll.saEnrolment)))
+        EssttpBackend.DetermineTaxId.findJourney(Origins.Sa.Bta)(JourneyJsonTemplates.`Computed Tax Id`(Origins.Sa.Bta, "1234567895"))
+
+        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+        val result = controller.determineTaxId()(fakeRequest)
+
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.DetermineEligibilityController.determineEligibility.url)
+      }
+
+      "the relevant enrolment is found with the necessary identifier and the enrolment is active" in {
+        val enrolments =
+          Set(
+            enrolment(EnrolmentDef.Sa.`IR-SA`.enrolmentKey, activated = true)(
+              EnrolmentDef.Sa.`IR-SA`.identifierKey -> "Ref"
+            )
+          )
+
+        stubCommonActions(authAllEnrolments = Some(enrolments))
+        EssttpBackend.StartJourney.findJourney(Origins.Sa.Bta)
+        EssttpBackend.DetermineTaxId.stubUpdateTaxId(
+          TdAll.journeyId,
+          JourneyJsonTemplates.`Computed Tax Id`(origin       = Origins.Sa.Bta, taxReference = "Ref")
+        )
+
+        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+        val result = controller.determineTaxId()(fakeRequest)
+
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.DetermineEligibilityController.determineEligibility.url)
+
+        EssttpBackend.DetermineTaxId.verifyTaxIdRequest(TdAll.journeyId, SaUtr("Ref"))
+      }
+
+      "the relevant enrolment is found but the correct identifiers could not be found" in {
+        val enrolments = Set(enrolment(EnrolmentDef.Sa.`IR-SA`.enrolmentKey, activated = false)())
+        stubCommonActions(authAllEnrolments = Some(enrolments))
+        EssttpBackend.StartJourney.findJourney(Origins.Sa.GovUk)
+
+        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+        a[RuntimeException] shouldBe thrownBy(await(controller.determineTaxId()(fakeRequest)))
+      }
+
+      "the relevant enrolment is not found" in {
+        stubCommonActions(authAllEnrolments = Some(Set.empty))
+        EssttpBackend.StartJourney.findJourney(Origins.Sa.GovUk)
+
+        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+        val result = controller.determineTaxId()(fakeRequest)
+
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.NotEnrolledController.notSaEnrolled.url)
+        AuditConnectorStub.verifyEventAudited(
+          "EligibilityCheck",
+          Json.parse(
+            s"""
+               |{
+               |  "eligibilityResult" : "ineligible",
+               |  "enrollmentReasons": "not enrolled",
+               |  "noEligibilityReasons": 0,
+               |  "eligibilityReasons" : [  ],
+               |  "origin": "GovUk",
+               |  "taxType": "Sa",
                |  "taxDetail": { },
                |  "authProviderId": "authId-999",
                |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",

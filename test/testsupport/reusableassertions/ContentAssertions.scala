@@ -94,12 +94,14 @@ object ContentAssertions extends RichMatchers {
           regimeBeingTested match {
             case Some(TaxRegime.Epaye) => TdAll.expectedServiceNamePayeEn
             case Some(TaxRegime.Vat)   => TdAll.expectedServiceNameVatEn
+            case Some(TaxRegime.Sa)    => TdAll.expectedServiceNameSaEn
             case None                  => TdAll.expectedServiceNameGenericEn
           }
         case Languages.Welsh =>
           regimeBeingTested match {
             case Some(TaxRegime.Epaye) => TdAll.expectedServiceNamePayeCy
             case Some(TaxRegime.Vat)   => TdAll.expectedServiceNameVatCy
+            case Some(TaxRegime.Sa)    => TdAll.expectedServiceNameSaCy
             case None                  => TdAll.expectedServiceNameGenericCy
           }
       }
@@ -119,6 +121,7 @@ object ContentAssertions extends RichMatchers {
     serviceName.attr("href") shouldBe (if (shouldServiceNameBeInHeader) regimeBeingTested match {
       case Some(TaxRegime.Epaye) => routes.LandingController.epayeLandingPage.url
       case Some(TaxRegime.Vat)   => routes.LandingController.vatLandingPage.url
+      case Some(TaxRegime.Sa)    => routes.LandingController.saLandingPage.url
       case None                  => ""
     }
     else "")
@@ -255,6 +258,8 @@ object ContentAssertions extends RichMatchers {
           case Languages.English => "your VAT number. This is 9 characters, for example, 123456789"
           case Languages.Welsh   => "eich rhif TAW. Mae hyn yn cynnwys 9 o gymeriadau, er enghraifft, 123456789"
         }
+        case TaxRegime.Sa => throw new NotImplementedError()
+
       }
     )
     beforeYouCallList(1).text() shouldBe {

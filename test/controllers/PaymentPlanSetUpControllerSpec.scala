@@ -62,6 +62,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
             val result: Future[Result] = taxRegime match {
               case TaxRegime.Epaye => controller.epayePaymentPlanSetUp(fakeRequest)
               case TaxRegime.Vat   => controller.vatPaymentPlanSetUp(fakeRequest)
+              case TaxRegime.Sa    => controller.saPaymentPlanSetUp(fakeRequest)
             }
             val pageContent: String = contentAsString(result)
             val doc: Document = Jsoup.parse(pageContent)
@@ -81,6 +82,8 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
                 "Your payment reference is 123PA44545546"
               case TaxRegime.Vat =>
                 "Your payment reference is 101747001"
+              case TaxRegime.Sa =>
+                "Your payment reference is 1234567895"
             })
 
             val subheadings = doc.select(".govuk-heading-m").asScala.toList
@@ -115,6 +118,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
             surveyLink.attr("href") shouldBe (taxRegime match {
               case TaxRegime.Epaye => PageUrls.exitSurveyEpayeUrl
               case TaxRegime.Vat   => PageUrls.exitSurveyVatUrl
+              case TaxRegime.Sa    => throw new NotImplementedError()
             })
             ()
           }
@@ -247,6 +251,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
             val expectedPaymentReference = taxRegime match {
               case TaxRegime.Epaye => "123PA44545546"
               case TaxRegime.Vat   => "101747001"
+              case TaxRegime.Sa    => "1234567895"
             }
             assertKeyAndValue(paymentReferenceSummaryListRows(0), ("Payment reference", expectedPaymentReference))
           }
@@ -294,6 +299,7 @@ class PaymentPlanSetUpControllerEmailDisabledSpec extends ItSpec {
               val result: Future[Result] = taxRegime match {
                 case TaxRegime.Epaye => controller.epayePaymentPlanSetUp(fakeRequest)
                 case TaxRegime.Vat   => controller.vatPaymentPlanSetUp(fakeRequest)
+                case TaxRegime.Sa    => controller.saPaymentPlanSetUp(fakeRequest)
               }
               val pageContent: String = contentAsString(result)
               val doc: Document = Jsoup.parse(pageContent)

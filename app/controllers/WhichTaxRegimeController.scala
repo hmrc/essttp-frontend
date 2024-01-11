@@ -63,6 +63,7 @@ class WhichTaxRegimeController @Inject() (
           {
             case TaxRegime.Epaye => Redirect(routes.StartJourneyController.startDetachedEpayeJourney)
             case TaxRegime.Vat   => Redirect(routes.StartJourneyController.startDetachedVatJourney)
+            case TaxRegime.Sa    => Redirect(routes.StartJourneyController.startDetachedSaJourney)
           }
         )
     }

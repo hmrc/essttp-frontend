@@ -78,5 +78,6 @@ object SubmitArrangementController {
   def whichPaymentPlanSetupPage(taxRegime: TaxRegime): Call = taxRegime match {
     case TaxRegime.Epaye => routes.PaymentPlanSetUpController.epayePaymentPlanSetUp
     case TaxRegime.Vat   => routes.PaymentPlanSetUpController.vatPaymentPlanSetUp
+    case TaxRegime.Sa    => routes.PaymentPlanSetUpController.saPaymentPlanSetUp
   }
 }

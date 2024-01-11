@@ -134,7 +134,8 @@
 @serviceUrl = @{
     taxRegime.map {
         case TaxRegime.Epaye => routes.LandingController.epayeLandingPage.url
-        case TaxRegime.Vat => routes.LandingController.vatLandingPage.url
+        case TaxRegime.Vat   => routes.LandingController.vatLandingPage.url
+        case TaxRegime.Sa    => routes.LandingController.saLandingPage.url
     }
 }
 

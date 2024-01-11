@@ -13,11 +13,16 @@ GET    /epaye-payment-plan-continue                         controllers.LandingC
 GET    /vat-payment-plan                                    controllers.LandingController.vatLandingPage
 GET    /vat-payment-plan-continue                           controllers.LandingController.vatLandingPageContinue
 
+GET    /sa-payment-plan                                    controllers.LandingController.saLandingPage
+GET    /sa-payment-plan-continue                           controllers.LandingController.saLandingPageContinue
+
 GET    /epaye/start                                         controllers.StartJourneyController.startDetachedEpayeJourney
 GET    /vat/start                                           controllers.StartJourneyController.startDetachedVatJourney
+GET    /sa/start                                           controllers.StartJourneyController.startDetachedSaJourney
 
 GET    /govuk/epaye/start                                   controllers.StartJourneyController.startGovukEpayeJourney
 GET    /govuk/vat/start                                     controllers.StartJourneyController.startGovukVatJourney
+GET    /govuk/sa/start                                     controllers.StartJourneyController.startGovukSaJourney
 
 GET    /determine-taxId                                     controllers.DetermineTaxIdController.determineTaxId
 
@@ -25,9 +30,11 @@ GET    /determine-eligibility                               controllers.Determin
 
 GET    /not-enrolled                                        controllers.NotEnrolledController.notEnrolled
 GET    /not-vat-registered                                  controllers.NotEnrolledController.notVatRegistered
+GET    /not-sa-enrolled                                     controllers.NotEnrolledController.notSaEnrolled
 
 GET    /not-eligible-epaye                                  controllers.IneligibleController.payeGenericIneligiblePage
 GET    /not-eligible-vat                                    controllers.IneligibleController.vatGenericIneligiblePage
+GET    /not-eligible-sa                                     controllers.IneligibleController.saGenericIneligiblePage
 GET    /debt-too-large-epaye                                controllers.IneligibleController.epayeDebtTooLargePage
 GET    /debt-too-large-vat                                  controllers.IneligibleController.vatDebtTooLargePage
 GET    /debt-too-small-epaye                                controllers.IneligibleController.epayeDebtTooSmallPage
@@ -105,6 +112,7 @@ GET    /submit-arrangement                                  controllers.SubmitAr
 
 GET    /epaye-payment-plan-set-up                           controllers.PaymentPlanSetUpController.epayePaymentPlanSetUp
 GET    /vat-payment-plan-set-up                             controllers.PaymentPlanSetUpController.vatPaymentPlanSetUp
+GET    /sa-payment-plan-set-up                              controllers.PaymentPlanSetUpController.saPaymentPlanSetUp
 GET    /payment-plan-print-summary                          controllers.PaymentPlanSetUpController.printSummary
 
 GET    /assets/*file                                        controllers.Assets.versioned(path="/public", file: Asset)
@@ -113,6 +121,7 @@ GET    /timed-out                                           controllers.SignOutC
 
 GET    /exit-survey/paye                                    controllers.SignOutController.exitSurveyPaye
 GET    /exit-survey/vat                                     controllers.SignOutController.exitSurveyVat
+GET    /exit-survey/sa                                      controllers.SignOutController.exitSurveySa
 
 GET    /information-missing                                 controllers.MissingInfoController.missingInfo
 GET    /determine-next                                      controllers.MissingInfoController.determineNextPage

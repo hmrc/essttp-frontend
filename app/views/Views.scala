@@ -19,6 +19,7 @@ package views
 import play.api.data.FormError
 import views.html._
 import views.html.epaye.EPayeLanding
+import views.html.sa.SaLanding
 import views.html.epaye.ineligible.{Ineligible, NotEnrolled}
 import views.html.vat.{NotVatRegistered, VatLanding}
 import views.html.emailerrors._
@@ -30,6 +31,7 @@ class Views @Inject() (
     val whichTaxRegime:                   WhichTaxRegime,
     val epayeLanding:                     EPayeLanding,
     val vatLanding:                       VatLanding,
+    val saLanding:                        SaLanding,
     val yourBillIs:                       YourBillIs,
     val notEnrolled:                      NotEnrolled,
     val notVatRegistered:                 NotVatRegistered,

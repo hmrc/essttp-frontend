@@ -88,6 +88,8 @@ object EssttpBackend {
     private val startJourneyDetachedEpayeUrl = "/essttp-backend/epaye/detached-url/journey/start"
     private val startJourneyGovUkVatUrl = "/essttp-backend/vat/gov-uk/journey/start"
     private val startJourneyDetachedVatUrl = "/essttp-backend/vat/detached-url/journey/start"
+    private val startJourneyGovUkSaUrl = "/essttp-backend/sa/gov-uk/journey/start"
+    private val startJourneyDetachedSaUrl = "/essttp-backend/sa/detached-url/journey/start"
 
     def startJourneyInBackend(origin: Origin): StubMapping = {
       val (url, expectedRequestBody, responseBody): (String, String, String) = origin match {
@@ -99,6 +101,10 @@ object EssttpBackend {
           (startJourneyGovUkVatUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.govUk(TaxRegime.Vat))
         case Origins.Vat.DetachedUrl =>
           (startJourneyDetachedVatUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.detachedUrl(TaxRegime.Vat))
+        case Origins.Sa.GovUk =>
+          (startJourneyGovUkSaUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.govUk(TaxRegime.Sa))
+        case Origins.Sa.DetachedUrl =>
+          (startJourneyDetachedSaUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.detachedUrl(TaxRegime.Sa))
         case other => throw new Exception(s"Origin ${other.toString} not handled")
       }
       stubFor(
@@ -114,12 +120,16 @@ object EssttpBackend {
     def startJourneyEpayeDetached: StubMapping = startJourneyInBackend(Origins.Epaye.DetachedUrl)
     def startJourneyVatGovUk: StubMapping = startJourneyInBackend(Origins.Vat.GovUk)
     def startJourneyVatDetached: StubMapping = startJourneyInBackend(Origins.Vat.DetachedUrl)
+    def startJourneySaGovUk: StubMapping = startJourneyInBackend(Origins.Sa.GovUk)
+    def startJourneySaDetached: StubMapping = startJourneyInBackend(Origins.Sa.DetachedUrl)
 
     def verifyStartJourney(url: String): Unit = verify(exactly(1), postRequestedFor(urlPathEqualTo(url)))
     def verifyStartJourneyEpayeGovUk(): Unit = verifyStartJourney(startJourneyGovUkEpayeUrl)
     def verifyStartJourneyEpayeDetached(): Unit = verifyStartJourney(startJourneyDetachedEpayeUrl)
     def verifyStartJourneyVatGovUk(): Unit = verifyStartJourney(startJourneyGovUkVatUrl)
     def verifyStartJourneyVatDetached(): Unit = verifyStartJourney(startJourneyDetachedVatUrl)
+    def verifyStartJourneySaGovUk(): Unit = verifyStartJourney(startJourneyGovUkSaUrl)
+    def verifyStartJourneySaDetached(): Unit = verifyStartJourney(startJourneyDetachedSaUrl)
 
     def findJourney(origin: Origin = Origins.Epaye.Bta): StubMapping =
       findByLatestSessionId(JourneyJsonTemplates.Started(origin))
@@ -130,6 +140,7 @@ object EssttpBackend {
                                       val taxReference = origin.taxRegime match {
                                         case TaxRegime.Epaye=> "864FZ00049"
                                         case TaxRegime.Vat=> "101747001"
+                                        case TaxRegime.Sa=> "1234567895"
                                       }
                                       JourneyJsonTemplates.`Computed Tax Id`(origin, taxReference)
                                     }): StubMapping = findByLatestSessionId(jsonBody)

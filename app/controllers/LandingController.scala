@@ -63,6 +63,21 @@ class LandingController @Inject() (
       as.default(_ => NotImplemented)
     }
 
+  val saLandingPage: Action[AnyContent] =
+    if (appConfig.saEnabled) {
+      as.default.async { implicit request =>
+        checkNotShuttered(TaxRegime.Sa) {
+          journeyConnector.findLatestJourneyBySessionId().map {
+            maybeJourney =>
+              val maybeBackUrl = maybeJourney.flatMap(_.backUrl)
+              Ok(views.saLanding(maybeBackUrl))
+          }
+        }
+      }
+    } else {
+      as.default(_ => Redirect(appConfig.Urls.saSuppUrl))
+    }
+
   val epayeLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
     checkNotShuttered(TaxRegime.Epaye) {
       handleLandingPageContinue(routes.StartJourneyController.startDetachedEpayeJourney)
@@ -72,6 +87,12 @@ class LandingController @Inject() (
   val vatLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
     checkNotShuttered(TaxRegime.Vat) {
       handleLandingPageContinue(routes.StartJourneyController.startDetachedVatJourney)
+    }
+  }
+
+  val saLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
+    checkNotShuttered(TaxRegime.Sa) {
+      handleLandingPageContinue(routes.StartJourneyController.startDetachedSaJourney)
     }
   }
 

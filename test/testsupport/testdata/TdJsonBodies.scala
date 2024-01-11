@@ -48,6 +48,7 @@ object TdJsonBodies {
       val relativeUrl = taxRegime match {
         case TaxRegime.Epaye => "/epaye-payment-plan"
         case TaxRegime.Vat   => "/vat-payment-plan"
+        case TaxRegime.Sa    => "/sa-payment-plan"
       }
       s"""{
          |  "nextUrl": "http://localhost:19001/set-up-a-payment-plan$relativeUrl",
@@ -527,6 +528,7 @@ object TdJsonBodies {
     val customerReference = taxRegime match {
       case TaxRegime.Epaye => "123PA44545546"
       case TaxRegime.Vat   => "101747001"
+      case TaxRegime.Sa    => "1234567895"
     }
     s"""
        |"arrangementResponse" : {

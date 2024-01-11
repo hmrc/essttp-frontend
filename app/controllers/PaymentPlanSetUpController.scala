@@ -50,6 +50,10 @@ class PaymentPlanSetUpController @Inject() (
     paymentPlanSetup(request)
   }
 
+  val saPaymentPlanSetUp: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    paymentPlanSetup(request)
+  }
+
   private def paymentPlanSetup(request: EligibleJourneyRequest[AnyContent])(implicit eligibleJourneyRequest: EligibleJourneyRequest[_]): Result = {
     request.journey match {
       case j: Journey.BeforeArrangementSubmitted => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)

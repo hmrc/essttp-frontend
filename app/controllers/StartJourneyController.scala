@@ -50,6 +50,16 @@ class StartJourneyController @Inject() (
       as.default(_ => NotImplemented)
     }
 
+  def startGovukSaJourney: Action[AnyContent] =
+    if (appConfig.saEnabled) {
+      as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
+        journeyConnector.Sa.startJourneyGovUk(SjRequest.Sa.Empty())
+          .map(_ => Redirect(routes.DetermineTaxIdController.determineTaxId.url))
+      }
+    } else {
+      as.default(_ => Redirect(appConfig.Urls.saSuppUrl))
+    }
+
   def startDetachedEpayeJourney: Action[AnyContent] = as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
     journeyConnector.Epaye.startJourneyDetachedUrl(SjRequest.Epaye.Empty())
       .map(redirectFromDetachedJourneyStarted)
@@ -63,6 +73,16 @@ class StartJourneyController @Inject() (
       }
     } else {
       as.default(_ => NotImplemented)
+    }
+
+  def startDetachedSaJourney: Action[AnyContent] =
+    if (appConfig.saEnabled) {
+      as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
+        journeyConnector.Sa.startJourneyDetachedUrl(SjRequest.Sa.Empty())
+          .map(redirectFromDetachedJourneyStarted)
+      }
+    } else {
+      as.default(_ => Redirect(appConfig.Urls.saSuppUrl))
     }
 
   private def redirectFromDetachedJourneyStarted(sjResponse: SjResponse)(implicit r: Request[_]): Result = {
