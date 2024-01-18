@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import config.AppConfig
 @import controllers.routes
 @import messages.Messages
 @import essttp.rootmodel.TaxRegime
@@ -23,15 +24,15 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-        layout: templates.Layout,
-        govukButton: GovukButton,
-        govukRadios: GovukRadios,
-        formWithCSRF: FormWithCSRF,
-        govukErrorSummary: GovukErrorSummary,
-        requestSupport: RequestSupport
+layout: templates.Layout,
+govukButton: GovukButton,
+govukRadios: GovukRadios,
+formWithCSRF: FormWithCSRF,
+govukErrorSummary: GovukErrorSummary,
+requestSupport: RequestSupport
 )
 
-@(form: Form[TaxRegime])(implicit request: Request[_])
+@(form: Form[TaxRegime], saEnabled: Boolean)(implicit request: Request[_])
 
 @import requestSupport._
 
@@ -41,6 +42,26 @@
 
 @title = @{
     Messages.WhichTaxRegime.`Which tax do you want to set up a payment plan for?`.show
+}
+
+@radioItems = @{
+  val epayeAndVat = Seq(
+    RadioItem(
+    content = Text(Messages.WhichTaxRegime.EPAYE.show),
+    value = Some("EPAYE")
+    ),
+    RadioItem(
+    content = Text(Messages.WhichTaxRegime.VAT.show),
+    value = Some("VAT")
+    )
+  )
+
+  val sa = RadioItem(
+      content = Text(Messages.WhichTaxRegime.SA.show),
+      value = Some("SA")
+  )
+
+  if(saEnabled) epayeAndVat :+ sa else epayeAndVat
 }
 
 @layout(pageTitle = Some(title), hasErrors = form.hasErrors, showBackLink = false) {
@@ -66,16 +87,7 @@
             )),
             idPrefix = Some(key),
             name = key,
-            items = Seq(
-                RadioItem(
-                    content = Text(Messages.WhichTaxRegime.EPAYE.show),
-                    value = Some("EPAYE")
-                ),
-                RadioItem(
-                    content = Text(Messages.WhichTaxRegime.VAT.show),
-                    value = Some("VAT")
-                )
-            ),
+            items = radioItems,
             errorMessage = form.error(key).map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(content = Text(e.message)))
         ))
         @govukButton(Button(content = Text(Messages.continue.show), attributes = Map("id" -> "continue")))
