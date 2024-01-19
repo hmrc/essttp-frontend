@@ -38,9 +38,11 @@ import scala.jdk.CollectionConverters.{CollectionHasAsScala, IteratorHasAsScala}
 class UpfrontPaymentControllerSpec extends ItSpec {
 
   private val controller: UpfrontPaymentController = app.injector.instanceOf[UpfrontPaymentController]
-  private val expectedH1CanYouPayUpfrontPage: String = "Can you make an upfront payment?"
-  private val expectedPageHintCanPayUpfrontPage: String =
-    "Your monthly payments will be lower if you can make an upfront payment. This payment will be taken from your bank account within 6 working days."
+  private val expectedH1CanYouPayUpfrontPage: String = "Upfront payment"
+  private val expectedP1CanYouPayUpfrontPage: String =
+    "You’ll pay less interest and have a shorter payment plan if you can make an upfront payment. This payment will be taken from your bank account within 6 working days."
+  private val expectedP2CanYouPayUpfrontPage: String = "An upfront payment is separate to any recent payments you have made."
+  private val expectedPageLegendCanPayUpfrontPage: String = "Can you make an upfront payment?"
   private val expectedH1HowMuchCanYouPayUpfrontPage: String = "How much can you pay upfront?"
   private val expectedH1UpfrontSummaryPage: String = "Payment summary"
 
@@ -74,7 +76,9 @@ class UpfrontPaymentControllerSpec extends ItSpec {
             radioContent(0).text() shouldBe "Yes"
             radioContent(1).text() shouldBe "No"
 
-            doc.select("#CanYouMakeAnUpFrontPayment-hint").text() shouldBe expectedPageHintCanPayUpfrontPage
+            doc.select("legend").text() shouldBe expectedPageLegendCanPayUpfrontPage
+            doc.select("#upfrontPayment-p1").text() shouldBe expectedP1CanYouPayUpfrontPage
+            doc.select("#upfrontPayment-p2").text() shouldBe expectedP2CanYouPayUpfrontPage
           }
 
           s"[$regime journey] should prepopulate the form when user navigates back and they have a chosen way to pay in their journey" in {
@@ -160,7 +164,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
               regimeBeingTested       = Some(taxRegime)
             )
 
-            doc.select("#CanYouMakeAnUpFrontPayment-hint").text() shouldBe expectedPageHintCanPayUpfrontPage
+            doc.select("legend").text() shouldBe expectedPageLegendCanPayUpfrontPage
             val errorSummary = doc.select(".govuk-error-summary")
             val errorLink = errorSummary.select("a")
             errorLink.text() shouldBe "Select yes if you can make an upfront payment"
