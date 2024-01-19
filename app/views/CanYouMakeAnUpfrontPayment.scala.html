@@ -40,7 +40,7 @@
 }
 
 @title = @{
-    Messages.UpfrontPayment.`Can you make an upfront payment?`.show
+    Messages.UpfrontPayment.`Upfront payment`.show
 }
 
 @layout(pageTitle = Some(title), hasErrors = form.hasErrors) {
@@ -55,17 +55,26 @@
                 title = Text(Messages.`There is a problem`.show))
         )
     }
+
+<h1 class="govuk-heading-xl">
+    @{Messages.UpfrontPayment.`Upfront payment`.show}
+</h1>
+
+    <p class="govuk-body" id="upfrontPayment-p1">
+        @{Messages.UpfrontPayment.`You'll pay less interest and have a shorter...`.show}
+    </p>
+
+    <p class="govuk-body" id="upfrontPayment-p2">
+        @{Messages.UpfrontPayment.`An upfront payment is separate to...`.show}
+    </p>
+
     @formWithCSRF(action = routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit) {
         @govukRadios(Radios(
             fieldset = Some(Fieldset(
                 legend = Some(Legend(
-                    content = Text(title),
-                    classes = "govuk-fieldset__legend--xl",
-                    isPageHeading = true
+                    content = Text(Messages.UpfrontPayment.`Can you make an upfront payment?`.show),
+                    classes = "govuk-fieldset__legend--m"
                 ))
-            )),
-            hint = Some(Hint(
-                content = Text(Messages.UpfrontPayment.`Your monthly payments will be lower if you ...`.show)
             )),
             idPrefix = Some(key),
             name = key,
