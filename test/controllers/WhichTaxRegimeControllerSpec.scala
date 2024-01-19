@@ -61,11 +61,11 @@ class WhichTaxRegimeControllerSpec extends ItSpec {
         radios(0).select(".govuk-radios__input").`val`() shouldBe "EPAYE"
         radios(0).select(".govuk-radios__label").text() shouldBe "Employers’ PAYE"
 
-        radios(1).select(".govuk-radios__input").`val`() shouldBe "VAT"
-        radios(1).select(".govuk-radios__label").text() shouldBe "VAT"
+        radios(1).select(".govuk-radios__input").`val`() shouldBe "SA"
+        radios(1).select(".govuk-radios__label").text() shouldBe "Self Assessment"
 
-        radios(2).select(".govuk-radios__input").`val`() shouldBe "SA"
-        radios(2).select(".govuk-radios__label").text() shouldBe "Self Assessment"
+        radios(2).select(".govuk-radios__input").`val`() shouldBe "VAT"
+        radios(2).select(".govuk-radios__label").text() shouldBe "VAT"
         ()
       }
 
@@ -132,11 +132,11 @@ class WhichTaxRegimeControllerSpec extends ItSpec {
       radios(0).select(".govuk-radios__input").`val`() shouldBe "EPAYE"
       radios(0).select(".govuk-radios__label").text() shouldBe "TWE Cyflogwyr"
 
-      radios(1).select(".govuk-radios__input").`val`() shouldBe "VAT"
-      radios(1).select(".govuk-radios__label").text() shouldBe "TAW"
+      radios(1).select(".govuk-radios__input").`val`() shouldBe "SA"
+      radios(1).select(".govuk-radios__label").text() shouldBe "Hunanasesiad"
 
-      radios(2).select(".govuk-radios__input").`val`() shouldBe "SA"
-      radios(2).select(".govuk-radios__label").text() shouldBe "Hunanasesiad"
+      radios(2).select(".govuk-radios__input").`val`() shouldBe "VAT"
+      radios(2).select(".govuk-radios__label").text() shouldBe "TAW"
     }
 
   }

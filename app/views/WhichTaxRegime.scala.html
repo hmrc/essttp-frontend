@@ -45,23 +45,23 @@ requestSupport: RequestSupport
 }
 
 @radioItems = @{
-  val epayeAndVat = Seq(
+  val epaye =
     RadioItem(
     content = Text(Messages.WhichTaxRegime.EPAYE.show),
     value = Some("EPAYE")
-    ),
-    RadioItem(
+    )
+
+  val vat =   RadioItem(
     content = Text(Messages.WhichTaxRegime.VAT.show),
     value = Some("VAT")
     )
-  )
 
   val sa = RadioItem(
       content = Text(Messages.WhichTaxRegime.SA.show),
       value = Some("SA")
   )
 
-  if(saEnabled) epayeAndVat :+ sa else epayeAndVat
+  if(saEnabled) Seq(epaye, sa, vat) else Seq(epaye, vat)
 }
 
 @layout(pageTitle = Some(title), hasErrors = form.hasErrors, showBackLink = false) {
