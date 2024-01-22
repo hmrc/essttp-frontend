@@ -653,6 +653,70 @@ object Messages {
     )
   }
 
+  object Sa {
+
+    val `Set up a Self Assessment payment plan`: Message = Message(
+      english = "Set up a Self Assessment payment plan",
+      welsh   = "Sefydlu cynllun talu ar gyfer Hunanasesiad"
+    )
+
+    val `A payment plan allows you to pay your tax charges in instalments over a period of time.`: Message = Message(
+      english = "A payment plan allows you to pay your tax charges in instalments over a period of time.",
+      welsh   = "Mae cynllun talu yn eich galluogi i dalu’ch taliadau treth fesul rhandaliad dros gyfnod o amser."
+    )
+
+    val `Your plan covers the tax you owe...`: Message = Message(
+      english = "Your plan covers the tax you owe and, if applicable, the 2 advance payments towards your tax bill. It also covers any penalties or charges against your account. You’ll have to pay interest on the amount you pay late.",
+      welsh   = "Mae eich cynllun yn cwmpasu’r dreth sydd arnoch ac, os yw’n berthnasol, y ddau daliad ymlaen llaw tuag at eich bil treth. Mae’r cynllun hefyd yn cwmpasu unrhyw gosbau neu daliadau yn erbyn eich cyfrif. Bydd yn rhaid i chi dalu llog ar y swm a dalwch yn hwyr."
+    )
+
+    val `To be eligible to set up an online payment plan you need to:`: Message = Message(
+      english = "To be eligible to set up an online payment plan you need to:",
+      welsh   = " fod yn gymwys i sefydlu cynllun talu ar-lein, mae’n rhaid i’r canlynol fod yn wir amdanoch:"
+    )
+
+    val `ensure your tax returns are up to date`: Message = Message(
+      english = "ensure your tax returns are up to date",
+      welsh   = "mae’n rhaid i chi sicrhau bod eich Ffurflenni Treth yn gyfredol"
+    )
+
+    def `owe ... or less`(maxAmountOfDebt: AmountInPence): Message = Message(
+      english = s"owe ${maxAmountOfDebt.gdsFormatInPounds} or less",
+      welsh   = s"mae arnoch ${maxAmountOfDebt.gdsFormatInPounds} neu lai"
+    )
+
+    val `have no other tax debts`: Message = Message(
+      english = "have no other tax debts",
+      welsh   = "nid oes gennych unrhyw ddyledion treth eraill"
+    )
+
+    val `have no other HMRC payment plans set up`: Message = Message(
+      english = "have no other HMRC payment plans set up",
+      welsh   = "nid ydych wedi sefydlu cynlluniau talu eraill gyda CThEF"
+    )
+
+    val `You can use this service within 60 days of the payment deadline.`: Message = Message(
+      english = "\tGallwch ddefnyddio’r gwasanaeth hwn cyn pen 60 diwrnod i’r dyddiad cau ar gyfer talu.",
+      welsh   = ""
+    )
+
+    val `Before you start`: Message = Message(
+      english = "Before you start",
+      welsh   = "Cyn i chi ddechrau"
+    )
+
+    val `HMRC intend this as a one-off payment plan...`: Message = Message(
+      english = "HMRC intend this as a one-off payment plan to give you extra support. You must keep up to date with your payments. If you do not, HMRC may ask you to pay the entire outstanding amount.",
+      welsh   = "Bwriad CThEF yw y bydd hwn yn gynllun talu un-tro er mwyn rhoi cymorth ychwanegol i chi. Mae’n rhaid i chi sicrhau eich bod yn gwneud eich taliadau mewn pryd. Os na fyddwch, mae’n bosibl y bydd CThEF yn gofyn i chi dalu’r swm cyfan sy’n weddill."
+    )
+
+    val `To set up the payment plan, you’ll need to know your monthly income and spending, and any savings or investments.`: Message = Message(
+      english = "To set up the payment plan, you’ll need to know your monthly income and spending, and any savings or investments.",
+      welsh   = "Er mwyn sefydlu’r cynllun talu, bydd angen i chi wybod beth yw’ch incwm a’ch gwariant misol, ac unrhyw gynilion neu fuddsoddiadau."
+    )
+
+  }
+
   object UpfrontPaymentAmount {
 
     val `How much can you pay upfront?`: Message = Message(

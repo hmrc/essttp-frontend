@@ -223,6 +223,23 @@ class LandingPageControllerSpec extends ItSpec {
         backLinkUrlOverride         = Some("/set-up-a-payment-plan/test-only/bta-page?starting-page")
       )
 
+      val lists = doc.select(".govuk-list").asScala.toList
+      lists.size shouldBe 1
+
+      val paragraphs = doc.select("p.govuk-body").asScala.toList
+      paragraphs(0).text() shouldBe "A payment plan allows you to pay your tax charges in instalments over a period of time."
+      paragraphs(1).text() shouldBe "Your plan covers the tax you owe and, if applicable, the 2 advance payments towards your tax bill. " +
+        "It also covers any penalties or charges against your account. You’ll have to pay interest on the amount you pay late."
+      paragraphs(2).text() shouldBe "To be eligible to set up an online payment plan you need to:"
+
+      val firstListBullets = lists(0).select("li").asScala.toList
+      firstListBullets.size shouldBe 4
+
+      firstListBullets(0).text() shouldBe "ensure your tax returns are up to date"
+      firstListBullets(1).text() shouldBe "owe £30,000 or less"
+      firstListBullets(2).text() shouldBe "have no other tax debts"
+      firstListBullets(3).text() shouldBe "have no other HMRC payment plans set up"
+
       val button = doc.select(".govuk-button")
       button.attr("href") shouldBe routes.LandingController.saLandingPageContinue.url
       button.text() shouldBe Messages.`Start now`.english
