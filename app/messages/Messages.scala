@@ -696,8 +696,8 @@ object Messages {
     )
 
     val `You can use this service within 60 days of the payment deadline.`: Message = Message(
-      english = "\tGallwch ddefnyddio’r gwasanaeth hwn cyn pen 60 diwrnod i’r dyddiad cau ar gyfer talu.",
-      welsh   = ""
+      english = "You can use this service within 60 days of the payment deadline.",
+      welsh   = "Gallwch ddefnyddio’r gwasanaeth hwn cyn pen 60 diwrnod i’r dyddiad cau ar gyfer talu."
     )
 
     val `Before you start`: Message = Message(

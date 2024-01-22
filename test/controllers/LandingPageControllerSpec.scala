@@ -240,6 +240,8 @@ class LandingPageControllerSpec extends ItSpec {
       firstListBullets(2).text() shouldBe "have no other tax debts"
       firstListBullets(3).text() shouldBe "have no other HMRC payment plans set up"
 
+      paragraphs(3).text() shouldBe "You can use this service within 60 days of the payment deadline."
+
       val button = doc.select(".govuk-button")
       button.attr("href") shouldBe routes.LandingController.saLandingPageContinue.url
       button.text() shouldBe Messages.`Start now`.english
