@@ -122,6 +122,22 @@ class IneligibleController @Inject() (
     genericAlreadyHaveAPaymentPlanPage
   }
 
+  private def genericNoDueDatesReachedPage(implicit request: AuthenticatedJourneyRequest[AnyContent]): Result =
+    Ok(
+      views.partials.noDueDatesTemplatePage(
+        Messages.NotEligible.`You cannot use this service`,
+        views.partials.noDueDatesReachedPartial(request.journey.taxRegime)
+      )
+    )
+
+  val epayeNoDueDatesReachedPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    genericNoDueDatesReachedPage
+  }
+
+  val vatNoDueDatesReachedPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    genericNoDueDatesReachedPage
+  }
+
   private def determineBtaReturnUrl(implicit request: AuthenticatedJourneyRequest[AnyContent]): String = request.journey.sjRequest match {
     case SjRequest.Epaye.Simple(returnUrl, _) => returnUrl.value
     case SjRequest.Epaye.Empty()              => s"${appConfig.Urls.businessTaxAccountUrl}"

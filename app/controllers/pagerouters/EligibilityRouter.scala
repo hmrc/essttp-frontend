@@ -16,8 +16,12 @@
 
 package controllers.pagerouters
 
+import cats.Eq
+import cats.implicits.catsSyntaxEq
+import config.AppConfig
 import controllers.routes
 import essttp.rootmodel.TaxRegime
+import essttp.rootmodel.TaxRegime.Sa
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import models.EligibilityErrors._
 import models.{EligibilityError, EligibilityErrors}
@@ -25,7 +29,9 @@ import play.api.mvc.Call
 
 object EligibilityRouter {
 
-  def nextPage(eligibilityResult: EligibilityCheckResult, taxRegime: TaxRegime): Call = {
+  implicit val eqTaxRegime: Eq[TaxRegime] = Eq.fromUniversalEquals
+
+  def nextPage(eligibilityResult: EligibilityCheckResult, taxRegime: TaxRegime)(implicit appConfig: AppConfig): Call = {
     if (eligibilityResult.isEligible) {
       routes.YourBillController.yourBill
     } else {
@@ -44,11 +50,12 @@ object EligibilityRouter {
         case Some(MissingFiledReturns)               => whichFileYourReturnsPage(taxRegime)
         case Some(HasInvalidInterestSignals)         => whichGenericEligibilityPage(taxRegime)
         case Some(DmSpecialOfficeProcessingRequired) => whichGenericEligibilityPage(taxRegime)
-        case Some(NoDueDatesReached)                 => whichGenericEligibilityPage(taxRegime)
-        case Some(CannotFindLockReason)              => whichGenericEligibilityPage(taxRegime)
-        case Some(CreditsNotAllowed)                 => whichGenericEligibilityPage(taxRegime)
-        case Some(IsMoreThanMaxPaymentReference)     => whichGenericEligibilityPage(taxRegime)
-        case Some(ChargesBeforeMaxAccountingDate)    => routes.IneligibleController.vatDebtBeforeAccountingDatePage
+        case Some(NoDueDatesReached) => if (appConfig.cr111Enabled && taxRegime =!= Sa) { whichNoDueDatesReachedPage(taxRegime) }
+        else whichGenericEligibilityPage(Sa)
+        case Some(CannotFindLockReason)           => whichGenericEligibilityPage(taxRegime)
+        case Some(CreditsNotAllowed)              => whichGenericEligibilityPage(taxRegime)
+        case Some(IsMoreThanMaxPaymentReference)  => whichGenericEligibilityPage(taxRegime)
+        case Some(ChargesBeforeMaxAccountingDate) => routes.IneligibleController.vatDebtBeforeAccountingDatePage
       }
     }
   }
@@ -100,5 +107,11 @@ object EligibilityRouter {
   ): Call = (maybeEligibilityError, isLessThanMinDebtAllowance, taxRegime) match {
     case (Some(MultipleReasons), true, _) => whichDebtTooSmallPage(taxRegime)
     case _                                => whichGenericEligibilityPage(taxRegime)
+  }
+
+  private def whichNoDueDatesReachedPage(taxRegime: TaxRegime): Call = taxRegime match {
+    case TaxRegime.Epaye => routes.IneligibleController.epayeNoDueDatesReachedPage
+    case TaxRegime.Vat   => routes.IneligibleController.vatNoDueDatesReachedPage
+    case TaxRegime.Sa    => throw new NotImplementedError("Ineligibility reason not relevant to SA")
   }
 }

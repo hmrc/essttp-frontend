@@ -18,6 +18,7 @@ package controllers
 
 import _root_.actions.Actions
 import cats.syntax.eq._
+import config.AppConfig
 import controllers.InstalmentsController.instalmentsForm
 import controllers.JourneyFinalStateCheck.finalStateCheckF
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
@@ -42,7 +43,7 @@ class InstalmentsController @Inject() (
     mcc:            MessagesControllerComponents,
     journeyService: JourneyService,
     views:          Views
-)(implicit executionContext: ExecutionContext) extends FrontendController(mcc)
+)(implicit executionContext: ExecutionContext, appConfig: AppConfig) extends FrontendController(mcc)
   with Logging {
 
   val instalmentOptions: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>

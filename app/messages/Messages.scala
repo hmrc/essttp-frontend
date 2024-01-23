@@ -441,6 +441,21 @@ object Messages {
       welsh   = "Ffoniwch ni ar <strong>0300 200 1900</strong> oherwydd mae’n bosibl y gallwch drefnu cynllun dros y ffôn."
     )
 
+    val `You cannot set up an Employers' PAYE payment plan online...not overdue`: Message = Message(
+      english = "You cannot set up an Employers’ PAYE payment plan online because your bill is not overdue.",
+      welsh   = "Ni allwch drefnu cynllun talu ar gyfer TWE y Cyflogwr ar-lein oherwydd nad yw’ch bil yn hwyr."
+    )
+
+    val `You cannot set up a VAT payment plan online...not overdue`: Message = Message(
+      english = "You cannot set up a VAT payment plan online because your bill is not overdue.",
+      welsh   = "Ni allwch drefnu cynllun talu TAW ar-lein oherwydd nad yw’ch bil yn hwyr."
+    )
+
+    val `You may be able to set up a payment plan once the deadline...`: Message = Message(
+      english = "You may be able to set up a payment plan once the deadline has passed to pay your bill.",
+      welsh   = "Efallai y byddwch yn gallu trefnu cynllun talu unwaith y bydd y dyddiad cau wedi mynd heibio i dalu’ch bil."
+    )
+
   }
 
   object EnrolmentMissing {

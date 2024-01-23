@@ -44,9 +44,8 @@ class UpfrontPaymentController @Inject() (
     mcc:            MessagesControllerComponents,
     views:          Views,
     journeyService: JourneyService,
-    requestSupport: RequestSupport,
-    appConfig:      AppConfig
-)(implicit ec: ExecutionContext)
+    requestSupport: RequestSupport
+)(implicit ec: ExecutionContext, appConfig: AppConfig)
   extends FrontendController(mcc)
   with Logging {
 

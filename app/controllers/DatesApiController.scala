@@ -17,6 +17,7 @@
 package controllers
 
 import actions.Actions
+import config.AppConfig
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import controllers.JourneyFinalStateCheck.finalStateCheckF
 import essttp.journey.model.Journey
@@ -34,7 +35,7 @@ class DatesApiController @Inject() (
     mcc:            MessagesControllerComponents,
     datesService:   DatesService,
     journeyService: JourneyService
-)(implicit ec: ExecutionContext)
+)(implicit ec: ExecutionContext, appConfig: AppConfig)
   extends FrontendController(mcc)
   with Logging {
 
