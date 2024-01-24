@@ -16,8 +16,7 @@
 
 package controllers.pagerouters
 
-import cats.Eq
-import cats.implicits.catsSyntaxEq
+import cats.syntax.eq._
 import config.AppConfig
 import controllers.routes
 import essttp.rootmodel.TaxRegime
@@ -28,8 +27,6 @@ import models.{EligibilityError, EligibilityErrors}
 import play.api.mvc.Call
 
 object EligibilityRouter {
-
-  implicit val eqTaxRegime: Eq[TaxRegime] = Eq.fromUniversalEquals
 
   def nextPage(eligibilityResult: EligibilityCheckResult, taxRegime: TaxRegime)(implicit appConfig: AppConfig): Call = {
     if (eligibilityResult.isEligible) {
@@ -51,7 +48,7 @@ object EligibilityRouter {
         case Some(HasInvalidInterestSignals)         => whichGenericEligibilityPage(taxRegime)
         case Some(DmSpecialOfficeProcessingRequired) => whichGenericEligibilityPage(taxRegime)
         case Some(NoDueDatesReached) => if (appConfig.cr111Enabled && taxRegime =!= Sa) { whichNoDueDatesReachedPage(taxRegime) }
-        else whichGenericEligibilityPage(Sa)
+        else whichGenericEligibilityPage(taxRegime)
         case Some(CannotFindLockReason)           => whichGenericEligibilityPage(taxRegime)
         case Some(CreditsNotAllowed)              => whichGenericEligibilityPage(taxRegime)
         case Some(IsMoreThanMaxPaymentReference)  => whichGenericEligibilityPage(taxRegime)

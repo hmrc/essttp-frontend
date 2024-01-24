@@ -74,4 +74,6 @@ object PageUrls {
   val printPlanUrl: String = s"$serviceBaseUrl/payment-plan-print-summary"
   val exitSurveyEpayeUrl: String = s"$serviceBaseUrl/exit-survey/paye"
   val exitSurveyVatUrl: String = s"$serviceBaseUrl/exit-survey/vat"
+  val payeNoDueDatesReachedUrl: String = s"$serviceBaseUrl/bill-not-overdue-epaye"
+  val vatNoDueDatesReachedUrl: String = s"$serviceBaseUrl/bill-not-overdue-vat"
 }
