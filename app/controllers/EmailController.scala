@@ -47,9 +47,8 @@ class EmailController @Inject() (
     mcc:                      MessagesControllerComponents,
     views:                    Views,
     emailVerificationService: EmailVerificationService,
-    journeyService:           JourneyService,
-    appConfig:                AppConfig
-)(implicit execution: ExecutionContext) extends FrontendController(mcc) with Logging {
+    journeyService:           JourneyService
+)(implicit execution: ExecutionContext, appConfig: AppConfig) extends FrontendController(mcc) with Logging {
 
   private def withEmailEnabled(action: Action[AnyContent]): Action[AnyContent] =
     if (!appConfig.emailJourneyEnabled) {

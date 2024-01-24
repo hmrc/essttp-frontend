@@ -18,12 +18,11 @@
 @import play.twirl.api.Html
 @import messages.Message
 @import actionsmodel.AuthenticatedJourneyRequest
-@import views.html.partials.CommonIneligibilityPartial
+
 
 @this(
         layout: views.html.templates.Layout,
-        requestSupport: RequestSupport,
-        commonIneligibilityPartial: CommonIneligibilityPartial
+        requestSupport: RequestSupport
 )
 
 @(
@@ -36,6 +35,4 @@
 @layout(pageTitle = Some(pageh1.show), showBackLink = false) {
     <h1 class="govuk-heading-xl">@{pageh1.show}</h1>
     @leadingContent
-
-    @commonIneligibilityPartial(request.journey.taxRegime)
 }

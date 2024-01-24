@@ -17,6 +17,7 @@
 package actions
 
 import actionsmodel.{AuthenticatedJourneyRequest, BarsNotLockedOutRequest}
+import config.AppConfig
 import controllers.{JourneyIncorrectStateRouter, routes}
 import essttp.bars.BarsVerifyStatusConnector
 import essttp.journey.model.Journey
@@ -29,7 +30,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class BarsLockoutActionRefiner @Inject() (barsVerifyStatusConnector: BarsVerifyStatusConnector)(
     implicit
-    ec: ExecutionContext
+    ec: ExecutionContext, appConfig: AppConfig
 ) extends ActionRefiner[AuthenticatedJourneyRequest, BarsNotLockedOutRequest] with Logging with Results {
 
   override protected def refine[A](request: AuthenticatedJourneyRequest[A]): Future[Either[Result, BarsNotLockedOutRequest[A]]] = {

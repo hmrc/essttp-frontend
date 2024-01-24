@@ -31,14 +31,13 @@ import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class TermsAndConditionsController @Inject() (
-    appConfig:      AppConfig,
     as:             Actions,
     views:          Views,
     mcc:            MessagesControllerComponents,
     journeyService: JourneyService
 )(
     implicit
-    executionContext: ExecutionContext
+    executionContext: ExecutionContext, appConfig: AppConfig
 ) extends FrontendController(mcc) with Logging {
 
   val termsAndConditions: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>

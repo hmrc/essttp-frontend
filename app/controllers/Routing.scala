@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.AppConfig
 import controllers.pagerouters.EligibilityRouter
 import essttp.journey.model.{EmailVerificationAnswers, Journey, UpfrontPaymentAnswers}
 import essttp.journey.model.Journey._
@@ -32,7 +33,7 @@ object Routing {
   // session key to indicate someone has just clicked a change link from a CYA page
   val clickedChangeFromSessionKey: String = "essttpClickedChangeFrom"
 
-  def redirectToNext(current: Call, journey: Journey, submittedValueUnchanged: Boolean)(implicit request: Request[_]): Result = {
+  def redirectToNext(current: Call, journey: Journey, submittedValueUnchanged: Boolean)(implicit request: Request[_], appConfig: AppConfig): Result = {
     val journeyRoutes: Map[Call, () => Call] = Map(
       routes.LandingController.epayeLandingPage -> { () =>
         routes.DetermineTaxIdController.determineTaxId
@@ -158,7 +159,7 @@ object Routing {
     redirect.removingFromSession(clickedChangeFromSessionKey)
   }
 
-  def latestPossiblePage(journey: Journey): Call = journey match {
+  def latestPossiblePage(journey: Journey)(implicit appConfig: AppConfig): Call = journey match {
     case j: Journey.Stages.Started =>
       j.taxRegime match {
         case TaxRegime.Epaye => routes.LandingController.epayeLandingPage

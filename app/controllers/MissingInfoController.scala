@@ -17,6 +17,7 @@
 package controllers
 
 import actions.Actions
+import config.AppConfig
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -30,7 +31,8 @@ class MissingInfoController @Inject() (
     as:    Actions,
     mcc:   MessagesControllerComponents,
     views: Views
-) extends FrontendController(mcc)
+)(implicit appConfig: AppConfig)
+  extends FrontendController(mcc)
   with Logging {
 
   val missingInfo: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>

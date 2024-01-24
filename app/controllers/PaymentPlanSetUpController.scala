@@ -33,11 +33,11 @@ import java.time.LocalDate
 
 @Singleton
 class PaymentPlanSetUpController @Inject() (
-    as:        Actions,
-    mcc:       MessagesControllerComponents,
-    views:     Views,
-    appConfig: AppConfig
-) extends FrontendController(mcc)
+    as:    Actions,
+    mcc:   MessagesControllerComponents,
+    views: Views
+)(implicit appConfig: AppConfig)
+  extends FrontendController(mcc)
   with Logging {
 
   implicit val localDateOrdering: Ordering[LocalDate] = _ compareTo _

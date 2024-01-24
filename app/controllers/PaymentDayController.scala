@@ -18,6 +18,7 @@ package controllers
 
 import _root_.actions.Actions
 import cats.implicits.catsSyntaxEq
+import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import controllers.PaymentDayController.{PaymentDayForm, paymentDayForm}
@@ -42,7 +43,7 @@ class PaymentDayController @Inject() (
     views:          Views,
     journeyService: JourneyService,
     mcc:            MessagesControllerComponents
-)(implicit executionContext: ExecutionContext)
+)(implicit executionContext: ExecutionContext, appConfig: AppConfig)
   extends FrontendController(mcc)
   with Logging {
 

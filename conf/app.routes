@@ -46,6 +46,8 @@ GET    /file-your-return                                    controllers.Ineligib
 GET    /return-not-filed-vat                                controllers.IneligibleController.vatFileYourReturnPage
 GET    /already-have-a-payment-plan-epaye                   controllers.IneligibleController.epayeAlreadyHaveAPaymentPlanPage
 GET    /already-have-a-payment-plan-vat                     controllers.IneligibleController.vatAlreadyHaveAPaymentPlanPage
+GET    /bill-not-overdue-epaye                              controllers.IneligibleController.epayeNoDueDatesReachedPage
+GET    /bill-not-overdue-vat                                controllers.IneligibleController.vatNoDueDatesReachedPage
 
 GET    /your-bill                                           controllers.YourBillController.yourBill
 POST   /your-bill                                           controllers.YourBillController.yourBillSubmit

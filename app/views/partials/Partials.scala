@@ -16,13 +16,14 @@
 
 package views.partials
 
-import views.html.epaye.ineligible.Ineligible
+import views.html.epaye.ineligible.{Ineligible, NoDueDatesReached}
 import views.html.partials._
 
 import javax.inject.Inject
 
 class Partials @Inject() (
     val ineligibleTemplatePage:             Ineligible,
+    val noDueDatesTemplatePage:             NoDueDatesReached,
     val genericIneligiblePartial:           GenericIneligiblePartial,
     val debtTooLargePartial:                DebtTooLargePartial,
     val debtTooSmallPartial:                DebtTooSmallPartial,
@@ -30,5 +31,6 @@ class Partials @Inject() (
     val vatDebtBeforeAccountingDatePartial: VatDebtBeforeAccountingDatePartial,
     val existingPaymentPlanPartial:         ExistingPaymentPlanPartial,
     val returnsNotUpToDatePartial:          ReturnsNotUpToDatePartial,
-    val extraSupportRelayPartial:           ExtraSupportRelayPartial
+    val extraSupportRelayPartial:           ExtraSupportRelayPartial,
+    val noDueDatesReachedPartial:           NoDueDatesReachedPartial
 )

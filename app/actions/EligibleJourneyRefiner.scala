@@ -17,6 +17,7 @@
 package actions
 
 import actionsmodel.{BarsNotLockedOutRequest, EligibleJourneyRequest}
+import config.AppConfig
 import controllers.JourneyIncorrectStateRouter
 import controllers.pagerouters.EligibilityRouter
 import essttp.journey.model.Journey
@@ -27,7 +28,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class EligibleJourneyRefiner @Inject() (ec: ExecutionContext) extends ActionRefiner[BarsNotLockedOutRequest, EligibleJourneyRequest] {
+class EligibleJourneyRefiner @Inject() (ec: ExecutionContext)(implicit appConfig: AppConfig) extends ActionRefiner[BarsNotLockedOutRequest, EligibleJourneyRequest] {
 
   override protected def refine[A](
       request: BarsNotLockedOutRequest[A]

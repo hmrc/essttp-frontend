@@ -17,6 +17,7 @@
 package controllers
 
 import _root_.actions.Actions
+import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import essttp.journey.model.Journey
@@ -37,7 +38,7 @@ class YourBillController @Inject() (
     as:    Actions,
     mcc:   MessagesControllerComponents,
     views: Views
-)
+)(implicit appConfig: AppConfig)
   extends FrontendController(mcc)
   with Logging {
 

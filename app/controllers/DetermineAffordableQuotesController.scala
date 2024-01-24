@@ -17,6 +17,7 @@
 package controllers
 
 import _root_.actions.Actions
+import config.AppConfig
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import controllers.JourneyFinalStateCheck.finalStateCheckF
 import essttp.journey.model.Journey
@@ -35,7 +36,7 @@ class DetermineAffordableQuotesController @Inject() (
     mcc:            MessagesControllerComponents,
     ttpService:     TtpService,
     journeyService: JourneyService
-)(implicit ec: ExecutionContext)
+)(implicit ec: ExecutionContext, appConfig: AppConfig)
   extends FrontendController(mcc)
   with Logging {
 
