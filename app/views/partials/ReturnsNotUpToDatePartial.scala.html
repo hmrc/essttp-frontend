@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import config.AppConfig
 @import play.api.mvc.Request
 @import requests.RequestSupport
 @import messages.Messages
@@ -22,11 +23,11 @@
 
 @this(requestSupport: RequestSupport)
 
-@(btaLink: String, taxRegime: TaxRegime)(implicit request: Request[_])
+@(btaLink: => String, taxRegime: TaxRegime, appConfig: AppConfig)(implicit request: Request[_])
 
 @import requestSupport._
 
-@commonParagraph = {
+@commonParagraph() = {
     <p class="govuk-body">
         <a href="@{btaLink}" class="govuk-link" id="bta-link">
             @{Messages.NotEligible.`Go to your tax account`.show}
@@ -41,7 +42,7 @@
     }
     </p>
 
-    @commonParagraph
+    @commonParagraph()
 
     <p class="govuk-body">
     @{Html(Messages.NotEligible.`If you have recently filed your return, your account may take up to 72 hours to be updated before you can set up a payment plan.`.show)}
@@ -53,18 +54,24 @@
     @{Html(Messages.NotEligible.`To be eligible to set up a payment plan online, you need to have filed your VAT returns. Once you have done this, you can return to the service.`.show)}
     </p>
 
-    @commonParagraph
+    @commonParagraph()
 
     <p class="govuk-body">
     @{Html(Messages.NotEligible.`If you have recently filed your return, your account may take up to 72 hours to be updated before you can set up a payment plan.`.show)}
     </p>
 }
 
+  @saContent = {
+      <p class="govuk-body">
+      @{Html(Messages.NotEligible.`You must file your tax return before you can set up a Self Assessment payment plan online.`(appConfig.Urls.fileSaReturnUUrl).show)}
+      </p>
+  }
+
 @{
     taxRegime match {
         case TaxRegime.Epaye => epayeContent
         case TaxRegime.Vat   => vatContent
-        case TaxRegime.Sa => throw new NotImplementedError()
+        case TaxRegime.Sa => saContent
 
     }
 }

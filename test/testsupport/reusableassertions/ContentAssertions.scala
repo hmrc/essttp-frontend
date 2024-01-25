@@ -188,12 +188,13 @@ object ContentAssertions extends RichMatchers {
       "Ffoniwch ni ar <strong>0300 200 1900</strong> oherwydd mae’n bosibl y gallwch drefnu cynllun dros y ffôn."
 
   def commonIneligibilityTextCheck(
-      doc:                  Document,
-      taxRegime:            TaxRegime,
-      language:             Language,
-      callUsContentEnglish: String    = ContentAssertions.defaultCallUsContentEnglish,
-      callUsContentWelsh:   String    = ContentAssertions.defaultCallUsContentWelsh
-  ): Assertion = {
+      doc:                        Document,
+      taxRegime:                  TaxRegime,
+      language:                   Language,
+      callUsContentEnglish:       String    = ContentAssertions.defaultCallUsContentEnglish,
+      callUsContentWelsh:         String    = ContentAssertions.defaultCallUsContentWelsh,
+      expectCallPreparationHints: Boolean   = true
+  ): Unit = {
 
     val callUsContentFromDoc = doc.select("#call-us-content")
     callUsContentFromDoc.html() shouldBe {
@@ -214,6 +215,7 @@ object ContentAssertions extends RichMatchers {
     }
 
     val subheadings = commonEligibilityWrapper.select("h2").asScala.toList
+    subheadings.size shouldBe (if (expectCallPreparationHints) 3 else 1)
 
     subheadings(0).text shouldBe {
       language match {
@@ -240,53 +242,56 @@ object ContentAssertions extends RichMatchers {
       }
     }
 
-    subheadings(1).text shouldBe {
-      language match {
-        case Languages.English => "Before you call, make sure you have:"
-        case Languages.Welsh   => "Cyn i chi ffonio, sicrhewch fod gennych y canlynol:"
-      }
-    }
-    val bulletLists = commonEligibilityWrapper.select(".govuk-list").asScala.toList
-    val beforeYouCallList = bulletLists(0).select("li").asScala.toList
-    beforeYouCallList(0).text() shouldBe (
-      taxRegime match {
-        case TaxRegime.Epaye => language match {
-          case Languages.English => "your Accounts Office reference. This is 13 characters, for example, 123PX00123456"
-          case Languages.Welsh   => "eich cyfeirnod Swyddfa Gyfrifon, sy’n 13 o gymeriadau o hyd, er enghraifft, 123PX00123456"
+    if (expectCallPreparationHints) {
+      subheadings(1).text shouldBe {
+        language match {
+          case Languages.English => "Before you call, make sure you have:"
+          case Languages.Welsh   => "Cyn i chi ffonio, sicrhewch fod gennych y canlynol:"
         }
-        case TaxRegime.Vat => language match {
-          case Languages.English => "your VAT number. This is 9 characters, for example, 123456789"
-          case Languages.Welsh   => "eich rhif TAW. Mae hyn yn cynnwys 9 o gymeriadau, er enghraifft, 123456789"
+      }
+      val bulletLists = commonEligibilityWrapper.select(".govuk-list").asScala.toList
+      val beforeYouCallList = bulletLists(0).select("li").asScala.toList
+      beforeYouCallList(0).text() shouldBe (
+        taxRegime match {
+          case TaxRegime.Epaye => language match {
+            case Languages.English => "your Accounts Office reference. This is 13 characters, for example, 123PX00123456"
+            case Languages.Welsh   => "eich cyfeirnod Swyddfa Gyfrifon, sy’n 13 o gymeriadau o hyd, er enghraifft, 123PX00123456"
+          }
+          case TaxRegime.Vat => language match {
+            case Languages.English => "your VAT number. This is 9 characters, for example, 123456789"
+            case Languages.Welsh   => "eich rhif TAW. Mae hyn yn cynnwys 9 o gymeriadau, er enghraifft, 123456789"
+          }
+          case TaxRegime.Sa => throw new NotImplementedError()
+
         }
-        case TaxRegime.Sa => throw new NotImplementedError()
+      )
+      beforeYouCallList(1).text() shouldBe {
+        language match {
+          case Languages.English => "your bank details"
+          case Languages.Welsh   => "eich manylion banc"
+        }
+      }
 
+      subheadings(2).text() shouldBe {
+        language match {
+          case Languages.English => "We’re likely to ask:"
+          case Languages.Welsh   => "Rydym yn debygol o ofyn:"
+        }
       }
-    )
-    beforeYouCallList(1).text() shouldBe {
-      language match {
-        case Languages.English => "your bank details"
-        case Languages.Welsh   => "eich manylion banc"
+      val likelyToAskList = bulletLists(1).select("li").asScala.toList
+      likelyToAskList(0).text() shouldBe {
+        language match {
+          case Languages.English => "what you’ve done to try to pay the bill"
+          case Languages.Welsh   => "beth rydych wedi’i wneud i geisio talu’r bil"
+        }
       }
-    }
-
-    subheadings(2).text() shouldBe {
-      language match {
-        case Languages.English => "We’re likely to ask:"
-        case Languages.Welsh   => "Rydym yn debygol o ofyn:"
+      likelyToAskList(1).text() shouldBe {
+        language match {
+          case Languages.English => "if you can pay some of the bill now"
+          case Languages.Welsh   => "a allwch dalu rhywfaint o’r bil nawr"
+        }
       }
-    }
-    val likelyToAskList = bulletLists(1).select("li").asScala.toList
-    likelyToAskList(0).text() shouldBe {
-      language match {
-        case Languages.English => "what you’ve done to try to pay the bill"
-        case Languages.Welsh   => "beth rydych wedi’i wneud i geisio talu’r bil"
-      }
-    }
-    likelyToAskList(1).text() shouldBe {
-      language match {
-        case Languages.English => "if you can pay some of the bill now"
-        case Languages.Welsh   => "a allwch dalu rhywfaint o’r bil nawr"
-      }
+      ()
     }
   }
 

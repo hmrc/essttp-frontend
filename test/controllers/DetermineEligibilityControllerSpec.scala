@@ -78,6 +78,9 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       ("MissingFiledReturns - VAT", TdAll.notEligibleMissingFiledReturns, "missingFiledReturns", PageUrls.vatFileYourReturnUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - MissingFiledReturns`(Origins.Vat.Bta),
         Origins.Vat.Bta),
+      ("MissingFiledReturns - SA", TdAll.notEligibleMissingFiledReturns, "missingFiledReturns", PageUrls.saFileYourReturnUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - MissingFiledReturns`(Origins.Sa.Bta),
+        Origins.Sa.Bta),
       ("NoDueDatesReached - EPAYE", TdAll.notEligibleNoDueDatesReached, "noDueDatesReached", PageUrls.payeNoDueDatesReachedUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Epaye.Bta),
         Origins.Epaye.Bta),
@@ -152,7 +155,7 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
                   ("Vat", """{ "vrn": "101747001" }""")
 
                 case TaxRegime.Sa =>
-                  throw new NotImplementedError()
+                  ("Sa", """{ "utr": "1234567895" }""")
               }
 
             AuditConnectorStub.verifyEventAudited(

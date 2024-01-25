@@ -24,7 +24,7 @@
 
 @this(requestSupport: RequestSupport, extraSupportRelayPartial: ExtraSupportRelayPartial)
 
-@(taxRegime: TaxRegime)(implicit request: Request[_])
+@(taxRegime: TaxRegime, showCallPreparationTips: Boolean = true)(implicit request: Request[_])
 
 @import requestSupport._
 
@@ -34,22 +34,24 @@
 
     @extraSupportRelayPartial()
 
-  <h2 class="govuk-heading-m">@{Messages.NotEligible.`Before you call, make sure you have:`.show}</h2>
-  <ul class="govuk-list govuk-list--bullet">
-      <li>@{
-        taxRegime match {
-          case TaxRegime.Epaye => Messages.NotEligible.`your Accounts Office reference...`.show
-          case TaxRegime.Vat   => Messages.NotEligible.`your VAT number. This is 9 characters, for example, 1233456789`.show
-          case TaxRegime.Sa => throw new NotImplementedError()
+  @if(showCallPreparationTips){
+    <h2 class="govuk-heading-m">@{Messages.NotEligible.`Before you call, make sure you have:`.show}</h2>
+    <ul class="govuk-list govuk-list--bullet">
+        <li>@{
+          taxRegime match {
+            case TaxRegime.Epaye => Messages.NotEligible.`your Accounts Office reference...`.show
+            case TaxRegime.Vat   => Messages.NotEligible.`your VAT number. This is 9 characters, for example, 1233456789`.show
+            case TaxRegime.Sa => throw new NotImplementedError()
+          }
         }
-      }
-      <li>@{Messages.NotEligible.`your bank details`.show}</li>
-  </ul>
+        <li>@{Messages.NotEligible.`your bank details`.show}</li>
+    </ul>
 
-  <h2 class="govuk-heading-m">@{Messages.NotEligible.`We're likely to ask:`.show}</h2>
-  <ul class="govuk-list govuk-list--bullet">
-      <li>@{Messages.NotEligible.`what you've done to try to pay the bill`.show}</li>
-      <li>@{Messages.NotEligible.`if you can pay some of the bill now`.show}</li>
-  </ul>
+    <h2 class="govuk-heading-m">@{Messages.NotEligible.`We're likely to ask:`.show}</h2>
+    <ul class="govuk-list govuk-list--bullet">
+        <li>@{Messages.NotEligible.`what you've done to try to pay the bill`.show}</li>
+        <li>@{Messages.NotEligible.`if you can pay some of the bill now`.show}</li>
+    </ul>
+  }
 
 </div>

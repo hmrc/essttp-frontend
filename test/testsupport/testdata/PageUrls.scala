@@ -38,6 +38,7 @@ object PageUrls {
   val vatDebtBeforeAccountingDateUrl: String = s"$serviceBaseUrl/debt-before-accounting-date-vat"
   val epayeFileYourReturnUrl: String = s"$serviceBaseUrl/file-your-return"
   val vatFileYourReturnUrl: String = s"$serviceBaseUrl/return-not-filed-vat"
+  val saFileYourReturnUrl: String = s"$serviceBaseUrl/return-not-filed-sa"
   val epayeAlreadyHaveAPaymentPlanUrl: String = s"$serviceBaseUrl/already-have-a-payment-plan-epaye"
   val vatAlreadyHaveAPaymentPlanUrl: String = s"$serviceBaseUrl/already-have-a-payment-plan-vat"
   val yourBillIsUrl: String = s"$serviceBaseUrl/your-bill"

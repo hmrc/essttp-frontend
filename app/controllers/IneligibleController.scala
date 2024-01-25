@@ -18,8 +18,10 @@ package controllers
 
 import actions.Actions
 import actionsmodel.AuthenticatedJourneyRequest
+import cats.implicits.catsSyntaxEq
 import config.AppConfig
 import essttp.journey.model.SjRequest
+import essttp.rootmodel.TaxRegime
 import messages.Messages
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -99,13 +101,16 @@ class IneligibleController @Inject() (
 
   def genericFileReturnPage(implicit request: AuthenticatedJourneyRequest[AnyContent]): Result =
     Ok(views.partials.ineligibleTemplatePage(
-      pageh1         = Messages.NotEligible.`File your return to use this service`,
-      leadingContent = views.partials.returnsNotUpToDatePartial(determineBtaReturnUrl, request.journey.taxRegime)
+      pageh1                  = Messages.NotEligible.`File your return to use this service`(request.journey.taxRegime),
+      leadingContent          = views.partials.returnsNotUpToDatePartial(determineBtaReturnUrl, request.journey.taxRegime, appConfig),
+      showCallPreparationTips = request.journey.taxRegime =!= TaxRegime.Sa
     ))
 
   val epayeFileYourReturnPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericFileReturnPage }
 
   val vatFileYourReturnPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericFileReturnPage }
+
+  val saFileYourReturnPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericFileReturnPage }
 
   def genericAlreadyHaveAPaymentPlanPage(implicit request: AuthenticatedJourneyRequest[AnyContent]): Result =
     Ok(

@@ -93,7 +93,7 @@ object EligibilityRouter {
   private def whichFileYourReturnsPage(taxRegime: TaxRegime): Call = taxRegime match {
     case TaxRegime.Epaye => routes.IneligibleController.epayeFileYourReturnPage
     case TaxRegime.Vat   => routes.IneligibleController.vatFileYourReturnPage
-    case TaxRegime.Sa    => throw new NotImplementedError()
+    case TaxRegime.Sa    => routes.IneligibleController.saFileYourReturnPage
   }
 
   //requirement from business that if multiple reasons exist but any of them are isLessThanMinDebtAllowance, go to debt too small page
