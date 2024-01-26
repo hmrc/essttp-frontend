@@ -86,13 +86,10 @@ object YourBillController {
     InvoicePeriod(monthNumberInTaxYear(startDate), startDate, endDate, dueDate)
   }
 
-  private def chargeBearsInterest(ass: ChargeTypeAssessment): Option[IsInterestBearingCharge] = {
-    List(ass).headOption.map { (chargeTypeAssessment: ChargeTypeAssessment) =>
-      chargeTypeAssessment.charges.headOption.map { charges: Charges =>
-        charges.isInterestBearingCharge
-      }
-    }.getOrElse(throw new IllegalArgumentException("missing charge list")).getOrElse(throw new IllegalArgumentException("missing charge list"))
-  }
+  private def chargeBearsInterest(ass: ChargeTypeAssessment): Option[IsInterestBearingCharge] =
+    ass.charges.headOption.flatMap { charges: Charges =>
+      charges.isInterestBearingCharge
+    }
 
   private val taxMonthStartDay: Int = 6
 
