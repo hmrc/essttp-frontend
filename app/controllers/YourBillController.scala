@@ -23,6 +23,7 @@ import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import essttp.journey.model.Journey
 import essttp.rootmodel.ttp.eligibility.{ChargeTypeAssessment, Charges, EligibilityCheckResult}
 import essttp.rootmodel.AmountInPence
+import essttp.rootmodel.ttp.IsInterestBearingCharge
 import models.{InvoicePeriod, OverDuePayments, OverduePayment}
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -85,6 +86,11 @@ object YourBillController {
     InvoicePeriod(monthNumberInTaxYear(startDate), startDate, endDate, dueDate)
   }
 
+  private def chargeBearsInterest(ass: ChargeTypeAssessment): Option[IsInterestBearingCharge] =
+    ass.charges.headOption.flatMap { charges: Charges =>
+      charges.isInterestBearingCharge
+    }
+
   private val taxMonthStartDay: Int = 6
 
   def monthNumberInTaxYear(date: LocalDate): Int = {
@@ -96,7 +102,7 @@ object YourBillController {
   }
 
   private def overDuePaymentOf(ass: ChargeTypeAssessment): OverduePayment =
-    OverduePayment(invoicePeriod(ass), ass.debtTotalAmount.value)
+    OverduePayment(invoicePeriod(ass), ass.debtTotalAmount.value, chargeBearsInterest(ass))
 
   private def overDuePayments(eligibilityResult: EligibilityCheckResult): OverDuePayments = {
     val qualifyingDebt: AmountInPence = eligibilityResult.chargeTypeAssessment.map(_.debtTotalAmount.value).fold(AmountInPence.zero)(_ + _)

@@ -275,7 +275,7 @@ object StartJourneyController {
     val charges: Charges = Charges(
       chargeType                    = ChargeType("InYearRTICharge-Tax"),
       mainType                      = MainType("InYearRTICharge(FPS)"),
-      chargeReference               = ChargeReference(form.taxReference.value),
+      chargeReference               = Some(ChargeReference(form.taxReference.value)),
       mainTrans                     = MainTrans("mainTrans"),
       subTrans                      = SubTrans("subTrans"),
       outstandingAmount             = OutstandingAmount(debtAmountFromForm),
@@ -304,6 +304,7 @@ object StartJourneyController {
         TaxPeriodFrom("2020-08-13"),
         TaxPeriodTo("2020-08-14"),
         DebtTotalAmount(debtAmountFromForm + interestAmount),
+        Some(ChargeReference("A00000000001")),
         List(charges)
       )
     )

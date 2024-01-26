@@ -178,6 +178,8 @@ object EssttpBackend {
     def findJourney(encrypter: Encrypter, origin: Origin = Origins.Epaye.Bta)(jsonBody: String = JourneyJsonTemplates.`Eligibility Checked - Eligible`(origin)(encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
 
+    def findJourneyWithNoInterestBearingCharges(encrypter: Encrypter, origin: Origin = Origins.Epaye.Bta)(jsonBody: String = JourneyJsonTemplates.`Eligibility Checked - Eligible - NoInterestBearingCharge`(origin)(encrypter)): StubMapping =
+      findByLatestSessionId(jsonBody)
   }
 
   object CanPayUpfront {
