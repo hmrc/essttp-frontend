@@ -230,10 +230,11 @@ object TdAll {
         taxPeriodFrom   = TaxPeriodFrom("2020-08-13"),
         taxPeriodTo     = TaxPeriodTo("2020-08-14"),
         debtTotalAmount = DebtTotalAmount(AmountInPence(300000)),
+        chargeReference = Some(ChargeReference("A00000000001")),
         charges         = List(Charges(
           chargeType                    = ChargeType("InYearRTICharge-Tax"),
           mainType                      = MainType("InYearRTICharge(FPS)"),
-          chargeReference               = ChargeReference("A00000000001"),
+          chargeReference               = None,
           mainTrans                     = MainTrans("mainTrans"),
           subTrans                      = SubTrans("subTrans"),
           outstandingAmount             = OutstandingAmount(AmountInPence(100000)),
@@ -291,7 +292,7 @@ object TdAll {
         subTrans                = SubTrans("subTrans"),
         isInterestBearingCharge = Some(IsInterestBearingCharge(true)),
         useChargeReference      = Some(UseChargeReference(true)),
-        debtItemChargeId        = ChargeReference("A00000000001"),
+        debtItemChargeId        = Some(ChargeReference("A00000000001")),
         interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
         debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-03-07"))
       ),
@@ -301,7 +302,7 @@ object TdAll {
         subTrans                = SubTrans("subTrans"),
         isInterestBearingCharge = Some(IsInterestBearingCharge(true)),
         useChargeReference      = Some(UseChargeReference(true)),
-        debtItemChargeId        = ChargeReference("A00000000002"),
+        debtItemChargeId        = Some(ChargeReference("A00000000002")),
         interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-02-07"))),
         debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-02-07"))
       )
@@ -330,7 +331,7 @@ object TdAll {
           subTrans                = SubTrans("subTrans"),
           isInterestBearingCharge = Some(IsInterestBearingCharge(true)),
           useChargeReference      = Some(UseChargeReference(true)),
-          debtItemChargeId        = ChargeReference("A00000000001"),
+          debtItemChargeId        = Some(ChargeReference("A00000000001")),
           interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
           debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-03-07"))
         ),
@@ -340,7 +341,7 @@ object TdAll {
           subTrans                = SubTrans("subTrans"),
           isInterestBearingCharge = Some(IsInterestBearingCharge(true)),
           useChargeReference      = Some(UseChargeReference(true)),
-          debtItemChargeId        = ChargeReference("A00000000002"),
+          debtItemChargeId        = Some(ChargeReference("A00000000002")),
           interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-02-07"))),
           debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-02-07"))
         )
@@ -447,7 +448,7 @@ object TdAll {
         debtItemCharges      = List(
           DebtItemCharges(
             outstandingDebtAmount   = OutstandingDebtAmount(AmountInPence(50000)),
-            debtItemChargeId        = ChargeReference("A00000000001"),
+            debtItemChargeId        = Some(ChargeReference("A00000000001")),
             debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-03-07")),
             accruedInterest         = AccruedInterest(AmountInPence(1597)),
             isInterestBearingCharge = Some(IsInterestBearingCharge(true)),
@@ -455,7 +456,7 @@ object TdAll {
           ),
           DebtItemCharges(
             outstandingDebtAmount   = OutstandingDebtAmount(AmountInPence(100000)),
-            debtItemChargeId        = ChargeReference("A00000000002"),
+            debtItemChargeId        = Some(ChargeReference("A00000000002")),
             debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-02-07")),
             accruedInterest         = AccruedInterest(AmountInPence(1597)),
             isInterestBearingCharge = Some(IsInterestBearingCharge(true)),

@@ -86,10 +86,10 @@ object TtpJsonResponses {
        |    "taxPeriodFrom" : "2020-08-13",
        |    "taxPeriodTo" : "2020-08-14",
        |    "debtTotalAmount" : ${if (poundsInsteadOfPence) "3000.00" else "300000"},
+       |    "chargeReference" : "A00000000001",
        |    "charges" : [ {
        |      "chargeType": "InYearRTICharge-Tax",
        |      "mainType": "InYearRTICharge(FPS)",
-       |      "chargeReference" : "A00000000001",
        |      "mainTrans" : "mainTrans",
        |      "subTrans" : "subTrans",
        |      "outstandingAmount" : ${if (poundsInsteadOfPence) "1000.00" else "100000"},

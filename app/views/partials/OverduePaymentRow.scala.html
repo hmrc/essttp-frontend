@@ -20,8 +20,10 @@
 @import requests.RequestSupport
 @import essttp.rootmodel.TaxRegime
 @import java.time.LocalDate
+@import config.AppConfig
 
-@this(requestSupport: RequestSupport)
+@this(requestSupport: RequestSupport, appConfig: AppConfig)
+
 
 @(payment: OverduePayment, taxRegime: TaxRegime)(implicit request: Request[_])
 
@@ -29,38 +31,72 @@
 
 @invoicePeriodDateShortMonth(date: LocalDate) = @{s"${date.getDayOfMonth.toString} ${DateMessages.shortMonthName(date.getMonthValue).show}"}
 @invoicePeriodDateLongMonth(date: LocalDate) = @{s"${date.getDayOfMonth.toString} ${DateMessages.monthName(date.getMonthValue).show}"}
+@invoicePeriodDateYear(date: LocalDate) = @{date.getYear.toString}
 
 @invoicePeriodString = @{
-
-    taxRegime match {
-        case TaxRegime.Epaye =>
-            s"${invoicePeriodDateShortMonth(payment.invoicePeriod.start)} " +
-                    s"${Messages.YourBill.to.show} ${invoicePeriodDateShortMonth(payment.invoicePeriod.end)} " +
-                    s"(${Messages.YourBill.month.show} ${payment.invoicePeriod.monthNumber.toString})"
-        case TaxRegime.Vat =>
-            s"${invoicePeriodDateLongMonth(payment.invoicePeriod.start)} " +
-                    s"${Messages.YourBill.to.show} ${invoicePeriodDateLongMonth(payment.invoicePeriod.end)} ${payment.invoicePeriod.end.getYear.toString}"
-        case TaxRegime.Sa =>
-            s"${invoicePeriodDateShortMonth(payment.invoicePeriod.start)} " +
-                    s"${Messages.YourBill.to.show} ${invoicePeriodDateShortMonth(payment.invoicePeriod.end)} " +
-                    s"(${Messages.YourBill.month.show} ${payment.invoicePeriod.monthNumber.toString})"
-
+    if(appConfig.cr111Enabled) {
+        taxRegime match {
+            case TaxRegime.Epaye =>
+                s"${invoicePeriodDateShortMonth(payment.invoicePeriod.start)} " + s"${invoicePeriodDateYear(payment.invoicePeriod.start)} " +
+                        s"${Messages.YourBill.to.show} ${invoicePeriodDateShortMonth(payment.invoicePeriod.end)} " + s"${invoicePeriodDateYear(payment.invoicePeriod.end)}"
+            case TaxRegime.Vat =>
+                s"${invoicePeriodDateLongMonth(payment.invoicePeriod.start)} " + s"${invoicePeriodDateYear(payment.invoicePeriod.start)} " +
+                        s"${Messages.YourBill.to.show} ${invoicePeriodDateLongMonth(payment.invoicePeriod.end)} ${payment.invoicePeriod.end.getYear.toString}"
+            case TaxRegime.Sa =>
+                s"${invoicePeriodDateShortMonth(payment.invoicePeriod.start)} " +
+                        s"${Messages.YourBill.to.show} ${invoicePeriodDateShortMonth(payment.invoicePeriod.end)} "
+        }
+    } else {
+        taxRegime match {
+            case TaxRegime.Epaye =>
+                s"${invoicePeriodDateShortMonth(payment.invoicePeriod.start)} " +
+                        s"${Messages.YourBill.to.show} ${invoicePeriodDateShortMonth(payment.invoicePeriod.end)} " +
+                        s"(${Messages.YourBill.month.show} ${payment.invoicePeriod.monthNumber.toString})"
+            case TaxRegime.Vat =>
+                s"${invoicePeriodDateLongMonth(payment.invoicePeriod.start)} " +
+                        s"${Messages.YourBill.to.show} ${invoicePeriodDateLongMonth(payment.invoicePeriod.end)} ${payment.invoicePeriod.end.getYear.toString}"
+            case TaxRegime.Sa =>
+                s"${invoicePeriodDateShortMonth(payment.invoicePeriod.start)} " +
+                        s"${Messages.YourBill.to.show} ${invoicePeriodDateShortMonth(payment.invoicePeriod.end)} " +
+                        s"(${Messages.YourBill.month.show} ${payment.invoicePeriod.monthNumber.toString})"
+        }
     }
 }
 
 @govDateFormat(date: LocalDate) = @{s"${date.getDayOfMonth.toString} ${DateMessages.monthName(date.getMonthValue).show} ${date.getYear.toString}"}
 
-<div class="govuk-summary-list__row">
-  <dt class="govuk-summary-list__key govuk-!-width-two-thirds">
-    @invoicePeriodString<br>
-    <span class="govuk-!-font-weight-regular govuk-!-font-size-16">
-      @{Messages.YourBill.`Bill due`.show} @{govDateFormat(payment.invoicePeriod.dueDate)}
-    </span>
-  </dt>
-  <dd class="govuk-summary-list__value">
-    @{payment.amount.gdsFormatInPounds}<br>
-    <span class="govuk-!-font-size-16">
-      @{Messages.YourBill.`(includes interest added to date)`.show}
-    </span>
-  </dd>
-</div>
+    @if(appConfig.cr111Enabled) {
+
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key govuk-!-width-two-thirds">
+            @invoicePeriodString<br>
+            <span class="govuk-!-font-weight-regular govuk-!-font-size-16">
+                @{Messages.YourBill.`Bill due`.show} @{govDateFormat(payment.invoicePeriod.dueDate)}
+            </span>
+          </dt>
+          <dd class="govuk-summary-list__value">
+            @{payment.amount.gdsFormatInPounds}<br>
+              @if(payment.interestBearingCharge.exists(_.value)) {
+            <span class="govuk-!-font-size-16">
+                @{Messages.YourBill.`(includes interest added to date)`.show}
+            </span>
+                  }
+          </dd>
+        </div>
+} else {
+
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key govuk-!-width-two-thirds">
+            @invoicePeriodString<br>
+            <span class="govuk-!-font-weight-regular govuk-!-font-size-16">
+                @{Messages.YourBill.`Bill due`.show} @{govDateFormat(payment.invoicePeriod.dueDate)}
+            </span>
+        </dt>
+        <dd class="govuk-summary-list__value">
+            @{payment.amount.gdsFormatInPounds}<br>
+            <span class="govuk-!-font-size-16">
+                @{Messages.YourBill.`(includes interest added to date)`.show}
+            </span>
+        </dd>
+    </div>
+}
