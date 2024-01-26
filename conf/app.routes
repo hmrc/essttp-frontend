@@ -44,6 +44,7 @@ GET    /debt-too-old-vat                                    controllers.Ineligib
 GET    /debt-before-accounting-date-vat                     controllers.IneligibleController.vatDebtBeforeAccountingDatePage
 GET    /file-your-return                                    controllers.IneligibleController.epayeFileYourReturnPage
 GET    /return-not-filed-vat                                controllers.IneligibleController.vatFileYourReturnPage
+GET    /return-not-filed-sa                                 controllers.IneligibleController.saFileYourReturnPage
 GET    /already-have-a-payment-plan-epaye                   controllers.IneligibleController.epayeAlreadyHaveAPaymentPlanPage
 GET    /already-have-a-payment-plan-vat                     controllers.IneligibleController.vatAlreadyHaveAPaymentPlanPage
 GET    /bill-not-overdue-epaye                              controllers.IneligibleController.epayeNoDueDatesReachedPage
