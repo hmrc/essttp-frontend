@@ -41,6 +41,142 @@ class YourBillControllerSpec extends ItSpec {
   private val controller: YourBillController = app.injector.instanceOf[YourBillController]
 
   "GET /your-bill should" - {
+    "return you bill page for EPAYE for interest bearing charges" in {
+      stubCommonActions()
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Epaye.Bta)()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+      val result: Future[Result] = controller.yourBill(fakeRequest)
+      val pageContent: String = contentAsString(result)
+      val doc: Document = Jsoup.parse(pageContent)
+
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1              = "Your PAYE bill is £3,000",
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl       = Some(routes.YourBillController.yourBillSubmit.url)
+      )
+
+      val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
+      tableRows.size shouldBe 2
+
+      tableRows(0).select(".govuk-summary-list__key").text() shouldBe "13 Jul 2020 to 14 Jul 2020 Bill due 7 February 2017"
+      tableRows(0).select(".govuk-summary-list__value").text() shouldBe "£2,000 (includes interest added to date)"
+
+      tableRows(1).select(".govuk-summary-list__key").text() shouldBe "13 Aug 2020 to 14 Aug 2020 Bill due 7 March 2017"
+      tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£1,000 (includes interest added to date)"
+    }
+
+    "return you bill page for EPAYE for non-interest bearing charges" in {
+      stubCommonActions()
+      EssttpBackend.EligibilityCheck.findJourneyWithNoInterestBearingCharges(testCrypto, Origins.Epaye.Bta)()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+      val result: Future[Result] = controller.yourBill(fakeRequest)
+      val pageContent: String = contentAsString(result)
+      val doc: Document = Jsoup.parse(pageContent)
+
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1              = "Your PAYE bill is £3,000",
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl       = Some(routes.YourBillController.yourBillSubmit.url)
+      )
+
+      val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
+      tableRows.size shouldBe 2
+
+      tableRows(0).select(".govuk-summary-list__key").text() shouldBe "13 Jul 2020 to 14 Jul 2020 Bill due 7 February 2017"
+      tableRows(0).select(".govuk-summary-list__value").text() shouldBe "£2,000"
+
+      tableRows(1).select(".govuk-summary-list__key").text() shouldBe "13 Aug 2020 to 14 Aug 2020 Bill due 7 March 2017"
+      tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£1,000"
+    }
+
+    "return you bill page for VAT for interest bearing charges" in {
+      stubCommonActions()
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Vat.Bta)()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+      val result: Future[Result] = controller.yourBill(fakeRequest)
+      val pageContent: String = contentAsString(result)
+      val doc: Document = Jsoup.parse(pageContent)
+
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1              = "Your VAT bill is £3,000",
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl       = Some(routes.YourBillController.yourBillSubmit.url),
+        regimeBeingTested       = Some(TaxRegime.Vat)
+      )
+
+      val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
+      tableRows.size shouldBe 2
+
+      tableRows(0).select(".govuk-summary-list__key").text() shouldBe "13 Jul 2020 to 14 Jul 2020 Bill due 7 February 2017"
+      tableRows(0).select(".govuk-summary-list__value").text() shouldBe "£2,000 (includes interest added to date)"
+
+      tableRows(1).select(".govuk-summary-list__key").text() shouldBe "13 Aug 2020 to 14 Aug 2020 Bill due 7 March 2017"
+      tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£1,000 (includes interest added to date)"
+    }
+
+    "return you bill page for VAT for non-interest bearing charges" in {
+      stubCommonActions()
+      EssttpBackend.EligibilityCheck.findJourneyWithNoInterestBearingCharges(testCrypto, Origins.Vat.Bta)()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+      val result: Future[Result] = controller.yourBill(fakeRequest)
+      val pageContent: String = contentAsString(result)
+      val doc: Document = Jsoup.parse(pageContent)
+
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1              = "Your VAT bill is £3,000",
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl       = Some(routes.YourBillController.yourBillSubmit.url),
+        regimeBeingTested       = Some(TaxRegime.Vat)
+      )
+
+      val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
+      tableRows.size shouldBe 2
+
+      tableRows(0).select(".govuk-summary-list__key").text() shouldBe "13 Jul 2020 to 14 Jul 2020 Bill due 7 February 2017"
+      tableRows(0).select(".govuk-summary-list__value").text() shouldBe "£2,000"
+
+      tableRows(1).select(".govuk-summary-list__key").text() shouldBe "13 Aug 2020 to 14 Aug 2020 Bill due 7 March 2017"
+      tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£1,000"
+    }
+  }
+
+  "POST /your-bill should" - {
+    "redirect to can you make an upfront payment question page" in {
+      stubCommonActions()
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Vat.Bta)()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+      val result = controller.yourBillSubmit(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.canYouMakeAnUpfrontPaymentUrl)
+    }
+  }
+}
+
+class YourBillControllerSpecWithCR111FlagOff extends ItSpec {
+
+  private val controller: YourBillController = app.injector.instanceOf[YourBillController]
+
+  override lazy val configOverrides: Map[String, Any] = Map("features.cr111" -> false)
+
+  "GET /your-bill should" - {
     "return you bill page for EPAYE" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Epaye.Bta)()
@@ -96,19 +232,6 @@ class YourBillControllerSpec extends ItSpec {
 
       tableRows(1).select(".govuk-summary-list__key").text() shouldBe "13 July to 14 July 2020 Bill due 7 February 2017"
       tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£2,000 (includes interest added to date)"
-    }
-  }
-
-  "POST /your-bill should" - {
-    "redirect to can you make an upfront payment question page" in {
-      stubCommonActions()
-      EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Vat.Bta)()
-
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
-      val result = controller.yourBillSubmit(fakeRequest)
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.canYouMakeAnUpfrontPaymentUrl)
     }
   }
 

@@ -23,13 +23,15 @@
 @import messages.Messages
 @import requests.RequestSupport
 @import models.OverDuePayments
+@import config.AppConfig
 
 @this(
 layout: Layout,
 govukButton: GovukButton,
 formWithCSRF: FormWithCSRF,
 requestSupport: RequestSupport,
-overduePaymentRow: OverduePaymentRow
+overduePaymentRow: OverduePaymentRow,
+appConfig: AppConfig
 )
 
 @(overduePayments: OverDuePayments, taxRegime: TaxRegime)(implicit request: Request[_])
@@ -44,7 +46,11 @@ overduePaymentRow: OverduePaymentRow
   <h1 class="govuk-heading-xl">@title</h1>
   <h2 class="govuk-heading-m">@{Messages.YourBill.`Overdue payments`.show}</h2>
   <dl class="govuk-summary-list">
-    @overduePayments.payments.sortBy(overduePayment => overduePayment.invoicePeriod.dueDate).map(payment => overduePaymentRow(payment, taxRegime))
+      @if(appConfig.cr111Enabled) {
+          @overduePayments.payments.sortBy(overduePayment => overduePayment.invoicePeriod.dueDate).map(payment => overduePaymentRow(payment, taxRegime))
+      } else {
+          @overduePayments.payments.map(payment => overduePaymentRow(payment, taxRegime))
+      }
   </dl>
   @formWithCSRF(action = routes.YourBillController.yourBillSubmit) {
   @govukButton(Button(content = Text(Messages.continue.show), attributes = Map("id" -> "continue")))
