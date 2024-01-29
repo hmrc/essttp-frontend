@@ -1407,6 +1407,11 @@ object Messages {
       welsh   = "Er enghraifft, fyenw@enghraifft.cymru"
     )
 
+    val `Email address`: Message = Message(
+      english = "Email address",
+      welsh   = "Cyfeiriad e-bost"
+    )
+
     val `Select which email address you want to use`: Message = Message(
       english = "Select which email address you want to use",
       welsh   = "Pa e-bost rydych am ei ddefnyddio?"

@@ -136,7 +136,9 @@ class EmailControllerSpec extends ItSpec {
             radioLabels(0).text() shouldBe "bobross@joyofpainting.com"
             radioLabels(1).text() shouldBe "A new email address"
 
+            doc.select(".govuk-radios__conditional .govuk-label").text() shouldBe "Email address"
             doc.select("#newEmailInput-hint").text() shouldBe "For example, myname@sample.com"
+
             doc.select("#newEmailInput").attr("type") shouldBe "email"
           }
 
