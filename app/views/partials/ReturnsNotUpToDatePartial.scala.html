@@ -14,6 +14,8 @@
  * limitations under the License.
  *@
 
+@import cats.syntax.eq._
+
 @import config.AppConfig
 @import play.api.mvc.Request
 @import requests.RequestSupport
@@ -27,7 +29,7 @@
 
 @import requestSupport._
 
-@commonParagraph() = {
+@goToYourTaxAccount() = {
     <p class="govuk-body">
         <a href="@{btaLink}" class="govuk-link" id="bta-link">
             @{Messages.NotEligible.`Go to your tax account`.show}
@@ -35,45 +37,58 @@
     </p>
 }
 
-@epayeContent = {
-    <p class="govuk-body">
-    @{
-        Html(Messages.NotEligible.`To be eligible to set up a payment plan online, you need to be up to date with your Employers PAYE returns...`.show)
+@callUsContent = {
+    <p id="call-us-content" class="govuk-body">
+    @if(taxRegime =!= TaxRegime.Sa) {
+        @Html(Messages.NotEligible.`Call us on 0300 123 1813 as you may be able to set up a plan over the phone`.show)
+    } else {
+        @Html(Messages.NotEligible.`Call us on 0300 123 1813 if you need to speak to an adviser.`.show)
     }
     </p>
+}
 
-    @commonParagraph()
+@epayeContent = {
+    <p class="govuk-body">
+      @{Html(Messages.NotEligible.`To be eligible to set up a payment plan online, you need to be up to date with your Employers PAYE returns...`.show)}
+    </p>
+
+    @goToYourTaxAccount()
 
     <p class="govuk-body">
-    @{Html(Messages.NotEligible.`If you have recently filed your return, your account may take up to 72 hours to be updated before you can set up a payment plan.`.show)}
+      @{Html(Messages.NotEligible.`If you have recently filed your return, your account may take up to 72 hours to be updated before you can set up a payment plan.`.show)}
     </p>
+
+  @callUsContent
 }
 
 @vatContent = {
     <p class="govuk-body">
-    @{Html(Messages.NotEligible.`To be eligible to set up a payment plan online, you need to have filed your VAT returns. Once you have done this, you can return to the service.`.show)}
+      @{Html(Messages.NotEligible.`To be eligible to set up a payment plan online, you need to have filed your VAT returns. Once you have done this, you can return to the service.`.show)}
     </p>
 
-    @commonParagraph()
+    @goToYourTaxAccount()
 
     <p class="govuk-body">
-    @{Html(Messages.NotEligible.`If you have recently filed your return, your account may take up to 72 hours to be updated before you can set up a payment plan.`.show)}
+      @{Html(Messages.NotEligible.`If you have recently filed your return, your account may take up to 72 hours to be updated before you can set up a payment plan.`.show)}
     </p>
+
+  @callUsContent
 }
 
-  @saContent = {
-      <p class="govuk-body">
+@saContent = {
+    <p class="govuk-body">
       @{Html(Messages.NotEligible.`You must file your tax return before you can set up a Self Assessment payment plan online.`(appConfig.Urls.fileSaReturnUUrl).show)}
-      </p>
-  }
+    </p>
+
+  @callUsContent
+}
 
 @{
     taxRegime match {
         case TaxRegime.Epaye => epayeContent
         case TaxRegime.Vat   => vatContent
         case TaxRegime.Sa => saContent
-
     }
 }
 
-<p id="call-us-content" class="govuk-body">@{Html(Messages.NotEligible.`Call us on 0300 123 1813 as you may be able to set up a plan over the phone`.show)}</p>
+

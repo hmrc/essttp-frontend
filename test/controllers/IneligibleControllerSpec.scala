@@ -243,6 +243,11 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Sa =>
                 (controller.saFileYourReturnPage(fakeRequest), "File your Self Assessment tax return to use this service")
             }
+
+            val expectedCallUsContent =
+              if (taxRegime =!= TaxRegime.Sa) "Call us on <strong>0300 123 1813</strong> as you may be able to set up a plan over the phone."
+              else "Call us on <strong>0300 123 1813</strong> if you need to speak to an adviser."
+
             val page = pageContentAsDoc(result)
 
             ContentAssertions.commonPageChecks(
@@ -264,7 +269,13 @@ class IneligibleControllerSpec extends ItSpec {
               leadingP1 = expectedLeadingContent
             )
 
-            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English, expectCallPreparationHints = taxRegime =!= TaxRegime.Sa)
+            ContentAssertions.commonIneligibilityTextCheck(
+              page,
+              taxRegime,
+              Languages.English,
+              expectCallPreparationHints = taxRegime =!= TaxRegime.Sa,
+              callUsContentEnglish       = expectedCallUsContent
+            )
 
             if (taxRegime =!= TaxRegime.Sa) {
               page.select(".govuk-body").asScala.toList(1).text() shouldBe "Go to your tax account to file your tax return."
@@ -523,12 +534,22 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Sa    => "Mae’n rhaid i chi gyflwyno’ch Ffurflen Dreth cyn i chi allu trefnu cynllun talu ar gyfer Hunanasesiad ar-lein."
             }
 
+            val expectedCallUsContent =
+              if (taxRegime =!= TaxRegime.Sa) "Ffoniwch ni ar <strong>0300 200 1900</strong> oherwydd mae’n bosibl y gallwch drefnu cynllun dros y ffôn."
+              else "Ffoniwch ni ar <strong>0300 200 1900</strong> os oes angen i chi siarad ag ymgynghorydd."
+
             assertIneligiblePageLeadingP1(
               page      = page,
               leadingP1 = expectedLeadingContent
             )
 
-            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.Welsh, expectCallPreparationHints = taxRegime =!= TaxRegime.Sa)
+            ContentAssertions.commonIneligibilityTextCheck(
+              page,
+              taxRegime,
+              Languages.Welsh,
+              expectCallPreparationHints = taxRegime =!= TaxRegime.Sa,
+              callUsContentWelsh         = expectedCallUsContent
+            )
 
             if (taxRegime =!= TaxRegime.Sa) {
               ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.Welsh)
