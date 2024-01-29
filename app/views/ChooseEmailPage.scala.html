@@ -60,6 +60,9 @@
         errorMessage = form.error(newEmailKey).map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
             content = Text(Messages.EmailEntry.getError(s"${e.key}.${e.message}").show)
         )),
+        label = Label(
+            content =  Text(Messages.EmailEntry.`Email address`.show)
+        ),
         value = form(newEmailKey).value
     ))
 }
