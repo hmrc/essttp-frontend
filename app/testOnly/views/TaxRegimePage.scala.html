@@ -1,0 +1,93 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import testOnly.controllers.routes
+@import messages.Messages
+@import essttp.rootmodel.TaxRegime
+@import play.api.mvc.Request
+@import play.api.data.Form
+@import requests.RequestSupport
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import testOnly.views.html.TestOnlyLayout
+
+@this(
+  layout: TestOnlyLayout,
+  govukButton: GovukButton,
+  govukRadios: GovukRadios,
+  formWithCSRF: FormWithCSRF,
+  govukErrorSummary: GovukErrorSummary,
+  requestSupport: RequestSupport
+)
+
+@(form: Form[TaxRegime])(implicit request: Request[_])
+
+@import requestSupport._
+
+@key = @{
+    "taxRegime"
+}
+
+@title = @{
+    "Test only: Choose a tax regime"
+}
+
+@radioItems = @{
+    Seq(
+        RadioItem(
+            content = Text(Messages.WhichTaxRegime.EPAYE.show),
+            value = Some("EPAYE")
+        ),
+        RadioItem(
+            content = Text(Messages.WhichTaxRegime.VAT.show),
+            value = Some("VAT")
+        ),
+        RadioItem(
+            content = Text(Messages.WhichTaxRegime.SA.show),
+            value = Some("SA")
+        )
+    )
+}
+
+@layout(pageTitle = Some(title), hasErrors = form.hasErrors) {
+    @if(form.errors.nonEmpty) {
+        @govukErrorSummary(
+            ErrorSummary(errorList = form.errors.map(e =>
+                ErrorLink(
+                    href = Some(s"#${e.key}"),
+                    content = Text(e.message)
+                )
+            ),
+                title = Text(Messages.`There is a problem`.show))
+        )
+    }
+    @formWithCSRF(action = routes.StartJourneyController.whichTaxRegimeSubmit) {
+        @govukRadios(Radios(
+            fieldset = Some(Fieldset(
+                legend = Some(Legend(
+                    content = Text(title),
+                    classes = "govuk-fieldset__legend--l",
+                    isPageHeading = true
+                ))
+            )),
+            idPrefix = Some(key),
+            name = key,
+            items = radioItems,
+            errorMessage = form.error(key).map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(content = Text(e.message)))
+        ))
+        @govukButton(Button(content = Text(Messages.continue.show), attributes = Map("id" -> "continue")))
+    }
+
+}

@@ -12,13 +12,23 @@
 # Add all the application routes to the prod.routes file
 ->   /                                                            prod.Routes
 
-GET  /set-up-a-payment-plan/test-only/start-journey               testOnly.controllers.StartJourneyController.startJourneyGet
-POST /set-up-a-payment-plan/test-only/start-journey               testOnly.controllers.StartJourneyController.startJourneySubmit
+
+GET  /set-up-a-payment-plan/test-only/tax-regime                  testOnly.controllers.StartJourneyController.whichTaxRegime
+POST /set-up-a-payment-plan/test-only/tax-regime                  testOnly.controllers.StartJourneyController.whichTaxRegimeSubmit
+
+GET  /set-up-a-payment-plan/test-only/start-journey-epaye         testOnly.controllers.StartJourneyController.startJourneyEpayeGet
+GET  /set-up-a-payment-plan/test-only/start-journey-vat          testOnly.controllers.StartJourneyController.startJourneyVatGet
+GET  /set-up-a-payment-plan/test-only/start-journey-sa            testOnly.controllers.StartJourneyController.startJourneySaGet
+
+POST /set-up-a-payment-plan/test-only/start-journey-epaye         testOnly.controllers.StartJourneyController.startJourneyEpayeSubmit
+POST /set-up-a-payment-plan/test-only/start-journey-vat          testOnly.controllers.StartJourneyController.startJourneyVatSubmit
+POST /set-up-a-payment-plan/test-only/start-journey-sa            testOnly.controllers.StartJourneyController.startJourneySaSubmit
+
 GET  /set-up-a-payment-plan/test-only/show-journey                testOnly.controllers.DebugJourneyController.showJourney
 
 GET  /set-up-a-payment-plan/test-only/bta-epaye-page              testOnly.controllers.StartJourneyController.showBtaEpayePage
 GET  /set-up-a-payment-plan/test-only/bta-vat-page                testOnly.controllers.StartJourneyController.showBtaVatPage
-GET  /set-up-a-payment-plan/test-only/bta-sa-page                testOnly.controllers.StartJourneyController.showBtaSaPage
+GET  /set-up-a-payment-plan/test-only/bta-sa-page                 testOnly.controllers.StartJourneyController.showBtaSaPage
 
 GET  /set-up-a-payment-plan/test-only/govuk-epaye-page            testOnly.controllers.StartJourneyController.showGovukEpayePage
 GET  /set-up-a-payment-plan/test-only/govuk-vat-page              testOnly.controllers.StartJourneyController.showGovukVatPage

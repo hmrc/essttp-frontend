@@ -33,7 +33,7 @@ import requests.RequestSupport
 import testOnly.AuthLoginApiService
 import testOnly.connectors.EssttpStubConnector
 import testOnly.controllers.StartJourneyController._
-import testOnly.models.formsmodel.StartJourneyForm
+import testOnly.models.formsmodel.{StartJourneyForm, TaxRegimeForm}
 import testOnly.models.testusermodel.TestUser
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 import uk.gov.hmrc.http.HeaderCarrier
@@ -53,6 +53,7 @@ class StartJourneyController @Inject() (
     testOnlyStartPage:   TestOnlyStartPage,
     journeyConnector:    JourneyConnector,
     loginService:        AuthLoginApiService,
+    taxRegimePage:       TaxRegimePage,
     iAmBtaPage:          IAmBtaPage,
     iAmPtaPage:          IAmPtaPage,
     iAmEpayePage:        IAmEPAYEPage,
@@ -67,34 +68,62 @@ class StartJourneyController @Inject() (
 
   import requestSupport._
 
-  val startJourneyGet: Action[AnyContent] = as.default { implicit request =>
-    Ok(testOnlyStartPage(
-      StartJourneyForm.form(
-        appConfig.PolicyParameters.EPAYE.maxAmountOfDebt,
-        appConfig.PolicyParameters.VAT.maxAmountOfDebt,
-        appConfig.PolicyParameters.SA.maxAmountOfDebt
-      )
-    ))
+  val whichTaxRegime: Action[AnyContent] = as.default { implicit request =>
+    Ok(taxRegimePage(TaxRegimeForm.form))
   }
 
-  val startJourneySubmit: Action[AnyContent] = as.default.async { implicit request =>
-    StartJourneyForm.form(
-      appConfig.PolicyParameters.EPAYE.maxAmountOfDebt,
-      appConfig.PolicyParameters.VAT.maxAmountOfDebt,
-      appConfig.PolicyParameters.SA.maxAmountOfDebt
+  val whichTaxRegimeSubmit: Action[AnyContent] = as.default { implicit request =>
+    TaxRegimeForm.form.bindFromRequest().fold(
+      formWithErrors => BadRequest(taxRegimePage(formWithErrors)), {
+        case TaxRegime.Epaye => Redirect(routes.StartJourneyController.startJourneyEpayeGet)
+        case TaxRegime.Vat   => Redirect(routes.StartJourneyController.startJourneyVatGet)
+        case TaxRegime.Sa    => Redirect(routes.StartJourneyController.startJourneySaGet)
+      }
     )
+  }
+
+  val startJourneyEpayeGet: Action[AnyContent] = as.default { implicit request =>
+    Ok(startPage(TaxRegime.Epaye))
+  }
+
+  val startJourneyVatGet: Action[AnyContent] = as.default { implicit request =>
+    Ok(startPage(TaxRegime.Vat))
+
+  }
+
+  val startJourneySaGet: Action[AnyContent] = as.default { implicit request =>
+    Ok(startPage(TaxRegime.Sa))
+  }
+
+  private def startPage(taxRegime: TaxRegime)(implicit request: Request[_]) =
+    testOnlyStartPage(taxRegime, StartJourneyForm.form(taxRegime, appConfig))
+
+  val startJourneyEpayeSubmit: Action[AnyContent] = as.default.async { implicit request =>
+    startJourneySubmit(TaxRegime.Epaye)
+  }
+
+  val startJourneyVatSubmit: Action[AnyContent] = as.default.async { implicit request =>
+    startJourneySubmit(TaxRegime.Vat)
+
+  }
+
+  val startJourneySaSubmit: Action[AnyContent] = as.default.async { implicit request =>
+    startJourneySubmit(TaxRegime.Sa)
+  }
+
+  private def startJourneySubmit(taxRegime: TaxRegime)(implicit request: Request[_]): Future[Result] = {
+    StartJourneyForm.form(taxRegime, appConfig)
       .bindFromRequest()
       .fold(
-        formWithErrors =>
-          Future.successful(Ok(testOnlyStartPage(formWithErrors))),
-        startJourney
+        formWithErrors => Future.successful(Ok(testOnlyStartPage(taxRegime, formWithErrors))),
+        startJourney(taxRegime, _)
       )
   }
 
-  private def startJourney(startJourneyForm: StartJourneyForm): Future[Result] = {
+  private def startJourney(taxRegime: TaxRegime, startJourneyForm: StartJourneyForm): Future[Result] = {
     implicit val hc: HeaderCarrier = HeaderCarrier()
     for {
-      _ <- essttpStubConnector.primeStubs(makeEligibilityCheckResult(startJourneyForm))
+      _ <- essttpStubConnector.primeStubs(makeEligibilityCheckResult(taxRegime, startJourneyForm))
       maybeTestUser = TestUser.makeTestUser(startJourneyForm)
       session <- maybeTestUser.map(testUser => loginService.logIn(testUser)).getOrElse(Future.successful(Session.emptyCookie))
       redirectTo: Call = startJourneyForm.origin match {
@@ -261,7 +290,7 @@ object StartJourneyController {
     case "Individual"   => uk.gov.hmrc.auth.core.AffinityGroup.Individual
   }
 
-  private def makeEligibilityCheckResult(form: StartJourneyForm): EligibilityCheckResult = {
+  private def makeEligibilityCheckResult(taxRegime: TaxRegime, form: StartJourneyForm): EligibilityCheckResult = {
 
     val debtAmountFromForm: AmountInPence = AmountInPence(form.debtTotalAmount)
     val interestAmount: AmountInPence = AmountInPence(form.interestAmount.getOrElse(BigDecimal(0)))
@@ -332,7 +361,7 @@ object StartJourneyController {
     }
     EligibilityCheckResult(
       processingDateTime              = ProcessingDateTime(LocalDate.now().toString),
-      identification                  = makeIdentificationForTaxType(form),
+      identification                  = makeIdentificationForTaxType(taxRegime, form),
       customerPostcodes               = List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate("2022-01-01"))),
       regimePaymentFrequency          = PaymentPlanFrequencies.Monthly,
       paymentPlanFrequency            = PaymentPlanFrequencies.Monthly,
@@ -347,8 +376,8 @@ object StartJourneyController {
     )
   }
 
-  def makeIdentificationForTaxType(form: StartJourneyForm): List[Identification] = {
-    form.taxRegime match {
+  def makeIdentificationForTaxType(taxRegime: TaxRegime, form: StartJourneyForm): List[Identification] = {
+    taxRegime match {
       case TaxRegime.Epaye => List(
         Identification(IdType("EMPREF"), IdValue(form.taxReference.value)),
         Identification(IdType("BROCS"), IdValue(form.taxReference.value))

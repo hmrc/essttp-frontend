@@ -72,9 +72,16 @@ const clickContinue = () => {
 
 /* ########################      ESSTTP PAGES      ######################## */
 
-const testOnlyStartPage = () => {
-    if (currentPageIs('/set-up-a-payment-plan/test-only/start-journey')) {
-        document.getElementsByName('taxRegime').value = 'Epaye'
+const testOnlyTaxRegimePage = () => {
+    if (currentPageIs('/set-up-a-payment-plan/test-only/tax-regime')) {
+        document.getElementById('taxRegime').checked = true
+
+        clickContinue()
+    }
+}
+
+const testOnlyStartPageEpaye = () => {
+    if (currentPageIs('/set-up-a-payment-plan/test-only/start-journey-epaye')) {
         document.getElementById('signInAs').checked = true
         document.getElementById('enrolments').checked = true
         document.getElementById('payeDebtTotalAmount').value = '10000'
@@ -83,6 +90,36 @@ const testOnlyStartPage = () => {
         document.getElementById('regimeDigitalCorrespondence').checked = true
         document.getElementById('emailAddressPresent').checked = true
         document.getElementById('origin-3').checked = true
+
+        clickContinue()
+    }
+}
+
+const testOnlyStartPageVat = () => {
+    if (currentPageIs('/set-up-a-payment-plan/test-only/start-journey-vat')) {
+        document.getElementById('signInAs').checked = true
+        document.getElementById('enrolments-2').checked = true
+        document.getElementById('vatDebtTotalAmount').value = '10000'
+        document.getElementById('interestAmount').value = '0'
+        document.getElementById('vatTaxReference').value = ''
+        document.getElementById('regimeDigitalCorrespondence').checked = true
+        document.getElementById('emailAddressPresent').checked = true
+        document.getElementById('origin-3').checked = true
+
+        clickContinue()
+    }
+}
+
+const testOnlyStartPageSa = () => {
+    if (currentPageIs('/set-up-a-payment-plan/test-only/start-journey-sa')) {
+        document.getElementById('signInAs').checked = true
+        document.getElementById('enrolments-3').checked = true
+        document.getElementById('saDebtTotalAmount').value = '10000'
+        document.getElementById('interestAmount').value = '0'
+        document.getElementById('saTaxReference').value = ''
+        document.getElementById('regimeDigitalCorrespondence').checked = true
+        document.getElementById('emailAddressPresent').checked = true
+        document.getElementById('origin-4').checked = true
 
         clickContinue()
     }
@@ -207,7 +244,10 @@ const emailAddressConfirmed = () => {
 
 /* ########################     MAIN FUNCTION     ########################## */
 function continueJourney() {
-    testOnlyStartPage()
+    testOnlyTaxRegimePage()
+    testOnlyStartPageEpaye()
+    testOnlyStartPageVat()
+    testOnlyStartPageSa()
     landingPage()
     yourBill()
     canYouMakeUpfrontPayment()

@@ -25,26 +25,26 @@
 @import essttp.rootmodel.TaxRegime
 @import testOnly.models.formsmodel.Enrolments
 @import testOnly.models.formsmodel.SignInAs
+@import testOnly.views.html.TestOnlyLayout
 @import cats.syntax.eq._
 @import config.AppConfig
 
 @this(
-        testOnlyLayout: TestOnlyLayout,
-        govukButton: GovukButton,
-        formWithCSRF: FormWithCSRF,
-        govukRadios: GovukRadios,
-        requestSupport: RequestSupport,
-        govukTabs: GovukTabs,
-        govukCheckboxes: GovukCheckboxes,
-        govukErrorSummary: GovukErrorSummary,
-        govukInput: GovukInput,
-        appConfig: AppConfig
+testOnlyLayout: TestOnlyLayout,
+govukButton: GovukButton,
+formWithCSRF: FormWithCSRF,
+govukRadios: GovukRadios,
+requestSupport: RequestSupport,
+govukCheckboxes: GovukCheckboxes,
+govukErrorSummary: GovukErrorSummary,
+govukInput: GovukInput,
+appConfig: AppConfig
 )
 
-
-@(form: Form[StartJourneyForm])(implicit request: Request[_])
+@(taxRegime: TaxRegime, form: Form[StartJourneyForm])(implicit request: Request[_])
 
 @import requestSupport._
+
 @title = @{
     "Test only starter page"
 }
@@ -75,7 +75,7 @@
     .map(toCheckboxItem)
 }
 
-@enrolmentsContent(taxRegime: TaxRegime) = @{
+@enrolmentsContent = @{
     govukCheckboxes(Checkboxes(
         fieldset = Some(Fieldset(
             legend = Some(Legend(
@@ -301,11 +301,10 @@
 }
 
 @payeContent = {
-@formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneySubmit) {
+@formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneyEpayeSubmit) {
 
-    <input type="hidden" name="taxRegime" value="Epaye">
     @signInAsContent
-    @enrolmentsContent(TaxRegime.Epaye)
+    @enrolmentsContent
 
     @govukInput(Input(
         id = "payeDebtTotalAmount",
@@ -414,10 +413,9 @@
 }
 
 @vatContent = {
-@formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneySubmit) {
-    <input type="hidden" name="taxRegime" value="Vat">
+@formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneyVatSubmit) {
     @signInAsContent
-    @enrolmentsContent(TaxRegime.Vat)
+    @enrolmentsContent
 
     @govukInput(Input(
         id = "vatDebtTotalAmount",
@@ -533,11 +531,10 @@
 }
 
 @saContent = {
-@formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneySubmit) {
+@formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneySaSubmit) {
 
-    <input type="hidden" name="taxRegime" value="Sa">
     @signInAsContent
-    @enrolmentsContent(TaxRegime.Sa)
+    @enrolmentsContent
 
     @govukInput(Input(
         id = "saDebtTotalAmount",
@@ -647,9 +644,8 @@
 }
 }
 
-@testOnlyLayout(pageTitle = Some(title)) {
+@testOnlyLayout(pageTitle = Some(title), backUrl = Some(testOnlyRoutes.StartJourneyController.whichTaxRegime.url)) {
     @if(form.errors.nonEmpty) {
-        <input type="hidden" id="@{form.data("taxRegime")}Submitted" name="submittedRegime">
         @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
             ErrorLink(
                 href = Some(s"#${e.key}"),
@@ -659,31 +655,16 @@
         ))
     }
 
-    <h1 class="govuk-heading-xl">@title</h1>
+    <h1 class="govuk-heading-xl">@title - @{taxRegime.entryName}</h1>
     <p class="govuk-body">Set up journeys and emulate entry point behaviours.</p>
 
-    @govukTabs(Tabs(items = Seq(
-        TabItem(
-            id = Some("paye"),
-            label = "PAYE",
-            panel = TabPanel(
-                content = HtmlContent(payeContent)
-            )
-        ),
-        TabItem(
-            id = Some("vat"),
-            label = "VAT",
-            panel = TabPanel(
-                content = HtmlContent(vatContent)
-            )
-        ),
-        TabItem(
-            id = Some("sa"),
-            label = "SA",
-            panel = TabPanel(
-                content = HtmlContent(saContent)
-            )
-        )
-    )))
+    @{
+        taxRegime match {
+            case TaxRegime.Epaye => payeContent
+            case TaxRegime.Vat => vatContent
+            case TaxRegime.Sa => saContent
+        }
+
+    }
 
 }

@@ -17,6 +17,7 @@
 package testOnly.models.formsmodel
 
 import cats.syntax.either._
+import config.AppConfig
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.{AmountInPence, EmpRef, SaUtr, TaxId, TaxRegime, Vrn}
 import models.MoneyUtil.{amountOfMoneyFormatter, formatAmountOfMoneyWithoutPoundSign}
@@ -38,7 +39,6 @@ final case class StartJourneyForm(
     debtTotalAmount:               BigDecimal,
     interestAmount:                Option[BigDecimal],
     taxReference:                  TaxId,
-    taxRegime:                     TaxRegime,
     regimeDigitalCorrespondence:   Boolean,
     emailAddressPresent:           Boolean,
     isInterestBearingCharge:       Option[Boolean],
@@ -51,9 +51,8 @@ final case class StartJourneyForm(
 object StartJourneyForm {
 
   def form(
-      payeMaxAmountOfDebt: AmountInPence,
-      vatMaxAmountOfDebt:  AmountInPence,
-      saMaxAmountOfDebt:   AmountInPence
+      taxRegime: TaxRegime,
+      appConfig: AppConfig
   )(implicit language: Language): Form[StartJourneyForm] = {
     Form(
       mapping(
@@ -61,10 +60,9 @@ object StartJourneyForm {
         "enrolments" -> enrolmentsMapping,
         "origin" -> originMapping,
         "eligibilityErrors" -> seq(enumeratum.Forms.enumMapping(EligibilityErrors)),
-        "" -> Forms.of(debtTotalAmountFormat(payeMaxAmountOfDebt, vatMaxAmountOfDebt, saMaxAmountOfDebt)),
+        "" -> Forms.of(debtTotalAmountFormat(taxRegime, appConfig)),
         "interestAmount" -> interestAmountMapping,
-        "" -> Forms.of(taxReferenceFormat),
-        taxRegimeKey -> Forms.of(taxRegimeFormatter),
+        "" -> Forms.of(taxReferenceFormat(taxRegime)),
         "regimeDigitalCorrespondence" -> optionalBooleanMappingDefaultTrue,
         "emailAddressPresent" -> optionalBooleanMappingDefaultTrue,
         "isInterestBearingCharge" -> chargesOptionalFieldsMapping,
@@ -75,8 +73,6 @@ object StartJourneyForm {
       )(StartJourneyForm.apply)(StartJourneyForm.unapply)
     )
   }
-
-  private val taxRegimeKey: String = "taxRegime"
 
   private val payeDebtTotalAmountKey: String = "payeDebtTotalAmount"
   private val vatDebtTotalAmountKey: String = "vatDebtTotalAmount"
@@ -109,70 +105,63 @@ object StartJourneyForm {
   private val interestAmountMapping: Mapping[Option[BigDecimal]] =
     optional(Forms.of(amountOfMoneyFormatter(_ < 0, _ => false)))
 
-  private val taxRegimeFormatter: Formatter[TaxRegime] = EnumFormatter.format(
-    `enum`                  = TaxRegime,
-    errorMessageIfMissing   = "Tax regime not found: missing",
-    errorMessageIfEnumError = "Tax regime not found: enum error",
-    insensitive             = true
-  )
-
   private def debtTotalAmountFormat(
-      payeMaxAmountOfDebt: AmountInPence,
-      vatMaxAmountOfDebt:  AmountInPence,
-      saMaxAmountOfDebt:   AmountInPence
+      taxRegime: TaxRegime,
+      appConfig: AppConfig
   ): Formatter[BigDecimal] = {
     new Formatter[BigDecimal] {
-      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], BigDecimal] =
-        taxRegimeFormatter.bind(taxRegimeKey, data).flatMap { taxRegime =>
-          val (maxAmount, amountKey) = taxRegime match {
-            case TaxRegime.Epaye => payeMaxAmountOfDebt -> payeDebtTotalAmountKey
-            case TaxRegime.Vat   => vatMaxAmountOfDebt -> vatDebtTotalAmountKey
-            case TaxRegime.Sa    => saMaxAmountOfDebt -> saDebtTotalAmountKey
-          }
-          val minAmount = AmountInPence(100)
+      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], BigDecimal] = {
 
-          amountOfMoneyFormatter(
-            isTooSmall = minAmount > AmountInPence(_),
-            isTooLarge = AmountInPence(_) > maxAmount
-          ).bind(amountKey, data).leftMap(errors =>
-            errors.map { e =>
-              val mappedMesage = e.message match {
-                case "error.pattern"  => "Total debt amount must be a number"
-                case "error.required" => "Total debt amount not found"
-                case "error.tooLarge" => s"Total debt amount must be below ${maxAmount.gdsFormatInPounds}"
-                case "error.tooSmall" => s"Total debt amount must be above ${minAmount.gdsFormatInPounds}"
-                case other            => other
-              }
-              FormError(e.key, mappedMesage)
-            })
+        val (maxAmount, amountKey) = taxRegime match {
+          case TaxRegime.Epaye => appConfig.PolicyParameters.EPAYE.maxAmountOfDebt -> payeDebtTotalAmountKey
+          case TaxRegime.Vat   => appConfig.PolicyParameters.VAT.maxAmountOfDebt -> vatDebtTotalAmountKey
+          case TaxRegime.Sa    => appConfig.PolicyParameters.SA.maxAmountOfDebt -> saDebtTotalAmountKey
         }
+        val minAmount = AmountInPence(100)
+
+        amountOfMoneyFormatter(
+          isTooSmall = minAmount > AmountInPence(_),
+          isTooLarge = AmountInPence(_) > maxAmount
+        ).bind(amountKey, data).leftMap(errors =>
+          errors.map { e =>
+            val mappedMesage = e.message match {
+              case "error.pattern"  => "Total debt amount must be a number"
+              case "error.required" => "Total debt amount not found"
+              case "error.tooLarge" => s"Total debt amount must be below ${maxAmount.gdsFormatInPounds}"
+              case "error.tooSmall" => s"Total debt amount must be above ${minAmount.gdsFormatInPounds}"
+              case other            => other
+            }
+            FormError(e.key, mappedMesage)
+          })
+      }
 
       override def unbind(key: String, value: BigDecimal): Map[String, String] =
         Map(key -> formatAmountOfMoneyWithoutPoundSign(value))
     }
   }
 
-  private val taxReferenceFormat: Formatter[TaxId] = {
+  private def taxReferenceFormat(taxRegime: TaxRegime): Formatter[TaxId] = {
     new Formatter[TaxId] {
-      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], TaxId] =
-        taxRegimeFormatter.bind(taxRegimeKey, data).map { taxRegime =>
-          val (taxReferenceKey, defaultTaxRef): (String, TaxId) = taxRegime match {
-            case TaxRegime.Epaye => payeTaxReferenceKey -> RandomDataGenerator.nextEpayeRefs()(Random)._3
-            case TaxRegime.Vat   => vatTaxReferenceKey -> RandomDataGenerator.nextVrn()(Random)
-            case TaxRegime.Sa    => saTaxReferenceKey -> RandomDataGenerator.nextSaUtr()(Random)
-          }
-
-          data.get(taxReferenceKey)
-            .filter(_.nonEmpty)
-            .map[TaxId] { someTaxRef: String =>
-              taxRegime match {
-                case TaxRegime.Epaye => EmpRef(someTaxRef)
-                case TaxRegime.Vat   => Vrn(someTaxRef)
-                case TaxRegime.Sa    => SaUtr(someTaxRef)
-              }
-            }
-            .getOrElse(defaultTaxRef)
+      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], TaxId] = {
+        val (taxReferenceKey, defaultTaxRef): (String, TaxId) = taxRegime match {
+          case TaxRegime.Epaye => payeTaxReferenceKey -> RandomDataGenerator.nextEpayeRefs()(Random)._3
+          case TaxRegime.Vat   => vatTaxReferenceKey -> RandomDataGenerator.nextVrn()(Random)
+          case TaxRegime.Sa    => saTaxReferenceKey -> RandomDataGenerator.nextSaUtr()(Random)
         }
+
+        val taxId: TaxId = data.get(taxReferenceKey)
+          .filter(_.nonEmpty)
+          .map[TaxId] { someTaxRef: String =>
+            taxRegime match {
+              case TaxRegime.Epaye => EmpRef(someTaxRef)
+              case TaxRegime.Vat   => Vrn(someTaxRef)
+              case TaxRegime.Sa    => SaUtr(someTaxRef)
+            }
+          }
+          .getOrElse(defaultTaxRef)
+
+        Right(taxId)
+      }
 
       override def unbind(key: String, value: TaxId): Map[String, String] = {
         value match {
