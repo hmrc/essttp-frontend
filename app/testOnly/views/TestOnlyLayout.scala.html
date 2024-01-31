@@ -31,6 +31,7 @@
         appConfig: AppConfig,
         govukLayout: GovukLayout,
         govukPhaseBanner : GovukPhaseBanner,
+        govukBackLink: GovukBackLink,
         hmrcHead: HmrcHead,
         hmrcStandardHeader: HmrcStandardHeader,
         hmrcStandardFooter: HmrcStandardFooter,
@@ -42,7 +43,8 @@
         pageTitle: Option[String] = None,
         headBlock: Option[Html] = None,
         scriptsBlock: Option[Html] = None,
-        hasErrors: Boolean = false
+        hasErrors: Boolean = false,
+        backUrl: Option[String] = None
 )(
         contentBlock: Html)(implicit
         request: Request[_]
@@ -64,13 +66,14 @@
 
 @beforeContentBlock = {
 
-@govukPhaseBanner(PhaseBanner(
+  @govukPhaseBanner(PhaseBanner(
     tag = Some(Tag(
         content = Text(Messages.ServicePhase.beta.show)
     )),
     content = HtmlContent(Messages.ServicePhase.bannerText(appConfig.Urls.betaFeedbackUrl(request)).show)
-))
+  ))
 
+  @backUrl.map(url => govukBackLink(BackLink(href = url, content = Text(Messages.back.show))))
 
 }
 
