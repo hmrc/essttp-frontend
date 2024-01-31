@@ -40,9 +40,9 @@ class LandingPageControllerSpec extends ItSpec {
   private val controller: LandingController = app.injector.instanceOf[LandingController]
 
   "GET /epaye-payment-plan" - {
-    "return 200 and the PAYE landing page" in {
+    "return 200 and the PAYE landing page when logged in" in {
       EssttpBackend.StartJourney.findJourney()
-      val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId").withAuthToken()
       val result: Future[Result] = controller.epayeLandingPage(fakeRequest)
 
       RequestAssertions.assertGetRequestOk(result)
@@ -53,7 +53,6 @@ class LandingPageControllerSpec extends ItSpec {
         expectedH1                  = "Set up an Employers’ PAYE payment plan",
         shouldBackLinkBePresent     = true,
         expectedSubmitUrl           = None,
-        signedIn                    = false,
         shouldH1BeSameAsServiceName = true,
         regimeBeingTested           = Some(TaxRegime.Epaye),
         shouldServiceNameBeInHeader = false,
@@ -80,6 +79,26 @@ class LandingPageControllerSpec extends ItSpec {
       val button = doc.select(".govuk-button")
       button.attr("href") shouldBe routes.LandingController.epayeLandingPageContinue.url
       button.text() shouldBe Messages.`Start now`.english
+    }
+
+    "return 200 and the PAYE landing page when not logged in" in {
+      EssttpBackend.StartJourney.findJourney()
+      val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.epayeLandingPage(fakeRequest)
+
+      RequestAssertions.assertGetRequestOk(result)
+      val doc: Document = Jsoup.parse(contentAsString(result))
+
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1                  = "Set up an Employers’ PAYE payment plan",
+        shouldBackLinkBePresent     = true,
+        expectedSubmitUrl           = None,
+        signedIn                    = false,
+        shouldH1BeSameAsServiceName = true,
+        regimeBeingTested           = Some(TaxRegime.Epaye),
+        shouldServiceNameBeInHeader = false
+      )
     }
   }
 
@@ -122,9 +141,9 @@ class LandingPageControllerSpec extends ItSpec {
   }
 
   "GET /vat-payment-plan" - {
-    "return 200 and the VAT landing page" in {
+    "return 200 and the VAT landing page when logged in" in {
       EssttpBackend.StartJourney.findJourney(Origins.Vat.DetachedUrl)
-      val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId").withAuthToken()
       val result: Future[Result] = controller.vatLandingPage(fakeRequest)
 
       RequestAssertions.assertGetRequestOk(result)
@@ -135,7 +154,6 @@ class LandingPageControllerSpec extends ItSpec {
         expectedH1                  = "Set up a VAT payment plan",
         shouldBackLinkBePresent     = true,
         expectedSubmitUrl           = None,
-        signedIn                    = false,
         shouldH1BeSameAsServiceName = true,
         regimeBeingTested           = Some(TaxRegime.Vat),
         shouldServiceNameBeInHeader = false,
@@ -161,6 +179,25 @@ class LandingPageControllerSpec extends ItSpec {
       val button = doc.select(".govuk-button")
       button.attr("href") shouldBe routes.LandingController.vatLandingPageContinue.url
       button.text() shouldBe Messages.`Start now`.english
+    }
+    "return 200 and the VAT landing page when not logged in" in {
+      EssttpBackend.StartJourney.findJourney(Origins.Vat.DetachedUrl)
+      val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.vatLandingPage(fakeRequest)
+
+      RequestAssertions.assertGetRequestOk(result)
+      val doc: Document = Jsoup.parse(contentAsString(result))
+
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1                  = "Set up a VAT payment plan",
+        shouldBackLinkBePresent     = true,
+        expectedSubmitUrl           = None,
+        signedIn                    = false,
+        shouldH1BeSameAsServiceName = true,
+        regimeBeingTested           = Some(TaxRegime.Vat),
+        shouldServiceNameBeInHeader = false
+      )
     }
   }
 
@@ -203,9 +240,9 @@ class LandingPageControllerSpec extends ItSpec {
   }
 
   "GET /sa-payment-plan" - {
-    "return 200 and the SA landing page" in {
+    "return 200 and the SA landing page when logged in" in {
       EssttpBackend.StartJourney.findJourney(origin = Origins.Sa.Bta)
-      val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId").withAuthToken()
       val result: Future[Result] = controller.saLandingPage(fakeRequest)
 
       RequestAssertions.assertGetRequestOk(result)
@@ -216,7 +253,6 @@ class LandingPageControllerSpec extends ItSpec {
         expectedH1                  = "Set up a Self Assessment payment plan",
         shouldBackLinkBePresent     = true,
         expectedSubmitUrl           = None,
-        signedIn                    = false,
         shouldH1BeSameAsServiceName = true,
         regimeBeingTested           = Some(TaxRegime.Sa),
         shouldServiceNameBeInHeader = false,
@@ -245,6 +281,25 @@ class LandingPageControllerSpec extends ItSpec {
       val button = doc.select(".govuk-button")
       button.attr("href") shouldBe routes.LandingController.saLandingPageContinue.url
       button.text() shouldBe Messages.`Start now`.english
+    }
+    "return 200 and the SA landing page when not logged in" in {
+      EssttpBackend.StartJourney.findJourney(origin = Origins.Sa.Bta)
+      val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.saLandingPage(fakeRequest)
+
+      RequestAssertions.assertGetRequestOk(result)
+      val doc: Document = Jsoup.parse(contentAsString(result))
+
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1                  = "Set up a Self Assessment payment plan",
+        shouldBackLinkBePresent     = true,
+        expectedSubmitUrl           = None,
+        signedIn                    = false,
+        shouldH1BeSameAsServiceName = true,
+        regimeBeingTested           = Some(TaxRegime.Sa),
+        shouldServiceNameBeInHeader = false
+      )
     }
   }
 

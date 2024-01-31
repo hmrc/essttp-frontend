@@ -19,8 +19,9 @@ package controllers
 import _root_.actions.Actions
 import config.AppConfig
 import essttp.journey.JourneyConnector
-import essttp.rootmodel.TaxRegime
-import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Request, Result}
+import essttp.rootmodel.{BackUrl, TaxRegime}
+import play.api.mvc._
+import requests.RequestSupport
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.Views
@@ -40,10 +41,8 @@ class LandingController @Inject() (
 
   val epayeLandingPage: Action[AnyContent] = as.default.async { implicit request =>
     checkNotShuttered(TaxRegime.Epaye) {
-      journeyConnector.findLatestJourneyBySessionId().map {
-        maybeJourney =>
-          val maybeBackUrl = maybeJourney.flatMap(_.backUrl)
-          Ok(views.epayeLanding(maybeBackUrl))
+      getBackUrl().map { maybeBackUrl =>
+        Ok(views.epayeLanding(maybeBackUrl))
       }
     }
   }
@@ -52,10 +51,8 @@ class LandingController @Inject() (
     if (appConfig.vatEnabled) {
       as.default.async { implicit request =>
         checkNotShuttered(TaxRegime.Vat) {
-          journeyConnector.findLatestJourneyBySessionId().map {
-            maybeJourney =>
-              val maybeBackUrl = maybeJourney.flatMap(_.backUrl)
-              Ok(views.vatLanding(maybeBackUrl))
+          getBackUrl().map { maybeBackUrl =>
+            Ok(views.vatLanding(maybeBackUrl))
           }
         }
       }
@@ -67,10 +64,8 @@ class LandingController @Inject() (
     if (appConfig.saEnabled) {
       as.default.async { implicit request =>
         checkNotShuttered(TaxRegime.Sa) {
-          journeyConnector.findLatestJourneyBySessionId().map {
-            maybeJourney =>
-              val maybeBackUrl = maybeJourney.flatMap(_.backUrl)
-              Ok(views.saLanding(maybeBackUrl))
+          getBackUrl().map { maybeBackUrl =>
+            Ok(views.saLanding(maybeBackUrl))
           }
         }
       }
@@ -110,6 +105,13 @@ class LandingController @Inject() (
   private def checkNotShuttered(taxRegime: TaxRegime)(f: => Future[Result])(implicit request: Request[_]): Future[Result] =
     if (appConfig.shutteredTaxRegimes.contains(taxRegime)) Future.successful(Ok(views.shuttered())) else f
 
+  private def getBackUrl()(implicit request: Request[AnyContent]): Future[Option[BackUrl]] =
+    if (RequestSupport.isLoggedIn) {
+      journeyConnector.findLatestJourneyBySessionId()
+        .map(maybeJourney => maybeJourney.flatMap(_.backUrl))
+    } else {
+      Future.successful[Option[BackUrl]](None)
+    }
 }
 
 object LandingController {
