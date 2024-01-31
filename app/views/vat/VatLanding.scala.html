@@ -77,6 +77,7 @@
 
     @govukButton(Button(
         href = Some(routes.LandingController.vatLandingPageContinue.url),
-        content = Text(Messages.`Start now`.show)
+        content = Text(Messages.`Start now`.show),
+        isStartButton = true
     ))
 }
