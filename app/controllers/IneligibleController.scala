@@ -64,6 +64,13 @@ class IneligibleController @Inject() (
     ))
   }
 
+  val saDebtTooLargePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    Ok(views.partials.ineligibleTemplatePage(
+      pageh1         = Messages.NotEligible.`Call us about a payment plan`,
+      leadingContent = views.partials.debtTooLargePartial(appConfig.PolicyParameters.SA.maxAmountOfDebt)
+    ))
+  }
+
   val epayeDebtTooSmallPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     Ok(views.partials.ineligibleTemplatePage(
       pageh1         = Messages.NotEligible.`Pay your ... bill in full`(request.journey.taxRegime),
@@ -89,6 +96,13 @@ class IneligibleController @Inject() (
     Ok(views.partials.ineligibleTemplatePage(
       pageh1         = Messages.NotEligible.`Call us about a payment plan`,
       leadingContent = views.partials.debtTooOldPartial(appConfig.PolicyParameters.VAT.maxAgeOfDebtInDays)
+    ))
+  }
+
+  val saDebtTooOldPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    Ok(views.partials.ineligibleTemplatePage(
+      pageh1         = Messages.NotEligible.`Call us about a payment plan`,
+      leadingContent = views.partials.debtTooOldPartial(appConfig.PolicyParameters.SA.maxAgeOfDebtInDays)
     ))
   }
 

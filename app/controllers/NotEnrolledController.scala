@@ -39,8 +39,8 @@ class NotEnrolledController @Inject() (
     Ok(views.notVatRegistered())
   }
 
-  def notSaEnrolled: Action[AnyContent] = as.authenticatedJourneyAction { _ =>
-    Ok("Not enrolled to SA")
+  def notSaEnrolled: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    Ok(views.notSaEnrolled())
   }
 
 }

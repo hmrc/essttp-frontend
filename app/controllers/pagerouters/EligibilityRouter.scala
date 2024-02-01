@@ -69,7 +69,7 @@ object EligibilityRouter {
   private def whichDebtTooLargePage(taxRegime: TaxRegime): Call = taxRegime match {
     case TaxRegime.Epaye => routes.IneligibleController.epayeDebtTooLargePage
     case TaxRegime.Vat   => routes.IneligibleController.vatDebtTooLargePage
-    case TaxRegime.Sa    => throw new NotImplementedError()
+    case TaxRegime.Sa    => routes.IneligibleController.saDebtTooLargePage
   }
 
   private def whichDebtTooSmallPage(taxRegime: TaxRegime): Call = taxRegime match {
@@ -87,7 +87,7 @@ object EligibilityRouter {
   private def whichDebtTooOldPage(taxRegime: TaxRegime): Call = taxRegime match {
     case TaxRegime.Epaye => routes.IneligibleController.epayeDebtTooOldPage
     case TaxRegime.Vat   => routes.IneligibleController.vatDebtTooOldPage
-    case TaxRegime.Sa    => throw new NotImplementedError()
+    case TaxRegime.Sa    => routes.IneligibleController.saDebtTooOldPage
   }
 
   private def whichFileYourReturnsPage(taxRegime: TaxRegime): Call = taxRegime match {

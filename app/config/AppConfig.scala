@@ -72,6 +72,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     val govUkUrl: String = config.get[String]("govUkUrls.govUk")
     val enrolForPayeUrl: String = config.get[String]("govUkUrls.enrolPayeUrl")
     val enrolForVatUrl: String = config.get[String]("govUkUrls.enrolVatUrl")
+    val enrolForSaUrl: String = config.get[String]("govUkUrls.enrolSaUrl")
     val extraSupportUrl: String = config.get[String]("govUkUrls.extraSupportUrl")
     val relayUrl: String = config.get[String]("govUkUrls.relayUrl")
     val businessTaxAccountUrl: String = s"${BaseUrl.businessTaxAccountFrontend}/business-account"
@@ -139,6 +140,8 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
 
       val maxAmountOfDebt: AmountInPence = AmountInPence(getParam[Long]("max-amount-of-debt-in-pounds") * 100L)
       val maxPlanDurationInMonths: Int = getParam[Int]("max-plan-duration-in-months")
+      val maxAgeOfDebtInDays: Int = getParam[Int]("max-age-of-debt-in-days")
+
     }
   }
 

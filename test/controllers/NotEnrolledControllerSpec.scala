@@ -129,4 +129,59 @@ class NotEnrolledControllerSpec extends ItSpec {
     }
 
   }
+
+  "GET /request-access-to-self-assessment should" - {
+
+    "return the not enrolled page in English" in {
+      stubCommonActions(authAllEnrolments = Some(Set.empty))
+      EssttpBackend.StartJourney.findJourney()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+      val result = controller.notSaEnrolled(fakeRequest)
+      val page: Document = Jsoup.parse(contentAsString(result))
+
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        page,
+        expectedH1              = "Request access to Self Assessment to use this service",
+        shouldBackLinkBePresent = false,
+        expectedSubmitUrl       = None
+      )
+
+      page.select(".govuk-body").asScala.toList(0).html() shouldBe (
+        "You must " +
+        """<a href="https://www.tax.service.gov.uk/business-account/add-tax/self-assessment/enter-sa-utr?origin=ssttp-sa" class="govuk-link">request access to Self Assessment</a> """ +
+        "before you can set up a Self Assessment payment plan."
+      )
+      ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Sa, Languages.English)
+    }
+
+    "return the not enrolled page in Welsh" in {
+      stubCommonActions(authAllEnrolments = Some(Set.empty))
+      EssttpBackend.StartJourney.findJourney()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+      val result = controller.notSaEnrolled(fakeRequest.withLangWelsh())
+      val page: Document = Jsoup.parse(contentAsString(result))
+
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        page,
+        expectedH1              = "Gwneud cais i gael mynediad at eich cyfrif Hunanasesiad er mwyn defnyddio’r gwasanaeth hwn",
+        shouldBackLinkBePresent = false,
+        expectedSubmitUrl       = None,
+        language                = Languages.Welsh
+      )
+
+      page.select(".govuk-body").asScala.toList(0).html() shouldBe (
+        "Mae’n rhaid i chi " +
+        """<a href="https://www.tax.service.gov.uk/business-account/add-tax/self-assessment/enter-sa-utr?origin=ssttp-sa" class="govuk-link">wneud cais i gael mynediad at eich cyfrif Hunanasesiad</a> """ +
+        "cyn i chi allu trefnu cynllun talu Hunanasesiad ar-lein."
+      )
+      ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Sa, Languages.Welsh)
+    }
+
+  }
 }

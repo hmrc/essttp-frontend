@@ -316,7 +316,10 @@ object Messages {
           welsh   = s"Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein oherwydd mae arnoch dros ${maxAmountOfDebt.gdsFormatInPounds}."
         )
       case TaxRegime.Sa =>
-        throw new NotImplementedError()
+        Message(
+          english = s"You cannot set up a Self Assessment payment plan online because you owe more than ${maxAmountOfDebt.gdsFormatInPounds}.",
+          welsh   = s"Ni allwch drefnu cynllun talu Hunanasesiad ar-lein oherwydd mae arnoch dros ${maxAmountOfDebt.gdsFormatInPounds}."
+        )
     }
 
     def `Pay your ... bill in full`(taxRegime: TaxRegime): Message = {
@@ -382,8 +385,10 @@ object Messages {
         english = s"You cannot set up a VAT payment plan online because your payment deadline was over ${ageOfDebtInYearsOrDays.toString} days ago.",
         welsh   = s"Ni allwch drefnu cynllun talu TAW ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros ${ageOfDebtInYearsOrDays.toString} wythnos yn ôl."
       )
-      case TaxRegime.Sa =>
-        throw new NotImplementedError()
+      case TaxRegime.Sa => Message(
+        english = s"You cannot set up a Self Assessment payment plan online because your payment deadline was over ${ageOfDebtInYearsOrDays.toString} days ago.",
+        welsh   = s"Ni allwch drefnu cynllun talu Hunanasesiad ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros ${ageOfDebtInYearsOrDays.toString} diwrnod yn ôl."
+      )
     }
 
     def `You cannot set up ... accounting period that started before`(accountingPeriodStart: String): Message = Message(
@@ -519,6 +524,16 @@ object Messages {
     def `You must register for VAT online before you can set up a VAT payment plan.`(vatLink: String): Message = Message(
       english = s"""You must <a href="$vatLink" class="govuk-link">register for VAT online</a> before you can set up a VAT payment plan.""",
       welsh   = s"""Mae’n rhaid i chi <a href="$vatLink" class="govuk-link">gofrestru ar gyfer TAW ar-lein</a> cyn i chi allu trefnu cynllun talu ar gyfer TAW."""
+    )
+
+    val `Request access to Self Assessment to use this service`: Message = Message(
+      english = "Request access to Self Assessment to use this service",
+      welsh   = "Gwneud cais i gael mynediad at eich cyfrif Hunanasesiad er mwyn defnyddio’r gwasanaeth hwn"
+    )
+
+    def `You must request access to Self Assessment before you can set up a Self Assessment payment plan.`(saLink: String): Message = Message(
+      english = s"""You must <a href="$saLink" class="govuk-link">request access to Self Assessment</a> before you can set up a Self Assessment payment plan.""",
+      welsh   = s"""Mae’n rhaid i chi <a href="$saLink" class="govuk-link">wneud cais i gael mynediad at eich cyfrif Hunanasesiad</a> cyn i chi allu trefnu cynllun talu Hunanasesiad ar-lein."""
     )
 
   }

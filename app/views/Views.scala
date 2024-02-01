@@ -19,7 +19,7 @@ package views
 import play.api.data.FormError
 import views.html._
 import views.html.epaye.EPayeLanding
-import views.html.sa.SaLanding
+import views.html.sa.{NotSaEnrolled, SaLanding}
 import views.html.epaye.ineligible.{Ineligible, NotEnrolled}
 import views.html.vat.{NotVatRegistered, VatLanding}
 import views.html.emailerrors._
@@ -35,6 +35,7 @@ class Views @Inject() (
     val yourBillIs:                       YourBillIs,
     val notEnrolled:                      NotEnrolled,
     val notVatRegistered:                 NotVatRegistered,
+    val notSaEnrolled:                    NotSaEnrolled,
     val ineligible:                       Ineligible,
     val partials:                         Partials,
     val canYouMakeAnUpFrontPayment:       CanYouMakeAnUpfrontPayment,
