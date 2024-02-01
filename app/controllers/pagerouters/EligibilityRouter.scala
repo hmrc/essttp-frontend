@@ -35,23 +35,23 @@ object EligibilityRouter {
       EligibilityErrors.toEligibilityError(eligibilityResult.eligibilityRules) match {
         case ee @ Some(MultipleReasons) =>
           determineWhetherToGoToDebtTooSmall(ee, eligibilityResult.eligibilityRules.isLessThanMinDebtAllowance, taxRegime)
-        case None                                    => whichGenericEligibilityPage(taxRegime)
-        case Some(HasRlsOnAddress)                   => whichGenericEligibilityPage(taxRegime)
-        case Some(MarkedAsInsolvent)                 => whichGenericEligibilityPage(taxRegime)
+        case None                                    => whichGenericIneligiblePage(taxRegime)
+        case Some(HasRlsOnAddress)                   => whichGenericIneligiblePage(taxRegime)
+        case Some(MarkedAsInsolvent)                 => whichGenericIneligiblePage(taxRegime)
         case Some(IsLessThanMinDebtAllowance)        => whichDebtTooSmallPage(taxRegime)
         case Some(IsMoreThanMaxDebtAllowance)        => whichDebtTooLargePage(taxRegime)
-        case Some(DisallowedChargeLockTypes)         => whichGenericEligibilityPage(taxRegime)
+        case Some(DisallowedChargeLockTypes)         => whichGenericIneligiblePage(taxRegime)
         case Some(ChargesOverMaxDebtAge)             => whichDebtTooOldPage(taxRegime)
         case Some(ExistingTtp)                       => whichExistingPlanPage(taxRegime)
-        case Some(IneligibleChargeTypes)             => whichGenericEligibilityPage(taxRegime)
+        case Some(IneligibleChargeTypes)             => whichGenericIneligiblePage(taxRegime)
         case Some(MissingFiledReturns)               => whichFileYourReturnsPage(taxRegime)
-        case Some(HasInvalidInterestSignals)         => whichGenericEligibilityPage(taxRegime)
-        case Some(DmSpecialOfficeProcessingRequired) => whichGenericEligibilityPage(taxRegime)
+        case Some(HasInvalidInterestSignals)         => whichGenericIneligiblePage(taxRegime)
+        case Some(DmSpecialOfficeProcessingRequired) => whichGenericIneligiblePage(taxRegime)
         case Some(NoDueDatesReached) => if (appConfig.cr111Enabled && taxRegime =!= Sa) { whichNoDueDatesReachedPage(taxRegime) }
-        else whichGenericEligibilityPage(taxRegime)
-        case Some(CannotFindLockReason)           => whichGenericEligibilityPage(taxRegime)
-        case Some(CreditsNotAllowed)              => whichGenericEligibilityPage(taxRegime)
-        case Some(IsMoreThanMaxPaymentReference)  => whichGenericEligibilityPage(taxRegime)
+        else whichGenericIneligiblePage(taxRegime)
+        case Some(CannotFindLockReason)           => whichGenericIneligiblePage(taxRegime)
+        case Some(CreditsNotAllowed)              => whichGenericIneligiblePage(taxRegime)
+        case Some(IsMoreThanMaxPaymentReference)  => whichGenericIneligiblePage(taxRegime)
         case Some(ChargesBeforeMaxAccountingDate) => routes.IneligibleController.vatDebtBeforeAccountingDatePage
       }
     }
@@ -60,10 +60,10 @@ object EligibilityRouter {
   /**
    * To be used when there are more than one 'flavour' of a lockout page. Design want them to have different urls.
    */
-  private def whichGenericEligibilityPage(taxRegime: TaxRegime): Call = taxRegime match {
+  private def whichGenericIneligiblePage(taxRegime: TaxRegime): Call = taxRegime match {
     case TaxRegime.Epaye => routes.IneligibleController.payeGenericIneligiblePage
     case TaxRegime.Vat   => routes.IneligibleController.vatGenericIneligiblePage
-    case TaxRegime.Sa    => throw new NotImplementedError()
+    case TaxRegime.Sa    => routes.IneligibleController.saGenericIneligiblePage
   }
 
   private def whichDebtTooLargePage(taxRegime: TaxRegime): Call = taxRegime match {
@@ -103,7 +103,7 @@ object EligibilityRouter {
       taxRegime:                  TaxRegime
   ): Call = (maybeEligibilityError, isLessThanMinDebtAllowance, taxRegime) match {
     case (Some(MultipleReasons), true, _) => whichDebtTooSmallPage(taxRegime)
-    case _                                => whichGenericEligibilityPage(taxRegime)
+    case _                                => whichGenericIneligiblePage(taxRegime)
   }
 
   private def whichNoDueDatesReachedPage(taxRegime: TaxRegime): Call = taxRegime match {
