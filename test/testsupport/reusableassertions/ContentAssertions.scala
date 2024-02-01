@@ -251,26 +251,50 @@ object ContentAssertions extends RichMatchers {
       }
       val bulletLists = commonEligibilityWrapper.select(".govuk-list").asScala.toList
       val beforeYouCallList = bulletLists(0).select("li").asScala.toList
-      beforeYouCallList(0).text() shouldBe (
-        taxRegime match {
-          case TaxRegime.Epaye => language match {
-            case Languages.English => "your Accounts Office reference. This is 13 characters, for example, 123PX00123456"
-            case Languages.Welsh   => "eich cyfeirnod Swyddfa Gyfrifon, sy’n 13 o gymeriadau o hyd, er enghraifft, 123PX00123456"
-          }
-          case TaxRegime.Vat => language match {
-            case Languages.English => "your VAT number. This is 9 characters, for example, 123456789"
-            case Languages.Welsh   => "eich rhif TAW. Mae hyn yn cynnwys 9 o gymeriadau, er enghraifft, 123456789"
-          }
-          case TaxRegime.Sa => throw new NotImplementedError()
-
-        }
-      )
-      beforeYouCallList(1).text() shouldBe {
+      val expectedBeforeYouCallBullets = {
         language match {
-          case Languages.English => "your bank details"
-          case Languages.Welsh   => "eich manylion banc"
+          case Languages.English =>
+            taxRegime match {
+              case TaxRegime.Epaye => List(
+                "your Accounts Office reference. This is 13 characters, for example, 123PX00123456",
+                "your bank details"
+              )
+              case TaxRegime.Vat =>
+                List(
+                  "your VAT number. This is 9 characters, for example, 123456789",
+                  "your bank details"
+                )
+              case TaxRegime.Sa =>
+                List(
+                  "your 10-digit Unique Taxpayer Reference (UTR) number",
+                  "information on any savings or investments you have",
+                  "your bank details",
+                  "details of your income and spending"
+                )
+            }
+          case Languages.Welsh =>
+            taxRegime match {
+              case TaxRegime.Epaye => List(
+                "eich cyfeirnod Swyddfa Gyfrifon, sy’n 13 o gymeriadau o hyd, er enghraifft, 123PX00123456",
+                "eich manylion banc"
+              )
+              case TaxRegime.Vat =>
+                List(
+                  "eich rhif TAW. Mae hyn yn cynnwys 9 o gymeriadau, er enghraifft, 123456789",
+                  "eich manylion banc"
+                )
+              case TaxRegime.Sa =>
+                List(
+                  "eich Cyfeirnod Unigryw y Trethdalwr (UTR) 10 digid",
+                  "gwybodaeth am unrhyw gynilion neu fuddsoddiadau sydd gennych",
+                  "eich manylion banc",
+                  "manylion eich incwm a’ch gwariant"
+                )
+            }
         }
       }
+
+      beforeYouCallList.map(_.text()) shouldBe expectedBeforeYouCallBullets
 
       subheadings(2).text() shouldBe {
         language match {

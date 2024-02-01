@@ -259,6 +259,21 @@ object Messages {
       welsh   = "eich rhif TAW. Mae hyn yn cynnwys 9 o gymeriadau, er enghraifft, 123456789"
     )
 
+    val `your 10-digit Unique Taxpayer Reference (UTR) number`: Message = Message(
+      english = "your 10-digit Unique Taxpayer Reference (UTR) number",
+      welsh   = "eich Cyfeirnod Unigryw y Trethdalwr (UTR) 10 digid"
+    )
+
+    val `information on any savings or investments you have`: Message = Message(
+      english = "information on any savings or investments you have",
+      welsh   = "gwybodaeth am unrhyw gynilion neu fuddsoddiadau sydd gennych"
+    )
+
+    val `details of your income and spending`: Message = Message(
+      english = "details of your income and spending",
+      welsh   = "manylion eich incwm a’ch gwariant"
+    )
+
     val `your bank details`: Message = Message(
       english = "your bank details",
       welsh   = "eich manylion banc"
@@ -403,7 +418,10 @@ object Messages {
           welsh   = "Nid ydych yn gymwys i drefnu cynllun talu TAW ar-lein."
         )
       case TaxRegime.Sa =>
-        throw new NotImplementedError()
+        Message(
+          english = "You are not eligible to set up a Self Assessment payment plan online.",
+          welsh   = "Nid ydych yn gymwys i drefnu cynllun talu Hunanasesiad ar-lein."
+        )
     }
 
     def `File your return to use this service`(taxRegime: TaxRegime): Message = taxRegime match {

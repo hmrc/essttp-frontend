@@ -28,6 +28,24 @@
 
 @import requestSupport._
 
+@makeSureYouHaveItems = @{
+    taxRegime match {
+        case TaxRegime.Epaye => List(
+            Messages.NotEligible.`your Accounts Office reference...`,
+            Messages.NotEligible.`your bank details`
+        )
+        case TaxRegime.Vat => List(
+            Messages.NotEligible.`your VAT number. This is 9 characters, for example, 1233456789`,
+            Messages.NotEligible.`your bank details`
+        )
+        case TaxRegime.Sa => List(
+          Messages.NotEligible.`your 10-digit Unique Taxpayer Reference (UTR) number`,
+          Messages.NotEligible.`information on any savings or investments you have`,
+            Messages.NotEligible.`your bank details`,
+            Messages.NotEligible.`details of your income and spending`
+        )
+    }}
+
 <div id="common-eligibility">
 
    <p class="govuk-body">@{Html(Messages.NotEligible.`Our opening times are Monday to Friday, 8am to 6pm. We are closed on weekends and bank holidays.`.show)}</p>
@@ -37,14 +55,9 @@
   @if(showCallPreparationTips){
     <h2 class="govuk-heading-m">@{Messages.NotEligible.`Before you call, make sure you have:`.show}</h2>
     <ul class="govuk-list govuk-list--bullet">
-        <li>@{
-          taxRegime match {
-            case TaxRegime.Epaye => Messages.NotEligible.`your Accounts Office reference...`.show
-            case TaxRegime.Vat   => Messages.NotEligible.`your VAT number. This is 9 characters, for example, 1233456789`.show
-            case TaxRegime.Sa => throw new NotImplementedError()
-          }
-        }
-        <li>@{Messages.NotEligible.`your bank details`.show}</li>
+        @makeSureYouHaveItems.map(message =>
+            <li>{message.show}</li>
+        )
     </ul>
 
     <h2 class="govuk-heading-m">@{Messages.NotEligible.`We're likely to ask:`.show}</h2>
