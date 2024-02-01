@@ -30,17 +30,19 @@ GET    /determine-eligibility                               controllers.Determin
 
 GET    /not-enrolled                                        controllers.NotEnrolledController.notEnrolled
 GET    /not-vat-registered                                  controllers.NotEnrolledController.notVatRegistered
-GET    /not-sa-enrolled                                     controllers.NotEnrolledController.notSaEnrolled
+GET    /request-access-to-self-assessment                   controllers.NotEnrolledController.notSaEnrolled
 
 GET    /not-eligible-epaye                                  controllers.IneligibleController.payeGenericIneligiblePage
 GET    /not-eligible-vat                                    controllers.IneligibleController.vatGenericIneligiblePage
 GET    /not-eligible-sa                                     controllers.IneligibleController.saGenericIneligiblePage
 GET    /debt-too-large-epaye                                controllers.IneligibleController.epayeDebtTooLargePage
 GET    /debt-too-large-vat                                  controllers.IneligibleController.vatDebtTooLargePage
+GET    /debt-too-large-sa                                   controllers.IneligibleController.saDebtTooLargePage
 GET    /debt-too-small-epaye                                controllers.IneligibleController.epayeDebtTooSmallPage
 GET    /debt-too-small-vat                                  controllers.IneligibleController.vatDebtTooSmallPage
 GET    /debt-too-old-epaye                                  controllers.IneligibleController.epayeDebtTooOldPage
 GET    /debt-too-old-vat                                    controllers.IneligibleController.vatDebtTooOldPage
+GET    /debt-too-old-sa                                     controllers.IneligibleController.saDebtTooOldPage
 GET    /debt-before-accounting-date-vat                     controllers.IneligibleController.vatDebtBeforeAccountingDatePage
 GET    /file-your-return                                    controllers.IneligibleController.epayeFileYourReturnPage
 GET    /return-not-filed-vat                                controllers.IneligibleController.vatFileYourReturnPage

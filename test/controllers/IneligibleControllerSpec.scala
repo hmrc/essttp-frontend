@@ -92,39 +92,70 @@ class IneligibleControllerSpec extends ItSpec {
             ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English)
           }
 
-          if (taxRegime =!= TaxRegime.Sa) {
-            s"${taxRegime.entryName} Debt too large ineligible page correctly" in {
-              stubCommonActions(authAllEnrolments = enrolments)
-              EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(origin))
+          s"${taxRegime.entryName} Debt too large ineligible page correctly" in {
+            stubCommonActions(authAllEnrolments = enrolments)
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(origin))
 
-              val result: Future[Result] = taxRegime match {
-                case TaxRegime.Epaye => controller.epayeDebtTooLargePage(fakeRequest)
-                case TaxRegime.Vat   => controller.vatDebtTooLargePage(fakeRequest)
-                case TaxRegime.Sa    => throw new NotImplementedError()
-              }
-              val page = pageContentAsDoc(result)
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.epayeDebtTooLargePage(fakeRequest)
+              case TaxRegime.Vat   => controller.vatDebtTooLargePage(fakeRequest)
+              case TaxRegime.Sa    => controller.saDebtTooLargePage(fakeRequest)
+            }
+            val page = pageContentAsDoc(result)
 
-              ContentAssertions.commonPageChecks(
-                page,
-                expectedH1              = "Call us about a payment plan",
-                shouldBackLinkBePresent = false,
-                expectedSubmitUrl       = None,
-                regimeBeingTested       = Some(taxRegime)
-              )
+            ContentAssertions.commonPageChecks(
+              page,
+              expectedH1              = "Call us about a payment plan",
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime)
+            )
 
-              val expectedLeadingP1 = taxRegime match {
-                case TaxRegime.Epaye => "You cannot set up an Employers’ PAYE payment plan online because you owe more than £50,000."
-                case TaxRegime.Vat   => "You cannot set up a VAT payment plan online because you owe more than £50,000."
-                case TaxRegime.Sa    => throw new NotImplementedError()
-              }
-
-              assertIneligiblePageLeadingP1(
-                page      = page,
-                leadingP1 = expectedLeadingP1
-              )
-              ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English)
+            val expectedLeadingP1 = taxRegime match {
+              case TaxRegime.Epaye => "You cannot set up an Employers’ PAYE payment plan online because you owe more than £50,000."
+              case TaxRegime.Vat   => "You cannot set up a VAT payment plan online because you owe more than £50,000."
+              case TaxRegime.Sa    => "You cannot set up a Self Assessment payment plan online because you owe more than £30,000."
             }
 
+            assertIneligiblePageLeadingP1(
+              page      = page,
+              leadingP1 = expectedLeadingP1
+            )
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English)
+          }
+
+          s"${taxRegime.entryName} Debt too old ineligible page correctly" in {
+            stubCommonActions(authAllEnrolments = enrolments)
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(origin))
+
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.epayeDebtTooOldPage(fakeRequest)
+              case TaxRegime.Vat   => controller.vatDebtTooOldPage(fakeRequest)
+              case TaxRegime.Sa    => controller.saDebtTooOldPage(fakeRequest)
+            }
+
+            val page = pageContentAsDoc(result)
+
+            ContentAssertions.commonPageChecks(
+              page,
+              expectedH1              = "Call us about a payment plan",
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime)
+            )
+            val expectedLeadingP1 = taxRegime match {
+              case TaxRegime.Epaye => "You cannot set up an Employers’ PAYE payment plan online because your payment deadline was over 5 years ago."
+              case TaxRegime.Vat   => "You cannot set up a VAT payment plan online because your payment deadline was over 28 days ago."
+              case TaxRegime.Sa    => "You cannot set up a Self Assessment payment plan online because your payment deadline was over 60 days ago."
+            }
+            assertIneligiblePageLeadingP1(
+              page      = page,
+              leadingP1 = expectedLeadingP1
+            )
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English)
+          }
+
+          if (taxRegime =!= TaxRegime.Sa) {
             s"${taxRegime.entryName} Debt too small ineligible page correctly" in {
               stubCommonActions(authAllEnrolments = enrolments)
               EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsLessThanMinDebtAllowance`(origin))
@@ -166,37 +197,6 @@ class IneligibleControllerSpec extends ItSpec {
               leadingParagraphs(0).html() shouldBe expectedParagraph1
               leadingParagraphs(1).html() shouldBe expectedParagraph2
               ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English, callUsContentEnglish)
-            }
-
-            s"${taxRegime.entryName} Debt too old ineligible page correctly" in {
-              stubCommonActions(authAllEnrolments = enrolments)
-              EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(origin))
-
-              val result: Future[Result] = taxRegime match {
-                case TaxRegime.Epaye => controller.epayeDebtTooOldPage(fakeRequest)
-                case TaxRegime.Vat   => controller.vatDebtTooOldPage(fakeRequest)
-                case TaxRegime.Sa    => throw new NotImplementedError()
-              }
-
-              val page = pageContentAsDoc(result)
-
-              ContentAssertions.commonPageChecks(
-                page,
-                expectedH1              = "Call us about a payment plan",
-                shouldBackLinkBePresent = false,
-                expectedSubmitUrl       = None,
-                regimeBeingTested       = Some(taxRegime)
-              )
-              val expectedLeadingP1 = taxRegime match {
-                case TaxRegime.Epaye => "You cannot set up an Employers’ PAYE payment plan online because your payment deadline was over 5 years ago."
-                case TaxRegime.Vat   => "You cannot set up a VAT payment plan online because your payment deadline was over 28 days ago."
-                case TaxRegime.Sa    => throw new NotImplementedError()
-              }
-              assertIneligiblePageLeadingP1(
-                page      = page,
-                leadingP1 = expectedLeadingP1
-              )
-              ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English)
             }
 
             s"${taxRegime.entryName} Existing ttp ineligible page correctly" in {
@@ -362,41 +362,72 @@ class IneligibleControllerSpec extends ItSpec {
             ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.Welsh)
           }
 
-          if (taxRegime =!= TaxRegime.Sa) {
+          s"${taxRegime.entryName} Debt too large ineligible page correctly" in {
+            stubCommonActions(authAllEnrolments = enrolments)
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(origin))
 
-            s"${taxRegime.entryName} Debt too large ineligible page correctly" in {
-              stubCommonActions(authAllEnrolments = enrolments)
-              EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(origin))
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.epayeDebtTooLargePage(fakeRequest.withLangWelsh())
+              case TaxRegime.Vat   => controller.vatDebtTooLargePage(fakeRequest.withLangWelsh())
+              case TaxRegime.Sa    => controller.saDebtTooLargePage(fakeRequest.withLangWelsh())
+            }
+            val page = pageContentAsDoc(result)
 
-              val result: Future[Result] = taxRegime match {
-                case TaxRegime.Epaye => controller.epayeDebtTooLargePage(fakeRequest.withLangWelsh())
-                case TaxRegime.Vat   => controller.vatDebtTooLargePage(fakeRequest.withLangWelsh())
-                case TaxRegime.Sa    => throw new NotImplementedError()
-              }
-              val page = pageContentAsDoc(result)
+            ContentAssertions.commonPageChecks(
+              page,
+              expectedH1              = "Ffoniwch ni ynghylch cynllun talu",
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime),
+              language                = Languages.Welsh
+            )
 
-              ContentAssertions.commonPageChecks(
-                page,
-                expectedH1              = "Ffoniwch ni ynghylch cynllun talu",
-                shouldBackLinkBePresent = false,
-                expectedSubmitUrl       = None,
-                regimeBeingTested       = Some(taxRegime),
-                language                = Languages.Welsh
-              )
-
-              val expectedLeadingP1 = taxRegime match {
-                case TaxRegime.Epaye => "Ni allwch drefnu cynllun talu TAW ar-lein oherwydd mae arnoch dros £50,000."
-                case TaxRegime.Vat   => "Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein oherwydd mae arnoch dros £50,000."
-                case TaxRegime.Sa    => throw new NotImplementedError()
-              }
-
-              assertIneligiblePageLeadingP1(
-                page      = page,
-                leadingP1 = expectedLeadingP1
-              )
-              ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.Welsh)
+            val expectedLeadingP1 = taxRegime match {
+              case TaxRegime.Epaye => "Ni allwch drefnu cynllun talu TAW ar-lein oherwydd mae arnoch dros £50,000."
+              case TaxRegime.Vat   => "Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein oherwydd mae arnoch dros £50,000."
+              case TaxRegime.Sa    => "Ni allwch drefnu cynllun talu Hunanasesiad ar-lein oherwydd mae arnoch dros £30,000."
             }
 
+            assertIneligiblePageLeadingP1(
+              page      = page,
+              leadingP1 = expectedLeadingP1
+            )
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.Welsh)
+          }
+
+          s"${taxRegime.entryName} Debt too old ineligible page correctly" in {
+            stubCommonActions(authAllEnrolments = enrolments)
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(origin))
+
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.epayeDebtTooOldPage(fakeRequest.withLangWelsh())
+              case TaxRegime.Vat   => controller.vatDebtTooOldPage(fakeRequest.withLangWelsh())
+              case TaxRegime.Sa    => controller.saDebtTooOldPage(fakeRequest.withLangWelsh())
+            }
+
+            val page = pageContentAsDoc(result)
+
+            ContentAssertions.commonPageChecks(
+              page,
+              expectedH1              = "Ffoniwch ni ynghylch cynllun talu",
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime),
+              language                = Languages.Welsh
+            )
+            val expectedLeadingP1 = taxRegime match {
+              case TaxRegime.Epaye => "Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros 5 mlynedd yn ôl."
+              case TaxRegime.Vat   => "Ni allwch drefnu cynllun talu TAW ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros 28 wythnos yn ôl."
+              case TaxRegime.Sa    => "Ni allwch drefnu cynllun talu Hunanasesiad ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros 60 diwrnod yn ôl."
+            }
+            assertIneligiblePageLeadingP1(
+              page      = page,
+              leadingP1 = expectedLeadingP1
+            )
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.Welsh)
+          }
+
+          if (taxRegime =!= TaxRegime.Sa) {
             s"${taxRegime.entryName} Debt too small ineligible page correctly" in {
               stubCommonActions(authAllEnrolments = enrolments)
               EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsLessThanMinDebtAllowance`(origin))
@@ -439,38 +470,6 @@ class IneligibleControllerSpec extends ItSpec {
               leadingParagraphs(0).html() shouldBe expectedParagraph1
               leadingParagraphs(1).html() shouldBe expectedParagraph2
               ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.Welsh, callUsContentWelsh = callUsContentWelsh)
-            }
-
-            s"${taxRegime.entryName} Debt too old ineligible page correctly" in {
-              stubCommonActions(authAllEnrolments = enrolments)
-              EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(origin))
-
-              val result: Future[Result] = taxRegime match {
-                case TaxRegime.Epaye => controller.epayeDebtTooOldPage(fakeRequest.withLangWelsh())
-                case TaxRegime.Vat   => controller.vatDebtTooOldPage(fakeRequest.withLangWelsh())
-                case TaxRegime.Sa    => throw new NotImplementedError()
-              }
-
-              val page = pageContentAsDoc(result)
-
-              ContentAssertions.commonPageChecks(
-                page,
-                expectedH1              = "Ffoniwch ni ynghylch cynllun talu",
-                shouldBackLinkBePresent = false,
-                expectedSubmitUrl       = None,
-                regimeBeingTested       = Some(taxRegime),
-                language                = Languages.Welsh
-              )
-              val expectedLeadingP1 = taxRegime match {
-                case TaxRegime.Epaye => "Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros 5 mlynedd yn ôl."
-                case TaxRegime.Vat   => "Ni allwch drefnu cynllun talu TAW ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros 28 wythnos yn ôl."
-                case TaxRegime.Sa    => throw new NotImplementedError()
-              }
-              assertIneligiblePageLeadingP1(
-                page      = page,
-                leadingP1 = expectedLeadingP1
-              )
-              ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.Welsh)
             }
 
             s"${taxRegime.entryName} Existing ttp ineligible page correctly" in {
