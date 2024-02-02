@@ -58,7 +58,7 @@
         <li>@{Messages.Sa.`have no other HMRC payment plans set up`.show}</li>
     </ul>
 
-    <p class="govuk-body">@{Messages.Sa.`You can use this service within 60 days of the payment deadline.`.show}</p>
+    <p class="govuk-body">@{Messages.Sa.`You can use this service within ... days of the payment deadline.`(appConfig.PolicyParameters.SA.maxAgeOfDebtInDays).show}</p>
 
     <h2 class="govuk-heading-m">@{Messages.Sa.`Before you start`.show}</h2>
 

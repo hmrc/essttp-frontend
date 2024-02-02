@@ -766,9 +766,9 @@ object Messages {
       welsh   = "nid ydych wedi sefydlu cynlluniau talu eraill gyda CThEF"
     )
 
-    val `You can use this service within 60 days of the payment deadline.`: Message = Message(
-      english = "You can use this service within 60 days of the payment deadline.",
-      welsh   = "Gallwch ddefnyddio’r gwasanaeth hwn cyn pen 60 diwrnod i’r dyddiad cau ar gyfer talu."
+    def `You can use this service within ... days of the payment deadline.`(maxAgeOfDebtInDays: Int): Message = Message(
+      english = s"You can use this service within ${maxAgeOfDebtInDays.toString} days of the payment deadline.",
+      welsh   = s"Gallwch ddefnyddio’r gwasanaeth hwn cyn pen ${maxAgeOfDebtInDays.toString} diwrnod i’r dyddiad cau ar gyfer talu."
     )
 
     val `Before you start`: Message = Message(
