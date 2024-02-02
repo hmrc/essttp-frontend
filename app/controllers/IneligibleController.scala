@@ -85,6 +85,13 @@ class IneligibleController @Inject() (
     ))
   }
 
+  val saDebtTooSmallPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    Ok(views.partials.ineligibleTemplatePage(
+      pageh1         = Messages.NotEligible.`Pay your ... bill in full`(request.journey.taxRegime),
+      leadingContent = views.partials.debtTooSmallPartial(appConfig.PolicyParameters.SA.payOnlineLink)
+    ))
+  }
+
   val epayeDebtTooOldPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     Ok(views.partials.ineligibleTemplatePage(
       pageh1         = Messages.NotEligible.`Call us about a payment plan`,
@@ -138,6 +145,9 @@ class IneligibleController @Inject() (
     genericAlreadyHaveAPaymentPlanPage
   }
   val vatAlreadyHaveAPaymentPlanPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    genericAlreadyHaveAPaymentPlanPage
+  }
+  val saAlreadyHaveAPaymentPlanPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     genericAlreadyHaveAPaymentPlanPage
   }
 

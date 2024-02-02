@@ -326,7 +326,7 @@ object Messages {
       val (taxSpecificContentEnglish, taxSpecificContentWelsh) = taxRegime match {
         case TaxRegime.Epaye => "PAYE" -> "TWE"
         case TaxRegime.Vat   => "VAT" -> "TAW"
-        case TaxRegime.Sa    => throw new NotImplementedError()
+        case TaxRegime.Sa    => "Self Assessment tax" -> "treth Hunanasesiad"
       }
       Message(
         english = s"Pay your $taxSpecificContentEnglish bill in full",
@@ -351,22 +351,28 @@ object Messages {
           welsh   = "Ni allwch drefnu cynllun talu TAW ar-lein oherwydd bod eich bil yn rhy fach."
         )
       case TaxRegime.Sa =>
-        throw new NotImplementedError()
+        Message(
+          english = "You cannot set up a Self Assessment payment plan online because your bill is too small.",
+          welsh   = "Ni allwch drefnu cynllun talu Hunanasesiad ar-lein oherwydd bod eich bil yn rhy fach."
+        )
     }
 
     def `Make a payment online to cover your ... bill in full.`(taxRegime: TaxRegime, link: String): Message = taxRegime match {
       case TaxRegime.Epaye =>
         Message(
           english = s"""<a class="govuk-link" href="$link">Make a payment online</a> to cover your PAYE bill in full.""",
-          welsh   = s"""<a class="govuk-link" href="$link">Gwnewch daliad ar-lein</a> i dalu’ch bil TWE yn llawn.""".stripMargin
+          welsh   = s"""<a class="govuk-link" href="$link">Gwnewch daliad ar-lein</a> i dalu’ch bil TWE yn llawn."""
         )
       case TaxRegime.Vat =>
         Message(
           english = s"""<a class="govuk-link" href="$link">Make a payment online</a> to cover your VAT bill in full.""",
-          welsh   = s"""<a class="govuk-link" href="$link">Gwnewch daliad ar-lein</a> i dalu’ch bil TAW yn llawn.""".stripMargin
+          welsh   = s"""<a class="govuk-link" href="$link">Gwnewch daliad ar-lein</a> i dalu’ch bil TAW yn llawn."""
         )
       case TaxRegime.Sa =>
-        throw new NotImplementedError()
+        Message(
+          english = s"""<a class="govuk-link" href="$link">Make a payment online</a> to cover your Self Assessment tax bill in full.""",
+          welsh   = s"""<a class="govuk-link" href="$link">Gwnewch daliad ar-lein</a> i dalu’ch bil Hunanasesiad yn llawn."""
+        )
     }
 
     def `Call us on 0300 123 1813 if you are having difficulty making a payment online.`: Message = Message(
@@ -409,6 +415,11 @@ object Messages {
     val `You cannot set up a VAT payment plan online.`: Message = Message(
       english = "You cannot set up a VAT payment plan online.",
       welsh   = "Ni allwch drefnu cynllun talu TAW ar-lein."
+    )
+
+    val `You cannot set up a Self Assessment payment plan online.`: Message = Message(
+      english = "You cannot set up a Self Assessment payment plan online.",
+      welsh   = "Ni allwch drefnu cynllun talu Hunanasesiad ar-lein."
     )
 
     def `Generic ineligible message`(taxRegime: TaxRegime): Message = taxRegime match {
