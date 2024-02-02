@@ -40,6 +40,7 @@ GET    /debt-too-large-vat                                  controllers.Ineligib
 GET    /debt-too-large-sa                                   controllers.IneligibleController.saDebtTooLargePage
 GET    /debt-too-small-epaye                                controllers.IneligibleController.epayeDebtTooSmallPage
 GET    /debt-too-small-vat                                  controllers.IneligibleController.vatDebtTooSmallPage
+GET    /pay-self-assessment-tax-bill-in-full                controllers.IneligibleController.saDebtTooSmallPage
 GET    /debt-too-old-epaye                                  controllers.IneligibleController.epayeDebtTooOldPage
 GET    /debt-too-old-vat                                    controllers.IneligibleController.vatDebtTooOldPage
 GET    /debt-too-old-sa                                     controllers.IneligibleController.saDebtTooOldPage
@@ -49,6 +50,7 @@ GET    /return-not-filed-vat                                controllers.Ineligib
 GET    /return-not-filed-sa                                 controllers.IneligibleController.saFileYourReturnPage
 GET    /already-have-a-payment-plan-epaye                   controllers.IneligibleController.epayeAlreadyHaveAPaymentPlanPage
 GET    /already-have-a-payment-plan-vat                     controllers.IneligibleController.vatAlreadyHaveAPaymentPlanPage
+GET    /already-have-a-plan-sa                              controllers.IneligibleController.saAlreadyHaveAPaymentPlanPage
 GET    /bill-not-overdue-epaye                              controllers.IneligibleController.epayeNoDueDatesReachedPage
 GET    /bill-not-overdue-vat                                controllers.IneligibleController.vatNoDueDatesReachedPage
 

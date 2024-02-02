@@ -155,80 +155,81 @@ class IneligibleControllerSpec extends ItSpec {
             ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English)
           }
 
-          if (taxRegime =!= TaxRegime.Sa) {
-            s"${taxRegime.entryName} Debt too small ineligible page correctly" in {
-              stubCommonActions(authAllEnrolments = enrolments)
-              EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsLessThanMinDebtAllowance`(origin))
+          s"${taxRegime.entryName} Debt too small ineligible page correctly" in {
+            stubCommonActions(authAllEnrolments = enrolments)
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsLessThanMinDebtAllowance`(origin))
 
-              val result: Future[Result] = taxRegime match {
-                case TaxRegime.Epaye => controller.epayeDebtTooSmallPage(fakeRequest)
-                case TaxRegime.Vat   => controller.vatDebtTooSmallPage(fakeRequest)
-                case TaxRegime.Sa    => throw new NotImplementedError()
-              }
-              val page = pageContentAsDoc(result)
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.epayeDebtTooSmallPage(fakeRequest)
+              case TaxRegime.Vat   => controller.vatDebtTooSmallPage(fakeRequest)
+              case TaxRegime.Sa    => controller.saDebtTooSmallPage(fakeRequest)
+            }
+            val page = pageContentAsDoc(result)
 
-              val expectedH1 = taxRegime match {
-                case TaxRegime.Epaye => "Pay your PAYE bill in full"
-                case TaxRegime.Vat   => "Pay your VAT bill in full"
-                case TaxRegime.Sa    => throw new NotImplementedError()
-              }
-
-              ContentAssertions.commonPageChecks(
-                page,
-                expectedH1              = expectedH1,
-                shouldBackLinkBePresent = false,
-                expectedSubmitUrl       = None,
-                regimeBeingTested       = Some(taxRegime)
-              )
-
-              val (expectedParagraph1, expectedParagraph2) = taxRegime match {
-                case TaxRegime.Epaye =>
-                  "You cannot set up an Employers’ PAYE payment plan online because your bill is too small." ->
-                    "<a class=\"govuk-link\" href=\"https://tax.service.gov.uk/business-account/epaye/overdue-payments\">Make a payment online</a> to cover your PAYE bill in full."
-                case TaxRegime.Vat =>
-                  "You cannot set up a VAT payment plan online because your bill is too small." ->
-                    "<a class=\"govuk-link\" href=\"https://tax.service.gov.uk/vat-through-software/what-you-owe\">Make a payment online</a> to cover your VAT bill in full."
-                case TaxRegime.Sa => throw new NotImplementedError()
-              }
-
-              val callUsContentEnglish = "Call us on <strong>0300 123 1813</strong> if you are having difficulty making a payment online."
-
-              val leadingParagraphs = page.select(".govuk-body").asScala.toList
-              leadingParagraphs(0).html() shouldBe expectedParagraph1
-              leadingParagraphs(1).html() shouldBe expectedParagraph2
-              ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English, callUsContentEnglish)
+            val expectedH1 = taxRegime match {
+              case TaxRegime.Epaye => "Pay your PAYE bill in full"
+              case TaxRegime.Vat   => "Pay your VAT bill in full"
+              case TaxRegime.Sa    => "Pay your Self Assessment tax bill in full"
             }
 
-            s"${taxRegime.entryName} Existing ttp ineligible page correctly" in {
-              stubCommonActions(authAllEnrolments = enrolments)
-              EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExistingTTP`(origin))
-              val result: Future[Result] = taxRegime match {
-                case TaxRegime.Epaye => controller.epayeAlreadyHaveAPaymentPlanPage(fakeRequest)
-                case TaxRegime.Vat   => controller.vatAlreadyHaveAPaymentPlanPage(fakeRequest)
-                case TaxRegime.Sa    => throw new NotImplementedError()
-              }
-              val page = pageContentAsDoc(result)
+            ContentAssertions.commonPageChecks(
+              page,
+              expectedH1              = expectedH1,
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime)
+            )
 
-              ContentAssertions.commonPageChecks(
-                page,
-                expectedH1              = "You already have a payment plan with HMRC",
-                shouldBackLinkBePresent = false,
-                expectedSubmitUrl       = None,
-                regimeBeingTested       = Some(taxRegime)
-              )
+            val (expectedParagraph1, expectedParagraph2) = taxRegime match {
+              case TaxRegime.Epaye =>
+                "You cannot set up an Employers’ PAYE payment plan online because your bill is too small." ->
+                  "<a class=\"govuk-link\" href=\"https://tax.service.gov.uk/business-account/epaye/overdue-payments\">Make a payment online</a> to cover your PAYE bill in full."
+              case TaxRegime.Vat =>
+                "You cannot set up a VAT payment plan online because your bill is too small." ->
+                  "<a class=\"govuk-link\" href=\"https://tax.service.gov.uk/vat-through-software/what-you-owe\">Make a payment online</a> to cover your VAT bill in full."
+              case TaxRegime.Sa =>
+                "You cannot set up a Self Assessment payment plan online because your bill is too small." ->
+                  "<a class=\"govuk-link\" href=\"https://www.gov.uk/pay-self-assessment-tax-bill\">Make a payment online</a> to cover your Self Assessment tax bill in full."
 
-              val expectedP1 = taxRegime match {
-                case TaxRegime.Epaye => "You cannot set up an Employers’ PAYE payment plan online."
-                case TaxRegime.Vat   => "You cannot set up a VAT payment plan online."
-                case TaxRegime.Sa    => throw new NotImplementedError()
-              }
-
-              assertIneligiblePageLeadingP1(
-                page      = page,
-                leadingP1 = expectedP1
-              )
-              ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English)
             }
+
+            val callUsContentEnglish = "Call us on <strong>0300 123 1813</strong> if you are having difficulty making a payment online."
+
+            val leadingParagraphs = page.select(".govuk-body").asScala.toList
+            leadingParagraphs(0).html() shouldBe expectedParagraph1
+            leadingParagraphs(1).html() shouldBe expectedParagraph2
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English, callUsContentEnglish)
+          }
+
+          s"${taxRegime.entryName} Existing ttp ineligible page correctly" in {
+            stubCommonActions(authAllEnrolments = enrolments)
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExistingTTP`(origin))
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.epayeAlreadyHaveAPaymentPlanPage(fakeRequest)
+              case TaxRegime.Vat   => controller.vatAlreadyHaveAPaymentPlanPage(fakeRequest)
+              case TaxRegime.Sa    => controller.saAlreadyHaveAPaymentPlanPage(fakeRequest)
+            }
+            val page = pageContentAsDoc(result)
+
+            ContentAssertions.commonPageChecks(
+              page,
+              expectedH1              = "You already have a payment plan with HMRC",
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime)
+            )
+
+            val expectedP1 = taxRegime match {
+              case TaxRegime.Epaye => "You cannot set up an Employers’ PAYE payment plan online."
+              case TaxRegime.Vat   => "You cannot set up a VAT payment plan online."
+              case TaxRegime.Sa    => "You cannot set up a Self Assessment payment plan online."
+            }
+
+            assertIneligiblePageLeadingP1(
+              page      = page,
+              leadingP1 = expectedP1
+            )
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English)
           }
 
           s"${taxRegime.entryName} Returns not up to date ineligible page correctly" in {
@@ -427,82 +428,83 @@ class IneligibleControllerSpec extends ItSpec {
             ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.Welsh)
           }
 
-          if (taxRegime =!= TaxRegime.Sa) {
-            s"${taxRegime.entryName} Debt too small ineligible page correctly" in {
-              stubCommonActions(authAllEnrolments = enrolments)
-              EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsLessThanMinDebtAllowance`(origin))
+          s"${taxRegime.entryName} Debt too small ineligible page correctly" in {
+            stubCommonActions(authAllEnrolments = enrolments)
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsLessThanMinDebtAllowance`(origin))
 
-              val result: Future[Result] = taxRegime match {
-                case TaxRegime.Epaye => controller.epayeDebtTooSmallPage(fakeRequest.withLangWelsh())
-                case TaxRegime.Vat   => controller.vatDebtTooSmallPage(fakeRequest.withLangWelsh())
-                case TaxRegime.Sa    => throw new NotImplementedError()
-              }
-              val page = pageContentAsDoc(result)
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.epayeDebtTooSmallPage(fakeRequest.withLangWelsh())
+              case TaxRegime.Vat   => controller.vatDebtTooSmallPage(fakeRequest.withLangWelsh())
+              case TaxRegime.Sa    => controller.saDebtTooSmallPage(fakeRequest.withLangWelsh())
+            }
+            val page = pageContentAsDoc(result)
 
-              val expectedH1 = taxRegime match {
-                case TaxRegime.Epaye => "Talu’ch bil TWE yn llawn"
-                case TaxRegime.Vat   => "Talu’ch bil TAW yn llawn"
-                case TaxRegime.Sa    => throw new NotImplementedError()
-              }
-
-              ContentAssertions.commonPageChecks(
-                page,
-                expectedH1              = expectedH1,
-                shouldBackLinkBePresent = false,
-                expectedSubmitUrl       = None,
-                regimeBeingTested       = Some(taxRegime),
-                language                = Languages.Welsh
-              )
-
-              val (expectedParagraph1, expectedParagraph2) = taxRegime match {
-                case TaxRegime.Epaye =>
-                  "Ni allwch drefnu cynllun talu ar gyfer TWE y Cyflogwr ar-lein oherwydd bod eich bil yn rhy fach." ->
-                    "<a class=\"govuk-link\" href=\"https://tax.service.gov.uk/business-account/epaye/overdue-payments\">Gwnewch daliad ar-lein</a> i dalu’ch bil TWE yn llawn."
-                case TaxRegime.Vat =>
-                  "Ni allwch drefnu cynllun talu TAW ar-lein oherwydd bod eich bil yn rhy fach." ->
-                    "<a class=\"govuk-link\" href=\"https://tax.service.gov.uk/vat-through-software/what-you-owe\">Gwnewch daliad ar-lein</a> i dalu’ch bil TAW yn llawn."
-                case TaxRegime.Sa => throw new NotImplementedError()
-              }
-
-              val callUsContentWelsh = "Os ydych yn cael anawsterau wrth dalu ar-lein, ffoniwch ni ar <strong>0300 200 1900</strong>."
-
-              val leadingParagraphs = page.select(".govuk-body").asScala.toList
-              leadingParagraphs(0).html() shouldBe expectedParagraph1
-              leadingParagraphs(1).html() shouldBe expectedParagraph2
-              ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.Welsh, callUsContentWelsh = callUsContentWelsh)
+            val expectedH1 = taxRegime match {
+              case TaxRegime.Epaye => "Talu’ch bil TWE yn llawn"
+              case TaxRegime.Vat   => "Talu’ch bil TAW yn llawn"
+              case TaxRegime.Sa    => "Talu’ch bil treth Hunanasesiad yn llawn"
             }
 
-            s"${taxRegime.entryName} Existing ttp ineligible page correctly" in {
-              stubCommonActions(authAllEnrolments = enrolments)
-              EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExistingTTP`(origin))
-              val result: Future[Result] = taxRegime match {
-                case TaxRegime.Epaye => controller.epayeAlreadyHaveAPaymentPlanPage(fakeRequest.withLangWelsh())
-                case TaxRegime.Vat   => controller.vatAlreadyHaveAPaymentPlanPage(fakeRequest.withLangWelsh())
-                case TaxRegime.Sa    => throw new NotImplementedError()
-              }
-              val page = pageContentAsDoc(result)
+            ContentAssertions.commonPageChecks(
+              page,
+              expectedH1              = expectedH1,
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime),
+              language                = Languages.Welsh
+            )
 
-              ContentAssertions.commonPageChecks(
-                page,
-                expectedH1              = "Mae gennych chi gynllun talu gyda CThEF yn barod",
-                shouldBackLinkBePresent = false,
-                expectedSubmitUrl       = None,
-                regimeBeingTested       = Some(taxRegime),
-                language                = Languages.Welsh
-              )
+            val (expectedParagraph1, expectedParagraph2) = taxRegime match {
+              case TaxRegime.Epaye =>
+                "Ni allwch drefnu cynllun talu ar gyfer TWE y Cyflogwr ar-lein oherwydd bod eich bil yn rhy fach." ->
+                  "<a class=\"govuk-link\" href=\"https://tax.service.gov.uk/business-account/epaye/overdue-payments\">Gwnewch daliad ar-lein</a> i dalu’ch bil TWE yn llawn."
+              case TaxRegime.Vat =>
+                "Ni allwch drefnu cynllun talu TAW ar-lein oherwydd bod eich bil yn rhy fach." ->
+                  "<a class=\"govuk-link\" href=\"https://tax.service.gov.uk/vat-through-software/what-you-owe\">Gwnewch daliad ar-lein</a> i dalu’ch bil TAW yn llawn."
+              case TaxRegime.Sa =>
+                "Ni allwch drefnu cynllun talu Hunanasesiad ar-lein oherwydd bod eich bil yn rhy fach." ->
+                  "<a class=\"govuk-link\" href=\"https://www.gov.uk/pay-self-assessment-tax-bill\">Gwnewch daliad ar-lein</a> i dalu’ch bil Hunanasesiad yn llawn."
 
-              val expectedP1 = taxRegime match {
-                case TaxRegime.Epaye => "Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein."
-                case TaxRegime.Vat   => "Ni allwch drefnu cynllun talu TAW ar-lein."
-                case TaxRegime.Sa    => throw new NotImplementedError()
-              }
-
-              assertIneligiblePageLeadingP1(
-                page      = page,
-                leadingP1 = expectedP1
-              )
-              ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.Welsh)
             }
+
+            val callUsContentWelsh = "Os ydych yn cael anawsterau wrth dalu ar-lein, ffoniwch ni ar <strong>0300 200 1900</strong>."
+
+            val leadingParagraphs = page.select(".govuk-body").asScala.toList
+            leadingParagraphs(0).html() shouldBe expectedParagraph1
+            leadingParagraphs(1).html() shouldBe expectedParagraph2
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.Welsh, callUsContentWelsh = callUsContentWelsh)
+          }
+
+          s"${taxRegime.entryName} Existing ttp ineligible page correctly" in {
+            stubCommonActions(authAllEnrolments = enrolments)
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExistingTTP`(origin))
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.epayeAlreadyHaveAPaymentPlanPage(fakeRequest.withLangWelsh())
+              case TaxRegime.Vat   => controller.vatAlreadyHaveAPaymentPlanPage(fakeRequest.withLangWelsh())
+              case TaxRegime.Sa    => controller.saAlreadyHaveAPaymentPlanPage(fakeRequest.withLangWelsh())
+            }
+            val page = pageContentAsDoc(result)
+
+            ContentAssertions.commonPageChecks(
+              page,
+              expectedH1              = "Mae gennych chi gynllun talu gyda CThEF yn barod",
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime),
+              language                = Languages.Welsh
+            )
+
+            val expectedP1 = taxRegime match {
+              case TaxRegime.Epaye => "Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein."
+              case TaxRegime.Vat   => "Ni allwch drefnu cynllun talu TAW ar-lein."
+              case TaxRegime.Sa    => "Ni allwch drefnu cynllun talu Hunanasesiad ar-lein."
+            }
+
+            assertIneligiblePageLeadingP1(
+              page      = page,
+              leadingP1 = expectedP1
+            )
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.Welsh)
           }
 
           s"${taxRegime.entryName} Returns not up to date ineligible page correctly" in {
