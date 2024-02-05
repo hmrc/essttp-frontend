@@ -38,8 +38,8 @@ GET    /not-eligible-sa                                     controllers.Ineligib
 GET    /debt-too-large-epaye                                controllers.IneligibleController.epayeDebtTooLargePage
 GET    /debt-too-large-vat                                  controllers.IneligibleController.vatDebtTooLargePage
 GET    /debt-too-large-sa                                   controllers.IneligibleController.saDebtTooLargePage
-GET    /debt-too-small-epaye                                controllers.IneligibleController.epayeDebtTooSmallPage
-GET    /debt-too-small-vat                                  controllers.IneligibleController.vatDebtTooSmallPage
+GET    /pay-paye-bill-in-full                               controllers.IneligibleController.epayeDebtTooSmallPage
+GET    /pay-vat-bill-in-full                                controllers.IneligibleController.vatDebtTooSmallPage
 GET    /pay-self-assessment-tax-bill-in-full                controllers.IneligibleController.saDebtTooSmallPage
 GET    /debt-too-old-epaye                                  controllers.IneligibleController.epayeDebtTooOldPage
 GET    /debt-too-old-vat                                    controllers.IneligibleController.vatDebtTooOldPage
