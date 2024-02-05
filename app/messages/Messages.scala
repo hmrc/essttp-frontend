@@ -17,8 +17,10 @@
 package messages
 
 import essttp.rootmodel.{AmountInPence, Email, TaxRegime}
+import models.Languages
 import models.forms.BankDetailsForm._
 
+import java.time.LocalDate
 import scala.annotation.tailrec
 
 object Messages {
@@ -159,6 +161,33 @@ object Messages {
       english = "Overdue payments",
       welsh   = "Taliadau sy’n hwyr"
     )
+
+    val `Self Assessment statement`: Message = Message(
+      english = "Self Assessment statement",
+      welsh   = "Datganiad Hunanasesiad"
+    )
+
+    def Due(date: LocalDate): Message = {
+      val day = date.getDayOfMonth
+
+      val enlgishDateString =
+        s"${day.toString} ${DateMessages.monthName(date.getMonthValue).english} ${date.getYear.toString}"
+      val welshDateString =
+        s"${day.toString}${DateMessages.getSuffix(day)(Languages.Welsh)} " +
+          s"${DateMessages.monthName(date.getMonthValue).show(Languages.Welsh)} " +
+          s"${date.getYear.toString}"
+
+      Message(
+        english = s"Due $enlgishDateString",
+        welsh   = s"Yn ddyledus erbyn $welshDateString"
+      )
+    }
+
+    def `Balancing payment for tax year`(taxYearStartYear: Int, taxYearEndYear: Int): Message = Message(
+      english = s"Balancing payment for tax year ${taxYearStartYear.toString} to ${taxYearEndYear.toString}",
+      welsh   = s"Taliad mantoli ar gyfer blwyddyn dreth ${taxYearStartYear.toString} i ${taxYearEndYear.toString}"
+    )
+
   }
 
   object TimeOut {

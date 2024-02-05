@@ -26,12 +26,12 @@
 @import config.AppConfig
 
 @this(
-layout: Layout,
-govukButton: GovukButton,
-formWithCSRF: FormWithCSRF,
-requestSupport: RequestSupport,
-overduePaymentRow: OverduePaymentRow,
-appConfig: AppConfig
+  layout: Layout,
+  govukButton: GovukButton,
+  formWithCSRF: FormWithCSRF,
+  requestSupport: RequestSupport,
+  overduePaymentRow: OverduePaymentRow,
+  appConfig: AppConfig
 )
 
 @(overduePayments: OverDuePayments, taxRegime: TaxRegime)(implicit request: Request[_])
@@ -40,11 +40,19 @@ appConfig: AppConfig
 
 @title= @{Messages.YourBill.yourBillIs(overduePayments.total, taxRegime).show}
 
+@subheading = @{
+    taxRegime match {
+        case TaxRegime.Epaye => Messages.YourBill.`Overdue payments`
+        case TaxRegime.Vat => Messages.YourBill.`Overdue payments`
+        case TaxRegime.Sa => Messages.YourBill.`Self Assessment statement`
+    }
+}
+
 @layout(
   pageTitle = Some(title)
 ) {
   <h1 class="govuk-heading-xl">@title</h1>
-  <h2 class="govuk-heading-m">@{Messages.YourBill.`Overdue payments`.show}</h2>
+  <h2 class="govuk-heading-m">@{subheading.show}</h2>
   <dl class="govuk-summary-list">
       @if(appConfig.cr111Enabled) {
           @overduePayments.payments.sortBy(overduePayment => overduePayment.invoicePeriod.dueDate).map(payment => overduePaymentRow(payment, taxRegime))

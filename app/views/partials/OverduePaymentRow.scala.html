@@ -33,7 +33,7 @@
 @invoicePeriodDateLongMonth(date: LocalDate) = @{s"${date.getDayOfMonth.toString} ${DateMessages.monthName(date.getMonthValue).show}"}
 @invoicePeriodDateYear(date: LocalDate) = @{date.getYear.toString}
 
-@invoicePeriodString = @{
+@mainInfo = @{
     if(appConfig.cr111Enabled) {
         taxRegime match {
             case TaxRegime.Epaye =>
@@ -43,8 +43,7 @@
                 s"${invoicePeriodDateShortMonth(payment.invoicePeriod.start)} " + s"${invoicePeriodDateYear(payment.invoicePeriod.start)} " +
                         s"${Messages.YourBill.to.show} ${invoicePeriodDateShortMonth(payment.invoicePeriod.end)} ${payment.invoicePeriod.end.getYear.toString}"
             case TaxRegime.Sa =>
-                s"${invoicePeriodDateShortMonth(payment.invoicePeriod.start)} " +
-                        s"${Messages.YourBill.to.show} ${invoicePeriodDateShortMonth(payment.invoicePeriod.end)} "
+                Messages.YourBill.`Due`(payment.invoicePeriod.dueDate).show
         }
     } else {
         taxRegime match {
@@ -56,11 +55,24 @@
                 s"${invoicePeriodDateLongMonth(payment.invoicePeriod.start)} " +
                         s"${Messages.YourBill.to.show} ${invoicePeriodDateLongMonth(payment.invoicePeriod.end)} ${payment.invoicePeriod.end.getYear.toString}"
             case TaxRegime.Sa =>
-                s"${invoicePeriodDateShortMonth(payment.invoicePeriod.start)} " +
-                        s"${Messages.YourBill.to.show} ${invoicePeriodDateShortMonth(payment.invoicePeriod.end)} " +
-                        s"(${Messages.YourBill.month.show} ${payment.invoicePeriod.monthNumber.toString})"
+                Messages.YourBill.`Due`(payment.invoicePeriod.dueDate).show
         }
     }
+}
+
+@accompanyingInfo = @{
+    taxRegime match {
+        case TaxRegime.Epaye =>
+            s"${Messages.YourBill.`Bill due`.show} ${govDateFormat(payment.invoicePeriod.dueDate)}"
+
+        case TaxRegime.Vat =>
+            s"${Messages.YourBill.`Bill due`.show} ${govDateFormat(payment.invoicePeriod.dueDate)}"
+
+        case TaxRegime.Sa =>
+           Messages.YourBill.`Balancing payment for tax year`(payment.invoicePeriod.start.getYear, payment.invoicePeriod.end.getYear).show
+
+    }
+
 }
 
 @govDateFormat(date: LocalDate) = @{s"${date.getDayOfMonth.toString} ${DateMessages.monthName(date.getMonthValue).show} ${date.getYear.toString}"}
@@ -69,9 +81,9 @@
 
         <div class="govuk-summary-list__row">
           <dt class="govuk-summary-list__key govuk-!-width-two-thirds">
-            @invoicePeriodString<br>
+            @mainInfo<br>
             <span class="govuk-!-font-weight-regular govuk-!-font-size-16">
-                @{Messages.YourBill.`Bill due`.show} @{govDateFormat(payment.invoicePeriod.dueDate)}
+                @accompanyingInfo
             </span>
           </dt>
           <dd class="govuk-summary-list__value">
@@ -83,13 +95,13 @@
                   }
           </dd>
         </div>
-} else {
+    } else {
 
     <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key govuk-!-width-two-thirds">
-            @invoicePeriodString<br>
+            @mainInfo<br>
             <span class="govuk-!-font-weight-regular govuk-!-font-size-16">
-                @{Messages.YourBill.`Bill due`.show} @{govDateFormat(payment.invoicePeriod.dueDate)}
+                @accompanyingInfo
             </span>
         </dt>
         <dd class="govuk-summary-list__value">
