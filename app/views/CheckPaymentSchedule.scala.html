@@ -19,7 +19,7 @@
 @import play.twirl.api.Html
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import essttp.journey.model.UpfrontPaymentAnswers
-@import essttp.rootmodel.{AmountInPence, DayOfMonth}
+@import essttp.rootmodel.{AmountInPence, DayOfMonth, TaxRegime}
 @import essttp.rootmodel.ttp.affordablequotes.PaymentPlan
 @import controllers.routes
 @import messages.DateMessages
@@ -201,10 +201,19 @@
 
   @govukSummaryList(SummaryList(rows = montlyAmountRow :: monthlyPaymentRows, classes = "govuk-!-margin-top-6"))
 
-  @govukWarningText(WarningText(
-    content = Text(Messages.PaymentSchedule.`If you already have a Direct Debit for TAX_REGIME`(request.journey.taxRegime).show),
-    attributes = Map("id" -> "existing-dd-warning")
-  ))
+  @{
+    request.journey.taxRegime match {
+      case TaxRegime.Epaye | TaxRegime.Vat => {
+        govukWarningText(WarningText(
+          content = Text(Messages.PaymentSchedule.`If you already have a Direct Debit for TAX_REGIME`(request.journey.taxRegime).show),
+          attributes = Map("id" -> "existing-dd-warning")
+        ))
+      }
+      case TaxRegime.Sa =>
+        Html("")
+    }
+
+  }
 
   @formWithCSRF(action = routes.PaymentScheduleController.checkPaymentScheduleSubmit) {
     @govukButton(Button(content = Text(Messages.continue.show)))
