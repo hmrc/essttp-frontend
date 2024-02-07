@@ -1433,7 +1433,10 @@ object Messages {
             welsh   = "Gwasanaeth Cwsmeriaid Cymraeg CThEF <br>HMRC<br>BX9 1ST"
           )
         case TaxRegime.Sa =>
-          throw new NotImplementedError()
+          Message(
+            english = "Debt Management<br>Self Assessment<br>HM Revenue and Customs<br>BX9 1AS<br>United Kingdom",
+            welsh   = "Rheolaeth Dyledion<br>Hunanasesiad<br>Gwasanaeth Cwsmeriaid Cymraeg CThEF<br>HMRC<br>BX9 1ST"
+          )
 
       }
     }

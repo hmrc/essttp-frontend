@@ -44,7 +44,8 @@ class TermsAndConditionsControllerSpec extends ItSpec {
 
   Seq[(String, Origin, TaxRegime)](
     ("EPAYE", Origins.Epaye.Bta, TaxRegime.Epaye),
-    ("VAT", Origins.Vat.Bta, TaxRegime.Vat)
+    ("VAT", Origins.Vat.Bta, TaxRegime.Vat),
+    ("SA", Origins.Sa.Bta, TaxRegime.Sa)
   ).foreach {
       case (regime, origin, taxRegime) =>
 
@@ -71,7 +72,7 @@ class TermsAndConditionsControllerSpec extends ItSpec {
               val taxRegimeAddress: String = taxRegime match {
                 case TaxRegime.Epaye => "DM PAYE HM Revenue and Customs BX9 1EW United Kingdom"
                 case TaxRegime.Vat   => "HMRC Direct Debit Support Team VAT 2 DMB 612 BX5 5AB United Kingdom"
-                case TaxRegime.Sa    => throw new NotImplementedError()
+                case TaxRegime.Sa    => "Debt Management Self Assessment HM Revenue and Customs BX9 1AS United Kingdom"
               }
 
               ContentAssertions.assertListOfContent(
@@ -201,7 +202,8 @@ class TermsAndConditionsControllerEmailDisabledSpec extends ItSpec {
 
   Seq[(String, Origin)](
     ("EPAYE", Origins.Epaye.Bta),
-    ("VAT", Origins.Vat.Bta)
+    ("VAT", Origins.Vat.Bta),
+    ("SA", Origins.Sa.Bta)
   ).foreach {
       case (regime, origin) =>
 
