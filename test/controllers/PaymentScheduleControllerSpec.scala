@@ -18,6 +18,7 @@ package controllers
 
 import controllers.PaymentScheduleControllerSpec.SummaryRow
 import essttp.journey.model.{Origin, Origins}
+import essttp.rootmodel.TaxRegime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import play.api.http.Status
@@ -40,7 +41,8 @@ class PaymentScheduleControllerSpec extends ItSpec {
   private val controller: PaymentScheduleController = app.injector.instanceOf[PaymentScheduleController]
   Seq[(String, Origin)](
     ("Epaye", Origins.Epaye.Bta),
-    ("Vat", Origins.Vat.Bta)
+    ("Vat", Origins.Vat.Bta),
+    ("Sa", Origins.Sa.Bta)
   ).foreach {
       case (regime, origin) =>
         s"GET ${routes.PaymentScheduleController.checkPaymentSchedule.url}" - {
@@ -141,10 +143,10 @@ class PaymentScheduleControllerSpec extends ItSpec {
                 testPaymentPlanRows(summaries(1))("£300", paymentDayValue, datesToAmountsValues, totalToPayValue)
 
                 doc.select("#existing-dd-warning").select("strong").text() shouldBe {
-                  regime match {
-                    case "Epaye" => "Warning If you already have a Direct Debit for Employers’ PAYE, contact your bank to stop the next payment being collected. This will prevent you from being charged twice."
-                    case "Vat"   => "Warning If you already have a Direct Debit for VAT, contact your bank to stop the next payment being collected. This will prevent you from being charged twice."
-                    case tt      => throw new MatchError(s"Unknown tax type: $tt")
+                  origin.taxRegime match {
+                    case TaxRegime.Epaye => "Warning If you already have a Direct Debit for Employers’ PAYE, contact your bank to stop the next payment being collected. This will prevent you from being charged twice."
+                    case TaxRegime.Vat   => "Warning If you already have a Direct Debit for VAT, contact your bank to stop the next payment being collected. This will prevent you from being charged twice."
+                    case TaxRegime.Sa    => ""
                   }
                 }
               }
