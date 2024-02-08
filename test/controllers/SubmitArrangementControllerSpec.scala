@@ -44,7 +44,8 @@ class SubmitArrangementControllerSpec extends ItSpec {
 
     List[(TaxRegime, Origin)](
       TaxRegime.Epaye -> Origins.Epaye.Bta,
-      TaxRegime.Vat -> Origins.Vat.Bta
+      TaxRegime.Vat -> Origins.Vat.Bta,
+      TaxRegime.Sa -> Origins.Sa.Bta
     ).foreach {
         case (taxRegime, origin) =>
 

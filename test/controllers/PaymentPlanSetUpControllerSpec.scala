@@ -44,7 +44,8 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
 
   List(
     Origins.Epaye.Bta,
-    Origins.Vat.Bta
+    Origins.Vat.Bta,
+    Origins.Sa.Bta
   ).foreach { origin =>
       val taxRegime = origin.taxRegime
 
@@ -118,7 +119,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
             surveyLink.attr("href") shouldBe (taxRegime match {
               case TaxRegime.Epaye => PageUrls.exitSurveyEpayeUrl
               case TaxRegime.Vat   => PageUrls.exitSurveyVatUrl
-              case TaxRegime.Sa    => throw new NotImplementedError()
+              case TaxRegime.Sa    => PageUrls.exitSurveySaUrl
             })
             ()
           }
@@ -283,7 +284,8 @@ class PaymentPlanSetUpControllerEmailDisabledSpec extends ItSpec {
 
     List(
       Origins.Epaye.Bta,
-      Origins.Vat.Bta
+      Origins.Vat.Bta,
+      Origins.Sa.Bta
     ).foreach { origin =>
         val taxRegime = origin.taxRegime
 

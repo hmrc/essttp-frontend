@@ -59,7 +59,7 @@
     taxRegime match {
         case TaxRegime.Epaye => routes.SignOutController.exitSurveyPaye.url
         case TaxRegime.Vat => routes.SignOutController.exitSurveyVat.url
-        case TaxRegime.Sa => throw new NotImplementedError()
+        case TaxRegime.Sa => routes.SignOutController.exitSurveySa.url
     }
 }
 
