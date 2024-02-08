@@ -62,6 +62,13 @@
         case TaxRegime.Sa => routes.SignOutController.exitSurveySa.url
     }
 }
+@buttonUrl = @{
+    taxRegime match {
+        case TaxRegime.Epaye | TaxRegime.Vat => appConfig.Urls.businessTaxAccountUrl
+        case TaxRegime.Sa => appConfig.Urls.personalTaxAccountUrl
+    }
+
+}
 
 @layout(pageTitle = Some(title), showBackLink = false) {
     @govukPanel(Panel(
@@ -113,7 +120,7 @@
 
 
     <p class="govuk-body">
-        <a href=@{appConfig.Urls.businessTaxAccountUrl} class="govuk-button" role="button" data-module="govuk-button">
+        <a href=@{buttonUrl} class="govuk-button" role="button" data-module="govuk-button">
         @{
             Messages.Confirmation.`Go to tax account`.show
         }
