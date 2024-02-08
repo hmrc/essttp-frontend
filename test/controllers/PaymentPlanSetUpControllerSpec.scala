@@ -113,6 +113,10 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
             val continueButton = doc.select(".govuk-button")
             continueButton.text() shouldBe "Go to tax account"
             continueButton.attr("role") shouldBe "button"
+            continueButton.attr("href") shouldBe (taxRegime match {
+              case TaxRegime.Epaye | TaxRegime.Vat => "http://localhost:9020/business-account"
+              case TaxRegime.Sa                    => "http://localhost:9232/personal-account"
+            })
 
             val surveyLink = doc.select(".govuk-body > .govuk-link").asScala.toList(1)
             surveyLink.parent().text() shouldBe "What did you think of this service? (takes 30 seconds)"

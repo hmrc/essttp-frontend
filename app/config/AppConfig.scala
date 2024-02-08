@@ -50,6 +50,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     val feedbackFrontend: String = platformHost.getOrElse(config.get[String]("baseUrl.feedback-frontend"))
     val gg: String = config.get[String]("baseUrl.gg")
     val businessTaxAccountFrontend: String = platformHost.getOrElse(config.get[String]("baseUrl.business-tax-account-frontend"))
+    val personalTaxAccountFrontend: String = platformHost.getOrElse(config.get[String]("baseUrl.pertax-frontend"))
     val timeToPayUrl: String = servicesConfig.baseUrl("time-to-pay")
     val timeToPayEligibilityUrl: String = servicesConfig.baseUrl("time-to-pay-eligibility")
     val barsUrl: String = servicesConfig.baseUrl("bank-account-reputation")
@@ -76,6 +77,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     val extraSupportUrl: String = config.get[String]("govUkUrls.extraSupportUrl")
     val relayUrl: String = config.get[String]("govUkUrls.relayUrl")
     val businessTaxAccountUrl: String = s"${BaseUrl.businessTaxAccountFrontend}/business-account"
+    val personalTaxAccountUrl: String = s"${BaseUrl.personalTaxAccountFrontend}/personal-account"
     val businessPaymentSupportService: String = config.get[String]("govUkUrls.businessPaymentSupportService")
     val welshLanguageHelplineForDebtManagement: String = config.get[String]("govUkUrls.welshLanguageHelplineForDebtManagement")
     val saSuppUrl: String = {
