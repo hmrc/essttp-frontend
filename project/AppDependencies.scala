@@ -11,7 +11,7 @@ object AppDependencies {
     "uk.gov.hmrc"       %% "play-conditional-form-mapping-play-30"   % "2.0.0",
     "com.beachape"      %% "enumeratum-play"                         % "1.8.0",
     "org.typelevel"     %% "cats-core"                               % "2.10.0",
-    "uk.gov.hmrc"       %% "essttp-backend-cor-journey"              % "1.127.0",
+    "uk.gov.hmrc"       %% "essttp-backend-cor-journey"              % "1.128.0",
     "uk.gov.hmrc"       %% "emailaddress-play-30"                    % "4.0.0",
     "uk.gov.hmrc"       %% "domain-play-30"                          % "9.0.0"
   // format: ON
@@ -19,7 +19,7 @@ object AppDependencies {
 
   val test: Seq[ModuleID] = Seq(
     // format: OFF
-    "org.scalatest"           %% "scalatest"               % "3.2.17",
+    "org.scalatest"           %% "scalatest"               % "3.2.18",
     "org.scalatestplus"       %% "scalacheck-1-15"         % "3.2.11.0",
     "org.scalatestplus.play"  %% "scalatestplus-play"      % "7.0.1",
     "org.jsoup"               %  "jsoup"                   % "1.17.2",

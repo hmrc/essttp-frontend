@@ -397,7 +397,7 @@ object TdAll {
     val regimeType = taxRegime match {
       case TaxRegime.Epaye => RegimeType("PAYE")
       case TaxRegime.Vat   => RegimeType("VATC")
-      case TaxRegime.Sa    => throw new NotImplementedError()
+      case TaxRegime.Sa    => RegimeType("SA")
     }
     ArrangementRequest(
       channelIdentifier           = ChannelIdentifiers.eSSTTP,

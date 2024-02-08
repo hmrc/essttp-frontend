@@ -136,9 +136,9 @@ class TtpService @Inject() (
   ): Future[ArrangementResponse] = {
 
     val regimeType: RegimeType = journey.fold(_.taxRegime, _.taxRegime) match {
-      case TaxRegime.Epaye => RegimeType.`PAYE`
-      case TaxRegime.Vat   => RegimeType.`VAT`
-      case TaxRegime.Sa    => throw new NotImplementedError()
+      case TaxRegime.Epaye => RegimeType.PAYE
+      case TaxRegime.Vat   => RegimeType.VAT
+      case TaxRegime.Sa    => RegimeType.SA
     }
     val eligibilityCheckResult = journey.fold(_.eligibilityCheckResult, _.eligibilityCheckResult)
     val selectedPaymentPlan = journey.fold(_.selectedPaymentPlan, _.selectedPaymentPlan)
