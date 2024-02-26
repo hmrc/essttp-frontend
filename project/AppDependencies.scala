@@ -25,7 +25,7 @@ object AppDependencies {
     "org.jsoup"               %  "jsoup"                   % "1.17.2",
     "uk.gov.hmrc"             %% "bootstrap-test-play-30"  % bootstrapVersion,
     "org.scalacheck"          %% "scalacheck"              % "1.17.0",
-    "org.wiremock"            %  "wiremock-standalone"     % "3.3.1"
+    "org.wiremock"            %  "wiremock-standalone"     % "3.4.2"
   // format: ON
   ).map(_ % Test)
 }
