@@ -34,7 +34,7 @@ object EligibilityRouter {
     } else {
       EligibilityErrors.toEligibilityError(eligibilityResult.eligibilityRules) match {
         case ee @ Some(MultipleReasons) =>
-          determineWhetherToGoToDebtTooSmall(ee, eligibilityResult.eligibilityRules.isLessThanMinDebtAllowance, taxRegime)
+          determineWhetherToGoToDebtTooSmall(ee, eligibilityResult.eligibilityRules.isLessThanMinDebtAllowance, eligibilityResult.eligibilityRules.noDueDatesReached, taxRegime)
         case None                                    => whichGenericIneligiblePage(taxRegime)
         case Some(HasRlsOnAddress)                   => whichGenericIneligiblePage(taxRegime)
         case Some(MarkedAsInsolvent)                 => whichGenericIneligiblePage(taxRegime)
@@ -96,14 +96,19 @@ object EligibilityRouter {
     case TaxRegime.Sa    => routes.IneligibleController.saFileYourReturnPage
   }
 
-  //requirement from business that if multiple reasons exist but any of them are isLessThanMinDebtAllowance, go to debt too small page
+  /*
+  requirement from business that if multiple reasons exist but any of them are isLessThanMinDebtAllowance,
+  go to debt too small page, unless reason is NoDueDatesReached
+  */
   private def determineWhetherToGoToDebtTooSmall(
       maybeEligibilityError:      Option[EligibilityError],
       isLessThanMinDebtAllowance: Boolean,
+      dueDatesReached:            Boolean,
       taxRegime:                  TaxRegime
-  ): Call = (maybeEligibilityError, isLessThanMinDebtAllowance, taxRegime) match {
-    case (Some(MultipleReasons), true, _) => whichDebtTooSmallPage(taxRegime)
-    case _                                => whichGenericIneligiblePage(taxRegime)
+  ): Call = (maybeEligibilityError, isLessThanMinDebtAllowance, dueDatesReached, taxRegime) match {
+    case (Some(MultipleReasons), true, true, _) => whichNoDueDatesReachedPage(taxRegime)
+    case (Some(MultipleReasons), true, _, _)    => whichDebtTooSmallPage(taxRegime)
+    case _                                      => whichGenericIneligiblePage(taxRegime)
   }
 
   private def whichNoDueDatesReachedPage(taxRegime: TaxRegime): Call = taxRegime match {

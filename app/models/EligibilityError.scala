@@ -37,6 +37,8 @@ object EligibilityErrors extends Enum[EligibilityError] {
 
   case object MarkedAsInsolvent extends EligibilityError
 
+  case object NoDueDatesReached extends EligibilityError
+
   case object IsLessThanMinDebtAllowance extends EligibilityError
 
   case object IsMoreThanMaxDebtAllowance extends EligibilityError
@@ -54,8 +56,6 @@ object EligibilityErrors extends Enum[EligibilityError] {
   case object HasInvalidInterestSignals extends EligibilityError
 
   case object DmSpecialOfficeProcessingRequired extends EligibilityError
-
-  case object NoDueDatesReached extends EligibilityError
 
   case object CannotFindLockReason extends EligibilityError
 
@@ -77,6 +77,7 @@ object EligibilityErrors extends Enum[EligibilityError] {
       case eligibilityRules if eligibilityRules.moreThanOneReasonForIneligibility    => Some(MultipleReasons)
       case EligibilityRules(true, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)       => Some(HasRlsOnAddress)
       case EligibilityRules(_, true, _, _, _, _, _, _, _, _, _, _, _, _, _, _)       => Some(MarkedAsInsolvent)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, true, _, _, _, _)       => Some(NoDueDatesReached)
       case EligibilityRules(_, _, true, _, _, _, _, _, _, _, _, _, _, _, _, _)       => Some(IsLessThanMinDebtAllowance)
       case EligibilityRules(_, _, _, true, _, _, _, _, _, _, _, _, _, _, _, _)       => Some(IsMoreThanMaxDebtAllowance)
       case EligibilityRules(_, _, _, _, true, _, _, _, _, _, _, _, _, _, _, _)       => Some(DisallowedChargeLockTypes)
@@ -86,7 +87,6 @@ object EligibilityErrors extends Enum[EligibilityError] {
       case EligibilityRules(_, _, _, _, _, _, _, _, true, _, _, _, _, _, _, _)       => Some(MissingFiledReturns)
       case EligibilityRules(_, _, _, _, _, _, _, _, _, Some(true), _, _, _, _, _, _) => Some(HasInvalidInterestSignals)
       case EligibilityRules(_, _, _, _, _, _, _, _, _, _, Some(true), _, _, _, _, _) => Some(DmSpecialOfficeProcessingRequired)
-      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, true, _, _, _, _)       => Some(NoDueDatesReached)
       case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, Some(true), _, _, _) => Some(CannotFindLockReason)
       case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, _, Some(true), _, _) => Some(CannotFindLockReason)
       case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, _, _, Some(true), _) => Some(IsMoreThanMaxPaymentReference)
