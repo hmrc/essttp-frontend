@@ -232,6 +232,33 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
         }
     }
 
+    "Ineligible: NoDueDatesReached with isLessThanMinDebtAllowance also true should redirect correctly" - {
+      forAll(Table(
+        ("Scenario flavour", "eligibility rules", "expected redirect", "updated journey json", "origin"),
+        ("NoDueDatesReached - EPAYE", TdAll.notEligibleNoDueDatesReached.copy(isLessThanMinDebtAllowance = true), PageUrls.payeNoDueDatesReachedUrl,
+          JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Epaye.Bta), Origins.Epaye.Bta),
+        ("NoDueDatesReached - VAT", TdAll.notEligibleNoDueDatesReached.copy(isLessThanMinDebtAllowance = true), PageUrls.vatNoDueDatesReachedUrl,
+          JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Vat.Bta), Origins.Vat.Bta)
+      )) {
+        (sf: String, eligibilityRules: EligibilityRules, expectedRedirect: String, updatedJourneyJson: String, origin: Origin) => {
+          s"[$sf] should redirect to noDueDatesReached page" in {
+            val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(origin.taxRegime, TdAll.notEligibleEligibilityPass, eligibilityRules)
+
+            stubCommonActions()
+            EssttpBackend.DetermineTaxId.findJourney(origin)()
+            Ttp.Eligibility.stubRetrieveEligibility(origin.taxRegime)(eligibilityCheckResponseJson)
+            EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(TdAll.journeyId, updatedJourneyJson)
+
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+            val result = controller.determineEligibility(fakeRequest)
+
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(expectedRedirect)
+          }
+        }
+      }
+    }
+
     "Eligible for Epaye: should redirect to your bill and send an audit event" - {
       allCombinationOfTwoBooleanOptions.foreach(combo => {
         val maybeChargeIsInterestBearingCharge = combo._1
