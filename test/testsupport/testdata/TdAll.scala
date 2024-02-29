@@ -111,12 +111,15 @@ object TdAll {
     ineligibleChargeTypes             = false,
     missingFiledReturns               = false,
     hasInvalidInterestSignals         = None,
+    hasInvalidInterestSignalCESA      = None,
     dmSpecialOfficeProcessingRequired = None,
     noDueDatesReached                 = false,
     cannotFindLockReason              = None,
     creditsNotAllowed                 = None,
     isMoreThanMaxPaymentReference     = None,
-    chargesBeforeMaxAccountingDate    = None
+    chargesBeforeMaxAccountingDate    = None,
+    hasDisguisedRemuneration          = None,
+    hasCapacitor                      = None
   )
   val notEligibleHasRlsOnAddress: EligibilityRules = eligibleEligibilityRules.copy(hasRlsOnAddress = true)
   val notEligibleMarkedAsInsolvent: EligibilityRules = eligibleEligibilityRules.copy(markedAsInsolvent = true)
@@ -219,7 +222,13 @@ object TdAll {
     EligibilityCheckResult(
       processingDateTime              = ProcessingDateTime("2022-03-23T13:49:51.141Z"),
       identification                  = identification(taxRegime),
+      invalidSignals                  = Some(List(InvalidSignals(
+        signalType        = "xyz",
+        signalValue       = "123",
+        signalDescription = "Descriptiion"
+      ))),
       customerPostcodes               = List(CustomerPostcode(customerPostcode, PostcodeDate("2022-01-31"))),
+      customerType                    = Some(CustomerTypes.MTDITSA),
       regimePaymentFrequency          = PaymentPlanFrequencies.Monthly,
       paymentPlanFrequency            = PaymentPlanFrequencies.Monthly,
       paymentPlanMinLength            = PaymentPlanMinLength(1),
@@ -475,7 +484,7 @@ object TdAll {
   val someRegimeDigitalCorrespondenceFalse: Option[RegimeDigitalCorrespondence] = Some(RegimeDigitalCorrespondence(false))
   val someRegimeDigitalCorrespondenceTrue: Option[RegimeDigitalCorrespondence] = Some(RegimeDigitalCorrespondence(true))
 
-  def customerReference(taxRegime: TaxRegime) = taxRegime match {
+  def customerReference(taxRegime: TaxRegime): CustomerReference = taxRegime match {
     case TaxRegime.Epaye => CustomerReference("123PA44545546")
     case TaxRegime.Vat   => CustomerReference("101747001")
     case TaxRegime.Sa    => CustomerReference("1234567895")

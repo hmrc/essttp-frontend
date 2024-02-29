@@ -351,18 +351,23 @@ object StartJourneyController {
         ineligibleChargeTypes             = containsError(IneligibleChargeTypes),
         missingFiledReturns               = containsError(MissingFiledReturns),
         hasInvalidInterestSignals         = Some(containsError(HasInvalidInterestSignals)),
+        hasInvalidInterestSignalCESA      = Some(containsError(HasInvalidInterestSignalCESA)),
         dmSpecialOfficeProcessingRequired = Some(containsError(DmSpecialOfficeProcessingRequired)),
         noDueDatesReached                 = containsError(NoDueDatesReached),
         cannotFindLockReason              = Some(containsError(CannotFindLockReason)),
         creditsNotAllowed                 = Some(containsError(CreditsNotAllowed)),
         isMoreThanMaxPaymentReference     = Some(containsError(IsMoreThanMaxPaymentReference)),
-        chargesBeforeMaxAccountingDate    = Some(containsError(ChargesBeforeMaxAccountingDate))
+        chargesBeforeMaxAccountingDate    = Some(containsError(ChargesBeforeMaxAccountingDate)),
+        hasDisguisedRemuneration          = Some(containsError(HasDisguisedRemuneration)),
+        hasCapacitor                      = Some(containsError(HasCapacitor))
       )
     }
     EligibilityCheckResult(
       processingDateTime              = ProcessingDateTime(LocalDate.now().toString),
       identification                  = makeIdentificationForTaxType(taxRegime, form),
+      invalidSignals                  = Some(List(InvalidSignals(signalType        = "xyz", signalValue = "123", signalDescription = "Description"))),
       customerPostcodes               = List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate("2022-01-01"))),
+      customerType                    = Some(CustomerTypes.MTDITSA),
       regimePaymentFrequency          = PaymentPlanFrequencies.Monthly,
       paymentPlanFrequency            = PaymentPlanFrequencies.Monthly,
       paymentPlanMinLength            = PaymentPlanMinLength(form.planMinLength),
