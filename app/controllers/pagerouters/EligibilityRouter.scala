@@ -46,7 +46,7 @@ object EligibilityRouter {
         case Some(IneligibleChargeTypes)             => whichGenericIneligiblePage(taxRegime)
         case Some(MissingFiledReturns)               => whichFileYourReturnsPage(taxRegime)
         case Some(HasInvalidInterestSignals)         => whichGenericIneligiblePage(taxRegime)
-        case Some(HasInvalidInterestSignalCESA)      => whichGenericIneligiblePage(taxRegime)
+        case Some(HasInvalidInterestSignalsCESA)     => whichGenericIneligiblePage(taxRegime)
         case Some(DmSpecialOfficeProcessingRequired) => whichGenericIneligiblePage(taxRegime)
         case Some(NoDueDatesReached) => if (appConfig.cr111Enabled && taxRegime =!= Sa) {
           whichNoDueDatesReachedPage(taxRegime)

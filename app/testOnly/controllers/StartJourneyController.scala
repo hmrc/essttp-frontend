@@ -351,7 +351,7 @@ object StartJourneyController {
         ineligibleChargeTypes             = containsError(IneligibleChargeTypes),
         missingFiledReturns               = containsError(MissingFiledReturns),
         hasInvalidInterestSignals         = Some(containsError(HasInvalidInterestSignals)),
-        hasInvalidInterestSignalCESA      = Some(containsError(HasInvalidInterestSignalCESA)),
+        hasInvalidInterestSignalsCESA     = Some(containsError(HasInvalidInterestSignalsCESA)),
         dmSpecialOfficeProcessingRequired = Some(containsError(DmSpecialOfficeProcessingRequired)),
         noDueDatesReached                 = containsError(NoDueDatesReached),
         cannotFindLockReason              = Some(containsError(CannotFindLockReason)),

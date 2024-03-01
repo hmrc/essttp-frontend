@@ -111,7 +111,7 @@ object TdAll {
     ineligibleChargeTypes             = false,
     missingFiledReturns               = false,
     hasInvalidInterestSignals         = None,
-    hasInvalidInterestSignalCESA      = None,
+    hasInvalidInterestSignalsCESA     = None,
     dmSpecialOfficeProcessingRequired = None,
     noDueDatesReached                 = false,
     cannotFindLockReason              = None,
@@ -132,12 +132,15 @@ object TdAll {
   val notEligibleMissingFiledReturns: EligibilityRules = eligibleEligibilityRules.copy(missingFiledReturns = true)
   val notEligibleNoDueDatesReached: EligibilityRules = eligibleEligibilityRules.copy(noDueDatesReached = true)
   val notEligibleHasInvalidInterestSignals: EligibilityRules = eligibleEligibilityRules.copy(hasInvalidInterestSignals = Some(true))
+  val notEligibleHasInvalidInterestSignalsCESA: EligibilityRules = eligibleEligibilityRules.copy(hasInvalidInterestSignalsCESA = Some(true))
   val notEligibleDmSpecialOfficeProcessingRequired: EligibilityRules = eligibleEligibilityRules.copy(dmSpecialOfficeProcessingRequired = Some(true))
   val notEligibleCannotFindLockReason: EligibilityRules = eligibleEligibilityRules.copy(cannotFindLockReason = Some(true))
   val notEligibleCreditsNotAllowed: EligibilityRules = eligibleEligibilityRules.copy(creditsNotAllowed = Some(true))
   val notEligibleIsMoreThanMaxPaymentReference: EligibilityRules = eligibleEligibilityRules.copy(isMoreThanMaxPaymentReference = Some(true))
   val notEligibleChargesBeforeMaxAccountingDate: EligibilityRules = eligibleEligibilityRules.copy(chargesBeforeMaxAccountingDate = Some(true))
   val notEligibleMultipleReasons: EligibilityRules = eligibleEligibilityRules.copy(missingFiledReturns = true).copy(hasRlsOnAddress = true)
+  val notEligibleHasDisguisedRemuneration: EligibilityRules = eligibleEligibilityRules.copy(hasDisguisedRemuneration = Some(true))
+  val notEligibleHasCapacitor: EligibilityRules = eligibleEligibilityRules.copy(hasCapacitor = Some(true))
 
   val callEligibilityApiRequestEpaye: CallEligibilityApiRequest = CallEligibilityApiRequest(
     channelIdentifier         = "eSSTTP",
@@ -222,13 +225,9 @@ object TdAll {
     EligibilityCheckResult(
       processingDateTime              = ProcessingDateTime("2022-03-23T13:49:51.141Z"),
       identification                  = identification(taxRegime),
-      invalidSignals                  = Some(List(InvalidSignals(
-        signalType        = "xyz",
-        signalValue       = "123",
-        signalDescription = "Descriptiion"
-      ))),
+      invalidSignals                  = None,
       customerPostcodes               = List(CustomerPostcode(customerPostcode, PostcodeDate("2022-01-31"))),
-      customerType                    = Some(CustomerTypes.MTDITSA),
+      customerType                    = None,
       regimePaymentFrequency          = PaymentPlanFrequencies.Monthly,
       paymentPlanFrequency            = PaymentPlanFrequencies.Monthly,
       paymentPlanMinLength            = PaymentPlanMinLength(1),

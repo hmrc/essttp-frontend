@@ -55,7 +55,7 @@ object EligibilityErrors extends Enum[EligibilityError] {
 
   case object HasInvalidInterestSignals extends EligibilityError
 
-  case object HasInvalidInterestSignalCESA extends EligibilityError
+  case object HasInvalidInterestSignalsCESA extends EligibilityError
 
   case object DmSpecialOfficeProcessingRequired extends EligibilityError
 
@@ -92,7 +92,7 @@ object EligibilityErrors extends Enum[EligibilityError] {
       case EligibilityRules(_, _, _, _, _, _, _, true, _, _, _, _, _, _, _, _, _, _, _)       => Some(IneligibleChargeTypes)
       case EligibilityRules(_, _, _, _, _, _, _, _, true, _, _, _, _, _, _, _, _, _, _)       => Some(MissingFiledReturns)
       case EligibilityRules(_, _, _, _, _, _, _, _, _, Some(true), _, _, _, _, _, _, _, _, _) => Some(HasInvalidInterestSignals)
-      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, Some(true), _, _, _, _, _, _, _, _) => Some(HasInvalidInterestSignalCESA)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, Some(true), _, _, _, _, _, _, _, _) => Some(HasInvalidInterestSignalsCESA)
       case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, Some(true), _, _, _, _, _, _, _) => Some(DmSpecialOfficeProcessingRequired)
       case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, _, Some(true), _, _, _, _, _) => Some(CannotFindLockReason)
       case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, _, _, Some(true), _, _, _, _) => Some(CreditsNotAllowed)
