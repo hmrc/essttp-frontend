@@ -46,13 +46,17 @@ object EligibilityRouter {
         case Some(IneligibleChargeTypes)             => whichGenericIneligiblePage(taxRegime)
         case Some(MissingFiledReturns)               => whichFileYourReturnsPage(taxRegime)
         case Some(HasInvalidInterestSignals)         => whichGenericIneligiblePage(taxRegime)
+        case Some(HasInvalidInterestSignalsCESA)     => whichGenericIneligiblePage(taxRegime)
         case Some(DmSpecialOfficeProcessingRequired) => whichGenericIneligiblePage(taxRegime)
-        case Some(NoDueDatesReached) => if (appConfig.cr111Enabled && taxRegime =!= Sa) { whichNoDueDatesReachedPage(taxRegime) }
-        else whichGenericIneligiblePage(taxRegime)
+        case Some(NoDueDatesReached) => if (appConfig.cr111Enabled && taxRegime =!= Sa) {
+          whichNoDueDatesReachedPage(taxRegime)
+        } else { whichGenericIneligiblePage(taxRegime) }
         case Some(CannotFindLockReason)           => whichGenericIneligiblePage(taxRegime)
         case Some(CreditsNotAllowed)              => whichGenericIneligiblePage(taxRegime)
         case Some(IsMoreThanMaxPaymentReference)  => whichGenericIneligiblePage(taxRegime)
-        case Some(ChargesBeforeMaxAccountingDate) => routes.IneligibleController.vatDebtBeforeAccountingDatePage
+        case Some(ChargesBeforeMaxAccountingDate) => whichDebtBeforeAccountingDatePage(taxRegime)
+        case Some(HasDisguisedRemuneration)       => whichGenericIneligiblePage(taxRegime)
+        case Some(HasCapacitor)                   => whichGenericIneligiblePage(taxRegime)
       }
     }
   }
@@ -94,6 +98,12 @@ object EligibilityRouter {
     case TaxRegime.Epaye => routes.IneligibleController.epayeFileYourReturnPage
     case TaxRegime.Vat   => routes.IneligibleController.vatFileYourReturnPage
     case TaxRegime.Sa    => routes.IneligibleController.saFileYourReturnPage
+  }
+
+  private def whichDebtBeforeAccountingDatePage(taxRegime: TaxRegime): Call = taxRegime match {
+    case TaxRegime.Epaye => throw new NotImplementedError("Ineligibility reason not relevant to EPAYE")
+    case TaxRegime.Vat   => routes.IneligibleController.vatDebtBeforeAccountingDatePage
+    case TaxRegime.Sa    => routes.IneligibleController.saDebtTooOldPage
   }
 
   /*

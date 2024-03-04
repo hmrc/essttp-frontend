@@ -75,12 +75,15 @@ object TtpJsonResponses {
        |    "missingFiledReturns" : ${eligibilityRules.missingFiledReturns.toString},
        |    "noDueDatesReached": ${eligibilityRules.noDueDatesReached.toString}
        |  ${optionalEligibilityResponsesJson(eligibilityRules.hasInvalidInterestSignals, "hasInvalidInterestSignals")}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.hasInvalidInterestSignalsCESA, "hasInvalidInterestSignalsCESA")}
        |  ${optionalEligibilityResponsesJson(eligibilityRules.dmSpecialOfficeProcessingRequired, "dmSpecialOfficeProcessingRequired")}
        |  ${optionalEligibilityResponsesJson(eligibilityRules.cannotFindLockReason, "cannotFindLockReason")}
        |  ${optionalEligibilityResponsesJson(eligibilityRules.creditsNotAllowed, "creditsNotAllowed")}
        |  ${optionalEligibilityResponsesJson(eligibilityRules.isMoreThanMaxPaymentReference, "isMoreThanMaxPaymentReference")}
        |  ${optionalEligibilityResponsesJson(eligibilityRules.chargesBeforeMaxAccountingDate, "chargesBeforeMaxAccountingDate")}
        |  ${optionalEligibilityResponsesJson(eligibilityRules.chargesOverMaxDebtAge, "chargesOverMaxDebtAge")}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.hasDisguisedRemuneration, "hasDisguisedRemuneration")}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.hasCapacitor, "hasCapacitor")}
        |  },
        |  "chargeTypeAssessment" : [ {
        |    "taxPeriodFrom" : "2020-08-13",

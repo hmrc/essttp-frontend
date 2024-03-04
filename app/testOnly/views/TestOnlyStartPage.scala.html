@@ -59,19 +59,26 @@ appConfig: AppConfig
 
 @epayeEligibilityErrorCheckboxes = @{
     EligibilityErrors.values
-      .filterNot(e => e === EligibilityErrors.MultipleReasons || e === EligibilityErrors.ChargesBeforeMaxAccountingDate)
-      .map(toCheckboxItem)
+      .filterNot(e => e === EligibilityErrors.MultipleReasons
+            || e === EligibilityErrors.ChargesBeforeMaxAccountingDate
+            || e === EligibilityErrors.HasInvalidInterestSignalsCESA
+            || e === EligibilityErrors.HasDisguisedRemuneration
+            || e === EligibilityErrors.HasCapacitor
+    ).map(toCheckboxItem)
 }
 
 @vatEligibilityErrorCheckboxes = @{
     EligibilityErrors.values
-      .filterNot(_ === EligibilityErrors.MultipleReasons)
-      .map(toCheckboxItem)
+      .filterNot(e => e === EligibilityErrors.MultipleReasons
+            || e === EligibilityErrors.HasInvalidInterestSignalsCESA
+            || e === EligibilityErrors.HasDisguisedRemuneration
+            || e === EligibilityErrors.HasCapacitor
+    ).map(toCheckboxItem)
 }
 
 @saEligibilityErrorCheckboxes = @{
     EligibilityErrors.values
-    .filterNot(e => e === EligibilityErrors.MultipleReasons || e === EligibilityErrors.ChargesBeforeMaxAccountingDate)
+    .filterNot(_ === EligibilityErrors.MultipleReasons)
     .map(toCheckboxItem)
 }
 

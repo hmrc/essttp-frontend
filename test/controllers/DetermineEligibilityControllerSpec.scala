@@ -134,6 +134,9 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       ("HasInvalidInterestSignals - SA", TdAll.notEligibleHasInvalidInterestSignals, "hasInvalidInterestSignals", PageUrls.saNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasInvalidInterestSignals`(Origins.Sa.Bta), Origins.Sa.Bta),
 
+      ("HasInvalidInterestSignalsCESA - SA", TdAll.notEligibleHasInvalidInterestSignalsCESA, "hasInvalidInterestSignalsCESA", PageUrls.saNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasInvalidInterestSignalsCESA`(Origins.Sa.Bta), Origins.Sa.Bta),
+
       ("DmSpecialOfficeProcessingRequired - EPAYE", TdAll.notEligibleDmSpecialOfficeProcessingRequired, "dmSpecialOfficeProcessingRequired", PageUrls.payeNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - DmSpecialOfficeProcessingRequired`(Origins.Epaye.Bta), Origins.Epaye.Bta),
       ("DmSpecialOfficeProcessingRequired - VAT", TdAll.notEligibleDmSpecialOfficeProcessingRequired, "dmSpecialOfficeProcessingRequired", PageUrls.vatNotEligibleUrl,
@@ -163,7 +166,12 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxPaymentReference`(Origins.Sa.Bta), Origins.Sa.Bta),
       ("ChargesBeforeMaxAccountingDate - VAT", TdAll.notEligibleChargesBeforeMaxAccountingDate, "chargesBeforeMaxAccountingDate", PageUrls.vatDebtBeforeAccountingDateUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - ChargesBeforeMaxAccountingDate`(Origins.Vat.Bta),
-        Origins.Vat.Bta)
+        Origins.Vat.Bta),
+
+      ("HasDisguisedRemuneration - SA", TdAll.notEligibleHasDisguisedRemuneration, "hasDisguisedRemuneration", PageUrls.saNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasDisguisedRemuneration`(Origins.Sa.Bta), Origins.Sa.Bta),
+      ("HasCapacitor - SA", TdAll.notEligibleHasCapacitor, "hasCapacitor", PageUrls.saNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasCapacitor`(Origins.Sa.Bta), Origins.Sa.Bta)
     )) {
       (sf: String, eligibilityRules: EligibilityRules, auditIneligibilityReason: String, expectedRedirect: String, updatedJourneyJson: String, origin: Origin) =>
         {

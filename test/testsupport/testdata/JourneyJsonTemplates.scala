@@ -119,6 +119,12 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
+  def `Eligibility Checked - Ineligible - HasInvalidInterestSignalsCESA`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.eligibilityCheckedIneligible,
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleHasInvalidInterestSignalsCESA(origin.taxRegime, encrypter),
+    origin      = origin
+  )
+
   def `Eligibility Checked - Ineligible - DmSpecialOfficeProcessingRequired`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleDmSpecialOfficeProcessingRequired(origin.taxRegime, encrypter),
@@ -146,6 +152,18 @@ object JourneyJsonTemplates {
   def `Eligibility Checked - Ineligible - ChargesBeforeMaxAccountingDate`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
     journeyInfo = JourneyInfo.eligibilityCheckedChargesBeforeMaxAccountingDate(origin.taxRegime, encrypter),
+    origin      = origin
+  )
+
+  def `Eligibility Checked - Ineligible - HasDisguisedRemuneration`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.eligibilityCheckedIneligible,
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleHasDisguisedRemuneration(origin.taxRegime, encrypter),
+    origin      = origin
+  )
+
+  def `Eligibility Checked - Ineligible - HasCapacitor`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.eligibilityCheckedIneligible,
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleHasCapacitor(origin.taxRegime, encrypter),
     origin      = origin
   )
 
