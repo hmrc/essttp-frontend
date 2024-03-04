@@ -78,9 +78,7 @@ appConfig: AppConfig
 
 @saEligibilityErrorCheckboxes = @{
     EligibilityErrors.values
-    .filterNot(e => e === EligibilityErrors.MultipleReasons
-            || e === EligibilityErrors.ChargesBeforeMaxAccountingDate
-            || e === EligibilityErrors.NoDueDatesReached)
+    .filterNot(_ === EligibilityErrors.MultipleReasons)
     .map(toCheckboxItem)
 }
 
