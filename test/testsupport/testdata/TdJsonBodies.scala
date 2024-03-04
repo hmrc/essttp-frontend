@@ -160,10 +160,10 @@ object TdJsonBodies {
       |      "taxPeriodFrom" : "2020-08-13",
       |      "taxPeriodTo" : "2020-08-14",
       |      "debtTotalAmount" : 100000,
+      |      "chargeReference" : "A00000000001",
       |      "charges" : [ {
       |        "chargeType": "InYearRTICharge-Tax",
       |        "mainType": "InYearRTICharge(FPS)",
-      |        "chargeReference" : "A00000000001",
       |        "mainTrans" : "mainTrans",
       |        "subTrans" : "subTrans",
       |        "outstandingAmount" : 50000,
@@ -187,10 +187,10 @@ object TdJsonBodies {
       |      "taxPeriodFrom" : "2020-07-13",
       |      "taxPeriodTo" : "2020-07-14",
       |      "debtTotalAmount" : 200000,
+      |      "chargeReference" : "A00000000002",
       |      "charges" : [ {
       |        "chargeType": "InYearRTICharge-Tax",
       |        "mainType": "InYearRTICharge(FPS)",
-      |        "chargeReference" : "A00000000002",
       |        "mainTrans" : "mainTrans",
       |        "subTrans" : "subTrans",
       |        "outstandingAmount" : 100000,

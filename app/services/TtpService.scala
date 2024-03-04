@@ -35,7 +35,7 @@ import essttp.rootmodel.ttp.eligibility._
 import essttp.utils.Errors
 import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
-import services.TtpService.{deriveCustomerDetail, padLeftWithZeros}
+import services.TtpService.{deriveCustomerDetail, padLeftWithZeros, toDebtItemCharge}
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 import uk.gov.hmrc.http.{HttpException, UpstreamErrorResponse}
 import util.JourneyLogger
@@ -95,21 +95,7 @@ class TtpService @Inject() (
     val initialPaymentAmount: Option[UpfrontPaymentAmount] = TtpService.deriveUpfrontPaymentAmount(upfrontPaymentAnswers)
     val monthlyPaymentAmount = TtpService.monthlyPaymentAmountFromJourney(journey)
     val startDatesResponse = journey.startDatesResponse
-
-    val debtItemCharges = eligibilityCheckResult.chargeTypeAssessment
-      .flatMap(_.charges)
-      .map { charge: Charges =>
-        DebtItemCharge(
-          outstandingDebtAmount   = OutstandingDebtAmount(charge.outstandingAmount.value),
-          mainTrans               = charge.mainTrans,
-          subTrans                = charge.subTrans,
-          isInterestBearingCharge = charge.isInterestBearingCharge,
-          useChargeReference      = charge.useChargeReference,
-          debtItemChargeId        = charge.chargeReference,
-          interestStartDate       = charge.interestStartDate,
-          debtItemOriginalDueDate = DebtItemOriginalDueDate(charge.dueDate.value)
-        )
-      }
+    val debtItemCharges = eligibilityCheckResult.chargeTypeAssessment.flatMap(toDebtItemCharge)
 
     val affordableQuotesRequest: AffordableQuotesRequest = AffordableQuotesRequest(
       channelIdentifier           = ChannelIdentifiers.eSSTTP,
@@ -147,20 +133,22 @@ class TtpService @Inject() (
     val customerDetail = journey.fold(_.eligibilityCheckResult.customerDetails, deriveCustomerDetail)
 
     val directDebitDetails = journey.fold(_.directDebitDetails, _.directDebitDetails)
-    val accountNumberPaddedWithZero: AccountNumber = directDebitDetails.accountNumber.copy(SensitiveString(padLeftWithZeros(directDebitDetails.accountNumber.value.decryptedValue)))
+    val accountNumberPaddedWithZero: AccountNumber = directDebitDetails.accountNumber
+      .copy(SensitiveString(padLeftWithZeros(directDebitDetails.accountNumber.value.decryptedValue)))
 
-    val debtItemCarges: List[DebtItemCharges] = eligibilityCheckResult.chargeTypeAssessment
-      .flatMap(_.charges)
-      .map { charge: Charges =>
-        DebtItemCharges(
-          outstandingDebtAmount   = OutstandingDebtAmount(charge.outstandingAmount.value),
-          debtItemChargeId        = charge.chargeReference,
-          debtItemOriginalDueDate = DebtItemOriginalDueDate(charge.dueDate.value),
-          accruedInterest         = charge.accruedInterest,
-          isInterestBearingCharge = charge.isInterestBearingCharge,
-          useChargeReference      = charge.useChargeReference
-        )
-      }
+      def toDebtItemCharges(chargeTypeAssessment: ChargeTypeAssessment): List[DebtItemCharges] =
+        chargeTypeAssessment.charges.map { charge: Charges =>
+          DebtItemCharges(
+            outstandingDebtAmount   = OutstandingDebtAmount(charge.outstandingAmount.value),
+            debtItemChargeId        = charge.chargeReference orElse chargeTypeAssessment.chargeReference,
+            debtItemOriginalDueDate = DebtItemOriginalDueDate(charge.dueDate.value),
+            accruedInterest         = charge.accruedInterest,
+            isInterestBearingCharge = charge.isInterestBearingCharge,
+            useChargeReference      = charge.useChargeReference
+          )
+        }
+
+    val debtItemCharges = eligibilityCheckResult.chargeTypeAssessment.flatMap(toDebtItemCharges)
 
     val arrangementRequest: ArrangementRequest = ArrangementRequest(
       channelIdentifier           = ChannelIdentifiers.eSSTTP,
@@ -183,7 +171,7 @@ class TtpService @Inject() (
         planInterest         = selectedPaymentPlan.planInterest,
         collections          = selectedPaymentPlan.collections,
         instalments          = selectedPaymentPlan.instalments,
-        debtItemCharges      = debtItemCarges
+        debtItemCharges      = debtItemCharges
       ),
       customerDetails             = customerDetail,
       regimeDigitalCorrespondence = regimeDigitalCorrespondence
@@ -253,19 +241,9 @@ object TtpService {
     )
     val debtChargeItemsFromEligibilityCheck: List[DebtItemCharge] = eligibilityCheckResult.chargeTypeAssessment.flatMap {
       chargeTypeAssessment: ChargeTypeAssessment =>
-        chargeTypeAssessment.charges.map { charge: Charges =>
-          DebtItemCharge(
-            outstandingDebtAmount   = OutstandingDebtAmount(charge.outstandingAmount.value),
-            mainTrans               = charge.mainTrans,
-            subTrans                = charge.subTrans,
-            isInterestBearingCharge = charge.isInterestBearingCharge,
-            useChargeReference      = charge.useChargeReference,
-            debtItemChargeId        = charge.chargeReference,
-            interestStartDate       = charge.interestStartDate,
-            debtItemOriginalDueDate = DebtItemOriginalDueDate(charge.dueDate.value)
-          )
-        }
+        toDebtItemCharge(chargeTypeAssessment)
     }
+
     InstalmentAmountRequest(
       channelIdentifier            = ChannelIdentifiers.eSSTTP,
       paymentPlanMinLength         = eligibilityCheckResult.paymentPlanMinLength,
@@ -279,6 +257,21 @@ object TtpService {
       debtItemCharges              = debtChargeItemsFromEligibilityCheck,
       customerPostcodes            = eligibilityCheckResult.customerPostcodes
     )
+  }
+
+  private def toDebtItemCharge(chargeTypeAssessment: ChargeTypeAssessment): List[DebtItemCharge] = {
+    chargeTypeAssessment.charges.map { charge: Charges =>
+      DebtItemCharge(
+        outstandingDebtAmount   = OutstandingDebtAmount(charge.outstandingAmount.value),
+        mainTrans               = charge.mainTrans,
+        subTrans                = charge.subTrans,
+        isInterestBearingCharge = charge.isInterestBearingCharge,
+        useChargeReference      = charge.useChargeReference,
+        debtItemChargeId        = charge.chargeReference orElse chargeTypeAssessment.chargeReference,
+        interestStartDate       = charge.interestStartDate,
+        debtItemOriginalDueDate = DebtItemOriginalDueDate(charge.dueDate.value)
+      )
+    }
   }
 
   private def calculateCumulativeInterest(eligibilityCheckResult: EligibilityCheckResult): AmountInPence = AmountInPence(
