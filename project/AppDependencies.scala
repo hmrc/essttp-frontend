@@ -2,17 +2,16 @@ import sbt.*
 
 object AppDependencies {
 
-  val bootstrapVersion = "8.4.0"
+  val bootstrapVersion = "8.5.0"
 
   val compile: Seq[ModuleID] = Seq(
     // format: OFF
     "uk.gov.hmrc"       %% "bootstrap-frontend-play-30"              % bootstrapVersion,
-    "uk.gov.hmrc"       %% "play-frontend-hmrc-play-30"              % "8.5.0",
+    "uk.gov.hmrc"       %% "play-frontend-hmrc-play-30"              % "9.0.0",
     "uk.gov.hmrc"       %% "play-conditional-form-mapping-play-30"   % "2.0.0",
     "com.beachape"      %% "enumeratum-play"                         % "1.8.0",
     "org.typelevel"     %% "cats-core"                               % "2.10.0",
     "uk.gov.hmrc"       %% "essttp-backend-cor-journey"              % "1.130.0",
-    "uk.gov.hmrc"       %% "emailaddress-play-30"                    % "4.0.0",
     "uk.gov.hmrc"       %% "domain-play-30"                          % "9.0.0"
   // format: ON
   )

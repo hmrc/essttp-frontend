@@ -338,7 +338,7 @@ class EmailControllerSpec extends ItSpec {
         s"[taxRegime: ${taxRegime.toString}] POST /enter-your-email-address should" - {
 
           "update backend with given email" in {
-            val email: Email = Email(SensitiveString("somenewemail@newemail.com"))
+            val email: Email = Email(SensitiveString("some.!#$%&’'*+/=?^_`{|}~-newemail@newemail.com"))
 
             stubCommonActions()
             EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin, etmpEmail = None)()
@@ -363,7 +363,11 @@ class EmailControllerSpec extends ItSpec {
           forAll(Table(
             ("Input Scenario", "inputValue", "expected error message", "errorTarget"),
             ("Empty email", "newEmailInput" -> "", "Enter your email address in the correct format, like name@example.com", "#newEmailInput"),
-            ("Invalid email format", "newEmailInput" -> "abc", "Enter your email address in the correct format, like name@example.com", "#newEmailInput"),
+            ("No @ sign", "newEmailInput" -> "abc", "Enter your email address in the correct format, like name@example.com", "#newEmailInput"),
+            ("Empty username", "newEmailInput" -> "@domain.com", "Enter your email address in the correct format, like name@example.com", "#newEmailInput"),
+            ("Empty domain", "newEmailInput" -> "username@", "Enter your email address in the correct format, like name@example.com", "#newEmailInput"),
+            ("Special characters in domain", "newEmailInput" -> "username@1&3", "Enter your email address in the correct format, like name@example.com", "#newEmailInput"),
+            ("Disallowed characters in username", "newEmailInput" -> "シusername@domain", "Enter your email address in the correct format, like name@example.com", "#newEmailInput"),
             ("Email too long (> 256 characters)", "newEmailInput" -> "a" * 257, "Enter an email address with 256 characters or less", "#newEmailInput")
           )) {
             (scenario: String, inputValue: (String, String), expectedErrorMessage: String, expectedErrorTarget: String) =>
