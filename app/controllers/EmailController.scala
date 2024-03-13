@@ -33,7 +33,6 @@ import play.api.data.Form
 import play.api.mvc._
 import services.{EmailVerificationService, JourneyService}
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
-import uk.gov.hmrc.emailaddress.EmailAddress
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.Views
@@ -41,6 +40,7 @@ import views.Views
 import java.util.Locale
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.matching.Regex
 
 class EmailController @Inject() (
     as:                       Actions,
@@ -325,12 +325,14 @@ object EmailController {
     )(ChooseEmailForm.apply)(ChooseEmailForm.unapply)
   )
 
+  private val emailRegex: Regex = "^([a-zA-Z0-9.!#$%&’'*+/=?^_`{|}~-]+)@([a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*)$".r
+
   val differentEmailAddressMapping: Mapping[String] = nonEmptyText
     .transform[String](email => email.toLowerCase(Locale.UK), _.toLowerCase(Locale.UK))
     .verifying(
       Constraint[String]((email: String) =>
         if (email.length > 256) Invalid("error.tooManyChar")
-        else if (EmailAddress.isValid(email)) Valid
+        else if (emailRegex.matches(email)) Valid
         else Invalid("error.invalidFormat"))
     )
 
