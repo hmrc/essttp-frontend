@@ -32,5 +32,7 @@ class Partials @Inject() (
     val existingPaymentPlanPartial:         ExistingPaymentPlanPartial,
     val returnsNotUpToDatePartial:          ReturnsNotUpToDatePartial,
     val extraSupportRelayPartial:           ExtraSupportRelayPartial,
-    val noDueDatesReachedPartial:           NoDueDatesReachedPartial
+    val noDueDatesReachedPartial:           NoDueDatesReachedPartial,
+    val ifYouNeedExtraSupportPartial:       IfYouNeedExtraSupportPartial,
+    val ifCallingFromOutsideUKPartial:      IfCallingFromOutsideUKPartial
 )

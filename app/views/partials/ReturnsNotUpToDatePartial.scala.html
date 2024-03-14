@@ -22,8 +22,10 @@
 @import messages.Messages
 @import play.twirl.api.Html
 @import essttp.rootmodel.TaxRegime
+@import views.html.partials.IfCallingFromOutsideUKPartial
 
-@this(requestSupport: RequestSupport)
+@this(requestSupport: RequestSupport, ifCallingFromOutsideUKPartial: IfCallingFromOutsideUKPartial)
+
 
 @(btaLink: => String, taxRegime: TaxRegime, appConfig: AppConfig)(implicit request: Request[_])
 
@@ -81,6 +83,8 @@
     </p>
 
   @callUsContent
+
+  @ifCallingFromOutsideUKPartial
 }
 
 @{

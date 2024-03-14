@@ -264,6 +264,19 @@ object Messages {
       welsh   = "Os ydych y tu allan i’r DU: <strong>+44 300 200 1900</strong>"
     )
 
+    // The "If you are calling from outside the UK" section is only shown in English
+    val `If you're calling from outside the UK`: Message = Message(
+      english = "If you’re calling from outside the UK"
+    )
+
+    val `Call us on...`: Message = Message(
+      english = "Call us on <strong>+44 2890 538 192</strong>."
+    )
+
+    val `Our opening times are...`: Message = Message(
+      english = "Our opening times are Monday to Friday, 8am to 6pm (UK time). We are closed on weekends and bank holidays."
+    )
+
   }
 
   object NotEligible {
@@ -279,18 +292,18 @@ object Messages {
     )
 
     val `your Accounts Office reference...`: Message = Message(
-      english = "your Accounts Office reference. This is 13 characters, for example, 123PX00123456",
-      welsh   = "eich cyfeirnod Swyddfa Gyfrifon, sy’n 13 o gymeriadau o hyd, er enghraifft, 123PX00123456"
+      english = "your Accounts Office reference which is 13 characters long, like 123PX00123456",
+      welsh   = "eich cyfeirnod Swyddfa Gyfrifon, sy’n 13 o gymeriadau o hyd, er enghraifft 123PX00123456"
     )
 
-    val `your VAT number. This is 9 characters, for example, 1233456789`: Message = Message(
-      english = "your VAT number. This is 9 characters, for example, 123456789",
-      welsh   = "eich rhif TAW. Mae hyn yn cynnwys 9 o gymeriadau, er enghraifft, 123456789"
+    val `your VAT registration number which is 9 digits long, like 123456789`: Message = Message(
+      english = "your VAT registration number which is 9 digits long, like 123456789",
+      welsh   = "eich rhif cofrestru TAW, sy’n 9 digid o hyd, er enghraifft 123456789"
     )
 
-    val `your 10-digit Unique Taxpayer Reference (UTR) number`: Message = Message(
-      english = "your 10-digit Unique Taxpayer Reference (UTR) number",
-      welsh   = "eich Cyfeirnod Unigryw y Trethdalwr (UTR) 10 digid"
+    val `your Self Assessment Unique Taxpayer Reference (UTR)...`: Message = Message(
+      english = "your Self Assessment Unique Taxpayer Reference (UTR) which can be 10 or 13 digits long",
+      welsh   = "eich Cyfeirnod Unigryw y Trethdalwr (UTR) ar gyfer Hunanasesiad a allai fod yn 10 neu 13 digid o hyd "
     )
 
     val `information on any savings or investments you have`: Message = Message(
