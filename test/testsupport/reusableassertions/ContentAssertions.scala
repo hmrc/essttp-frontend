@@ -296,6 +296,33 @@ object ContentAssertions extends RichMatchers {
         }
       }
       ()
+
+      subheadings(2).text() shouldBe {
+        language match {
+          case Languages.English => "If you need extra support"
+          case Languages.Welsh   => "Os oes angen cymorth ychwanegol arnoch chi"
+        }
+      }
+      govukBodyElements(1).html() shouldBe {
+        language match {
+          case Languages.English => """Find out the different ways to <a href="https://www.gov.uk/get-help-hmrc-extra-support" class="govuk-link">deal with HMRC if you need some help</a>."""
+          case Languages.Welsh   => """Dysgwch am y ffyrdd gwahanol o <a href="https://www.gov.uk/get-help-hmrc-extra-support" class="govuk-link">ddelio â CThEF os oes angen help arnoch chi</a>."""
+        }
+      }
+      govukBodyElements(2).html() shouldBe {
+        language match {
+          case Languages.English => """You can also use <a href="https://www.relayuk.bt.com/" class="govuk-link">Relay UK</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>."""
+          case Languages.Welsh   => """Gallwch hefyd ddefnyddio <a href="https://www.relayuk.bt.com/" class="govuk-link">Relay UK</a> os na allwch glywed na siarad dros y ffôn: deialwch <strong>18001</strong> ac yna <strong>0345 300 3900</strong>. Sylwer – dim ond galwadau ffôn Saesneg eu hiaith y mae Relay UK yn gallu ymdrin â nhw."""
+        }
+      }
+      ()
+
+      if (language === Languages.English) {
+        subheadings(3).text() shouldBe "If you’re calling from outside the UK"
+        govukBodyElements(3).html() shouldBe "Call us on <strong>+44 2890 538 192</strong>."
+        govukBodyElements(4).html() shouldBe "Our opening times are Monday to Friday, 8am to 6pm (UK time). We are closed on weekends and bank holidays."
+        ()
+      }
     }
   }
 
