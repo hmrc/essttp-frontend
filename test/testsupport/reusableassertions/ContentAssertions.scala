@@ -215,35 +215,15 @@ object ContentAssertions extends RichMatchers {
     }
 
     val subheadings = commonEligibilityWrapper.select("h2").asScala.toList
-    subheadings.size shouldBe (if (expectCallPreparationHints) 3 else 1)
-
-    subheadings(0).text shouldBe {
+    subheadings.size shouldBe {
       language match {
-        case Languages.English => "If you need extra support"
-        case Languages.Welsh   => "Os oes angen cymorth ychwanegol arnoch chi"
-      }
-    }
-    govukBodyElements(1).html() shouldBe {
-      language match {
-        case Languages.English => "Find out the different ways to <a href=\"https://www.gov.uk/get-help-hmrc-extra-support\" class=\"govuk-link\">deal with HMRC if you need some help</a>."
-        case Languages.Welsh   => "Dysgwch am y ffyrdd gwahanol o <a href=\"https://www.gov.uk/get-help-hmrc-extra-support\" class=\"govuk-link\">ddelio â CThEF os oes angen help arnoch chi</a>."
-      }
-    }
-    govukBodyElements(2).html() shouldBe {
-      language match {
-        case Languages.English => "You can also use <a href=\"https://www.relayuk.bt.com/\" class=\"govuk-link\">Relay UK</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>."
-        case Languages.Welsh   => "Gallwch hefyd ddefnyddio <a href=\"https://www.relayuk.bt.com/\" class=\"govuk-link\">Relay UK</a> os na allwch glywed na siarad dros y ffôn: deialwch <strong>18001</strong> ac yna <strong>0345 300 3900</strong>. Sylwer – dim ond galwadau ffôn Saesneg eu hiaith y mae Relay UK yn gallu ymdrin â nhw."
-      }
-    }
-    govukBodyElements(3).html() shouldBe {
-      language match {
-        case Languages.English => "If you are outside the UK: <strong>+44 2890 538 192</strong>"
-        case Languages.Welsh   => "Os ydych y tu allan i’r DU: <strong>+44 300 200 1900</strong>"
+        case Languages.English => if (expectCallPreparationHints) 4 else 2
+        case Languages.Welsh   => if (expectCallPreparationHints) 3 else 1
       }
     }
 
     if (expectCallPreparationHints) {
-      subheadings(1).text shouldBe {
+      subheadings(0).text shouldBe {
         language match {
           case Languages.English => "Before you call, make sure you have:"
           case Languages.Welsh   => "Cyn i chi ffonio, sicrhewch fod gennych y canlynol:"
@@ -256,17 +236,17 @@ object ContentAssertions extends RichMatchers {
           case Languages.English =>
             taxRegime match {
               case TaxRegime.Epaye => List(
-                "your Accounts Office reference. This is 13 characters, for example, 123PX00123456",
+                "your Accounts Office reference which is 13 characters long, like 123PX00123456",
                 "your bank details"
               )
               case TaxRegime.Vat =>
                 List(
-                  "your VAT number. This is 9 characters, for example, 123456789",
+                  "your VAT registration number which is 9 digits long, like 123456789",
                   "your bank details"
                 )
               case TaxRegime.Sa =>
                 List(
-                  "your 10-digit Unique Taxpayer Reference (UTR) number",
+                  "your Self Assessment Unique Taxpayer Reference (UTR) which can be 10 or 13 digits long",
                   "information on any savings or investments you have",
                   "your bank details",
                   "details of your income and spending"
@@ -275,17 +255,17 @@ object ContentAssertions extends RichMatchers {
           case Languages.Welsh =>
             taxRegime match {
               case TaxRegime.Epaye => List(
-                "eich cyfeirnod Swyddfa Gyfrifon, sy’n 13 o gymeriadau o hyd, er enghraifft, 123PX00123456",
+                "eich cyfeirnod Swyddfa Gyfrifon, sy’n 13 o gymeriadau o hyd, er enghraifft 123PX00123456",
                 "eich manylion banc"
               )
               case TaxRegime.Vat =>
                 List(
-                  "eich rhif TAW. Mae hyn yn cynnwys 9 o gymeriadau, er enghraifft, 123456789",
+                  "eich rhif cofrestru TAW, sy’n 9 digid o hyd, er enghraifft 123456789",
                   "eich manylion banc"
                 )
               case TaxRegime.Sa =>
                 List(
-                  "eich Cyfeirnod Unigryw y Trethdalwr (UTR) 10 digid",
+                  "eich Cyfeirnod Unigryw y Trethdalwr (UTR) ar gyfer Hunanasesiad a allai fod yn 10 neu 13 digid o hyd",
                   "gwybodaeth am unrhyw gynilion neu fuddsoddiadau sydd gennych",
                   "eich manylion banc",
                   "manylion eich incwm a’ch gwariant"
@@ -296,7 +276,7 @@ object ContentAssertions extends RichMatchers {
 
       beforeYouCallList.map(_.text()) shouldBe expectedBeforeYouCallBullets
 
-      subheadings(2).text() shouldBe {
+      subheadings(1).text() shouldBe {
         language match {
           case Languages.English => "We’re likely to ask:"
           case Languages.Welsh   => "Rydym yn debygol o ofyn:"
@@ -316,6 +296,33 @@ object ContentAssertions extends RichMatchers {
         }
       }
       ()
+
+      subheadings(2).text() shouldBe {
+        language match {
+          case Languages.English => "If you need extra support"
+          case Languages.Welsh   => "Os oes angen cymorth ychwanegol arnoch chi"
+        }
+      }
+      govukBodyElements(1).html() shouldBe {
+        language match {
+          case Languages.English => """Find out the different ways to <a href="https://www.gov.uk/get-help-hmrc-extra-support" class="govuk-link">deal with HMRC if you need some help</a>."""
+          case Languages.Welsh   => """Dysgwch am y ffyrdd gwahanol o <a href="https://www.gov.uk/get-help-hmrc-extra-support" class="govuk-link">ddelio â CThEF os oes angen help arnoch chi</a>."""
+        }
+      }
+      govukBodyElements(2).html() shouldBe {
+        language match {
+          case Languages.English => """You can also use <a href="https://www.relayuk.bt.com/" class="govuk-link">Relay UK</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>."""
+          case Languages.Welsh   => """Gallwch hefyd ddefnyddio <a href="https://www.relayuk.bt.com/" class="govuk-link">Relay UK</a> os na allwch glywed na siarad dros y ffôn: deialwch <strong>18001</strong> ac yna <strong>0345 300 3900</strong>. Sylwer – dim ond galwadau ffôn Saesneg eu hiaith y mae Relay UK yn gallu ymdrin â nhw."""
+        }
+      }
+      ()
+
+      if (language === Languages.English) {
+        subheadings(3).text() shouldBe "If you’re calling from outside the UK"
+        govukBodyElements(3).html() shouldBe "Call us on <strong>+44 2890 538 192</strong>."
+        govukBodyElements(4).html() shouldBe "Our opening times are Monday to Friday, 8am to 6pm (UK time). We are closed on weekends and bank holidays."
+        ()
+      }
     }
   }
 

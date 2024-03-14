@@ -14,20 +14,23 @@
  * limitations under the License.
  *@
 
-@import config.AppConfig
 @import essttp.rootmodel.TaxRegime
-@import play.api.mvc.Request
-@import requests.RequestSupport
 @import messages.Messages
+@import play.api.mvc.Request
 @import play.twirl.api.Html
-@import views.html.partials.ExtraSupportRelayPartial
+@import requests.RequestSupport
+@import views.html.partials.{ExtraSupportRelayPartial, IfCallingFromOutsideUKPartial}
+@import models.Languages.English
+@import cats.implicits.catsSyntaxEq
 
-@this(requestSupport: RequestSupport, extraSupportRelayPartial: ExtraSupportRelayPartial)
+@this(requestSupport: RequestSupport, ifYouNeedExtraSupportPartial: IfYouNeedExtraSupportPartial, ifCallingFromOutsideUKPartial: IfCallingFromOutsideUKPartial)
+
 
 @(taxRegime: TaxRegime, showCallPreparationTips: Boolean = true)(implicit request: Request[_])
 
 @import requestSupport._
 
+@import views.html.partials.IfYouNeedExtraSupportPartial
 @makeSureYouHaveItems = @{
     taxRegime match {
         case TaxRegime.Epaye => List(
@@ -35,11 +38,11 @@
             Messages.NotEligible.`your bank details`
         )
         case TaxRegime.Vat => List(
-            Messages.NotEligible.`your VAT number. This is 9 characters, for example, 1233456789`,
+            Messages.NotEligible.`your VAT registration number which is 9 digits long, like 123456789`,
             Messages.NotEligible.`your bank details`
         )
         case TaxRegime.Sa => List(
-          Messages.NotEligible.`your 10-digit Unique Taxpayer Reference (UTR) number`,
+          Messages.NotEligible.`your Self Assessment Unique Taxpayer Reference (UTR)...`,
           Messages.NotEligible.`information on any savings or investments you have`,
             Messages.NotEligible.`your bank details`,
             Messages.NotEligible.`details of your income and spending`
@@ -49,8 +52,6 @@
 <div id="common-eligibility">
 
    <p class="govuk-body">@{Html(Messages.NotEligible.`Our opening times are Monday to Friday, 8am to 6pm. We are closed on weekends and bank holidays.`.show)}</p>
-
-    @extraSupportRelayPartial()
 
   @if(showCallPreparationTips){
     <h2 class="govuk-heading-m">@{Messages.NotEligible.`Before you call, make sure you have:`.show}</h2>
@@ -66,5 +67,11 @@
         <li>@{Messages.NotEligible.`if you can pay some of the bill now`.show}</li>
     </ul>
   }
+
+    @ifYouNeedExtraSupportPartial()
+
+    @if(language === English) {
+        @ifCallingFromOutsideUKPartial()
+    }
 
 </div>

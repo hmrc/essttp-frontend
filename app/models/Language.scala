@@ -16,6 +16,7 @@
 
 package models
 
+import cats.Eq
 import enumeratum.{Enum, EnumEntry}
 import essttp.utils.EnumFormat
 import essttp.utils.ValueClassBinder.valueClassBinder
@@ -35,6 +36,7 @@ sealed trait Language extends EnumEntry with Product with Serializable {
 }
 
 object Language {
+  implicit val eq: Eq[Language] = Eq.fromUniversalEquals
 
   implicit val format: Format[Language] = EnumFormat(Languages)
   implicit val languagePathBinder: PathBindable[Language] = valueClassBinder(_.toString)
