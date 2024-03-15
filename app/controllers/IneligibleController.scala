@@ -18,10 +18,8 @@ package controllers
 
 import actions.Actions
 import actionsmodel.AuthenticatedJourneyRequest
-import cats.implicits.catsSyntaxEq
 import config.AppConfig
 import essttp.journey.model.SjRequest
-import essttp.rootmodel.TaxRegime
 import messages.Messages
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -123,8 +121,8 @@ class IneligibleController @Inject() (
   def genericFileReturnPage(implicit request: AuthenticatedJourneyRequest[AnyContent]): Result =
     Ok(views.partials.ineligibleTemplatePage(
       pageh1                  = Messages.NotEligible.`File your return to use this service`(request.journey.taxRegime),
-      leadingContent          = views.partials.returnsNotUpToDatePartial(determineBtaReturnUrl, request.journey.taxRegime, appConfig),
-      showCallPreparationTips = request.journey.taxRegime =!= TaxRegime.Sa
+      leadingContent          = views.partials.returnsNotUpToDatePartial(determineFileYourReturnUrl, request.journey.taxRegime),
+      showCallPreparationTips = false
     ))
 
   val epayeFileYourReturnPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericFileReturnPage }
@@ -167,12 +165,13 @@ class IneligibleController @Inject() (
     genericNoDueDatesReachedPage
   }
 
-  private def determineBtaReturnUrl(implicit request: AuthenticatedJourneyRequest[AnyContent]): String = request.journey.sjRequest match {
+  private def determineFileYourReturnUrl(implicit request: AuthenticatedJourneyRequest[AnyContent]): String = request.journey.sjRequest match {
     case SjRequest.Epaye.Simple(returnUrl, _) => returnUrl.value
     case SjRequest.Epaye.Empty()              => s"${appConfig.Urls.businessTaxAccountUrl}"
     case SjRequest.Vat.Simple(returnUrl, _)   => returnUrl.value
     case SjRequest.Vat.Empty()                => s"${appConfig.Urls.businessTaxAccountUrl}"
     case SjRequest.Sa.Simple(returnUrl, _)    => returnUrl.value
-    case SjRequest.Sa.Empty()                 => throw new NotImplementedError()
+    case SjRequest.Sa.Empty()                 => s"${appConfig.Urls.enrolForSaUrl}"
   }
+
 }

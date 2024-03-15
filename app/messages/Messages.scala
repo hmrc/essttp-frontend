@@ -500,24 +500,24 @@ object Messages {
         )
     }
 
-    val `To be eligible to set up a payment plan online, you need to be up to date with your Employers PAYE returns...`: Message = Message(
-      english = "To be eligible to set up a payment plan online, you need to be up to date with your Employers’ PAYE returns. Once you have done this, you can return to the service.",
-      welsh   = "I fod yn gymwys i drefnu cynllun talu ar-lein, mae’n rhaid i chi fod wedi cyflwyno’ch Ffurflenni Treth TWE Cyflogwyr. Pan fyddwch wedi gwneud hyn, gallwch ddychwelyd i’r gwasanaeth."
+    val `If you have recently filed your return, your account can take up to 3 days to update. Try again after 3 days.`: Message = Message(
+      english = "If you have recently filed your return, your account can take up to 3 days to update. Try again after 3 days.",
+      welsh   = "Os ydych wedi cyflwyno’ch Ffurflen Dreth yn ddiweddar, gall gymryd hyd at 3 diwrnod i ddiweddaru’ch cyfrif. Rhowch gynnig arall arni ar ôl 3 diwrnod."
     )
 
-    val `To be eligible to set up a payment plan online, you need to have filed your VAT returns. Once you have done this, you can return to the service.`: Message = Message(
-      english = "To be eligible to set up a payment plan online, you need to have filed your VAT returns. Once you have done this, you can return to the service.",
-      welsh   = "I fod yn gymwys i drefnu cynllun talu ar-lein, mae’n rhaid i chi fod wedi cyflwyno’ch Ffurflen TAW. Pan fyddwch wedi gwneud hyn, gallwch ddychwelyd i’r gwasanaeth."
+    def `You must file your tax return before you can set up an Employers’ PAYE payment plan online`(fileReturnUrl: String): Message = Message(
+      english = s"""You must <a class="govuk-link" href="$fileReturnUrl">file your tax return</a> before you can set up an Employers’ PAYE payment plan online.""",
+      welsh   = s"""Mae’n rhaid i chi <a class="govuk-link" href="$fileReturnUrl">gyflwyno’ch Ffurflen Dreth</a> cyn i chi allu trefnu cynllun talu ar gyfer TWE y Cyflogwr."""
     )
 
-    val `If you have recently filed your return, your account may take up to 72 hours to be updated before you can set up a payment plan.`: Message = Message(
-      english = "If you have recently filed your return, your account may take up to 72 hours to be updated before you can set up a payment plan.",
-      welsh   = "Os ydych chi wedi cyflwyno’ch Ffurflen Dreth yn ddiweddar, gallai gymryd hyd at 72 awr i’ch cyfrif gael ei ddiweddaru cyn i chi allu trefnu cynllun talu."
+    def `You must file your tax return before you can set up a VAT payment plan online`(fileReturnUrl: String): Message = Message(
+      english = s"""You must <a class="govuk-link" href="$fileReturnUrl">file your tax return</a> before you can set up a VAT payment plan online.""",
+      welsh   = s"""Mae’n rhaid i chi <a class="govuk-link" href="$fileReturnUrl">gyflwyno’ch Ffurflen Dreth</a> cyn i chi allu trefnu cynllun talu ar gyfer TAW."""
     )
 
-    def `You must file your tax return before you can set up a Self Assessment payment plan online.`(fileSaReturnUrl: String): Message = Message(
-      english = s"""You must <a class="govuk-link" href="$fileSaReturnUrl">file your tax return</a> before you can set up a Self Assessment payment plan online.""",
-      welsh   = s"""Mae’n rhaid i chi <a class="govuk-link" href="$fileSaReturnUrl">gyflwyno’ch Ffurflen Dreth</a> cyn i chi allu trefnu cynllun talu ar gyfer Hunanasesiad ar-lein."""
+    def `You must file your tax return before you can set up a Self Assessment payment plan online`(fileReturnUrl: String): Message = Message(
+      english = s"""You must <a class="govuk-link" href="$fileReturnUrl">file your tax return</a> before you can set up a Self Assessment payment plan online.""",
+      welsh   = s"""Mae’n rhaid i chi <a class="govuk-link" href="$fileReturnUrl">gyflwyno’ch Ffurflen Dreth</a> cyn i chi allu trefnu cynllun talu ar gyfer Hunanasesiad ar-lein."""
     )
 
     val `Go to your tax account`: Message = Message(
