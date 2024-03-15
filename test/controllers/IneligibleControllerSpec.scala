@@ -16,7 +16,6 @@
 
 package controllers
 
-import cats.implicits.catsSyntaxEq
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.TaxRegime
 import models.Languages
@@ -245,9 +244,7 @@ class IneligibleControllerSpec extends ItSpec {
                 (controller.saFileYourReturnPage(fakeRequest), "File your Self Assessment tax return to use this service")
             }
 
-            val expectedCallUsContent =
-              if (taxRegime =!= TaxRegime.Sa) "Call us on <strong>0300 123 1813</strong> as you may be able to set up a plan over the phone."
-              else "Call us on <strong>0300 123 1813</strong> if you need to speak to an adviser."
+            val expectedCallUsContent = "Call us on <strong>0300 123 1813</strong> if you need to speak to an adviser."
 
             val page = pageContentAsDoc(result)
 
@@ -260,8 +257,8 @@ class IneligibleControllerSpec extends ItSpec {
             )
 
             val expectedLeadingContent = taxRegime match {
-              case TaxRegime.Epaye => "To be eligible to set up a payment plan online, you need to be up to date with your Employers’ PAYE returns. Once you have done this, you can return to the service."
-              case TaxRegime.Vat   => "To be eligible to set up a payment plan online, you need to have filed your VAT returns. Once you have done this, you can return to the service."
+              case TaxRegime.Epaye => "You must file your tax return before you can set up an Employers’ PAYE payment plan online."
+              case TaxRegime.Vat   => "You must file your tax return before you can set up a VAT payment plan online."
               case TaxRegime.Sa    => "You must file your tax return before you can set up a Self Assessment payment plan online."
             }
 
@@ -274,19 +271,16 @@ class IneligibleControllerSpec extends ItSpec {
               page,
               taxRegime,
               Languages.English,
-              expectCallPreparationHints = taxRegime =!= TaxRegime.Sa,
+              expectCallPreparationHints = false,
               callUsContentEnglish       = expectedCallUsContent
             )
 
-            if (taxRegime =!= TaxRegime.Sa) {
-              page.select(".govuk-body").asScala.toList(1).text() shouldBe "Go to your tax account to file your tax return."
-              page.select(".govuk-body").asScala.toList(2).text() shouldBe "If you have recently filed your return, your account may take up to 72 hours to be updated before you can set up a payment plan."
-              page.select("#bta-link").attr("href") shouldBe "/set-up-a-payment-plan/test-only/bta-page?return-page"
-            } else {
-              val fileYourTaxReturnLink = page.select("p.govuk-body").first().select("a")
-              fileYourTaxReturnLink.text() shouldBe "file your tax return"
-              fileYourTaxReturnLink.attr("href") shouldBe "https://www.gov.uk/log-in-file-self-assessment-tax-return"
-            }
+            val fileYourTaxReturnLink = page.select("p.govuk-body").first().select("a")
+            fileYourTaxReturnLink.text() shouldBe "file your tax return"
+            fileYourTaxReturnLink.attr("href") shouldBe "/set-up-a-payment-plan/test-only/bta-page?return-page"
+
+            page.select(".govuk-body").asScala.toList(1).text() shouldBe "If you have recently filed your return, your account can take up to 3 days to update. Try again after 3 days."
+
           }
       }
 
@@ -531,14 +525,12 @@ class IneligibleControllerSpec extends ItSpec {
             )
 
             val expectedLeadingContent = taxRegime match {
-              case TaxRegime.Epaye => "I fod yn gymwys i drefnu cynllun talu ar-lein, mae’n rhaid i chi fod wedi cyflwyno’ch Ffurflenni Treth TWE Cyflogwyr. Pan fyddwch wedi gwneud hyn, gallwch ddychwelyd i’r gwasanaeth."
-              case TaxRegime.Vat   => "I fod yn gymwys i drefnu cynllun talu ar-lein, mae’n rhaid i chi fod wedi cyflwyno’ch Ffurflen TAW. Pan fyddwch wedi gwneud hyn, gallwch ddychwelyd i’r gwasanaeth."
+              case TaxRegime.Epaye => "Mae’n rhaid i chi gyflwyno’ch Ffurflen Dreth cyn i chi allu trefnu cynllun talu ar gyfer TWE y Cyflogwr."
+              case TaxRegime.Vat   => "Mae’n rhaid i chi gyflwyno’ch Ffurflen Dreth cyn i chi allu trefnu cynllun talu ar gyfer TAW."
               case TaxRegime.Sa    => "Mae’n rhaid i chi gyflwyno’ch Ffurflen Dreth cyn i chi allu trefnu cynllun talu ar gyfer Hunanasesiad ar-lein."
             }
 
-            val expectedCallUsContent =
-              if (taxRegime =!= TaxRegime.Sa) "Ffoniwch ni ar <strong>0300 200 1900</strong> oherwydd mae’n bosibl y gallwch drefnu cynllun dros y ffôn."
-              else "Ffoniwch ni ar <strong>0300 200 1900</strong> os oes angen i chi siarad ag ymgynghorydd."
+            val expectedCallUsContent = "Ffoniwch ni ar <strong>0300 200 1900</strong> os oes angen i chi siarad ag ymgynghorydd."
 
             assertIneligiblePageLeadingP1(
               page      = page,
@@ -549,20 +541,15 @@ class IneligibleControllerSpec extends ItSpec {
               page,
               taxRegime,
               Languages.Welsh,
-              expectCallPreparationHints = taxRegime =!= TaxRegime.Sa,
+              expectCallPreparationHints = false,
               callUsContentWelsh         = expectedCallUsContent
             )
 
-            if (taxRegime =!= TaxRegime.Sa) {
-              ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.Welsh)
-              page.select(".govuk-body").asScala.toList(1).text() shouldBe "Ewch i’ch cyfrif treth er mwyn cyflwyno’ch Ffurflen Dreth."
-              page.select(".govuk-body").asScala.toList(2).text() shouldBe "Os ydych chi wedi cyflwyno’ch Ffurflen Dreth yn ddiweddar, gallai gymryd hyd at 72 awr i’ch cyfrif gael ei ddiweddaru cyn i chi allu trefnu cynllun talu."
-              page.select("#bta-link").attr("href") shouldBe "/set-up-a-payment-plan/test-only/bta-page?return-page"
-            } else {
-              val fileYourTaxReturnLink = page.select("p.govuk-body").first().select("a")
-              fileYourTaxReturnLink.text() shouldBe "gyflwyno’ch Ffurflen Dreth"
-              fileYourTaxReturnLink.attr("href") shouldBe "https://www.gov.uk/log-in-file-self-assessment-tax-return"
-            }
+            val fileYourTaxReturnLink = page.select("p.govuk-body").first().select("a")
+            fileYourTaxReturnLink.text() shouldBe "gyflwyno’ch Ffurflen Dreth"
+            fileYourTaxReturnLink.attr("href") shouldBe "/set-up-a-payment-plan/test-only/bta-page?return-page"
+
+            page.select(".govuk-body").asScala.toList(1).text() shouldBe "Os ydych wedi cyflwyno’ch Ffurflen Dreth yn ddiweddar, gall gymryd hyd at 3 diwrnod i ddiweddaru’ch cyfrif. Rhowch gynnig arall arni ar ôl 3 diwrnod."
           }
       }
 
