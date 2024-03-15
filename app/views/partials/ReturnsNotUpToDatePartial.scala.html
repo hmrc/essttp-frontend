@@ -18,17 +18,40 @@
 @import play.api.mvc.Request
 @import play.twirl.api.Html
 @import requests.RequestSupport
+@import essttp.rootmodel.TaxRegime
 
 @this(requestSupport: RequestSupport)
 
 
-@(fileReturnLink: => String, taxRegimeFullName: => (String, String))(implicit request: Request[_])
+@(fileReturnLink: => String, taxRegime: TaxRegime)(implicit request: Request[_])
 
 @import requestSupport._
 
+@{
+    taxRegime match {
+        case TaxRegime.Epaye => epayeContent
+        case TaxRegime.Vat   => vatContent
+        case TaxRegime.Sa => saContent
+    }
+}
+
+@epayeContent = {
     <p class="govuk-body">
-        @{Html{Messages.NotEligible.`You must file your tax return before you can set up a ... payment plan online`(fileReturnLink, taxRegimeFullName).show}}
+    @{Html{Messages.NotEligible.`You must file your tax return before you can set up an Employers’ PAYE payment plan online`(fileReturnLink).show}}
     </p>
+}
+
+@vatContent ={
+    <p class="govuk-body">
+    @{Html{Messages.NotEligible.`You must file your tax return before you can set up a VAT payment plan online`(fileReturnLink).show}}
+    </p>
+}
+
+@saContent ={
+    <p class="govuk-body">
+    @{Html{Messages.NotEligible.`You must file your tax return before you can set up a Self Assessment payment plan online`(fileReturnLink).show}}
+    </p>
+}
 
     <p class="govuk-body">
     @{Html(Messages.NotEligible.`If you have recently filed your return, your account can take up to 3 days to update. Try again after 3 days.`.show)}

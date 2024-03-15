@@ -20,7 +20,6 @@ import actions.Actions
 import actionsmodel.AuthenticatedJourneyRequest
 import config.AppConfig
 import essttp.journey.model.SjRequest
-import essttp.rootmodel.TaxRegime._
 import messages.Messages
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -122,7 +121,7 @@ class IneligibleController @Inject() (
   def genericFileReturnPage(implicit request: AuthenticatedJourneyRequest[AnyContent]): Result =
     Ok(views.partials.ineligibleTemplatePage(
       pageh1                  = Messages.NotEligible.`File your return to use this service`(request.journey.taxRegime),
-      leadingContent          = views.partials.returnsNotUpToDatePartial(determineFileYourReturnUrl, determineTaxRegimeFullName),
+      leadingContent          = views.partials.returnsNotUpToDatePartial(determineFileYourReturnUrl, request.journey.taxRegime),
       showCallPreparationTips = false
     ))
 
@@ -175,9 +174,4 @@ class IneligibleController @Inject() (
     case SjRequest.Sa.Empty()                 => s"${appConfig.Urls.enrolForSaUrl}"
   }
 
-  private def determineTaxRegimeFullName(implicit request: AuthenticatedJourneyRequest[AnyContent]): (String, String) = request.journey.taxRegime match {
-    case Epaye => ("an Employers’ PAYE", "TWE y Cyflogwr")
-    case Vat   => ("a VAT", "TAW")
-    case Sa    => ("a Self Assessment", "Hunanasesiad ar-lein")
-  }
 }
