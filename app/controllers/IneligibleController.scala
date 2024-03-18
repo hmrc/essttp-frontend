@@ -85,8 +85,9 @@ class IneligibleController @Inject() (
 
   val saDebtTooSmallPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     Ok(views.partials.ineligibleTemplatePage(
-      pageh1         = Messages.NotEligible.`Pay your ... bill in full`(request.journey.taxRegime),
-      leadingContent = views.partials.debtTooSmallPartial(appConfig.PolicyParameters.SA.payOnlineLink)
+      pageh1                      = Messages.NotEligible.`Pay your ... bill in full`(request.journey.taxRegime),
+      leadingContent              = views.partials.debtTooSmallPartial(appConfig.PolicyParameters.SA.payOnlineLink),
+      showFullListPreparationTips = false
     ))
   }
 

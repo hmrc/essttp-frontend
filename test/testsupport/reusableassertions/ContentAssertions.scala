@@ -188,12 +188,13 @@ object ContentAssertions extends RichMatchers {
       "Ffoniwch ni ar <strong>0300 200 1900</strong> oherwydd mae’n bosibl y gallwch drefnu cynllun dros y ffôn."
 
   def commonIneligibilityTextCheck(
-      doc:                        Document,
-      taxRegime:                  TaxRegime,
-      language:                   Language,
-      callUsContentEnglish:       String    = ContentAssertions.defaultCallUsContentEnglish,
-      callUsContentWelsh:         String    = ContentAssertions.defaultCallUsContentWelsh,
-      expectCallPreparationHints: Boolean   = true
+      doc:                         Document,
+      taxRegime:                   TaxRegime,
+      language:                    Language,
+      callUsContentEnglish:        String    = ContentAssertions.defaultCallUsContentEnglish,
+      callUsContentWelsh:          String    = ContentAssertions.defaultCallUsContentWelsh,
+      expectCallPreparationHints:  Boolean   = true,
+      showFullListPreparationTips: Boolean   = true
   ): Unit = {
 
     val callUsContentFromDoc = doc.select("#call-us-content")
@@ -244,13 +245,19 @@ object ContentAssertions extends RichMatchers {
                   "your VAT registration number which is 9 digits long, like 123456789",
                   "your bank details"
                 )
-              case TaxRegime.Sa =>
+              case TaxRegime.Sa => if (showFullListPreparationTips) {
                 List(
                   "your Self Assessment Unique Taxpayer Reference (UTR) which can be 10 or 13 digits long",
                   "information on any savings or investments you have",
                   "your bank details",
                   "details of your income and spending"
                 )
+              } else {
+                List(
+                  "your Self Assessment Unique Taxpayer Reference (UTR) which can be 10 or 13 digits long",
+                  "your bank details"
+                )
+              }
             }
           case Languages.Welsh =>
             taxRegime match {
@@ -263,13 +270,19 @@ object ContentAssertions extends RichMatchers {
                   "eich rhif cofrestru TAW, sy’n 9 digid o hyd, er enghraifft 123456789",
                   "eich manylion banc"
                 )
-              case TaxRegime.Sa =>
+              case TaxRegime.Sa => if (showFullListPreparationTips) {
                 List(
                   "eich Cyfeirnod Unigryw y Trethdalwr (UTR) ar gyfer Hunanasesiad a allai fod yn 10 neu 13 digid o hyd",
                   "gwybodaeth am unrhyw gynilion neu fuddsoddiadau sydd gennych",
                   "eich manylion banc",
                   "manylion eich incwm a’ch gwariant"
                 )
+              } else {
+                List(
+                  "eich Cyfeirnod Unigryw y Trethdalwr (UTR) ar gyfer Hunanasesiad a allai fod yn 10 neu 13 digid o hyd",
+                  "eich manylion banc"
+                )
+              }
             }
         }
       }
