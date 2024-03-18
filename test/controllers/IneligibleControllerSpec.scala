@@ -219,9 +219,9 @@ class IneligibleControllerSpec extends ItSpec {
             )
 
             val expectedP1 = taxRegime match {
-              case TaxRegime.Epaye => "You cannot set up an Employers’ PAYE payment plan online."
-              case TaxRegime.Vat   => "You cannot set up a VAT payment plan online."
-              case TaxRegime.Sa    => "You cannot set up a Self Assessment payment plan online."
+              case TaxRegime.Epaye => "You cannot set up an Employers’ PAYE payment plan online because you already have a payment plan with HMRC."
+              case TaxRegime.Vat   => "You cannot set up a VAT payment plan online because you already have a payment plan with HMRC."
+              case TaxRegime.Sa    => "You cannot set up a Self Assessment payment plan online because you already have a payment plan with HMRC."
             }
 
             assertIneligiblePageLeadingP1(
@@ -489,9 +489,9 @@ class IneligibleControllerSpec extends ItSpec {
             )
 
             val expectedP1 = taxRegime match {
-              case TaxRegime.Epaye => "Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein."
-              case TaxRegime.Vat   => "Ni allwch drefnu cynllun talu TAW ar-lein."
-              case TaxRegime.Sa    => "Ni allwch drefnu cynllun talu Hunanasesiad ar-lein."
+              case TaxRegime.Epaye => "Ni allwch drefnu cynllun talu ar-lein ar gyfer TWE y Cyflogwr oherwydd bod gennych gynllun talu ar-lein gyda CThEF yn barod."
+              case TaxRegime.Vat   => "Ni allwch drefnu cynllun talu ar-lein ar gyfer TAW oherwydd bod gennych gynllun talu gyda CThEF yn barod."
+              case TaxRegime.Sa    => "Ni allwch drefnu cynllun talu ar-lein ar gyfer Hunanasesiad oherwydd bod gennych gynllun talu gyda CThEF yn barod."
             }
 
             assertIneligiblePageLeadingP1(
