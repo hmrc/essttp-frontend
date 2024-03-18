@@ -29,7 +29,8 @@
 @(
   pageh1: Message,
   leadingContent: Html,
-  showCallPreparationTips: Boolean = true
+  showCallPreparationTips: Boolean = true,
+  showFullListPreparationTips: Boolean = true
 )(implicit request: AuthenticatedJourneyRequest[_])
 
 @import requestSupport._
@@ -38,5 +39,5 @@
     <h1 class="govuk-heading-xl">@{pageh1.show}</h1>
     @leadingContent
 
-    @commonIneligibilityPartial(request.journey.taxRegime, showCallPreparationTips)
+    @commonIneligibilityPartial(request.journey.taxRegime, showCallPreparationTips, showFullListPreparationTips)
 }

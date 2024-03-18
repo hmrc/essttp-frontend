@@ -19,18 +19,17 @@
 @import play.api.mvc.Request
 @import play.twirl.api.Html
 @import requests.RequestSupport
-@import views.html.partials.{ExtraSupportRelayPartial, IfCallingFromOutsideUKPartial}
+@import views.html.partials.{IfCallingFromOutsideUKPartial, IfYouNeedExtraSupportPartial}
 @import models.Languages.English
 @import cats.implicits.catsSyntaxEq
 
 @this(requestSupport: RequestSupport, ifYouNeedExtraSupportPartial: IfYouNeedExtraSupportPartial, ifCallingFromOutsideUKPartial: IfCallingFromOutsideUKPartial)
 
 
-@(taxRegime: TaxRegime, showCallPreparationTips: Boolean = true)(implicit request: Request[_])
+@(taxRegime: TaxRegime, showCallPreparationTips: Boolean = true, showFullListPreparationTips: Boolean = true)(implicit request: Request[_])
 
 @import requestSupport._
 
-@import views.html.partials.IfYouNeedExtraSupportPartial
 @makeSureYouHaveItems = @{
     taxRegime match {
         case TaxRegime.Epaye => List(
@@ -41,12 +40,19 @@
             Messages.NotEligible.`your VAT registration number which is 9 digits long, like 123456789`,
             Messages.NotEligible.`your bank details`
         )
-        case TaxRegime.Sa => List(
-          Messages.NotEligible.`your Self Assessment Unique Taxpayer Reference (UTR)...`,
-          Messages.NotEligible.`information on any savings or investments you have`,
-            Messages.NotEligible.`your bank details`,
-            Messages.NotEligible.`details of your income and spending`
-        )
+        case TaxRegime.Sa => if(showFullListPreparationTips) {
+            List(
+                Messages.NotEligible.`your Self Assessment Unique Taxpayer Reference (UTR)...`,
+                Messages.NotEligible.`information on any savings or investments you have`,
+                Messages.NotEligible.`your bank details`,
+                Messages.NotEligible.`details of your income and spending`
+            )
+        } else {
+            List(
+                Messages.NotEligible.`your Self Assessment Unique Taxpayer Reference (UTR)...`,
+                Messages.NotEligible.`your bank details`
+            )
+        }
     }}
 
 <div id="common-eligibility">

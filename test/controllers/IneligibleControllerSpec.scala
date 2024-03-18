@@ -197,7 +197,7 @@ class IneligibleControllerSpec extends ItSpec {
             val leadingParagraphs = page.select(".govuk-body").asScala.toList
             leadingParagraphs(0).html() shouldBe expectedParagraph1
             leadingParagraphs(1).html() shouldBe expectedParagraph2
-            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English, callUsContentEnglish)
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English, callUsContentEnglish, showFullListPreparationTips = false)
           }
 
           s"${taxRegime.entryName} Existing ttp ineligible page correctly" in {
@@ -466,7 +466,7 @@ class IneligibleControllerSpec extends ItSpec {
             val leadingParagraphs = page.select(".govuk-body").asScala.toList
             leadingParagraphs(0).html() shouldBe expectedParagraph1
             leadingParagraphs(1).html() shouldBe expectedParagraph2
-            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.Welsh, callUsContentWelsh = callUsContentWelsh)
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.Welsh, callUsContentWelsh = callUsContentWelsh, showFullListPreparationTips = false)
           }
 
           s"${taxRegime.entryName} Existing ttp ineligible page correctly" in {
