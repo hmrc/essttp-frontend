@@ -14,44 +14,53 @@
  * limitations under the License.
  *@
 
-@import requests.RequestSupport
+@import config.AppConfig
+@import essttp.rootmodel.TaxRegime
 @import messages.Messages
 @import play.api.mvc.Request
 @import play.twirl.api.Html
-@import uk.gov.hmrc.govukfrontend.views.html.components._
-@import config.AppConfig
-@import views.html.partials.ExtraSupportRelayPartial
+@import requests.RequestSupport
+@import views.html.partials.{IfCallingFromOutsideUKPartial, IfYouNeedExtraSupportPartial}
+@import models.Languages.English
+@import cats.implicits.catsSyntaxEq
 
 @this(
         layout: templates.Layout,
-        govukButton: GovukButton,
         requestSupport: RequestSupport,
-        appConfig: AppConfig,
-        extraSupportRelayPartial: ExtraSupportRelayPartial
+        ifYouNeedExtraSupportPartial: IfYouNeedExtraSupportPartial,
+        ifCallingFromOutsideUKPartial: IfCallingFromOutsideUKPartial
 )
 
-@()(implicit request: Request[_])
+
+@(taxRegime: TaxRegime)(implicit request: Request[_])
 
 @import requestSupport._
 
-@title = @{Messages.NotSoleSignatory.`You cannot set up a Direct Debit online`.show}
+@title = @{Messages.NotSoleSignatory.`Call us about a payment plan`.show}
 
 @layout(pageTitle = Some(title)) {
     <h1 class="govuk-heading-xl">@title</h1>
 
-    <p class="govuk-body">@{
-        Messages.NotSoleSignatory.`You need a named account holder or someone with authorisation to set up a Direct Debit.`.show
-    }</p>
+    <p class="govuk-body">
+    @{
+        val message = taxRegime match {
+            case TaxRegime.Epaye => Messages.NotSoleSignatory.`You cannot set up an Employers’ PAYE payment plan online if you are not the only account holder.`
+            case TaxRegime.Vat => Messages.NotSoleSignatory.`You cannot set up a VAT payment plan online if you are not the only account holder.`
+            case TaxRegime.Sa => Messages.NotSoleSignatory.`You cannot set up a Self Assessment payment plan online if you are not the only account holder.`
+        }
+        Html(message.show)
+    }
+    </p>
 
     <p class="govuk-body">@{
-        Html(Messages.NotSoleSignatory.`If you are not the account holder...`.show)
+        Html(Messages.NotSoleSignatory.`Call us on 0300 123 1813 if you need to set up a Direct Debit from a joint account. All account holders must be present when calling.`.show)
     }</p>
 
-    @extraSupportRelayPartial()
+    @ifYouNeedExtraSupportPartial()
 
-    @govukButton(Button(
-        href = Some(appConfig.Urls.businessTaxAccountUrl),
-        content = Text(Messages.NotSoleSignatory.`Go to tax account`.show)
-    ))
+
+    @if(language === English) {
+        @ifCallingFromOutsideUKPartial()
+    }
 
 }

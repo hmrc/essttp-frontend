@@ -254,7 +254,7 @@ class BankDetailsController @Inject() (
       case j: Journey.AfterEnteredDetailsAboutBankAccount =>
         //only show this page if user has said they are not the account holder
         if (!j.detailsAboutBankAccount.isAccountHolder)
-          Ok(views.cannotSetupDirectDebitPage())
+          Ok(views.cannotSetupDirectDebitPage(request.journey.taxRegime))
         else
           JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
     }

@@ -1616,28 +1616,29 @@ object Messages {
 
   object NotSoleSignatory {
 
-    val `You cannot set up a Direct Debit online`: Message = Message(
-      english = "You cannot set up a Direct Debit online",
-      welsh   = "Ni allwch drefnu Debyd Uniongyrchol ar-lein"
+    val `Call us about a payment plan`: Message = Message(
+      english = "Call us about a payment plan",
+      welsh   = "Ffoniwch ni ynghylch cynllun talu"
     )
 
-    val `You need a named account holder or someone with authorisation to set up a Direct Debit.`: Message = Message(
-      english = "You need a named account holder or someone with authorisation to set up a Direct Debit.",
-      welsh   = "Mae angen rhywun sydd wedi’i enwi’n ddeiliad y cyfrif, neu rywun ag awdurdod, er mwyn trefnu Debyd Uniongyrchol."
+    val `You cannot set up a Self Assessment payment plan online if you are not the only account holder.`: Message = Message(
+      english = "You cannot set up a Self Assessment payment plan online if you are not the only account holder.",
+      welsh   = "Ni allwch drefnu cynllun talu ar-lein ar gyfer Hunanasesiad os nad chi yw’r unig ddeiliad y cyfrif."
     )
 
-    val `If you are not the account holder...`: Message = Message(
-      english = "If you are not the account holder or you wish to set up a Direct Debit with a multi-signature account, we " +
-        "recommend you speak to an adviser on <strong>0300 123 1813</strong>. You must ensure all account " +
-        "holders are present when calling.",
-      welsh   = "Os nad chi yw deiliad y cyfrif, neu os ydych yn dymuno trefnu Debyd Uniongyrchol gyda chyfrif aml-lofnod, rydym " +
-        "yn argymell eich bod yn siarad ag ymgynghorydd ar <strong>0300 200 1900</strong>. Rhaid i chi sicrhau " +
-        "bod holl ddeiliaid y cyfrif yn bresennol pan fyddwch yn ffonio."
+    val `You cannot set up an Employers’ PAYE payment plan online if you are not the only account holder.`: Message = Message(
+      english = "You cannot set up an Employers’ PAYE payment plan online if you are not the only account holder.",
+      welsh   = "Ni allwch drefnu cynllun talu ar-lein ar gyfer TWE y Cyflogwr os nad chi yw’r unig ddeiliad y cyfrif."
     )
 
-    val `Go to tax account`: Message = Message(
-      english = "Go to tax account",
-      welsh   = "Ewch i’r cyfrif treth"
+    val `You cannot set up a VAT payment plan online if you are not the only account holder.`: Message = Message(
+      english = "You cannot set up a VAT payment plan online if you are not the only account holder.",
+      welsh   = "Ni allwch drefnu cynllun talu ar-lein ar gyfer TAW os nad chi yw’r unig ddeiliad y cyfrif."
+    )
+
+    val `Call us on 0300 123 1813 if you need to set up a Direct Debit from a joint account. All account holders must be present when calling.`: Message = Message(
+      english = "Call us on <strong>0300 123 1813</strong> if you need to set up a Direct Debit from a joint account. All account holders must be present when calling.",
+      welsh   = "Ffoniwch ni ar <strong>0300 200 1900</strong> os oes angen trefnu Debyd Uniongyrchol o gyfrif ar y cyd. Mae’n rhaid i holl ddeiliaid y cyfrif fod yn bresennol pan fyddwch yn ffonio."
     )
 
   }
