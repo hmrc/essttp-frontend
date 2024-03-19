@@ -565,8 +565,8 @@ object Messages {
     )
 
     def `You must enrol for PAYE Online before you can set up an Employers’ PAYE payment plan.`(payeLink: String): Message = Message(
-      english = s"""You must <a href="$payeLink" class="govuk-link">enrol for PAYE Online</a> before you can set up an Employers’ PAYE payment plan.""",
-      welsh   = s"""Mae’n rhaid i chi <a href="$payeLink" class="govuk-link">ymrestru ar gyfer TWE Ar-lein</a> cyn i chi allu trefnu cynllun talu ar gyfer TWE y Cyflogwr."""
+      english = s"""You must <a href="$payeLink" class="govuk-link">enrol for PAYE Online</a> before you can set up an Employers’ PAYE payment plan online.""",
+      welsh   = s"""Mae’n rhaid i chi <a href="$payeLink" class="govuk-link">ymrestru ar gyfer TWE Ar-lein</a> cyn i chi allu trefnu cynllun talu ar-lein ar gyfer TWE y Cyflogwr."""
     )
 
     val `Register for VAT online to use this service`: Message = Message(
@@ -575,8 +575,8 @@ object Messages {
     )
 
     def `You must register for VAT online before you can set up a VAT payment plan.`(vatLink: String): Message = Message(
-      english = s"""You must <a href="$vatLink" class="govuk-link">register for VAT online</a> before you can set up a VAT payment plan.""",
-      welsh   = s"""Mae’n rhaid i chi <a href="$vatLink" class="govuk-link">gofrestru ar gyfer TAW ar-lein</a> cyn i chi allu trefnu cynllun talu ar gyfer TAW."""
+      english = s"""You must <a href="$vatLink" class="govuk-link">register for VAT online</a> before you can set up a VAT payment plan online.""",
+      welsh   = s"""Mae’n rhaid i chi <a href="$vatLink" class="govuk-link">gofrestru ar gyfer TAW ar-lein</a> cyn i chi allu trefnu cynllun talu ar-lein ar gyfer TAW."""
     )
 
     val `Request access to Self Assessment to use this service`: Message = Message(
@@ -585,8 +585,8 @@ object Messages {
     )
 
     def `You must request access to Self Assessment before you can set up a Self Assessment payment plan.`(saLink: String): Message = Message(
-      english = s"""You must <a href="$saLink" class="govuk-link">request access to Self Assessment</a> before you can set up a Self Assessment payment plan.""",
-      welsh   = s"""Mae’n rhaid i chi <a href="$saLink" class="govuk-link">wneud cais i gael mynediad at eich cyfrif Hunanasesiad</a> cyn i chi allu trefnu cynllun talu Hunanasesiad ar-lein."""
+      english = s"""You must <a href="$saLink" class="govuk-link">request access to Self Assessment</a> before you can set up a Self Assessment payment plan online.""",
+      welsh   = s"""Mae’n rhaid i chi <a href="$saLink" class="govuk-link">wneud cais i gael mynediad at eich cyfrif Hunanasesiad</a> cyn i chi allu trefnu cynllun talu ar-lein ar gyfer Hunanasesiad."""
     )
 
   }
