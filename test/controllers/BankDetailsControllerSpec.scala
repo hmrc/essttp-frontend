@@ -78,14 +78,15 @@ class BankDetailsControllerSpec extends ItSpec {
   }
 
   object CannotSetupDirectDebitPage {
-    val expectedH1: String = "You cannot set up a Direct Debit online"
-    val paragraphContent1: String =
-      "You need a named account holder or someone with authorisation to set up a Direct Debit."
+    val expectedH1: String = "Call us about a payment plan"
+    def paragraphContent1(taxRegime: TaxRegime): String =
+      taxRegime match {
+        case TaxRegime.Epaye => "You cannot set up an Employers’ PAYE payment plan online if you are not the only account holder."
+        case TaxRegime.Vat   => "You cannot set up a VAT payment plan online if you are not the only account holder."
+        case TaxRegime.Sa    => "You cannot set up a Self Assessment payment plan online if you are not the only account holder."
+      }
     val paragraphContent2: String =
-      "If you are not the account holder or you wish to set up a Direct Debit with a multi-signature account, we recommend " +
-        "you speak to an adviser on 0300 123 1813. You must ensure all account holders are " +
-        "present when calling."
-    val buttonContent: String = "Go to tax account"
+      "Call us on 0300 123 1813 if you need to set up a Direct Debit from a joint account. All account holders must be present when calling."
   }
 
   object BarsLockoutPage {
@@ -1241,7 +1242,7 @@ class BankDetailsControllerSpec extends ItSpec {
         }
 
         "GET /you-cannot-set-up-a-direct-debit-online should" - {
-          s"[$regime journey] return 200 and You cannot set up a direct debit online page" in {
+          s"[$regime journey] return 200 and Call us about a payment plan page" in {
             stubCommonActions()
             EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)(
               JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = false, origin)
@@ -1263,19 +1264,18 @@ class BankDetailsControllerSpec extends ItSpec {
             )
 
             val paragraphs = doc.select(".govuk-body").asScala.toList
-            paragraphs.size shouldBe 5
+            paragraphs.size shouldBe 6
 
-            paragraphs(0).text() shouldBe CannotSetupDirectDebitPage.paragraphContent1
+            paragraphs(0).text() shouldBe CannotSetupDirectDebitPage.paragraphContent1(taxRegime)
             paragraphs(1).text() shouldBe CannotSetupDirectDebitPage.paragraphContent2
 
             doc.select("h2").asScala.toList(0).text() shouldBe "If you need extra support"
             paragraphs(2).html() shouldBe "Find out the different ways to <a href=\"https://www.gov.uk/get-help-hmrc-extra-support\" class=\"govuk-link\">deal with HMRC if you need some help</a>."
             paragraphs(3).html() shouldBe "You can also use <a href=\"https://www.relayuk.bt.com/\" class=\"govuk-link\">Relay UK</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>."
-            paragraphs(4).html() shouldBe "If you are outside the UK: <strong>+44 2890 538 192</strong>"
 
-            val cta = doc.select(".govuk-button")
-            cta.text() shouldBe CannotSetupDirectDebitPage.buttonContent
-            cta.attr("href") shouldBe "http://localhost:9020/business-account"
+            doc.select("h2").asScala.toList(1).text() shouldBe "If you’re calling from outside the UK"
+            paragraphs(4).html() shouldBe "Call us on <strong>+44 2890 538 192</strong>."
+            paragraphs(5).html() shouldBe "Our opening times are Monday to Friday, 8am to 6pm (UK time). We are closed on weekends and bank holidays."
           }
         }
 
