@@ -24,6 +24,8 @@ Current tax regimes supported:
 
 ### Running locally
 
+Start up supporting services with `sm2 --start ESSTTP`
+
 You can run the service locally using sbt: `sbt run`
 
 To run with test endpoints enabled: `sbt runTestOnly`
