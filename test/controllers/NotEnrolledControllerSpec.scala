@@ -53,7 +53,7 @@ class NotEnrolledControllerSpec extends ItSpec {
         expectedSubmitUrl       = None
       )
 
-      page.select(".govuk-body").asScala.toList(0).html() shouldBe s"""You must <a href="https://www.gov.uk/paye-online/enrol" class="govuk-link">enrol for PAYE Online</a> before you can set up an Employers’ PAYE payment plan."""
+      page.select(".govuk-body").asScala.toList(0).html() shouldBe s"""You must <a href="https://www.gov.uk/paye-online/enrol" class="govuk-link">enrol for PAYE Online</a> before you can set up an Employers’ PAYE payment plan online."""
       ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Epaye, Languages.English)
     }
 
@@ -75,7 +75,7 @@ class NotEnrolledControllerSpec extends ItSpec {
         language                = Languages.Welsh
       )
 
-      page.select(".govuk-body").asScala.toList(0).html() shouldBe s"""Mae’n rhaid i chi <a href="https://www.gov.uk/paye-online/enrol" class="govuk-link">ymrestru ar gyfer TWE Ar-lein</a> cyn i chi allu trefnu cynllun talu ar gyfer TWE y Cyflogwr."""
+      page.select(".govuk-body").asScala.toList(0).html() shouldBe s"""Mae’n rhaid i chi <a href="https://www.gov.uk/paye-online/enrol" class="govuk-link">ymrestru ar gyfer TWE Ar-lein</a> cyn i chi allu trefnu cynllun talu ar-lein ar gyfer TWE y Cyflogwr."""
       ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Epaye, Languages.Welsh)
     }
 
@@ -101,7 +101,7 @@ class NotEnrolledControllerSpec extends ItSpec {
         regimeBeingTested       = Some(TaxRegime.Vat)
       )
 
-      page.select(".govuk-body").asScala.toList(0).html() shouldBe s"""You must <a href="https://www.gov.uk/register-for-vat" class="govuk-link">register for VAT online</a> before you can set up a VAT payment plan."""
+      page.select(".govuk-body").asScala.toList(0).html() shouldBe s"""You must <a href="https://www.gov.uk/register-for-vat" class="govuk-link">register for VAT online</a> before you can set up a VAT payment plan online."""
       ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Vat, Languages.English)
     }
 
@@ -124,7 +124,7 @@ class NotEnrolledControllerSpec extends ItSpec {
         language                = Languages.Welsh
       )
 
-      page.select(".govuk-body").asScala.toList(0).html() shouldBe s"""Mae’n rhaid i chi <a href="https://www.gov.uk/register-for-vat" class="govuk-link">gofrestru ar gyfer TAW ar-lein</a> cyn i chi allu trefnu cynllun talu ar gyfer TAW."""
+      page.select(".govuk-body").asScala.toList(0).html() shouldBe s"""Mae’n rhaid i chi <a href="https://www.gov.uk/register-for-vat" class="govuk-link">gofrestru ar gyfer TAW ar-lein</a> cyn i chi allu trefnu cynllun talu ar-lein ar gyfer TAW."""
       ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Vat, Languages.Welsh)
     }
 
@@ -152,7 +152,7 @@ class NotEnrolledControllerSpec extends ItSpec {
       page.select(".govuk-body").asScala.toList(0).html() shouldBe (
         "You must " +
         """<a href="https://www.tax.service.gov.uk/business-account/add-tax/self-assessment/enter-sa-utr?origin=ssttp-sa" class="govuk-link">request access to Self Assessment</a> """ +
-        "before you can set up a Self Assessment payment plan."
+        "before you can set up a Self Assessment payment plan online."
       )
       ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Sa, Languages.English)
     }
@@ -178,7 +178,7 @@ class NotEnrolledControllerSpec extends ItSpec {
       page.select(".govuk-body").asScala.toList(0).html() shouldBe (
         "Mae’n rhaid i chi " +
         """<a href="https://www.tax.service.gov.uk/business-account/add-tax/self-assessment/enter-sa-utr?origin=ssttp-sa" class="govuk-link">wneud cais i gael mynediad at eich cyfrif Hunanasesiad</a> """ +
-        "cyn i chi allu trefnu cynllun talu Hunanasesiad ar-lein."
+        "cyn i chi allu trefnu cynllun talu ar-lein ar gyfer Hunanasesiad."
       )
       ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Sa, Languages.Welsh)
     }
