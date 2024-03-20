@@ -507,17 +507,17 @@ object Messages {
 
     def `You must file your tax return before you can set up an Employers’ PAYE payment plan online`(fileReturnUrl: String): Message = Message(
       english = s"""You must <a class="govuk-link" href="$fileReturnUrl">file your tax return</a> before you can set up an Employers’ PAYE payment plan online.""",
-      welsh   = s"""Mae’n rhaid i chi <a class="govuk-link" href="$fileReturnUrl">gyflwyno’ch Ffurflen Dreth</a> cyn i chi allu trefnu cynllun talu ar gyfer TWE y Cyflogwr."""
+      welsh   = s"""Mae’n rhaid i chi <a class="govuk-link" href="$fileReturnUrl">gyflwyno’ch Ffurflen Dreth</a> cyn i chi allu trefnu cynllun talu ar-lein ar gyfer TWE y Cyflogwr."""
     )
 
     def `You must file your tax return before you can set up a VAT payment plan online`(fileReturnUrl: String): Message = Message(
       english = s"""You must <a class="govuk-link" href="$fileReturnUrl">file your tax return</a> before you can set up a VAT payment plan online.""",
-      welsh   = s"""Mae’n rhaid i chi <a class="govuk-link" href="$fileReturnUrl">gyflwyno’ch Ffurflen Dreth</a> cyn i chi allu trefnu cynllun talu ar gyfer TAW."""
+      welsh   = s"""Mae’n rhaid i chi <a class="govuk-link" href="$fileReturnUrl">gyflwyno’ch Ffurflen Dreth</a> cyn i chi allu trefnu cynllun talu ar-lein ar gyfer TAW."""
     )
 
     def `You must file your tax return before you can set up a Self Assessment payment plan online`(fileReturnUrl: String): Message = Message(
       english = s"""You must <a class="govuk-link" href="$fileReturnUrl">file your tax return</a> before you can set up a Self Assessment payment plan online.""",
-      welsh   = s"""Mae’n rhaid i chi <a class="govuk-link" href="$fileReturnUrl">gyflwyno’ch Ffurflen Dreth</a> cyn i chi allu trefnu cynllun talu ar gyfer Hunanasesiad ar-lein."""
+      welsh   = s"""Mae’n rhaid i chi <a class="govuk-link" href="$fileReturnUrl">gyflwyno’ch Ffurflen Dreth</a> cyn i chi allu trefnu cynllun talu ar-lein ar gyfer Hunanasesiad ar-lein."""
     )
 
     val `Go to your tax account`: Message = Message(

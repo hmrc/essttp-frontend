@@ -525,9 +525,9 @@ class IneligibleControllerSpec extends ItSpec {
             )
 
             val expectedLeadingContent = taxRegime match {
-              case TaxRegime.Epaye => "Mae’n rhaid i chi gyflwyno’ch Ffurflen Dreth cyn i chi allu trefnu cynllun talu ar gyfer TWE y Cyflogwr."
-              case TaxRegime.Vat   => "Mae’n rhaid i chi gyflwyno’ch Ffurflen Dreth cyn i chi allu trefnu cynllun talu ar gyfer TAW."
-              case TaxRegime.Sa    => "Mae’n rhaid i chi gyflwyno’ch Ffurflen Dreth cyn i chi allu trefnu cynllun talu ar gyfer Hunanasesiad ar-lein."
+              case TaxRegime.Epaye => "Mae’n rhaid i chi gyflwyno’ch Ffurflen Dreth cyn i chi allu trefnu cynllun talu ar-lein ar gyfer TWE y Cyflogwr."
+              case TaxRegime.Vat   => "Mae’n rhaid i chi gyflwyno’ch Ffurflen Dreth cyn i chi allu trefnu cynllun talu ar-lein ar gyfer TAW."
+              case TaxRegime.Sa    => "Mae’n rhaid i chi gyflwyno’ch Ffurflen Dreth cyn i chi allu trefnu cynllun talu ar-lein ar gyfer Hunanasesiad ar-lein."
             }
 
             val expectedCallUsContent = "Ffoniwch ni ar <strong>0300 200 1900</strong> os oes angen i chi siarad ag ymgynghorydd."
