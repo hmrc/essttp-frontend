@@ -17,7 +17,6 @@
 package controllers
 
 import _root_.actions.Actions
-import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheckF
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import essttp.journey.model.Journey
@@ -36,7 +35,7 @@ class DetermineAffordabilityController @Inject() (
     mcc:            MessagesControllerComponents,
     ttpService:     TtpService,
     journeyService: JourneyService
-)(implicit ec: ExecutionContext, appConfig: AppConfig)
+)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 

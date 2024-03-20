@@ -18,7 +18,6 @@ package controllers
 
 import _root_.actions.Actions
 import actionsmodel.EligibleJourneyRequest
-import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.PaymentScheduleController.{dayOfMonthFromJourney, upfrontPaymentAnswersFromJourney}
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
@@ -42,7 +41,7 @@ class PaymentScheduleController @Inject() (
     paymentSchedulePage: CheckPaymentSchedule,
     journeyService:      JourneyService,
     auditService:        AuditService
-)(implicit ec: ExecutionContext, appConfig: AppConfig) extends FrontendController(mcc)
+)(implicit ec: ExecutionContext) extends FrontendController(mcc)
   with Logging {
 
   implicit val localDateOrdering: Ordering[LocalDate] = _ compareTo _

@@ -18,7 +18,6 @@ package controllers
 
 import _root_.actions.Actions
 import actionsmodel.AuthenticatedJourneyRequest
-import config.AppConfig
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import essttp.journey.model.Journey
 import essttp.rootmodel.TaxRegime
@@ -37,7 +36,7 @@ class SubmitArrangementController @Inject() (
     mcc:            MessagesControllerComponents,
     ttpService:     TtpService,
     journeyService: JourneyService
-)(implicit ec: ExecutionContext, appConfig: AppConfig)
+)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 

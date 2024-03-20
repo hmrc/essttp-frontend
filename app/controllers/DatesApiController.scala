@@ -17,9 +17,8 @@
 package controllers
 
 import actions.Actions
-import config.AppConfig
-import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import controllers.JourneyFinalStateCheck.finalStateCheckF
+import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import essttp.journey.model.Journey
 import play.api.mvc._
 import services.{DatesService, JourneyService}
@@ -35,7 +34,7 @@ class DatesApiController @Inject() (
     mcc:            MessagesControllerComponents,
     datesService:   DatesService,
     journeyService: JourneyService
-)(implicit ec: ExecutionContext, appConfig: AppConfig)
+)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 

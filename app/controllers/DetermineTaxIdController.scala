@@ -33,7 +33,6 @@
 package controllers
 
 import _root_.actions.Actions
-import config.AppConfig
 import essttp.journey.model.Journey
 import essttp.rootmodel.{TaxId, TaxRegime}
 import play.api.mvc._
@@ -49,7 +48,7 @@ class DetermineTaxIdController @Inject() (
     as:               Actions,
     mcc:              MessagesControllerComponents,
     enrolmentService: EnrolmentService
-)(implicit ec: ExecutionContext, appConfig: AppConfig)
+)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 
