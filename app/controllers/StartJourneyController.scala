@@ -41,13 +41,9 @@ class StartJourneyController @Inject() (
   }
 
   def startGovukVatJourney: Action[AnyContent] =
-    if (appConfig.vatEnabled) {
-      as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
-        journeyConnector.Vat.startJourneyGovUk(SjRequest.Vat.Empty())
-          .map(_ => Redirect(routes.DetermineTaxIdController.determineTaxId.url))
-      }
-    } else {
-      as.default(_ => NotImplemented)
+    as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
+      journeyConnector.Vat.startJourneyGovUk(SjRequest.Vat.Empty())
+        .map(_ => Redirect(routes.DetermineTaxIdController.determineTaxId.url))
     }
 
   def startGovukSaJourney: Action[AnyContent] =
@@ -66,13 +62,9 @@ class StartJourneyController @Inject() (
   }
 
   def startDetachedVatJourney: Action[AnyContent] =
-    if (appConfig.vatEnabled) {
-      as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
-        journeyConnector.Vat.startJourneyDetachedUrl(SjRequest.Vat.Empty())
-          .map(redirectFromDetachedJourneyStarted)
-      }
-    } else {
-      as.default(_ => NotImplemented)
+    as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
+      journeyConnector.Vat.startJourneyDetachedUrl(SjRequest.Vat.Empty())
+        .map(redirectFromDetachedJourneyStarted)
     }
 
   def startDetachedSaJourney: Action[AnyContent] =

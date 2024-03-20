@@ -71,35 +71,3 @@ class ContinueToLandingPagesAuthenticatedActionRefinerSpec extends ItSpec {
   }
 }
 
-class ContinueToLandingPagesAuthenticatedActionRefinerVatDisabledSpec extends ItSpec {
-
-  override lazy val configOverrides: Map[String, Any] = Map(
-    "features.vat" -> false
-  )
-
-  val controller: DetermineTaxIdController = app.injector.instanceOf[DetermineTaxIdController]
-
-  "ContinueToLandingPagesAuthenticatedActionRefinerSpec" - {
-
-    "redirect to login page when user has no active session (i.e. no auth token)" in {
-      AuthStub.authorise(None, None)
-      EssttpBackend.DetermineTaxId.findJourney(Origins.Epaye.Bta)()
-      val fakeRequest = FakeRequest()
-      val result = controller.determineTaxId()(fakeRequest)
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some("http://localhost:9949/auth-login-stub/gg-sign-in?" +
-        "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fepaye-payment-plan" +
-        "&origin=essttp-frontend")
-    }
-
-    "redirect to the EPAYE landing page when there is no session found in backend" in {
-      AuthStub.authorise()
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val result = controller.determineTaxId()(fakeRequest)
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.epayeLandingPageUrl)
-    }
-
-  }
-
-}

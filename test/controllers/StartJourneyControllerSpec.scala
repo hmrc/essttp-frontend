@@ -219,32 +219,6 @@ class StartJourneyControllerSpec extends ItSpec {
 
 }
 
-class GovUkVatNotEnabledControllerSpec extends ItSpec {
-
-  override lazy val configOverrides: Map[String, Any] = Map("features.vat" -> false)
-
-  private val controller = app.injector.instanceOf[StartJourneyController]
-
-  "VAT start govuk journey endpoint should return 501 (NOT IMPLEMENTED) when VAT is not enabled" in {
-    val fakeRequest = FakeRequest()
-      .withAuthToken()
-      .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
-    val result: Future[Result] = controller.startGovukVatJourney(fakeRequest)
-    status(result) shouldBe NOT_IMPLEMENTED
-  }
-
-  "VAT start detached journey endpoint should return 501 (NOT IMPLEMENTED) when VAT is not enabled" in {
-    val fakeRequest = FakeRequest()
-      .withAuthToken()
-      .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
-    val result: Future[Result] = controller.startDetachedVatJourney(fakeRequest)
-    status(result) shouldBe NOT_IMPLEMENTED
-  }
-
-}
-
 class GovUkSaNotEnabledControllerSpec extends ItSpec {
 
   override lazy val configOverrides: Map[String, Any] = Map("features.sa" -> false)

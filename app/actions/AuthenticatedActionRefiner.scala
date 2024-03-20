@@ -85,11 +85,7 @@ class ContinueToLandingPagesAuthenticatedActionRefiner @Inject() (
 ) extends ActionRefiner[Request, AuthenticatedRequest] with AuthorisedFunctions with AuthenticatedActionRefiner {
 
   override def loginContinueToUrl(request: Request[_]): String =
-    if (appConfig.vatEnabled) {
-      routes.WhichTaxRegimeController.whichTaxRegime.url
-    } else {
-      routes.LandingController.epayeLandingPage.url
-    }
+    routes.WhichTaxRegimeController.whichTaxRegime.url
 
 }
 
