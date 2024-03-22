@@ -17,7 +17,6 @@
 package controllers
 
 import _root_.actions.Actions
-import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import controllers.MonthlyPaymentAmountController.{monthlyPaymentAmountForm, upfrontPaymentAnswersFromJourney}
@@ -45,7 +44,7 @@ class MonthlyPaymentAmountController @Inject() (
     journeyService: JourneyService
 )(
     implicit
-    executionContext: ExecutionContext, appConfig: AppConfig
+    executionContext: ExecutionContext
 ) extends FrontendController(mcc)
   with Logging {
 

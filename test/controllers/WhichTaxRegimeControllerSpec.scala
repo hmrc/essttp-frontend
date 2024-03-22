@@ -201,26 +201,6 @@ class WhichTaxRegimeControllerSpec extends ItSpec {
 
 }
 
-class WhichTaxRegimeVatDisabledControllerSpec extends ItSpec {
-
-  val controller = app.injector.instanceOf[WhichTaxRegimeController]
-
-  override lazy val configOverrides: Map[String, Any] = Map(
-    "features.vat" -> false
-  )
-
-  "A 501 NotImplemented response should be returned by" - {
-
-    "GET /which-tax" in {
-      status(controller.whichTaxRegime(FakeRequest())) shouldBe NOT_IMPLEMENTED
-    }
-
-    "POST /which-tax" in {
-      status(controller.whichTaxRegimeSubmit(FakeRequest())) shouldBe NOT_IMPLEMENTED
-    }
-  }
-}
-
 class WhichTaxRegimeSaDisabledControllerSpec extends ItSpec {
 
   val controller = app.injector.instanceOf[WhichTaxRegimeController]

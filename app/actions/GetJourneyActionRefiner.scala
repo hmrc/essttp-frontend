@@ -17,7 +17,6 @@
 package actions
 
 import actionsmodel.{AuthenticatedJourneyRequest, AuthenticatedRequest}
-import config.AppConfig
 import controllers.support.RequestSupport.hc
 import essttp.journey.JourneyConnector
 import essttp.journey.model.Journey
@@ -28,7 +27,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class GetJourneyActionRefiner @Inject() (journeyConnector: JourneyConnector, appConfig: AppConfig)(
+class GetJourneyActionRefiner @Inject() (journeyConnector: JourneyConnector)(
     implicit
     ec: ExecutionContext
 ) extends ActionRefiner[AuthenticatedRequest, AuthenticatedJourneyRequest] {
@@ -43,13 +42,7 @@ class GetJourneyActionRefiner @Inject() (journeyConnector: JourneyConnector, app
       case Some(journey) => Right(new AuthenticatedJourneyRequest(request, request.enrolments, journey, request.ggCredId))
       case None =>
         logger.error(s"No journey found for sessionId: [ ${hc.sessionId.toString} ]")
-        val redirectTo =
-          if (appConfig.vatEnabled) {
-            controllers.routes.WhichTaxRegimeController.whichTaxRegime
-          } else {
-            controllers.routes.LandingController.epayeLandingPage
-          }
-        Left(Results.Redirect(redirectTo))
+        Left(Results.Redirect(controllers.routes.WhichTaxRegimeController.whichTaxRegime))
     }
   }
 

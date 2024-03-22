@@ -41,7 +41,7 @@ class WhichTaxRegimeController @Inject() (
 
   import requestSupport._
 
-  val whichTaxRegime: Action[AnyContent] = withVatEnabled{
+  val whichTaxRegime: Action[AnyContent] =
     as.authenticatedAction { implicit request =>
       val hasEpayeEnrolment = EnrolmentDef.Epaye.findEnrolmentValues(request.enrolments).isSuccess
       val hasVatEnrolment = EnrolmentDef.Vat.findEnrolmentValues(request.enrolments).isSuccess
@@ -55,9 +55,8 @@ class WhichTaxRegimeController @Inject() (
           Ok(views.whichTaxRegime(TaxRegimeForm.form, appConfig.saEnabled))
       }
     }
-  }
 
-  val whichTaxRegimeSubmit: Action[AnyContent] = withVatEnabled {
+  val whichTaxRegimeSubmit: Action[AnyContent] =
     as.authenticatedAction { implicit request =>
       TaxRegimeForm.form.bindFromRequest()
         .fold(
@@ -69,9 +68,5 @@ class WhichTaxRegimeController @Inject() (
           }
         )
     }
-  }
-
-  private def withVatEnabled(f: => Action[AnyContent]): Action[AnyContent] =
-    if (appConfig.vatEnabled) f else as.default { _ => NotImplemented }
 
 }

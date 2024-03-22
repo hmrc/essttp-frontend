@@ -48,16 +48,12 @@ class LandingController @Inject() (
   }
 
   val vatLandingPage: Action[AnyContent] =
-    if (appConfig.vatEnabled) {
-      as.default.async { implicit request =>
-        checkNotShuttered(TaxRegime.Vat) {
-          getBackUrl().map { maybeBackUrl =>
-            Ok(views.vatLanding(maybeBackUrl))
-          }
+    as.default.async { implicit request =>
+      checkNotShuttered(TaxRegime.Vat) {
+        getBackUrl().map { maybeBackUrl =>
+          Ok(views.vatLanding(maybeBackUrl))
         }
       }
-    } else {
-      as.default(_ => NotImplemented)
     }
 
   val saLandingPage: Action[AnyContent] =

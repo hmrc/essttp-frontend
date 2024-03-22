@@ -17,13 +17,12 @@
 package controllers
 
 import _root_.actions.Actions
-import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import essttp.journey.model.Journey
-import essttp.rootmodel.ttp.eligibility.{ChargeTypeAssessment, Charges, EligibilityCheckResult}
 import essttp.rootmodel.AmountInPence
 import essttp.rootmodel.ttp.IsInterestBearingCharge
+import essttp.rootmodel.ttp.eligibility.{ChargeTypeAssessment, Charges, EligibilityCheckResult}
 import models.{InvoicePeriod, OverDuePayments, OverduePayment}
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -39,7 +38,7 @@ class YourBillController @Inject() (
     as:    Actions,
     mcc:   MessagesControllerComponents,
     views: Views
-)(implicit appConfig: AppConfig)
+)
   extends FrontendController(mcc)
   with Logging {
 

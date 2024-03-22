@@ -140,7 +140,7 @@ class TtpService @Inject() (
         chargeTypeAssessment.charges.map { charge: Charges =>
           DebtItemCharges(
             outstandingDebtAmount   = OutstandingDebtAmount(charge.outstandingAmount.value),
-            debtItemChargeId        = charge.chargeReference orElse chargeTypeAssessment.chargeReference,
+            debtItemChargeId        = chargeTypeAssessment.chargeReference,
             debtItemOriginalDueDate = DebtItemOriginalDueDate(charge.dueDate.value),
             accruedInterest         = charge.accruedInterest,
             isInterestBearingCharge = charge.isInterestBearingCharge,
@@ -267,7 +267,7 @@ object TtpService {
         subTrans                = charge.subTrans,
         isInterestBearingCharge = charge.isInterestBearingCharge,
         useChargeReference      = charge.useChargeReference,
-        debtItemChargeId        = charge.chargeReference orElse chargeTypeAssessment.chargeReference,
+        debtItemChargeId        = chargeTypeAssessment.chargeReference,
         interestStartDate       = charge.interestStartDate,
         debtItemOriginalDueDate = DebtItemOriginalDueDate(charge.dueDate.value)
       )

@@ -33,13 +33,11 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
 
   val appName: String = config.get[String]("appName")
   val emailJourneyEnabled: Boolean = config.get[Boolean]("features.email-journey")
-  val vatEnabled: Boolean = config.get[Boolean]("features.vat")
   val saEnabled: Boolean = config.get[Boolean]("features.sa")
   val authTimeoutSeconds: Int = config.get[FiniteDuration]("timeout-dialog.timeout").toSeconds.toInt
   val authTimeoutCountdownSeconds: Int = config.get[FiniteDuration]("timeout-dialog.countdown").toSeconds.toInt
   val accessibilityStatementPath: String = config.get[String]("accessibility-statement.service-path")
   val shutteredTaxRegimes: List[TaxRegime] = config.underlying.get[List[String]]("shuttering.shuttered-tax-regimes").value.map(TaxRegime.withNameInsensitive)
-  val cr111Enabled: Boolean = config.get[Boolean]("features.cr111")
 
   object BaseUrl {
     val platformHost: Option[String] = config.getOptional[String]("platform.frontend.host")

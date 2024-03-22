@@ -343,23 +343,6 @@ class LandingPageControllerSpec extends ItSpec {
 
 }
 
-class LandingPageVatNotEnabledControllerSpec extends ItSpec {
-
-  override lazy val configOverrides: Map[String, Any] = Map("features.vat" -> false)
-
-  private val controller = app.injector.instanceOf[LandingController]
-
-  "GET /vat-payment-plan should return 501 (NOT IMPLEMENTED) when VAT is not enabled" in {
-    val fakeRequest = FakeRequest()
-      .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
-    val result: Future[Result] = controller.vatLandingPage(fakeRequest)
-    status(result) shouldBe NOT_IMPLEMENTED
-
-  }
-
-}
-
 class LandingPageSaNotEnabledControllerSpec extends ItSpec {
 
   override lazy val configOverrides: Map[String, Any] = Map("features.sa" -> false)

@@ -30,8 +30,7 @@
   govukButton: GovukButton,
   formWithCSRF: FormWithCSRF,
   requestSupport: RequestSupport,
-  overduePaymentRow: OverduePaymentRow,
-  appConfig: AppConfig
+  overduePaymentRow: OverduePaymentRow
 )
 
 @(overduePayments: OverDuePayments, taxRegime: TaxRegime)(implicit request: Request[_])
@@ -54,11 +53,7 @@
   <h1 class="govuk-heading-xl">@title</h1>
   <h2 class="govuk-heading-m">@{subheading.show}</h2>
   <dl class="govuk-summary-list">
-      @if(appConfig.cr111Enabled) {
-          @overduePayments.payments.sortBy(overduePayment => overduePayment.invoicePeriod.dueDate).map(payment => overduePaymentRow(payment, taxRegime))
-      } else {
-          @overduePayments.payments.map(payment => overduePaymentRow(payment, taxRegime))
-      }
+    @overduePayments.payments.sortBy(overduePayment => overduePayment.invoicePeriod.dueDate).map(payment => overduePaymentRow(payment, taxRegime))
   </dl>
   @formWithCSRF(action = routes.YourBillController.yourBillSubmit) {
   @govukButton(Button(content = Text(Messages.continue.show), attributes = Map("id" -> "continue")))

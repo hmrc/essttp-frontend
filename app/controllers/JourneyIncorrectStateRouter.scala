@@ -16,7 +16,6 @@
 
 package controllers
 
-import config.AppConfig
 import essttp.journey.model.Journey
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{Request, Result}
@@ -26,9 +25,9 @@ import scala.concurrent.Future
 
 object JourneyIncorrectStateRouter {
 
-  def logErrorAndRouteToDefaultPageF(journey: Journey)(implicit request: Request[_], appConfig: AppConfig): Future[Result] = Future.successful(logErrorAndRouteToDefaultPage(journey))
+  def logErrorAndRouteToDefaultPageF(journey: Journey)(implicit request: Request[_]): Future[Result] = Future.successful(logErrorAndRouteToDefaultPage(journey))
 
-  def logErrorAndRouteToDefaultPage(journey: Journey)(implicit request: Request[_], appConfig: AppConfig): Result = {
+  def logErrorAndRouteToDefaultPage(journey: Journey)(implicit request: Request[_]): Result = {
     val redirectTo = Routing.latestPossiblePage(journey)
 
     JourneyLogger.error(
