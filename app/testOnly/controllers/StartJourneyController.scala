@@ -16,16 +16,16 @@
 
 package testOnly.controllers
 
-import _root_.testOnly.controllers.{routes => testOnlyRoutes}
 import _root_.actions.Actions
 import _root_.essttp.rootmodel.ttp._
+import _root_.testOnly.controllers.{routes => testOnlyRoutes}
 import _root_.testOnly.views.html._
 import config.AppConfig
 import essttp.journey.JourneyConnector
 import essttp.journey.model.{Origins, SjRequest}
 import essttp.rootmodel.ttp.affordablequotes.DueDate
 import essttp.rootmodel.ttp.eligibility._
-import essttp.rootmodel.{AmountInPence, BackUrl, Email, ReturnUrl, TaxRegime}
+import essttp.rootmodel._
 import models.EligibilityErrors._
 import models.{EligibilityError, EligibilityErrors}
 import play.api.mvc._
@@ -304,7 +304,6 @@ object StartJourneyController {
     val charges: Charges = Charges(
       chargeType                    = ChargeType("InYearRTICharge-Tax"),
       mainType                      = MainType("InYearRTICharge(FPS)"),
-      chargeReference               = Some(ChargeReference(form.taxReference.value)),
       mainTrans                     = MainTrans("mainTrans"),
       subTrans                      = SubTrans("subTrans"),
       outstandingAmount             = OutstandingAmount(debtAmountFromForm),
@@ -333,7 +332,7 @@ object StartJourneyController {
         TaxPeriodFrom("2020-08-13"),
         TaxPeriodTo("2020-08-14"),
         DebtTotalAmount(debtAmountFromForm + interestAmount),
-        Some(ChargeReference("A00000000001")),
+        ChargeReference("A00000000001"),
         List(charges)
       )
     )
