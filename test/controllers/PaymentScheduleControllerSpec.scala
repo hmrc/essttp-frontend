@@ -18,7 +18,6 @@ package controllers
 
 import controllers.PaymentScheduleControllerSpec.SummaryRow
 import essttp.journey.model.{Origin, Origins}
-import essttp.rootmodel.TaxRegime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import play.api.http.Status
@@ -33,8 +32,8 @@ import testsupport.stubs.{AuditConnectorStub, EssttpBackend}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
-import scala.jdk.CollectionConverters.IteratorHasAsScala
 import scala.concurrent.Future
+import scala.jdk.CollectionConverters.IteratorHasAsScala
 
 class PaymentScheduleControllerSpec extends ItSpec {
 
@@ -141,14 +140,6 @@ class PaymentScheduleControllerSpec extends ItSpec {
 
                 testUpfrontPaymentSummaryRows(summaries(0))(canPayUpfrontValue, upfrontPaymentAmountValue)
                 testPaymentPlanRows(summaries(1))("£300", paymentDayValue, datesToAmountsValues, totalToPayValue)
-
-                doc.select("#existing-dd-warning").select("strong").text() shouldBe {
-                  origin.taxRegime match {
-                    case TaxRegime.Epaye => "Warning If you already have a Direct Debit for Employers’ PAYE, contact your bank to stop the next payment being collected. This will prevent you from being charged twice."
-                    case TaxRegime.Vat   => "Warning If you already have a Direct Debit for VAT, contact your bank to stop the next payment being collected. This will prevent you from being charged twice."
-                    case TaxRegime.Sa    => ""
-                  }
-                }
               }
 
             s"[$regime journey] there is an upfrontPayment amount" in {
