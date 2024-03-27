@@ -114,7 +114,7 @@ object ContentAssertions extends RichMatchers {
       page.title() shouldBe s"$titlePrefix$expectedH1 - $regimeServiceName - GOV.UK"
     }
 
-    val serviceName = page.select(".hmrc-header__service-name")
+    val serviceName = page.select(".govuk-header__service-name")
 
     serviceName.is("a") shouldBe regimeBeingTested.isDefined && shouldServiceNameBeInHeader
     serviceName.text() shouldBe (if (shouldServiceNameBeInHeader) regimeServiceName else "")
