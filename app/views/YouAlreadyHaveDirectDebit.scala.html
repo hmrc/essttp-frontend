@@ -1,0 +1,68 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import play.api.mvc.Request
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import controllers.routes
+@import essttp.rootmodel.TaxRegime
+@import views.html.templates.Layout
+@import views.html.partials.OverduePaymentRow
+@import messages.Messages
+@import requests.RequestSupport
+@import models.OverDuePayments
+@import play.twirl.api.Html
+
+@this(
+  layout: Layout,
+  govukButton: GovukButton,
+  formWithCSRF: FormWithCSRF,
+  requestSupport: RequestSupport,
+  overduePaymentRow: OverduePaymentRow
+)
+
+@(overduePayments: OverDuePayments, taxRegime: TaxRegime)(implicit request: Request[_])
+
+@import requestSupport._
+
+@title= @{Messages.DualChargeWarning.`You already have a Direct Debit`.show}
+@chargesInPlural = @{overduePayments.payments.nonEmpty}
+
+@layout(
+  pageTitle = Some(title)
+) {
+  <h1 class="govuk-heading-xl">@title</h1>
+    <p class="govuk-body">@{Messages.DualChargeWarning.`You already have a Direct Debit set up for...`(taxRegime).show}</p>
+    <p class="govuk-body">@{Messages.DualChargeWarning.`If you set up a payment plan, the following charge.. could be collected twice.`(chargesInPlural).show}</p>
+
+  <dl class="govuk-summary-list">
+    @overduePayments.payments.sortBy(overduePayment => overduePayment.invoicePeriod.dueDate).map(payment => overduePaymentRow(payment, taxRegime))
+  </dl>
+
+    <div class="govuk-warning-text">
+        <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+        <strong class="govuk-warning-text__text">@{Messages.DualChargeWarning.`Contact your bank to discuss your payment options before setting up a payment plan.`.show}</strong>
+    </div>
+
+    <p class="govuk-body">@{Messages.DualChargeWarning.`If you select continue you understand that you may be charged twice if you do not contact your bank.`.show}</p>
+
+  @formWithCSRF(action = routes.YourBillController.yourBill) {
+      <div class="govuk-button-group">
+        @govukButton(Button(content = Text(Messages.continue.show), attributes = Map("id" -> "continue")))
+        <p class="govuk-body">@{Html{Messages.DualChargeWarning.`I do not want to set up a payment plan`("").show}}</p>
+      </div>
+ }
+
+}

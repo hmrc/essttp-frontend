@@ -42,7 +42,7 @@ class YourBillControllerSpec extends ItSpec {
   private val controller: YourBillController = app.injector.instanceOf[YourBillController]
 
   "GET /your-bill should" - {
-    "return you bill page for EPAYE for interest bearing charges" in {
+    "return your bill page for EPAYE for interest bearing charges" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Epaye.Bta)()
 
@@ -70,7 +70,7 @@ class YourBillControllerSpec extends ItSpec {
       tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£1,000 (includes interest added to date)"
     }
 
-    "return you bill page for EPAYE for non-interest bearing charges" in {
+    "return your bill page for EPAYE for non-interest bearing charges" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourneyWithNoInterestBearingCharges(testCrypto, Origins.Epaye.Bta)()
 
@@ -98,7 +98,7 @@ class YourBillControllerSpec extends ItSpec {
       tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£1,000"
     }
 
-    "return you bill page for VAT for interest bearing charges" in {
+    "return your bill page for VAT for interest bearing charges" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Vat.Bta)()
 
@@ -127,7 +127,7 @@ class YourBillControllerSpec extends ItSpec {
       tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£1,000 (includes interest added to date)"
     }
 
-    "return you bill page for VAT for non-interest bearing charges" in {
+    "return your bill page for VAT for non-interest bearing charges" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourneyWithNoInterestBearingCharges(testCrypto, Origins.Vat.Bta)()
 
@@ -156,7 +156,7 @@ class YourBillControllerSpec extends ItSpec {
       tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£1,000"
     }
 
-    "return you bill page for SA" in {
+    "return your bill page for SA" in {
       val origin = Origins.Sa.Bta
       val journeyJson = eligibleJsonWithChargeTypeAssessmentItems(
         chargeTypeAssessmentItemJson(

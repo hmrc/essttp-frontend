@@ -18,11 +18,11 @@ package views
 
 import play.api.data.FormError
 import views.html._
-import views.html.epaye.EPayeLanding
-import views.html.sa.{NotSaEnrolled, SaLanding}
-import views.html.epaye.ineligible.{Ineligible, NotEnrolled}
-import views.html.vat.{NotVatRegistered, VatLanding}
 import views.html.emailerrors._
+import views.html.epaye.EPayeLanding
+import views.html.epaye.ineligible.{Ineligible, NotEnrolled}
+import views.html.sa.{NotSaEnrolled, SaLanding}
+import views.html.vat.{NotVatRegistered, VatLanding}
 import views.partials.Partials
 
 import javax.inject.Inject
@@ -60,7 +60,8 @@ class Views @Inject() (
     val printSummaryPage:                 PrintSummaryPage,
     val missingInfoPage:                  MissingInformation,
     val timedOutPage:                     TimedOut,
-    val shuttered:                        shuttering.Shuttered
+    val shuttered:                        shuttering.Shuttered,
+    val youAlreadyHaveDirectDebit:        YouAlreadyHaveDirectDebit
 )
 
 object Views {

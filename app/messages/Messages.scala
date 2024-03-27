@@ -557,6 +557,54 @@ object Messages {
 
   }
 
+  object DualChargeWarning {
+
+    val `You already have a Direct Debit`: Message = Message(
+      english = "You already have a Direct Debit",
+      welsh   = "Mae eisoes gennych drefniant Debyd Uniongyrchol"
+    )
+
+    def `You already have a Direct Debit set up for...`(taxRegime: TaxRegime): Message = taxRegime match {
+      case TaxRegime.Epaye => Message(
+        english = "You already have a Direct Debit set up for Employers’ PAYE.",
+        welsh   = "Mae eisoes gennych drefniant Debyd Uniongyrchol er mwyn talu TWE y Cyflogwr."
+      )
+      case TaxRegime.Vat => Message(
+        english = "You already have a Direct Debit set up for VAT.",
+        welsh   = "Mae eisoes gennych drefniant Debyd Uniongyrchol er mwyn talu TAW."
+      )
+      case TaxRegime.Sa => throw new NotImplementedError("ddInProgress flag not relevant to SA charges")
+    }
+
+    def `If you set up a payment plan, the following charge.. could be collected twice.`(chargesInPlural: Boolean): Message =
+      if (chargesInPlural) {
+        Message(
+          english = "If you set up a payment plan, the following charges could be collected twice.",
+          welsh   = "Os ydych yn trefnu cynllun talu, mae’n bosibl y gall y taliadau hyn gael eu casglu ddwywaith."
+        )
+      } else {
+        Message(
+          english = "If you set up a payment plan, the following charge could be collected twice.",
+          welsh   = "Os ydych yn trefnu cynllun talu, mae’n bosibl y gall y taliad hwn gael ei gasglu ddwywaith."
+        )
+      }
+
+    val `Contact your bank to discuss your payment options before setting up a payment plan.`: Message = Message(
+      english = "Contact your bank to discuss your payment options before setting up a payment plan.",
+      welsh   = "Os dewiswch yr opsiwn i fynd yn eich blaen cyn cysylltu â’ch banc, rydych yn deall ei bod yn bosibl y gall taliadau gael eu casglu ddwywaith."
+    )
+
+    val `If you select continue you understand that you may be charged twice if you do not contact your bank.`: Message = Message(
+      english = "If you select ‘continue’ you understand that you may be charged twice if you do not contact your bank.",
+      welsh   = "Os dewiswch yr opsiwn i fynd yn eich blaen cyn cysylltu â’ch banc, rydych yn deall ei bod yn bosibl y gall taliadau gael eu casglu ddwywaith."
+    )
+
+    def `I do not want to set up a payment plan`(link: String): Message = Message(
+      english = s"""<a class="govuk-link" href="$link">I do not want to set up a payment plan</a>""",
+      welsh   = s"""<a class="govuk-link" href="$link">Nid wyf am drefnu cynllun talu</a>"""
+    )
+  }
+
   object EnrolmentMissing {
 
     val `Enrol for PAYE Online to use this service`: Message = Message(

@@ -256,7 +256,8 @@ object TdAll {
           dueDateNotReached             = false,
           isInterestBearingCharge       = chargeIsInterestBearingCharge.map(IsInterestBearingCharge(_)),
           useChargeReference            = chargeUseChargeReference.map(UseChargeReference(_)),
-          chargeBeforeMaxAccountingDate = chargeChargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_))
+          chargeBeforeMaxAccountingDate = chargeChargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_)),
+          ddInProgress                  = None //ddInProgress.map(DdInProgress(_))
         ))
       )),
       customerDetails                 = None,

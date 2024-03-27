@@ -54,6 +54,8 @@ GET    /already-have-a-plan-sa                              controllers.Ineligib
 GET    /bill-not-overdue-epaye                              controllers.IneligibleController.epayeNoDueDatesReachedPage
 GET    /bill-not-overdue-vat                                controllers.IneligibleController.vatNoDueDatesReachedPage
 
+GET    /you-already-have-a-direct-debit                     controllers.YourAlreadyHaveDirectDebitController.youAlreadyHaveDirectDebit
+
 GET    /your-bill                                           controllers.YourBillController.yourBill
 POST   /your-bill                                           controllers.YourBillController.yourBillSubmit
 
