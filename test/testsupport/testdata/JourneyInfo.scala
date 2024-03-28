@@ -32,6 +32,7 @@ object JourneyInfo {
       email:                              Option[String],
       maybeChargeIsInterestBearingCharge: Option[Boolean],
       maybeChargeUseChargeReference:      Option[Boolean],
+      maybeDdInProgress:                  Option[Boolean],
       eligibilityMinPlanLength:           Int,
       eligibilityMaxPlanLength:           Int
 
@@ -43,6 +44,7 @@ object JourneyInfo {
       email                              = email,
       maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge,
       maybeChargeUseChargeReference      = maybeChargeUseChargeReference,
+      maybeDdInProgress                  = maybeDdInProgress,
       eligibilityMinPlanLength           = eligibilityMinPlanLength,
       eligibilityMaxPlanLength           = eligibilityMaxPlanLength
     )
@@ -106,6 +108,7 @@ object JourneyInfo {
       etmpEmail:                          Option[String]  = Some(TdAll.etmpEmail),
       maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true),
       maybeChargeUseChargeReference:      Option[Boolean] = Some(true),
+      maybeDdInProgress:                  Option[Boolean] = None,
       eligibilityMinPlanLength:           Int             = 1,
       eligibilityMaxPlanLength:           Int             = 12
   ): List[JourneyInfoAsJson] =
@@ -116,6 +119,7 @@ object JourneyInfo {
       etmpEmail,
       maybeChargeIsInterestBearingCharge,
       maybeChargeUseChargeReference,
+      maybeDdInProgress,
       eligibilityMinPlanLength,
       eligibilityMaxPlanLength
     ) :: taxIdDetermined()

@@ -38,7 +38,7 @@
 @import requestSupport._
 
 @title= @{Messages.DualChargeWarning.`You already have a Direct Debit`.show}
-@chargesInPlural = @{overduePayments.payments.nonEmpty}
+@chargesInPlural = @{overduePayments.payments.size > 1}
 
 @layout(
   pageTitle = Some(title)
@@ -58,10 +58,10 @@
 
     <p class="govuk-body">@{Messages.DualChargeWarning.`If you select continue you understand that you may be charged twice if you do not contact your bank.`.show}</p>
 
-  @formWithCSRF(action = routes.YourBillController.yourBill) {
+  @formWithCSRF(action = routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment) {
       <div class="govuk-button-group">
         @govukButton(Button(content = Text(Messages.continue.show), attributes = Map("id" -> "continue")))
-        <p class="govuk-body">@{Html{Messages.DualChargeWarning.`I do not want to set up a payment plan`("").show}}</p>
+        <p class="govuk-body" id="link">@{Html{Messages.DualChargeWarning.`I do not want to set up a payment plan`("").show}}</p>
       </div>
  }
 

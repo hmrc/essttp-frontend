@@ -17,13 +17,14 @@
 package models
 
 import essttp.rootmodel.AmountInPence
-import essttp.rootmodel.ttp.IsInterestBearingCharge
+import essttp.rootmodel.ttp.{IsInterestBearingCharge, DdInProgress}
 import play.api.libs.json.{Format, Json}
 
 final case class OverduePayment(
     invoicePeriod:         InvoicePeriod,
     amount:                AmountInPence,
-    interestBearingCharge: Option[IsInterestBearingCharge]
+    interestBearingCharge: Option[IsInterestBearingCharge],
+    ddInProgress:          Option[DdInProgress]            = None
 )
 
 object OverduePayment {

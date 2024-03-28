@@ -13,16 +13,16 @@ GET    /epaye-payment-plan-continue                         controllers.LandingC
 GET    /vat-payment-plan                                    controllers.LandingController.vatLandingPage
 GET    /vat-payment-plan-continue                           controllers.LandingController.vatLandingPageContinue
 
-GET    /sa-payment-plan                                    controllers.LandingController.saLandingPage
-GET    /sa-payment-plan-continue                           controllers.LandingController.saLandingPageContinue
+GET    /sa-payment-plan                                     controllers.LandingController.saLandingPage
+GET    /sa-payment-plan-continue                            controllers.LandingController.saLandingPageContinue
 
 GET    /epaye/start                                         controllers.StartJourneyController.startDetachedEpayeJourney
 GET    /vat/start                                           controllers.StartJourneyController.startDetachedVatJourney
-GET    /sa/start                                           controllers.StartJourneyController.startDetachedSaJourney
+GET    /sa/start                                            controllers.StartJourneyController.startDetachedSaJourney
 
 GET    /govuk/epaye/start                                   controllers.StartJourneyController.startGovukEpayeJourney
 GET    /govuk/vat/start                                     controllers.StartJourneyController.startGovukVatJourney
-GET    /govuk/sa/start                                     controllers.StartJourneyController.startGovukSaJourney
+GET    /govuk/sa/start                                      controllers.StartJourneyController.startGovukSaJourney
 
 GET    /determine-taxId                                     controllers.DetermineTaxIdController.determineTaxId
 
@@ -54,10 +54,10 @@ GET    /already-have-a-plan-sa                              controllers.Ineligib
 GET    /bill-not-overdue-epaye                              controllers.IneligibleController.epayeNoDueDatesReachedPage
 GET    /bill-not-overdue-vat                                controllers.IneligibleController.vatNoDueDatesReachedPage
 
-GET    /you-already-have-a-direct-debit                     controllers.YourAlreadyHaveDirectDebitController.youAlreadyHaveDirectDebit
-
 GET    /your-bill                                           controllers.YourBillController.yourBill
 POST   /your-bill                                           controllers.YourBillController.yourBillSubmit
+GET    /you-already-have-a-direct-debit                     controllers.YourBillController.youAlreadyHaveDirectDebit
+POST   /you-already-have-a-direct-debit                     controllers.YourBillController.youAlreadyHaveDirectDebitSubmit
 
 GET    /can-you-make-an-upfront-payment                     controllers.UpfrontPaymentController.canYouMakeAnUpfrontPayment
 POST   /can-you-make-an-upfront-payment                     controllers.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit

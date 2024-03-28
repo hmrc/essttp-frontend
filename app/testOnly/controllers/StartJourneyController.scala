@@ -325,7 +325,7 @@ object StartJourneyController {
       isInterestBearingCharge       = form.isInterestBearingCharge.map(IsInterestBearingCharge(_)),
       useChargeReference            = form.useChargeReference.map(UseChargeReference(_)),
       chargeBeforeMaxAccountingDate = form.chargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_)),
-      ddInProgress                  = None //form.ddInProgress.map(DdInProgress(_))
+      ddInProgress                  = form.ddInProgress.map(DdInProgress(_))
     )
 
     val chargeTypeAssessments: List[ChargeTypeAssessment] = List(

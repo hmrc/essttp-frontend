@@ -591,7 +591,7 @@ object Messages {
 
     val `Contact your bank to discuss your payment options before setting up a payment plan.`: Message = Message(
       english = "Contact your bank to discuss your payment options before setting up a payment plan.",
-      welsh   = "Os dewiswch yr opsiwn i fynd yn eich blaen cyn cysylltu â’ch banc, rydych yn deall ei bod yn bosibl y gall taliadau gael eu casglu ddwywaith."
+      welsh   = "Dylech gysylltu â’ch banc i drafod eich opsiynau talu cyn i chi drefnu cynllun talu."
     )
 
     val `If you select continue you understand that you may be charged twice if you do not contact your bank.`: Message = Message(

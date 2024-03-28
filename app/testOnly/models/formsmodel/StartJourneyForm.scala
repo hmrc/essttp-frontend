@@ -44,6 +44,7 @@ final case class StartJourneyForm(
     isInterestBearingCharge:       Option[Boolean],
     useChargeReference:            Option[Boolean],
     chargeBeforeMaxAccountingDate: Option[Boolean],
+    ddInProgress:                  Option[Boolean],
     planMinLength:                 Int,
     planMaxLength:                 Int
 )
@@ -68,6 +69,7 @@ object StartJourneyForm {
         "isInterestBearingCharge" -> chargesOptionalFieldsMapping,
         "useChargeReference" -> chargesOptionalFieldsMapping,
         "chargeBeforeMaxAccountingDate" -> chargesOptionalFieldsMapping,
+        "ddInProgress" -> chargesOptionalFieldsMapping,
         "planMinLength" -> number,
         "planMaxLength" -> number
       )(StartJourneyForm.apply)(StartJourneyForm.unapply)
