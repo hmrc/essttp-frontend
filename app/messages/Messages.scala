@@ -1183,19 +1183,6 @@ object Messages {
       english = "how much you can afford to pay each month",
       welsh   = "faint y gallwch fforddio ei dalu bob mis"
     )
-
-    def `If you already have a Direct Debit for TAX_REGIME`(taxRegime: TaxRegime): Message = {
-      val (englishRegimeName, welshRegimeName) = taxRegime match {
-        case TaxRegime.Epaye => "Employers’ PAYE" -> "TWE y Cyflogwyr"
-        case TaxRegime.Vat   => "VAT" -> "TAW"
-        case TaxRegime.Sa    => throw new NotImplementedError()
-      }
-      Message(
-        english = s"If you already have a Direct Debit for $englishRegimeName, contact your bank to stop the next payment being collected. This will prevent you from being charged twice.",
-        welsh   = s"Os oes gennych Debyd Uniongyrchol ar gyfer $welshRegimeName eisoes, cysylltwch â’ch banc i atal y taliad nesaf rhag cael ei gasglu. Bydd hyn yn eich atal rhag cael tâl wedi codi arnoch ddwywaith."
-      )
-    }
-
   }
 
   object AboutYourBankAccount {
