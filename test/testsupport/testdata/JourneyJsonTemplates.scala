@@ -47,6 +47,12 @@ object JourneyJsonTemplates {
     origin
   )
 
+  def `Eligibility Checked - Eligible- ddInProgress`(origin: Origin = Origins.Epaye.Bta)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.eligibilityCheckedEligible,
+    journeyInfo = JourneyInfo.eligibilityCheckedEligible(origin.taxRegime, encrypter, maybeDdInProgress = Some(true)),
+    origin
+  )
+
   def `Eligibility Checked - Ineligible - HasRlsOnAddress`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleHasRls(origin.taxRegime, encrypter),

@@ -106,6 +106,7 @@ object TdJsonBodies {
       email:                              Option[String]   = Some(TdAll.etmpEmail),
       maybeChargeIsInterestBearingCharge: Option[Boolean]  = None,
       maybeChargeUseChargeReference:      Option[Boolean]  = None,
+      maybeDdInProgress:                  Option[Boolean]  = None,
       eligibilityMinPlanLength:           Int              = 1,
       eligibilityMaxPlanLength:           Int              = 12
   ): JourneyInfoAsJson = {
@@ -117,6 +118,11 @@ object TdJsonBodies {
 
     val useChargeReferenceValue = maybeChargeUseChargeReference match {
       case Some(bool) => s""""useChargeReference":${bool.toString},"""
+      case None       => ""
+    }
+
+    val ddInProgress = maybeDdInProgress match {
+      case Some(bool) => s""""ddInProgress":${bool.toString},"""
       case None       => ""
     }
 
@@ -172,10 +178,10 @@ object TdJsonBodies {
       |        "accruedInterest" : 1597,
       |        "ineligibleChargeType": false,
       |        "chargeOverMaxDebtAge": false,
-
       |         "dueDateNotReached": false,
       |         $isInterestBearingChargeValue
       |         $useChargeReferenceValue
+      |         $ddInProgress
       |         "locks": [ {
       |            "lockType": "Payment",
       |            "lockReason": "Risk/Fraud",
@@ -202,6 +208,7 @@ object TdJsonBodies {
       |         "dueDateNotReached": false,
       |         $isInterestBearingChargeValue
       |         $useChargeReferenceValue
+      |         $ddInProgress
       |         "locks": [ {
       |            "lockType": "Payment",
       |            "lockReason": "Risk/Fraud",

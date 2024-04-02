@@ -21,8 +21,8 @@ import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import essttp.journey.model.Journey
 import essttp.rootmodel.AmountInPence
-import essttp.rootmodel.ttp.IsInterestBearingCharge
 import essttp.rootmodel.ttp.eligibility.{ChargeTypeAssessment, Charges, EligibilityCheckResult}
+import essttp.rootmodel.ttp.{DdInProgress, IsInterestBearingCharge}
 import models.{InvoicePeriod, OverDuePayments, OverduePayment}
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -57,7 +57,30 @@ class YourBillController @Inject() (
       )
     )
 
-  val yourBillSubmit: Action[AnyContent] = as.eligibleJourneyAction { _ =>
+  val yourBillSubmit: Action[AnyContent] = as.eligibleJourneyAction { eligibilityRequest =>
+    if (YourBillController.hasAnyChargesWithDdInProgress(eligibilityRequest.eligibilityCheckResult)) {
+      Redirect(routes.YourBillController.youAlreadyHaveDirectDebit)
+    } else {
+      Redirect(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment)
+    }
+  }
+
+  val youAlreadyHaveDirectDebit: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    request.journey match {
+      case j: Journey.BeforeEligibilityChecked => logErrorAndRouteToDefaultPage(j)
+      case j: Journey.AfterEligibilityChecked  => finalStateCheck(j, displayYouAlreadyHaveDirectDebitPage(j))
+    }
+  }
+
+  private def displayYouAlreadyHaveDirectDebitPage(journey: Journey.AfterEligibilityChecked)(implicit request: Request[_]): Result =
+    Ok(
+      views.youAlreadyHaveDirectDebit(
+        YourBillController.overDuePaymentsWithDdInProgress(journey.eligibilityCheckResult),
+        journey.taxRegime
+      )
+    )
+
+  val youAlreadyHaveDirectDebitSubmit: Action[AnyContent] = as.eligibleJourneyAction { _ =>
     Redirect(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment)
   }
 
@@ -90,6 +113,14 @@ object YourBillController {
       charges.isInterestBearingCharge
     }
 
+  private def ddInProgress(ass: ChargeTypeAssessment): Option[DdInProgress] =
+    ass.charges.headOption.flatMap { charges: Charges =>
+      charges.ddInProgress
+    }
+
+  private def hasAnyChargesWithDdInProgress(eligibilityResult: EligibilityCheckResult) =
+    eligibilityResult.chargeTypeAssessment.map(overDuePaymentOf).exists(_.ddInProgress.contains(DdInProgress(true)))
+
   private val taxMonthStartDay: Int = 6
 
   def monthNumberInTaxYear(date: LocalDate): Int = {
@@ -101,11 +132,18 @@ object YourBillController {
   }
 
   private def overDuePaymentOf(ass: ChargeTypeAssessment): OverduePayment =
-    OverduePayment(invoicePeriod(ass), ass.debtTotalAmount.value, chargeBearsInterest(ass))
+    OverduePayment(invoicePeriod(ass), ass.debtTotalAmount.value, chargeBearsInterest(ass), ddInProgress(ass))
+
+  private def qualifyingDebt(eligibilityResult: EligibilityCheckResult): AmountInPence =
+    eligibilityResult.chargeTypeAssessment.map(_.debtTotalAmount.value).fold(AmountInPence.zero)(_ + _)
 
   private def overDuePayments(eligibilityResult: EligibilityCheckResult): OverDuePayments = {
-    val qualifyingDebt: AmountInPence = eligibilityResult.chargeTypeAssessment.map(_.debtTotalAmount.value).fold(AmountInPence.zero)(_ + _)
     val payments = eligibilityResult.chargeTypeAssessment.map(overDuePaymentOf)
-    OverDuePayments(qualifyingDebt, payments)
+    OverDuePayments(qualifyingDebt(eligibilityResult), payments)
+  }
+
+  private def overDuePaymentsWithDdInProgress(eligibilityResult: EligibilityCheckResult): OverDuePayments = {
+    val paymentsWithDdInProgress = eligibilityResult.chargeTypeAssessment.map(overDuePaymentOf).filter(_.ddInProgress.contains(DdInProgress(true)))
+    OverDuePayments(qualifyingDebt(eligibilityResult), paymentsWithDdInProgress)
   }
 }

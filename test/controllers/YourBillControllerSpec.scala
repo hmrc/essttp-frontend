@@ -18,6 +18,7 @@ package controllers
 
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.TaxRegime
+import models.Languages
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.http.Status
@@ -42,7 +43,7 @@ class YourBillControllerSpec extends ItSpec {
   private val controller: YourBillController = app.injector.instanceOf[YourBillController]
 
   "GET /your-bill should" - {
-    "return you bill page for EPAYE for interest bearing charges" in {
+    "return your bill page for EPAYE for interest bearing charges" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Epaye.Bta)()
 
@@ -70,7 +71,7 @@ class YourBillControllerSpec extends ItSpec {
       tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£1,000 (includes interest added to date)"
     }
 
-    "return you bill page for EPAYE for non-interest bearing charges" in {
+    "return your bill page for EPAYE for non-interest bearing charges" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourneyWithNoInterestBearingCharges(testCrypto, Origins.Epaye.Bta)()
 
@@ -98,7 +99,7 @@ class YourBillControllerSpec extends ItSpec {
       tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£1,000"
     }
 
-    "return you bill page for VAT for interest bearing charges" in {
+    "return your bill page for VAT for interest bearing charges" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Vat.Bta)()
 
@@ -127,7 +128,7 @@ class YourBillControllerSpec extends ItSpec {
       tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£1,000 (includes interest added to date)"
     }
 
-    "return you bill page for VAT for non-interest bearing charges" in {
+    "return your bill page for VAT for non-interest bearing charges" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourneyWithNoInterestBearingCharges(testCrypto, Origins.Vat.Bta)()
 
@@ -156,7 +157,7 @@ class YourBillControllerSpec extends ItSpec {
       tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£1,000"
     }
 
-    "return you bill page for SA" in {
+    "return your bill page for SA" in {
       val origin = Origins.Sa.Bta
       val journeyJson = eligibleJsonWithChargeTypeAssessmentItems(
         chargeTypeAssessmentItemJson(
@@ -210,6 +211,141 @@ class YourBillControllerSpec extends ItSpec {
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
       val result = controller.yourBillSubmit(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.canYouMakeAnUpfrontPaymentUrl)
+    }
+
+    "redirect to You already have a direct debit page when there is a ddInProgress" in {
+      stubCommonActions()
+      EssttpBackend.EligibilityCheck.findJourneyWithDdInProgress(testCrypto, Origins.Epaye.Bta)()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+      val result = controller.yourBillSubmit(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.youAlreadyHaveDirectDebit)
+    }
+  }
+
+  "GET /you-already-have-a-direct-debit should" - {
+    "return You already have a direct debit page for charges with ddInProgress" in {
+      stubCommonActions()
+      EssttpBackend.EligibilityCheck.findJourneyWithDdInProgress(testCrypto, Origins.Epaye.Bta)()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+      val result = controller.youAlreadyHaveDirectDebit(fakeRequest)
+      val pageContent: String = contentAsString(result)
+      val doc: Document = Jsoup.parse(pageContent)
+
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1              = "You already have a Direct Debit",
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl       = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url)
+      )
+
+      ContentAssertions.assertListOfContent(
+        elements = doc.select(".govuk-body")
+      )(
+          expectedContent = List(
+            "You already have a Direct Debit set up for Employers’ PAYE.",
+            "If you set up a payment plan, the following charges could be collected twice.",
+            "If you select ‘continue’ you understand that you may be charged twice if you do not contact your bank."
+          )
+        )
+
+      ContentAssertions.assertListOfContent(
+        elements = doc.select(".govuk-warning-text__text")
+      )(
+          expectedContent = List(
+            "Warning Contact your bank to discuss your payment options before setting up a payment plan."
+          )
+        )
+
+      ContentAssertions.assertListOfContent(
+        elements = doc.select("#link")
+      )(
+          expectedContent = List(
+            "I do not want to set up a payment plan"
+          )
+        )
+
+      val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
+      tableRows.size shouldBe 2
+
+      tableRows(0).select(".govuk-summary-list__key").text() shouldBe "13 Jul 2020 to 14 Jul 2020 Bill due 7 February 2017"
+      tableRows(0).select(".govuk-summary-list__value").text() shouldBe "£2,000 (includes interest added to date)"
+
+      tableRows(1).select(".govuk-summary-list__key").text() shouldBe "13 Aug 2020 to 14 Aug 2020 Bill due 7 March 2017"
+      tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£1,000 (includes interest added to date)"
+    }
+
+    "return You already have a direct debit page for charges with ddInProgress in Welsh" in {
+      stubCommonActions()
+      EssttpBackend.EligibilityCheck.findJourneyWithDdInProgress(testCrypto, Origins.Epaye.Bta)()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId").withLangWelsh()
+
+      val result = controller.youAlreadyHaveDirectDebit(fakeRequest)
+      val pageContent: String = contentAsString(result)
+      val doc: Document = Jsoup.parse(pageContent)
+
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1              = "Mae eisoes gennych drefniant Debyd Uniongyrchol",
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl       = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url),
+        language                = Languages.Welsh
+      )
+
+      ContentAssertions.assertListOfContent(
+        elements = doc.select(".govuk-body")
+      )(
+          expectedContent = List(
+            "Mae eisoes gennych drefniant Debyd Uniongyrchol er mwyn talu TWE y Cyflogwr.",
+            "Os ydych yn trefnu cynllun talu, mae’n bosibl y gall y taliadau hyn gael eu casglu ddwywaith.",
+            "Os dewiswch yr opsiwn i fynd yn eich blaen cyn cysylltu â’ch banc, rydych yn deall ei bod yn bosibl y gall taliadau gael eu casglu ddwywaith."
+          )
+        )
+
+      ContentAssertions.assertListOfContent(
+        elements = doc.select(".govuk-warning-text__text")
+      )(
+          expectedContent = List(
+            "Rhybudd Dylech gysylltu â’ch banc i drafod eich opsiynau talu cyn i chi drefnu cynllun talu."
+          )
+        )
+
+      ContentAssertions.assertListOfContent(
+        elements = doc.select("#link")
+      )(
+          expectedContent = List(
+            "Nid wyf am drefnu cynllun talu"
+          )
+        )
+
+      val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
+      tableRows.size shouldBe 2
+
+      tableRows(0).select(".govuk-summary-list__key").text() shouldBe "13 Gorff 2020 i 14 Gorff 2020 Bil yn ddyledus 7 Chwefror 2017"
+      tableRows(0).select(".govuk-summary-list__value").text() shouldBe "£2,000 (yn cynnwys llog a ychwanegwyd hyd yn hyn)"
+
+      tableRows(1).select(".govuk-summary-list__key").text() shouldBe "13 Awst 2020 i 14 Awst 2020 Bil yn ddyledus 7 Mawrth 2017"
+      tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£1,000 (yn cynnwys llog a ychwanegwyd hyd yn hyn)"
+    }
+  }
+
+  "POST /you-already-have-a-direct-debit should" - {
+    "redirect to can you make an upfront payment question page" in {
+      stubCommonActions()
+      EssttpBackend.EligibilityCheck.findJourneyWithDdInProgress(testCrypto, Origins.Vat.Bta)()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+      val result = controller.youAlreadyHaveDirectDebitSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.canYouMakeAnUpfrontPaymentUrl)
     }

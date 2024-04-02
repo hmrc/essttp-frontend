@@ -219,7 +219,8 @@ object TdAll {
       regimeDigitalCorrespondence:         Option[RegimeDigitalCorrespondence],
       chargeIsInterestBearingCharge:       Option[Boolean]                     = None,
       chargeUseChargeReference:            Option[Boolean]                     = None,
-      chargeChargeBeforeMaxAccountingDate: Option[Boolean]                     = None
+      chargeChargeBeforeMaxAccountingDate: Option[Boolean]                     = None,
+      ddInProgress:                        Option[Boolean]                     = None
   ): EligibilityCheckResult = {
 
     EligibilityCheckResult(
@@ -256,7 +257,8 @@ object TdAll {
           dueDateNotReached             = false,
           isInterestBearingCharge       = chargeIsInterestBearingCharge.map(IsInterestBearingCharge(_)),
           useChargeReference            = chargeUseChargeReference.map(UseChargeReference(_)),
-          chargeBeforeMaxAccountingDate = chargeChargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_))
+          chargeBeforeMaxAccountingDate = chargeChargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_)),
+          ddInProgress                  = ddInProgress.map(DdInProgress(_))
         ))
       )),
       customerDetails                 = None,
