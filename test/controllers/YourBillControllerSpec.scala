@@ -260,7 +260,7 @@ class YourBillControllerSpec extends ItSpec {
         elements = doc.select(".govuk-warning-text__text")
       )(
           expectedContent = List(
-            "Contact your bank to discuss your payment options before setting up a payment plan."
+            "Warning Contact your bank to discuss your payment options before setting up a payment plan."
           )
         )
 
@@ -315,7 +315,7 @@ class YourBillControllerSpec extends ItSpec {
         elements = doc.select(".govuk-warning-text__text")
       )(
           expectedContent = List(
-            "Dylech gysylltu â’ch banc i drafod eich opsiynau talu cyn i chi drefnu cynllun talu."
+            "Rhybudd Dylech gysylltu â’ch banc i drafod eich opsiynau talu cyn i chi drefnu cynllun talu."
           )
         )
 
