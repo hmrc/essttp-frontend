@@ -28,6 +28,7 @@
 @this(
   layout: Layout,
   govukButton: GovukButton,
+  govukWarningText: GovukWarningText,
   formWithCSRF: FormWithCSRF,
   requestSupport: RequestSupport,
   overduePaymentRow: OverduePaymentRow
@@ -51,10 +52,11 @@
     @overduePayments.payments.sortBy(overduePayment => overduePayment.invoicePeriod.dueDate).map(payment => overduePaymentRow(payment, taxRegime))
   </dl>
 
-    <div class="govuk-warning-text">
-        <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
-        <strong class="govuk-warning-text__text">@{Messages.DualChargeWarning.`Contact your bank to discuss your payment options before setting up a payment plan.`.show}</strong>
-    </div>
+    @govukWarningText(
+        WarningText(
+            content = HtmlContent{Messages.DualChargeWarning.`Contact your bank to discuss your payment options before setting up a payment plan.`.show}
+        )
+    )
 
     <p class="govuk-body">@{Messages.DualChargeWarning.`If you select continue you understand that you may be charged twice if you do not contact your bank.`.show}</p>
 
