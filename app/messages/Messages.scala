@@ -555,6 +555,16 @@ object Messages {
       welsh   = "Efallai y byddwch yn gallu trefnu cynllun talu unwaith y bydd y dyddiad cau wedi mynd heibio i dalu’ch bil."
     )
 
+    val `You have chosen not to set up an Employers' PAYE payment plan online.`: Message = Message(
+      english = "You have chosen not to set up an Employers’ PAYE payment plan online.",
+      welsh   = "Rydych wedi dewis peidio â threfnu cynllun talu TWE y Cyflogwr ar-lein."
+    )
+
+    val `You have chosen not to set up a VAT payment plan online.`: Message = Message(
+      english = "You have chosen not to set up a VAT payment plan online.",
+      welsh   = "Rydych wedi dewis peidio â threfnu cynllun talu TAW ar-lein."
+    )
+
   }
 
   object DualChargeWarning {
@@ -600,7 +610,7 @@ object Messages {
     )
 
     def `I do not want to set up a payment plan`(link: String): Message = Message(
-      english = s"""<a class="govuk-link" href="$link">I do not want to set up a payment plan</a>""",
+      english = s"""<a class="govuk-link" id="kickout" href="$link">I do not want to set up a payment plan</a>""",
       welsh   = s"""<a class="govuk-link" href="$link">Nid wyf am drefnu cynllun talu</a>"""
     )
   }

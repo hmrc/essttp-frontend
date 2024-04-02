@@ -175,4 +175,21 @@ class IneligibleController @Inject() (
     case SjRequest.Sa.Empty()                 => s"${appConfig.Urls.enrolForSaUrl}"
   }
 
+  private def genericYouHaveChosenNotToSetUpPage(implicit request: AuthenticatedJourneyRequest[AnyContent]): Result =
+    Ok(
+      views.partials.ineligibleTemplatePage(
+        Messages.NotEligible.`Call us about a payment plan`,
+        views.partials.youAlreadyHaveDirectDebitPartial(request.journey.taxRegime),
+        hasBackLink = true
+      )
+    )
+
+  val epayeYouHaveChosenNotToSetUpPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    genericYouHaveChosenNotToSetUpPage
+  }
+
+  val vatYouHaveChosenNotToSetUpPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    genericYouHaveChosenNotToSetUpPage
+  }
+
 }
