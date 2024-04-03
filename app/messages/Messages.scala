@@ -611,7 +611,7 @@ object Messages {
 
     def `I do not want to set up a payment plan`(link: String): Message = Message(
       english = s"""<a class="govuk-link" id="kickout" href="$link">I do not want to set up a payment plan</a>""",
-      welsh   = s"""<a class="govuk-link" href="$link">Nid wyf am drefnu cynllun talu</a>"""
+      welsh   = s"""<a class="govuk-link" id="kickout" href="$link">Nid wyf am drefnu cynllun talu</a>"""
     )
   }
 
