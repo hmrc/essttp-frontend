@@ -272,6 +272,9 @@ class YourBillControllerSpec extends ItSpec {
           )
         )
 
+      val backLink = doc.select("#kickout")
+      backLink.attr("href") shouldBe routes.IneligibleController.epayeYouHaveChosenNotToSetUpPage.url
+
       val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
       tableRows.size shouldBe 2
 

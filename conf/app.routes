@@ -53,6 +53,8 @@ GET    /already-have-a-payment-plan-vat                     controllers.Ineligib
 GET    /already-have-a-plan-sa                              controllers.IneligibleController.saAlreadyHaveAPaymentPlanPage
 GET    /bill-not-overdue-epaye                              controllers.IneligibleController.epayeNoDueDatesReachedPage
 GET    /bill-not-overdue-vat                                controllers.IneligibleController.vatNoDueDatesReachedPage
+GET    /call-us-already-have-direct-debit-epaye             controllers.IneligibleController.epayeYouHaveChosenNotToSetUpPage
+GET    /call-us-already-have-direct-debit-vat               controllers.IneligibleController.vatYouHaveChosenNotToSetUpPage
 
 GET    /your-bill                                           controllers.YourBillController.yourBill
 POST   /your-bill                                           controllers.YourBillController.yourBillSubmit

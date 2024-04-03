@@ -14,10 +14,10 @@
  * limitations under the License.
  *@
 
-@import requests.RequestSupport
-@import play.twirl.api.Html
-@import messages.Message
 @import actionsmodel.AuthenticatedJourneyRequest
+@import messages.Message
+@import play.twirl.api.Html
+@import requests.RequestSupport
 @import views.html.partials.CommonIneligibilityPartial
 
 @this(
@@ -30,12 +30,13 @@
   pageh1: Message,
   leadingContent: Html,
   showCallPreparationTips: Boolean = true,
-  showFullListPreparationTips: Boolean = true
+  showFullListPreparationTips: Boolean = true,
+  hasBackLink: Boolean = false
 )(implicit request: AuthenticatedJourneyRequest[_])
 
 @import requestSupport._
 
-@layout(pageTitle = Some(pageh1.show), showBackLink = false) {
+@layout(pageTitle = Some(pageh1.show), showBackLink = hasBackLink) {
     <h1 class="govuk-heading-xl">@{pageh1.show}</h1>
     @leadingContent
 

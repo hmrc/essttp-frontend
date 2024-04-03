@@ -40,6 +40,13 @@
 
 @title= @{Messages.DualChargeWarning.`You already have a Direct Debit`.show}
 @chargesInPlural = @{overduePayments.payments.size > 1}
+@linkToKickoutPage = @{
+    taxRegime match {
+        case TaxRegime.Epaye => routes.IneligibleController.epayeYouHaveChosenNotToSetUpPage.url
+        case TaxRegime.Vat => routes.IneligibleController.vatYouHaveChosenNotToSetUpPage.url
+        case TaxRegime.Sa => throw new NotImplementedError("SA does not receive ddInProgress flag")
+    }
+}
 
 @layout(
   pageTitle = Some(title)
@@ -63,7 +70,7 @@
   @formWithCSRF(action = routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment) {
       <div class="govuk-button-group">
         @govukButton(Button(content = Text(Messages.continue.show), attributes = Map("id" -> "continue")))
-        <p class="govuk-body" id="link">@{Html{Messages.DualChargeWarning.`I do not want to set up a payment plan`("").show}}</p>
+        <p class="govuk-body" id="link">@{Html{Messages.DualChargeWarning.`I do not want to set up a payment plan`(linkToKickoutPage).show}}</p>
       </div>
  }
 
