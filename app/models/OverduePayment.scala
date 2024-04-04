@@ -24,7 +24,7 @@ final case class OverduePayment(
     invoicePeriod:         InvoicePeriod,
     amount:                AmountInPence,
     interestBearingCharge: Option[IsInterestBearingCharge],
-    ddInProgress:          Option[DdInProgress]            = None
+    ddInProgress:          List[DdInProgress]              = List.empty
 )
 
 object OverduePayment {

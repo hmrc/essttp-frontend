@@ -113,8 +113,8 @@ object YourBillController {
       charges.isInterestBearingCharge
     }
 
-  private def ddInProgress(ass: ChargeTypeAssessment): Option[DdInProgress] =
-    ass.charges.headOption.flatMap { charges: Charges =>
+  private def ddInProgress(ass: ChargeTypeAssessment): List[DdInProgress] =
+    ass.charges.flatMap { charges: Charges =>
       charges.ddInProgress
     }
 
