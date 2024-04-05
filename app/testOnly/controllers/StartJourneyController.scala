@@ -341,25 +341,26 @@ object StartJourneyController {
     val containsError: EligibilityError => Boolean = (ee: EligibilityError) => form.eligibilityErrors.contains(ee)
     val eligibilityRules: EligibilityRules = {
       EligibilityRules(
-        hasRlsOnAddress                   = containsError(HasRlsOnAddress),
-        markedAsInsolvent                 = containsError(MarkedAsInsolvent),
-        isLessThanMinDebtAllowance        = containsError(IsLessThanMinDebtAllowance),
-        isMoreThanMaxDebtAllowance        = containsError(IsMoreThanMaxDebtAllowance),
-        disallowedChargeLockTypes         = containsError(EligibilityErrors.DisallowedChargeLockTypes),
-        existingTTP                       = containsError(ExistingTtp),
-        chargesOverMaxDebtAge             = Some(containsError(ChargesOverMaxDebtAge)),
-        ineligibleChargeTypes             = containsError(IneligibleChargeTypes),
-        missingFiledReturns               = containsError(MissingFiledReturns),
-        hasInvalidInterestSignals         = Some(containsError(HasInvalidInterestSignals)),
-        hasInvalidInterestSignalsCESA     = Some(containsError(HasInvalidInterestSignalsCESA)),
-        dmSpecialOfficeProcessingRequired = Some(containsError(DmSpecialOfficeProcessingRequired)),
-        noDueDatesReached                 = containsError(NoDueDatesReached),
-        cannotFindLockReason              = Some(containsError(CannotFindLockReason)),
-        creditsNotAllowed                 = Some(containsError(CreditsNotAllowed)),
-        isMoreThanMaxPaymentReference     = Some(containsError(IsMoreThanMaxPaymentReference)),
-        chargesBeforeMaxAccountingDate    = Some(containsError(ChargesBeforeMaxAccountingDate)),
-        hasDisguisedRemuneration          = Some(containsError(HasDisguisedRemuneration)),
-        hasCapacitor                      = Some(containsError(HasCapacitor))
+        hasRlsOnAddress                       = containsError(HasRlsOnAddress),
+        markedAsInsolvent                     = containsError(MarkedAsInsolvent),
+        isLessThanMinDebtAllowance            = containsError(IsLessThanMinDebtAllowance),
+        isMoreThanMaxDebtAllowance            = containsError(IsMoreThanMaxDebtAllowance),
+        disallowedChargeLockTypes             = containsError(EligibilityErrors.DisallowedChargeLockTypes),
+        existingTTP                           = containsError(ExistingTtp),
+        chargesOverMaxDebtAge                 = Some(containsError(ChargesOverMaxDebtAge)),
+        ineligibleChargeTypes                 = containsError(IneligibleChargeTypes),
+        missingFiledReturns                   = containsError(MissingFiledReturns),
+        hasInvalidInterestSignals             = Some(containsError(HasInvalidInterestSignals)),
+        hasInvalidInterestSignalsCESA         = Some(containsError(HasInvalidInterestSignalsCESA)),
+        dmSpecialOfficeProcessingRequired     = Some(containsError(DmSpecialOfficeProcessingRequired)),
+        noDueDatesReached                     = containsError(NoDueDatesReached),
+        cannotFindLockReason                  = Some(containsError(CannotFindLockReason)),
+        creditsNotAllowed                     = Some(containsError(CreditsNotAllowed)),
+        isMoreThanMaxPaymentReference         = Some(containsError(IsMoreThanMaxPaymentReference)),
+        chargesBeforeMaxAccountingDate        = Some(containsError(ChargesBeforeMaxAccountingDate)),
+        hasDisguisedRemuneration              = Some(containsError(HasDisguisedRemuneration)),
+        hasCapacitor                          = Some(containsError(HasCapacitor)),
+        dmSpecialOfficeProcessingRequiredCDCS = Some(containsError(DmSpecialOfficeProcessingRequiredCDCS))
       )
     }
     EligibilityCheckResult(
