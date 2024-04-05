@@ -84,6 +84,7 @@ object TtpJsonResponses {
        |  ${optionalEligibilityResponsesJson(eligibilityRules.chargesOverMaxDebtAge, "chargesOverMaxDebtAge")}
        |  ${optionalEligibilityResponsesJson(eligibilityRules.hasDisguisedRemuneration, "hasDisguisedRemuneration")}
        |  ${optionalEligibilityResponsesJson(eligibilityRules.hasCapacitor, "hasCapacitor")}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.dmSpecialOfficeProcessingRequiredCDCS, "dmSpecialOfficeProcessingRequiredCDCS")}
        |  },
        |  "chargeTypeAssessment" : [ {
        |    "taxPeriodFrom" : "2020-08-13",

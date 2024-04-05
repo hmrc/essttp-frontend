@@ -101,25 +101,26 @@ object TdAll {
   val eligibleEligibilityPass: EligibilityPass = EligibilityPass(true)
   val notEligibleEligibilityPass: EligibilityPass = eligibleEligibilityPass.copy(value = false)
   val eligibleEligibilityRules: EligibilityRules = EligibilityRules(
-    hasRlsOnAddress                   = false,
-    markedAsInsolvent                 = false,
-    isLessThanMinDebtAllowance        = false,
-    isMoreThanMaxDebtAllowance        = false,
-    disallowedChargeLockTypes         = false,
-    existingTTP                       = false,
-    chargesOverMaxDebtAge             = None,
-    ineligibleChargeTypes             = false,
-    missingFiledReturns               = false,
-    hasInvalidInterestSignals         = None,
-    hasInvalidInterestSignalsCESA     = None,
-    dmSpecialOfficeProcessingRequired = None,
-    noDueDatesReached                 = false,
-    cannotFindLockReason              = None,
-    creditsNotAllowed                 = None,
-    isMoreThanMaxPaymentReference     = None,
-    chargesBeforeMaxAccountingDate    = None,
-    hasDisguisedRemuneration          = None,
-    hasCapacitor                      = None
+    hasRlsOnAddress                       = false,
+    markedAsInsolvent                     = false,
+    isLessThanMinDebtAllowance            = false,
+    isMoreThanMaxDebtAllowance            = false,
+    disallowedChargeLockTypes             = false,
+    existingTTP                           = false,
+    chargesOverMaxDebtAge                 = None,
+    ineligibleChargeTypes                 = false,
+    missingFiledReturns                   = false,
+    hasInvalidInterestSignals             = None,
+    hasInvalidInterestSignalsCESA         = None,
+    dmSpecialOfficeProcessingRequired     = None,
+    noDueDatesReached                     = false,
+    cannotFindLockReason                  = None,
+    creditsNotAllowed                     = None,
+    isMoreThanMaxPaymentReference         = None,
+    chargesBeforeMaxAccountingDate        = None,
+    hasDisguisedRemuneration              = None,
+    hasCapacitor                          = None,
+    dmSpecialOfficeProcessingRequiredCDCS = None
   )
   val notEligibleHasRlsOnAddress: EligibilityRules = eligibleEligibilityRules.copy(hasRlsOnAddress = true)
   val notEligibleMarkedAsInsolvent: EligibilityRules = eligibleEligibilityRules.copy(markedAsInsolvent = true)
@@ -141,6 +142,7 @@ object TdAll {
   val notEligibleMultipleReasons: EligibilityRules = eligibleEligibilityRules.copy(missingFiledReturns = true).copy(hasRlsOnAddress = true)
   val notEligibleHasDisguisedRemuneration: EligibilityRules = eligibleEligibilityRules.copy(hasDisguisedRemuneration = Some(true))
   val notEligibleHasCapacitor: EligibilityRules = eligibleEligibilityRules.copy(hasCapacitor = Some(true))
+  val notEligibleDmSpecialOfficeProcessingRequiredCDCS: EligibilityRules = eligibleEligibilityRules.copy(dmSpecialOfficeProcessingRequiredCDCS = Some(true))
 
   val callEligibilityApiRequestEpaye: CallEligibilityApiRequest = CallEligibilityApiRequest(
     channelIdentifier         = "eSSTTP",

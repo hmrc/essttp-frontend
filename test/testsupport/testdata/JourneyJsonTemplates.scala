@@ -173,6 +173,12 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
+  def `Eligibility Checked - Ineligible - DmSpecialOfficeProcessingRequiredCDCS`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.eligibilityCheckedIneligible,
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleDmSpecialOfficeProcessingRequiredCDCS(origin.taxRegime, encrypter),
+    origin      = origin
+  )
+
   def `Eligibility Checked - Ineligible - MultipleReasons`(origin: Origin = Origins.Epaye.Bta)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMultipleReasons(origin.taxRegime, encrypter),
