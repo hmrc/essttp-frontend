@@ -171,7 +171,29 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       ("HasDisguisedRemuneration - SA", TdAll.notEligibleHasDisguisedRemuneration, "hasDisguisedRemuneration", PageUrls.saNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasDisguisedRemuneration`(Origins.Sa.Bta), Origins.Sa.Bta),
       ("HasCapacitor - SA", TdAll.notEligibleHasCapacitor, "hasCapacitor", PageUrls.saNotEligibleUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasCapacitor`(Origins.Sa.Bta), Origins.Sa.Bta)
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasCapacitor`(Origins.Sa.Bta), Origins.Sa.Bta),
+
+      ("DmSpecialOfficeProcessingRequiredCDCS - PAYE",
+        TdAll.notEligibleDmSpecialOfficeProcessingRequiredCDCS,
+        "dmSpecialOfficeProcessingRequiredCDCS",
+        PageUrls.payeNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - DmSpecialOfficeProcessingRequiredCDCS`(Origins.Epaye.Bta),
+        Origins.Epaye.Bta
+      ),
+      ("DmSpecialOfficeProcessingRequiredCDCS - VAT",
+        TdAll.notEligibleDmSpecialOfficeProcessingRequiredCDCS,
+        "dmSpecialOfficeProcessingRequiredCDCS",
+        PageUrls.vatNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - DmSpecialOfficeProcessingRequiredCDCS`(Origins.Vat.Bta),
+        Origins.Vat.Bta
+      ),
+      ("DmSpecialOfficeProcessingRequiredCDCS - SA",
+        TdAll.notEligibleDmSpecialOfficeProcessingRequiredCDCS,
+        "dmSpecialOfficeProcessingRequiredCDCS",
+        PageUrls.saNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - DmSpecialOfficeProcessingRequiredCDCS`(Origins.Sa.Bta),
+        Origins.Sa.Bta
+      )
     )) {
       (sf: String, eligibilityRules: EligibilityRules, auditIneligibilityReason: String, expectedRedirect: String, updatedJourneyJson: String, origin: Origin) =>
         {
@@ -246,7 +268,9 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
         ("NoDueDatesReached - EPAYE", TdAll.notEligibleNoDueDatesReached.copy(isLessThanMinDebtAllowance = true), PageUrls.payeNoDueDatesReachedUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Epaye.Bta), Origins.Epaye.Bta),
         ("NoDueDatesReached - VAT", TdAll.notEligibleNoDueDatesReached.copy(isLessThanMinDebtAllowance = true), PageUrls.vatNoDueDatesReachedUrl,
-          JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Vat.Bta), Origins.Vat.Bta)
+          JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Vat.Bta), Origins.Vat.Bta),
+        ("NoDueDatesReached - SA", TdAll.notEligibleNoDueDatesReached.copy(isLessThanMinDebtAllowance = true), PageUrls.saNotEligibleUrl,
+          JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Sa.Bta), Origins.Sa.Bta)
       )) {
         (sf: String, eligibilityRules: EligibilityRules, expectedRedirect: String, updatedJourneyJson: String, origin: Origin) =>
           {
