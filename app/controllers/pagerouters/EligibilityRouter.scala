@@ -28,6 +28,7 @@ import play.api.mvc.Call
 object EligibilityRouter {
 
   def nextPage(eligibilityResult: EligibilityCheckResult, taxRegime: TaxRegime): Call = {
+
     if (eligibilityResult.isEligible) {
       routes.YourBillController.yourBill
     } else {
@@ -50,13 +51,15 @@ object EligibilityRouter {
         case Some(NoDueDatesReached) => if (taxRegime =!= Sa) {
           whichNoDueDatesReachedPage(taxRegime)
         } else { whichGenericIneligiblePage(taxRegime) }
-        case Some(CannotFindLockReason)                  => whichGenericIneligiblePage(taxRegime)
-        case Some(CreditsNotAllowed)                     => whichGenericIneligiblePage(taxRegime)
-        case Some(IsMoreThanMaxPaymentReference)         => whichGenericIneligiblePage(taxRegime)
-        case Some(ChargesBeforeMaxAccountingDate)        => whichDebtBeforeAccountingDatePage(taxRegime)
-        case Some(HasDisguisedRemuneration)              => whichGenericIneligiblePage(taxRegime)
-        case Some(HasCapacitor)                          => whichGenericIneligiblePage(taxRegime)
-        case Some(DmSpecialOfficeProcessingRequiredCDCS) => whichGenericIneligiblePage(taxRegime)
+        case Some(CannotFindLockReason)           => whichGenericIneligiblePage(taxRegime)
+        case Some(CreditsNotAllowed)              => whichGenericIneligiblePage(taxRegime)
+        case Some(IsMoreThanMaxPaymentReference)  => whichGenericIneligiblePage(taxRegime)
+        case Some(ChargesBeforeMaxAccountingDate) => whichDebtBeforeAccountingDatePage(taxRegime)
+        case Some(HasDisguisedRemuneration)       => whichGenericIneligiblePage(taxRegime)
+        case Some(HasCapacitor)                   => whichGenericIneligiblePage(taxRegime)
+        case Some(DmSpecialOfficeProcessingRequiredCDCS) =>
+          if (taxRegime === Sa) whichGenericIneligiblePage(taxRegime)
+          else throw new NotImplementedError(s"dmSpecialOfficeProcessingRequiredCDCS ineligibility reason not relevant to ${taxRegime.entryName}")
       }
     }
   }
