@@ -16,6 +16,8 @@
 
 package controllers
 
+import cats.syntax.eq._
+
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.ttp.eligibility.{EligibilityRules, RegimeDigitalCorrespondence}
@@ -173,20 +175,6 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       ("HasCapacitor - SA", TdAll.notEligibleHasCapacitor, "hasCapacitor", PageUrls.saNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasCapacitor`(Origins.Sa.Bta), Origins.Sa.Bta),
 
-      ("DmSpecialOfficeProcessingRequiredCDCS - PAYE",
-        TdAll.notEligibleDmSpecialOfficeProcessingRequiredCDCS,
-        "dmSpecialOfficeProcessingRequiredCDCS",
-        PageUrls.payeNotEligibleUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - DmSpecialOfficeProcessingRequiredCDCS`(Origins.Epaye.Bta),
-        Origins.Epaye.Bta
-      ),
-      ("DmSpecialOfficeProcessingRequiredCDCS - VAT",
-        TdAll.notEligibleDmSpecialOfficeProcessingRequiredCDCS,
-        "dmSpecialOfficeProcessingRequiredCDCS",
-        PageUrls.vatNotEligibleUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - DmSpecialOfficeProcessingRequiredCDCS`(Origins.Vat.Bta),
-        Origins.Vat.Bta
-      ),
       ("DmSpecialOfficeProcessingRequiredCDCS - SA",
         TdAll.notEligibleDmSpecialOfficeProcessingRequiredCDCS,
         "dmSpecialOfficeProcessingRequiredCDCS",
@@ -290,6 +278,40 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
             }
           }
       }
+    }
+
+    "throw an error is dmSpecialOfficeProcessingRequiredCDCS is received for a tax regime that is not SA" in {
+      val taxRegimesAndOrigins = TaxRegime.values.map{ taxRegime =>
+        val origin = taxRegime match {
+          case TaxRegime.Epaye => Origins.Epaye.Bta
+          case TaxRegime.Vat   => Origins.Vat.Bta
+          case TaxRegime.Sa    => Origins.Sa.Bta
+        }
+        taxRegime -> origin
+      }
+
+      taxRegimesAndOrigins.filter(p => p._1 =!= TaxRegime.Sa).foreach{
+        case (taxRegime, origin) =>
+          withClue(s"For tax regime ${taxRegime.entryName} and origin ${origin.toString}: "){
+            val eligibilityResponseJson =
+              TtpJsonResponses.ttpEligibilityCallJson(
+                taxRegime,
+                TdAll.notEligibleEligibilityPass,
+                TdAll.notEligibleDmSpecialOfficeProcessingRequiredCDCS
+              )
+
+            stubCommonActions()
+            EssttpBackend.DetermineTaxId.findJourney(origin)()
+            Ttp.Eligibility.stubRetrieveEligibility(taxRegime)(eligibilityResponseJson)
+            EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(TdAll.journeyId, JourneyJsonTemplates.`Eligibility Checked - Ineligible - DmSpecialOfficeProcessingRequiredCDCS`(origin))
+
+            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+            val error = intercept[Exception](controller.determineEligibility(fakeRequest).futureValue)
+            error.getMessage should include(s"dmSpecialOfficeProcessingRequiredCDCS ineligibility reason not relevant to ${taxRegime.entryName}")
+          }
+      }
+
     }
 
     "Eligible for Epaye: should redirect to your bill and send an audit event" - {

@@ -159,7 +159,8 @@ object TdJsonBodies {
       |    "cannotFindLockReason": ${eligibilityRules.cannotFindLockReason.getOrElse(false).toString},
       |    "creditsNotAllowed": ${eligibilityRules.creditsNotAllowed.getOrElse(false).toString},
       |    "isMoreThanMaxPaymentReference": ${eligibilityRules.isMoreThanMaxPaymentReference.getOrElse(false).toString},
-      |    "chargesBeforeMaxAccountingDate": ${eligibilityRules.chargesBeforeMaxAccountingDate.getOrElse(false).toString}
+      |    "chargesBeforeMaxAccountingDate": ${eligibilityRules.chargesBeforeMaxAccountingDate.getOrElse(false).toString},
+      |    "dmSpecialOfficeProcessingRequiredCDCS": ${eligibilityRules.dmSpecialOfficeProcessingRequiredCDCS.getOrElse(false).toString}
       |  },
       |  "chargeTypeAssessment" : [
       |    {
