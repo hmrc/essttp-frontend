@@ -25,6 +25,7 @@ import essttp.rootmodel.ttp.eligibility.{ChargeTypeAssessment, Charges, Eligibil
 import essttp.rootmodel.ttp.{DdInProgress, IsInterestBearingCharge}
 import models.{InvoicePeriod, OverDuePayments, OverduePayment}
 import play.api.mvc._
+import services.AuditService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.Views
@@ -35,9 +36,10 @@ import javax.inject.{Inject, Singleton}
 
 @Singleton
 class YourBillController @Inject() (
-    as:    Actions,
-    mcc:   MessagesControllerComponents,
-    views: Views
+    as:           Actions,
+    mcc:          MessagesControllerComponents,
+    views:        Views,
+    auditService: AuditService
 )
   extends FrontendController(mcc)
   with Logging {
@@ -80,7 +82,8 @@ class YourBillController @Inject() (
       )
     )
 
-  val youAlreadyHaveDirectDebitSubmit: Action[AnyContent] = as.eligibleJourneyAction { _ =>
+  val youAlreadyHaveDirectDebitSubmit: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    auditService.auditDdInProgress(request.journey, true)
     Redirect(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment)
   }
 

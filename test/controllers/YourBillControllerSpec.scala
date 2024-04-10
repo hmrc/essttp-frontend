@@ -16,7 +16,7 @@
 
 package controllers
 
-import essttp.journey.model.{Origin, Origins}
+import essttp.journey.model.{Journey, Origin, Origins}
 import essttp.rootmodel.TaxRegime
 import models.Languages
 import org.jsoup.Jsoup

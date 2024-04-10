@@ -67,7 +67,7 @@
 
     <p class="govuk-body">@{Messages.DualChargeWarning.`If you select continue you understand that you may be charged twice if you do not contact your bank.`.show}</p>
 
-  @formWithCSRF(action = routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment) {
+  @formWithCSRF(action = routes.YourBillController.youAlreadyHaveDirectDebitSubmit) {
       <div class="govuk-button-group">
         @govukButton(Button(content = Text(Messages.continue.show), attributes = Map("id" -> "continue")))
         <p class="govuk-body" id="link">@{Html{Messages.DualChargeWarning.`I do not want to set up a payment plan`(linkToKickoutPage).show}}</p>
