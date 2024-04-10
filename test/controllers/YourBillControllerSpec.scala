@@ -16,7 +16,7 @@
 
 package controllers
 
-import essttp.journey.model.{Journey, Origin, Origins}
+import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.TaxRegime
 import models.Languages
 import org.jsoup.Jsoup
@@ -243,7 +243,7 @@ class YourBillControllerSpec extends ItSpec {
         doc,
         expectedH1              = "You already have a Direct Debit",
         shouldBackLinkBePresent = true,
-        expectedSubmitUrl       = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url)
+        expectedSubmitUrl       = Some(routes.YourBillController.youAlreadyHaveDirectDebitSubmit.url)
       )
 
       ContentAssertions.assertListOfContent(
@@ -300,7 +300,7 @@ class YourBillControllerSpec extends ItSpec {
         doc,
         expectedH1              = "Mae eisoes gennych drefniant Debyd Uniongyrchol",
         shouldBackLinkBePresent = true,
-        expectedSubmitUrl       = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url),
+        expectedSubmitUrl       = Some(routes.YourBillController.youAlreadyHaveDirectDebitSubmit.url),
         language                = Languages.Welsh
       )
 
