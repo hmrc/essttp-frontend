@@ -107,10 +107,10 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
   }
 
   def auditDdInProgress(
-      journey:            Journey,
-      continueOrExitBool: Boolean
+      journey:             Journey,
+      hasChosenToContinue: Boolean
   )(implicit r: AuthenticatedJourneyRequest[_], hc: HeaderCarrier): Unit =
-    audit(toDdinProgressAuditDetail(journey, continueOrExitBool))
+    audit(toDdinProgressAuditDetail(journey, hasChosenToContinue))
 
   private def toEligibilityCheck(
       journey:          Started,
@@ -214,12 +214,8 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
     )
   }
 
-  private def toDdinProgressAuditDetail(journey: Journey, continueOrExitBool: Boolean)
+  private def toDdinProgressAuditDetail(journey: Journey, hasChosenToContinue: Boolean)
     (implicit r: AuthenticatedJourneyRequest[_]): DdInProgressAuditDetail = {
-    val continueOrExit: String = continueOrExitBool match {
-      case true  => "continue"
-      case false => "exit"
-    }
 
     DdInProgressAuditDetail(
       toAuditString(journey.origin),
@@ -227,7 +223,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       toTaxDetail(toEligibilityCheckResult(journey)),
       journey.correlationId.toString,
       r.ggCredId.toString,
-      continueOrExit
+      if (hasChosenToContinue) "continue" else "exit"
     )
   }
 

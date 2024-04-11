@@ -29,7 +29,7 @@ final case class DdInProgressAuditDetail(
 )
   extends AuditDetail {
 
-  override val auditType: String = "DDinProgress"
+  override val auditType: String = "DirectDebitInProgress"
 
 }
 
