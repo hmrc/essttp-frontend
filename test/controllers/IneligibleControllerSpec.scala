@@ -22,13 +22,14 @@ import models.Languages
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalatest.Assertion
+import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.ContentAssertions
-import testsupport.stubs.EssttpBackend
+import testsupport.stubs.{AuditConnectorStub, EssttpBackend}
 import testsupport.testdata.{JourneyJsonTemplates, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
@@ -359,6 +360,25 @@ class IneligibleControllerSpec extends ItSpec {
         leadingP1 = expectedLeadingP1
       )
       ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Vat, Languages.English)
+
+      val expectedTaxDetailsJson = """{ "vrn": "101747001" }"""
+
+      AuditConnectorStub.verifyEventAudited(
+        "DirectDebitInProgress",
+        Json.parse(
+          s"""
+             |{
+             |  "origin": "Bta",
+             |  "taxType": "Vat",
+             |  "taxDetail": $expectedTaxDetailsJson,
+             |  "correlationId": "CorrelationId(8d89a98b-0b26-4ab2-8114-f7c7c81c3059)",
+             |  "authProviderId": "GGCredId(authId-999)",
+             |  "continueOrExit": "exit"
+             |}
+             |""".
+            stripMargin
+        ).as[JsObject]
+      )
     }
   }
 

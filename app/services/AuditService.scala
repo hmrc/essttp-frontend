@@ -29,6 +29,7 @@ import essttp.rootmodel.ttp.eligibility.{EligibilityCheckResult, EmailSource}
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
 import essttp.utils.Errors
 import models.audit.bars._
+import models.audit.ddinprogress.DdInProgressAuditDetail
 import models.audit.eligibility.{EligibilityCheckAuditDetail, EligibilityResult, EnrollmentReasons}
 import models.audit.emailverification.{EmailVerificationRequestedAuditDetail, EmailVerificationResultAuditDetail}
 import models.audit.paymentplansetup.PaymentPlanSetUpAuditDetail
@@ -104,6 +105,12 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
   )(implicit authenticatedJourneyRequest: AuthenticatedJourneyRequest[_], headerCarrier: HeaderCarrier): Unit = {
     audit(toPaymentPlanSetupAuditDetail(journey, responseFromTtp))
   }
+
+  def auditDdInProgress(
+      journey:             Journey,
+      hasChosenToContinue: Boolean
+  )(implicit r: AuthenticatedJourneyRequest[_], hc: HeaderCarrier): Unit =
+    audit(toDdinProgressAuditDetail(journey, hasChosenToContinue))
 
   private def toEligibilityCheck(
       journey:          Started,
@@ -204,6 +211,19 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
         verifyStatusResponse.lockoutExpiryDateTime.map(_.toString)
       ),
       correlationId = journey.correlationId.value.toString
+    )
+  }
+
+  private def toDdinProgressAuditDetail(journey: Journey, hasChosenToContinue: Boolean)
+    (implicit r: AuthenticatedJourneyRequest[_]): DdInProgressAuditDetail = {
+
+    DdInProgressAuditDetail(
+      toAuditString(journey.origin),
+      journey.taxRegime.toString,
+      toTaxDetail(toEligibilityCheckResult(journey)),
+      journey.correlationId.toString,
+      r.ggCredId.toString,
+      if (hasChosenToContinue) "continue" else "exit"
     )
   }
 

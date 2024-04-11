@@ -22,6 +22,7 @@ import config.AppConfig
 import essttp.journey.model.SjRequest
 import messages.Messages
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import services.AuditService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.Views
@@ -30,10 +31,11 @@ import javax.inject.{Inject, Singleton}
 
 @Singleton()
 class IneligibleController @Inject() (
-    mcc:       MessagesControllerComponents,
-    views:     Views,
-    as:        Actions,
-    appConfig: AppConfig
+    mcc:          MessagesControllerComponents,
+    views:        Views,
+    as:           Actions,
+    appConfig:    AppConfig,
+    auditService: AuditService
 ) extends FrontendController(mcc) with Logging {
 
   def genericIneligiblePage(implicit request: AuthenticatedJourneyRequest[AnyContent]): Result =
@@ -185,10 +187,12 @@ class IneligibleController @Inject() (
     )
 
   val epayeYouHaveChosenNotToSetUpPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    auditService.auditDdInProgress(request.journey, false)
     genericYouHaveChosenNotToSetUpPage
   }
 
   val vatYouHaveChosenNotToSetUpPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    auditService.auditDdInProgress(request.journey, false)
     genericYouHaveChosenNotToSetUpPage
   }
 

@@ -29,7 +29,7 @@ import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
-import testsupport.stubs.EssttpBackend
+import testsupport.stubs.{AuditConnectorStub, EssttpBackend}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls}
 import uk.gov.hmrc.http.SessionKeys
 
@@ -243,7 +243,7 @@ class YourBillControllerSpec extends ItSpec {
         doc,
         expectedH1              = "You already have a Direct Debit",
         shouldBackLinkBePresent = true,
-        expectedSubmitUrl       = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url)
+        expectedSubmitUrl       = Some(routes.YourBillController.youAlreadyHaveDirectDebitSubmit.url)
       )
 
       ContentAssertions.assertListOfContent(
@@ -300,7 +300,7 @@ class YourBillControllerSpec extends ItSpec {
         doc,
         expectedH1              = "Mae eisoes gennych drefniant Debyd Uniongyrchol",
         shouldBackLinkBePresent = true,
-        expectedSubmitUrl       = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url),
+        expectedSubmitUrl       = Some(routes.YourBillController.youAlreadyHaveDirectDebitSubmit.url),
         language                = Languages.Welsh
       )
 
@@ -351,6 +351,26 @@ class YourBillControllerSpec extends ItSpec {
       val result = controller.youAlreadyHaveDirectDebitSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.canYouMakeAnUpfrontPaymentUrl)
+
+      val expectedTaxDetailsJson = """{ "vrn": "101747001" }"""
+
+      AuditConnectorStub.verifyEventAudited(
+        "DirectDebitInProgress",
+        Json.parse(
+          s"""
+             |{
+             |  "origin": "Bta",
+             |  "taxType": "Vat",
+             |  "taxDetail": $expectedTaxDetailsJson,
+             |  "correlationId": "CorrelationId(8d89a98b-0b26-4ab2-8114-f7c7c81c3059)",
+             |  "authProviderId": "GGCredId(authId-999)",
+             |  "continueOrExit": "continue"
+             |}
+             |""".
+            stripMargin
+        ).as[JsObject]
+      )
+
     }
   }
 
