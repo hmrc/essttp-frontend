@@ -358,7 +358,7 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
                 TdAll.eligibleEligibilityPass,
                 TdAll.eligibleEligibilityRules,
                 TaxRegime.Epaye,
-                Some(RegimeDigitalCorrespondence(true)),
+                Some(RegimeDigitalCorrespondence(value = true)),
                 maybeChargeIsInterestBearingCharge,
                 maybeChargeUseChargeReference
               )
@@ -427,7 +427,7 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
           TdAll.eligibleEligibilityPass,
           TdAll.eligibleEligibilityRules,
           TaxRegime.Vat,
-          Some(RegimeDigitalCorrespondence(true)),
+          Some(RegimeDigitalCorrespondence(value = true)),
           chargeChargeBeforeMaxAccountingDate = Some(true)
         )
       )(testOperationCryptoFormat)
@@ -492,7 +492,7 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
           TdAll.eligibleEligibilityPass,
           TdAll.eligibleEligibilityRules,
           TaxRegime.Sa,
-          Some(RegimeDigitalCorrespondence(true)),
+          Some(RegimeDigitalCorrespondence(value = true)),
           chargeChargeBeforeMaxAccountingDate = Some(true)
         )
       )(testOperationCryptoFormat)

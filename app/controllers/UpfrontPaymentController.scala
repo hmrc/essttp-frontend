@@ -69,8 +69,8 @@ class UpfrontPaymentController @Inject() (
     case j: Journey.AfterAnsweredCanPayUpfront  => Some(j.canPayUpfront)
     case j: Journey.AfterUpfrontPaymentAnswers =>
       j.upfrontPaymentAnswers match {
-        case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => Some(CanPayUpfront(true))
-        case UpfrontPaymentAnswers.NoUpfrontPayment          => Some(CanPayUpfront(false))
+        case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => Some(CanPayUpfront(value = true))
+        case UpfrontPaymentAnswers.NoUpfrontPayment          => Some(CanPayUpfront(value = false))
       }
   }
 

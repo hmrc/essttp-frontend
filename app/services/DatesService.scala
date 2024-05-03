@@ -43,8 +43,8 @@ class DatesService @Inject() (datesApiConnector: DatesApiConnector) {
 
   def extremeDates(journey: Journey.AfterAnsweredCanPayUpfront)(implicit request: RequestHeader): Future[ExtremeDatesResponse] = {
     val extremeDatesRequest: ExtremeDatesRequest = journey.canPayUpfront match {
-      case CanPayUpfront(true)  => ExtremeDatesRequest(InitialPayment(true))
-      case CanPayUpfront(false) => ExtremeDatesRequest(InitialPayment(false))
+      case CanPayUpfront(true)  => ExtremeDatesRequest(InitialPayment(value = true))
+      case CanPayUpfront(false) => ExtremeDatesRequest(InitialPayment(value = false))
     }
     datesApiConnector.extremeDates(extremeDatesRequest)
   }
@@ -53,8 +53,8 @@ class DatesService @Inject() (datesApiConnector: DatesApiConnector) {
 
 object DatesService {
   private def deriveInitialPayment(upfrontPaymentAnswers: UpfrontPaymentAnswers): InitialPayment = upfrontPaymentAnswers match {
-    case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => InitialPayment(true)
-    case UpfrontPaymentAnswers.NoUpfrontPayment          => InitialPayment(false)
+    case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => InitialPayment(value = true)
+    case UpfrontPaymentAnswers.NoUpfrontPayment          => InitialPayment(value = false)
   }
 
   private def upfrontPaymentAnswersFromJourney(journey: Journey.AfterEnteredDayOfMonth): UpfrontPaymentAnswers = journey match {

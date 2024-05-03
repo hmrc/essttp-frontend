@@ -88,7 +88,7 @@ object TdAll {
 
   val unactivePayeEnrolment: Enrolment = payeEnrolment.copy(state = "Not Activated")
 
-  val canPayUpfront: CanPayUpfront = CanPayUpfront(true)
+  val canPayUpfront: CanPayUpfront = CanPayUpfront(value = true)
   val canNotPayUpfront: CanPayUpfront = canPayUpfront.copy(false)
 
   val amountInPence: AmountInPence = AmountInPence(1000)
@@ -98,7 +98,7 @@ object TdAll {
 
   def upfrontPaymentAmount(amount: Long): UpfrontPaymentAmount = UpfrontPaymentAmount(AmountInPence(amount))
 
-  val eligibleEligibilityPass: EligibilityPass = EligibilityPass(true)
+  val eligibleEligibilityPass: EligibilityPass = EligibilityPass(value = true)
   val notEligibleEligibilityPass: EligibilityPass = eligibleEligibilityPass.copy(value = false)
   val eligibleEligibilityRules: EligibilityRules = EligibilityRules(
     hasRlsOnAddress                       = false,
@@ -251,10 +251,10 @@ object TdAll {
           interestStartDate             = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
           dueDate                       = DueDate(LocalDate.parse("2017-03-07")),
           accruedInterest               = AccruedInterest(AmountInPence(1597)),
-          ineligibleChargeType          = IneligibleChargeType(false),
-          chargeOverMaxDebtAge          = Some(ChargeOverMaxDebtAge(false)),
+          ineligibleChargeType          = IneligibleChargeType(value = false),
+          chargeOverMaxDebtAge          = Some(ChargeOverMaxDebtAge(value = false)),
           locks                         = Some(
-            List(Lock(LockType("Payment"), LockReason("Risk/Fraud"), DisallowedChargeLockType(false)))
+            List(Lock(LockType("Payment"), LockReason("Risk/Fraud"), DisallowedChargeLockType(value = false)))
           ),
           dueDateNotReached             = false,
           isInterestBearingCharge       = chargeIsInterestBearingCharge.map(IsInterestBearingCharge(_)),
@@ -301,8 +301,8 @@ object TdAll {
         OutstandingDebtAmount(AmountInPence(50000)),
         mainTrans               = MainTrans("mainTrans"),
         subTrans                = SubTrans("subTrans"),
-        isInterestBearingCharge = Some(IsInterestBearingCharge(true)),
-        useChargeReference      = Some(UseChargeReference(true)),
+        isInterestBearingCharge = Some(IsInterestBearingCharge(value = true)),
+        useChargeReference      = Some(UseChargeReference(value = true)),
         debtItemChargeId        = ChargeReference("A00000000001"),
         interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
         debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-03-07"))
@@ -311,8 +311,8 @@ object TdAll {
         OutstandingDebtAmount(AmountInPence(100000)),
         mainTrans               = MainTrans("mainTrans"),
         subTrans                = SubTrans("subTrans"),
-        isInterestBearingCharge = Some(IsInterestBearingCharge(true)),
-        useChargeReference      = Some(UseChargeReference(true)),
+        isInterestBearingCharge = Some(IsInterestBearingCharge(value = true)),
+        useChargeReference      = Some(UseChargeReference(value = true)),
         debtItemChargeId        = ChargeReference("A00000000002"),
         interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-02-07"))),
         debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-02-07"))
@@ -340,8 +340,8 @@ object TdAll {
           OutstandingDebtAmount(AmountInPence(50000)),
           mainTrans               = MainTrans("mainTrans"),
           subTrans                = SubTrans("subTrans"),
-          isInterestBearingCharge = Some(IsInterestBearingCharge(true)),
-          useChargeReference      = Some(UseChargeReference(true)),
+          isInterestBearingCharge = Some(IsInterestBearingCharge(value = true)),
+          useChargeReference      = Some(UseChargeReference(value = true)),
           debtItemChargeId        = ChargeReference("A00000000001"),
           interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
           debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-03-07"))
@@ -350,8 +350,8 @@ object TdAll {
           OutstandingDebtAmount(AmountInPence(100000)),
           mainTrans               = MainTrans("mainTrans"),
           subTrans                = SubTrans("subTrans"),
-          isInterestBearingCharge = Some(IsInterestBearingCharge(true)),
-          useChargeReference      = Some(UseChargeReference(true)),
+          isInterestBearingCharge = Some(IsInterestBearingCharge(value = true)),
+          useChargeReference      = Some(UseChargeReference(value = true)),
           debtItemChargeId        = ChargeReference("A00000000002"),
           interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-02-07"))),
           debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-02-07"))
@@ -420,7 +420,7 @@ object TdAll {
         sortCode        = SortCode(SensitiveString("123456")),
         accountNumber   = AccountNumber(SensitiveString(accountNumber)),
         accountName     = AccountName(SensitiveString(testAccountName)),
-        paperAuddisFlag = PaperAuddisFlag(false)
+        paperAuddisFlag = PaperAuddisFlag(value = false)
       ),
       paymentPlan                 = EnactPaymentPlan(
         planDuration         = PlanDuration(2),
@@ -462,16 +462,16 @@ object TdAll {
             debtItemChargeId        = ChargeReference("A00000000001"),
             debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-03-07")),
             accruedInterest         = AccruedInterest(AmountInPence(1597)),
-            isInterestBearingCharge = Some(IsInterestBearingCharge(true)),
-            useChargeReference      = Some(UseChargeReference(true))
+            isInterestBearingCharge = Some(IsInterestBearingCharge(value = true)),
+            useChargeReference      = Some(UseChargeReference(value = true))
           ),
           DebtItemCharges(
             outstandingDebtAmount   = OutstandingDebtAmount(AmountInPence(100000)),
             debtItemChargeId        = ChargeReference("A00000000002"),
             debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-02-07")),
             accruedInterest         = AccruedInterest(AmountInPence(1597)),
-            isInterestBearingCharge = Some(IsInterestBearingCharge(true)),
-            useChargeReference      = Some(UseChargeReference(true))
+            isInterestBearingCharge = Some(IsInterestBearingCharge(value = true)),
+            useChargeReference      = Some(UseChargeReference(value = true))
           )
         )
       ),
@@ -483,8 +483,8 @@ object TdAll {
   def customerDetail(email: String = "bobross@joyofpainting.com", source: EmailSource = EmailSource.ETMP): Option[List[CustomerDetail]] =
     Some(List(CustomerDetail(Some(Email(SensitiveString(email))), Some(source))))
 
-  val someRegimeDigitalCorrespondenceFalse: Option[RegimeDigitalCorrespondence] = Some(RegimeDigitalCorrespondence(false))
-  val someRegimeDigitalCorrespondenceTrue: Option[RegimeDigitalCorrespondence] = Some(RegimeDigitalCorrespondence(true))
+  val someRegimeDigitalCorrespondenceFalse: Option[RegimeDigitalCorrespondence] = Some(RegimeDigitalCorrespondence(value = false))
+  val someRegimeDigitalCorrespondenceTrue: Option[RegimeDigitalCorrespondence] = Some(RegimeDigitalCorrespondence(value = true))
 
   def customerReference(taxRegime: TaxRegime): CustomerReference = taxRegime match {
     case TaxRegime.Epaye => CustomerReference("123PA44545546")

@@ -153,7 +153,7 @@ class TermsAndConditionsControllerSpec extends ItSpec {
             val result: Future[Result] = controller.termsAndConditionsSubmit(fakeRequest)
             status(result) shouldBe Status.SEE_OTHER
             redirectLocation(result) shouldBe Some(PageUrls.submitArrangementUrl)
-            EssttpBackend.TermsAndConditions.verifyUpdateAgreedTermsAndConditionsRequest(TdAll.journeyId, IsEmailAddressRequired(false))
+            EssttpBackend.TermsAndConditions.verifyUpdateAgreedTermsAndConditionsRequest(TdAll.journeyId, IsEmailAddressRequired(value = false))
           }
 
           s"[$regime journey] redirect the user to the email journey if regimeDigitalCorrespondence is enabled and update backend" +
@@ -170,7 +170,7 @@ class TermsAndConditionsControllerSpec extends ItSpec {
               val result: Future[Result] = controller.termsAndConditionsSubmit(fakeRequest)
               status(result) shouldBe Status.SEE_OTHER
               redirectLocation(result) shouldBe Some(PageUrls.whichEmailDoYouWantToUseUrl)
-              EssttpBackend.TermsAndConditions.verifyUpdateAgreedTermsAndConditionsRequest(TdAll.journeyId, IsEmailAddressRequired(true))
+              EssttpBackend.TermsAndConditions.verifyUpdateAgreedTermsAndConditionsRequest(TdAll.journeyId, IsEmailAddressRequired(value = true))
             }
 
           s"[$regime journey] redirect the user to the email journey if regimeDigitalCorrespondence is enabled and update backend" +
@@ -187,7 +187,7 @@ class TermsAndConditionsControllerSpec extends ItSpec {
               val result: Future[Result] = controller.termsAndConditionsSubmit(fakeRequest)
               status(result) shouldBe Status.SEE_OTHER
               redirectLocation(result) shouldBe Some(PageUrls.enterEmailAddressUrl)
-              EssttpBackend.TermsAndConditions.verifyUpdateAgreedTermsAndConditionsRequest(TdAll.journeyId, IsEmailAddressRequired(true))
+              EssttpBackend.TermsAndConditions.verifyUpdateAgreedTermsAndConditionsRequest(TdAll.journeyId, IsEmailAddressRequired(value = true))
             }
         }
     }
@@ -222,7 +222,7 @@ class TermsAndConditionsControllerEmailDisabledSpec extends ItSpec {
             val result: Future[Result] = controller.termsAndConditionsSubmit(fakeRequest)
             status(result) shouldBe Status.SEE_OTHER
             redirectLocation(result) shouldBe Some(PageUrls.submitArrangementUrl)
-            EssttpBackend.TermsAndConditions.verifyUpdateAgreedTermsAndConditionsRequest(TdAll.journeyId, IsEmailAddressRequired(false))
+            EssttpBackend.TermsAndConditions.verifyUpdateAgreedTermsAndConditionsRequest(TdAll.journeyId, IsEmailAddressRequired(value = false))
           }
         }
     }

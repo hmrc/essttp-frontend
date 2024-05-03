@@ -83,7 +83,7 @@ class YourBillController @Inject() (
     )
 
   val youAlreadyHaveDirectDebitSubmit: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
-    auditService.auditDdInProgress(request.journey, true)
+    auditService.auditDdInProgress(request.journey, hasChosenToContinue = true)
     Redirect(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment)
   }
 
@@ -101,8 +101,6 @@ object YourBillController {
   val LocalDateTimeFmt: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
   def parseLocalDate(s: String): LocalDate = LocalDateTimeFmt.parse(s, LocalDate.from)
-
-  def formatLocalDateTime(d: LocalDate): String = LocalDateTimeFmt.format(d)
 
   def invoicePeriod(ass: ChargeTypeAssessment): InvoicePeriod = {
     val dueDate: LocalDate = chargeDueDate(List(ass))
@@ -122,7 +120,7 @@ object YourBillController {
     }
 
   private def hasAnyChargesWithDdInProgress(eligibilityResult: EligibilityCheckResult) =
-    eligibilityResult.chargeTypeAssessment.map(overDuePaymentOf).exists(_.ddInProgress.contains(DdInProgress(true)))
+    eligibilityResult.chargeTypeAssessment.map(overDuePaymentOf).exists(_.ddInProgress.contains(DdInProgress(value = true)))
 
   private val taxMonthStartDay: Int = 6
 
@@ -146,7 +144,12 @@ object YourBillController {
   }
 
   private def overDuePaymentsWithDdInProgress(eligibilityResult: EligibilityCheckResult): OverDuePayments = {
-    val paymentsWithDdInProgress = eligibilityResult.chargeTypeAssessment.map(overDuePaymentOf).filter(_.ddInProgress.contains(DdInProgress(true)))
+    val paymentsWithDdInProgress =
+      eligibilityResult
+        .chargeTypeAssessment
+        .map(overDuePaymentOf)
+        .filter(_.ddInProgress.contains(DdInProgress(value = true)))
+
     OverDuePayments(qualifyingDebt(eligibilityResult), paymentsWithDdInProgress)
   }
 }

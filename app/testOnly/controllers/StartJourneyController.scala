@@ -310,14 +310,14 @@ object StartJourneyController {
       interestStartDate             = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
       dueDate                       = DueDate(LocalDate.parse("2017-03-07")),
       accruedInterest               = AccruedInterest(interestAmount),
-      ineligibleChargeType          = IneligibleChargeType(false),
-      chargeOverMaxDebtAge          = if (form.chargeBeforeMaxAccountingDate.isEmpty) Some(ChargeOverMaxDebtAge(false)) else None,
+      ineligibleChargeType          = IneligibleChargeType(value = false),
+      chargeOverMaxDebtAge          = if (form.chargeBeforeMaxAccountingDate.isEmpty) Some(ChargeOverMaxDebtAge(value = false)) else None,
       locks                         = Some(
         List(
           Lock(
             lockType                 = LockType("Payment"),
             lockReason               = LockReason("Risk/Fraud"),
-            disallowedChargeLockType = DisallowedChargeLockType(false)
+            disallowedChargeLockType = DisallowedChargeLockType(value = false)
           )
         )
       ),
