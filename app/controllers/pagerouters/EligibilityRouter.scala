@@ -34,7 +34,13 @@ object EligibilityRouter {
     } else {
       EligibilityErrors.toEligibilityError(eligibilityResult.eligibilityRules) match {
         case ee @ Some(MultipleReasons) =>
-          determineWhetherToGoToDebtTooSmall(ee, eligibilityResult.eligibilityRules.isLessThanMinDebtAllowance, eligibilityResult.eligibilityRules.noDueDatesReached, taxRegime)
+          determineWhereToGoBasedOnHierarchy(
+            ee,
+            eligibilityResult.eligibilityRules.isLessThanMinDebtAllowance,
+            eligibilityResult.eligibilityRules.noDueDatesReached,
+            eligibilityResult.eligibilityRules.hasRlsOnAddress,
+            taxRegime
+          )
         case None                                    => whichGenericIneligiblePage(taxRegime)
         case Some(HasRlsOnAddress)                   => whichGenericRLSPage(taxRegime)
         case Some(MarkedAsInsolvent)                 => whichGenericIneligiblePage(taxRegime)
@@ -110,19 +116,22 @@ object EligibilityRouter {
   }
 
   /*
-  requirement from business that if multiple reasons exist but any of them are isLessThanMinDebtAllowance,
-  go to debt too small page, unless reason is NoDueDatesReached
+  Requirement from business is that if multiple reasons exist but any of them are isLessThanMinDebtAllowance,
+  go to debt too small page, unless reason is also NoDueDatesReached. If neither of these two are true, then hasRlsOnAddress
+  takes precedence over all other eligibility rules.
   */
-  private def determineWhetherToGoToDebtTooSmall(
+  private def determineWhereToGoBasedOnHierarchy(
       maybeEligibilityError:      Option[EligibilityError],
       isLessThanMinDebtAllowance: Boolean,
       dueDatesReached:            Boolean,
+      hasRlsOnAddress:            Boolean,
       taxRegime:                  TaxRegime
-  ): Call = (maybeEligibilityError, isLessThanMinDebtAllowance, dueDatesReached, taxRegime) match {
-    case (Some(MultipleReasons), true, true, Sa) => routes.IneligibleController.saGenericIneligiblePage
-    case (Some(MultipleReasons), true, true, _)  => whichNoDueDatesReachedPage(taxRegime)
-    case (Some(MultipleReasons), true, _, _)     => whichDebtTooSmallPage(taxRegime)
-    case _                                       => whichGenericIneligiblePage(taxRegime)
+  ): Call = (maybeEligibilityError, isLessThanMinDebtAllowance, dueDatesReached, hasRlsOnAddress, taxRegime) match {
+    case (Some(MultipleReasons), _, true, _, Sa) => routes.IneligibleController.saGenericIneligiblePage
+    case (Some(MultipleReasons), _, true, _, _) => whichNoDueDatesReachedPage(taxRegime)
+    case (Some(MultipleReasons), true, false, _, _) => whichDebtTooSmallPage(taxRegime)
+    case (Some(MultipleReasons), false, false, true, _) => whichGenericRLSPage(taxRegime)
+    case _ => whichGenericIneligiblePage(taxRegime)
   }
 
   private def whichNoDueDatesReachedPage(taxRegime: TaxRegime): Call = taxRegime match {
