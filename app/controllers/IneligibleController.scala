@@ -196,4 +196,16 @@ class IneligibleController @Inject() (
     genericYouHaveChosenNotToSetUpPage
   }
 
+  def genericRLSIneligiblePage(implicit request: AuthenticatedJourneyRequest[AnyContent]): Result =
+    Ok(views.partials.ineligibleTemplatePage(
+      pageh1         = Messages.NotEligible.`Update your personal details to use this service`,
+      leadingContent = views.partials.genericRLSPartial(appConfig.Urls.tellHMRCChangeDetailsUrl)
+    ))
+
+  val epayeRLSPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericRLSIneligiblePage }
+
+  val vatRLSPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericRLSIneligiblePage }
+
+  val saRLSPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericRLSIneligiblePage }
+
 }

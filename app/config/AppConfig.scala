@@ -83,6 +83,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
       s"$baseUrl/pay-what-you-owe-in-instalments"
     }
     val fileSaReturnUUrl: String = config.get[String]("govUkUrls.fileSaReturnUrl")
+    val tellHMRCChangeDetailsUrl: String = config.get[String]("govUkUrls.changeDetails")
   }
 
   object TtpHeaders {

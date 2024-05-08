@@ -282,6 +282,48 @@ class IneligibleControllerSpec extends ItSpec {
 
             page.select(".govuk-body").asScala.toList(1).text() shouldBe "If you have recently filed your return, your account can take up to 3 days to update. Try again after 3 days."
           }
+
+          s"${taxRegime.entryName} RLS not eligible page correctly" in {
+            stubCommonActions(authAllEnrolments = enrolments)
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(origin))
+
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.epayeRLSPage(fakeRequest)
+              case TaxRegime.Vat   => controller.vatRLSPage(fakeRequest)
+              case TaxRegime.Sa    => controller.saRLSPage(fakeRequest)
+            }
+            val page = pageContentAsDoc(result)
+
+            val (expectedP1, expectedP2) = taxRegime match {
+              case TaxRegime.Epaye => ("You cannot set up an Employers’ PAYE payment plan online because some of your personal details are not up to date.",
+                "You must <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">update your details with HMRC</a>. After you’ve updated your details, wait 3 working days before trying again online.")
+              case TaxRegime.Vat => ("You cannot set up a VAT payment plan online because some of your personal details are not up to date.",
+                "You must <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">update your details with HMRC</a>. After you’ve updated your details, wait 3 working days before trying again online.")
+              case TaxRegime.Sa => ("You cannot set up a Self Assessment payment plan online because some of your personal details are not up to date.",
+                "You must <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">update your details with HMRC</a>. After you’ve updated your details, wait 3 working days before trying again online.")
+            }
+
+            val expectedCallUsContent = "Call us on <strong>0300 123 1813</strong> as you may be able to set up a plan over the phone."
+
+            ContentAssertions.commonPageChecks(
+              page,
+              expectedH1              = "Update your personal details to use this service",
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime)
+            )
+
+            val leadingParagraphs = page.select(".govuk-body").asScala.toList
+            leadingParagraphs(0).html() shouldBe expectedP1
+            leadingParagraphs(1).html() shouldBe expectedP2
+
+            ContentAssertions.commonIneligibilityTextCheck(
+              page,
+              taxRegime,
+              Languages.English,
+              callUsContentEnglish = expectedCallUsContent
+            )
+          }
       }
 
     "Vat Debt charges before max accounting date ineligible page correctly" in {
@@ -621,6 +663,48 @@ class IneligibleControllerSpec extends ItSpec {
             fileYourTaxReturnLink.attr("href") shouldBe "/set-up-a-payment-plan/test-only/bta-page?return-page"
 
             page.select(".govuk-body").asScala.toList(1).text() shouldBe "Os ydych wedi cyflwyno’ch Ffurflen Dreth yn ddiweddar, gall gymryd hyd at 3 diwrnod i ddiweddaru’ch cyfrif. Rhowch gynnig arall arni ar ôl 3 diwrnod."
+          }
+
+          s"${taxRegime.entryName} RLS not eligible page correctly" in {
+            stubCommonActions(authAllEnrolments = enrolments)
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(origin))
+
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.epayeRLSPage(fakeRequest.withLangWelsh())
+              case TaxRegime.Vat   => controller.vatRLSPage(fakeRequest.withLangWelsh())
+              case TaxRegime.Sa    => controller.saRLSPage(fakeRequest.withLangWelsh())
+            }
+            val page = pageContentAsDoc(result)
+            val (expectedP1, expectedP2) = taxRegime match {
+              case TaxRegime.Epaye => ("Ni allwch drefnu cynllun talu ar gyfer TWE y Cyflogwr ar-lein oherwydd nad yw rhai o’ch manylion personol yn gyfredol.",
+                "Mae’n rhaid i chi <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">roi’ch manylion newydd i CThEF</a>. Ar ôl i chi diweddaru’ch manylion, arhoswch 3 diwrnod gwaith cyn rhoi tro arall arni ar-lein.")
+              case TaxRegime.Vat => ("Ni allwch drefnu cynllun talu TAW ar-lein oherwydd nad yw rhai o’ch manylion personol yn gyfredol.",
+                "Mae’n rhaid i chi <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">roi’ch manylion newydd i CThEF</a>. Ar ôl i chi diweddaru’ch manylion, arhoswch 3 diwrnod gwaith cyn rhoi tro arall arni ar-lein.")
+              case TaxRegime.Sa => ("Ni allwch drefnu cynllun talu Hunanasesiad ar-lein oherwydd nad yw rhai o’ch manylion personol yn gyfredol.",
+                "Mae’n rhaid i chi <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">roi’ch manylion newydd i CThEF</a>. Ar ôl i chi diweddaru’ch manylion, arhoswch 3 diwrnod gwaith cyn rhoi tro arall arni ar-lein.")
+            }
+
+            val expectedCallUsContent = "Ffoniwch ni ar <strong>0300 200 1900</strong> oherwydd mae’n bosibl y gallwch drefnu cynllun dros y ffôn."
+
+            ContentAssertions.commonPageChecks(
+              page,
+              expectedH1              = "Diweddaru’ch manylion personol i ddefnyddio’r gwasanaeth hwn",
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime),
+              language                = Languages.Welsh
+            )
+
+            val leadingParagraphs = page.select(".govuk-body").asScala.toList
+            leadingParagraphs(0).html() shouldBe expectedP1
+            leadingParagraphs(1).html() shouldBe expectedP2
+
+            ContentAssertions.commonIneligibilityTextCheck(
+              page,
+              taxRegime,
+              language           = Languages.Welsh,
+              callUsContentWelsh = expectedCallUsContent
+            )
           }
       }
 

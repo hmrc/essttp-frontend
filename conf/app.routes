@@ -55,6 +55,9 @@ GET    /bill-not-overdue-epaye                              controllers.Ineligib
 GET    /bill-not-overdue-vat                                controllers.IneligibleController.vatNoDueDatesReachedPage
 GET    /call-us-already-have-direct-debit-epaye             controllers.IneligibleController.epayeYouHaveChosenNotToSetUpPage
 GET    /call-us-already-have-direct-debit-vat               controllers.IneligibleController.vatYouHaveChosenNotToSetUpPage
+GET    /update-personal-details-epaye                       controllers.IneligibleController.epayeRLSPage
+GET    /update-personal-details-vat                         controllers.IneligibleController.vatRLSPage
+GET    /update-personal-details-sa                          controllers.IneligibleController.saRLSPage
 
 GET    /your-bill                                           controllers.YourBillController.yourBill
 POST   /your-bill                                           controllers.YourBillController.yourBillSubmit

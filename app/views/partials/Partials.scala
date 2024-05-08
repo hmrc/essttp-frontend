@@ -35,5 +35,6 @@ class Partials @Inject() (
     val noDueDatesReachedPartial:           NoDueDatesReachedPartial,
     val ifYouNeedExtraSupportPartial:       IfYouNeedExtraSupportPartial,
     val ifCallingFromOutsideUKPartial:      IfCallingFromOutsideUKPartial,
-    val youAlreadyHaveDirectDebitPartial:   YouAlreadyHaveDirectDebitPartial
+    val youAlreadyHaveDirectDebitPartial:   YouAlreadyHaveDirectDebitPartial,
+    val genericRLSPartial:                  GenericRLSPartial
 )
