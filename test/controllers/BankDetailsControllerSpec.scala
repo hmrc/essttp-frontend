@@ -109,7 +109,7 @@ class BankDetailsControllerSpec extends ItSpec {
   }
 
   private def getExpectedFormValue(field: String, formData: Seq[(String, String)]): String =
-    formData.collectFirst { case (x, value) if x == field => value }.getOrElse("")
+    formData.collectFirst { case (x, formValue) if x == field => formValue }.getOrElse("")
 
   def testFormError(action: Action[AnyContent])(formData: (String, String)*)(
       textAndHrefContent: List[(String, String)],

@@ -130,7 +130,6 @@ object MonthlyPaymentAmountController {
 
   private val onePound: AmountInPence = AmountInPence(100)
 
-  //todo this probably isn't the right place for this, move to amount in pence? but it is specific to this page atm...
   // if amount left of the balance is < £10, round to nearest £1, else round to nearest £10
   // extra: if minimum amount is < £1, return £1
   def roundingForMinMax(amountLeft: AmountInPence, minimumAmount: AmountInPence, maximumAmount: AmountInPence): (AmountInPence, AmountInPence) = {

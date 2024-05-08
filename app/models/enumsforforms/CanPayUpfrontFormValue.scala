@@ -23,8 +23,8 @@ import scala.collection.immutable
 
 sealed trait CanPayUpfrontFormValue extends enumeratum.EnumEntry {
   def asCanPayUpfront: CanPayUpfront = this match {
-    case CanPayUpfrontFormValue.Yes => CanPayUpfront(true)
-    case CanPayUpfrontFormValue.No  => CanPayUpfront(false)
+    case CanPayUpfrontFormValue.Yes => CanPayUpfront(value = true)
+    case CanPayUpfrontFormValue.No  => CanPayUpfront(value = false)
   }
 }
 object CanPayUpfrontFormValue extends Enum[CanPayUpfrontFormValue] {

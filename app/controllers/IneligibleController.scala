@@ -187,12 +187,12 @@ class IneligibleController @Inject() (
     )
 
   val epayeYouHaveChosenNotToSetUpPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    auditService.auditDdInProgress(request.journey, false)
+    auditService.auditDdInProgress(request.journey, hasChosenToContinue = false)
     genericYouHaveChosenNotToSetUpPage
   }
 
   val vatYouHaveChosenNotToSetUpPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    auditService.auditDdInProgress(request.journey, false)
+    auditService.auditDdInProgress(request.journey, hasChosenToContinue = false)
     genericYouHaveChosenNotToSetUpPage
   }
 

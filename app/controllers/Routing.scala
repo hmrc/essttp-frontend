@@ -55,8 +55,8 @@ object Routing {
           case j: AfterAnsweredCanPayUpfront  => canPayUpfrontRoute(j.canPayUpfront)
           case j: AfterUpfrontPaymentAnswers =>
             val canPayUpfront = j.upfrontPaymentAnswers match {
-              case UpfrontPaymentAnswers.NoUpfrontPayment          => CanPayUpfront(false)
-              case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => CanPayUpfront(true)
+              case UpfrontPaymentAnswers.NoUpfrontPayment          => CanPayUpfront(value = false)
+              case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => CanPayUpfront(value = true)
             }
             canPayUpfrontRoute(canPayUpfront)
         }

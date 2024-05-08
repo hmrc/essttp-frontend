@@ -50,7 +50,7 @@ object TestUser {
         Some(EpayeEnrolment(
           taxOfficeNumber    = TaxOfficeNumber(form.taxReference.value.take(3)),
           taxOfficeReference = TaxOfficeReference(form.taxReference.value.drop(3)),
-          enrolmentStatus    = EnrolmentStatus.Activated //TODO: read this from the form
+          enrolmentStatus    = EnrolmentStatus.Activated
         ))
       } else {
         None
@@ -69,13 +69,13 @@ object TestUser {
 
     maybeAffinityGroup.map { affinityGroup: AffinityGroup =>
       TestUser(
-        nino            = None, //TODO: read this from the form, populate if individual
+        nino            = None,
         epayeEnrolment  = maybeEpayeEnrolment(form),
         vatEnrolment    = maybeVatEnrolment(form),
         irSaEnrolment   = maybeIrSaEnrolment(form),
         authorityId     = RandomDataGenerator.nextAuthorityId(),
         affinityGroup   = affinityGroup,
-        confidenceLevel = ConfidenceLevel.L50 //TODO: read this from the form
+        confidenceLevel = ConfidenceLevel.L50
       )
     }
   }

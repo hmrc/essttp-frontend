@@ -160,7 +160,7 @@ class TtpService @Inject() (
         sortCode        = directDebitDetails.sortCode,
         accountNumber   = accountNumberPaddedWithZero,
         accountName     = directDebitDetails.name,
-        paperAuddisFlag = PaperAuddisFlag(false)
+        paperAuddisFlag = PaperAuddisFlag(value = false)
       ),
       paymentPlan                 = EnactPaymentPlan(
         planDuration         = selectedPaymentPlan.planDuration,

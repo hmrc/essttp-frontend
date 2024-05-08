@@ -57,14 +57,6 @@ class DetermineEligibilityController @Inject() (
   }
 
   def determineEligibilityAndUpdateJourney(journey: Journey.Stages.ComputedTaxId)(implicit r: AuthenticatedJourneyRequest[_]): Future[Result] = {
-    /**
-     * TODO: return this function to whats in comment below, it's been changed to a disgusting hacky fix to cater for ETMP/IF errors downstream
-     * for {
-     * eligibilityCheckResult <- ttpService.determineEligibility(journey)
-     * _ = auditService.auditEligibilityCheck(journey, eligibilityCheckResult)
-     * updatedJourney <- journeyService.updateEligibilityCheckResult(journey.id, eligibilityCheckResult)
-     * } yield Redirect(Routing.next(updatedJourney))
-     */
     val maybeEligibilityCheckResult: Future[Option[EligibilityCheckResult]] = for {
       eligibilityCheckResult: Option[EligibilityCheckResult] <- ttpService.determineEligibility(journey)
     } yield eligibilityCheckResult
