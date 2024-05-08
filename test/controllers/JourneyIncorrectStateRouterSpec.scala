@@ -40,10 +40,13 @@ class JourneyIncorrectStateRouterSpec extends ItSpec {
       ("Stages.EligibilityChecked", () => EssttpBackend.EligibilityCheck.findJourney(testCrypto)(), PageUrls.yourBillIsUrl), //check this
       ("Stages.EligibilityChecked - PAYE", () => EssttpBackend.EligibilityCheck.findJourney(testCrypto)(
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(Origins.Epaye.Bta)
-      ), PageUrls.payeNotEligibleUrl),
+      ), PageUrls.epayeRLSUrl),
       ("Stages.EligibilityChecked - VAT", () => EssttpBackend.EligibilityCheck.findJourney(testCrypto)(
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(Origins.Vat.Bta)
-      ), PageUrls.vatNotEligibleUrl),
+      ), PageUrls.vatRLSUrl),
+      ("Stages.EligibilityChecked - SA", () => EssttpBackend.EligibilityCheck.findJourney(testCrypto)(
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(Origins.Sa.Bta)
+      ), PageUrls.saRLSUrl),
       ("Stages.AnsweredCanPayUpfront - can pay upfront", () => EssttpBackend.CanPayUpfront.findJourney(testCrypto)(), PageUrls.howMuchCanYouPayUpfrontUrl),
       ("Stages.AnsweredCanPayUpfront - can't pay upfront",
         () => EssttpBackend.CanPayUpfront.findJourney(testCrypto)(JourneyJsonTemplates.`Answered Can Pay Upfront - No`(Origins.Epaye.Bta)(testCrypto)),

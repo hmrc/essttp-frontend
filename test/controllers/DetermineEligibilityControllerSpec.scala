@@ -38,13 +38,13 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
   "Determine eligibility endpoint should route user correctly and send an audit event" - {
     forAll(Table(
       ("Scenario flavour", "eligibility rules", "ineligibility reason audit string", "expected redirect", "updated journey json", "origin"),
-      ("HasRlsOnAddress - EPAYE", TdAll.notEligibleHasRlsOnAddress, "hasRlsOnAddress", PageUrls.payeNotEligibleUrl,
+      ("HasRlsOnAddress - EPAYE", TdAll.notEligibleHasRlsOnAddress, "hasRlsOnAddress", PageUrls.epayeRLSUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(Origins.Epaye.Bta),
         Origins.Epaye.Bta),
-      ("HasRlsOnAddress - VAT", TdAll.notEligibleHasRlsOnAddress, "hasRlsOnAddress", PageUrls.vatNotEligibleUrl,
+      ("HasRlsOnAddress - VAT", TdAll.notEligibleHasRlsOnAddress, "hasRlsOnAddress", PageUrls.vatRLSUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(Origins.Vat.Bta),
         Origins.Vat.Bta),
-      ("HasRlsOnAddress - SA", TdAll.notEligibleHasRlsOnAddress, "hasRlsOnAddress", PageUrls.saNotEligibleUrl,
+      ("HasRlsOnAddress - SA", TdAll.notEligibleHasRlsOnAddress, "hasRlsOnAddress", PageUrls.saRLSUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(Origins.Sa.Bta),
         Origins.Sa.Bta),
       ("MarkedAsInsolvent - EPAYE", TdAll.notEligibleMarkedAsInsolvent, "markedAsInsolvent", PageUrls.payeNotEligibleUrl,

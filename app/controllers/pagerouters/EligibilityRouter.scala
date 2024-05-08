@@ -36,7 +36,7 @@ object EligibilityRouter {
         case ee @ Some(MultipleReasons) =>
           determineWhetherToGoToDebtTooSmall(ee, eligibilityResult.eligibilityRules.isLessThanMinDebtAllowance, eligibilityResult.eligibilityRules.noDueDatesReached, taxRegime)
         case None                                    => whichGenericIneligiblePage(taxRegime)
-        case Some(HasRlsOnAddress)                   => whichGenericIneligiblePage(taxRegime)
+        case Some(HasRlsOnAddress)                   => whichGenericRLSPage(taxRegime)
         case Some(MarkedAsInsolvent)                 => whichGenericIneligiblePage(taxRegime)
         case Some(IsLessThanMinDebtAllowance)        => whichDebtTooSmallPage(taxRegime)
         case Some(IsMoreThanMaxDebtAllowance)        => whichDebtTooLargePage(taxRegime)
@@ -129,5 +129,11 @@ object EligibilityRouter {
     case TaxRegime.Epaye => routes.IneligibleController.epayeNoDueDatesReachedPage
     case TaxRegime.Vat   => routes.IneligibleController.vatNoDueDatesReachedPage
     case TaxRegime.Sa    => throw new NotImplementedError("Ineligibility reason not relevant to SA")
+  }
+
+  private def whichGenericRLSPage(taxRegime: TaxRegime): Call = taxRegime match {
+    case TaxRegime.Epaye => routes.IneligibleController.epayeRLSPage
+    case TaxRegime.Vat   => routes.IneligibleController.vatRLSPage
+    case TaxRegime.Sa    => routes.IneligibleController.saRLSPage
   }
 }

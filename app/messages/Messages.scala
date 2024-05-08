@@ -482,6 +482,34 @@ object Messages {
         )
     }
 
+    val `Update your personal details to use this service`: Message = Message(
+      english = "Update your personal details to use this service",
+      welsh   = "Diweddaru’ch manylion personol i ddefnyddio’r gwasanaeth hwn"
+    )
+
+    def `Generic RLS message`(taxRegime: TaxRegime): Message = taxRegime match {
+      case TaxRegime.Epaye =>
+        Message(
+          english = "You cannot set up an Employers’ PAYE payment plan online because some of your personal details are not up to date.",
+          welsh   = "Ni allwch drefnu cynllun talu ar gyfer TWE y Cyflogwr ar-lein oherwydd nad yw rhai o’ch manylion personol yn gyfredol."
+        )
+      case TaxRegime.Vat =>
+        Message(
+          english = "You cannot set up a VAT payment plan online because some of your personal details are not up to date.",
+          welsh   = "Ni allwch drefnu cynllun talu TAW ar-lein oherwydd nad yw rhai o’ch manylion personol yn gyfredol."
+        )
+      case TaxRegime.Sa =>
+        Message(
+          english = "You cannot set up a Self Assessment payment plan online because some of your personal details are not up to date.",
+          welsh   = "Ni allwch drefnu cynllun talu Hunanasesiad ar-lein oherwydd nad yw rhai o’ch manylion personol yn gyfredol."
+        )
+    }
+
+    def `You must update your details with HMRC`(link: String): Message = Message(
+      english = s"""You must <a href="$link" class="govuk-link">update your details with HMRC</a>. After you’ve updated your details, wait 3 working days before trying again online.""",
+      welsh   = s"""Mae’n rhaid i chi <a href="$link" class="govuk-link">roi’ch manylion newydd i CThEF</a>. Ar ôl i chi diweddaru’ch manylion, arhoswch 3 diwrnod gwaith cyn rhoi tro arall arni ar-lein."""
+    )
+
     def `File your return to use this service`(taxRegime: TaxRegime): Message = taxRegime match {
       case TaxRegime.Epaye =>
         Message(

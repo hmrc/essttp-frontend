@@ -61,7 +61,7 @@ object JourneyJsonTemplates {
 
   def `Eligibility Checked - Ineligible - MarkedAsInsolvent`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,
-    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleHasRls(origin.taxRegime, encrypter),
+    journeyInfo = JourneyInfo.eligibilityCheckedMarkedAsInsolvent(origin.taxRegime, encrypter),
     origin      = origin
   )
 
