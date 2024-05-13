@@ -62,7 +62,7 @@ class YourBillController @Inject() (
     } catch {
       // SA only: if MainTrans is not found, see README
       case e: NoSuchElementException =>
-        logger.warn(s"The MainTrans did not have a corresponding charge type to display: ${e.toString}")
+        logger.warn(s"MainTrans with no corresponding charge type: ${e.toString}")
         Redirect(routes.IneligibleController.saGenericIneligiblePage)
     }
   }
