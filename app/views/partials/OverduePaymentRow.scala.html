@@ -54,7 +54,7 @@
             s"${Messages.YourBill.`Bill due`.show} ${govDateFormat(payment.invoicePeriod.dueDate)}"
 
         case TaxRegime.Sa =>
-           Messages.YourBill.`Balancing payment for tax year`(payment.invoicePeriod.start.getYear, payment.invoicePeriod.end.getYear).show
+           Messages.YourBill.`ChargeTypeRow`(payment.mainTrans, payment.invoicePeriod.start.getYear, payment.invoicePeriod.end.getYear).show
 
     }
 

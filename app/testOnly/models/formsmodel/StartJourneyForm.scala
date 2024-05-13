@@ -19,10 +19,10 @@ package testOnly.models.formsmodel
 import cats.syntax.either._
 import config.AppConfig
 import essttp.journey.model.{Origin, Origins}
-import essttp.rootmodel.{AmountInPence, EmpRef, SaUtr, TaxId, TaxRegime, Vrn}
+import essttp.rootmodel._
 import models.MoneyUtil.{amountOfMoneyFormatter, formatAmountOfMoneyWithoutPoundSign}
 import models.{EligibilityError, EligibilityErrors, Language}
-import play.api.data.Forms.{boolean, mapping, number, optional, seq}
+import play.api.data.Forms._
 import play.api.data._
 import play.api.data.format.Formatter
 import testOnly.messages.Messages
@@ -46,7 +46,8 @@ final case class StartJourneyForm(
     chargeBeforeMaxAccountingDate: Option[Boolean],
     ddInProgress:                  Option[Boolean],
     planMinLength:                 Int,
-    planMaxLength:                 Int
+    planMaxLength:                 Int,
+    mainTrans:                     Int
 )
 
 object StartJourneyForm {
@@ -71,7 +72,8 @@ object StartJourneyForm {
         "chargeBeforeMaxAccountingDate" -> chargesOptionalFieldsMapping,
         "ddInProgress" -> chargesOptionalFieldsMapping,
         "planMinLength" -> number,
-        "planMaxLength" -> number
+        "planMaxLength" -> number,
+        "mainTrans" -> number
       )(StartJourneyForm.apply)(StartJourneyForm.unapply)
     )
   }

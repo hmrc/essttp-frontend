@@ -51,13 +51,21 @@ class YourBillController @Inject() (
     }
   }
 
-  private def displayPage(journey: Journey.AfterEligibilityChecked)(implicit request: Request[_]): Result =
-    Ok(
-      views.yourBillIs(
-        YourBillController.overDuePayments(journey.eligibilityCheckResult),
-        journey.taxRegime
+  private def displayPage(journey: Journey.AfterEligibilityChecked)(implicit request: Request[_]): Result = {
+    try {
+      Ok(
+        views.yourBillIs(
+          YourBillController.overDuePayments(journey.eligibilityCheckResult),
+          journey.taxRegime
+        )
       )
-    )
+    } catch {
+      // SA only: if MainTrans is not found, see README
+      case e: NoSuchElementException =>
+        logger.warn(s"The MainTrans did not have a corresponding charge type to display: ${e.toString}")
+        Redirect(routes.IneligibleController.saGenericIneligiblePage)
+    }
+  }
 
   val yourBillSubmit: Action[AnyContent] = as.eligibleJourneyAction { eligibilityRequest =>
     if (YourBillController.hasAnyChargesWithDdInProgress(eligibilityRequest.eligibilityCheckResult)) {
@@ -132,8 +140,13 @@ object YourBillController {
     if (month >= 4) month - 3 else month + 9
   }
 
-  private def overDuePaymentOf(ass: ChargeTypeAssessment): OverduePayment =
-    OverduePayment(invoicePeriod(ass), ass.debtTotalAmount.value, chargeBearsInterest(ass), ddInProgress(ass))
+  private def overDuePaymentOf(ass: ChargeTypeAssessment): OverduePayment = {
+    val mainTrans = ass.charges.headOption.map(_.mainTrans).getOrElse(
+      throw new RuntimeException("This charge did not have a MainTrans")
+    )
+
+    OverduePayment(invoicePeriod(ass), ass.debtTotalAmount.value, chargeBearsInterest(ass), ddInProgress(ass), mainTrans)
+  }
 
   private def qualifyingDebt(eligibilityResult: EligibilityCheckResult): AmountInPence =
     eligibilityResult.chargeTypeAssessment.map(_.debtTotalAmount.value).fold(AmountInPence.zero)(_ + _)
