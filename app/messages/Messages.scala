@@ -16,6 +16,7 @@
 
 package messages
 
+import essttp.rootmodel.ttp.eligibility.MainTrans
 import essttp.rootmodel.{AmountInPence, Email, TaxRegime}
 import models.Languages
 import models.forms.BankDetailsForm._
@@ -183,10 +184,26 @@ object Messages {
       )
     }
 
-    def `Balancing payment for tax year`(taxYearStartYear: Int, taxYearEndYear: Int): Message = Message(
-      english = s"Balancing payment for tax year ${taxYearStartYear.toString} to ${taxYearEndYear.toString}",
-      welsh   = s"Taliad mantoli ar gyfer blwyddyn dreth ${taxYearStartYear.toString} i ${taxYearEndYear.toString}"
-    )
+    def `ChargeTypeRow`(mTrans: MainTrans, taxYearStartYear: Int, taxYearEndYear: Int): Message = {
+
+      val chargeTypeDescriptionEnglish: String = ChargeTypeMessages.chargeFromMTrans.get(mTrans).map(_.english)
+        .getOrElse(
+          throw MainTrans.UnknownMainTransException(mTrans)
+        )
+
+      val chargeTypeDescriptionWelsh: String = ChargeTypeMessages.chargeFromMTrans.get(mTrans).map(_.show(Languages.Welsh))
+        .getOrElse(
+          throw MainTrans.UnknownMainTransException(mTrans)
+        )
+
+      val forTaxYearEnglish: String = s"for tax year ${taxYearStartYear.toString} to ${taxYearEndYear.toString}"
+      val forTaxYearWelsh: String = s"ar gyfer blwyddyn dreth ${taxYearStartYear.toString} i ${taxYearEndYear.toString}"
+
+      Message(
+        english = s"$chargeTypeDescriptionEnglish $forTaxYearEnglish",
+        welsh   = s"$chargeTypeDescriptionWelsh $forTaxYearWelsh"
+      )
+    }
 
   }
 

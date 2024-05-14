@@ -18,6 +18,8 @@ package controllers
 
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.TaxRegime
+import essttp.rootmodel.ttp.eligibility.MainTrans
+import messages.ChargeTypeMessages.chargeFromMTrans
 import models.Languages
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -157,20 +159,69 @@ class YourBillControllerSpec extends ItSpec {
       tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£1,000"
     }
 
-    "return your bill page for SA" in {
+    "return your bill page for SA for known MainTrans code" in {
+      val mTransCodes = List("5060", "4910", "5050", "4950", "4990", "5210", "4920", "4930", "5190", "4960", "4970", "5010", "5020",
+        "6010", "5110", "5120", "5130", "5080", "5100", "5070", "5140", "4940", "5150", "5160", "4980", "5170", "5200", "5071",
+        "5180", "5090", "5030", "5040", "5073", "4000", "4001", "4002", "4003", "4026")
+
+      mTransCodes.size shouldBe chargeFromMTrans.size
+
+      for {
+        code <- mTransCodes
+      } {
+        val origin = Origins.Sa.Bta
+        val journeyJson = eligibleJsonWithChargeTypeAssessmentItems(
+          chargeTypeAssessmentItemJson(
+            taxPeriodFrom           = LocalDate.of(2020, 4, 4),
+            taxPeriodTo             = LocalDate.of(2021, 4, 4),
+            isInterestBearingCharge = true,
+            dueDate                 = LocalDate.of(2020, 6, 15),
+            mainTrans               = MainTrans(code)
+          )
+        )(origin)
+
+        stubCommonActions()
+        EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin)(journeyJson)
+
+        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+        val result: Future[Result] = controller.yourBill(fakeRequest)
+        val pageContent: String = contentAsString(result)
+        val doc: Document = Jsoup.parse(pageContent)
+
+        RequestAssertions.assertGetRequestOk(result)
+        ContentAssertions.commonPageChecks(
+          doc,
+          expectedH1              = "Your Self Assessment tax bill is £10,000",
+          shouldBackLinkBePresent = true,
+          expectedSubmitUrl       = Some(routes.YourBillController.yourBillSubmit.url),
+          regimeBeingTested       = Some(TaxRegime.Sa)
+        )
+
+        val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
+        tableRows.size shouldBe 1
+
+        tableRows(0).select(".govuk-summary-list__key").text() shouldBe s"Due 15 June 2020 ${chargeFromMTrans(MainTrans(code)).english} for tax year 2020 to 2021"
+        tableRows(0).select(".govuk-summary-list__value").text() shouldBe "£10,000 (includes interest added to date)"
+      }
+    }
+
+    "return sa generic ineligible page for unknown MainTrans code" in {
       val origin = Origins.Sa.Bta
       val journeyJson = eligibleJsonWithChargeTypeAssessmentItems(
         chargeTypeAssessmentItemJson(
           taxPeriodFrom           = LocalDate.of(2020, 4, 4),
           taxPeriodTo             = LocalDate.of(2021, 4, 4),
           isInterestBearingCharge = true,
-          dueDate                 = LocalDate.of(2020, 6, 15)
+          dueDate                 = LocalDate.of(2020, 6, 15),
+          mainTrans               = MainTrans("4910")
         ),
         chargeTypeAssessmentItemJson(
           taxPeriodFrom           = LocalDate.of(2021, 4, 4),
           taxPeriodTo             = LocalDate.of(2022, 4, 4),
           isInterestBearingCharge = false,
-          dueDate                 = LocalDate.of(2021, 7, 13)
+          dueDate                 = LocalDate.of(2021, 7, 13),
+          mainTrans               = MainTrans("mainTransNotInTable")
         )
       )(origin)
 
@@ -178,28 +229,10 @@ class YourBillControllerSpec extends ItSpec {
       EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin)(journeyJson)
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
       val result: Future[Result] = controller.yourBill(fakeRequest)
-      val pageContent: String = contentAsString(result)
-      val doc: Document = Jsoup.parse(pageContent)
 
-      RequestAssertions.assertGetRequestOk(result)
-      ContentAssertions.commonPageChecks(
-        doc,
-        expectedH1              = "Your Self Assessment tax bill is £20,000",
-        shouldBackLinkBePresent = true,
-        expectedSubmitUrl       = Some(routes.YourBillController.yourBillSubmit.url),
-        regimeBeingTested       = Some(TaxRegime.Sa)
-      )
-
-      val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
-      tableRows.size shouldBe 2
-
-      tableRows(0).select(".govuk-summary-list__key").text() shouldBe "Due 15 June 2020 Balancing payment for tax year 2020 to 2021"
-      tableRows(0).select(".govuk-summary-list__value").text() shouldBe "£10,000 (includes interest added to date)"
-
-      tableRows(1).select(".govuk-summary-list__key").text() shouldBe "Due 13 July 2021 Balancing payment for tax year 2021 to 2022"
-      tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£10,000"
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.IneligibleController.saGenericIneligiblePage.url)
     }
   }
 
@@ -395,7 +428,8 @@ class YourBillControllerSpec extends ItSpec {
       taxPeriodFrom:           LocalDate,
       taxPeriodTo:             LocalDate,
       isInterestBearingCharge: Boolean,
-      dueDate:                 LocalDate
+      dueDate:                 LocalDate,
+      mainTrans:               MainTrans
   ): String =
     s"""{
        |  "taxPeriodFrom" : "${DateTimeFormatter.ISO_DATE.format(taxPeriodFrom)}",
@@ -407,7 +441,7 @@ class YourBillControllerSpec extends ItSpec {
        |        "chargeType" : "InYearRTICharge-Tax",
        |        "mainType" : "InYearRTICharge(FPS)",
        |        "chargeReference" : "9000064909",
-       |        "mainTrans" : "mainTrans",
+       |        "mainTrans" : "${mainTrans.value}",
        |        "subTrans" : "subTrans",
        |        "outstandingAmount" : 1000000,
        |        "interestStartDate" : "2017-03-07",

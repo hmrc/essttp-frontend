@@ -79,6 +79,12 @@ see here for more BARs stub data https://github.com/hmrc/bank-account-reputation
 
 ---
 
+### MainTrans codes for SA
+In SA we look up the MainTrans code received in ChargeReference and display the corresponding charge
+type in the 'You Bill' page. If the code does not have a corresponding charge description, the user is taken to the 
+generic sa ineligibility kick out page. See the entire [table here](https://confluence.tools.tax.service.gov.uk/display/SSTTP/Your+Bill+translations)
+
+
 ### Navigating through quickly with Tampermonkey
 A script has been created to be used with [Tampermonkey](https://www.tampermonkey.net/) to enable fast navigation through 
 the service to make testing easier. To make use of it, install the Tampermonkey browser extension on your browser and
