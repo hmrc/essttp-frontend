@@ -296,6 +296,7 @@ object StartJourneyController {
     val interestAmount: AmountInPence = AmountInPence(form.interestAmount.getOrElse(BigDecimal(0)))
     val mainTrans: String = form.mainTrans.getOrElse(4910).toString // defaults to 4910, which  corresponds to 'Balancing Payment'
 
+
     val maybeCustomerDetail =
       if (form.emailAddressPresent) Some(List(CustomerDetail(Some(Email(SensitiveString("bobross@joyofpainting.com"))), Some(EmailSource.ETMP))))
       else Some(List.empty)

@@ -74,6 +74,7 @@ object StartJourneyForm {
         "planMinLength" -> number,
         "planMaxLength" -> number,
         "mainTrans" -> optional(number)
+
       )(StartJourneyForm.apply)(StartJourneyForm.unapply)
     )
   }
