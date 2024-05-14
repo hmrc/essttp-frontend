@@ -47,7 +47,7 @@ final case class StartJourneyForm(
     ddInProgress:                  Option[Boolean],
     planMinLength:                 Int,
     planMaxLength:                 Int,
-    mainTrans:                     Int
+    mainTrans:                     Option[Int]
 )
 
 object StartJourneyForm {
@@ -73,7 +73,8 @@ object StartJourneyForm {
         "ddInProgress" -> chargesOptionalFieldsMapping,
         "planMinLength" -> number,
         "planMaxLength" -> number,
-        "mainTrans" -> number
+        "mainTrans" -> optional(number)
+
       )(StartJourneyForm.apply)(StartJourneyForm.unapply)
     )
   }
