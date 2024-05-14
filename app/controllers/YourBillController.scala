@@ -21,7 +21,7 @@ import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import essttp.journey.model.Journey
 import essttp.rootmodel.AmountInPence
-import essttp.rootmodel.ttp.eligibility.{ChargeTypeAssessment, Charges, EligibilityCheckResult}
+import essttp.rootmodel.ttp.eligibility.{ChargeTypeAssessment, Charges, EligibilityCheckResult, MainTrans}
 import essttp.rootmodel.ttp.{DdInProgress, IsInterestBearingCharge}
 import models.{InvoicePeriod, OverDuePayments, OverduePayment}
 import play.api.mvc._
@@ -61,8 +61,8 @@ class YourBillController @Inject() (
       )
     } catch {
       // SA only: if MainTrans is not found, see README
-      case e: NoSuchElementException =>
-        logger.warn(s"MainTrans with no corresponding charge type: ${e.toString}")
+      case e: MainTrans.UnknownMainTransException =>
+        logger.warn(s"${e.getClass.getName}: MainTrans with no corresponding charge type: ${e.mTrans.value}")
         Redirect(routes.IneligibleController.saGenericIneligiblePage)
     }
   }

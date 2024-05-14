@@ -40,7 +40,6 @@ object ChargeTypeMessages {
     MainTrans("5130") -> Message(english = "12 months late payment penalty", welsh = "Cosb am dalu 12 mis yn hwyr"),
     MainTrans("5080") -> Message(english = "Penalty", welsh = "Cosb"),
     MainTrans("5100") -> Message(english = "Amount no longer included in Tax Code", welsh = "Swm sydd heb ei gynnwys yn y Cod Treth mwyach"),
-    MainTrans("5060") -> Message(english = "Revenue assessment", welsh = "Asesiad refeniw"),
     MainTrans("5070") -> Message(english = "Repayment supplement", welsh = "Atodiad ad-daliad"),
     MainTrans("5140") -> Message(english = "First penalty for late tax return", welsh = "Cosb gyntaf ar gyfer Ffurflen Dreth hwyr"),
     MainTrans("4940") -> Message(english = "First penalty for late tax return", welsh = "Cosb gyntaf ar gyfer Ffurflen Dreth hwyr"),

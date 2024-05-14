@@ -80,54 +80,9 @@ see here for more BARs stub data https://github.com/hmrc/bank-account-reputation
 ---
 
 ### MainTrans codes for SA
-In SA we look up the MainTrans code received in ChargeReference in the table below and display the corresponding charge
-type in the 'You Bill' page. If the code does not have a corresponding charge description, the user is take to the 
-generic sa ineligibility kick out page.
-
-| Main Trans code | English description                            | Welsh description                                   |
-|-----------------|------------------------------------------------|-----------------------------------------------------|
-| 5060            | Revenue assessment                             | Asesiad refeniw                                     |
-|                 | Balancing Charge Credit                        | Credyd cost mantoli                                 |
-| 4910            | Balancing payment                              | Taliad mantoli                                      |
-| 5050            | Revenue Determination                          | Penderfyniad refeniw                                |
-| 4950            | Daily penalty                                  | Cosb ddyddiol                                       |
-| 4990            | Partnership daily penalty                      | Cosb ddyddiol i bartneriaeth                        |
-| 5210            | Enquiry Amendment                              | Diwygiad ymholiad                                   |
-| 4920            | First payment on account                       | Taliad ar gyfrif cyntaf                             |
-| 4930            | Second payment on account                      | Ail daliad ar gyfrif                                |
-| 5190            | Enquiry Amendment                              | Diwygiad ymholiad                                   |
-| 4960            | 6 month late filing penalty                    | Cosb am gyflwyno 6 mis yn hwyr                      |
-| 4970            | 12 month late filing penalty                   | Cosb am gyflwyno 12 mis yn hwyr                     |
-| 5010            | Partnership 6 months late filing penalty       | Cosb i bartneriaeth am gyflwyno 6 mis yn hwyr       |
-| 5020            | Partnership 12 months late filing penalty      | Cosb i bartneriaeth am gyflwyno 12 mis yn hwyr      |
-| 6010            | Late Payment interest                          | Llog ar daliadau hwyr                               |
-| 5110            | 30 days late payment penalty                   | Cosb am dalu 30 diwrnod yn hwyr                     |
-| 5120            | 6 months late payment penalty                  | Cosb am dalu 6 mis yn hwyr                          |
-| 5130            | 12 months late payment penalty                 | Cosb am dalu 12 mis yn hwyr                         |
-| 5080            | Penalty                                        | Cosb                                                |
-| 5100            | Amount no longer included in Tax Code          | Swm sydd heb ei gynnwys yn y Cod Treth mwyach       |
-| 5060            | Revenue assessment                             | Asesiad refeniw                                     |
-| 5070            | Repayment supplement                           | Atodiad ad-daliad                                   |
-| 5140            | First penalty for late tax return              | Cosb gyntaf ar gyfer Ffurflen Dreth hwyr            |
-| 4940            | First penalty for late tax return              | Cosb gyntaf ar gyfer Ffurflen Dreth hwyr            |
-| 5150            | Second penalty for late tax return             | Ail gosb ar gyfer Ffurflen Dreth hwy                |
-|                 | Late filing penalty                            | Cosb am gyflwyno'n hwyr                             |
-| 5160            | First penalty for late partnership tax return  | Cosb gyntaf ar gyfer Ffurflen Dreth Partneriae hwyr |
-| 4980            | First penalty for late partnership tax return  | Cosb gyntaf ar gyfer Ffurflen Dreth Partneriae hwyr |
-| 5170            | Second penalty for late partnership tax return | Ail gosb ar gyfer Ffurflen Dreth Partneriaeth hwr   |
-|                 | Partnership late filing penalty                | Cosb i bartneriaeth am gyflwyno'n hwyr              |
-| 5200            | Tax return amendment                           | Diwygiad i'r Ffurflen Dreth                         |
-| 5071            | Repayment                                      | Ad-daliad                                           |
-| 5180            | Enquiry amendment                              | Diwygiad ymholiad                                   |
-| 5090            | Amount no longer included in tax code          | Swm sydd heb ei gynnwys yn y cod treth mwyach       |
-| 5030            | First surcharge for late payment               | Gordal cyntaf ar gyfer taliad hwyr                  |
-| 5040            | Second surcharge for late payment              | Ail ordal ar gyfer taliad hwyr                      |
-| 5073            | Transfer to OAS                                | Trosglwyddo i OAS                                   |
-| 4000            | HMRC adjustment                                | Addasiad gan CThEF                                  |
-| 4001            | HMRC adjustment                                | Addasiad gan CThEF                                  |
-| 4002            | HMRC adjustment                                | Addasiad gan CThEF                                  |
-| 4003            | HMRC adjustment                                | Addasiad gan CThEF                                  |
-| 4026            | ITSA Penalty Interest                          | Llog ar gosb ITSA                                   |
+In SA we look up the MainTrans code received in ChargeReference and display the corresponding charge
+type in the 'You Bill' page. If the code does not have a corresponding charge description, the user is taken to the 
+generic sa ineligibility kick out page. See the entire [table here](https://confluence.tools.tax.service.gov.uk/display/SSTTP/Your+Bill+translations)
 
 
 ### Navigating through quickly with Tampermonkey

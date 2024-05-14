@@ -186,9 +186,15 @@ object Messages {
 
     def `ChargeTypeRow`(mTrans: MainTrans, taxYearStartYear: Int, taxYearEndYear: Int): Message = {
 
-      val chargeTypeDescriptionEnglish: String = ChargeTypeMessages.chargeFromMTrans(mTrans).english
+      val chargeTypeDescriptionEnglish: String = ChargeTypeMessages.chargeFromMTrans.get(mTrans).map(_.english)
+        .getOrElse(
+          throw MainTrans.UnknownMainTransException(mTrans)
+        )
 
-      val chargeTypeDescriptionWelsh: String = ChargeTypeMessages.chargeFromMTrans(mTrans).show(Languages.Welsh)
+      val chargeTypeDescriptionWelsh: String = ChargeTypeMessages.chargeFromMTrans.get(mTrans).map(_.show(Languages.Welsh))
+        .getOrElse(
+          throw MainTrans.UnknownMainTransException(mTrans)
+        )
 
       val forTaxYearEnglish: String = s"for tax year ${taxYearStartYear.toString} to ${taxYearEndYear.toString}"
       val forTaxYearWelsh: String = s"ar gyfer blwyddyn dreth ${taxYearStartYear.toString} i ${taxYearEndYear.toString}"
