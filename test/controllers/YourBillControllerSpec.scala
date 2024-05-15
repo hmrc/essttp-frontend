@@ -206,33 +206,51 @@ class YourBillControllerSpec extends ItSpec {
       }
     }
 
-    "return sa generic ineligible page for unknown MainTrans code" in {
-      val origin = Origins.Sa.Bta
-      val journeyJson = eligibleJsonWithChargeTypeAssessmentItems(
-        chargeTypeAssessmentItemJson(
-          taxPeriodFrom           = LocalDate.of(2020, 4, 4),
-          taxPeriodTo             = LocalDate.of(2021, 4, 4),
-          isInterestBearingCharge = true,
-          dueDate                 = LocalDate.of(2020, 6, 15),
-          mainTrans               = MainTrans("4910")
-        ),
-        chargeTypeAssessmentItemJson(
-          taxPeriodFrom           = LocalDate.of(2021, 4, 4),
-          taxPeriodTo             = LocalDate.of(2022, 4, 4),
-          isInterestBearingCharge = false,
-          dueDate                 = LocalDate.of(2021, 7, 13),
-          mainTrans               = MainTrans("mainTransNotInTable")
-        )
-      )(origin)
+    "return sa generic ineligible page" - {
+      "for unknown MainTrans code" in {
+        val origin = Origins.Sa.Bta
+        val journeyJson = eligibleJsonWithChargeTypeAssessmentItems(
+          chargeTypeAssessmentItemJson(
+            taxPeriodFrom           = LocalDate.of(2020, 4, 4),
+            taxPeriodTo             = LocalDate.of(2021, 4, 4),
+            isInterestBearingCharge = true,
+            dueDate                 = LocalDate.of(2020, 6, 15),
+            mainTrans               = MainTrans("mainTransNotInTable")
+          )
+        )(origin)
 
-      stubCommonActions()
-      EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin)(journeyJson)
+        stubCommonActions()
+        EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin)(journeyJson)
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val result: Future[Result] = controller.yourBill(fakeRequest)
+        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+        val result: Future[Result] = controller.yourBill(fakeRequest)
 
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.IneligibleController.saGenericIneligiblePage.url)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.IneligibleController.saGenericIneligiblePage.url)
+      }
+
+      "for ChargeTypeAssessment containing charges with different MainTrans" in {
+        val origin = Origins.Sa.Bta
+        val journeyJson = eligibleJsonWithChargeTypeAssessmentItems(
+          chargeTypeAssessmentWithMultipleChargesItemJson(
+            taxPeriodFrom           = LocalDate.of(2020, 4, 4),
+            taxPeriodTo             = LocalDate.of(2021, 4, 4),
+            isInterestBearingCharge = true,
+            dueDate                 = LocalDate.of(2020, 6, 15),
+            mainTrans1              = MainTrans("4910"),
+            mainTrans2              = MainTrans("4920")
+          )
+        )(origin)
+
+        stubCommonActions()
+        EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin)(journeyJson)
+
+        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+        val result: Future[Result] = controller.yourBill(fakeRequest)
+
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.IneligibleController.saGenericIneligiblePage.url)
+      }
     }
   }
 
@@ -462,6 +480,68 @@ class YourBillControllerSpec extends ItSpec {
        |  ]
        |}
        |""".stripMargin
+
+  def chargeTypeAssessmentWithMultipleChargesItemJson(
+      taxPeriodFrom:           LocalDate,
+      taxPeriodTo:             LocalDate,
+      isInterestBearingCharge: Boolean,
+      dueDate:                 LocalDate,
+      mainTrans1:              MainTrans,
+      mainTrans2:              MainTrans
+  ): String =
+    s"""{
+         |  "taxPeriodFrom" : "${DateTimeFormatter.ISO_DATE.format(taxPeriodFrom)}",
+         |  "taxPeriodTo" : "${DateTimeFormatter.ISO_DATE.format(taxPeriodTo)}",
+         |  "debtTotalAmount" : 1000000,
+         |  "chargeReference" : "A00000000001",
+         |  "charges" : [
+         |    {
+         |        "chargeType" : "InYearRTICharge-Tax",
+         |        "mainType" : "InYearRTICharge(FPS)",
+         |        "chargeReference" : "9000064909",
+         |        "mainTrans" : "${mainTrans1.value}",
+         |        "subTrans" : "subTrans",
+         |        "outstandingAmount" : 1000000,
+         |        "interestStartDate" : "2017-03-07",
+         |        "isInterestBearingCharge": ${isInterestBearingCharge.toString},
+         |        "dueDate" : "${DateTimeFormatter.ISO_DATE.format(dueDate)}",
+         |        "accruedInterest" : 0,
+         |        "ineligibleChargeType" : false,
+         |        "chargeOverMaxDebtAge" : false,
+         |        "locks" : [
+         |            {
+         |                "lockType" : "Payment",
+         |                "lockReason" : "Risk/Fraud",
+         |                "disallowedChargeLockType" : false
+         |            }
+         |        ],
+         |        "dueDateNotReached" : false
+         |    },
+         |        {
+         |        "chargeType" : "InYearRTICharge-Tax",
+         |        "mainType" : "InYearRTICharge(FPS)",
+         |        "chargeReference" : "9000064908",
+         |        "mainTrans" : "${mainTrans2.value}",
+         |        "subTrans" : "subTrans",
+         |        "outstandingAmount" : 1000000,
+         |        "interestStartDate" : "2017-03-07",
+         |        "isInterestBearingCharge": ${isInterestBearingCharge.toString},
+         |        "dueDate" : "${DateTimeFormatter.ISO_DATE.format(dueDate)}",
+         |        "accruedInterest" : 0,
+         |        "ineligibleChargeType" : false,
+         |        "chargeOverMaxDebtAge" : false,
+         |        "locks" : [
+         |            {
+         |                "lockType" : "Payment",
+         |                "lockReason" : "Risk/Fraud",
+         |                "disallowedChargeLockType" : false
+         |            }
+         |        ],
+         |        "dueDateNotReached" : false
+         |    }
+         |  ]
+         |}
+         |""".stripMargin
 
 }
 

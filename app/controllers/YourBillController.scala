@@ -17,6 +17,7 @@
 package controllers
 
 import _root_.actions.Actions
+import cats.syntax.eq._
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import essttp.journey.model.Journey
@@ -60,9 +61,11 @@ class YourBillController @Inject() (
         )
       )
     } catch {
-      // SA only: if MainTrans is not found, see README
       case e: MainTrans.UnknownMainTransException =>
         logger.warn(s"${e.getClass.getName}: MainTrans with no corresponding charge type: ${e.mTrans.value}")
+        Redirect(routes.IneligibleController.saGenericIneligiblePage)
+      case e: ChargeTypeAssessment.ChargesWithDifferentMTransException =>
+        logger.warn(s"${e.getClass.getName}: ChargeTypeAssessment has charges with different MainTrans: ${e.charges.map(_.mainTrans).toString}")
         Redirect(routes.IneligibleController.saGenericIneligiblePage)
     }
   }
@@ -141,8 +144,11 @@ object YourBillController {
   }
 
   private def overDuePaymentOf(ass: ChargeTypeAssessment): OverduePayment = {
-    val mainTrans = ass.charges.headOption.map(_.mainTrans).getOrElse(
-      throw new RuntimeException("This charge did not have a MainTrans")
+    val maybeMainTrans = ass.charges.map(_.mainTrans).reduceOption((a, b) =>
+      if (a === b) a else throw ChargeTypeAssessment.ChargesWithDifferentMTransException(ass.charges))
+
+    val mainTrans = maybeMainTrans.getOrElse(
+      throw new RuntimeException("This should not be possible: A charge did not have a MainTrans")
     )
 
     OverduePayment(invoicePeriod(ass), ass.debtTotalAmount.value, chargeBearsInterest(ass), ddInProgress(ass), mainTrans)
