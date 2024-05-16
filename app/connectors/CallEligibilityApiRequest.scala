@@ -16,17 +16,36 @@
 
 package connectors
 
-import play.api.libs.json.{Json, OFormat}
+import essttp.rootmodel.ttp.eligibility.{IdType, IdValue, Identification}
+import models.EligibilityReqIdentificationFlag
+import play.api.libs.json.{Json, OWrites}
 
 final case class CallEligibilityApiRequest(
     channelIdentifier:         String,
-    idType:                    String,
-    idValue:                   String,
+    identification:            List[Identification],
     regimeType:                String,
     returnFinancialAssessment: Boolean
 )
 
 object CallEligibilityApiRequest {
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  implicit val format: OFormat[CallEligibilityApiRequest] = Json.format[CallEligibilityApiRequest]
+  implicit def customWritesFormat(implicit e: EligibilityReqIdentificationFlag): OWrites[CallEligibilityApiRequest] = {
+    if (e.value) {
+      Json.writes[CallEligibilityApiRequest]
+    } else {
+      OWrites { callEligibilityApiRequest =>
+        val firstIdentification = callEligibilityApiRequest.identification.headOption
+          .getOrElse(throw new RuntimeException("Not possible: There should be an idType and idValue"))
+        Json.obj(
+          "channelIdentifier" -> callEligibilityApiRequest.channelIdentifier,
+          "idType" -> firstIdentification.idType,
+          "idValue" -> firstIdentification.idValue,
+          "regimeType" -> callEligibilityApiRequest.regimeType,
+          "returnFinancialAssessment" -> callEligibilityApiRequest.returnFinancialAssessment
+        )
+      }
+    }
+  }
+
 }
+

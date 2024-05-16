@@ -19,6 +19,7 @@ package services
 import actionsmodel.AuthenticatedJourneyRequest
 import cats.Eq
 import cats.implicits.catsSyntaxEq
+import config.AppConfig
 import connectors.{CallEligibilityApiRequest, TtpConnector}
 import controllers.support.RequestSupport.hc
 import essttp.crypto.CryptoFormat
@@ -51,8 +52,11 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class TtpService @Inject() (
     ttpConnector: TtpConnector,
-    auditService: AuditService
+    auditService: AuditService,
+    appConfig:    AppConfig
 )(implicit executionContext: ExecutionContext) {
+
+  import appConfig.eligibilityReqIdentificationFlag
 
   implicit val cryptoFormat: CryptoFormat = CryptoFormat.NoOpCryptoFormat
   implicit val eq: Eq[TaxRegime] = Eq.fromUniversalEquals
@@ -220,8 +224,7 @@ object TtpService {
     case j: Journey.Sa =>
       CallEligibilityApiRequest(
         channelIdentifier         = EligibilityRequestDefaults.essttpChannelIdentifier,
-        idType                    = EligibilityRequestDefaults.Sa.idType,
-        idValue                   = j.taxId.value,
+        identification            = List(Identification(IdType(EligibilityRequestDefaults.Sa.idType), IdValue(j.taxId.value))),
         regimeType                = EligibilityRequestDefaults.Sa.regimeType,
         returnFinancialAssessment = true
       )
