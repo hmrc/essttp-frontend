@@ -16,9 +16,9 @@
 
 package connectors
 
-import essttp.rootmodel.ttp.eligibility.{IdType, IdValue, Identification}
+import essttp.rootmodel.ttp.eligibility.Identification
 import models.EligibilityReqIdentificationFlag
-import play.api.libs.json.{Json, OWrites}
+import play.api.libs.json._
 
 final case class CallEligibilityApiRequest(
     channelIdentifier:         String,
@@ -29,11 +29,11 @@ final case class CallEligibilityApiRequest(
 
 object CallEligibilityApiRequest {
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  implicit def customWritesFormat(implicit e: EligibilityReqIdentificationFlag): OWrites[CallEligibilityApiRequest] = {
-    if (e.value) {
+  implicit def customWritesFormat(implicit e: EligibilityReqIdentificationFlag): Format[CallEligibilityApiRequest] = {
+    val writes = if (e.value) {
       Json.writes[CallEligibilityApiRequest]
     } else {
-      OWrites { callEligibilityApiRequest =>
+      OWrites { callEligibilityApiRequest: CallEligibilityApiRequest =>
         val firstIdentification = callEligibilityApiRequest.identification.headOption
           .getOrElse(throw new RuntimeException("Not possible: There should be an idType and idValue"))
         Json.obj(
@@ -45,6 +45,9 @@ object CallEligibilityApiRequest {
         )
       }
     }
+    val reads: Reads[CallEligibilityApiRequest] = Json.reads[CallEligibilityApiRequest]
+
+    Format(reads, writes)
   }
 
 }

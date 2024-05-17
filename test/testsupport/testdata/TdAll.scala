@@ -146,24 +146,21 @@ object TdAll {
 
   val callEligibilityApiRequestEpaye: CallEligibilityApiRequest = CallEligibilityApiRequest(
     channelIdentifier         = "eSSTTP",
-    idType                    = "EMPREF",
-    idValue                   = "864FZ00049",
+    identification            = List(Identification(IdType("EMPREF"), IdValue("864FZ00049"))),
     regimeType                = "PAYE",
     returnFinancialAssessment = true
   )
 
   val callEligibilityApiRequestVat: CallEligibilityApiRequest = CallEligibilityApiRequest(
     channelIdentifier         = "eSSTTP",
-    idType                    = "VRN",
-    idValue                   = "101747001",
+    identification            = List(Identification(IdType("VRN"), IdValue("101747001"))),
     regimeType                = "VATC",
     returnFinancialAssessment = true
   )
 
   val callEligibilityApiRequestSa: CallEligibilityApiRequest = CallEligibilityApiRequest(
     channelIdentifier         = "eSSTTP",
-    idType                    = "UTR",
-    idValue                   = "1234567895",
+    identification            = List(Identification(IdType("UTR"), IdValue("1234567895"))),
     regimeType                = "SA",
     returnFinancialAssessment = true
   )
@@ -265,7 +262,8 @@ object TdAll {
       )),
       customerDetails                 = None,
       regimeDigitalCorrespondence     = regimeDigitalCorrespondence,
-      futureChargeLiabilitiesExcluded = false
+      futureChargeLiabilitiesExcluded = false,
+      chargeTypesExcluded             = None
     )
   }
 

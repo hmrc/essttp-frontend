@@ -379,7 +379,8 @@ object StartJourneyController {
       chargeTypeAssessment            = chargeTypeAssessments,
       customerDetails                 = maybeCustomerDetail,
       regimeDigitalCorrespondence     = maybeRegimeDigitalCorrespondence,
-      futureChargeLiabilitiesExcluded = false
+      futureChargeLiabilitiesExcluded = false,
+      chargeTypesExcluded             = None
     )
   }
 

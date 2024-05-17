@@ -17,7 +17,7 @@
 package controllers
 
 import cats.syntax.eq._
-
+import config.AppConfig
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.ttp.eligibility.{EligibilityRules, RegimeDigitalCorrespondence}
@@ -32,7 +32,9 @@ import testsupport.stubs.{AuditConnectorStub, EssttpBackend, Ttp}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll, TtpJsonResponses}
 import uk.gov.hmrc.http.SessionKeys
 
-class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper {
+import javax.inject.Inject
+
+class DetermineEligibilityControllerSpec @Inject() (implicit appConfig: AppConfig) extends ItSpec with CombinationsHelper {
   private val controller: DetermineEligibilityController = app.injector.instanceOf[DetermineEligibilityController]
 
   "Determine eligibility endpoint should route user correctly and send an audit event" - {

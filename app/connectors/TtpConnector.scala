@@ -34,6 +34,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class TtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)(implicit ec: ExecutionContext) {
 
+  import appConfig.eligibilityReqIdentificationFlag
   implicit val cryptoFormat: CryptoFormat = CryptoFormat.NoOpCryptoFormat
 
   private val correlationIdHeaderKey: String = appConfig.TtpHeaders.correlationId
