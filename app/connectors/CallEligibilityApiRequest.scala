@@ -35,15 +35,17 @@ object CallEligibilityApiRequest {
       Json.writes[CallEligibilityApiRequest]
     } else {
       OWrites { callEligibilityApiRequest: CallEligibilityApiRequest =>
-        val firstIdentification = callEligibilityApiRequest.identification.headOption
-          .getOrElse(throw new RuntimeException("Not possible: There should be an idType and idValue"))
-        Json.obj(
-          "channelIdentifier" -> callEligibilityApiRequest.channelIdentifier,
-          "idType" -> firstIdentification.idType,
-          "idValue" -> firstIdentification.idValue,
-          "regimeType" -> callEligibilityApiRequest.regimeType,
-          "returnFinancialAssessment" -> callEligibilityApiRequest.returnFinancialAssessment
-        )
+        callEligibilityApiRequest.identification match {
+          case Nil => sys.error("There should be something in the identification list and there was nothing")
+          case head :: Nil => Json.obj(
+            "channelIdentifier" -> callEligibilityApiRequest.channelIdentifier,
+            "idType" -> head.idType,
+            "idValue" -> head.idValue,
+            "regimeType" -> callEligibilityApiRequest.regimeType,
+            "returnFinancialAssessment" -> callEligibilityApiRequest.returnFinancialAssessment
+          )
+          case _ => sys.error("There was more than one Identification in the identification list. We don't know what to do with that")
+        }
       }
     }
 

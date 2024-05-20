@@ -83,6 +83,30 @@ class CallEligibilityApiRequestSpec extends AnyFreeSpec with Matchers {
         (json \ "returnFinancialAssessment").as[Boolean] shouldEqual true
       }
 
+      "should fail if there is nothing in the identification list" in {
+        val request = CallEligibilityApiRequest(
+          "eSSTTP", List.empty, "regime", returnFinancialAssessment = true
+        )
+
+        val exception = intercept[RuntimeException] {
+          Json.toJson(request)(CallEligibilityApiRequest.format)
+        }
+        exception.getMessage should include("There should be something in the identification list and there was nothing")
+      }
+
+      "should fail if there is more than one Identification in the identification list" in {
+        val request = CallEligibilityApiRequest(
+          "eSSTTP", List(
+            Identification(IdType("type1"), IdValue("value2")),
+            Identification(IdType("type2"), IdValue("value2"))
+          ), "regime", returnFinancialAssessment = true
+        )
+        val exception = intercept[RuntimeException] {
+          Json.toJson(request)(CallEligibilityApiRequest.format)
+        }
+        exception.getMessage should include("There was more than one Identification in the identification list. We don't know what to do with that")
+      }
+
       "should correctly deserialize" in {
         val json = Json.parse(jsonStringFalseFlag)
         val request = json.as[CallEligibilityApiRequest](CallEligibilityApiRequest.format)
