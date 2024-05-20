@@ -18,6 +18,7 @@ package config
 
 import configs.syntax._
 import essttp.rootmodel.{AmountInPence, TaxRegime}
+import models.EligibilityReqIdentificationFlag
 import play.api.mvc.RequestHeader
 import play.api.{ConfigLoader, Configuration}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -38,6 +39,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val authTimeoutCountdownSeconds: Int = config.get[FiniteDuration]("timeout-dialog.countdown").toSeconds.toInt
   val accessibilityStatementPath: String = config.get[String]("accessibility-statement.service-path")
   val shutteredTaxRegimes: List[TaxRegime] = config.underlying.get[List[String]]("shuttering.shuttered-tax-regimes").value.map(TaxRegime.withNameInsensitive)
+  implicit val eligibilityReqIdentificationFlag: EligibilityReqIdentificationFlag = EligibilityReqIdentificationFlag(config.get[Boolean]("features.eligibilityReqIdentificationFlag"))
 
   object BaseUrl {
     val platformHost: Option[String] = config.getOptional[String]("platform.frontend.host")

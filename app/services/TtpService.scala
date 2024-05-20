@@ -19,6 +19,7 @@ package services
 import actionsmodel.AuthenticatedJourneyRequest
 import cats.Eq
 import cats.implicits.catsSyntaxEq
+import config.AppConfig
 import connectors.{CallEligibilityApiRequest, TtpConnector}
 import controllers.support.RequestSupport.hc
 import essttp.crypto.CryptoFormat
@@ -51,8 +52,11 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class TtpService @Inject() (
     ttpConnector: TtpConnector,
-    auditService: AuditService
+    auditService: AuditService,
+    appConfig:    AppConfig
 )(implicit executionContext: ExecutionContext) {
+
+  import appConfig.eligibilityReqIdentificationFlag
 
   implicit val cryptoFormat: CryptoFormat = CryptoFormat.NoOpCryptoFormat
   implicit val eq: Eq[TaxRegime] = Eq.fromUniversalEquals
@@ -194,25 +198,25 @@ object TtpService {
 
   private def buildEligibilityRequest(journey: ComputedTaxId): CallEligibilityApiRequest = journey match {
     case j: Journey.Epaye =>
+      val idValue = j.taxId match {
+        case empRef: EmpRef => IdValue(empRef.value)
+        case other          => sys.error(s"Expected EmpRef but found ${other.getClass.getSimpleName}")
+      }
       CallEligibilityApiRequest(
         channelIdentifier         = EligibilityRequestDefaults.essttpChannelIdentifier,
-        idType                    = EligibilityRequestDefaults.Epaye.idType,
-        idValue                   = j.taxId match {
-          case empRef: EmpRef => empRef.value
-          case other          => sys.error(s"Expected EmpRef but found ${other.getClass.getSimpleName}")
-        },
+        identification            = List(Identification(IdType(EligibilityRequestDefaults.Epaye.idType), idValue)),
         regimeType                = EligibilityRequestDefaults.Epaye.regimeType,
         returnFinancialAssessment = true
       )
 
     case j: Journey.Vat =>
+      val idValue = j.taxId match {
+        case vrn: Vrn => IdValue(vrn.value)
+        case other    => sys.error(s"Expected Vrn but found ${other.getClass.getSimpleName}")
+      }
       CallEligibilityApiRequest(
         channelIdentifier         = EligibilityRequestDefaults.essttpChannelIdentifier,
-        idType                    = EligibilityRequestDefaults.Vat.idType,
-        idValue                   = j.taxId match {
-          case vrn: Vrn => vrn.value
-          case other    => sys.error(s"Expected Vrn but found ${other.getClass.getSimpleName}")
-        },
+        identification            = List(Identification(IdType(EligibilityRequestDefaults.Vat.idType), idValue)),
         regimeType                = EligibilityRequestDefaults.Vat.regimeType,
         returnFinancialAssessment = true
       )
@@ -220,8 +224,7 @@ object TtpService {
     case j: Journey.Sa =>
       CallEligibilityApiRequest(
         channelIdentifier         = EligibilityRequestDefaults.essttpChannelIdentifier,
-        idType                    = EligibilityRequestDefaults.Sa.idType,
-        idValue                   = j.taxId.value,
+        identification            = List(Identification(IdType(EligibilityRequestDefaults.Sa.idType), IdValue(j.taxId.value))),
         regimeType                = EligibilityRequestDefaults.Sa.regimeType,
         returnFinancialAssessment = true
       )

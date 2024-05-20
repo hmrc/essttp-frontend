@@ -17,10 +17,11 @@
 package controllers
 
 import cats.syntax.eq._
-
+import config.AppConfig
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.ttp.eligibility.{EligibilityRules, RegimeDigitalCorrespondence}
+import models.EligibilityReqIdentificationFlag
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
@@ -33,6 +34,7 @@ import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll, TtpJsonRespo
 import uk.gov.hmrc.http.SessionKeys
 
 class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper {
+  implicit val eligibilityReqIdentificationFlag: EligibilityReqIdentificationFlag = app.injector.instanceOf[AppConfig].eligibilityReqIdentificationFlag
   private val controller: DetermineEligibilityController = app.injector.instanceOf[DetermineEligibilityController]
 
   "Determine eligibility endpoint should route user correctly and send an audit event" - {

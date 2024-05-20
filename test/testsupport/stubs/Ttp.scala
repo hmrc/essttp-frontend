@@ -25,6 +25,7 @@ import essttp.rootmodel.ttp.affordability.InstalmentAmountRequest
 import essttp.rootmodel.ttp.affordablequotes.AffordableQuotesRequest
 import essttp.rootmodel.ttp.arrangement.ArrangementRequest
 import essttp.rootmodel.ttp.eligibility.{CustomerDetail, RegimeDigitalCorrespondence}
+import models.EligibilityReqIdentificationFlag
 import play.api.http.Status
 import play.api.libs.json.Format
 import testsupport.testdata.{TdAll, TtpJsonResponses}
@@ -50,7 +51,8 @@ object Ttp {
     def stub422RetrieveEligibility(): StubMapping =
       stubFor(post(urlPathEqualTo(eligibilityUrl)).willReturn(aResponse().withStatus(Status.UNPROCESSABLE_ENTITY)))
 
-    def verifyTtpEligibilityRequests(taxRegime: TaxRegime): Unit = {
+    def verifyTtpEligibilityRequests(taxRegime: TaxRegime)(implicit eligibilityReqIdentificationFlag: EligibilityReqIdentificationFlag): Unit = {
+
       val request = taxRegime match {
         case TaxRegime.Epaye => TdAll.callEligibilityApiRequestEpaye
         case TaxRegime.Vat   => TdAll.callEligibilityApiRequestVat
