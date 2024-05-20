@@ -59,7 +59,7 @@ object Ttp {
         case TaxRegime.Vat   => TdAll.callEligibilityApiRequestVat
         case TaxRegime.Sa    => TdAll.callEligibilityApiRequestSa
       }
-      ttpVerify(eligibilityUrl, request)(CallEligibilityApiRequest.customWritesFormat)
+      ttpVerify(eligibilityUrl, request)(CallEligibilityApiRequest.format)
     }
   }
 

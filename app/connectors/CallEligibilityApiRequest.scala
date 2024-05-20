@@ -29,7 +29,7 @@ final case class CallEligibilityApiRequest(
 
 object CallEligibilityApiRequest {
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  implicit def customWritesFormat(implicit e: EligibilityReqIdentificationFlag): Format[CallEligibilityApiRequest] = {
+  implicit def format(implicit e: EligibilityReqIdentificationFlag): Format[CallEligibilityApiRequest] = {
     val writes = if (e.value) {
       Json.writes[CallEligibilityApiRequest]
     } else {
