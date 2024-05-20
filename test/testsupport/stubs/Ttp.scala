@@ -18,7 +18,6 @@ package testsupport.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import config.AppConfig
 import connectors.CallEligibilityApiRequest
 import essttp.crypto.CryptoFormat
 import essttp.rootmodel.TaxRegime
@@ -26,6 +25,7 @@ import essttp.rootmodel.ttp.affordability.InstalmentAmountRequest
 import essttp.rootmodel.ttp.affordablequotes.AffordableQuotesRequest
 import essttp.rootmodel.ttp.arrangement.ArrangementRequest
 import essttp.rootmodel.ttp.eligibility.{CustomerDetail, RegimeDigitalCorrespondence}
+import models.EligibilityReqIdentificationFlag
 import play.api.http.Status
 import play.api.libs.json.Format
 import testsupport.testdata.{TdAll, TtpJsonResponses}
@@ -51,8 +51,7 @@ object Ttp {
     def stub422RetrieveEligibility(): StubMapping =
       stubFor(post(urlPathEqualTo(eligibilityUrl)).willReturn(aResponse().withStatus(Status.UNPROCESSABLE_ENTITY)))
 
-    def verifyTtpEligibilityRequests(taxRegime: TaxRegime)(implicit appConfig: AppConfig): Unit = {
-      import appConfig.eligibilityReqIdentificationFlag
+    def verifyTtpEligibilityRequests(taxRegime: TaxRegime)(implicit eligibilityReqIdentificationFlag: EligibilityReqIdentificationFlag): Unit = {
 
       val request = taxRegime match {
         case TaxRegime.Epaye => TdAll.callEligibilityApiRequestEpaye

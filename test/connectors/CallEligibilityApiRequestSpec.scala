@@ -24,6 +24,25 @@ import play.api.libs.json._
 
 class CallEligibilityApiRequestSpec extends AnyFreeSpec with Matchers {
 
+  val jsonStringTrueFlag = """
+{
+  "channelIdentifier": "eSSTTP",
+  "identification": [{"idType":"someType", "idValue":"someValue"}],
+  "regimeType": "regime",
+  "returnFinancialAssessment": true
+}
+"""
+
+  val jsonStringFalseFlag = """
+{
+  "channelIdentifier": "eSSTTP",
+  "idType": "someType",
+  "idValue": "someValue",
+  "regimeType": "regime",
+  "returnFinancialAssessment": true
+}
+"""
+
   "callEligibilityApiRequest" - {
     "when EligibilityReqIdentificationFlag is true" - {
       implicit val flag: EligibilityReqIdentificationFlag = EligibilityReqIdentificationFlag(value = true)
@@ -38,6 +57,14 @@ class CallEligibilityApiRequestSpec extends AnyFreeSpec with Matchers {
           .getOrElse(Identification(IdType(""), IdValue(""))) shouldEqual Identification(IdType("someType"), IdValue("someValue"))
         (json \ "regimeType").as[String] shouldEqual "regime"
         (json \ "returnFinancialAssessment").as[Boolean] shouldEqual true
+      }
+
+      "should correctly deserialize" in {
+        val json = Json.parse(jsonStringTrueFlag)
+        val request = json.as[CallEligibilityApiRequest](CallEligibilityApiRequest.format)
+        request shouldEqual CallEligibilityApiRequest(
+          "eSSTTP", List(Identification(IdType("someType"), IdValue("someValue"))), "regime", returnFinancialAssessment = true
+        )
       }
     }
 
@@ -54,6 +81,14 @@ class CallEligibilityApiRequestSpec extends AnyFreeSpec with Matchers {
         (json \ "idValue").as[String] shouldEqual "someValue"
         (json \ "regimeType").as[String] shouldEqual "regime"
         (json \ "returnFinancialAssessment").as[Boolean] shouldEqual true
+      }
+
+      "should correctly deserialize" in {
+        val json = Json.parse(jsonStringFalseFlag)
+        val request = json.as[CallEligibilityApiRequest](CallEligibilityApiRequest.format)
+        request shouldEqual CallEligibilityApiRequest(
+          "eSSTTP", List(Identification(IdType("someType"), IdValue("someValue"))), "regime", returnFinancialAssessment = true
+        )
       }
     }
   }

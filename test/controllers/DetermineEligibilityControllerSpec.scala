@@ -21,6 +21,7 @@ import config.AppConfig
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.ttp.eligibility.{EligibilityRules, RegimeDigitalCorrespondence}
+import models.EligibilityReqIdentificationFlag
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
@@ -32,9 +33,8 @@ import testsupport.stubs.{AuditConnectorStub, EssttpBackend, Ttp}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll, TtpJsonResponses}
 import uk.gov.hmrc.http.SessionKeys
 
-import javax.inject.Inject
-
-class DetermineEligibilityControllerSpec @Inject() (implicit appConfig: AppConfig) extends ItSpec with CombinationsHelper {
+class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper {
+  implicit val eligibilityReqIdentificationFlag: EligibilityReqIdentificationFlag = app.injector.instanceOf[AppConfig].eligibilityReqIdentificationFlag
   private val controller: DetermineEligibilityController = app.injector.instanceOf[DetermineEligibilityController]
 
   "Determine eligibility endpoint should route user correctly and send an audit event" - {
