@@ -48,8 +48,7 @@
     Messages.Confirmation.`Your payment plan is set up`.show
 }
 @nextPayment = @{
-    val dayOfMonth: Int = paymentDay.value.getDayOfMonth
-    val day = s"${dayOfMonth.toString}${DateMessages.getSuffix(dayOfMonth)}"
+    val day: String = paymentDay.value.getDayOfMonth.toString
     val month: String = DateMessages.monthName(paymentDay.value.getMonth.getValue).show
     val year: String = paymentDay.value.getYear.toString
     s"$day $month $year"
