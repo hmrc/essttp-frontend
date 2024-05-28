@@ -170,11 +170,10 @@ class IneligibleController @Inject() (
 
   private def determineFileYourReturnUrl(implicit request: AuthenticatedJourneyRequest[AnyContent]): String = request.journey.sjRequest match {
     case SjRequest.Epaye.Simple(returnUrl, _) => returnUrl.value
-    case SjRequest.Epaye.Empty()              => s"${appConfig.Urls.businessTaxAccountUrl}"
+    case SjRequest.Epaye.Empty()              => appConfig.Urls.businessTaxAccountUrl
     case SjRequest.Vat.Simple(returnUrl, _)   => returnUrl.value
-    case SjRequest.Vat.Empty()                => s"${appConfig.Urls.businessTaxAccountUrl}"
-    case SjRequest.Sa.Simple(returnUrl, _)    => returnUrl.value
-    case SjRequest.Sa.Empty()                 => s"${appConfig.Urls.enrolForSaUrl}"
+    case SjRequest.Vat.Empty()                => appConfig.Urls.businessTaxAccountUrl
+    case _: SjRequest.Sa                      => appConfig.Urls.fileSaReturnUrl
   }
 
   private def genericYouHaveChosenNotToSetUpPage(implicit request: AuthenticatedJourneyRequest[AnyContent]): Result =

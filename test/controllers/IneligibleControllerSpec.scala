@@ -46,6 +46,12 @@ class IneligibleControllerSpec extends ItSpec {
   def assertIneligiblePageLeadingP1(page: Document, leadingP1: String): Assertion =
     page.select(".govuk-body").asScala.toList(0).text() shouldBe leadingP1
 
+  def expectedFileYourReturnLink(taxRegime: TaxRegime) = taxRegime match {
+    case TaxRegime.Sa    => "https://www.gov.uk/log-in-file-self-assessment-tax-return"
+    case TaxRegime.Epaye => "/set-up-a-payment-plan/test-only/bta-page?return-page"
+    case TaxRegime.Vat   => "/set-up-a-payment-plan/test-only/bta-page?return-page"
+  }
+
   "IneligibleController should display in English" - {
 
     Seq[(TaxRegime, Origin)](
@@ -278,7 +284,7 @@ class IneligibleControllerSpec extends ItSpec {
 
             val fileYourTaxReturnLink = page.select("p.govuk-body").first().select("a")
             fileYourTaxReturnLink.text() shouldBe "file your tax return"
-            fileYourTaxReturnLink.attr("href") shouldBe "/set-up-a-payment-plan/test-only/bta-page?return-page"
+            fileYourTaxReturnLink.attr("href") shouldBe expectedFileYourReturnLink(taxRegime)
 
             page.select(".govuk-body").asScala.toList(1).text() shouldBe "If you have recently filed your return, your account can take up to 3 days to update. Try again after 3 days."
           }
@@ -660,7 +666,7 @@ class IneligibleControllerSpec extends ItSpec {
 
             val fileYourTaxReturnLink = page.select("p.govuk-body").first().select("a")
             fileYourTaxReturnLink.text() shouldBe "gyflwyno’ch Ffurflen Dreth"
-            fileYourTaxReturnLink.attr("href") shouldBe "/set-up-a-payment-plan/test-only/bta-page?return-page"
+            fileYourTaxReturnLink.attr("href") shouldBe expectedFileYourReturnLink(taxRegime)
 
             page.select(".govuk-body").asScala.toList(1).text() shouldBe "Os ydych wedi cyflwyno’ch Ffurflen Dreth yn ddiweddar, gall gymryd hyd at 3 diwrnod i ddiweddaru’ch cyfrif. Rhowch gynnig arall arni ar ôl 3 diwrnod."
           }
