@@ -19,27 +19,33 @@ package connectors
 import com.google.inject.{Inject, Singleton}
 import essttp.rootmodel.dates.extremedates.{ExtremeDatesRequest, ExtremeDatesResponse}
 import essttp.rootmodel.dates.startdates.{StartDatesRequest, StartDatesResponse}
+import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
 import requests.RequestSupport._
-import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.http.HttpReads.Implicits.readFromJson
+import uk.gov.hmrc.http.StringContextOps
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class DatesApiConnector @Inject() (config: DatesApiConfig, httpClient: HttpClient)(implicit ec: ExecutionContext) {
+class DatesApiConnector @Inject() (config: DatesApiConfig, httpClient: HttpClientV2)(implicit ec: ExecutionContext) {
 
   private val startDatesUrl: String = config.baseUrl + "/essttp-backend/start-dates"
 
   def startDates(startDatesRequest: StartDatesRequest)(implicit request: RequestHeader): Future[StartDatesResponse] = {
-    httpClient.POST[StartDatesRequest, StartDatesResponse](startDatesUrl, startDatesRequest)
+    httpClient.post(url"$startDatesUrl")
+      .withBody(Json.toJson(startDatesRequest))
+      .execute[StartDatesResponse]
   }
 
   private val extremeDatesUrl: String = config.baseUrl + "/essttp-backend/extreme-dates"
 
   def extremeDates(extremeDatesRequest: ExtremeDatesRequest)(implicit request: RequestHeader): Future[ExtremeDatesResponse] = {
-    httpClient.POST[ExtremeDatesRequest, ExtremeDatesResponse](extremeDatesUrl, extremeDatesRequest)
+    httpClient.post(url"$extremeDatesUrl")
+      .withBody(Json.toJson(extremeDatesRequest))
+      .execute[ExtremeDatesResponse]
   }
 }
 

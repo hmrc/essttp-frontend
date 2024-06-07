@@ -15,11 +15,11 @@
  *@
 
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-@import play.api.mvc.Request
+@import play.api.mvc.RequestHeader
 
 @this(layout: templates.Layout)
 
-@(pageTitle: String, heading: String, message: String)(implicit request: Request[_])
+@(pageTitle: String, heading: String, message: String)(implicit request: RequestHeader)
 
 @layout(pageTitle = Some(pageTitle), showBackLink = false) {
   <h1 class="govuk-heading-xl">@{Text(heading).asHtml}</h1>
