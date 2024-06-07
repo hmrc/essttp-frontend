@@ -44,7 +44,7 @@ class ItSpec
   val baseUrl: BaseUrl = BaseUrl(s"http://localhost:${testPort.toString}")
 
   implicit override val patienceConfig: PatienceConfig =
-    PatienceConfig(timeout  = scaled(Span(300, Millis)), interval = scaled(Span(2, Seconds)))
+    PatienceConfig(timeout  = scaled(Span(2000, Millis)), interval = scaled(Span(2, Seconds)))
 
   protected lazy val configOverrides: Map[String, Any] = Map()
 

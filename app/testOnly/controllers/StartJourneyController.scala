@@ -361,7 +361,8 @@ object StartJourneyController {
         chargesBeforeMaxAccountingDate        = Some(containsError(ChargesBeforeMaxAccountingDate)),
         hasDisguisedRemuneration              = Some(containsError(HasDisguisedRemuneration)),
         hasCapacitor                          = Some(containsError(HasCapacitor)),
-        dmSpecialOfficeProcessingRequiredCDCS = Some(containsError(DmSpecialOfficeProcessingRequiredCDCS))
+        dmSpecialOfficeProcessingRequiredCDCS = Some(containsError(DmSpecialOfficeProcessingRequiredCDCS)),
+        isAnMtdCustomer                       = Some(containsError(IsAnMtdCustomer))
       )
     }
     EligibilityCheckResult(

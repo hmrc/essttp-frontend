@@ -21,18 +21,19 @@ import com.google.inject.{Inject, Singleton}
 import config.AppConfig
 import play.api.http.Status.NOT_FOUND
 import testOnly.models.EmailVerificationPasscodes
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, UpstreamErrorResponse}
 import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps, UpstreamErrorResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class EmailVerificationConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)(implicit ec: ExecutionContext) {
+class EmailVerificationConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2)(implicit ec: ExecutionContext) {
 
   private val getPasscodesUrl: String = appConfig.BaseUrl.emailVerificationUrl + "/test-only/passcodes"
 
   def requestEmailVerification()(implicit hc: HeaderCarrier): Future[EmailVerificationPasscodes] =
-    httpClient.GET[EmailVerificationPasscodes](getPasscodesUrl)
+    httpClient.get(url"$getPasscodesUrl").execute[EmailVerificationPasscodes]
       .recover{
         case e: UpstreamErrorResponse if e.statusCode === NOT_FOUND => EmailVerificationPasscodes(List.empty)
       }

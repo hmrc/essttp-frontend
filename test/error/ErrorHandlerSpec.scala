@@ -29,12 +29,12 @@ class ErrorHandlerSpec extends ItSpec {
 
     "must not have a back link" in {
       implicit val request: Request[_] = FakeRequest()
-      val html = errorHandler.standardErrorTemplate("title", "heading", "message")
+      whenReady(errorHandler.standardErrorTemplate("title", "heading", "message")) { html =>
 
-      val doc = Jsoup.parse(html.body)
-      doc.select(".govuk-back-link").isEmpty shouldBe true
+        val doc = Jsoup.parse(html.body)
+        doc.select(".govuk-back-link").isEmpty shouldBe true
+      }
     }
-
   }
 
 }

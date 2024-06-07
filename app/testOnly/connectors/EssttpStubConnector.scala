@@ -19,15 +19,17 @@ package testOnly.connectors
 import essttp.crypto.CryptoFormat
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import play.api.Configuration
+import play.api.libs.json.Json
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class EssttpStubConnector @Inject() (httpClient: HttpClient, config: Configuration) extends ServicesConfig(config) {
+class EssttpStubConnector @Inject() (httpClient: HttpClientV2, config: Configuration) extends ServicesConfig(config) {
 
   implicit val cryptoFormat: CryptoFormat = CryptoFormat.NoOpCryptoFormat
 
@@ -36,6 +38,8 @@ class EssttpStubConnector @Inject() (httpClient: HttpClient, config: Configurati
   val insertEligibilityDataUrl: String = s"$stubsBaseUrl/debts/time-to-pay/eligibility/insert"
 
   def primeStubs(response: EligibilityCheckResult)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
-    httpClient.POST[EligibilityCheckResult, Unit](insertEligibilityDataUrl, response)
+    httpClient.post(url"$insertEligibilityDataUrl")
+      .withBody(Json.toJson(response))
+      .execute[Unit]
 
 }

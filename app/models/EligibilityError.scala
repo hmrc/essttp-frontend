@@ -75,32 +75,35 @@ object EligibilityErrors extends Enum[EligibilityError] {
 
   case object DmSpecialOfficeProcessingRequiredCDCS extends EligibilityError
 
+  case object IsAnMtdCustomer extends EligibilityError
+
   override val values: immutable.IndexedSeq[EligibilityError] = findValues
 
   def toEligibilityError(eligibilityRules: EligibilityRules): Option[EligibilityError] =
     eligibilityRules match {
-      case eligibilityRules if eligibilityRules.moreThanOneReasonForIneligibility                => Some(MultipleReasons)
-      case EligibilityRules(true, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)       => Some(HasRlsOnAddress)
-      case EligibilityRules(_, true, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)       => Some(MarkedAsInsolvent)
-      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, true, _, _, _, _, _, _, _, _)       => Some(NoDueDatesReached)
-      case EligibilityRules(_, _, true, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)       => Some(IsLessThanMinDebtAllowance)
-      case EligibilityRules(_, _, _, true, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)       => Some(IsMoreThanMaxDebtAllowance)
-      case EligibilityRules(_, _, _, _, true, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)       => Some(DisallowedChargeLockTypes)
-      case EligibilityRules(_, _, _, _, _, true, _, _, _, _, _, _, _, _, _, _, _, _, _, _)       => Some(ExistingTtp)
-      case EligibilityRules(_, _, _, _, _, _, Some(true), _, _, _, _, _, _, _, _, _, _, _, _, _) => Some(ChargesOverMaxDebtAge)
-      case EligibilityRules(_, _, _, _, _, _, _, true, _, _, _, _, _, _, _, _, _, _, _, _)       => Some(IneligibleChargeTypes)
-      case EligibilityRules(_, _, _, _, _, _, _, _, true, _, _, _, _, _, _, _, _, _, _, _)       => Some(MissingFiledReturns)
-      case EligibilityRules(_, _, _, _, _, _, _, _, _, Some(true), _, _, _, _, _, _, _, _, _, _) => Some(HasInvalidInterestSignals)
-      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, Some(true), _, _, _, _, _, _, _, _, _) => Some(DmSpecialOfficeProcessingRequired)
-      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, Some(true), _, _, _, _, _, _, _) => Some(CannotFindLockReason)
-      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, _, Some(true), _, _, _, _, _, _) => Some(CreditsNotAllowed)
-      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, _, _, Some(true), _, _, _, _, _) => Some(IsMoreThanMaxPaymentReference)
-      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Some(true), _, _, _, _) => Some(ChargesBeforeMaxAccountingDate)
-      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Some(true), _, _, _) => Some(HasInvalidInterestSignalsCESA)
-      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Some(true), _, _) => Some(HasDisguisedRemuneration)
-      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Some(true), _) => Some(HasCapacitor)
-      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Some(true)) => Some(DmSpecialOfficeProcessingRequiredCDCS)
-      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)          => None //all false
+      case eligibilityRules if eligibilityRules.moreThanOneReasonForIneligibility                   => Some(MultipleReasons)
+      case EligibilityRules(true, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)       => Some(HasRlsOnAddress)
+      case EligibilityRules(_, true, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)       => Some(MarkedAsInsolvent)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, true, _, _, _, _, _, _, _, _, _)       => Some(NoDueDatesReached)
+      case EligibilityRules(_, _, true, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)       => Some(IsLessThanMinDebtAllowance)
+      case EligibilityRules(_, _, _, true, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)       => Some(IsMoreThanMaxDebtAllowance)
+      case EligibilityRules(_, _, _, _, true, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)       => Some(DisallowedChargeLockTypes)
+      case EligibilityRules(_, _, _, _, _, true, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)       => Some(ExistingTtp)
+      case EligibilityRules(_, _, _, _, _, _, Some(true), _, _, _, _, _, _, _, _, _, _, _, _, _, _) => Some(ChargesOverMaxDebtAge)
+      case EligibilityRules(_, _, _, _, _, _, _, true, _, _, _, _, _, _, _, _, _, _, _, _, _)       => Some(IneligibleChargeTypes)
+      case EligibilityRules(_, _, _, _, _, _, _, _, true, _, _, _, _, _, _, _, _, _, _, _, _)       => Some(MissingFiledReturns)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, Some(true), _, _, _, _, _, _, _, _, _, _, _) => Some(HasInvalidInterestSignals)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, Some(true), _, _, _, _, _, _, _, _, _, _) => Some(DmSpecialOfficeProcessingRequired)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, Some(true), _, _, _, _, _, _, _, _) => Some(CannotFindLockReason)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, _, Some(true), _, _, _, _, _, _, _) => Some(CreditsNotAllowed)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, _, _, Some(true), _, _, _, _, _, _) => Some(IsMoreThanMaxPaymentReference)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Some(true), _, _, _, _, _) => Some(ChargesBeforeMaxAccountingDate)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Some(true), _, _, _, _) => Some(HasInvalidInterestSignalsCESA)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Some(true), _, _, _) => Some(HasDisguisedRemuneration)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Some(true), _, _) => Some(HasCapacitor)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Some(true), _) => Some(DmSpecialOfficeProcessingRequiredCDCS)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Some(true)) => Some(IsAnMtdCustomer)
+      case EligibilityRules(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)          => None //all false
     }
 
   implicit val format: Format[EligibilityError] = implicitly[Format[String]].inmap(EligibilityErrors.withName, _.entryName)

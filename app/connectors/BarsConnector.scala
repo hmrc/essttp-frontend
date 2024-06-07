@@ -19,16 +19,18 @@ package connectors
 import com.google.inject.{Inject, Singleton}
 import config.AppConfig
 import models.bars.request.{BarsValidateRequest, BarsVerifyBusinessRequest, BarsVerifyPersonalRequest}
+import models.bars.response.BarsVerifyResponse
+import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
 import requests.RequestSupport._
-import uk.gov.hmrc.http.{HttpClient, HttpResponse}
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import models.bars.response.BarsVerifyResponse
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HttpResponse, StringContextOps}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class BarsConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)(implicit ec: ExecutionContext) {
+class BarsConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2)(implicit ec: ExecutionContext) {
 
   /**
    * "The Validate Bank Details endpoint combines several functions to provide an aggregated validation result"
@@ -36,7 +38,9 @@ class BarsConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)(imp
   private val validateUrl: String = appConfig.BaseUrl.barsUrl + "/validate/bank-details"
 
   def validateBankDetails(barsValidateRequest: BarsValidateRequest)(implicit requestHeader: RequestHeader): Future[HttpResponse] = {
-    httpClient.POST[BarsValidateRequest, HttpResponse](validateUrl, barsValidateRequest)
+    httpClient.post(url"$validateUrl")
+      .withBody(Json.toJson(barsValidateRequest))
+      .execute[HttpResponse]
   }
 
   /**
@@ -46,7 +50,9 @@ class BarsConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)(imp
   private val verifyPersonalUrl: String = appConfig.BaseUrl.barsUrl + "/verify/personal"
 
   def verifyPersonal(barsVerifyPersonalRequest: BarsVerifyPersonalRequest)(implicit requestHeader: RequestHeader): Future[BarsVerifyResponse] = {
-    httpClient.POST[BarsVerifyPersonalRequest, BarsVerifyResponse](verifyPersonalUrl, barsVerifyPersonalRequest)
+    httpClient.post(url"$verifyPersonalUrl")
+      .withBody(Json.toJson(barsVerifyPersonalRequest))
+      .execute[BarsVerifyResponse]
   }
 
   /**
@@ -55,6 +61,8 @@ class BarsConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)(imp
   private val verifyBusinessUrl: String = appConfig.BaseUrl.barsUrl + "/verify/business"
 
   def verifyBusiness(barsVerifyBusinessRequest: BarsVerifyBusinessRequest)(implicit requestHeader: RequestHeader): Future[BarsVerifyResponse] = {
-    httpClient.POST[BarsVerifyBusinessRequest, BarsVerifyResponse](verifyBusinessUrl, barsVerifyBusinessRequest)
+    httpClient.post(url"$verifyBusinessUrl")
+      .withBody(Json.toJson(barsVerifyBusinessRequest))
+      .execute[BarsVerifyResponse]
   }
 }

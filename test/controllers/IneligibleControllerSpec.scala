@@ -358,6 +358,30 @@ class IneligibleControllerSpec extends ItSpec {
       ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Vat, Languages.English)
     }
 
+    "SA generic ineligible page correctly for IsAnMtdCustomer eligibility reason" in {
+      val enrolment = Some(Set(TdAll.saEnrolment))
+
+      stubCommonActions(authAllEnrolments = enrolment)
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - isAnMtdCustomer`(Origins.Sa.Bta))
+
+      val result: Future[Result] = controller.saGenericIneligiblePage(fakeRequest)
+
+      val page = pageContentAsDoc(result)
+
+      ContentAssertions.commonPageChecks(
+        page,
+        expectedH1              = "Call us about a payment plan",
+        shouldBackLinkBePresent = false,
+        expectedSubmitUrl       = None,
+        regimeBeingTested       = Some(TaxRegime.Sa)
+      )
+      assertIneligiblePageLeadingP1(
+        page      = page,
+        leadingP1 = "You are not eligible to set up a Self Assessment payment plan online."
+      )
+      ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Sa, Languages.English)
+    }
+
     "Epaye You have chosen not to set up an Employers’ PAYE payment plan online page correctly" in {
       val enrolment = Some(Set(TdAll.payeEnrolment))
 
@@ -793,6 +817,31 @@ class IneligibleControllerSpec extends ItSpec {
         leadingP1 = expectedLeadingP1
       )
       ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Vat, Languages.Welsh)
+    }
+
+    "SA generic ineligible page correctly for IsAnMtdCustomer eligibility reason" in {
+      val enrolment = Some(Set(TdAll.saEnrolment))
+
+      stubCommonActions(authAllEnrolments = enrolment)
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - isAnMtdCustomer`(Origins.Sa.Bta))
+
+      val result: Future[Result] = controller.saGenericIneligiblePage(fakeRequest.withLangWelsh())
+
+      val page = pageContentAsDoc(result)
+
+      ContentAssertions.commonPageChecks(
+        page,
+        expectedH1              = "Ffoniwch ni ynghylch cynllun talu",
+        shouldBackLinkBePresent = false,
+        expectedSubmitUrl       = None,
+        regimeBeingTested       = Some(TaxRegime.Sa),
+        language                = Languages.Welsh
+      )
+      assertIneligiblePageLeadingP1(
+        page      = page,
+        leadingP1 = "Nid ydych yn gymwys i drefnu cynllun talu Hunanasesiad ar-lein."
+      )
+      ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Sa, Languages.Welsh)
     }
   }
 }

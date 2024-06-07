@@ -120,7 +120,8 @@ object TdAll {
     chargesBeforeMaxAccountingDate        = None,
     hasDisguisedRemuneration              = None,
     hasCapacitor                          = None,
-    dmSpecialOfficeProcessingRequiredCDCS = None
+    dmSpecialOfficeProcessingRequiredCDCS = None,
+    isAnMtdCustomer                       = None
   )
   val notEligibleHasRlsOnAddress: EligibilityRules = eligibleEligibilityRules.copy(hasRlsOnAddress = true)
   val notEligibleMarkedAsInsolvent: EligibilityRules = eligibleEligibilityRules.copy(markedAsInsolvent = true)
@@ -143,6 +144,7 @@ object TdAll {
   val notEligibleHasDisguisedRemuneration: EligibilityRules = eligibleEligibilityRules.copy(hasDisguisedRemuneration = Some(true))
   val notEligibleHasCapacitor: EligibilityRules = eligibleEligibilityRules.copy(hasCapacitor = Some(true))
   val notEligibleDmSpecialOfficeProcessingRequiredCDCS: EligibilityRules = eligibleEligibilityRules.copy(dmSpecialOfficeProcessingRequiredCDCS = Some(true))
+  val notEligibleIsAnMtdCustomer: EligibilityRules = eligibleEligibilityRules.copy(isAnMtdCustomer = Some(true))
 
   val callEligibilityApiRequestEpaye: CallEligibilityApiRequest = CallEligibilityApiRequest(
     channelIdentifier         = "eSSTTP",

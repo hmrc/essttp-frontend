@@ -191,6 +191,12 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
+  def `Eligibility Checked - Ineligible - isAnMtdCustomer`(origin: Origin = Origins.Sa.Bta)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.eligibilityCheckedIneligible,
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleIsAnMtdCustomer(origin.taxRegime, encrypter),
+    origin      = origin
+  )
+
   def `Answered Can Pay Upfront - Yes`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.answeredCanPayUpfrontYes,
     journeyInfo = JourneyInfo.answeredCanPayUpfrontYes(origin.taxRegime, encrypter),

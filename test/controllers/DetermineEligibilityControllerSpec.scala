@@ -560,7 +560,7 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
 
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val error = intercept[Exception](controller.determineEligibility(fakeRequest).futureValue)
-            error.getMessage should include("The future returned an exception of type: uk.gov.hmrc.http.Upstream5xxResponse")
+            error.getMessage should include("The future returned an exception of type: uk.gov.hmrc.http.UpstreamErrorResponse")
 
             Ttp.Eligibility.verifyTtpEligibilityRequests(taxRegime)
             EssttpBackend.EligibilityCheck.verifyNoneUpdateEligibilityRequest(TdAll.journeyId)

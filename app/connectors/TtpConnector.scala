@@ -20,19 +20,21 @@ import com.google.inject.{Inject, Singleton}
 import config.AppConfig
 import essttp.crypto.CryptoFormat
 import essttp.journey.model.CorrelationId
-import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import essttp.rootmodel.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
 import essttp.rootmodel.ttp.affordablequotes.{AffordableQuotesRequest, AffordableQuotesResponse}
 import essttp.rootmodel.ttp.arrangement.{ArrangementRequest, ArrangementResponse}
+import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
+import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
 import requests.RequestSupport._
-import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.http.HttpReads.Implicits.readFromJson
+import uk.gov.hmrc.http.StringContextOps
+import uk.gov.hmrc.http.client.HttpClientV2
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class TtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)(implicit ec: ExecutionContext) {
+class TtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2)(implicit ec: ExecutionContext) {
 
   import appConfig.eligibilityReqIdentificationFlag
   implicit val cryptoFormat: CryptoFormat = CryptoFormat.NoOpCryptoFormat
@@ -47,11 +49,10 @@ class TtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)(impl
 
   def callEligibilityApi(eligibilityRequest: CallEligibilityApiRequest, correlationId: CorrelationId)
     (implicit requestHeader: RequestHeader): Future[EligibilityCheckResult] = {
-    httpClient.POST[CallEligibilityApiRequest, EligibilityCheckResult](
-      url     = eligibilityUrl,
-      body    = eligibilityRequest,
-      headers = Seq((correlationIdHeaderKey, correlationId.value.toString))
-    )
+    httpClient.post(url"$eligibilityUrl")
+      .withBody(Json.toJson(eligibilityRequest))
+      .setHeader((correlationIdHeaderKey, correlationId.value.toString))
+      .execute[EligibilityCheckResult]
   }
 
   /**
@@ -62,11 +63,10 @@ class TtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)(impl
 
   def callAffordabilityApi(instalmentAmountRequest: InstalmentAmountRequest, correlationId: CorrelationId)
     (implicit requestHeader: RequestHeader): Future[InstalmentAmounts] = {
-    httpClient.POST[InstalmentAmountRequest, InstalmentAmounts](
-      url     = affordabilityUrl,
-      body    = instalmentAmountRequest,
-      headers = Seq((correlationIdHeaderKey, correlationId.value.toString))
-    )
+    httpClient.post(url"$affordabilityUrl")
+      .withBody(Json.toJson(instalmentAmountRequest))
+      .setHeader((correlationIdHeaderKey, correlationId.value.toString))
+      .execute[InstalmentAmounts]
   }
 
   /**
@@ -77,11 +77,10 @@ class TtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)(impl
 
   def callAffordableQuotesApi(affordableQuotesRequest: AffordableQuotesRequest, correlationId: CorrelationId)
     (implicit requestHeader: RequestHeader): Future[AffordableQuotesResponse] = {
-    httpClient.POST[AffordableQuotesRequest, AffordableQuotesResponse](
-      url     = affordableQuotesUrl,
-      body    = affordableQuotesRequest,
-      headers = Seq((correlationIdHeaderKey, correlationId.value.toString))
-    )
+    httpClient.post(url"$affordableQuotesUrl")
+      .withBody(Json.toJson(affordableQuotesRequest))
+      .setHeader((correlationIdHeaderKey, correlationId.value.toString))
+      .execute[AffordableQuotesResponse]
   }
 
   /**
@@ -92,10 +91,9 @@ class TtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)(impl
 
   def callArrangementApi(arrangementRequest: ArrangementRequest, correlationId: CorrelationId)
     (implicit requestHeader: RequestHeader): Future[ArrangementResponse] = {
-    httpClient.POST[ArrangementRequest, ArrangementResponse](
-      url     = arrangementUrl,
-      body    = arrangementRequest,
-      headers = Seq((correlationIdHeaderKey, correlationId.value.toString))
-    )
+    httpClient.post(url"$arrangementUrl")
+      .withBody(Json.toJson(arrangementRequest))
+      .setHeader((correlationIdHeaderKey, correlationId.value.toString))
+      .execute[ArrangementResponse]
   }
 }
