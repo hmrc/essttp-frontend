@@ -72,13 +72,19 @@ class PaymentPlanSetUpController @Inject() (
       case UpfrontPaymentAnswers.NoUpfrontPayment          => false
     }
 
+    val correspondence: Boolean = request.eligibilityCheckResult.regimeDigitalCorrespondence match {
+      case Some(correspondence) => correspondence.value
+      case _                    => false
+    }
+
     Ok(
       views.paymentPlanSetUpPage(
-        customerPaymentReference = journey.arrangementResponse.customerReference.value,
-        paymentDay               = firstPaymentDay,
-        hasUpfrontPayment        = hasUpfrontPayment,
-        taxRegime                = journey.taxRegime,
-        wasEmailAddressRequired  = request.isEmailAddressRequired(appConfig)
+        customerPaymentReference    = journey.arrangementResponse.customerReference.value,
+        paymentDay                  = firstPaymentDay,
+        hasUpfrontPayment           = hasUpfrontPayment,
+        taxRegime                   = journey.taxRegime,
+        wasEmailAddressRequired     = request.isEmailAddressRequired(appConfig),
+        regimeDigitalCorrespondence = correspondence
       )
     )
   }

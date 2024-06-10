@@ -22,6 +22,7 @@
 @import essttp.rootmodel.TaxRegime
 @import messages.DateMessages
 @import controllers.routes
+@import play.twirl.api.Html
 @import config.AppConfig
 
 @this(
@@ -36,7 +37,8 @@
         paymentDay: DueDate,
         hasUpfrontPayment: Boolean,
         taxRegime: TaxRegime,
-        wasEmailAddressRequired: Boolean
+        wasEmailAddressRequired: Boolean,
+        regimeDigitalCorrespondence: Boolean
 )(
         implicit
         request: Request[_]
@@ -85,7 +87,7 @@
         Messages.Confirmation.`HMRC will send you a letter within 5 working days with your payment dates.`.show
     }</p>
 
-    @{if(wasEmailAddressRequired) {
+    @{if(wasEmailAddressRequired && regimeDigitalCorrespondence) {
         <p class="govuk-body">
             {Messages.Confirmation.`We will send a secure message with payment due dates to your business tax account inbox within 24 hours.`.show}
         </p>
@@ -117,6 +119,13 @@
         Messages.Confirmation.`Call the HMRC Helpline on 0300 123 1813.`.show
     }</p>
 
+    <p class="govuk-body">@{
+        Messages.NotEligible.`Our opening times are Monday to Friday, 8am to 6pm. We are closed on weekends and bank holidays.`.show
+    }</p>
+
+    <p class="govuk-body">@{Html(
+        Messages.ExtraSupport.`You can also use Relay UK...`(appConfig.Urls.relayUrl).show)
+    }</p>
 
     <p class="govuk-body">
         <a href=@{buttonUrl} class="govuk-button" role="button" data-module="govuk-button">
