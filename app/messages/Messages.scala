@@ -1838,6 +1838,11 @@ object Messages {
       welsh   = "Argraffu copi o’ch cynllun talu"
     )
 
+    val `Print or save a copy of your payment plan`: Message = Message(
+      english = "Print or save a copy of your payment plan",
+      welsh   = "Argraffwch neu cadwch gopi o’r cynllun talu"
+    )
+
     val `View your payment plan`: Message = Message(
       english = "View your payment plan",
       welsh   = "Bwrw golwg dros eich cynllun talu"
