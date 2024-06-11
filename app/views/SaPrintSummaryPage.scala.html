@@ -1,0 +1,286 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import requests.RequestSupport
+@import messages.Messages
+@import play.api.mvc.Request
+@import play.twirl.api.Html
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import essttp.rootmodel.AmountInPence
+@import messages.DateMessages
+@import essttp.rootmodel.ttp.affordablequotes.PaymentPlan
+@import cats.syntax.eq._
+@import java.time.LocalDate
+@import views.html.helper.CSPNonce
+
+@this(
+        layout: templates.Layout,
+        requestSupport: RequestSupport,
+        govukSummaryList: GovukSummaryList
+)
+
+@(
+        paymentReference: String,
+        upfrontPaymentAmount: Option[AmountInPence],
+        dayOfMonth: Int,
+        paymentPlan: PaymentPlan
+)(
+        implicit
+        request: Request[_],
+        ord: Ordering[LocalDate]
+)
+
+@import requestSupport._
+
+@title = @{
+    Messages.PrintSummary.`Confirmation of your payment plan`(paymentPlan.totalDebtIncInt.value.gdsFormatInPounds).show
+}
+
+@scripts = { <script src="@{controllers.routes.Assets.versioned("javascripts/print-dialogue.js")}" @{CSPNonce.attr}></script> }
+
+@maybeUpfrontPaymentAmount = @{
+    upfrontPaymentAmount.map { someAmount =>
+        SummaryListRow(
+            key = Key(
+                content = HtmlContent(Html(Messages.UpfrontPaymentSummary.`Upfront payment`.show)),
+                classes = "govuk-!-width-one-half"
+            ),
+            value = Value(
+                content = Text(someAmount.gdsFormatInPounds)
+            ),
+            actions = None
+        )
+    }.toList
+}
+
+@paymentDayRow = @{
+    SummaryListRow(
+        key = Key(
+            content = HtmlContent(Html(Messages.PaymentSchedule.`Payments collected on`.show)),
+            classes = "govuk-!-width-one-half"
+        ),
+        value = Value(
+            content = Text(s"${dayOfMonth.toString}${DateMessages.getSuffix(dayOfMonth)} ${Messages.PaymentSchedule.`or next working day`.show}")
+        ),
+        actions = None
+    )
+}
+
+@monthRows = @{
+    paymentPlan.collections.regularCollections.sortBy(_.dueDate.value).zipWithIndex.map { case (p, index) =>
+        SummaryListRow(
+            classes = s"grouped-row ${
+                if(index > (paymentPlan.collections.regularCollections.size - 2)) {
+                    "last-grouped-row"
+                } else {
+                    ""
+                }
+            }",
+            key = Key(
+                content = Text(s"${DateMessages.monthName(p.dueDate.value.getMonthValue).show} ${p.dueDate.value.getYear.toString}"),
+                classes = s"govuk-!-width-one-half${if(index === 0) " govuk-!-padding-top-2" else ""}"
+            ),
+            value = Value(
+                content = Text(p.amountDue.value.gdsFormatInPounds)
+            ),
+            actions = None
+        )
+    }
+}
+
+@interestRow = @{
+    SummaryListRow(
+        key = Key(
+            content = HtmlContent(Html(Messages.PaymentSchedule.`Estimated total interest`.show)),
+            classes = "govuk-!-width-one-half"
+        ),
+        value = Value(
+            content = Text(paymentPlan.planInterest.value.gdsFormatInPounds)
+        ),
+        actions = None
+    )
+}
+
+@totalRow = @{
+    SummaryListRow(
+        key = Key(
+            content = Text(Messages.PaymentSchedule.`Total to pay`.show),
+            classes = "govuk-!-width-one-half"
+        ),
+        value = Value(
+            content = Text(paymentPlan.totalDebtIncInt.value.gdsFormatInPounds)
+        ),
+        actions = None
+    )
+}
+
+
+@monthlyPaymentRows = @{ paymentDayRow :: monthRows ::: List(interestRow) ::: List(totalRow) }
+
+@layout(pageTitle = Some(title), additionalScripts = Some(scripts)) {
+
+    <h1 class="govuk-heading-xl">
+    @title
+    </h1>
+
+    <p class="govuk-body js-visible">
+        <a href="#print-dialogue" class="govuk-link" id="printLink">
+            @{
+            Messages.Confirmation.`Print or save a copy of your payment plan`.show
+            }
+        </a>
+    </p>
+
+    <p class = "govuk-body">
+        @{
+        Messages.PrintSummary.`You have set up a payment plan`(paymentPlan.totalDebtIncInt.value.gdsFormatInPounds).show
+        }
+    </p>
+
+    <p class = "govuk-body">
+        @{
+        Messages.PrintSummary.`HMRC has agreed to this plan`(paymentPlan.totalDebtIncInt.value.gdsFormatInPounds).show
+        }
+    </p>
+
+    <p class = "govuk-body">
+        @{
+        Messages.PrintSummary.`You need to make any other payments on time`.show
+        }
+    </p>
+
+    <p class = "govuk-body">
+        @{
+        Messages.PrintSummary.`Make sure that your payments reach us`.show
+        }
+    </p>
+
+    <h2 class="govuk-heading-m">
+        @{
+        Messages.PrintSummary.`Your payment plan`.show
+        }
+    </h2>
+
+
+
+
+    @govukSummaryList(SummaryList(
+        rows = Seq(
+            SummaryListRow(
+                key = Key(
+                    content = Text(Messages.PrintSummary.`Payment reference`.show),
+                    classes = "govuk-!-width-one-half"
+                ),
+                value = Value(
+                    content = Text(paymentReference)
+                ),
+                actions = None
+            )
+        )
+    ))
+
+    @govukSummaryList(SummaryList(
+        rows = Seq(
+            SummaryListRow(
+                key = Key(
+                    content = HtmlContent(Html(Messages.UpfrontPayment.`Can you make an upfront payment?`.show)),
+                    classes = "govuk-!-width-one-half"
+                ),
+                value = Value(
+                    content = Text(upfrontPaymentAmount.fold(Messages.`No`)(_ => Messages.`Yes`).show)
+                ),
+                actions = None
+            )
+        ).toList.++(maybeUpfrontPaymentAmount)
+    ))
+
+    <h2 class="govuk-heading-m">
+        @{
+        Messages.PaymentSchedule.`Monthly payments`.show
+        }
+    </h2>
+
+    @govukSummaryList(SummaryList(
+        rows = monthlyPaymentRows
+    ))
+
+    <h2 class="govuk-heading-m">
+        @{
+        Messages.NotPaidOnTime.`If you do not pay on time`.show
+        }
+    </h2>
+
+    <p class = "govuk-body">
+        @{
+        Messages.NotPaidOnTime.`If you do not send future tax returns`.show
+        }
+    </p>
+
+    <p class = "govuk-body">
+        @{
+        Messages.NotPaidOnTime.`We’ve calculated interest at the current rate`.show
+        }
+    </p>
+
+    <p class = "govuk-body">
+        @{
+        Messages.NotPaidOnTime.`If you’re due a refund from us`.show
+        }
+    </p>
+
+    <p class = "govuk-body">
+        @{Html(
+        Messages.NotPaidOnTime.`If you’ve set up a Direct Debit`.show)
+        }
+    </p>
+
+    <p class = "govuk-body">
+        @{
+        Messages.NotPaidOnTime.`If we do not hear from you`.show
+        }
+    </p>
+
+    <p class = "govuk-body">
+        @{
+        Messages.NotPaidOnTime.`When you make any future Self Assessment payments`.show
+        }
+    </p>
+
+    <h2 class="govuk-heading-m">
+        @{
+        Messages.DifficultyPaying.`If you’re having difficulty paying`.show
+        }
+    </h2>
+
+    <p class="govuk-body">
+        @{Html(
+        Messages.DifficultyPaying.`We’re here to help`.show)
+        }
+    </p>
+
+    <p class="govuk-body">
+        @{Html(
+        Messages.DifficultyPaying.`You’ll need your payment reference`(paymentReference).show)
+        }
+    </p>
+
+    <p class="govuk-body">
+        @{Html(
+        Messages.DifficultyPaying.`HM Revenue and Customs`.show)
+        }
+    </p>
+
+}

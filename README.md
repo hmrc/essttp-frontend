@@ -32,6 +32,8 @@ To run with test endpoints enabled: `sbt runTestOnly`
 
 If running locally, the service runs on port `9215`
 
+Go to `/set-up-a-payment-plan/test-only/email-verification-passcodes` when using email verification to get the passcode
+
 ---
 
 ### Running tests

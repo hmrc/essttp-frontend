@@ -1229,6 +1229,16 @@ object Messages {
       welsh   = "dros sawl mis yr hoffech dalu"
     )
 
+    val `Estimated total interest`: Message = Message(
+      english = "Estimated total interest<br><span class=\"govuk-body-s\">Included in your plan</span>",
+      welsh   = "Amcangyfrif o gyfanswm y llog<br><span class=\"govuk-body-s\">TYn gynwysedig yn eich cynllun</span>"
+    )
+
+    val `Included in your plan`: Message = Message(
+      english = "Included in your plan",
+      welsh   = "Yn gynwysedig yn eich cynllun"
+    )
+
     val `Total to pay`: Message = Message(
       english = "Total to pay",
       welsh   = "Y cyfanswm i’w dalu"
@@ -1783,6 +1793,26 @@ object Messages {
       welsh   = "Yr hyn sy’n digwydd nesaf"
     )
 
+    val `What you need to do next`: Message = Message(
+      english = "What you need to do next",
+      welsh   = "Yr hyn y mae angen i chi ei wneud nesaf"
+    )
+
+    def `View your payment plan where`(link: String): Message = Message(
+      english = s"""<a href="$link" class="govuk-link">View your payment plan</a> where you will be able to print or save a copy.""",
+      welsh   = s"""<a href="$link" class="govuk-link">Bwrw golwg dros eich cynllun talu</a> lle byddwch yn gallu argraffu neu gadw copi ohono."""
+    )
+
+    val `We will not send you a copy`: Message = Message(
+      english = "<strong>We will not send a copy of your payment plan in the post. This is your only chance to access this information.</strong>",
+      welsh   = "<strong>Ni fyddwn yn anfon copi o’ch cynllun talu drwy’r post. Dyma’ch unig gyfle i gael mynediad at yr wybodaeth hon.</strong>"
+    )
+
+    val `About your payment plan`: Message = Message(
+      english = "About your payment plan",
+      welsh   = "Ynglŷn â’ch cynllun talu"
+    )
+
     val `HMRC will send you a letter within 5 working days with your payment dates.`: Message = Message(
       english = "HMRC will send you a letter within 5 working days with your payment dates.",
       welsh   = "Bydd CThEF yn anfon llythyr atoch cyn pen 5 diwrnod gwaith gyda’ch dyddiadau talu."
@@ -1806,6 +1836,11 @@ object Messages {
     val `Print a copy of your payment plan`: Message = Message(
       english = "Print a copy of your payment plan",
       welsh   = "Argraffu copi o’ch cynllun talu"
+    )
+
+    val `Print or save a copy of your payment plan`: Message = Message(
+      english = "Print or save a copy of your payment plan",
+      welsh   = "Argraffwch neu cadwch gopi o’r cynllun talu"
     )
 
     val `View your payment plan`: Message = Message(
@@ -1846,10 +1881,95 @@ object Messages {
       english = "Your payment plan",
       welsh   = "Eich cynllun talu"
     )
+    def `Confirmation of your payment plan`(amount: String): Message = Message(
+      english = s"Confirmation of plan to pay $amount",
+      welsh   = s"Cadarnhad o’ch cynllun talu i dalu $amount"
+    )
+
+    def `You have set up a payment plan`(amount: String): Message = Message(
+      english = s"You have set up a payment plan to pay $amount",
+      welsh   = s"Rydych wedi trefnu cynllun talu i dalu $amount"
+    )
+
+    def `HMRC has agreed to this plan`(amount: String): Message = Message(
+      english = s"HMRC has agreed to this plan on the understanding that you’ve told us about all your HMRC debts. This plan is only for $amount.",
+      welsh   = s"Mae CThEF wedi cytuno i’r cynllun hwn ar y ddealltwriaeth eich bod wedi rhoi gwybod i ni am eich dyledion gyda CThEF i gyd. Mae’r cynllun ar gyfer $amount yn unig."
+    )
+    val `You need to make any other payments on time`: Message = Message(
+      english = "You need to make any other payments on time. You also need to send in all future tax returns on time.",
+      welsh   = "Mae angen i chi gwneud unrhyw daliadau eraill mewn pryd. Mae angen i chi hefyd anfon bob Ffurflen Dreth atom mewn pryd yn y dyfodol."
+    )
+    val `Make sure that your payments reach us`: Message = Message(
+      english = "Make sure that your payments reach us by the date agreed.",
+      welsh   = "Gwnewch yn siŵr bod eich taliadau yn ein cyrraedd erbyn y dyddiad y cytunwyd arno."
+    )
 
     val `Payment reference`: Message = Message(
       english = "Payment reference",
       welsh   = "Cyfeirnod y taliad"
+    )
+
+  }
+
+  object NotPaidOnTime {
+
+    val `If you do not pay on time`: Message = Message(
+      english = "If you do not pay on time",
+      welsh   = "Os nad ydych yn talu mewn pryd"
+    )
+
+    val `If you do not send future tax returns`: Message = Message(
+      english = "If you do not send future tax returns or pay any tax due on time, we may cancel this plan and ask you to pay in full.",
+      welsh   = "Os na fyddwch yr anfon Ffurflenni Treth neu’n talu unrhyw dreth mewn pryd, mae’n bosibl y byddwn yn canslo’r cynllun hwn a gofyn i chi dalu’n llawn."
+    )
+
+    val `We’ve calculated interest at the current rate`: Message = Message(
+      english = "We’ve calculated interest at the current rate using the amounts and dates agreed. If you pay on any other date, or the interest rate changes, the amount of interest we charge will change.",
+      welsh   = "Rydym wedi cyfrifo llog ar y gyfradd bresennol gan ddefnyddio’r symiau a dyddiadau y cytunwyd arnynt. Os ydych yn talu ar unrhyw ddyddiad arall, neu os yw’r gyfradd llog yn newid, bydd swm y llog byddwn yn ei godi yn newid."
+    )
+
+    val `If you’re due a refund from us`: Message = Message(
+      english = "If you’re due a refund from us while you’re in this plan, we’ll take it off the amount you owe. This will reduce the amount of interest you’ll have to pay.",
+      welsh   = "Os yw ad-daliad yn ddyledus i chi oddi wrthym tra byddwch yn y cynllun hwn, byddwn yn ei dynnu oddi ar y swm sy’n ddyledus gennych. Bydd hyn yn gostwng swm y llog y bydd yn rhaid i chi ei dalu."
+    )
+
+    val `If you’ve set up a Direct Debit`: Message = Message(
+      english = "If you’ve set up a Direct Debit, we’ll continue to collect the original amount unless you give us permission to change it. You can do this by calling us on <strong>0300 123 1813</strong>.",
+      welsh   = "Os ydych wedi trefnu Debyd Uniongyrchol, byddwn yn parhau i gasglu’r swm gwreiddiol oni bai eich bod yn rhoi caniatâd i ni ei newid. Gallwch wneud hyn drwy ffonio ni ar <strong>0300 200 1900</strong>."
+    )
+
+    val `If we do not hear from you`: Message = Message(
+      english = "If we do not hear from you, we’ll put any overpayment at the end of the plan towards any future tax you owe, or send you a refund.",
+      welsh   = "Os na fyddwn yn clywed gennych, byddwn yn rhoi unrhyw ordaliad ar ddiwedd y cynllun tuag at unrhyw dreth bydd arnoch yn y dyfodol neu byddwn yn anfon ad-daliad atoch."
+    )
+
+    val `When you make any future Self Assessment payments`: Message = Message(
+      english = "When you make any future Self Assessment payments, we’ll put these towards your payment plan instead of your latest Self Assessment bill. If you want us to put your payment towards your Self Assessment bill first, call us 5 days after you’ve paid.",
+      welsh   = "Pan fyddwch yn gwneud unrhyw daliadau Hunanasesiad yn y dyfodol, byddwn yn rhoi’r rhain tuag at eich cynllun talu yn hytrach na’ch bil Hunanasesiad diweddaraf. Os ydych am i ni roi eich taliad tuag at eich bil Hunanasesiad yn gyntaf, ffoniwch ni 5 diwrnod ar ôl i chi dalu."
+    )
+
+  }
+
+  object DifficultyPaying {
+
+    val `If you’re having difficulty paying`: Message = Message(
+      english = "If you’re having difficulty paying",
+      welsh   = "Os ydych yn cael trafferth i dalu"
+    )
+
+    val `We’re here to help`: Message = Message(
+      english = "We’re here to help. Call us on <strong>0300 123 1813</strong>. Our opening times are Monday to Friday, 8am to 6pm. We are closed on weekends and bank holidays.",
+      welsh   = "Rydym yma i helpu. Ffoniwch ni ar <strong>0300 200 1900</strong>. Ein horiau agor yw Dydd Llun i Ddydd Gwener, 8am i 5:30pm. Rydym ar gau ar benwythnosau a gwyliau banc."
+    )
+
+    def `You’ll need your payment reference`(ref: String): Message = Message(
+      english = s"You’ll need your payment reference which is <strong>$ref</strong>",
+      welsh   = s"Bydd angen eich cyfeirnod talu arnoch, sef <strong>$ref</strong>"
+    )
+
+    val `HM Revenue and Customs`: Message = Message(
+      english = "<strong>HM Revenue & Customs</strong>",
+      welsh   = "<strong>Cyllid a Thollau EF</strong>"
     )
 
   }

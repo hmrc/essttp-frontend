@@ -21,7 +21,7 @@ import actionsmodel.EligibleJourneyRequest
 import config.AppConfig
 import essttp.journey.model.Journey.Stages
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
-import essttp.rootmodel.AmountInPence
+import essttp.rootmodel.{AmountInPence, TaxRegime}
 import essttp.utils.Errors
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -72,27 +72,58 @@ class PaymentPlanSetUpController @Inject() (
       case UpfrontPaymentAnswers.NoUpfrontPayment          => false
     }
 
-    Ok(
-      views.paymentPlanSetUpPage(
-        customerPaymentReference = journey.arrangementResponse.customerReference.value,
-        paymentDay               = firstPaymentDay,
-        hasUpfrontPayment        = hasUpfrontPayment,
-        taxRegime                = journey.taxRegime,
-        wasEmailAddressRequired  = request.isEmailAddressRequired(appConfig)
-      )
-    )
+    val correspondence: Boolean = request.eligibilityCheckResult.regimeDigitalCorrespondence match {
+      case Some(correspondence) => correspondence.value
+      case _                    => false
+    }
+
+    journey.taxRegime match {
+      //OPS-12246 sa page differs from the others due to these changes, split off into two
+      case TaxRegime.Sa =>
+        Ok(
+          views.saPaymentPlanSetUpPage(
+            customerPaymentReference    = journey.arrangementResponse.customerReference.value,
+            paymentDay                  = firstPaymentDay,
+            hasUpfrontPayment           = hasUpfrontPayment,
+            wasEmailAddressRequired     = request.isEmailAddressRequired(appConfig),
+            regimeDigitalCorrespondence = correspondence
+          )
+        )
+      case _ =>
+        Ok(
+          views.paymentPlanSetUpPage(
+            customerPaymentReference    = journey.arrangementResponse.customerReference.value,
+            paymentDay                  = firstPaymentDay,
+            hasUpfrontPayment           = hasUpfrontPayment,
+            taxRegime                   = journey.taxRegime,
+            wasEmailAddressRequired     = request.isEmailAddressRequired(appConfig),
+            regimeDigitalCorrespondence = correspondence
+          )
+        )
+    }
+
   }
 
   val printSummary: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
       case j: Journey.BeforeArrangementSubmitted => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
       case j: Journey.Stages.SubmittedArrangement =>
-        Ok(views.printSummaryPage(
-          paymentReference     = j.arrangementResponse.customerReference.value,
-          upfrontPaymentAmount = PaymentPlanSetUpController.deriveUpfrontPaymentFromAnswers(j.upfrontPaymentAnswers),
-          dayOfMonth           = j.dayOfMonth.value,
-          paymentPlan          = j.selectedPaymentPlan
-        ))
+        j.taxRegime match {
+          case TaxRegime.Sa =>
+            Ok(views.saPrintSummaryPage(
+              paymentReference     = j.arrangementResponse.customerReference.value,
+              upfrontPaymentAmount = PaymentPlanSetUpController.deriveUpfrontPaymentFromAnswers(j.upfrontPaymentAnswers),
+              dayOfMonth           = j.dayOfMonth.value,
+              paymentPlan          = j.selectedPaymentPlan
+            ))
+          case _ =>
+            Ok(views.printSummaryPage(
+              paymentReference     = j.arrangementResponse.customerReference.value,
+              upfrontPaymentAmount = PaymentPlanSetUpController.deriveUpfrontPaymentFromAnswers(j.upfrontPaymentAnswers),
+              dayOfMonth           = j.dayOfMonth.value,
+              paymentPlan          = j.selectedPaymentPlan
+            ))
+        }
     }
   }
 
