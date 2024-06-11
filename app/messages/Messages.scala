@@ -1230,8 +1230,13 @@ object Messages {
     )
 
     val `Estimated total interest`: Message = Message(
-      english = "Estimated total interest",
-      welsh   = "Amcangyfrif o gyfanswm y llog"
+      english = "Estimated total interest<br><span class=\"govuk-body-s\">Included in your plan</span>",
+      welsh   = "Amcangyfrif o gyfanswm y llog<br><span class=\"govuk-body-s\">TYn gynwysedig yn eich cynllun</span>"
+    )
+
+    val `Included in your plan`: Message = Message(
+      english = "Included in your plan",
+      welsh   = "Yn gynwysedig yn eich cynllun"
     )
 
     val `Total to pay`: Message = Message(
@@ -1786,6 +1791,26 @@ object Messages {
     val `What happens next`: Message = Message(
       english = "What happens next",
       welsh   = "Yr hyn sy’n digwydd nesaf"
+    )
+
+    val `What you need to do next`: Message = Message(
+      english = "What you need to do next",
+      welsh   = "Yr hyn y mae angen i chi ei wneud nesaf"
+    )
+
+    def `View your payment plan where`(link: String): Message = Message(
+      english = s"""<a href="$link" class="govuk-link">View your payment plan</a> where you will be able to print or save a copy.""",
+      welsh   = s"""<a href="$link" class="govuk-link">Bwrw golwg dros eich cynllun talu</a> lle byddwch yn gallu argraffu neu gadw copi ohono."""
+    )
+
+    val `We will not send you a copy`: Message = Message(
+      english = "<strong>We will not send a copy of your payment plan in the post. This is your only chance to access this information.</strong>",
+      welsh   = "<strong>Ni fyddwn yn anfon copi o’ch cynllun talu drwy’r post. Dyma’ch unig gyfle i gael mynediad at yr wybodaeth hon.</strong>"
+    )
+
+    val `About your payment plan`: Message = Message(
+      english = "About your payment plan",
+      welsh   = "Ynglŷn â’ch cynllun talu"
     )
 
     val `HMRC will send you a letter within 5 working days with your payment dates.`: Message = Message(

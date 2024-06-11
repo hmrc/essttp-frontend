@@ -46,7 +46,7 @@
 @import requestSupport._
 
 @title = @{
-    Messages.PrintSummary.`Your payment plan`.show
+    Messages.PrintSummary.`Confirmation of your payment plan`(paymentPlan.totalDebtIncInt.value.gdsFormatInPounds).show
 }
 
 @scripts = { <script src="@{controllers.routes.Assets.versioned("javascripts/print-dialogue.js")}" @{CSPNonce.attr}></script> }
@@ -101,6 +101,19 @@
     }
 }
 
+@interestRow = @{
+    SummaryListRow(
+        key = Key(
+            content = HtmlContent(Html(Messages.PaymentSchedule.`Estimated total interest`.show)),
+            classes = "govuk-!-width-one-half"
+        ),
+        value = Value(
+            content = Text(paymentPlan.planInterest.value.gdsFormatInPounds)
+        ),
+        actions = None
+    )
+}
+
 @totalRow = @{
     SummaryListRow(
         key = Key(
@@ -114,13 +127,55 @@
     )
 }
 
-@monthlyPaymentRows = @{ paymentDayRow :: monthRows ::: List(totalRow) }
+
+@monthlyPaymentRows = @{ paymentDayRow :: monthRows ::: List(interestRow) ::: List(totalRow) }
 
 @layout(pageTitle = Some(title), additionalScripts = Some(scripts)) {
 
     <h1 class="govuk-heading-xl">
     @title
     </h1>
+
+    <p class="govuk-body js-visible">
+        <a href="#print-dialogue" class="govuk-link" id="printLink">
+            @{
+            Messages.Confirmation.`Print a copy of your payment plan`.show
+            }
+        </a>
+    </p>
+
+    <p class = "govuk-body">
+        @{
+        Messages.PrintSummary.`You have set up a payment plan`(paymentPlan.totalDebtIncInt.value.gdsFormatInPounds).show
+        }
+    </p>
+
+    <p class = "govuk-body">
+        @{
+        Messages.PrintSummary.`HMRC has agreed to this plan`(paymentPlan.totalDebtIncInt.value.gdsFormatInPounds).show
+        }
+    </p>
+
+    <p class = "govuk-body">
+        @{
+        Messages.PrintSummary.`You need to make any other payments on time`.show
+        }
+    </p>
+
+    <p class = "govuk-body">
+        @{
+        Messages.PrintSummary.`Make sure that your payments reach us`.show
+        }
+    </p>
+
+    <h2 class="govuk-heading-m">
+        @{
+        Messages.PrintSummary.`Your payment plan`.show
+        }
+    </h2>
+
+
+
 
     @govukSummaryList(SummaryList(
         rows = Seq(
@@ -153,21 +208,79 @@
     ))
 
     <h2 class="govuk-heading-m">
-    @{
+        @{
         Messages.PaymentSchedule.`Monthly payments`.show
-    }
+        }
     </h2>
 
     @govukSummaryList(SummaryList(
         rows = monthlyPaymentRows
     ))
 
-    <p class="govuk-body js-visible">
-        <a href="#print-dialogue" class="govuk-link" id="printLink">
+    <h2 class="govuk-heading-m">
         @{
-            Messages.Confirmation.`Print a copy of your payment plan`.show
+        Messages.NotPaidOnTime.`If you do not pay on time`.show
         }
-        </a>
+    </h2>
+
+    <p class = "govuk-body">
+        @{
+        Messages.NotPaidOnTime.`If you do not send future tax returns`.show
+        }
+    </p>
+
+    <p class = "govuk-body">
+        @{
+        Messages.NotPaidOnTime.`We’ve calculated interest at the current rate`.show
+        }
+    </p>
+
+    <p class = "govuk-body">
+        @{
+        Messages.NotPaidOnTime.`If you’re due a refund from us`.show
+        }
+    </p>
+
+    <p class = "govuk-body">
+        @{Html(
+        Messages.NotPaidOnTime.`If you’ve set up a Direct Debit`.show)
+        }
+    </p>
+
+    <p class = "govuk-body">
+        @{
+        Messages.NotPaidOnTime.`If we do not hear from you`.show
+        }
+    </p>
+
+    <p class = "govuk-body">
+        @{
+        Messages.NotPaidOnTime.`When you make any future Self Assessment payments`.show
+        }
+    </p>
+
+    <h2 class="govuk-heading-m">
+        @{
+        Messages.DifficultyPaying.`If you’re having difficulty paying`.show
+        }
+    </h2>
+
+    <p class="govuk-body">
+        @{Html(
+        Messages.DifficultyPaying.`We’re here to help`.show)
+        }
+    </p>
+
+    <p class="govuk-body">
+        @{Html(
+        Messages.DifficultyPaying.`You’ll need your payment reference`(paymentReference).show)
+        }
+    </p>
+
+    <p class="govuk-body">
+        @{Html(
+        Messages.DifficultyPaying.`HM Revenue and Customs`.show)
+        }
     </p>
 
 }
