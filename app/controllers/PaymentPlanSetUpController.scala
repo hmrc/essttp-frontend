@@ -28,8 +28,8 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.Views
 
-import javax.inject.{Inject, Singleton}
 import java.time.LocalDate
+import javax.inject.{Inject, Singleton}
 
 @Singleton
 class PaymentPlanSetUpController @Inject() (
@@ -52,6 +52,21 @@ class PaymentPlanSetUpController @Inject() (
 
   val saPaymentPlanSetUp: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     paymentPlanSetup(request)
+  }
+
+  val epayeVatPrintSummary: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    printSummarySetup(request)
+  }
+
+  val saPrintSummary: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    printSummarySetup(request)
+  }
+
+  private def printSummarySetup(request: EligibleJourneyRequest[AnyContent])(implicit eligibleJourneyRequest: EligibleJourneyRequest[_]): Result = {
+    request.journey match {
+      case j: Journey.BeforeArrangementSubmitted => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
+      case j: Stages.SubmittedArrangement        => printSummary(j)
+    }
   }
 
   private def paymentPlanSetup(request: EligibleJourneyRequest[AnyContent])(implicit eligibleJourneyRequest: EligibleJourneyRequest[_]): Result = {
@@ -104,26 +119,22 @@ class PaymentPlanSetUpController @Inject() (
 
   }
 
-  val printSummary: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
-    request.journey match {
-      case j: Journey.BeforeArrangementSubmitted => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
-      case j: Journey.Stages.SubmittedArrangement =>
-        j.taxRegime match {
-          case TaxRegime.Sa =>
-            Ok(views.saPrintSummaryPage(
-              paymentReference     = j.arrangementResponse.customerReference.value,
-              upfrontPaymentAmount = PaymentPlanSetUpController.deriveUpfrontPaymentFromAnswers(j.upfrontPaymentAnswers),
-              dayOfMonth           = j.dayOfMonth.value,
-              paymentPlan          = j.selectedPaymentPlan
-            ))
-          case _ =>
-            Ok(views.printSummaryPage(
-              paymentReference     = j.arrangementResponse.customerReference.value,
-              upfrontPaymentAmount = PaymentPlanSetUpController.deriveUpfrontPaymentFromAnswers(j.upfrontPaymentAnswers),
-              dayOfMonth           = j.dayOfMonth.value,
-              paymentPlan          = j.selectedPaymentPlan
-            ))
-        }
+  def printSummary(journey: Journey.Stages.SubmittedArrangement)(implicit request: EligibleJourneyRequest[_]): Result = {
+    journey.taxRegime match {
+      case TaxRegime.Sa =>
+        Ok(views.saPrintSummaryPage(
+          paymentReference     = journey.arrangementResponse.customerReference.value,
+          upfrontPaymentAmount = PaymentPlanSetUpController.deriveUpfrontPaymentFromAnswers(journey.upfrontPaymentAnswers),
+          dayOfMonth           = journey.dayOfMonth.value,
+          paymentPlan          = journey.selectedPaymentPlan
+        ))
+      case _ =>
+        Ok(views.printSummaryPage(
+          paymentReference     = journey.arrangementResponse.customerReference.value,
+          upfrontPaymentAmount = PaymentPlanSetUpController.deriveUpfrontPaymentFromAnswers(journey.upfrontPaymentAnswers),
+          dayOfMonth           = journey.dayOfMonth.value,
+          paymentPlan          = journey.selectedPaymentPlan
+        ))
     }
   }
 
