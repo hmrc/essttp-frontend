@@ -105,7 +105,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
             paragraphs(emailParagraphOffset + 3).text() shouldBe "Your tax account will be updated with your payment plan within 24 hours."
             paragraphs(emailParagraphOffset + 4).text() shouldBe "View your payment plan"
 
-            doc.select("#print-plan-link").attr("href") shouldBe PageUrls.printPlanUrl
+            doc.select("#print-plan-link").attr("href") shouldBe PageUrls.epayeVatPrintPlanUrl
 
             subheadings(1).text() shouldBe "If you need to change your payment plan"
             paragraphs(emailParagraphOffset + 5).text() shouldBe "Call the HMRC Helpline on 0300 123 1813."
@@ -181,7 +181,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
 
           val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
-          val result: Future[Result] = controller.printSummary(fakeRequest)
+          val result: Future[Result] = controller.epayeVatPrintSummary(fakeRequest)
           val pageContent: String = contentAsString(result)
           val doc: Document = Jsoup.parse(pageContent)
 
@@ -221,7 +221,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
 
           val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
-          val result: Future[Result] = controller.printSummary(fakeRequest)
+          val result: Future[Result] = controller.saPrintSummary(fakeRequest)
           val pageContent: String = contentAsString(result)
           val doc: Document = Jsoup.parse(pageContent)
 
@@ -404,7 +404,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
-      val result: Future[Result] = controller.printSummary(fakeRequest)
+      val result: Future[Result] = controller.epayeVatPrintSummary(fakeRequest)
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
 
@@ -448,7 +448,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
-      val result: Future[Result] = controller.printSummary(fakeRequest)
+      val result: Future[Result] = controller.saPrintSummary(fakeRequest)
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
 
