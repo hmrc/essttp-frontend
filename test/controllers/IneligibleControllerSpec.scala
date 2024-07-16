@@ -118,8 +118,8 @@ class IneligibleControllerSpec extends ItSpec {
             )
 
             val expectedLeadingP1 = taxRegime match {
-              case TaxRegime.Epaye => "You cannot set up an Employers’ PAYE payment plan online because you owe more than £50,000."
-              case TaxRegime.Vat   => "You cannot set up a VAT payment plan online because you owe more than £50,000."
+              case TaxRegime.Epaye => "You cannot set up an Employers’ PAYE payment plan online because you owe more than £100,000."
+              case TaxRegime.Vat   => "You cannot set up a VAT payment plan online because you owe more than £100,000."
               case TaxRegime.Sa    => "You cannot set up a Self Assessment payment plan online because you owe more than £30,000."
             }
 
@@ -521,8 +521,8 @@ class IneligibleControllerSpec extends ItSpec {
             )
 
             val expectedLeadingP1 = taxRegime match {
-              case TaxRegime.Epaye => "Ni allwch drefnu cynllun talu TAW ar-lein oherwydd mae arnoch dros £50,000."
-              case TaxRegime.Vat   => "Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein oherwydd mae arnoch dros £50,000."
+              case TaxRegime.Epaye => "Ni allwch drefnu cynllun talu TAW ar-lein oherwydd mae arnoch dros £100,000."
+              case TaxRegime.Vat   => "Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein oherwydd mae arnoch dros £100,000."
               case TaxRegime.Sa    => "Ni allwch drefnu cynllun talu Hunanasesiad ar-lein oherwydd mae arnoch dros £30,000."
             }
 
