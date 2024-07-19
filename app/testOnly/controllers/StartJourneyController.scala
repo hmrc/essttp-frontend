@@ -362,7 +362,8 @@ object StartJourneyController {
         hasDisguisedRemuneration              = Some(containsError(HasDisguisedRemuneration)),
         hasCapacitor                          = Some(containsError(HasCapacitor)),
         dmSpecialOfficeProcessingRequiredCDCS = Some(containsError(DmSpecialOfficeProcessingRequiredCDCS)),
-        isAnMtdCustomer                       = Some(containsError(IsAnMtdCustomer))
+        isAnMtdCustomer                       = Some(containsError(IsAnMtdCustomer)),
+        dmSpecialOfficeProcessingRequiredCESA = Some(containsError(DmSpecialOfficeProcessingRequiredCESA))
       )
     }
     EligibilityCheckResult(
