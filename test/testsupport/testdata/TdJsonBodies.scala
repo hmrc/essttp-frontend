@@ -16,7 +16,7 @@
 
 package testsupport.testdata
 
-import essttp.journey.model.{Origin, Origins}
+import essttp.journey.model.{Origin, Origins, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.ttp.eligibility.{EligibilityPass, EligibilityRules}
 import essttp.rootmodel.{DayOfMonth, TaxRegime, UpfrontPaymentAmount}
 import paymentsEmailVerification.models.EmailVerificationResult
@@ -62,7 +62,12 @@ object TdJsonBodies {
     def detachedUrl(taxRegime: TaxRegime): String = response(taxRegime)
   }
 
-  def createJourneyJson(stageInfo: StageInfo, journeyInfo: List[String], origin: Origin = Origins.Epaye.Bta): String = {
+  def createJourneyJson(
+      stageInfo:            StageInfo,
+      journeyInfo:          List[String],
+      origin:               Origin       = Origins.Epaye.Bta,
+      affordabilityEnabled: Boolean      = false
+  ): String = {
     val jsonFormatted: String = if (journeyInfo.isEmpty) "" else s",\n${journeyInfo.mkString(",")}"
     s"""
       |{
@@ -80,6 +85,7 @@ object TdJsonBodies {
       |        "backUrl" : "/set-up-a-payment-plan/test-only/bta-page?starting-page"
       |      }
       |    },
+      |    "affordabilityEnabled" : ${affordabilityEnabled.toString},
       |    "sessionId": "IamATestSessionId",
       |    "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059"$jsonFormatted
       |  },
@@ -223,6 +229,23 @@ object TdJsonBodies {
       |  "futureChargeLiabilitiesExcluded": false
       |}
       |""".stripMargin
+  }
+
+  def whyCannotPayInFull(answers: WhyCannotPayInFullAnswers): String = {
+    val value = answers match {
+      case WhyCannotPayInFullAnswers.AnswerNotRequired =>
+        """{
+          |  "AnswerNotRequired": { }
+          |}""".stripMargin
+      case WhyCannotPayInFullAnswers.WhyCannotPayInFull(reasons) =>
+        s"""{
+           |  "WhyCannotPayInFull": {
+           |    "reasons": [ ${reasons.map(r => s""""${r.entryName}"""").mkString(",")}]
+           |  }
+           |}""".stripMargin
+    }
+
+    s""""whyCannotPayInFullAnswers": $value"""
   }
 
   def canPayUpfrontJourneyInfo(canPayUpfront: Boolean): String = s""""canPayUpfront": ${canPayUpfront.toString}"""

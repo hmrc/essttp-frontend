@@ -33,6 +33,7 @@ class JourneyFinalStateCheckSpec extends ItSpec {
     forAll(Table(
       ("scenario", "action"),
       (PageUrls.yourBillIsUrl, app.injector.instanceOf[YourBillController].yourBill),
+      (PageUrls.whyCannotPayInFull, app.injector.instanceOf[WhyCannotPayInFullController].whyCannotPayInFull),
       (PageUrls.canYouMakeAnUpfrontPaymentUrl, app.injector.instanceOf[UpfrontPaymentController].canYouMakeAnUpfrontPayment),
       (PageUrls.howMuchCanYouPayUpfrontUrl, app.injector.instanceOf[UpfrontPaymentController].upfrontPaymentAmount),
       (PageUrls.upfrontPaymentSummaryUrl, app.injector.instanceOf[UpfrontPaymentController].upfrontPaymentSummary),

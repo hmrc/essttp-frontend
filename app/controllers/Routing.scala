@@ -49,6 +49,9 @@ object Routing {
           case j: AfterEligibilityChecked  => EligibilityRouter.nextPage(j.eligibilityCheckResult, j.taxRegime)
         }
       },
+      routes.WhyCannotPayInFullController.whyCannotPayInFull -> { () =>
+        routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment
+      },
       routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment -> { () =>
         journey match {
           case _: BeforeAnsweredCanPayUpfront => throw UpstreamErrorResponse("Could not find CanPayUpfront answer to determine route", INTERNAL_SERVER_ERROR)
@@ -171,6 +174,9 @@ object Routing {
 
     case j: Journey.Stages.EligibilityChecked =>
       EligibilityRouter.nextPage(j.eligibilityCheckResult, j.taxRegime)
+
+    case _: Journey.Stages.ObtainedWhyCannotPayInFullAnswers =>
+      routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment
 
     case j: Journey.Stages.AnsweredCanPayUpfront =>
       canPayUpfrontRoute(j.canPayUpfront)

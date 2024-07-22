@@ -23,6 +23,7 @@ object StageInfo {
   val computedTaxId: StageInfo = StageInfo("ComputedTaxId", "ComputedTaxId")
   val eligibilityCheckedEligible: StageInfo = StageInfo("EligibilityChecked", "Eligible")
   val eligibilityCheckedIneligible: StageInfo = StageInfo("EligibilityChecked", "Ineligible")
+  val whyCannotPayInFullNotRequired: StageInfo = StageInfo("ObtainedWhyCannotPayInFullAnswers", "AnswerNotRequired")
   val answeredCanPayUpfrontYes: StageInfo = StageInfo("AnsweredCanPayUpfront", "Yes")
   val answeredCanPayUpfrontNo: StageInfo = StageInfo("AnsweredCanPayUpfront", "No")
   val enteredUpfrontPaymentAmount: StageInfo = StageInfo("EnteredUpfrontPaymentAmount", "EnteredUpfrontPaymentAmount")

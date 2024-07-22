@@ -16,7 +16,7 @@
 
 package controllers
 
-import essttp.journey.model.{Origin, Origins}
+import essttp.journey.model.{Origin, Origins, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.ttp.eligibility.MainTrans
 import messages.ChargeTypeMessages.chargeFromMTrans
@@ -32,7 +32,7 @@ import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend}
-import testsupport.testdata.{JourneyJsonTemplates, PageUrls}
+import testsupport.testdata.{JourneyInfo, JourneyJsonTemplates, PageUrls, StageInfo, TdAll, TdJsonBodies}
 import uk.gov.hmrc.http.SessionKeys
 
 import java.time.LocalDate
@@ -255,15 +255,40 @@ class YourBillControllerSpec extends ItSpec {
   }
 
   "POST /your-bill should" - {
-    "redirect to can you make an upfront payment question page" in {
+    "redirect to the 'can you make an upfront payment' page when affordability is not enabled in the journey" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Vat.Bta)()
+      EssttpBackend.WhyCannotPayInFull.stubUpdateWhyCannotPayInFull(
+        TdAll.journeyId,
+        WhyCannotPayInFullAnswers.AnswerNotRequired,
+        JourneyJsonTemplates.`Why Cannot Pay in Full - Not Required`(Origins.Vat.Bta)(testCrypto)
+      )
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
       val result = controller.yourBillSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.canYouMakeAnUpfrontPaymentUrl)
+
+      EssttpBackend.WhyCannotPayInFull.verifyUpdateWhyCannotPayInFullRequest(TdAll.journeyId, WhyCannotPayInFullAnswers.AnswerNotRequired)
+    }
+
+    "redirect to the 'why can't you pay in full' page when affordability is enabled in the journey" in {
+      stubCommonActions()
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Vat.Bta)(
+        TdJsonBodies.createJourneyJson(
+          stageInfo   = StageInfo.eligibilityCheckedEligible,
+          journeyInfo = JourneyInfo.eligibilityCheckedEligible(TaxRegime.Vat, testCrypto),
+          Origins.Vat.Bta,
+          affordabilityEnabled = true
+        )
+      )
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+      val result = controller.yourBillSubmit(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.whyCannotPayInFull)
     }
 
     "redirect to You already have a direct debit page when there is a ddInProgress" in {
@@ -393,9 +418,15 @@ class YourBillControllerSpec extends ItSpec {
   }
 
   "POST /you-already-have-a-direct-debit should" - {
-    "redirect to can you make an upfront payment question page" in {
+
+    "redirect to can you make an upfront payment question page when affordability is not enabled in the journey" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourneyWithDdInProgress(testCrypto, Origins.Vat.Bta)()
+      EssttpBackend.WhyCannotPayInFull.stubUpdateWhyCannotPayInFull(
+        TdAll.journeyId,
+        WhyCannotPayInFullAnswers.AnswerNotRequired,
+        JourneyJsonTemplates.`Why Cannot Pay in Full - Not Required`(Origins.Vat.Bta)(testCrypto)
+      )
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
@@ -421,7 +452,7 @@ class YourBillControllerSpec extends ItSpec {
             stripMargin
         ).as[JsObject]
       )
-
+      EssttpBackend.WhyCannotPayInFull.verifyUpdateWhyCannotPayInFullRequest(TdAll.journeyId, WhyCannotPayInFullAnswers.AnswerNotRequired)
     }
   }
 

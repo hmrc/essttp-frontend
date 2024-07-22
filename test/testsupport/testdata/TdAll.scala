@@ -28,7 +28,7 @@ import essttp.rootmodel.ttp.eligibility._
 import essttp.rootmodel.ttp._
 import essttp.rootmodel.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
 import essttp.rootmodel.ttp.arrangement._
-import essttp.rootmodel.{AmountInPence, CanPayUpfront, DayOfMonth, Email, MonthlyPaymentAmount, TaxRegime, UpfrontPaymentAmount}
+import essttp.rootmodel.{AmountInPence, CanPayUpfront, CannotPayReason, DayOfMonth, Email, MonthlyPaymentAmount, TaxRegime, UpfrontPaymentAmount}
 import play.api.libs.json.Json
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
@@ -268,6 +268,8 @@ object TdAll {
       chargeTypesExcluded             = None
     )
   }
+
+  val whyCannotPayReasons: Set[CannotPayReason] = Set(CannotPayReason.OverRepayment, CannotPayReason.NationalDisaster)
 
   def dayOfMonth(day: Int = 28): DayOfMonth = DayOfMonth(day)
 
