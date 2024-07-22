@@ -19,7 +19,7 @@ package testsupport.stubs
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.crypto.CryptoFormat
-import essttp.journey.model.{JourneyId, Origin, Origins}
+import essttp.journey.model.{JourneyId, Origin, Origins, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.bank.DetailsAboutBankAccount
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
 import essttp.rootmodel.dates.startdates.StartDatesResponse
@@ -183,6 +183,37 @@ object EssttpBackend {
 
     def findJourneyWithDdInProgress(encrypter: Encrypter, origin: Origin = Origins.Epaye.Bta)(jsonBody: String = JourneyJsonTemplates.`Eligibility Checked - Eligible- ddInProgress`(origin)(encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
+  }
+
+  object WhyCannotPayInFull {
+    def updateWhyCannotPayInFullUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-why-cannot-pay-in-full"
+
+    def stubUpdateWhyCannotPayInFull(journeyId: JourneyId, whyCannotPayInFull: WhyCannotPayInFullAnswers, updatedJourneyJson: String): StubMapping =
+      stubFor(
+        post(urlPathEqualTo(updateWhyCannotPayInFullUrl(journeyId)))
+          .withRequestBody(equalTo(Json.toJson(whyCannotPayInFull).toString))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(updatedJourneyJson)
+          )
+      )
+
+    def verifyUpdateWhyCannotPayInFullRequest(journeyId: JourneyId, expectedWhyCannotPayInFull: WhyCannotPayInFullAnswers): Unit =
+      WireMockHelpers.verifyWithBodyParse(updateWhyCannotPayInFullUrl(journeyId), expectedWhyCannotPayInFull)
+
+    def verifyNoneUpdateWhyCannotPayInFullRequest(journeyId: JourneyId): Unit =
+      verify(
+        exactly(0),
+        postRequestedFor(urlPathEqualTo(updateWhyCannotPayInFullUrl(journeyId)))
+      )
+
+    def findJourney(
+        encrypter: Encrypter,
+        origin:    Origin    = Origins.Epaye.Bta
+    )(jsonBody: String = JourneyJsonTemplates.`Why Cannot Pay in Full - Not Required`(origin)(encrypter)): StubMapping =
+      findByLatestSessionId(jsonBody)
+
   }
 
   object CanPayUpfront {

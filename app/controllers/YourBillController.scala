@@ -20,7 +20,8 @@ import _root_.actions.Actions
 import cats.syntax.eq._
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
-import essttp.journey.model.Journey
+import essttp.journey.JourneyConnector
+import essttp.journey.model.{Journey, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.AmountInPence
 import essttp.rootmodel.ttp.eligibility.{ChargeTypeAssessment, Charges, EligibilityCheckResult, MainTrans}
 import essttp.rootmodel.ttp.{DdInProgress, IsInterestBearingCharge}
@@ -34,14 +35,16 @@ import views.Views
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class YourBillController @Inject() (
-    as:           Actions,
-    mcc:          MessagesControllerComponents,
-    views:        Views,
-    auditService: AuditService
-)
+    as:               Actions,
+    mcc:              MessagesControllerComponents,
+    views:            Views,
+    auditService:     AuditService,
+    journeyConnector: JourneyConnector
+)(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 
@@ -70,12 +73,11 @@ class YourBillController @Inject() (
     }
   }
 
-  val yourBillSubmit: Action[AnyContent] = as.eligibleJourneyAction { eligibilityRequest =>
-    if (YourBillController.hasAnyChargesWithDdInProgress(eligibilityRequest.eligibilityCheckResult)) {
+  val yourBillSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit eligibilityRequest =>
+    if (YourBillController.hasAnyChargesWithDdInProgress(eligibilityRequest.eligibilityCheckResult))
       Redirect(routes.YourBillController.youAlreadyHaveDirectDebit)
-    } else {
-      Redirect(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment)
-    }
+    else
+      computeNext(eligibilityRequest.journey).map(Redirect(_))
   }
 
   val youAlreadyHaveDirectDebit: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
@@ -93,9 +95,18 @@ class YourBillController @Inject() (
       )
     )
 
-  val youAlreadyHaveDirectDebitSubmit: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+  val youAlreadyHaveDirectDebitSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     auditService.auditDdInProgress(request.journey, hasChosenToContinue = true)
-    Redirect(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment)
+    computeNext(request.journey).map(Redirect(_))
+  }
+
+  private def computeNext(journey: Journey)(implicit rh: RequestHeader): Future[Call] = {
+    if (journey.affordabilityEnabled.contains(true))
+      Future.successful(routes.WhyCannotPayInFullController.whyCannotPayInFull)
+    else
+      journeyConnector
+        .updateWhyCannotPayInFullAnswers(journey.journeyId, WhyCannotPayInFullAnswers.AnswerNotRequired)
+        .map(_ => routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment)
   }
 
 }

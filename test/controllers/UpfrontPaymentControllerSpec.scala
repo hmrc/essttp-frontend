@@ -56,7 +56,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
           s"[$regime journey] should return 200 and the can you make an upfront payment page" in {
             stubCommonActions()
-            EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin)()
+            EssttpBackend.WhyCannotPayInFull.findJourney(testCrypto, origin)()
 
             val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
@@ -99,7 +99,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
           s"[$regime journey] should redirect to /how-much-can-you-pay-upfront when user chooses yes" in {
             stubCommonActions()
-            EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin)()
+            EssttpBackend.WhyCannotPayInFull.findJourney(testCrypto, origin)()
             EssttpBackend.CanPayUpfront.stubUpdateCanPayUpfront(
               TdAll.journeyId,
               canPayUpfrontScenario = true,
@@ -121,7 +121,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
           s"[$regime journey] should redirect to /can-you-make-an-upfront-payment when user chooses no" in {
             stubCommonActions()
-            EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin)()
+            EssttpBackend.WhyCannotPayInFull.findJourney(testCrypto, origin)()
             EssttpBackend.CanPayUpfront.stubUpdateCanPayUpfront(
               TdAll.journeyId,
               canPayUpfrontScenario = false,
@@ -143,7 +143,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
           s"[$regime journey] should redirect to /can-you-make-an-upfront-payment with error summary when no option is selected" in {
             stubCommonActions()
-            EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin)()
+            EssttpBackend.WhyCannotPayInFull.findJourney(testCrypto, origin)()
 
             val fakeRequest = FakeRequest(
               method = "POST",

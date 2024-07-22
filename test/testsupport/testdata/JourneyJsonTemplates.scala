@@ -16,7 +16,7 @@
 
 package testsupport.testdata
 
-import essttp.journey.model.{Origin, Origins}
+import essttp.journey.model.{Origin, Origins, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.DayOfMonth
 import paymentsEmailVerification.models.EmailVerificationResult
 import uk.gov.hmrc.crypto.Encrypter
@@ -197,6 +197,18 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
+  def `Why Cannot Pay in Full - Not Required`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.whyCannotPayInFullNotRequired,
+    journeyInfo = JourneyInfo.whyCannotPayInFullNotRequired(origin.taxRegime, encrypter),
+    origin      = origin
+  )
+
+  def `Why Cannot Pay in Full - Required`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.whyCannotPayInFullNotRequired,
+    journeyInfo = JourneyInfo.whyCannotPayInFullRequired(origin.taxRegime, encrypter),
+    origin      = origin
+  )
+
   def `Answered Can Pay Upfront - Yes`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.answeredCanPayUpfrontYes,
     journeyInfo = JourneyInfo.answeredCanPayUpfrontYes(origin.taxRegime, encrypter),
@@ -262,6 +274,7 @@ object JourneyJsonTemplates {
     journeyInfo = List(
       TdJsonBodies.taxIdJourneyInfo(),
       TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.eligibleEligibilityPass, TdAll.eligibleEligibilityRules, origin.taxRegime, encrypter, regimeDigitalCorrespondence),
+      TdJsonBodies.whyCannotPayInFull(WhyCannotPayInFullAnswers.AnswerNotRequired),
       TdJsonBodies.upfrontPaymentAnswersJourneyInfo(upfrontPaymentAmountJsonString),
       TdJsonBodies.extremeDatesJourneyInfo(),
       TdJsonBodies.affordabilityResultJourneyInfo(),

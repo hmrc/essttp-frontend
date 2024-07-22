@@ -17,7 +17,7 @@
 package messages
 
 import essttp.rootmodel.ttp.eligibility.MainTrans
-import essttp.rootmodel.{AmountInPence, Email, TaxRegime}
+import essttp.rootmodel.{AmountInPence, CannotPayReason, Email, TaxRegime}
 import models.Languages
 import models.forms.BankDetailsForm._
 
@@ -691,6 +691,81 @@ object Messages {
       english = s"""You must <a href="$saLink" class="govuk-link">request access to Self Assessment</a> before you can set up a Self Assessment payment plan online.""",
       welsh   = s"""Mae’n rhaid i chi <a href="$saLink" class="govuk-link">wneud cais i gael mynediad at eich cyfrif Hunanasesiad</a> cyn i chi allu trefnu cynllun talu ar-lein ar gyfer Hunanasesiad."""
     )
+
+  }
+
+  object WhyCannotPayInFull {
+
+    val `Why are you unable to pay in full?`: Message = Message(
+      english = "Why are you unable to pay in full?"
+    )
+
+    val `This won't affect your payment plan...`: Message = Message(
+      english = "This won’t affect your payment plan. Your answers help us plan services in the future. Select all that apply."
+    )
+
+    val or: Message = Message(
+      english = "or"
+    )
+
+    val `Select all that apply or 'none of the above'`: Message = Message(
+      english = "Select all that apply or ‘none of the above’"
+    )
+
+    def checkboxMessage(cannotPayReason: CannotPayReason): Message = cannotPayReason match {
+      case CannotPayReason.Bankrupt =>
+        Message(
+          english = "Bankrupt, Insolvent or Voluntary arrangement"
+        )
+      case CannotPayReason.Bereavement =>
+        Message(
+          english = "Bereavement"
+        )
+      case CannotPayReason.ChangeToPersonalCircumstances =>
+        Message(
+          english = "Change to personal circumstances (family breakdown)"
+        )
+      case CannotPayReason.FloodFireTheft =>
+        Message(
+          english = "Flood, fire, theft or unexpected repairs"
+        )
+      case CannotPayReason.IllHealth =>
+        Message(
+          english = "Ill health"
+        )
+      case CannotPayReason.LocalDisaster =>
+        Message(
+          english = "Local disaster"
+        )
+      case CannotPayReason.LostReducedBusiness =>
+        Message(
+          english = "Lost or reduced business"
+        )
+      case CannotPayReason.LowIncome =>
+        Message(
+          english = "Low income"
+        )
+      case CannotPayReason.NationalDisaster =>
+        Message(
+          english = "National disaster"
+        )
+      case CannotPayReason.NoProvisions =>
+        Message(
+          english = "No provisions"
+        )
+      case CannotPayReason.OverRepayment =>
+        Message(
+          english = "Over repayment"
+        )
+      case CannotPayReason.Unemployed =>
+        Message(
+          english = "Unemployed or lack of work"
+        )
+      case CannotPayReason.Other =>
+        Message(
+          english = "None of the above"
+        )
+    }
 
   }
 

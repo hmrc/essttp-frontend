@@ -38,6 +38,7 @@ class Views @Inject() (
     val notSaEnrolled:                    NotSaEnrolled,
     val ineligible:                       Ineligible,
     val partials:                         Partials,
+    val whyCannotPayInFull:               WhyCannotPayInFull,
     val canYouMakeAnUpFrontPayment:       CanYouMakeAnUpfrontPayment,
     val upfrontPaymentAmountPage:         UpfrontPaymentAmountPage,
     val upfrontSummaryPage:               UpfrontPaymentSummary,

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ESSTTP quick journey
 // @namespace    http://tampermonkey.net/
-// @version      2.0
+// @version      3.0
 // @description
 // @author       achung
 // @match        http*://*/set-up-a-payment-plan*
@@ -127,7 +127,8 @@ const testOnlyStartPageSa = () => {
 
 const landingPage = () => {
     if (currentPageIs('/set-up-a-payment-plan/epaye-payment-plan') ||
-        currentPageIs('/set-up-a-payment-plan/vat-payment-plan')) {
+        currentPageIs('/set-up-a-payment-plan/vat-payment-plan') ||
+        currentPageIs('/set-up-a-payment-plan/sa-payment-plan')) {
         clickContinue()
     }
 }
@@ -137,6 +138,17 @@ const yourBill = () => {
         clickContinue()
     }
 }
+
+const whyCannotPayInFull = () => {
+    if (currentPageIs('/set-up-a-payment-plan/why-are-you-unable-to-pay-in-full')) {
+        document.getElementById('option-Bankrupt').checked = true
+        document.getElementById('option-FloodFireTheft').checked = true
+        document.getElementById('option-OverRepayment').checked = true
+        clickContinue()
+    }
+}
+
+
 
 const canYouMakeUpfrontPayment = () => {
     if (currentPageIs('/set-up-a-payment-plan/can-you-make-an-upfront-payment')) {
@@ -250,6 +262,7 @@ function continueJourney() {
     testOnlyStartPageSa()
     landingPage()
     yourBill()
+    whyCannotPayInFull()
     canYouMakeUpfrontPayment()
     howMuchCanYouPayUpfront()
     paymentSummary()

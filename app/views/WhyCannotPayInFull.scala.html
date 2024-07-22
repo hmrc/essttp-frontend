@@ -1,0 +1,112 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import controllers.routes
+@import messages.Messages
+@import essttp.rootmodel.CannotPayReason
+@import play.api.mvc.Request
+@import play.api.data.Form
+@import requests.RequestSupport
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+
+@this(
+layout: templates.Layout,
+govukButton: GovukButton,
+govukCheckboxes: GovukCheckboxes,
+formWithCSRF: FormWithCSRF,
+govukErrorSummary: GovukErrorSummary,
+requestSupport: RequestSupport
+)
+
+@(form: Form[Set[CannotPayReason]])(implicit request: Request[_])
+
+@import requestSupport._
+
+@key = @{
+    "WhyCannotPayInFull"
+}
+
+@title = @{
+    Messages.WhyCannotPayInFull.`Why are you unable to pay in full?`.show
+}
+
+@toCheckBoxItem(reason: CannotPayReason) = @{
+    CheckboxItem(
+        content = Text(Messages.WhyCannotPayInFull.checkboxMessage(reason).show),
+        value = reason.entryName,
+        id = Some(s"option-${reason.entryName}"),
+        checked = form.value.exists(_.contains(reason))
+    )
+}
+
+@checkboxItems = @{
+  val reasons: Seq[CheckboxItem] = Seq(
+    CannotPayReason.Bankrupt,
+    CannotPayReason.Bereavement,
+    CannotPayReason.ChangeToPersonalCircumstances,
+    CannotPayReason.FloodFireTheft,
+    CannotPayReason.IllHealth,
+    CannotPayReason.LocalDisaster,
+    CannotPayReason.LostReducedBusiness,
+    CannotPayReason.LowIncome,
+    CannotPayReason.NationalDisaster,
+    CannotPayReason.NoProvisions,
+    CannotPayReason.OverRepayment,
+    CannotPayReason.Unemployed
+  ).map(toCheckBoxItem)
+
+  val divider = CheckboxItem(divider = Some(Messages.WhyCannotPayInFull.or.show))
+
+  val other = toCheckBoxItem(CannotPayReason.Other).copy(behaviour = Some(ExclusiveCheckbox))
+
+  reasons :+ divider :+ other
+}
+
+@layout(pageTitle = Some(title), hasErrors = form.hasErrors, showBackLink = true) {
+    @if(form.errors.nonEmpty) {
+        @govukErrorSummary(
+            ErrorSummary(errorList = form.errors.map(e =>
+                ErrorLink(
+                    href = Some(s"#${e.key}"),
+                    content = Text(e.message)
+                )
+            ),
+                title = Text(Messages.`There is a problem`.show))
+        )
+    }
+
+    @formWithCSRF(action = routes.WhyCannotPayInFullController.whyCannotPayInFullSubmit) {
+        @govukCheckboxes(
+          Checkboxes(
+            fieldset = Some(Fieldset(
+                legend = Some(Legend(
+                    content = Text(title),
+                    classes = "govuk-fieldset__legend--xl",
+                    isPageHeading = true
+                ))
+            )),
+            idPrefix = Some(key),
+            name = s"$key[]",
+            hint = Some(Hint(content = Text(Messages.WhyCannotPayInFull.`This won't affect your payment plan...`.show))),
+            items = checkboxItems,
+            errorMessage = form.error(key).map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(content = Text(e.message)))
+          )
+        )
+
+        @govukButton(Button(content = Text(Messages.continue.show), attributes = Map("id" -> "continue")))
+    }
+
+}

@@ -49,7 +49,8 @@ class PaymentDayController @Inject() (
   val paymentDay: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
       case j: Journey.BeforeEnteredMonthlyPaymentAmount => logErrorAndRouteToDefaultPage(j)
-      case j: Journey.AfterEnteredMonthlyPaymentAmount  => finalStateCheck(j, displayPaymentDayPage(j))
+      case j: Journey.AfterEnteredMonthlyPaymentAmount =>
+        finalStateCheck(j, displayPaymentDayPage(j))
     }
   }
 
