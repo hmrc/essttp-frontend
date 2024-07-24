@@ -24,7 +24,7 @@ import config.AppConfig
 import essttp.journey.JourneyConnector
 import essttp.journey.model.{Origins, SjRequest}
 import essttp.rootmodel.ttp.affordablequotes.DueDate
-import essttp.rootmodel.ttp.eligibility._
+import essttp.rootmodel.ttp.eligibility.{AccruedInterest, ChargeOverMaxDebtAge, ChargeReference, ChargeType, ChargeTypeAssessment, Charges, CustomerDetail, CustomerPostcode, DebtTotalAmount, DisallowedChargeLockType, EligibilityCheckResult, EligibilityPass, EligibilityRules, EligibilityStatus, EmailSource, IdType, IdValue, Identification, IneligibleChargeType, InterestStartDate, InvalidSignals, Lock, LockReason, LockType, MainTrans, MainType, OutstandingAmount, Postcode, PostcodeDate, ProcessingDateTime, RegimeDigitalCorrespondence, SubTrans, TaxPeriodFrom, TaxPeriodTo}
 import essttp.rootmodel._
 import models.EligibilityErrors._
 import models.{EligibilityError, EligibilityErrors}
