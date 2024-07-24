@@ -1,0 +1,106 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import messages.Messages
+@import requests.RequestSupport
+@import play.api.mvc.Request
+@import play.api.data.Form
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import controllers.routes
+@import models.enumsforforms.CanPayWithinSixMonthsFormValue
+@import essttp.rootmodel.AmountInPence
+
+@this(
+layout: templates.Layout,
+govukButton: GovukButton,
+govukRadios: GovukRadios,
+formWithCSRF: FormWithCSRF,
+govukErrorSummary: GovukErrorSummary,
+requestSupport: RequestSupport
+)
+
+@(form: Form[CanPayWithinSixMonthsFormValue], remainingAmountToPay: AmountInPence)(implicit request: Request[_])
+
+@import requestSupport._
+
+@key = @{
+    "CanPayWithinSixMonths"
+}
+
+@title = @{
+    Messages.CanPayWithinSixMonths.`Paying within 6 months`.show
+}
+
+@layout(pageTitle = Some(title), hasErrors = form.hasErrors) {
+    @if(form.errors.nonEmpty) {
+        @govukErrorSummary(
+            ErrorSummary(errorList = form.errors.map(e =>
+                ErrorLink(
+                    href = Some(s"#${e.key}"),
+                    content = Text(e.message)
+                )
+            ),
+                title = Text(Messages.`There is a problem`.show))
+        )
+    }
+
+    <h1 class="govuk-heading-xl">
+    @{Messages.CanPayWithinSixMonths.`Paying within 6 months`.show}
+    </h1>
+
+    <p class="govuk-body" id="upfrontPayment-p1">
+    @{Messages.CanPayWithinSixMonths.`If you can afford to pay within 6 months...`.show}
+    </p>
+
+    <dl class="govuk-summary-list">
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key govuk-!-width-two-thirds">
+                @{Messages.CanPayWithinSixMonths.`Remaining amount to pay`.show}
+            </dt>
+            <dd class="govuk-summary-list__value">
+                @{remainingAmountToPay.gdsFormatInPounds}
+            </dd>
+        </div>
+    </dl>
+
+    @formWithCSRF(action = routes.CanPayWithinSixMonthsController.canPayWithinSixMonthsSubmit) {
+        @govukRadios(Radios(
+            fieldset = Some(Fieldset(
+                legend = Some(Legend(
+                    content = Text(Messages.CanPayWithinSixMonths.`Can you pay within 6 months?`.show),
+                    classes = "govuk-fieldset__legend--m"
+                ))
+            )),
+            idPrefix = Some(key),
+            name = key,
+            items = Seq(
+                RadioItem(
+                    content = Text(Messages.CanPayWithinSixMonths.`Yes, I can pay within 6 months`.show),
+                    value = Some("Yes"),
+                    checked = form.data.values.toList.contains("Yes")
+                ),
+                RadioItem(
+                    content = Text(Messages.CanPayWithinSixMonths.`No, I need a longer plan`.show),
+                    value = Some("No"),
+                    checked = form.data.values.toList.contains("No")
+                )
+            ),
+            errorMessage = form.error(key).map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(content = Text(e.message)))
+        ))
+        @govukButton(Button(content = Text(Messages.continue.show), attributes = Map("id" -> "continue")))
+    }
+
+}

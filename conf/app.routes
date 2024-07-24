@@ -77,6 +77,9 @@ GET    /upfront-payment-summary/change/:pageId              controllers.UpfrontP
 GET    /retrieve-extreme-dates                              controllers.DatesApiController.retrieveExtremeDates
 GET    /determine-affordability                             controllers.DetermineAffordabilityController.determineAffordability
 
+GET    /paying-within-six-months                            controllers.CanPayWithinSixMonthsController.canPayWithinSixMonths
+POST   /paying-within-six-months                            controllers.CanPayWithinSixMonthsController.canPayWithinSixMonthsSubmit
+
 GET    /how-much-can-you-pay-each-month                     controllers.MonthlyPaymentAmountController.displayMonthlyPaymentAmount
 POST   /how-much-can-you-pay-each-month                     controllers.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit
 
@@ -143,3 +146,5 @@ GET    /exit-survey/sa                                      controllers.SignOutC
 
 GET    /information-missing                                 controllers.MissingInfoController.missingInfo
 GET    /determine-next                                      controllers.MissingInfoController.determineNextPage
+
+GET    /pega-start                                          controllers.PegaController.startPegaJourney

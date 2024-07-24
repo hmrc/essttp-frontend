@@ -18,7 +18,7 @@ package controllers
 
 import controllers.pagerouters.EligibilityRouter
 import essttp.journey.model.Journey._
-import essttp.journey.model.{EmailVerificationAnswers, Journey, UpfrontPaymentAnswers}
+import essttp.journey.model.{CanPayWithinSixMonthsAnswers, EmailVerificationAnswers, Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import essttp.rootmodel.{CanPayUpfront, IsEmailAddressRequired, TaxRegime}
 import paymentsEmailVerification.models.EmailVerificationResult
@@ -74,7 +74,15 @@ object Routing {
         routes.DetermineAffordabilityController.determineAffordability
       },
       routes.DetermineAffordabilityController.determineAffordability -> { () =>
-        routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount
+        affordabilityRoute(journey)
+      },
+      routes.CanPayWithinSixMonthsController.canPayWithinSixMonths -> { () =>
+        journey match {
+          case _: BeforeCanPayWithinSixMonthsAnswers =>
+            throw UpstreamErrorResponse("Could not find CanPayWithinSixMonths answer to determine route", INTERNAL_SERVER_ERROR)
+          case j: AfterCanPayWithinSixMonthsAnswers =>
+            canPayWithinSixMonthsRoute(j.canPayWithinSixMonthsAnswers)
+        }
       },
       routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount -> { () =>
         routes.PaymentDayController.paymentDay
@@ -181,18 +189,19 @@ object Routing {
     case j: Journey.Stages.AnsweredCanPayUpfront =>
       canPayUpfrontRoute(j.canPayUpfront)
 
-    case _: Journey.Stages.EnteredUpfrontPaymentAmount    => routes.UpfrontPaymentController.upfrontPaymentSummary
-    case _: Journey.Stages.RetrievedExtremeDates          => routes.DetermineAffordabilityController.determineAffordability
-    case _: Journey.Stages.RetrievedAffordabilityResult   => routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount
-    case _: Journey.Stages.EnteredMonthlyPaymentAmount    => routes.PaymentDayController.paymentDay
-    case _: Journey.Stages.EnteredDayOfMonth              => routes.DatesApiController.retrieveStartDates
-    case _: Journey.Stages.RetrievedStartDates            => routes.DetermineAffordableQuotesController.retrieveAffordableQuotes
-    case _: Journey.Stages.RetrievedAffordableQuotes      => routes.InstalmentsController.instalmentOptions
-    case _: Journey.Stages.ChosenPaymentPlan              => routes.PaymentScheduleController.checkPaymentSchedule
-    case _: Journey.Stages.CheckedPaymentPlan             => routes.BankDetailsController.detailsAboutBankAccount
-    case j: Journey.Stages.EnteredDetailsAboutBankAccount => detailsAboutBankAccountRoute(j.detailsAboutBankAccount.isAccountHolder)
-    case _: Journey.Stages.EnteredDirectDebitDetails      => routes.BankDetailsController.checkBankDetails
-    case _: Journey.Stages.ConfirmedDirectDebitDetails    => routes.TermsAndConditionsController.termsAndConditions
+    case _: Journey.Stages.EnteredUpfrontPaymentAmount          => routes.UpfrontPaymentController.upfrontPaymentSummary
+    case _: Journey.Stages.RetrievedExtremeDates                => routes.DetermineAffordabilityController.determineAffordability
+    case j: Journey.Stages.RetrievedAffordabilityResult         => affordabilityRoute(j)
+    case j: Journey.Stages.ObtainedCanPayWithinSixMonthsAnswers => canPayWithinSixMonthsRoute(j.canPayWithinSixMonthsAnswers)
+    case _: Journey.Stages.EnteredMonthlyPaymentAmount          => routes.PaymentDayController.paymentDay
+    case _: Journey.Stages.EnteredDayOfMonth                    => routes.DatesApiController.retrieveStartDates
+    case _: Journey.Stages.RetrievedStartDates                  => routes.DetermineAffordableQuotesController.retrieveAffordableQuotes
+    case _: Journey.Stages.RetrievedAffordableQuotes            => routes.InstalmentsController.instalmentOptions
+    case _: Journey.Stages.ChosenPaymentPlan                    => routes.PaymentScheduleController.checkPaymentSchedule
+    case _: Journey.Stages.CheckedPaymentPlan                   => routes.BankDetailsController.detailsAboutBankAccount
+    case j: Journey.Stages.EnteredDetailsAboutBankAccount       => detailsAboutBankAccountRoute(j.detailsAboutBankAccount.isAccountHolder)
+    case _: Journey.Stages.EnteredDirectDebitDetails            => routes.BankDetailsController.checkBankDetails
+    case _: Journey.Stages.ConfirmedDirectDebitDetails          => routes.TermsAndConditionsController.termsAndConditions
 
     case j: Journey.Stages.AgreedTermsAndConditions =>
       termsAndConditionsRoute(j.isEmailAddressRequired, j.eligibilityCheckResult, allowSubmitArrangement = false, j.taxRegime)
@@ -210,6 +219,10 @@ object Routing {
   private def canPayUpfrontRoute(canPayUpfront: CanPayUpfront): Call =
     if (canPayUpfront.value) routes.UpfrontPaymentController.upfrontPaymentAmount
     else routes.DatesApiController.retrieveExtremeDates
+
+  private def affordabilityRoute(journey: Journey): Call =
+    if (journey.affordabilityEnabled.contains(true)) routes.CanPayWithinSixMonthsController.canPayWithinSixMonths
+    else routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount
 
   private def detailsAboutBankAccountRoute(isAccountHolder: Boolean): Call =
     if (isAccountHolder) routes.BankDetailsController.enterBankDetails
@@ -235,6 +248,15 @@ object Routing {
     emailVerificationResult match {
       case EmailVerificationResult.Verified => routes.EmailController.emailAddressConfirmed
       case EmailVerificationResult.Locked   => routes.EmailController.tooManyPasscodeAttempts
+    }
+
+  private def canPayWithinSixMonthsRoute(canPayWithinSixMonths: CanPayWithinSixMonthsAnswers): Call =
+    canPayWithinSixMonths match {
+      case CanPayWithinSixMonthsAnswers.AnswerNotRequired =>
+        routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount
+      case CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths(canPay) =>
+        if (canPay) routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount
+        else routes.PegaController.startPegaJourney
     }
 
 }

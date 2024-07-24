@@ -17,7 +17,7 @@
 package controllers
 
 import essttp.crypto.CryptoFormat
-import essttp.journey.model.{Origin, Origins}
+import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Origin, Origins}
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -40,19 +40,43 @@ class DetermineAffordabilityControllerSpec extends ItSpec {
   ).foreach {
       case (regime, origin) =>
         "GET /determine-affordability" - {
-          s"[$regime journey] trigger call to ttp microservice affordability endpoint and update backend" in {
-            stubCommonActions()
-            EssttpBackend.Dates.findJourneyExtremeDates(testCrypto, origin)()
-            EssttpBackend.AffordabilityMinMaxApi.stubUpdateAffordability(TdAll.journeyId, JourneyJsonTemplates.`Retrieved Affordability`(origin))
-            Ttp.Affordability.stubRetrieveAffordability()
+          s"[$regime journey] trigger call to ttp microservice affordability endpoint and update backend when" - {
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-            val result: Future[Result] = controller.determineAffordability(fakeRequest)
+            "affordability is not enabled" in {
+              stubCommonActions()
+              EssttpBackend.Dates.findJourneyExtremeDates(testCrypto, origin)()
+              EssttpBackend.AffordabilityMinMaxApi.stubUpdateAffordability(TdAll.journeyId, JourneyJsonTemplates.`Retrieved Affordability`(origin))
+              EssttpBackend.CanPayWithinSixMonths.stubUpdateCanPayWithinSixMonths(TdAll.journeyId, JourneyJsonTemplates `Obtained Can Pay Within 6 months - not required` (origin))
+              Ttp.Affordability.stubRetrieveAffordability()
 
-            status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(PageUrls.howMuchCanYouPayEachMonthUrl)
-            EssttpBackend.AffordabilityMinMaxApi.verifyUpdateAffordabilityRequest(TdAll.journeyId, TdAll.instalmentAmounts)
-            Ttp.Affordability.verifyTtpAffordabilityRequest(CryptoFormat.NoOpCryptoFormat)
+              val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+              val result: Future[Result] = controller.determineAffordability(fakeRequest)
+
+              status(result) shouldBe Status.SEE_OTHER
+              redirectLocation(result) shouldBe Some(PageUrls.howMuchCanYouPayEachMonthUrl)
+              EssttpBackend.AffordabilityMinMaxApi.verifyUpdateAffordabilityRequest(TdAll.journeyId, TdAll.instalmentAmounts)
+              EssttpBackend.CanPayWithinSixMonths.verifyUpdateCanPayWithinSixMonthsRequest(TdAll.journeyId, CanPayWithinSixMonthsAnswers.AnswerNotRequired)
+              Ttp.Affordability.verifyTtpAffordabilityRequest(CryptoFormat.NoOpCryptoFormat)
+            }
+
+            "affordability is enabled" in {
+              stubCommonActions()
+              EssttpBackend.Dates.findJourneyExtremeDates(testCrypto, origin)(
+                JourneyJsonTemplates.`Retrieved Extreme Dates Response`(origin, affordabilityEnabled = true)(testCrypto)
+              )
+              EssttpBackend.AffordabilityMinMaxApi.stubUpdateAffordability(TdAll.journeyId, JourneyJsonTemplates.`Retrieved Affordability`(origin, affordabilityEnabled = true))
+              Ttp.Affordability.stubRetrieveAffordability()
+
+              val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+              val result: Future[Result] = controller.determineAffordability(fakeRequest)
+
+              status(result) shouldBe Status.SEE_OTHER
+              redirectLocation(result) shouldBe Some(PageUrls.canPayWithinSixMonthsUrl)
+              EssttpBackend.AffordabilityMinMaxApi.verifyUpdateAffordabilityRequest(TdAll.journeyId, TdAll.instalmentAmounts)
+              EssttpBackend.CanPayWithinSixMonths.verifyNoneUpdateCanPayWithinSixMonthsRequest(TdAll.journeyId)
+              Ttp.Affordability.verifyTtpAffordabilityRequest(CryptoFormat.NoOpCryptoFormat)
+            }
+
           }
         }
     }

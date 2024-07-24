@@ -42,6 +42,7 @@ class Views @Inject() (
     val canYouMakeAnUpFrontPayment:       CanYouMakeAnUpfrontPayment,
     val upfrontPaymentAmountPage:         UpfrontPaymentAmountPage,
     val upfrontSummaryPage:               UpfrontPaymentSummary,
+    val canPayWithinSixMonthsPage:        CanPayWithinSixMonths,
     val monthlyPaymentAmountPage:         MonthlyPaymentAmount,
     val paymentDayPage:                   PaymentDay,
     val instalmentOptionsPage:            InstalmentOptions,
