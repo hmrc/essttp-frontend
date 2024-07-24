@@ -206,7 +206,7 @@ object JourneyJsonTemplates {
   def `Why Cannot Pay in Full - Required`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.whyCannotPayInFullNotRequired,
     journeyInfo = JourneyInfo.whyCannotPayInFullRequired(origin.taxRegime, encrypter),
-    origin = origin
+    origin      = origin
   )
   def `Eligibility Checked - Ineligible - dmSpecialOfficeProcessingRequiredCESA`(origin: Origin = Origins.Sa.Bta)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.eligibilityCheckedIneligible,

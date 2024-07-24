@@ -261,13 +261,15 @@ object TdAll {
           isInterestBearingCharge       = chargeIsInterestBearingCharge.map(IsInterestBearingCharge(_)),
           useChargeReference            = chargeUseChargeReference.map(UseChargeReference(_)),
           chargeBeforeMaxAccountingDate = chargeChargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_)),
-          ddInProgress                  = ddInProgress.map(DdInProgress(_))
+          ddInProgress                  = ddInProgress.map(DdInProgress(_)),
+          chargeSource                  = None
         ))
       )),
       customerDetails                 = None,
       regimeDigitalCorrespondence     = regimeDigitalCorrespondence,
       futureChargeLiabilitiesExcluded = false,
-      chargeTypesExcluded             = None
+      chargeTypesExcluded             = None,
+      transitionToCDCS                = None
     )
   }
 
