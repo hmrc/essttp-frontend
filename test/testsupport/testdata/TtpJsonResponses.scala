@@ -85,6 +85,7 @@ object TtpJsonResponses {
        |  ${optionalEligibilityResponsesJson(eligibilityRules.hasDisguisedRemuneration, "hasDisguisedRemuneration")}
        |  ${optionalEligibilityResponsesJson(eligibilityRules.hasCapacitor, "hasCapacitor")}
        |  ${optionalEligibilityResponsesJson(eligibilityRules.dmSpecialOfficeProcessingRequiredCDCS, "dmSpecialOfficeProcessingRequiredCDCS")}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.dmSpecialOfficeProcessingRequiredCESA, "dmSpecialOfficeProcessingRequiredCESA")}
        |  },
        |  "chargeTypeAssessment" : [ {
        |    "taxPeriodFrom" : "2020-08-13",
