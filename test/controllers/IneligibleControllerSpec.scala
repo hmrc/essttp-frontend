@@ -381,6 +381,29 @@ class IneligibleControllerSpec extends ItSpec {
       )
       ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Sa, Languages.English)
     }
+    "SA generic ineligible page correctly for DmSpecialOfficeProcessingRequiredCESA eligibility reason" in {
+      val enrolment = Some(Set(TdAll.saEnrolment))
+
+      stubCommonActions(authAllEnrolments = enrolment)
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - dmSpecialOfficeProcessingRequiredCESA`(Origins.Sa.Bta))
+
+      val result: Future[Result] = controller.saGenericIneligiblePage(fakeRequest)
+
+      val page = pageContentAsDoc(result)
+
+      ContentAssertions.commonPageChecks(
+        page,
+        expectedH1              = "Call us about a payment plan",
+        shouldBackLinkBePresent = false,
+        expectedSubmitUrl       = None,
+        regimeBeingTested       = Some(TaxRegime.Sa)
+      )
+      assertIneligiblePageLeadingP1(
+        page      = page,
+        leadingP1 = "You are not eligible to set up a Self Assessment payment plan online."
+      )
+      ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Sa, Languages.English)
+    }
 
     "Epaye You have chosen not to set up an Employers’ PAYE payment plan online page correctly" in {
       val enrolment = Some(Set(TdAll.payeEnrolment))

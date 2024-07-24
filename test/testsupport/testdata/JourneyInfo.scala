@@ -71,6 +71,7 @@ object JourneyInfo {
   def ineligibleHasCapacitor(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleHasCapacitor, taxRegime, encrypter)
   def ineligibleDmSpecialOfficeProcessingRequiredCDCS(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleDmSpecialOfficeProcessingRequiredCDCS, taxRegime, encrypter)
   def ineligibleisAnMtdCustomer(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleIsAnMtdCustomer, taxRegime, encrypter)
+  def ineligibleDmSpecialOfficeProcessingRequiredCESA(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleDmSpecialOfficeProcessingRequiredCESA, taxRegime, encrypter)
   def multipleIneligibleReasons(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleHasRlsOnAddress.copy(markedAsInsolvent = true), taxRegime, encrypter)
   def multipleIneligibleReasonsDebtTooLowAndOld(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleIsLessThanMinDebtAllowance.copy(chargesOverMaxDebtAge = Some(true)), taxRegime, encrypter)
   val whyCannotPayInFullNotRequiredAnswer: JourneyInfoAsJson = TdJsonBodies.whyCannotPayInFull(WhyCannotPayInFullAnswers.AnswerNotRequired)
@@ -196,6 +197,9 @@ object JourneyInfo {
 
   def eligibilityCheckedIneligibleIsAnMtdCustomer(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
     ineligibleisAnMtdCustomer(taxRegime, encrypter) :: taxIdDetermined()
+
+  def eligibilityCheckedIneligibleDmSpecialOfficeProcessingRequiredCESA(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
+    ineligibleDmSpecialOfficeProcessingRequiredCESA(taxRegime, encrypter) :: taxIdDetermined()
 
   def eligibilityCheckedIneligibleMultipleReasons(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
     multipleIneligibleReasons(taxRegime, encrypter) :: taxIdDetermined()

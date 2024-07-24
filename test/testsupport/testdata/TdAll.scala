@@ -121,7 +121,8 @@ object TdAll {
     hasDisguisedRemuneration              = None,
     hasCapacitor                          = None,
     dmSpecialOfficeProcessingRequiredCDCS = None,
-    isAnMtdCustomer                       = None
+    isAnMtdCustomer                       = None,
+    dmSpecialOfficeProcessingRequiredCESA = None
   )
   val notEligibleHasRlsOnAddress: EligibilityRules = eligibleEligibilityRules.copy(hasRlsOnAddress = true)
   val notEligibleMarkedAsInsolvent: EligibilityRules = eligibleEligibilityRules.copy(markedAsInsolvent = true)
@@ -145,6 +146,7 @@ object TdAll {
   val notEligibleHasCapacitor: EligibilityRules = eligibleEligibilityRules.copy(hasCapacitor = Some(true))
   val notEligibleDmSpecialOfficeProcessingRequiredCDCS: EligibilityRules = eligibleEligibilityRules.copy(dmSpecialOfficeProcessingRequiredCDCS = Some(true))
   val notEligibleIsAnMtdCustomer: EligibilityRules = eligibleEligibilityRules.copy(isAnMtdCustomer = Some(true))
+  val notEligibleDmSpecialOfficeProcessingRequiredCESA: EligibilityRules = eligibleEligibilityRules.copy(dmSpecialOfficeProcessingRequiredCESA = Some(true))
 
   val callEligibilityApiRequestEpaye: CallEligibilityApiRequest = CallEligibilityApiRequest(
     channelIdentifier         = "eSSTTP",
@@ -259,13 +261,15 @@ object TdAll {
           isInterestBearingCharge       = chargeIsInterestBearingCharge.map(IsInterestBearingCharge(_)),
           useChargeReference            = chargeUseChargeReference.map(UseChargeReference(_)),
           chargeBeforeMaxAccountingDate = chargeChargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_)),
-          ddInProgress                  = ddInProgress.map(DdInProgress(_))
+          ddInProgress                  = ddInProgress.map(DdInProgress(_)),
+          chargeSource                  = None
         ))
       )),
       customerDetails                 = None,
       regimeDigitalCorrespondence     = regimeDigitalCorrespondence,
       futureChargeLiabilitiesExcluded = false,
-      chargeTypesExcluded             = None
+      chargeTypesExcluded             = None,
+      transitionToCDCS                = None
     )
   }
 
