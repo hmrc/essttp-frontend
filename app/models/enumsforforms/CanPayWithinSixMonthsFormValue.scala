@@ -23,7 +23,7 @@ import scala.collection.immutable
 
 sealed trait CanPayWithinSixMonthsFormValue extends enumeratum.EnumEntry {
 
-  def asCanPayUpfront: CanPayWithinSixMonths = this match {
+  def asCanPayWithinSixMonths: CanPayWithinSixMonths = this match {
     case CanPayWithinSixMonthsFormValue.Yes => CanPayWithinSixMonths(value = true)
     case CanPayWithinSixMonthsFormValue.No  => CanPayWithinSixMonths(value = false)
   }
@@ -37,7 +37,7 @@ object CanPayWithinSixMonthsFormValue extends Enum[CanPayWithinSixMonthsFormValu
 
   override def values: immutable.IndexedSeq[CanPayWithinSixMonthsFormValue] = findValues
 
-  def canPayUpfrontToFormValue(canPayWithinSixMonths: CanPayWithinSixMonths): CanPayWithinSixMonthsFormValue =
+  def canPayWithinSixMonthsToFormValue(canPayWithinSixMonths: CanPayWithinSixMonths): CanPayWithinSixMonthsFormValue =
     canPayWithinSixMonths match {
       case CanPayWithinSixMonths(true)  => CanPayWithinSixMonthsFormValue.Yes
       case CanPayWithinSixMonths(false) => CanPayWithinSixMonthsFormValue.No

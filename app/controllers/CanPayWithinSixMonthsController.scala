@@ -58,7 +58,7 @@ class CanPayWithinSixMonthsController @Inject() (
           {
             val previousAnswers = existingAnswersInJourney(request.journey)
             val form = previousAnswers.fold(CanPayWithinSixMonthsForm.form)(value =>
-              CanPayWithinSixMonthsForm.form.fill(CanPayWithinSixMonthsFormValue.canPayUpfrontToFormValue(value)))
+              CanPayWithinSixMonthsForm.form.fill(CanPayWithinSixMonthsFormValue.canPayWithinSixMonthsToFormValue(value)))
 
             Ok(views.canPayWithinSixMonthsPage(form, remainingAmountToPay(j)))
           }
@@ -70,7 +70,7 @@ class CanPayWithinSixMonthsController @Inject() (
     CanPayWithinSixMonthsForm.form.bindFromRequest().fold(
       formWithErrors => Ok(views.canPayWithinSixMonthsPage(formWithErrors, remainingAmountToPay(request.journey))),
       { canPayFormValue =>
-        val canPay = canPayFormValue.asCanPayUpfront
+        val canPay = canPayFormValue.asCanPayWithinSixMonths
         val valueChanged = existingAnswersInJourney(request.journey).forall(_.value =!= canPay.value)
 
         journeyConnector.updateCanPayWithinSixMonthsAnswers(
