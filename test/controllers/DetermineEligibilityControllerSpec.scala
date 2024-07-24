@@ -177,6 +177,14 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       ("HasCapacitor - SA", TdAll.notEligibleHasCapacitor, "hasCapacitor", PageUrls.saNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasCapacitor`(Origins.Sa.Bta), Origins.Sa.Bta),
 
+      ("DmSpecialOfficeProcessingRequiredCESA - SA",
+        TdAll.notEligibleDmSpecialOfficeProcessingRequiredCESA,
+        "dmSpecialOfficeProcessingRequiredCESA",
+        PageUrls.saNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - dmSpecialOfficeProcessingRequiredCESA`(Origins.Sa.Bta),
+        Origins.Sa.Bta
+      ),
+
       ("DmSpecialOfficeProcessingRequiredCDCS - SA",
         TdAll.notEligibleDmSpecialOfficeProcessingRequiredCDCS,
         "dmSpecialOfficeProcessingRequiredCDCS",
