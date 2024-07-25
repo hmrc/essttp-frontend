@@ -19,7 +19,8 @@ package controllers
 import _root_.actions.Actions
 import controllers.JourneyFinalStateCheck.finalStateCheckF
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
-import essttp.journey.model.Journey
+import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Journey}
+import essttp.rootmodel.ttp.affordability.InstalmentAmounts
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import play.api.mvc._
 import services.{JourneyService, TtpService}
@@ -52,8 +53,19 @@ class DetermineAffordabilityController @Inject() (
   )(implicit request: Request[_]): Future[Result] = {
     for {
       instalmentAmounts <- ttpService.determineAffordability(journey, eligibilityCheckResult)
-      updatedJourney <- journeyService.updateAffordabilityResult(journey.id, instalmentAmounts)
+      updatedJourney <- updateJourney(journey, instalmentAmounts)
     } yield Routing.redirectToNext(routes.DetermineAffordabilityController.determineAffordability, updatedJourney, submittedValueUnchanged = false)
+  }
+
+  // if affordability is not enabled then we skip the "can you pay within 6 months" page - we need to update the journey
+  // further in that case to get it to the right stage
+  private def updateJourney(journey: Journey.AfterUpfrontPaymentAnswers, instalmentAmounts: InstalmentAmounts)(implicit rh: RequestHeader): Future[Journey] = {
+    lazy val updateAffordabilityResult = journeyService.updateAffordabilityResult(journey.id, instalmentAmounts)
+
+    if (journey.affordabilityEnabled.contains(false))
+      updateAffordabilityResult.flatMap(_ => journeyService.updateCanPayWithinSixMonths(journey.id, CanPayWithinSixMonthsAnswers.AnswerNotRequired))
+    else
+      updateAffordabilityResult
   }
 
 }

@@ -57,3 +57,6 @@ GET  /set-up-a-payment-plan/test-only/start-journey-vat-penalties testOnly.contr
 GET  /set-up-a-payment-plan/test-only/start-journey-sa-bta        testOnly.controllers.StartJourneyController.startJourneySaBta
 GET  /set-up-a-payment-plan/test-only/start-journey-sa-pta        testOnly.controllers.StartJourneyController.startJourneySaPta
 GET  /set-up-a-payment-plan/test-only/start-journey-sa-mobile     testOnly.controllers.StartJourneyController.startJourneySaMobile
+
+
+GET /set-up-a-payment-plan/test-only/pega                         testOnly.controllers.PegaController.dummyPegaPage

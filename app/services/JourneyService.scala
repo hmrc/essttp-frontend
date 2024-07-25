@@ -18,7 +18,7 @@ package services
 
 import com.google.inject.{Inject, Singleton}
 import essttp.journey.JourneyConnector
-import essttp.journey.model.{Journey, JourneyId}
+import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Journey, JourneyId}
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import essttp.rootmodel.ttp.affordability.InstalmentAmounts
 import essttp.rootmodel.ttp.affordablequotes.{AffordableQuotesResponse, PaymentPlan}
@@ -66,6 +66,9 @@ class JourneyService @Inject() (journeyConnector: JourneyConnector) extends Logg
 
   def updateAffordabilityResult(journeyId: JourneyId, instalmentAmounts: InstalmentAmounts)(implicit requestHeader: RequestHeader): Future[Journey] =
     journeyConnector.updateAffordabilityResult(journeyId, instalmentAmounts)
+
+  def updateCanPayWithinSixMonths(journeyId: JourneyId, canPayWithinSixMonths: CanPayWithinSixMonthsAnswers)(implicit requestHeader: RequestHeader): Future[Journey] =
+    journeyConnector.updateCanPayWithinSixMonthsAnswers(journeyId, canPayWithinSixMonths)
 
   def updateMonthlyPaymentAmount(journeyId: JourneyId, monthlyPaymentAmount: MonthlyPaymentAmount)(implicit requestHeader: RequestHeader): Future[Journey] =
     journeyConnector.updateMonthlyPaymentAmount(journeyId, monthlyPaymentAmount)

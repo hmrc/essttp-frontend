@@ -16,7 +16,7 @@
 
 package testsupport.testdata
 
-import essttp.journey.model.{Origin, Origins, WhyCannotPayInFullAnswers}
+import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Origin, Origins, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.ttp.eligibility.{EligibilityPass, EligibilityRules}
 import essttp.rootmodel.{DayOfMonth, TaxRegime, UpfrontPaymentAmount}
 import paymentsEmailVerification.models.EmailVerificationResult
@@ -270,6 +270,23 @@ object TdJsonBodies {
        |   "maximumInstalmentAmount": 87944
        |}
        |""".stripMargin
+
+  def canPayWithinSixMonthsJourneyInfo(answers: CanPayWithinSixMonthsAnswers): String = {
+    val value = answers match {
+      case CanPayWithinSixMonthsAnswers.AnswerNotRequired =>
+        """{
+            |  "AnswerNotRequired": { }
+            |}""".stripMargin
+      case CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths(value) =>
+        s"""{
+             |  "CanPayWithinSixMonths": {
+             |    "value": ${value.toString}
+             |  }
+             |}""".stripMargin
+    }
+
+    s""""canPayWithinSixMonthsAnswers": $value""".stripMargin
+  }
 
   def monthlyPaymentAmountJourneyInfo: String = """"monthlyPaymentAmount": 30000"""
 

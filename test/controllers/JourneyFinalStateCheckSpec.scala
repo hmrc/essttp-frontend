@@ -39,6 +39,7 @@ class JourneyFinalStateCheckSpec extends ItSpec {
       (PageUrls.upfrontPaymentSummaryUrl, app.injector.instanceOf[UpfrontPaymentController].upfrontPaymentSummary),
       (PageUrls.retrievedExtremeDatesUrl, app.injector.instanceOf[DatesApiController].retrieveExtremeDates),
       (PageUrls.determineAffordabilityUrl, app.injector.instanceOf[DetermineAffordabilityController].determineAffordability),
+      (PageUrls.canPayWithinSixMonthsUrl, app.injector.instanceOf[CanPayWithinSixMonthsController].canPayWithinSixMonths),
       (PageUrls.howMuchCanYouPayEachMonthUrl, app.injector.instanceOf[MonthlyPaymentAmountController].displayMonthlyPaymentAmount),
       (PageUrls.whichDayDoYouWantToPayUrl, app.injector.instanceOf[PaymentDayController].paymentDay),
       (PageUrls.retrieveStartDatesUrl, app.injector.instanceOf[DatesApiController].retrieveStartDates),

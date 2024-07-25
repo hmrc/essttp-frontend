@@ -1092,6 +1092,38 @@ object Messages {
 
   }
 
+  object CanPayWithinSixMonths {
+
+    val `Paying within 6 months`: Message = Message(
+      english = "Paying within 6 months"
+    )
+
+    val `If you can afford to pay within 6 months...`: Message = Message(
+      english = "If you can afford to pay within 6 months, you’ll pay less interest than on a longer plan."
+    )
+
+    val `Remaining amount to pay`: Message = Message(
+      english = "Remaining amount to pay"
+    )
+
+    val `Can you pay within 6 months?`: Message = Message(
+      english = "Can you pay within 6 months?"
+    )
+
+    val `Yes, I can pay within 6 months`: Message = Message(
+      english = "Yes, I can pay within 6 months"
+    )
+
+    val `No, I need a longer plan`: Message = Message(
+      english = "No, I need a longer plan"
+    )
+
+    val `Select yes if you can pay within 6 months`: Message = Message(
+      english = "Select yes if you can pay within 6 months"
+    )
+
+  }
+
   object MonthlyPaymentAmount {
 
     val `Monthly payments`: Message = Message(

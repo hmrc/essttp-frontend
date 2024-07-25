@@ -225,6 +225,4 @@ object UpfrontPaymentController {
   def deriveRemainingAmountToPay(totalDebt: DebtTotalAmount, upfrontPaymentAmount: UpfrontPaymentAmount): AmountInPence =
     totalDebt.value.-(upfrontPaymentAmount.value)
 
-  val canYouMakeAnUpfrontPaymentCall: Call = routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment
-  val upfrontPaymentAmountCall: Call = routes.UpfrontPaymentController.upfrontPaymentAmount
 }

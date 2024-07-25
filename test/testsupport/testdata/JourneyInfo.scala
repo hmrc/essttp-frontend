@@ -16,7 +16,7 @@
 
 package testsupport.testdata
 
-import essttp.journey.model.WhyCannotPayInFullAnswers
+import essttp.journey.model.{CanPayWithinSixMonthsAnswers, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.{DayOfMonth, TaxRegime}
 import paymentsEmailVerification.models.EmailVerificationResult
 import uk.gov.hmrc.crypto.Encrypter
@@ -83,6 +83,9 @@ object JourneyInfo {
   val upfrontPaymentAnswersNoUpfrontPayment: JourneyInfoAsJson = TdJsonBodies.upfrontPaymentAnswersJourneyInfo("""{"NoUpfrontPayment": {}}""")
   val extremeDates: JourneyInfoAsJson = TdJsonBodies.extremeDatesJourneyInfo()
   def affordableResult(minimumInstalmentAmount: Int = 29997): JourneyInfoAsJson = TdJsonBodies.affordabilityResultJourneyInfo(minimumInstalmentAmount)
+  val obtainedCanPayWithinSixMonthsNotRequired: JourneyInfoAsJson = TdJsonBodies.canPayWithinSixMonthsJourneyInfo(CanPayWithinSixMonthsAnswers.AnswerNotRequired)
+  val obtainedCanPayWithinSixMonthsYes: JourneyInfoAsJson = TdJsonBodies.canPayWithinSixMonthsJourneyInfo(CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths(value = true))
+  val obtainedCanPayWithinSixMonthsNo: JourneyInfoAsJson = TdJsonBodies.canPayWithinSixMonthsJourneyInfo(CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths(value = false))
   val monthlyPaymentAmount: JourneyInfoAsJson = TdJsonBodies.monthlyPaymentAmountJourneyInfo
   def dayOfMonth(dayOfMonth: DayOfMonth = TdAll.dayOfMonth()): JourneyInfoAsJson = TdJsonBodies.dayOfMonthJourneyInfo(dayOfMonth)
   val startDates: JourneyInfoAsJson = TdJsonBodies.startDatesJourneyInfo
@@ -253,6 +256,51 @@ object JourneyInfo {
   def retrievedAffordabilityResultNoUpfrontPayment(minimumInstalmentAmount: Int = 29997, taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
     affordableResult(minimumInstalmentAmount) :: retrievedExtremeDatesNoUpfrontPayment(taxRegime, encrypter)
 
+  def obtainedCanPayWithinSixMonthsNotRequired(
+      taxRegime:                TaxRegime,
+      encrypter:                Encrypter,
+      etmpEmail:                Option[String] = Some(TdAll.etmpEmail),
+      eligibilityMinPlanLength: Int            = 1,
+      eligibilityMaxPlanLength: Int            = 12
+  ): List[JourneyInfoAsJson] =
+    obtainedCanPayWithinSixMonthsNotRequired :: retrievedAffordabilityResult(
+      taxRegime                = taxRegime,
+      encrypter                = encrypter,
+      etmpEmail                = etmpEmail,
+      eligibilityMinPlanLength = eligibilityMinPlanLength,
+      eligibilityMaxPlanLength = eligibilityMaxPlanLength
+    )
+
+  def obtainedCanPayWithinSixMonthsYes(
+      taxRegime:                TaxRegime,
+      encrypter:                Encrypter,
+      etmpEmail:                Option[String] = Some(TdAll.etmpEmail),
+      eligibilityMinPlanLength: Int            = 1,
+      eligibilityMaxPlanLength: Int            = 12
+  ): List[JourneyInfoAsJson] =
+    obtainedCanPayWithinSixMonthsYes :: retrievedAffordabilityResult(
+      taxRegime                = taxRegime,
+      encrypter                = encrypter,
+      etmpEmail                = etmpEmail,
+      eligibilityMinPlanLength = eligibilityMinPlanLength,
+      eligibilityMaxPlanLength = eligibilityMaxPlanLength
+    )
+
+  def obtainedCanPayWithinSixMonthsNo(
+      taxRegime:                TaxRegime,
+      encrypter:                Encrypter,
+      etmpEmail:                Option[String] = Some(TdAll.etmpEmail),
+      eligibilityMinPlanLength: Int            = 1,
+      eligibilityMaxPlanLength: Int            = 12
+  ): List[JourneyInfoAsJson] =
+    obtainedCanPayWithinSixMonthsNo :: retrievedAffordabilityResult(
+      taxRegime                = taxRegime,
+      encrypter                = encrypter,
+      etmpEmail                = etmpEmail,
+      eligibilityMinPlanLength = eligibilityMinPlanLength,
+      eligibilityMaxPlanLength = eligibilityMaxPlanLength
+    )
+
   def enteredMonthlyPaymentAmount(
       taxRegime:                TaxRegime,
       encrypter:                Encrypter,
@@ -260,7 +308,7 @@ object JourneyInfo {
       eligibilityMinPlanLength: Int            = 1,
       eligibilityMaxPlanLength: Int            = 12
   ): List[JourneyInfoAsJson] =
-    monthlyPaymentAmount :: retrievedAffordabilityResult(
+    monthlyPaymentAmount :: obtainedCanPayWithinSixMonthsNotRequired(
       taxRegime                = taxRegime,
       encrypter                = encrypter,
       etmpEmail                = etmpEmail,
@@ -336,13 +384,13 @@ object JourneyInfo {
   def submittedArrangementNoUpfrontPayment(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
     arrangementSubmitted(taxRegime) :: emailVerificationAnswersNoEmailRequired :: emailAddressRequired(isEmailAddressRequired = false) :: directDebitDetails(encrypter) ::
       detailsAboutBankAccountBusiness(isAccountHolder = true) :: selectedPlan :: affordableQuotes ::
-      upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: monthlyPaymentAmount ::
+      upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: obtainedCanPayWithinSixMonthsNotRequired :: monthlyPaymentAmount ::
       dayOfMonth() :: startDates :: cannotPayUpfront :: whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(taxRegime, encrypter)
 
   def submittedArrangementPaddedAccountNumber(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
     arrangementSubmitted(taxRegime) :: emailVerificationAnswersNoEmailRequired :: emailAddressRequired(isEmailAddressRequired = false) :: directDebitDetailsPaddedAccountNumber(encrypter) ::
       detailsAboutBankAccountBusiness(isAccountHolder = true) :: selectedPlan :: affordableQuotes ::
-      upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: monthlyPaymentAmount ::
+      upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: obtainedCanPayWithinSixMonthsNotRequired :: monthlyPaymentAmount ::
       dayOfMonth() :: startDates :: cannotPayUpfront :: whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(taxRegime, encrypter)
 
   def submittedArrangementWithEmailParams(
@@ -353,7 +401,7 @@ object JourneyInfo {
     arrangementSubmitted(taxRegime) :: emailVerificationAnswersEmailRequired(email, EmailVerificationResult.Verified, encrypter) ::
       emailAddressRequired(isEmailAddressRequired = true) :: directDebitDetails(encrypter) ::
       detailsAboutBankAccountBusiness(isAccountHolder = true) :: selectedPlan :: affordableQuotes ::
-      upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: monthlyPaymentAmount ::
+      upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: obtainedCanPayWithinSixMonthsNotRequired :: monthlyPaymentAmount ::
       dayOfMonth() :: startDates :: cannotPayUpfront :: whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(taxRegime, encrypter)
 
   def confirmedDdDetailsWithRegimeDigitalCorrespondance(
@@ -363,6 +411,6 @@ object JourneyInfo {
   ): List[JourneyInfoAsJson] =
     directDebitDetails(encrypter) ::
       detailsAboutBankAccountBusiness(isAccountHolder = true) :: selectedPlan :: affordableQuotes ::
-      upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: monthlyPaymentAmount ::
+      upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: obtainedCanPayWithinSixMonthsNotRequired :: monthlyPaymentAmount ::
       dayOfMonth() :: startDates :: cannotPayUpfront :: whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(taxRegime, encrypter, regimeDigitalCorrespondence = regimeDigitalCorrespondence)
 }

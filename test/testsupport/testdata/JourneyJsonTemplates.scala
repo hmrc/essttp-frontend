@@ -16,7 +16,7 @@
 
 package testsupport.testdata
 
-import essttp.journey.model.{Origin, Origins, WhyCannotPayInFullAnswers}
+import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Origin, Origins, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.DayOfMonth
 import paymentsEmailVerification.models.EmailVerificationResult
 import uk.gov.hmrc.crypto.Encrypter
@@ -232,21 +232,41 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
-  def `Retrieved Extreme Dates Response`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
-    stageInfo   = StageInfo.retrievedExtremeDates,
-    journeyInfo = JourneyInfo.retrievedExtremeDates(origin.taxRegime, encrypter),
-    origin      = origin
+  def `Retrieved Extreme Dates Response`(origin: Origin, affordabilityEnabled: Boolean = false)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo            = StageInfo.retrievedExtremeDates,
+    journeyInfo          = JourneyInfo.retrievedExtremeDates(origin.taxRegime, encrypter),
+    origin               = origin,
+    affordabilityEnabled = affordabilityEnabled
   )
 
-  def `Retrieved Affordability`(origin: Origin, minimumInstalmentAmount: Int = 29997)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
-    stageInfo   = StageInfo.retrievedAffordabilityResult,
-    journeyInfo = JourneyInfo.retrievedAffordabilityResult(minimumInstalmentAmount, origin.taxRegime, encrypter),
-    origin      = origin
+  def `Retrieved Affordability`(origin: Origin, minimumInstalmentAmount: Int = 29997, affordabilityEnabled: Boolean = false)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo            = StageInfo.retrievedAffordabilityResult,
+    journeyInfo          = JourneyInfo.retrievedAffordabilityResult(minimumInstalmentAmount, origin.taxRegime, encrypter),
+    origin               = origin,
+    affordabilityEnabled = affordabilityEnabled
   )
 
   def `Retrieved Affordability no upfront payment`(origin: Origin, minimumInstalmentAmount: Int = 29997)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.retrievedAffordabilityResult,
     journeyInfo = JourneyInfo.retrievedAffordabilityResultNoUpfrontPayment(minimumInstalmentAmount, origin.taxRegime, encrypter),
+    origin      = origin
+  )
+
+  def `Obtained Can Pay Within 6 months - not required`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.obtainedCanPayWithinSixMonthsNotRequired,
+    journeyInfo = JourneyInfo.obtainedCanPayWithinSixMonthsNotRequired(origin.taxRegime, encrypter),
+    origin      = origin
+  )
+
+  def `Obtained Can Pay Within 6 months - yes`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.obtainedCanPayWithinSixMonthsNotRequired,
+    journeyInfo = JourneyInfo.obtainedCanPayWithinSixMonthsYes(origin.taxRegime, encrypter),
+    origin      = origin
+  )
+
+  def `Obtained Can Pay Within 6 months - no`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.obtainedCanPayWithinSixMonthsNotRequired,
+    journeyInfo = JourneyInfo.obtainedCanPayWithinSixMonthsNo(origin.taxRegime, encrypter),
     origin      = origin
   )
 
@@ -283,6 +303,7 @@ object JourneyJsonTemplates {
       TdJsonBodies.upfrontPaymentAnswersJourneyInfo(upfrontPaymentAmountJsonString),
       TdJsonBodies.extremeDatesJourneyInfo(),
       TdJsonBodies.affordabilityResultJourneyInfo(),
+      TdJsonBodies.canPayWithinSixMonthsJourneyInfo(CanPayWithinSixMonthsAnswers.AnswerNotRequired),
       TdJsonBodies.monthlyPaymentAmountJourneyInfo,
       TdJsonBodies.dayOfMonthJourneyInfo(TdAll.dayOfMonth()),
       TdJsonBodies.startDatesJourneyInfo,

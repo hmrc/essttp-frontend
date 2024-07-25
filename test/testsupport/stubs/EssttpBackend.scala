@@ -19,7 +19,7 @@ package testsupport.stubs
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.crypto.CryptoFormat
-import essttp.journey.model.{JourneyId, Origin, Origins, WhyCannotPayInFullAnswers}
+import essttp.journey.model.{CanPayWithinSixMonthsAnswers, JourneyId, Origin, Origins, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.bank.DetailsAboutBankAccount
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
 import essttp.rootmodel.dates.startdates.StartDatesResponse
@@ -314,6 +314,24 @@ object EssttpBackend {
         exactly(0),
         postRequestedFor(urlPathEqualTo(updateAffordabilityUrl(journeyId)))
       )
+  }
+
+  object CanPayWithinSixMonths {
+    def updateCanPayWithinSixMonthsUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-can-pay-within-six-months"
+
+    def stubUpdateCanPayWithinSixMonths(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(updateCanPayWithinSixMonthsUrl(journeyId), updatedJourneyJson)
+
+    def verifyUpdateCanPayWithinSixMonthsRequest(journeyId: JourneyId, expectedCanPayWithinSixMonths: CanPayWithinSixMonthsAnswers): Unit =
+      WireMockHelpers.verifyWithBodyParse(updateCanPayWithinSixMonthsUrl(journeyId), expectedCanPayWithinSixMonths)
+
+    def verifyNoneUpdateCanPayWithinSixMonthsRequest(journeyId: JourneyId): Unit =
+      verify(
+        exactly(0),
+        postRequestedFor(urlPathEqualTo(updateCanPayWithinSixMonthsUrl(journeyId)))
+      )
+
+    def findJourney(encrypter: Encrypter, origin: Origin)(jsonBody: String = JourneyJsonTemplates.`Obtained Can Pay Within 6 months - not required`(origin)(encrypter)): StubMapping = findByLatestSessionId(jsonBody)
   }
 
   object MonthlyPaymentAmount {
