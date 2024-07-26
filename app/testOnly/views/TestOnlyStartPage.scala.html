@@ -293,6 +293,21 @@ appConfig: AppConfig
   ))
 }
 
+@chargeSourceInput(defaultValue: String) = {
+  @govukInput(Input(
+    id = "chargeSource",
+    name = "chargeSource",
+    label = Label(
+        isPageHeading = false,
+        classes = "govuk-label--m",
+        content = Text("Enter charge source")
+    ),
+    classes = "govuk-input--width-10",
+    spellcheck = Some(false),
+    value = form.data.get("chargeSource").orElse(Some(defaultValue))
+  ))
+}
+
 @planMaxLengthInput(defaultValue: Int) = {
   @govukInput(Input(
     id = "planMaxLength",
@@ -624,6 +639,10 @@ appConfig: AppConfig
     @chargesOptionalFieldRadios("isInterestBearingCharge")
 
     @chargesOptionalFieldRadios("useChargeReference")
+
+    @chargesOptionalFieldRadios("transitionToCDCS")
+
+    @chargeSourceInput("CESA")
 
     @planMinLengthInput(1)
 
