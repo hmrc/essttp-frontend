@@ -24,7 +24,7 @@ import config.AppConfig
 import essttp.journey.JourneyConnector
 import essttp.journey.model.{Origins, SjRequest}
 import essttp.rootmodel.ttp.affordablequotes.DueDate
-import essttp.rootmodel.ttp.eligibility.{AccruedInterest, ChargeOverMaxDebtAge, ChargeReference, ChargeType, ChargeTypeAssessment, Charges, CustomerDetail, CustomerPostcode, DebtTotalAmount, DisallowedChargeLockType, EligibilityCheckResult, EligibilityPass, EligibilityRules, EligibilityStatus, EmailSource, IdType, IdValue, Identification, IneligibleChargeType, InterestStartDate, InvalidSignals, Lock, LockReason, LockType, MainTrans, MainType, OutstandingAmount, Postcode, PostcodeDate, ProcessingDateTime, RegimeDigitalCorrespondence, SubTrans, TaxPeriodFrom, TaxPeriodTo}
+import essttp.rootmodel.ttp.eligibility.{AccruedInterest, ChargeOverMaxDebtAge, ChargeReference, ChargeSource, ChargeType, ChargeTypeAssessment, Charges, CustomerDetail, CustomerPostcode, DebtTotalAmount, DisallowedChargeLockType, EligibilityCheckResult, EligibilityPass, EligibilityRules, EligibilityStatus, EmailSource, IdType, IdValue, Identification, IneligibleChargeType, InterestStartDate, InvalidSignals, Lock, LockReason, LockType, MainTrans, MainType, OutstandingAmount, Postcode, PostcodeDate, ProcessingDateTime, RegimeDigitalCorrespondence, SubTrans, TaxPeriodFrom, TaxPeriodTo, TransitionToCDCS}
 import essttp.rootmodel._
 import models.EligibilityErrors._
 import models.{EligibilityError, EligibilityErrors}
@@ -327,7 +327,7 @@ object StartJourneyController {
       useChargeReference            = form.useChargeReference.map(UseChargeReference(_)),
       chargeBeforeMaxAccountingDate = form.chargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_)),
       ddInProgress                  = form.ddInProgress.map(DdInProgress(_)),
-      chargeSource                  = None
+      chargeSource                  = form.chargeSource.map(ChargeSource(_))
     )
 
     val chargeTypeAssessments: List[ChargeTypeAssessment] = List(
@@ -384,7 +384,7 @@ object StartJourneyController {
       regimeDigitalCorrespondence     = maybeRegimeDigitalCorrespondence,
       futureChargeLiabilitiesExcluded = false,
       chargeTypesExcluded             = None,
-      transitionToCDCS                = None
+      transitionToCDCS                = form.transitionToCDCS.map(TransitionToCDCS(_))
     )
   }
 
