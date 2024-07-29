@@ -45,6 +45,8 @@ final case class StartJourneyForm(
     useChargeReference:            Option[Boolean],
     chargeBeforeMaxAccountingDate: Option[Boolean],
     ddInProgress:                  Option[Boolean],
+    transitionToCDCS:              Option[Boolean],
+    chargeSource:                  Option[String],
     planMinLength:                 Int,
     planMaxLength:                 Int,
     mainTrans:                     Option[Int]
@@ -71,6 +73,8 @@ object StartJourneyForm {
         "useChargeReference" -> chargesOptionalFieldsMapping,
         "chargeBeforeMaxAccountingDate" -> chargesOptionalFieldsMapping,
         "ddInProgress" -> chargesOptionalFieldsMapping,
+        "transitionToCDCS" -> chargesOptionalFieldsMapping,
+        "chargeSource" -> chargesOptionalStringMapping,
         "planMinLength" -> number,
         "planMaxLength" -> number,
         "mainTrans" -> optional(number)
@@ -184,6 +188,10 @@ object StartJourneyForm {
 
   private val chargesOptionalFieldsMapping: Mapping[Option[Boolean]] = {
     optional(boolean)
+  }
+
+  private val chargesOptionalStringMapping: Mapping[Option[String]] = {
+    optional(text)
   }
 
 }
