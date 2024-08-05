@@ -151,21 +151,21 @@ object TdAll {
   val callEligibilityApiRequestEpaye: CallEligibilityApiRequest = CallEligibilityApiRequest(
     channelIdentifier         = "eSSTTP",
     identification            = List(Identification(IdType("EMPREF"), IdValue("864FZ00049"))),
-    regimeType                = "PAYE",
+    regimeType                = RegimeType.EPAYE,
     returnFinancialAssessment = true
   )
 
   val callEligibilityApiRequestVat: CallEligibilityApiRequest = CallEligibilityApiRequest(
     channelIdentifier         = "eSSTTP",
     identification            = List(Identification(IdType("VRN"), IdValue("101747001"))),
-    regimeType                = "VATC",
+    regimeType                = RegimeType.VAT,
     returnFinancialAssessment = true
   )
 
   val callEligibilityApiRequestSa: CallEligibilityApiRequest = CallEligibilityApiRequest(
     channelIdentifier         = "eSSTTP",
     identification            = List(Identification(IdType("UTR"), IdValue("1234567895"))),
-    regimeType                = "SA",
+    regimeType                = RegimeType.SA,
     returnFinancialAssessment = true
   )
 
@@ -292,40 +292,49 @@ object TdAll {
     instalmentStartDate = InstalmentStartDate(LocalDate.parse("2022-07-28"))
   )
 
-  val instalmentAmountRequest: InstalmentAmountRequest = InstalmentAmountRequest(
-    channelIdentifier            = ChannelIdentifiers.eSSTTP,
-    paymentPlanFrequency         = PaymentPlanFrequencies.Monthly,
-    paymentPlanMinLength         = PaymentPlanMinLength(1),
-    paymentPlanMaxLength         = PaymentPlanMaxLength(12),
-    earliestPaymentPlanStartDate = EarliestPaymentPlanStartDate(LocalDate.parse("2022-07-14")),
-    latestPaymentPlanStartDate   = LatestPaymentPlanStartDate(LocalDate.parse("2022-08-13")),
-    initialPaymentDate           = Some(InitialPaymentDate(LocalDate.parse("2022-06-24"))),
-    initialPaymentAmount         = Some(AmountInPence(200)),
-    accruedDebtInterest          = AccruedDebtInterest(AmountInPence(3194)),
-    debtItemCharges              = List(
-      DebtItemCharge(
-        OutstandingDebtAmount(AmountInPence(50000)),
-        mainTrans               = MainTrans("mainTrans"),
-        subTrans                = SubTrans("subTrans"),
-        isInterestBearingCharge = Some(IsInterestBearingCharge(value = true)),
-        useChargeReference      = Some(UseChargeReference(value = true)),
-        debtItemChargeId        = ChargeReference("A00000000001"),
-        interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
-        debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-03-07"))
+  def instalmentAmountRequest(taxRegime: TaxRegime): InstalmentAmountRequest = {
+    val regimeType = taxRegime match {
+      case TaxRegime.Epaye => RegimeType.EPAYE
+      case TaxRegime.Vat   => RegimeType.VAT
+      case TaxRegime.Sa    => RegimeType.SA
+    }
+
+    InstalmentAmountRequest(
+      channelIdentifier            = ChannelIdentifiers.eSSTTP,
+      regimeType                   = regimeType,
+      paymentPlanFrequency         = PaymentPlanFrequencies.Monthly,
+      paymentPlanMinLength         = PaymentPlanMinLength(1),
+      paymentPlanMaxLength         = PaymentPlanMaxLength(12),
+      earliestPaymentPlanStartDate = EarliestPaymentPlanStartDate(LocalDate.parse("2022-07-14")),
+      latestPaymentPlanStartDate   = LatestPaymentPlanStartDate(LocalDate.parse("2022-08-13")),
+      initialPaymentDate           = Some(InitialPaymentDate(LocalDate.parse("2022-06-24"))),
+      initialPaymentAmount         = Some(AmountInPence(200)),
+      accruedDebtInterest          = AccruedDebtInterest(AmountInPence(3194)),
+      debtItemCharges              = List(
+        DebtItemCharge(
+          OutstandingDebtAmount(AmountInPence(50000)),
+          mainTrans               = MainTrans("mainTrans"),
+          subTrans                = SubTrans("subTrans"),
+          isInterestBearingCharge = Some(IsInterestBearingCharge(value = true)),
+          useChargeReference      = Some(UseChargeReference(value = true)),
+          debtItemChargeId        = ChargeReference("A00000000001"),
+          interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
+          debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-03-07"))
+        ),
+        DebtItemCharge(
+          OutstandingDebtAmount(AmountInPence(100000)),
+          mainTrans               = MainTrans("mainTrans"),
+          subTrans                = SubTrans("subTrans"),
+          isInterestBearingCharge = Some(IsInterestBearingCharge(value = true)),
+          useChargeReference      = Some(UseChargeReference(value = true)),
+          debtItemChargeId        = ChargeReference("A00000000002"),
+          interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-02-07"))),
+          debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-02-07"))
+        )
       ),
-      DebtItemCharge(
-        OutstandingDebtAmount(AmountInPence(100000)),
-        mainTrans               = MainTrans("mainTrans"),
-        subTrans                = SubTrans("subTrans"),
-        isInterestBearingCharge = Some(IsInterestBearingCharge(value = true)),
-        useChargeReference      = Some(UseChargeReference(value = true)),
-        debtItemChargeId        = ChargeReference("A00000000002"),
-        interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-02-07"))),
-        debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-02-07"))
-      )
-    ),
-    customerPostcodes            = List(CustomerPostcode(customerPostcode, PostcodeDate("2022-01-31")))
-  )
+      customerPostcodes            = List(CustomerPostcode(customerPostcode, PostcodeDate("2022-01-31")))
+    )
+  }
 
   def affordableQuotesRequest(taxRegime: TaxRegime): AffordableQuotesRequest = {
     val expectedPaymentPlanMaxLength = taxRegime match {
@@ -333,8 +342,14 @@ object TdAll {
       case TaxRegime.Vat   => PaymentPlanMaxLength(12)
       case TaxRegime.Sa    => PaymentPlanMaxLength(12)
     }
+    val regimeType = taxRegime match {
+      case TaxRegime.Epaye => RegimeType.EPAYE
+      case TaxRegime.Vat   => RegimeType.VAT
+      case TaxRegime.Sa    => RegimeType.SA
+    }
     AffordableQuotesRequest(
       channelIdentifier           = ChannelIdentifiers.eSSTTP,
+      regimeType                  = regimeType,
       paymentPlanFrequency        = PaymentPlanFrequencies.Monthly,
       paymentPlanMinLength        = PaymentPlanMinLength(1),
       paymentPlanMaxLength        = expectedPaymentPlanMaxLength,
@@ -412,9 +427,9 @@ object TdAll {
       accountNumber:               String                              = "12345678"
   ): ArrangementRequest = {
     val regimeType = taxRegime match {
-      case TaxRegime.Epaye => RegimeType("PAYE")
-      case TaxRegime.Vat   => RegimeType("VATC")
-      case TaxRegime.Sa    => RegimeType("SA")
+      case TaxRegime.Epaye => RegimeType.EPAYE
+      case TaxRegime.Vat   => RegimeType.VAT
+      case TaxRegime.Sa    => RegimeType.SA
     }
     ArrangementRequest(
       channelIdentifier           = ChannelIdentifiers.eSSTTP,

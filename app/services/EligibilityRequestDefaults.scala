@@ -18,7 +18,6 @@ package services
 
 sealed trait EligibilityRequestDefaults {
   def idType: String
-  def regimeType: String
 }
 
 object EligibilityRequestDefaults {
@@ -27,17 +26,14 @@ object EligibilityRequestDefaults {
 
   object Epaye extends EligibilityRequestDefaults {
     val idType: String = "EMPREF"
-    val regimeType: String = "PAYE"
   }
 
   object Vat extends EligibilityRequestDefaults {
     val idType: String = "VRN"
-    val regimeType: String = "VATC"
   }
 
   object Sa {
     val idType: String = "UTR"
-    val regimeType: String = "SA"
   }
 
 }

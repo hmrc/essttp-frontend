@@ -56,7 +56,7 @@ class DetermineAffordabilityControllerSpec extends ItSpec {
               redirectLocation(result) shouldBe Some(PageUrls.howMuchCanYouPayEachMonthUrl)
               EssttpBackend.AffordabilityMinMaxApi.verifyUpdateAffordabilityRequest(TdAll.journeyId, TdAll.instalmentAmounts)
               EssttpBackend.CanPayWithinSixMonths.verifyUpdateCanPayWithinSixMonthsRequest(TdAll.journeyId, CanPayWithinSixMonthsAnswers.AnswerNotRequired)
-              Ttp.Affordability.verifyTtpAffordabilityRequest(CryptoFormat.NoOpCryptoFormat)
+              Ttp.Affordability.verifyTtpAffordabilityRequest(origin.taxRegime)(CryptoFormat.NoOpCryptoFormat)
             }
 
             "affordability is enabled" in {
@@ -74,7 +74,7 @@ class DetermineAffordabilityControllerSpec extends ItSpec {
               redirectLocation(result) shouldBe Some(PageUrls.canPayWithinSixMonthsUrl)
               EssttpBackend.AffordabilityMinMaxApi.verifyUpdateAffordabilityRequest(TdAll.journeyId, TdAll.instalmentAmounts)
               EssttpBackend.CanPayWithinSixMonths.verifyNoneUpdateCanPayWithinSixMonthsRequest(TdAll.journeyId)
-              Ttp.Affordability.verifyTtpAffordabilityRequest(CryptoFormat.NoOpCryptoFormat)
+              Ttp.Affordability.verifyTtpAffordabilityRequest(origin.taxRegime)(CryptoFormat.NoOpCryptoFormat)
             }
 
           }

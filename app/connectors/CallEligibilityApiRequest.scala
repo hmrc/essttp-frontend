@@ -16,6 +16,7 @@
 
 package connectors
 
+import essttp.rootmodel.ttp.RegimeType
 import essttp.rootmodel.ttp.eligibility.{IdType, IdValue, Identification}
 import models.EligibilityReqIdentificationFlag
 import play.api.libs.json._
@@ -24,7 +25,7 @@ import play.api.libs.functional.syntax._
 final case class CallEligibilityApiRequest(
     channelIdentifier:         String,
     identification:            List[Identification],
-    regimeType:                String,
+    regimeType:                RegimeType,
     returnFinancialAssessment: Boolean
 )
 
@@ -41,7 +42,7 @@ object CallEligibilityApiRequest {
             "channelIdentifier" -> callEligibilityApiRequest.channelIdentifier,
             "idType" -> head.idType,
             "idValue" -> head.idValue,
-            "regimeType" -> callEligibilityApiRequest.regimeType,
+            "regimeType" -> RegimeType.format.writes(callEligibilityApiRequest.regimeType),
             "returnFinancialAssessment" -> callEligibilityApiRequest.returnFinancialAssessment
           )
           case _ => sys.error("There was more than one Identification in the identification list. We don't know what to do with that")
@@ -52,12 +53,12 @@ object CallEligibilityApiRequest {
     val reads: Reads[CallEligibilityApiRequest] = if (e.value) {
       ((__ \ "channelIdentifier").read[String] and
         (__ \ "identification").read[List[Identification]] and
-        (__ \ "regimeType").read[String] and
+        (__ \ "regimeType").read[RegimeType] and
         (__ \ "returnFinancialAssessment").read[Boolean])(CallEligibilityApiRequest(_, _, _, _))
     } else {
       ((__ \ "channelIdentifier").read[String] and
         ((__ \ "idType").read[IdType] and (__ \ "idValue").read[IdValue]).tupled.map((Identification.apply _).tupled).map(List(_)) and
-        (__ \ "regimeType").read[String] and
+        (__ \ "regimeType").read[RegimeType] and
         (__ \ "returnFinancialAssessment").read[Boolean])(CallEligibilityApiRequest(_, _, _, _))
     }
 
