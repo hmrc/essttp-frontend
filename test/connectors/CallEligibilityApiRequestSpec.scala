@@ -16,6 +16,7 @@
 
 package connectors
 
+import essttp.rootmodel.ttp.RegimeType
 import essttp.rootmodel.ttp.eligibility.{IdType, IdValue, Identification}
 import models.EligibilityReqIdentificationFlag
 import org.scalatest.freespec.AnyFreeSpec
@@ -28,7 +29,7 @@ class CallEligibilityApiRequestSpec extends AnyFreeSpec with Matchers {
 {
   "channelIdentifier": "eSSTTP",
   "identification": [{"idType":"someType", "idValue":"someValue"}],
-  "regimeType": "regime",
+  "regimeType": "PAYE",
   "returnFinancialAssessment": true
 }
 """
@@ -38,7 +39,7 @@ class CallEligibilityApiRequestSpec extends AnyFreeSpec with Matchers {
   "channelIdentifier": "eSSTTP",
   "idType": "someType",
   "idValue": "someValue",
-  "regimeType": "regime",
+  "regimeType": "PAYE",
   "returnFinancialAssessment": true
 }
 """
@@ -49,13 +50,13 @@ class CallEligibilityApiRequestSpec extends AnyFreeSpec with Matchers {
 
       "should correctly serialize" in {
         val request = CallEligibilityApiRequest(
-          "eSSTTP", List(Identification(IdType("someType"), IdValue("someValue"))), "regime", returnFinancialAssessment = true
+          "eSSTTP", List(Identification(IdType("someType"), IdValue("someValue"))), RegimeType.EPAYE, returnFinancialAssessment = true
         )
         val json = Json.toJson(request)(CallEligibilityApiRequest.format)
         (json \ "channelIdentifier").as[String] shouldEqual "eSSTTP"
         (json \ "identification").as[List[JsValue]].headOption.map(_.as[Identification])
           .getOrElse(Identification(IdType(""), IdValue(""))) shouldEqual Identification(IdType("someType"), IdValue("someValue"))
-        (json \ "regimeType").as[String] shouldEqual "regime"
+        (json \ "regimeType").as[String] shouldEqual "PAYE"
         (json \ "returnFinancialAssessment").as[Boolean] shouldEqual true
       }
 
@@ -63,7 +64,7 @@ class CallEligibilityApiRequestSpec extends AnyFreeSpec with Matchers {
         val json = Json.parse(jsonStringTrueFlag)
         val request = json.as[CallEligibilityApiRequest](CallEligibilityApiRequest.format)
         request shouldEqual CallEligibilityApiRequest(
-          "eSSTTP", List(Identification(IdType("someType"), IdValue("someValue"))), "regime", returnFinancialAssessment = true
+          "eSSTTP", List(Identification(IdType("someType"), IdValue("someValue"))), RegimeType.EPAYE, returnFinancialAssessment = true
         )
       }
     }
@@ -73,19 +74,19 @@ class CallEligibilityApiRequestSpec extends AnyFreeSpec with Matchers {
 
       "should correctly serialize" in {
         val request = CallEligibilityApiRequest(
-          "eSSTTP", List(Identification(IdType("someType"), IdValue("someValue"))), "regime", returnFinancialAssessment = true
+          "eSSTTP", List(Identification(IdType("someType"), IdValue("someValue"))), RegimeType.EPAYE, returnFinancialAssessment = true
         )
         val json = Json.toJson(request)(CallEligibilityApiRequest.format)
         (json \ "channelIdentifier").as[String] shouldEqual "eSSTTP"
         (json \ "idType").as[String] shouldEqual "someType"
         (json \ "idValue").as[String] shouldEqual "someValue"
-        (json \ "regimeType").as[String] shouldEqual "regime"
+        (json \ "regimeType").as[String] shouldEqual "PAYE"
         (json \ "returnFinancialAssessment").as[Boolean] shouldEqual true
       }
 
       "should fail if there is nothing in the identification list" in {
         val request = CallEligibilityApiRequest(
-          "eSSTTP", List.empty, "regime", returnFinancialAssessment = true
+          "eSSTTP", List.empty, RegimeType.EPAYE, returnFinancialAssessment = true
         )
 
         val exception = intercept[RuntimeException] {
@@ -99,7 +100,7 @@ class CallEligibilityApiRequestSpec extends AnyFreeSpec with Matchers {
           "eSSTTP", List(
             Identification(IdType("type1"), IdValue("value2")),
             Identification(IdType("type2"), IdValue("value2"))
-          ), "regime", returnFinancialAssessment = true
+          ), RegimeType.EPAYE, returnFinancialAssessment = true
         )
         val exception = intercept[RuntimeException] {
           Json.toJson(request)(CallEligibilityApiRequest.format)
@@ -111,7 +112,7 @@ class CallEligibilityApiRequestSpec extends AnyFreeSpec with Matchers {
         val json = Json.parse(jsonStringFalseFlag)
         val request = json.as[CallEligibilityApiRequest](CallEligibilityApiRequest.format)
         request shouldEqual CallEligibilityApiRequest(
-          "eSSTTP", List(Identification(IdType("someType"), IdValue("someValue"))), "regime", returnFinancialAssessment = true
+          "eSSTTP", List(Identification(IdType("someType"), IdValue("someValue"))), RegimeType.EPAYE, returnFinancialAssessment = true
         )
       }
     }

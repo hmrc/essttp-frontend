@@ -86,7 +86,8 @@ class TtpService @Inject() (
       case _                                    => Errors.throwServerErrorException("Trying to get extreme dates response for journey before they exist...")
     }
     val upfrontPaymentAmount: Option[UpfrontPaymentAmount] = TtpService.deriveUpfrontPaymentAmount(journey.upfrontPaymentAnswers)
-    val instalmentAmountRequest: InstalmentAmountRequest = TtpService.buildInstalmentRequest(upfrontPaymentAmount, eligibilityCheckResult, extremeDatesResponse)
+    val instalmentAmountRequest: InstalmentAmountRequest =
+      TtpService.buildInstalmentRequest(upfrontPaymentAmount, eligibilityCheckResult, extremeDatesResponse, journey.taxRegime)
 
     ttpConnector.callAffordabilityApi(instalmentAmountRequest, journey.correlationId)
   }
@@ -103,6 +104,7 @@ class TtpService @Inject() (
 
     val affordableQuotesRequest: AffordableQuotesRequest = AffordableQuotesRequest(
       channelIdentifier           = ChannelIdentifiers.eSSTTP,
+      regimeType                  = RegimeType.fromTaxRegime(journey.taxRegime),
       paymentPlanAffordableAmount = PaymentPlanAffordableAmount(monthlyPaymentAmount.value),
       paymentPlanFrequency        = PaymentPlanFrequencies.Monthly,
       paymentPlanMaxLength        = eligibilityCheckResult.paymentPlanMaxLength,
@@ -124,12 +126,7 @@ class TtpService @Inject() (
       implicit
       authenticatedJourneyRequest: AuthenticatedJourneyRequest[_]
   ): Future[ArrangementResponse] = {
-
-    val regimeType: RegimeType = journey.fold(_.taxRegime, _.taxRegime) match {
-      case TaxRegime.Epaye => RegimeType.PAYE
-      case TaxRegime.Vat   => RegimeType.VAT
-      case TaxRegime.Sa    => RegimeType.SA
-    }
+    val taxRegime = journey.fold(_.taxRegime, _.taxRegime)
     val eligibilityCheckResult = journey.fold(_.eligibilityCheckResult, _.eligibilityCheckResult)
     val selectedPaymentPlan = journey.fold(_.selectedPaymentPlan, _.selectedPaymentPlan)
     val correlationId = journey.fold(_.correlationId, _.correlationId)
@@ -156,7 +153,7 @@ class TtpService @Inject() (
 
     val arrangementRequest: ArrangementRequest = ArrangementRequest(
       channelIdentifier           = ChannelIdentifiers.eSSTTP,
-      regimeType                  = regimeType,
+      regimeType                  = RegimeType.fromTaxRegime(taxRegime),
       regimePaymentFrequency      = PaymentPlanFrequencies.Monthly,
       arrangementAgreedDate       = ArrangementAgreedDate(LocalDate.now(ZoneOffset.of("Z")).toString),
       identification              = eligibilityCheckResult.identification,
@@ -205,7 +202,7 @@ object TtpService {
       CallEligibilityApiRequest(
         channelIdentifier         = EligibilityRequestDefaults.essttpChannelIdentifier,
         identification            = List(Identification(IdType(EligibilityRequestDefaults.Epaye.idType), idValue)),
-        regimeType                = EligibilityRequestDefaults.Epaye.regimeType,
+        regimeType                = RegimeType.EPAYE,
         returnFinancialAssessment = true
       )
 
@@ -217,7 +214,7 @@ object TtpService {
       CallEligibilityApiRequest(
         channelIdentifier         = EligibilityRequestDefaults.essttpChannelIdentifier,
         identification            = List(Identification(IdType(EligibilityRequestDefaults.Vat.idType), idValue)),
-        regimeType                = EligibilityRequestDefaults.Vat.regimeType,
+        regimeType                = RegimeType.VAT,
         returnFinancialAssessment = true
       )
 
@@ -225,7 +222,7 @@ object TtpService {
       CallEligibilityApiRequest(
         channelIdentifier         = EligibilityRequestDefaults.essttpChannelIdentifier,
         identification            = List(Identification(IdType(EligibilityRequestDefaults.Sa.idType), IdValue(j.taxId.value))),
-        regimeType                = EligibilityRequestDefaults.Sa.regimeType,
+        regimeType                = RegimeType.SA,
         returnFinancialAssessment = true
       )
 
@@ -234,7 +231,8 @@ object TtpService {
   private def buildInstalmentRequest(
       upfrontPaymentAmount:   Option[UpfrontPaymentAmount],
       eligibilityCheckResult: EligibilityCheckResult,
-      extremeDatesResponse:   ExtremeDatesResponse
+      extremeDatesResponse:   ExtremeDatesResponse,
+      taxRegime:              TaxRegime
   ): InstalmentAmountRequest = {
     val allInterestAccrued: AmountInPence = AmountInPence(
       eligibilityCheckResult.chargeTypeAssessment
@@ -249,6 +247,7 @@ object TtpService {
 
     InstalmentAmountRequest(
       channelIdentifier            = ChannelIdentifiers.eSSTTP,
+      regimeType                   = RegimeType.fromTaxRegime(taxRegime),
       paymentPlanMinLength         = eligibilityCheckResult.paymentPlanMinLength,
       paymentPlanMaxLength         = eligibilityCheckResult.paymentPlanMaxLength,
       paymentPlanFrequency         = PaymentPlanFrequencies.Monthly,
