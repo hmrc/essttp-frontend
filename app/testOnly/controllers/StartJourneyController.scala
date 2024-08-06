@@ -297,7 +297,7 @@ object StartJourneyController {
     val mainTrans: String = form.mainTrans.getOrElse(4910).toString // defaults to 4910, which  corresponds to 'Balancing Payment'
 
     val maybeCustomerDetail =
-      if (form.emailAddressPresent) Some(List(CustomerDetail(Some(Email(SensitiveString("bobross@joyofpainting.com"))), Some(EmailSource.ETMP))))
+      if (form.emailAddressPresent) Some(List(CustomerDetail(Some(Email(SensitiveString("bobross@joyofpainting.com"))), Some(EmailSource.ETMP), None, None, None, None, None, None)))
       else Some(List.empty)
 
     val maybeRegimeDigitalCorrespondence = Some(RegimeDigitalCorrespondence(form.regimeDigitalCorrespondence))
@@ -381,6 +381,7 @@ object StartJourneyController {
       eligibilityRules                = eligibilityRules,
       chargeTypeAssessment            = chargeTypeAssessments,
       customerDetails                 = maybeCustomerDetail,
+      addresses                       = None,
       regimeDigitalCorrespondence     = maybeRegimeDigitalCorrespondence,
       futureChargeLiabilitiesExcluded = false,
       chargeTypesExcluded             = None,
