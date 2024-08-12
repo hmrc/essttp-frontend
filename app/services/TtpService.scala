@@ -296,13 +296,13 @@ object TtpService {
     val emailThatsBeenVerified: Email = journey.emailToBeVerified
     val customerDetail = journey.eligibilityCheckResult.email match {
       case None =>
-        CustomerDetail(Some(emailThatsBeenVerified), Some(EmailSource.TEMP))
+        CustomerDetail(Some(emailThatsBeenVerified), Some(EmailSource.TEMP), None, None, None, None, None, None)
 
       case Some(etmpEmail) =>
         if (etmpEmail.value.decryptedValue.toLowerCase(Locale.UK) === emailThatsBeenVerified.value.decryptedValue.toLowerCase(Locale.UK)) {
-          CustomerDetail(Some(etmpEmail), Some(EmailSource.ETMP))
+          CustomerDetail(Some(etmpEmail), Some(EmailSource.ETMP), None, None, None, None, None, None)
         } else {
-          CustomerDetail(Some(emailThatsBeenVerified), Some(EmailSource.TEMP))
+          CustomerDetail(Some(emailThatsBeenVerified), Some(EmailSource.TEMP), None, None, None, None, None, None)
         }
     }
 
