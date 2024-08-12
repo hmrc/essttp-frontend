@@ -31,6 +31,7 @@ import util.EnumFormatter
 
 import scala.util.Random
 
+//TODO OPS-12584 - Clean this up when TTP has implemented the changes to the Eligibility API. The newTtpApi option in start page will not be needed
 final case class StartJourneyForm(
     signInAs:                      SignInAs,
     enrolments:                    Seq[Enrolment],
@@ -49,7 +50,8 @@ final case class StartJourneyForm(
     chargeSource:                  Option[String],
     planMinLength:                 Int,
     planMaxLength:                 Int,
-    mainTrans:                     Option[Int]
+    mainTrans:                     Option[Int],
+    newTtpApi:                     Boolean
 )
 
 object StartJourneyForm {
@@ -77,7 +79,8 @@ object StartJourneyForm {
         "chargeSource" -> chargesOptionalStringMapping,
         "planMinLength" -> number,
         "planMaxLength" -> number,
-        "mainTrans" -> optional(number)
+        "mainTrans" -> optional(number),
+        "newTtpApi" -> optionalBooleanMappingDefaultTrue
 
       )(StartJourneyForm.apply)(StartJourneyForm.unapply)
     )
