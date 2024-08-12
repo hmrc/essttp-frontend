@@ -230,7 +230,7 @@ object TdAll {
       processingDateTime              = ProcessingDateTime("2022-03-23T13:49:51.141Z"),
       identification                  = identification(taxRegime),
       invalidSignals                  = None,
-      customerPostcodes               = List(CustomerPostcode(customerPostcode, PostcodeDate("2022-01-31"))),
+      customerPostcodes               = List(CustomerPostcode(customerPostcode, PostcodeDate(LocalDate.of(2022, 1, 31)))),
       customerType                    = None,
       regimePaymentFrequency          = PaymentPlanFrequencies.Monthly,
       paymentPlanFrequency            = PaymentPlanFrequencies.Monthly,
@@ -333,7 +333,7 @@ object TdAll {
           debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-02-07"))
         )
       ),
-      customerPostcodes            = List(CustomerPostcode(customerPostcode, PostcodeDate("2022-01-31")))
+      customerPostcodes            = List(CustomerPostcode(customerPostcode, PostcodeDate(LocalDate.of(2022, 1, 31))))
     )
   }
 
@@ -379,7 +379,7 @@ object TdAll {
           debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-02-07"))
         )
       ),
-      customerPostcodes           = List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate("2022-01-31"))),
+      customerPostcodes           = List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate(LocalDate.of(2022, 1, 31)))),
       paymentPlanAffordableAmount = PaymentPlanAffordableAmount(AmountInPence(30000)),
       paymentPlanStartDate        = InstalmentStartDate(LocalDate.parse("2022-07-28"))
     )
