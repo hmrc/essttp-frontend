@@ -28,6 +28,7 @@ import essttp.rootmodel.ttp.affordablequotes.{AffordableQuotesResponse, PaymentP
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import essttp.rootmodel._
+import essttp.rootmodel.pega.StartCaseResponse
 import paymentsEmailVerification.models.EmailVerificationResult
 import play.api.http.Status._
 import play.api.libs.json.Json
@@ -334,6 +335,19 @@ object EssttpBackend {
     def findJourney(encrypter: Encrypter, origin: Origin)(jsonBody: String = JourneyJsonTemplates.`Obtained Can Pay Within 6 months - not required`(origin)(encrypter)): StubMapping = findByLatestSessionId(jsonBody)
   }
 
+  object StartedPegaCase {
+    private def updateStartPegaCaseResponseUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-pega-start-case-response"
+
+    def stubUpdateStartPegaCaseResponse(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(updateStartPegaCaseResponseUrl(journeyId), updatedJourneyJson)
+
+    def verifyUpdateStartPegaCaseResponseRequest(journeyId: JourneyId, expectedResponse: StartCaseResponse): Unit =
+      WireMockHelpers.verifyWithBodyParse(updateStartPegaCaseResponseUrl(journeyId), expectedResponse)
+
+    def findJourney(encrypter: Encrypter, origin: Origin)(jsonBody: String = JourneyJsonTemplates.`Started PEGA case`(origin)(encrypter)): StubMapping =
+      findByLatestSessionId(jsonBody)
+  }
+
   object MonthlyPaymentAmount {
     def monthlyPaymentAmountUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-monthly-payment-amount"
 
@@ -576,5 +590,33 @@ object EssttpBackend {
 
     def findJourney(origin: Origin, encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Arrangement Submitted - with upfront payment`(origin)(encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
+  }
+
+  object Pega {
+
+    type HttpStatus = Int
+
+    def startCaseUrl(journeyId: JourneyId) = s"/essttp-backend/pega-case/${journeyId.value}"
+
+    def stubStartCase(journeyId: JourneyId, result: Either[HttpStatus, StartCaseResponse]): StubMapping =
+      stubFor(
+        post(startCaseUrl(journeyId))
+          .willReturn(
+            result.fold(
+              aResponse().withStatus(_),
+              response => aResponse().withStatus(CREATED).withBody(
+                s"""{
+                   |  "caseId": "${response.caseId.value}",
+                   |  "assignmentId": "${response.assignmentId.value}"
+                   |}
+                   |""".stripMargin
+              )
+            )
+          )
+      )
+
+    def verifyStartCaseCalled(journeyId: JourneyId): Unit =
+      verify(exactly(1), postRequestedFor(urlPathEqualTo(startCaseUrl(journeyId))))
+
   }
 }

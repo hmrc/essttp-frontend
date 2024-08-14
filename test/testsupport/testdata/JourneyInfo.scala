@@ -86,6 +86,7 @@ object JourneyInfo {
   val obtainedCanPayWithinSixMonthsNotRequired: JourneyInfoAsJson = TdJsonBodies.canPayWithinSixMonthsJourneyInfo(CanPayWithinSixMonthsAnswers.AnswerNotRequired)
   val obtainedCanPayWithinSixMonthsYes: JourneyInfoAsJson = TdJsonBodies.canPayWithinSixMonthsJourneyInfo(CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths(value = true))
   val obtainedCanPayWithinSixMonthsNo: JourneyInfoAsJson = TdJsonBodies.canPayWithinSixMonthsJourneyInfo(CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths(value = false))
+  val startPegaCaseResponse: JourneyInfoAsJson = TdJsonBodies.startedPegaCaseJourneyInfo
   val monthlyPaymentAmount: JourneyInfoAsJson = TdJsonBodies.monthlyPaymentAmountJourneyInfo
   def dayOfMonth(dayOfMonth: DayOfMonth = TdAll.dayOfMonth()): JourneyInfoAsJson = TdJsonBodies.dayOfMonthJourneyInfo(dayOfMonth)
   val startDates: JourneyInfoAsJson = TdJsonBodies.startDatesJourneyInfo
@@ -294,6 +295,21 @@ object JourneyInfo {
       eligibilityMaxPlanLength: Int            = 12
   ): List[JourneyInfoAsJson] =
     obtainedCanPayWithinSixMonthsNo :: retrievedAffordabilityResult(
+      taxRegime                = taxRegime,
+      encrypter                = encrypter,
+      etmpEmail                = etmpEmail,
+      eligibilityMinPlanLength = eligibilityMinPlanLength,
+      eligibilityMaxPlanLength = eligibilityMaxPlanLength
+    )
+
+  def startedPegaCase(
+      taxRegime:                TaxRegime,
+      encrypter:                Encrypter,
+      etmpEmail:                Option[String] = Some(TdAll.etmpEmail),
+      eligibilityMinPlanLength: Int            = 1,
+      eligibilityMaxPlanLength: Int            = 12
+  ): List[JourneyInfoAsJson] =
+    startPegaCaseResponse :: obtainedCanPayWithinSixMonthsNo(
       taxRegime                = taxRegime,
       encrypter                = encrypter,
       etmpEmail                = etmpEmail,

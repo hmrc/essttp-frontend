@@ -23,6 +23,7 @@ import essttp.rootmodel.bank.{AccountName, AccountNumber, BankDetails, DetailsAb
 import essttp.rootmodel.dates.{InitialPayment, InitialPaymentDate}
 import essttp.rootmodel.dates.extremedates.{EarliestPaymentPlanStartDate, ExtremeDatesRequest, ExtremeDatesResponse, LatestPaymentPlanStartDate}
 import essttp.rootmodel.dates.startdates.{InstalmentStartDate, PreferredDayOfMonth, StartDatesRequest, StartDatesResponse}
+import essttp.rootmodel.pega.{PegaAssigmentId, PegaCaseId, StartCaseResponse}
 import essttp.rootmodel.ttp.affordablequotes._
 import essttp.rootmodel.ttp.eligibility._
 import essttp.rootmodel.ttp._
@@ -386,6 +387,12 @@ object TdAll {
   }
 
   val instalmentAmounts: InstalmentAmounts = InstalmentAmounts(AmountInPence(33333), AmountInPence(100000))
+
+  val pegaStartCaseResponse: StartCaseResponse = StartCaseResponse(
+    PegaCaseId("case"),
+    PegaAssigmentId("assignment")
+  )
+
   val monthlyPaymentAmount: MonthlyPaymentAmount = MonthlyPaymentAmount(AmountInPence(30000))
 
   def paymentPlan(numberOfInstalments: Int, amountDue: AmountDue): PaymentPlan = PaymentPlan(
