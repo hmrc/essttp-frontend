@@ -270,6 +270,12 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
+  def `Started PEGA case`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.startedPegaCase,
+    journeyInfo = JourneyInfo.startedPegaCase(origin.taxRegime, encrypter),
+    origin      = origin
+  )
+
   def `Entered Monthly Payment Amount`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.enteredMonthlyPaymentAmount,
     journeyInfo = JourneyInfo.enteredMonthlyPaymentAmount(origin.taxRegime, encrypter),

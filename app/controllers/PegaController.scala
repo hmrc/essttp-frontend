@@ -17,19 +17,26 @@
 package controllers
 
 import actions.Actions
+import config.AppConfig
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import services.PegaService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class PegaController @Inject() (
-    as:  Actions,
-    mcc: MessagesControllerComponents
-) extends FrontendController(mcc) {
+    as:          Actions,
+    mcc:         MessagesControllerComponents,
+    pegaService: PegaService,
+    appConfig:   AppConfig
+)(implicit ex: ExecutionContext) extends FrontendController(mcc) {
 
-  val startPegaJourney: Action[AnyContent] = as.authenticatedJourneyAction { _ =>
-    SeeOther(testOnly.controllers.routes.PegaController.dummyPegaPage.url)
+  val startPegaJourney: Action[AnyContent] = as.authenticatedJourneyAction.async{ implicit request =>
+    pegaService.startCase(request.journey).map{ _ =>
+      SeeOther(appConfig.pegaRedirectUrl)
+    }
   }
 
 }

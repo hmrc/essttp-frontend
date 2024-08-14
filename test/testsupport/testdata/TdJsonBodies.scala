@@ -288,6 +288,14 @@ object TdJsonBodies {
     s""""canPayWithinSixMonthsAnswers": $value""".stripMargin
   }
 
+  def startedPegaCaseJourneyInfo: String =
+    """
+      |"startCaseResponse": {
+      |  "caseId": "case",
+      |  "assignmentId": "assigment"
+      |}
+      |""".stripMargin
+
   def monthlyPaymentAmountJourneyInfo: String = """"monthlyPaymentAmount": 30000"""
 
   def dayOfMonthJourneyInfo(dayOfMonth: DayOfMonth): String = s""""dayOfMonth": ${dayOfMonth.value.toString}"""

@@ -31,6 +31,7 @@ object StageInfo {
   val retrievedAffordabilityResult: StageInfo = StageInfo("RetrievedAffordabilityResult", "RetrievedAffordabilityResult")
   val obtainedCanPayWithinSixMonthsNotRequired: StageInfo = StageInfo("ObtainedCanPayWithinSixMonthsAnswers", "AnswerNotRequired")
   val obtainedCanPayWithinSixMonthsRequired: StageInfo = StageInfo("ObtainedCanPayWithinSixMonthsAnswers", "AnswerRequired")
+  val startedPegaCase: StageInfo = StageInfo("StartedPegaCase", "StartedPegaCase")
   val enteredMonthlyPaymentAmount: StageInfo = StageInfo("EnteredMonthlyPaymentAmount", "EnteredMonthlyPaymentAmount")
   val enteredDayOfMonth: StageInfo = StageInfo("EnteredDayOfMonth", "EnteredDayOfMonth")
   val retrievedStartDates: StageInfo = StageInfo("RetrievedStartDates", "StartDatesResponseRetrieved")

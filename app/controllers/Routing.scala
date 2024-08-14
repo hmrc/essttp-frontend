@@ -193,6 +193,7 @@ object Routing {
     case _: Journey.Stages.RetrievedExtremeDates                => routes.DetermineAffordabilityController.determineAffordability
     case j: Journey.Stages.RetrievedAffordabilityResult         => affordabilityRoute(j)
     case j: Journey.Stages.ObtainedCanPayWithinSixMonthsAnswers => canPayWithinSixMonthsRoute(j.canPayWithinSixMonthsAnswers)
+    case _: Journey.Stages.StartedPegaCase                      => routes.CanPayWithinSixMonthsController.canPayWithinSixMonths
     case _: Journey.Stages.EnteredMonthlyPaymentAmount          => routes.PaymentDayController.paymentDay
     case _: Journey.Stages.EnteredDayOfMonth                    => routes.DatesApiController.retrieveStartDates
     case _: Journey.Stages.RetrievedStartDates                  => routes.DetermineAffordableQuotesController.retrieveAffordableQuotes

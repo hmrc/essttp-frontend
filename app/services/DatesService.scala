@@ -16,7 +16,7 @@
 
 package services
 
-import connectors.DatesApiConnector
+import connectors.EssttpBackendConnector
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel.CanPayUpfront
 import essttp.rootmodel.dates.InitialPayment
@@ -31,7 +31,7 @@ import scala.concurrent.Future
  * Essttp-dates Service.
  */
 @Singleton
-class DatesService @Inject() (datesApiConnector: DatesApiConnector) {
+class DatesService @Inject() (datesApiConnector: EssttpBackendConnector) {
 
   def startDates(journey: Journey.AfterEnteredDayOfMonth)(implicit request: RequestHeader): Future[StartDatesResponse] = {
     val dayOfMonth: PreferredDayOfMonth = PreferredDayOfMonth(journey.dayOfMonth.value)

@@ -17,8 +17,10 @@
 package connectors
 
 import com.google.inject.{Inject, Singleton}
+import essttp.journey.model.JourneyId
 import essttp.rootmodel.dates.extremedates.{ExtremeDatesRequest, ExtremeDatesResponse}
 import essttp.rootmodel.dates.startdates.{StartDatesRequest, StartDatesResponse}
+import essttp.rootmodel.pega.StartCaseResponse
 import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
 import requests.RequestSupport._
@@ -30,26 +32,31 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class DatesApiConnector @Inject() (config: DatesApiConfig, httpClient: HttpClientV2)(implicit ec: ExecutionContext) {
+class EssttpBackendConnector @Inject() (config: EssttpBackendConfig, httpClient: HttpClientV2)(implicit ec: ExecutionContext) {
 
   private val startDatesUrl: String = config.baseUrl + "/essttp-backend/start-dates"
 
-  def startDates(startDatesRequest: StartDatesRequest)(implicit request: RequestHeader): Future[StartDatesResponse] = {
+  private val extremeDatesUrl: String = config.baseUrl + "/essttp-backend/extreme-dates"
+
+  private val startPegaCaseUrl: String = config.baseUrl + "/essttp-backend/pega-case"
+
+  def startDates(startDatesRequest: StartDatesRequest)(implicit request: RequestHeader): Future[StartDatesResponse] =
     httpClient.post(url"$startDatesUrl")
       .withBody(Json.toJson(startDatesRequest))
       .execute[StartDatesResponse]
-  }
 
-  private val extremeDatesUrl: String = config.baseUrl + "/essttp-backend/extreme-dates"
-
-  def extremeDates(extremeDatesRequest: ExtremeDatesRequest)(implicit request: RequestHeader): Future[ExtremeDatesResponse] = {
+  def extremeDates(extremeDatesRequest: ExtremeDatesRequest)(implicit request: RequestHeader): Future[ExtremeDatesResponse] =
     httpClient.post(url"$extremeDatesUrl")
       .withBody(Json.toJson(extremeDatesRequest))
       .execute[ExtremeDatesResponse]
-  }
+
+  def startPegaCase(journeyId: JourneyId)(implicit requestHeader: RequestHeader): Future[StartCaseResponse] =
+    httpClient.post(url"$startPegaCaseUrl/${journeyId.value}")
+      .execute[StartCaseResponse]
+
 }
 
-final case class DatesApiConfig(baseUrl: String) {
+final case class EssttpBackendConfig(baseUrl: String) {
   @Inject()
   def this(config: ServicesConfig) = {
     this(
