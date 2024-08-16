@@ -19,8 +19,8 @@ package controllers
 import _root_.actions.Actions
 import actionsmodel.EligibleJourneyRequest
 import controllers.JourneyFinalStateCheck.finalStateCheck
-import controllers.PaymentScheduleController.{dayOfMonthFromJourney, upfrontPaymentAnswersFromJourney}
-import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
+import controllers.PaymentScheduleController.{canPayWithinSixMonthsFromJourney, dayOfMonthFromJourney, upfrontPaymentAnswersFromJourney, whyCannotPayInFullAnswersFromJourney}
+import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Journey, UpfrontPaymentAnswers, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.DayOfMonth
 import essttp.utils.Errors
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -62,7 +62,9 @@ class PaymentScheduleController @Inject() (
             upfrontPaymentAnswers          = upfrontPaymentAnswersFromJourney(j),
             paymentDay                     = dayOfMonthFromJourney(j),
             paymentPlan                    = j.selectedPaymentPlan,
-            affordableMonthlyPaymentAmount = monthlyPaymentAmount.value
+            affordableMonthlyPaymentAmount = monthlyPaymentAmount.value,
+            whyCannotPayInFullAnswers      = whyCannotPayInFullAnswersFromJourney(j),
+            canPayWithinSixMonthsAnswers   = canPayWithinSixMonthsFromJourney(j)
           ))
         )
     }
@@ -95,6 +97,16 @@ object PaymentScheduleController {
   private def upfrontPaymentAnswersFromJourney(journey: Journey.AfterSelectedPaymentPlan): UpfrontPaymentAnswers = journey match {
     case j: Journey.AfterUpfrontPaymentAnswers => j.upfrontPaymentAnswers
     case _                                     => Errors.throwServerErrorException("Trying to get upfront payment answers for journey before they exist..")
+  }
+
+  private def whyCannotPayInFullAnswersFromJourney(journey: Journey.AfterSelectedPaymentPlan): WhyCannotPayInFullAnswers = journey match {
+    case j: Journey.AfterWhyCannotPayInFullAnswers => j.whyCannotPayInFullAnswers
+    case _                                         => Errors.throwServerErrorException("Trying to get why cannot pay in full answer for journey before it exists..")
+  }
+
+  private def canPayWithinSixMonthsFromJourney(journey: Journey.AfterSelectedPaymentPlan): CanPayWithinSixMonthsAnswers = journey match {
+    case j: Journey.AfterCanPayWithinSixMonthsAnswers => j.canPayWithinSixMonthsAnswers
+    case _ => Errors.throwServerErrorException("Trying to get can pay within six months answer for journey before it exists...")
   }
 
   private def dayOfMonthFromJourney(journey: Journey.AfterSelectedPaymentPlan): DayOfMonth = journey match {

@@ -36,6 +36,7 @@ class Views @Inject() (
     val notEnrolled:                      NotEnrolled,
     val notVatRegistered:                 NotVatRegistered,
     val notSaEnrolled:                    NotSaEnrolled,
+    val checkYourPaymentSchedule:         CheckPaymentSchedule,
     val ineligible:                       Ineligible,
     val partials:                         Partials,
     val whyCannotPayInFull:               WhyCannotPayInFull,

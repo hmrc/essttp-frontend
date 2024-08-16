@@ -80,7 +80,6 @@ class WhyCannotPayInFullController @Inject() (
     WhyCannotPayInFullController.form.bindFromRequest().fold(
       formWithErrors => Ok(views.whyCannotPayInFull(formWithErrors)),
       { reasons =>
-        val valueChanged = existingAnswersInJourney(request.journey).forall(_ =!= reasons)
 
         journeyConnector.updateWhyCannotPayInFullAnswers(
           request.journeyId,
@@ -89,7 +88,8 @@ class WhyCannotPayInFullController @Inject() (
             Routing.redirectToNext(
               routes.WhyCannotPayInFullController.whyCannotPayInFull,
               updatedJourney,
-              valueChanged
+              //even if the value is changed we still want to go to cya page
+              submittedValueUnchanged = true
             ))
       }
     )

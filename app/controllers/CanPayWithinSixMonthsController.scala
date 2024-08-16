@@ -71,7 +71,7 @@ class CanPayWithinSixMonthsController @Inject() (
       formWithErrors => Ok(views.canPayWithinSixMonthsPage(formWithErrors, remainingAmountToPay(request.journey))),
       { canPayFormValue =>
         val canPay = canPayFormValue.asCanPayWithinSixMonths
-        val valueChanged = existingAnswersInJourney(request.journey).forall(_.value =!= canPay.value)
+        val valueUnchanged = existingAnswersInJourney(request.journey).forall(_.value === canPay.value)
 
         journeyConnector.updateCanPayWithinSixMonthsAnswers(
           request.journeyId,
@@ -80,7 +80,7 @@ class CanPayWithinSixMonthsController @Inject() (
             Routing.redirectToNext(
               routes.CanPayWithinSixMonthsController.canPayWithinSixMonths,
               updatedJourney,
-              valueChanged
+              valueUnchanged
             ))
       }
     )
