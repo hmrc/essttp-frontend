@@ -18,8 +18,8 @@
 @import messages.Messages
 @import play.twirl.api.Html
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-@import essttp.journey.model.UpfrontPaymentAnswers
-@import essttp.rootmodel.{AmountInPence, DayOfMonth, TaxRegime}
+@import essttp.journey.model.{UpfrontPaymentAnswers, CanPayWithinSixMonthsAnswers, WhyCannotPayInFullAnswers}
+@import essttp.rootmodel.{AmountInPence, DayOfMonth, CannotPayReason}
 @import essttp.rootmodel.ttp.affordablequotes.PaymentPlan
 @import controllers.routes
 @import messages.DateMessages
@@ -40,7 +40,9 @@
   upfrontPaymentAnswers: UpfrontPaymentAnswers,
   paymentDay: DayOfMonth,
   paymentPlan: PaymentPlan,
-  affordableMonthlyPaymentAmount: AmountInPence
+  affordableMonthlyPaymentAmount: AmountInPence,
+  whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers,
+  canPayWithinSixMonthsAnswers: CanPayWithinSixMonthsAnswers
 )(implicit request: EligibleJourneyRequest[_], ord: Ordering[LocalDate])
 
 @import requestSupport._
@@ -99,6 +101,72 @@
   canPayUpfrontRow :: upfrontPaymentAmountRow.toList
 }
 
+@canPayWithinSixMonthsRow = @{
+  val canPayWithinSixMonths =
+    canPayWithinSixMonthsAnswers match {
+      case CanPayWithinSixMonthsAnswers.AnswerNotRequired => None
+      case CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths(answer) => Some(answer)
+    }
+
+  canPayWithinSixMonths.map {
+    canPay =>
+    SummaryListRow(
+      key = Key(
+        content = HtmlContent(Html(Messages.CanPayWithinSixMonths.`Can you pay within 6 months?`.show)),
+        classes = "govuk-!-width-one-half"
+      ),
+      value = Value(
+        content = Text((if(canPay){Messages.`Yes`} else Messages.`No`).show)
+      ),
+      actions = Some(Actions(
+        items = Seq(
+          ActionItem(
+            href = CheckPaymentPlanChangeLink.CanPayWithinSixMonths.changeLink.url,
+            content = Text(Messages.change.show),
+            visuallyHiddenText = Some(Messages.CanPayWithinSixMonths.`Can you pay within 6 months?`.show)
+          )
+        )
+      ))
+    )
+  }
+}
+
+@whyCannotPayInFullBullets(reasons: Set[CannotPayReason]) = {
+    <ul class="govuk-list govuk-list--bullet">
+    @reasons.map{ reason =>
+      <li>@{Messages.WhyCannotPayInFull.checkboxMessage(reason).show}</li>
+  }
+  </ul>
+}
+
+@whyCannotPayInFullRow = @{
+  val whyCannotPayInFullReasons =
+    whyCannotPayInFullAnswers match {
+      case WhyCannotPayInFullAnswers.AnswerNotRequired => None
+      case WhyCannotPayInFullAnswers.WhyCannotPayInFull(reasons) => Some(reasons)
+    }
+
+  whyCannotPayInFullReasons.map { reasons =>
+    SummaryListRow(
+      key = Key(
+        content = HtmlContent(Html(Messages.WhyCannotPayInFull.`Why are you unable to pay in full?`.show)),
+        classes = "govuk-!-width-one-half"
+      ),
+      value = Value(
+        content = HtmlContent(whyCannotPayInFullBullets(reasons))
+      ),
+      actions = Some(Actions(
+        items = Seq(
+          ActionItem(
+            href = CheckPaymentPlanChangeLink.WhyCannotPayInFull.changeLink.url,
+            content = Text(Messages.change.show),
+            visuallyHiddenText = Some(Messages.WhyCannotPayInFull.`Why are you unable to pay in full?`.show)
+          )
+        )
+      ))
+    )
+  }
+}
 
 @montlyAmountRow = @{
   SummaryListRow(
@@ -190,9 +258,7 @@
     @title
   </h1>
 
-
-  @govukSummaryList(SummaryList(rows = upfrontPaymentRows, classes = "govuk-!-margin-bottom-9"))
-
+  @govukSummaryList(SummaryList(rows = whyCannotPayInFullRow.toList ::: upfrontPaymentRows ::: canPayWithinSixMonthsRow.toList, classes = "govuk-!-margin-bottom-9"))
 
   <h2 class="govuk-heading-m">
     @{Messages.PaymentSchedule.`Monthly payments`.show}

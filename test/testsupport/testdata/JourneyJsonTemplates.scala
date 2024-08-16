@@ -17,6 +17,7 @@
 package testsupport.testdata
 
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Origin, Origins, WhyCannotPayInFullAnswers}
+import essttp.rootmodel.CannotPayReason.Bankrupt
 import essttp.rootmodel.DayOfMonth
 import paymentsEmailVerification.models.EmailVerificationResult
 import uk.gov.hmrc.crypto.Encrypter
@@ -305,11 +306,11 @@ object JourneyJsonTemplates {
     journeyInfo = List(
       TdJsonBodies.taxIdJourneyInfo(),
       TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.eligibleEligibilityPass, TdAll.eligibleEligibilityRules, origin.taxRegime, encrypter, regimeDigitalCorrespondence),
-      TdJsonBodies.whyCannotPayInFull(WhyCannotPayInFullAnswers.AnswerNotRequired),
       TdJsonBodies.upfrontPaymentAnswersJourneyInfo(upfrontPaymentAmountJsonString),
+      TdJsonBodies.whyCannotPayInFull(WhyCannotPayInFullAnswers.WhyCannotPayInFull(Set(Bankrupt))),
+      TdJsonBodies.canPayWithinSixMonthsJourneyInfo(CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths(value = true)),
       TdJsonBodies.extremeDatesJourneyInfo(),
       TdJsonBodies.affordabilityResultJourneyInfo(),
-      TdJsonBodies.canPayWithinSixMonthsJourneyInfo(CanPayWithinSixMonthsAnswers.AnswerNotRequired),
       TdJsonBodies.monthlyPaymentAmountJourneyInfo,
       TdJsonBodies.dayOfMonthJourneyInfo(TdAll.dayOfMonth()),
       TdJsonBodies.startDatesJourneyInfo,

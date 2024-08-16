@@ -54,8 +54,19 @@ class PaymentScheduleControllerSpec extends ItSpec {
               )
             }
 
-            def testUpfrontPaymentSummaryRows(summary: Element)(canPayUpfrontValue: String, upfrontPaymentAmountValue: Option[String]) = {
+            def testUpfrontPaymentSummaryRows(summary: Element)(
+                canPayUpfrontValue:        String,
+                upfrontPaymentAmountValue: Option[String],
+                reasonsToNotPayInFull:     List[String],
+                canPayWithinSixMonths:     String
+            ) = {
               val upfrontPaymentSummaryRows = summary.select(".govuk-summary-list__row").iterator().asScala.toList
+
+              val whyCannotPayInFullRow = SummaryRow(
+                "Why are you unable to pay in full?",
+                reasonsToNotPayInFull.mkString("\n"),
+                PageUrls.checkPaymentPlanChangeUrl("WhyCannotPayInFull")
+              )
 
               val canPayUpfrontRow = SummaryRow(
                 "Can you make an upfront payment?",
@@ -69,7 +80,18 @@ class PaymentScheduleControllerSpec extends ItSpec {
                   PageUrls.checkPaymentPlanChangeUrl("UpfrontPaymentAmount")
                 ))
 
-              val expectedSummaryRows = List(Some(canPayUpfrontRow), upfrontPaymentAmountRow).collect { case Some(s) => s }
+              val canPayWithinSixMonthsRow = SummaryRow(
+                "Can you pay within 6 months?",
+                canPayWithinSixMonths,
+                PageUrls.checkPaymentPlanChangeUrl("CanPayWithinSixMonths")
+              )
+
+              val expectedSummaryRows = List(
+                Some(whyCannotPayInFullRow),
+                Some(canPayUpfrontRow),
+                upfrontPaymentAmountRow,
+                Some(canPayWithinSixMonthsRow)
+              ).collect { case Some(s) => s }
 
               extractSummaryRows(upfrontPaymentSummaryRows) shouldBe expectedSummaryRows
             }
@@ -138,7 +160,12 @@ class PaymentScheduleControllerSpec extends ItSpec {
                 val summaries = doc.select(".govuk-summary-list").iterator().asScala.toList
                 summaries.size shouldBe 2
 
-                testUpfrontPaymentSummaryRows(summaries(0))(canPayUpfrontValue, upfrontPaymentAmountValue)
+                testUpfrontPaymentSummaryRows(summaries(0))(
+                  canPayUpfrontValue,
+                  upfrontPaymentAmountValue,
+                  List("Bankrupt, Insolvent or Voluntary arrangement"),
+                  canPayWithinSixMonths = "Yes"
+                )
                 testPaymentPlanRows(summaries(1))("£300", paymentDayValue, datesToAmountsValues, totalToPayValue)
               }
 
@@ -283,6 +310,14 @@ class PaymentScheduleControllerSpec extends ItSpec {
 
             "PaymentPlan" in {
               test("PaymentPlan", routes.InstalmentsController.instalmentOptions)
+            }
+
+            "WhyCannotPayInFull" in {
+              test("WhyCannotPayInFull", routes.WhyCannotPayInFullController.whyCannotPayInFull)
+            }
+
+            "CanPayWithinSixMonths" in {
+              test("CanPayWithinSixMonths", routes.CanPayWithinSixMonthsController.canPayWithinSixMonths)
             }
 
           }

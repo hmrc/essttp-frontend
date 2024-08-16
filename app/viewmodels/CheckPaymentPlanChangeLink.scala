@@ -43,6 +43,14 @@ object CheckPaymentPlanChangeLink extends Enum[CheckPaymentPlanChangeLink] {
     lazy val targetPage: Call = routes.PaymentDayController.paymentDay
   }
 
+  case object WhyCannotPayInFull extends CheckPaymentPlanChangeLink {
+    lazy val targetPage: Call = routes.WhyCannotPayInFullController.whyCannotPayInFull
+  }
+
+  case object CanPayWithinSixMonths extends CheckPaymentPlanChangeLink {
+    lazy val targetPage: Call = routes.CanPayWithinSixMonthsController.canPayWithinSixMonths
+  }
+
   case object PaymentPlan extends CheckPaymentPlanChangeLink {
     lazy val targetPage: Call = routes.InstalmentsController.instalmentOptions
   }
