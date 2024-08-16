@@ -107,24 +107,28 @@
       case CanPayWithinSixMonthsAnswers.AnswerNotRequired => None
       case CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths(answer) => Some(answer)
     }
-  SummaryListRow(
-    key = Key(
-      content = HtmlContent(Html(Messages.CanPayWithinSixMonths.`Can you pay within 6 months?`.show)),
-      classes = "govuk-!-width-one-half"
-    ),
-    value = Value(
-      content = Text(canPayWithinSixMonths.fold(Messages.`No`)(_ => Messages.`Yes`).show)
-    ),
-    actions = Some(Actions(
-      items = Seq(
-        ActionItem(
-          href = CheckPaymentPlanChangeLink.CanPayWithinSixMonths.changeLink.url,
-          content = Text(Messages.change.show),
-          visuallyHiddenText = Some(Messages.CanPayWithinSixMonths.`Can you pay within 6 months?`.show)
+
+  canPayWithinSixMonths.map {
+    canPay =>
+    SummaryListRow(
+      key = Key(
+        content = HtmlContent(Html(Messages.CanPayWithinSixMonths.`Can you pay within 6 months?`.show)),
+        classes = "govuk-!-width-one-half"
+      ),
+      value = Value(
+        content = Text((if(canPay){Messages.`Yes`} else Messages.`No`).show)
+      ),
+      actions = Some(Actions(
+        items = Seq(
+          ActionItem(
+            href = CheckPaymentPlanChangeLink.CanPayWithinSixMonths.changeLink.url,
+            content = Text(Messages.change.show),
+            visuallyHiddenText = Some(Messages.CanPayWithinSixMonths.`Can you pay within 6 months?`.show)
+          )
         )
-      )
-    ))
-  )
+      ))
+    )
+  }
 }
 
 @whyCannotPayInFullBullets(reasons: Set[CannotPayReason]) = {
@@ -254,10 +258,7 @@
     @title
   </h1>
 
-@if(request.journey.affordabilityEnabled.getOrElse(false)) {
-  @govukSummaryList(SummaryList(rows = whyCannotPayInFullRow.toList ::: upfrontPaymentRows, classes = "govuk-!-margin-bottom-9"))
-  @govukSummaryList(SummaryList(rows = List(canPayWithinSixMonthsRow), classes = "govuk-!-margin-bottom-9"))
-} else { @govukSummaryList(SummaryList(rows = upfrontPaymentRows, classes = "govuk-!-margin-bottom-9")) }
+  @govukSummaryList(SummaryList(rows = whyCannotPayInFullRow.toList ::: upfrontPaymentRows ::: canPayWithinSixMonthsRow.toList, classes = "govuk-!-margin-bottom-9"))
 
   <h2 class="govuk-heading-m">
     @{Messages.PaymentSchedule.`Monthly payments`.show}
