@@ -16,8 +16,8 @@
 
 package models.forms
 
-import models.Language
 import messages.Messages
+import models.Language
 import models.enumsforforms.CanPayUpfrontFormValue
 import play.api.data.Forms.mapping
 import play.api.data.{Form, Forms, Mapping}

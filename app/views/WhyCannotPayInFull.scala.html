@@ -15,20 +15,20 @@
  *@
 
 @import controllers.routes
-@import messages.Messages
 @import essttp.rootmodel.CannotPayReason
-@import play.api.mvc.Request
+@import messages.Messages
 @import play.api.data.Form
+@import play.api.mvc.Request
 @import requests.RequestSupport
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-layout: templates.Layout,
-govukButton: GovukButton,
-govukCheckboxes: GovukCheckboxes,
-formWithCSRF: FormWithCSRF,
-govukErrorSummary: GovukErrorSummary,
-requestSupport: RequestSupport
+  layout: templates.Layout,
+  govukButton: GovukButton,
+  govukCheckboxes: GovukCheckboxes,
+  formWithCSRF: FormWithCSRF,
+  govukErrorSummary: GovukErrorSummary,
+  requestSupport: RequestSupport
 )
 
 @(form: Form[Set[CannotPayReason]])(implicit request: Request[_])

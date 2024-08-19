@@ -16,7 +16,7 @@
 
 package models.bars.request
 
-import play.api.libs.json.{OFormat, Json}
+import play.api.libs.json.{Json, OFormat}
 
 final case class BarsSubject(
     title:     Option[String], // e.g. "Mr" etc; must >= 2 character and <= 35 characters long

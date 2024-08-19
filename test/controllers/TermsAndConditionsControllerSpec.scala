@@ -23,14 +23,11 @@ import org.jsoup.nodes.Document
 import play.api.http.Status
 import play.api.libs.json.{JsBoolean, JsObject, Json}
 import play.api.mvc.Result
-import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.{ItSpec, JsonUtils}
-import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.EssttpBackend
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
-import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
 
@@ -54,7 +51,6 @@ class TermsAndConditionsControllerSpec extends ItSpec {
             def test(stubActions: () => Unit)(extraContentChecks: Document => Unit): Unit = {
               stubActions()
 
-              val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
               val result: Future[Result] = controller.termsAndConditions(fakeRequest)
               val pageContent: String = contentAsString(result)
               val doc: Document = Jsoup.parse(pageContent)
@@ -148,8 +144,6 @@ class TermsAndConditionsControllerSpec extends ItSpec {
               JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = false, origin, Some(TdAll.etmpEmail))
             )
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
             val result: Future[Result] = controller.termsAndConditionsSubmit(fakeRequest)
             status(result) shouldBe Status.SEE_OTHER
             redirectLocation(result) shouldBe Some(PageUrls.submitArrangementUrl)
@@ -165,8 +159,6 @@ class TermsAndConditionsControllerSpec extends ItSpec {
                 JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = true, origin, Some(TdAll.etmpEmail))
               )
 
-              val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
               val result: Future[Result] = controller.termsAndConditionsSubmit(fakeRequest)
               status(result) shouldBe Status.SEE_OTHER
               redirectLocation(result) shouldBe Some(PageUrls.whichEmailDoYouWantToUseUrl)
@@ -181,8 +173,6 @@ class TermsAndConditionsControllerSpec extends ItSpec {
                 TdAll.journeyId,
                 JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = true, origin, None)
               )
-
-              val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
               val result: Future[Result] = controller.termsAndConditionsSubmit(fakeRequest)
               status(result) shouldBe Status.SEE_OTHER
@@ -216,8 +206,6 @@ class TermsAndConditionsControllerEmailDisabledSpec extends ItSpec {
               TdAll.journeyId,
               JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddresRequired = false, origin = origin, etmpEmail = Some(TdAll.etmpEmail))
             )
-
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
             val result: Future[Result] = controller.termsAndConditionsSubmit(fakeRequest)
             status(result) shouldBe Status.SEE_OTHER

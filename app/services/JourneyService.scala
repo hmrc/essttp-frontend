@@ -18,15 +18,15 @@ package services
 
 import com.google.inject.{Inject, Singleton}
 import essttp.journey.JourneyConnector
-import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Journey, JourneyId}
-import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
-import essttp.rootmodel.ttp.affordability.InstalmentAmounts
-import essttp.rootmodel.ttp.affordablequotes.{AffordableQuotesResponse, PaymentPlan}
-import essttp.rootmodel.ttp.arrangement.ArrangementResponse
+import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Journey, JourneyId, PaymentPlanAnswers}
 import essttp.rootmodel.bank.{BankDetails, DetailsAboutBankAccount}
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
 import essttp.rootmodel.dates.startdates.StartDatesResponse
-import essttp.rootmodel.{CanPayUpfront, DayOfMonth, Email, EmpRef, IsEmailAddressRequired, MonthlyPaymentAmount, SaUtr, UpfrontPaymentAmount, Vrn}
+import essttp.rootmodel.ttp.affordability.InstalmentAmounts
+import essttp.rootmodel.ttp.affordablequotes.{AffordableQuotesResponse, PaymentPlan}
+import essttp.rootmodel.ttp.arrangement.ArrangementResponse
+import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
+import essttp.rootmodel._
 import paymentsEmailVerification.models.EmailVerificationResult
 import play.api.mvc.RequestHeader
 import util.Logging
@@ -85,8 +85,8 @@ class JourneyService @Inject() (journeyConnector: JourneyConnector) extends Logg
   def updateChosenPaymentPlan(journeyId: JourneyId, paymentPlan: PaymentPlan)(implicit requestHeader: RequestHeader): Future[Journey] =
     journeyConnector.updateChosenPaymentPlan(journeyId, paymentPlan)
 
-  def updateHasCheckedPaymentPlan(journeyId: JourneyId)(implicit requestHeader: RequestHeader): Future[Journey] =
-    journeyConnector.updateHasCheckedPaymentPlan(journeyId)
+  def updateHasCheckedPaymentPlan(journeyId: JourneyId, paymentPlanAnswers: PaymentPlanAnswers)(implicit requestHeader: RequestHeader): Future[Journey] =
+    journeyConnector.updateHasCheckedPaymentPlan(journeyId, paymentPlanAnswers)
 
   def updateDetailsAboutBankAccount(journeyId: JourneyId, detailsAboutBankAccount: DetailsAboutBankAccount)(implicit requestHeader: RequestHeader): Future[Journey] =
     journeyConnector.updateDetailsAboutBankAccount(journeyId, detailsAboutBankAccount)

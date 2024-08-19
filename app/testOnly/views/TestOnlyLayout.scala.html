@@ -14,18 +14,15 @@
  * limitations under the License.
  *@
 
-@import config.AppConfig
-@import views.html.helper.CSPNonce
-@import uk.gov.hmrc.govukfrontend.views.html.components._
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
-
 @import actionsmodel.JourneyRequest
-@import essttp.rootmodel.TaxRegime
+@import config.AppConfig
+@import messages.Messages
 @import play.api.mvc.Request
 @import play.twirl.api.Html
-
 @import requests.RequestSupport
-@import messages.Messages
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
+@import views.html.helper.CSPNonce
 
 @this(
         appConfig: AppConfig,

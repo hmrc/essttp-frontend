@@ -14,13 +14,12 @@
  * limitations under the License.
  *@
 
-@import requests.RequestSupport
+@import controllers.routes
+@import essttp.rootmodel.{AmountInPence, UpfrontPaymentAmount}
 @import messages.Messages
 @import play.api.mvc.Request
 @import play.twirl.api.Html
-
-@import controllers.routes
-@import essttp.rootmodel.{AmountInPence, UpfrontPaymentAmount}
+@import requests.RequestSupport
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import viewmodels.UpfrontPaymentSummaryChangeLink
 
@@ -34,7 +33,6 @@
 @(upfrontPayment: UpfrontPaymentAmount, remainingAmountToPay: AmountInPence)(implicit request: Request[_])
 
 @import requestSupport._
-
 
 @title = @{
     Messages.UpfrontPaymentSummary.`Payment summary`.show

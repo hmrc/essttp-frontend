@@ -14,12 +14,11 @@
  * limitations under the License.
  *@
 
-@import requests.RequestSupport
+@import controllers.routes
 @import messages.Messages
 @import play.api.mvc.Request
-@import controllers.routes
-@import uk.gov.hmrc.govukfrontend.views.html.components.{Button, Text}
-@import uk.gov.hmrc.govukfrontend.views.html.components.GovukButton
+@import requests.RequestSupport
+@import uk.gov.hmrc.govukfrontend.views.html.components.{Button, GovukButton, Text}
 
 @this(
   layout: templates.Layout,
@@ -30,7 +29,6 @@
 @()(implicit request: Request[_])
 
 @import requestSupport._
-
 
 @title = @{Messages.MissingInformation.`Some information is missing`.show}
 

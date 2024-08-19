@@ -23,9 +23,9 @@ import models.bars.request._
 import models.bars.response.ValidateResponse.validateFailure
 import models.bars.response._
 import models.bars.{BarsTypeOfBankAccount, BarsTypesOfBankAccount}
-import util.HttpResponseUtils.HttpResponseOps
 import play.api.Logging
 import play.api.http.Status._
+import util.HttpResponseUtils.HttpResponseOps
 import play.api.libs.json._
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.{HttpResponse, UpstreamErrorResponse}

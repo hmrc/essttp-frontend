@@ -16,8 +16,8 @@
 
 package models.enumsforforms
 
-import essttp.rootmodel.CanPayUpfront
 import enumeratum.Enum
+import essttp.rootmodel.CanPayUpfront
 
 import scala.collection.immutable
 

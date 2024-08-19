@@ -19,7 +19,8 @@ package controllers
 import actions.Actions
 import controllers.JourneyFinalStateCheck.finalStateCheckF
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
-import essttp.journey.model.Journey
+import essttp.journey.model.{Journey, PaymentPlanAnswers}
+import essttp.utils.Errors
 import play.api.mvc._
 import services.{DatesService, JourneyService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -62,16 +63,24 @@ class DatesApiController @Inject() (
   val retrieveStartDates: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     request.journey match {
       case j: Journey.BeforeEnteredDayOfMonth => logErrorAndRouteToDefaultPageF(j)
-      case j: Journey.AfterEnteredDayOfMonth  => finalStateCheckF(j, getStartDatesAndUpdateJourney(j))
+      case _: Journey.AfterStartedPegaCase    => Errors.throwServerErrorException("Not expecting to retrieve start dates when started PEGA case")
+      case j: Journey.AfterEnteredDayOfMonth  => finalStateCheckF(j, getStartDatesAndUpdateJourney(Left(j)))
+      case j: Journey.AfterCheckedPaymentPlan =>
+        j.paymentPlanAnswers match {
+          case p: PaymentPlanAnswers.PaymentPlanNoAffordability =>
+            finalStateCheckF(j, getStartDatesAndUpdateJourney(Right(j -> p)))
+          case _: PaymentPlanAnswers.PaymentPlanAfterAffordability =>
+            Errors.throwServerErrorException("Not expecting to retrieve start dates after checked payment plan on affordability journey")
+        }
     }
   }
 
-  def getStartDatesAndUpdateJourney(
-      journey: Journey.AfterEnteredDayOfMonth
+  private def getStartDatesAndUpdateJourney(
+      journey: Either[Journey.AfterEnteredDayOfMonth, (Journey.AfterCheckedPaymentPlan, PaymentPlanAnswers.PaymentPlanNoAffordability)]
   )(implicit request: Request[_]): Future[Result] = {
     for {
       startDatesResponse <- datesService.startDates(journey)
-      updatedJourney <- journeyService.updateStartDates(journey.id, startDatesResponse)
+      updatedJourney <- journeyService.updateStartDates(journey.map(_._1).merge.id, startDatesResponse)
     } yield Routing.redirectToNext(routes.DatesApiController.retrieveStartDates, updatedJourney, submittedValueUnchanged = false)
   }
 

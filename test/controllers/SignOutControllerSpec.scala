@@ -21,13 +21,10 @@ import essttp.rootmodel.TaxRegime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.mvc.{Result, Session}
-import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
-import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.EssttpBackend
-import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
 
@@ -38,7 +35,6 @@ class SignOutControllerSpec extends ItSpec {
   "signOutFromTimeout should" - {
 
     "return the timed out page" in {
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
       val result: Future[Result] = controller.signOutFromTimeout(fakeRequest)
       val pageContent: String = contentAsString(result)
@@ -61,8 +57,6 @@ class SignOutControllerSpec extends ItSpec {
       stubCommonActions()
       EssttpBackend.SubmitArrangement.findJourney(Origins.Epaye.Bta, testCrypto)()
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
       val result: Future[Result] = controller.exitSurveyPaye(fakeRequest)
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("http://localhost:9514/feedback/eSSTTP-PAYE")
@@ -75,8 +69,6 @@ class SignOutControllerSpec extends ItSpec {
       stubCommonActions()
       EssttpBackend.SubmitArrangement.findJourney(Origins.Epaye.Bta, testCrypto)()
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
       val result: Future[Result] = controller.exitSurveyVat(fakeRequest)
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("http://localhost:9514/feedback/eSSTTP-VAT")
@@ -88,8 +80,6 @@ class SignOutControllerSpec extends ItSpec {
     "redirect to feedback frontend with eSSTTP-SA as the service identifier" in {
       stubCommonActions()
       EssttpBackend.SubmitArrangement.findJourney(Origins.Sa.Bta, testCrypto)()
-
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
       val result: Future[Result] = controller.exitSurveySa(fakeRequest)
       status(result) shouldBe SEE_OTHER
@@ -110,7 +100,6 @@ class SignOutControllerSpec extends ItSpec {
         stubCommonActions()
         EssttpBackend.StartJourney.findJourney(origin)
 
-        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
         val result: Future[Result] = controller.signOut(fakeRequest)
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(expectedRedirectLocation)

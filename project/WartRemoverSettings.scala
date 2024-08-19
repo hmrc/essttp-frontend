@@ -1,6 +1,6 @@
 import play.sbt.routes.RoutesKeys.routes
-import sbt._
-import sbt.Keys._
+import sbt.*
+import sbt.Keys.*
 import wartremover.Wart
 import wartremover.WartRemover.autoImport.{Warts, wartremoverErrors, wartremoverExcluded}
 

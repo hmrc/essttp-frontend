@@ -23,14 +23,12 @@ import org.jsoup.nodes.{Document, Element}
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{Call, Result, Session}
-import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
-import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
-import uk.gov.hmrc.http.SessionKeys
+import uk.gov.hmrc.http.UpstreamErrorResponse
 
 import scala.concurrent.Future
 import scala.jdk.CollectionConverters.IteratorHasAsScala
@@ -142,8 +140,6 @@ class PaymentScheduleControllerSpec extends ItSpec {
                 stubCommonActions()
                 EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin)(journeyJsonBody)
 
-                val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
                 val result: Future[Result] = controller.checkPaymentSchedule(fakeRequest)
                 val pageContent: String = contentAsString(result)
                 val doc: Document = Jsoup.parse(pageContent)
@@ -204,11 +200,37 @@ class PaymentScheduleControllerSpec extends ItSpec {
             stubCommonActions()
             EssttpBackend.AffordableQuotes.findJourney(testCrypto, origin)()
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
             val result: Future[Result] = controller.checkPaymentSchedule(fakeRequest)
             status(result) shouldBe SEE_OTHER
             redirectLocation(result) shouldBe Some(routes.MissingInfoController.missingInfo.url)
+
+          }
+
+          s"[regime $regime] return an error when" - {
+
+            "the journey is in state" - {
+
+              "AfterStartedPegaCase" in {
+                stubCommonActions()
+                EssttpBackend.StartedPegaCase.findJourney(testCrypto, origin)()
+
+                val exception = intercept[UpstreamErrorResponse](await(controller.checkPaymentSchedule(fakeRequest)))
+
+                exception.statusCode shouldBe INTERNAL_SERVER_ERROR
+                exception.message shouldBe "Not expecting to check payment plan here when started PEGA case"
+              }
+
+              "AfterCheckedPaymentPlan on an affordability journey" in {
+                stubCommonActions()
+                EssttpBackend.HasCheckedPlan.findJourney(withAffordability = true, testCrypto, origin)()
+
+                val exception = intercept[UpstreamErrorResponse](await(controller.checkPaymentSchedule(fakeRequest)))
+
+                exception.statusCode shouldBe INTERNAL_SERVER_ERROR
+                exception.message shouldBe "Not expecting to check payment plan here on affordability journey"
+              }
+
+            }
 
           }
         }
@@ -225,9 +247,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
                   regimeDigitalCorrespondence    = false
                 )
               )
-              EssttpBackend.HasCheckedPlan.stubUpdateHasCheckedPlan(TdAll.journeyId, JourneyJsonTemplates.`Has Checked Payment Plan`(origin))
-
-              val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+              EssttpBackend.HasCheckedPlan.stubUpdateHasCheckedPlan(TdAll.journeyId, JourneyJsonTemplates.`Has Checked Payment Plan - No Affordability`(origin))
 
               val result: Future[Result] = controller.checkPaymentScheduleSubmit(fakeRequest)
               status(result) shouldBe Status.SEE_OTHER
@@ -269,11 +289,37 @@ class PaymentScheduleControllerSpec extends ItSpec {
                 ).as[JsObject]
               )
             }
+
+          s"[regime $regime] return an error when" - {
+
+            "the journey is in state" - {
+
+              "AfterStartedPegaCase" in {
+                stubCommonActions()
+                EssttpBackend.StartedPegaCase.findJourney(testCrypto, origin)()
+
+                val exception = intercept[UpstreamErrorResponse](await(controller.checkPaymentScheduleSubmit(fakeRequest)))
+
+                exception.statusCode shouldBe INTERNAL_SERVER_ERROR
+                exception.message shouldBe "Not expecting to check payment plan here when started PEGA case"
+              }
+
+              "AfterCheckedPaymentPlan on an affordability journey" in {
+                stubCommonActions()
+                EssttpBackend.HasCheckedPlan.findJourney(withAffordability = true, testCrypto, origin)()
+
+                val exception = intercept[UpstreamErrorResponse](await(controller.checkPaymentScheduleSubmit(fakeRequest)))
+
+                exception.statusCode shouldBe INTERNAL_SERVER_ERROR
+                exception.message shouldBe "Not expecting to check payment plan here on affordability journey"
+              }
+
+            }
+
+          }
         }
 
         "GET /check-payment-plan/change" - {
-
-          val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
           s"[$regime journey] should redirect to the correct page and update the cookie session with the pageId" - {
 

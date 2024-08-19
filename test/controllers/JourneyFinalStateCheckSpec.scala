@@ -20,13 +20,10 @@ import essttp.journey.model.Origins
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.http.Status
 import play.api.mvc.{Action, AnyContent}
-import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
-import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.EssttpBackend
 import testsupport.testdata.PageUrls
-import uk.gov.hmrc.http.SessionKeys
 
 class JourneyFinalStateCheckSpec extends ItSpec {
   "Controllers using finalStateCheck(F) should route user to confirmation page when their journey is in completed state" - {
@@ -57,8 +54,6 @@ class JourneyFinalStateCheckSpec extends ItSpec {
           s"GET $scenario should redirect to ${PageUrls.epayeConfirmationUrl}" in {
             stubCommonActions()
             EssttpBackend.SubmitArrangement.findJourney(Origins.Epaye.Bta, testCrypto)()
-
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
             val result = action(fakeRequest)
             status(result) shouldBe Status.SEE_OTHER

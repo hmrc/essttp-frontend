@@ -14,16 +14,16 @@
  * limitations under the License.
  *@
 
-@import play.api.mvc.Request
-@import requests.RequestSupport
 @import messages.Messages
+@import play.api.mvc.Request
 @import play.twirl.api.Html
+@import requests.RequestSupport
 
 @this(requestSupport: RequestSupport)
 
 @()(implicit request: Request[_])
 
-@import requestSupport._
+ @import requestSupport._
 
 <h2 class="govuk-heading-m">@{Messages.ExtraSupport.`If you're calling from outside the UK`.show}</h2>
 

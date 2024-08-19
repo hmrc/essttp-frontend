@@ -16,11 +16,11 @@
 
 package controllers
 
-import _root_.actions.Actions
+import actions.Actions
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import controllers.MonthlyPaymentAmountController.{monthlyPaymentAmountForm, upfrontPaymentAnswersFromJourney}
-import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
+import essttp.journey.model.{Journey, PaymentPlanAnswers, UpfrontPaymentAnswers}
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import essttp.rootmodel.{AmountInPence, MonthlyPaymentAmount}
 import essttp.utils.Errors
@@ -84,9 +84,19 @@ class MonthlyPaymentAmountController @Inject() (
   }
 
   private def existingMonthlyPaymentAmount(journey: Journey): Option[MonthlyPaymentAmount] = journey match {
-    case _: Journey.BeforeEnteredMonthlyPaymentAmount => None
-    case j: Journey.AfterEnteredMonthlyPaymentAmount  => Some(j.monthlyPaymentAmount)
-
+    case _: Journey.BeforeEnteredMonthlyPaymentAmount =>
+      None
+    case j: Journey.AfterEnteredMonthlyPaymentAmount =>
+      Some(j.monthlyPaymentAmount)
+    case j: Journey.AfterCheckedPaymentPlan =>
+      j.paymentPlanAnswers match {
+        case p: PaymentPlanAnswers.PaymentPlanNoAffordability =>
+          Some(p.monthlyPaymentAmount)
+        case _: PaymentPlanAnswers.PaymentPlanAfterAffordability =>
+          Errors.throwServerErrorException("Trying to find monthly payment amount on affordability journey")
+      }
+    case _: Journey.AfterStartedPegaCase =>
+      Errors.throwServerErrorException("Trying to find monthly payment amount after stating PEGA case")
   }
 
   val monthlyPaymentAmountSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>

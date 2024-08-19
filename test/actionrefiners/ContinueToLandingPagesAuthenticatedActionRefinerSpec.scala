@@ -22,10 +22,8 @@ import play.api.http.Status
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
-import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.{AuthStub, EssttpBackend}
 import testsupport.testdata.PageUrls
-import uk.gov.hmrc.http.SessionKeys
 
 class ContinueToLandingPagesAuthenticatedActionRefinerSpec extends ItSpec {
 
@@ -35,7 +33,6 @@ class ContinueToLandingPagesAuthenticatedActionRefinerSpec extends ItSpec {
     "should return redirect to determine eligibility when tax id is already determined" in {
       AuthStub.authorise()
       EssttpBackend.DetermineTaxId.findJourney(Origins.Epaye.Bta)()
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.determineTaxId()(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.determineEligibilityUrl)
@@ -44,7 +41,6 @@ class ContinueToLandingPagesAuthenticatedActionRefinerSpec extends ItSpec {
     "redirect to not enrolled when user doesn't have the right enrolments (via AuthenticatedActionRefiner)" in {
       AuthStub.authorise(allEnrolments = Some(Set.empty))
       EssttpBackend.StartJourney.findJourney()
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.determineTaxId()(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.notEnrolledUrl)
@@ -63,7 +59,6 @@ class ContinueToLandingPagesAuthenticatedActionRefinerSpec extends ItSpec {
 
     "redirect to the which-tax-regime page when there is no session found in backend" in {
       AuthStub.authorise()
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.determineTaxId()(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.whichTaxRegimeUrl)

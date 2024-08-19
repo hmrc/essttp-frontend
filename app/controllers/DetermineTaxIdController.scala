@@ -32,7 +32,7 @@
 
 package controllers
 
-import _root_.actions.Actions
+import actions.Actions
 import essttp.journey.model.Journey
 import essttp.rootmodel.{TaxId, TaxRegime}
 import play.api.mvc._

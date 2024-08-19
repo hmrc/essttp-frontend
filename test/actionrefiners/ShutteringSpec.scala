@@ -24,19 +24,15 @@ import models.{Language, Languages}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.http.Status
-import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.ContentAssertions
 import testsupport.stubs.{AuthStub, EssttpBackend}
-import uk.gov.hmrc.http.SessionKeys
 
 trait ShutteringSpec { this: ItSpec =>
 
   lazy val appConfig = app.injector.instanceOf[AppConfig]
-
-  lazy val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
   def assertShutteringPageContent(
       doc:       Document,

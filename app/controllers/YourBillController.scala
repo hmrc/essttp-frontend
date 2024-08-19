@@ -16,7 +16,7 @@
 
 package controllers
 
-import _root_.actions.Actions
+import actions.Actions
 import cats.syntax.eq._
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage

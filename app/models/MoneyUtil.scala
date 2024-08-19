@@ -16,10 +16,10 @@
 
 package models
 
-import play.api.data.FormError
-import play.api.data.format.Formatter
 import cats.syntax.either._
 import cats.syntax.eq._
+import play.api.data.FormError
+import play.api.data.format.Formatter
 
 import scala.util.Try
 

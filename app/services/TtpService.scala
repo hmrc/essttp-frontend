@@ -24,7 +24,7 @@ import connectors.{CallEligibilityApiRequest, TtpConnector}
 import controllers.support.RequestSupport.hc
 import essttp.crypto.CryptoFormat
 import essttp.journey.model.Journey.Stages.ComputedTaxId
-import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
+import essttp.journey.model.{Journey, PaymentPlanAnswers, UpfrontPaymentAnswers}
 import essttp.rootmodel._
 import essttp.rootmodel.bank.AccountNumber
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
@@ -93,18 +93,19 @@ class TtpService @Inject() (
   }
 
   def determineAffordableQuotes(
-      journey:                Journey.AfterStartDatesResponse,
+      journey:                Either[Journey.AfterStartDatesResponse, (Journey.AfterCheckedPaymentPlan, PaymentPlanAnswers.PaymentPlanNoAffordability)],
       eligibilityCheckResult: EligibilityCheckResult
   )(implicit requestHeader: RequestHeader): Future[AffordableQuotesResponse] = {
-    val upfrontPaymentAnswers = TtpService.upfrontPaymentAnswersFromJourney(journey)
+    val journeyMerged = journey.map(_._1).merge
+    val upfrontPaymentAnswers = TtpService.upfrontPaymentAnswersFromJourney(journeyMerged)
     val initialPaymentAmount: Option[UpfrontPaymentAmount] = TtpService.deriveUpfrontPaymentAmount(upfrontPaymentAnswers)
-    val monthlyPaymentAmount = TtpService.monthlyPaymentAmountFromJourney(journey)
-    val startDatesResponse = journey.startDatesResponse
+    val monthlyPaymentAmount = journey.fold(TtpService.monthlyPaymentAmountFromJourney, _._2.monthlyPaymentAmount)
+    val startDatesResponse = journey.fold(_.startDatesResponse, _._2.startDatesResponse)
     val debtItemCharges = eligibilityCheckResult.chargeTypeAssessment.flatMap(toDebtItemCharge)
 
     val affordableQuotesRequest: AffordableQuotesRequest = AffordableQuotesRequest(
       channelIdentifier           = ChannelIdentifiers.eSSTTP,
-      regimeType                  = RegimeType.fromTaxRegime(journey.taxRegime),
+      regimeType                  = RegimeType.fromTaxRegime(journeyMerged.taxRegime),
       paymentPlanAffordableAmount = PaymentPlanAffordableAmount(monthlyPaymentAmount.value),
       paymentPlanFrequency        = PaymentPlanFrequencies.Monthly,
       paymentPlanMaxLength        = eligibilityCheckResult.paymentPlanMaxLength,
@@ -117,7 +118,7 @@ class TtpService @Inject() (
       customerPostcodes           = eligibilityCheckResult.customerPostcodes
     )
 
-    ttpConnector.callAffordableQuotesApi(affordableQuotesRequest, journey.correlationId)
+    ttpConnector.callAffordableQuotesApi(affordableQuotesRequest, journeyMerged.correlationId)
   }
 
   def submitArrangement(
@@ -128,7 +129,10 @@ class TtpService @Inject() (
   ): Future[ArrangementResponse] = {
     val taxRegime = journey.fold(_.taxRegime, _.taxRegime)
     val eligibilityCheckResult = journey.fold(_.eligibilityCheckResult, _.eligibilityCheckResult)
-    val selectedPaymentPlan = journey.fold(_.selectedPaymentPlan, _.selectedPaymentPlan)
+    val selectedPaymentPlan = journey.fold(_.paymentPlanAnswers, _.paymentPlanAnswers) match {
+      case p: PaymentPlanAnswers.PaymentPlanNoAffordability    => p.selectedPaymentPlan
+      case p: PaymentPlanAnswers.PaymentPlanAfterAffordability => p.selectedPaymentPlan
+    }
     val correlationId = journey.fold(_.correlationId, _.correlationId)
     val regimeDigitalCorrespondence = journey.fold(_.eligibilityCheckResult.regimeDigitalCorrespondence, _.eligibilityCheckResult.regimeDigitalCorrespondence)
     val customerDetail = journey.fold(_.eligibilityCheckResult.customerDetails, deriveCustomerDetail)
@@ -309,7 +313,7 @@ object TtpService {
     Some(List(customerDetail))
   }
 
-  private def upfrontPaymentAnswersFromJourney(journey: Journey.AfterStartDatesResponse): UpfrontPaymentAnswers = journey match {
+  private def upfrontPaymentAnswersFromJourney(journey: Journey): UpfrontPaymentAnswers = journey match {
     case j: Journey.AfterUpfrontPaymentAnswers => j.upfrontPaymentAnswers
     case _                                     => Errors.throwServerErrorException("Trying to get upfront payment answers for journey before they exist..")
   }

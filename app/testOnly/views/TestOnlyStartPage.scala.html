@@ -14,20 +14,18 @@
  * limitations under the License.
  *@
 
-@import play.api.mvc.Request
-@import uk.gov.hmrc.govukfrontend.views.html.components._
-@import testOnly.controllers.{routes => testOnlyRoutes}
-@import testOnly.models.formsmodel.StartJourneyForm
-@import play.api.data.Form
-@import requests.RequestSupport
-@import models.{EligibilityError, EligibilityErrors}
-@import essttp.journey.model.Origins
-@import essttp.rootmodel.TaxRegime
-@import testOnly.models.formsmodel.Enrolments
-@import testOnly.models.formsmodel.SignInAs
-@import testOnly.views.html.TestOnlyLayout
 @import cats.syntax.eq._
 @import config.AppConfig
+@import essttp.journey.model.Origins
+@import essttp.rootmodel.TaxRegime
+@import models.{EligibilityError, EligibilityErrors}
+@import play.api.data.Form
+@import play.api.mvc.Request
+@import requests.RequestSupport
+@import testOnly.controllers.{routes => testOnlyRoutes}
+@import testOnly.models.formsmodel.{Enrolments, SignInAs, StartJourneyForm}
+@import testOnly.views.html.TestOnlyLayout
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
 testOnlyLayout: TestOnlyLayout,

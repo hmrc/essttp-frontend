@@ -15,9 +15,9 @@
  *@
 
 @import config.AppConfig
-@import requests.RequestSupport
 @import messages.Messages
 @import play.api.mvc.Request
+@import requests.RequestSupport
 
 @this(
   layout: templates.Layout,
@@ -28,7 +28,6 @@
 @()(implicit request: Request[_])
 
 @import requestSupport._
-
 
 @title = @{Messages.TimeOut.`For your security, we signed you out`.show}
 

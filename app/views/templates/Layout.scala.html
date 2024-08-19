@@ -14,22 +14,18 @@
  * limitations under the License.
  *@
 
+@import actionsmodel.{AuthenticatedJourneyRequest, BarsLockedOutRequest}
 @import cats.syntax.eq._
 @import config.AppConfig
 @import controllers.routes
-@import views.html.helper.CSPNonce
-@import uk.gov.hmrc.govukfrontend.views.html.components.BackLink
-@import uk.gov.hmrc.govukfrontend.views.html.components._
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
-
-@import actionsmodel.AuthenticatedJourneyRequest
-@import actionsmodel.BarsLockedOutRequest
 @import essttp.rootmodel.TaxRegime
+@import messages.Messages
 @import play.api.mvc.RequestHeader
 @import play.twirl.api.Html
-
 @import requests.RequestSupport
-@import messages.Messages
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
+@import views.html.helper.CSPNonce
 
 @this(
         appConfig: AppConfig,
@@ -62,6 +58,7 @@
 )
 
 @import requestSupport._
+
 @showSignOut = @{ showSignOutOverride.getOrElse(RequestSupport.isLoggedIn) }
 
 @head = {

@@ -16,16 +16,15 @@
 
 package controllers
 
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.journey.model.{Origin, Origins}
 import play.api.http.Status
 import play.api.mvc.Result
-import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
-import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.{EssttpBackend, EssttpDates}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
-import uk.gov.hmrc.http.SessionKeys
+import uk.gov.hmrc.http.UpstreamErrorResponse
 
 import scala.concurrent.Future
 
@@ -46,7 +45,6 @@ class DatesApiControllerSpec extends ItSpec {
             EssttpDates.stubExtremeDatesCall()
             EssttpBackend.Dates.stubUpdateExtremeDates(TdAll.journeyId, JourneyJsonTemplates.`Retrieved Extreme Dates Response`(origin))
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result: Future[Result] = controller.retrieveExtremeDates(fakeRequest)
 
             status(result) shouldBe Status.SEE_OTHER
@@ -57,19 +55,64 @@ class DatesApiControllerSpec extends ItSpec {
         }
 
         "GET /retrieve-start-dates" - {
-          s"[$regime journey] should trigger call to essttp-dates microservice start dates endpoint and update backend" in {
-            stubCommonActions()
-            EssttpBackend.DayOfMonth.findJourney(TdAll.dayOfMonth(), testCrypto, origin)()
-            EssttpDates.stubStartDatesCall()
-            EssttpBackend.Dates.stubUpdateStartDates(TdAll.journeyId, JourneyJsonTemplates.`Retrieved Start Dates`(origin))
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-            val result: Future[Result] = controller.retrieveStartDates(fakeRequest)
+          s"[regime $regime] return an error when" - {
 
-            status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(PageUrls.determineAffordableQuotesUrl)
-            EssttpBackend.Dates.verifyUpdateStartDates(TdAll.journeyId, TdAll.startDatesResponse())
-            EssttpDates.verifyStartDates(TdAll.startDatesRequest(initialPayment = true, day = 28))
+            "the journey is in state" - {
+
+              "AfterStartedPegaCase" in {
+                stubCommonActions()
+                EssttpBackend.StartedPegaCase.findJourney(testCrypto, origin)()
+
+                val exception = intercept[UpstreamErrorResponse](await(controller.retrieveStartDates(fakeRequest)))
+
+                exception.statusCode shouldBe INTERNAL_SERVER_ERROR
+                exception.message shouldBe "Not expecting to retrieve start dates when started PEGA case"
+              }
+
+              "AfterCheckedPaymentPlan on an affordability journey" in {
+                stubCommonActions()
+                EssttpBackend.HasCheckedPlan.findJourney(withAffordability = true, testCrypto, origin)()
+
+                val exception = intercept[UpstreamErrorResponse](await(controller.retrieveStartDates(fakeRequest)))
+
+                exception.statusCode shouldBe INTERNAL_SERVER_ERROR
+                exception.message shouldBe "Not expecting to retrieve start dates after checked payment plan on affordability journey"
+              }
+
+            }
+
+          }
+
+          s"[$regime journey] should trigger call to essttp-dates microservice start dates endpoint and update backend when" - {
+
+              def test(stubFindJourney: () => StubMapping): Unit = {
+                stubCommonActions()
+                stubFindJourney()
+                EssttpDates.stubStartDatesCall()
+                EssttpBackend.Dates.stubUpdateStartDates(TdAll.journeyId, JourneyJsonTemplates.`Retrieved Start Dates`(origin))
+
+                val result: Future[Result] = controller.retrieveStartDates(fakeRequest)
+
+                status(result) shouldBe Status.SEE_OTHER
+                redirectLocation(result) shouldBe Some(PageUrls.determineAffordableQuotesUrl)
+                EssttpBackend.Dates.verifyUpdateStartDates(TdAll.journeyId, TdAll.startDatesResponse())
+                EssttpDates.verifyStartDates(TdAll.startDatesRequest(initialPayment = true, day = 28))
+                ()
+              }
+
+            "the user has entered the day of month but has not checked their payment plan yet" in {
+              test(
+                () => EssttpBackend.DayOfMonth.findJourney(TdAll.dayOfMonth(), testCrypto, origin)()
+              )
+            }
+
+            "the user has their checked payment plan on a non-affordability journey" in {
+              test(
+                () => EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, origin)()
+              )
+            }
+
           }
         }
     }

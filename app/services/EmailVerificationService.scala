@@ -19,14 +19,13 @@ package services
 import actionsmodel.EligibleJourneyRequest
 import com.google.inject.{Inject, Singleton}
 import config.AppConfig
-import paymentsEmailVerification.connectors.PaymentsEmailVerificationConnector
 import controllers.routes
 import essttp.rootmodel.Email
-import paymentsEmailVerification.models.api.GetEmailVerificationResultRequest
-import paymentsEmailVerification.models.EmailVerificationResult
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import messages.Messages
-import paymentsEmailVerification.models.api.{GetEarliestCreatedAtTimeResponse, StartEmailVerificationJourneyRequest, StartEmailVerificationJourneyResponse}
+import paymentsEmailVerification.connectors.PaymentsEmailVerificationConnector
+import paymentsEmailVerification.models.EmailVerificationResult
+import paymentsEmailVerification.models.api.{GetEarliestCreatedAtTimeResponse, GetEmailVerificationResultRequest, StartEmailVerificationJourneyRequest, StartEmailVerificationJourneyResponse}
 import requests.RequestSupport
 import uk.gov.hmrc.hmrcfrontend.config.ContactFrontendConfig
 import uk.gov.hmrc.http.HeaderCarrier

@@ -17,6 +17,7 @@
 package models.enumsforforms
 
 import enumeratum.Enum
+
 import scala.collection.immutable
 
 sealed trait IsSoleSignatoryFormValue extends enumeratum.EnumEntry {

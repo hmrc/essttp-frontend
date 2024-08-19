@@ -16,8 +16,8 @@
 
 package models.forms
 
-import essttp.rootmodel.ttp.eligibility.DebtTotalAmount
 import essttp.rootmodel.AmountInPence
+import essttp.rootmodel.ttp.eligibility.DebtTotalAmount
 import models.MoneyUtil.amountOfMoneyFormatter
 import play.api.data.Forms.mapping
 import play.api.data.{Form, Forms}
