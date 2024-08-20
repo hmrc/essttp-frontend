@@ -16,7 +16,7 @@
 
 package testOnly.controllers
 
-import _root_.actions.Actions
+import actions.Actions
 import essttp.crypto.CryptoFormat
 import play.api.libs.json.Json
 import play.api.mvc._

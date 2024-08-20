@@ -17,19 +17,14 @@
 package controllers
 
 import essttp.journey.model.Origins
-import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
-import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.EssttpBackend
-import testsupport.testdata.{JourneyJsonTemplates, TdAll}
-import uk.gov.hmrc.http.SessionKeys
+import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 
 class PegaControllerSpec extends ItSpec {
 
   lazy val controller = app.injector.instanceOf[PegaController]
-
-  val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
   "PegaController when" - {
 
@@ -98,6 +93,56 @@ class PegaControllerSpec extends ItSpec {
 
     }
 
+    "handling callbacks must" - {
+
+      "return an error when" - {
+
+        "the user has not started a PEGA case yet" in {
+          stubCommonActions()
+          EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, Origins.Epaye.Bta)()
+
+          val exception = intercept[Exception](await(controller.callback(fakeRequest)))
+          exception.getMessage should include("Cannot get PEGA case when journey is in state essttp.journey.model.Journey.Epaye.RetrievedAffordabilityResult")
+        }
+
+        "the user has checked their payment plan but is not on an affordability journey" in {
+          stubCommonActions()
+          EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, Origins.Epaye.Bta)()
+
+          val exception = intercept[Exception](await(controller.callback(fakeRequest)))
+          exception.getMessage should include("Trying to get PEGA case on non-affordability journey")
+
+        }
+
+        "there is a problem getting the case" in {
+          stubCommonActions()
+          EssttpBackend.StartedPegaCase.findJourney(testCrypto, Origins.Epaye.Bta)()
+          EssttpBackend.Pega.stubGetCase(TdAll.journeyId, Left(501))
+
+          val exception = intercept[Exception](await(controller.callback(fakeRequest)))
+          exception.getMessage should include("returned 501")
+        }
+      }
+
+      "get a case, update the journey and redirect to the next page" in {
+        stubCommonActions()
+        EssttpBackend.StartedPegaCase.findJourney(testCrypto, Origins.Epaye.Bta)()
+        EssttpBackend.Pega.stubGetCase(TdAll.journeyId, Right(TdAll.pegaGetCaseResponse))
+        EssttpBackend.HasCheckedPlan.stubUpdateHasCheckedPlan(
+          TdAll.journeyId,
+          JourneyJsonTemplates.`Has Checked Payment Plan - With Affordability`(Origins.Epaye.Bta)(testCrypto)
+        )
+
+        val result = controller.callback(fakeRequest)
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(PageUrls.aboutYourBankAccountUrl)
+
+        EssttpBackend.Pega.verifyGetCaseCalled(TdAll.journeyId)
+        EssttpBackend.HasCheckedPlan.verifyUpdateHasCheckedPlanRequest(TdAll.journeyId)
+      }
+
+    }
+
   }
 
 }
@@ -111,8 +156,6 @@ class PegaControllerRedirectInConfigSpec extends ItSpec {
   )
 
   lazy val controller = app.injector.instanceOf[PegaController]
-
-  val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
   "PegaController when" - {
 

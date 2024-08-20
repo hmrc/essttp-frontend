@@ -16,12 +16,12 @@
 
 package models.forms
 
-import models.enumsforforms.{IsSoleSignatoryFormValue, TypeOfAccountFormValue}
-import play.api.data.{Form, Forms, Mapping}
-import play.api.data.Forms.mapping
-import util.EnumFormatter
-import models.Language
 import messages.Messages
+import models.Language
+import models.enumsforforms.{IsSoleSignatoryFormValue, TypeOfAccountFormValue}
+import play.api.data.Forms.mapping
+import play.api.data.{Form, Forms, Mapping}
+import util.EnumFormatter
 
 final case class DetailsAboutBankAccountForm(typeOfAccount: TypeOfAccountFormValue, isSoleSignatory: IsSoleSignatoryFormValue)
 

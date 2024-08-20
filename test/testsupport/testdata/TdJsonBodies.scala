@@ -531,6 +531,33 @@ object TdJsonBodies {
        |               }
        |""".stripMargin
 
+  def paymentPlanAnswers(withAffordability: Boolean): String =
+    if (withAffordability) {
+      s"""
+         | "paymentPlanAnswers": {
+         |   "PaymentPlanAfterAffordability": {
+         |     "startCaseResponse": {
+         |       "caseId": "case",
+         |       "assignmentId": "assignment"
+         |     },
+         |     $selectedPlanJourneyInfo
+         |   }
+         | }
+         |""".stripMargin
+    } else {
+      s"""
+         | "paymentPlanAnswers": {
+         |   "PaymentPlanNoAffordability": {
+         |     $monthlyPaymentAmountJourneyInfo,
+         |     ${dayOfMonthJourneyInfo(DayOfMonth(28))},
+         |     $startDatesJourneyInfo,
+         |     $affordableQuotesJourneyInfo,
+         |     $selectedPlanJourneyInfo
+         |   }
+         | }
+         |""".stripMargin
+    }
+
   def detailsAboutBankAccountJourneyInfo(typeOfAccount: String = "Business", isAccountHolder: Boolean = true): String =
     s"""
        |"detailsAboutBankAccount": {

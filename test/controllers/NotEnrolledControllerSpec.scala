@@ -20,13 +20,11 @@ import essttp.rootmodel.TaxRegime
 import models.Languages
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.EssttpBackend
-import uk.gov.hmrc.http.SessionKeys
 
 import scala.jdk.CollectionConverters.IterableHasAsScala
 
@@ -39,8 +37,6 @@ class NotEnrolledControllerSpec extends ItSpec {
     "return the not enrolled page in English" in {
       stubCommonActions(authAllEnrolments = Some(Set.empty))
       EssttpBackend.StartJourney.findJourney()
-
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
       val result = controller.notEnrolled(fakeRequest)
       val page: Document = Jsoup.parse(contentAsString(result))
@@ -60,8 +56,6 @@ class NotEnrolledControllerSpec extends ItSpec {
     "return the not enrolled page in Welsh" in {
       stubCommonActions(authAllEnrolments = Some(Set.empty))
       EssttpBackend.StartJourney.findJourney()
-
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
       val result = controller.notEnrolled(fakeRequest.withLangWelsh())
       val page: Document = Jsoup.parse(contentAsString(result))
@@ -87,8 +81,6 @@ class NotEnrolledControllerSpec extends ItSpec {
       stubCommonActions(authAllEnrolments = Some(Set.empty))
       EssttpBackend.StartJourney.findJourney(Origins.Vat.GovUk)
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
       val result = controller.notVatRegistered(fakeRequest)
       val page: Document = Jsoup.parse(contentAsString(result))
 
@@ -108,8 +100,6 @@ class NotEnrolledControllerSpec extends ItSpec {
     "return the not vat registered page in Welsh" in {
       stubCommonActions(authAllEnrolments = Some(Set.empty))
       EssttpBackend.StartJourney.findJourney(Origins.Vat.GovUk)
-
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
       val result = controller.notVatRegistered(fakeRequest.withLangWelsh())
       val page: Document = Jsoup.parse(contentAsString(result))
@@ -136,8 +126,6 @@ class NotEnrolledControllerSpec extends ItSpec {
       stubCommonActions(authAllEnrolments = Some(Set.empty))
       EssttpBackend.StartJourney.findJourney()
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
       val result = controller.notSaEnrolled(fakeRequest)
       val page: Document = Jsoup.parse(contentAsString(result))
 
@@ -160,8 +148,6 @@ class NotEnrolledControllerSpec extends ItSpec {
     "return the not enrolled page in Welsh" in {
       stubCommonActions(authAllEnrolments = Some(Set.empty))
       EssttpBackend.StartJourney.findJourney()
-
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
       val result = controller.notSaEnrolled(fakeRequest.withLangWelsh())
       val page: Document = Jsoup.parse(contentAsString(result))

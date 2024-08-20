@@ -25,13 +25,11 @@ import paymentsEmailVerification.models.EmailVerificationResult
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{Call, Result}
-import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
-import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend, Ttp}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
-import uk.gov.hmrc.http.{SessionKeys, UpstreamErrorResponse}
+import uk.gov.hmrc.http.UpstreamErrorResponse
 
 import java.util.Locale
 import scala.concurrent.Future
@@ -96,8 +94,6 @@ class SubmitArrangementControllerSpec extends ItSpec {
                       JourneyJsonTemplates.`Arrangement Submitted - with upfront payment and email`("bobross@joyofpainting.com", origin)
                     )
                     Ttp.EnactArrangement.stubEnactArrangement(taxRegime)()
-
-                    val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
                     val result: Future[Result] = controller.submitArrangement(fakeRequest)
                     status(result) shouldBe Status.SEE_OTHER
@@ -177,7 +173,6 @@ class SubmitArrangementControllerSpec extends ItSpec {
           stubCommonActions()
           journeyStubMapping()
 
-          val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
           val result = controller.submitArrangement(fakeRequest)
 
           status(result) shouldBe SEE_OTHER
@@ -226,8 +221,6 @@ class SubmitArrangementControllerSpec extends ItSpec {
       EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto, origin, None)(JourneyJsonTemplates.`Agreed Terms and Conditions - padded account number`(false, origin, None))
       EssttpBackend.SubmitArrangement.stubUpdateSubmitArrangement(TdAll.journeyId, JourneyJsonTemplates.`Arrangement Submitted - padded account number`(origin))
       Ttp.EnactArrangement.stubEnactArrangement(taxRegime)()
-
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
       val result: Future[Result] = controller.submitArrangement(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
@@ -288,8 +281,6 @@ class SubmitArrangementControllerSpec extends ItSpec {
       stubCommonActions()
       EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto, origin = Origins.Epaye.Bta, etmpEmail = Some(TdAll.etmpEmail))()
       Ttp.EnactArrangement.stubEnactArrangementFail()
-
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
       val result = controller.submitArrangement(fakeRequest)
       assertThrows[UpstreamErrorResponse](await(result))

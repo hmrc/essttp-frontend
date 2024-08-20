@@ -14,22 +14,21 @@
  * limitations under the License.
  *@
 
-@import config.AppConfig
 @import controllers.routes
-@import messages.Messages
 @import essttp.rootmodel.TaxRegime
-@import play.api.mvc.Request
+@import messages.Messages
 @import play.api.data.Form
+@import play.api.mvc.Request
 @import requests.RequestSupport
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-layout: templates.Layout,
-govukButton: GovukButton,
-govukRadios: GovukRadios,
-formWithCSRF: FormWithCSRF,
-govukErrorSummary: GovukErrorSummary,
-requestSupport: RequestSupport
+  layout: templates.Layout,
+  govukButton: GovukButton,
+  govukRadios: GovukRadios,
+  formWithCSRF: FormWithCSRF,
+  govukErrorSummary: GovukErrorSummary,
+  requestSupport: RequestSupport
 )
 
 @(form: Form[TaxRegime], saEnabled: Boolean)(implicit request: Request[_])

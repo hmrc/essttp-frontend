@@ -20,7 +20,7 @@ import com.google.inject.{Inject, Singleton}
 import essttp.journey.model.JourneyId
 import essttp.rootmodel.dates.extremedates.{ExtremeDatesRequest, ExtremeDatesResponse}
 import essttp.rootmodel.dates.startdates.{StartDatesRequest, StartDatesResponse}
-import essttp.rootmodel.pega.StartCaseResponse
+import essttp.rootmodel.pega.{GetCaseResponse, StartCaseResponse}
 import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
 import requests.RequestSupport._
@@ -38,7 +38,7 @@ class EssttpBackendConnector @Inject() (config: EssttpBackendConfig, httpClient:
 
   private val extremeDatesUrl: String = config.baseUrl + "/essttp-backend/extreme-dates"
 
-  private val startPegaCaseUrl: String = config.baseUrl + "/essttp-backend/pega-case"
+  private val pegaCaseUrl: String = config.baseUrl + "/essttp-backend/pega-case"
 
   def startDates(startDatesRequest: StartDatesRequest)(implicit request: RequestHeader): Future[StartDatesResponse] =
     httpClient.post(url"$startDatesUrl")
@@ -51,8 +51,12 @@ class EssttpBackendConnector @Inject() (config: EssttpBackendConfig, httpClient:
       .execute[ExtremeDatesResponse]
 
   def startPegaCase(journeyId: JourneyId)(implicit requestHeader: RequestHeader): Future[StartCaseResponse] =
-    httpClient.post(url"$startPegaCaseUrl/${journeyId.value}")
+    httpClient.post(url"$pegaCaseUrl/${journeyId.value}")
       .execute[StartCaseResponse]
+
+  def getPegaCase(journeyId: JourneyId)(implicit requestHeader: RequestHeader): Future[GetCaseResponse] =
+    httpClient.get(url"$pegaCaseUrl/${journeyId.value}")
+      .execute[GetCaseResponse]
 
 }
 

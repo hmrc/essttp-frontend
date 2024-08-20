@@ -18,14 +18,11 @@ package actionrefiners
 
 import controllers.YourBillController
 import play.api.http.Status
-import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
-import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.EssttpBackend.BarsVerifyStatusStub
 import testsupport.stubs.{AuthStub, EssttpBackend}
 import testsupport.testdata.PageUrls
-import uk.gov.hmrc.http.SessionKeys
 import java.time.Instant
 
 class BarsLockoutActionFilterSpec extends ItSpec {
@@ -39,7 +36,6 @@ class BarsLockoutActionFilterSpec extends ItSpec {
       EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
       BarsVerifyStatusStub.statusUnlocked()
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.yourBill(fakeRequest)
 
       status(result) shouldBe Status.OK
@@ -52,7 +48,6 @@ class BarsLockoutActionFilterSpec extends ItSpec {
       val expiry = Instant.now
       BarsVerifyStatusStub.statusLocked(expiry)
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.yourBill(fakeRequest)
 
       status(result) shouldBe Status.SEE_OTHER

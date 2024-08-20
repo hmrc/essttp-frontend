@@ -16,7 +16,7 @@
 
 package controllers
 
-import _root_.actions.Actions
+import actions.Actions
 import actionsmodel.EligibleJourneyRequest
 import config.AppConfig
 import essttp.journey.model.Journey.Stages
@@ -77,7 +77,7 @@ class PaymentPlanSetUpController @Inject() (
   }
 
   def displayConfirmationPage(journey: Journey.Stages.SubmittedArrangement)(implicit request: EligibleJourneyRequest[_]): Result = {
-    val firstPaymentDay = journey.selectedPaymentPlan.collections.regularCollections
+    val firstPaymentDay = journey.paymentPlanAnswers.selectedPaymentPlan.collections.regularCollections
       .sortBy(_.dueDate.value)
       .headOption.getOrElse(Errors.throwServerErrorException("There are no regular collection dates, this should never happen..."))
       .dueDate
@@ -125,15 +125,15 @@ class PaymentPlanSetUpController @Inject() (
         Ok(views.saPrintSummaryPage(
           paymentReference     = journey.arrangementResponse.customerReference.value,
           upfrontPaymentAmount = PaymentPlanSetUpController.deriveUpfrontPaymentFromAnswers(journey.upfrontPaymentAnswers),
-          dayOfMonth           = journey.dayOfMonth.value,
-          paymentPlan          = journey.selectedPaymentPlan
+          dayOfMonth           = journey.paymentPlanAnswers.dayOfMonth.value,
+          paymentPlan          = journey.paymentPlanAnswers.selectedPaymentPlan
         ))
       case _ =>
         Ok(views.printSummaryPage(
           paymentReference     = journey.arrangementResponse.customerReference.value,
           upfrontPaymentAmount = PaymentPlanSetUpController.deriveUpfrontPaymentFromAnswers(journey.upfrontPaymentAnswers),
-          dayOfMonth           = journey.dayOfMonth.value,
-          paymentPlan          = journey.selectedPaymentPlan
+          dayOfMonth           = journey.paymentPlanAnswers.dayOfMonth.value,
+          paymentPlan          = journey.paymentPlanAnswers.selectedPaymentPlan
         ))
     }
   }

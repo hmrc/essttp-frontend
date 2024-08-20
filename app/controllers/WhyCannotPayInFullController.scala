@@ -17,17 +17,17 @@
 package controllers
 
 import actions.Actions
-import cats.syntax.eq._
 import cats.syntax.either._
+import cats.syntax.eq._
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import essttp.journey.JourneyConnector
 import essttp.journey.model.{Journey, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.CannotPayReason
 import messages.Messages
 import models.Language
-import play.api.data.{Form, FormError}
 import play.api.data.Forms.{of, set}
 import play.api.data.format.Formatter
+import play.api.data.{Form, FormError}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import requests.RequestSupport
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController

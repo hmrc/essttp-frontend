@@ -17,8 +17,8 @@
 package actions
 
 import actions.EnrolmentDefResult.{EnrolmentNotFound, IdentifierNotFound, Inactive, Success}
-import essttp.rootmodel.{SaUtr, Vrn}
 import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
+import essttp.rootmodel.{SaUtr, Vrn}
 import uk.gov.hmrc.auth.core.Enrolments
 
 /**

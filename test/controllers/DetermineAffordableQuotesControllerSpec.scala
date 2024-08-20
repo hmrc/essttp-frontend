@@ -16,18 +16,17 @@
 
 package controllers
 
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.crypto.CryptoFormat
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.ttp.{PaymentPlanMaxLength, PaymentPlanMinLength}
 import play.api.http.Status
 import play.api.mvc.Result
-import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
-import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.{EssttpBackend, Ttp}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
-import uk.gov.hmrc.http.SessionKeys
+import uk.gov.hmrc.http.UpstreamErrorResponse
 
 import scala.concurrent.Future
 
@@ -42,27 +41,69 @@ class DetermineAffordableQuotesControllerSpec extends ItSpec {
   ).foreach {
       case (regime, origin) =>
         "GET /determine-affordable-quotes" - {
-          s"[$regime journey] trigger call to ttp microservice affordable quotes endpoint and update backend" in {
-            val journeyJson =
-              JourneyJsonTemplates.`Retrieved Start Dates`(origin, eligibilityMinPlanLength = 2, eligibilityMaxPlanLength = 24)(testCrypto)
 
-            val expectedAffordableQuotesRequest = TdAll.affordableQuotesRequest(origin.taxRegime).copy(
-              paymentPlanMinLength = PaymentPlanMinLength(2),
-              paymentPlanMaxLength = PaymentPlanMaxLength(24)
-            )
+          s"[regime $regime] return an error when" - {
 
-            stubCommonActions()
-            EssttpBackend.Dates.findJourneyStartDates(testCrypto, origin)(journeyJson)
-            Ttp.AffordableQuotes.stubRetrieveAffordableQuotes()
-            EssttpBackend.AffordableQuotes.stubUpdateAffordableQuotes(TdAll.journeyId, JourneyJsonTemplates.`Retrieved Affordable Quotes`(origin))
+            "the journey is in state" - {
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-            val result: Future[Result] = controller.retrieveAffordableQuotes(fakeRequest)
+              "AfterStartedPegaCase" in {
+                stubCommonActions()
+                EssttpBackend.StartedPegaCase.findJourney(testCrypto, origin)()
 
-            status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(PageUrls.instalmentsUrl)
-            Ttp.AffordableQuotes.verifyTtpAffordableQuotesRequest(origin.taxRegime)(expectedAffordableQuotesRequest)(CryptoFormat.NoOpCryptoFormat)
-            EssttpBackend.AffordableQuotes.verifyUpdateAffordableQuotesRequest(TdAll.journeyId)
+                val exception = intercept[UpstreamErrorResponse](await(controller.retrieveAffordableQuotes(fakeRequest)))
+
+                exception.statusCode shouldBe INTERNAL_SERVER_ERROR
+                exception.message shouldBe "Not expecting to retrieve affordable quotes when started PEGA case"
+              }
+
+              "AfterCheckedPaymentPlan on an affordability journey" in {
+                stubCommonActions()
+                EssttpBackend.HasCheckedPlan.findJourney(withAffordability = true, testCrypto, origin)()
+
+                val exception = intercept[UpstreamErrorResponse](await(controller.retrieveAffordableQuotes(fakeRequest)))
+
+                exception.statusCode shouldBe INTERNAL_SERVER_ERROR
+                exception.message shouldBe "Not expecting to retrieve affordable quotes when payment plan has been checked on affordability journey"
+              }
+
+            }
+
+          }
+
+          s"[$regime journey] trigger call to ttp microservice affordable quotes endpoint and update backend when" - {
+
+              def test(stubFindJourney: () => StubMapping): Unit = {
+                val expectedAffordableQuotesRequest = TdAll.affordableQuotesRequest(origin.taxRegime).copy(
+                  paymentPlanMinLength = PaymentPlanMinLength(2),
+                  paymentPlanMaxLength = PaymentPlanMaxLength(24)
+                )
+
+                stubCommonActions()
+                stubFindJourney()
+                Ttp.AffordableQuotes.stubRetrieveAffordableQuotes()
+                EssttpBackend.AffordableQuotes.stubUpdateAffordableQuotes(TdAll.journeyId, JourneyJsonTemplates.`Retrieved Affordable Quotes`(origin))
+
+                val result: Future[Result] = controller.retrieveAffordableQuotes(fakeRequest)
+
+                status(result) shouldBe Status.SEE_OTHER
+                redirectLocation(result) shouldBe Some(PageUrls.instalmentsUrl)
+                Ttp.AffordableQuotes.verifyTtpAffordableQuotesRequest(origin.taxRegime)(expectedAffordableQuotesRequest)(CryptoFormat.NoOpCryptoFormat)
+                EssttpBackend.AffordableQuotes.verifyUpdateAffordableQuotesRequest(TdAll.journeyId)
+              }
+
+            "the user has not checked their payment plan yet" in {
+              val journeyJson =
+                JourneyJsonTemplates.`Retrieved Start Dates`(origin, eligibilityMinPlanLength = 2, eligibilityMaxPlanLength = 24)(testCrypto)
+
+              test(() =>
+                EssttpBackend.Dates.findJourneyStartDates(testCrypto, origin)(journeyJson))
+            }
+
+            "the user has checked their payment plan on a non-affordability journey" in {
+              test(
+                () => EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, origin, eligibilityMinPlanLength = 2, eligibilityMaxPlanLength = 24)()
+              )
+            }
           }
         }
     }

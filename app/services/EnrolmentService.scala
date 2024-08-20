@@ -16,11 +16,11 @@
 
 package services
 
-import actions.{EnrolmentDef, EnrolmentDefResult}
 import actions.EnrolmentDefResult.{EnrolmentNotFound, IdentifierNotFound, Inactive, Success}
+import actions.{EnrolmentDef, EnrolmentDefResult}
 import actionsmodel.AuthenticatedJourneyRequest
 import essttp.journey.model.Journey
-import essttp.rootmodel.{EmpRef, SaUtr, TaxId, TaxRegime, Vrn}
+import essttp.rootmodel._
 import models.audit.eligibility.EnrollmentReasons
 import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.http.HeaderCarrier

@@ -19,14 +19,11 @@ package controllers
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Origins}
 import org.jsoup.Jsoup
 import play.api.mvc.Result
-import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
-import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.EssttpBackend
 import testsupport.testdata.{JourneyJsonTemplates, TdAll}
-import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
 import scala.jdk.CollectionConverters.CollectionHasAsScala
@@ -34,8 +31,6 @@ import scala.jdk.CollectionConverters.CollectionHasAsScala
 class CanPayWithinSixMonthsControllerSpec extends ItSpec {
 
   val controller = app.injector.instanceOf[CanPayWithinSixMonthsController]
-
-  val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
   "GET /paying-within-six-months should" - {
 

@@ -39,4 +39,14 @@ class PegaController @Inject() (
     }
   }
 
+  val callback: Action[AnyContent] = as.authenticatedJourneyAction.async{ implicit request =>
+    pegaService.getCase(request.journey).map{ _ =>
+      Routing.redirectToNext(
+        routes.PegaController.callback,
+        request.journey,
+        submittedValueUnchanged = true
+      )
+    }
+  }
+
 }

@@ -26,14 +26,12 @@ import org.jsoup.nodes.Document
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Result
-import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend}
 import testsupport.testdata.{JourneyInfo, JourneyJsonTemplates, PageUrls, StageInfo, TdAll, TdJsonBodies}
-import uk.gov.hmrc.http.SessionKeys
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -48,8 +46,6 @@ class YourBillControllerSpec extends ItSpec {
     "return your bill page for EPAYE for interest bearing charges" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Epaye.Bta)()
-
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
       val result: Future[Result] = controller.yourBill(fakeRequest)
       val pageContent: String = contentAsString(result)
@@ -77,8 +73,6 @@ class YourBillControllerSpec extends ItSpec {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourneyWithNoInterestBearingCharges(testCrypto, Origins.Epaye.Bta)()
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
       val result: Future[Result] = controller.yourBill(fakeRequest)
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
@@ -104,8 +98,6 @@ class YourBillControllerSpec extends ItSpec {
     "return your bill page for VAT for interest bearing charges" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Vat.Bta)()
-
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
       val result: Future[Result] = controller.yourBill(fakeRequest)
       val pageContent: String = contentAsString(result)
@@ -133,8 +125,6 @@ class YourBillControllerSpec extends ItSpec {
     "return your bill page for VAT for non-interest bearing charges" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourneyWithNoInterestBearingCharges(testCrypto, Origins.Vat.Bta)()
-
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
       val result: Future[Result] = controller.yourBill(fakeRequest)
       val pageContent: String = contentAsString(result)
@@ -183,8 +173,6 @@ class YourBillControllerSpec extends ItSpec {
         stubCommonActions()
         EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin)(journeyJson)
 
-        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
         val result: Future[Result] = controller.yourBill(fakeRequest)
         val pageContent: String = contentAsString(result)
         val doc: Document = Jsoup.parse(pageContent)
@@ -222,7 +210,6 @@ class YourBillControllerSpec extends ItSpec {
         stubCommonActions()
         EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin)(journeyJson)
 
-        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
         val result: Future[Result] = controller.yourBill(fakeRequest)
 
         status(result) shouldBe Status.SEE_OTHER
@@ -245,7 +232,6 @@ class YourBillControllerSpec extends ItSpec {
         stubCommonActions()
         EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin)(journeyJson)
 
-        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
         val result: Future[Result] = controller.yourBill(fakeRequest)
 
         status(result) shouldBe Status.SEE_OTHER
@@ -263,8 +249,6 @@ class YourBillControllerSpec extends ItSpec {
         WhyCannotPayInFullAnswers.AnswerNotRequired,
         JourneyJsonTemplates.`Why Cannot Pay in Full - Not Required`(Origins.Vat.Bta)(testCrypto)
       )
-
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
       val result = controller.yourBillSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
@@ -284,8 +268,6 @@ class YourBillControllerSpec extends ItSpec {
         )
       )
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
       val result = controller.yourBillSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.whyCannotPayInFull)
@@ -294,8 +276,6 @@ class YourBillControllerSpec extends ItSpec {
     "redirect to You already have a direct debit page when there is a ddInProgress" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourneyWithDdInProgress(testCrypto, Origins.Epaye.Bta)()
-
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
       val result = controller.yourBillSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
@@ -307,8 +287,6 @@ class YourBillControllerSpec extends ItSpec {
     "return You already have a direct debit page for charges with ddInProgress" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourneyWithDdInProgress(testCrypto, Origins.Epaye.Bta)()
-
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
       val result = controller.youAlreadyHaveDirectDebit(fakeRequest)
       val pageContent: String = contentAsString(result)
@@ -365,9 +343,7 @@ class YourBillControllerSpec extends ItSpec {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourneyWithDdInProgress(testCrypto, Origins.Epaye.Bta)()
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId").withLangWelsh()
-
-      val result = controller.youAlreadyHaveDirectDebit(fakeRequest)
+      val result = controller.youAlreadyHaveDirectDebit(fakeRequest.withLangWelsh())
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
 
@@ -427,8 +403,6 @@ class YourBillControllerSpec extends ItSpec {
         WhyCannotPayInFullAnswers.AnswerNotRequired,
         JourneyJsonTemplates.`Why Cannot Pay in Full - Not Required`(Origins.Vat.Bta)(testCrypto)
       )
-
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
       val result = controller.youAlreadyHaveDirectDebitSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER

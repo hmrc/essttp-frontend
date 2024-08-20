@@ -23,10 +23,10 @@ import essttp.crypto.CryptoFormat
 import essttp.journey.model.Journey.AfterEnteredDetailsAboutBankAccount
 import essttp.journey.model.Journey.Stages._
 import essttp.journey.model.{EmailVerificationAnswers, Journey, Origin}
-import essttp.rootmodel.{Email, GGCredId}
 import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount}
-import essttp.rootmodel.ttp.eligibility.{EligibilityCheckResult, EmailSource}
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
+import essttp.rootmodel.ttp.eligibility.{EligibilityCheckResult, EmailSource}
+import essttp.rootmodel.{Email, GGCredId}
 import essttp.utils.Errors
 import models.audit.bars._
 import models.audit.ddinprogress.DdInProgressAuditDetail
@@ -235,8 +235,9 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
     val status: Int = responseFromTtp.fold(_.responseCode, _ => Status.ACCEPTED)
 
     val directDebitDetails = journey.fold(_.directDebitDetails, _.directDebitDetails)
-    val selectedPaymentPlan = journey.fold(_.selectedPaymentPlan, _.selectedPaymentPlan)
-    val dayOfMonth = journey.fold(_.dayOfMonth, _.dayOfMonth)
+    val paymentPlanAnswers = journey.fold(_.paymentPlanAnswers, _.paymentPlanAnswers)
+    val selectedPaymentPlan = paymentPlanAnswers.selectedPaymentPlan
+    val dayOfMonth = paymentPlanAnswers.dayOfMonth
     val origin = journey.fold(_.origin, _.origin)
     val taxRegime = journey.fold(_.taxRegime, _.taxRegime)
     val eligibilityCheckResult = journey.fold(_.eligibilityCheckResult, _.eligibilityCheckResult)

@@ -16,7 +16,7 @@
 
 package models.bars.request
 
-import play.api.libs.json.{OFormat, Json}
+import play.api.libs.json.{Json, OFormat}
 
 final case class BarsBankAccount(
     sortCode:      String,

@@ -16,7 +16,7 @@
 
 package testOnly.controllers
 
-import _root_.actions.Actions
+import actions.Actions
 import essttp.crypto.CryptoFormat
 import essttp.journey.JourneyConnector
 import play.api.libs.json.Json

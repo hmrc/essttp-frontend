@@ -18,8 +18,8 @@ package rounding
 
 import controllers.MonthlyPaymentAmountController
 import essttp.rootmodel.AmountInPence
-import testsupport.UnitSpec
 import org.scalatest.prop.TableDrivenPropertyChecks._
+import testsupport.UnitSpec
 
 class RoundingSpec extends UnitSpec {
   "MonthlyPaymentAmountController.roundingForMinMax" - {

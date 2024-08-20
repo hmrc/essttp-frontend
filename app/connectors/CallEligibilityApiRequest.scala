@@ -19,8 +19,8 @@ package connectors
 import essttp.rootmodel.ttp.RegimeType
 import essttp.rootmodel.ttp.eligibility.{IdType, IdValue, Identification}
 import models.EligibilityReqIdentificationFlag
-import play.api.libs.json._
 import play.api.libs.functional.syntax._
+import play.api.libs.json._
 
 final case class CallEligibilityApiRequest(
     channelIdentifier:         String,

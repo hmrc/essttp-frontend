@@ -22,15 +22,16 @@ import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.bind
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
-import play.api.test.{DefaultTestServerFactory, RunningServer}
+import play.api.test.{DefaultTestServerFactory, FakeRequest, RunningServer}
 import play.api.{Application, Mode}
 import play.core.server.ServerConfig
+import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.{AuthStub, EssttpBackend}
 import testsupport.testdata.TdAll
 import uk.gov.hmrc.auth.core.Enrolment
 import uk.gov.hmrc.auth.core.retrieve.Credentials
 import uk.gov.hmrc.crypto.{AesCrypto, Decrypter, Encrypter}
-import uk.gov.hmrc.http.HttpReadsInstances
+import uk.gov.hmrc.http.{HttpReadsInstances, SessionKeys}
 
 import java.time.Instant
 
@@ -113,5 +114,7 @@ class ItSpec
       sc.copy(configuration = sc.configuration.withFallback(overrideServerConfiguration(app)))
     }
   }
+
+  val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
 }

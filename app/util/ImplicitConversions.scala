@@ -17,6 +17,7 @@
 package util
 
 import play.api.mvc.Result
+
 import scala.concurrent.Future
 
 object ImplicitConversions {

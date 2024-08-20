@@ -16,12 +16,12 @@
 
 package controllers
 
-import _root_.actions.Actions
+import actions.Actions
 import config.AppConfig
-import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import controllers.JourneyFinalStateCheck.finalStateCheck
-import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
+import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import essttp.journey.model.UpfrontPaymentAnswers.DeclaredUpfrontPayment
+import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel.ttp.eligibility.{DebtTotalAmount, EligibilityCheckResult}
 import essttp.rootmodel.{AmountInPence, CanPayUpfront, UpfrontPaymentAmount}
 import models.enumsforforms.CanPayUpfrontFormValue

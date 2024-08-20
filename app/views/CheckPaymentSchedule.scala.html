@@ -14,19 +14,19 @@
  * limitations under the License.
  *@
 
-@import requests.RequestSupport
-@import messages.Messages
-@import play.twirl.api.Html
-@import uk.gov.hmrc.govukfrontend.views.html.components._
-@import essttp.journey.model.{UpfrontPaymentAnswers, CanPayWithinSixMonthsAnswers, WhyCannotPayInFullAnswers}
-@import essttp.rootmodel.{AmountInPence, DayOfMonth, CannotPayReason}
-@import essttp.rootmodel.ttp.affordablequotes.PaymentPlan
-@import controllers.routes
-@import messages.DateMessages
-@import cats.syntax.eq._
-@import java.time.LocalDate
-@import viewmodels.CheckPaymentPlanChangeLink
 @import actionsmodel.EligibleJourneyRequest
+@import cats.syntax.eq._
+@import controllers.routes
+@import essttp.journey.model.{UpfrontPaymentAnswers, CanPayWithinSixMonthsAnswers, WhyCannotPayInFullAnswers}
+@import essttp.rootmodel.ttp.affordablequotes.PaymentPlan
+@import essttp.rootmodel.{AmountInPence, DayOfMonth, CannotPayReason}
+@import messages.{DateMessages, Messages}
+@import play.twirl.api.Html
+@import requests.RequestSupport
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import viewmodels.CheckPaymentPlanChangeLink
+
+@import java.time.LocalDate
 
 @this(
   layout: templates.Layout,

@@ -18,9 +18,9 @@ package services
 
 import connectors.EssttpBackendConnector
 import essttp.journey.JourneyConnector
-import essttp.journey.model.Journey.AfterCanPayWithinSixMonthsAnswers
-import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Journey}
-import essttp.rootmodel.pega.StartCaseResponse
+import essttp.journey.model.Journey.{AfterCanPayWithinSixMonthsAnswers, AfterCheckedPaymentPlan, AfterStartedPegaCase}
+import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Journey, PaymentPlanAnswers}
+import essttp.rootmodel.pega.{GetCaseResponse, StartCaseResponse}
 import play.api.mvc.RequestHeader
 
 import javax.inject.{Inject, Singleton}
@@ -54,7 +54,35 @@ class PegaService @Inject() (
         sys.error(s"Cannot start PEGA case when journey is in state ${other.name}")
 
     }
+  }
 
+  def getCase(journey: Journey)(implicit rh: RequestHeader): Future[GetCaseResponse] = {
+      def doGetCase(startCaseResponse: StartCaseResponse): Future[GetCaseResponse] =
+        for {
+          getCaseResponse <- essttpConnector.getPegaCase(journey.journeyId)
+          paymentPlanAnswers = PaymentPlanAnswers.PaymentPlanAfterAffordability(
+            startCaseResponse, getCaseResponse.paymentPlan
+          )
+          _ <- journeyConnector.updateHasCheckedPaymentPlan(journey.journeyId, paymentPlanAnswers)
+        } yield getCaseResponse
+
+    journey match {
+      case j: AfterStartedPegaCase =>
+        doGetCase(j.startCaseResponse)
+
+      case j: AfterCheckedPaymentPlan =>
+        j.paymentPlanAnswers match {
+          case _: PaymentPlanAnswers.PaymentPlanNoAffordability =>
+            sys.error("Trying to get PEGA case on non-affordability journey")
+
+          case p: PaymentPlanAnswers.PaymentPlanAfterAffordability =>
+            doGetCase(p.startCaseResponse)
+        }
+
+      case other =>
+        sys.error(s"Cannot get PEGA case when journey is in state ${other.name}")
+
+    }
   }
 
 }

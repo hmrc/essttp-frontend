@@ -20,13 +20,10 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.journey.model.Origins
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.http.Status
-import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
-import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.EssttpBackend
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
-import uk.gov.hmrc.http.SessionKeys
 
 class JourneyIncorrectStateRouterSpec extends ItSpec {
 
@@ -80,7 +77,7 @@ class JourneyIncorrectStateRouterSpec extends ItSpec {
       ("Stages.RetrievedStartDates", () => EssttpBackend.Dates.findJourneyStartDates(testCrypto, Origins.Epaye.Bta)(), PageUrls.determineAffordableQuotesUrl),
       ("Stages.RetrievedAffordableQuotes", () => EssttpBackend.AffordableQuotes.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.instalmentsUrl),
       ("Stages.ChosenPaymentPlan", () => EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.checkPaymentPlanUrl),
-      ("Stages.CheckedPaymentPlan", () => EssttpBackend.HasCheckedPlan.findJourney(testCrypto)(), PageUrls.aboutYourBankAccountUrl),
+      ("Stages.CheckedPaymentPlan", () => EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto)(), PageUrls.aboutYourBankAccountUrl),
       ("Stages.EnteredDetailsAboutBankAccount - is account holder", () => EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.directDebitDetailsUrl),
       ("Stages.EnteredDetailsAboutBankAccount - is not account holder",
         () => EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, Origins.Epaye.Bta)(JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = false)),
@@ -96,8 +93,6 @@ class JourneyIncorrectStateRouterSpec extends ItSpec {
           s"[ GET $scenario ] should redirect to the first page that supports that journey: [ $expectedRedirectUrl ]" in {
             stubCommonActions()
             journeyState()
-
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
             val result = app.injector.instanceOf[SubmitArrangementController].submitArrangement(fakeRequest)
             status(result) shouldBe Status.SEE_OTHER

@@ -23,8 +23,8 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import org.jsoup.select.Elements
 import org.scalatest.prop.TableDrivenPropertyChecks._
-import paymentsEmailVerification.models.{EmailVerificationResult, EmailVerificationState}
 import paymentsEmailVerification.models.api.StartEmailVerificationJourneyResponse
+import paymentsEmailVerification.models.{EmailVerificationResult, EmailVerificationState}
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc._
@@ -67,7 +67,6 @@ class EmailControllerSpec extends ItSpec {
                   stubCommonActions()
                   journeyStubMapping()
 
-                  val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
                   val result = action(fakeRequest)
 
                   status(result) shouldBe SEE_OTHER
@@ -108,7 +107,6 @@ class EmailControllerSpec extends ItSpec {
             stubCommonActions()
             EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin = origin, etmpEmail = Some(TdAll.etmpEmail))()
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result: Future[Result] = controller.whichEmailDoYouWantToUse(fakeRequest)
             val doc: Document = Jsoup.parse(contentAsString(result))
 
@@ -147,7 +145,6 @@ class EmailControllerSpec extends ItSpec {
               stubCommonActions()
               EssttpBackend.SelectEmail.findJourney("bobross@joyofpainting.com", testCrypto, origin)()
 
-              val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
               val result: Future[Result] = controller.whichEmailDoYouWantToUse(fakeRequest)
 
               val doc: Document = Jsoup.parse(contentAsString(result))
@@ -163,7 +160,6 @@ class EmailControllerSpec extends ItSpec {
               stubCommonActions()
               EssttpBackend.SelectEmail.findJourney("somenewemail@newemail.com", testCrypto, origin)()
 
-              val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
               val result: Future[Result] = controller.whichEmailDoYouWantToUse(fakeRequest)
 
               val doc: Document = Jsoup.parse(contentAsString(result))
@@ -180,7 +176,6 @@ class EmailControllerSpec extends ItSpec {
             stubCommonActions()
             EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin, etmpEmail = None)()
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val error = intercept[Exception](controller.whichEmailDoYouWantToUse(fakeRequest).futureValue)
             error.getMessage should endWith("Could not find email address in eligibility response.")
           }
@@ -287,7 +282,6 @@ class EmailControllerSpec extends ItSpec {
             stubCommonActions()
             EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin, etmpEmail = None)()
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val error = intercept[Exception](controller.whichEmailDoYouWantToUseSubmit(fakeRequest).futureValue)
             error.getMessage should endWith("Could not find email address in eligibility response.")
           }
@@ -300,7 +294,6 @@ class EmailControllerSpec extends ItSpec {
             stubCommonActions()
             EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, encrypter = testCrypto, origin = origin, etmpEmail = None)()
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result: Future[Result] = controller.enterEmail(fakeRequest)
             val doc: Document = Jsoup.parse(contentAsString(result))
 
@@ -325,7 +318,6 @@ class EmailControllerSpec extends ItSpec {
             stubCommonActions()
             EssttpBackend.SelectEmail.findJourney("somenewemail@newemail.com", testCrypto, origin, etmpEmail = None)()
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result: Future[Result] = controller.enterEmail(fakeRequest)
 
             val doc: Document = Jsoup.parse(contentAsString(result))
@@ -410,7 +402,6 @@ class EmailControllerSpec extends ItSpec {
         s"[taxRegime: ${taxRegime.toString}] GET /email-verification should" - {
 
           val email: Email = Email(SensitiveString("email@domain.com"))
-          val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
           val urlPrefix = "http://localhost:9215"
 
           val expectedPageTitle = taxRegime match {
@@ -677,7 +668,6 @@ class EmailControllerSpec extends ItSpec {
         s"[taxRegime: ${taxRegime.toString}]GET /email-callback should" - {
 
           val email: Email = Email(SensitiveString("email@domain.com"))
-          val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
           "not allow journeys where an email has not been selected" in {
             stubCommonActions()
@@ -782,7 +772,6 @@ class EmailControllerSpec extends ItSpec {
             stubCommonActions()
             EssttpBackend.EmailVerificationResult.findJourney(email.value.decryptedValue, EmailVerificationResult.Verified, testCrypto, origin)()
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result = controller.emailAddressConfirmed(fakeRequest)
             status(result) shouldBe OK
 
@@ -820,7 +809,6 @@ class EmailControllerSpec extends ItSpec {
                   stubCommonActions()
                   EssttpBackend.EmailVerificationResult.findJourney(email.value.decryptedValue, EmailVerificationResult.Verified, testCrypto, origin)()
 
-                  val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
                   val result = controller.emailAddressConfirmedSubmit(fakeRequest)
                   status(result) shouldBe SEE_OTHER
                   redirectLocation(result) shouldBe Some(routes.SubmitArrangementController.submitArrangement.url)
@@ -839,7 +827,7 @@ class EmailControllerSpec extends ItSpec {
                   stubCommonActions()
                   EssttpBackend.SelectEmail.findJourney("email@test.com", testCrypto, origin, emailInEtmp)()
 
-                  val result = controller.tooManyPasscodeJourneysStarted(FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId"))
+                  val result = controller.tooManyPasscodeJourneysStarted(fakeRequest)
                   status(result) shouldBe OK
 
                   val doc = Jsoup.parse(contentAsString(result))
@@ -870,7 +858,7 @@ class EmailControllerSpec extends ItSpec {
               def test(stubActions: () => Unit)(expectedEmailEntryUrl: String): Unit = {
                 stubActions()
 
-                val result = controller.tooManyPasscodeAttempts(FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId"))
+                val result = controller.tooManyPasscodeAttempts(fakeRequest)
                 status(result) shouldBe OK
 
                 val doc = Jsoup.parse(contentAsString(result))
@@ -919,7 +907,7 @@ class EmailControllerSpec extends ItSpec {
             EssttpBackend.SelectEmail.findJourney("email@test.com", testCrypto, origin)()
             EmailVerificationStub.getLockoutCreatedAt(Some(LocalDateTime.of(2023, 1, 7, 11, 13)))
 
-            val result = controller.tooManyDifferentEmailAddresses(FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId"))
+            val result = controller.tooManyDifferentEmailAddresses(fakeRequest)
             status(result) shouldBe OK
 
             val doc = Jsoup.parse(contentAsString(result))
@@ -946,7 +934,7 @@ class EmailControllerSpec extends ItSpec {
             EssttpBackend.SelectEmail.findJourney("email@test.com", testCrypto, origin)()
             EmailVerificationStub.getLockoutCreatedAt(None)
             val error: UpstreamErrorResponse = intercept[UpstreamErrorResponse](
-              await(controller.tooManyDifferentEmailAddresses(FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")))
+              await(controller.tooManyDifferentEmailAddresses(fakeRequest))
             )
             error.statusCode shouldBe INTERNAL_SERVER_ERROR
           }
@@ -1016,7 +1004,6 @@ class EmailNonLocalControllerSpec extends ItSpec {
     "redirect to the given redirectUri if the call to request email verification is successful" in {
       val redirectUri: String = "/redirect"
       val email: Email = Email(SensitiveString("email@domain.com"))
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
       stubCommonActions()
       EssttpBackend.SelectEmail.findJourney(email.value.decryptedValue, testCrypto, Origins.Epaye.Bta)()

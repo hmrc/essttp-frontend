@@ -16,6 +16,7 @@
 
 package controllers
 
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.{AmountInPence, MonthlyPaymentAmount, TaxRegime}
 import models.Languages
@@ -32,7 +33,7 @@ import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.EssttpBackend
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
-import uk.gov.hmrc.http.SessionKeys
+import uk.gov.hmrc.http.{SessionKeys, UpstreamErrorResponse}
 
 import scala.concurrent.Future
 import scala.jdk.CollectionConverters.IterableHasAsScala
@@ -49,49 +50,88 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
   ).foreach {
       case (regime, origin, taxRegime) =>
         "GET /how-much-can-you-pay-each-month" - {
-          s"[$regime journey] should return 200 and the how much can you pay a month page" in {
-            stubCommonActions()
-            EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, origin)()
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-            val result: Future[Result] = controller.displayMonthlyPaymentAmount(fakeRequest)
-            val pageContent: String = contentAsString(result)
-            val doc: Document = Jsoup.parse(pageContent)
+          s"[regime $regime] return an error when" - {
 
-            RequestAssertions.assertGetRequestOk(result)
-            ContentAssertions.commonPageChecks(
-              doc,
-              expectedH1              = expectedH1,
-              shouldBackLinkBePresent = true,
-              expectedSubmitUrl       = Some(routes.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit.url),
-              regimeBeingTested       = Some(taxRegime)
-            )
+            "the journey is in state" - {
 
-            doc.select("p.govuk-body").first().text() shouldBe "The minimum payment you can make is £300."
+              "AfterStartedPegaCase" in {
+                stubCommonActions()
+                EssttpBackend.StartedPegaCase.findJourney(testCrypto, origin)()
 
-            doc.select(".govuk-details__summary-text").text() shouldBe "I cannot afford the minimum payment"
-            val progressiveRevealSubContent = doc.select(".govuk-details__text").select(".govuk-body").asScala.toSeq
-            progressiveRevealSubContent.size shouldBe 1
-            progressiveRevealSubContent(0).text() shouldBe "You may still be able to set up a payment plan over the phone. " +
-              "Call us on 0300 123 1813 to speak to an adviser."
+                val exception = intercept[UpstreamErrorResponse](await(controller.displayMonthlyPaymentAmount(fakeRequest)))
 
-            doc.select(".govuk-label").text() shouldBe "How much can you afford to pay each month?"
-            doc.select("#MonthlyPaymentAmount-hint").text() shouldBe "Enter an amount between £300 and £880"
-            doc.select("#MonthlyPaymentAmount").size() shouldBe 1
+                exception.statusCode shouldBe INTERNAL_SERVER_ERROR
+                exception.message shouldBe "Trying to find monthly payment amount after stating PEGA case"
+              }
 
-            val poundSymbol = doc.select(".govuk-input__prefix")
-            poundSymbol.size() shouldBe 1
-            poundSymbol.text() shouldBe "£"
+              "AfterCheckedPaymentPlan on an affordability journey" in {
+                stubCommonActions()
+                EssttpBackend.HasCheckedPlan.findJourney(withAffordability = true, testCrypto, origin)()
 
-            doc.select("#continue").text() should include("Continue")
+                val exception = intercept[UpstreamErrorResponse](await(controller.displayMonthlyPaymentAmount(fakeRequest)))
+
+                exception.statusCode shouldBe INTERNAL_SERVER_ERROR
+                exception.message shouldBe "Trying to find monthly payment amount on affordability journey"
+              }
+
+            }
+
+          }
+
+          s"[$regime journey] should return 200 and the how much can you pay a month page when" - {
+
+              def test(stubFindJourney: () => StubMapping): Unit = {
+                stubCommonActions()
+                stubFindJourney()
+
+                val result: Future[Result] = controller.displayMonthlyPaymentAmount(fakeRequest)
+                val pageContent: String = contentAsString(result)
+                val doc: Document = Jsoup.parse(pageContent)
+
+                RequestAssertions.assertGetRequestOk(result)
+                ContentAssertions.commonPageChecks(
+                  doc,
+                  expectedH1              = expectedH1,
+                  shouldBackLinkBePresent = true,
+                  expectedSubmitUrl       = Some(routes.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit.url),
+                  regimeBeingTested       = Some(taxRegime)
+                )
+
+                doc.select("p.govuk-body").first().text() shouldBe "The minimum payment you can make is £300."
+
+                doc.select(".govuk-details__summary-text").text() shouldBe "I cannot afford the minimum payment"
+                val progressiveRevealSubContent = doc.select(".govuk-details__text").select(".govuk-body").asScala.toSeq
+                progressiveRevealSubContent.size shouldBe 1
+                progressiveRevealSubContent(0).text() shouldBe "You may still be able to set up a payment plan over the phone. " +
+                  "Call us on 0300 123 1813 to speak to an adviser."
+
+                doc.select(".govuk-label").text() shouldBe "How much can you afford to pay each month?"
+                doc.select("#MonthlyPaymentAmount-hint").text() shouldBe "Enter an amount between £300 and £880"
+                doc.select("#MonthlyPaymentAmount").size() shouldBe 1
+
+                val poundSymbol = doc.select(".govuk-input__prefix")
+                poundSymbol.size() shouldBe 1
+                poundSymbol.text() shouldBe "£"
+
+                doc.select("#continue").text() should include("Continue")
+                ()
+              }
+
+            "the user has not checked their payment plan yet" in {
+              test(() => EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, origin)())
+            }
+
+            "the user has checked their payment plan on a non-affordability journey" in {
+              test(() => EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, origin)())
+            }
           }
 
           s"[$regime journey] should return 200 and the how much can you pay a month page in Welsh" in {
             stubCommonActions()
             EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, origin)()
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId").withLangWelsh()
-            val result: Future[Result] = controller.displayMonthlyPaymentAmount(fakeRequest)
+            val result: Future[Result] = controller.displayMonthlyPaymentAmount(fakeRequest.withLangWelsh())
             val pageContent: String = contentAsString(result)
             val doc: Document = Jsoup.parse(pageContent)
 
@@ -124,7 +164,6 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
             stubCommonActions()
             EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto, origin)()
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result: Future[Result] = controller.displayMonthlyPaymentAmount(fakeRequest)
 
             RequestAssertions.assertGetRequestOk(result)
@@ -137,7 +176,6 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
             stubCommonActions()
             EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, origin)(JourneyJsonTemplates.`Retrieved Affordability`(origin, 1))
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result: Future[Result] = controller.displayMonthlyPaymentAmount(fakeRequest)
 
             RequestAssertions.assertGetRequestOk(result)
@@ -147,25 +185,37 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
         }
 
         "POST /how-much-can-you-pay-each-month should" - {
-          s"[$regime journey] redirect to what day do you want to pay on when form is valid" in {
-            stubCommonActions()
-            EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, origin)()
-            EssttpBackend.MonthlyPaymentAmount.stubUpdateMonthlyPaymentAmount(
-              TdAll.journeyId,
-              JourneyJsonTemplates.`Entered Monthly Payment Amount`(origin)
-            )
+          s"[$regime journey] redirect to what day do you want to pay on when form is valid and" - {
 
-            val fakeRequest = FakeRequest(
-              method = "POST",
-              path   = "/how-much-can-you-pay-each-month"
-            ).withAuthToken()
-              .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-              .withFormUrlEncodedBody(("MonthlyPaymentAmount", "300"))
+              def test(stubFindJourney: () => StubMapping): Unit = {
+                stubCommonActions()
+                stubFindJourney()
+                EssttpBackend.MonthlyPaymentAmount.stubUpdateMonthlyPaymentAmount(
+                  TdAll.journeyId,
+                  JourneyJsonTemplates.`Entered Monthly Payment Amount`(origin)
+                )
 
-            val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
-            status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(PageUrls.whichDayDoYouWantToPayUrl)
-            EssttpBackend.MonthlyPaymentAmount.verifyUpdateMonthlyPaymentAmountRequest(TdAll.journeyId, TdAll.monthlyPaymentAmount)
+                val fakeRequest = FakeRequest(
+                  method = "POST",
+                  path   = "/how-much-can-you-pay-each-month"
+                ).withAuthToken()
+                  .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+                  .withFormUrlEncodedBody(("MonthlyPaymentAmount", "300"))
+
+                val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
+                status(result) shouldBe Status.SEE_OTHER
+                redirectLocation(result) shouldBe Some(PageUrls.whichDayDoYouWantToPayUrl)
+                EssttpBackend.MonthlyPaymentAmount.verifyUpdateMonthlyPaymentAmountRequest(TdAll.journeyId, TdAll.monthlyPaymentAmount)
+                ()
+              }
+
+            "the user has not checked their payment plan yet" in {
+              test(() => EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, origin)())
+            }
+
+            "the user has checked their payment plan on a non-affordability journey" in {
+              test(() => EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, origin)())
+            }
           }
 
           s"[$regime journey] should redirect to the specified url in session if the user came from a change link and did not change their answer" in {

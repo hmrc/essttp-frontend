@@ -92,6 +92,7 @@ object JourneyInfo {
   val startDates: JourneyInfoAsJson = TdJsonBodies.startDatesJourneyInfo
   val affordableQuotes: JourneyInfoAsJson = TdJsonBodies.affordableQuotesJourneyInfo
   val selectedPlan: JourneyInfoAsJson = TdJsonBodies.selectedPlanJourneyInfo
+  def paymentPlanAnswers(withAffordability: Boolean): JourneyInfoAsJson = TdJsonBodies.paymentPlanAnswers(withAffordability)
   def detailsAboutBankAccountBusiness(isAccountHolder: Boolean): JourneyInfoAsJson = TdJsonBodies.detailsAboutBankAccountJourneyInfo("Business", isAccountHolder)
   def detailsAboutBankAccountPersonal(isAccountHolder: Boolean): JourneyInfoAsJson = TdJsonBodies.detailsAboutBankAccountJourneyInfo("Personal", isAccountHolder)
   def directDebitDetails(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo(encrypter)
@@ -357,29 +358,67 @@ object JourneyInfo {
   def chosenPaymentPlan(taxRegime: TaxRegime, encrypter: Encrypter, etmpEmail: Option[String] = Some(TdAll.etmpEmail)): List[JourneyInfoAsJson] =
     selectedPlan :: retrievedAffordableQuotes(taxRegime, encrypter, etmpEmail)
 
-  def hasCheckedPaymentPlan(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
-    chosenPaymentPlan(taxRegime, encrypter)
+  def hasCheckedPaymentPlan(
+      withAffordability:        Boolean,
+      taxRegime:                TaxRegime,
+      encrypter:                Encrypter,
+      etmpEmail:                Option[String] = Some(TdAll.etmpEmail),
+      eligibilityMinPlanLength: Int            = 1,
+      eligibilityMaxPlanLength: Int            = 12
+  ): List[JourneyInfoAsJson] = {
+    if (withAffordability)
+      paymentPlanAnswers(withAffordability) :: startedPegaCase(taxRegime, encrypter, etmpEmail, eligibilityMinPlanLength, eligibilityMaxPlanLength)
+    else
+      paymentPlanAnswers(withAffordability) :: obtainedCanPayWithinSixMonthsNotRequired(taxRegime, encrypter, etmpEmail, eligibilityMinPlanLength, eligibilityMaxPlanLength)
+  }
 
-  def enteredDetailsAboutBankAccountBusiness(isAccountHolder: Boolean, taxRegime: TaxRegime, encrypter: Encrypter, etmpEmail: Option[String] = Some(TdAll.etmpEmail)): List[JourneyInfoAsJson] =
-    detailsAboutBankAccountBusiness(isAccountHolder) :: chosenPaymentPlan(taxRegime, encrypter, etmpEmail)
+  def enteredDetailsAboutBankAccountBusiness(
+      isAccountHolder:   Boolean,
+      taxRegime:         TaxRegime,
+      encrypter:         Encrypter,
+      etmpEmail:         Option[String] = Some(TdAll.etmpEmail),
+      withAffordability: Boolean        = false
+  ): List[JourneyInfoAsJson] =
+    detailsAboutBankAccountBusiness(isAccountHolder) :: hasCheckedPaymentPlan(withAffordability, taxRegime, encrypter, etmpEmail)
 
-  def enteredDetailsAboutBankAccountPersonal(isAccountHolder: Boolean, taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
-    detailsAboutBankAccountPersonal(isAccountHolder) :: chosenPaymentPlan(taxRegime, encrypter)
+  def enteredDetailsAboutBankAccountPersonal(
+      isAccountHolder:   Boolean,
+      taxRegime:         TaxRegime,
+      encrypter:         Encrypter,
+      withAffordability: Boolean   = false
+  ): List[JourneyInfoAsJson] =
+    detailsAboutBankAccountPersonal(isAccountHolder) :: hasCheckedPaymentPlan(withAffordability, taxRegime, encrypter)
 
-  def enteredDirectDebitDetails(taxRegime: TaxRegime, encrypter: Encrypter, etmpEmail: Option[String] = Some(TdAll.etmpEmail)): List[JourneyInfoAsJson] =
-    directDebitDetails(encrypter) :: enteredDetailsAboutBankAccountBusiness(isAccountHolder = true, taxRegime, encrypter, etmpEmail)
+  def enteredDirectDebitDetails(
+      taxRegime:         TaxRegime,
+      encrypter:         Encrypter,
+      etmpEmail:         Option[String] = Some(TdAll.etmpEmail),
+      withAffordability: Boolean        = false
+  ): List[JourneyInfoAsJson] =
+    directDebitDetails(encrypter) :: enteredDetailsAboutBankAccountBusiness(isAccountHolder = true, taxRegime, encrypter, etmpEmail, withAffordability)
 
   def enteredDirectDebitDetailsPaddedAccountNumber(taxRegime: TaxRegime, encrypter: Encrypter, etmpEmail: Option[String] = Some(TdAll.etmpEmail)): List[JourneyInfoAsJson] =
     directDebitDetailsPaddedAccountNumber(encrypter) :: enteredDetailsAboutBankAccountBusiness(isAccountHolder = true, taxRegime, encrypter, etmpEmail)
 
-  def confirmedDirectDebitDetails(taxRegime: TaxRegime, encrypter: Encrypter, etmpEmail: Option[String] = Some(TdAll.etmpEmail)): List[JourneyInfoAsJson] =
-    enteredDirectDebitDetails(taxRegime, encrypter, etmpEmail)
+  def confirmedDirectDebitDetails(
+      taxRegime:         TaxRegime,
+      encrypter:         Encrypter,
+      etmpEmail:         Option[String] = Some(TdAll.etmpEmail),
+      withAffordability: Boolean        = false
+  ): List[JourneyInfoAsJson] =
+    enteredDirectDebitDetails(taxRegime, encrypter, etmpEmail, withAffordability)
 
   def `confirmedDirectDebitDetails - padded account number`(taxRegime: TaxRegime, encrypter: Encrypter, etmpEmail: Option[String] = Some(TdAll.etmpEmail)): List[JourneyInfoAsJson] =
     enteredDirectDebitDetailsPaddedAccountNumber(taxRegime, encrypter, etmpEmail)
 
-  def agreedTermsAndConditions(isEmailAddressRequired: Boolean, taxRegime: TaxRegime, encrypter: Encrypter, etmpEmail: Option[String] = Some(TdAll.etmpEmail)): List[JourneyInfoAsJson] =
-    emailAddressRequired(isEmailAddressRequired) :: confirmedDirectDebitDetails(taxRegime, encrypter, etmpEmail)
+  def agreedTermsAndConditions(
+      isEmailAddressRequired: Boolean,
+      taxRegime:              TaxRegime,
+      encrypter:              Encrypter,
+      etmpEmail:              Option[String] = Some(TdAll.etmpEmail),
+      withAffordability:      Boolean        = false
+  ): List[JourneyInfoAsJson] =
+    emailAddressRequired(isEmailAddressRequired) :: confirmedDirectDebitDetails(taxRegime, encrypter, etmpEmail, withAffordability)
 
   def `agreedTermsAndConditions - padded account number`(isEmailAddressRequired: Boolean, taxRegime: TaxRegime, encrypter: Encrypter, etmpEmail: Option[String] = None): List[JourneyInfoAsJson] =
     emailAddressRequired(isEmailAddressRequired) :: `confirmedDirectDebitDetails - padded account number`(taxRegime, encrypter, etmpEmail)
@@ -390,43 +429,45 @@ object JourneyInfo {
   def emailVerificationComplete(email: String, result: EmailVerificationResult, taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
     emailVerificationResult(result) :: emailVerificationAnswersEmailRequired(email, result, encrypter) :: selectedEmailToBeVerified(email, taxRegime, encrypter)
 
-  def emailVerificationAnswers(isEmailAddressRequired: Boolean, taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
-    emailVerificationAnswersNoEmailRequired :: agreedTermsAndConditions(isEmailAddressRequired, taxRegime, encrypter)
+  def emailVerificationAnswers(isEmailAddressRequired: Boolean, taxRegime: TaxRegime, encrypter: Encrypter, withAffordability: Boolean = false): List[JourneyInfoAsJson] =
+    emailVerificationAnswersNoEmailRequired :: agreedTermsAndConditions(isEmailAddressRequired, taxRegime, encrypter, withAffordability = withAffordability)
 
-  def submittedArrangementWithUpfrontPayment(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
-    arrangementSubmitted(taxRegime) :: emailVerificationAnswers(isEmailAddressRequired = false, taxRegime, encrypter)
+  def submittedArrangementWithUpfrontPayment(taxRegime: TaxRegime, encrypter: Encrypter, withAffordability: Boolean = false): List[JourneyInfoAsJson] =
+    arrangementSubmitted(taxRegime) :: emailVerificationAnswers(isEmailAddressRequired = false, taxRegime, encrypter, withAffordability)
 
   //used in final page test
-  def submittedArrangementNoUpfrontPayment(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
+  def submittedArrangementNoUpfrontPayment(taxRegime: TaxRegime, encrypter: Encrypter, withAffordability: Boolean = false): List[JourneyInfoAsJson] =
     arrangementSubmitted(taxRegime) :: emailVerificationAnswersNoEmailRequired :: emailAddressRequired(isEmailAddressRequired = false) :: directDebitDetails(encrypter) ::
-      detailsAboutBankAccountBusiness(isAccountHolder = true) :: selectedPlan :: affordableQuotes ::
-      upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: obtainedCanPayWithinSixMonthsNotRequired :: monthlyPaymentAmount ::
-      dayOfMonth() :: startDates :: cannotPayUpfront :: whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(taxRegime, encrypter)
+      detailsAboutBankAccountBusiness(isAccountHolder = true) :: hasCheckedPaymentPlan(withAffordability, taxRegime, encrypter) :::
+      upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: obtainedCanPayWithinSixMonthsNotRequired ::
+      cannotPayUpfront :: whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(taxRegime, encrypter)
 
-  def submittedArrangementPaddedAccountNumber(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
+  def submittedArrangementPaddedAccountNumber(taxRegime: TaxRegime, encrypter: Encrypter, withAffordability: Boolean = false): List[JourneyInfoAsJson] =
     arrangementSubmitted(taxRegime) :: emailVerificationAnswersNoEmailRequired :: emailAddressRequired(isEmailAddressRequired = false) :: directDebitDetailsPaddedAccountNumber(encrypter) ::
-      detailsAboutBankAccountBusiness(isAccountHolder = true) :: selectedPlan :: affordableQuotes ::
-      upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: obtainedCanPayWithinSixMonthsNotRequired :: monthlyPaymentAmount ::
-      dayOfMonth() :: startDates :: cannotPayUpfront :: whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(taxRegime, encrypter)
+      detailsAboutBankAccountBusiness(isAccountHolder = true) :: hasCheckedPaymentPlan(withAffordability, taxRegime, encrypter) :::
+      upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: obtainedCanPayWithinSixMonthsNotRequired ::
+      cannotPayUpfront :: whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(taxRegime, encrypter)
 
   def submittedArrangementWithEmailParams(
-      email:     String,
-      taxRegime: TaxRegime,
-      encrypter: Encrypter
+      email:             String,
+      taxRegime:         TaxRegime,
+      encrypter:         Encrypter,
+      withAffordability: Boolean   = false
   ): List[JourneyInfoAsJson] =
     arrangementSubmitted(taxRegime) :: emailVerificationAnswersEmailRequired(email, EmailVerificationResult.Verified, encrypter) ::
       emailAddressRequired(isEmailAddressRequired = true) :: directDebitDetails(encrypter) ::
-      detailsAboutBankAccountBusiness(isAccountHolder = true) :: selectedPlan :: affordableQuotes ::
-      upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: obtainedCanPayWithinSixMonthsNotRequired :: monthlyPaymentAmount ::
-      dayOfMonth() :: startDates :: cannotPayUpfront :: whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(taxRegime, encrypter)
+      detailsAboutBankAccountBusiness(isAccountHolder = true) :: hasCheckedPaymentPlan(withAffordability, taxRegime, encrypter) :::
+      upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: obtainedCanPayWithinSixMonthsNotRequired ::
+      cannotPayUpfront :: whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(taxRegime, encrypter)
 
   def confirmedDdDetailsWithRegimeDigitalCorrespondance(
       regimeDigitalCorrespondence: Boolean,
       taxRegime:                   TaxRegime,
-      encrypter:                   Encrypter
+      encrypter:                   Encrypter,
+      withAffordability:           Boolean   = false
   ): List[JourneyInfoAsJson] =
     directDebitDetails(encrypter) ::
-      detailsAboutBankAccountBusiness(isAccountHolder = true) :: selectedPlan :: affordableQuotes ::
-      upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: obtainedCanPayWithinSixMonthsNotRequired :: monthlyPaymentAmount ::
-      dayOfMonth() :: startDates :: cannotPayUpfront :: whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(taxRegime, encrypter, regimeDigitalCorrespondence = regimeDigitalCorrespondence)
+      detailsAboutBankAccountBusiness(isAccountHolder = true) :: hasCheckedPaymentPlan(withAffordability, taxRegime, encrypter) :::
+      upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: obtainedCanPayWithinSixMonthsNotRequired ::
+      cannotPayUpfront :: whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(taxRegime, encrypter, regimeDigitalCorrespondence = regimeDigitalCorrespondence)
 }

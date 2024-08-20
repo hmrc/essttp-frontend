@@ -102,6 +102,9 @@ object Routing {
       routes.PaymentScheduleController.checkPaymentSchedule -> { () =>
         routes.BankDetailsController.detailsAboutBankAccount
       },
+      routes.PegaController.callback -> { () =>
+        routes.BankDetailsController.detailsAboutBankAccount
+      },
       routes.BankDetailsController.detailsAboutBankAccount -> { () =>
         journey match {
           case _: BeforeEnteredDetailsAboutBankAccount =>

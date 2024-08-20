@@ -16,7 +16,7 @@
 
 package controllers
 
-import _root_.actions.Actions
+import actions.Actions
 import controllers.JourneyFinalStateCheck.finalStateCheckF
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Journey}

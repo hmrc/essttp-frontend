@@ -19,7 +19,7 @@ package testsupport.stubs
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.crypto.CryptoFormat
-import essttp.journey.model.{CanPayWithinSixMonthsAnswers, JourneyId, Origin, Origins, WhyCannotPayInFullAnswers}
+import essttp.journey.model.{CanPayWithinSixMonthsAnswers, JourneyId, Origin, Origins, PaymentPlanAnswers, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.bank.DetailsAboutBankAccount
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
 import essttp.rootmodel.dates.startdates.StartDatesResponse
@@ -28,7 +28,7 @@ import essttp.rootmodel.ttp.affordablequotes.{AffordableQuotesResponse, PaymentP
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import essttp.rootmodel._
-import essttp.rootmodel.pega.StartCaseResponse
+import essttp.rootmodel.pega.{GetCaseResponse, StartCaseResponse}
 import paymentsEmailVerification.models.EmailVerificationResult
 import play.api.http.Status._
 import play.api.libs.json.Json
@@ -440,11 +440,21 @@ object EssttpBackend {
       WireMockHelpers.stubForPostWithResponseBody(hasCheckedPlanUrl(journeyId), updatedJourneyJson)
 
     def verifyUpdateHasCheckedPlanRequest(journeyId: JourneyId): Unit =
-      verify(
-        postRequestedFor(urlPathEqualTo(hasCheckedPlanUrl(journeyId)))
-      )
+      WireMockHelpers.verifyWithBodyParse(hasCheckedPlanUrl(journeyId))(PaymentPlanAnswers.format)
 
-    def findJourney(encrypter: Encrypter, origin: Origin = Origins.Epaye.Bta)(jsonBody: String = JourneyJsonTemplates.`Has Checked Payment Plan`(origin)(encrypter)): StubMapping = findByLatestSessionId(jsonBody)
+    def findJourney(
+        withAffordability:        Boolean,
+        encrypter:                Encrypter,
+        origin:                   Origin    = Origins.Epaye.Bta,
+        eligibilityMinPlanLength: Int       = 1,
+        eligibilityMaxPlanLength: Int       = 12
+    )(
+        jsonBody: String = if (withAffordability) {
+          JourneyJsonTemplates.`Has Checked Payment Plan - With Affordability`(origin, eligibilityMinPlanLength, eligibilityMaxPlanLength)(encrypter)
+        } else {
+          JourneyJsonTemplates.`Has Checked Payment Plan - No Affordability`(origin, eligibilityMinPlanLength, eligibilityMaxPlanLength)(encrypter)
+        }
+    ): StubMapping = findByLatestSessionId(jsonBody)
   }
 
   object EnteredDetailsAboutBankAccount {
@@ -588,7 +598,13 @@ object EssttpBackend {
     def verifyNoneUpdateSubmitArrangementRequest(journeyId: JourneyId): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(submitArrangementUrl(journeyId))))
 
-    def findJourney(origin: Origin, encrypter: Encrypter)(jsonBody: String = JourneyJsonTemplates.`Arrangement Submitted - with upfront payment`(origin)(encrypter)): StubMapping =
+    def findJourney(
+        origin:            Origin,
+        encrypter:         Encrypter,
+        withAffordability: Boolean   = false
+    )(
+        jsonBody: String = JourneyJsonTemplates.`Arrangement Submitted - with upfront payment`(origin, withAffordability)(encrypter)
+    ): StubMapping =
       findByLatestSessionId(jsonBody)
   }
 
@@ -596,11 +612,11 @@ object EssttpBackend {
 
     type HttpStatus = Int
 
-    def startCaseUrl(journeyId: JourneyId) = s"/essttp-backend/pega-case/${journeyId.value}"
+    private def caseUrl(journeyId: JourneyId) = s"/essttp-backend/pega-case/${journeyId.value}"
 
     def stubStartCase(journeyId: JourneyId, result: Either[HttpStatus, StartCaseResponse]): StubMapping =
       stubFor(
-        post(startCaseUrl(journeyId))
+        post(caseUrl(journeyId))
           .willReturn(
             result.fold(
               aResponse().withStatus(_),
@@ -615,8 +631,24 @@ object EssttpBackend {
           )
       )
 
+    def stubGetCase(journeyId: JourneyId, result: Either[HttpStatus, GetCaseResponse]): StubMapping =
+      stubFor(
+        get(caseUrl(journeyId))
+          .willReturn(
+            result.fold(
+              aResponse().withStatus(_),
+              response => aResponse().withStatus(CREATED).withBody(
+                Json.toJson(response).toString
+              )
+            )
+          )
+      )
+
     def verifyStartCaseCalled(journeyId: JourneyId): Unit =
-      verify(exactly(1), postRequestedFor(urlPathEqualTo(startCaseUrl(journeyId))))
+      verify(exactly(1), postRequestedFor(urlPathEqualTo(caseUrl(journeyId))))
+
+    def verifyGetCaseCalled(journeyId: JourneyId): Unit =
+      verify(exactly(1), getRequestedFor(urlPathEqualTo(caseUrl(journeyId))))
 
   }
 }

@@ -16,12 +16,11 @@
 
 package models
 
-import enumeratum.EnumEntry
-import play.api.libs.functional.syntax._
-import enumeratum.Enum
-import play.api.libs.json.Format
 import cats.Eq
+import enumeratum.{Enum, EnumEntry}
 import essttp.rootmodel.ttp.eligibility.EligibilityRules
+import play.api.libs.functional.syntax._
+import play.api.libs.json.Format
 
 import scala.collection.immutable
 

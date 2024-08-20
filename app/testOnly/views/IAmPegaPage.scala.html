@@ -15,8 +15,9 @@
  *@
 
 @import play.api.mvc.Request
-@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import controllers.routes
 @import testOnly.views.html.TestOnlyLayout
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
   testOnlyLayout: TestOnlyLayout,
@@ -35,7 +36,7 @@
     <p class="govuk-body">Dummy PEGA page</p>
 
     @govukButton(Button(
-        href = Some("#"),
+        href = Some(routes.PegaController.callback.url),
         content = Text("Continue")
     ))
 

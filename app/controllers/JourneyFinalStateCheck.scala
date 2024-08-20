@@ -21,9 +21,8 @@ import cats.implicits.catsSyntaxEq
 import essttp.journey.model.Stage.AfterSubmittedArrangement
 import essttp.journey.model.{Journey, Stage}
 import essttp.rootmodel.TaxRegime
-import play.api.mvc.{Request, Result}
 import play.api.mvc.Results.Redirect
-import play.api.mvc.RequestHeader
+import play.api.mvc.{Request, RequestHeader, Result}
 import util.JourneyLogger
 
 import scala.concurrent.Future

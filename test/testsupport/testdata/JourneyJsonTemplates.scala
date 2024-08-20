@@ -320,9 +320,23 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
-  def `Has Checked Payment Plan`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Has Checked Payment Plan - No Affordability`(
+      origin:                   Origin,
+      eligibilityMinPlanLength: Int    = 1,
+      eligibilityMaxPlanLength: Int    = 12
+  )(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.hasCheckedPaymentPlan,
-    journeyInfo = JourneyInfo.hasCheckedPaymentPlan(origin.taxRegime, encrypter),
+    journeyInfo = JourneyInfo.hasCheckedPaymentPlan(withAffordability = false, origin.taxRegime, encrypter, eligibilityMinPlanLength = eligibilityMinPlanLength, eligibilityMaxPlanLength = eligibilityMaxPlanLength),
+    origin      = origin
+  )
+
+  def `Has Checked Payment Plan - With Affordability`(
+      origin:                   Origin,
+      eligibilityMinPlanLength: Int    = 1,
+      eligibilityMaxPlanLength: Int    = 12
+  )(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = StageInfo.hasCheckedPaymentPlan,
+    journeyInfo = JourneyInfo.hasCheckedPaymentPlan(withAffordability = true, origin.taxRegime, encrypter, eligibilityMinPlanLength = eligibilityMinPlanLength, eligibilityMaxPlanLength = eligibilityMaxPlanLength),
     origin      = origin
   )
 
@@ -383,9 +397,9 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
-  def `Arrangement Submitted - with upfront payment`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Arrangement Submitted - with upfront payment`(origin: Origin, withAffordability: Boolean = false)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.submittedArrangement,
-    journeyInfo = JourneyInfo.submittedArrangementWithUpfrontPayment(origin.taxRegime, encrypter),
+    journeyInfo = JourneyInfo.submittedArrangementWithUpfrontPayment(origin.taxRegime, encrypter, withAffordability),
     origin      = origin
   )
 

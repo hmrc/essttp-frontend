@@ -17,7 +17,7 @@
 package services
 
 import connectors.EssttpBackendConnector
-import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
+import essttp.journey.model.{Journey, PaymentPlanAnswers, UpfrontPaymentAnswers}
 import essttp.rootmodel.CanPayUpfront
 import essttp.rootmodel.dates.InitialPayment
 import essttp.rootmodel.dates.extremedates.{ExtremeDatesRequest, ExtremeDatesResponse}
@@ -33,9 +33,9 @@ import scala.concurrent.Future
 @Singleton
 class DatesService @Inject() (datesApiConnector: EssttpBackendConnector) {
 
-  def startDates(journey: Journey.AfterEnteredDayOfMonth)(implicit request: RequestHeader): Future[StartDatesResponse] = {
-    val dayOfMonth: PreferredDayOfMonth = PreferredDayOfMonth(journey.dayOfMonth.value)
-    val upfrontPaymentAnswers = DatesService.upfrontPaymentAnswersFromJourney(journey)
+  def startDates(journey: Either[Journey.AfterEnteredDayOfMonth, (Journey.AfterCheckedPaymentPlan, PaymentPlanAnswers.PaymentPlanNoAffordability)])(implicit request: RequestHeader): Future[StartDatesResponse] = {
+    val dayOfMonth: PreferredDayOfMonth = PreferredDayOfMonth(journey.fold(_.dayOfMonth, _._2.dayOfMonth).value)
+    val upfrontPaymentAnswers = DatesService.upfrontPaymentAnswersFromJourney(journey.map(_._1).merge)
     val initialPayment = DatesService.deriveInitialPayment(upfrontPaymentAnswers)
     val startDatesRequest: StartDatesRequest = StartDatesRequest(initialPayment, dayOfMonth)
     datesApiConnector.startDates(startDatesRequest)
@@ -57,7 +57,7 @@ object DatesService {
     case UpfrontPaymentAnswers.NoUpfrontPayment          => InitialPayment(value = false)
   }
 
-  private def upfrontPaymentAnswersFromJourney(journey: Journey.AfterEnteredDayOfMonth): UpfrontPaymentAnswers = journey match {
+  private def upfrontPaymentAnswersFromJourney(journey: Journey): UpfrontPaymentAnswers = journey match {
     case j: Journey.AfterUpfrontPaymentAnswers => j.upfrontPaymentAnswers
     case _                                     => Errors.throwServerErrorException("Trying to get upfront payment answers for journey before they exist..")
   }

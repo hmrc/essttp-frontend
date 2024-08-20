@@ -16,7 +16,7 @@
 
 package controllers
 
-import _root_.actions.Actions
+import actions.Actions
 import config.AppConfig
 import essttp.journey.JourneyConnector
 import essttp.journey.model.{SjRequest, SjResponse}

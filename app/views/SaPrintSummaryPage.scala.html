@@ -14,17 +14,17 @@
  * limitations under the License.
  *@
 
-@import requests.RequestSupport
-@import messages.Messages
+@import cats.syntax.eq._
+@import essttp.rootmodel.AmountInPence
+@import essttp.rootmodel.ttp.affordablequotes.PaymentPlan
+@import messages.{DateMessages, Messages}
 @import play.api.mvc.Request
 @import play.twirl.api.Html
+@import requests.RequestSupport
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-@import essttp.rootmodel.AmountInPence
-@import messages.DateMessages
-@import essttp.rootmodel.ttp.affordablequotes.PaymentPlan
-@import cats.syntax.eq._
-@import java.time.LocalDate
 @import views.html.helper.CSPNonce
+
+@import java.time.LocalDate
 
 @this(
         layout: templates.Layout,

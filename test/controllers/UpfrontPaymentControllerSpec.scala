@@ -58,8 +58,6 @@ class UpfrontPaymentControllerSpec extends ItSpec {
             stubCommonActions()
             EssttpBackend.WhyCannotPayInFull.findJourney(testCrypto, origin)()
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
             val result: Future[Result] = controller.canYouMakeAnUpfrontPayment(fakeRequest)
             val pageContent: String = contentAsString(result)
             val doc: Document = Jsoup.parse(pageContent)
@@ -84,8 +82,6 @@ class UpfrontPaymentControllerSpec extends ItSpec {
           s"[$regime journey] should prepopulate the form when user navigates back and they have a chosen way to pay in their journey" in {
             stubCommonActions()
             EssttpBackend.CanPayUpfront.findJourney(testCrypto, origin)()
-
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
             val result: Future[Result] = controller.canYouMakeAnUpfrontPayment(fakeRequest)
             val doc: Document = Jsoup.parse(contentAsString(result))
@@ -204,7 +200,6 @@ class UpfrontPaymentControllerSpec extends ItSpec {
             stubCommonActions()
             EssttpBackend.CanPayUpfront.findJourney(testCrypto, origin)()
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result: Future[Result] = controller.upfrontPaymentAmount(fakeRequest)
             val pageContent: String = contentAsString(result)
             val doc: Document = Jsoup.parse(pageContent)
@@ -233,7 +228,6 @@ class UpfrontPaymentControllerSpec extends ItSpec {
             stubCommonActions()
             EssttpBackend.CanPayUpfront.findJourney(testCrypto)(JourneyJsonTemplates.`Answered Can Pay Upfront - No`(origin))
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result: Future[Result] = controller.upfrontPaymentAmount(fakeRequest)
 
             status(result) shouldBe Status.SEE_OTHER
@@ -244,7 +238,6 @@ class UpfrontPaymentControllerSpec extends ItSpec {
             stubCommonActions()
             EssttpBackend.UpfrontPaymentAmount.findJourney(testCrypto, origin)()
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result: Future[Result] = controller.upfrontPaymentAmount(fakeRequest)
 
             RequestAssertions.assertGetRequestOk(result)
@@ -410,7 +403,6 @@ class UpfrontPaymentControllerSpec extends ItSpec {
                   expectedRemainingAmountString:      String
               ) = {
                 stubActions()
-                val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
                 val result: Future[Result] = controller.upfrontPaymentSummary(fakeRequest)
                 val pageContent: String = contentAsString(result)
@@ -478,7 +470,6 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
               def test(stubActions: () => Unit) = {
                 stubActions()
-                val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
                 val result: Future[Result] = controller.upfrontPaymentSummary(fakeRequest)
                 status(result) shouldBe SEE_OTHER
@@ -509,8 +500,6 @@ class UpfrontPaymentControllerSpec extends ItSpec {
         }
 
         "GET /upfront-payment-summary/change" - {
-
-          val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
           s"[$regime journey] should redirect to the correct page and update the cookie session with the pageId" - {
 

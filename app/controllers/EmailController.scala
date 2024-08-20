@@ -27,8 +27,8 @@ import essttp.journey.model.Journey
 import essttp.journey.model.Journey.AfterEmailAddressSelectedToBeVerified
 import essttp.rootmodel.Email
 import essttp.utils.Errors
-import paymentsEmailVerification.models.{EmailVerificationResult, EmailVerificationState}
 import paymentsEmailVerification.models.api.StartEmailVerificationJourneyResponse
+import paymentsEmailVerification.models.{EmailVerificationResult, EmailVerificationState}
 import play.api.data.Form
 import play.api.mvc._
 import services.{EmailVerificationService, JourneyService}

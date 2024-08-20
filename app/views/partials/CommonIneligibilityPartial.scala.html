@@ -14,14 +14,14 @@
  * limitations under the License.
  *@
 
+@import cats.syntax.eq._
 @import essttp.rootmodel.TaxRegime
 @import messages.Messages
+@import models.Languages.English
 @import play.api.mvc.Request
 @import play.twirl.api.Html
 @import requests.RequestSupport
 @import views.html.partials.{IfCallingFromOutsideUKPartial, IfYouNeedExtraSupportPartial}
-@import models.Languages.English
-@import cats.implicits.catsSyntaxEq
 
 @this(requestSupport: RequestSupport, ifYouNeedExtraSupportPartial: IfYouNeedExtraSupportPartial, ifCallingFromOutsideUKPartial: IfCallingFromOutsideUKPartial)
 

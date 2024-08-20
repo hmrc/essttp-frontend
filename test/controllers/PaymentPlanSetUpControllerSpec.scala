@@ -23,15 +23,12 @@ import org.jsoup.nodes.{Document, Element}
 import org.scalatest.Assertion
 import play.api.libs.json.{JsBoolean, JsObject, Json}
 import play.api.mvc.Result
-import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.{ItSpec, JsonUtils}
-import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.ContentAssertions.assertKeyAndValue
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.EssttpBackend
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls}
-import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
 import scala.jdk.CollectionConverters.IterableHasAsScala
@@ -57,8 +54,6 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
               isEmailAddressRequired: Boolean
           ): Unit = {
             stubActions()
-
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
             val result: Future[Result] = taxRegime match {
               case TaxRegime.Epaye => controller.epayePaymentPlanSetUp(fakeRequest)
@@ -172,14 +167,25 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
             isEmailAddressRequired = false
           )
         }
+
+        "return the confirmation page with correct content when the user had gone through an affordability journey" in {
+          test(
+            { () =>
+              stubCommonActions()
+              EssttpBackend.SubmitArrangement.findJourney(origin, testCrypto, withAffordability = true)()
+              ()
+            },
+            hasUpfrontPayment      = true,
+            isEmailAddressRequired = true
+          )
+        }
+
       }
 
       s"[taxRegime: ${taxRegime.toString}] GET /payment-plan-print-summary should" - {
         "return the print payment schedule page with correct content (with upfront payment)" in {
           stubCommonActions()
           EssttpBackend.SubmitArrangement.findJourney(origin, testCrypto)()
-
-          val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
           val result: Future[Result] = controller.epayeVatPrintSummary(fakeRequest)
           val pageContent: String = contentAsString(result)
@@ -219,8 +225,6 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
             JourneyJsonTemplates.`Arrangement Submitted - No upfront payment`(origin)
           )
 
-          val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
           val result: Future[Result] = controller.saPrintSummary(fakeRequest)
           val pageContent: String = contentAsString(result)
           val doc: Document = Jsoup.parse(pageContent)
@@ -247,6 +251,42 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
 
           upfrontPaymentSummaryListRows.size shouldBe 1
           assertKeyAndValue(upfrontPaymentSummaryListRows(0), ("Can you make an upfront payment?", "No"))
+
+          assertMonthlyPaymentSummaryList(monthlyPaymentSummaryListRows)
+          assertPrintLink(doc)
+        }
+
+        "return the print payment schedule page with correct content (affordability)" in {
+          stubCommonActions()
+          EssttpBackend.SubmitArrangement.findJourney(origin, testCrypto, withAffordability = true)()
+
+          val result: Future[Result] = controller.epayeVatPrintSummary(fakeRequest)
+          val pageContent: String = contentAsString(result)
+          val doc: Document = Jsoup.parse(pageContent)
+
+          RequestAssertions.assertGetRequestOk(result)
+          ContentAssertions.commonPageChecks(
+            doc,
+            expectedH1              = expectedH1PaymentPlanPrintPage,
+            shouldBackLinkBePresent = true,
+            expectedSubmitUrl       = None,
+            regimeBeingTested       = Some(taxRegime)
+          )
+
+          val subheadings = doc.select(".govuk-heading-m").asScala.toList
+          subheadings.size shouldBe 1
+          subheadings(0).text() shouldBe "Monthly payments"
+
+          val allSummaryLists = doc.select(".govuk-summary-list").asScala.toList
+          val paymentReferenceSummaryListRows = allSummaryLists(0).select(".govuk-summary-list__row").asScala.toList
+          val upfrontPaymentSummaryListRows = allSummaryLists(1).select(".govuk-summary-list__row").asScala.toList
+          val monthlyPaymentSummaryListRows = allSummaryLists(2).select(".govuk-summary-list__row").asScala.toList
+
+          assertPaymentReference(paymentReferenceSummaryListRows)
+
+          upfrontPaymentSummaryListRows.size shouldBe 2
+          assertKeyAndValue(upfrontPaymentSummaryListRows(0), ("Can you make an upfront payment?", "Yes"))
+          assertKeyAndValue(upfrontPaymentSummaryListRows(1), ("Upfront payment Taken within 6 working days", "£2"))
 
           assertMonthlyPaymentSummaryList(monthlyPaymentSummaryListRows)
           assertPrintLink(doc)
@@ -285,8 +325,6 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
           isEmailAddressRequired: Boolean
       ): Unit = {
         stubActions()
-
-        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
         val result: Future[Result] = controller.saPaymentPlanSetUp(fakeRequest)
 
@@ -402,8 +440,6 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
       stubCommonActions()
       EssttpBackend.SubmitArrangement.findJourney(origin, testCrypto)()
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
       val result: Future[Result] = controller.epayeVatPrintSummary(fakeRequest)
       val pageContent: String = contentAsString(result)
       val doc: Document = Jsoup.parse(pageContent)
@@ -445,8 +481,6 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
       EssttpBackend.SubmitArrangement.findJourney(origin, testCrypto)(
         JourneyJsonTemplates.`Arrangement Submitted - No upfront payment`(origin)
       )
-
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
       val result: Future[Result] = controller.saPrintSummary(fakeRequest)
       val pageContent: String = contentAsString(result)
@@ -530,8 +564,6 @@ class PaymentPlanSetUpControllerEmailDisabledSpec extends ItSpec {
             ): Unit = {
               stubActions()
 
-              val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
               val result: Future[Result] = taxRegime match {
                 case TaxRegime.Epaye => controller.epayePaymentPlanSetUp(fakeRequest)
                 case TaxRegime.Vat   => controller.vatPaymentPlanSetUp(fakeRequest)
@@ -589,8 +621,6 @@ class PaymentPlanSetUpControllerEmailDisabledSpec extends ItSpec {
             stubActions: () => Unit
         ): Unit = {
           stubActions()
-
-          val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
           val result: Future[Result] = controller.saPaymentPlanSetUp(fakeRequest)
 

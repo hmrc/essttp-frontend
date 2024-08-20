@@ -25,13 +25,10 @@ import models.EligibilityReqIdentificationFlag
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
-import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.{CombinationsHelper, ItSpec}
-import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend, Ttp}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll, TtpJsonResponses}
-import uk.gov.hmrc.http.SessionKeys
 
 class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper {
   implicit val eligibilityReqIdentificationFlag: EligibilityReqIdentificationFlag = app.injector.instanceOf[AppConfig].eligibilityReqIdentificationFlag
@@ -206,7 +203,6 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
             Ttp.Eligibility.stubRetrieveEligibility(origin.taxRegime)(eligibilityCheckResponseJson)
             EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(TdAll.journeyId, updatedJourneyJson)
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result = controller.determineEligibility(fakeRequest)
 
             status(result) shouldBe Status.SEE_OTHER
@@ -280,7 +276,6 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
               Ttp.Eligibility.stubRetrieveEligibility(origin.taxRegime)(eligibilityCheckResponseJson)
               EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(TdAll.journeyId, updatedJourneyJson)
 
-              val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
               val result = controller.determineEligibility(fakeRequest)
 
               status(result) shouldBe Status.SEE_OTHER
@@ -314,8 +309,6 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
             EssttpBackend.DetermineTaxId.findJourney(origin)()
             Ttp.Eligibility.stubRetrieveEligibility(taxRegime)(eligibilityResponseJson)
             EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(TdAll.journeyId, JourneyJsonTemplates.`Eligibility Checked - Ineligible - DmSpecialOfficeProcessingRequiredCDCS`(origin))
-
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
             val error = intercept[Exception](controller.determineEligibility(fakeRequest).futureValue)
             error.getMessage should include(s"dmSpecialOfficeProcessingRequiredCDCS ineligibility reason not relevant to ${taxRegime.entryName}")
@@ -354,7 +347,6 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
               JourneyJsonTemplates.`Eligibility Checked - Eligible`()
             )
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result = controller.determineEligibility(fakeRequest)
 
             status(result) shouldBe Status.SEE_OTHER
@@ -423,7 +415,6 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
         JourneyJsonTemplates.`Eligibility Checked - Eligible`()
       )
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.determineEligibility(fakeRequest)
 
       status(result) shouldBe Status.SEE_OTHER
@@ -488,7 +479,6 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
         JourneyJsonTemplates.`Eligibility Checked - Eligible`()
       )
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.determineEligibility(fakeRequest)
 
       status(result) shouldBe Status.SEE_OTHER
@@ -535,7 +525,6 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.determineEligibility(fakeRequest)
 
       status(result) shouldBe Status.SEE_OTHER
@@ -547,7 +536,6 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       stubCommonActions()
       EssttpBackend.StartJourney.findJourney()
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.determineEligibility(fakeRequest)
 
       status(result) shouldBe Status.SEE_OTHER
@@ -566,7 +554,6 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
             EssttpBackend.DetermineTaxId.findJourney(origin)()
             Ttp.Eligibility.stubServiceUnavailableRetrieveEligibility()
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val error = intercept[Exception](controller.determineEligibility(fakeRequest).futureValue)
             error.getMessage should include("The future returned an exception of type: uk.gov.hmrc.http.UpstreamErrorResponse")
 
@@ -580,7 +567,6 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
             EssttpBackend.DetermineTaxId.findJourney(origin)()
             Ttp.Eligibility.stub422RetrieveEligibility()
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result = controller.determineEligibility(fakeRequest)
             status(result) shouldBe Status.SEE_OTHER
 
@@ -606,7 +592,6 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       EssttpBackend.DetermineTaxId.findJourney(Origins.Vat.Bta)()
       EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(TdAll.journeyId, JourneyJsonTemplates.`Eligibility Checked - Ineligible - MultipleReasons - debt too low and old`(Origins.Vat.Bta))
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.determineEligibility(fakeRequest)
 
       status(result) shouldBe Status.SEE_OTHER
@@ -622,7 +607,6 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       EssttpBackend.DetermineTaxId.findJourney(Origins.Epaye.Bta)()
       EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(TdAll.journeyId, JourneyJsonTemplates.`Eligibility Checked - Ineligible - MultipleReasons - debt too low and old`())
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result = controller.determineEligibility(fakeRequest)
 
       status(result) shouldBe Status.SEE_OTHER

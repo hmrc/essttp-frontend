@@ -21,14 +21,11 @@ import essttp.journey.model.Origins
 import essttp.rootmodel.{EmpRef, SaUtr, Vrn}
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
-import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
-import testsupport.TdRequest.FakeRequestOps
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend}
 import testsupport.testdata.{JourneyJsonTemplates, TdAll}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
-import uk.gov.hmrc.http.SessionKeys
 
 class DetermineTaxIdControllerSpec extends ItSpec {
 
@@ -45,7 +42,6 @@ class DetermineTaxIdControllerSpec extends ItSpec {
         stubCommonActions()
         EssttpBackend.DetermineTaxId.findJourney(Origins.Epaye.Bta)()
 
-        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
         val result = controller.determineTaxId()(fakeRequest)
 
         status(result) shouldBe Status.SEE_OTHER
@@ -68,7 +64,6 @@ class DetermineTaxIdControllerSpec extends ItSpec {
           JourneyJsonTemplates.`Computed Tax Id`(origin       = Origins.Epaye.Bta, taxReference = "NumberRef")
         )
 
-        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
         val result = controller.determineTaxId()(fakeRequest)
 
         status(result) shouldBe Status.SEE_OTHER
@@ -89,7 +84,6 @@ class DetermineTaxIdControllerSpec extends ItSpec {
         stubCommonActions(authAllEnrolments = Some(enrolments))
         EssttpBackend.StartJourney.findJourney()
 
-        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
         val result = controller.determineTaxId()(fakeRequest)
 
         status(result) shouldBe Status.SEE_OTHER
@@ -139,8 +133,6 @@ class DetermineTaxIdControllerSpec extends ItSpec {
               JourneyJsonTemplates.`Computed Tax Id`(origin       = Origins.Epaye.Bta, taxReference = "NumberRef")
             )
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
             a[RuntimeException] shouldBe thrownBy(await(controller.determineTaxId()(fakeRequest)))
           }
 
@@ -150,7 +142,6 @@ class DetermineTaxIdControllerSpec extends ItSpec {
         stubCommonActions(authAllEnrolments = Some(Set.empty))
         EssttpBackend.StartJourney.findJourney()
 
-        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
         val result = controller.determineTaxId()(fakeRequest)
 
         status(result) shouldBe Status.SEE_OTHER
@@ -184,7 +175,6 @@ class DetermineTaxIdControllerSpec extends ItSpec {
         stubCommonActions(authAllEnrolments = Some(Set(TdAll.vatEnrolment)))
         EssttpBackend.DetermineTaxId.findJourney(Origins.Vat.Bta)(JourneyJsonTemplates.`Computed Tax Id`(Origins.Vat.Bta, "101747001"))
 
-        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
         val result = controller.determineTaxId()(fakeRequest)
 
         status(result) shouldBe Status.SEE_OTHER
@@ -206,7 +196,6 @@ class DetermineTaxIdControllerSpec extends ItSpec {
           JourneyJsonTemplates.`Computed Tax Id`(origin       = Origins.Vat.Bta, taxReference = "Ref")
         )
 
-        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
         val result = controller.determineTaxId()(fakeRequest)
 
         status(result) shouldBe Status.SEE_OTHER
@@ -220,8 +209,6 @@ class DetermineTaxIdControllerSpec extends ItSpec {
         stubCommonActions(authAllEnrolments = Some(enrolments))
         EssttpBackend.StartJourney.findJourney(Origins.Vat.GovUk)
 
-        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
         a[RuntimeException] shouldBe thrownBy(await(controller.determineTaxId()(fakeRequest)))
       }
 
@@ -229,7 +216,6 @@ class DetermineTaxIdControllerSpec extends ItSpec {
         stubCommonActions(authAllEnrolments = Some(Set.empty))
         EssttpBackend.StartJourney.findJourney(Origins.Vat.GovUk)
 
-        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
         val result = controller.determineTaxId()(fakeRequest)
 
         status(result) shouldBe Status.SEE_OTHER
@@ -262,7 +248,6 @@ class DetermineTaxIdControllerSpec extends ItSpec {
         stubCommonActions(authAllEnrolments = Some(Set(TdAll.saEnrolment)))
         EssttpBackend.DetermineTaxId.findJourney(Origins.Sa.Bta)(JourneyJsonTemplates.`Computed Tax Id`(Origins.Sa.Bta, "1234567895"))
 
-        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
         val result = controller.determineTaxId()(fakeRequest)
 
         status(result) shouldBe Status.SEE_OTHER
@@ -284,7 +269,6 @@ class DetermineTaxIdControllerSpec extends ItSpec {
           JourneyJsonTemplates.`Computed Tax Id`(origin       = Origins.Sa.Bta, taxReference = "Ref")
         )
 
-        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
         val result = controller.determineTaxId()(fakeRequest)
 
         status(result) shouldBe Status.SEE_OTHER
@@ -298,8 +282,6 @@ class DetermineTaxIdControllerSpec extends ItSpec {
         stubCommonActions(authAllEnrolments = Some(enrolments))
         EssttpBackend.StartJourney.findJourney(Origins.Sa.GovUk)
 
-        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
         a[RuntimeException] shouldBe thrownBy(await(controller.determineTaxId()(fakeRequest)))
       }
 
@@ -307,7 +289,6 @@ class DetermineTaxIdControllerSpec extends ItSpec {
         stubCommonActions(authAllEnrolments = Some(Set.empty))
         EssttpBackend.StartJourney.findJourney(Origins.Sa.GovUk)
 
-        val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
         val result = controller.determineTaxId()(fakeRequest)
 
         status(result) shouldBe Status.SEE_OTHER

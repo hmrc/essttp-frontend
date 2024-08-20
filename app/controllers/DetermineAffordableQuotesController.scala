@@ -16,11 +16,12 @@
 
 package controllers
 
-import _root_.actions.Actions
+import actions.Actions
 import controllers.JourneyFinalStateCheck.finalStateCheckF
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
-import essttp.journey.model.Journey
+import essttp.journey.model.{Journey, PaymentPlanAnswers}
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
+import essttp.utils.Errors
 import play.api.mvc._
 import services.{JourneyService, TtpService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -41,18 +42,31 @@ class DetermineAffordableQuotesController @Inject() (
 
   val retrieveAffordableQuotes: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     request.journey match {
-      case j: Journey.BeforeStartDatesResponse => logErrorAndRouteToDefaultPageF(j)
-      case j: Journey.AfterStartDatesResponse  => finalStateCheckF(j, determineAffordableQuotesAndUpdateJourney(j, request.eligibilityCheckResult))
+      case j: Journey.BeforeStartDatesResponse =>
+        logErrorAndRouteToDefaultPageF(j)
+      case j: Journey.AfterStartDatesResponse =>
+        finalStateCheckF(j, determineAffordableQuotesAndUpdateJourney(Left(j), request.eligibilityCheckResult))
+      case j: Journey.AfterCheckedPaymentPlan =>
+        j.paymentPlanAnswers match {
+          case p: PaymentPlanAnswers.PaymentPlanNoAffordability =>
+            finalStateCheckF(j, determineAffordableQuotesAndUpdateJourney(Right(j -> p), request.eligibilityCheckResult))
+          case _: PaymentPlanAnswers.PaymentPlanAfterAffordability =>
+            Errors.throwServerErrorException("Not expecting to retrieve affordable quotes when payment plan has been checked on affordability journey")
+        }
+
+      case _: Journey.AfterStartedPegaCase =>
+        Errors.throwServerErrorException("Not expecting to retrieve affordable quotes when started PEGA case")
+
     }
   }
 
   def determineAffordableQuotesAndUpdateJourney(
-      journey:                Journey.AfterStartDatesResponse,
+      journey:                Either[Journey.AfterStartDatesResponse, (Journey.AfterCheckedPaymentPlan, PaymentPlanAnswers.PaymentPlanNoAffordability)],
       eligibilityCheckResult: EligibilityCheckResult
   )(implicit request: Request[_]): Future[Result] = {
     for {
       affordableQuotes <- ttpService.determineAffordableQuotes(journey, eligibilityCheckResult)
-      updatedJourney <- journeyService.updateAffordableQuotes(journey.id, affordableQuotes)
+      updatedJourney <- journeyService.updateAffordableQuotes(journey.fold(_.id, _._1.id), affordableQuotes)
     } yield Routing.redirectToNext(routes.DetermineAffordableQuotesController.retrieveAffordableQuotes, updatedJourney, submittedValueUnchanged = false)
   }
 

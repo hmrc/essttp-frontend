@@ -21,9 +21,9 @@ import com.google.inject.{Inject, Singleton}
 import config.AppConfig
 import play.api.Logging
 import play.api.mvc.{ActionFilter, Result, Results}
+import views.Views
 
 import scala.concurrent.{ExecutionContext, Future}
-import views.Views
 
 @Singleton
 class ShutteringActionFilter @Inject() (

@@ -157,9 +157,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
           s"[$regime journey] return 200 and display the 'about your bank account' page" in {
             stubCommonActions()
-            EssttpBackend.HasCheckedPlan.findJourney(testCrypto, origin)()
-
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+            EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, origin)()
 
             val result: Future[Result] = controller.detailsAboutBankAccount(fakeRequest)
             val pageContent: String = contentAsString(result)
@@ -208,8 +206,6 @@ class BankDetailsControllerSpec extends ItSpec {
                     stubCommonActions()
                     EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)(wiremockJson)
 
-                    val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
                     val result: Future[Result] = controller.detailsAboutBankAccount(fakeRequest)
                     val pageContent: String = contentAsString(result)
                     val doc: Document = Jsoup.parse(pageContent)
@@ -239,7 +235,7 @@ class BankDetailsControllerSpec extends ItSpec {
                 }
 
               stubCommonActions()
-              EssttpBackend.HasCheckedPlan.findJourney(testCrypto, origin)()
+              EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, origin)()
               EssttpBackend.EnteredDetailsAboutBankAccount.stubUpdateEnteredDetailsAboutBankAccount(TdAll.journeyId, updatedJourneyJson)
 
               val fakeRequest = FakeRequest(
@@ -309,7 +305,7 @@ class BankDetailsControllerSpec extends ItSpec {
               case (formData, expectedErrors, populatedRadioId) =>
                 s"[$regime journey] show correct error messages when ${formData.filter(_._2.isEmpty).map(_._1).mkString("&")} is empty" in {
                   stubCommonActions()
-                  EssttpBackend.HasCheckedPlan.findJourney(testCrypto, origin)()
+                  EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, origin)()
 
                   testFormError(controller.detailsAboutBankAccountSubmit)(formData: _*)(expectedErrors, { doc =>
                     val radioInputs = doc.select(".govuk-radios__input")
@@ -334,8 +330,6 @@ class BankDetailsControllerSpec extends ItSpec {
           s"[$regime journey] should return 200 and the bank details page" in {
             stubCommonActions()
             EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)()
-
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
             val result: Future[Result] = controller.enterBankDetails(fakeRequest)
             val pageContent: String = contentAsString(result)
@@ -379,8 +373,6 @@ class BankDetailsControllerSpec extends ItSpec {
             stubCommonActions()
             EssttpBackend.DirectDebitDetails.findJourney(testCrypto, origin)()
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
             val result: Future[Result] = controller.enterBankDetails(fakeRequest)
             val pageContent: String = contentAsString(result)
             val doc: Document = Jsoup.parse(pageContent)
@@ -404,8 +396,6 @@ class BankDetailsControllerSpec extends ItSpec {
             EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)(
               JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = false, origin)
             )
-
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
             val result: Future[Result] = controller.enterBankDetails(fakeRequest)
             status(result) shouldBe SEE_OTHER
@@ -442,9 +432,7 @@ class BankDetailsControllerSpec extends ItSpec {
               JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = false, origin)
             )
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId").withMethod("POST")
-
-            val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
+            val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest.withMethod("POST"))
             status(result) shouldBe SEE_OTHER
             redirectLocation(result) shouldBe Some(routes.BankDetailsController.cannotSetupDirectDebitOnlinePage.url)
           }
@@ -1134,8 +1122,7 @@ class BankDetailsControllerSpec extends ItSpec {
             stubCommonActions(barsLockoutExpiry = None)
             EssttpBackend.CanPayUpfront.findJourney(testCrypto, origin)()
 
-            val request = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-            val result = controller.barsLockout(request)
+            val result = controller.barsLockout(fakeRequest)
             status(result) shouldBe SEE_OTHER
             redirectLocation(result) shouldBe Some(routes.UpfrontPaymentController.upfrontPaymentAmount.url)
 
@@ -1151,8 +1138,7 @@ class BankDetailsControllerSpec extends ItSpec {
             stubCommonActions(barsLockoutExpiry = Some(expiry))
             EssttpBackend.DetermineTaxId.findJourney(origin)(JourneyJsonTemplates.`Computed Tax Id`(origin))
 
-            val request = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-            val result: Future[Result] = controller.barsLockout(request)
+            val result: Future[Result] = controller.barsLockout(fakeRequest)
             status(result) shouldBe Status.OK
 
             val pageContent: String = contentAsString(result)
@@ -1183,7 +1169,6 @@ class BankDetailsControllerSpec extends ItSpec {
             stubCommonActions()
             EssttpBackend.DirectDebitDetails.findJourney(testCrypto, origin)()
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
             val result: Future[Result] = controller.checkBankDetails(fakeRequest)
 
             RequestAssertions.assertGetRequestOk(result)
@@ -1232,8 +1217,6 @@ class BankDetailsControllerSpec extends ItSpec {
             EssttpBackend.DirectDebitDetails.findJourney(testCrypto, origin)()
             EssttpBackend.ConfirmedDirectDebitDetails.stubUpdateConfirmDirectDebitDetails(TdAll.journeyId, JourneyJsonTemplates.`Confirmed Direct Debit Details`(origin))
 
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-
             val result: Future[Result] = controller.checkBankDetailsSubmit(fakeRequest)
             status(result) shouldBe Status.SEE_OTHER
             redirectLocation(result) shouldBe Some(PageUrls.termsAndConditionsUrl)
@@ -1247,7 +1230,6 @@ class BankDetailsControllerSpec extends ItSpec {
             EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)(
               JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = false, origin)
             )
-            val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
             val result: Future[Result] = controller.cannotSetupDirectDebitOnlinePage(fakeRequest)
             RequestAssertions.assertGetRequestOk(result)

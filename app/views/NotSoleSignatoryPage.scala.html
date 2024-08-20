@@ -14,15 +14,14 @@
  * limitations under the License.
  *@
 
-@import config.AppConfig
+@import  cats.implicits.catsSyntaxEq
 @import essttp.rootmodel.TaxRegime
 @import messages.Messages
+@import models.Languages.English
 @import play.api.mvc.Request
 @import play.twirl.api.Html
 @import requests.RequestSupport
 @import views.html.partials.{IfCallingFromOutsideUKPartial, IfYouNeedExtraSupportPartial}
-@import models.Languages.English
-@import cats.implicits.catsSyntaxEq
 
 @this(
         layout: templates.Layout,
