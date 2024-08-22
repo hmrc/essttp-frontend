@@ -117,4 +117,7 @@ class ItSpec
 
   val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
+  def fakeRequestWithPath(path: String) =
+    FakeRequest("GET", path).withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
 }

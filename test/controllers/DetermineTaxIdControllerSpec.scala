@@ -16,7 +16,7 @@
 
 package controllers
 
-import actions.EnrolmentDef
+import essttp.enrolments.EnrolmentDef
 import essttp.journey.model.Origins
 import essttp.rootmodel.{EmpRef, SaUtr, Vrn}
 import play.api.http.Status

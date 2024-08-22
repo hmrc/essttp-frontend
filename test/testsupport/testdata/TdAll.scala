@@ -16,7 +16,7 @@
 
 package testsupport.testdata
 
-import actions.EnrolmentDef
+import essttp.enrolments.EnrolmentDef
 import connectors.CallEligibilityApiRequest
 import essttp.journey.model.{CorrelationId, JourneyId}
 import essttp.rootmodel.bank.{AccountName, AccountNumber, BankDetails, DetailsAboutBankAccount, SortCode, TypeOfBankAccount, TypesOfBankAccount}

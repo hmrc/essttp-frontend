@@ -148,4 +148,4 @@ GET    /information-missing                                 controllers.MissingI
 GET    /determine-next                                      controllers.MissingInfoController.determineNextPage
 
 GET    /pega-start                                          controllers.PegaController.startPegaJourney
-GET    /pega-callback                                       controllers.PegaController.callback
+GET    /pega-callback                                       controllers.PegaController.callback(regime: TaxRegime)

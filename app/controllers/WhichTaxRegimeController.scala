@@ -16,8 +16,9 @@
 
 package controllers
 
-import actions.{Actions, EnrolmentDef}
+import actions.Actions
 import config.AppConfig
+import essttp.enrolments.EnrolmentDef
 import essttp.rootmodel.TaxRegime
 import models.forms.TaxRegimeForm
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}

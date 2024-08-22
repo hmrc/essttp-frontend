@@ -69,19 +69,19 @@ class LandingController @Inject() (
       as.default(_ => Redirect(appConfig.Urls.saSuppUrl))
     }
 
-  val epayeLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
+  val epayeLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
     checkNotShuttered(TaxRegime.Epaye) {
       handleLandingPageContinue(routes.StartJourneyController.startDetachedEpayeJourney)
     }
   }
 
-  val vatLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
+  val vatLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
     checkNotShuttered(TaxRegime.Vat) {
       handleLandingPageContinue(routes.StartJourneyController.startDetachedVatJourney)
     }
   }
 
-  val saLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
+  val saLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
     checkNotShuttered(TaxRegime.Sa) {
       handleLandingPageContinue(routes.StartJourneyController.startDetachedSaJourney)
     }

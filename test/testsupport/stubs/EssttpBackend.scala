@@ -31,7 +31,7 @@ import essttp.rootmodel._
 import essttp.rootmodel.pega.{GetCaseResponse, StartCaseResponse}
 import paymentsEmailVerification.models.EmailVerificationResult
 import play.api.http.Status._
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import testsupport.stubs.WireMockHelpers._
 import testsupport.testdata.{JourneyJsonTemplates, TdAll, TdJsonBodies}
 import uk.gov.hmrc.crypto.Encrypter
@@ -49,7 +49,13 @@ object EssttpBackend {
         .withBody(jsonBody))
   )
 
-  def verifyFindByLatestSessionId(): Unit = verify(postRequestedFor(urlPathEqualTo(findByLatestSessionIdUrl)))
+  def findByLatestSessionNotFound(): StubMapping = stubFor(
+    get(urlPathEqualTo(findByLatestSessionIdUrl))
+      .willReturn(aResponse()
+        .withStatus(NOT_FOUND))
+  )
+
+  def verifyFindByLatestSessionId(): Unit = verify(getRequestedFor(urlPathEqualTo(findByLatestSessionIdUrl)))
 
   object BarsVerifyStatusStub {
     private def noLockoutBody(numberOfAttempts: Int) = s"""{
@@ -612,7 +618,19 @@ object EssttpBackend {
 
     type HttpStatus = Int
 
-    private def caseUrl(journeyId: JourneyId) = s"/essttp-backend/pega-case/${journeyId.value}"
+    private def caseUrl(journeyId: JourneyId) = s"/essttp-backend/pega/case/${journeyId.value}"
+
+    private def saveJourneyUrl(journeyId: JourneyId): String = s"/essttp-backend/pega/journey/${journeyId.value}"
+
+    private def recreatedSessionUrl(taxRegime: TaxRegime): String = {
+      val regime = taxRegime match {
+        case TaxRegime.Epaye => "epaye"
+        case TaxRegime.Vat   => "vat"
+        case TaxRegime.Sa    => "sa"
+      }
+
+      s"/essttp-backend/pega/recreate-session/$regime"
+    }
 
     def stubStartCase(journeyId: JourneyId, result: Either[HttpStatus, StartCaseResponse]): StubMapping =
       stubFor(
@@ -644,11 +662,42 @@ object EssttpBackend {
           )
       )
 
+    def stubSaveJourneyForPega(journeyId: JourneyId, result: Either[HttpStatus, Unit]): StubMapping =
+      stubFor(
+        post(saveJourneyUrl(journeyId))
+          .willReturn(
+            result.fold(
+              aResponse().withStatus(_),
+              _ => aResponse().withStatus(OK)
+            )
+          )
+      )
+
+    def stubRecreateSession(taxRegime: TaxRegime, result: Either[HttpStatus, JsValue]): StubMapping =
+      stubFor(
+        get(recreatedSessionUrl(taxRegime))
+          .willReturn(
+            result.fold(
+              aResponse().withStatus(_),
+              response => aResponse().withStatus(OK).withBody(response.toString())
+            )
+          )
+      )
+
     def verifyStartCaseCalled(journeyId: JourneyId): Unit =
       verify(exactly(1), postRequestedFor(urlPathEqualTo(caseUrl(journeyId))))
 
     def verifyGetCaseCalled(journeyId: JourneyId): Unit =
       verify(exactly(1), getRequestedFor(urlPathEqualTo(caseUrl(journeyId))))
+
+    def verifySaveJourneyForPegaCalled(journeyId: JourneyId): Unit =
+      verify(exactly(1), postRequestedFor(urlPathEqualTo(saveJourneyUrl(journeyId))))
+
+    def verifyRecreateSessionCalled(taxRegime: TaxRegime): Unit =
+      verify(exactly(1), getRequestedFor(urlPathEqualTo(recreatedSessionUrl(taxRegime))))
+
+    def verifyRecreateSessionNotCalled(taxRegime: TaxRegime): Unit =
+      verify(exactly(0), getRequestedFor(urlPathEqualTo(recreatedSessionUrl(taxRegime))))
 
   }
 }
