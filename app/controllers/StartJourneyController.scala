@@ -35,20 +35,20 @@ class StartJourneyController @Inject() (
     appConfig:        AppConfig
 )(implicit ec: ExecutionContext) extends FrontendController(cc) with Logging {
 
-  def startGovukEpayeJourney: Action[AnyContent] = as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
+  def startGovukEpayeJourney: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
     journeyConnector.Epaye.startJourneyGovUk(SjRequest.Epaye.Empty())
       .map(_ => Redirect(routes.DetermineTaxIdController.determineTaxId.url))
   }
 
   def startGovukVatJourney: Action[AnyContent] =
-    as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
+    as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
       journeyConnector.Vat.startJourneyGovUk(SjRequest.Vat.Empty())
         .map(_ => Redirect(routes.DetermineTaxIdController.determineTaxId.url))
     }
 
   def startGovukSaJourney: Action[AnyContent] =
     if (appConfig.saEnabled) {
-      as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
+      as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
         journeyConnector.Sa.startJourneyGovUk(SjRequest.Sa.Empty())
           .map(_ => Redirect(routes.DetermineTaxIdController.determineTaxId.url))
       }
@@ -56,20 +56,20 @@ class StartJourneyController @Inject() (
       as.default(_ => Redirect(appConfig.Urls.saSuppUrl))
     }
 
-  def startDetachedEpayeJourney: Action[AnyContent] = as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
+  def startDetachedEpayeJourney: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
     journeyConnector.Epaye.startJourneyDetachedUrl(SjRequest.Epaye.Empty())
       .map(redirectFromDetachedJourneyStarted)
   }
 
   def startDetachedVatJourney: Action[AnyContent] =
-    as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
+    as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
       journeyConnector.Vat.startJourneyDetachedUrl(SjRequest.Vat.Empty())
         .map(redirectFromDetachedJourneyStarted)
     }
 
   def startDetachedSaJourney: Action[AnyContent] =
     if (appConfig.saEnabled) {
-      as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
+      as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
         journeyConnector.Sa.startJourneyDetachedUrl(SjRequest.Sa.Empty())
           .map(redirectFromDetachedJourneyStarted)
       }

@@ -16,29 +16,38 @@
 
 package connectors
 
+import cats.syntax.either._
 import com.google.inject.{Inject, Singleton}
-import essttp.journey.model.JourneyId
+import essttp.crypto.CryptoFormat.OperationalCryptoFormat
+import essttp.journey.model.{Journey, JourneyId}
+import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.dates.extremedates.{ExtremeDatesRequest, ExtremeDatesResponse}
 import essttp.rootmodel.dates.startdates.{StartDatesRequest, StartDatesResponse}
 import essttp.rootmodel.pega.{GetCaseResponse, StartCaseResponse}
 import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
 import requests.RequestSupport._
-import uk.gov.hmrc.http.HttpReads.Implicits.readFromJson
-import uk.gov.hmrc.http.StringContextOps
+import uk.gov.hmrc.http.{StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-
+import uk.gov.hmrc.http.HttpReadsInstances._
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class EssttpBackendConnector @Inject() (config: EssttpBackendConfig, httpClient: HttpClientV2)(implicit ec: ExecutionContext) {
+class EssttpBackendConnector @Inject() (
+    config:     EssttpBackendConfig,
+    httpClient: HttpClientV2
+)(implicit ec: ExecutionContext, cryptoFormat: OperationalCryptoFormat) {
 
   private val startDatesUrl: String = config.baseUrl + "/essttp-backend/start-dates"
 
   private val extremeDatesUrl: String = config.baseUrl + "/essttp-backend/extreme-dates"
 
-  private val pegaCaseUrl: String = config.baseUrl + "/essttp-backend/pega-case"
+  private val pegaCaseUrl: String = config.baseUrl + "/essttp-backend/pega/case"
+
+  private val saveJourneyForPegaUrl: String = config.baseUrl + "/essttp-backend/pega/journey"
+
+  private val recreatedSessionUrl: String = config.baseUrl + "/essttp-backend/pega/recreate-session"
 
   def startDates(startDatesRequest: StartDatesRequest)(implicit request: RequestHeader): Future[StartDatesResponse] =
     httpClient.post(url"$startDatesUrl")
@@ -57,6 +66,15 @@ class EssttpBackendConnector @Inject() (config: EssttpBackendConfig, httpClient:
   def getPegaCase(journeyId: JourneyId)(implicit requestHeader: RequestHeader): Future[GetCaseResponse] =
     httpClient.get(url"$pegaCaseUrl/${journeyId.value}")
       .execute[GetCaseResponse]
+
+  def saveJourneyForPega(journeyId: JourneyId)(implicit requestHeader: RequestHeader): Future[Unit] =
+    httpClient.post(url"$saveJourneyForPegaUrl/${journeyId.value}")
+      .execute[Either[UpstreamErrorResponse, Unit]]
+      .map(_.leftMap(throw _).merge)
+
+  def recreateSession(taxRegime: TaxRegime)(implicit requestHeader: RequestHeader): Future[Option[Journey]] =
+    httpClient.get(url"$recreatedSessionUrl/${TaxRegime.pathBindable.unbind("taxRegime", taxRegime)}")
+      .execute[Option[Journey]]
 
 }
 

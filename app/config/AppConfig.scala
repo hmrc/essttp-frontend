@@ -149,7 +149,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     }
   }
 
-  lazy val pegaRedirectUrl: String =
-    config.getOptional[String]("pega.redirect-url").getOrElse(testOnly.controllers.routes.PegaController.dummyPegaPage.url)
+  def pegaRedirectUrl(taxRegime: TaxRegime): String =
+    config.getOptional[String]("pega.redirect-url").getOrElse(testOnly.controllers.routes.PegaController.dummyPegaPage(taxRegime).url)
 
 }

@@ -37,6 +37,7 @@ class PegaService @Inject() (
         for {
           startCaseResponse <- essttpConnector.startPegaCase(journey.journeyId)
           _ <- journeyConnector.updatePegaStartCaseResponse(journey.journeyId, startCaseResponse)
+          _ <- essttpConnector.saveJourneyForPega(journey.journeyId)
         } yield startCaseResponse
 
     journey match {

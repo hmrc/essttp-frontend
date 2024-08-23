@@ -17,6 +17,7 @@
 package testOnly.controllers
 
 import actions.Actions
+import essttp.rootmodel.TaxRegime
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import testOnly.views.html.IAmPegaPage
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -30,8 +31,12 @@ class PegaController @Inject() (
     IAmPegaPage: IAmPegaPage
 ) extends FrontendController(mcc) {
 
-  val dummyPegaPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    Ok(IAmPegaPage())
+  def dummyPegaPage(regime: TaxRegime): Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    Ok(IAmPegaPage(regime, request.enrolments))
+  }
+
+  def dummyPegaPageContinue(regime: TaxRegime): Action[AnyContent] = as.authenticatedJourneyAction { _ =>
+    Redirect(controllers.routes.PegaController.callback(regime)).withNewSession
   }
 
 }

@@ -15,19 +15,35 @@
  *@
 
 @import play.api.mvc.Request
-@import controllers.routes
+@import play.twirl.api.Html
+@import testOnly.controllers.routes
+@import essttp.rootmodel.TaxRegime
 @import testOnly.views.html.TestOnlyLayout
+@import requests.RequestSupport
+@import uk.gov.hmrc.auth.core.{Enrolments, Enrolment}
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
   testOnlyLayout: TestOnlyLayout,
-  govukButton: GovukButton
+  govukButton: GovukButton,
+  formWithCSRF: FormWithCSRF,
+  requestSupport: RequestSupport
 )
 
-@()(implicit request: Request[_])
+@(taxRegime: TaxRegime, enrolments: Enrolments)(implicit request: Request[_])
+
+@import requestSupport._
 
 @title = @{
     "I am Pega Page"
+}
+
+@enrolmentRow(enrolment: Enrolment) = {
+   <tr class="govuk-table__row">
+     <td class="govuk-table__cell">@{enrolment.key}</td>
+     <td class="govuk-table__cell">@{Html(enrolment.identifiers.map(_.key).mkString("<br/>"))}</td>
+     <td class="govuk-table__cell">@{Html(enrolment.identifiers.map(_.value).mkString("<br/>"))}</td>
+   </tr>
 }
 
 @testOnlyLayout(pageTitle = Some(title)) {
@@ -35,9 +51,33 @@
     <h1 class="govuk-heading-xl">@title</h1>
     <p class="govuk-body">Dummy PEGA page</p>
 
-    @govukButton(Button(
-        href = Some(routes.PegaController.callback.url),
-        content = Text("Continue")
-    ))
+    <h2 class="govuk-heading-l">☆*:・ﾟ・*★IMPORTANT★*・ﾟ・:*☆</h2>
+
+    <p class="govuk-body">Clicking continue will sign you out and prompt you to log in again.</p>
+
+    <p class="govuk-body">You won’t be able to see this page again after continuing and clicking back.</p>
+
+    <p class="govuk-body">Make a note of these enrolments in the current login - you’ll have to enter them again on the auth login stub page:</p>
+
+    <table class="govuk-table">
+        <thead class="govuk-table__head">
+            <tr class="govuk-table__row">
+                <th scope="col" class="govuk-table__header">Enrolment Key</th>
+                <th scope="col" class="govuk-table__header">Identifier Name</th>
+                <th scope="col" class="govuk-table__header">Identifier Value</th>
+            </tr>
+        </thead>
+
+        <tbody class="govuk-table__body">
+            @{enrolments.enrolments.map(enrolmentRow)}
+        </tbody>
+    </table>
+
+    @formWithCSRF(action = routes.PegaController.dummyPegaPageContinue(taxRegime)) {
+        @govukButton(Button(
+            content = Text("Continue"),
+            attributes = Map("id" -> "continue")
+        ))
+    }
 
 }

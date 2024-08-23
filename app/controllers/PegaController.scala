@@ -18,6 +18,7 @@ package controllers
 
 import actions.Actions
 import config.AppConfig
+import essttp.rootmodel.TaxRegime
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.PegaService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -35,14 +36,14 @@ class PegaController @Inject() (
 
   val startPegaJourney: Action[AnyContent] = as.authenticatedJourneyAction.async{ implicit request =>
     pegaService.startCase(request.journey).map{ _ =>
-      SeeOther(appConfig.pegaRedirectUrl)
+      SeeOther(appConfig.pegaRedirectUrl(request.journey.taxRegime))
     }
   }
 
-  val callback: Action[AnyContent] = as.authenticatedJourneyAction.async{ implicit request =>
+  def callback(regime: TaxRegime): Action[AnyContent] = as.continueToSameEndpointAuthenticatedJourneyAction.async{ implicit request =>
     pegaService.getCase(request.journey).map{ _ =>
       Routing.redirectToNext(
-        routes.PegaController.callback,
+        routes.PegaController.callback(regime),
         request.journey,
         submittedValueUnchanged = true
       )

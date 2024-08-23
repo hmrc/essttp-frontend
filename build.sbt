@@ -45,7 +45,8 @@ lazy val root = (project in file("."))
       EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
     pipelineStages := Seq(digest),
     scalacOptions ++= scalaCompilerOptions,
-    (Compile / doc / sources) := Seq.empty
+    (Compile / doc / sources) := Seq.empty,
+    routesImport ++= Seq("essttp.rootmodel.TaxRegime")
   )
   .settings(
     commands += Command.command("runTestOnly") { state =>

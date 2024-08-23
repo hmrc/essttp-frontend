@@ -17,9 +17,13 @@
 package actions
 
 import actionsmodel.{AuthenticatedJourneyRequest, AuthenticatedRequest}
+import cats.data.OptionT
+import cats.syntax.traverse._
+import connectors.EssttpBackendConnector
 import controllers.support.RequestSupport.hc
 import essttp.journey.JourneyConnector
 import essttp.journey.model.Journey
+import essttp.rootmodel.TaxRegime
 import play.api.Logger
 import play.api.mvc.{ActionRefiner, Request, Result, Results}
 
@@ -27,7 +31,10 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class GetJourneyActionRefiner @Inject() (journeyConnector: JourneyConnector)(
+class GetJourneyActionRefiner @Inject() (
+    journeyConnector:       JourneyConnector,
+    essttpBackendConnector: EssttpBackendConnector
+)(
     implicit
     ec: ExecutionContext
 ) extends ActionRefiner[AuthenticatedRequest, AuthenticatedJourneyRequest] {
@@ -36,15 +43,29 @@ class GetJourneyActionRefiner @Inject() (journeyConnector: JourneyConnector)(
 
   override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, AuthenticatedJourneyRequest[A]]] = {
     implicit val r: Request[A] = request
-    for {
-      maybeJourney: Option[Journey] <- journeyConnector.findLatestJourneyBySessionId()
-    } yield maybeJourney match {
-      case Some(journey) => Right(new AuthenticatedJourneyRequest(request, request.enrolments, journey, request.ggCredId))
+
+    findJourney(request).map{
+      case Some(journey) =>
+        Right(new AuthenticatedJourneyRequest(request, request.enrolments, journey, request.ggCredId))
       case None =>
         logger.error(s"No journey found for sessionId: [ ${hc.sessionId.toString} ]")
         Left(Results.Redirect(controllers.routes.WhichTaxRegimeController.whichTaxRegime))
     }
   }
+
+  // if no journey is found for the session id, the user have have just come back from PEGA. In this case the
+  // session id would change - see if the backend can reconstruct the session data saved just before going to PEGA
+  private def findJourney[A](request: AuthenticatedRequest[A])(implicit rh: Request[_]): Future[Option[Journey]] =
+    OptionT(journeyConnector.findLatestJourneyBySessionId())
+      .orElseF(
+        taxRegime(request)
+          .map(regime => essttpBackendConnector.recreateSession(regime))
+          .flatSequence
+      )
+      .value
+
+  private def taxRegime[A](request: AuthenticatedRequest[A]): Option[TaxRegime] =
+    request.getQueryString("regime").flatMap(TaxRegime.withNameInsensitiveOption)
 
   override protected def executionContext: ExecutionContext = ec
 

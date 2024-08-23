@@ -36,9 +36,16 @@ class Actions @Inject() (
   val default: ActionBuilder[Request, AnyContent] = actionBuilder
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  val continueToSameEndpointAuthenticatedJourneyAction: ActionBuilder[AuthenticatedRequest, AnyContent] =
+  val continueToSameEndpointAuthenticatedAction: ActionBuilder[AuthenticatedRequest, AnyContent] =
     actionBuilder
       .andThen(continueToSameEndpointAuthenticatedActionRefiner)
+
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  val continueToSameEndpointAuthenticatedJourneyAction: ActionBuilder[AuthenticatedJourneyRequest, AnyContent] =
+    actionBuilder
+      .andThen(continueToSameEndpointAuthenticatedActionRefiner)
+      .andThen(getJourneyActionRefiner)
+      .andThen(shutteringActionFilter)
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val authenticatedAction: ActionBuilder[AuthenticatedRequest, AnyContent] =

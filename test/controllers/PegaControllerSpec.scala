@@ -17,10 +17,16 @@
 package controllers
 
 import essttp.journey.model.Origins
+import essttp.rootmodel.TaxRegime
+import play.api.libs.json.Json
+import play.api.mvc.{AnyContent, Request, Result}
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.stubs.EssttpBackend
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
+import uk.gov.hmrc.http.UpstreamErrorResponse
+
+import scala.concurrent.Future
 
 class PegaControllerSpec extends ItSpec {
 
@@ -70,6 +76,23 @@ class PegaControllerSpec extends ItSpec {
           val exception = intercept[Exception](await(controller.startPegaJourney(fakeRequest)))
           exception.getMessage should include("returned 500")
         }
+
+        "there is a problem saving the journey" in {
+          stubCommonActions()
+          EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(
+            JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
+          )
+          EssttpBackend.Pega.stubStartCase(TdAll.journeyId, Right(TdAll.pegaStartCaseResponse))
+          EssttpBackend.StartedPegaCase.stubUpdateStartPegaCaseResponse(
+            TdAll.journeyId,
+            JourneyJsonTemplates.`Started PEGA case`(Origins.Epaye.Bta)(testCrypto)
+          )
+          EssttpBackend.Pega.stubSaveJourneyForPega(TdAll.journeyId, Left(429))
+
+          val exception = intercept[Exception](await(controller.startPegaJourney(fakeRequest)))
+          exception.getMessage should include("returned 429")
+        }
+
       }
 
       "start a case, update the journey and redirect to PEGA" in {
@@ -82,18 +105,22 @@ class PegaControllerSpec extends ItSpec {
           TdAll.journeyId,
           JourneyJsonTemplates.`Started PEGA case`(Origins.Epaye.Bta)(testCrypto)
         )
+        EssttpBackend.Pega.stubSaveJourneyForPega(TdAll.journeyId, Right(()))
 
         val result = controller.startPegaJourney(fakeRequest)
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/test-only/pega")
+        redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/test-only/pega?regime=epaye")
 
         EssttpBackend.Pega.verifyStartCaseCalled(TdAll.journeyId)
         EssttpBackend.StartedPegaCase.verifyUpdateStartPegaCaseResponseRequest(TdAll.journeyId, TdAll.pegaStartCaseResponse)
+        EssttpBackend.Pega.verifySaveJourneyForPegaCalled(TdAll.journeyId)
       }
 
     }
 
     "handling callbacks must" - {
+
+      behave like recreateSessionErrorBehaviour(controller.callback(_)(_))
 
       "return an error when" - {
 
@@ -101,7 +128,7 @@ class PegaControllerSpec extends ItSpec {
           stubCommonActions()
           EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, Origins.Epaye.Bta)()
 
-          val exception = intercept[Exception](await(controller.callback(fakeRequest)))
+          val exception = intercept[Exception](await(controller.callback(TaxRegime.Epaye)(fakeRequest)))
           exception.getMessage should include("Cannot get PEGA case when journey is in state essttp.journey.model.Journey.Epaye.RetrievedAffordabilityResult")
         }
 
@@ -109,7 +136,7 @@ class PegaControllerSpec extends ItSpec {
           stubCommonActions()
           EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, Origins.Epaye.Bta)()
 
-          val exception = intercept[Exception](await(controller.callback(fakeRequest)))
+          val exception = intercept[Exception](await(controller.callback(TaxRegime.Epaye)(fakeRequest)))
           exception.getMessage should include("Trying to get PEGA case on non-affordability journey")
 
         }
@@ -119,26 +146,103 @@ class PegaControllerSpec extends ItSpec {
           EssttpBackend.StartedPegaCase.findJourney(testCrypto, Origins.Epaye.Bta)()
           EssttpBackend.Pega.stubGetCase(TdAll.journeyId, Left(501))
 
-          val exception = intercept[Exception](await(controller.callback(fakeRequest)))
+          val exception = intercept[Exception](await(controller.callback(TaxRegime.Epaye)(fakeRequest)))
           exception.getMessage should include("returned 501")
         }
+
       }
 
-      "get a case, update the journey and redirect to the next page" in {
+      "get a case, update the journey and redirect to the next page when" - {
+
+          def test(): Unit = {
+            stubCommonActions()
+            EssttpBackend.Pega.stubGetCase(TdAll.journeyId, Right(TdAll.pegaGetCaseResponse))
+            EssttpBackend.HasCheckedPlan.stubUpdateHasCheckedPlan(
+              TdAll.journeyId,
+              JourneyJsonTemplates.`Has Checked Payment Plan - With Affordability`(Origins.Epaye.Bta)(testCrypto)
+            )
+
+            val result = controller.callback(TaxRegime.Epaye)(fakeRequestWithPath("/b?regime=epaye"))
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe Some(PageUrls.aboutYourBankAccountUrl)
+
+            EssttpBackend.Pega.verifyGetCaseCalled(TdAll.journeyId)
+            EssttpBackend.HasCheckedPlan.verifyUpdateHasCheckedPlanRequest(TdAll.journeyId)
+          }
+
+        "a journey can be found" in {
+          EssttpBackend.StartedPegaCase.findJourney(testCrypto, Origins.Epaye.Bta)()
+
+          test()
+        }
+
+        "a journey is successfully reconstructed" in {
+          EssttpBackend.findByLatestSessionNotFound()
+          EssttpBackend.Pega.stubRecreateSession(
+            TaxRegime.Epaye,
+            Right(Json.parse(JourneyJsonTemplates.`Started PEGA case`(Origins.Epaye.Bta)(testCrypto)))
+          )
+
+          test()
+
+          EssttpBackend.verifyFindByLatestSessionId()
+          EssttpBackend.Pega.verifyRecreateSessionCalled(TaxRegime.Epaye)
+        }
+
+      }
+
+    }
+
+  }
+
+  def recreateSessionErrorBehaviour(performAction: (TaxRegime, Request[AnyContent]) => Future[Result]): Unit = {
+
+    "return an error when" - {
+
+      "there is no session found in the BE and the call to reconstruct a session returns an error" in {
         stubCommonActions()
-        EssttpBackend.StartedPegaCase.findJourney(testCrypto, Origins.Epaye.Bta)()
-        EssttpBackend.Pega.stubGetCase(TdAll.journeyId, Right(TdAll.pegaGetCaseResponse))
-        EssttpBackend.HasCheckedPlan.stubUpdateHasCheckedPlan(
-          TdAll.journeyId,
-          JourneyJsonTemplates.`Has Checked Payment Plan - With Affordability`(Origins.Epaye.Bta)(testCrypto)
+        EssttpBackend.findByLatestSessionNotFound()
+        EssttpBackend.Pega.stubRecreateSession(TaxRegime.Sa, Left(SERVICE_UNAVAILABLE))
+
+        val exception = intercept[UpstreamErrorResponse](
+          await(performAction(TaxRegime.Sa, fakeRequestWithPath("/a?regime=sa")))
         )
+        exception.statusCode shouldBe SERVICE_UNAVAILABLE
 
-        val result = controller.callback(fakeRequest)
+        EssttpBackend.verifyFindByLatestSessionId()
+        EssttpBackend.Pega.verifyRecreateSessionCalled(TaxRegime.Sa)
+      }
+
+    }
+
+    "redirect to the which tax regime page when" - {
+
+      "no journey is found and no journey was reconstructed when a regime can be found in the query parameters" in {
+        stubCommonActions()
+        EssttpBackend.findByLatestSessionNotFound()
+        EssttpBackend.Pega.stubRecreateSession(TaxRegime.Epaye, Left(NOT_FOUND))
+
+        val result = performAction(TaxRegime.Epaye, fakeRequestWithPath("/a?regime=vat"))
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(PageUrls.aboutYourBankAccountUrl)
+        redirectLocation(result) shouldBe Some(routes.WhichTaxRegimeController.whichTaxRegime.url)
 
-        EssttpBackend.Pega.verifyGetCaseCalled(TdAll.journeyId)
-        EssttpBackend.HasCheckedPlan.verifyUpdateHasCheckedPlanRequest(TdAll.journeyId)
+        EssttpBackend.verifyFindByLatestSessionId()
+        EssttpBackend.Pega.verifyRecreateSessionCalled(TaxRegime.Vat)
+      }
+
+      "no journey is found if there is no regime in the query parameters" in {
+        stubCommonActions()
+        EssttpBackend.findByLatestSessionNotFound()
+        EssttpBackend.Pega.stubRecreateSession(TaxRegime.Epaye, Left(NOT_FOUND))
+
+        val result = performAction(TaxRegime.Epaye, fakeRequest)
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.WhichTaxRegimeController.whichTaxRegime.url)
+
+        EssttpBackend.verifyFindByLatestSessionId()
+        EssttpBackend.Pega.verifyRecreateSessionNotCalled(TaxRegime.Epaye)
+        EssttpBackend.Pega.verifyRecreateSessionNotCalled(TaxRegime.Vat)
+        EssttpBackend.Pega.verifyRecreateSessionNotCalled(TaxRegime.Sa)
       }
 
     }
@@ -171,6 +275,7 @@ class PegaControllerRedirectInConfigSpec extends ItSpec {
           TdAll.journeyId,
           JourneyJsonTemplates.`Started PEGA case`(Origins.Epaye.Bta)(testCrypto)
         )
+        EssttpBackend.Pega.stubSaveJourneyForPega(TdAll.journeyId, Right(()))
 
         val result = controller.startPegaJourney(fakeRequest)
         status(result) shouldBe SEE_OTHER
@@ -178,6 +283,7 @@ class PegaControllerRedirectInConfigSpec extends ItSpec {
 
         EssttpBackend.Pega.verifyStartCaseCalled(TdAll.journeyId)
         EssttpBackend.StartedPegaCase.verifyUpdateStartPegaCaseResponseRequest(TdAll.journeyId, TdAll.pegaStartCaseResponse)
+        EssttpBackend.Pega.verifySaveJourneyForPegaCalled(TdAll.journeyId)
       }
 
     }

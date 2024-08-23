@@ -16,8 +16,8 @@
 
 package services
 
-import actions.EnrolmentDefResult.{EnrolmentNotFound, IdentifierNotFound, Inactive, Success}
-import actions.{EnrolmentDef, EnrolmentDefResult}
+import essttp.enrolments.EnrolmentDefResult.{EnrolmentNotFound, IdentifierNotFound, Inactive, Success}
+import essttp.enrolments.{EnrolmentDef, EnrolmentDefResult}
 import actionsmodel.AuthenticatedJourneyRequest
 import essttp.journey.model.Journey
 import essttp.rootmodel._

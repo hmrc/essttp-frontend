@@ -102,7 +102,13 @@ object Routing {
       routes.PaymentScheduleController.checkPaymentSchedule -> { () =>
         routes.BankDetailsController.detailsAboutBankAccount
       },
-      routes.PegaController.callback -> { () =>
+      routes.PegaController.callback(TaxRegime.Epaye) -> { () =>
+        routes.BankDetailsController.detailsAboutBankAccount
+      },
+      routes.PegaController.callback(TaxRegime.Vat) -> { () =>
+        routes.BankDetailsController.detailsAboutBankAccount
+      },
+      routes.PegaController.callback(TaxRegime.Sa) -> { () =>
         routes.BankDetailsController.detailsAboutBankAccount
       },
       routes.BankDetailsController.detailsAboutBankAccount -> { () =>
