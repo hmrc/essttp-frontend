@@ -18,6 +18,7 @@ package views
 
 import play.api.data.FormError
 import views.html._
+import views.html.checkpaymentchedule._
 import views.html.emailerrors._
 import views.html.epaye.EPayeLanding
 import views.html.epaye.ineligible.{Ineligible, NotEnrolled}

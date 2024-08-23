@@ -17,7 +17,9 @@
 package testOnly.controllers
 
 import actions.Actions
+import essttp.journey.model.Journey
 import essttp.rootmodel.TaxRegime
+import essttp.utils.Errors
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import testOnly.views.html.IAmPegaPage
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -32,11 +34,36 @@ class PegaController @Inject() (
 ) extends FrontendController(mcc) {
 
   def dummyPegaPage(regime: TaxRegime): Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    Ok(IAmPegaPage(regime, request.enrolments))
+    val whyCannotPayInFullAnswers = request.journey match {
+      case j: Journey.AfterWhyCannotPayInFullAnswers => j.whyCannotPayInFullAnswers
+      case other                                     => Errors.throwServerErrorException(s"Could not find WhyCannotPayInFullAnswers from journey in state ${other.name}")
+    }
+
+    val upfrontPaymentAnswers = request.journey match {
+      case j: Journey.AfterUpfrontPaymentAnswers => j.upfrontPaymentAnswers
+      case other                                 => Errors.throwServerErrorException(s"Could not find UpfrontPaymentAnswers from journey in state ${other.name}")
+    }
+
+    val canPayWithinSixMonthsAnswers = request.journey match {
+      case j: Journey.AfterCanPayWithinSixMonthsAnswers => j.canPayWithinSixMonthsAnswers
+      case other                                        => Errors.throwServerErrorException(s"Could not find CanPayWithinSixMonthsAnswers from journey in state ${other.name}")
+    }
+
+    Ok(IAmPegaPage(
+      regime,
+      request.enrolments,
+      whyCannotPayInFullAnswers,
+      upfrontPaymentAnswers,
+      canPayWithinSixMonthsAnswers
+    ))
   }
 
   def dummyPegaPageContinue(regime: TaxRegime): Action[AnyContent] = as.authenticatedJourneyAction { _ =>
     Redirect(controllers.routes.PegaController.callback(regime)).withNewSession
+  }
+
+  def change(pageId: String, regime: TaxRegime): Action[AnyContent] = as.authenticatedJourneyAction { _ =>
+    Redirect(controllers.routes.PaymentScheduleController.changeFromCheckPaymentSchedule(pageId, regime)).withNewSession
   }
 
 }

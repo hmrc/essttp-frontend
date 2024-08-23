@@ -36,7 +36,7 @@ class PegaController @Inject() (
 
   val startPegaJourney: Action[AnyContent] = as.authenticatedJourneyAction.async{ implicit request =>
     pegaService.startCase(request.journey).map{ _ =>
-      SeeOther(appConfig.pegaRedirectUrl(request.journey.taxRegime))
+      SeeOther(appConfig.pegaStartRedirectUrl(request.journey.taxRegime))
     }
   }
 

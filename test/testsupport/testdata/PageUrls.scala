@@ -16,6 +16,10 @@
 
 package testsupport.testdata
 
+import essttp.rootmodel.TaxRegime
+
+import java.util.Locale
+
 object PageUrls {
   val serviceBaseUrl = "/set-up-a-payment-plan"
   val whichTaxRegimeUrl: String = s"$serviceBaseUrl/which-tax"
@@ -62,7 +66,8 @@ object PageUrls {
   val determineAffordableQuotesUrl: String = s"$serviceBaseUrl/determine-affordable-quotes"
   val instalmentsUrl: String = s"$serviceBaseUrl/how-many-months-do-you-want-to-pay-over"
   val checkPaymentPlanUrl: String = s"$serviceBaseUrl/check-your-payment-plan"
-  def checkPaymentPlanChangeUrl(pageId: String): String = s"$serviceBaseUrl/check-your-payment-plan/change/$pageId"
+  def checkPaymentPlanChangeUrl(pageId: String, taxRegime: TaxRegime): String =
+    s"$serviceBaseUrl/check-your-payment-plan/change/$pageId?regime=${taxRegime.entryName.toLowerCase(Locale.UK)}"
   val aboutYourBankAccountUrl: String = s"$serviceBaseUrl/about-your-bank-account"
   val directDebitDetailsUrl: String = s"$serviceBaseUrl/set-up-direct-debit"
   val cannotSetupDirectDebitOnlineUrl: String = s"$serviceBaseUrl/you-cannot-set-up-a-direct-debit-online"

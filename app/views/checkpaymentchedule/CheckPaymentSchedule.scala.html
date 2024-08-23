@@ -19,17 +19,19 @@
 @import controllers.routes
 @import essttp.journey.model.{UpfrontPaymentAnswers, CanPayWithinSixMonthsAnswers, WhyCannotPayInFullAnswers}
 @import essttp.rootmodel.ttp.affordablequotes.PaymentPlan
-@import essttp.rootmodel.{AmountInPence, DayOfMonth, CannotPayReason}
+@import essttp.rootmodel.{AmountInPence, DayOfMonth, TaxRegime}
 @import messages.{DateMessages, Messages}
 @import play.twirl.api.Html
 @import requests.RequestSupport
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import viewmodels.CheckPaymentPlanChangeLink
+@import views.html.templates.Layout
+@import views.checkpaymentchedule.CheckPaymentScheduleRows
 
 @import java.time.LocalDate
 
 @this(
-  layout: templates.Layout,
+  layout: Layout,
   requestSupport: RequestSupport,
   govukSummaryList : GovukSummaryList,
   formWithCSRF: FormWithCSRF,
@@ -42,130 +44,24 @@
   paymentPlan: PaymentPlan,
   affordableMonthlyPaymentAmount: AmountInPence,
   whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers,
-  canPayWithinSixMonthsAnswers: CanPayWithinSixMonthsAnswers
+  canPayWithinSixMonthsAnswers: CanPayWithinSixMonthsAnswers,
+  taxRegime: TaxRegime
 )(implicit request: EligibleJourneyRequest[_], ord: Ordering[LocalDate])
 
 @import requestSupport._
 
 @title = @{Messages.PaymentSchedule.`Check your payment plan`.show}
 
+@whyCannotPayInFullRow = @{
+  CheckPaymentScheduleRows.whyCannotPayInFullRow(whyCannotPayInFullAnswers, CheckPaymentPlanChangeLink.WhyUnableInFull.changeLink(taxRegime))
+}
+
 @upfrontPaymentRows = @{
-  val upfrontPaymentAmount =
-    upfrontPaymentAnswers match {
-      case UpfrontPaymentAnswers.NoUpfrontPayment => None
-      case UpfrontPaymentAnswers.DeclaredUpfrontPayment(amount) => Some(amount)
-    }
-
-  val canPayUpfrontRow =
-    SummaryListRow(
-      key = Key(
-        content = HtmlContent(Html(Messages.UpfrontPayment.`Can you make an upfront payment?`.show)),
-        classes = "govuk-!-width-one-half"
-      ),
-      value = Value(
-        content = Text(upfrontPaymentAmount.fold(Messages.`No`)(_ => Messages.`Yes`).show)
-      ),
-      actions = Some(Actions(
-        items = Seq(
-          ActionItem(
-            href = CheckPaymentPlanChangeLink.CanPayUpfront.changeLink.url,
-            content = Text(Messages.change.show),
-            visuallyHiddenText = Some(Messages.UpfrontPaymentSummary.`Change Payment`.show)
-          )
-        )
-      ))
-    )
-
-
-  val upfrontPaymentAmountRow = upfrontPaymentAmount.map{ amount =>
-    SummaryListRow(
-      key = Key(
-        content = HtmlContent(Html(Messages.UpfrontPaymentSummary.`Upfront payment`.show)),
-        classes = "govuk-!-width-one-half"
-      ),
-      value = Value(
-        content = Text(amount.value.gdsFormatInPounds)
-      ),
-      actions = Some(Actions(
-        items = Seq(
-          ActionItem(
-            href = CheckPaymentPlanChangeLink.UpfrontPaymentAmount.changeLink.url,
-            content = Text(Messages.change.show),
-            visuallyHiddenText = Some(Messages.UpfrontPaymentSummary.`Upfront payment-visually-hidden-message`.show)
-          )
-        )
-      ))
-    )
-  }
-
-  canPayUpfrontRow :: upfrontPaymentAmountRow.toList
+  CheckPaymentScheduleRows.upfrontPaymentRows(upfrontPaymentAnswers, CheckPaymentPlanChangeLink.CanPayUpfront.changeLink(taxRegime), CheckPaymentPlanChangeLink.UpfrontPaymentAmount.changeLink(taxRegime))
 }
 
 @canPayWithinSixMonthsRow = @{
-  val canPayWithinSixMonths =
-    canPayWithinSixMonthsAnswers match {
-      case CanPayWithinSixMonthsAnswers.AnswerNotRequired => None
-      case CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths(answer) => Some(answer)
-    }
-
-  canPayWithinSixMonths.map {
-    canPay =>
-    SummaryListRow(
-      key = Key(
-        content = HtmlContent(Html(Messages.CanPayWithinSixMonths.`Can you pay within 6 months?`.show)),
-        classes = "govuk-!-width-one-half"
-      ),
-      value = Value(
-        content = Text((if(canPay){Messages.`Yes`} else Messages.`No`).show)
-      ),
-      actions = Some(Actions(
-        items = Seq(
-          ActionItem(
-            href = CheckPaymentPlanChangeLink.CanPayWithinSixMonths.changeLink.url,
-            content = Text(Messages.change.show),
-            visuallyHiddenText = Some(Messages.CanPayWithinSixMonths.`Can you pay within 6 months?`.show)
-          )
-        )
-      ))
-    )
-  }
-}
-
-@whyCannotPayInFullBullets(reasons: Set[CannotPayReason]) = {
-    <ul class="govuk-list govuk-list--bullet">
-    @reasons.map{ reason =>
-      <li>@{Messages.WhyCannotPayInFull.checkboxMessage(reason).show}</li>
-  }
-  </ul>
-}
-
-@whyCannotPayInFullRow = @{
-  val whyCannotPayInFullReasons =
-    whyCannotPayInFullAnswers match {
-      case WhyCannotPayInFullAnswers.AnswerNotRequired => None
-      case WhyCannotPayInFullAnswers.WhyCannotPayInFull(reasons) => Some(reasons)
-    }
-
-  whyCannotPayInFullReasons.map { reasons =>
-    SummaryListRow(
-      key = Key(
-        content = HtmlContent(Html(Messages.WhyCannotPayInFull.`Why are you unable to pay in full?`.show)),
-        classes = "govuk-!-width-one-half"
-      ),
-      value = Value(
-        content = HtmlContent(whyCannotPayInFullBullets(reasons))
-      ),
-      actions = Some(Actions(
-        items = Seq(
-          ActionItem(
-            href = CheckPaymentPlanChangeLink.WhyCannotPayInFull.changeLink.url,
-            content = Text(Messages.change.show),
-            visuallyHiddenText = Some(Messages.WhyCannotPayInFull.`Why are you unable to pay in full?`.show)
-          )
-        )
-      ))
-    )
-  }
+  CheckPaymentScheduleRows.canPayWithinSixMonthsRow(canPayWithinSixMonthsAnswers, CheckPaymentPlanChangeLink.PayWithin6Months.changeLink(taxRegime))
 }
 
 @montlyAmountRow = @{
@@ -180,7 +76,7 @@
     actions = Some(Actions(
       items = Seq(
         ActionItem(
-          href = CheckPaymentPlanChangeLink.MonthlyPaymentAmount.changeLink.url,
+          href = CheckPaymentPlanChangeLink.MonthlyPaymentAmount.changeLink(taxRegime).url,
           content = Text(Messages.change.show),
           visuallyHiddenText = Some(Messages.PaymentSchedule.`How much you can afford to pay each month`.show)
         )
@@ -201,7 +97,7 @@
     actions = Some(Actions(
       items = Seq(
         ActionItem(
-          href = CheckPaymentPlanChangeLink.PaymentDay.changeLink.url,
+          href = CheckPaymentPlanChangeLink.PaymentDay.changeLink(taxRegime).url,
           content = Text(Messages.change.show),
           visuallyHiddenText = Some(Messages.PaymentSchedule.`payment day`.show)
         )
@@ -226,7 +122,7 @@
       actions = Some(Actions(
         items = Seq(
           ActionItem(
-            href = CheckPaymentPlanChangeLink.PaymentPlan.changeLink.url,
+            href = CheckPaymentPlanChangeLink.PaymentPlan.changeLink(taxRegime).url,
              classes = s"${if(index === 0) "" else "grouped-change"}",
             content = Text(Messages.change.show),
             visuallyHiddenText = Some(Messages.PaymentSchedule.`Change months duration`.show)
@@ -258,7 +154,12 @@
     @title
   </h1>
 
-  @govukSummaryList(SummaryList(rows = whyCannotPayInFullRow.toList ::: upfrontPaymentRows ::: canPayWithinSixMonthsRow.toList, classes = "govuk-!-margin-bottom-9"))
+  @govukSummaryList(
+    SummaryList(
+      rows = whyCannotPayInFullRow.toList ::: upfrontPaymentRows ::: canPayWithinSixMonthsRow.toList,
+      classes = "govuk-!-margin-bottom-9"
+    )
+  )
 
   <h2 class="govuk-heading-m">
     @{Messages.PaymentSchedule.`Monthly payments`.show}

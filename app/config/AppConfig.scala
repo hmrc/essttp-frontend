@@ -149,7 +149,14 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     }
   }
 
-  def pegaRedirectUrl(taxRegime: TaxRegime): String =
-    config.getOptional[String]("pega.redirect-url").getOrElse(testOnly.controllers.routes.PegaController.dummyPegaPage(taxRegime).url)
+  def pegaStartRedirectUrl(taxRegime: TaxRegime): String =
+    Some(config.get[String]("pega.start-redirect-url"))
+      .filter(_.nonEmpty)
+      .getOrElse(testOnly.controllers.routes.PegaController.dummyPegaPage(taxRegime).url)
+
+  def pegaChangeLinkReturnUrl(taxRegime: TaxRegime): String =
+    Some(config.get[String]("pega.change-link-return-url"))
+      .filter(_.nonEmpty)
+      .getOrElse(testOnly.controllers.routes.PegaController.dummyPegaPage(taxRegime).url)
 
 }
