@@ -95,7 +95,7 @@ POST   /how-many-months-do-you-want-to-pay-over             controllers.Instalme
 
 GET    /check-your-payment-plan                             controllers.PaymentScheduleController.checkPaymentSchedule
 POST   /check-your-payment-plan                             controllers.PaymentScheduleController.checkPaymentScheduleSubmit
-GET    /check-your-payment-plan/change/:pageId              controllers.PaymentScheduleController.changeFromCheckPaymentSchedule(pageId: String)
+GET    /check-your-payment-plan/change/:pageId              controllers.PaymentScheduleController.changeFromCheckPaymentSchedule(pageId: String, regime: TaxRegime)
 
 GET    /about-your-bank-account                             controllers.BankDetailsController.detailsAboutBankAccount
 POST   /about-your-bank-account                             controllers.BankDetailsController.detailsAboutBankAccountSubmit

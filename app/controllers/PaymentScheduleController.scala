@@ -18,17 +18,18 @@ package controllers
 
 import actions.Actions
 import actionsmodel.EligibleJourneyRequest
+import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.PaymentScheduleController._
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Journey, PaymentPlanAnswers, UpfrontPaymentAnswers, WhyCannotPayInFullAnswers}
-import essttp.rootmodel.DayOfMonth
+import essttp.rootmodel.{DayOfMonth, TaxRegime}
 import essttp.utils.Errors
 import play.api.mvc._
 import services.{AuditService, JourneyService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.{JourneyLogger, Logging}
 import viewmodels.CheckPaymentPlanChangeLink
-import views.html.CheckPaymentSchedule
+import views.html.checkpaymentchedule.CheckPaymentSchedule
 
 import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
@@ -40,7 +41,8 @@ class PaymentScheduleController @Inject() (
     mcc:                 MessagesControllerComponents,
     paymentSchedulePage: CheckPaymentSchedule,
     journeyService:      JourneyService,
-    auditService:        AuditService
+    auditService:        AuditService,
+    config:              AppConfig
 )(implicit ec: ExecutionContext) extends FrontendController(mcc)
   with Logging {
 
@@ -70,7 +72,8 @@ class PaymentScheduleController @Inject() (
       selectedPaymentPlan,
       monthlyPaymentAmount.value,
       whyCannotPayInFullAnswersFromJourney(journeyMerged),
-      canPayWithinSixMonthsFromJourney(journeyMerged)
+      canPayWithinSixMonthsFromJourney(journeyMerged),
+      journeyMerged.taxRegime
     ))
   }
 
@@ -101,10 +104,25 @@ class PaymentScheduleController @Inject() (
     }
   }
 
-  def changeFromCheckPaymentSchedule(pageId: String): Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
-    Redirect(CheckPaymentPlanChangeLink.withName(pageId).targetPage)
-      .addingToSession(Routing.clickedChangeFromSessionKey -> routes.PaymentScheduleController.checkPaymentSchedule.url)
-  }
+  def changeFromCheckPaymentSchedule(pageId: String, regime: TaxRegime): Action[AnyContent] =
+    as.continueToSameEndpointAuthenticatedJourneyAction { implicit request =>
+      val redirectTo = request.journey match {
+        case _: Journey.AfterStartedPegaCase =>
+          config.pegaChangeLinkReturnUrl(regime)
+        case _: Journey.AfterSelectedPaymentPlan =>
+          routes.PaymentScheduleController.checkPaymentSchedule.url
+        case j: Journey.AfterCheckedPaymentPlan =>
+          j.paymentPlanAnswers match {
+            case _: PaymentPlanAnswers.PaymentPlanNoAffordability    => routes.PaymentScheduleController.checkPaymentSchedule.url
+            case _: PaymentPlanAnswers.PaymentPlanAfterAffordability => config.pegaChangeLinkReturnUrl(regime)
+          }
+        case other =>
+          Errors.throwServerErrorException(s"Cannot change answer from check your payment plan page in journey state ${other.name}")
+      }
+
+      Redirect(CheckPaymentPlanChangeLink.withName(pageId).targetPage)
+        .addingToSession(Routing.clickedChangeFromSessionKey -> redirectTo)
+    }
 
   private def withJourneyInCorrectState[A](journey: Journey)(
       f: Either[Journey.AfterSelectedPaymentPlan, (Journey.AfterCheckedPaymentPlan, PaymentPlanAnswers.PaymentPlanNoAffordability)] => Future[Result]

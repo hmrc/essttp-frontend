@@ -18,11 +18,12 @@ package viewmodels
 
 import controllers.routes
 import enumeratum._
+import essttp.rootmodel.TaxRegime
 import play.api.mvc.Call
 
 sealed trait CheckPaymentPlanChangeLink extends EnumEntry {
   def targetPage: Call
-  def changeLink: Call = routes.PaymentScheduleController.changeFromCheckPaymentSchedule(entryName)
+  def changeLink(taxRegime: TaxRegime): Call = routes.PaymentScheduleController.changeFromCheckPaymentSchedule(entryName, taxRegime)
 }
 
 object CheckPaymentPlanChangeLink extends Enum[CheckPaymentPlanChangeLink] {
@@ -43,11 +44,11 @@ object CheckPaymentPlanChangeLink extends Enum[CheckPaymentPlanChangeLink] {
     lazy val targetPage: Call = routes.PaymentDayController.paymentDay
   }
 
-  case object WhyCannotPayInFull extends CheckPaymentPlanChangeLink {
+  case object WhyUnableInFull extends CheckPaymentPlanChangeLink {
     lazy val targetPage: Call = routes.WhyCannotPayInFullController.whyCannotPayInFull
   }
 
-  case object CanPayWithinSixMonths extends CheckPaymentPlanChangeLink {
+  case object PayWithin6Months extends CheckPaymentPlanChangeLink {
     lazy val targetPage: Call = routes.CanPayWithinSixMonthsController.canPayWithinSixMonths
   }
 

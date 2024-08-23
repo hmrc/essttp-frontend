@@ -19,16 +19,13 @@ package controllers
 import essttp.journey.model.Origins
 import essttp.rootmodel.TaxRegime
 import play.api.libs.json.Json
-import play.api.mvc.{AnyContent, Request, Result}
 import play.api.test.Helpers._
 import testsupport.ItSpec
+import testsupport.reusableassertions.PegaRecreateSessionAssertions
 import testsupport.stubs.EssttpBackend
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
-import uk.gov.hmrc.http.UpstreamErrorResponse
 
-import scala.concurrent.Future
-
-class PegaControllerSpec extends ItSpec {
+class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
 
   lazy val controller = app.injector.instanceOf[PegaController]
 
@@ -195,60 +192,6 @@ class PegaControllerSpec extends ItSpec {
 
   }
 
-  def recreateSessionErrorBehaviour(performAction: (TaxRegime, Request[AnyContent]) => Future[Result]): Unit = {
-
-    "return an error when" - {
-
-      "there is no session found in the BE and the call to reconstruct a session returns an error" in {
-        stubCommonActions()
-        EssttpBackend.findByLatestSessionNotFound()
-        EssttpBackend.Pega.stubRecreateSession(TaxRegime.Sa, Left(SERVICE_UNAVAILABLE))
-
-        val exception = intercept[UpstreamErrorResponse](
-          await(performAction(TaxRegime.Sa, fakeRequestWithPath("/a?regime=sa")))
-        )
-        exception.statusCode shouldBe SERVICE_UNAVAILABLE
-
-        EssttpBackend.verifyFindByLatestSessionId()
-        EssttpBackend.Pega.verifyRecreateSessionCalled(TaxRegime.Sa)
-      }
-
-    }
-
-    "redirect to the which tax regime page when" - {
-
-      "no journey is found and no journey was reconstructed when a regime can be found in the query parameters" in {
-        stubCommonActions()
-        EssttpBackend.findByLatestSessionNotFound()
-        EssttpBackend.Pega.stubRecreateSession(TaxRegime.Epaye, Left(NOT_FOUND))
-
-        val result = performAction(TaxRegime.Epaye, fakeRequestWithPath("/a?regime=vat"))
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.WhichTaxRegimeController.whichTaxRegime.url)
-
-        EssttpBackend.verifyFindByLatestSessionId()
-        EssttpBackend.Pega.verifyRecreateSessionCalled(TaxRegime.Vat)
-      }
-
-      "no journey is found if there is no regime in the query parameters" in {
-        stubCommonActions()
-        EssttpBackend.findByLatestSessionNotFound()
-        EssttpBackend.Pega.stubRecreateSession(TaxRegime.Epaye, Left(NOT_FOUND))
-
-        val result = performAction(TaxRegime.Epaye, fakeRequest)
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.WhichTaxRegimeController.whichTaxRegime.url)
-
-        EssttpBackend.verifyFindByLatestSessionId()
-        EssttpBackend.Pega.verifyRecreateSessionNotCalled(TaxRegime.Epaye)
-        EssttpBackend.Pega.verifyRecreateSessionNotCalled(TaxRegime.Vat)
-        EssttpBackend.Pega.verifyRecreateSessionNotCalled(TaxRegime.Sa)
-      }
-
-    }
-
-  }
-
 }
 
 class PegaControllerRedirectInConfigSpec extends ItSpec {
@@ -256,7 +199,7 @@ class PegaControllerRedirectInConfigSpec extends ItSpec {
   val redirectUrl = "http://redirect-to/here"
 
   override lazy val configOverrides: Map[String, Any] = Map(
-    "pega.redirect-url" -> redirectUrl
+    "pega.start-redirect-url" -> redirectUrl
   )
 
   lazy val controller = app.injector.instanceOf[PegaController]

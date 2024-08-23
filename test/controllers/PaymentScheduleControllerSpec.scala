@@ -16,6 +16,7 @@
 
 package controllers
 
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import controllers.PaymentScheduleControllerSpec.SummaryRow
 import essttp.journey.model.{Origin, Origins}
 import org.jsoup.Jsoup
@@ -23,26 +24,29 @@ import org.jsoup.nodes.{Document, Element}
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{Call, Result, Session}
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
-import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
+import testsupport.TdRequest.FakeRequestOps
+import testsupport.reusableassertions.{ContentAssertions, PegaRecreateSessionAssertions, RequestAssertions}
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
-import uk.gov.hmrc.http.UpstreamErrorResponse
+import uk.gov.hmrc.http.{SessionKeys, UpstreamErrorResponse}
 
 import scala.concurrent.Future
 import scala.jdk.CollectionConverters.IteratorHasAsScala
 
-class PaymentScheduleControllerSpec extends ItSpec {
+class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
 
   private val controller: PaymentScheduleController = app.injector.instanceOf[PaymentScheduleController]
+
   Seq[(String, Origin)](
     ("Epaye", Origins.Epaye.Bta),
     ("Vat", Origins.Vat.Bta),
     ("Sa", Origins.Sa.Bta)
   ).foreach {
       case (regime, origin) =>
-        s"GET ${routes.PaymentScheduleController.checkPaymentSchedule.url}" - {
+        s"[$regime journey] GET ${routes.PaymentScheduleController.checkPaymentSchedule.url}" - {
 
             def extractSummaryRows(elements: List[Element]): List[SummaryRow] = elements.map { e =>
               SummaryRow(
@@ -63,25 +67,25 @@ class PaymentScheduleControllerSpec extends ItSpec {
               val whyCannotPayInFullRow = SummaryRow(
                 "Why are you unable to pay in full?",
                 reasonsToNotPayInFull.mkString("\n"),
-                PageUrls.checkPaymentPlanChangeUrl("WhyCannotPayInFull")
+                PageUrls.checkPaymentPlanChangeUrl("WhyUnableInFull", origin.taxRegime)
               )
 
               val canPayUpfrontRow = SummaryRow(
                 "Can you make an upfront payment?",
                 canPayUpfrontValue,
-                PageUrls.checkPaymentPlanChangeUrl("CanPayUpfront")
+                PageUrls.checkPaymentPlanChangeUrl("CanPayUpfront", origin.taxRegime)
               )
               val upfrontPaymentAmountRow = upfrontPaymentAmountValue.map(amount =>
                 SummaryRow(
                   "Upfront payment\n<br><span class=\"govuk-body-s\">Taken within 6 working days</span>",
                   amount,
-                  PageUrls.checkPaymentPlanChangeUrl("UpfrontPaymentAmount")
+                  PageUrls.checkPaymentPlanChangeUrl("UpfrontPaymentAmount", origin.taxRegime)
                 ))
 
               val canPayWithinSixMonthsRow = SummaryRow(
                 "Can you pay within 6 months?",
                 canPayWithinSixMonths,
-                PageUrls.checkPaymentPlanChangeUrl("CanPayWithinSixMonths")
+                PageUrls.checkPaymentPlanChangeUrl("PayWithin6Months", origin.taxRegime)
               )
 
               val expectedSummaryRows = List(
@@ -105,18 +109,18 @@ class PaymentScheduleControllerSpec extends ItSpec {
               val monthlyPaymentAmountRow = SummaryRow(
                 "How much can you afford to pay each month?",
                 affordableMonthlyPaymentAmount,
-                PageUrls.checkPaymentPlanChangeUrl("MonthlyPaymentAmount")
+                PageUrls.checkPaymentPlanChangeUrl("MonthlyPaymentAmount", origin.taxRegime)
               )
 
               val paymentDayRow = SummaryRow(
                 "Payments collected on",
                 paymentDayValue,
-                PageUrls.checkPaymentPlanChangeUrl("PaymentDay")
+                PageUrls.checkPaymentPlanChangeUrl("PaymentDay", origin.taxRegime)
               )
 
               val paymentAmountRows = datesToAmountsValues.map {
                 case (date, amount) =>
-                  SummaryRow(date, amount, PageUrls.checkPaymentPlanChangeUrl("PaymentPlan"))
+                  SummaryRow(date, amount, PageUrls.checkPaymentPlanChangeUrl("PaymentPlan", origin.taxRegime))
               }
 
               val totalToPayRow = SummaryRow("Total to pay", totalToPayValue, "")
@@ -126,7 +130,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
               extractSummaryRows(paymentPlanRows) shouldBe expectedRows
             }
 
-          s"[$regime journey] should return 200 and the can you make an upfront payment page when" - {
+          "should return 200 and the can you make an upfront payment page when" - {
 
               def test(
                   journeyJsonBody: String
@@ -196,7 +200,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
             }
           }
 
-          s"[$regime journey] redirect to the missing info page if no payment plan has been selected yet" in {
+          "redirect to the missing info page if no payment plan has been selected yet" in {
             stubCommonActions()
             EssttpBackend.AffordableQuotes.findJourney(testCrypto, origin)()
 
@@ -206,7 +210,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
 
           }
 
-          s"[regime $regime] return an error when" - {
+          "return an error when" - {
 
             "the journey is in state" - {
 
@@ -235,9 +239,9 @@ class PaymentScheduleControllerSpec extends ItSpec {
           }
         }
 
-        s"POST ${routes.PaymentScheduleController.checkPaymentScheduleSubmit.url}" - {
+        s"[$regime journey] POST ${routes.PaymentScheduleController.checkPaymentScheduleSubmit.url}" - {
 
-          s"[$regime journey] should redirect to ${routes.BankDetailsController.detailsAboutBankAccount.url} if the journey " +
+          "should redirect to ${routes.BankDetailsController.detailsAboutBankAccount.url} if the journey " +
             "has been updated successfully and send an audit event" in {
               stubCommonActions()
               EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, origin)(
@@ -290,7 +294,7 @@ class PaymentScheduleControllerSpec extends ItSpec {
               )
             }
 
-          s"[regime $regime] return an error when" - {
+          "return an error when" - {
 
             "the journey is in state" - {
 
@@ -319,18 +323,23 @@ class PaymentScheduleControllerSpec extends ItSpec {
           }
         }
 
-        "GET /check-payment-plan/change" - {
+        s"[$regime journey] GET /check-payment-plan/change" - {
 
-          s"[$regime journey] should redirect to the correct page and update the cookie session with the pageId" - {
+          behave like recreateSessionErrorBehaviour(controller.changeFromCheckPaymentSchedule("", _)(_))
+
+          "should redirect to the correct page and update the cookie session with the pageId" - {
 
               def test(pageId: String, expectedRedirect: Call): Unit = {
                 stubCommonActions()
                 EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, origin)()
 
                 val expectedUpdatedSession = Session(
-                  fakeRequest.session.data.updated(Routing.clickedChangeFromSessionKey, routes.PaymentScheduleController.checkPaymentSchedule.url)
+                  fakeRequest.session.data.updated(
+                    Routing.clickedChangeFromSessionKey,
+                    routes.PaymentScheduleController.checkPaymentSchedule.url
+                  )
                 )
-                val result = controller.changeFromCheckPaymentSchedule(pageId)(fakeRequest)
+                val result = controller.changeFromCheckPaymentSchedule(pageId, origin.taxRegime)(fakeRequest)
 
                 status(result) shouldBe SEE_OTHER
                 redirectLocation(result) shouldBe Some(expectedRedirect.url)
@@ -358,23 +367,119 @@ class PaymentScheduleControllerSpec extends ItSpec {
               test("PaymentPlan", routes.InstalmentsController.instalmentOptions)
             }
 
-            "WhyCannotPayInFull" in {
-              test("WhyCannotPayInFull", routes.WhyCannotPayInFullController.whyCannotPayInFull)
+            "WhyUnableInFull" in {
+              test("WhyUnableInFull", routes.WhyCannotPayInFullController.whyCannotPayInFull)
             }
 
-            "CanPayWithinSixMonths" in {
-              test("CanPayWithinSixMonths", routes.CanPayWithinSixMonthsController.canPayWithinSixMonths)
+            "PayWithin6Months" in {
+              test("PayWithin6Months", routes.CanPayWithinSixMonthsController.canPayWithinSixMonths)
             }
 
           }
 
-          s"[$regime journey] should return an error when the pageId is not recognised" in {
-            stubCommonActions()
-            EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, origin)()
+          "should write the correct value for 'essttpClickedChangeFrom' in the session cookie in the journey state" - {
 
-            a[NoSuchElementException] shouldBe thrownBy(
-              await(controller.changeFromCheckPaymentSchedule("abc")(fakeRequest))
+              def test(
+                  stubGetJourney:                  () => StubMapping,
+                  expectedEssttpClickedChangeFrom: Call
+              ): Unit = {
+                stubCommonActions()
+                stubGetJourney()
+
+                val expectedUpdatedSession = Session(
+                  fakeRequest.session.data.updated(
+                    Routing.clickedChangeFromSessionKey,
+                    expectedEssttpClickedChangeFrom.url
+                  )
+                )
+                val result = controller.changeFromCheckPaymentSchedule("CanPayUpfront", origin.taxRegime)(fakeRequest)
+
+                status(result) shouldBe SEE_OTHER
+                redirectLocation(result) shouldBe Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url)
+                session(result) shouldBe expectedUpdatedSession
+                ()
+              }
+
+            "AfterStartedPegaCase" in {
+              test(
+                () => EssttpBackend.StartedPegaCase.findJourney(testCrypto, origin)(),
+                testOnly.controllers.routes.PegaController.dummyPegaPage(origin.taxRegime)
+              )
+            }
+
+            "AfterSelectedPaymentPlan" in {
+              test(
+                () => EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, origin)(),
+                routes.PaymentScheduleController.checkPaymentSchedule
+              )
+            }
+
+            "AfterCheckedPaymentPlan on an affordability journey" in {
+              test(
+                () => EssttpBackend.HasCheckedPlan.findJourney(withAffordability = true, testCrypto, origin)(),
+                testOnly.controllers.routes.PegaController.dummyPegaPage(origin.taxRegime)
+              )
+            }
+
+            "AfterCheckedPaymentPlan on a non-affordability journey" in {
+              test(
+                () => EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, origin)(),
+                routes.PaymentScheduleController.checkPaymentSchedule
+              )
+            }
+
+          }
+
+          "be able to redirect correctly when no session if found but is successfully recreated" in {
+            stubCommonActions()
+            EssttpBackend.findByLatestSessionNotFound()
+            EssttpBackend.Pega.stubRecreateSession(
+              origin.taxRegime,
+              Right(Json.parse(JourneyJsonTemplates.`Started PEGA case`(origin)(testCrypto)))
             )
+
+            val request =
+              FakeRequest("GET", s"/p?regime=${origin.taxRegime.entryName}")
+                .withAuthToken()
+                .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+            val expectedUpdatedSession = Session(
+              request.session.data.updated(
+                Routing.clickedChangeFromSessionKey,
+                testOnly.controllers.routes.PegaController.dummyPegaPage(origin.taxRegime).url
+              )
+            )
+            val result = controller.changeFromCheckPaymentSchedule("CanPayUpfront", origin.taxRegime)(request)
+
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url)
+            session(result) shouldBe expectedUpdatedSession
+
+            EssttpBackend.verifyFindByLatestSessionId()
+            EssttpBackend.Pega.verifyRecreateSessionCalled(origin.taxRegime)
+          }
+
+          "should return an error when" - {
+
+            "the journey is not in an appropriate state" in {
+              stubCommonActions()
+              EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, origin)()
+
+              val error = intercept[UpstreamErrorResponse](
+                await(controller.changeFromCheckPaymentSchedule("CanPayUpfront", origin.taxRegime)(fakeRequest))
+              )
+              error.statusCode shouldBe INTERNAL_SERVER_ERROR
+              error.getMessage should startWith("Cannot change answer from check your payment plan page in journey state")
+            }
+
+            "the pageId is not recognised" in {
+              stubCommonActions()
+              EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, origin)()
+
+              a[NoSuchElementException] shouldBe thrownBy(
+                await(controller.changeFromCheckPaymentSchedule("abc", origin.taxRegime)(fakeRequest))
+              )
+            }
           }
 
         }
@@ -387,3 +492,52 @@ object PaymentScheduleControllerSpec {
   final case class SummaryRow(question: String, answer: String, changeLink: String)
 
 }
+
+class PaymentSchedulePegaRedirectInConfigControllerSpec extends ItSpec {
+
+  val pegaRedirectUrl = "/redirect-to-here"
+
+  override lazy val configOverrides: Map[String, Any] = Map(
+    "pega.change-link-return-url" -> pegaRedirectUrl
+  )
+
+  private val controller: PaymentScheduleController = app.injector.instanceOf[PaymentScheduleController]
+
+  "GET /check-payment-plan/change" - {
+
+    "should use the configured PEGA redirect URL for 'essttpClickedChangeFrom' in the session cookie in the journey state" - {
+
+      val origin = Origins.Epaye.Bta
+
+        def test(stubGetJourney: () => StubMapping): Unit = {
+          stubCommonActions()
+          stubGetJourney()
+
+          val expectedUpdatedSession = Session(
+            fakeRequest.session.data.updated(
+              Routing.clickedChangeFromSessionKey,
+              pegaRedirectUrl
+            )
+          )
+          val result = controller.changeFromCheckPaymentSchedule("CanPayUpfront", origin.taxRegime)(fakeRequest)
+
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url)
+          session(result) shouldBe expectedUpdatedSession
+          ()
+        }
+
+      "AfterStartedPegaCase" in {
+        test(() => EssttpBackend.StartedPegaCase.findJourney(testCrypto, origin)())
+      }
+
+      "AfterCheckedPaymentPlan on an affordability journey" in {
+        test(() => EssttpBackend.HasCheckedPlan.findJourney(withAffordability = true, testCrypto, origin)())
+      }
+
+    }
+
+  }
+
+}
+
