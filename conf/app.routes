@@ -77,7 +77,8 @@ GET    /upfront-payment-summary/change/:pageId              controllers.UpfrontP
 GET    /retrieve-extreme-dates                              controllers.DatesApiController.retrieveExtremeDates
 GET    /determine-affordability                             controllers.DetermineAffordabilityController.determineAffordability
 
-GET    /paying-within-six-months                            controllers.CanPayWithinSixMonthsController.canPayWithinSixMonths
+GET    /paying-within-six-months                            controllers.CanPayWithinSixMonthsController.canPayWithinSixMonths(regime: TaxRegime)
+GET    /paying-within-six-months/back                       controllers.CanPayWithinSixMonthsController.backFromPegaLanding(regime: TaxRegime)
 POST   /paying-within-six-months                            controllers.CanPayWithinSixMonthsController.canPayWithinSixMonthsSubmit
 
 GET    /how-much-can-you-pay-each-month                     controllers.MonthlyPaymentAmountController.displayMonthlyPaymentAmount

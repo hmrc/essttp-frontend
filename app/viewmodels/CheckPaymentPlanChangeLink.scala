@@ -22,38 +22,38 @@ import essttp.rootmodel.TaxRegime
 import play.api.mvc.Call
 
 sealed trait CheckPaymentPlanChangeLink extends EnumEntry {
-  def targetPage: Call
+  def targetPage(taxRegime: TaxRegime): Call
   def changeLink(taxRegime: TaxRegime): Call = routes.PaymentScheduleController.changeFromCheckPaymentSchedule(entryName, taxRegime)
 }
 
 object CheckPaymentPlanChangeLink extends Enum[CheckPaymentPlanChangeLink] {
 
   case object CanPayUpfront extends CheckPaymentPlanChangeLink {
-    lazy val targetPage: Call = routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment
+    def targetPage(taxRegime: TaxRegime): Call = routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment
   }
 
   case object UpfrontPaymentAmount extends CheckPaymentPlanChangeLink {
-    lazy val targetPage: Call = routes.UpfrontPaymentController.upfrontPaymentAmount
+    def targetPage(taxRegime: TaxRegime): Call = routes.UpfrontPaymentController.upfrontPaymentAmount
   }
 
   case object MonthlyPaymentAmount extends CheckPaymentPlanChangeLink {
-    lazy val targetPage: Call = routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount
+    def targetPage(taxRegime: TaxRegime): Call = routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount
   }
 
   case object PaymentDay extends CheckPaymentPlanChangeLink {
-    lazy val targetPage: Call = routes.PaymentDayController.paymentDay
+    def targetPage(taxRegime: TaxRegime): Call = routes.PaymentDayController.paymentDay
   }
 
   case object WhyUnableInFull extends CheckPaymentPlanChangeLink {
-    lazy val targetPage: Call = routes.WhyCannotPayInFullController.whyCannotPayInFull
+    def targetPage(taxRegime: TaxRegime): Call = routes.WhyCannotPayInFullController.whyCannotPayInFull
   }
 
   case object PayWithin6Months extends CheckPaymentPlanChangeLink {
-    lazy val targetPage: Call = routes.CanPayWithinSixMonthsController.canPayWithinSixMonths
+    def targetPage(taxRegime: TaxRegime): Call = routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(taxRegime)
   }
 
   case object PaymentPlan extends CheckPaymentPlanChangeLink {
-    lazy val targetPage: Call = routes.InstalmentsController.instalmentOptions
+    def targetPage(taxRegime: TaxRegime): Call = routes.InstalmentsController.instalmentOptions
   }
 
   override val values = findValues

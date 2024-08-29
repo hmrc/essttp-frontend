@@ -18,6 +18,7 @@ package controllers
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.journey.model.Origins
+import essttp.rootmodel.TaxRegime.Epaye
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.http.Status
 import play.api.test.Helpers._
@@ -71,7 +72,7 @@ class JourneyIncorrectStateRouterSpec extends ItSpec {
       ("Stages.ObtainedCanPayWithinSixMonthsAnswers - yes", () => EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(
         JourneyJsonTemplates.`Obtained Can Pay Within 6 months - yes`(Origins.Epaye.Bta)(testCrypto)
       ), PageUrls.howMuchCanYouPayEachMonthUrl),
-      ("Stages.StartedPegaCase", () => EssttpBackend.StartedPegaCase.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.canPayWithinSixMonthsUrl),
+      ("Stages.StartedPegaCase", () => EssttpBackend.StartedPegaCase.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.canPayWithinSixMonthsUrl(Epaye)),
       ("Stages.EnteredMonthlyPaymentAmount", () => EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.whichDayDoYouWantToPayUrl),
       ("Stages.EnteredDayOfMonth", () => EssttpBackend.DayOfMonth.findJourney(TdAll.dayOfMonth(), testCrypto, Origins.Epaye.Bta)(), PageUrls.retrieveStartDatesUrl),
       ("Stages.RetrievedStartDates", () => EssttpBackend.Dates.findJourneyStartDates(testCrypto, Origins.Epaye.Bta)(), PageUrls.determineAffordableQuotesUrl),

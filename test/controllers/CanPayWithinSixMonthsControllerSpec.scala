@@ -17,6 +17,7 @@
 package controllers
 
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Origins}
+import essttp.rootmodel.TaxRegime.Epaye
 import org.jsoup.Jsoup
 import play.api.mvc.Result
 import play.api.test.Helpers._
@@ -73,7 +74,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec {
       stubCommonActions()
       EssttpBackend.Dates.findJourneyExtremeDates(testCrypto, Origins.Epaye.Bta)()
 
-      val result = controller.canPayWithinSixMonths(fakeRequest)
+      val result = controller.canPayWithinSixMonths(Epaye)(fakeRequest)
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.DetermineAffordabilityController.determineAffordability.url)
     }
@@ -82,7 +83,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec {
       stubCommonActions()
       EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, Origins.Epaye.Bta)()
 
-      val result = controller.canPayWithinSixMonths(fakeRequest)
+      val result = controller.canPayWithinSixMonths(Epaye)(fakeRequest)
       testPageIsDisplayed(result, None)
     }
 
@@ -92,7 +93,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec {
         JourneyJsonTemplates.`Obtained Can Pay Within 6 months - yes`(Origins.Epaye.Bta)(testCrypto)
       )
 
-      val result = controller.canPayWithinSixMonths(fakeRequest)
+      val result = controller.canPayWithinSixMonths(Epaye)(fakeRequest)
       testPageIsDisplayed(result, Some(true))
     }
 
@@ -102,7 +103,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec {
         JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
       )
 
-      val result = controller.canPayWithinSixMonths(fakeRequest)
+      val result = controller.canPayWithinSixMonths(Epaye)(fakeRequest)
       testPageIsDisplayed(result, Some(false))
     }
 

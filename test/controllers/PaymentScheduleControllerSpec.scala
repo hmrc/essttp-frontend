@@ -372,7 +372,7 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
             }
 
             "PayWithin6Months" in {
-              test("PayWithin6Months", routes.CanPayWithinSixMonthsController.canPayWithinSixMonths)
+              test("PayWithin6Months", routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(origin.taxRegime))
             }
 
           }

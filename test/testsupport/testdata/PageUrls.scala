@@ -58,7 +58,7 @@ object PageUrls {
   def upfrontPaymentSummaryChangeUrl(pageId: String): String = s"$serviceBaseUrl/upfront-payment-summary/change/$pageId"
   val retrievedExtremeDatesUrl: String = s"$serviceBaseUrl/retrieve-extreme-dates"
   val determineAffordabilityUrl: String = s"$serviceBaseUrl/determine-affordability"
-  val canPayWithinSixMonthsUrl: String = s"$serviceBaseUrl/paying-within-six-months"
+  def canPayWithinSixMonthsUrl(regime: TaxRegime): String = s"$serviceBaseUrl/paying-within-six-months?regime=${regime.entryName.toLowerCase(Locale.UK)}"
   val startPegaCaseUrl: String = s"$serviceBaseUrl/pega-start"
   val howMuchCanYouPayEachMonthUrl: String = s"$serviceBaseUrl/how-much-can-you-pay-each-month"
   val whichDayDoYouWantToPayUrl: String = s"$serviceBaseUrl/which-day-do-you-want-to-pay-each-month"
