@@ -13,53 +13,54 @@
 ->   /                                                            prod.Routes
 
 
-GET  /set-up-a-payment-plan/test-only/tax-regime                  testOnly.controllers.StartJourneyController.whichTaxRegime
-POST /set-up-a-payment-plan/test-only/tax-regime                  testOnly.controllers.StartJourneyController.whichTaxRegimeSubmit
+GET  /set-up-a-payment-plan/test-only/tax-regime                        testOnly.controllers.StartJourneyController.whichTaxRegime
+POST /set-up-a-payment-plan/test-only/tax-regime                        testOnly.controllers.StartJourneyController.whichTaxRegimeSubmit
 
-GET  /set-up-a-payment-plan/test-only/start-journey-epaye         testOnly.controllers.StartJourneyController.startJourneyEpayeGet
-GET  /set-up-a-payment-plan/test-only/start-journey-vat          testOnly.controllers.StartJourneyController.startJourneyVatGet
-GET  /set-up-a-payment-plan/test-only/start-journey-sa            testOnly.controllers.StartJourneyController.startJourneySaGet
+GET  /set-up-a-payment-plan/test-only/start-journey-epaye               testOnly.controllers.StartJourneyController.startJourneyEpayeGet
+GET  /set-up-a-payment-plan/test-only/start-journey-vat                 testOnly.controllers.StartJourneyController.startJourneyVatGet
+GET  /set-up-a-payment-plan/test-only/start-journey-sa                  testOnly.controllers.StartJourneyController.startJourneySaGet
 
-POST /set-up-a-payment-plan/test-only/start-journey-epaye         testOnly.controllers.StartJourneyController.startJourneyEpayeSubmit
-POST /set-up-a-payment-plan/test-only/start-journey-vat          testOnly.controllers.StartJourneyController.startJourneyVatSubmit
-POST /set-up-a-payment-plan/test-only/start-journey-sa            testOnly.controllers.StartJourneyController.startJourneySaSubmit
+POST /set-up-a-payment-plan/test-only/start-journey-epaye               testOnly.controllers.StartJourneyController.startJourneyEpayeSubmit
+POST /set-up-a-payment-plan/test-only/start-journey-vat                 testOnly.controllers.StartJourneyController.startJourneyVatSubmit
+POST /set-up-a-payment-plan/test-only/start-journey-sa                  testOnly.controllers.StartJourneyController.startJourneySaSubmit
 
-GET  /set-up-a-payment-plan/test-only/show-journey                testOnly.controllers.DebugJourneyController.showJourney
+GET  /set-up-a-payment-plan/test-only/show-journey                      testOnly.controllers.DebugJourneyController.showJourney
 
-GET  /set-up-a-payment-plan/test-only/bta-epaye-page              testOnly.controllers.StartJourneyController.showBtaEpayePage
-GET  /set-up-a-payment-plan/test-only/bta-vat-page                testOnly.controllers.StartJourneyController.showBtaVatPage
-GET  /set-up-a-payment-plan/test-only/bta-sa-page                 testOnly.controllers.StartJourneyController.showBtaSaPage
+GET  /set-up-a-payment-plan/test-only/bta-epaye-page                    testOnly.controllers.StartJourneyController.showBtaEpayePage
+GET  /set-up-a-payment-plan/test-only/bta-vat-page                      testOnly.controllers.StartJourneyController.showBtaVatPage
+GET  /set-up-a-payment-plan/test-only/bta-sa-page                       testOnly.controllers.StartJourneyController.showBtaSaPage
 
-GET  /set-up-a-payment-plan/test-only/govuk-epaye-page            testOnly.controllers.StartJourneyController.showGovukEpayePage
-GET  /set-up-a-payment-plan/test-only/govuk-vat-page              testOnly.controllers.StartJourneyController.showGovukVatPage
-GET  /set-up-a-payment-plan/test-only/govuk-sa-page              testOnly.controllers.StartJourneyController.showGovukSaPage
+GET  /set-up-a-payment-plan/test-only/govuk-epaye-page                  testOnly.controllers.StartJourneyController.showGovukEpayePage
+GET  /set-up-a-payment-plan/test-only/govuk-vat-page                    testOnly.controllers.StartJourneyController.showGovukVatPage
+GET  /set-up-a-payment-plan/test-only/govuk-sa-page                     testOnly.controllers.StartJourneyController.showGovukSaPage
 
-GET  /set-up-a-payment-plan/test-only/epaye-page                  testOnly.controllers.StartJourneyController.showEpayePage
+GET  /set-up-a-payment-plan/test-only/epaye-page                        testOnly.controllers.StartJourneyController.showEpayePage
 
-GET  /set-up-a-payment-plan/test-only/vat-page                    testOnly.controllers.StartJourneyController.showVatPage
-GET  /set-up-a-payment-plan/test-only/vat-penalties               testOnly.controllers.StartJourneyController.showVatPenaltiesPage
+GET  /set-up-a-payment-plan/test-only/vat-page                          testOnly.controllers.StartJourneyController.showVatPage
+GET  /set-up-a-payment-plan/test-only/vat-penalties                     testOnly.controllers.StartJourneyController.showVatPenaltiesPage
 
-GET  /set-up-a-payment-plan/test-only/pta-sa                      testOnly.controllers.StartJourneyController.showPtaSaPage
-GET  /set-up-a-payment-plan/test-only/mobile-sa                   testOnly.controllers.StartJourneyController.showMobileSaPage
+GET  /set-up-a-payment-plan/test-only/pta-sa                            testOnly.controllers.StartJourneyController.showPtaSaPage
+GET  /set-up-a-payment-plan/test-only/mobile-sa                         testOnly.controllers.StartJourneyController.showMobileSaPage
 
 
 
-GET /set-up-a-payment-plan/test-only/email-verification-passcodes testOnly.controllers.EmailController.emailVerificationPasscodes
+GET /set-up-a-payment-plan/test-only/email-verification-passcodes       testOnly.controllers.EmailController.emailVerificationPasscodes
 
 #Pretends that that journey starts from Bta
-GET  /set-up-a-payment-plan/test-only/start-journey-epaye-bta     testOnly.controllers.StartJourneyController.startJourneyEpayeBta
-GET  /set-up-a-payment-plan/test-only/start-journey-epaye-epaye   testOnly.controllers.StartJourneyController.startJourneyEpayeEpaye
+GET  /set-up-a-payment-plan/test-only/start-journey-epaye-bta           testOnly.controllers.StartJourneyController.startJourneyEpayeBta
+GET  /set-up-a-payment-plan/test-only/start-journey-epaye-epaye         testOnly.controllers.StartJourneyController.startJourneyEpayeEpaye
 
-GET  /set-up-a-payment-plan/test-only/start-journey-vat-bta       testOnly.controllers.StartJourneyController.startJourneyVatBta
-GET  /set-up-a-payment-plan/test-only/start-journey-vat-vat       testOnly.controllers.StartJourneyController.startJourneyVatVatService
-GET  /set-up-a-payment-plan/test-only/start-journey-vat-penalties testOnly.controllers.StartJourneyController.startJourneyVatVatPenalties
+GET  /set-up-a-payment-plan/test-only/start-journey-vat-bta             testOnly.controllers.StartJourneyController.startJourneyVatBta
+GET  /set-up-a-payment-plan/test-only/start-journey-vat-vat             testOnly.controllers.StartJourneyController.startJourneyVatVatService
+GET  /set-up-a-payment-plan/test-only/start-journey-vat-penalties       testOnly.controllers.StartJourneyController.startJourneyVatVatPenalties
 
-GET  /set-up-a-payment-plan/test-only/start-journey-sa-bta        testOnly.controllers.StartJourneyController.startJourneySaBta
-GET  /set-up-a-payment-plan/test-only/start-journey-sa-pta        testOnly.controllers.StartJourneyController.startJourneySaPta
-GET  /set-up-a-payment-plan/test-only/start-journey-sa-mobile     testOnly.controllers.StartJourneyController.startJourneySaMobile
+GET  /set-up-a-payment-plan/test-only/start-journey-sa-bta              testOnly.controllers.StartJourneyController.startJourneySaBta
+GET  /set-up-a-payment-plan/test-only/start-journey-sa-pta              testOnly.controllers.StartJourneyController.startJourneySaPta
+GET  /set-up-a-payment-plan/test-only/start-journey-sa-mobile           testOnly.controllers.StartJourneyController.startJourneySaMobile
 
 
-GET  /set-up-a-payment-plan/test-only/pega                         testOnly.controllers.PegaController.dummyPegaPage(regime: TaxRegime)
-POST /set-up-a-payment-plan/test-only/pega                         testOnly.controllers.PegaController.dummyPegaPageContinue(regime: TaxRegime)
+GET  /set-up-a-payment-plan/test-only/pega                              testOnly.controllers.PegaController.dummyPegaPage(regime: TaxRegime)
+POST /set-up-a-payment-plan/test-only/pega                              testOnly.controllers.PegaController.dummyPegaPageContinue(regime: TaxRegime)
+GET  /set-up-a-payment-plan/test-only/paying-within-six-months/back     testOnly.controllers.PegaController.backFromPegaLanding(regime: TaxRegime)
 
-GET /set-up-a-payment-plan/test-only/pega/change/:pageId          testOnly.controllers.PegaController.change(pageId: String, regime: TaxRegime)
+GET /set-up-a-payment-plan/test-only/pega/change/:pageId                testOnly.controllers.PegaController.change(pageId: String, regime: TaxRegime)

@@ -24,7 +24,6 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import views.checkpaymentchedule.CheckPaymentScheduleRows
 @import viewmodels.CheckPaymentPlanChangeLink
-@import play.api.mvc.Results.Redirect
 
 @this(
   testOnlyLayout: TestOnlyLayout,
@@ -80,7 +79,7 @@
 @testOnlyLayout(
     pageTitle = Some(title),
     showBackLink = true,
-    backLinkUrlOverride = Some(controllers.routes.CanPayWithinSixMonthsController.backFromPegaLanding(taxRegime).url)
+    backLinkUrlOverride = Some(testOnly.controllers.routes.PegaController.backFromPegaLanding(taxRegime).url)
 ) {
 
     <h1 class="govuk-heading-xl">@title</h1>

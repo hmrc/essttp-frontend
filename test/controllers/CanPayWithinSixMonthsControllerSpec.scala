@@ -17,21 +17,28 @@
 package controllers
 
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Origins}
+import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.TaxRegime.Epaye
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
+import play.api.libs.json.Json
 import play.api.mvc.Result
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
-import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
+import testsupport.TdRequest.FakeRequestOps
+import testsupport.reusableassertions.{ContentAssertions, PegaRecreateSessionAssertions, RequestAssertions}
 import testsupport.stubs.EssttpBackend
 import testsupport.testdata.{JourneyJsonTemplates, TdAll}
+import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
-class CanPayWithinSixMonthsControllerSpec extends ItSpec {
+class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
 
   val controller = app.injector.instanceOf[CanPayWithinSixMonthsController]
+  private def pageContentAsDoc(result: Future[Result]): Document = Jsoup.parse(contentAsString(result))
 
   "GET /paying-within-six-months should" - {
 
@@ -108,6 +115,38 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec {
     }
 
   }
+
+  List(TaxRegime.Epaye, TaxRegime.Vat, TaxRegime.Sa)
+    .foreach(regime =>
+      s"[${regime.entryName} journey] GET ${routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(regime).url}" - {
+
+        behave like recreateSessionErrorBehaviour(controller.canPayWithinSixMonths(_)(_))
+
+        "be able to show the page correctly when no session is found but is successfully recreated" in {
+          stubCommonActions()
+          EssttpBackend.findByLatestSessionNotFound()
+          EssttpBackend.Pega.stubRecreateSession(
+            regime,
+            Right(Json.parse(JourneyJsonTemplates.`Started PEGA case`(Origins.Epaye.Bta)(testCrypto)))
+          )
+
+          val request =
+            FakeRequest("GET", s"/p?regime=${regime.toString}")
+              .withAuthToken()
+              .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+          val result = controller.canPayWithinSixMonths(regime)(request)
+
+          status(result) shouldBe OK
+
+          val pageH1 = pageContentAsDoc(result).getElementsByClass("govuk-heading-xl").text()
+          pageH1 shouldBe "Paying within 6 months"
+
+          EssttpBackend.verifyFindByLatestSessionId()
+          EssttpBackend.Pega.verifyRecreateSessionCalled(regime)
+        }
+
+      })
 
   "POST /paying-within-six-months should" - {
 

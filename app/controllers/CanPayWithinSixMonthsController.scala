@@ -68,10 +68,6 @@ class CanPayWithinSixMonthsController @Inject() (
       }
     }
 
-  def backFromPegaLanding(regime: TaxRegime): Action[AnyContent] = as.authenticatedJourneyAction { _ =>
-    Redirect(controllers.routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(regime)).withNewSession
-  }
-
   val canPayWithinSixMonthsSubmit: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     CanPayWithinSixMonthsForm.form.bindFromRequest().fold(
       formWithErrors => Ok(views.canPayWithinSixMonthsPage(formWithErrors, remainingAmountToPay(request.journey))),

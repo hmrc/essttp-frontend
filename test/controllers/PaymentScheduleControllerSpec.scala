@@ -430,7 +430,7 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
 
           }
 
-          "be able to redirect correctly when no session if found but is successfully recreated" in {
+          "be able to redirect correctly when no session is found but is successfully recreated" in {
             stubCommonActions()
             EssttpBackend.findByLatestSessionNotFound()
             EssttpBackend.Pega.stubRecreateSession(

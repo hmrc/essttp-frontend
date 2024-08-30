@@ -66,4 +66,8 @@ class PegaController @Inject() (
     Redirect(controllers.routes.PaymentScheduleController.changeFromCheckPaymentSchedule(pageId, regime)).withNewSession
   }
 
+  def backFromPegaLanding(regime: TaxRegime): Action[AnyContent] = as.authenticatedJourneyAction { _ =>
+    Redirect(controllers.routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(regime)).withNewSession
+  }
+
 }
