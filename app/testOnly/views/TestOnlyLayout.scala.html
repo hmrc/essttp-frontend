@@ -39,9 +39,10 @@
 @(
         pageTitle: Option[String] = None,
         headBlock: Option[Html] = None,
-        scriptsBlock: Option[Html] = None,
         hasErrors: Boolean = false,
-        backUrl: Option[String] = None
+        backUrl: Option[String] = None,
+        backLinkUrlOverride: Option[String] = None,
+        showBackLink: Boolean = false
 )(
         contentBlock: Html)(implicit
         request: Request[_]
@@ -57,7 +58,9 @@
 }
 
 @scripts = {
-  @scriptsBlock.getOrElse(Html(""))
+    @if(showBackLink && backLinkUrlOverride.isEmpty){
+        <script src="@{controllers.routes.Assets.versioned("javascripts/back-link.js")}" @{CSPNonce.attr}></script>
+    }
 }
 
 @beforeContentBlock = {
@@ -71,6 +74,13 @@
 
   @backUrl.map(url => govukBackLink(BackLink(href = url, content = Text(Messages.back.show))))
 
+@{
+    if(showBackLink) {
+        backLinkUrlOverride.fold(
+            govukBackLink(BackLink(href = "#", classes = "js-visible", content = Text(Messages.back.show)))
+        )(url => govukBackLink(BackLink(href = url, content = Text(Messages.back.show))))
+    }
+}
 }
 
 @content = {

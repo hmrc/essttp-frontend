@@ -120,7 +120,7 @@ class PaymentScheduleController @Inject() (
           Errors.throwServerErrorException(s"Cannot change answer from check your payment plan page in journey state ${other.name}")
       }
 
-      Redirect(CheckPaymentPlanChangeLink.withName(pageId).targetPage)
+      Redirect(CheckPaymentPlanChangeLink.withName(pageId).targetPage(regime))
         .addingToSession(Routing.clickedChangeFromSessionKey -> redirectTo)
     }
 

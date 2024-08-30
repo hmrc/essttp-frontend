@@ -22,7 +22,7 @@ import controllers.JourneyFinalStateCheck.finalStateCheck
 import essttp.journey.JourneyConnector
 import essttp.journey.model.CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Journey, UpfrontPaymentAnswers}
-import essttp.rootmodel.{AmountInPence, UpfrontPaymentAmount}
+import essttp.rootmodel.{AmountInPence, TaxRegime, UpfrontPaymentAmount}
 import models.enumsforforms.CanPayWithinSixMonthsFormValue
 import models.forms.CanPayWithinSixMonthsForm
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -32,6 +32,7 @@ import util.Logging
 import views.Views
 
 import javax.inject.{Inject, Singleton}
+import scala.annotation.unused
 import scala.concurrent.ExecutionContext
 
 @Singleton
@@ -47,24 +48,25 @@ class CanPayWithinSixMonthsController @Inject() (
 
   import requestSupport._
 
-  val canPayWithinSixMonths: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    request.journey match {
-      case j: Journey.BeforeRetrievedAffordabilityResult =>
-        JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
+  def canPayWithinSixMonths(@unused regime: TaxRegime): Action[AnyContent] =
+    as.continueToSameEndpointAuthenticatedJourneyAction { implicit request =>
+      request.journey match {
+        case j: Journey.BeforeRetrievedAffordabilityResult =>
+          JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
 
-      case j: Journey.AfterRetrievedAffordabilityResult =>
-        finalStateCheck(
-          j,
-          {
-            val previousAnswers = existingAnswersInJourney(request.journey)
-            val form = previousAnswers.fold(CanPayWithinSixMonthsForm.form)(value =>
-              CanPayWithinSixMonthsForm.form.fill(CanPayWithinSixMonthsFormValue.canPayWithinSixMonthsToFormValue(value)))
+        case j: Journey.AfterRetrievedAffordabilityResult =>
+          finalStateCheck(
+            j,
+            {
+              val previousAnswers = existingAnswersInJourney(request.journey)
+              val form = previousAnswers.fold(CanPayWithinSixMonthsForm.form)(value =>
+                CanPayWithinSixMonthsForm.form.fill(CanPayWithinSixMonthsFormValue.canPayWithinSixMonthsToFormValue(value)))
 
-            Ok(views.canPayWithinSixMonthsPage(form, remainingAmountToPay(j)))
-          }
-        )
+              Ok(views.canPayWithinSixMonthsPage(form, remainingAmountToPay(j)))
+            }
+          )
+      }
     }
-  }
 
   val canPayWithinSixMonthsSubmit: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     CanPayWithinSixMonthsForm.form.bindFromRequest().fold(
@@ -78,7 +80,7 @@ class CanPayWithinSixMonthsController @Inject() (
           canPay
         ).map(updatedJourney =>
             Routing.redirectToNext(
-              routes.CanPayWithinSixMonthsController.canPayWithinSixMonths,
+              routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(request.journey.taxRegime),
               updatedJourney,
               valueUnchanged
             ))

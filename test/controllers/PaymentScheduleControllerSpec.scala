@@ -372,7 +372,7 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
             }
 
             "PayWithin6Months" in {
-              test("PayWithin6Months", routes.CanPayWithinSixMonthsController.canPayWithinSixMonths)
+              test("PayWithin6Months", routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(origin.taxRegime))
             }
 
           }
@@ -430,7 +430,7 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
 
           }
 
-          "be able to redirect correctly when no session if found but is successfully recreated" in {
+          "be able to redirect correctly when no session is found but is successfully recreated" in {
             stubCommonActions()
             EssttpBackend.findByLatestSessionNotFound()
             EssttpBackend.Pega.stubRecreateSession(

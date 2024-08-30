@@ -19,7 +19,6 @@
 @import testOnly.controllers.routes
 @import essttp.rootmodel.TaxRegime
 @import essttp.journey.model.{UpfrontPaymentAnswers, CanPayWithinSixMonthsAnswers, WhyCannotPayInFullAnswers}
-@import testOnly.views.html.TestOnlyLayout
 @import requests.RequestSupport
 @import uk.gov.hmrc.auth.core.{Enrolments, Enrolment}
 @import uk.gov.hmrc.govukfrontend.views.html.components._
@@ -33,7 +32,6 @@
   formWithCSRF: FormWithCSRF,
   requestSupport: RequestSupport
 )
-
 @(
         taxRegime: TaxRegime,
         enrolments: Enrolments,
@@ -78,7 +76,11 @@
     )
 }
 
-@testOnlyLayout(pageTitle = Some(title)) {
+@testOnlyLayout(
+    pageTitle = Some(title),
+    showBackLink = true,
+    backLinkUrlOverride = Some(testOnly.controllers.routes.PegaController.backFromPegaLanding(taxRegime).url)
+) {
 
     <h1 class="govuk-heading-xl">@title</h1>
     <p class="govuk-body">Dummy PEGA page</p>
@@ -87,7 +89,7 @@
 
     <h2 class="govuk-heading-l">☆*:・ﾟ・*★IMPORTANT★*・ﾟ・:*☆</h2>
 
-    <p class="govuk-body">Clicking continue or one of the change links will sign you out and prompt you to log in again.</p>
+    <p class="govuk-body">Clicking continue, one of the change links or the back link will sign you out and prompt you to log in again.</p>
 
     <p class="govuk-body">You won’t be able to see this page again after continuing and clicking back.</p>
 

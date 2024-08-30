@@ -66,7 +66,7 @@ class DetermineAffordabilityControllerSpec extends ItSpec {
               val result: Future[Result] = controller.determineAffordability(fakeRequest)
 
               status(result) shouldBe Status.SEE_OTHER
-              redirectLocation(result) shouldBe Some(PageUrls.canPayWithinSixMonthsUrl)
+              redirectLocation(result) shouldBe Some(PageUrls.canPayWithinSixMonthsUrl(origin.taxRegime))
               EssttpBackend.AffordabilityMinMaxApi.verifyUpdateAffordabilityRequest(TdAll.journeyId, TdAll.instalmentAmounts)
               EssttpBackend.CanPayWithinSixMonths.verifyNoneUpdateCanPayWithinSixMonthsRequest(TdAll.journeyId)
               Ttp.Affordability.verifyTtpAffordabilityRequest(origin.taxRegime)(CryptoFormat.NoOpCryptoFormat)
