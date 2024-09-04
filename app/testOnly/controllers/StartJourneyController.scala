@@ -78,6 +78,7 @@ class StartJourneyController @Inject() (
         case TaxRegime.Epaye => Redirect(routes.StartJourneyController.startJourneyEpayeGet)
         case TaxRegime.Vat   => Redirect(routes.StartJourneyController.startJourneyVatGet)
         case TaxRegime.Sa    => Redirect(routes.StartJourneyController.startJourneySaGet)
+        case TaxRegime.Sia   => Redirect(routes.StartJourneyController.startJourneySiaGet)
       }
     )
   }
@@ -95,6 +96,10 @@ class StartJourneyController @Inject() (
     Ok(startPage(TaxRegime.Sa))
   }
 
+  val startJourneySiaGet: Action[AnyContent] = as.default { implicit request =>
+    Ok(startPage(TaxRegime.Sia))
+  }
+
   private def startPage(taxRegime: TaxRegime)(implicit request: Request[_]) =
     testOnlyStartPage(taxRegime, StartJourneyForm.form(taxRegime, appConfig))
 
@@ -109,6 +114,10 @@ class StartJourneyController @Inject() (
 
   val startJourneySaSubmit: Action[AnyContent] = as.default.async { implicit request =>
     startJourneySubmit(TaxRegime.Sa)
+  }
+
+  val startJourneySiaSubmit: Action[AnyContent] = as.default.async { implicit request =>
+    startJourneySubmit(TaxRegime.Sia)
   }
 
   private def startJourneySubmit(taxRegime: TaxRegime)(implicit request: Request[_]): Future[Result] = {

@@ -19,10 +19,12 @@ POST /set-up-a-payment-plan/test-only/tax-regime                        testOnly
 GET  /set-up-a-payment-plan/test-only/start-journey-epaye               testOnly.controllers.StartJourneyController.startJourneyEpayeGet
 GET  /set-up-a-payment-plan/test-only/start-journey-vat                 testOnly.controllers.StartJourneyController.startJourneyVatGet
 GET  /set-up-a-payment-plan/test-only/start-journey-sa                  testOnly.controllers.StartJourneyController.startJourneySaGet
+GET  /set-up-a-payment-plan/test-only/start-journey-sia                 testOnly.controllers.StartJourneyController.startJourneySiaGet
 
 POST /set-up-a-payment-plan/test-only/start-journey-epaye               testOnly.controllers.StartJourneyController.startJourneyEpayeSubmit
 POST /set-up-a-payment-plan/test-only/start-journey-vat                 testOnly.controllers.StartJourneyController.startJourneyVatSubmit
 POST /set-up-a-payment-plan/test-only/start-journey-sa                  testOnly.controllers.StartJourneyController.startJourneySaSubmit
+POST /set-up-a-payment-plan/test-only/start-journey-sia                 testOnly.controllers.StartJourneyController.startJourneySiaSubmit
 
 GET  /set-up-a-payment-plan/test-only/show-journey                      testOnly.controllers.DebugJourneyController.showJourney
 

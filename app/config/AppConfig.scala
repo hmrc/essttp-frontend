@@ -145,7 +145,15 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
       val maxPlanDurationInMonths: Int = getParam[Int]("max-plan-duration-in-months")
       val maxAgeOfDebtInDays: Int = getParam[Int]("max-age-of-debt-in-days")
       val payOnlineLink: String = getParam[String]("pay-online-link")
+    }
 
+    object SIA {
+      private def getParam[A: ConfigLoader](path: String): A = config.get[A](s"policy-parameters.sia.$path")
+
+      val maxAmountOfDebt: AmountInPence = AmountInPence(getParam[Long]("max-amount-of-debt-in-pounds") * 100L)
+      val maxPlanDurationInMonths: Int = getParam[Int]("max-plan-duration-in-months")
+      val maxAgeOfDebtInYears: Int = getParam[Int]("max-age-of-debt-in-years")
+      val payOnlineLink: String = getParam[String]("pay-online-link")
     }
   }
 

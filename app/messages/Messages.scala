@@ -108,6 +108,11 @@ object Messages {
       welsh   = "Hunanasesiad"
     )
 
+    val SIA: Message = Message(
+      english = "Simple Assessment",
+      welsh   = "Asesiad Syml"
+    )
+
     val `Select which tax you want to set up a payment plan for`: Message = Message(
       english = "Select which tax you want to set up a payment plan for",
       welsh   = "Dewiswch pa dreth rydych chi am sefydlu cynllun talu ar ei chyfer"
