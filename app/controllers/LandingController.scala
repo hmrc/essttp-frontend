@@ -69,6 +69,20 @@ class LandingController @Inject() (
       as.default(_ => Redirect(appConfig.Urls.saSuppUrl))
     }
 
+  val siaLandingPage: Action[AnyContent] = {
+    if (appConfig.siaEnabled) {
+      as.default.async { implicit request =>
+        checkNotShuttered(TaxRegime.Sia) {
+          getBackUrl().map { maybeBackUrl =>
+            Ok(views.siaLanding(maybeBackUrl))
+          }
+        }
+      }
+    } else {
+      as.default(_ => Redirect(appConfig.Urls.siaSuppUrl))
+    }
+  }
+
   val epayeLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
     checkNotShuttered(TaxRegime.Epaye) {
       handleLandingPageContinue(routes.StartJourneyController.startDetachedEpayeJourney)
@@ -84,6 +98,12 @@ class LandingController @Inject() (
   val saLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
     checkNotShuttered(TaxRegime.Sa) {
       handleLandingPageContinue(routes.StartJourneyController.startDetachedSaJourney)
+    }
+  }
+
+  val siaLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
+    checkNotShuttered(TaxRegime.Sia) {
+      handleLandingPageContinue(routes.StartJourneyController.startDetachedSiaJourney)
     }
   }
 

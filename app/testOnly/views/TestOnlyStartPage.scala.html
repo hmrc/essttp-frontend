@@ -816,7 +816,7 @@ appConfig: AppConfig
             ),
             RadioItem(
                 content = Text("Personal Tax Account"),
-                value = Some(Origins.SIA.Pta.entryName),
+                value = Some(Origins.Sia.Pta.entryName),
                 hint = Some(Hint(content = Text("Set up a payment plan if you cannot pay in full"))),
                 checked = form.data.exists(_._2 === Origins.Sia.Pta.entryName)
             ),

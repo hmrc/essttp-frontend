@@ -32,6 +32,7 @@
    case TaxRegime.Epaye => Messages.NotEligible.`You cannot set up an Employers' PAYE payment plan online`
    case TaxRegime.Vat => Messages.NotEligible.`You cannot set up a VAT payment plan online.`
    case TaxRegime.Sa => Messages.NotEligible.`You cannot set up a Self Assessment payment plan online.`
+   case TaxRegime.Sia => Messages.NotEligible.`You cannot set up a Simple Assessment payment plan online.`
   }
  Html(message.show)
 }

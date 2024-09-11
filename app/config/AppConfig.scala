@@ -35,6 +35,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val appName: String = config.get[String]("appName")
   val emailJourneyEnabled: Boolean = config.get[Boolean]("features.email-journey")
   val saEnabled: Boolean = config.get[Boolean]("features.sa")
+  val siaEnabled: Boolean = config.get[Boolean]("features.sia")
   val authTimeoutSeconds: Int = config.get[FiniteDuration]("timeout-dialog.timeout").toSeconds.toInt
   val authTimeoutCountdownSeconds: Int = config.get[FiniteDuration]("timeout-dialog.countdown").toSeconds.toInt
   val accessibilityStatementPath: String = config.get[String]("accessibility-statement.service-path")
@@ -84,6 +85,10 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
       val baseUrl = BaseUrl.platformHost.getOrElse("http://localhost:9063")
       s"$baseUrl/pay-what-you-owe-in-instalments"
     }
+    val siaSuppUrl: String = {
+      val baseUrl = BaseUrl.platformHost.getOrElse("http://localhost:9063")
+      s"$baseUrl/pay-what-you-owe-in-instalments"
+    }
     val fileSaReturnUrl: String = config.get[String]("govUkUrls.fileSaReturnUrl")
     val tellHMRCChangeDetailsUrl: String = config.get[String]("govUkUrls.changeDetails")
   }
@@ -100,6 +105,8 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     val vatExitSurveyUrl: String = s"$baseUrl/eSSTTP-VAT"
 
     val saExitSurveyUrl: String = s"$baseUrl/eSSTTP-SA"
+
+    val siaExitSurveyUrl: String = s"$baseUrl/eSSTTP-SIA"
   }
 
   object Crypto {

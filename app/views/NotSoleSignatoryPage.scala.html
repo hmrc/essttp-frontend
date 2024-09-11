@@ -46,6 +46,7 @@
             case TaxRegime.Epaye => Messages.NotSoleSignatory.`You cannot set up an Employers’ PAYE payment plan online if you are not the only account holder.`
             case TaxRegime.Vat => Messages.NotSoleSignatory.`You cannot set up a VAT payment plan online if you are not the only account holder.`
             case TaxRegime.Sa => Messages.NotSoleSignatory.`You cannot set up a Self Assessment payment plan online if you are not the only account holder.`
+            case TaxRegime.Sia => Messages.NotSoleSignatory.`You cannot set up a Self Assessment payment plan online if you are not the only account holder.`
         }
         Html(message.show)
     }

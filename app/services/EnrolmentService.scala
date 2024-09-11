@@ -58,6 +58,12 @@ class EnrolmentService @Inject() (journeyService: JourneyService, auditService: 
           EnrolmentDef.Sa.findEnrolmentValues(enrolments),
           journey
         )(journeyService.UpdateTaxRef.updateSaTaxId(journey.id, _))
+
+      case TaxRegime.Sia =>
+        handleTaxRegime[SaUtr](
+          EnrolmentDef.Sa.findEnrolmentValues(enrolments),
+          journey
+        )(journeyService.UpdateTaxRef.updateSaTaxId(journey.id, _))
     }
   }
 

@@ -150,6 +150,10 @@ class StartJourneyController @Inject() (
         case Origins.Sa.Mobile          => testOnlyRoutes.StartJourneyController.showMobileSaPage
         case Origins.Sa.GovUk           => testOnlyRoutes.StartJourneyController.showGovukSaPage
         case Origins.Sa.DetachedUrl     => _root_.controllers.routes.StartJourneyController.startDetachedSaJourney
+        case Origins.Sia.Pta            => testOnlyRoutes.StartJourneyController.showPtaSaPage
+        case Origins.Sia.Mobile         => testOnlyRoutes.StartJourneyController.showMobileSaPage
+        case Origins.Sia.GovUk          => testOnlyRoutes.StartJourneyController.showGovukSaPage
+        case Origins.Sia.DetachedUrl    => _root_.controllers.routes.StartJourneyController.startDetachedSaJourney
       }
     } yield Redirect(redirectTo).withSession(session)
   }
@@ -446,6 +450,9 @@ object StartJourneyController {
 
       case TaxRegime.Sa =>
         List(Identification(IdType("UTR"), IdValue(form.taxReference.value)))
+
+      case TaxRegime.Sia =>
+        List(Identification(IdType("NINO"), IdValue(form.taxReference.value)))
     }
   }
 

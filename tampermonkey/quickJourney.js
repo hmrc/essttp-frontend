@@ -128,7 +128,8 @@ const testOnlyStartPageSa = () => {
 const landingPage = () => {
     if (currentPageIs('/set-up-a-payment-plan/epaye-payment-plan') ||
         currentPageIs('/set-up-a-payment-plan/vat-payment-plan') ||
-        currentPageIs('/set-up-a-payment-plan/sa-payment-plan')) {
+        currentPageIs('/set-up-a-payment-plan/sa-payment-plan')) ||
+        currentPageIs('/set-up-a-payment-plan/sia-payment-plan')) {
         clickContinue()
     }
 }

@@ -59,6 +59,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
               case TaxRegime.Epaye => controller.epayePaymentPlanSetUp(fakeRequest)
               case TaxRegime.Vat   => controller.vatPaymentPlanSetUp(fakeRequest)
               case TaxRegime.Sa    => controller.saPaymentPlanSetUp(fakeRequest)
+              case TaxRegime.Sia   => controller.siaPaymentPlanSetUp(fakeRequest)
             }
             val pageContent: String = contentAsString(result)
             val doc: Document = Jsoup.parse(pageContent)
@@ -80,6 +81,8 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
                 "Your payment reference is 101747001"
               case TaxRegime.Sa =>
                 "Your payment reference is 1234567895"
+              case TaxRegime.Sia =>
+                "Your payment reference is QQ123456A"
             })
 
             val subheadings = doc.select(".govuk-heading-m").asScala.toList
@@ -111,6 +114,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
             continueButton.attr("href") shouldBe (taxRegime match {
               case TaxRegime.Epaye | TaxRegime.Vat => "http://localhost:9020/business-account"
               case TaxRegime.Sa                    => "http://localhost:9232/personal-account"
+              case TaxRegime.Sia                   => "http://localhost:9056/personal-account"
             })
 
             val surveyLink = doc.select(".govuk-body > .govuk-link").asScala.toList(2)
@@ -119,6 +123,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
               case TaxRegime.Epaye => PageUrls.exitSurveyEpayeUrl
               case TaxRegime.Vat   => PageUrls.exitSurveyVatUrl
               case TaxRegime.Sa    => PageUrls.exitSurveySaUrl
+              case TaxRegime.Sia   => PageUrls.exitSurveySiaUrl
             })
             ()
           }
@@ -297,6 +302,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
               case TaxRegime.Epaye => "123PA44545546"
               case TaxRegime.Vat   => "101747001"
               case TaxRegime.Sa    => "1234567895"
+              case TaxRegime.Sia   => "QQ123456A"
             }
             assertKeyAndValue(paymentReferenceSummaryListRows(0), ("Payment reference", expectedPaymentReference))
           }
@@ -350,6 +356,8 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
             "Your payment reference is 101747001"
           case TaxRegime.Sa =>
             "Your payment reference is 1234567895"
+          case TaxRegime.Sia =>
+            "Your payment reference is QQ123456A"
         })
 
         val subheadings = doc.select(".govuk-heading-m").asScala.toList
@@ -522,6 +530,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
           case TaxRegime.Epaye => "123PA44545546"
           case TaxRegime.Vat   => "101747001"
           case TaxRegime.Sa    => "1234567895"
+          case TaxRegime.Sia   => "QQ123456A"
         }
         assertKeyAndValue(paymentReferenceSummaryListRows(0), ("Payment reference", expectedPaymentReference))
       }
@@ -568,6 +577,7 @@ class PaymentPlanSetUpControllerEmailDisabledSpec extends ItSpec {
                 case TaxRegime.Epaye => controller.epayePaymentPlanSetUp(fakeRequest)
                 case TaxRegime.Vat   => controller.vatPaymentPlanSetUp(fakeRequest)
                 case TaxRegime.Sa    => controller.saPaymentPlanSetUp(fakeRequest)
+                case TaxRegime.Sia   => controller.siaPaymentPlanSetUp(fakeRequest)
               }
               val pageContent: String = contentAsString(result)
               val doc: Document = Jsoup.parse(pageContent)

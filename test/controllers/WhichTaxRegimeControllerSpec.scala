@@ -56,7 +56,7 @@ class WhichTaxRegimeControllerSpec extends ItSpec {
         )
 
         val radios = doc.select(".govuk-radios__item").asScala.toList
-        radios.size shouldBe 3
+        radios.size shouldBe 4
 
         radios(0).select(".govuk-radios__input").`val`() shouldBe "EPAYE"
         radios(0).select(".govuk-radios__label").text() shouldBe "Employers’ PAYE"
@@ -64,8 +64,11 @@ class WhichTaxRegimeControllerSpec extends ItSpec {
         radios(1).select(".govuk-radios__input").`val`() shouldBe "SA"
         radios(1).select(".govuk-radios__label").text() shouldBe "Self Assessment"
 
-        radios(2).select(".govuk-radios__input").`val`() shouldBe "VAT"
-        radios(2).select(".govuk-radios__label").text() shouldBe "VAT"
+        radios(2).select(".govuk-radios__input").`val`() shouldBe "SIA"
+        radios(2).select(".govuk-radios__label").text() shouldBe "Simple Assessment"
+
+        radios(3).select(".govuk-radios__input").`val`() shouldBe "VAT"
+        radios(3).select(".govuk-radios__label").text() shouldBe "VAT"
         ()
       }
 
@@ -98,8 +101,10 @@ class WhichTaxRegimeControllerSpec extends ItSpec {
 
     "display the page when there are no enrolments for supported tax regimes" in {
       AuthStub.authorise(Some(Set()), Some(authCredentials))
+      val result = controller.whichTaxRegime(fakeRequest)
+      status(result) shouldBe SEE_OTHER
 
-      testPageIsDisplayed(controller.whichTaxRegime(fakeRequest))
+      redirectLocation(result) shouldBe Some(routes.LandingController.siaLandingPage.url)
     }
 
     "display the page when there are enrolments for more than one supported tax regime" in {
@@ -127,7 +132,7 @@ class WhichTaxRegimeControllerSpec extends ItSpec {
       )
 
       val radios = doc.select(".govuk-radios__item").asScala.toList
-      radios.size shouldBe 3
+      radios.size shouldBe 4
 
       radios(0).select(".govuk-radios__input").`val`() shouldBe "EPAYE"
       radios(0).select(".govuk-radios__label").text() shouldBe "TWE Cyflogwyr"
@@ -135,8 +140,11 @@ class WhichTaxRegimeControllerSpec extends ItSpec {
       radios(1).select(".govuk-radios__input").`val`() shouldBe "SA"
       radios(1).select(".govuk-radios__label").text() shouldBe "Hunanasesiad"
 
-      radios(2).select(".govuk-radios__input").`val`() shouldBe "VAT"
-      radios(2).select(".govuk-radios__label").text() shouldBe "TAW"
+      radios(2).select(".govuk-radios__input").`val`() shouldBe "SIA"
+      radios(2).select(".govuk-radios__label").text() shouldBe "Asesiad Syml"
+
+      radios(3).select(".govuk-radios__input").`val`() shouldBe "VAT"
+      radios(3).select(".govuk-radios__label").text() shouldBe "TAW"
     }
 
   }
@@ -230,13 +238,16 @@ class WhichTaxRegimeSaDisabledControllerSpec extends ItSpec {
 
         val radios = doc.select(".govuk-radios__item").asScala.toList
         // SA shouldn't be an option
-        radios.size shouldBe 2
+        radios.size shouldBe 3
 
         radios(0).select(".govuk-radios__input").`val`() shouldBe "EPAYE"
         radios(0).select(".govuk-radios__label").text() shouldBe "Employers’ PAYE"
 
-        radios(1).select(".govuk-radios__input").`val`() shouldBe "VAT"
-        radios(1).select(".govuk-radios__label").text() shouldBe "VAT"
+        radios(1).select(".govuk-radios__input").`val`() shouldBe "SIA"
+        radios(1).select(".govuk-radios__label").text() shouldBe "Simple Assessment"
+
+        radios(2).select(".govuk-radios__input").`val`() shouldBe "VAT"
+        radios(2).select(".govuk-radios__label").text() shouldBe "VAT"
 
         ()
       }
@@ -247,6 +258,85 @@ class WhichTaxRegimeSaDisabledControllerSpec extends ItSpec {
 
         val result = controller.whichTaxRegime(fakeRequest)
         testPageIsDisplayed(result)
+      }
+  }
+}
+class WhichTaxRegimeSiaDisabledControllerSpec extends ItSpec {
+
+  val controller = app.injector.instanceOf[WhichTaxRegimeController]
+
+  override lazy val configOverrides: Map[String, Any] = Map(
+    "features.sia" -> false
+  )
+
+  val authCredentials: Credentials = Credentials("authId-999", "GovernmentGateway")
+
+  "GET /which-tax should" - {
+
+    val fakeRequest = FakeRequest().withAuthToken()
+
+      def testPageIsDisplayed(result: Future[Result]): Unit = {
+        RequestAssertions.assertGetRequestOk(result)
+
+        val doc = Jsoup.parse(contentAsString(result))
+
+        ContentAssertions.commonPageChecks(
+          doc,
+          "Which tax do you want to set up a payment plan for?",
+          shouldBackLinkBePresent = false,
+          expectedSubmitUrl       = Some(routes.WhichTaxRegimeController.whichTaxRegimeSubmit.url),
+          regimeBeingTested       = None
+        )
+
+        val radios = doc.select(".govuk-radios__item").asScala.toList
+        // SIA shouldn't be an option
+        radios.size shouldBe 3
+
+        radios(0).select(".govuk-radios__input").`val`() shouldBe "EPAYE"
+        radios(0).select(".govuk-radios__label").text() shouldBe "Employers’ PAYE"
+
+        radios(1).select(".govuk-radios__input").`val`() shouldBe "SA"
+        radios(1).select(".govuk-radios__label").text() shouldBe "Self Assessment"
+
+        radios(2).select(".govuk-radios__input").`val`() shouldBe "VAT"
+        radios(2).select(".govuk-radios__label").text() shouldBe "VAT"
+
+        ()
+      }
+
+    "not redirect to the any landing page if the user has an no enrolments for " +
+      "supported tax regimes" in {
+        AuthStub.authorise(Some(Set()), Some(authCredentials))
+
+        val result = controller.whichTaxRegime(fakeRequest)
+        testPageIsDisplayed(result)
+      }
+
+    "redirect to the EPAYE landing page if the user has a EPAYE enrolment and no other enrolments for " +
+      "supported tax regimes" in {
+        AuthStub.authorise(Some(Set(TdAll.payeEnrolment)), Some(authCredentials))
+
+        val result = controller.whichTaxRegime(fakeRequest)
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.LandingController.epayeLandingPage.url)
+      }
+
+    "redirect to the VAT landing page if the user has a VAT enrolment and no other enrolments for " +
+      "supported tax regimes" in {
+        AuthStub.authorise(Some(Set(TdAll.vatEnrolment)), Some(authCredentials))
+
+        val result = controller.whichTaxRegime(fakeRequest)
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.LandingController.vatLandingPage.url)
+      }
+
+    "redirect to the SA landing page if the user has a VAT enrolment and no other enrolments for " +
+      "supported tax regimes" in {
+        AuthStub.authorise(Some(Set(TdAll.saEnrolment)), Some(authCredentials))
+
+        val result = controller.whichTaxRegime(fakeRequest)
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.LandingController.saLandingPage.url)
       }
   }
 }

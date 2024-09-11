@@ -69,6 +69,7 @@ class TermsAndConditionsControllerSpec extends ItSpec {
                 case TaxRegime.Epaye => "DM PAYE HM Revenue and Customs BX9 1EW United Kingdom"
                 case TaxRegime.Vat   => "HMRC Direct Debit Support Team VAT 2 DMB 612 BX5 5AB United Kingdom"
                 case TaxRegime.Sa    => "Debt Management Self Assessment HM Revenue and Customs BX9 1AS United Kingdom"
+                case TaxRegime.Sia   => "Debt Management Simple Assessment HM Revenue and Customs BX9 1AS United Kingdom"
               }
 
               ContentAssertions.assertListOfContent(

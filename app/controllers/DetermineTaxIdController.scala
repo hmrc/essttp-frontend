@@ -69,6 +69,7 @@ class DetermineTaxIdController @Inject() (
         case TaxRegime.Epaye => Redirect(routes.NotEnrolledController.notEnrolled)
         case TaxRegime.Vat   => Redirect(routes.NotEnrolledController.notVatRegistered)
         case TaxRegime.Sa    => Redirect(routes.NotEnrolledController.notSaEnrolled)
+        case TaxRegime.Sia   => Redirect(routes.NotEnrolledController.notSaEnrolled)
       }
     }
   }

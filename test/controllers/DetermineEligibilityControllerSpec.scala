@@ -229,6 +229,9 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
 
                 case TaxRegime.Sa =>
                   ("Sa", """{ "utr": "1234567895" }""")
+
+                case TaxRegime.Sia =>
+                  ("Sia", """{ "nino": "QQ123456A" }""")
               }
 
             AuditConnectorStub.verifyEventAudited(
@@ -291,6 +294,7 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
           case TaxRegime.Epaye => Origins.Epaye.Bta
           case TaxRegime.Vat   => Origins.Vat.Bta
           case TaxRegime.Sa    => Origins.Sa.Bta
+          case TaxRegime.Sia   => Origins.Sia.Pta
         }
         taxRegime -> origin
       }
@@ -574,6 +578,7 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
               case TaxRegime.Epaye => PageUrls.payeNotEligibleUrl
               case TaxRegime.Vat   => PageUrls.vatNotEligibleUrl
               case TaxRegime.Sa    => PageUrls.saNotEligibleUrl
+              case TaxRegime.Sia   => PageUrls.siaNotEligibleUrl
             }
             redirectLocation(result) shouldBe Some(expectedPageUrl)
 

@@ -45,6 +45,7 @@
         case TaxRegime.Epaye => routes.IneligibleController.epayeYouHaveChosenNotToSetUpPage.url
         case TaxRegime.Vat => routes.IneligibleController.vatYouHaveChosenNotToSetUpPage.url
         case TaxRegime.Sa => throw new NotImplementedError("SA does not receive ddInProgress flag")
+        case TaxRegime.Sia => throw new NotImplementedError("SA does not receive ddInProgress flag")
     }
 }
 

@@ -101,6 +101,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
                       case TaxRegime.Epaye => PageUrls.epayeConfirmationUrl
                       case TaxRegime.Vat   => PageUrls.vatConfirmationUrl
                       case TaxRegime.Sa    => PageUrls.saConfirmationUrl
+                      case TaxRegime.Sia   => PageUrls.siaConfirmationUrl
                     })
 
                     Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(
@@ -113,6 +114,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
                       case TaxRegime.Epaye => "Epaye"
                       case TaxRegime.Vat   => "Vat"
                       case TaxRegime.Sa    => "Sa"
+                      case TaxRegime.Sia   => "Sia"
                     }
 
                     AuditConnectorStub.verifyEventAudited(

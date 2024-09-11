@@ -31,7 +31,7 @@
   requestSupport: RequestSupport
 )
 
-@(form: Form[TaxRegime], saEnabled: Boolean)(implicit request: Request[_])
+@(form: Form[TaxRegime], saEnabled: Boolean, siaEnabled: Boolean)(implicit request: Request[_])
 
 @import requestSupport._
 
@@ -60,7 +60,12 @@
       value = Some("SA")
   )
 
-  if(saEnabled) Seq(epaye, sa, vat) else Seq(epaye, vat)
+  val sia = RadioItem(
+      content = Text(Messages.WhichTaxRegime.SIA.show),
+      value = Some("SIA")
+  )
+
+  if(saEnabled && siaEnabled) Seq(epaye, sa, sia, vat) else if(saEnabled) Seq(epaye, sa, vat) else if(siaEnabled) Seq(epaye, sia, vat) else Seq(epaye, vat)
 }
 
 @layout(pageTitle = Some(title), hasErrors = form.hasErrors, showBackLink = false) {
