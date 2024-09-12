@@ -184,7 +184,6 @@ class TtpService @Inject() (
 
     ttpConnector.callArrangementApi(arrangementRequest, correlationId)
       .map { response: ArrangementResponse =>
-        println("hello there" + response.toString)
         auditService.auditPaymentPlanSetUp(journey, Right(response))
         response
       }.recover {
