@@ -24,7 +24,8 @@ final case class TaxDetail(
     taxOfficeRef:      Option[String],
     employerRef:       Option[String],
     accountsOfficeRef: Option[String],
-    vrn:               Option[String]
+    vrn:               Option[String],
+    nino:              Option[String]
 )
 
 object TaxDetail {

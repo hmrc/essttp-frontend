@@ -205,6 +205,16 @@ class WhichTaxRegimeControllerSpec extends ItSpec {
       redirectLocation(result) shouldBe Some(routes.StartJourneyController.startDetachedSaJourney.url)
     }
 
+    "redirect to the start SIA journey endpoint if the user selects SIA" in {
+      stubCommonActions()
+      EssttpBackend.StartJourney.startJourneyInBackend(Origins.Sia.DetachedUrl)
+
+      val request = fakeRequest.withFormUrlEncodedBody("WhichTaxRegime" -> "SIA")
+      val result: Future[Result] = controller.whichTaxRegimeSubmit(request)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.StartJourneyController.startDetachedSiaJourney.url)
+    }
+
   }
 
 }

@@ -315,5 +315,17 @@ class DetermineTaxIdControllerSpec extends ItSpec {
         )
       }
     }
+
+    "for SIA when" - {
+      "the tax id has already been determined" in {
+        stubCommonActions(authAllEnrolments = Some(Set()))
+        EssttpBackend.DetermineTaxId.findJourney(Origins.Sia.Pta)(JourneyJsonTemplates.`Computed Tax Id`(Origins.Sia.Pta, "1234567895"))
+
+        val result = controller.determineTaxId()(fakeRequest)
+
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.DetermineEligibilityController.determineEligibility.url)
+      }
+    }
   }
 }

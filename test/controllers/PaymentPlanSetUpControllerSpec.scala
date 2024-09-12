@@ -42,7 +42,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
 
   List(
     Origins.Epaye.Bta,
-    Origins.Vat.Bta,
+    Origins.Vat.Bta
   ).foreach { origin =>
       val taxRegime = origin.taxRegime
 

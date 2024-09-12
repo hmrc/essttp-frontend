@@ -1904,6 +1904,11 @@ object Messages {
 
     val `You cannot set up a Self Assessment payment plan online if you are not the only account holder.`: Message = Message(
       english = "You cannot set up a Self Assessment payment plan online if you are not the only account holder.",
+      welsh   = "Ni allwch drefnu cynllun talu ar-lein ar gyfer Asesiad Syml os nad chi yw’r unig ddeiliad y cyfrif."
+    )
+
+    val `You cannot set up a Simple Assessment payment plan online if you are not the only account holder.`: Message = Message(
+      english = "You cannot set up a Simple Assessment payment plan online if you are not the only account holder.",
       welsh   = "Ni allwch drefnu cynllun talu ar-lein ar gyfer Hunanasesiad os nad chi yw’r unig ddeiliad y cyfrif."
     )
 

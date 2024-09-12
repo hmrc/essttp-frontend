@@ -43,7 +43,8 @@ class SubmitArrangementControllerSpec extends ItSpec {
     List[(TaxRegime, Origin)](
       TaxRegime.Epaye -> Origins.Epaye.Bta,
       TaxRegime.Vat -> Origins.Vat.Bta,
-      TaxRegime.Sa -> Origins.Sa.Bta
+      TaxRegime.Sa -> Origins.Sa.Bta,
+      TaxRegime.Sia -> Origins.Sia.Pta
     ).foreach {
         case (taxRegime, origin) =>
 
@@ -147,7 +148,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
                      |	},
                      |	"status": "successfully sent to TTP",
                      |	"failedSubmissionReason": 202,
-                     |	"origin": "Bta",
+                     |	"origin": "${origin.toString().takeRight(3)}",
                      |	"taxType": "$taxType",
                      |	"taxDetail": ${TdAll.taxDetailJsonString(taxRegime)},
                      |	"correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",

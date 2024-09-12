@@ -42,7 +42,8 @@ class TermsAndConditionsControllerSpec extends ItSpec {
   Seq[(String, Origin, TaxRegime)](
     ("EPAYE", Origins.Epaye.Bta, TaxRegime.Epaye),
     ("VAT", Origins.Vat.Bta, TaxRegime.Vat),
-    ("SA", Origins.Sa.Bta, TaxRegime.Sa)
+    ("SA", Origins.Sa.Bta, TaxRegime.Sa),
+    ("SIA", Origins.Sia.Pta, TaxRegime.Sia)
   ).foreach {
       case (regime, origin, taxRegime) =>
 
@@ -194,7 +195,8 @@ class TermsAndConditionsControllerEmailDisabledSpec extends ItSpec {
   Seq[(String, Origin)](
     ("EPAYE", Origins.Epaye.Bta),
     ("VAT", Origins.Vat.Bta),
-    ("SA", Origins.Sa.Bta)
+    ("SA", Origins.Sa.Bta),
+    ("SIA", Origins.Sia.Pta)
   ).foreach {
       case (regime, origin) =>
 

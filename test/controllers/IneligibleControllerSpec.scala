@@ -511,6 +511,7 @@ class IneligibleControllerSpec extends ItSpec {
             case TaxRegime.Sa    => Some(Set(TdAll.saEnrolment))
             case TaxRegime.Sia   => Some(Set(TdAll.saEnrolment))
           }
+          // sia has no enrolment, but this match needed an option for it
 
           s"${taxRegime.entryName} Generic not eligible page correctly" in {
             stubCommonActions(authAllEnrolments = enrolments)

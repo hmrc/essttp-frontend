@@ -43,7 +43,8 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
   Seq[(String, Origin)](
     ("Epaye", Origins.Epaye.Bta),
     ("Vat", Origins.Vat.Bta),
-    ("Sa", Origins.Sa.Bta)
+    ("Sa", Origins.Sa.Bta),
+    ("Sia", Origins.Sia.Pta)
   ).foreach {
       case (regime, origin) =>
         s"[$regime journey] GET ${routes.PaymentScheduleController.checkPaymentSchedule.url}" - {
@@ -264,7 +265,7 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
                   s"""
                  |{
                  |        "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-                 |        "origin": "Bta",
+                 |        "origin": "${origin.toString().takeRight(3)}",
                  |        "schedule": {
                  |            "collectionDate": 28,
                  |            "collectionLengthCalendarMonths": 2,

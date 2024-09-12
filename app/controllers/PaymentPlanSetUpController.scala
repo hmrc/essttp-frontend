@@ -112,6 +112,16 @@ class PaymentPlanSetUpController @Inject() (
             regimeDigitalCorrespondence = correspondence
           )
         )
+      case TaxRegime.Sia =>
+        Ok(
+          views.siaPaymentPlanSetUpPage(
+            customerPaymentReference    = journey.arrangementResponse.customerReference.value,
+            paymentDay                  = firstPaymentDay,
+            hasUpfrontPayment           = hasUpfrontPayment,
+            wasEmailAddressRequired     = request.isEmailAddressRequired(appConfig),
+            regimeDigitalCorrespondence = correspondence
+          )
+        )
       case _ =>
         Ok(
           views.paymentPlanSetUpPage(

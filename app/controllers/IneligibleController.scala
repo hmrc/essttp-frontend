@@ -197,6 +197,10 @@ class IneligibleController @Inject() (
     genericNoDueDatesReachedPage
   }
 
+  val siaNoDueDatesReachedPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    genericNoDueDatesReachedPage
+  }
+
   private def determineFileYourReturnUrl(implicit request: AuthenticatedJourneyRequest[AnyContent]): String = request.journey.sjRequest match {
     case SjRequest.Epaye.Simple(returnUrl, _) => returnUrl.value
     case SjRequest.Epaye.Empty()              => appConfig.Urls.businessTaxAccountUrl
