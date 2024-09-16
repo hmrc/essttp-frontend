@@ -1192,32 +1192,32 @@ object Messages {
 
     val `Paying within 6 months`: Message = Message(
       english = "Paying within 6 months",
-      welsh = "Talu cyn pen 6 mis"
+      welsh   = "Talu cyn pen 6 mis"
     )
 
     val `If you can afford to pay within 6 months...`: Message = Message(
       english = "If you can afford to pay within 6 months, you’ll pay less interest than on a longer plan.",
-      welsh = "Os gallwch fforddio talu cyn pen 6 mis, byddwch yn talu llai o log nag ar gynllun hirach."
+      welsh   = "Os gallwch fforddio talu cyn pen 6 mis, byddwch yn talu llai o log nag ar gynllun hirach."
     )
 
     val `Remaining amount to pay`: Message = Message(
       english = "Remaining amount to pay",
-      welsh = "Swm sy’n weddill i’w dalu"
+      welsh   = "Swm sy’n weddill i’w dalu"
     )
 
     val `Can you pay within 6 months?`: Message = Message(
       english = "Can you pay within 6 months?",
-      welsh = "A allwch dalu cyn pen 6 mis?"
+      welsh   = "A allwch dalu cyn pen 6 mis?"
     )
 
     val `Yes, I can pay within 6 months`: Message = Message(
       english = "Yes, I can pay within 6 months",
-      welsh = "Iawn, gallaf dalu cyn pen 6 mis"
+      welsh   = "Iawn, gallaf dalu cyn pen 6 mis"
     )
 
     val `No, I need a longer plan`: Message = Message(
       english = "No, I need a longer plan",
-      welsh = "Na, bydd angen cynllun hirach arnaf ar gyfer talu"
+      welsh   = "Na, bydd angen cynllun hirach arnaf ar gyfer talu"
     )
 
     val `Select yes if you can pay within 6 months`: Message = Message(

@@ -19,6 +19,7 @@ package controllers
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Origins}
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.TaxRegime.Epaye
+import models.Languages.Welsh
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.libs.json.Json
@@ -112,6 +113,45 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
 
       val result = controller.canPayWithinSixMonths(Epaye)(fakeRequest)
       testPageIsDisplayed(result, Some(false))
+    }
+
+    "display the page in Welsh" in {
+      stubCommonActions()
+      EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, Origins.Epaye.Bta)()
+
+      val result = controller.canPayWithinSixMonths(Epaye)(fakeRequest.withLangWelsh())
+      RequestAssertions.assertGetRequestOk(result)
+
+      val doc = Jsoup.parse(contentAsString(result))
+
+      ContentAssertions.commonPageChecks(
+        doc,
+        "Talu cyn pen 6 mis",
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl       = Some(routes.CanPayWithinSixMonthsController.canPayWithinSixMonthsSubmit.url),
+        language                = Welsh
+      )
+
+      doc.select("p.govuk-body").text() shouldBe "Os gallwch fforddio talu cyn pen 6 mis, byddwch yn talu llai o log nag ar gynllun hirach."
+
+      val summaryList = doc.select(".govuk-summary-list")
+      val summaryListRows = summaryList.select(".govuk-summary-list__row").asScala.toList
+      val summaryListRowKeysAndValues = summaryListRows.map(row => row.select(".govuk-summary-list__key").text() -> row.select(".govuk-summary-list__value").text())
+
+      summaryListRowKeysAndValues shouldBe List("Swm sy’n weddill i’w dalu" -> "£1,498")
+
+      doc.select(".govuk-form-group > .govuk-fieldset > legend").text() shouldBe "A allwch dalu cyn pen 6 mis?"
+
+      val radioItems = doc.select(".govuk-radios__item").asScala.toList
+      radioItems.map(r =>
+        (
+          r.select(".govuk-radios__input").attr("value"),
+          r.select(".govuk-radios__label").text(),
+          r.select(".govuk-radios__input").hasAttr("checked")
+        )) shouldBe List(
+        ("Yes", "Iawn, gallaf dalu cyn pen 6 mis", false),
+        ("No", "Na, bydd angen cynllun hirach arnaf ar gyfer talu", false)
+      )
     }
 
   }
