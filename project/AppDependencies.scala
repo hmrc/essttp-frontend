@@ -23,7 +23,7 @@ object AppDependencies {
     "org.scalatestplus.play"  %% "scalatestplus-play"      % "7.0.1",
     "org.jsoup"               %  "jsoup"                   % "1.18.1",
     "uk.gov.hmrc"             %% "bootstrap-test-play-30"  % bootstrapVersion,
-    "org.scalacheck"          %% "scalacheck"              % "1.18.0",
+    "org.scalacheck"          %% "scalacheck"              % "1.18.1",
     "org.wiremock"            %  "wiremock-standalone"     % "3.9.1"
   // format: ON
   ).map(_ % Test)

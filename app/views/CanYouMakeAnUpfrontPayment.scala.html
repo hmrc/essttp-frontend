@@ -61,11 +61,16 @@
 </h1>
 
     <p class="govuk-body" id="upfrontPayment-p1">
-        @{Messages.UpfrontPayment.`You'll pay less interest and have a shorter...`.show}
+        @{Messages.UpfrontPayment.`If you pay some of your bill upfront, you'll`.show}
     </p>
 
+    <ul class="govuk-list govuk-list--bullet">
+        <li>@{Messages.UpfrontPayment.`have a shorter payment plan`.show}</li>
+        <li>@{Messages.UpfrontPayment.`pay less interest`.show}</li>
+    </ul>
+
     <p class="govuk-body" id="upfrontPayment-p2">
-        @{Messages.UpfrontPayment.`An upfront payment is separate to...`.show}
+        @{Messages.UpfrontPayment.`An upfront payment is separate to any recent payments you've made...`.show}
     </p>
 
     @formWithCSRF(action = routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit) {

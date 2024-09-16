@@ -776,14 +776,24 @@ object Messages {
       welsh   = "Taliad ymlaen llaw"
     )
 
-    val `You'll pay less interest and have a shorter...`: Message = Message(
-      english = "You’ll pay less interest and have a shorter payment plan if you can make an upfront payment. This payment will be taken from your bank account within 6 working days.",
-      welsh   = "Byddwch yn talu llai o log a bydd gennych gynllun talu byrrach os gallwch wneud taliad ymlaen llaw. Caiff y taliad hwn ei gymryd o’ch cyfrif banc cyn pen 6 diwrnod gwaith."
+    val `If you pay some of your bill upfront, you'll`: Message = Message(
+      english = "If you pay some of your bill upfront, you’ll:",
+      welsh   = "Os byddwch yn talu rhywfaint o’ch bil ymlaen llaw, bydd y canlynol yn wir:"
     )
 
-    val `An upfront payment is separate to...`: Message = Message(
-      english = "An upfront payment is separate to any recent payments you have made.",
-      welsh   = "Mae taliad ymlaen llaw ar wahân i unrhyw daliadau diweddar yr ydych wedi eu gwneud."
+    val `have a shorter payment plan`: Message = Message(
+      english = "have a shorter payment plan",
+      welsh   = "bydd gennych gynllun talu byrrach"
+    )
+
+    val `pay less interest`: Message = Message(
+      english = "pay less interest",
+      welsh   = "byddwch yn talu llai o log"
+    )
+
+    val `An upfront payment is separate to any recent payments you've made...`: Message = Message(
+      english = "An upfront payment is separate to any recent payments you’ve made. We’ll take it from your bank account within 6 working days.",
+      welsh   = "Mae taliad ymlaen llaw ar wahân i unrhyw daliadau diweddar yr ydych wedi eu gwneud. Byddwn yn ei gymryd o’ch cyfrif banc cyn pen 6 diwrnod gwaith."
     )
 
     val `Can you make an upfront payment?`: Message = Message(
