@@ -39,9 +39,8 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
   private val controller: UpfrontPaymentController = app.injector.instanceOf[UpfrontPaymentController]
   private val expectedH1CanYouPayUpfrontPage: String = "Upfront payment"
-  private val expectedP1CanYouPayUpfrontPage: String =
-    "You’ll pay less interest and have a shorter payment plan if you can make an upfront payment. This payment will be taken from your bank account within 6 working days."
-  private val expectedP2CanYouPayUpfrontPage: String = "An upfront payment is separate to any recent payments you have made."
+  private val expectedP1CanYouPayUpfrontPage: String = "If you pay some of your bill upfront, you’ll:"
+  private val expectedP2CanYouPayUpfrontPage: String = "An upfront payment is separate to any recent payments you’ve made. We’ll take it from your bank account within 6 working days."
   private val expectedPageLegendCanPayUpfrontPage: String = "Can you make an upfront payment?"
   private val expectedH1HowMuchCanYouPayUpfrontPage: String = "How much can you pay upfront?"
   private val expectedH1UpfrontSummaryPage: String = "Payment summary"
@@ -76,6 +75,7 @@ class UpfrontPaymentControllerSpec extends ItSpec {
 
             doc.select("legend").text() shouldBe expectedPageLegendCanPayUpfrontPage
             doc.select("#upfrontPayment-p1").text() shouldBe expectedP1CanYouPayUpfrontPage
+            doc.select(".govuk-list > li").asScala.toList.map(_.text()) shouldBe List("have a shorter payment plan", "pay less interest")
             doc.select("#upfrontPayment-p2").text() shouldBe expectedP2CanYouPayUpfrontPage
           }
 
