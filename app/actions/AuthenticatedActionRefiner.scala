@@ -20,7 +20,7 @@ import actionsmodel.AuthenticatedRequest
 import com.google.inject.{Inject, Singleton}
 import config.AppConfig
 import controllers.routes
-import essttp.rootmodel.GGCredId
+import essttp.rootmodel.{GGCredId, Nino}
 import play.api.Logger
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Request, Result}
@@ -46,16 +46,18 @@ trait AuthenticatedActionRefiner { this: ActionRefiner[Request, AuthenticatedReq
     implicit val r: Request[A] = request
 
     authorised(AuthProviders(GovernmentGateway)).retrieve(
-      Retrievals.allEnrolments and Retrievals.credentials
+      Retrievals.allEnrolments and Retrievals.credentials and Retrievals.nino
     ) {
-        case enrolments ~ credentials =>
+        case enrolments ~ credentials ~ nino =>
           credentials match {
             case None =>
               Future.failed(new RuntimeException(s"Could not find credentials"))
 
             case Some(ggCredId) =>
               Future.successful(
-                Right(new AuthenticatedRequest[A](request, enrolments, GGCredId(ggCredId.providerId)))
+                Right(
+                  new AuthenticatedRequest[A](request, enrolments, GGCredId(ggCredId.providerId), Some(Nino(nino.getOrElse(""))))
+                )
               )
           }
 

@@ -23,7 +23,7 @@ import views.html.emailerrors._
 import views.html.epaye.EPayeLanding
 import views.html.epaye.ineligible.{Ineligible, NotEnrolled}
 import views.html.sa.{NotSaEnrolled, SaLanding}
-import views.html.sia.SiaLanding
+import views.html.sia.{NoNinoFound, SiaLanding}
 import views.html.vat.{NotVatRegistered, VatLanding}
 import views.partials.Partials
 
@@ -39,6 +39,7 @@ class Views @Inject() (
     val notEnrolled:                      NotEnrolled,
     val notVatRegistered:                 NotVatRegistered,
     val notSaEnrolled:                    NotSaEnrolled,
+    val noNinoFound:                      NoNinoFound,
     val checkYourPaymentSchedule:         CheckPaymentSchedule,
     val ineligible:                       Ineligible,
     val partials:                         Partials,

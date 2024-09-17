@@ -63,7 +63,7 @@ class StartJourneyController @Inject() (
           .map(_ => Redirect(routes.DetermineTaxIdController.determineTaxId.url))
       }
     } else {
-      as.default(_ => Redirect(appConfig.Urls.siaSuppUrl))
+      throw new RuntimeException("Simple Assessment is not available")
     }
 
   def startDetachedEpayeJourney: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
@@ -94,7 +94,7 @@ class StartJourneyController @Inject() (
           .map(redirectFromDetachedJourneyStarted)
       }
     } else {
-      as.default(_ => Redirect(appConfig.Urls.siaSuppUrl))
+      throw new RuntimeException("Simple Assessment is not available")
     }
 
   private def redirectFromDetachedJourneyStarted(sjResponse: SjResponse)(implicit r: Request[_]): Result = {

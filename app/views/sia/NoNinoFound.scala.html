@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,17 +12,27 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package actionsmodel
+@import config.AppConfig
+@import essttp.rootmodel.TaxRegime
+@import messages.Messages
+@import play.api.mvc.Request
+@import play.twirl.api.Html
+@import requests.RequestSupport
+@import views.html.partials.CommonIneligibilityPartial
 
-import essttp.rootmodel.{GGCredId, Nino}
-import play.api.mvc.{Request, WrappedRequest}
-import uk.gov.hmrc.auth.core.Enrolments
+@this(
+layout: views.html.templates.Layout,
+requestSupport: RequestSupport,
+commonIneligibilityPartial: CommonIneligibilityPartial
+)
 
-class AuthenticatedRequest[A](
-    val request:    Request[A],
-    val enrolments: Enrolments,
-    val ggCredId:   GGCredId,
-    val nino:       Option[Nino]
-) extends WrappedRequest[A](request)
+@()(implicit request: Request[_])
+
+@import requestSupport._
+
+@layout(pageTitle = Some(Messages.`No NINO has been found`.show), showBackLink = false) {
+
+@commonIneligibilityPartial(TaxRegime.Epaye)
+}

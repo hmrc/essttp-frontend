@@ -48,6 +48,7 @@ class EligibleJourneyRefiner @Inject() (ec: ExecutionContext) extends ActionRefi
               enrolments = request.enrolments,
               request    = request,
               request.ggCredId,
+              request.nino,
               request.numberOfBarsVerifyAttempts,
               j.eligibilityCheckResult
             )

@@ -265,7 +265,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
           stubCommonActions()
           EssttpBackend.SubmitArrangement.findJourney(origin, testCrypto, withAffordability = true)()
 
-          val result: Future[Result] = controller.epayeVatPrintSummary(fakeRequest)
+          val result: Future[Result] = controller.saPrintSummary(fakeRequest)
           val pageContent: String = contentAsString(result)
           val doc: Document = Jsoup.parse(pageContent)
 

@@ -11,7 +11,7 @@ object AppDependencies {
     "uk.gov.hmrc"       %% "play-conditional-form-mapping-play-30"   % "3.2.0",
     "com.beachape"      %% "enumeratum-play"                         % "1.8.0",
     "org.typelevel"     %% "cats-core"                               % "2.12.0",
-    "uk.gov.hmrc"       %% "essttp-backend-cor-journey"              % "1.153.0",
+    "uk.gov.hmrc"       %% "essttp-backend-cor-journey"              % "1.154.0",
     "uk.gov.hmrc"       %% "domain-play-30"                          % "10.0.0"
   // format: ON
   )
@@ -23,7 +23,7 @@ object AppDependencies {
     "org.scalatestplus.play"  %% "scalatestplus-play"      % "7.0.1",
     "org.jsoup"               %  "jsoup"                   % "1.18.1",
     "uk.gov.hmrc"             %% "bootstrap-test-play-30"  % bootstrapVersion,
-    "org.scalacheck"          %% "scalacheck"              % "1.18.0",
+    "org.scalacheck"          %% "scalacheck"              % "1.18.1",
     "org.wiremock"            %  "wiremock-standalone"     % "3.9.1"
   // format: ON
   ).map(_ % Test)

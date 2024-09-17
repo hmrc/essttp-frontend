@@ -85,10 +85,6 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
       val baseUrl = BaseUrl.platformHost.getOrElse("http://localhost:9063")
       s"$baseUrl/pay-what-you-owe-in-instalments"
     }
-    val siaSuppUrl: String = {
-      val baseUrl = BaseUrl.platformHost.getOrElse("http://localhost:9063")
-      s"$baseUrl/pay-what-you-owe-in-instalments"
-    }
     val fileSaReturnUrl: String = config.get[String]("govUkUrls.fileSaReturnUrl")
     val tellHMRCChangeDetailsUrl: String = config.get[String]("govUkUrls.changeDetails")
   }

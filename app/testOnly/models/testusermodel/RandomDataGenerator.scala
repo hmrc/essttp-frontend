@@ -18,7 +18,7 @@ package testOnly.models.testusermodel
 
 import cats.syntax.eq._
 import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
-import essttp.rootmodel.{Email, EmpRef, SaUtr, Vrn}
+import essttp.rootmodel.{Email, EmpRef, SaUtr, Vrn, Nino}
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 import uk.gov.hmrc.domain.SaUtrGenerator
 
@@ -36,10 +36,6 @@ object RandomDataGenerator {
 
   private def nextTaxOfficeNumber()(implicit random: Random): TaxOfficeNumber = TaxOfficeNumber(nextNumber(3))
   private def nextTaxOfficeReference()(implicit random: Random): TaxOfficeReference = TaxOfficeReference(s"GZ${nextNumber(5)}")
-
-  def nextNino()(implicit random: Random): Nino = {
-    Nino(s"AA${nextNumber(6)}A")
-  }
 
   def nextEmail()(implicit r: Random): String = s"${nextForename()}.${nextSurname()}@${nextDomain()}"
 
@@ -70,6 +66,10 @@ object RandomDataGenerator {
 
   def nextSaUtr()(implicit r: Random): SaUtr =
     SaUtr(new SaUtrGenerator(r).nextSaUtr.utr)
+
+  def nextNino()(implicit r: Random): Nino = {
+    Nino(s"AA${nextNumber(6)}A")
+  }
 
   def nextAuthorityId(): AuthorityId = AuthorityId(s"authId-${UUID.randomUUID().toString}")
 

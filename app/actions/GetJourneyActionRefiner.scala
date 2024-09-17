@@ -46,7 +46,7 @@ class GetJourneyActionRefiner @Inject() (
 
     findJourney(request).map{
       case Some(journey) =>
-        Right(new AuthenticatedJourneyRequest(request, request.enrolments, journey, request.ggCredId))
+        Right(new AuthenticatedJourneyRequest(request, request.enrolments, journey, request.ggCredId, request.nino))
       case None =>
         logger.error(s"No journey found for sessionId: [ ${hc.sessionId.toString} ]")
         Left(Results.Redirect(controllers.routes.WhichTaxRegimeController.whichTaxRegime))

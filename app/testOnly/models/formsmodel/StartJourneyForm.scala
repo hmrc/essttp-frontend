@@ -89,6 +89,7 @@ object StartJourneyForm {
   private val payeDebtTotalAmountKey: String = "payeDebtTotalAmount"
   private val vatDebtTotalAmountKey: String = "vatDebtTotalAmount"
   private val saDebtTotalAmountKey: String = "saDebtTotalAmount"
+  private val siaDebtTotalAmountKey: String = "siaDebtTotalAmount"
 
   private val payeTaxReferenceKey: String = "payeTaxReference"
   private val vatTaxReferenceKey: String = "vatTaxReference"
@@ -129,7 +130,7 @@ object StartJourneyForm {
           case TaxRegime.Epaye => appConfig.PolicyParameters.EPAYE.maxAmountOfDebt -> payeDebtTotalAmountKey
           case TaxRegime.Vat   => appConfig.PolicyParameters.VAT.maxAmountOfDebt -> vatDebtTotalAmountKey
           case TaxRegime.Sa    => appConfig.PolicyParameters.SA.maxAmountOfDebt -> saDebtTotalAmountKey
-          case TaxRegime.Sia   => appConfig.PolicyParameters.SIA.maxAmountOfDebt -> saDebtTotalAmountKey
+          case TaxRegime.Sia   => appConfig.PolicyParameters.SIA.maxAmountOfDebt -> siaDebtTotalAmountKey
         }
         val minAmount = AmountInPence(100)
 
@@ -161,7 +162,7 @@ object StartJourneyForm {
           case TaxRegime.Epaye => payeTaxReferenceKey -> RandomDataGenerator.nextEpayeRefs()(Random)._3
           case TaxRegime.Vat   => vatTaxReferenceKey -> RandomDataGenerator.nextVrn()(Random)
           case TaxRegime.Sa    => saTaxReferenceKey -> RandomDataGenerator.nextSaUtr()(Random)
-          case TaxRegime.Sia   => saTaxReferenceKey -> RandomDataGenerator.nextSaUtr()(Random)
+          case TaxRegime.Sia   => siaTaxReferenceKey -> RandomDataGenerator.nextNino()(Random)
         }
 
         val taxId: TaxId = data.get(taxReferenceKey)

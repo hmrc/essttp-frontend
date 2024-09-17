@@ -723,6 +723,11 @@ object Messages {
     )
   }
 
+  //OPS-12345 awaiting real data
+  def `No NINO has been found`: Message = Message(
+    english = "No nino has been found"
+  )
+
   object EnrolmentMissing {
 
     val `Enrol for PAYE Online to use this service`: Message = Message(

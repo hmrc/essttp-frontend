@@ -47,6 +47,7 @@ class BarsLockedOutJourneyRefiner @Inject() (barsVerifyStatusConnector: BarsVeri
                   request.enrolments,
                   request.journey,
                   request.ggCredId,
+                  request.nino,
                   status.attempts,
                   expiresAt
                 )

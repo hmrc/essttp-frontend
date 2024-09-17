@@ -50,6 +50,7 @@ class BarsLockoutActionRefiner @Inject() (barsVerifyStatusConnector: BarsVerifyS
                   request.enrolments,
                   j,
                   request.ggCredId,
+                  request.nino,
                   status.attempts
                 )
               )

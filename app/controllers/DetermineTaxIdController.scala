@@ -55,7 +55,11 @@ class DetermineTaxIdController @Inject() (
   def determineTaxId(): Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     val (maybeTaxId, taxRegime): (Future[Option[TaxId]], TaxRegime) = request.journey match {
       case j: Journey.Stages.Started =>
-        enrolmentService.determineTaxIdAndUpdateJourney(j, request.enrolments) -> j.taxRegime
+        if (j.taxRegime == TaxRegime.Sia) {
+          (Future(request.nino.asInstanceOf[Option[TaxId]]), j.taxRegime)
+        } else {
+          enrolmentService.determineTaxIdAndUpdateJourney(j, request.enrolments) -> j.taxRegime
+        }
       case j: Journey.AfterComputedTaxId =>
         JourneyLogger.info("TaxId already determined, skipping.")
         Future.successful(Some(j.taxId)) -> j.taxRegime

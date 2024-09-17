@@ -35,6 +35,7 @@ GET  /set-up-a-payment-plan/test-only/bta-sa-page                       testOnly
 GET  /set-up-a-payment-plan/test-only/govuk-epaye-page                  testOnly.controllers.StartJourneyController.showGovukEpayePage
 GET  /set-up-a-payment-plan/test-only/govuk-vat-page                    testOnly.controllers.StartJourneyController.showGovukVatPage
 GET  /set-up-a-payment-plan/test-only/govuk-sa-page                     testOnly.controllers.StartJourneyController.showGovukSaPage
+GET  /set-up-a-payment-plan/test-only/govuk-sia-page                    testOnly.controllers.StartJourneyController.showGovukSiaPage
 
 GET  /set-up-a-payment-plan/test-only/epaye-page                        testOnly.controllers.StartJourneyController.showEpayePage
 
@@ -43,6 +44,9 @@ GET  /set-up-a-payment-plan/test-only/vat-penalties                     testOnly
 
 GET  /set-up-a-payment-plan/test-only/pta-sa                            testOnly.controllers.StartJourneyController.showPtaSaPage
 GET  /set-up-a-payment-plan/test-only/mobile-sa                         testOnly.controllers.StartJourneyController.showMobileSaPage
+
+GET  /set-up-a-payment-plan/test-only/pta-sia                           testOnly.controllers.StartJourneyController.showPtaSiaPage
+GET  /set-up-a-payment-plan/test-only/mobile-sia                        testOnly.controllers.StartJourneyController.showMobileSiaPage
 
 
 
@@ -59,6 +63,9 @@ GET  /set-up-a-payment-plan/test-only/start-journey-vat-penalties       testOnly
 GET  /set-up-a-payment-plan/test-only/start-journey-sa-bta              testOnly.controllers.StartJourneyController.startJourneySaBta
 GET  /set-up-a-payment-plan/test-only/start-journey-sa-pta              testOnly.controllers.StartJourneyController.startJourneySaPta
 GET  /set-up-a-payment-plan/test-only/start-journey-sa-mobile           testOnly.controllers.StartJourneyController.startJourneySaMobile
+
+GET  /set-up-a-payment-plan/test-only/start-journey-sia-pta             testOnly.controllers.StartJourneyController.startJourneySiaPta
+GET  /set-up-a-payment-plan/test-only/start-journey-sia-mobile          testOnly.controllers.StartJourneyController.startJourneySiaMobile
 
 
 GET  /set-up-a-payment-plan/test-only/pega                              testOnly.controllers.PegaController.dummyPegaPage(regime: TaxRegime)

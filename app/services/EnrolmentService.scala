@@ -60,10 +60,7 @@ class EnrolmentService @Inject() (journeyService: JourneyService, auditService: 
         )(journeyService.UpdateTaxRef.updateSaTaxId(journey.id, _))
 
       case TaxRegime.Sia =>
-        handleTaxRegime[SaUtr](
-          EnrolmentDef.Sa.findEnrolmentValues(enrolments),
-          journey
-        )(journeyService.UpdateTaxRef.updateSaTaxId(journey.id, _))
+        throw new RuntimeException("Enrolment cannot exist for Simple Assessment")
     }
   }
 

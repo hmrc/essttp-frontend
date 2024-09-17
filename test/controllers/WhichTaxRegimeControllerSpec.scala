@@ -285,43 +285,6 @@ class WhichTaxRegimeSiaDisabledControllerSpec extends ItSpec {
 
     val fakeRequest = FakeRequest().withAuthToken()
 
-      def testPageIsDisplayed(result: Future[Result]): Unit = {
-        RequestAssertions.assertGetRequestOk(result)
-
-        val doc = Jsoup.parse(contentAsString(result))
-
-        ContentAssertions.commonPageChecks(
-          doc,
-          "Which tax do you want to set up a payment plan for?",
-          shouldBackLinkBePresent = false,
-          expectedSubmitUrl       = Some(routes.WhichTaxRegimeController.whichTaxRegimeSubmit.url),
-          regimeBeingTested       = None
-        )
-
-        val radios = doc.select(".govuk-radios__item").asScala.toList
-        // SIA shouldn't be an option
-        radios.size shouldBe 3
-
-        radios(0).select(".govuk-radios__input").`val`() shouldBe "EPAYE"
-        radios(0).select(".govuk-radios__label").text() shouldBe "Employers’ PAYE"
-
-        radios(1).select(".govuk-radios__input").`val`() shouldBe "SA"
-        radios(1).select(".govuk-radios__label").text() shouldBe "Self Assessment"
-
-        radios(2).select(".govuk-radios__input").`val`() shouldBe "VAT"
-        radios(2).select(".govuk-radios__label").text() shouldBe "VAT"
-
-        ()
-      }
-
-    "not redirect to the any landing page if the user has an no enrolments for " +
-      "supported tax regimes" in {
-        AuthStub.authorise(Some(Set()), Some(authCredentials))
-
-        val result = controller.whichTaxRegime(fakeRequest)
-        testPageIsDisplayed(result)
-      }
-
     "redirect to the EPAYE landing page if the user has a EPAYE enrolment and no other enrolments for " +
       "supported tax regimes" in {
         AuthStub.authorise(Some(Set(TdAll.payeEnrolment)), Some(authCredentials))

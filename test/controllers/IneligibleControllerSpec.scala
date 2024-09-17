@@ -64,7 +64,7 @@ class IneligibleControllerSpec extends ItSpec {
             case TaxRegime.Epaye => Some(Set(TdAll.payeEnrolment))
             case TaxRegime.Vat   => Some(Set(TdAll.vatEnrolment))
             case TaxRegime.Sa    => Some(Set(TdAll.saEnrolment))
-            case TaxRegime.Sia   => Some(Set(TdAll.saEnrolment))
+            case TaxRegime.Sia   => None
           }
           //OPS-12345 - sia doesn't have an enrolment; uncertain what should go here, but the match needs an option for sia
 
