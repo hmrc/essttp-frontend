@@ -44,8 +44,12 @@
 }
 
 @toCheckBoxItem(reason: CannotPayReason) = @{
+
+  val (content, hint) = Messages.WhyCannotPayInFull.checkboxMessageWithHint(reason)
+
     CheckboxItem(
-        content = Text(Messages.WhyCannotPayInFull.checkboxMessage(reason).show),
+        content = Text(content.show),
+        hint = hint.map(m => Hint(content = Text(m.show))),
         value = reason.entryName,
         id = Some(s"option-${reason.entryName}"),
         checked = form.value.exists(_.contains(reason))
@@ -54,18 +58,13 @@
 
 @checkboxItems = @{
   val reasons: Seq[CheckboxItem] = Seq(
-    CannotPayReason.Bankrupt,
-    CannotPayReason.Bereavement,
+    CannotPayReason.UnexpectedReductionOfIncome,
+    CannotPayReason.UnexpectedIncreaseInSpending,
+    CannotPayReason.LostOrReducedAbilityToEarnOrTrade,
+    CannotPayReason.NationalOrLocalDisaster,
     CannotPayReason.ChangeToPersonalCircumstances,
-    CannotPayReason.FloodFireTheft,
-    CannotPayReason.IllHealth,
-    CannotPayReason.LocalDisaster,
-    CannotPayReason.LostReducedBusiness,
-    CannotPayReason.LowIncome,
-    CannotPayReason.NationalDisaster,
-    CannotPayReason.NoProvisions,
-    CannotPayReason.OverRepayment,
-    CannotPayReason.Unemployed
+    CannotPayReason.NoMoneySetAside,
+    CannotPayReason.WaitingForRefund
   ).map(toCheckBoxItem)
 
   val divider = CheckboxItem(divider = Some(Messages.WhyCannotPayInFull.or.show))
@@ -100,7 +99,7 @@
             )),
             idPrefix = Some(key),
             name = s"$key[]",
-            hint = Some(Hint(content = Text(Messages.WhyCannotPayInFull.`This won't affect your payment plan...`.show))),
+            hint = Some(Hint(content = Text(Messages.WhyCannotPayInFull.`Your answers help us plan services in the future...`.show))),
             items = checkboxItems,
             errorMessage = form.error(key).map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(content = Text(e.message)))
           )

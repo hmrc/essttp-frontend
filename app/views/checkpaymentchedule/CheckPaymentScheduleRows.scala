@@ -34,7 +34,7 @@ object CheckPaymentScheduleRows {
         Html(
           s"""
            |<ul class="govuk-list govuk-list--bullet">
-           |${reasons.map(reason => s"""<li>${Messages.WhyCannotPayInFull.checkboxMessage(reason).show}</li>""").mkString("\n")}
+           |${reasons.map(reason => s"""<li>${Messages.WhyCannotPayInFull.checkboxMessageWithHint(reason)._1.show}</li>""").mkString("\n")}
            |</ul>
            |""".stripMargin
         )

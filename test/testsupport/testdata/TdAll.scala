@@ -295,7 +295,7 @@ object TdAll {
     )
   }
 
-  val whyCannotPayReasons: Set[CannotPayReason] = Set(CannotPayReason.OverRepayment, CannotPayReason.NationalDisaster)
+  val whyCannotPayReasons: Set[CannotPayReason] = Set(CannotPayReason.ChangeToPersonalCircumstances, CannotPayReason.NoMoneySetAside)
 
   def dayOfMonth(day: Int = 28): DayOfMonth = DayOfMonth(day)
 

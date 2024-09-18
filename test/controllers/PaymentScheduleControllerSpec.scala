@@ -67,7 +67,7 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
 
               val whyCannotPayInFullRow = SummaryRow(
                 "Why are you unable to pay in full?",
-                reasonsToNotPayInFull.mkString("\n"),
+                reasonsToNotPayInFull.mkString(" "),
                 PageUrls.checkPaymentPlanChangeUrl("WhyUnableInFull", origin.taxRegime)
               )
 
@@ -164,7 +164,7 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
                 testUpfrontPaymentSummaryRows(summaries(0))(
                   canPayUpfrontValue,
                   upfrontPaymentAmountValue,
-                  List("Bankrupt, Insolvent or Voluntary arrangement"),
+                  List("Change to personal circumstances", "No money set aside to pay"),
                   canPayWithinSixMonths = "Yes"
                 )
                 testPaymentPlanRows(summaries(1))("£300", paymentDayValue, datesToAmountsValues, totalToPayValue)

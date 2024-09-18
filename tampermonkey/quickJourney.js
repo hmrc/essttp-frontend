@@ -143,7 +143,7 @@ const testOnlyStartPageSia = () => {
 const landingPage = () => {
     if (currentPageIs('/set-up-a-payment-plan/epaye-payment-plan') ||
         currentPageIs('/set-up-a-payment-plan/vat-payment-plan') ||
-        currentPageIs('/set-up-a-payment-plan/sa-payment-plan')) ||
+        currentPageIs('/set-up-a-payment-plan/sa-payment-plan') ||
         currentPageIs('/set-up-a-payment-plan/sia-payment-plan')) {
         clickContinue()
     }
@@ -157,9 +157,9 @@ const yourBill = () => {
 
 const whyCannotPayInFull = () => {
     if (currentPageIs('/set-up-a-payment-plan/why-are-you-unable-to-pay-in-full')) {
-        document.getElementById('option-Bankrupt').checked = true
-        document.getElementById('option-FloodFireTheft').checked = true
-        document.getElementById('option-OverRepayment').checked = true
+        document.getElementById('option-ChangeToPersonalCircumstances').checked = true
+        document.getElementById('option-NoMoneySetAside').checked = true
+        document.getElementById('option-WaitingForRefund').checked = true
         clickContinue()
     }
 }
