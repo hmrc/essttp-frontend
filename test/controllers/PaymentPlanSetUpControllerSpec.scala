@@ -550,8 +550,16 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
         printLink.attr("href") shouldBe "#print-dialogue"
       }
   }
-}
 
+  //OPS-12345 - TODO these are placeholders, add tests for sia once we have info on how page will look
+  s"[taxRegime: ${Origins.Sia.Pta.taxRegime.toString}] GET /payment-plan-print-summary should" - {
+    "return the print payment schedule page with correct content (with upfront payment)" in {
+    }
+
+    "return the print payment schedule page with correct content (without upfront payment)" in {
+    }
+  }
+}
 class PaymentPlanSetUpControllerEmailDisabledSpec extends ItSpec {
 
   override lazy val configOverrides = Map("features.email-journey" -> false)

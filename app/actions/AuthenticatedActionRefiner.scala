@@ -53,10 +53,11 @@ trait AuthenticatedActionRefiner { this: ActionRefiner[Request, AuthenticatedReq
             case None =>
               Future.failed(new RuntimeException(s"Could not find credentials"))
 
+
             case Some(ggCredId) =>
               Future.successful(
                 Right(
-                  new AuthenticatedRequest[A](request, enrolments, GGCredId(ggCredId.providerId), Some(Nino(nino.getOrElse(""))))
+                  new AuthenticatedRequest[A](request, enrolments, GGCredId(ggCredId.providerId), nino.map(nino => Nino(nino)))
                 )
               )
           }

@@ -131,7 +131,7 @@ const testOnlyStartPageSia = () => {
         document.getElementById('enrolments-3').checked = true
         document.getElementById('siaDebtTotalAmount').value = '10000'
         document.getElementById('interestAmount').value = '0'
-        document.getElementById('siaTaxReference').value = ''
+        document.getElementById('nino').value = ''
         document.getElementById('regimeDigitalCorrespondence').checked = true
         document.getElementById('emailAddressPresent').checked = true
         document.getElementById('origin-4').checked = true

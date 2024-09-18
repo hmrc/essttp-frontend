@@ -283,7 +283,7 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
                    |  "enrollmentReasons": "did not pass eligibility check",
                    |  "noEligibilityReasons": 1,
                    |  "eligibilityReasons" : [ "$auditIneligibilityReason" ],
-                   |  "origin": "${origin.toString().takeRight(3)}",
+                   |  "origin": "${origin.toString().split('.').last}",
                    |  "taxType": "$expectedTaxType",
                    |  "taxDetail": $expectedTaxDetailsJson,
                    |  "authProviderId": "authId-999",

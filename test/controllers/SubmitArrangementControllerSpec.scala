@@ -148,7 +148,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
                      |	},
                      |	"status": "successfully sent to TTP",
                      |	"failedSubmissionReason": 202,
-                     |	"origin": "${origin.toString().takeRight(3)}",
+                     |	"origin": "${origin.toString().split('.').last}",
                      |	"taxType": "$taxType",
                      |	"taxDetail": ${TdAll.taxDetailJsonString(taxRegime)},
                      |	"correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",

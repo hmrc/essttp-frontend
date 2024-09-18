@@ -56,7 +56,7 @@ class DetermineTaxIdController @Inject() (
     val (maybeTaxId, taxRegime): (Future[Option[TaxId]], TaxRegime) = request.journey match {
       case j: Journey.Stages.Started =>
         if (j.taxRegime == TaxRegime.Sia) {
-          (Future(request.nino.asInstanceOf[Option[TaxId]]), j.taxRegime)
+          (Future(request.nino), j.taxRegime)
         } else {
           enrolmentService.determineTaxIdAndUpdateJourney(j, request.enrolments) -> j.taxRegime
         }
@@ -73,7 +73,7 @@ class DetermineTaxIdController @Inject() (
         case TaxRegime.Epaye => Redirect(routes.NotEnrolledController.notEnrolled)
         case TaxRegime.Vat   => Redirect(routes.NotEnrolledController.notVatRegistered)
         case TaxRegime.Sa    => Redirect(routes.NotEnrolledController.notSaEnrolled)
-        case TaxRegime.Sia   => Redirect(routes.NotEnrolledController.notSaEnrolled)
+        case TaxRegime.Sia   => Redirect(routes.NotEnrolledController.siaNoNino)
       }
     }
   }

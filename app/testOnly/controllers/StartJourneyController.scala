@@ -211,7 +211,7 @@ class StartJourneyController @Inject() (
     withSessionId(Future.successful(Ok(iAmGovUkPage(TaxRegime.Sa))))
   }
 
-  /** Pretends being a Govuk Sa page */
+  /** Pretends being a Govuk Sia page */
   val showGovukSiaPage: Action[AnyContent] = as.default.async { implicit request =>
     withSessionId(Future.successful(Ok(iAmGovUkPage(TaxRegime.Sia))))
   }
