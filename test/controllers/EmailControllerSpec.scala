@@ -51,7 +51,8 @@ class EmailControllerSpec extends ItSpec {
   List(
     TaxRegime.Epaye -> Origins.Epaye.Bta,
     TaxRegime.Vat -> Origins.Vat.Bta,
-    TaxRegime.Sa -> Origins.Sa.Bta
+    TaxRegime.Sa -> Origins.Sa.Bta,
+    TaxRegime.Sia -> Origins.Sia.Pta
   ).foreach {
       case (taxRegime, origin) =>
 
@@ -87,6 +88,7 @@ class EmailControllerSpec extends ItSpec {
                     case TaxRegime.Epaye => routes.PaymentPlanSetUpController.epayePaymentPlanSetUp
                     case TaxRegime.Vat   => routes.PaymentPlanSetUpController.vatPaymentPlanSetUp
                     case TaxRegime.Sa    => routes.PaymentPlanSetUpController.saPaymentPlanSetUp
+                    case TaxRegime.Sia   => routes.PaymentPlanSetUpController.siaPaymentPlanSetUp
                   }
                 )
               }
@@ -408,11 +410,13 @@ class EmailControllerSpec extends ItSpec {
             case TaxRegime.Epaye => "Set up an Employers’ PAYE payment plan"
             case TaxRegime.Vat   => "Set up a VAT payment plan"
             case TaxRegime.Sa    => "Set up a Self Assessment payment plan"
+            case TaxRegime.Sia   => "Set up a Simple Assessment payment plan"
           }
           val expectedPageTitleWelsh = taxRegime match {
             case TaxRegime.Epaye => "Trefnu cynllun talu ar gyfer TWE Cyflogwyr"
             case TaxRegime.Vat   => "Trefnu cynllun talu TAW"
             case TaxRegime.Sa    => "Sefydlu cynllun talu ar gyfer Hunanasesiad"
+            case TaxRegime.Sia   => "Sefydlu cynllun talu ar gyfer Asesiad Syml"
           }
 
           "not allow journeys where an email has not been selected" in {
@@ -452,7 +456,7 @@ class EmailControllerSpec extends ItSpec {
                 Json.parse(
                   s"""
                    |{
-                   |  "origin" : "Bta",
+                   |  "origin" : "${origin.toString().split('.').last}",
                    |  "taxType" : "${taxRegime.entryName}",
                    |  "taxDetail" : {
                    |    ${TdAll.taxDetailForAuditEvent(taxRegime)}
@@ -493,7 +497,7 @@ class EmailControllerSpec extends ItSpec {
                 Json.parse(
                   s"""
                    |{
-                   |  "origin" : "Bta",
+                   |  "origin" : "${origin.toString().split('.').last}",
                    |  "taxType" : "${taxRegime.entryName}",
                    |  "taxDetail" : {
                    |    ${TdAll.taxDetailForAuditEvent(taxRegime)}
@@ -557,7 +561,7 @@ class EmailControllerSpec extends ItSpec {
               Json.parse(
                 s"""
                    |{
-                   |  "origin" : "Bta",
+                   |  "origin" : "${origin.toString().split('.').last}",
                    |  "taxType" : "${taxRegime.entryName}",
                    |  "taxDetail" : {
                    |    ${TdAll.taxDetailForAuditEvent(taxRegime)}
@@ -585,7 +589,7 @@ class EmailControllerSpec extends ItSpec {
               Json.parse(
                 s"""
                    |{
-                   |  "origin" : "Bta",
+                   |  "origin" : "${origin.toString().split('.').last}",
                    |  "taxType" : "${taxRegime.entryName}",
                    |  "taxDetail" : {
                    |    ${TdAll.taxDetailForAuditEvent(taxRegime)}
@@ -613,7 +617,7 @@ class EmailControllerSpec extends ItSpec {
               Json.parse(
                 s"""
                    |{
-                   |  "origin" : "Bta",
+                   |  "origin" : "${origin.toString().split('.').last}",
                    |  "taxType" : "${taxRegime.entryName}",
                    |  "taxDetail" : {
                    |    ${TdAll.taxDetailForAuditEvent(taxRegime)}
@@ -648,7 +652,7 @@ class EmailControllerSpec extends ItSpec {
               Json.parse(
                 s"""
                    |{
-                   |  "origin" : "Bta",
+                   |  "origin" : "${origin.toString().split('.').last}",
                    |  "taxType" : "${taxRegime.entryName}",
                    |  "taxDetail" : {
                    |    ${TdAll.taxDetailForAuditEvent(taxRegime)}
@@ -704,7 +708,7 @@ class EmailControllerSpec extends ItSpec {
               Json.parse(
                 s"""
                    |{
-                   |  "origin" : "Bta",
+                   |  "origin" : "${origin.toString().split('.').last}",
                    |  "taxType" : "${taxRegime.entryName}",
                    |  "taxDetail" : {
                    |    ${TdAll.taxDetailForAuditEvent(taxRegime)}
@@ -743,7 +747,7 @@ class EmailControllerSpec extends ItSpec {
               Json.parse(
                 s"""
                    |{
-                   |  "origin" : "Bta",
+                   |  "origin" : "${origin.toString().split('.').last}",
                    |  "taxType" : "${taxRegime.entryName}",
                    |  "taxDetail" : {
                    |    ${TdAll.taxDetailForAuditEvent(taxRegime)}

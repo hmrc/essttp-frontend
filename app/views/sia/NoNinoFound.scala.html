@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,24 +12,27 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package models.audit
+@import config.AppConfig
+@import essttp.rootmodel.TaxRegime
+@import messages.Messages
+@import play.api.mvc.Request
+@import play.twirl.api.Html
+@import requests.RequestSupport
+@import views.html.partials.CommonIneligibilityPartial
 
-import play.api.libs.json.{Json, OWrites}
-
-final case class TaxDetail(
-    utr:               Option[String],
-    taxOfficeNo:       Option[String],
-    taxOfficeRef:      Option[String],
-    employerRef:       Option[String],
-    accountsOfficeRef: Option[String],
-    vrn:               Option[String],
-    nino:              Option[String]
+@this(
+layout: views.html.templates.Layout,
+requestSupport: RequestSupport,
+commonIneligibilityPartial: CommonIneligibilityPartial
 )
 
-object TaxDetail {
+@()(implicit request: Request[_])
 
-  implicit val writes: OWrites[TaxDetail] = Json.writes
+@import requestSupport._
 
+@layout(pageTitle = Some(Messages.`No NINO has been found`.show), showBackLink = false) {
+
+@commonIneligibilityPartial(TaxRegime.Epaye)
 }

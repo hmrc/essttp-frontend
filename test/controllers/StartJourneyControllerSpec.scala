@@ -100,6 +100,29 @@ class StartJourneyControllerSpec extends ItSpec {
     }
   }
 
+  "GET /govuk/sia/start" - {
+    "should start a gov uk SIA journey and redirect" in {
+      stubCommonActions()
+      EssttpBackend.StartJourney.startJourneySiaGovUk
+
+      val fakeRequest = FakeRequest()
+        .withAuthToken()
+        .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+      val result: Future[Result] = controller.startGovukSiaJourney(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.DetermineTaxIdController.determineTaxId.url)
+      EssttpBackend.StartJourney.verifyStartJourneySiaGovUk()
+    }
+
+    "should redirect to login with the correct continue url if the user is not logged in" in {
+      val result = controller.startGovukSiaJourney(FakeRequest("GET", routes.StartJourneyController.startGovukSiaJourney.url))
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some("http://localhost:9949/auth-login-stub/gg-sign-in?" +
+        "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fgovuk%2Fsia%2Fstart&origin=essttp-frontend")
+    }
+  }
+
   "GET /epaye/start" - {
     "should start a detached EPAYE journey and redirect" in {
       stubCommonActions()

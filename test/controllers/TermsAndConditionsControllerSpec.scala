@@ -42,7 +42,8 @@ class TermsAndConditionsControllerSpec extends ItSpec {
   Seq[(String, Origin, TaxRegime)](
     ("EPAYE", Origins.Epaye.Bta, TaxRegime.Epaye),
     ("VAT", Origins.Vat.Bta, TaxRegime.Vat),
-    ("SA", Origins.Sa.Bta, TaxRegime.Sa)
+    ("SA", Origins.Sa.Bta, TaxRegime.Sa),
+    ("SIA", Origins.Sia.Pta, TaxRegime.Sia)
   ).foreach {
       case (regime, origin, taxRegime) =>
 
@@ -69,6 +70,7 @@ class TermsAndConditionsControllerSpec extends ItSpec {
                 case TaxRegime.Epaye => "DM PAYE HM Revenue and Customs BX9 1EW United Kingdom"
                 case TaxRegime.Vat   => "HMRC Direct Debit Support Team VAT 2 DMB 612 BX5 5AB United Kingdom"
                 case TaxRegime.Sa    => "Debt Management Self Assessment HM Revenue and Customs BX9 1AS United Kingdom"
+                case TaxRegime.Sia   => "Debt Management Simple Assessment HM Revenue and Customs BX9 1AS United Kingdom"
               }
 
               ContentAssertions.assertListOfContent(
@@ -193,7 +195,8 @@ class TermsAndConditionsControllerEmailDisabledSpec extends ItSpec {
   Seq[(String, Origin)](
     ("EPAYE", Origins.Epaye.Bta),
     ("VAT", Origins.Vat.Bta),
-    ("SA", Origins.Sa.Bta)
+    ("SA", Origins.Sa.Bta),
+    ("SIA", Origins.Sia.Pta)
   ).foreach {
       case (regime, origin) =>
 

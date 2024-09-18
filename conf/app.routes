@@ -16,13 +16,18 @@ GET    /vat-payment-plan-continue                           controllers.LandingC
 GET    /sa-payment-plan                                     controllers.LandingController.saLandingPage
 GET    /sa-payment-plan-continue                            controllers.LandingController.saLandingPageContinue
 
+GET    /sia-payment-plan                                    controllers.LandingController.siaLandingPage
+GET    /sia-payment-plan-continue                           controllers.LandingController.siaLandingPageContinue
+
 GET    /epaye/start                                         controllers.StartJourneyController.startDetachedEpayeJourney
 GET    /vat/start                                           controllers.StartJourneyController.startDetachedVatJourney
 GET    /sa/start                                            controllers.StartJourneyController.startDetachedSaJourney
+GET    /sia/start                                           controllers.StartJourneyController.startDetachedSiaJourney
 
 GET    /govuk/epaye/start                                   controllers.StartJourneyController.startGovukEpayeJourney
 GET    /govuk/vat/start                                     controllers.StartJourneyController.startGovukVatJourney
 GET    /govuk/sa/start                                      controllers.StartJourneyController.startGovukSaJourney
+GET    /govuk/sia/start                                     controllers.StartJourneyController.startGovukSiaJourney
 
 GET    /determine-taxId                                     controllers.DetermineTaxIdController.determineTaxId
 
@@ -31,33 +36,42 @@ GET    /determine-eligibility                               controllers.Determin
 GET    /not-enrolled                                        controllers.NotEnrolledController.notEnrolled
 GET    /not-vat-registered                                  controllers.NotEnrolledController.notVatRegistered
 GET    /request-access-to-self-assessment                   controllers.NotEnrolledController.notSaEnrolled
+GET    /no-nino-found-sia                                   controllers.NotEnrolledController.siaNoNino
 
 GET    /not-eligible-epaye                                  controllers.IneligibleController.payeGenericIneligiblePage
 GET    /not-eligible-vat                                    controllers.IneligibleController.vatGenericIneligiblePage
 GET    /not-eligible-sa                                     controllers.IneligibleController.saGenericIneligiblePage
+GET    /not-eligible-sia                                    controllers.IneligibleController.siaGenericIneligiblePage
 GET    /debt-too-large-epaye                                controllers.IneligibleController.epayeDebtTooLargePage
 GET    /debt-too-large-vat                                  controllers.IneligibleController.vatDebtTooLargePage
 GET    /debt-too-large-sa                                   controllers.IneligibleController.saDebtTooLargePage
+GET    /debt-too-large-sia                                  controllers.IneligibleController.siaDebtTooLargePage
 GET    /pay-paye-bill-in-full                               controllers.IneligibleController.epayeDebtTooSmallPage
 GET    /pay-vat-bill-in-full                                controllers.IneligibleController.vatDebtTooSmallPage
 GET    /pay-self-assessment-tax-bill-in-full                controllers.IneligibleController.saDebtTooSmallPage
+GET    /pay-simple-assessment-tax-bill-in-full              controllers.IneligibleController.siaDebtTooSmallPage
 GET    /debt-too-old-epaye                                  controllers.IneligibleController.epayeDebtTooOldPage
 GET    /debt-too-old-vat                                    controllers.IneligibleController.vatDebtTooOldPage
 GET    /debt-too-old-sa                                     controllers.IneligibleController.saDebtTooOldPage
+GET    /debt-too-old-sia                                    controllers.IneligibleController.siaDebtTooOldPage
 GET    /debt-before-accounting-date-vat                     controllers.IneligibleController.vatDebtBeforeAccountingDatePage
 GET    /file-your-return                                    controllers.IneligibleController.epayeFileYourReturnPage
 GET    /return-not-filed-vat                                controllers.IneligibleController.vatFileYourReturnPage
 GET    /return-not-filed-sa                                 controllers.IneligibleController.saFileYourReturnPage
+GET    /return-not-filed-sia                                controllers.IneligibleController.siaFileYourReturnPage
 GET    /already-have-a-payment-plan-epaye                   controllers.IneligibleController.epayeAlreadyHaveAPaymentPlanPage
 GET    /already-have-a-payment-plan-vat                     controllers.IneligibleController.vatAlreadyHaveAPaymentPlanPage
 GET    /already-have-a-plan-sa                              controllers.IneligibleController.saAlreadyHaveAPaymentPlanPage
+GET    /already-have-a-plan-sia                             controllers.IneligibleController.siaAlreadyHaveAPaymentPlanPage
 GET    /bill-not-overdue-epaye                              controllers.IneligibleController.epayeNoDueDatesReachedPage
 GET    /bill-not-overdue-vat                                controllers.IneligibleController.vatNoDueDatesReachedPage
+GET    /bill-not-overdue-sia                                controllers.IneligibleController.siaNoDueDatesReachedPage
 GET    /call-us-already-have-direct-debit-epaye             controllers.IneligibleController.epayeYouHaveChosenNotToSetUpPage
 GET    /call-us-already-have-direct-debit-vat               controllers.IneligibleController.vatYouHaveChosenNotToSetUpPage
 GET    /update-personal-details-epaye                       controllers.IneligibleController.epayeRLSPage
 GET    /update-personal-details-vat                         controllers.IneligibleController.vatRLSPage
 GET    /update-personal-details-sa                          controllers.IneligibleController.saRLSPage
+GET    /update-personal-details-sia                         controllers.IneligibleController.siaRLSPage
 
 GET    /your-bill                                           controllers.YourBillController.yourBill
 POST   /your-bill                                           controllers.YourBillController.yourBillSubmit
@@ -133,8 +147,10 @@ GET    /submit-arrangement                                  controllers.SubmitAr
 GET    /epaye-payment-plan-set-up                           controllers.PaymentPlanSetUpController.epayePaymentPlanSetUp
 GET    /vat-payment-plan-set-up                             controllers.PaymentPlanSetUpController.vatPaymentPlanSetUp
 GET    /sa-payment-plan-set-up                              controllers.PaymentPlanSetUpController.saPaymentPlanSetUp
+GET    /sia-payment-plan-set-up                             controllers.PaymentPlanSetUpController.siaPaymentPlanSetUp
 GET    /your-payment-plan                                   controllers.PaymentPlanSetUpController.epayeVatPrintSummary
 GET    /confirmation-of-your-plan-to-pay                    controllers.PaymentPlanSetUpController.saPrintSummary
+GET    /confirmation-of-your-plan-to-pay-sia                controllers.PaymentPlanSetUpController.siaPrintSummary
 
 GET    /assets/*file                                        controllers.Assets.versioned(path="/public", file: Asset)
 
@@ -143,6 +159,7 @@ GET    /timed-out                                           controllers.SignOutC
 GET    /exit-survey/paye                                    controllers.SignOutController.exitSurveyPaye
 GET    /exit-survey/vat                                     controllers.SignOutController.exitSurveyVat
 GET    /exit-survey/sa                                      controllers.SignOutController.exitSurveySa
+GET    /exit-survey/sia                                     controllers.SignOutController.exitSurveySia
 
 GET    /information-missing                                 controllers.MissingInfoController.missingInfo
 GET    /determine-next                                      controllers.MissingInfoController.determineNextPage

@@ -16,7 +16,6 @@
 
 @import config.AppConfig
 @import controllers.routes
-@import essttp.rootmodel.TaxRegime
 @import essttp.rootmodel.ttp.affordablequotes.DueDate
 @import messages.{DateMessages, Messages}
 @import play.api.mvc.Request
@@ -35,7 +34,6 @@
         customerPaymentReference: String,
         paymentDay: DueDate,
         hasUpfrontPayment: Boolean,
-        taxRegime: TaxRegime,
         wasEmailAddressRequired: Boolean,
         regimeDigitalCorrespondence: Boolean
 )(
@@ -56,16 +54,11 @@
 }
 
 @surveyUrl = @{
-    taxRegime match {
-        case TaxRegime.Epaye => routes.SignOutController.exitSurveyPaye.url
-        case TaxRegime.Vat => routes.SignOutController.exitSurveyVat.url
-        case TaxRegime.Sa => routes.SignOutController.exitSurveySa.url
-        case TaxRegime.Sia => routes.SignOutController.exitSurveySia.url
-    }
+        routes.SignOutController.exitSurveySia.url
 }
 
 @buttonUrl = @{
-    appConfig.Urls.businessTaxAccountUrl
+    appConfig.Urls.personalTaxAccountUrl
 }
 
 @layout(pageTitle = Some(title), showBackLink = false) {
@@ -77,11 +70,31 @@
     ))
     <h2 class="govuk-heading-m">
     @{
-        Messages.Confirmation.`What happens next`.show
+        Messages.Confirmation.`What you need to do next`.show
     }
     </h2>
+
+    <p class="govuk-body">@{Html(
+        Messages.Confirmation.`View your payment plan where`(routes.PaymentPlanSetUpController.siaPrintSummary.url).show)
+    }</p>
+
+    <div class="govuk-warning-text">
+        <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+        <strong class="govuk-warning-text__text">
+            <p class="govuk-body">@{Html(
+                Messages.Confirmation.`We will not send you a copy`.show)
+                }</p>
+        </strong>
+    </div>
+
+    <h2 class="govuk-heading-m">
+        @{
+        Messages.Confirmation.`About your payment plan`.show
+        }
+    </h2>
+
     <p class="govuk-body">@{
-        Messages.Confirmation.`HMRC will send you a letter within 5 working days with your payment dates.`.show
+        Messages.Confirmation.paymentInfo(hasUpfrontPayment = hasUpfrontPayment, nextPayment).show
     }</p>
 
     @{if(wasEmailAddressRequired && regimeDigitalCorrespondence) {
@@ -90,21 +103,10 @@
         </p>
     }}
 
-    <p class="govuk-body">@{
-        Messages.Confirmation.paymentInfo(hasUpfrontPayment = hasUpfrontPayment, nextPayment).show
-    }</p>
+
     <p class="govuk-body">@{
         Messages.Confirmation.`Your tax account will be updated with your payment plan within 24 hours.`.show
     }</p>
-    <p class="govuk-body">
-        <a href="@{
-            routes.PaymentPlanSetUpController.epayeVatPrintSummary.url
-        }" class="govuk-link" id="print-plan-link">
-        @{
-            Messages.Confirmation.`View your payment plan`.show
-        }
-        </a>
-    </p>
 
     <h2 class="govuk-heading-m">
     @{

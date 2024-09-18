@@ -43,5 +43,9 @@ class NotEnrolledController @Inject() (
     Ok(views.notSaEnrolled())
   }
 
+  def siaNoNino: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    Ok(views.noNinoFound())
+  }
+
 }
 

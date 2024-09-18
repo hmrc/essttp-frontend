@@ -79,5 +79,6 @@ object SubmitArrangementController {
     case TaxRegime.Epaye => routes.PaymentPlanSetUpController.epayePaymentPlanSetUp
     case TaxRegime.Vat   => routes.PaymentPlanSetUpController.vatPaymentPlanSetUp
     case TaxRegime.Sa    => routes.PaymentPlanSetUpController.saPaymentPlanSetUp
+    case TaxRegime.Sia   => routes.PaymentPlanSetUpController.siaPaymentPlanSetUp
   }
 }

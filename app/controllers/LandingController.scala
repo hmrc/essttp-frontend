@@ -68,6 +68,20 @@ class LandingController @Inject() (
     } else {
       as.default(_ => Redirect(appConfig.Urls.saSuppUrl))
     }
+  // OPS-12345 sia landing needs to be a def, otherwise tests where it is set to false go to the exception the moment the controller is injected
+  def siaLandingPage: Action[AnyContent] = {
+    if (appConfig.siaEnabled) {
+      as.default.async { implicit request =>
+        checkNotShuttered(TaxRegime.Sia) {
+          getBackUrl().map { maybeBackUrl =>
+            Ok(views.siaLanding(maybeBackUrl))
+          }
+        }
+      }
+    } else {
+      throw new RuntimeException("Simple Assessment is not available")
+    }
+  }
 
   val epayeLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
     checkNotShuttered(TaxRegime.Epaye) {
@@ -84,6 +98,12 @@ class LandingController @Inject() (
   val saLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
     checkNotShuttered(TaxRegime.Sa) {
       handleLandingPageContinue(routes.StartJourneyController.startDetachedSaJourney)
+    }
+  }
+
+  val siaLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
+    checkNotShuttered(TaxRegime.Sia) {
+      handleLandingPageContinue(routes.StartJourneyController.startDetachedSiaJourney)
     }
   }
 

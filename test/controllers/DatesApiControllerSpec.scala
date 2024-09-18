@@ -35,7 +35,8 @@ class DatesApiControllerSpec extends ItSpec {
   Seq[(String, Origin)](
     ("EPAYE", Origins.Epaye.Bta),
     ("VAT", Origins.Vat.Bta),
-    ("SA", Origins.Sa.Bta)
+    ("SA", Origins.Sa.Bta),
+    ("SIA", Origins.Sia.Pta)
   ).foreach {
       case (regime, origin) =>
         "GET /retrieve-extreme-dates" - {

@@ -19,7 +19,7 @@ package actionsmodel
 import config.AppConfig
 import essttp.bars.model.NumberOfBarsVerifyAttempts
 import essttp.journey.model.{Journey, JourneyId}
-import essttp.rootmodel.GGCredId
+import essttp.rootmodel.{GGCredId, Nino}
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import play.api.mvc._
 import uk.gov.hmrc.auth.core.Enrolments
@@ -36,8 +36,9 @@ class AuthenticatedJourneyRequest[A](
     override val request:    Request[A],
     override val enrolments: Enrolments,
     val journey:             Journey,
-    ggCredId:                GGCredId
-) extends AuthenticatedRequest[A](request, enrolments, ggCredId) {
+    ggCredId:                GGCredId,
+    nino:                    Option[Nino]
+) extends AuthenticatedRequest[A](request, enrolments, ggCredId, nino) {
   val journeyId: JourneyId = journey._id
 }
 
@@ -46,9 +47,10 @@ class BarsLockedOutRequest[A](
     override val enrolments:        Enrolments,
     val journey:                    Journey,
     ggCredId:                       GGCredId,
+    nino:                           Option[Nino],
     val numberOfBarsVerifyAttempts: NumberOfBarsVerifyAttempts,
     val barsLockoutExpiryTime:      Instant
-) extends AuthenticatedRequest[A](request, enrolments, ggCredId) {
+) extends AuthenticatedRequest[A](request, enrolments, ggCredId, nino) {
   val journeyId: JourneyId = journey._id
 }
 
@@ -57,8 +59,9 @@ class BarsNotLockedOutRequest[A](
     override val enrolments:        Enrolments,
     val journey:                    Journey,
     ggCredId:                       GGCredId,
+    nino:                           Option[Nino],
     val numberOfBarsVerifyAttempts: NumberOfBarsVerifyAttempts
-) extends AuthenticatedRequest[A](request, enrolments, ggCredId) {
+) extends AuthenticatedRequest[A](request, enrolments, ggCredId, nino) {
   val journeyId: JourneyId = journey._id
 }
 
@@ -67,9 +70,10 @@ final class EligibleJourneyRequest[A](
     override val enrolments:        Enrolments,
     override val request:           Request[A],
     ggCredId:                       GGCredId,
+    nino:                           Option[Nino],
     val numberOfBarsVerifyAttempts: NumberOfBarsVerifyAttempts,
     val eligibilityCheckResult:     EligibilityCheckResult
-) extends AuthenticatedJourneyRequest[A](request, enrolments, journey, ggCredId)
+) extends AuthenticatedJourneyRequest[A](request, enrolments, journey, ggCredId, nino)
 
 object EligibleJourneyRequest {
 

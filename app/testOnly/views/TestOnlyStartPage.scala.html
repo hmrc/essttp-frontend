@@ -724,6 +724,117 @@ appConfig: AppConfig
 }
 }
 
+@siaContent = {
+@formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneySiaSubmit) {
+
+    @signInAsContent
+    @enrolmentsContent
+
+    @govukInput(Input(
+        id = "siaTotalAmount",
+        name = "siaDebtTotalAmount",
+        label = Label(
+            isPageHeading = false,
+            classes = "govuk-label--m",
+            content = Text("Enter total debt amount without interest")
+        ),
+        classes = "govuk-input--width-5",
+        spellcheck = Some(false),
+        prefix = Some(PrefixOrSuffix(
+            content = Text("£")
+        )),
+        errorMessage = form.error("siaDebtTotalAmount").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
+            content = Text(e.message)
+        )),
+        value = form.data.get("siaDebtTotalAmount").orElse(Some("10000")),
+        hint = Some(Hint(content = Text(s"Enter an amount between £1 and ${appConfig.PolicyParameters.SIA.maxAmountOfDebt.gdsFormatInPounds} for SIA.")))
+    ))
+
+    @interestAmountContent
+
+    @govukInput(Input(
+        id = "nino",
+        name = "nino",
+        label = Label(
+            isPageHeading = false,
+            classes = "govuk-label--m",
+            content = Text("Enter a NINO")
+        ),
+        classes = "govuk-input--width-10",
+        spellcheck = Some(false),
+        value = form.data.get("siaNINO"),
+        hint = Some(Hint(content = Text("NINO format NNNLLNNNNN, e.g. 864FZ00049. If left empty, it will be a random one.")))
+    ))
+
+    @regimeDigitalCorrespondenceRadios
+
+    @emailAddressPresentRadios
+
+    @govukCheckboxes(Checkboxes(
+        fieldset = Some(Fieldset(
+            legend = Some(Legend(
+                content = Text("Eligibility failures"),
+                classes = "govuk-fieldset__legend--m",
+                isPageHeading = false
+            ))
+        )),
+        idPrefix = Some("eligibilityErrors"),
+        name = "eligibilityErrors[]",
+        items = epayeEligibilityErrorCheckboxes,
+        classes = "govuk-checkboxes--small"
+    ))
+
+    @chargesOptionalFieldRadios("isInterestBearingCharge")
+
+    @chargesOptionalFieldRadios("useChargeReference")
+
+    @chargesOptionalFieldRadios("ddInProgress")
+
+    @planMinLengthInput(1)
+
+    @planMaxLengthInput(appConfig.PolicyParameters.SIA.maxPlanDurationInMonths)
+
+    @govukRadios(Radios(
+        fieldset = Some(Fieldset(
+            legend = Some(Legend(
+                content = Text("Entry origins"),
+                classes = "govuk-fieldset__legend--m",
+                isPageHeading = false
+            ))
+        )),
+        idPrefix = Some("origin"),
+        name = "origin",
+        errorMessage = form.error("origin").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
+            content = Text(e.message)
+        )),
+        items = Seq(
+            RadioItem(
+                content = Text("GOV.UK"),
+                value = Some(Origins.Sia.GovUk.entryName),
+                checked = form.data.exists(_._2 === Origins.Sia.GovUk.entryName)
+            ),
+            RadioItem(
+                content = Text("Personal Tax Account"),
+                value = Some(Origins.Sia.Pta.entryName),
+                checked = form.data.exists(_._2 === Origins.Sia.Pta.entryName)
+            ),
+            RadioItem(
+                content = Text("Detached Url"),
+                value = Some(Origins.Sia.DetachedUrl.entryName),
+                checked = form.data.exists(_._2 === Origins.Sia.DetachedUrl.entryName)
+            ),
+            RadioItem(
+                content = Text("Mobile service"),
+                value = Some(Origins.Sia.Mobile.entryName),
+                checked = form.data.exists(_._2 === Origins.Sia.Mobile.entryName)
+            )
+        ),
+        classes = "govuk-radios--small"
+    ))
+    @govukButton(Button(content = Text("Start now")))
+}
+}
+
 @testOnlyLayout(pageTitle = Some(title), backUrl = Some(testOnlyRoutes.StartJourneyController.whichTaxRegime.url)) {
     @if(form.errors.nonEmpty) {
         @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
@@ -740,9 +851,10 @@ appConfig: AppConfig
 
     @{
         taxRegime match {
-            case TaxRegime.Epaye => payeContent
-            case TaxRegime.Vat => vatContent
-            case TaxRegime.Sa => saContent
+            case TaxRegime.Epaye    => payeContent
+            case TaxRegime.Vat      => vatContent
+            case TaxRegime.Sa       => saContent
+            case TaxRegime.Sia      => siaContent
         }
 
     }

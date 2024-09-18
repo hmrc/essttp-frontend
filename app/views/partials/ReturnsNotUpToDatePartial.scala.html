@@ -32,6 +32,7 @@
         case TaxRegime.Epaye => epayeContent
         case TaxRegime.Vat   => vatContent
         case TaxRegime.Sa => saContent
+        case TaxRegime.Sia => siaContent
     }
 }
 
@@ -51,6 +52,12 @@
     <p class="govuk-body">
     @{Html{Messages.NotEligible.`You must file your tax return before you can set up a Self Assessment payment plan online`(fileReturnLink).show}}
     </p>
+}
+
+@siaContent ={
+<p class="govuk-body">
+    @{Html{Messages.NotEligible.`You must file your tax return before you can set up a Simple Assessment payment plan online`(fileReturnLink).show}}
+</p>
 }
 
     <p class="govuk-body">

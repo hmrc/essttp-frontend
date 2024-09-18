@@ -123,7 +123,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       eligibilityReasons              = List.empty,
       origin                          = toAuditString(journey.origin),
       taxType                         = journey.taxRegime.toString,
-      taxDetail                       = TaxDetail(None, None, None, None, None, None),
+      taxDetail                       = TaxDetail(None, None, None, None, None, None, None),
       authProviderId                  = r.ggCredId.value,
       chargeTypeAssessment            = List.empty,
       correlationId                   = journey.correlationId.value.toString,
@@ -311,7 +311,8 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       taxOfficeRef      = None,
       employerRef       = getTaxId("EMPREF")(eligibilityCheckResult),
       accountsOfficeRef = getTaxId("BROCS")(eligibilityCheckResult),
-      vrn               = getTaxId("VRN")(eligibilityCheckResult)
+      vrn               = getTaxId("VRN")(eligibilityCheckResult),
+      nino              = getTaxId("NINO")(eligibilityCheckResult)
     )
 
   private def toEmailInfo(journey: EmailVerificationComplete): (Option[Email], Option[EmailSource]) = {

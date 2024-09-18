@@ -111,6 +111,9 @@ object Routing {
       routes.PegaController.callback(TaxRegime.Sa) -> { () =>
         routes.BankDetailsController.detailsAboutBankAccount
       },
+      routes.PegaController.callback(TaxRegime.Sia) -> { () =>
+        routes.BankDetailsController.detailsAboutBankAccount
+      },
       routes.BankDetailsController.detailsAboutBankAccount -> { () =>
         journey match {
           case _: BeforeEnteredDetailsAboutBankAccount =>
@@ -184,6 +187,7 @@ object Routing {
         case TaxRegime.Epaye => routes.LandingController.epayeLandingPage
         case TaxRegime.Vat   => routes.LandingController.vatLandingPage
         case TaxRegime.Sa    => routes.LandingController.saLandingPage
+        case TaxRegime.Sia   => routes.LandingController.siaLandingPage
       }
 
     case _: Journey.Stages.ComputedTaxId =>

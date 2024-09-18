@@ -95,6 +95,7 @@ object ContentAssertions extends RichMatchers {
             case Some(TaxRegime.Epaye) => TdAll.expectedServiceNamePayeEn
             case Some(TaxRegime.Vat)   => TdAll.expectedServiceNameVatEn
             case Some(TaxRegime.Sa)    => TdAll.expectedServiceNameSaEn
+            case Some(TaxRegime.Sia)   => TdAll.expectedServiceNameSiaEn
             case None                  => TdAll.expectedServiceNameGenericEn
           }
         case Languages.Welsh =>
@@ -102,6 +103,7 @@ object ContentAssertions extends RichMatchers {
             case Some(TaxRegime.Epaye) => TdAll.expectedServiceNamePayeCy
             case Some(TaxRegime.Vat)   => TdAll.expectedServiceNameVatCy
             case Some(TaxRegime.Sa)    => TdAll.expectedServiceNameSaCy
+            case Some(TaxRegime.Sia)   => TdAll.expectedServiceNameSiaCy
             case None                  => TdAll.expectedServiceNameGenericCy
           }
       }
@@ -122,6 +124,7 @@ object ContentAssertions extends RichMatchers {
       case Some(TaxRegime.Epaye) => routes.LandingController.epayeLandingPage.url
       case Some(TaxRegime.Vat)   => routes.LandingController.vatLandingPage.url
       case Some(TaxRegime.Sa)    => routes.LandingController.saLandingPage.url
+      case Some(TaxRegime.Sia)   => routes.LandingController.siaLandingPage.url
       case None                  => ""
     }
     else "")
@@ -258,6 +261,10 @@ object ContentAssertions extends RichMatchers {
                   "your bank details"
                 )
               }
+              case TaxRegime.Sia =>
+                List(
+                  "this is a dummy message, awaiting data"
+                )
             }
           case Languages.Welsh =>
             taxRegime match {
@@ -283,6 +290,11 @@ object ContentAssertions extends RichMatchers {
                   "eich manylion banc"
                 )
               }
+              case TaxRegime.Sia =>
+                List(
+                  "eich rhif cofrestru TAW, sy’n 9 digid o hyd, er enghraifft 123456789",
+                  "eich manylion banc"
+                )
             }
         }
       }

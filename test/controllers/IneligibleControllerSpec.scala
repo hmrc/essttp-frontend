@@ -46,6 +46,7 @@ class IneligibleControllerSpec extends ItSpec {
     case TaxRegime.Sa    => "https://www.gov.uk/log-in-file-self-assessment-tax-return"
     case TaxRegime.Epaye => "/set-up-a-payment-plan/test-only/bta-page?return-page"
     case TaxRegime.Vat   => "/set-up-a-payment-plan/test-only/bta-page?return-page"
+    case TaxRegime.Sia   => "/set-up-a-payment-plan/test-only/bta-page?return-page"
   }
 
   "IneligibleController should display in English" - {
@@ -53,7 +54,8 @@ class IneligibleControllerSpec extends ItSpec {
     Seq[(TaxRegime, Origin)](
       (TaxRegime.Epaye, Origins.Epaye.Bta),
       (TaxRegime.Vat, Origins.Vat.Bta),
-      (TaxRegime.Sa, Origins.Sa.Bta)
+      (TaxRegime.Sa, Origins.Sa.Bta),
+      (TaxRegime.Sia, Origins.Sia.Pta)
     )
       .foreach {
         case (taxRegime, origin) =>
@@ -62,6 +64,7 @@ class IneligibleControllerSpec extends ItSpec {
             case TaxRegime.Epaye => Some(Set(TdAll.payeEnrolment))
             case TaxRegime.Vat   => Some(Set(TdAll.vatEnrolment))
             case TaxRegime.Sa    => Some(Set(TdAll.saEnrolment))
+            case TaxRegime.Sia   => None
           }
 
           s"${taxRegime.entryName} Generic not eligible page correctly" in {
@@ -72,12 +75,14 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Epaye => controller.payeGenericIneligiblePage(fakeRequest)
               case TaxRegime.Vat   => controller.vatGenericIneligiblePage(fakeRequest)
               case TaxRegime.Sa    => controller.saGenericIneligiblePage(fakeRequest)
+              case TaxRegime.Sia   => controller.siaGenericIneligiblePage(fakeRequest)
             }
             val page = pageContentAsDoc(result)
             val expectedLeadingP1 = taxRegime match {
               case TaxRegime.Epaye => "You are not eligible to set up an Employers’ PAYE payment plan online."
               case TaxRegime.Vat   => "You are not eligible to set up a VAT payment plan online."
               case TaxRegime.Sa    => "You are not eligible to set up a Self Assessment payment plan online."
+              case TaxRegime.Sia   => "You are not eligible to set up a Simple Assessment payment plan online."
             }
 
             ContentAssertions.commonPageChecks(
@@ -102,6 +107,7 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Epaye => controller.epayeDebtTooLargePage(fakeRequest)
               case TaxRegime.Vat   => controller.vatDebtTooLargePage(fakeRequest)
               case TaxRegime.Sa    => controller.saDebtTooLargePage(fakeRequest)
+              case TaxRegime.Sia   => controller.siaDebtTooLargePage(fakeRequest)
             }
             val page = pageContentAsDoc(result)
 
@@ -117,6 +123,7 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Epaye => "You cannot set up an Employers’ PAYE payment plan online because you owe more than £100,000."
               case TaxRegime.Vat   => "You cannot set up a VAT payment plan online because you owe more than £100,000."
               case TaxRegime.Sa    => "You cannot set up a Self Assessment payment plan online because you owe more than £30,000."
+              case TaxRegime.Sia   => "You cannot set up a Simple Assessment payment plan online because you owe more than £30,000."
             }
 
             assertIneligiblePageLeadingP1(
@@ -134,6 +141,7 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Epaye => controller.epayeDebtTooOldPage(fakeRequest)
               case TaxRegime.Vat   => controller.vatDebtTooOldPage(fakeRequest)
               case TaxRegime.Sa    => controller.saDebtTooOldPage(fakeRequest)
+              case TaxRegime.Sia   => controller.siaDebtTooOldPage(fakeRequest)
             }
 
             val page = pageContentAsDoc(result)
@@ -149,6 +157,7 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Epaye => "You cannot set up an Employers’ PAYE payment plan online because your payment deadline was over 5 years ago."
               case TaxRegime.Vat   => "You cannot set up a VAT payment plan online because your payment deadline was over 28 days ago."
               case TaxRegime.Sa    => "You cannot set up a Self Assessment payment plan online because your payment deadline was over 60 days ago."
+              case TaxRegime.Sia   => "You cannot set up a Simple Assessment payment plan online because your payment deadline was over 5 days ago."
             }
             assertIneligiblePageLeadingP1(
               page      = page,
@@ -165,6 +174,7 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Epaye => controller.epayeDebtTooSmallPage(fakeRequest)
               case TaxRegime.Vat   => controller.vatDebtTooSmallPage(fakeRequest)
               case TaxRegime.Sa    => controller.saDebtTooSmallPage(fakeRequest)
+              case TaxRegime.Sia   => controller.siaDebtTooSmallPage(fakeRequest)
             }
             val page = pageContentAsDoc(result)
 
@@ -172,6 +182,7 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Epaye => "Pay your PAYE bill in full"
               case TaxRegime.Vat   => "Pay your VAT bill in full"
               case TaxRegime.Sa    => "Pay your Self Assessment tax bill in full"
+              case TaxRegime.Sia   => "Pay your Simple Assessment tax bill in full"
             }
 
             ContentAssertions.commonPageChecks(
@@ -192,6 +203,9 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Sa =>
                 "You cannot set up a Self Assessment payment plan online because your bill is too small." ->
                   "<a class=\"govuk-link\" href=\"https://www.gov.uk/pay-self-assessment-tax-bill\">Make a payment online</a> to cover your Self Assessment tax bill in full."
+              case TaxRegime.Sia =>
+                "You cannot set up a Simple Assessment payment plan online because your bill is too small." ->
+                  "<a class=\"govuk-link\" href=\"https://www.gov.uk/pay-self-assessment-tax-bill\">Make a payment online</a> to cover your Simple Assessment tax bill in full."
 
             }
 
@@ -210,6 +224,7 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Epaye => controller.epayeAlreadyHaveAPaymentPlanPage(fakeRequest)
               case TaxRegime.Vat   => controller.vatAlreadyHaveAPaymentPlanPage(fakeRequest)
               case TaxRegime.Sa    => controller.saAlreadyHaveAPaymentPlanPage(fakeRequest)
+              case TaxRegime.Sia   => controller.siaAlreadyHaveAPaymentPlanPage(fakeRequest)
             }
             val page = pageContentAsDoc(result)
 
@@ -225,6 +240,7 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Epaye => "You cannot set up an Employers’ PAYE payment plan online because you already have a payment plan with HMRC."
               case TaxRegime.Vat   => "You cannot set up a VAT payment plan online because you already have a payment plan with HMRC."
               case TaxRegime.Sa    => "You cannot set up a Self Assessment payment plan online because you already have a payment plan with HMRC."
+              case TaxRegime.Sia   => "You cannot set up a Simple Assessment payment plan online because you already have a payment plan with HMRC."
             }
 
             assertIneligiblePageLeadingP1(
@@ -245,6 +261,8 @@ class IneligibleControllerSpec extends ItSpec {
                 (controller.vatFileYourReturnPage(fakeRequest), "File your return to use this service")
               case TaxRegime.Sa =>
                 (controller.saFileYourReturnPage(fakeRequest), "File your Self Assessment tax return to use this service")
+              case TaxRegime.Sia =>
+                (controller.siaFileYourReturnPage(fakeRequest), "File your Simple Assessment tax return to use this service")
             }
 
             val expectedCallUsContent = "Call us on <strong>0300 123 1813</strong> if you need to speak to an adviser."
@@ -263,6 +281,7 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Epaye => "You must file your tax return before you can set up an Employers’ PAYE payment plan online."
               case TaxRegime.Vat   => "You must file your tax return before you can set up a VAT payment plan online."
               case TaxRegime.Sa    => "You must file your tax return before you can set up a Self Assessment payment plan online."
+              case TaxRegime.Sia   => "You must file your tax return before you can set up a Simple Assessment payment plan online."
             }
 
             assertIneligiblePageLeadingP1(
@@ -293,6 +312,7 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Epaye => controller.epayeRLSPage(fakeRequest)
               case TaxRegime.Vat   => controller.vatRLSPage(fakeRequest)
               case TaxRegime.Sa    => controller.saRLSPage(fakeRequest)
+              case TaxRegime.Sia   => controller.siaRLSPage(fakeRequest)
             }
             val page = pageContentAsDoc(result)
 
@@ -302,6 +322,8 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Vat => ("You cannot set up a VAT payment plan online because some of your personal details are not up to date.",
                 "You must <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">update your details with HMRC</a>. After you’ve updated your details, wait 3 working days before trying again online.")
               case TaxRegime.Sa => ("You cannot set up a Self Assessment payment plan online because some of your personal details are not up to date.",
+                "You must <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">update your details with HMRC</a>. After you’ve updated your details, wait 3 working days before trying again online.")
+              case TaxRegime.Sia => ("You cannot set up a Simple Assessment payment plan online because some of your personal details are not up to date.",
                 "You must <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">update your details with HMRC</a>. After you’ve updated your details, wait 3 working days before trying again online.")
             }
 
@@ -486,6 +508,7 @@ class IneligibleControllerSpec extends ItSpec {
             case TaxRegime.Epaye => Some(Set(TdAll.payeEnrolment))
             case TaxRegime.Vat   => Some(Set(TdAll.vatEnrolment))
             case TaxRegime.Sa    => Some(Set(TdAll.saEnrolment))
+            case TaxRegime.Sia   => None
           }
 
           s"${taxRegime.entryName} Generic not eligible page correctly" in {
@@ -496,12 +519,14 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Epaye => controller.payeGenericIneligiblePage(fakeRequest.withLangWelsh())
               case TaxRegime.Vat   => controller.vatGenericIneligiblePage(fakeRequest.withLangWelsh())
               case TaxRegime.Sa    => controller.saGenericIneligiblePage(fakeRequest.withLangWelsh())
+              case TaxRegime.Sia   => controller.siaGenericIneligiblePage(fakeRequest.withLangWelsh())
             }
             val page = pageContentAsDoc(result)
             val expectedLeadingP1 = taxRegime match {
               case TaxRegime.Epaye => "Nid ydych yn gymwys i drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein."
               case TaxRegime.Vat   => "Nid ydych yn gymwys i drefnu cynllun talu TAW ar-lein."
               case TaxRegime.Sa    => "Nid ydych yn gymwys i drefnu cynllun talu Hunanasesiad ar-lein."
+              case TaxRegime.Sia   => "Nid ydych yn gymwys i drefnu cynllun talu Asesiad Syml ar-lein."
             }
 
             ContentAssertions.commonPageChecks(
@@ -527,6 +552,7 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Epaye => controller.epayeDebtTooLargePage(fakeRequest.withLangWelsh())
               case TaxRegime.Vat   => controller.vatDebtTooLargePage(fakeRequest.withLangWelsh())
               case TaxRegime.Sa    => controller.saDebtTooLargePage(fakeRequest.withLangWelsh())
+              case TaxRegime.Sia   => controller.siaDebtTooLargePage(fakeRequest.withLangWelsh())
             }
             val page = pageContentAsDoc(result)
 
@@ -543,6 +569,7 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Epaye => "Ni allwch drefnu cynllun talu TAW ar-lein oherwydd mae arnoch dros £100,000."
               case TaxRegime.Vat   => "Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein oherwydd mae arnoch dros £100,000."
               case TaxRegime.Sa    => "Ni allwch drefnu cynllun talu Hunanasesiad ar-lein oherwydd mae arnoch dros £30,000."
+              case TaxRegime.Sia   => "Ni allwch drefnu cynllun talu Asesiad Syml ar-lein oherwydd mae arnoch dros £30,000."
             }
 
             assertIneligiblePageLeadingP1(
@@ -560,6 +587,7 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Epaye => controller.epayeDebtTooOldPage(fakeRequest.withLangWelsh())
               case TaxRegime.Vat   => controller.vatDebtTooOldPage(fakeRequest.withLangWelsh())
               case TaxRegime.Sa    => controller.saDebtTooOldPage(fakeRequest.withLangWelsh())
+              case TaxRegime.Sia   => controller.siaDebtTooOldPage(fakeRequest.withLangWelsh())
             }
 
             val page = pageContentAsDoc(result)
@@ -576,6 +604,7 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Epaye => "Ni allwch drefnu cynllun talu ar gyfer TWE Cyflogwyr ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros 5 mlynedd yn ôl."
               case TaxRegime.Vat   => "Ni allwch drefnu cynllun talu TAW ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros 28 wythnos yn ôl."
               case TaxRegime.Sa    => "Ni allwch drefnu cynllun talu Hunanasesiad ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros 60 diwrnod yn ôl."
+              case TaxRegime.Sia   => "Ni allwch drefnu cynllun talu Asesiad Syml ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros 5 diwrnod yn ôl."
             }
             assertIneligiblePageLeadingP1(
               page      = page,
@@ -592,6 +621,7 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Epaye => controller.epayeDebtTooSmallPage(fakeRequest.withLangWelsh())
               case TaxRegime.Vat   => controller.vatDebtTooSmallPage(fakeRequest.withLangWelsh())
               case TaxRegime.Sa    => controller.saDebtTooSmallPage(fakeRequest.withLangWelsh())
+              case TaxRegime.Sia   => controller.siaDebtTooSmallPage(fakeRequest.withLangWelsh())
             }
             val page = pageContentAsDoc(result)
 
@@ -599,6 +629,7 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Epaye => "Talu’ch bil TWE yn llawn"
               case TaxRegime.Vat   => "Talu’ch bil TAW yn llawn"
               case TaxRegime.Sa    => "Talu’ch bil treth Hunanasesiad yn llawn"
+              case TaxRegime.Sia   => "Talu’ch bil treth Asesiad Syml yn llawn"
             }
 
             ContentAssertions.commonPageChecks(
@@ -620,6 +651,9 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Sa =>
                 "Ni allwch drefnu cynllun talu Hunanasesiad ar-lein oherwydd bod eich bil yn rhy fach." ->
                   "<a class=\"govuk-link\" href=\"https://www.gov.uk/pay-self-assessment-tax-bill\">Gwnewch daliad ar-lein</a> i dalu’ch bil Hunanasesiad yn llawn."
+              case TaxRegime.Sia =>
+                "Ni allwch drefnu cynllun talu Asesiad Syml ar-lein oherwydd bod eich bil yn rhy fach." ->
+                  "<a class=\"govuk-link\" href=\"https://www.gov.uk/pay-self-assessment-tax-bill\">Gwnewch daliad ar-lein</a> i dalu’ch bil Asesiad Syml yn llawn."
 
             }
 
@@ -638,6 +672,7 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Epaye => controller.epayeAlreadyHaveAPaymentPlanPage(fakeRequest.withLangWelsh())
               case TaxRegime.Vat   => controller.vatAlreadyHaveAPaymentPlanPage(fakeRequest.withLangWelsh())
               case TaxRegime.Sa    => controller.saAlreadyHaveAPaymentPlanPage(fakeRequest.withLangWelsh())
+              case TaxRegime.Sia   => controller.siaAlreadyHaveAPaymentPlanPage(fakeRequest.withLangWelsh())
             }
             val page = pageContentAsDoc(result)
 
@@ -654,6 +689,7 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Epaye => "Ni allwch drefnu cynllun talu ar-lein ar gyfer TWE y Cyflogwr oherwydd bod gennych gynllun talu ar-lein gyda CThEF yn barod."
               case TaxRegime.Vat   => "Ni allwch drefnu cynllun talu ar-lein ar gyfer TAW oherwydd bod gennych gynllun talu gyda CThEF yn barod."
               case TaxRegime.Sa    => "Ni allwch drefnu cynllun talu ar-lein ar gyfer Hunanasesiad oherwydd bod gennych gynllun talu gyda CThEF yn barod."
+              case TaxRegime.Sia   => "Ni allwch drefnu cynllun talu ar-lein ar gyfer Asesiad Syml oherwydd bod gennych gynllun talu gyda CThEF yn barod."
             }
 
             assertIneligiblePageLeadingP1(
@@ -674,6 +710,8 @@ class IneligibleControllerSpec extends ItSpec {
                 (controller.vatFileYourReturnPage(fakeRequest.withLangWelsh()), "Cyflwynwch eich Ffurflen Dreth i ddefnyddio’r gwasanaeth hwn")
               case TaxRegime.Sa =>
                 (controller.saFileYourReturnPage(fakeRequest.withLangWelsh()), "Cyflwynwch eich Ffurflen Dreth Hunanasesiad er mwyn defnyddio’r gwasanaeth hwn")
+              case TaxRegime.Sia =>
+                (controller.siaFileYourReturnPage(fakeRequest.withLangWelsh()), "Cyflwynwch eich Ffurflen Dreth Asesiad Syml er mwyn defnyddio’r gwasanaeth hwn")
             }
             val page = pageContentAsDoc(result)
 
@@ -690,6 +728,7 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Epaye => "Mae’n rhaid i chi gyflwyno’ch Ffurflen Dreth cyn i chi allu trefnu cynllun talu ar-lein ar gyfer TWE y Cyflogwr."
               case TaxRegime.Vat   => "Mae’n rhaid i chi gyflwyno’ch Ffurflen Dreth cyn i chi allu trefnu cynllun talu ar-lein ar gyfer TAW."
               case TaxRegime.Sa    => "Mae’n rhaid i chi gyflwyno’ch Ffurflen Dreth cyn i chi allu trefnu cynllun talu ar-lein ar gyfer Hunanasesiad ar-lein."
+              case TaxRegime.Sia   => "Mae’n rhaid i chi gyflwyno’ch Ffurflen Dreth cyn i chi allu trefnu cynllun talu ar-lein ar gyfer Asesiad Syml ar-lein."
             }
 
             val expectedCallUsContent = "Ffoniwch ni ar <strong>0300 200 1900</strong> os oes angen i chi siarad ag ymgynghorydd."
@@ -722,6 +761,7 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Epaye => controller.epayeRLSPage(fakeRequest.withLangWelsh())
               case TaxRegime.Vat   => controller.vatRLSPage(fakeRequest.withLangWelsh())
               case TaxRegime.Sa    => controller.saRLSPage(fakeRequest.withLangWelsh())
+              case TaxRegime.Sia   => controller.siaRLSPage(fakeRequest.withLangWelsh())
             }
             val page = pageContentAsDoc(result)
             val (expectedP1, expectedP2) = taxRegime match {
@@ -730,6 +770,8 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Vat => ("Ni allwch drefnu cynllun talu TAW ar-lein oherwydd nad yw rhai o’ch manylion personol yn gyfredol.",
                 "Mae’n rhaid i chi <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">roi’ch manylion newydd i CThEF</a>. Ar ôl i chi diweddaru’ch manylion, arhoswch 3 diwrnod gwaith cyn rhoi tro arall arni ar-lein.")
               case TaxRegime.Sa => ("Ni allwch drefnu cynllun talu Hunanasesiad ar-lein oherwydd nad yw rhai o’ch manylion personol yn gyfredol.",
+                "Mae’n rhaid i chi <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">roi’ch manylion newydd i CThEF</a>. Ar ôl i chi diweddaru’ch manylion, arhoswch 3 diwrnod gwaith cyn rhoi tro arall arni ar-lein.")
+              case TaxRegime.Sia => ("Ni allwch drefnu cynllun talu Asesiad Syml ar-lein oherwydd nad yw rhai o’ch manylion personol yn gyfredol.",
                 "Mae’n rhaid i chi <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">roi’ch manylion newydd i CThEF</a>. Ar ôl i chi diweddaru’ch manylion, arhoswch 3 diwrnod gwaith cyn rhoi tro arall arni ar-lein.")
             }
 

@@ -35,6 +35,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val appName: String = config.get[String]("appName")
   val emailJourneyEnabled: Boolean = config.get[Boolean]("features.email-journey")
   val saEnabled: Boolean = config.get[Boolean]("features.sa")
+  val siaEnabled: Boolean = config.get[Boolean]("features.sia")
   val authTimeoutSeconds: Int = config.get[FiniteDuration]("timeout-dialog.timeout").toSeconds.toInt
   val authTimeoutCountdownSeconds: Int = config.get[FiniteDuration]("timeout-dialog.countdown").toSeconds.toInt
   val accessibilityStatementPath: String = config.get[String]("accessibility-statement.service-path")
@@ -100,6 +101,8 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     val vatExitSurveyUrl: String = s"$baseUrl/eSSTTP-VAT"
 
     val saExitSurveyUrl: String = s"$baseUrl/eSSTTP-SA"
+
+    val siaExitSurveyUrl: String = s"$baseUrl/eSSTTP-SIA"
   }
 
   object Crypto {
@@ -145,7 +148,15 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
       val maxPlanDurationInMonths: Int = getParam[Int]("max-plan-duration-in-months")
       val maxAgeOfDebtInDays: Int = getParam[Int]("max-age-of-debt-in-days")
       val payOnlineLink: String = getParam[String]("pay-online-link")
+    }
 
+    object SIA {
+      private def getParam[A: ConfigLoader](path: String): A = config.get[A](s"policy-parameters.sia.$path")
+
+      val maxAmountOfDebt: AmountInPence = AmountInPence(getParam[Long]("max-amount-of-debt-in-pounds") * 100L)
+      val maxPlanDurationInMonths: Int = getParam[Int]("max-plan-duration-in-months")
+      val maxAgeOfDebtInYears: Int = getParam[Int]("max-age-of-debt-in-years")
+      val payOnlineLink: String = getParam[String]("pay-online-link")
     }
   }
 

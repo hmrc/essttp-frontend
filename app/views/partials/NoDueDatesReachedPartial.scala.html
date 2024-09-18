@@ -33,6 +33,7 @@
     case TaxRegime.Epaye => Messages.NotEligible.`You cannot set up an Employers' PAYE payment plan online...not overdue`
     case TaxRegime.Vat => Messages.NotEligible.`You cannot set up a VAT payment plan online...not overdue`
     case TaxRegime.Sa => throw new NotImplementedError()
+    case TaxRegime.Sia => throw new NotImplementedError()
   }
   Html(message.show)
  }

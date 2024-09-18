@@ -49,11 +49,10 @@ class WhichTaxRegimeController @Inject() (
       val hasSaEnrolment = EnrolmentDef.Sa.findEnrolmentValues(request.enrolments).isSuccess
 
       (hasEpayeEnrolment, hasVatEnrolment, hasSaEnrolment) match {
-        case (true, false, false)                        => Redirect(routes.LandingController.epayeLandingPage)
-        case (false, true, false)                        => Redirect(routes.LandingController.vatLandingPage)
+        case (true, false, false) => Redirect(routes.LandingController.epayeLandingPage)
+        case (false, true, false) => Redirect(routes.LandingController.vatLandingPage)
         case (false, false, true) if appConfig.saEnabled => Redirect(routes.LandingController.saLandingPage)
-        case _ =>
-          Ok(views.whichTaxRegime(TaxRegimeForm.form, appConfig.saEnabled))
+        case _ => Ok(views.whichTaxRegime(TaxRegimeForm.form, appConfig.saEnabled, appConfig.siaEnabled))
       }
     }
 
@@ -61,11 +60,12 @@ class WhichTaxRegimeController @Inject() (
     as.authenticatedAction { implicit request =>
       TaxRegimeForm.form.bindFromRequest()
         .fold(
-          formWithErrors => Ok(views.whichTaxRegime(formWithErrors, appConfig.saEnabled)),
+          formWithErrors => Ok(views.whichTaxRegime(formWithErrors, appConfig.saEnabled, appConfig.siaEnabled)),
           {
             case TaxRegime.Epaye => Redirect(routes.StartJourneyController.startDetachedEpayeJourney)
             case TaxRegime.Vat   => Redirect(routes.StartJourneyController.startDetachedVatJourney)
             case TaxRegime.Sa    => Redirect(routes.StartJourneyController.startDetachedSaJourney)
+            case TaxRegime.Sia   => Redirect(routes.StartJourneyController.startDetachedSiaJourney)
           }
         )
     }

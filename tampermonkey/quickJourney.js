@@ -125,10 +125,26 @@ const testOnlyStartPageSa = () => {
     }
 }
 
+const testOnlyStartPageSia = () => {
+    if (currentPageIs('/set-up-a-payment-plan/test-only/start-journey-sia')) {
+        document.getElementById('signInAs').checked = true
+        document.getElementById('enrolments-3').checked = true
+        document.getElementById('siaDebtTotalAmount').value = '10000'
+        document.getElementById('interestAmount').value = '0'
+        document.getElementById('nino').value = ''
+        document.getElementById('regimeDigitalCorrespondence').checked = true
+        document.getElementById('emailAddressPresent').checked = true
+        document.getElementById('origin-4').checked = true
+
+        clickContinue()
+    }
+}
+
 const landingPage = () => {
     if (currentPageIs('/set-up-a-payment-plan/epaye-payment-plan') ||
         currentPageIs('/set-up-a-payment-plan/vat-payment-plan') ||
-        currentPageIs('/set-up-a-payment-plan/sa-payment-plan')) {
+        currentPageIs('/set-up-a-payment-plan/sa-payment-plan')) ||
+        currentPageIs('/set-up-a-payment-plan/sia-payment-plan')) {
         clickContinue()
     }
 }
@@ -260,6 +276,7 @@ function continueJourney() {
     testOnlyStartPageEpaye()
     testOnlyStartPageVat()
     testOnlyStartPageSa()
+    testOnlyStartPageSia()
     landingPage()
     yourBill()
     whyCannotPayInFull()

@@ -54,11 +54,19 @@ class PaymentPlanSetUpController @Inject() (
     paymentPlanSetup(request)
   }
 
+  val siaPaymentPlanSetUp: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    paymentPlanSetup(request)
+  }
+
   val epayeVatPrintSummary: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     printSummarySetup(request)
   }
 
   val saPrintSummary: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    printSummarySetup(request)
+  }
+
+  val siaPrintSummary: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     printSummarySetup(request)
   }
 
@@ -97,6 +105,16 @@ class PaymentPlanSetUpController @Inject() (
       case TaxRegime.Sa =>
         Ok(
           views.saPaymentPlanSetUpPage(
+            customerPaymentReference    = journey.arrangementResponse.customerReference.value,
+            paymentDay                  = firstPaymentDay,
+            hasUpfrontPayment           = hasUpfrontPayment,
+            wasEmailAddressRequired     = request.isEmailAddressRequired(appConfig),
+            regimeDigitalCorrespondence = correspondence
+          )
+        )
+      case TaxRegime.Sia =>
+        Ok(
+          views.siaPaymentPlanSetUpPage(
             customerPaymentReference    = journey.arrangementResponse.customerReference.value,
             paymentDay                  = firstPaymentDay,
             hasUpfrontPayment           = hasUpfrontPayment,

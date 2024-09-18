@@ -230,6 +230,14 @@ object TtpService {
         returnFinancialAssessment = true
       )
 
+    case j: Journey.Sia =>
+      CallEligibilityApiRequest(
+        channelIdentifier         = EligibilityRequestDefaults.essttpChannelIdentifier,
+        identification            = List(Identification(IdType(EligibilityRequestDefaults.Sia.idType), IdValue(j.taxId.value))),
+        regimeType                = RegimeType.SIA,
+        returnFinancialAssessment = true
+      )
+
   }
 
   private def buildInstalmentRequest(

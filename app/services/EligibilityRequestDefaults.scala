@@ -36,4 +36,8 @@ object EligibilityRequestDefaults {
     val idType: String = "UTR"
   }
 
+  object Sia {
+    val idType: String = "NINO"
+  }
+
 }

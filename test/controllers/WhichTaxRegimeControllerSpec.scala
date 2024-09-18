@@ -56,7 +56,7 @@ class WhichTaxRegimeControllerSpec extends ItSpec {
         )
 
         val radios = doc.select(".govuk-radios__item").asScala.toList
-        radios.size shouldBe 3
+        radios.size shouldBe 4
 
         radios(0).select(".govuk-radios__input").`val`() shouldBe "EPAYE"
         radios(0).select(".govuk-radios__label").text() shouldBe "Employers’ PAYE"
@@ -64,8 +64,11 @@ class WhichTaxRegimeControllerSpec extends ItSpec {
         radios(1).select(".govuk-radios__input").`val`() shouldBe "SA"
         radios(1).select(".govuk-radios__label").text() shouldBe "Self Assessment"
 
-        radios(2).select(".govuk-radios__input").`val`() shouldBe "VAT"
-        radios(2).select(".govuk-radios__label").text() shouldBe "VAT"
+        radios(2).select(".govuk-radios__input").`val`() shouldBe "SIA"
+        radios(2).select(".govuk-radios__label").text() shouldBe "Simple Assessment"
+
+        radios(3).select(".govuk-radios__input").`val`() shouldBe "VAT"
+        radios(3).select(".govuk-radios__label").text() shouldBe "VAT"
         ()
       }
 
@@ -127,7 +130,7 @@ class WhichTaxRegimeControllerSpec extends ItSpec {
       )
 
       val radios = doc.select(".govuk-radios__item").asScala.toList
-      radios.size shouldBe 3
+      radios.size shouldBe 4
 
       radios(0).select(".govuk-radios__input").`val`() shouldBe "EPAYE"
       radios(0).select(".govuk-radios__label").text() shouldBe "TWE Cyflogwyr"
@@ -135,8 +138,11 @@ class WhichTaxRegimeControllerSpec extends ItSpec {
       radios(1).select(".govuk-radios__input").`val`() shouldBe "SA"
       radios(1).select(".govuk-radios__label").text() shouldBe "Hunanasesiad"
 
-      radios(2).select(".govuk-radios__input").`val`() shouldBe "VAT"
-      radios(2).select(".govuk-radios__label").text() shouldBe "TAW"
+      radios(2).select(".govuk-radios__input").`val`() shouldBe "SIA"
+      radios(2).select(".govuk-radios__label").text() shouldBe "Asesiad Syml"
+
+      radios(3).select(".govuk-radios__input").`val`() shouldBe "VAT"
+      radios(3).select(".govuk-radios__label").text() shouldBe "TAW"
     }
 
   }
@@ -197,6 +203,16 @@ class WhichTaxRegimeControllerSpec extends ItSpec {
       redirectLocation(result) shouldBe Some(routes.StartJourneyController.startDetachedSaJourney.url)
     }
 
+    "redirect to the start SIA journey endpoint if the user selects SIA" in {
+      stubCommonActions()
+      EssttpBackend.StartJourney.startJourneyInBackend(Origins.Sia.DetachedUrl)
+
+      val request = fakeRequest.withFormUrlEncodedBody("WhichTaxRegime" -> "SIA")
+      val result: Future[Result] = controller.whichTaxRegimeSubmit(request)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.StartJourneyController.startDetachedSiaJourney.url)
+    }
+
   }
 
 }
@@ -230,13 +246,16 @@ class WhichTaxRegimeSaDisabledControllerSpec extends ItSpec {
 
         val radios = doc.select(".govuk-radios__item").asScala.toList
         // SA shouldn't be an option
-        radios.size shouldBe 2
+        radios.size shouldBe 3
 
         radios(0).select(".govuk-radios__input").`val`() shouldBe "EPAYE"
         radios(0).select(".govuk-radios__label").text() shouldBe "Employers’ PAYE"
 
-        radios(1).select(".govuk-radios__input").`val`() shouldBe "VAT"
-        radios(1).select(".govuk-radios__label").text() shouldBe "VAT"
+        radios(1).select(".govuk-radios__input").`val`() shouldBe "SIA"
+        radios(1).select(".govuk-radios__label").text() shouldBe "Simple Assessment"
+
+        radios(2).select(".govuk-radios__input").`val`() shouldBe "VAT"
+        radios(2).select(".govuk-radios__label").text() shouldBe "VAT"
 
         ()
       }
@@ -250,3 +269,4 @@ class WhichTaxRegimeSaDisabledControllerSpec extends ItSpec {
       }
   }
 }
+

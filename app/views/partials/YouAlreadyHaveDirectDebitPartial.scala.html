@@ -33,6 +33,7 @@
     case TaxRegime.Epaye => Messages.NotEligible.`You have chosen not to set up an Employers' PAYE payment plan online.`
     case TaxRegime.Vat => Messages.NotEligible.`You have chosen not to set up a VAT payment plan online.`
     case TaxRegime.Sa => throw new NotImplementedError("SA does not receive ddInProgress flag")
+    case TaxRegime.Sia => throw new NotImplementedError("SIA does not receive ddInProgress flag")
   }
   Html(message.show)
  }
