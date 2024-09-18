@@ -94,7 +94,7 @@ object StartJourneyForm {
   private val payeTaxReferenceKey: String = "payeTaxReference"
   private val vatTaxReferenceKey: String = "vatTaxReference"
   private val saTaxReferenceKey: String = "saTaxReference"
-  private val siaTaxReferenceKey: String = "siaTaxReference"
+  private val siaTaxReferenceKey: String = "nino"
 
   private def signInMapping(implicit language: Language): Mapping[SignInAs] = {
     Forms.of(EnumFormatter.format(

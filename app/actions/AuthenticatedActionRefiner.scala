@@ -53,7 +53,6 @@ trait AuthenticatedActionRefiner { this: ActionRefiner[Request, AuthenticatedReq
             case None =>
               Future.failed(new RuntimeException(s"Could not find credentials"))
 
-
             case Some(ggCredId) =>
               Future.successful(
                 Right(

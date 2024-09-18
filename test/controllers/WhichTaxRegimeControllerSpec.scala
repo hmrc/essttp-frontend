@@ -101,10 +101,8 @@ class WhichTaxRegimeControllerSpec extends ItSpec {
 
     "display the page when there are no enrolments for supported tax regimes" in {
       AuthStub.authorise(Some(Set()), Some(authCredentials))
-      val result = controller.whichTaxRegime(fakeRequest)
-      status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(routes.LandingController.siaLandingPage.url)
+      testPageIsDisplayed(controller.whichTaxRegime(fakeRequest))
     }
 
     "display the page when there are enrolments for more than one supported tax regime" in {
@@ -271,45 +269,4 @@ class WhichTaxRegimeSaDisabledControllerSpec extends ItSpec {
       }
   }
 }
-class WhichTaxRegimeSiaDisabledControllerSpec extends ItSpec {
 
-  val controller = app.injector.instanceOf[WhichTaxRegimeController]
-
-  override lazy val configOverrides: Map[String, Any] = Map(
-    "features.sia" -> false
-  )
-
-  val authCredentials: Credentials = Credentials("authId-999", "GovernmentGateway")
-
-  "GET /which-tax should" - {
-
-    val fakeRequest = FakeRequest().withAuthToken()
-
-    "redirect to the EPAYE landing page if the user has a EPAYE enrolment and no other enrolments for " +
-      "supported tax regimes" in {
-        AuthStub.authorise(Some(Set(TdAll.payeEnrolment)), Some(authCredentials))
-
-        val result = controller.whichTaxRegime(fakeRequest)
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.LandingController.epayeLandingPage.url)
-      }
-
-    "redirect to the VAT landing page if the user has a VAT enrolment and no other enrolments for " +
-      "supported tax regimes" in {
-        AuthStub.authorise(Some(Set(TdAll.vatEnrolment)), Some(authCredentials))
-
-        val result = controller.whichTaxRegime(fakeRequest)
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.LandingController.vatLandingPage.url)
-      }
-
-    "redirect to the SA landing page if the user has a VAT enrolment and no other enrolments for " +
-      "supported tax regimes" in {
-        AuthStub.authorise(Some(Set(TdAll.saEnrolment)), Some(authCredentials))
-
-        val result = controller.whichTaxRegime(fakeRequest)
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.LandingController.saLandingPage.url)
-      }
-  }
-}

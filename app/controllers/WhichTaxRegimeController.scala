@@ -52,7 +52,6 @@ class WhichTaxRegimeController @Inject() (
         case (true, false, false) => Redirect(routes.LandingController.epayeLandingPage)
         case (false, true, false) => Redirect(routes.LandingController.vatLandingPage)
         case (false, false, true) if appConfig.saEnabled => Redirect(routes.LandingController.saLandingPage)
-        case (false, false, false) if appConfig.siaEnabled => Redirect(routes.LandingController.siaLandingPage)
         case _ => Ok(views.whichTaxRegime(TaxRegimeForm.form, appConfig.saEnabled, appConfig.siaEnabled))
       }
     }
