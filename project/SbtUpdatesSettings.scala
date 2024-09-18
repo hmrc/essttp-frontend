@@ -13,8 +13,7 @@ object SbtUpdatesSettings {
     // higher version of enumeratum breaks with java.lang.ClassCastException -Nov'23
     dependencyUpdatesFilter -= moduleFilter("com.beachape", "enumeratum-play"),
     // locked by version of play
-    dependencyUpdatesFilter -= moduleFilter("org.scalatestplus.play", "scalatestplus-play"),
-    dependencyUpdatesFilter -= moduleFilter("uk.gov.hmrc", "essttp-backend-cor-journey")
+    dependencyUpdatesFilter -= moduleFilter("org.scalatestplus.play", "scalatestplus-play")
   )
 
 }

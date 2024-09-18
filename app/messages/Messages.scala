@@ -781,7 +781,7 @@ object Messages {
 
     val `Select all that apply or 'none of the above'`: Message = Message(
       english = "Select all that apply or ‘none of the above’",
-      welsh = "Dewiswch bob un sy’n gymwys neu ‘dim un o’r uchod’"
+      welsh   = "Dewiswch bob un sy’n gymwys neu ‘dim un o’r uchod’"
     )
 
     def checkboxMessageWithHint(cannotPayReason: CannotPayReason): (Message, Option[Message]) = cannotPayReason match {
