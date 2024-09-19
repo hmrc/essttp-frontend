@@ -745,9 +745,7 @@ appConfig: AppConfig
         )),
         errorMessage = form.error("siaDebtTotalAmount").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
             content = Text(e.message)
-        )),
-        value = form.data.get("siaDebtTotalAmount").orElse(Some("10000")),
-        hint = Some(Hint(content = Text(s"Enter an amount between £1 and ${appConfig.PolicyParameters.SIA.maxAmountOfDebt.gdsFormatInPounds} for SIA.")))
+        ))
     ))
 
     @interestAmountContent
@@ -787,8 +785,6 @@ appConfig: AppConfig
     @chargesOptionalFieldRadios("isInterestBearingCharge")
 
     @chargesOptionalFieldRadios("useChargeReference")
-
-    @chargesOptionalFieldRadios("ddInProgress")
 
     @planMinLengthInput(1)
 
