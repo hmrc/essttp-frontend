@@ -16,6 +16,7 @@
 
 package controllers
 
+import controllers.WhyCannotPayInFullControllerSpec.CheckBoxInfo
 import essttp.journey.model.{Origins, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.CannotPayReason
 import org.jsoup.Jsoup
@@ -49,33 +50,69 @@ class WhyCannotPayInFullControllerSpec extends ItSpec {
         )
 
         val hint = doc.select(".govuk-form-group > .govuk-fieldset > .govuk-hint").text()
-        hint shouldBe "This won’t affect your payment plan. Your answers help us plan services in the future. Select all that apply."
+        hint shouldBe "Your answers help us plan services in the future. Select all that apply."
 
         val checkboxes: List[Element] = doc.select(".govuk-checkboxes__item").asScala.toList
-        checkboxes.size shouldBe 13
+        checkboxes.size shouldBe 8
 
-        val valuesWithLabelsAndDataBehaviour = checkboxes.map { checkbox =>
-          (
+        val valuesWithLabelsHintsAndDataBehaviour = checkboxes.map { checkbox =>
+          CheckBoxInfo(
             checkbox.select(".govuk-checkboxes__input").`val`(),
             checkbox.select(".govuk-checkboxes__label").text(),
+            checkbox.select(".govuk-checkboxes__hint").text(),
             checkbox.select(".govuk-checkboxes__input").attr("data-behaviour")
           )
         }
 
-        valuesWithLabelsAndDataBehaviour shouldBe List(
-          ("Bankrupt", "Bankrupt, Insolvent or Voluntary arrangement", ""),
-          ("Bereavement", "Bereavement", ""),
-          ("ChangeToPersonalCircumstances", "Change to personal circumstances (family breakdown)", ""),
-          ("FloodFireTheft", "Flood, fire, theft or unexpected repairs", ""),
-          ("IllHealth", "Ill health", ""),
-          ("LocalDisaster", "Local disaster", ""),
-          ("LostReducedBusiness", "Lost or reduced business", ""),
-          ("LowIncome", "Low income", ""),
-          ("NationalDisaster", "National disaster", ""),
-          ("NoProvisions", "No provisions", ""),
-          ("OverRepayment", "Over repayment", ""),
-          ("Unemployed", "Unemployed or lack of work", ""),
-          ("Other", "None of the above", "exclusive")
+        valuesWithLabelsHintsAndDataBehaviour shouldBe List(
+          CheckBoxInfo(
+            "UnexpectedReductionOfIncome",
+            "Unexpected reduction of income",
+            "For example, lost or reduced business or unemployment.",
+            ""
+          ),
+          CheckBoxInfo(
+            "UnexpectedIncreaseInSpending",
+            "Unexpected increase in spending",
+            "For example unexpected repairs following theft or damage to premises.",
+            ""
+          ),
+          CheckBoxInfo(
+            "LostOrReducedAbilityToEarnOrTrade",
+            "Lost or reduced ability to earn or trade",
+            "",
+            ""
+          ),
+          CheckBoxInfo(
+            "NationalOrLocalDisaster",
+            "National or local disaster",
+            "For example COVID-19, extreme weather conditions.",
+            ""
+          ),
+          CheckBoxInfo(
+            "ChangeToPersonalCircumstances",
+            "Change to personal circumstances",
+            "For example, ill health or bereavement.",
+            ""
+          ),
+          CheckBoxInfo(
+            "NoMoneySetAside",
+            "No money set aside to pay",
+            "",
+            ""
+          ),
+          CheckBoxInfo(
+            "WaitingForRefund",
+            "Waiting for a refund from HMRC",
+            "",
+            ""
+          ),
+          CheckBoxInfo(
+            "Other",
+            "None of the above",
+            "",
+            "exclusive"
+          )
         )
 
         CannotPayReason.values.foreach{ reason =>
@@ -178,4 +215,10 @@ class WhyCannotPayInFullControllerSpec extends ItSpec {
     }
 
   }
+}
+
+object WhyCannotPayInFullControllerSpec {
+
+  final case class CheckBoxInfo(value: String, label: String, hint: String, dataBehaviour: String)
+
 }
