@@ -95,10 +95,11 @@ class ItSpec
   def stubCommonActions(
       authAllEnrolments: Option[Set[Enrolment]] = Some(Set(TdAll.payeEnrolment)),
       authCredentials:   Option[Credentials]    = Some(Credentials("authId-999", "GovernmentGateway")),
-      barsLockoutExpiry: Option[Instant]        = None
+      barsLockoutExpiry: Option[Instant]        = None,
+      authNino:          Option[String]         = None
   ): StubMapping = {
     // stub Authenticated action
-    AuthStub.authorise(authAllEnrolments, authCredentials)
+    AuthStub.authorise(authAllEnrolments, authCredentials, authNino)
     // stub Bars lockout filter
     barsLockoutExpiry.fold(EssttpBackend.BarsVerifyStatusStub.statusUnlocked()) { expiry =>
       EssttpBackend.BarsVerifyStatusStub.statusLocked(expiry)

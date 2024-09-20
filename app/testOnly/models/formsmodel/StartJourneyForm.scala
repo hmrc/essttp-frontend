@@ -51,7 +51,8 @@ final case class StartJourneyForm(
     planMinLength:                 Int,
     planMaxLength:                 Int,
     mainTrans:                     Option[Int],
-    newTtpApi:                     Boolean
+    newTtpApi:                     Boolean,
+    nino:                          Option[String]
 )
 
 object StartJourneyForm {
@@ -80,7 +81,8 @@ object StartJourneyForm {
         "planMinLength" -> number,
         "planMaxLength" -> number,
         "mainTrans" -> optional(number),
-        "newTtpApi" -> optionalBooleanMappingDefaultTrue
+        "newTtpApi" -> optionalBooleanMappingDefaultTrue,
+        "nino" -> optional(text)
 
       )(StartJourneyForm.apply)(StartJourneyForm.unapply)
     )

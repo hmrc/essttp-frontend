@@ -744,6 +744,20 @@ appConfig: AppConfig
     @enrolmentsContent
 
     @govukInput(Input(
+        id = "nino",
+        name = "nino",
+        label = Label(
+            isPageHeading = false,
+            classes = "govuk-label--m",
+            content = Text("Enter a NINO")
+        ),
+        classes = "govuk-input--width-10",
+        spellcheck = Some(false),
+        value = Some(form.data.getOrElse("nino", "AB123456C")),
+        hint = Some(Hint(content = Text("NINO format NNNLLNNNNN, e.g. 864FZ00049.")))
+    ))
+
+    @govukInput(Input(
         id = "siaTotalAmount",
         name = "siaDebtTotalAmount",
         label = Label(
@@ -764,20 +778,6 @@ appConfig: AppConfig
     ))
 
     @interestAmountContent
-
-    @govukInput(Input(
-        id = "nino",
-        name = "nino",
-        label = Label(
-            isPageHeading = false,
-            classes = "govuk-label--m",
-            content = Text("Enter a NINO")
-        ),
-        classes = "govuk-input--width-10",
-        spellcheck = Some(false),
-        value = form.data.get("siaNINO"),
-        hint = Some(Hint(content = Text("NINO format NNNLLNNNNN, e.g. 864FZ00049. If left empty, it will be a random one.")))
-    ))
 
     @regimeDigitalCorrespondenceRadios
 

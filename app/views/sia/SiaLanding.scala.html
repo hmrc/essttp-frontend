@@ -25,6 +25,7 @@
 
 @this(
   layout: Layout,
+  govukButton: GovukButton,
   requestSupport: RequestSupport
 )
 
@@ -40,5 +41,13 @@
     fallBackTaxRegime = Some(TaxRegime.Sia),
     showServiceNameInHeader = false
 ) {
+
+  <h1 class="govuk-heading-xl">Dummy SIA landing page</h1>
+
+    @govukButton(Button(
+        href = Some(routes.LandingController.siaLandingPageContinue.url),
+        content = Text(Messages.`Start now`.show),
+        isStartButton = true
+    ))
 
 }

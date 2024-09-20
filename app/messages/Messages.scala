@@ -781,7 +781,7 @@ object Messages {
 
     val `Select all that apply or 'none of the above'`: Message = Message(
       english = "Select all that apply or ‘none of the above’",
-      welsh   = "Dewiswch bob un sy’n gymwys neu ‘dim un o’r uchod’"
+      welsh   = "Dewiswch bob un sy’n berthnasol neu ‘Dim un o’r uchod’"
     )
 
     def checkboxMessageWithHint(cannotPayReason: CannotPayReason): (Message, Option[Message]) = cannotPayReason match {
@@ -1222,7 +1222,7 @@ object Messages {
 
     val `Select yes if you can pay within 6 months`: Message = Message(
       english = "Select yes if you can pay within 6 months",
-      welsh = "Dewiswch ‘Iawn’ os gallwch dalu cyn pen 6 mis"
+      welsh   = "Dewiswch ‘Iawn’ os gallwch dalu cyn pen 6 mis"
     )
 
   }

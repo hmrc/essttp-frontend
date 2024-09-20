@@ -33,6 +33,9 @@
 package controllers
 
 import actions.Actions
+import cats.syntax.traverse._
+import cats.syntax.eq._
+import essttp.journey.JourneyConnector
 import essttp.journey.model.Journey
 import essttp.rootmodel.{TaxId, TaxRegime}
 import play.api.mvc._
@@ -47,29 +50,33 @@ import scala.concurrent.{ExecutionContext, Future}
 class DetermineTaxIdController @Inject() (
     as:               Actions,
     mcc:              MessagesControllerComponents,
+    journeyConnector: JourneyConnector,
     enrolmentService: EnrolmentService
 )(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
 
   def determineTaxId(): Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
-    val (maybeTaxId, taxRegime): (Future[Option[TaxId]], TaxRegime) = request.journey match {
+    val maybeTaxId: Future[Option[TaxId]] = request.journey match {
       case j: Journey.Stages.Started =>
-        if (j.taxRegime == TaxRegime.Sia) {
-          (Future(request.nino), j.taxRegime)
+        if (j.taxRegime === TaxRegime.Sia) {
+          request.nino.map(nino =>
+            journeyConnector.updateTaxId(j.journeyId, nino)
+              .map(_ => nino)).sequence
+
         } else {
-          enrolmentService.determineTaxIdAndUpdateJourney(j, request.enrolments) -> j.taxRegime
+          enrolmentService.determineTaxIdAndUpdateJourney(j, request.enrolments)
         }
       case j: Journey.AfterComputedTaxId =>
         JourneyLogger.info("TaxId already determined, skipping.")
-        Future.successful(Some(j.taxId)) -> j.taxRegime
+        Future.successful(Some(j.taxId))
     }
 
     maybeTaxId.map {
       case Some(_) =>
         Routing.redirectToNext(routes.DetermineTaxIdController.determineTaxId, request.journey, submittedValueUnchanged = false)
 
-      case None => taxRegime match {
+      case None => request.journey.taxRegime match {
         case TaxRegime.Epaye => Redirect(routes.NotEnrolledController.notEnrolled)
         case TaxRegime.Vat   => Redirect(routes.NotEnrolledController.notVatRegistered)
         case TaxRegime.Sa    => Redirect(routes.NotEnrolledController.notSaEnrolled)
