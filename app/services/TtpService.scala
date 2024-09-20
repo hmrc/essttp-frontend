@@ -70,8 +70,11 @@ class TtpService @Inject() (
     ttpConnector
       .callEligibilityApi(eligibilityRequest, journey.correlationId).map(Option.apply)
       .recover {
-        // 422 is a case where ttp thinks user is deregistered, so they should be sent to ineligible, otherwise we should error as usual.
-        case e: UpstreamErrorResponse if e.statusCode === 422 =>
+        // 422 is a case where ttp thinks user is deregistered, so they should be sent to ineligible if the tax regime is
+        // epaye or vat, otherwise we should error as usual.
+        case e: UpstreamErrorResponse if e.statusCode === 422 && (
+          journey.taxRegime === TaxRegime.Epaye || journey.taxRegime === TaxRegime.Vat
+        ) =>
           JourneyLogger.info("422 Error Code from TTP, suggesting de-registered user")
           None
       }

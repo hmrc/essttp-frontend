@@ -16,7 +16,6 @@
 
 package controllers
 
-import cats.syntax.eq._
 import config.AppConfig
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.TaxRegime
@@ -29,6 +28,7 @@ import play.api.test.Helpers._
 import testsupport.{CombinationsHelper, ItSpec}
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend, Ttp}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll, TtpJsonResponses}
+import uk.gov.hmrc.http.UpstreamErrorResponse
 
 class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper {
   implicit val eligibilityReqIdentificationFlag: EligibilityReqIdentificationFlag = app.injector.instanceOf[AppConfig].eligibilityReqIdentificationFlag
@@ -339,7 +339,7 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
         taxRegime -> origin
       }
 
-      taxRegimesAndOrigins.filter(p => p._1 =!= TaxRegime.Sa).foreach{
+      taxRegimesAndOrigins.filter(p => p._1 !== TaxRegime.Sa).foreach{
         case (taxRegime, origin) =>
           withClue(s"For tax regime ${taxRegime.entryName} and origin ${origin.toString}: "){
             val eligibilityResponseJson =
@@ -654,7 +654,8 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
     List(
       Origins.Epaye.Bta -> TaxRegime.Epaye,
       Origins.Vat.Bta -> TaxRegime.Vat,
-      Origins.Sa.Bta -> TaxRegime.Sa
+      Origins.Sa.Bta -> TaxRegime.Sa,
+      Origins.Sia.Pta -> TaxRegime.Sia
     ).foreach {
         case (origin, taxRegime) =>
           s"[${taxRegime.entryName}] throw an error when ttp eligibility call returns a legitimate error (not a 422)" in {
@@ -670,26 +671,42 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
             AuditConnectorStub.verifyNoAuditEvent()
           }
 
-          s"[${taxRegime.entryName}] Redirect to generic ineligible call us page when ttp eligibility call returns a 422 response" in {
-            stubCommonActions()
-            EssttpBackend.DetermineTaxId.findJourney(origin)()
-            Ttp.Eligibility.stub422RetrieveEligibility()
+          if (taxRegime === TaxRegime.Epaye || taxRegime === TaxRegime.Vat) {
+            s"[${taxRegime.entryName}] Redirect to generic ineligible call us page when ttp eligibility call returns a 422 response" in {
+              stubCommonActions()
+              EssttpBackend.DetermineTaxId.findJourney(origin)()
+              Ttp.Eligibility.stub422RetrieveEligibility()
 
-            val result = controller.determineEligibility(fakeRequest)
-            status(result) shouldBe Status.SEE_OTHER
+              val result = controller.determineEligibility(fakeRequest)
+              status(result) shouldBe Status.SEE_OTHER
 
-            val expectedPageUrl: String = taxRegime match {
-              case TaxRegime.Epaye => PageUrls.payeNotEligibleUrl
-              case TaxRegime.Vat   => PageUrls.vatNotEligibleUrl
-              case TaxRegime.Sa    => PageUrls.saNotEligibleUrl
-              case TaxRegime.Sia   => PageUrls.siaNotEligibleUrl
+              val expectedPageUrl: String = taxRegime match {
+                case TaxRegime.Epaye => PageUrls.payeNotEligibleUrl
+                case TaxRegime.Vat   => PageUrls.vatNotEligibleUrl
+                case TaxRegime.Sa    => PageUrls.saNotEligibleUrl
+                case TaxRegime.Sia   => PageUrls.siaNotEligibleUrl
+              }
+              redirectLocation(result) shouldBe Some(expectedPageUrl)
+
+              Ttp.Eligibility.verifyTtpEligibilityRequests(taxRegime)
+              EssttpBackend.EligibilityCheck.verifyNoneUpdateEligibilityRequest(TdAll.journeyId)
+              AuditConnectorStub.verifyNoAuditEvent()
             }
-            redirectLocation(result) shouldBe Some(expectedPageUrl)
+          } else {
+            s"[${taxRegime.entryName}] Return a technical error  when ttp eligibility call returns a 422 response" in {
+              stubCommonActions()
+              EssttpBackend.DetermineTaxId.findJourney(origin)()
+              Ttp.Eligibility.stub422RetrieveEligibility()
 
-            Ttp.Eligibility.verifyTtpEligibilityRequests(taxRegime)
-            EssttpBackend.EligibilityCheck.verifyNoneUpdateEligibilityRequest(TdAll.journeyId)
-            AuditConnectorStub.verifyNoAuditEvent()
+              val result = intercept[UpstreamErrorResponse](await(controller.determineEligibility(fakeRequest)))
+              result.statusCode shouldBe UNPROCESSABLE_ENTITY
+
+              Ttp.Eligibility.verifyTtpEligibilityRequests(taxRegime)
+              EssttpBackend.EligibilityCheck.verifyNoneUpdateEligibilityRequest(TdAll.journeyId)
+              AuditConnectorStub.verifyNoAuditEvent()
+            }
           }
+
       }
 
     "VAT user with a debt below the minimum amount and debt too old should be redirected to generic ineligible page" in {
