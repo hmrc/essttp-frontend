@@ -18,7 +18,7 @@ package controllers
 
 import essttp.enrolments.EnrolmentDef
 import essttp.journey.model.Origins
-import essttp.rootmodel.{EmpRef, SaUtr, Vrn}
+import essttp.rootmodel.{EmpRef, Nino, SaUtr, Vrn}
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.Helpers._
@@ -326,6 +326,33 @@ class DetermineTaxIdControllerSpec extends ItSpec {
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.DetermineEligibilityController.determineEligibility.url)
       }
+
+      "a NINO can be found in the auth retrievals" in {
+        stubCommonActions(authNino = Some("AB123456C"))
+        EssttpBackend.DetermineTaxId.findJourney(Origins.Sia.Pta)(JourneyJsonTemplates.Started(Origins.Sia.Pta))
+        EssttpBackend.DetermineTaxId.stubUpdateTaxId(
+          TdAll.journeyId,
+          JourneyJsonTemplates.`Computed Tax Id`(origin       = Origins.Sia.Pta, taxReference = "AB123456C")
+        )
+        val result = controller.determineTaxId()(fakeRequest)
+
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.DetermineEligibilityController.determineEligibility.url)
+
+        EssttpBackend.DetermineTaxId.verifyTaxIdRequest(TdAll.journeyId, Nino("AB123456C"))
+      }
+
+      "a NINO cannot be found in the auth retrievals" in {
+        stubCommonActions()
+        EssttpBackend.DetermineTaxId.findJourney(Origins.Sia.Pta)(JourneyJsonTemplates.Started(Origins.Sia.Pta))
+
+        val result = controller.determineTaxId()(fakeRequest)
+
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.NotEnrolledController.siaNoNino.url)
+
+      }
+
     }
   }
 }

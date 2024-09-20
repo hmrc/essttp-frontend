@@ -69,7 +69,7 @@ object TestUser {
 
     maybeAffinityGroup.map { affinityGroup: AffinityGroup =>
       TestUser(
-        nino            = None,
+        nino            = form.nino.map(Nino),
         epayeEnrolment  = maybeEpayeEnrolment(form),
         vatEnrolment    = maybeVatEnrolment(form),
         irSaEnrolment   = maybeIrSaEnrolment(form),

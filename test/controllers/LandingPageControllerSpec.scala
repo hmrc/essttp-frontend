@@ -364,7 +364,7 @@ class LandingPageSaNotEnabledControllerSpec extends ItSpec {
 class LandingPageShutteringControllerSpec extends ItSpec with ShutteringSpec {
 
   override lazy val configOverrides: Map[String, Any] = Map(
-    "shuttering.shuttered-tax-regimes" -> List("epaye", "vat", "sa")
+    "shuttering.shuttered-tax-regimes" -> List("epaye", "vat", "sa", "sia")
   )
 
   private val controller = app.injector.instanceOf[LandingController]
@@ -405,6 +405,16 @@ class LandingPageShutteringControllerSpec extends ItSpec with ShutteringSpec {
       AuthStub.authorise()
 
       test(controller.saLandingPageContinue(fakeRequest))
+    }
+
+    "GET /sia-payment-plan" in {
+      test(controller.siaLandingPage(fakeRequest))
+    }
+
+    "GET /sia-payment-plan-continue" in {
+      AuthStub.authorise()
+
+      test(controller.siaLandingPageContinue(fakeRequest))
     }
   }
 

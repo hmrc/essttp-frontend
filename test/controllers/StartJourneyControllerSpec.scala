@@ -240,6 +240,45 @@ class StartJourneyControllerSpec extends ItSpec {
     }
   }
 
+  "GET /sia/start" - {
+    "should start a detached VAT journey and redirect" in {
+      stubCommonActions()
+      EssttpBackend.StartJourney.startJourneySiaDetached
+
+      val fakeRequest = FakeRequest()
+        .withAuthToken()
+        .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+      val result: Future[Result] = controller.startDetachedSiaJourney(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some("http://localhost:19001/set-up-a-payment-plan/sia-payment-plan")
+      EssttpBackend.StartJourney.verifyStartJourneySiaDetached()
+    }
+
+    "should start a detached VAT journey and redirect if the user has already seen the landing page" in {
+      stubCommonActions()
+      EssttpBackend.StartJourney.startJourneySiaDetached
+
+      val fakeRequest = FakeRequest()
+        .withAuthToken()
+        .withSession(SessionKeys.sessionId -> "IamATestSessionId", LandingController.hasSeenLandingPageSessionKey -> "true")
+
+      val result: Future[Result] = controller.startDetachedSiaJourney(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.DetermineTaxIdController.determineTaxId.url)
+      session(result).data.get(LandingController.hasSeenLandingPageSessionKey) shouldBe empty
+
+      EssttpBackend.StartJourney.verifyStartJourneySiaDetached()
+    }
+
+    "should redirect to login with the correct continue url if the user is not logged in" in {
+      val result = controller.startDetachedSiaJourney(FakeRequest("GET", routes.StartJourneyController.startDetachedSiaJourney.url))
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some("http://localhost:9949/auth-login-stub/gg-sign-in?" +
+        "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fsia%2Fstart&origin=essttp-frontend")
+    }
+  }
+
 }
 
 class GovUkSaNotEnabledControllerSpec extends ItSpec {

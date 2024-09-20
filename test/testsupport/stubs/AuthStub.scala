@@ -26,7 +26,8 @@ import uk.gov.hmrc.auth.core.retrieve.Credentials
 object AuthStub {
   def authorise(
       allEnrolments: Option[Set[Enrolment]] = Some(Set(TdAll.payeEnrolment)),
-      credentials:   Option[Credentials]    = Some(Credentials("authId-999", "GovernmentGateway"))
+      credentials:   Option[Credentials]    = Some(Credentials("authId-999", "GovernmentGateway")),
+      authNino:      Option[String]         = None
   ): StubMapping = {
 
     implicit val enrolmentFormat: OFormat[Enrolment] = {
@@ -46,7 +47,9 @@ object AuthStub {
     val enrolments: Set[Enrolment] = allEnrolments.getOrElse(Set())
     val allEnrolmentsJsonPart: JsObject = Json.obj("allEnrolments" -> enrolments)
 
-    val authoriseJsonBody: JsObject = allEnrolmentsJsonPart ++ optionalCredentialsPart
+    val ninoPart = authNino.fold(Json.obj())(nino => Json.obj("nino" -> nino))
+
+    val authoriseJsonBody: JsObject = allEnrolmentsJsonPart ++ optionalCredentialsPart ++ ninoPart
 
     stubFor(
       post(urlPathEqualTo("/auth/authorise"))

@@ -560,6 +560,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
     }
   }
 }
+
 class PaymentPlanSetUpControllerEmailDisabledSpec extends ItSpec {
 
   override lazy val configOverrides = Map("features.email-journey" -> false)

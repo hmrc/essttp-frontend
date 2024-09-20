@@ -16,6 +16,7 @@
 
 package testOnly
 
+import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.http.HeaderNames
 import play.api.libs.json.JsObject
@@ -23,7 +24,7 @@ import play.api.mvc.Session
 import testOnly.models.testusermodel.{AuthToken, TestUser}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, SessionKeys, StringContextOps}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, SessionKeys, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.time.Clock
@@ -50,11 +51,15 @@ class AuthLoginApiService @Inject() (
       .withBody(requestBody)
       .execute[HttpResponse]
       .map(r =>
-        AuthToken(
-          r
-            .header(HeaderNames.AUTHORIZATION)
-            .getOrElse(throw new RuntimeException(s"missing 'AUTHORIZATION' header: ${r.toString()}"))
-        ))
+        if (r.status === 201) {
+          AuthToken(
+            r
+              .header(HeaderNames.AUTHORIZATION)
+              .getOrElse(throw new RuntimeException(s"missing 'AUTHORIZATION' header: ${r.toString()}"))
+          )
+        } else {
+          throw UpstreamErrorResponse(s"Got response with status ${r.status.toString} and body ${r.body}", 500)
+        })
   }
 
   private def buildAuthenticatedSession(authToken: AuthToken) =

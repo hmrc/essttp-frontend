@@ -150,7 +150,8 @@ class BankDetailsControllerSpec extends ItSpec {
   Seq[(String, Origin, TaxRegime)](
     ("EPAYE", Origins.Epaye.Bta, TaxRegime.Epaye),
     ("VAT", Origins.Vat.Bta, TaxRegime.Vat),
-    ("SA", Origins.Sa.Bta, TaxRegime.Sa)
+    ("SA", Origins.Sa.Bta, TaxRegime.Sa),
+    ("SIA", Origins.Sia.Pta, TaxRegime.Sia)
   ).foreach {
       case (regime, origin, taxRegime) =>
 
@@ -466,7 +467,7 @@ class BankDetailsControllerSpec extends ItSpec {
              |{
              |  "taxDetail": ${TdAll.taxDetailJsonString(taxRegime)},
              |  "taxType": "${taxRegime.toString}",
-             |  "origin": "Bta",
+             |  "origin": "${origin.toString().split('.').last}",
              |  "request": {
              |    "account": {
              |       "accountType": "personal",
@@ -719,7 +720,7 @@ class BankDetailsControllerSpec extends ItSpec {
                    |{
                    |  "taxDetail": ${TdAll.taxDetailJsonString(taxRegime)},
                    |  "taxType": "${taxRegime.toString}",
-                   |  "origin": "Bta",
+                   |  "origin": "${origin.toString().split('.').last}",
                    |  "request": {
                    |    "account": {
                    |       "accountType": "personal",
@@ -773,7 +774,7 @@ class BankDetailsControllerSpec extends ItSpec {
              |{
              |  "taxDetail": ${TdAll.taxDetailJsonString(taxRegime)},
              |  "taxType": "${taxRegime.toString}",
-             |  "origin": "Bta",
+             |  "origin": "${origin.toString().split('.').last}",
              |  "request": {
              |    "account": {
              |       "accountType": "${typeOfAccount.entryName.toLowerCase(Locale.UK)}",

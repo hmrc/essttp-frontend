@@ -101,6 +101,7 @@
             name = s"$key[]",
             hint = Some(Hint(content = Text(Messages.WhyCannotPayInFull.`Your answers help us plan services in the future...`.show))),
             items = checkboxItems,
+            attributes = Map("id" -> key),
             errorMessage = form.error(key).map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(content = Text(e.message)))
           )
         )
