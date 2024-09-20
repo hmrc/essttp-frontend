@@ -76,6 +76,19 @@ appConfig: AppConfig
     ).map(toCheckboxItem)
 }
 
+@siaEligibilityErrorCheckboxes = @{
+    EligibilityErrors.values
+        .filterNot(e => e === EligibilityErrors.MultipleReasons
+            || e === EligibilityErrors.ChargesBeforeMaxAccountingDate
+            || e === EligibilityErrors.HasInvalidInterestSignalsCESA
+            || e === EligibilityErrors.HasDisguisedRemuneration
+            || e === EligibilityErrors.DmSpecialOfficeProcessingRequiredCESA
+            || e === EligibilityErrors.DmSpecialOfficeProcessingRequiredCDCS
+            || e === EligibilityErrors.HasCapacitor
+            || e === EligibilityErrors.IsAnMtdCustomer
+    ).map(toCheckboxItem)
+}
+
 @saEligibilityErrorCheckboxes = @{
     EligibilityErrors.values
     .filterNot(_ === EligibilityErrors.MultipleReasons)
@@ -780,15 +793,13 @@ appConfig: AppConfig
         )),
         idPrefix = Some("eligibilityErrors"),
         name = "eligibilityErrors[]",
-        items = epayeEligibilityErrorCheckboxes,
+        items = siaEligibilityErrorCheckboxes,
         classes = "govuk-checkboxes--small"
     ))
 
     @chargesOptionalFieldRadios("isInterestBearingCharge")
 
     @chargesOptionalFieldRadios("useChargeReference")
-
-    @chargesOptionalFieldRadios("ddInProgress")
 
     @planMinLengthInput(1)
 

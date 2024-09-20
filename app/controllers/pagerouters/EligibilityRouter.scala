@@ -19,7 +19,7 @@ package controllers.pagerouters
 import cats.syntax.eq._
 import controllers.routes
 import essttp.rootmodel.TaxRegime
-import essttp.rootmodel.TaxRegime.Sa
+import essttp.rootmodel.TaxRegime.{Sa, Sia}
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import models.EligibilityErrors._
 import models.{EligibilityError, EligibilityErrors}
@@ -66,8 +66,10 @@ object EligibilityRouter {
         case Some(DmSpecialOfficeProcessingRequiredCDCS) =>
           if (taxRegime === Sa) whichGenericIneligiblePage(taxRegime)
           else throw new NotImplementedError(s"dmSpecialOfficeProcessingRequiredCDCS ineligibility reason not relevant to ${taxRegime.entryName}")
-        case Some(IsAnMtdCustomer)                       => whichGenericIneligiblePage(taxRegime)
-        case Some(DmSpecialOfficeProcessingRequiredCESA) => whichGenericIneligiblePage(taxRegime)
+        case Some(IsAnMtdCustomer) => whichGenericIneligiblePage(taxRegime)
+        case Some(DmSpecialOfficeProcessingRequiredCESA) =>
+          if (taxRegime === Sia) throw new NotImplementedError(s"DmSpecialOfficeProcessingRequiredCESA ineligibility reason not relevant to ${taxRegime.entryName}")
+          else whichGenericIneligiblePage(taxRegime)
       }
     }
   }
