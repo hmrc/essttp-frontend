@@ -14,6 +14,7 @@ object SbtUpdatesSettings {
     dependencyUpdatesFilter -= moduleFilter("com.beachape", "enumeratum-play"),
     // locked by version of play
     dependencyUpdatesFilter -= moduleFilter("org.scalatestplus.play", "scalatestplus-play")
+
   )
 
 }
