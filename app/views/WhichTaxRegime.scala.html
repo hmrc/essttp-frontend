@@ -65,7 +65,12 @@
       value = Some("SIA")
   )
 
-  if(saEnabled && siaEnabled) Seq(epaye, sa, sia, vat) else if(saEnabled) Seq(epaye, sa, vat) else if(siaEnabled) Seq(epaye, sia, vat) else Seq(epaye, vat)
+  Seq(
+    Some(epaye),
+    Some(sa).filter(_ => saEnabled),
+    Some(sia).filter(_ => siaEnabled),
+    Some(vat)
+  ).collect{ case Some(regime) => regime }
 }
 
 @layout(pageTitle = Some(title), hasErrors = form.hasErrors, showBackLink = false) {
