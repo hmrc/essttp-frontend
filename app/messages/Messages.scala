@@ -1221,7 +1221,8 @@ object Messages {
     )
 
     val `Select yes if you can pay within 6 months`: Message = Message(
-      english = "Select yes if you can pay within 6 months"
+      english = "Select yes if you can pay within 6 months",
+      welsh = "Dewiswch ‘Iawn’ os gallwch dalu cyn pen 6 mis"
     )
 
   }
