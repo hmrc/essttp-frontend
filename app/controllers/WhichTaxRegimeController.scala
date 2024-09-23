@@ -18,7 +18,6 @@ package controllers
 
 import actions.Actions
 import config.AppConfig
-import essttp.enrolments.EnrolmentDef
 import essttp.rootmodel.TaxRegime
 import models.forms.TaxRegimeForm
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -44,16 +43,7 @@ class WhichTaxRegimeController @Inject() (
 
   val whichTaxRegime: Action[AnyContent] =
     as.authenticatedAction { implicit request =>
-      val hasEpayeEnrolment = EnrolmentDef.Epaye.findEnrolmentValues(request.enrolments).isSuccess
-      val hasVatEnrolment = EnrolmentDef.Vat.findEnrolmentValues(request.enrolments).isSuccess
-      val hasSaEnrolment = EnrolmentDef.Sa.findEnrolmentValues(request.enrolments).isSuccess
-
-      (hasEpayeEnrolment, hasVatEnrolment, hasSaEnrolment) match {
-        case (true, false, false) => Redirect(routes.LandingController.epayeLandingPage)
-        case (false, true, false) => Redirect(routes.LandingController.vatLandingPage)
-        case (false, false, true) if appConfig.saEnabled => Redirect(routes.LandingController.saLandingPage)
-        case _ => Ok(views.whichTaxRegime(TaxRegimeForm.form, appConfig.saEnabled, appConfig.siaEnabled))
-      }
+      Ok(views.whichTaxRegime(TaxRegimeForm.form, appConfig.saEnabled, appConfig.siaEnabled))
     }
 
   val whichTaxRegimeSubmit: Action[AnyContent] =
