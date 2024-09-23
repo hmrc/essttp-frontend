@@ -27,7 +27,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
-import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
+import testsupport.reusableassertions.{ContentAssertions, RequestAssertions, UnchangedFromCYALinkAssertions}
 import testsupport.stubs.EssttpBackend
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
@@ -35,7 +35,7 @@ import uk.gov.hmrc.http.SessionKeys
 import scala.concurrent.Future
 import scala.jdk.CollectionConverters.{CollectionHasAsScala, IteratorHasAsScala}
 
-class UpfrontPaymentControllerSpec extends ItSpec {
+class UpfrontPaymentControllerSpec extends ItSpec with UnchangedFromCYALinkAssertions {
 
   private val controller: UpfrontPaymentController = app.injector.instanceOf[UpfrontPaymentController]
   private val expectedH1CanYouPayUpfrontPage: String = "Upfront payment"
@@ -169,30 +169,16 @@ class UpfrontPaymentControllerSpec extends ItSpec {
             EssttpBackend.CanPayUpfront.verifyNoneUpdateCanPayUpfrontRequest(TdAll.journeyId)
           }
 
-          s"[$regime journey] should redirect to the specified url in session if the user came from a change link and did not change their answer" in {
-            val changeOriginUrl = "/abc"
-
-            stubCommonActions()
-            EssttpBackend.UpfrontPaymentAmount.findJourney(testCrypto, origin)()
+          behave like unchangedAnswerAfterClickingCYAChangeBehaviuor(
+            origin,
+            controller.canYouMakeAnUpfrontPaymentSubmit,
+            Seq(("CanYouMakeAnUpFrontPayment", "Yes")),
             EssttpBackend.CanPayUpfront.stubUpdateCanPayUpfront(
               TdAll.journeyId,
               canPayUpfrontScenario = true,
-              JourneyJsonTemplates.`Answered Can Pay Upfront - Yes`(origin)
+              _
             )
-
-            val fakeRequest = FakeRequest(
-              method = "POST",
-              path   = "/can-you-make-an-upfront-payment"
-            ).withAuthToken()
-              .withSession(SessionKeys.sessionId -> "IamATestSessionId", Routing.clickedChangeFromSessionKey -> changeOriginUrl)
-              .withFormUrlEncodedBody(("CanYouMakeAnUpFrontPayment", "Yes"))
-
-            val result: Future[Result] = controller.canYouMakeAnUpfrontPaymentSubmit(fakeRequest)
-            status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(changeOriginUrl)
-            session(result).get(Routing.clickedChangeFromSessionKey) shouldBe None
-            EssttpBackend.CanPayUpfront.verifyUpdateCanPayUpfrontRequest(TdAll.journeyId, TdAll.canPayUpfront)
-          }
+          )
 
         }
 
@@ -291,29 +277,15 @@ class UpfrontPaymentControllerSpec extends ItSpec {
             EssttpBackend.UpfrontPaymentAmount.verifyUpdateUpfrontPaymentAmountRequest(TdAll.journeyId, TdAll.upfrontPaymentAmount(149900))
           }
 
-          s"[$regime journey] should redirect to the specified url in session if the user came from a change link and did not change their answer" in {
-            val changeOriginUrl = "/abc"
-
-            stubCommonActions()
-            EssttpBackend.UpfrontPaymentAmount.findJourney(testCrypto, origin)()
+          behave like unchangedAnswerAfterClickingCYAChangeBehaviuor(
+            origin,
+            controller.upfrontPaymentAmountSubmit,
+            Seq(("UpfrontPaymentAmount", "2")),
             EssttpBackend.UpfrontPaymentAmount.stubUpdateUpfrontPaymentAmount(
               TdAll.journeyId,
-              JourneyJsonTemplates.`Entered Upfront payment amount`(origin)
+              _
             )
-
-            val fakeRequest = FakeRequest(
-              method = "POST",
-              path   = "/how-much-can-you-pay-upfront"
-            ).withAuthToken()
-              .withSession(SessionKeys.sessionId -> "IamATestSessionId", Routing.clickedChangeFromSessionKey -> changeOriginUrl)
-              .withFormUrlEncodedBody(("UpfrontPaymentAmount", "10"))
-
-            val result: Future[Result] = controller.upfrontPaymentAmountSubmit(fakeRequest)
-            status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(changeOriginUrl)
-            session(result).get(Routing.clickedChangeFromSessionKey) shouldBe None
-            EssttpBackend.UpfrontPaymentAmount.verifyUpdateUpfrontPaymentAmountRequest(TdAll.journeyId, TdAll.upfrontPaymentAmount(1000))
-          }
+          )
 
           forAll(
             Table(
@@ -541,4 +513,59 @@ class UpfrontPaymentControllerSpec extends ItSpec {
         }
 
     }
+}
+
+class UpfrontPaymentControllerPEGARedirectInConfigSpec extends ItSpec with UnchangedFromCYALinkAssertions {
+
+  val pegaChangeLinkReturnUrl = "/abc"
+
+  override protected lazy val configOverrides: Map[String, Any] = Map(
+    "pega.change-link-return-url" -> pegaChangeLinkReturnUrl
+  )
+
+  val controller: UpfrontPaymentController = app.injector.instanceOf[UpfrontPaymentController]
+
+  Seq(
+    Origins.Epaye.Bta,
+    Origins.Vat.Bta,
+    Origins.Sa.Bta,
+    Origins.Sia.Pta
+  ).foreach { origin =>
+
+      "When the PEGA change link return URL is defined in config" - {
+
+        "POST /can-you-make-an-upfront-payment" - {
+
+          behave like unchangedAnswerAfterClickingCYAChangeBehaviuor(
+            origin,
+            controller.canYouMakeAnUpfrontPaymentSubmit,
+            Seq(("CanYouMakeAnUpFrontPayment", "Yes")),
+            EssttpBackend.CanPayUpfront.stubUpdateCanPayUpfront(
+              TdAll.journeyId,
+              canPayUpfrontScenario = true,
+              _
+            ),
+            pegaChangeLinkReturnUrl
+          )
+
+        }
+
+        "POST /how-much-can-you-pay-upfront" - {
+
+          behave like unchangedAnswerAfterClickingCYAChangeBehaviuor(
+            origin,
+            controller.upfrontPaymentAmountSubmit,
+            Seq(("UpfrontPaymentAmount", "2")),
+            EssttpBackend.UpfrontPaymentAmount.stubUpdateUpfrontPaymentAmount(
+              TdAll.journeyId,
+              _
+            ),
+            pegaChangeLinkReturnUrl
+          )
+
+        }
+      }
+
+    }
+
 }

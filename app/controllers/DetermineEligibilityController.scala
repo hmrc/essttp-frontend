@@ -18,6 +18,7 @@ package controllers
 
 import actions.Actions
 import actionsmodel.AuthenticatedJourneyRequest
+import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheckF
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import controllers.pagerouters.EligibilityRouter
@@ -39,7 +40,7 @@ class DetermineEligibilityController @Inject() (
     ttpService:     TtpService,
     journeyService: JourneyService,
     auditService:   AuditService
-)(implicit ec: ExecutionContext)
+)(implicit ec: ExecutionContext, appConfig: AppConfig)
   extends FrontendController(mcc)
   with Logging {
 

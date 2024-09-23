@@ -19,6 +19,7 @@ package controllers
 import actions.Actions
 import config.AppConfig
 import essttp.rootmodel.TaxRegime
+import requests.RequestSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.PegaService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -28,15 +29,15 @@ import scala.concurrent.ExecutionContext
 
 @Singleton
 class PegaController @Inject() (
-    as:          Actions,
-    mcc:         MessagesControllerComponents,
-    pegaService: PegaService,
-    appConfig:   AppConfig
-)(implicit ex: ExecutionContext) extends FrontendController(mcc) {
+    as:             Actions,
+    mcc:            MessagesControllerComponents,
+    pegaService:    PegaService,
+    requestSupport: RequestSupport
+)(implicit ex: ExecutionContext, appConfig: AppConfig) extends FrontendController(mcc) {
 
   val startPegaJourney: Action[AnyContent] = as.authenticatedJourneyAction.async{ implicit request =>
     pegaService.startCase(request.journey).map{ _ =>
-      SeeOther(appConfig.pegaStartRedirectUrl(request.journey.taxRegime))
+      SeeOther(appConfig.pegaStartRedirectUrl(request.journey.taxRegime, requestSupport.language))
     }
   }
 

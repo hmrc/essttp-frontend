@@ -41,9 +41,8 @@ class PaymentScheduleController @Inject() (
     mcc:                 MessagesControllerComponents,
     paymentSchedulePage: CheckPaymentSchedule,
     journeyService:      JourneyService,
-    auditService:        AuditService,
-    config:              AppConfig
-)(implicit ec: ExecutionContext) extends FrontendController(mcc)
+    auditService:        AuditService
+)(implicit ec: ExecutionContext, appConfig: AppConfig) extends FrontendController(mcc)
   with Logging {
 
   implicit val localDateOrdering: Ordering[LocalDate] = _ compareTo _
@@ -106,22 +105,14 @@ class PaymentScheduleController @Inject() (
 
   def changeFromCheckPaymentSchedule(pageId: String, regime: TaxRegime): Action[AnyContent] =
     as.continueToSameEndpointAuthenticatedJourneyAction { implicit request =>
-      val redirectTo = request.journey match {
-        case _: Journey.AfterStartedPegaCase =>
-          config.pegaChangeLinkReturnUrl(regime)
-        case _: Journey.AfterSelectedPaymentPlan =>
-          routes.PaymentScheduleController.checkPaymentSchedule.url
-        case j: Journey.AfterCheckedPaymentPlan =>
-          j.paymentPlanAnswers match {
-            case _: PaymentPlanAnswers.PaymentPlanNoAffordability    => routes.PaymentScheduleController.checkPaymentSchedule.url
-            case _: PaymentPlanAnswers.PaymentPlanAfterAffordability => config.pegaChangeLinkReturnUrl(regime)
-          }
+      request.journey match {
+        case _: Journey.AfterStartedPegaCase | _: Journey.AfterSelectedPaymentPlan | _: Journey.AfterCheckedPaymentPlan =>
+          Redirect(CheckPaymentPlanChangeLink.withName(pageId).targetPage(regime))
+            .addingToSession(Routing.clickedChangeFromSessionKey -> "true")
+
         case other =>
           Errors.throwServerErrorException(s"Cannot change answer from check your payment plan page in journey state ${other.name}")
       }
-
-      Redirect(CheckPaymentPlanChangeLink.withName(pageId).targetPage(regime))
-        .addingToSession(Routing.clickedChangeFromSessionKey -> redirectTo)
     }
 
   private def withJourneyInCorrectState[A](journey: Journey)(

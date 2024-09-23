@@ -17,8 +17,10 @@
 package controllers
 
 import actions.Actions
+import actionsmodel.AuthenticatedJourneyRequest
 import cats.syntax.either._
 import cats.syntax.eq._
+import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import essttp.journey.JourneyConnector
 import essttp.journey.model.{Journey, WhyCannotPayInFullAnswers}
@@ -30,12 +32,13 @@ import play.api.data.format.Formatter
 import play.api.data.{Form, FormError}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import requests.RequestSupport
+import services.PegaService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.Views
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class WhyCannotPayInFullController @Inject() (
@@ -43,8 +46,9 @@ class WhyCannotPayInFullController @Inject() (
     mcc:              MessagesControllerComponents,
     requestSupport:   RequestSupport,
     views:            Views,
-    journeyConnector: JourneyConnector
-)(implicit ec: ExecutionContext)
+    journeyConnector: JourneyConnector,
+    pegaService:      PegaService
+)(implicit ec: ExecutionContext, appConfig: AppConfig)
   extends FrontendController(mcc)
   with Logging {
 
@@ -81,19 +85,43 @@ class WhyCannotPayInFullController @Inject() (
       formWithErrors => Ok(views.whyCannotPayInFull(formWithErrors)),
       { reasons =>
 
-        journeyConnector.updateWhyCannotPayInFullAnswers(
-          request.journeyId,
-          WhyCannotPayInFullAnswers.WhyCannotPayInFull(reasons)
-        ).map(updatedJourney =>
+        updateJourney(request.journey, existingAnswersInJourney(request.journey), reasons)
+          .map{ updatedJourney =>
             Routing.redirectToNext(
               routes.WhyCannotPayInFullController.whyCannotPayInFull,
               updatedJourney,
               //even if the value is changed we still want to go to cya page
               submittedValueUnchanged = true
-            ))
+            )
+          }
       }
     )
   }
+
+  private def updateJourney(
+      journey:    Journey,
+      oldAnswers: Option[Set[CannotPayReason]],
+      newAnswers: Set[CannotPayReason]
+  )(implicit r: AuthenticatedJourneyRequest[_]): Future[Journey] =
+    if (oldAnswers.contains(newAnswers)) {
+      // don't need to call BE to update journey if nothing has changed
+      Future.successful(journey)
+    } else {
+      // need to start a PEGA case if one has already been started and the answers have changed
+      val needToStartPegaCase = journey match {
+        case _: Journey.AfterStartedPegaCase => true
+        case _                               => false
+      }
+
+      if (needToStartPegaCase) {
+        pegaService.startCase(journey).map(_._1)
+      } else {
+        journeyConnector.updateWhyCannotPayInFullAnswers(
+          r.journeyId,
+          WhyCannotPayInFullAnswers.WhyCannotPayInFull(newAnswers)
+        )
+      }
+    }
 
 }
 

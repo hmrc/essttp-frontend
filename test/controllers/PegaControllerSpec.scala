@@ -18,12 +18,16 @@ package controllers
 
 import essttp.journey.model.Origins
 import essttp.rootmodel.TaxRegime
+import models.Languages
 import play.api.libs.json.Json
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
+import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.PegaRecreateSessionAssertions
 import testsupport.stubs.EssttpBackend
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
+import uk.gov.hmrc.http.SessionKeys
 
 class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
 
@@ -208,25 +212,40 @@ class PegaControllerRedirectInConfigSpec extends ItSpec {
 
     "handling requests to start a PEGA case must" - {
 
-      "start a case, update the journey and redirect to the url in config if one exists" in {
-        stubCommonActions()
-        EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(
-          JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
+      for {
+        (origin, expectedRegimeQueryParam) <- Seq(
+          (Origins.Epaye.Bta, "PAYE"),
+          (Origins.Vat.Bta, "VAT"),
+          (Origins.Sa.Bta, "SA")
         )
-        EssttpBackend.Pega.stubStartCase(TdAll.journeyId, Right(TdAll.pegaStartCaseResponse))
-        EssttpBackend.StartedPegaCase.stubUpdateStartPegaCaseResponse(
-          TdAll.journeyId,
-          JourneyJsonTemplates.`Started PEGA case`(Origins.Epaye.Bta)(testCrypto)
+        (lang, expectedLangQueryParam) <- Seq(
+          (Languages.English, "en"),
+          (Languages.Welsh, "cy")
         )
-        EssttpBackend.Pega.stubSaveJourneyForPega(TdAll.journeyId, Right(()))
+      } {
 
-        val result = controller.startPegaJourney(fakeRequest)
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(redirectUrl)
+        s"[${origin.toString}, ${lang.toString}]  start a case, update the journey and redirect to the url in config if one exists" in {
+          stubCommonActions()
+          EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, origin)(
+            JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(origin)(testCrypto)
+          )
+          EssttpBackend.Pega.stubStartCase(TdAll.journeyId, Right(TdAll.pegaStartCaseResponse))
+          EssttpBackend.StartedPegaCase.stubUpdateStartPegaCaseResponse(
+            TdAll.journeyId,
+            JourneyJsonTemplates.`Started PEGA case`(Origins.Epaye.Bta)(testCrypto)
+          )
+          EssttpBackend.Pega.stubSaveJourneyForPega(TdAll.journeyId, Right(()))
 
-        EssttpBackend.Pega.verifyStartCaseCalled(TdAll.journeyId)
-        EssttpBackend.StartedPegaCase.verifyUpdateStartPegaCaseResponseRequest(TdAll.journeyId, TdAll.pegaStartCaseResponse)
-        EssttpBackend.Pega.verifySaveJourneyForPegaCalled(TdAll.journeyId)
+          val request = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId").withLang(lang)
+
+          val result = controller.startPegaJourney(request)
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(redirectUrl + s"?regime=$expectedRegimeQueryParam&lang=$expectedLangQueryParam")
+
+          EssttpBackend.Pega.verifyStartCaseCalled(TdAll.journeyId)
+          EssttpBackend.StartedPegaCase.verifyUpdateStartPegaCaseResponseRequest(TdAll.journeyId, TdAll.pegaStartCaseResponse)
+          EssttpBackend.Pega.verifySaveJourneyForPegaCalled(TdAll.journeyId)
+        }
       }
 
     }

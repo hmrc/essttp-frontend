@@ -361,7 +361,11 @@ object EssttpBackend {
     def verifyUpdateStartPegaCaseResponseRequest(journeyId: JourneyId, expectedResponse: StartCaseResponse): Unit =
       WireMockHelpers.verifyWithBodyParse(updateStartPegaCaseResponseUrl(journeyId), expectedResponse)
 
-    def findJourney(encrypter: Encrypter, origin: Origin)(jsonBody: String = JourneyJsonTemplates.`Started PEGA case`(origin)(encrypter)): StubMapping =
+    def findJourney(
+        encrypter:                 Encrypter,
+        origin:                    Origin,
+        whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
+    )(jsonBody: String = JourneyJsonTemplates.`Started PEGA case`(origin, whyCannotPayInFullAnswers)(encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
   }
 
@@ -460,16 +464,17 @@ object EssttpBackend {
       WireMockHelpers.verifyWithBodyParse(hasCheckedPlanUrl(journeyId))(PaymentPlanAnswers.format)
 
     def findJourney(
-        withAffordability:        Boolean,
-        encrypter:                Encrypter,
-        origin:                   Origin    = Origins.Epaye.Bta,
-        eligibilityMinPlanLength: Int       = 1,
-        eligibilityMaxPlanLength: Int       = 12
+        withAffordability:         Boolean,
+        encrypter:                 Encrypter,
+        origin:                    Origin                    = Origins.Epaye.Bta,
+        eligibilityMinPlanLength:  Int                       = 1,
+        eligibilityMaxPlanLength:  Int                       = 12,
+        whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
     )(
         jsonBody: String = if (withAffordability) {
-          JourneyJsonTemplates.`Has Checked Payment Plan - With Affordability`(origin, eligibilityMinPlanLength, eligibilityMaxPlanLength)(encrypter)
+          JourneyJsonTemplates.`Has Checked Payment Plan - With Affordability`(origin, eligibilityMinPlanLength, eligibilityMaxPlanLength, whyCannotPayInFullAnswers)(encrypter)
         } else {
-          JourneyJsonTemplates.`Has Checked Payment Plan - No Affordability`(origin, eligibilityMinPlanLength, eligibilityMaxPlanLength)(encrypter)
+          JourneyJsonTemplates.`Has Checked Payment Plan - No Affordability`(origin, eligibilityMinPlanLength, eligibilityMaxPlanLength, whyCannotPayInFullAnswers)(encrypter)
         }
     ): StubMapping = findByLatestSessionId(jsonBody)
   }
@@ -699,11 +704,17 @@ object EssttpBackend {
     def verifyStartCaseCalled(journeyId: JourneyId): Unit =
       verify(exactly(1), postRequestedFor(urlPathEqualTo(caseUrl(journeyId))))
 
+    def verifyStartCaseNotCalled(journeyId: JourneyId): Unit =
+      verify(exactly(0), postRequestedFor(urlPathEqualTo(caseUrl(journeyId))))
+
     def verifyGetCaseCalled(journeyId: JourneyId): Unit =
       verify(exactly(1), getRequestedFor(urlPathEqualTo(caseUrl(journeyId))))
 
     def verifySaveJourneyForPegaCalled(journeyId: JourneyId): Unit =
       verify(exactly(1), postRequestedFor(urlPathEqualTo(saveJourneyUrl(journeyId))))
+
+    def verifySaveJourneyForPegaNotCalled(journeyId: JourneyId): Unit =
+      verify(exactly(0), postRequestedFor(urlPathEqualTo(saveJourneyUrl(journeyId))))
 
     def verifyRecreateSessionCalled(taxRegime: TaxRegime): Unit =
       verify(exactly(1), getRequestedFor(urlPathEqualTo(recreatedSessionUrl(taxRegime))))

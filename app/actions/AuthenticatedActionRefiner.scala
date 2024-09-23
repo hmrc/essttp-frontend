@@ -24,6 +24,7 @@ import essttp.rootmodel.{GGCredId, Nino}
 import play.api.Logger
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Request, Result}
+import requests.RequestSupport
 import requests.RequestSupport._
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
@@ -37,6 +38,7 @@ trait AuthenticatedActionRefiner { this: ActionRefiner[Request, AuthenticatedReq
   val appConfig: AppConfig
   val cc: MessagesControllerComponents
   def loginContinueToUrl(request: Request[_]): String
+  val requestSupport: RequestSupport
 
   private val logger = Logger(getClass)
 
@@ -56,7 +58,13 @@ trait AuthenticatedActionRefiner { this: ActionRefiner[Request, AuthenticatedReq
             case Some(ggCredId) =>
               Future.successful(
                 Right(
-                  new AuthenticatedRequest[A](request, enrolments, GGCredId(ggCredId.providerId), nino.map(nino => Nino(nino)))
+                  new AuthenticatedRequest[A](
+                    request,
+                    enrolments,
+                    GGCredId(ggCredId.providerId),
+                    nino.map(nino => Nino(nino)),
+                    requestSupport.language
+                  )
                 )
               )
           }
@@ -81,9 +89,10 @@ trait AuthenticatedActionRefiner { this: ActionRefiner[Request, AuthenticatedReq
 
 @Singleton
 class ContinueToLandingPagesAuthenticatedActionRefiner @Inject() (
-    val authConnector: AuthConnector,
-    val appConfig:     AppConfig,
-    val cc:            MessagesControllerComponents
+    val authConnector:  AuthConnector,
+    val appConfig:      AppConfig,
+    val cc:             MessagesControllerComponents,
+    val requestSupport: RequestSupport
 ) extends ActionRefiner[Request, AuthenticatedRequest] with AuthorisedFunctions with AuthenticatedActionRefiner {
 
   override def loginContinueToUrl(request: Request[_]): String =
@@ -93,9 +102,10 @@ class ContinueToLandingPagesAuthenticatedActionRefiner @Inject() (
 
 @Singleton
 class ContinueToSameEndpointAuthenticatedActionRefiner @Inject() (
-    val authConnector: AuthConnector,
-    val appConfig:     AppConfig,
-    val cc:            MessagesControllerComponents
+    val authConnector:  AuthConnector,
+    val appConfig:      AppConfig,
+    val cc:             MessagesControllerComponents,
+    val requestSupport: RequestSupport
 ) extends ActionRefiner[Request, AuthenticatedRequest] with AuthorisedFunctions with AuthenticatedActionRefiner {
 
   override def loginContinueToUrl(request: Request[_]): String =

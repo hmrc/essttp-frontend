@@ -16,15 +16,18 @@
 
 package controllers
 
+import actionsmodel.AuthenticatedRequest
+import config.AppConfig
 import controllers.pagerouters.EligibilityRouter
 import essttp.journey.model.Journey._
-import essttp.journey.model.{CanPayWithinSixMonthsAnswers, EmailVerificationAnswers, Journey, UpfrontPaymentAnswers}
+import essttp.journey.model.{CanPayWithinSixMonthsAnswers, EmailVerificationAnswers, Journey, PaymentPlanAnswers, UpfrontPaymentAnswers}
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import essttp.rootmodel.{CanPayUpfront, IsEmailAddressRequired, TaxRegime}
+import essttp.utils.Errors
 import paymentsEmailVerification.models.EmailVerificationResult
 import play.api.http.Status.INTERNAL_SERVER_ERROR
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{Call, Request, Result}
+import play.api.mvc.{Call, Result}
 import uk.gov.hmrc.http.UpstreamErrorResponse
 
 object Routing {
@@ -32,7 +35,11 @@ object Routing {
   // session key to indicate someone has just clicked a change link from a CYA page
   val clickedChangeFromSessionKey: String = "essttpClickedChangeFrom"
 
-  def redirectToNext(current: Call, journey: Journey, submittedValueUnchanged: Boolean)(implicit request: Request[_]): Result = {
+  def redirectToNext(
+      current:                 Call,
+      journey:                 Journey,
+      submittedValueUnchanged: Boolean
+  )(implicit request: AuthenticatedRequest[_], config: AppConfig): Result = {
     val journeyRoutes: Map[Call, () => Call] = Map(
       routes.LandingController.epayeLandingPage -> { () =>
         routes.DetermineTaxIdController.determineTaxId
@@ -167,8 +174,8 @@ object Routing {
     )
 
     val redirect = (request.session.get(clickedChangeFromSessionKey), submittedValueUnchanged) match {
-      case (Some(url), true) =>
-        Redirect(url)
+      case (Some(_), true) =>
+        Redirect(redirectToAfterUnchangedAnswerFromCYA(journey))
 
       case _ =>
         val next = journeyRoutes.getOrElse(
@@ -179,6 +186,25 @@ object Routing {
     }
 
     redirect.removingFromSession(clickedChangeFromSessionKey)
+  }
+
+  private def redirectToAfterUnchangedAnswerFromCYA(journey: Journey)(implicit request: AuthenticatedRequest[_], config: AppConfig): String = {
+    journey match {
+      case _: Journey.AfterStartedPegaCase =>
+        config.pegaChangeLinkReturnUrl(journey.taxRegime, request.lang)
+
+      case _: Journey.AfterSelectedPaymentPlan =>
+        routes.PaymentScheduleController.checkPaymentSchedule.url
+
+      case j: Journey.AfterCheckedPaymentPlan =>
+        j.paymentPlanAnswers match {
+          case _: PaymentPlanAnswers.PaymentPlanNoAffordability    => routes.PaymentScheduleController.checkPaymentSchedule.url
+          case _: PaymentPlanAnswers.PaymentPlanAfterAffordability => config.pegaChangeLinkReturnUrl(journey.taxRegime, request.lang)
+        }
+
+      case other =>
+        Errors.throwServerErrorException(s"Cannot change answer from check your payment plan page in journey state ${other.name}")
+    }
   }
 
   def latestPossiblePage(journey: Journey): Call = journey match {

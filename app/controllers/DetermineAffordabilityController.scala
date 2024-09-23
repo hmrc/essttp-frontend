@@ -17,6 +17,8 @@
 package controllers
 
 import actions.Actions
+import actionsmodel.AuthenticatedRequest
+import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheckF
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Journey}
@@ -36,7 +38,7 @@ class DetermineAffordabilityController @Inject() (
     mcc:            MessagesControllerComponents,
     ttpService:     TtpService,
     journeyService: JourneyService
-)(implicit ec: ExecutionContext)
+)(implicit ec: ExecutionContext, appConfig: AppConfig)
   extends FrontendController(mcc)
   with Logging {
 
@@ -50,7 +52,7 @@ class DetermineAffordabilityController @Inject() (
   def determineAffordabilityAndUpdateJourney(
       journey:                Journey.AfterUpfrontPaymentAnswers,
       eligibilityCheckResult: EligibilityCheckResult
-  )(implicit request: Request[_]): Future[Result] = {
+  )(implicit request: AuthenticatedRequest[_]): Future[Result] = {
     for {
       instalmentAmounts <- ttpService.determineAffordability(journey, eligibilityCheckResult)
       updatedJourney <- updateJourney(journey, instalmentAmounts)

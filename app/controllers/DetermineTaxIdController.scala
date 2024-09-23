@@ -35,6 +35,7 @@ package controllers
 import actions.Actions
 import cats.syntax.traverse._
 import cats.syntax.eq._
+import config.AppConfig
 import essttp.journey.JourneyConnector
 import essttp.journey.model.Journey
 import essttp.rootmodel.{TaxId, TaxRegime}
@@ -52,7 +53,7 @@ class DetermineTaxIdController @Inject() (
     mcc:              MessagesControllerComponents,
     journeyConnector: JourneyConnector,
     enrolmentService: EnrolmentService
-)(implicit ec: ExecutionContext)
+)(implicit ec: ExecutionContext, appConfig: AppConfig)
   extends FrontendController(mcc)
   with Logging {
 
