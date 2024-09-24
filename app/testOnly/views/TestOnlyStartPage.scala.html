@@ -95,6 +95,55 @@ appConfig: AppConfig
     .map(toCheckboxItem)
 }
 
+@ninoInput = @{
+    govukInput(Input(
+        id = "nino",
+        name = "nino",
+        label = Label(
+            isPageHeading = false,
+            classes = "govuk-label--m",
+            content = Text("Enter a NINO (must be supplied if confidence level > 50)")
+        ),
+        classes = "govuk-input--width-10",
+        spellcheck = Some(false),
+        value = Some(form.data.getOrElse("nino", "AB123456C")),
+        hint = Some(Hint(content = Text("NINO format NNNLLNNNNN, e.g. 864FZ00049."))),
+        errorMessage =  form.error("nino").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
+            content = Text(e.message)
+        ))
+    ))
+}
+
+@confidenceLevelRadios = @{
+    govukRadios(Radios(
+        fieldset = Some(Fieldset(
+            legend = Some(Legend(
+                content = Text("Confidence Level"),
+                classes = "govuk-fieldset__legend--m",
+                isPageHeading = false
+            ))
+        )),
+        idPrefix = Some("confidenceLevel"),
+        name = "confidenceLevel",
+        errorMessage = form.error("confidenceLevel").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
+            content = Text(e.message)
+        )),
+        items = Seq(
+            RadioItem(
+                content = Text("50"),
+                value = Some("50"),
+                checked = form.data.get("confidenceLevel").fold(true)(_ === "50")
+            ),
+            RadioItem(
+                content = Text("250"),
+                value = Some("250"),
+                checked = form.data.get("confidenceLevel").fold(false)(_ === "250")
+            )
+        ),
+        classes = "govuk-radios--small govuk-radios--inline"
+    ))
+}
+
 @enrolmentsContent = @{
     govukCheckboxes(Checkboxes(
         fieldset = Some(Fieldset(
@@ -139,59 +188,59 @@ appConfig: AppConfig
 }
 
 @signInAsContent = {
-@govukRadios(Radios(
-    fieldset = Some(Fieldset(
-        legend = Some(Legend(
-            content = Text("Signed in as"),
-            classes = "govuk-fieldset__legend--m",
-            isPageHeading = false
-        ))
-    )),
-    idPrefix = Some("signInAs"),
-    name = "signInAs",
-    errorMessage = form.error("signInAs").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
-        content = Text(e.message)
-    )),
-    items = Seq(
-        RadioItem(
-            content = Text("As an Organisation"),
-            value = Some(SignInAs.Organisation.entryName),
-            checked = form.data.get("signInAs").fold(true)(_ === SignInAs.Organisation.entryName)
-        ),
-        RadioItem(
-            content = Text("As an Individual"),
-            value = Some(SignInAs.Individual.entryName),
-            checked = form.data.get("signInAs").fold(false)(_ === SignInAs.Individual.entryName)
-        ),
-        RadioItem(
-            content = Text("Not signed in"),
-            value = Some(SignInAs.NoSignIn.entryName),
-            checked = form.data.get("signInAs").fold(false)(_ === SignInAs.NoSignIn.entryName)
-        )
-    ),
-    classes = "govuk-radios--small"
-))
+  @govukRadios(Radios(
+      fieldset = Some(Fieldset(
+          legend = Some(Legend(
+              content = Text("Signed in as"),
+              classes = "govuk-fieldset__legend--m",
+              isPageHeading = false
+          ))
+      )),
+      idPrefix = Some("signInAs"),
+      name = "signInAs",
+      errorMessage = form.error("signInAs").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
+          content = Text(e.message)
+      )),
+      items = Seq(
+          RadioItem(
+              content = Text("As an Organisation"),
+              value = Some(SignInAs.Organisation.entryName),
+              checked = form.data.get("signInAs").fold(true)(_ === SignInAs.Organisation.entryName)
+          ),
+          RadioItem(
+              content = Text("As an Individual"),
+              value = Some(SignInAs.Individual.entryName),
+              checked = form.data.get("signInAs").fold(false)(_ === SignInAs.Individual.entryName)
+          ),
+          RadioItem(
+              content = Text("Not signed in"),
+              value = Some(SignInAs.NoSignIn.entryName),
+              checked = form.data.get("signInAs").fold(false)(_ === SignInAs.NoSignIn.entryName)
+          )
+      ),
+      classes = "govuk-radios--small"
+  ))
 }
 
 @interestAmountContent = {
-@govukInput(Input(
-    id = "interestAmount",
-    name = "interestAmount",
-    label = Label(
-        isPageHeading = false,
-        classes = "govuk-label--m",
-        content = Text("Enter interest amount")
-    ),
-    classes = "govuk-input--width-5",
-    spellcheck = Some(false),
-    prefix = Some(PrefixOrSuffix(
-        content = Text("£")
-    )),
-    errorMessage = form.error("interestAmount").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
-        content = Text(e.message)
-    )),
-    value = form.data.get("interestAmount").orElse(Some("0"))
-))
+  @govukInput(Input(
+      id = "interestAmount",
+      name = "interestAmount",
+      label = Label(
+          isPageHeading = false,
+          classes = "govuk-label--m",
+          content = Text("Enter interest amount")
+      ),
+      classes = "govuk-input--width-5",
+      spellcheck = Some(false),
+      prefix = Some(PrefixOrSuffix(
+          content = Text("£")
+      )),
+      errorMessage = form.error("interestAmount").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
+          content = Text(e.message)
+      )),
+      value = form.data.get("interestAmount").orElse(Some("0"))
+  ))
 }
 
 @regimeDigitalCorrespondenceRadios = @{
@@ -383,8 +432,9 @@ appConfig: AppConfig
 
 @payeContent = {
 @formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneyEpayeSubmit) {
-
     @signInAsContent
+    @confidenceLevelRadios
+    @ninoInput
     @enrolmentsContent
 
     @govukInput(Input(
@@ -498,6 +548,8 @@ appConfig: AppConfig
 @vatContent = {
 @formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneyVatSubmit) {
     @signInAsContent
+    @confidenceLevelRadios
+    @ninoInput
     @enrolmentsContent
 
     @govukInput(Input(
@@ -619,6 +671,8 @@ appConfig: AppConfig
 @formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneySaSubmit) {
 
     @signInAsContent
+    @confidenceLevelRadios
+    @ninoInput
     @enrolmentsContent
 
     @govukInput(Input(
@@ -741,21 +795,11 @@ appConfig: AppConfig
 @formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneySiaSubmit) {
 
     @signInAsContent
+    @confidenceLevelRadios
+    @ninoInput
     @enrolmentsContent
 
-    @govukInput(Input(
-        id = "nino",
-        name = "nino",
-        label = Label(
-            isPageHeading = false,
-            classes = "govuk-label--m",
-            content = Text("Enter a NINO")
-        ),
-        classes = "govuk-input--width-10",
-        spellcheck = Some(false),
-        value = Some(form.data.getOrElse("nino", "AB123456C")),
-        hint = Some(Hint(content = Text("NINO format NNNLLNNNNN, e.g. 864FZ00049.")))
-    ))
+
 
     @govukInput(Input(
         id = "siaTotalAmount",
