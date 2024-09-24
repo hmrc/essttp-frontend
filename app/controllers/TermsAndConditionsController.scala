@@ -37,7 +37,8 @@ class TermsAndConditionsController @Inject() (
     journeyService: JourneyService
 )(
     implicit
-    executionContext: ExecutionContext, appConfig: AppConfig
+    executionContext: ExecutionContext,
+    appConfig:        AppConfig
 ) extends FrontendController(mcc) with Logging {
 
   val termsAndConditions: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>

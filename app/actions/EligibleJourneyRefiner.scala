@@ -22,7 +22,6 @@ import controllers.pagerouters.EligibilityRouter
 import essttp.journey.model.Journey
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, Request, Result}
-
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -50,7 +49,8 @@ class EligibleJourneyRefiner @Inject() (ec: ExecutionContext) extends ActionRefi
               request.ggCredId,
               request.nino,
               request.numberOfBarsVerifyAttempts,
-              j.eligibilityCheckResult
+              j.eligibilityCheckResult,
+              request.lang
             )
           )
         } else {

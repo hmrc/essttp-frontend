@@ -160,6 +160,7 @@ class UpfrontPaymentController @Inject() (
         (validForm: BigDecimal) => {
           //amount in pence case class apply method converts big decimal to pennies
           val upfrontPaymentAmount = UpfrontPaymentAmount(AmountInPence(validForm))
+
           journeyService.updateUpfrontPaymentAmount(request.journeyId, upfrontPaymentAmount)
             .map(updatedJourney =>
               Routing.redirectToNext(

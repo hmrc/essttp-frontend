@@ -271,9 +271,12 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
-  def `Started PEGA case`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Started PEGA case`(
+      origin:                    Origin,
+      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
+  )(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.startedPegaCase,
-    journeyInfo = JourneyInfo.startedPegaCase(origin.taxRegime, encrypter),
+    journeyInfo = JourneyInfo.startedPegaCase(origin.taxRegime, encrypter, whyCannotPayInFullAnswers = whyCannotPayInFullAnswers),
     origin      = origin
   )
 
@@ -321,22 +324,37 @@ object JourneyJsonTemplates {
   )
 
   def `Has Checked Payment Plan - No Affordability`(
-      origin:                   Origin,
-      eligibilityMinPlanLength: Int    = 1,
-      eligibilityMaxPlanLength: Int    = 12
+      origin:                    Origin,
+      eligibilityMinPlanLength:  Int                       = 1,
+      eligibilityMaxPlanLength:  Int                       = 12,
+      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
   )(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.hasCheckedPaymentPlan,
-    journeyInfo = JourneyInfo.hasCheckedPaymentPlan(withAffordability = false, origin.taxRegime, encrypter, eligibilityMinPlanLength = eligibilityMinPlanLength, eligibilityMaxPlanLength = eligibilityMaxPlanLength),
+    journeyInfo = JourneyInfo.hasCheckedPaymentPlan(
+      withAffordability = false,
+      origin.taxRegime,
+      encrypter,
+      eligibilityMinPlanLength  = eligibilityMinPlanLength,
+      eligibilityMaxPlanLength  = eligibilityMaxPlanLength,
+      whyCannotPayInFullAnswers = whyCannotPayInFullAnswers
+    ),
     origin      = origin
   )
 
   def `Has Checked Payment Plan - With Affordability`(
-      origin:                   Origin,
-      eligibilityMinPlanLength: Int    = 1,
-      eligibilityMaxPlanLength: Int    = 12
+      origin:                    Origin,
+      eligibilityMinPlanLength:  Int                       = 1,
+      eligibilityMaxPlanLength:  Int                       = 12,
+      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
   )(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.hasCheckedPaymentPlan,
-    journeyInfo = JourneyInfo.hasCheckedPaymentPlan(withAffordability = true, origin.taxRegime, encrypter, eligibilityMinPlanLength = eligibilityMinPlanLength, eligibilityMaxPlanLength = eligibilityMaxPlanLength),
+    journeyInfo = JourneyInfo.hasCheckedPaymentPlan(
+      withAffordability = true,
+      origin.taxRegime, encrypter,
+      eligibilityMinPlanLength  = eligibilityMinPlanLength,
+      eligibilityMaxPlanLength  = eligibilityMaxPlanLength,
+      whyCannotPayInFullAnswers = whyCannotPayInFullAnswers
+    ),
     origin      = origin
   )
 

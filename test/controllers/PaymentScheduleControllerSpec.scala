@@ -337,7 +337,7 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
                 val expectedUpdatedSession = Session(
                   fakeRequest.session.data.updated(
                     Routing.clickedChangeFromSessionKey,
-                    routes.PaymentScheduleController.checkPaymentSchedule.url
+                    "true"
                   )
                 )
                 val result = controller.changeFromCheckPaymentSchedule(pageId, origin.taxRegime)(fakeRequest)
@@ -381,8 +381,7 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
           "should write the correct value for 'essttpClickedChangeFrom' in the session cookie in the journey state" - {
 
               def test(
-                  stubGetJourney:                  () => StubMapping,
-                  expectedEssttpClickedChangeFrom: Call
+                  stubGetJourney: () => StubMapping
               ): Unit = {
                 stubCommonActions()
                 stubGetJourney()
@@ -390,7 +389,7 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
                 val expectedUpdatedSession = Session(
                   fakeRequest.session.data.updated(
                     Routing.clickedChangeFromSessionKey,
-                    expectedEssttpClickedChangeFrom.url
+                    "true"
                   )
                 )
                 val result = controller.changeFromCheckPaymentSchedule("CanPayUpfront", origin.taxRegime)(fakeRequest)
@@ -403,29 +402,25 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
 
             "AfterStartedPegaCase" in {
               test(
-                () => EssttpBackend.StartedPegaCase.findJourney(testCrypto, origin)(),
-                testOnly.controllers.routes.PegaController.dummyPegaPage(origin.taxRegime)
+                () => EssttpBackend.StartedPegaCase.findJourney(testCrypto, origin)()
               )
             }
 
             "AfterSelectedPaymentPlan" in {
               test(
-                () => EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, origin)(),
-                routes.PaymentScheduleController.checkPaymentSchedule
+                () => EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, origin)()
               )
             }
 
             "AfterCheckedPaymentPlan on an affordability journey" in {
               test(
-                () => EssttpBackend.HasCheckedPlan.findJourney(withAffordability = true, testCrypto, origin)(),
-                testOnly.controllers.routes.PegaController.dummyPegaPage(origin.taxRegime)
+                () => EssttpBackend.HasCheckedPlan.findJourney(withAffordability = true, testCrypto, origin)()
               )
             }
 
             "AfterCheckedPaymentPlan on a non-affordability journey" in {
               test(
-                () => EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, origin)(),
-                routes.PaymentScheduleController.checkPaymentSchedule
+                () => EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, origin)()
               )
             }
 
@@ -447,7 +442,7 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
             val expectedUpdatedSession = Session(
               request.session.data.updated(
                 Routing.clickedChangeFromSessionKey,
-                testOnly.controllers.routes.PegaController.dummyPegaPage(origin.taxRegime).url
+                "true"
               )
             )
             val result = controller.changeFromCheckPaymentSchedule("CanPayUpfront", origin.taxRegime)(request)
@@ -491,54 +486,6 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
 object PaymentScheduleControllerSpec {
 
   final case class SummaryRow(question: String, answer: String, changeLink: String)
-
-}
-
-class PaymentSchedulePegaRedirectInConfigControllerSpec extends ItSpec {
-
-  val pegaRedirectUrl = "/redirect-to-here"
-
-  override lazy val configOverrides: Map[String, Any] = Map(
-    "pega.change-link-return-url" -> pegaRedirectUrl
-  )
-
-  private val controller: PaymentScheduleController = app.injector.instanceOf[PaymentScheduleController]
-
-  "GET /check-payment-plan/change" - {
-
-    "should use the configured PEGA redirect URL for 'essttpClickedChangeFrom' in the session cookie in the journey state" - {
-
-      val origin = Origins.Epaye.Bta
-
-        def test(stubGetJourney: () => StubMapping): Unit = {
-          stubCommonActions()
-          stubGetJourney()
-
-          val expectedUpdatedSession = Session(
-            fakeRequest.session.data.updated(
-              Routing.clickedChangeFromSessionKey,
-              pegaRedirectUrl
-            )
-          )
-          val result = controller.changeFromCheckPaymentSchedule("CanPayUpfront", origin.taxRegime)(fakeRequest)
-
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url)
-          session(result) shouldBe expectedUpdatedSession
-          ()
-        }
-
-      "AfterStartedPegaCase" in {
-        test(() => EssttpBackend.StartedPegaCase.findJourney(testCrypto, origin)())
-      }
-
-      "AfterCheckedPaymentPlan on an affordability journey" in {
-        test(() => EssttpBackend.HasCheckedPlan.findJourney(withAffordability = true, testCrypto, origin)())
-      }
-
-    }
-
-  }
 
 }
 

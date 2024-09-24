@@ -16,6 +16,7 @@
 
 package controllers
 
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import controllers.WhyCannotPayInFullControllerSpec.CheckBoxInfo
 import essttp.journey.model.{Origins, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.CannotPayReason
@@ -24,14 +25,14 @@ import org.jsoup.nodes.Element
 import play.api.mvc.Result
 import play.api.test.Helpers._
 import testsupport.ItSpec
-import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
+import testsupport.reusableassertions.{ContentAssertions, RequestAssertions, UnchangedFromCYALinkAssertions}
 import testsupport.stubs.EssttpBackend
 import testsupport.testdata.{JourneyJsonTemplates, TdAll}
 
 import scala.concurrent.Future
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
-class WhyCannotPayInFullControllerSpec extends ItSpec {
+class WhyCannotPayInFullControllerSpec extends ItSpec with UnchangedFromCYALinkAssertions {
 
   val controller = app.injector.instanceOf[WhyCannotPayInFullController]
 
@@ -214,11 +215,88 @@ class WhyCannotPayInFullControllerSpec extends ItSpec {
       )
     }
 
+    "make a call to PEGA to start a case if the user has changed their answers after a PEGA journey has already been started" in {
+      stubCommonActions()
+      EssttpBackend.StartedPegaCase.findJourney(testCrypto, Origins.Epaye.Bta)()
+
+      EssttpBackend.Pega.stubStartCase(TdAll.journeyId, Right(TdAll.pegaStartCaseResponse))
+      EssttpBackend.Pega.stubSaveJourneyForPega(TdAll.journeyId, Right(()))
+      EssttpBackend.StartedPegaCase.stubUpdateStartPegaCaseResponse(
+        TdAll.journeyId,
+        JourneyJsonTemplates.`Started PEGA case`(Origins.Epaye.Bta)(testCrypto)
+      )
+
+      val request = fakeRequest.withFormUrlEncodedBody("WhyCannotPayInFull[]" -> "Other").withMethod("POST")
+      val result = controller.whyCannotPayInFullSubmit(request)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url)
+
+      EssttpBackend.Pega.verifyStartCaseCalled(TdAll.journeyId)
+      EssttpBackend.Pega.verifySaveJourneyForPegaCalled(TdAll.journeyId)
+      EssttpBackend.StartedPegaCase.verifyUpdateStartPegaCaseResponseRequest(TdAll.journeyId, TdAll.pegaStartCaseResponse)
+
+    }
+
+    "not make a call to PEGA to start a case if the user has not changed their answers after a PEGA journey has already been started" in {
+      stubCommonActions()
+      EssttpBackend.StartedPegaCase.findJourney(testCrypto, Origins.Epaye.Bta)(
+        JourneyJsonTemplates.`Started PEGA case`(
+          Origins.Epaye.Bta,
+          whyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(TdAll.whyCannotPayReasons)
+        )(testCrypto)
+      )
+
+      val formData = TdAll.whyCannotPayReasons.map(reason => "WhyCannotPayInFull[]" -> reason.entryName)
+
+      val request = fakeRequest.withFormUrlEncodedBody(formData.toSeq: _*).withMethod("POST")
+      val result = controller.whyCannotPayInFullSubmit(request)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url)
+
+      EssttpBackend.Pega.verifyStartCaseNotCalled(TdAll.journeyId)
+      EssttpBackend.Pega.verifySaveJourneyForPegaNotCalled(TdAll.journeyId)
+    }
+
+    behave like unchangedAnswerAfterClickingCYAChangeBehaviuor(
+      Origins.Epaye.Bta,
+      controller.whyCannotPayInFullSubmit,
+      TdAll.whyCannotPayReasons.map(reason => "WhyCannotPayInFull[]" -> reason.entryName).toSeq,
+      _ => new StubMapping()
+    )
+
   }
 }
 
 object WhyCannotPayInFullControllerSpec {
 
   final case class CheckBoxInfo(value: String, label: String, hint: String, dataBehaviour: String)
+
+}
+
+class WhyCannotPayInFullControllerPEGARedirectInConfigSpec extends ItSpec with UnchangedFromCYALinkAssertions {
+
+  val pegaChangeLinkReturnUrl = "/abc"
+
+  override protected lazy val configOverrides: Map[String, Any] = Map(
+    "pega.change-link-return-url" -> pegaChangeLinkReturnUrl
+  )
+
+  lazy val controller = app.injector.instanceOf[WhyCannotPayInFullController]
+
+  "When the PEGA change link return URL is defined in config" - {
+
+    "POST why-are-you-unable-to-pay-in-full should" - {
+
+      behave like unchangedAnswerAfterClickingCYAChangeBehaviuor(
+        Origins.Epaye.Bta,
+        controller.whyCannotPayInFullSubmit,
+        TdAll.whyCannotPayReasons.map(reason => "WhyCannotPayInFull[]" -> reason.entryName).toSeq,
+        _ => new StubMapping(),
+        pegaChangeLinkUrl = pegaChangeLinkReturnUrl
+      )
+
+    }
+
+  }
 
 }

@@ -17,6 +17,8 @@
 package controllers
 
 import actions.Actions
+import actionsmodel.AuthenticatedRequest
+import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheckF
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import essttp.journey.model.{Journey, PaymentPlanAnswers}
@@ -36,7 +38,7 @@ class DetermineAffordableQuotesController @Inject() (
     mcc:            MessagesControllerComponents,
     ttpService:     TtpService,
     journeyService: JourneyService
-)(implicit ec: ExecutionContext)
+)(implicit ec: ExecutionContext, appConfig: AppConfig)
   extends FrontendController(mcc)
   with Logging {
 
@@ -63,7 +65,7 @@ class DetermineAffordableQuotesController @Inject() (
   def determineAffordableQuotesAndUpdateJourney(
       journey:                Either[Journey.AfterStartDatesResponse, (Journey.AfterCheckedPaymentPlan, PaymentPlanAnswers.PaymentPlanNoAffordability)],
       eligibilityCheckResult: EligibilityCheckResult
-  )(implicit request: Request[_]): Future[Result] = {
+  )(implicit request: AuthenticatedRequest[_]): Future[Result] = {
     for {
       affordableQuotes <- ttpService.determineAffordableQuotes(journey, eligibilityCheckResult)
       updatedJourney <- journeyService.updateAffordableQuotes(journey.fold(_.id, _._1.id), affordableQuotes)

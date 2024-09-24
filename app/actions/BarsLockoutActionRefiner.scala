@@ -22,12 +22,16 @@ import essttp.bars.BarsVerifyStatusConnector
 import essttp.journey.model.Journey
 import play.api.Logging
 import play.api.mvc.{ActionRefiner, Request, Result, Results}
+import requests.RequestSupport
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class BarsLockoutActionRefiner @Inject() (barsVerifyStatusConnector: BarsVerifyStatusConnector)(
+class BarsLockoutActionRefiner @Inject() (
+    barsVerifyStatusConnector: BarsVerifyStatusConnector,
+    requestSupport:            RequestSupport
+)(
     implicit
     ec: ExecutionContext
 ) extends ActionRefiner[AuthenticatedJourneyRequest, BarsNotLockedOutRequest] with Logging with Results {
@@ -51,7 +55,8 @@ class BarsLockoutActionRefiner @Inject() (barsVerifyStatusConnector: BarsVerifyS
                   j,
                   request.ggCredId,
                   request.nino,
-                  status.attempts
+                  status.attempts,
+                  requestSupport.language
                 )
               )
           }

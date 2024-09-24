@@ -17,6 +17,7 @@
 package actionsmodel
 
 import essttp.rootmodel.{GGCredId, Nino}
+import models.Language
 import play.api.mvc.{Request, WrappedRequest}
 import uk.gov.hmrc.auth.core.Enrolments
 
@@ -24,5 +25,6 @@ class AuthenticatedRequest[A](
     val request:    Request[A],
     val enrolments: Enrolments,
     val ggCredId:   GGCredId,
-    val nino:       Option[Nino]
+    val nino:       Option[Nino],
+    val lang:       Language
 ) extends WrappedRequest[A](request)

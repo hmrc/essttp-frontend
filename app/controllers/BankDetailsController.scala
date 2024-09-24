@@ -19,6 +19,7 @@ package controllers
 import actions.Actions
 import actionsmodel.AuthenticatedJourneyRequest
 import cats.syntax.eq._
+import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import essttp.journey.model.Journey
 import essttp.journey.model.Journey.{AfterEnteredDetailsAboutBankAccount, BeforeEnteredDetailsAboutBankAccount}
@@ -48,7 +49,7 @@ class BankDetailsController @Inject() (
     barsService:    EssttpBarsService
 )(
     implicit
-    executionContext: ExecutionContext
+    executionContext: ExecutionContext, appConfig: AppConfig
 ) extends FrontendController(mcc) with Logging {
 
   import requestSupport._

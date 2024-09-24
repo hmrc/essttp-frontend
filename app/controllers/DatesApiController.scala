@@ -17,6 +17,8 @@
 package controllers
 
 import actions.Actions
+import actionsmodel.AuthenticatedRequest
+import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheckF
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import essttp.journey.model.{Journey, PaymentPlanAnswers}
@@ -35,7 +37,7 @@ class DatesApiController @Inject() (
     mcc:            MessagesControllerComponents,
     datesService:   DatesService,
     journeyService: JourneyService
-)(implicit ec: ExecutionContext)
+)(implicit ec: ExecutionContext, appConfig: AppConfig)
   extends FrontendController(mcc)
   with Logging {
 
@@ -52,7 +54,7 @@ class DatesApiController @Inject() (
 
   def getExtremeDatesAndUpdateJourney(
       journey: Either[Journey.Stages.EnteredUpfrontPaymentAmount, Journey.Stages.AnsweredCanPayUpfront]
-  )(implicit request: Request[_]): Future[Result] = {
+  )(implicit request: AuthenticatedRequest[_]): Future[Result] = {
     val j = journey.merge
     for {
       extremeDatesResponse <- datesService.extremeDates(j)
@@ -77,7 +79,7 @@ class DatesApiController @Inject() (
 
   private def getStartDatesAndUpdateJourney(
       journey: Either[Journey.AfterEnteredDayOfMonth, (Journey.AfterCheckedPaymentPlan, PaymentPlanAnswers.PaymentPlanNoAffordability)]
-  )(implicit request: Request[_]): Future[Result] = {
+  )(implicit request: AuthenticatedRequest[_]): Future[Result] = {
     for {
       startDatesResponse <- datesService.startDates(journey)
       updatedJourney <- journeyService.updateStartDates(journey.map(_._1).merge.id, startDatesResponse)

@@ -18,7 +18,7 @@ package config
 
 import configs.syntax._
 import essttp.rootmodel.{AmountInPence, TaxRegime}
-import models.EligibilityReqIdentificationFlag
+import models.{EligibilityReqIdentificationFlag, Language}
 import play.api.mvc.RequestHeader
 import play.api.{ConfigLoader, Configuration}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -160,14 +160,27 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     }
   }
 
-  def pegaStartRedirectUrl(taxRegime: TaxRegime): String =
+  def pegaStartRedirectUrl(taxRegime: TaxRegime, lang: Language): String =
     Some(config.get[String]("pega.start-redirect-url"))
       .filter(_.nonEmpty)
+      .map(_ + toPegaQueryParamString(taxRegime, lang))
       .getOrElse(testOnly.controllers.routes.PegaController.dummyPegaPage(taxRegime).url)
 
-  def pegaChangeLinkReturnUrl(taxRegime: TaxRegime): String =
+  def pegaChangeLinkReturnUrl(taxRegime: TaxRegime, lang: Language): String =
     Some(config.get[String]("pega.change-link-return-url"))
       .filter(_.nonEmpty)
+      .map(_ + toPegaQueryParamString(taxRegime, lang))
       .getOrElse(testOnly.controllers.routes.PegaController.dummyPegaPage(taxRegime).url)
+
+  private def toPegaQueryParamString(taxRegime: TaxRegime, lang: Language): String = {
+    val regimeValue = taxRegime match {
+      case TaxRegime.Epaye => "PAYE"
+      case TaxRegime.Vat   => "VAT"
+      case TaxRegime.Sa    => "SA"
+      case TaxRegime.Sia   => sys.error("Should not be trying to construct PEGA redirect URL's for SIA")
+    }
+
+    s"?regime=$regimeValue&lang=${lang.code}"
+  }
 
 }

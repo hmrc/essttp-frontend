@@ -17,7 +17,7 @@
 package testsupport.testdata
 
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, WhyCannotPayInFullAnswers}
-import essttp.rootmodel.{DayOfMonth, TaxRegime}
+import essttp.rootmodel.{CannotPayReason, DayOfMonth, TaxRegime}
 import paymentsEmailVerification.models.EmailVerificationResult
 import uk.gov.hmrc.crypto.Encrypter
 
@@ -75,7 +75,7 @@ object JourneyInfo {
   def multipleIneligibleReasons(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleHasRlsOnAddress.copy(markedAsInsolvent = true), taxRegime, encrypter)
   def multipleIneligibleReasonsDebtTooLowAndOld(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleIsLessThanMinDebtAllowance.copy(chargesOverMaxDebtAge = Some(true)), taxRegime, encrypter)
   val whyCannotPayInFullNotRequiredAnswer: JourneyInfoAsJson = TdJsonBodies.whyCannotPayInFull(WhyCannotPayInFullAnswers.AnswerNotRequired)
-  val whyCannotPayInFullRequiredAnswer: JourneyInfoAsJson = TdJsonBodies.whyCannotPayInFull(WhyCannotPayInFullAnswers.WhyCannotPayInFull(TdAll.whyCannotPayReasons))
+  def whyCannotPayInFullRequiredAnswer(reasons: Set[CannotPayReason] = TdAll.whyCannotPayReasons): JourneyInfoAsJson = TdJsonBodies.whyCannotPayInFull(WhyCannotPayInFullAnswers.WhyCannotPayInFull(reasons))
   val canPayUpfront: JourneyInfoAsJson = TdJsonBodies.canPayUpfrontJourneyInfo(true)
   val cannotPayUpfront: JourneyInfoAsJson = TdJsonBodies.canPayUpfrontJourneyInfo(false)
   val upfrontPaymentAmount: JourneyInfoAsJson = TdJsonBodies.upfrontPaymentAmountJourneyInfo(TdAll.upfrontPaymentAmount)
@@ -216,7 +216,7 @@ object JourneyInfo {
     whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(taxRegime, encrypter)
 
   def whyCannotPayInFullRequired(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
-    whyCannotPayInFullRequiredAnswer :: eligibilityCheckedEligible(taxRegime, encrypter)
+    whyCannotPayInFullRequiredAnswer() :: eligibilityCheckedEligible(taxRegime, encrypter)
 
   def answeredCanPayUpfrontYes(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
     canPayUpfront :: whyCannotPayInFullNotRequired(taxRegime, encrypter)
@@ -228,49 +228,61 @@ object JourneyInfo {
     upfrontPaymentAmount :: answeredCanPayUpfrontYes(taxRegime, encrypter)
 
   def retrievedExtremeDates(
-      taxRegime:                TaxRegime,
-      encrypter:                Encrypter,
-      etmpEmail:                Option[String] = Some(TdAll.etmpEmail),
-      eligibilityMinPlanLength: Int            = 1,
-      eligibilityMaxPlanLength: Int            = 12
-  ): List[JourneyInfoAsJson] =
-    extremeDates :: upfrontPaymentAnswers :: whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(
+      taxRegime:                 TaxRegime,
+      encrypter:                 Encrypter,
+      etmpEmail:                 Option[String]            = Some(TdAll.etmpEmail),
+      eligibilityMinPlanLength:  Int                       = 1,
+      eligibilityMaxPlanLength:  Int                       = 12,
+      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
+  ): List[JourneyInfoAsJson] = {
+    val whyCannotPay = whyCannotPayInFullAnswers match {
+      case WhyCannotPayInFullAnswers.AnswerNotRequired           => whyCannotPayInFullNotRequiredAnswer
+      case WhyCannotPayInFullAnswers.WhyCannotPayInFull(reasons) => whyCannotPayInFullRequiredAnswer(reasons)
+    }
+
+    extremeDates :: upfrontPaymentAnswers :: whyCannotPay :: eligibilityCheckedEligible(
       taxRegime,
       encrypter,
       etmpEmail                = etmpEmail,
       eligibilityMinPlanLength = eligibilityMinPlanLength,
       eligibilityMaxPlanLength = eligibilityMaxPlanLength
     )
+  }
 
   def retrievedExtremeDatesNoUpfrontPayment(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
     extremeDates :: upfrontPaymentAnswersNoUpfrontPayment :: whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(taxRegime, encrypter)
 
   def retrievedAffordabilityResult(
-      minimumInstalmentAmount:  Int            = 29997,
-      taxRegime:                TaxRegime,
-      encrypter:                Encrypter,
-      etmpEmail:                Option[String] = Some(TdAll.etmpEmail),
-      eligibilityMinPlanLength: Int            = 1,
-      eligibilityMaxPlanLength: Int            = 12
+      minimumInstalmentAmount:   Int                       = 29997,
+      taxRegime:                 TaxRegime,
+      encrypter:                 Encrypter,
+      etmpEmail:                 Option[String]            = Some(TdAll.etmpEmail),
+      eligibilityMinPlanLength:  Int                       = 1,
+      eligibilityMaxPlanLength:  Int                       = 12,
+      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
   ): List[JourneyInfoAsJson] =
-    affordableResult(minimumInstalmentAmount) :: retrievedExtremeDates(taxRegime, encrypter, etmpEmail, eligibilityMinPlanLength, eligibilityMaxPlanLength)
+    affordableResult(minimumInstalmentAmount) :: retrievedExtremeDates(
+      taxRegime, encrypter, etmpEmail, eligibilityMinPlanLength, eligibilityMaxPlanLength, whyCannotPayInFullAnswers
+    )
 
   def retrievedAffordabilityResultNoUpfrontPayment(minimumInstalmentAmount: Int = 29997, taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
     affordableResult(minimumInstalmentAmount) :: retrievedExtremeDatesNoUpfrontPayment(taxRegime, encrypter)
 
   def obtainedCanPayWithinSixMonthsNotRequired(
-      taxRegime:                TaxRegime,
-      encrypter:                Encrypter,
-      etmpEmail:                Option[String] = Some(TdAll.etmpEmail),
-      eligibilityMinPlanLength: Int            = 1,
-      eligibilityMaxPlanLength: Int            = 12
+      taxRegime:                 TaxRegime,
+      encrypter:                 Encrypter,
+      etmpEmail:                 Option[String]            = Some(TdAll.etmpEmail),
+      eligibilityMinPlanLength:  Int                       = 1,
+      eligibilityMaxPlanLength:  Int                       = 12,
+      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
   ): List[JourneyInfoAsJson] =
     obtainedCanPayWithinSixMonthsNotRequired :: retrievedAffordabilityResult(
-      taxRegime                = taxRegime,
-      encrypter                = encrypter,
-      etmpEmail                = etmpEmail,
-      eligibilityMinPlanLength = eligibilityMinPlanLength,
-      eligibilityMaxPlanLength = eligibilityMaxPlanLength
+      taxRegime                 = taxRegime,
+      encrypter                 = encrypter,
+      etmpEmail                 = etmpEmail,
+      eligibilityMinPlanLength  = eligibilityMinPlanLength,
+      eligibilityMaxPlanLength  = eligibilityMaxPlanLength,
+      whyCannotPayInFullAnswers = whyCannotPayInFullAnswers
     )
 
   def obtainedCanPayWithinSixMonthsYes(
@@ -289,33 +301,37 @@ object JourneyInfo {
     )
 
   def obtainedCanPayWithinSixMonthsNo(
-      taxRegime:                TaxRegime,
-      encrypter:                Encrypter,
-      etmpEmail:                Option[String] = Some(TdAll.etmpEmail),
-      eligibilityMinPlanLength: Int            = 1,
-      eligibilityMaxPlanLength: Int            = 12
+      taxRegime:                 TaxRegime,
+      encrypter:                 Encrypter,
+      etmpEmail:                 Option[String]            = Some(TdAll.etmpEmail),
+      eligibilityMinPlanLength:  Int                       = 1,
+      eligibilityMaxPlanLength:  Int                       = 12,
+      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
   ): List[JourneyInfoAsJson] =
     obtainedCanPayWithinSixMonthsNo :: retrievedAffordabilityResult(
-      taxRegime                = taxRegime,
-      encrypter                = encrypter,
-      etmpEmail                = etmpEmail,
-      eligibilityMinPlanLength = eligibilityMinPlanLength,
-      eligibilityMaxPlanLength = eligibilityMaxPlanLength
+      taxRegime                 = taxRegime,
+      encrypter                 = encrypter,
+      etmpEmail                 = etmpEmail,
+      eligibilityMinPlanLength  = eligibilityMinPlanLength,
+      eligibilityMaxPlanLength  = eligibilityMaxPlanLength,
+      whyCannotPayInFullAnswers = whyCannotPayInFullAnswers
     )
 
   def startedPegaCase(
-      taxRegime:                TaxRegime,
-      encrypter:                Encrypter,
-      etmpEmail:                Option[String] = Some(TdAll.etmpEmail),
-      eligibilityMinPlanLength: Int            = 1,
-      eligibilityMaxPlanLength: Int            = 12
+      taxRegime:                 TaxRegime,
+      encrypter:                 Encrypter,
+      etmpEmail:                 Option[String]            = Some(TdAll.etmpEmail),
+      eligibilityMinPlanLength:  Int                       = 1,
+      eligibilityMaxPlanLength:  Int                       = 12,
+      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
   ): List[JourneyInfoAsJson] =
     startPegaCaseResponse :: obtainedCanPayWithinSixMonthsNo(
-      taxRegime                = taxRegime,
-      encrypter                = encrypter,
-      etmpEmail                = etmpEmail,
-      eligibilityMinPlanLength = eligibilityMinPlanLength,
-      eligibilityMaxPlanLength = eligibilityMaxPlanLength
+      taxRegime                 = taxRegime,
+      encrypter                 = encrypter,
+      etmpEmail                 = etmpEmail,
+      eligibilityMinPlanLength  = eligibilityMinPlanLength,
+      eligibilityMaxPlanLength  = eligibilityMaxPlanLength,
+      whyCannotPayInFullAnswers = whyCannotPayInFullAnswers
     )
 
   def enteredMonthlyPaymentAmount(
@@ -359,17 +375,18 @@ object JourneyInfo {
     selectedPlan :: retrievedAffordableQuotes(taxRegime, encrypter, etmpEmail)
 
   def hasCheckedPaymentPlan(
-      withAffordability:        Boolean,
-      taxRegime:                TaxRegime,
-      encrypter:                Encrypter,
-      etmpEmail:                Option[String] = Some(TdAll.etmpEmail),
-      eligibilityMinPlanLength: Int            = 1,
-      eligibilityMaxPlanLength: Int            = 12
+      withAffordability:         Boolean,
+      taxRegime:                 TaxRegime,
+      encrypter:                 Encrypter,
+      etmpEmail:                 Option[String]            = Some(TdAll.etmpEmail),
+      eligibilityMinPlanLength:  Int                       = 1,
+      eligibilityMaxPlanLength:  Int                       = 12,
+      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
   ): List[JourneyInfoAsJson] = {
     if (withAffordability)
-      paymentPlanAnswers(withAffordability) :: startedPegaCase(taxRegime, encrypter, etmpEmail, eligibilityMinPlanLength, eligibilityMaxPlanLength)
+      paymentPlanAnswers(withAffordability) :: startedPegaCase(taxRegime, encrypter, etmpEmail, eligibilityMinPlanLength, eligibilityMaxPlanLength, whyCannotPayInFullAnswers)
     else
-      paymentPlanAnswers(withAffordability) :: obtainedCanPayWithinSixMonthsNotRequired(taxRegime, encrypter, etmpEmail, eligibilityMinPlanLength, eligibilityMaxPlanLength)
+      paymentPlanAnswers(withAffordability) :: obtainedCanPayWithinSixMonthsNotRequired(taxRegime, encrypter, etmpEmail, eligibilityMinPlanLength, eligibilityMaxPlanLength, whyCannotPayInFullAnswers)
   }
 
   def enteredDetailsAboutBankAccountBusiness(
