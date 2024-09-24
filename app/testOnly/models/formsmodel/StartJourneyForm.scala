@@ -26,10 +26,11 @@ import play.api.data.Forms._
 import play.api.data._
 import play.api.data.format.Formatter
 import testOnly.messages.Messages
-import testOnly.models.testusermodel.RandomDataGenerator
+import testOnly.models.testusermodel.{ConfidenceLevelAndNino, RandomDataGenerator}
+import uk.gov.hmrc.auth.core.ConfidenceLevel
 import util.EnumFormatter
 
-import scala.util.Random
+import scala.util.{Random, Try}
 
 //TODO OPS-12584 - Clean this up when TTP has implemented the changes to the Eligibility API. The newTtpApi option in start page will not be needed
 final case class StartJourneyForm(
@@ -52,7 +53,7 @@ final case class StartJourneyForm(
     planMaxLength:                 Int,
     mainTrans:                     Option[Int],
     newTtpApi:                     Boolean,
-    nino:                          Option[String]
+    confidenceLevelAndNino:        ConfidenceLevelAndNino
 )
 
 object StartJourneyForm {
@@ -82,11 +83,38 @@ object StartJourneyForm {
         "planMaxLength" -> number,
         "mainTrans" -> optional(number),
         "newTtpApi" -> optionalBooleanMappingDefaultTrue,
-        "nino" -> optional(text)
-
+        "" -> Forms.of(confidenceLevelAndNinoFormatter)
       )(StartJourneyForm.apply)(StartJourneyForm.unapply)
     )
   }
+
+  private val confidenceLevelKey: String = "confidenceLevel"
+
+  private val ninoKey: String = "nino"
+
+  private val confidenceLevelAndNinoFormatter: Formatter[ConfidenceLevelAndNino] =
+    new Formatter[ConfidenceLevelAndNino] {
+      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], ConfidenceLevelAndNino] = {
+        val result = for {
+          s <- Either.fromOption(data.get(confidenceLevelKey), FormError(key, "Confidence level is required"))
+          i <- Try(s.toInt).toEither.leftMap(_ => FormError(confidenceLevelKey, "Could not parse confidence level as number"))
+          cl <- ConfidenceLevel.fromInt(i).toEither.leftMap(_ => FormError(confidenceLevelKey, "Invalid confidence level"))
+          nino <- {
+            val value = data.get(ninoKey).filter(_.nonEmpty)
+            if (cl > ConfidenceLevel.L50) Either.fromOption(value, FormError(ninoKey, "NINO required if CL > 50")).map(Some(_))
+            else Right(value)
+          }
+        } yield ConfidenceLevelAndNino(cl, nino)
+
+        result.leftMap(Seq(_))
+      }
+
+      override def unbind(key: String, value: ConfidenceLevelAndNino): Map[String, String] =
+        Map(
+          confidenceLevelKey -> Some(value.confidenceLevel.level.toString),
+          ninoKey -> value.nino
+        ).collect{ case (k, Some(v)) => k -> v }
+    }
 
   private val payeDebtTotalAmountKey: String = "payeDebtTotalAmount"
   private val vatDebtTotalAmountKey: String = "vatDebtTotalAmount"

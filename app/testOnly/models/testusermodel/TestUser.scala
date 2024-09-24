@@ -69,13 +69,13 @@ object TestUser {
 
     maybeAffinityGroup.map { affinityGroup: AffinityGroup =>
       TestUser(
-        nino            = form.nino.map(Nino),
+        nino            = form.confidenceLevelAndNino.nino.map(Nino),
         epayeEnrolment  = maybeEpayeEnrolment(form),
         vatEnrolment    = maybeVatEnrolment(form),
         irSaEnrolment   = maybeIrSaEnrolment(form),
         authorityId     = RandomDataGenerator.nextAuthorityId(),
         affinityGroup   = affinityGroup,
-        confidenceLevel = ConfidenceLevel.L50
+        confidenceLevel = form.confidenceLevelAndNino.confidenceLevel
       )
     }
   }
