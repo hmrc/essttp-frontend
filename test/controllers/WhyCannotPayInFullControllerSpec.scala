@@ -216,9 +216,16 @@ class WhyCannotPayInFullControllerSpec extends ItSpec with UnchangedFromCYALinkA
     }
 
     "make a call to PEGA to start a case if the user has changed their answers after a PEGA journey has already been started" in {
+      val newWhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(Set(CannotPayReason.Other))
+
       stubCommonActions()
       EssttpBackend.StartedPegaCase.findJourney(testCrypto, Origins.Epaye.Bta)()
 
+      EssttpBackend.WhyCannotPayInFull.stubUpdateWhyCannotPayInFull(
+        TdAll.journeyId,
+        newWhyCannotPayInFullAnswers,
+        JourneyJsonTemplates.`Started PEGA case`(Origins.Epaye.Bta, newWhyCannotPayInFullAnswers)(testCrypto)
+      )
       EssttpBackend.Pega.stubStartCase(TdAll.journeyId, Right(TdAll.pegaStartCaseResponse))
       EssttpBackend.Pega.stubSaveJourneyForPega(TdAll.journeyId, Right(()))
       EssttpBackend.StartedPegaCase.stubUpdateStartPegaCaseResponse(
@@ -231,6 +238,7 @@ class WhyCannotPayInFullControllerSpec extends ItSpec with UnchangedFromCYALinkA
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url)
 
+      EssttpBackend.WhyCannotPayInFull.verifyUpdateWhyCannotPayInFullRequest(TdAll.journeyId, newWhyCannotPayInFullAnswers)
       EssttpBackend.Pega.verifyStartCaseCalled(TdAll.journeyId)
       EssttpBackend.Pega.verifySaveJourneyForPegaCalled(TdAll.journeyId)
       EssttpBackend.StartedPegaCase.verifyUpdateStartPegaCaseResponseRequest(TdAll.journeyId, TdAll.pegaStartCaseResponse)
