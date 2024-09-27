@@ -24,6 +24,8 @@ import controllers.PaymentScheduleController._
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Journey, PaymentPlanAnswers, UpfrontPaymentAnswers, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.{DayOfMonth, TaxRegime}
 import essttp.utils.Errors
+import models.Language
+import models.Languages.{English, Welsh}
 import play.api.mvc._
 import services.{AuditService, JourneyService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -103,13 +105,17 @@ class PaymentScheduleController @Inject() (
     }
   }
 
-  def changeFromCheckPaymentSchedule(pageId: String, regime: TaxRegime): Action[AnyContent] =
+  def changeFromCheckPaymentSchedule(pageId: String, regime: TaxRegime, lang: Option[Language]): Action[AnyContent] =
     as.continueToSameEndpointAuthenticatedJourneyAction { implicit request =>
       request.journey match {
         case _: Journey.AfterStartedPegaCase | _: Journey.AfterSelectedPaymentPlan | _: Journey.AfterCheckedPaymentPlan =>
-          Redirect(CheckPaymentPlanChangeLink.withName(pageId).targetPage(regime))
+          val result = Redirect(CheckPaymentPlanChangeLink.withName(pageId).targetPage(regime, lang))
             .addingToSession(Routing.clickedChangeFromSessionKey -> "true")
-
+          lang match {
+            case Some(Welsh)   => result.withCookies(Cookie("PLAY_LANG", "cy"))
+            case Some(English) => result.withCookies(Cookie("PLAY_LANG", "en"))
+            case None          => result
+          }
         case other =>
           Errors.throwServerErrorException(s"Cannot change answer from check your payment plan page in journey state ${other.name}")
       }

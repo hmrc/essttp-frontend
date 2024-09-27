@@ -24,9 +24,11 @@ import essttp.journey.JourneyConnector
 import essttp.journey.model.CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel.{AmountInPence, TaxRegime, UpfrontPaymentAmount}
+import models.Language
+import models.Languages.{English, Welsh}
 import models.enumsforforms.CanPayWithinSixMonthsFormValue
 import models.forms.CanPayWithinSixMonthsForm
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, Cookie, MessagesControllerComponents}
 import requests.RequestSupport
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
@@ -49,7 +51,7 @@ class CanPayWithinSixMonthsController @Inject() (
 
   import requestSupport._
 
-  def canPayWithinSixMonths(@unused regime: TaxRegime): Action[AnyContent] =
+  def canPayWithinSixMonths(@unused regime: TaxRegime, lang: Option[Language]): Action[AnyContent] =
     as.continueToSameEndpointAuthenticatedJourneyAction { implicit request =>
       request.journey match {
         case j: Journey.BeforeRetrievedAffordabilityResult =>
@@ -62,8 +64,12 @@ class CanPayWithinSixMonthsController @Inject() (
               val previousAnswers = existingAnswersInJourney(request.journey)
               val form = previousAnswers.fold(CanPayWithinSixMonthsForm.form)(value =>
                 CanPayWithinSixMonthsForm.form.fill(CanPayWithinSixMonthsFormValue.canPayWithinSixMonthsToFormValue(value)))
-
-              Ok(views.canPayWithinSixMonthsPage(form, remainingAmountToPay(j)))
+              val result = Ok(views.canPayWithinSixMonthsPage(form, remainingAmountToPay(j)))
+              lang match {
+                case Some(Welsh)   => result.withCookies(Cookie("PLAY_LANG", "cy"))
+                case Some(English) => result.withCookies(Cookie("PLAY_LANG", "en"))
+                case _             => result
+              }
             }
           )
       }
@@ -81,7 +87,7 @@ class CanPayWithinSixMonthsController @Inject() (
           canPay
         ).map(updatedJourney =>
             Routing.redirectToNext(
-              routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(request.journey.taxRegime),
+              routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(request.journey.taxRegime, Some(request.lang)),
               updatedJourney,
               valueUnchanged
             ))

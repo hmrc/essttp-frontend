@@ -37,7 +37,8 @@
         enrolments: Enrolments,
         whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers,
         upfrontPaymentAnswers: UpfrontPaymentAnswers,
-        canPayWithinSixMonthsAnswers: CanPayWithinSixMonthsAnswers
+        canPayWithinSixMonthsAnswers: CanPayWithinSixMonthsAnswers,
+        lang: Option[models.Language]
 )(implicit request: Request[_])
 
 @import requestSupport._
@@ -57,22 +58,22 @@
 @whyCannotPayInFullRow = @{
     CheckPaymentScheduleRows.whyCannotPayInFullRow(
         whyCannotPayInFullAnswers,
-        routes.PegaController.change(CheckPaymentPlanChangeLink.WhyUnableInFull.entryName, taxRegime)
+        routes.PegaController.change(CheckPaymentPlanChangeLink.WhyUnableInFull.entryName, taxRegime, lang)
     )
 }
 
 @upfrontPaymentRows = @{
     CheckPaymentScheduleRows.upfrontPaymentRows(
         upfrontPaymentAnswers,
-        routes.PegaController.change(CheckPaymentPlanChangeLink.CanPayUpfront.entryName, taxRegime),
-        routes.PegaController.change(CheckPaymentPlanChangeLink.UpfrontPaymentAmount.entryName, taxRegime)
+        routes.PegaController.change(CheckPaymentPlanChangeLink.CanPayUpfront.entryName, taxRegime, lang),
+        routes.PegaController.change(CheckPaymentPlanChangeLink.UpfrontPaymentAmount.entryName, taxRegime, lang)
     )
 }
 
 @canPayWithinSixMonthsRow = @{
     CheckPaymentScheduleRows.canPayWithinSixMonthsRow(
         canPayWithinSixMonthsAnswers,
-        routes.PegaController.change(CheckPaymentPlanChangeLink.PayWithin6Months.entryName, taxRegime)
+        routes.PegaController.change(CheckPaymentPlanChangeLink.PayWithin6Months.entryName, taxRegime, language)
     )
 }
 

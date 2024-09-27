@@ -91,7 +91,7 @@ GET    /upfront-payment-summary/change/:pageId              controllers.UpfrontP
 GET    /retrieve-extreme-dates                              controllers.DatesApiController.retrieveExtremeDates
 GET    /determine-affordability                             controllers.DetermineAffordabilityController.determineAffordability
 
-GET    /paying-within-six-months                            controllers.CanPayWithinSixMonthsController.canPayWithinSixMonths(regime: TaxRegime)
+GET    /paying-within-six-months                            controllers.CanPayWithinSixMonthsController.canPayWithinSixMonths(regime: TaxRegime, lang: Option[Language])
 POST   /paying-within-six-months                            controllers.CanPayWithinSixMonthsController.canPayWithinSixMonthsSubmit
 
 GET    /how-much-can-you-pay-each-month                     controllers.MonthlyPaymentAmountController.displayMonthlyPaymentAmount
@@ -109,7 +109,7 @@ POST   /how-many-months-do-you-want-to-pay-over             controllers.Instalme
 
 GET    /check-your-payment-plan                             controllers.PaymentScheduleController.checkPaymentSchedule
 POST   /check-your-payment-plan                             controllers.PaymentScheduleController.checkPaymentScheduleSubmit
-GET    /check-your-payment-plan/change/:pageId              controllers.PaymentScheduleController.changeFromCheckPaymentSchedule(pageId: String, regime: TaxRegime)
+GET    /check-your-payment-plan/change/:pageId              controllers.PaymentScheduleController.changeFromCheckPaymentSchedule(pageId: String, regime: TaxRegime, lang: Option[Language])
 
 GET    /about-your-bank-account                             controllers.BankDetailsController.detailsAboutBankAccount
 POST   /about-your-bank-account                             controllers.BankDetailsController.detailsAboutBankAccountSubmit
@@ -165,4 +165,4 @@ GET    /information-missing                                 controllers.MissingI
 GET    /determine-next                                      controllers.MissingInfoController.determineNextPage
 
 GET    /pega-start                                          controllers.PegaController.startPegaJourney
-GET    /pega-callback                                       controllers.PegaController.callback(regime: TaxRegime)
+GET    /pega-callback                                       controllers.PegaController.callback(regime: TaxRegime, lang: Option[Language])

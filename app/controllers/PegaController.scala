@@ -19,8 +19,10 @@ package controllers
 import actions.Actions
 import config.AppConfig
 import essttp.rootmodel.TaxRegime
+import models.Language
+import models.Languages.{English, Welsh}
+import play.api.mvc.{Action, AnyContent, Cookie, MessagesControllerComponents}
 import requests.RequestSupport
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.PegaService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
@@ -41,13 +43,18 @@ class PegaController @Inject() (
     }
   }
 
-  def callback(regime: TaxRegime): Action[AnyContent] = as.continueToSameEndpointAuthenticatedJourneyAction.async{ implicit request =>
+  def callback(regime: TaxRegime, lang: Option[Language]): Action[AnyContent] = as.continueToSameEndpointAuthenticatedJourneyAction.async{ implicit request =>
     pegaService.getCase(request.journey).map{ _ =>
-      Routing.redirectToNext(
-        routes.PegaController.callback(regime),
+      val result = Routing.redirectToNext(
+        routes.PegaController.callback(regime, lang),
         request.journey,
         submittedValueUnchanged = true
       )
+      lang match {
+        case Some(Welsh)   => result.withCookies(Cookie("PLAY_LANG", "cy"))
+        case Some(English) => result.withCookies(Cookie("PLAY_LANG", "en"))
+        case _             => result
+      }
     }
   }
 

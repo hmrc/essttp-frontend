@@ -25,7 +25,8 @@ import scala.concurrent.Future
 
 object JourneyIncorrectStateRouter {
 
-  def logErrorAndRouteToDefaultPageF(journey: Journey)(implicit request: Request[_]): Future[Result] = Future.successful(logErrorAndRouteToDefaultPage(journey))
+  def logErrorAndRouteToDefaultPageF(journey: Journey)(implicit request: Request[_]): Future[Result] =
+    Future.successful(logErrorAndRouteToDefaultPage(journey))
 
   def logErrorAndRouteToDefaultPage(journey: Journey)(implicit request: Request[_]): Result = {
     val redirectTo = Routing.latestPossiblePage(journey)

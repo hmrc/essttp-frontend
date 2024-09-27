@@ -20,6 +20,7 @@ import actions.Actions
 import essttp.journey.model.Journey
 import essttp.rootmodel.TaxRegime
 import essttp.utils.Errors
+import models.Language
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import testOnly.views.html.IAmPegaPage
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -54,20 +55,21 @@ class PegaController @Inject() (
       request.enrolments,
       whyCannotPayInFullAnswers,
       upfrontPaymentAnswers,
-      canPayWithinSixMonthsAnswers
+      canPayWithinSixMonthsAnswers,
+      None
     ))
   }
 
-  def dummyPegaPageContinue(regime: TaxRegime): Action[AnyContent] = as.authenticatedJourneyAction { _ =>
-    Redirect(controllers.routes.PegaController.callback(regime)).withNewSession
+  def dummyPegaPageContinue(regime: TaxRegime, lang: Option[Language]): Action[AnyContent] = as.authenticatedJourneyAction { _ =>
+    Redirect(controllers.routes.PegaController.callback(regime, lang)).withNewSession
   }
 
-  def change(pageId: String, regime: TaxRegime): Action[AnyContent] = as.authenticatedJourneyAction { _ =>
-    Redirect(controllers.routes.PaymentScheduleController.changeFromCheckPaymentSchedule(pageId, regime)).withNewSession
+  def change(pageId: String, regime: TaxRegime, lang: Option[Language]): Action[AnyContent] = as.authenticatedJourneyAction { _ =>
+    Redirect(controllers.routes.PaymentScheduleController.changeFromCheckPaymentSchedule(pageId, regime, lang)).withNewSession
   }
 
-  def backFromPegaLanding(regime: TaxRegime): Action[AnyContent] = as.authenticatedJourneyAction { _ =>
-    Redirect(controllers.routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(regime)).withNewSession
+  def backFromPegaLanding(regime: TaxRegime, lang: Option[Language]): Action[AnyContent] = as.authenticatedJourneyAction { _ =>
+    Redirect(controllers.routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(regime, lang)).withNewSession
   }
 
 }
