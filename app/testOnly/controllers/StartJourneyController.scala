@@ -340,7 +340,6 @@ object StartJourneyController {
 
     val debtAmountFromForm: AmountInPence = AmountInPence(form.debtTotalAmount)
     val interestAmount: AmountInPence = AmountInPence(form.interestAmount.getOrElse(BigDecimal(0)))
-    val mainTrans: String = form.mainTrans.getOrElse(4910).toString // defaults to 4910, which  corresponds to 'Balancing Payment'
 
     //TODO OPS-12584 - Clean this up when TTP has implemented the changes to the Eligibility API. The email address will be coming from the addresses field only
     val (maybeCustomerDetail, maybeAddresses) =
@@ -387,8 +386,8 @@ object StartJourneyController {
     val charges: Charges = Charges(
       chargeType                    = ChargeType("InYearRTICharge-Tax"),
       mainType                      = MainType("InYearRTICharge(FPS)"),
-      mainTrans                     = MainTrans(mainTrans),
-      subTrans                      = SubTrans("subTrans"),
+      mainTrans                     = MainTrans(form.mainTrans),
+      subTrans                      = SubTrans(form.subTrans),
       outstandingAmount             = OutstandingAmount(debtAmountFromForm),
       interestStartDate             = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
       dueDate                       = DueDate(LocalDate.parse("2017-03-07")),

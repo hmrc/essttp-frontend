@@ -17,6 +17,7 @@
 package testOnly.models.formsmodel
 
 import cats.syntax.either._
+import cats.syntax.eq._
 import config.AppConfig
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel._
@@ -51,7 +52,8 @@ final case class StartJourneyForm(
     chargeSource:                  Option[String],
     planMinLength:                 Int,
     planMaxLength:                 Int,
-    mainTrans:                     Option[Int],
+    mainTrans:                     String,
+    subTrans:                      String,
     newTtpApi:                     Boolean,
     confidenceLevelAndNino:        ConfidenceLevelAndNino
 )
@@ -81,12 +83,18 @@ object StartJourneyForm {
         "chargeSource" -> chargesOptionalStringMapping,
         "planMinLength" -> number,
         "planMaxLength" -> number,
-        "mainTrans" -> optional(number),
+        "mainTrans" -> textWithFourDigitsMapping("mainTrans"),
+        "subTrans" -> textWithFourDigitsMapping("subTrans"),
         "newTtpApi" -> optionalBooleanMappingDefaultTrue,
         "" -> Forms.of(confidenceLevelAndNinoFormatter)
       )(StartJourneyForm.apply)(StartJourneyForm.unapply)
     )
   }
+
+  private def textWithFourDigitsMapping(key: String) =
+    text
+      .transform[String](_.replaceAll("\\s", ""), identity)
+      .verifying(s"$key must be four digits", s => s.length === 4 && s.forall(_.isDigit))
 
   private val confidenceLevelKey: String = "confidenceLevel"
 
