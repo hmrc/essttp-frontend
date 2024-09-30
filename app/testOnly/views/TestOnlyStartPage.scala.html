@@ -384,19 +384,35 @@ appConfig: AppConfig
   ))
 }
 
-@mainTransInput(defaultValue: Int) = {
+@mainTransInput = {
     @govukInput(Input(
         id = "mainTrans",
         name = "mainTrans",
         label = Label(
             isPageHeading = false,
             classes = "govuk-label--m",
-            content = Text("Enter a MainTrans code")
+            content = Text("Enter a mainTrans code")
         ),
         classes = "govuk-input--width-10",
         spellcheck = Some(false),
-        value = form.data.get("mainTrans").orElse(Some(defaultValue.toString)),
-        hint = Some(Hint(content = Text("MainTrans is 4 digits. Code 4910 corresponds to 'Balancing payment'.")))
+        value = form.data.get("mainTrans").orElse(Some("4910")),
+        hint = Some(Hint(content = Text("mainTrans is 4 digits. Code 4910 corresponds to 'Balancing payment'.")))
+    ))
+}
+
+@subTransInput = {
+    @govukInput(Input(
+        id = "subTrans",
+        name = "subTrans",
+        label = Label(
+            isPageHeading = false,
+            classes = "govuk-label--m",
+            content = Text("Enter a subTrans code")
+        ),
+        classes = "govuk-input--width-10",
+        spellcheck = Some(false),
+        value = form.data.get("subTrans").orElse(Some("1000")),
+        hint = Some(Hint(content = Text("subTrans is 4 digits.")))
     ))
 }
 
@@ -472,6 +488,10 @@ appConfig: AppConfig
         value = form.data.get("payeTaxReference"),
         hint = Some(Hint(content = Text("PAYE format NNNLLNNNNN, e.g. 864FZ00049. If left empty, it will be a random one.")))
     ))
+
+    @mainTransInput
+
+    @subTransInput
 
     @regimeDigitalCorrespondenceRadios
 
@@ -587,6 +607,10 @@ appConfig: AppConfig
         value = form.data.get("vatTaxReference"),
         hint = Some(Hint(content = Text("VAT format NNNNNNNNN, e.g. 101747001. If left empty, it will be a random one.")))
     ))
+
+    @mainTransInput
+
+    @subTransInput
 
     @regimeDigitalCorrespondenceRadios
 
@@ -711,7 +735,9 @@ appConfig: AppConfig
         hint = Some(Hint(content = Text("SAUTR is 10 digits e.g. 1234567895. If left empty, it will be a random one.")))
     ))
 
-    @mainTransInput(4910)
+    @mainTransInput
+
+    @subTransInput
 
     @regimeDigitalCorrespondenceRadios
 
@@ -799,8 +825,6 @@ appConfig: AppConfig
     @ninoInput
     @enrolmentsContent
 
-
-
     @govukInput(Input(
         id = "siaTotalAmount",
         name = "siaDebtTotalAmount",
@@ -822,6 +846,10 @@ appConfig: AppConfig
     ))
 
     @interestAmountContent
+
+    @mainTransInput
+
+    @subTransInput
 
     @regimeDigitalCorrespondenceRadios
 
