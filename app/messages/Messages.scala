@@ -1724,7 +1724,7 @@ object Messages {
     )
 
     val `Contact HMRC...If we cancel this agreement...`: Message = Message(
-      english = "Contact HMRC straight away if you have a problem. If we cancel this agreement, you'll need to pay the total amount you owe. We can also use any refunds you are due to pay off your bill.",
+      english = "Contact HMRC straight away if you have a problem. If we cancel this agreement, you’ll need to pay the total amount you owe. We can also use any refunds you are due to pay off your bill.",
       welsh   = "Cysylltwch â CThEF ar unwaith os oes gennych broblem. Os byddwn yn canslo’r cytundeb hwn, bydd angen i chi dalu’r cyfanswm sydd arnoch. Gallwn hefyd ddefnyddio unrhyw ad-daliadau rydych sydd arnoch i dalu’ch bil."
     )
 
@@ -1775,8 +1775,7 @@ object Messages {
     )
 
     val `Outside UK...`: Message = Message(
-      english = "Outside UK: <strong>+44 2890 538 192</strong>",
-      welsh   = "O’r tu allan i’r DU: +44 300 123 1813"
+      english = "Outside UK: <strong>+44 2890 538 192</strong>"
     )
 
     val `Our phone line opening hours...`: Message = Message(
@@ -1800,8 +1799,8 @@ object Messages {
     )
 
     def `Use Relay UK...`(link: String): Message = Message(
-      english = s"""Use Relay UK if you cannot hear or speak on the telephone, dial <strong>18001</strong> then <strong>0345 300 3900</strong>. Find out more on the <a href="$link" class="govuk-link">Relay UK website (opens in new tab)</a>.""",
-      welsh   = s"""Defnyddiwch wasanaeth Text Relay UK os na allwch glywed na siarad dros y ffôn. Deialwch <strong>18001</strong> ac yna <strong>0345 300 3900</strong>. Dysgwch ragor am hyn ar <a href="$link" class="govuk-link">wefan Text Relay UK (yn agor tab newydd)</a>."""
+      english = s"""Use Relay UK if you cannot hear or speak on the telephone, dial <strong>18001</strong> then <strong>0345 300 3900</strong>. Find out more on the <a href="$link" class="govuk-link" rel="noreferrer noopener" target="_blank">Relay UK website (opens in new tab)</a>.""",
+      welsh   = s"""Defnyddiwch wasanaeth Text Relay UK os na allwch glywed na siarad dros y ffôn. Deialwch <strong>18001</strong> ac yna <strong>0345 300 3900</strong>. Dysgwch ragor am hyn ar <a href="$link" class="govuk-link" rel="noreferrer noopener" target="_blank">wefan Text Relay UK (yn agor tab newydd)</a>."""
     )
 
     val `If a health condition...`: Message = Message(
@@ -1810,8 +1809,8 @@ object Messages {
     )
 
     def `Our guidance Get help from HMRC...`(link: String): Message = Message(
-      english = s"""Our guidance <a href="$link" class="govuk-link">Get help from HMRC if you need extra support (opens in new tab)</a> explains how we can support you.""",
-      welsh   = s"""Bydd ein harweiniad ynghylch <a href="$link" class="govuk-link">‘Cael help gan CThEF os oes angen cymorth ychwanegol arnoch’ (yn agor tab newydd)</a> yn esbonio sut y gallwn eich helpu."""
+      english = s"""Our guidance <a href="$link" class="govuk-link" rel="noreferrer noopener" target="_blank">Get help from HMRC if you need extra support (opens in new tab)</a> explains how we can support you.""",
+      welsh   = s"""Bydd ein harweiniad ynghylch <a href="$link" class="govuk-link" rel="noreferrer noopener" target="_blank">‘Cael help gan CThEF os oes angen cymorth ychwanegol arnoch’ (yn agor tab newydd)</a> yn esbonio sut y gallwn eich helpu."""
     )
 
     val `Declaration`: Message = Message(
