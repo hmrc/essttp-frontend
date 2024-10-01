@@ -35,6 +35,11 @@ object ContentAssertions extends RichMatchers {
       .map { case (element, expectedText) => element.text() shouldBe expectedText }
   }
 
+  def assertListOfLinks(elements: Elements)(expectedContent: List[String]) = {
+    elements.asScala.toList.zip(expectedContent)
+      .map { case (element, expectedHref) => element.attr("href") shouldBe expectedHref }
+  }
+
   //used for summary lists
   def assertKeyAndValue(element: Element, keyValue: (String, String)): Assertion = {
     element.select(".govuk-summary-list__key").text() shouldBe keyValue._1

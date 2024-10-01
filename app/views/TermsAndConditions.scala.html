@@ -14,9 +14,12 @@
  * limitations under the License.
  *@
 
+@import cats.implicits.catsSyntaxEq
+@import config.AppConfig
 @import controllers.routes
 @import essttp.rootmodel.TaxRegime
 @import messages.Messages
+@import models.Languages.English
 @import play.api.mvc.Request
 @import play.twirl.api.Html
 @import requests.RequestSupport
@@ -26,7 +29,9 @@
         layout: templates.Layout,
         govukButton: GovukButton,
         formWithCSRF: FormWithCSRF,
+        appConfig: AppConfig,
         requestSupport: RequestSupport)
+
 
 @(taxRegime: TaxRegime, isEmailAddressRequired: Boolean)(implicit request: Request[_])
 
@@ -42,17 +47,37 @@
    <li>@{Messages.TermsAndConditions.`pay another tax bill late`.show}</li>
    <li>@{Messages.TermsAndConditions.`do not submit your future tax returns on time`.show}</li>
   </ul>
-  <p class="govuk-body">@{Messages.TermsAndConditions.`If we cancel this agreement...`.show}</p>
+  <p class="govuk-body">@{Messages.TermsAndConditions.`Contact HMRC...If we cancel this agreement...`.show}</p>
 
-  <p class="govuk-body">@{Messages.TermsAndConditions.`We can use any refunds you might get to pay off your tax charges.`.show}</p>
-
-  <p class="govuk-body">@{Html(Messages.TermsAndConditions.`If your circumstances change...`.show)}</p>
+  <p class="govuk-body">@{Messages.TermsAndConditions.`You should also tell us if your circumstances change...`.show}</p>
 
   <p class="govuk-body">@{Messages.TermsAndConditions.`You can write to us...`.show}</p>
 
   <p class="govuk-body">@{Html(Messages.TermsAndConditions.`HMRC address`(taxRegime).show)}</p>
 
-  <h2 class="govuk-heading-m">@{Messages.TermsAndConditions.`Declaration`.show}</h2>
+  <h2 class="govuk-heading-m">@{Messages.TermsAndConditions.`Call the debt management helpline`.show}</h2>
+
+  <p class="govuk-body">@{Html(Messages.TermsAndConditions.`Telephone...`.show)}</p>
+
+    @if(language === English) {
+        <p class="govuk-body">@{
+            Html(Messages.TermsAndConditions.`Outside UK...`.show)
+        }</p>
+    }
+
+  <p class="govuk-body">@{Messages.TermsAndConditions.`Our phone line opening hours...`.show}</p>
+  <p class="govuk-body">@{Messages.TermsAndConditions.`Monday to Friday...`.show}</p>
+  <p class="govuk-body">@{Messages.TermsAndConditions.`Closed weekends...`.show}</p>
+
+  <h2 class="govuk-heading-m">@{Messages.TermsAndConditions.`Text service`.show}</h2>
+
+  <p class="govuk-body">@{Html(Messages.TermsAndConditions.`Use Relay UK...`(appConfig.Urls.relayUrl).show)}</p>
+
+  <p class="govuk-body">@{Html(Messages.TermsAndConditions.`If a health condition...`.show)}</p>
+
+  <p class="govuk-body">@{Html(Messages.TermsAndConditions.`Our guidance Get help from HMRC...`(appConfig.Urls.extraSupportUrl).show)}</p>
+
+  <p class="govuk-body">@{Html(Messages.TermsAndConditions.`Declaration`.show)}</p>
 
   <p class="govuk-body">@{Messages.TermsAndConditions.`I agree to the terms and conditions...`.show}</p>
 
