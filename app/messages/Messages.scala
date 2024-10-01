@@ -1723,19 +1723,14 @@ object Messages {
       welsh   = "nad ydych yn cyflwyno’ch Ffurflenni Treth yn y dyfodol mewn pryd"
     )
 
-    val `If we cancel this agreement...`: Message = Message(
-      english = "If we cancel this agreement, you will need to pay the total amount you owe straight away.",
-      welsh   = "Os byddwn yn canslo’r cytundeb hwn, bydd yn rhaid i chi dalu’r cyfanswm sydd arnoch ar unwaith."
+    val `Contact HMRC...If we cancel this agreement...`: Message = Message(
+      english = "Contact HMRC straight away if you have a problem. If we cancel this agreement, you'll need to pay the total amount you owe. We can also use any refunds you are due to pay off your bill.",
+      welsh   = "Cysylltwch â CThEF ar unwaith os oes gennych broblem. Os byddwn yn canslo’r cytundeb hwn, bydd angen i chi dalu’r cyfanswm sydd arnoch. Gallwn hefyd ddefnyddio unrhyw ad-daliadau rydych sydd arnoch i dalu’ch bil."
     )
 
-    val `We can use any refunds you might get to pay off your tax charges.`: Message = Message(
-      english = "We can use any refunds you might get to pay off your tax charges.",
-      welsh   = "Gallwn ddefnyddio unrhyw ad-daliadau y gallech eu cael i dalu’ch taliadau treth."
-    )
-
-    val `If your circumstances change...`: Message = Message(
-      english = "Contact HMRC on <strong>0300 123 1813</strong> if anything changes that you think affects your payment plan.",
-      welsh   = "Cysylltwch â CThEF ar <strong>0300 200 1900</strong> os oes unrhyw beth yn newid ac rydych o’r farn ei fod yn effeithio ar eich cynllun talu."
+    val `You should also tell us if your circumstances change...`: Message = Message(
+      english = "You should also tell us if your circumstances change, and you can pay more or pay in full.",
+      welsh   = "Dylech hefyd roi gwybod i ni os bydd eich amgylchiadau’n newid, a gallwch dalu mwy neu dalu’n llawn."
     )
 
     val `You can write to us...`: Message = Message(
@@ -1769,9 +1764,59 @@ object Messages {
       }
     }
 
+    val `Call the debt management helpline`: Message = Message(
+      english = "Call the debt management helpline",
+      welsh   = "Ffoniwch y llinell gymorth rheoli dyledion"
+    )
+
+    val `Telephone...`: Message = Message(
+      english = "Telephone: <strong>0300 123 1813</strong>",
+      welsh   = "Ffôn: <strong>0300 200 1900</strong>"
+    )
+
+    val `Outside UK...`: Message = Message(
+      english = "Outside UK: <strong>+44 2890 538 192</strong>",
+      welsh   = "O’r tu allan i’r DU: +44 300 123 1813"
+    )
+
+    val `Our phone line opening hours...`: Message = Message(
+      english = "Our phone line opening hours are:",
+      welsh   = "Oriau agor ein llinell ffôn yw:"
+    )
+
+    val `Monday to Friday...`: Message = Message(
+      english = "Monday to Friday: 8am to 6pm",
+      welsh   = "Dydd Llun i ddydd Gwener: 8:30 i 17:00"
+    )
+
+    val `Closed weekends...`: Message = Message(
+      english = "Closed weekends and bank holidays.",
+      welsh   = "Ar gau ar benwythnosau a gwyliau banc."
+    )
+
+    val `Text service`: Message = Message(
+      english = "Text service",
+      welsh   = "Gwasanaeth Text Relay"
+    )
+
+    def `Use Relay UK...`(link: String): Message = Message(
+      english = s"""Use Relay UK if you cannot hear or speak on the telephone, dial <strong>18001</strong> then <strong>0345 300 3900</strong>. Find out more on the <a href="$link" class="govuk-link">Relay UK website (opens in new tab)</a>.""",
+      welsh   = s"""Defnyddiwch wasanaeth Text Relay UK os na allwch glywed na siarad dros y ffôn. Deialwch <strong>18001</strong> ac yna <strong>0345 300 3900</strong>. Dysgwch ragor am hyn ar <a href="$link" class="govuk-link">wefan Text Relay UK (yn agor tab newydd)</a>."""
+    )
+
+    val `If a health condition...`: Message = Message(
+      english = "<strong>If a health condition or personal circumstances make it difficult to contact us</strong>",
+      welsh   = "<strong>Os yw cyflwr iechyd neu amgylchiadau personol yn ei gwneud hi’n anodd i chi gysylltu â ni</strong>"
+    )
+
+    def `Our guidance Get help from HMRC...`(link: String): Message = Message(
+      english = s"""Our guidance <a href="$link" class="govuk-link">Get help from HMRC if you need extra support (opens in new tab)</a> explains how we can support you.""",
+      welsh   = s"""Bydd ein harweiniad ynghylch <a href="$link" class="govuk-link">‘Cael help gan CThEF os oes angen cymorth ychwanegol arnoch’ (yn agor tab newydd)</a> yn esbonio sut y gallwn eich helpu."""
+    )
+
     val `Declaration`: Message = Message(
-      english = "Declaration",
-      welsh   = "Datganiad"
+      english = "<strong>Declaration</strong>",
+      welsh   = "<strong>Datganiad</strong>"
     )
 
     val `I agree to the terms and conditions...`: Message = Message(
