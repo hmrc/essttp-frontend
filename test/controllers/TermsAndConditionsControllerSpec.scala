@@ -81,7 +81,7 @@ class TermsAndConditionsControllerSpec extends ItSpec {
               )(
                   expectedContent = List(
                     "We can cancel this agreement if you:",
-                    "Contact HMRC straight away if you have a problem. If we cancel this agreement, you'll need to pay the total amount you owe. We can also use any refunds you are due to pay off your bill.",
+                    "Contact HMRC straight away if you have a problem. If we cancel this agreement, you’ll need to pay the total amount you owe. We can also use any refunds you are due to pay off your bill.",
                     "You should also tell us if your circumstances change, and you can pay more or pay in full.",
                     "You can write to us about your Direct Debit:",
                     taxRegimeAddress,
