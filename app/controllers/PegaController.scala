@@ -46,7 +46,7 @@ class PegaController @Inject() (
   def callback(regime: TaxRegime, lang: Option[Language]): Action[AnyContent] = as.continueToSameEndpointAuthenticatedJourneyAction.async{ implicit request =>
     pegaService.getCase(request.journey).map{ _ =>
       val result = Routing.redirectToNext(
-        routes.PegaController.callback(regime, lang),
+        routes.PegaController.callback(regime, None),
         request.journey,
         submittedValueUnchanged = true
       )

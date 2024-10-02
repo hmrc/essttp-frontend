@@ -19,7 +19,6 @@ package controllers
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import controllers.PaymentScheduleControllerSpec.SummaryRow
 import essttp.journey.model.{Origin, Origins}
-import models.Languages.English
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import play.api.http.Status
@@ -69,25 +68,25 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
               val whyCannotPayInFullRow = SummaryRow(
                 "Why are you unable to pay in full?",
                 reasonsToNotPayInFull.mkString(" "),
-                PageUrls.checkPaymentPlanChangeUrl("WhyUnableInFull", origin.taxRegime, Some(English))
+                PageUrls.checkPaymentPlanChangeUrl("WhyUnableInFull", origin.taxRegime, None)
               )
 
               val canPayUpfrontRow = SummaryRow(
                 "Can you make an upfront payment?",
                 canPayUpfrontValue,
-                PageUrls.checkPaymentPlanChangeUrl("CanPayUpfront", origin.taxRegime, Some(English))
+                PageUrls.checkPaymentPlanChangeUrl("CanPayUpfront", origin.taxRegime, None)
               )
               val upfrontPaymentAmountRow = upfrontPaymentAmountValue.map(amount =>
                 SummaryRow(
                   "Upfront payment\n<br><span class=\"govuk-body-s\">Taken within 6 working days</span>",
                   amount,
-                  PageUrls.checkPaymentPlanChangeUrl("UpfrontPaymentAmount", origin.taxRegime, Some(English))
+                  PageUrls.checkPaymentPlanChangeUrl("UpfrontPaymentAmount", origin.taxRegime, None)
                 ))
 
               val canPayWithinSixMonthsRow = SummaryRow(
                 "Can you pay within 6 months?",
                 canPayWithinSixMonths,
-                PageUrls.checkPaymentPlanChangeUrl("PayWithin6Months", origin.taxRegime, Some(English))
+                PageUrls.checkPaymentPlanChangeUrl("PayWithin6Months", origin.taxRegime, None)
               )
 
               val expectedSummaryRows = List(
@@ -111,18 +110,18 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
               val monthlyPaymentAmountRow = SummaryRow(
                 "How much can you afford to pay each month?",
                 affordableMonthlyPaymentAmount,
-                PageUrls.checkPaymentPlanChangeUrl("MonthlyPaymentAmount", origin.taxRegime, Some(English))
+                PageUrls.checkPaymentPlanChangeUrl("MonthlyPaymentAmount", origin.taxRegime, None)
               )
 
               val paymentDayRow = SummaryRow(
                 "Payments collected on",
                 paymentDayValue,
-                PageUrls.checkPaymentPlanChangeUrl("PaymentDay", origin.taxRegime, Some(English))
+                PageUrls.checkPaymentPlanChangeUrl("PaymentDay", origin.taxRegime, None)
               )
 
               val paymentAmountRows = datesToAmountsValues.map {
                 case (date, amount) =>
-                  SummaryRow(date, amount, PageUrls.checkPaymentPlanChangeUrl("PaymentPlan", origin.taxRegime, Some(English)))
+                  SummaryRow(date, amount, PageUrls.checkPaymentPlanChangeUrl("PaymentPlan", origin.taxRegime, None))
               }
 
               val totalToPayRow = SummaryRow("Total to pay", totalToPayValue, "")
@@ -327,7 +326,7 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
 
         s"[$regime journey] GET /check-payment-plan/change" - {
 
-          behave like recreateSessionErrorBehaviour(controller.changeFromCheckPaymentSchedule("", _, Some(English))(_))
+          behave like recreateSessionErrorBehaviour(controller.changeFromCheckPaymentSchedule("", _, None)(_))
 
           "should redirect to the correct page and update the cookie session with the pageId" - {
 

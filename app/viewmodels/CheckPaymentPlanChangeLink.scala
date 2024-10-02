@@ -19,42 +19,41 @@ package viewmodels
 import controllers.routes
 import enumeratum._
 import essttp.rootmodel.TaxRegime
-import models.Language
 import play.api.mvc.Call
 
 sealed trait CheckPaymentPlanChangeLink extends EnumEntry {
-  def targetPage(taxRegime: TaxRegime, lang: Option[Language]): Call
-  def changeLink(taxRegime: TaxRegime, lang: Option[Language]): Call = routes.PaymentScheduleController.changeFromCheckPaymentSchedule(entryName, taxRegime, lang)
+  def targetPage(taxRegime: TaxRegime): Call
+  def changeLink(taxRegime: TaxRegime): Call = routes.PaymentScheduleController.changeFromCheckPaymentSchedule(entryName, taxRegime, None)
 }
 
 object CheckPaymentPlanChangeLink extends Enum[CheckPaymentPlanChangeLink] {
 
   case object CanPayUpfront extends CheckPaymentPlanChangeLink {
-    def targetPage(taxRegime: TaxRegime, lang: Option[Language]): Call = routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment
+    def targetPage(taxRegime: TaxRegime): Call = routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment
   }
 
   case object UpfrontPaymentAmount extends CheckPaymentPlanChangeLink {
-    def targetPage(taxRegime: TaxRegime, lang: Option[Language]): Call = routes.UpfrontPaymentController.upfrontPaymentAmount
+    def targetPage(taxRegime: TaxRegime): Call = routes.UpfrontPaymentController.upfrontPaymentAmount
   }
 
   case object MonthlyPaymentAmount extends CheckPaymentPlanChangeLink {
-    def targetPage(taxRegime: TaxRegime, lang: Option[Language]): Call = routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount
+    def targetPage(taxRegime: TaxRegime): Call = routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount
   }
 
   case object PaymentDay extends CheckPaymentPlanChangeLink {
-    def targetPage(taxRegime: TaxRegime, lang: Option[Language]): Call = routes.PaymentDayController.paymentDay
+    def targetPage(taxRegime: TaxRegime): Call = routes.PaymentDayController.paymentDay
   }
 
   case object WhyUnableInFull extends CheckPaymentPlanChangeLink {
-    def targetPage(taxRegime: TaxRegime, lang: Option[Language]): Call = routes.WhyCannotPayInFullController.whyCannotPayInFull
+    def targetPage(taxRegime: TaxRegime): Call = routes.WhyCannotPayInFullController.whyCannotPayInFull
   }
 
   case object PayWithin6Months extends CheckPaymentPlanChangeLink {
-    def targetPage(taxRegime: TaxRegime, lang: Option[Language]): Call = routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(taxRegime, lang)
+    def targetPage(taxRegime: TaxRegime): Call = routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(taxRegime, None)
   }
 
   case object PaymentPlan extends CheckPaymentPlanChangeLink {
-    def targetPage(taxRegime: TaxRegime, lang: Option[Language]): Call = routes.InstalmentsController.instalmentOptions
+    def targetPage(taxRegime: TaxRegime): Call = routes.InstalmentsController.instalmentOptions
   }
 
   override val values = findValues

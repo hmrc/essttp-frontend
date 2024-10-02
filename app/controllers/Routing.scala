@@ -24,6 +24,7 @@ import essttp.journey.model._
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import essttp.rootmodel.{CanPayUpfront, IsEmailAddressRequired, TaxRegime}
 import essttp.utils.Errors
+import models.Languages.{English, Welsh}
 import paymentsEmailVerification.models.EmailVerificationResult
 import play.api.http.Status.INTERNAL_SERVER_ERROR
 import play.api.mvc.Results.Redirect
@@ -83,13 +84,14 @@ object Routing {
       routes.DetermineAffordabilityController.determineAffordability -> { () =>
         affordabilityRoute(journey)
       },
+      routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(journey.taxRegime, Some(English)) -> { () =>
+        canPayWithinSixMonthsRoute(journey)
+      },
+      routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(journey.taxRegime, Some(Welsh)) -> { () =>
+        canPayWithinSixMonthsRoute(journey)
+      },
       routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(journey.taxRegime, None) -> { () =>
-        journey match {
-          case _: BeforeCanPayWithinSixMonthsAnswers =>
-            throw UpstreamErrorResponse("Could not find CanPayWithinSixMonths answer to determine route", INTERNAL_SERVER_ERROR)
-          case j: AfterCanPayWithinSixMonthsAnswers =>
-            canPayWithinSixMonthsRoute(j.canPayWithinSixMonthsAnswers)
-        }
+        canPayWithinSixMonthsRoute(journey)
       },
       routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount -> { () =>
         routes.PaymentDayController.paymentDay
@@ -254,6 +256,15 @@ object Routing {
 
     case j: Journey.Stages.SubmittedArrangement =>
       SubmitArrangementController.whichPaymentPlanSetupPage(j.taxRegime)
+  }
+
+  private def canPayWithinSixMonthsRoute(journey: Journey): Call = {
+    journey match {
+      case _: BeforeCanPayWithinSixMonthsAnswers =>
+        throw UpstreamErrorResponse("Could not find CanPayWithinSixMonths answer to determine route", INTERNAL_SERVER_ERROR)
+      case j: AfterCanPayWithinSixMonthsAnswers =>
+        canPayWithinSixMonthsRoute(j.canPayWithinSixMonthsAnswers)
+    }
   }
 
   private def canPayUpfrontRoute(canPayUpfront: CanPayUpfront): Call =

@@ -44,15 +44,12 @@ object Language {
     override def bind(key: String, value: String): Either[String, Option[Language]] =
       implicitly[PathBindable[Language]]
         .bind(key, value)
-        .fold(
-          left => Left(left),
-          right => Right(Some(right))
-        )
+        .map(Some(_))
 
-    override def unbind(key: String, value: Option[Language]): String = value map (_.toString) getOrElse ""
+    override def unbind(key: String, value: Option[Language]): String = value map (_.code) getOrElse ""
   }
 
-  implicit val languageBinder: QueryStringBindable[Language] =
+  implicit val languageQueryStringBindable: QueryStringBindable[Language] =
     new QueryStringBindable[Language] {
 
       override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, Language]] = {

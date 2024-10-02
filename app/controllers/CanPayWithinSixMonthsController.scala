@@ -87,7 +87,7 @@ class CanPayWithinSixMonthsController @Inject() (
           canPay
         ).map(updatedJourney =>
             Routing.redirectToNext(
-              routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(request.journey.taxRegime, Some(request.lang)),
+              routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(request.journey.taxRegime, None),
               updatedJourney,
               valueUnchanged
             ))

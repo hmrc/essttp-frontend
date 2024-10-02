@@ -46,8 +46,7 @@
   affordableMonthlyPaymentAmount: AmountInPence,
   whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers,
   canPayWithinSixMonthsAnswers: CanPayWithinSixMonthsAnswers,
-  taxRegime: TaxRegime,
-  language: Option[Language]
+  taxRegime: TaxRegime
 )(implicit request: EligibleJourneyRequest[_], ord: Ordering[LocalDate])
 
 @import requestSupport._
@@ -55,17 +54,17 @@
 @title = @{Messages.PaymentSchedule.`Check your payment plan`.show}
 
 @whyCannotPayInFullRow = @{
-  CheckPaymentScheduleRows.whyCannotPayInFullRow(whyCannotPayInFullAnswers, CheckPaymentPlanChangeLink.WhyUnableInFull.changeLink(taxRegime, language))
+  CheckPaymentScheduleRows.whyCannotPayInFullRow(whyCannotPayInFullAnswers, CheckPaymentPlanChangeLink.WhyUnableInFull.changeLink(taxRegime))
 }
 
 @upfrontPaymentRows = @{
   CheckPaymentScheduleRows.upfrontPaymentRows(upfrontPaymentAnswers,
-  CheckPaymentPlanChangeLink.CanPayUpfront.changeLink(taxRegime, language),
-  CheckPaymentPlanChangeLink.UpfrontPaymentAmount.changeLink(taxRegime, language))
+  CheckPaymentPlanChangeLink.CanPayUpfront.changeLink(taxRegime),
+  CheckPaymentPlanChangeLink.UpfrontPaymentAmount.changeLink(taxRegime))
 }
 
 @canPayWithinSixMonthsRow = @{
-  CheckPaymentScheduleRows.canPayWithinSixMonthsRow(canPayWithinSixMonthsAnswers, CheckPaymentPlanChangeLink.PayWithin6Months.changeLink(taxRegime, language))
+  CheckPaymentScheduleRows.canPayWithinSixMonthsRow(canPayWithinSixMonthsAnswers, CheckPaymentPlanChangeLink.PayWithin6Months.changeLink(taxRegime))
 }
 
 @montlyAmountRow = @{
@@ -80,7 +79,7 @@
     actions = Some(Actions(
       items = Seq(
         ActionItem(
-          href = CheckPaymentPlanChangeLink.MonthlyPaymentAmount.changeLink(taxRegime, language).url,
+          href = CheckPaymentPlanChangeLink.MonthlyPaymentAmount.changeLink(taxRegime).url,
           content = Text(Messages.change.show),
           visuallyHiddenText = Some(Messages.PaymentSchedule.`How much you can afford to pay each month`.show)
         )
@@ -101,7 +100,7 @@
     actions = Some(Actions(
       items = Seq(
         ActionItem(
-          href = CheckPaymentPlanChangeLink.PaymentDay.changeLink(taxRegime, language).url,
+          href = CheckPaymentPlanChangeLink.PaymentDay.changeLink(taxRegime).url,
           content = Text(Messages.change.show),
           visuallyHiddenText = Some(Messages.PaymentSchedule.`payment day`.show)
         )
@@ -126,7 +125,7 @@
       actions = Some(Actions(
         items = Seq(
           ActionItem(
-            href = CheckPaymentPlanChangeLink.PaymentPlan.changeLink(taxRegime, language).url,
+            href = CheckPaymentPlanChangeLink.PaymentPlan.changeLink(taxRegime).url,
              classes = s"${if(index === 0) "" else "grouped-change"}",
             content = Text(Messages.change.show),
             visuallyHiddenText = Some(Messages.PaymentSchedule.`Change months duration`.show)

@@ -74,8 +74,7 @@ class PaymentScheduleController @Inject() (
       monthlyPaymentAmount.value,
       whyCannotPayInFullAnswersFromJourney(journeyMerged),
       canPayWithinSixMonthsFromJourney(journeyMerged),
-      journeyMerged.taxRegime,
-      Some(r.lang)
+      journeyMerged.taxRegime
     ))
   }
 
@@ -110,7 +109,7 @@ class PaymentScheduleController @Inject() (
     as.continueToSameEndpointAuthenticatedJourneyAction { implicit request =>
       request.journey match {
         case _: Journey.AfterStartedPegaCase | _: Journey.AfterSelectedPaymentPlan | _: Journey.AfterCheckedPaymentPlan =>
-          val result = Redirect(CheckPaymentPlanChangeLink.withName(pageId).targetPage(regime, lang))
+          val result = Redirect(CheckPaymentPlanChangeLink.withName(pageId).targetPage(regime))
             .addingToSession(Routing.clickedChangeFromSessionKey -> "true")
           lang match {
             case Some(Welsh)   => result.withCookies(Cookie("PLAY_LANG", "cy"))

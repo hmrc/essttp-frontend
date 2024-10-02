@@ -38,8 +38,7 @@
         enrolments: Enrolments,
         whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers,
         upfrontPaymentAnswers: UpfrontPaymentAnswers,
-        canPayWithinSixMonthsAnswers: CanPayWithinSixMonthsAnswers,
-        language: Option[Language]
+        canPayWithinSixMonthsAnswers: CanPayWithinSixMonthsAnswers
 )(implicit request: Request[_])
 
 @import requestSupport._
@@ -59,29 +58,29 @@
 @whyCannotPayInFullRow = @{
     CheckPaymentScheduleRows.whyCannotPayInFullRow(
         whyCannotPayInFullAnswers,
-        routes.PegaController.change(CheckPaymentPlanChangeLink.WhyUnableInFull.entryName, taxRegime, language)
+        routes.PegaController.change(CheckPaymentPlanChangeLink.WhyUnableInFull.entryName, taxRegime)
     )
 }
 
 @upfrontPaymentRows = @{
     CheckPaymentScheduleRows.upfrontPaymentRows(
         upfrontPaymentAnswers,
-        routes.PegaController.change(CheckPaymentPlanChangeLink.CanPayUpfront.entryName, taxRegime, language),
-        routes.PegaController.change(CheckPaymentPlanChangeLink.UpfrontPaymentAmount.entryName, taxRegime, language)
+        routes.PegaController.change(CheckPaymentPlanChangeLink.CanPayUpfront.entryName, taxRegime),
+        routes.PegaController.change(CheckPaymentPlanChangeLink.UpfrontPaymentAmount.entryName, taxRegime)
     )
 }
 
 @canPayWithinSixMonthsRow = @{
     CheckPaymentScheduleRows.canPayWithinSixMonthsRow(
         canPayWithinSixMonthsAnswers,
-        routes.PegaController.change(CheckPaymentPlanChangeLink.PayWithin6Months.entryName, taxRegime, language)
+        routes.PegaController.change(CheckPaymentPlanChangeLink.PayWithin6Months.entryName, taxRegime)
     )
 }
 
 @testOnlyLayout(
     pageTitle = Some(title),
     showBackLink = true,
-    backLinkUrlOverride = Some(testOnly.controllers.routes.PegaController.backFromPegaLanding(taxRegime, language).url)
+    backLinkUrlOverride = Some(testOnly.controllers.routes.PegaController.backFromPegaLanding(taxRegime).url)
 ) {
 
     <h1 class="govuk-heading-xl">@title</h1>
@@ -122,7 +121,7 @@
         )
     )
 
-    @formWithCSRF(action = routes.PegaController.dummyPegaPageContinue(taxRegime, language)) {
+    @formWithCSRF(action = routes.PegaController.dummyPegaPageContinue(taxRegime)) {
         @govukButton(Button(
             content = Text("Continue"),
             attributes = Map("id" -> "continue")
