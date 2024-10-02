@@ -40,6 +40,18 @@ object Language {
 
   implicit val format: Format[Language] = EnumFormat(Languages)
   implicit val languagePathBinder: PathBindable[Language] = valueClassBinder(_.toString)
+  implicit val optionLanguagePathBinder: PathBindable[Option[Language]] = new PathBindable[Option[Language]] {
+    override def bind(key: String, value: String): Either[String, Option[Language]] =
+      implicitly[PathBindable[Language]]
+        .bind(key, value)
+        .fold(
+          left => Left(left),
+          right => Right(Some(right))
+        )
+
+    override def unbind(key: String, value: Option[Language]): String = value map (_.toString) getOrElse ""
+  }
+
   implicit val languageBinder: QueryStringBindable[Language] =
     new QueryStringBindable[Language] {
 

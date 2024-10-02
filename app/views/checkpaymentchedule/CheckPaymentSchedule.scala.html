@@ -22,6 +22,7 @@
 @import essttp.rootmodel.{AmountInPence, DayOfMonth, TaxRegime}
 @import messages.{DateMessages, Messages}
 @import play.twirl.api.Html
+@import models._
 @import requests.RequestSupport
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import viewmodels.CheckPaymentPlanChangeLink
@@ -45,7 +46,8 @@
   affordableMonthlyPaymentAmount: AmountInPence,
   whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers,
   canPayWithinSixMonthsAnswers: CanPayWithinSixMonthsAnswers,
-  taxRegime: TaxRegime
+  taxRegime: TaxRegime,
+  language: Option[Language]
 )(implicit request: EligibleJourneyRequest[_], ord: Ordering[LocalDate])
 
 @import requestSupport._
@@ -53,15 +55,17 @@
 @title = @{Messages.PaymentSchedule.`Check your payment plan`.show}
 
 @whyCannotPayInFullRow = @{
-  CheckPaymentScheduleRows.whyCannotPayInFullRow(whyCannotPayInFullAnswers, CheckPaymentPlanChangeLink.WhyUnableInFull.changeLink(taxRegime))
+  CheckPaymentScheduleRows.whyCannotPayInFullRow(whyCannotPayInFullAnswers, CheckPaymentPlanChangeLink.WhyUnableInFull.changeLink(taxRegime, language))
 }
 
 @upfrontPaymentRows = @{
-  CheckPaymentScheduleRows.upfrontPaymentRows(upfrontPaymentAnswers, CheckPaymentPlanChangeLink.CanPayUpfront.changeLink(taxRegime), CheckPaymentPlanChangeLink.UpfrontPaymentAmount.changeLink(taxRegime))
+  CheckPaymentScheduleRows.upfrontPaymentRows(upfrontPaymentAnswers,
+  CheckPaymentPlanChangeLink.CanPayUpfront.changeLink(taxRegime, language),
+  CheckPaymentPlanChangeLink.UpfrontPaymentAmount.changeLink(taxRegime, language))
 }
 
 @canPayWithinSixMonthsRow = @{
-  CheckPaymentScheduleRows.canPayWithinSixMonthsRow(canPayWithinSixMonthsAnswers, CheckPaymentPlanChangeLink.PayWithin6Months.changeLink(taxRegime))
+  CheckPaymentScheduleRows.canPayWithinSixMonthsRow(canPayWithinSixMonthsAnswers, CheckPaymentPlanChangeLink.PayWithin6Months.changeLink(taxRegime, language))
 }
 
 @montlyAmountRow = @{
@@ -76,7 +80,7 @@
     actions = Some(Actions(
       items = Seq(
         ActionItem(
-          href = CheckPaymentPlanChangeLink.MonthlyPaymentAmount.changeLink(taxRegime).url,
+          href = CheckPaymentPlanChangeLink.MonthlyPaymentAmount.changeLink(taxRegime, language).url,
           content = Text(Messages.change.show),
           visuallyHiddenText = Some(Messages.PaymentSchedule.`How much you can afford to pay each month`.show)
         )
@@ -97,7 +101,7 @@
     actions = Some(Actions(
       items = Seq(
         ActionItem(
-          href = CheckPaymentPlanChangeLink.PaymentDay.changeLink(taxRegime).url,
+          href = CheckPaymentPlanChangeLink.PaymentDay.changeLink(taxRegime, language).url,
           content = Text(Messages.change.show),
           visuallyHiddenText = Some(Messages.PaymentSchedule.`payment day`.show)
         )
@@ -122,7 +126,7 @@
       actions = Some(Actions(
         items = Seq(
           ActionItem(
-            href = CheckPaymentPlanChangeLink.PaymentPlan.changeLink(taxRegime).url,
+            href = CheckPaymentPlanChangeLink.PaymentPlan.changeLink(taxRegime, language).url,
              classes = s"${if(index === 0) "" else "grouped-change"}",
             content = Text(Messages.change.show),
             visuallyHiddenText = Some(Messages.PaymentSchedule.`Change months duration`.show)

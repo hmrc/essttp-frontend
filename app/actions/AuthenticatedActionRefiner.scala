@@ -63,7 +63,7 @@ trait AuthenticatedActionRefiner { this: ActionRefiner[Request, AuthenticatedReq
                     enrolments,
                     GGCredId(ggCredId.providerId),
                     nino.map(nino => Nino(nino)),
-                    requestSupport.language
+                    requestSupport.languageFromRequest
                   )
                 )
               )

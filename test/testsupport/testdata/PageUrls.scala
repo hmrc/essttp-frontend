@@ -17,6 +17,7 @@
 package testsupport.testdata
 
 import essttp.rootmodel.TaxRegime
+import models.Language
 
 import java.util.Locale
 
@@ -65,7 +66,8 @@ object PageUrls {
   def upfrontPaymentSummaryChangeUrl(pageId: String): String = s"$serviceBaseUrl/upfront-payment-summary/change/$pageId"
   val retrievedExtremeDatesUrl: String = s"$serviceBaseUrl/retrieve-extreme-dates"
   val determineAffordabilityUrl: String = s"$serviceBaseUrl/determine-affordability"
-  def canPayWithinSixMonthsUrl(regime: TaxRegime): String = s"$serviceBaseUrl/paying-within-six-months?regime=${regime.entryName.toLowerCase(Locale.UK)}"
+  def canPayWithinSixMonthsUrl(regime: TaxRegime, lang: Option[Language]): String =
+    s"$serviceBaseUrl/paying-within-six-months?regime=${regime.entryName.toLowerCase(Locale.UK)}${lang.fold("")("&" + _.code)}"
   val startPegaCaseUrl: String = s"$serviceBaseUrl/pega-start"
   val howMuchCanYouPayEachMonthUrl: String = s"$serviceBaseUrl/how-much-can-you-pay-each-month"
   val whichDayDoYouWantToPayUrl: String = s"$serviceBaseUrl/which-day-do-you-want-to-pay-each-month"
@@ -73,8 +75,8 @@ object PageUrls {
   val determineAffordableQuotesUrl: String = s"$serviceBaseUrl/determine-affordable-quotes"
   val instalmentsUrl: String = s"$serviceBaseUrl/how-many-months-do-you-want-to-pay-over"
   val checkPaymentPlanUrl: String = s"$serviceBaseUrl/check-your-payment-plan"
-  def checkPaymentPlanChangeUrl(pageId: String, taxRegime: TaxRegime): String =
-    s"$serviceBaseUrl/check-your-payment-plan/change/$pageId?regime=${taxRegime.entryName.toLowerCase(Locale.UK)}"
+  def checkPaymentPlanChangeUrl(pageId: String, taxRegime: TaxRegime, lang: Option[Language]): String =
+    s"$serviceBaseUrl/check-your-payment-plan/change/$pageId?regime=${taxRegime.entryName.toLowerCase(Locale.UK)}${lang.fold("")("&" + _.code)}"
   val aboutYourBankAccountUrl: String = s"$serviceBaseUrl/about-your-bank-account"
   val directDebitDetailsUrl: String = s"$serviceBaseUrl/set-up-direct-debit"
   val cannotSetupDirectDebitOnlineUrl: String = s"$serviceBaseUrl/you-cannot-set-up-a-direct-debit-online"

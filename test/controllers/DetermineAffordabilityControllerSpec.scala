@@ -61,13 +61,15 @@ class DetermineAffordabilityControllerSpec extends ItSpec {
               EssttpBackend.Dates.findJourneyExtremeDates(testCrypto, origin)(
                 JourneyJsonTemplates.`Retrieved Extreme Dates Response`(origin, affordabilityEnabled = true)(testCrypto)
               )
-              EssttpBackend.AffordabilityMinMaxApi.stubUpdateAffordability(TdAll.journeyId, JourneyJsonTemplates.`Retrieved Affordability`(origin, affordabilityEnabled = true))
+              EssttpBackend.AffordabilityMinMaxApi.stubUpdateAffordability(
+                TdAll.journeyId, JourneyJsonTemplates.`Retrieved Affordability`(origin, affordabilityEnabled = true)
+              )
               Ttp.Affordability.stubRetrieveAffordability()
 
               val result: Future[Result] = controller.determineAffordability(fakeRequest)
 
               status(result) shouldBe Status.SEE_OTHER
-              redirectLocation(result) shouldBe Some(PageUrls.canPayWithinSixMonthsUrl(origin.taxRegime))
+              redirectLocation(result) shouldBe Some(PageUrls.canPayWithinSixMonthsUrl(origin.taxRegime, None))
               EssttpBackend.AffordabilityMinMaxApi.verifyUpdateAffordabilityRequest(TdAll.journeyId, TdAll.instalmentAmounts)
               EssttpBackend.CanPayWithinSixMonths.verifyNoneUpdateCanPayWithinSixMonthsRequest(TdAll.journeyId)
               Ttp.Affordability.verifyTtpAffordabilityRequest(origin.taxRegime)(CryptoFormat.NoOpCryptoFormat)

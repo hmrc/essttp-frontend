@@ -82,7 +82,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
       stubCommonActions()
       EssttpBackend.Dates.findJourneyExtremeDates(testCrypto, Origins.Epaye.Bta)()
 
-      val result = controller.canPayWithinSixMonths(Epaye)(fakeRequest)
+      val result = controller.canPayWithinSixMonths(Epaye, None)(fakeRequest)
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.DetermineAffordabilityController.determineAffordability.url)
     }
@@ -91,7 +91,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
       stubCommonActions()
       EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, Origins.Epaye.Bta)()
 
-      val result = controller.canPayWithinSixMonths(Epaye)(fakeRequest)
+      val result = controller.canPayWithinSixMonths(Epaye, None)(fakeRequest)
       testPageIsDisplayed(result, None)
     }
 
@@ -101,7 +101,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
         JourneyJsonTemplates.`Obtained Can Pay Within 6 months - yes`(Origins.Epaye.Bta)(testCrypto)
       )
 
-      val result = controller.canPayWithinSixMonths(Epaye)(fakeRequest)
+      val result = controller.canPayWithinSixMonths(Epaye, None)(fakeRequest)
       testPageIsDisplayed(result, Some(true))
     }
 
@@ -111,7 +111,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
         JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
       )
 
-      val result = controller.canPayWithinSixMonths(Epaye)(fakeRequest)
+      val result = controller.canPayWithinSixMonths(Epaye, None)(fakeRequest)
       testPageIsDisplayed(result, Some(false))
     }
 
@@ -119,7 +119,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
       stubCommonActions()
       EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, Origins.Epaye.Bta)()
 
-      val result = controller.canPayWithinSixMonths(Epaye)(fakeRequest.withLangWelsh())
+      val result = controller.canPayWithinSixMonths(Epaye, None)(fakeRequest.withLangWelsh())
       RequestAssertions.assertGetRequestOk(result)
 
       val doc = Jsoup.parse(contentAsString(result))
@@ -158,9 +158,9 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
 
   List(TaxRegime.Epaye, TaxRegime.Vat, TaxRegime.Sa)
     .foreach(regime =>
-      s"[${regime.entryName} journey] GET ${routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(regime).url}" - {
+      s"[${regime.entryName} journey] GET ${routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(regime, None).url}" - {
 
-        behave like recreateSessionErrorBehaviour(controller.canPayWithinSixMonths(_)(_))
+        behave like recreateSessionErrorBehaviour(controller.canPayWithinSixMonths(_, None)(_))
 
         "be able to show the page correctly when no session is found but is successfully recreated" in {
           stubCommonActions()
@@ -175,7 +175,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
               .withAuthToken()
               .withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
-          val result = controller.canPayWithinSixMonths(regime)(request)
+          val result = controller.canPayWithinSixMonths(regime, None)(request)
 
           status(result) shouldBe OK
 

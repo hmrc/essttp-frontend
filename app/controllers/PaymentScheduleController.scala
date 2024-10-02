@@ -74,7 +74,8 @@ class PaymentScheduleController @Inject() (
       monthlyPaymentAmount.value,
       whyCannotPayInFullAnswersFromJourney(journeyMerged),
       canPayWithinSixMonthsFromJourney(journeyMerged),
-      journeyMerged.taxRegime
+      journeyMerged.taxRegime,
+      Some(r.lang)
     ))
   }
 

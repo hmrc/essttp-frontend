@@ -121,7 +121,7 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
 
     "handling callbacks must" - {
 
-      behave like recreateSessionErrorBehaviour(controller.callback(_)(_))
+      behave like recreateSessionErrorBehaviour(controller.callback(_, None)(_))
 
       "return an error when" - {
 
@@ -129,7 +129,7 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
           stubCommonActions()
           EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, Origins.Epaye.Bta)()
 
-          val exception = intercept[Exception](await(controller.callback(TaxRegime.Epaye)(fakeRequest)))
+          val exception = intercept[Exception](await(controller.callback(TaxRegime.Epaye, None)(fakeRequest)))
           exception.getMessage should include("Cannot get PEGA case when journey is in state essttp.journey.model.Journey.Epaye.RetrievedAffordabilityResult")
         }
 
@@ -137,7 +137,7 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
           stubCommonActions()
           EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, Origins.Epaye.Bta)()
 
-          val exception = intercept[Exception](await(controller.callback(TaxRegime.Epaye)(fakeRequest)))
+          val exception = intercept[Exception](await(controller.callback(TaxRegime.Epaye, None)(fakeRequest)))
           exception.getMessage should include("Trying to get PEGA case on non-affordability journey")
 
         }
@@ -147,7 +147,7 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
           EssttpBackend.StartedPegaCase.findJourney(testCrypto, Origins.Epaye.Bta)()
           EssttpBackend.Pega.stubGetCase(TdAll.journeyId, Left(501))
 
-          val exception = intercept[Exception](await(controller.callback(TaxRegime.Epaye)(fakeRequest)))
+          val exception = intercept[Exception](await(controller.callback(TaxRegime.Epaye, None)(fakeRequest)))
           exception.getMessage should include("returned 501")
         }
 
@@ -163,7 +163,7 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
               JourneyJsonTemplates.`Has Checked Payment Plan - With Affordability`(Origins.Epaye.Bta)(testCrypto)
             )
 
-            val result = controller.callback(TaxRegime.Epaye)(fakeRequestWithPath("/b?regime=epaye"))
+            val result = controller.callback(TaxRegime.Epaye, None)(fakeRequestWithPath("/b?regime=epaye"))
             status(result) shouldBe SEE_OTHER
             redirectLocation(result) shouldBe Some(PageUrls.aboutYourBankAccountUrl)
 

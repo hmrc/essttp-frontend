@@ -80,7 +80,7 @@ class JourneyIncorrectStateRouterSpec extends ItSpec {
       ("Stages.ObtainedCanPayWithinSixMonthsAnswers - yes", () => EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(
         JourneyJsonTemplates.`Obtained Can Pay Within 6 months - yes`(Origins.Epaye.Bta)(testCrypto)
       ), PageUrls.howMuchCanYouPayEachMonthUrl),
-      ("Stages.StartedPegaCase", () => EssttpBackend.StartedPegaCase.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.canPayWithinSixMonthsUrl(Epaye)),
+      ("Stages.StartedPegaCase", () => EssttpBackend.StartedPegaCase.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.canPayWithinSixMonthsUrl(Epaye, None)),
       ("Stages.EnteredMonthlyPaymentAmount", () => EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.whichDayDoYouWantToPayUrl),
       ("Stages.EnteredDayOfMonth", () => EssttpBackend.DayOfMonth.findJourney(TdAll.dayOfMonth(), testCrypto, Origins.Epaye.Bta)(), PageUrls.retrieveStartDatesUrl),
       ("Stages.RetrievedStartDates", () => EssttpBackend.Dates.findJourneyStartDates(testCrypto, Origins.Epaye.Bta)(), PageUrls.determineAffordableQuotesUrl),
