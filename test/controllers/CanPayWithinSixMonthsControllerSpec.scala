@@ -19,7 +19,7 @@ package controllers
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Origins}
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.TaxRegime.Epaye
-import models.Languages.Welsh
+import models.Languages.{English, Welsh}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.libs.json.Json
@@ -113,6 +113,26 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
 
       val result = controller.canPayWithinSixMonths(Epaye, None)(fakeRequest)
       testPageIsDisplayed(result, Some(false))
+    }
+
+    "change the language cookie to english" in {
+      stubCommonActions()
+      EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(
+        JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
+      )
+
+      val result = controller.canPayWithinSixMonths(Epaye, Some(English))(fakeRequest)
+      cookies(result).get("PLAY_LANG").map(_.value) shouldBe Some("en")
+    }
+
+    "change the language cookie to welsh" in {
+      stubCommonActions()
+      EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(
+        JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
+      )
+
+      val result = controller.canPayWithinSixMonths(Epaye, Some(Welsh))(fakeRequest)
+      cookies(result).get("PLAY_LANG").map(_.value) shouldBe Some("cy")
     }
 
     "display the page in Welsh" in {

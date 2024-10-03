@@ -68,7 +68,7 @@ class CanPayWithinSixMonthsController @Inject() (
               lang match {
                 case Some(Welsh)   => result.withCookies(Cookie("PLAY_LANG", "cy"))
                 case Some(English) => result.withCookies(Cookie("PLAY_LANG", "en"))
-                case _             => result
+                case None          => result
               }
             }
           )
