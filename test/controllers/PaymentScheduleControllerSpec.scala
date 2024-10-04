@@ -19,6 +19,7 @@ package controllers
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import controllers.PaymentScheduleControllerSpec.SummaryRow
 import essttp.journey.model.{Origin, Origins}
+import models.Languages.English
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import play.api.http.Status
@@ -376,6 +377,15 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
               test("PayWithin6Months", routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(origin.taxRegime, None))
             }
 
+          }
+
+          "should change the language cookie to english" in {
+            stubCommonActions()
+
+            EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, origin)()
+
+            val result = controller.changeFromCheckPaymentSchedule("CanPayUpfront", origin.taxRegime, Some(English))(fakeRequest)
+            cookies(result).get("PLAY_LANG").map(_.value) shouldBe Some("en")
           }
 
           "should write the correct value for 'essttpClickedChangeFrom' in the session cookie in the journey state" - {

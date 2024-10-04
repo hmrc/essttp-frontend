@@ -19,6 +19,7 @@ package controllers
 import essttp.journey.model.Origins
 import essttp.rootmodel.TaxRegime
 import models.Languages
+import models.Languages.{English, Welsh}
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -190,6 +191,32 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
           EssttpBackend.Pega.verifyRecreateSessionCalled(TaxRegime.Epaye)
         }
 
+        "change the language to english" in {
+          stubCommonActions()
+          EssttpBackend.StartedPegaCase.findJourney(testCrypto, Origins.Epaye.Bta)()
+          EssttpBackend.Pega.stubGetCase(TdAll.journeyId, Right(TdAll.pegaGetCaseResponse))
+          EssttpBackend.HasCheckedPlan.stubUpdateHasCheckedPlan(
+            TdAll.journeyId,
+            JourneyJsonTemplates.`Has Checked Payment Plan - With Affordability`(Origins.Epaye.Bta)(testCrypto)
+          )
+
+          val result = controller.callback(TaxRegime.Epaye, Some(English))(fakeRequestWithPath("/b?regime=epaye&lang=en"))
+          println(redirectLocation(result))
+          cookies(result).get("PLAY_LANG").map(_.value) shouldBe Some("en")
+        }
+
+        "change the language to welsh" in {
+          stubCommonActions()
+          EssttpBackend.StartedPegaCase.findJourney(testCrypto, Origins.Epaye.Bta)()
+          EssttpBackend.Pega.stubGetCase(TdAll.journeyId, Right(TdAll.pegaGetCaseResponse))
+          EssttpBackend.HasCheckedPlan.stubUpdateHasCheckedPlan(
+            TdAll.journeyId,
+            JourneyJsonTemplates.`Has Checked Payment Plan - With Affordability`(Origins.Epaye.Bta)(testCrypto)
+          )
+
+          val result = controller.callback(TaxRegime.Epaye, Some(Welsh))(fakeRequestWithPath("/b?regime=epaye&lang=cy"))
+          cookies(result).get("PLAY_LANG").map(_.value) shouldBe Some("cy")
+        }
       }
 
     }

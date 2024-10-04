@@ -131,9 +131,20 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
         JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
       )
 
-      val result = controller.canPayWithinSixMonths(Epaye, Some(Welsh))(fakeRequest)
+      val result = controller.canPayWithinSixMonths(Epaye, Some(Welsh))(fakeRequest.withLangWelsh())
       cookies(result).get("PLAY_LANG").map(_.value) shouldBe Some("cy")
     }
+
+    //    "keep the given language if lang is None" in {
+    //      stubCommonActions()
+    //      EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(
+    //        JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
+    //      )
+    //      Languages.values.foreach { lang =>
+    //        val result = controller.canPayWithinSixMonths(Epaye, None)(fakeRequest.withLang(lang))
+    //        cookies(result).get("PLAY_LANG").map(_.value) shouldBe Some(lang.code)
+    //      }
+    //    }
 
     "display the page in Welsh" in {
       stubCommonActions()
