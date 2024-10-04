@@ -19,6 +19,7 @@ package controllers
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Origins}
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.TaxRegime.Epaye
+import models.Languages
 import models.Languages.{English, Welsh}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -115,24 +116,41 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
       testPageIsDisplayed(result, Some(false))
     }
 
-    "change the language cookie to english" in {
+    "change the language cookie to english if lang=en is supplied as a query parameter" in {
       stubCommonActions()
       EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(
         JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
       )
 
-      val result = controller.canPayWithinSixMonths(Epaye, Some(English))(fakeRequest)
+      val result = controller.canPayWithinSixMonths(Epaye, Some(English))(fakeRequest.withLangWelsh())
       cookies(result).get("PLAY_LANG").map(_.value) shouldBe Some("en")
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(Epaye, None).url)
     }
 
-    "change the language cookie to welsh" in {
+    "change the language cookie to welsh if lang=cy is supplied as a query parameter" in {
       stubCommonActions()
       EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(
         JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
       )
 
-      val result = controller.canPayWithinSixMonths(Epaye, Some(Welsh))(fakeRequest.withLangWelsh())
+      val result = controller.canPayWithinSixMonths(Epaye, Some(Welsh))(fakeRequest.withLangEnglish())
       cookies(result).get("PLAY_LANG").map(_.value) shouldBe Some("cy")
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(Epaye, None).url)
+    }
+
+    "not change the language cookie if no lang is supplied as a query parameter" in {
+      Languages.values.foreach{ lang =>
+        stubCommonActions()
+        EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(
+          JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
+        )
+
+        val result = controller.canPayWithinSixMonths(Epaye, None)(fakeRequest.withLang(lang))
+        cookies(result).get("PLAY_LANG").map(_.value) shouldBe None
+        status(result) shouldBe OK
+      }
     }
 
     //    "keep the given language if lang is None" in {
