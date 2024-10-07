@@ -21,13 +21,14 @@ import actionsmodel.EligibleJourneyRequest
 import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.PaymentScheduleController._
-import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Journey, PaymentPlanAnswers, UpfrontPaymentAnswers, WhyCannotPayInFullAnswers}
+import essttp.journey.model._
 import essttp.rootmodel.{DayOfMonth, TaxRegime}
 import essttp.utils.Errors
 import models.Language
-import models.Languages.{English, Welsh}
+import play.api.http.HeaderNames
 import play.api.mvc._
 import services.{AuditService, JourneyService}
+import uk.gov.hmrc.hmrcfrontend.controllers.LanguageController
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.{JourneyLogger, Logging}
 import viewmodels.CheckPaymentPlanChangeLink
@@ -43,7 +44,8 @@ class PaymentScheduleController @Inject() (
     mcc:                 MessagesControllerComponents,
     paymentSchedulePage: CheckPaymentSchedule,
     journeyService:      JourneyService,
-    auditService:        AuditService
+    auditService:        AuditService,
+    languageController:  LanguageController
 )(implicit ec: ExecutionContext, appConfig: AppConfig) extends FrontendController(mcc)
   with Logging {
 
@@ -106,18 +108,23 @@ class PaymentScheduleController @Inject() (
   }
 
   def changeFromCheckPaymentSchedule(pageId: String, regime: TaxRegime, lang: Option[Language]): Action[AnyContent] =
-    as.continueToSameEndpointAuthenticatedJourneyAction { implicit request =>
-      request.journey match {
-        case _: Journey.AfterStartedPegaCase | _: Journey.AfterSelectedPaymentPlan | _: Journey.AfterCheckedPaymentPlan =>
-          val result = Redirect(CheckPaymentPlanChangeLink.withName(pageId).targetPage(regime))
-            .addingToSession(Routing.clickedChangeFromSessionKey -> "true")
-          lang match {
-            case Some(Welsh)   => result.withCookies(Cookie("PLAY_LANG", "cy"))
-            case Some(English) => result.withCookies(Cookie("PLAY_LANG", "en"))
-            case None          => result
-          }
-        case other =>
-          Errors.throwServerErrorException(s"Cannot change answer from check your payment plan page in journey state ${other.name}")
+    as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
+
+      lang match {
+        case None => request.journey match {
+          case _: Journey.AfterStartedPegaCase | _: Journey.AfterSelectedPaymentPlan | _: Journey.AfterCheckedPaymentPlan =>
+            Redirect(CheckPaymentPlanChangeLink.withName(pageId).targetPage(regime)).addingToSession(Routing.clickedChangeFromSessionKey -> "true")
+          case other =>
+            Errors.throwServerErrorException(s"Cannot change answer from check your payment plan page in journey state ${other.name}")
+        }
+        case Some(language) =>
+          languageController.switchToLanguage(language.code)(
+            request.withHeaders(
+              request.headers.add(
+                HeaderNames.REFERER -> routes.PaymentScheduleController.changeFromCheckPaymentSchedule(pageId, regime, None).url
+              )
+            )
+          )
       }
     }
 

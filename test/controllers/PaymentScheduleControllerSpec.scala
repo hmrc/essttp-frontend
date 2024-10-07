@@ -19,7 +19,7 @@ package controllers
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import controllers.PaymentScheduleControllerSpec.SummaryRow
 import essttp.journey.model.{Origin, Origins}
-import models.Languages.English
+import models.Languages.{English, Welsh}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import play.api.http.Status
@@ -379,13 +379,28 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
 
           }
 
-          "should change the language cookie to english" in {
+          "should change the language cookie to english if lang=en is supplied as a query parameter" in {
             stubCommonActions()
 
             EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, origin)()
 
-            val result = controller.changeFromCheckPaymentSchedule("CanPayUpfront", origin.taxRegime, Some(English))(fakeRequest)
+            val result = controller.changeFromCheckPaymentSchedule("CanPayUpfront", origin.taxRegime, Some(English))(fakeRequest.withLangEnglish())
             cookies(result).get("PLAY_LANG").map(_.value) shouldBe Some("en")
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe
+              Some(routes.PaymentScheduleController.changeFromCheckPaymentSchedule("CanPayUpfront", origin.taxRegime, None).url)
+          }
+
+          "should change the language cookie to welsh if lang=cy is supplied as a query parameter" in {
+            stubCommonActions()
+
+            EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, origin)()
+
+            val result = controller.changeFromCheckPaymentSchedule("CanPayUpfront", origin.taxRegime, Some(Welsh))(fakeRequest.withLangWelsh())
+            cookies(result).get("PLAY_LANG").map(_.value) shouldBe Some("cy")
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe
+              Some(routes.PaymentScheduleController.changeFromCheckPaymentSchedule("CanPayUpfront", origin.taxRegime, None).url)
           }
 
           "should write the correct value for 'essttpClickedChangeFrom' in the session cookie in the journey state" - {

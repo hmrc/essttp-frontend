@@ -20,10 +20,11 @@ import actions.Actions
 import config.AppConfig
 import essttp.rootmodel.TaxRegime
 import models.Language
-import models.Languages.{English, Welsh}
-import play.api.mvc.{Action, AnyContent, Cookie, MessagesControllerComponents}
+import play.api.http.HeaderNames
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import requests.RequestSupport
 import services.PegaService
+import uk.gov.hmrc.hmrcfrontend.controllers.LanguageController
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import javax.inject.{Inject, Singleton}
@@ -31,10 +32,11 @@ import scala.concurrent.ExecutionContext
 
 @Singleton
 class PegaController @Inject() (
-    as:             Actions,
-    mcc:            MessagesControllerComponents,
-    pegaService:    PegaService,
-    requestSupport: RequestSupport
+    as:                 Actions,
+    mcc:                MessagesControllerComponents,
+    pegaService:        PegaService,
+    requestSupport:     RequestSupport,
+    languageController: LanguageController
 )(implicit ex: ExecutionContext, appConfig: AppConfig) extends FrontendController(mcc) {
 
   val startPegaJourney: Action[AnyContent] = as.authenticatedJourneyAction.async{ implicit request =>
@@ -44,19 +46,22 @@ class PegaController @Inject() (
   }
 
   def callback(regime: TaxRegime, lang: Option[Language]): Action[AnyContent] = as.continueToSameEndpointAuthenticatedJourneyAction.async{ implicit request =>
-    println(lang.toString)
-    pegaService.getCase(request.journey).map{ _ =>
-      val result = Routing.redirectToNext(
-        routes.PegaController.callback(regime, None),
-        request.journey,
-        submittedValueUnchanged = true
-      )
-      lang match {
-        case Some(Welsh)   => result.withCookies(Cookie("PLAY_LANG", "cy"))
-        case Some(English) => result.withCookies(Cookie("PLAY_LANG", "en"))
-        case None          => result
+    lang match {
+      case None => pegaService.getCase(request.journey).map { _ =>
+        Routing.redirectToNext(
+          routes.PegaController.callback(regime, None),
+          request.journey,
+          submittedValueUnchanged = true
+        )
       }
+      case Some(language) =>
+        languageController.switchToLanguage(language.code)(
+          request.withHeaders(
+            request.headers.add(
+              HeaderNames.REFERER -> routes.PegaController.callback(regime, None).url
+            )
+          )
+        )
     }
   }
-
 }

@@ -191,7 +191,7 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
           EssttpBackend.Pega.verifyRecreateSessionCalled(TaxRegime.Epaye)
         }
 
-        "change the language to english" in {
+        "change the language to english if lang=en is supplied as a query parameter" in {
           stubCommonActions()
           EssttpBackend.StartedPegaCase.findJourney(testCrypto, Origins.Epaye.Bta)()
           EssttpBackend.Pega.stubGetCase(TdAll.journeyId, Right(TdAll.pegaGetCaseResponse))
@@ -200,12 +200,14 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
             JourneyJsonTemplates.`Has Checked Payment Plan - With Affordability`(Origins.Epaye.Bta)(testCrypto)
           )
 
-          val result = controller.callback(TaxRegime.Epaye, Some(English))(fakeRequestWithPath("/b?regime=epaye&lang=en"))
-          println(redirectLocation(result))
+          val result = controller.callback(TaxRegime.Epaye, Some(English))(fakeRequestWithPath("/b?regime=epaye&lang=en").withLangEnglish())
           cookies(result).get("PLAY_LANG").map(_.value) shouldBe Some("en")
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe
+            Some(routes.PegaController.callback(TaxRegime.Epaye, None).url)
         }
 
-        "change the language to welsh" in {
+        "change the language to welsh if lang=cy is supplied as a query parameter" in {
           stubCommonActions()
           EssttpBackend.StartedPegaCase.findJourney(testCrypto, Origins.Epaye.Bta)()
           EssttpBackend.Pega.stubGetCase(TdAll.journeyId, Right(TdAll.pegaGetCaseResponse))
@@ -214,8 +216,11 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
             JourneyJsonTemplates.`Has Checked Payment Plan - With Affordability`(Origins.Epaye.Bta)(testCrypto)
           )
 
-          val result = controller.callback(TaxRegime.Epaye, Some(Welsh))(fakeRequestWithPath("/b?regime=epaye&lang=cy"))
+          val result = controller.callback(TaxRegime.Epaye, Some(Welsh))(fakeRequestWithPath("/b?regime=epaye&lang=cy").withLangWelsh())
           cookies(result).get("PLAY_LANG").map(_.value) shouldBe Some("cy")
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe
+            Some(routes.PegaController.callback(TaxRegime.Epaye, None).url)
         }
       }
 
