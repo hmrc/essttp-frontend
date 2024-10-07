@@ -417,6 +417,7 @@ object TdAll {
   )
 
   val pegaGetCaseResponse: GetCaseResponse = GetCaseResponse(
+    dayOfMonth(),
     paymentPlan(1, AmountDue(AmountInPence(14323)))
   )
 
