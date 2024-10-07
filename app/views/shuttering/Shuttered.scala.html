@@ -16,7 +16,7 @@
 
 @import config.AppConfig
 @import messages.Messages
-@import models.Languages
+@import models.Languages.{English, Welsh}
 @import play.api.mvc.Request
 @import play.twirl.api.Html
 @import requests.RequestSupport
@@ -35,9 +35,9 @@
 @title = @{Messages.Shuttered.`Sorry the service is unavailable`.show}
 
 @link = @{
-    language match {
-        case Languages.English => appConfig.Urls.businessPaymentSupportService
-        case Languages.Welsh => appConfig.Urls.welshLanguageHelplineForDebtManagement
+    languageFromRequest match {
+        case English => appConfig.Urls.businessPaymentSupportService
+        case Welsh => appConfig.Urls.welshLanguageHelplineForDebtManagement
     }
 }
 

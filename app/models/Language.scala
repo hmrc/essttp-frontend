@@ -23,7 +23,7 @@ import essttp.utils.ValueClassBinder.valueClassBinder
 import models.Languages.{English, Welsh}
 import play.api.i18n.Lang
 import play.api.libs.json.Format
-import play.api.mvc.PathBindable
+import play.api.mvc.{PathBindable, QueryStringBindable}
 
 import scala.collection.immutable
 
@@ -40,6 +40,28 @@ object Language {
 
   implicit val format: Format[Language] = EnumFormat(Languages)
   implicit val languagePathBinder: PathBindable[Language] = valueClassBinder(_.toString)
+  implicit val optionLanguagePathBinder: PathBindable[Option[Language]] = new PathBindable[Option[Language]] {
+    override def bind(key: String, value: String): Either[String, Option[Language]] =
+      implicitly[PathBindable[Language]]
+        .bind(key, value)
+        .map(Some(_))
+
+    override def unbind(key: String, value: Option[Language]): String = value map (_.code) getOrElse ""
+  }
+
+  implicit val languageQueryStringBindable: QueryStringBindable[Language] =
+    new QueryStringBindable[Language] {
+
+      override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, Language]] = {
+        params.get(key).map(_.toList match {
+          case "en" :: Nil => Right(English)
+          case "cy" :: Nil => Right(Welsh)
+          case error       => Left(s"invalid query parameters for language ${error.toString()}")
+        })
+      }
+
+      override def unbind(key: String, language: Language): String = language.code
+    }
 
   def apply(lang: Lang): Language = lang.code match {
     case "en" => English

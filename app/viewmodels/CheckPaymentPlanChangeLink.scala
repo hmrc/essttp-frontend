@@ -23,7 +23,7 @@ import play.api.mvc.Call
 
 sealed trait CheckPaymentPlanChangeLink extends EnumEntry {
   def targetPage(taxRegime: TaxRegime): Call
-  def changeLink(taxRegime: TaxRegime): Call = routes.PaymentScheduleController.changeFromCheckPaymentSchedule(entryName, taxRegime)
+  def changeLink(taxRegime: TaxRegime): Call = routes.PaymentScheduleController.changeFromCheckPaymentSchedule(entryName, taxRegime, None)
 }
 
 object CheckPaymentPlanChangeLink extends Enum[CheckPaymentPlanChangeLink] {
@@ -49,7 +49,7 @@ object CheckPaymentPlanChangeLink extends Enum[CheckPaymentPlanChangeLink] {
   }
 
   case object PayWithin6Months extends CheckPaymentPlanChangeLink {
-    def targetPage(taxRegime: TaxRegime): Call = routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(taxRegime)
+    def targetPage(taxRegime: TaxRegime): Call = routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(taxRegime, None)
   }
 
   case object PaymentPlan extends CheckPaymentPlanChangeLink {

@@ -34,7 +34,7 @@ class RequestSupport @Inject() (i18nSupport: I18nSupport) {
 
   def lang(implicit requestHeader: RequestHeader): Lang = i18nSupport.request2Messages(requestHeader).lang
 
-  implicit def language(implicit requestHeader: RequestHeader): Language = {
+  implicit def languageFromRequest(implicit requestHeader: RequestHeader): Language = {
     val lang: Lang = i18nSupport.request2Messages(requestHeader).lang
     Language(lang)
   }

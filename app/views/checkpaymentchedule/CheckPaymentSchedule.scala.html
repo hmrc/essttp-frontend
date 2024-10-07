@@ -22,6 +22,7 @@
 @import essttp.rootmodel.{AmountInPence, DayOfMonth, TaxRegime}
 @import messages.{DateMessages, Messages}
 @import play.twirl.api.Html
+@import models._
 @import requests.RequestSupport
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import viewmodels.CheckPaymentPlanChangeLink
@@ -57,7 +58,9 @@
 }
 
 @upfrontPaymentRows = @{
-  CheckPaymentScheduleRows.upfrontPaymentRows(upfrontPaymentAnswers, CheckPaymentPlanChangeLink.CanPayUpfront.changeLink(taxRegime), CheckPaymentPlanChangeLink.UpfrontPaymentAmount.changeLink(taxRegime))
+  CheckPaymentScheduleRows.upfrontPaymentRows(upfrontPaymentAnswers,
+  CheckPaymentPlanChangeLink.CanPayUpfront.changeLink(taxRegime),
+  CheckPaymentPlanChangeLink.UpfrontPaymentAmount.changeLink(taxRegime))
 }
 
 @canPayWithinSixMonthsRow = @{

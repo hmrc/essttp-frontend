@@ -58,16 +58,16 @@ class PegaController @Inject() (
     ))
   }
 
-  def dummyPegaPageContinue(regime: TaxRegime): Action[AnyContent] = as.authenticatedJourneyAction { _ =>
-    Redirect(controllers.routes.PegaController.callback(regime)).withNewSession
+  def dummyPegaPageContinue(regime: TaxRegime): Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    Redirect(controllers.routes.PegaController.callback(regime, Some(request.lang))).withNewSession
   }
 
-  def change(pageId: String, regime: TaxRegime): Action[AnyContent] = as.authenticatedJourneyAction { _ =>
-    Redirect(controllers.routes.PaymentScheduleController.changeFromCheckPaymentSchedule(pageId, regime)).withNewSession
+  def change(pageId: String, regime: TaxRegime): Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    Redirect(controllers.routes.PaymentScheduleController.changeFromCheckPaymentSchedule(pageId, regime, Some(request.lang))).withNewSession
   }
 
-  def backFromPegaLanding(regime: TaxRegime): Action[AnyContent] = as.authenticatedJourneyAction { _ =>
-    Redirect(controllers.routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(regime)).withNewSession
+  def backFromPegaLanding(regime: TaxRegime): Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    Redirect(controllers.routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(regime, Some(request.lang))).withNewSession
   }
 
 }

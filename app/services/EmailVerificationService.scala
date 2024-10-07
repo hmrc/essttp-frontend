@@ -80,14 +80,14 @@ class EmailVerificationService @Inject() (
     paymentsEmailVerificationConnector.getEarliestCreatedAtTime()
 
   private def emailVerificationRequest(emailAddress: Email)(implicit r: EligibleJourneyRequest[_]): StartEmailVerificationJourneyRequest = {
-    val lang = language(r.request)
+    val lang = languageFromRequest(r.request)
 
     StartEmailVerificationJourneyRequest(
       continueUrl               = RequestEmailVerification.continueUrl,
       origin                    = RequestEmailVerification.origin,
       deskproServiceName        = RequestEmailVerification.deskproServiceName,
       accessibilityStatementUrl = RequestEmailVerification.accessibilityStatementUrl,
-      pageTitle                 = Messages.ServicePhase.serviceName(r.journey.taxRegime).show(language),
+      pageTitle                 = Messages.ServicePhase.serviceName(r.journey.taxRegime).show(languageFromRequest),
       backUrl                   = RequestEmailVerification.emailEntryUrl(r.eligibilityCheckResult),
       enterEmailUrl             = RequestEmailVerification.emailEntryUrl(r.eligibilityCheckResult),
       email                     = paymentsEmailVerification.models.Email(emailAddress.value.decryptedValue),

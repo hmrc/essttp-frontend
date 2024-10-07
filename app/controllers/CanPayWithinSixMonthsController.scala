@@ -24,10 +24,14 @@ import essttp.journey.JourneyConnector
 import essttp.journey.model.CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel.{AmountInPence, TaxRegime, UpfrontPaymentAmount}
+import models.Language
 import models.enumsforforms.CanPayWithinSixMonthsFormValue
 import models.forms.CanPayWithinSixMonthsForm
+import play.api.http.HeaderNames
+import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import requests.RequestSupport
+import uk.gov.hmrc.hmrcfrontend.controllers.LanguageController
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 import views.Views
@@ -38,34 +42,47 @@ import scala.concurrent.ExecutionContext
 
 @Singleton
 class CanPayWithinSixMonthsController @Inject() (
-    as:               Actions,
-    mcc:              MessagesControllerComponents,
-    requestSupport:   RequestSupport,
-    views:            Views,
-    journeyConnector: JourneyConnector
+    as:                 Actions,
+    mcc:                MessagesControllerComponents,
+    requestSupport:     RequestSupport,
+    views:              Views,
+    journeyConnector:   JourneyConnector,
+    languageController: LanguageController
 )(implicit ec: ExecutionContext, appConfig: AppConfig)
-  extends FrontendController(mcc)
+  extends FrontendController(mcc) with I18nSupport
   with Logging {
 
   import requestSupport._
 
-  def canPayWithinSixMonths(@unused regime: TaxRegime): Action[AnyContent] =
-    as.continueToSameEndpointAuthenticatedJourneyAction { implicit request =>
-      request.journey match {
-        case j: Journey.BeforeRetrievedAffordabilityResult =>
-          JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
+  def canPayWithinSixMonths(@unused regime: TaxRegime, lang: Option[Language]): Action[AnyContent] =
+    as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
+      lang match {
+        case None =>
+          request.journey match {
+            case j: Journey.BeforeRetrievedAffordabilityResult =>
+              JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
 
-        case j: Journey.AfterRetrievedAffordabilityResult =>
-          finalStateCheck(
-            j,
-            {
-              val previousAnswers = existingAnswersInJourney(request.journey)
-              val form = previousAnswers.fold(CanPayWithinSixMonthsForm.form)(value =>
-                CanPayWithinSixMonthsForm.form.fill(CanPayWithinSixMonthsFormValue.canPayWithinSixMonthsToFormValue(value)))
+            case j: Journey.AfterRetrievedAffordabilityResult =>
+              finalStateCheck(
+                j,
+                {
+                  val previousAnswers = existingAnswersInJourney(request.journey)
+                  val form = previousAnswers.fold(CanPayWithinSixMonthsForm.form)(value =>
+                    CanPayWithinSixMonthsForm.form.fill(CanPayWithinSixMonthsFormValue.canPayWithinSixMonthsToFormValue(value)))
+                  Ok(views.canPayWithinSixMonthsPage(form, remainingAmountToPay(j)))
+                }
+              )
+          }
 
-              Ok(views.canPayWithinSixMonthsPage(form, remainingAmountToPay(j)))
-            }
+        case Some(language) =>
+          languageController.switchToLanguage(language.code)(
+            request.withHeaders(
+              request.headers.add(
+                HeaderNames.REFERER -> routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(regime, None).url
+              )
+            )
           )
+
       }
     }
 
@@ -81,7 +98,7 @@ class CanPayWithinSixMonthsController @Inject() (
           canPay
         ).map(updatedJourney =>
             Routing.redirectToNext(
-              routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(request.journey.taxRegime),
+              routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(request.journey.taxRegime, None),
               updatedJourney,
               valueUnchanged
             ))

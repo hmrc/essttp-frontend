@@ -46,7 +46,7 @@ lazy val root = (project in file("."))
     pipelineStages := Seq(digest),
     scalacOptions ++= scalaCompilerOptions,
     (Compile / doc / sources) := Seq.empty,
-    routesImport ++= Seq("essttp.rootmodel.TaxRegime")
+    routesImport ++= Seq("essttp.rootmodel.TaxRegime", "models.Language")
   )
   .settings(
     commands += Command.command("runTestOnly") { state =>

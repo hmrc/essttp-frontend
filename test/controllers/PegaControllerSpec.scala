@@ -19,6 +19,7 @@ package controllers
 import essttp.journey.model.Origins
 import essttp.rootmodel.TaxRegime
 import models.Languages
+import models.Languages.{English, Welsh}
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -121,7 +122,7 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
 
     "handling callbacks must" - {
 
-      behave like recreateSessionErrorBehaviour(controller.callback(_)(_))
+      behave like recreateSessionErrorBehaviour(controller.callback(_, None)(_))
 
       "return an error when" - {
 
@@ -129,7 +130,7 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
           stubCommonActions()
           EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, Origins.Epaye.Bta)()
 
-          val exception = intercept[Exception](await(controller.callback(TaxRegime.Epaye)(fakeRequest)))
+          val exception = intercept[Exception](await(controller.callback(TaxRegime.Epaye, None)(fakeRequest)))
           exception.getMessage should include("Cannot get PEGA case when journey is in state essttp.journey.model.Journey.Epaye.RetrievedAffordabilityResult")
         }
 
@@ -137,7 +138,7 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
           stubCommonActions()
           EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, Origins.Epaye.Bta)()
 
-          val exception = intercept[Exception](await(controller.callback(TaxRegime.Epaye)(fakeRequest)))
+          val exception = intercept[Exception](await(controller.callback(TaxRegime.Epaye, None)(fakeRequest)))
           exception.getMessage should include("Trying to get PEGA case on non-affordability journey")
 
         }
@@ -147,7 +148,7 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
           EssttpBackend.StartedPegaCase.findJourney(testCrypto, Origins.Epaye.Bta)()
           EssttpBackend.Pega.stubGetCase(TdAll.journeyId, Left(501))
 
-          val exception = intercept[Exception](await(controller.callback(TaxRegime.Epaye)(fakeRequest)))
+          val exception = intercept[Exception](await(controller.callback(TaxRegime.Epaye, None)(fakeRequest)))
           exception.getMessage should include("returned 501")
         }
 
@@ -163,7 +164,7 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
               JourneyJsonTemplates.`Has Checked Payment Plan - With Affordability`(Origins.Epaye.Bta)(testCrypto)
             )
 
-            val result = controller.callback(TaxRegime.Epaye)(fakeRequestWithPath("/b?regime=epaye"))
+            val result = controller.callback(TaxRegime.Epaye, None)(fakeRequestWithPath("/b?regime=epaye"))
             status(result) shouldBe SEE_OTHER
             redirectLocation(result) shouldBe Some(PageUrls.aboutYourBankAccountUrl)
 
@@ -190,6 +191,37 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
           EssttpBackend.Pega.verifyRecreateSessionCalled(TaxRegime.Epaye)
         }
 
+        "change the language to english if lang=en is supplied as a query parameter" in {
+          stubCommonActions()
+          EssttpBackend.StartedPegaCase.findJourney(testCrypto, Origins.Epaye.Bta)()
+          EssttpBackend.Pega.stubGetCase(TdAll.journeyId, Right(TdAll.pegaGetCaseResponse))
+          EssttpBackend.HasCheckedPlan.stubUpdateHasCheckedPlan(
+            TdAll.journeyId,
+            JourneyJsonTemplates.`Has Checked Payment Plan - With Affordability`(Origins.Epaye.Bta)(testCrypto)
+          )
+
+          val result = controller.callback(TaxRegime.Epaye, Some(English))(fakeRequestWithPath("/b?regime=epaye&lang=en").withLangEnglish())
+          cookies(result).get("PLAY_LANG").map(_.value) shouldBe Some("en")
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe
+            Some(routes.PegaController.callback(TaxRegime.Epaye, None).url)
+        }
+
+        "change the language to welsh if lang=cy is supplied as a query parameter" in {
+          stubCommonActions()
+          EssttpBackend.StartedPegaCase.findJourney(testCrypto, Origins.Epaye.Bta)()
+          EssttpBackend.Pega.stubGetCase(TdAll.journeyId, Right(TdAll.pegaGetCaseResponse))
+          EssttpBackend.HasCheckedPlan.stubUpdateHasCheckedPlan(
+            TdAll.journeyId,
+            JourneyJsonTemplates.`Has Checked Payment Plan - With Affordability`(Origins.Epaye.Bta)(testCrypto)
+          )
+
+          val result = controller.callback(TaxRegime.Epaye, Some(Welsh))(fakeRequestWithPath("/b?regime=epaye&lang=cy").withLangWelsh())
+          cookies(result).get("PLAY_LANG").map(_.value) shouldBe Some("cy")
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe
+            Some(routes.PegaController.callback(TaxRegime.Epaye, None).url)
+        }
       }
 
     }

@@ -19,7 +19,8 @@ package controllers
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Origins}
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.TaxRegime.Epaye
-import models.Languages.Welsh
+import models.Languages
+import models.Languages.{English, Welsh}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.libs.json.Json
@@ -82,7 +83,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
       stubCommonActions()
       EssttpBackend.Dates.findJourneyExtremeDates(testCrypto, Origins.Epaye.Bta)()
 
-      val result = controller.canPayWithinSixMonths(Epaye)(fakeRequest)
+      val result = controller.canPayWithinSixMonths(Epaye, None)(fakeRequest)
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.DetermineAffordabilityController.determineAffordability.url)
     }
@@ -91,7 +92,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
       stubCommonActions()
       EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, Origins.Epaye.Bta)()
 
-      val result = controller.canPayWithinSixMonths(Epaye)(fakeRequest)
+      val result = controller.canPayWithinSixMonths(Epaye, None)(fakeRequest)
       testPageIsDisplayed(result, None)
     }
 
@@ -101,7 +102,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
         JourneyJsonTemplates.`Obtained Can Pay Within 6 months - yes`(Origins.Epaye.Bta)(testCrypto)
       )
 
-      val result = controller.canPayWithinSixMonths(Epaye)(fakeRequest)
+      val result = controller.canPayWithinSixMonths(Epaye, None)(fakeRequest)
       testPageIsDisplayed(result, Some(true))
     }
 
@@ -111,15 +112,52 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
         JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
       )
 
-      val result = controller.canPayWithinSixMonths(Epaye)(fakeRequest)
+      val result = controller.canPayWithinSixMonths(Epaye, None)(fakeRequest)
       testPageIsDisplayed(result, Some(false))
+    }
+
+    "change the language cookie to english if lang=en is supplied as a query parameter" in {
+      stubCommonActions()
+      EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(
+        JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
+      )
+
+      val result = controller.canPayWithinSixMonths(Epaye, Some(English))(fakeRequest.withLangWelsh())
+      cookies(result).get("PLAY_LANG").map(_.value) shouldBe Some("en")
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(Epaye, None).url)
+    }
+
+    "change the language cookie to welsh if lang=cy is supplied as a query parameter" in {
+      stubCommonActions()
+      EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(
+        JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
+      )
+
+      val result = controller.canPayWithinSixMonths(Epaye, Some(Welsh))(fakeRequest.withLangEnglish())
+      cookies(result).get("PLAY_LANG").map(_.value) shouldBe Some("cy")
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(Epaye, None).url)
+    }
+
+    "not change the language cookie if no lang is supplied as a query parameter" in {
+      Languages.values.foreach{ lang =>
+        stubCommonActions()
+        EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(
+          JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
+        )
+
+        val result = controller.canPayWithinSixMonths(Epaye, None)(fakeRequest.withLang(lang))
+        cookies(result).get("PLAY_LANG").map(_.value) shouldBe None
+        status(result) shouldBe OK
+      }
     }
 
     "display the page in Welsh" in {
       stubCommonActions()
       EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, Origins.Epaye.Bta)()
 
-      val result = controller.canPayWithinSixMonths(Epaye)(fakeRequest.withLangWelsh())
+      val result = controller.canPayWithinSixMonths(Epaye, None)(fakeRequest.withLangWelsh())
       RequestAssertions.assertGetRequestOk(result)
 
       val doc = Jsoup.parse(contentAsString(result))
@@ -158,9 +196,9 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
 
   List(TaxRegime.Epaye, TaxRegime.Vat, TaxRegime.Sa)
     .foreach(regime =>
-      s"[${regime.entryName} journey] GET ${routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(regime).url}" - {
+      s"[${regime.entryName} journey] GET ${routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(regime, None).url}" - {
 
-        behave like recreateSessionErrorBehaviour(controller.canPayWithinSixMonths(_)(_))
+        behave like recreateSessionErrorBehaviour(controller.canPayWithinSixMonths(_, None)(_))
 
         "be able to show the page correctly when no session is found but is successfully recreated" in {
           stubCommonActions()
@@ -175,7 +213,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
               .withAuthToken()
               .withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
-          val result = controller.canPayWithinSixMonths(regime)(request)
+          val result = controller.canPayWithinSixMonths(regime, None)(request)
 
           status(result) shouldBe OK
 

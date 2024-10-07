@@ -20,10 +20,11 @@ import actionsmodel.AuthenticatedRequest
 import config.AppConfig
 import controllers.pagerouters.EligibilityRouter
 import essttp.journey.model.Journey._
-import essttp.journey.model.{CanPayWithinSixMonthsAnswers, EmailVerificationAnswers, Journey, PaymentPlanAnswers, UpfrontPaymentAnswers}
+import essttp.journey.model._
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import essttp.rootmodel.{CanPayUpfront, IsEmailAddressRequired, TaxRegime}
 import essttp.utils.Errors
+import models.Languages.{English, Welsh}
 import paymentsEmailVerification.models.EmailVerificationResult
 import play.api.http.Status.INTERNAL_SERVER_ERROR
 import play.api.mvc.Results.Redirect
@@ -83,13 +84,14 @@ object Routing {
       routes.DetermineAffordabilityController.determineAffordability -> { () =>
         affordabilityRoute(journey)
       },
-      routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(journey.taxRegime) -> { () =>
-        journey match {
-          case _: BeforeCanPayWithinSixMonthsAnswers =>
-            throw UpstreamErrorResponse("Could not find CanPayWithinSixMonths answer to determine route", INTERNAL_SERVER_ERROR)
-          case j: AfterCanPayWithinSixMonthsAnswers =>
-            canPayWithinSixMonthsRoute(j.canPayWithinSixMonthsAnswers)
-        }
+      routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(journey.taxRegime, Some(English)) -> { () =>
+        canPayWithinSixMonthsRoute(journey)
+      },
+      routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(journey.taxRegime, Some(Welsh)) -> { () =>
+        canPayWithinSixMonthsRoute(journey)
+      },
+      routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(journey.taxRegime, None) -> { () =>
+        canPayWithinSixMonthsRoute(journey)
       },
       routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount -> { () =>
         routes.PaymentDayController.paymentDay
@@ -109,16 +111,16 @@ object Routing {
       routes.PaymentScheduleController.checkPaymentSchedule -> { () =>
         routes.BankDetailsController.detailsAboutBankAccount
       },
-      routes.PegaController.callback(TaxRegime.Epaye) -> { () =>
+      routes.PegaController.callback(TaxRegime.Epaye, None) -> { () =>
         routes.BankDetailsController.detailsAboutBankAccount
       },
-      routes.PegaController.callback(TaxRegime.Vat) -> { () =>
+      routes.PegaController.callback(TaxRegime.Vat, None) -> { () =>
         routes.BankDetailsController.detailsAboutBankAccount
       },
-      routes.PegaController.callback(TaxRegime.Sa) -> { () =>
+      routes.PegaController.callback(TaxRegime.Sa, None) -> { () =>
         routes.BankDetailsController.detailsAboutBankAccount
       },
-      routes.PegaController.callback(TaxRegime.Sia) -> { () =>
+      routes.PegaController.callback(TaxRegime.Sia, None) -> { () =>
         routes.BankDetailsController.detailsAboutBankAccount
       },
       routes.BankDetailsController.detailsAboutBankAccount -> { () =>
@@ -232,7 +234,7 @@ object Routing {
     case _: Journey.Stages.RetrievedExtremeDates                => routes.DetermineAffordabilityController.determineAffordability
     case j: Journey.Stages.RetrievedAffordabilityResult         => affordabilityRoute(j)
     case j: Journey.Stages.ObtainedCanPayWithinSixMonthsAnswers => canPayWithinSixMonthsRoute(j.canPayWithinSixMonthsAnswers)
-    case _: Journey.Stages.StartedPegaCase                      => routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(journey.taxRegime)
+    case _: Journey.Stages.StartedPegaCase                      => routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(journey.taxRegime, None)
     case _: Journey.Stages.EnteredMonthlyPaymentAmount          => routes.PaymentDayController.paymentDay
     case _: Journey.Stages.EnteredDayOfMonth                    => routes.DatesApiController.retrieveStartDates
     case _: Journey.Stages.RetrievedStartDates                  => routes.DetermineAffordableQuotesController.retrieveAffordableQuotes
@@ -256,12 +258,21 @@ object Routing {
       SubmitArrangementController.whichPaymentPlanSetupPage(j.taxRegime)
   }
 
+  private def canPayWithinSixMonthsRoute(journey: Journey): Call = {
+    journey match {
+      case _: BeforeCanPayWithinSixMonthsAnswers =>
+        throw UpstreamErrorResponse("Could not find CanPayWithinSixMonths answer to determine route", INTERNAL_SERVER_ERROR)
+      case j: AfterCanPayWithinSixMonthsAnswers =>
+        canPayWithinSixMonthsRoute(j.canPayWithinSixMonthsAnswers)
+    }
+  }
+
   private def canPayUpfrontRoute(canPayUpfront: CanPayUpfront): Call =
     if (canPayUpfront.value) routes.UpfrontPaymentController.upfrontPaymentAmount
     else routes.DatesApiController.retrieveExtremeDates
 
   private def affordabilityRoute(journey: Journey): Call =
-    if (journey.affordabilityEnabled.contains(true)) routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(journey.taxRegime)
+    if (journey.affordabilityEnabled.contains(true)) routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(journey.taxRegime, None)
     else routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount
 
   private def detailsAboutBankAccountRoute(isAccountHolder: Boolean): Call =

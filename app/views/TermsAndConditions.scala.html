@@ -59,7 +59,7 @@
 
   <p class="govuk-body">@{Html(Messages.TermsAndConditions.`Telephone...`.show)}</p>
 
-    @if(language === English) {
+    @if(languageFromRequest === English) {
         <p class="govuk-body">@{
             Html(Messages.TermsAndConditions.`Outside UK...`.show)
         }</p>
