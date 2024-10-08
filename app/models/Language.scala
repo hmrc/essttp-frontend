@@ -39,15 +39,8 @@ object Language {
   implicit val eq: Eq[Language] = Eq.fromUniversalEquals
 
   implicit val format: Format[Language] = EnumFormat(Languages)
-  implicit val languagePathBinder: PathBindable[Language] = valueClassBinder(_.toString)
-  implicit val optionLanguagePathBinder: PathBindable[Option[Language]] = new PathBindable[Option[Language]] {
-    override def bind(key: String, value: String): Either[String, Option[Language]] =
-      implicitly[PathBindable[Language]]
-        .bind(key, value)
-        .map(Some(_))
 
-    override def unbind(key: String, value: Option[Language]): String = value map (_.code) getOrElse ""
-  }
+  implicit val languagePathBinder: PathBindable[Language] = valueClassBinder(_.toString)
 
   implicit val languageQueryStringBindable: QueryStringBindable[Language] =
     new QueryStringBindable[Language] {
@@ -60,7 +53,7 @@ object Language {
         })
       }
 
-      override def unbind(key: String, language: Language): String = language.code
+      override def unbind(key: String, language: Language): String = s"$key=${language.code}"
     }
 
   def apply(lang: Lang): Language = lang.code match {

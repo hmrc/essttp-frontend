@@ -192,6 +192,18 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
       )
     }
 
+    "have the query parameters in the url" in {
+      routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(
+        TaxRegime.Sa,
+        Some(Languages.English)
+      ).url shouldBe "/set-up-a-payment-plan/paying-within-six-months?regime=sa&lang=en"
+
+      routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(
+        TaxRegime.Vat,
+        Some(Languages.Welsh)
+      ).url shouldBe "/set-up-a-payment-plan/paying-within-six-months?regime=vat&lang=cy"
+    }
+
   }
 
   List(TaxRegime.Epaye, TaxRegime.Vat, TaxRegime.Sa)
