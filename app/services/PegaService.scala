@@ -62,7 +62,7 @@ class PegaService @Inject() (
         for {
           getCaseResponse <- essttpConnector.getPegaCase(journey.journeyId)
           paymentPlanAnswers = PaymentPlanAnswers.PaymentPlanAfterAffordability(
-            startCaseResponse, getCaseResponse.paymentPlan
+            startCaseResponse, getCaseResponse.paymentDay, getCaseResponse.paymentPlan
           )
           _ <- journeyConnector.updateHasCheckedPaymentPlan(journey.journeyId, paymentPlanAnswers)
         } yield getCaseResponse

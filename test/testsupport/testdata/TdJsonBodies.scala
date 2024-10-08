@@ -541,6 +541,7 @@ object TdJsonBodies {
          |       "caseId": "case",
          |       "assignmentId": "assignment"
          |     },
+         |     ${dayOfMonthJourneyInfo(DayOfMonth(28))},
          |     $selectedPlanJourneyInfo
          |   }
          | }
