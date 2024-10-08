@@ -119,11 +119,12 @@ class PaymentScheduleController @Inject() (
         }
         case Some(language) =>
           languageController.switchToLanguage(language.code)(
-            request.withHeaders(
-              request.headers.add(
-                HeaderNames.REFERER -> routes.PaymentScheduleController.changeFromCheckPaymentSchedule(pageId, regime, None).url
+            request
+              .withHeaders(
+                request.headers
+                  .remove(HeaderNames.REFERER)
+                  .add(HeaderNames.REFERER -> routes.PaymentScheduleController.changeFromCheckPaymentSchedule(pageId, regime, None).url)
               )
-            )
           )
       }
     }

@@ -23,6 +23,7 @@ import models.Languages
 import models.Languages.{English, Welsh}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import play.api.http.HeaderNames
 import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -122,7 +123,8 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
         JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
       )
 
-      val result = controller.canPayWithinSixMonths(Epaye, Some(English))(fakeRequest.withLangWelsh())
+      val request = fakeRequest.withLangWelsh().withHeaders(HeaderNames.REFERER -> "blah")
+      val result = controller.canPayWithinSixMonths(Epaye, Some(English))(request)
       cookies(result).get("PLAY_LANG").map(_.value) shouldBe Some("en")
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(Epaye, None).url)
@@ -134,7 +136,8 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
         JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
       )
 
-      val result = controller.canPayWithinSixMonths(Epaye, Some(Welsh))(fakeRequest.withLangEnglish())
+      val request = fakeRequest.withLangEnglish().withHeaders(HeaderNames.REFERER -> "bluh")
+      val result = controller.canPayWithinSixMonths(Epaye, Some(Welsh))(request)
       cookies(result).get("PLAY_LANG").map(_.value) shouldBe Some("cy")
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(Epaye, None).url)

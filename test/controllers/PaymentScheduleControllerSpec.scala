@@ -24,7 +24,7 @@ import models.Languages
 import models.Languages.{English, Welsh}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
-import play.api.http.Status
+import play.api.http.{HeaderNames, Status}
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{Call, Result, Session}
 import play.api.test.FakeRequest
@@ -386,7 +386,9 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
 
             EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, origin)()
 
-            val result = controller.changeFromCheckPaymentSchedule("CanPayUpfront", origin.taxRegime, Some(English))(fakeRequest.withLangEnglish())
+            val request = fakeRequest.withLangWelsh().withHeaders(HeaderNames.REFERER -> "bleh")
+            val result = controller.changeFromCheckPaymentSchedule("CanPayUpfront", origin.taxRegime, Some(English))(request)
+
             cookies(result).get("PLAY_LANG").map(_.value) shouldBe Some("en")
             status(result) shouldBe SEE_OTHER
             redirectLocation(result) shouldBe
@@ -398,7 +400,8 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
 
             EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, origin)()
 
-            val result = controller.changeFromCheckPaymentSchedule("CanPayUpfront", origin.taxRegime, Some(Welsh))(fakeRequest.withLangWelsh())
+            val request = fakeRequest.withLangEnglish().withHeaders(HeaderNames.REFERER -> "bloh")
+            val result = controller.changeFromCheckPaymentSchedule("CanPayUpfront", origin.taxRegime, Some(Welsh))(request)
             cookies(result).get("PLAY_LANG").map(_.value) shouldBe Some("cy")
             status(result) shouldBe SEE_OTHER
             redirectLocation(result) shouldBe
