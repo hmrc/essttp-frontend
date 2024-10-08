@@ -57,9 +57,9 @@ class PegaController @Inject() (
       case Some(language) =>
         languageController.switchToLanguage(language.code)(
           request.withHeaders(
-            request.headers.add(
-              HeaderNames.REFERER -> routes.PegaController.callback(regime, None).url
-            )
+            request.headers
+              .remove(HeaderNames.REFERER)
+              .add(HeaderNames.REFERER -> routes.PegaController.callback(regime, None).url)
           )
         )
     }

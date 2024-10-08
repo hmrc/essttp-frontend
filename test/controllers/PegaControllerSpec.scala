@@ -20,6 +20,7 @@ import essttp.journey.model.Origins
 import essttp.rootmodel.TaxRegime
 import models.Languages
 import models.Languages.{English, Welsh}
+import play.api.http.HeaderNames
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -200,7 +201,8 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
             JourneyJsonTemplates.`Has Checked Payment Plan - With Affordability`(Origins.Epaye.Bta)(testCrypto)
           )
 
-          val result = controller.callback(TaxRegime.Epaye, Some(English))(fakeRequestWithPath("/b?regime=epaye&lang=en").withLangEnglish())
+          val request = fakeRequestWithPath("/b?regime=epaye&lang=en").withLangWelsh().withHeaders(HeaderNames.REFERER -> "bleep")
+          val result = controller.callback(TaxRegime.Epaye, Some(English))(request)
           cookies(result).get("PLAY_LANG").map(_.value) shouldBe Some("en")
           status(result) shouldBe SEE_OTHER
           redirectLocation(result) shouldBe
@@ -216,7 +218,8 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
             JourneyJsonTemplates.`Has Checked Payment Plan - With Affordability`(Origins.Epaye.Bta)(testCrypto)
           )
 
-          val result = controller.callback(TaxRegime.Epaye, Some(Welsh))(fakeRequestWithPath("/b?regime=epaye&lang=cy").withLangWelsh())
+          val request = fakeRequestWithPath("/b?regime=epaye&lang=cy").withLangEnglish().withHeaders(HeaderNames.REFERER -> "bloop")
+          val result = controller.callback(TaxRegime.Epaye, Some(Welsh))(request)
           cookies(result).get("PLAY_LANG").map(_.value) shouldBe Some("cy")
           status(result) shouldBe SEE_OTHER
           redirectLocation(result) shouldBe

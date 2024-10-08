@@ -77,9 +77,9 @@ class CanPayWithinSixMonthsController @Inject() (
         case Some(language) =>
           languageController.switchToLanguage(language.code)(
             request.withHeaders(
-              request.headers.add(
-                HeaderNames.REFERER -> routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(regime, None).url
-              )
+              request.headers
+                .remove(HeaderNames.REFERER)
+                .add(HeaderNames.REFERER -> routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(regime, None).url)
             )
           )
 
