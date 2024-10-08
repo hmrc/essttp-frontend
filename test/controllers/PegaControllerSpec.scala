@@ -222,6 +222,19 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
           redirectLocation(result) shouldBe
             Some(routes.PegaController.callback(TaxRegime.Epaye, None).url)
         }
+
+        "have the query parameters in the url" in {
+          routes.PegaController.callback(
+            TaxRegime.Sa,
+            Some(Languages.English)
+          ).url shouldBe "/set-up-a-payment-plan/pega-callback?regime=sa&lang=en"
+
+          routes.PegaController.callback(
+            TaxRegime.Sia,
+            Some(Languages.Welsh)
+          ).url shouldBe "/set-up-a-payment-plan/pega-callback?regime=sia&lang=cy"
+        }
+
       }
 
     }

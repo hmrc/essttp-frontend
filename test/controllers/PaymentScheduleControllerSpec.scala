@@ -19,6 +19,8 @@ package controllers
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import controllers.PaymentScheduleControllerSpec.SummaryRow
 import essttp.journey.model.{Origin, Origins}
+import essttp.rootmodel.TaxRegime
+import models.Languages
 import models.Languages.{English, Welsh}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
@@ -401,6 +403,20 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
             status(result) shouldBe SEE_OTHER
             redirectLocation(result) shouldBe
               Some(routes.PaymentScheduleController.changeFromCheckPaymentSchedule("CanPayUpfront", origin.taxRegime, None).url)
+          }
+
+          "have the query parameters in the url" in {
+            routes.PaymentScheduleController.changeFromCheckPaymentSchedule(
+              "CanPayUpfront",
+              TaxRegime.Epaye,
+              Some(Languages.English)
+            ).url shouldBe "/set-up-a-payment-plan/check-your-payment-plan/change/CanPayUpfront?regime=epaye&lang=en"
+
+            routes.PaymentScheduleController.changeFromCheckPaymentSchedule(
+              "CanPayUpfront",
+              TaxRegime.Vat,
+              Some(Languages.Welsh)
+            ).url shouldBe "/set-up-a-payment-plan/check-your-payment-plan/change/CanPayUpfront?regime=vat&lang=cy"
           }
 
           "should write the correct value for 'essttpClickedChangeFrom' in the session cookie in the journey state" - {
