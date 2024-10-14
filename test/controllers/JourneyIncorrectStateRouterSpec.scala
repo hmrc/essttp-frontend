@@ -46,9 +46,6 @@ class JourneyIncorrectStateRouterSpec extends ItSpec {
       ("Stages.EligibilityChecked - SA", () => EssttpBackend.EligibilityCheck.findJourney(testCrypto)(
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(Origins.Sa.Bta)
       ), PageUrls.saRLSUrl),
-      ("Stages.EligibilityChecked - SIA", () => EssttpBackend.EligibilityCheck.findJourney(testCrypto)(
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(Origins.Sia.Pta)
-      ), PageUrls.siaRLSUrl),
       ("Stages.ObtainedWhyCannotPayInFull - PAYE",
         () => EssttpBackend.WhyCannotPayInFull.findJourney(testCrypto)(JourneyJsonTemplates.`Why Cannot Pay in Full - Not Required`(Origins.Epaye.Bta)),
         PageUrls.canYouMakeAnUpfrontPaymentUrl

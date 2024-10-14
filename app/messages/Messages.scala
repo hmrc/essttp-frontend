@@ -1110,9 +1110,79 @@ object Messages {
   }
 
   object Sia {
-    val `dummy sia message`: Message = Message(
-      english = "this is a dummy message, awaiting data"
+
+    val `Set up a Simple Assessment payment plan`: Message = Message(
+      english = "Set up a Simple Assessment payment plan",
+      welsh   = "Set up a Welsh Simple Assessment payment plan"
     )
+
+    val `You can use this service to pay overdue payments in instalments.`: Message = Message(
+      english = "You can use this service to pay overdue payments in instalments.",
+      welsh   = "You can use this service to pay overdue payments in Welsh instalments."
+    )
+
+    val `You are eligible to set up an online payment plan if:`: Message = Message(
+      english = "You are eligible to set up an online payment plan if:",
+      welsh   = "You are eligible to set up a Welsh online payment plan if:"
+    )
+
+    def `you owe ... or less`(maxAmountOfDebt: AmountInPence): Message = Message(
+      english = s"you owe ${maxAmountOfDebt.gdsFormatInPounds} or less",
+      welsh   = s"Welsh you owe ${maxAmountOfDebt.gdsFormatInPounds} or less",
+    )
+
+    val `you do not have any other debts with HMRC`: Message = Message(
+      english = "you do not have any other debts with HMRC",
+      welsh   = "you do not have any other Welsh debts with HMRC"
+    )
+
+    val `you do not have any payment plans with HMRC`: Message = Message(
+      english = "you do not have any payment plans with HMRC",
+      welsh   = "you do not have any Welsh payment plans with HMRC"
+    )
+
+    val `You can choose to pay:`: Message = Message(
+      english = "You can choose to pay:",
+      welsh   = "Welsh you can choose to pay:"
+    )
+
+    val `part of the payment upfront and part in monthly instalments`: Message = Message(
+      english = "part of the payment upfront and part in monthly instalments",
+      welsh   = "part of the payment upfront and part in Welsh monthly instalments"
+    )
+
+    val `monthly instalments only`: Message = Message(
+      english = "monthly instalments only",
+      welsh   = "Welsh monthly instalments only"
+    )
+
+    val `Before you start`: Message = Message(
+      english = "Before you start",
+      welsh   = "Cyn i chi ddechrau"
+    )
+
+    val `You must be:`: Message = Message(
+      english = "You must be:",
+      welsh   = "Welsh you must be:"
+    )
+
+    val `a named account holder for the UK bank account you intend to use`: Message = Message(
+      english = "a named account holder for the UK bank account you intend to use",
+      welsh   = "a Welsh named account holder for the UK bank account you intend to use"
+    )
+
+    val `able to authorise a Direct Debit`: Message = Message(
+      english = "able to authorise a Direct Debit",
+      welsh   = "able to authorise a Welsh Direct Debit"
+    )
+
+    val `You must keep up to date with your payments...`: Message = Message(
+      english = "You must keep up to date with your payments. HMRC may ask you to pay the total outstanding amount if you do not. " +
+        "HMRC intend this as a one off payment plan to give you extra support.",
+      welsh   = "You must keep up to date with your Welsh payments. Welsh HMRC may ask you to pay the total outstanding amount if you do not. " +
+        "HMRC intend this as a one off payment plan to give you extra Welsh support."
+    )
+
   }
 
   object UpfrontPaymentAmount {
