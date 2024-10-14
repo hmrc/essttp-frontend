@@ -267,9 +267,7 @@ object ContentAssertions extends RichMatchers {
                 )
               }
               case TaxRegime.Sia =>
-                List(
-                  "this is a dummy message, awaiting data"
-                )
+                List()
             }
           case Languages.Welsh =>
             taxRegime match {
@@ -296,10 +294,7 @@ object ContentAssertions extends RichMatchers {
                 )
               }
               case TaxRegime.Sia =>
-                List(
-                  "eich rhif cofrestru TAW, sy’n 9 digid o hyd, er enghraifft 123456789",
-                  "eich manylion banc"
-                )
+                List()
             }
         }
       }

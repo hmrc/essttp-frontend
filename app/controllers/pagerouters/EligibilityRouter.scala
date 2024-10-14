@@ -102,28 +102,28 @@ object EligibilityRouter {
     case TaxRegime.Epaye => routes.IneligibleController.epayeAlreadyHaveAPaymentPlanPage
     case TaxRegime.Vat   => routes.IneligibleController.vatAlreadyHaveAPaymentPlanPage
     case TaxRegime.Sa    => routes.IneligibleController.saAlreadyHaveAPaymentPlanPage
-    case TaxRegime.Sia   => routes.IneligibleController.siaAlreadyHaveAPaymentPlanPage
+    case TaxRegime.Sia   => routes.IneligibleController.siaGenericIneligiblePage
   }
 
   private def whichDebtTooOldPage(taxRegime: TaxRegime): Call = taxRegime match {
     case TaxRegime.Epaye => routes.IneligibleController.epayeDebtTooOldPage
     case TaxRegime.Vat   => routes.IneligibleController.vatDebtTooOldPage
     case TaxRegime.Sa    => routes.IneligibleController.saDebtTooOldPage
-    case TaxRegime.Sia   => routes.IneligibleController.siaDebtTooOldPage
+    case TaxRegime.Sia   => routes.IneligibleController.siaGenericIneligiblePage
   }
 
   private def whichFileYourReturnsPage(taxRegime: TaxRegime): Call = taxRegime match {
     case TaxRegime.Epaye => routes.IneligibleController.epayeFileYourReturnPage
     case TaxRegime.Vat   => routes.IneligibleController.vatFileYourReturnPage
     case TaxRegime.Sa    => routes.IneligibleController.saFileYourReturnPage
-    case TaxRegime.Sia   => routes.IneligibleController.siaFileYourReturnPage
+    case TaxRegime.Sia   => routes.IneligibleController.siaGenericIneligiblePage
   }
 
   private def whichDebtBeforeAccountingDatePage(taxRegime: TaxRegime): Call = taxRegime match {
     case TaxRegime.Epaye => throw new NotImplementedError("Ineligibility reason not relevant to EPAYE")
     case TaxRegime.Vat   => routes.IneligibleController.vatDebtBeforeAccountingDatePage
     case TaxRegime.Sa    => routes.IneligibleController.saDebtTooOldPage
-    case TaxRegime.Sia   => routes.IneligibleController.siaDebtTooOldPage
+    case TaxRegime.Sia   => routes.IneligibleController.siaGenericIneligiblePage
   }
 
   /*
@@ -149,13 +149,13 @@ object EligibilityRouter {
     case TaxRegime.Epaye => routes.IneligibleController.epayeNoDueDatesReachedPage
     case TaxRegime.Vat   => routes.IneligibleController.vatNoDueDatesReachedPage
     case TaxRegime.Sa    => throw new NotImplementedError("Ineligibility reason not relevant to SA")
-    case TaxRegime.Sia   => routes.IneligibleController.siaNoDueDatesReachedPage
+    case TaxRegime.Sia   => routes.IneligibleController.siaGenericIneligiblePage
   }
 
   private def whichGenericRLSPage(taxRegime: TaxRegime): Call = taxRegime match {
     case TaxRegime.Epaye => routes.IneligibleController.epayeRLSPage
     case TaxRegime.Vat   => routes.IneligibleController.vatRLSPage
     case TaxRegime.Sa    => routes.IneligibleController.saRLSPage
-    case TaxRegime.Sia   => routes.IneligibleController.siaRLSPage
+    case TaxRegime.Sia   => routes.IneligibleController.siaGenericIneligiblePage
   }
 }

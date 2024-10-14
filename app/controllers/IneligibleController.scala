@@ -131,13 +131,6 @@ class IneligibleController @Inject() (
     ))
   }
 
-  val siaDebtTooOldPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    Ok(views.partials.ineligibleTemplatePage(
-      pageh1         = Messages.NotEligible.`Call us about a payment plan`,
-      leadingContent = views.partials.debtTooOldPartial(appConfig.PolicyParameters.SIA.maxAgeOfDebtInYears)
-    ))
-  }
-
   val vatDebtBeforeAccountingDatePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     Ok(views.partials.ineligibleTemplatePage(
       pageh1         = Messages.NotEligible.`Call us about a payment plan`,
@@ -158,8 +151,6 @@ class IneligibleController @Inject() (
 
   val saFileYourReturnPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericFileReturnPage }
 
-  val siaFileYourReturnPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericFileReturnPage }
-
   def genericAlreadyHaveAPaymentPlanPage(implicit request: AuthenticatedJourneyRequest[AnyContent]): Result =
     Ok(
       views.partials.ineligibleTemplatePage(
@@ -175,9 +166,6 @@ class IneligibleController @Inject() (
     genericAlreadyHaveAPaymentPlanPage
   }
   val saAlreadyHaveAPaymentPlanPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    genericAlreadyHaveAPaymentPlanPage
-  }
-  val siaAlreadyHaveAPaymentPlanPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     genericAlreadyHaveAPaymentPlanPage
   }
 
@@ -197,17 +185,12 @@ class IneligibleController @Inject() (
     genericNoDueDatesReachedPage
   }
 
-  val siaNoDueDatesReachedPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    genericNoDueDatesReachedPage
-  }
-
   private def determineFileYourReturnUrl(implicit request: AuthenticatedJourneyRequest[AnyContent]): String = request.journey.sjRequest match {
     case SjRequest.Epaye.Simple(returnUrl, _) => returnUrl.value
     case SjRequest.Epaye.Empty()              => appConfig.Urls.businessTaxAccountUrl
     case SjRequest.Vat.Simple(returnUrl, _)   => returnUrl.value
     case SjRequest.Vat.Empty()                => appConfig.Urls.businessTaxAccountUrl
-    case SjRequest.Sia.Simple(returnUrl, _)   => returnUrl.value
-    case SjRequest.Sia.Empty()                => appConfig.Urls.businessTaxAccountUrl
+    case _: SjRequest.Sia                     => throw new NotImplementedError("determineFileYourReturnUrl not implemented for SIA")
     case _: SjRequest.Sa                      => appConfig.Urls.fileSaReturnUrl
   }
 
@@ -242,5 +225,4 @@ class IneligibleController @Inject() (
 
   val saRLSPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericRLSIneligiblePage }
 
-  val siaRLSPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericRLSIneligiblePage }
 }

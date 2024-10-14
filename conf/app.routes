@@ -53,25 +53,20 @@ GET    /pay-simple-assessment-tax-bill-in-full              controllers.Ineligib
 GET    /debt-too-old-epaye                                  controllers.IneligibleController.epayeDebtTooOldPage
 GET    /debt-too-old-vat                                    controllers.IneligibleController.vatDebtTooOldPage
 GET    /debt-too-old-sa                                     controllers.IneligibleController.saDebtTooOldPage
-GET    /debt-too-old-sia                                    controllers.IneligibleController.siaDebtTooOldPage
 GET    /debt-before-accounting-date-vat                     controllers.IneligibleController.vatDebtBeforeAccountingDatePage
 GET    /file-your-return                                    controllers.IneligibleController.epayeFileYourReturnPage
 GET    /return-not-filed-vat                                controllers.IneligibleController.vatFileYourReturnPage
 GET    /return-not-filed-sa                                 controllers.IneligibleController.saFileYourReturnPage
-GET    /return-not-filed-sia                                controllers.IneligibleController.siaFileYourReturnPage
 GET    /already-have-a-payment-plan-epaye                   controllers.IneligibleController.epayeAlreadyHaveAPaymentPlanPage
 GET    /already-have-a-payment-plan-vat                     controllers.IneligibleController.vatAlreadyHaveAPaymentPlanPage
 GET    /already-have-a-plan-sa                              controllers.IneligibleController.saAlreadyHaveAPaymentPlanPage
-GET    /already-have-a-plan-sia                             controllers.IneligibleController.siaAlreadyHaveAPaymentPlanPage
 GET    /bill-not-overdue-epaye                              controllers.IneligibleController.epayeNoDueDatesReachedPage
 GET    /bill-not-overdue-vat                                controllers.IneligibleController.vatNoDueDatesReachedPage
-GET    /bill-not-overdue-sia                                controllers.IneligibleController.siaNoDueDatesReachedPage
 GET    /call-us-already-have-direct-debit-epaye             controllers.IneligibleController.epayeYouHaveChosenNotToSetUpPage
 GET    /call-us-already-have-direct-debit-vat               controllers.IneligibleController.vatYouHaveChosenNotToSetUpPage
 GET    /update-personal-details-epaye                       controllers.IneligibleController.epayeRLSPage
 GET    /update-personal-details-vat                         controllers.IneligibleController.vatRLSPage
 GET    /update-personal-details-sa                          controllers.IneligibleController.saRLSPage
-GET    /update-personal-details-sia                         controllers.IneligibleController.siaRLSPage
 
 GET    /your-bill                                           controllers.YourBillController.yourBill
 POST   /your-bill                                           controllers.YourBillController.yourBillSubmit

@@ -238,7 +238,7 @@ class WhichTaxRegimeSaDisabledControllerSpec extends ItSpec {
 
 class WhichTaxRegimeSiaDisabledControllerSpec extends ItSpec {
 
-  val controller = app.injector.instanceOf[WhichTaxRegimeController]
+  lazy val controller = app.injector.instanceOf[WhichTaxRegimeController]
 
   override lazy val configOverrides: Map[String, Any] = Map(
     "features.sia" -> false

@@ -341,6 +341,112 @@ class LandingPageControllerSpec extends ItSpec {
     }
   }
 
+  "GET /sia-payment-plan" - {
+    "return 200 and the SIA landing page when logged in" in {
+      EssttpBackend.StartJourney.findJourney(origin = Origins.Sia.Pta)
+      val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId").withAuthToken()
+      val result: Future[Result] = controller.siaLandingPage(fakeRequest)
+
+      RequestAssertions.assertGetRequestOk(result)
+      val doc: Document = Jsoup.parse(contentAsString(result))
+
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1                  = "Set up a Simple Assessment payment plan",
+        shouldBackLinkBePresent     = true,
+        expectedSubmitUrl           = None,
+        shouldH1BeSameAsServiceName = true,
+        regimeBeingTested           = Some(TaxRegime.Sia),
+        shouldServiceNameBeInHeader = false,
+        backLinkUrlOverride         = Some("/set-up-a-payment-plan/test-only/bta-page?starting-page")
+      )
+
+      val lists = doc.select(".govuk-list").asScala.toList
+      lists.size shouldBe 3
+
+      val paragraphs = doc.select("p.govuk-body").asScala.toList
+      paragraphs(0).text() shouldBe "You can use this service to pay overdue payments in instalments."
+      paragraphs(1).text() shouldBe "You are eligible to set up an online payment plan if:"
+
+      val firstListBullets = lists(0).select("li").asScala.toList
+      firstListBullets.size shouldBe 3
+
+      firstListBullets(0).text() shouldBe "you owe £50,000 or less"
+      firstListBullets(1).text() shouldBe "you do not have any other debts with HMRC"
+      firstListBullets(2).text() shouldBe "you do not have any payment plans with HMRC"
+
+      paragraphs(2).text() shouldBe "You can choose to pay:"
+
+      val secondListBullets = lists(1).select("li").asScala.toList
+      secondListBullets.size shouldBe 2
+
+      secondListBullets(0).text() shouldBe "part of the payment upfront and part in monthly instalments"
+      secondListBullets(1).text() shouldBe "monthly instalments only"
+
+      val button = doc.select(".govuk-button")
+      button.attr("href") shouldBe routes.LandingController.siaLandingPageContinue.url
+      button.text() shouldBe Messages.`Start now`.english
+    }
+
+    "return 200 and the SA landing page when not logged in" in {
+      EssttpBackend.StartJourney.findJourney(origin = Origins.Sia.Pta)
+      val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val result: Future[Result] = controller.siaLandingPage(fakeRequest)
+
+      RequestAssertions.assertGetRequestOk(result)
+      val doc: Document = Jsoup.parse(contentAsString(result))
+
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1                  = "Set up a Simple Assessment payment plan",
+        shouldBackLinkBePresent     = true,
+        expectedSubmitUrl           = None,
+        signedIn                    = false,
+        shouldH1BeSameAsServiceName = true,
+        regimeBeingTested           = Some(TaxRegime.Sia),
+        shouldServiceNameBeInHeader = false
+      )
+    }
+  }
+
+  "GET /sia-payment-plan-continue" - {
+    "should redirect to the login page and continue to the same continue endpoint once login is successful " +
+      "if the user is not logged in" in {
+        val result = controller.siaLandingPageContinue(FakeRequest("GET", routes.LandingController.siaLandingPageContinue.url))
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some("http://localhost:9949/auth-login-stub/gg-sign-in?" +
+          "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fsia-payment-plan-continue&origin=essttp-frontend")
+      }
+
+    "should redirect to start a detached journey with an updated session if no existing journey is found" in {
+      val existingSessionData = Map(SessionKeys.sessionId -> "IamATestSessionId")
+
+      stubCommonActions()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(existingSessionData.toList: _*)
+      val result = controller.siaLandingPageContinue(fakeRequest)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.StartJourneyController.startDetachedSiaJourney.url)
+      session(result).data.get(LandingController.hasSeenLandingPageSessionKey) shouldBe Some("true")
+    }
+
+    "should redirect to determine tax id if an existing journey is found" in {
+      val existingSessionData = Map(SessionKeys.sessionId -> "IamATestSessionId")
+
+      stubCommonActions()
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin = Origins.Sia.Pta)()
+
+      val fakeRequest = FakeRequest().withAuthToken().withSession(existingSessionData.toList: _*)
+      val result = controller.siaLandingPageContinue(fakeRequest)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.DetermineTaxIdController.determineTaxId.url)
+      session(result).data.get(LandingController.hasSeenLandingPageSessionKey) shouldBe None
+    }
+  }
+
 }
 
 class LandingPageSaNotEnabledControllerSpec extends ItSpec {
@@ -357,6 +463,22 @@ class LandingPageSaNotEnabledControllerSpec extends ItSpec {
     status(result) shouldBe SEE_OTHER
     redirectLocation(result) shouldBe Some("http://localhost:9063/pay-what-you-owe-in-instalments")
 
+  }
+
+}
+
+class LandingPageSiaNotEnabledControllerSpec extends ItSpec {
+
+  override lazy val configOverrides: Map[String, Any] = Map("features.sia" -> false)
+
+  private val controller = app.injector.instanceOf[LandingController]
+
+  "GET /sia-payment-plan should redirect to the SA SUPP service when SA is not enabled" in {
+    val fakeRequest = FakeRequest()
+      .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+    val error = intercept[Exception](await(controller.siaLandingPage(fakeRequest)))
+    error.getMessage shouldBe "Simple Assessment is not available"
   }
 
 }

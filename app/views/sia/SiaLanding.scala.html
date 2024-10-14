@@ -26,14 +26,15 @@
 @this(
   layout: Layout,
   govukButton: GovukButton,
-  requestSupport: RequestSupport
+  requestSupport: RequestSupport,
+  appConfig: AppConfig
 )
 
 @(backUrl: Option[BackUrl])(implicit request: Request[_])
 
 @import requestSupport._
 
-@title= @{Messages.Sia.`dummy sia message`.show }
+@title= @{Messages.Sia.`Set up a Simple Assessment payment plan`.show }
 
 @layout(
     pageTitle = Some(title),
@@ -42,9 +43,36 @@
     showServiceNameInHeader = false
 ) {
 
-  <h1 class="govuk-heading-xl">Dummy SIA landing page</h1>
+  <h1 class="govuk-heading-xl">@{Messages.Sia.`Set up a Simple Assessment payment plan`.show}</h1>
 
-    @govukButton(Button(
+  <p class="govuk-body">@{Messages.Sia.`You can use this service to pay overdue payments in instalments.`.show}</p>
+  <p class="govuk-body">@{Messages.Sia.`You are eligible to set up an online payment plan if:`.show}</p>
+
+  <ul class="govuk-list govuk-list--bullet">
+      <li>@{Messages.Sia.`you owe ... or less`(appConfig.PolicyParameters.SIA.maxAmountOfDebt).show}</li>
+      <li>@{Messages.Sia.`you do not have any other debts with HMRC`.show}</li>
+      <li>@{Messages.Sia.`you do not have any payment plans with HMRC`.show}</li>
+  </ul>
+
+  <p class="govuk-body">@{Messages.Sia.`You can choose to pay:`.show}</p>
+
+  <ul class="govuk-list govuk-list--bullet">
+      <li>@{Messages.Sia.`part of the payment upfront and part in monthly instalments`.show}</li>
+      <li>@{Messages.Sia.`monthly instalments only`.show}</li>
+  </ul>
+
+  <h2 class="govuk-heading-m">@{Messages.Epaye.`Before you start`.show}</h2>
+
+  <p class="govuk-body">@{Messages.Sia.`You must be:`.show}</p>
+
+  <ul class="govuk-list govuk-list--bullet">
+      <li>@{Messages.Sia.`a named account holder for the UK bank account you intend to use`.show}</li>
+      <li>@{Messages.Sia.`able to authorise a Direct Debit`.show}</li>
+  </ul>
+
+  <p class="govuk-body">@{Messages.Sia.`You must keep up to date with your payments...`.show}</p>
+
+  @govukButton(Button(
         href = Some(routes.LandingController.siaLandingPageContinue.url),
         content = Text(Messages.`Start now`.show),
         isStartButton = true
