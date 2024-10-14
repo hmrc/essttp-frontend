@@ -460,7 +460,9 @@ object TdAll {
       customerDetails:             Option[List[CustomerDetail]],
       regimeDigitalCorrespondence: Option[RegimeDigitalCorrespondence],
       taxRegime:                   TaxRegime,
-      accountNumber:               String                              = "12345678"
+      accountNumber:               String                              = "12345678",
+      hasAffordabilityAssessment:  Boolean                             = false,
+      caseID:                      Option[PegaCaseId]                  = None
   ): ArrangementRequest = {
     val regimeType = taxRegime match {
       case TaxRegime.Epaye => RegimeType.EPAYE
@@ -471,8 +473,8 @@ object TdAll {
     ArrangementRequest(
       channelIdentifier           = ChannelIdentifiers.eSSTTP,
       regimeType                  = regimeType,
-      hasAffordabilityAssessment  = false,
-      caseID                      = None,
+      hasAffordabilityAssessment  = hasAffordabilityAssessment,
+      caseID                      = caseID,
       regimePaymentFrequency      = PaymentPlanFrequencies.Monthly,
       arrangementAgreedDate       = ArrangementAgreedDate(LocalDate.now(ZoneOffset.of("Z")).toString),
       identification              = identification(taxRegime),

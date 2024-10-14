@@ -440,11 +440,11 @@ object JourneyInfo {
   def `agreedTermsAndConditions - padded account number`(isEmailAddressRequired: Boolean, taxRegime: TaxRegime, encrypter: Encrypter, etmpEmail: Option[String] = None): List[JourneyInfoAsJson] =
     emailAddressRequired(isEmailAddressRequired) :: `confirmedDirectDebitDetails - padded account number`(taxRegime, encrypter, etmpEmail)
 
-  def selectedEmailToBeVerified(email: String, taxRegime: TaxRegime, encrypter: Encrypter, etmpEmail: Option[String] = Some(TdAll.etmpEmail)): List[JourneyInfoAsJson] =
-    emailToBeVerified(email, encrypter) :: agreedTermsAndConditions(isEmailAddressRequired = true, taxRegime, encrypter, etmpEmail)
+  def selectedEmailToBeVerified(email: String, taxRegime: TaxRegime, encrypter: Encrypter, etmpEmail: Option[String] = Some(TdAll.etmpEmail), withAffordability: Boolean = false): List[JourneyInfoAsJson] =
+    emailToBeVerified(email, encrypter) :: agreedTermsAndConditions(isEmailAddressRequired = true, taxRegime, encrypter, etmpEmail, withAffordability = withAffordability)
 
-  def emailVerificationComplete(email: String, result: EmailVerificationResult, taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
-    emailVerificationResult(result) :: emailVerificationAnswersEmailRequired(email, result, encrypter) :: selectedEmailToBeVerified(email, taxRegime, encrypter)
+  def emailVerificationComplete(email: String, result: EmailVerificationResult, taxRegime: TaxRegime, encrypter: Encrypter, withAffordability: Boolean = false): List[JourneyInfoAsJson] =
+    emailVerificationResult(result) :: emailVerificationAnswersEmailRequired(email, result, encrypter) :: selectedEmailToBeVerified(email, taxRegime, encrypter, withAffordability = withAffordability)
 
   def emailVerificationAnswers(isEmailAddressRequired: Boolean, taxRegime: TaxRegime, encrypter: Encrypter, withAffordability: Boolean = false): List[JourneyInfoAsJson] =
     emailVerificationAnswersNoEmailRequired :: agreedTermsAndConditions(isEmailAddressRequired, taxRegime, encrypter, withAffordability = withAffordability)
