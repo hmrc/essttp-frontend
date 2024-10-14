@@ -158,8 +158,20 @@ class TtpService @Inject() (
 
     val debtItemCharges = eligibilityCheckResult.chargeTypeAssessment.flatMap(toDebtItemCharges)
 
+    val hasAffordabilityAssessment = journey.fold(_.paymentPlanAnswers, _.paymentPlanAnswers) match {
+      case _: PaymentPlanAnswers.PaymentPlanNoAffordability    => false
+      case _: PaymentPlanAnswers.PaymentPlanAfterAffordability => true
+    }
+
+    val caseID = journey.fold(_.paymentPlanAnswers, _.paymentPlanAnswers) match {
+      case _: PaymentPlanAnswers.PaymentPlanNoAffordability    => None
+      case p: PaymentPlanAnswers.PaymentPlanAfterAffordability => Some(p.startCaseResponse.caseId)
+    }
+
     val arrangementRequest: ArrangementRequest = ArrangementRequest(
       channelIdentifier           = ChannelIdentifiers.eSSTTP,
+      hasAffordabilityAssessment  = hasAffordabilityAssessment,
+      caseID                      = caseID,
       regimeType                  = RegimeType.fromTaxRegime(taxRegime),
       regimePaymentFrequency      = PaymentPlanFrequencies.Monthly,
       arrangementAgreedDate       = ArrangementAgreedDate(LocalDate.now(ZoneOffset.of("Z")).toString),

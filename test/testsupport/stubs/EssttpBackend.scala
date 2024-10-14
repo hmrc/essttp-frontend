@@ -563,8 +563,9 @@ object EssttpBackend {
         isEmailAddressRequired: Boolean,
         encrypter:              Encrypter,
         origin:                 Origin,
-        etmpEmail:              Option[String]
-    )(jsonBody: String = JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddressRequired, origin, etmpEmail)(encrypter)): StubMapping =
+        etmpEmail:              Option[String],
+        withAffordability:      Boolean        = false
+    )(jsonBody: String = JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddressRequired, origin, etmpEmail, withAffordability)(encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
   }
 

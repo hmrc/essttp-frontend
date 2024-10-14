@@ -52,7 +52,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
             (
               "T&C's accepted, no email required",
               () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto, origin, etmpEmail = Some(TdAll.etmpEmail))(),
-              None, None
+              None, None, false, None
             ),
             (
               "email verification success - same email as ETMP",
@@ -62,7 +62,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
                 testCrypto,
                 origin
               )(),
-              Some("bobross@joyofpainting.com"), Some(EmailSource.ETMP)
+              Some("bobross@joyofpainting.com"), Some(EmailSource.ETMP), false, None
             ),
             (
               "email verification success - new email",
@@ -72,7 +72,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
                 testCrypto,
                 origin
               )(),
-              Some("grogu@mandalorian.com"), Some(EmailSource.TEMP)
+              Some("grogu@mandalorian.com"), Some(EmailSource.TEMP), false, None
             ),
             (
               "email verification success - ETMP - same email with different casing",
@@ -82,10 +82,15 @@ class SubmitArrangementControllerSpec extends ItSpec {
                 testCrypto,
                 origin
               )(),
-              Some("BobRoss@joyofpainting.com"), Some(EmailSource.ETMP)
+              Some("BobRoss@joyofpainting.com"), Some(EmailSource.ETMP), false, None
+            ),
+            (
+              "T&C's accepted, no email required with affordability enabled",
+              () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto, origin, etmpEmail = Some(TdAll.etmpEmail), withAffordability = true)(),
+              None, None, true, Some(TdAll.pegaStartCaseResponse.caseId)
             )
           ).foreach {
-              case (journeyDescription, journeyStubMapping, expectedEmail, expectedEmailSource) =>
+              case (journeyDescription, journeyStubMapping, expectedEmail, expectedEmailSource, affordabilityEnabled, caseId) =>
                 s"[taxRegime: ${taxRegime.toString}] trigger call to ttp enact arrangement api, send an audit event " +
                   s"and also update backend for $journeyDescription" in {
                     stubCommonActions()
@@ -108,7 +113,9 @@ class SubmitArrangementControllerSpec extends ItSpec {
                     Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(
                       TdAll.customerDetail(expectedEmail.getOrElse(TdAll.etmpEmail).toLowerCase(Locale.UK), expectedEmailSource.getOrElse(EmailSource.ETMP)),
                       TdAll.someRegimeDigitalCorrespondenceTrue,
-                      taxRegime
+                      taxRegime,
+                      hasAffordability = affordabilityEnabled,
+                      caseId           = caseId
                     )(CryptoFormat.NoOpCryptoFormat)
 
                     val taxType = taxRegime match {

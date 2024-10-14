@@ -21,6 +21,7 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import connectors.CallEligibilityApiRequest
 import essttp.crypto.CryptoFormat
 import essttp.rootmodel.TaxRegime
+import essttp.rootmodel.pega.PegaCaseId
 import essttp.rootmodel.ttp.affordability.InstalmentAmountRequest
 import essttp.rootmodel.ttp.affordablequotes.AffordableQuotesRequest
 import essttp.rootmodel.ttp.arrangement.ArrangementRequest
@@ -94,11 +95,13 @@ object Ttp {
         customerDetails:             Option[List[CustomerDetail]],
         regimeDigitalCorrespondence: Option[RegimeDigitalCorrespondence],
         taxRegime:                   TaxRegime,
-        accountNumber:               String                              = "12345678"
+        accountNumber:               String                              = "12345678",
+        hasAffordability:            Boolean                             = false,
+        caseId:                      Option[PegaCaseId]                  = None
     )(implicit cryptoFormat: CryptoFormat): Unit =
       ttpVerify(
         enactArrangementUrl,
-        TdAll.arrangementRequest(customerDetails, regimeDigitalCorrespondence, taxRegime, accountNumber)
+        TdAll.arrangementRequest(customerDetails, regimeDigitalCorrespondence, taxRegime, accountNumber, hasAffordability, caseId)
       )(ArrangementRequest.format)
   }
 
