@@ -147,12 +147,12 @@ class TtpService @Inject() (
       def toDebtItemCharges(chargeTypeAssessment: ChargeTypeAssessment): List[DebtItemCharges] =
         chargeTypeAssessment.charges.map { charge: Charges =>
           DebtItemCharges(
-            outstandingDebtAmount   = OutstandingDebtAmount(charge.outstandingAmount.value),
+            outstandingDebtAmount   = OutstandingDebtAmount(charge.charges1.outstandingAmount.value),
             debtItemChargeId        = chargeTypeAssessment.chargeReference,
-            debtItemOriginalDueDate = DebtItemOriginalDueDate(charge.dueDate.value),
-            accruedInterest         = charge.accruedInterest,
-            isInterestBearingCharge = charge.isInterestBearingCharge,
-            useChargeReference      = charge.useChargeReference
+            debtItemOriginalDueDate = DebtItemOriginalDueDate(charge.charges1.dueDate.value),
+            accruedInterest         = charge.charges1.accruedInterest,
+            isInterestBearingCharge = charge.charges1.isInterestBearingCharge,
+            useChargeReference      = charge.charges2.useChargeReference
           )
         }
 
@@ -264,7 +264,7 @@ object TtpService {
     val allInterestAccrued: AmountInPence = AmountInPence(
       eligibilityCheckResult.chargeTypeAssessment
         .flatMap(_.charges
-          .map(_.accruedInterest.value.value))
+          .map(_.charges1.accruedInterest.value.value))
         .sum
     )
     val debtChargeItemsFromEligibilityCheck: List[DebtItemCharge] = eligibilityCheckResult.chargeTypeAssessment.flatMap {
@@ -291,14 +291,14 @@ object TtpService {
   private def toDebtItemCharge(chargeTypeAssessment: ChargeTypeAssessment): List[DebtItemCharge] = {
     chargeTypeAssessment.charges.map { charge: Charges =>
       DebtItemCharge(
-        outstandingDebtAmount   = OutstandingDebtAmount(charge.outstandingAmount.value),
-        mainTrans               = charge.mainTrans,
-        subTrans                = charge.subTrans,
-        isInterestBearingCharge = charge.isInterestBearingCharge,
-        useChargeReference      = charge.useChargeReference,
+        outstandingDebtAmount   = OutstandingDebtAmount(charge.charges1.outstandingAmount.value),
+        mainTrans               = charge.charges1.mainTrans,
+        subTrans                = charge.charges1.subTrans,
+        isInterestBearingCharge = charge.charges1.isInterestBearingCharge,
+        useChargeReference      = charge.charges2.useChargeReference,
         debtItemChargeId        = chargeTypeAssessment.chargeReference,
-        interestStartDate       = charge.interestStartDate,
-        debtItemOriginalDueDate = DebtItemOriginalDueDate(charge.dueDate.value)
+        interestStartDate       = charge.charges1.interestStartDate,
+        debtItemOriginalDueDate = DebtItemOriginalDueDate(charge.charges1.dueDate.value)
       )
     }
   }
@@ -306,7 +306,7 @@ object TtpService {
   private def calculateCumulativeInterest(eligibilityCheckResult: EligibilityCheckResult): AmountInPence = AmountInPence(
     eligibilityCheckResult.chargeTypeAssessment
       .flatMap(_.charges)
-      .map(_.accruedInterest.value.value)
+      .map(_.charges1.accruedInterest.value.value)
       .sum
   )
 

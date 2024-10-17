@@ -384,31 +384,43 @@ object StartJourneyController {
     val maybeRegimeDigitalCorrespondence = Some(RegimeDigitalCorrespondence(form.regimeDigitalCorrespondence))
 
     val charges: Charges = Charges(
-      chargeType                    = ChargeType("InYearRTICharge-Tax"),
-      mainType                      = MainType("InYearRTICharge(FPS)"),
-      mainTrans                     = MainTrans(form.mainTrans),
-      subTrans                      = SubTrans(form.subTrans),
-      outstandingAmount             = OutstandingAmount(debtAmountFromForm),
-      interestStartDate             = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
-      dueDate                       = DueDate(LocalDate.parse("2017-03-07")),
-      accruedInterest               = AccruedInterest(interestAmount),
-      ineligibleChargeType          = IneligibleChargeType(value = false),
-      chargeOverMaxDebtAge          = if (form.chargeBeforeMaxAccountingDate.isEmpty) Some(ChargeOverMaxDebtAge(value = false)) else None,
-      locks                         = Some(
-        List(
-          Lock(
-            lockType                 = LockType("Payment"),
-            lockReason               = LockReason("Risk/Fraud"),
-            disallowedChargeLockType = DisallowedChargeLockType(value = false)
+      Charges1(
+        chargeType              = ChargeType("InYearRTICharge-Tax"),
+        mainType                = MainType("InYearRTICharge(FPS)"),
+        mainTrans               = MainTrans(form.mainTrans),
+        subTrans                = SubTrans(form.subTrans),
+        outstandingAmount       = OutstandingAmount(debtAmountFromForm),
+        interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
+        dueDate                 = DueDate(LocalDate.parse("2017-03-07")),
+        accruedInterest         = AccruedInterest(interestAmount),
+        ineligibleChargeType    = IneligibleChargeType(value = false),
+        chargeOverMaxDebtAge    = if (form.chargeBeforeMaxAccountingDate.isEmpty) Some(ChargeOverMaxDebtAge(value = false)) else None,
+        locks                   = Some(
+          List(
+            Lock(
+              lockType                 = LockType("Payment"),
+              lockReason               = LockReason("Risk/Fraud"),
+              disallowedChargeLockType = DisallowedChargeLockType(value = false)
+            )
           )
-        )
+        ),
+        dueDateNotReached       = false,
+        isInterestBearingCharge = form.isInterestBearingCharge.map(IsInterestBearingCharge(_))
       ),
-      dueDateNotReached             = false,
-      isInterestBearingCharge       = form.isInterestBearingCharge.map(IsInterestBearingCharge(_)),
-      useChargeReference            = form.useChargeReference.map(UseChargeReference(_)),
-      chargeBeforeMaxAccountingDate = form.chargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_)),
-      ddInProgress                  = form.ddInProgress.map(DdInProgress(_)),
-      chargeSource                  = form.chargeSource.map(ChargeSource(_))
+      Charges2(
+        useChargeReference            = form.useChargeReference.map(UseChargeReference(_)),
+        chargeBeforeMaxAccountingDate = form.chargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_)),
+        ddInProgress                  = form.ddInProgress.map(DdInProgress(_)),
+        chargeSource                  = form.chargeSource.map(ChargeSource(_)),
+        parentChargeReference         = Some(ParentChargeReference("XW006559808862")),
+        parentMainTrans               = Some(ParentMainTrans("4700")),
+        originalCreationDate          = Some(OriginalCreationDate(LocalDate.parse("2022-05-17"))),
+        tieBreaker                    = Some(TieBreaker("xyz")),
+        originalTieBreaker            = Some(OriginalTieBreaker("xyz")),
+        saTaxYearEnd                  = Some(SaTaxYearEnd(LocalDate.parse("2022-05-17"))),
+        creationDate                  = Some(CreationDate(LocalDate.parse("2022-05-17"))),
+        originalChargeType            = Some(OriginalChargeType("VAT Return Debit Charge"))
+      )
     )
 
     val chargeTypeAssessments: List[ChargeTypeAssessment] = List(
@@ -452,7 +464,7 @@ object StartJourneyController {
       processingDateTime              = ProcessingDateTime(LocalDate.now().toString),
       identification                  = makeIdentificationForTaxType(taxRegime, form),
       invalidSignals                  = Some(List(InvalidSignals(signalType        = "xyz", signalValue = "123", signalDescription = "Description"))),
-      customerPostcodes               = List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate(LocalDate.of(2022, 1, 1)))),
+      customerPostcodes               = Some(List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate(LocalDate.of(2022, 1, 1))))),
       customerType                    = Some(CustomerTypes.MTDITSA),
       regimePaymentFrequency          = PaymentPlanFrequencies.Monthly,
       paymentPlanFrequency            = PaymentPlanFrequencies.Monthly,

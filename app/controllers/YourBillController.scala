@@ -68,7 +68,7 @@ class YourBillController @Inject() (
         logger.warn(s"${e.getClass.getName}: MainTrans with no corresponding charge type: ${e.mTrans.value}")
         Redirect(routes.IneligibleController.saGenericIneligiblePage)
       case e: ChargeTypeAssessment.ChargesWithDifferentMTransException =>
-        logger.warn(s"${e.getClass.getName}: ChargeTypeAssessment has charges with different MainTrans: ${e.charges.map(_.mainTrans).toString}")
+        logger.warn(s"${e.getClass.getName}: ChargeTypeAssessment has charges with different MainTrans: ${e.charges.map(_.charges1.mainTrans).toString}")
         Redirect(routes.IneligibleController.saGenericIneligiblePage)
     }
   }
@@ -115,7 +115,7 @@ object YourBillController {
   def chargeDueDate(chargeTypeAssessments: List[ChargeTypeAssessment]): LocalDate = {
     chargeTypeAssessments.headOption.map { (chargeTypeAssessment: ChargeTypeAssessment) =>
       chargeTypeAssessment.charges.headOption.map { charges: Charges =>
-        parseLocalDate(charges.dueDate.value.toString)
+        parseLocalDate(charges.charges1.dueDate.value.toString)
       }
     }.getOrElse(throw new IllegalArgumentException("missing charge list")).getOrElse(throw new IllegalArgumentException("missing charge list"))
   }
@@ -133,12 +133,12 @@ object YourBillController {
 
   private def chargeBearsInterest(ass: ChargeTypeAssessment): Option[IsInterestBearingCharge] =
     ass.charges.headOption.flatMap { charges: Charges =>
-      charges.isInterestBearingCharge
+      charges.charges1.isInterestBearingCharge
     }
 
   private def ddInProgress(ass: ChargeTypeAssessment): Option[DdInProgress] =
     ass.charges.headOption.flatMap { charges: Charges =>
-      charges.ddInProgress
+      charges.charges2.ddInProgress
     }
 
   private def hasAnyChargesWithDdInProgress(eligibilityResult: EligibilityCheckResult) =
@@ -155,7 +155,7 @@ object YourBillController {
   }
 
   private def overDuePaymentOf(ass: ChargeTypeAssessment): OverduePayment = {
-    val maybeMainTrans = ass.charges.map(_.mainTrans).reduceOption((a, b) =>
+    val maybeMainTrans = ass.charges.map(_.charges1.mainTrans).reduceOption((a, b) =>
       if (a === b) a else throw ChargeTypeAssessment.ChargesWithDifferentMTransException(ass.charges))
 
     val mainTrans = maybeMainTrans.getOrElse(

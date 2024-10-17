@@ -251,7 +251,7 @@ object TdAll {
       processingDateTime              = ProcessingDateTime("2022-03-23T13:49:51.141Z"),
       identification                  = identification(taxRegime),
       invalidSignals                  = None,
-      customerPostcodes               = List(CustomerPostcode(customerPostcode, PostcodeDate(LocalDate.of(2022, 1, 31)))),
+      customerPostcodes               = Some(List(CustomerPostcode(customerPostcode, PostcodeDate(LocalDate.of(2022, 1, 31))))),
       customerType                    = None,
       regimePaymentFrequency          = PaymentPlanFrequencies.Monthly,
       paymentPlanFrequency            = PaymentPlanFrequencies.Monthly,
@@ -265,25 +265,37 @@ object TdAll {
         debtTotalAmount = DebtTotalAmount(AmountInPence(300000)),
         chargeReference = ChargeReference("A00000000001"),
         charges         = List(Charges(
-          chargeType                    = ChargeType("InYearRTICharge-Tax"),
-          mainType                      = MainType("InYearRTICharge(FPS)"),
-          mainTrans                     = MainTrans("mainTrans"),
-          subTrans                      = SubTrans("subTrans"),
-          outstandingAmount             = OutstandingAmount(AmountInPence(100000)),
-          interestStartDate             = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
-          dueDate                       = DueDate(LocalDate.parse("2017-03-07")),
-          accruedInterest               = AccruedInterest(AmountInPence(1597)),
-          ineligibleChargeType          = IneligibleChargeType(value = false),
-          chargeOverMaxDebtAge          = Some(ChargeOverMaxDebtAge(value = false)),
-          locks                         = Some(
-            List(Lock(LockType("Payment"), LockReason("Risk/Fraud"), DisallowedChargeLockType(value = false)))
+          Charges1(
+            chargeType              = ChargeType("InYearRTICharge-Tax"),
+            mainType                = MainType("InYearRTICharge(FPS)"),
+            mainTrans               = MainTrans("mainTrans"),
+            subTrans                = SubTrans("subTrans"),
+            outstandingAmount       = OutstandingAmount(AmountInPence(100000)),
+            interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
+            dueDate                 = DueDate(LocalDate.parse("2017-03-07")),
+            accruedInterest         = AccruedInterest(AmountInPence(1597)),
+            ineligibleChargeType    = IneligibleChargeType(value = false),
+            chargeOverMaxDebtAge    = Some(ChargeOverMaxDebtAge(value = false)),
+            locks                   = Some(
+              List(Lock(LockType("Payment"), LockReason("Risk/Fraud"), DisallowedChargeLockType(value = false)))
+            ),
+            dueDateNotReached       = false,
+            isInterestBearingCharge = chargeIsInterestBearingCharge.map(IsInterestBearingCharge(_))
           ),
-          dueDateNotReached             = false,
-          isInterestBearingCharge       = chargeIsInterestBearingCharge.map(IsInterestBearingCharge(_)),
-          useChargeReference            = chargeUseChargeReference.map(UseChargeReference(_)),
-          chargeBeforeMaxAccountingDate = chargeChargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_)),
-          ddInProgress                  = ddInProgress.map(DdInProgress(_)),
-          chargeSource                  = None
+          Charges2(
+            useChargeReference            = chargeUseChargeReference.map(UseChargeReference(_)),
+            chargeBeforeMaxAccountingDate = chargeChargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_)),
+            ddInProgress                  = ddInProgress.map(DdInProgress(_)),
+            chargeSource                  = None,
+            parentChargeReference         = None,
+            parentMainTrans               = None,
+            originalCreationDate          = None,
+            tieBreaker                    = None,
+            originalTieBreaker            = None,
+            saTaxYearEnd                  = None,
+            creationDate                  = None,
+            originalChargeType            = None
+          )
         ))
       )),
       customerDetails                 = None,
@@ -355,7 +367,7 @@ object TdAll {
           debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-02-07"))
         )
       ),
-      customerPostcodes            = List(CustomerPostcode(customerPostcode, PostcodeDate(LocalDate.of(2022, 1, 31))))
+      customerPostcodes            = Some(List(CustomerPostcode(customerPostcode, PostcodeDate(LocalDate.of(2022, 1, 31)))))
     )
   }
 
@@ -403,7 +415,7 @@ object TdAll {
           debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-02-07"))
         )
       ),
-      customerPostcodes           = List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate(LocalDate.of(2022, 1, 31)))),
+      customerPostcodes           = Some(List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate(LocalDate.of(2022, 1, 31))))),
       paymentPlanAffordableAmount = PaymentPlanAffordableAmount(AmountInPence(30000)),
       paymentPlanStartDate        = InstalmentStartDate(LocalDate.parse("2022-07-28"))
     )

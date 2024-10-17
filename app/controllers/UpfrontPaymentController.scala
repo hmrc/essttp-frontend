@@ -220,7 +220,7 @@ object UpfrontPaymentController {
 
   def determineTotalAmountToPayWithoutInterest(eligibilityCheckResult: EligibilityCheckResult): DebtTotalAmount =
     DebtTotalAmount(
-      eligibilityCheckResult.chargeTypeAssessment.flatMap(_.charges.map(_.outstandingAmount.value)).fold(AmountInPence.zero)(_ + _)
+      eligibilityCheckResult.chargeTypeAssessment.flatMap(_.charges.map(_.charges1.outstandingAmount.value)).fold(AmountInPence.zero)(_ + _)
     )
 
   def deriveRemainingAmountToPay(totalDebt: DebtTotalAmount, upfrontPaymentAmount: UpfrontPaymentAmount): AmountInPence =
