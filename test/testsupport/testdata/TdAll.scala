@@ -415,7 +415,7 @@ object TdAll {
           debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-02-07"))
         )
       ),
-      customerPostcodes           = List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate(LocalDate.of(2022, 1, 31)))),
+      customerPostcodes           = Some(List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate(LocalDate.of(2022, 1, 31))))),
       paymentPlanAffordableAmount = PaymentPlanAffordableAmount(AmountInPence(30000)),
       paymentPlanStartDate        = InstalmentStartDate(LocalDate.parse("2022-07-28"))
     )
