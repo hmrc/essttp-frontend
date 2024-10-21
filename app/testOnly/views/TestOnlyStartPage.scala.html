@@ -384,6 +384,25 @@ appConfig: AppConfig
   ))
 }
 
+
+@mainTransDefaulValue = @{
+    taxRegime match {
+        case TaxRegime.Epaye => 2000
+        case TaxRegime.Vat   => 4700
+        case TaxRegime.Sa    => 4910
+        case TaxRegime.Sia   => 2000
+    }
+}
+
+@subTransDefaulValue = @{
+    taxRegime match {
+        case TaxRegime.Epaye => 1000
+        case TaxRegime.Vat   => 1174
+        case TaxRegime.Sa    => 1000
+        case TaxRegime.Sia   => 1000
+    }
+}
+
 @mainTransInput = {
     @govukInput(Input(
         id = "mainTrans",
@@ -395,7 +414,7 @@ appConfig: AppConfig
         ),
         classes = "govuk-input--width-10",
         spellcheck = Some(false),
-        value = form.data.get("mainTrans").orElse(Some("4910")),
+        value = form.data.get("mainTrans").orElse(Some(mainTransDefaulValue.toString)),
         hint = Some(Hint(content = Text("mainTrans is 4 digits. Code 4910 corresponds to 'Balancing payment'.")))
     ))
 }
@@ -411,7 +430,7 @@ appConfig: AppConfig
         ),
         classes = "govuk-input--width-10",
         spellcheck = Some(false),
-        value = form.data.get("subTrans").orElse(Some("1000")),
+        value = form.data.get("subTrans").orElse(Some(subTransDefaulValue.toString)),
         hint = Some(Hint(content = Text("subTrans is 4 digits.")))
     ))
 }
