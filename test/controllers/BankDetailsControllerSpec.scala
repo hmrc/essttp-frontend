@@ -195,13 +195,13 @@ class BankDetailsControllerSpec extends ItSpec {
           }
 
           Seq(
-            (true, JourneyJsonTemplates.`Entered Details About Bank Account`(isAccountHolder = true, origin), 0),
-            (false, JourneyJsonTemplates.`Entered Details About Bank Account`(isAccountHolder = false, origin), 1)
+            (true, JourneyJsonTemplates.`Entered Can Set Up Direct Debit`(isAccountHolder = true, origin), 0),
+            (false, JourneyJsonTemplates.`Entered Can Set Up Direct Debit`(isAccountHolder = false, origin), 1)
           ).foreach {
               case (isAccountHolder, wiremockJson, isAccountHolderCheckedElementIndex) =>
                 s"[$regime journey] prepopulate the form when the user has isAccountHolder=${isAccountHolder.toString} in their journey" in {
                   stubCommonActions()
-                  EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)(wiremockJson)
+                  EssttpBackend.EnteredCanSetUpDirectDebit.findJourney(testCrypto, origin)(wiremockJson)
 
                   val result: Future[Result] = controller.detailsAboutBankAccount(fakeRequest)
                   val pageContent: String = contentAsString(result)
@@ -222,11 +222,11 @@ class BankDetailsControllerSpec extends ItSpec {
             def testRedirect(
                 formBody: (String, String)
             )(expectedRedirectUrl: String, expectedDetailsAboutBankAccount: CanSetUpDirectDebit): Unit = {
-              val updatedJourneyJson = JourneyJsonTemplates.`Entered Details About Bank Account`(expectedDetailsAboutBankAccount.isAccountHolder, origin)
+              val updatedJourneyJson = JourneyJsonTemplates.`Entered Can Set Up Direct Debit`(expectedDetailsAboutBankAccount.isAccountHolder, origin)
 
               stubCommonActions()
               EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, origin)()
-              EssttpBackend.EnteredDetailsAboutBankAccount.stubUpdateEnteredDetailsAboutBankAccount(TdAll.journeyId, updatedJourneyJson)
+              EssttpBackend.EnteredCanSetUpDirectDebit.stubUpdateEnteredCanSetUpDirectDebit(TdAll.journeyId, updatedJourneyJson)
 
               val fakeRequest = FakeRequest(
                 method = "POST",
@@ -238,7 +238,7 @@ class BankDetailsControllerSpec extends ItSpec {
               val result: Future[Result] = controller.detailsAboutBankAccountSubmit(fakeRequest)
               status(result) shouldBe Status.SEE_OTHER
               redirectLocation(result) shouldBe Some(expectedRedirectUrl)
-              EssttpBackend.EnteredDetailsAboutBankAccount.verifyUpdateEnteredDetailsAboutBankAccountRequest(TdAll.journeyId, expectedDetailsAboutBankAccount)
+              EssttpBackend.EnteredCanSetUpDirectDebit.verifyUpdateEnteredCanSetUpDirectDebitRequest(TdAll.journeyId, expectedDetailsAboutBankAccount)
 
             }
 
@@ -270,7 +270,7 @@ class BankDetailsControllerSpec extends ItSpec {
               radioInputs.asScala.toList.foreach(_.hasAttr("checked") shouldBe false)
 
             })
-            EssttpBackend.EnteredDetailsAboutBankAccount.verifyNoneUpdateEnteredDetailsAboutBankAccountRequest(TdAll.journeyId)
+            EssttpBackend.EnteredCanSetUpDirectDebit.verifyNoneUpdateEnteredCanSetUpDirectDebitRequest(TdAll.journeyId)
           }
 
         }
@@ -279,7 +279,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
           s"[$regime journey] should return 200 and the bank details page" in {
             stubCommonActions()
-            EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)()
+            EssttpBackend.EnteredCanSetUpDirectDebit.findJourney(testCrypto, origin)()
 
             val result: Future[Result] = controller.enterBankDetails(fakeRequest)
             val pageContent: String = contentAsString(result)
@@ -346,8 +346,8 @@ class BankDetailsControllerSpec extends ItSpec {
 
           s"[$regime journey] redirect to the 'cannot set up direct debit' page if the user has said they are not an account holder" in {
             stubCommonActions()
-            EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)(
-              JourneyJsonTemplates.`Entered Details About Bank Account`(isAccountHolder = false, origin)
+            EssttpBackend.EnteredCanSetUpDirectDebit.findJourney(testCrypto, origin)(
+              JourneyJsonTemplates.`Entered Can Set Up Direct Debit`(isAccountHolder = false, origin)
             )
 
             val result: Future[Result] = controller.enterBankDetails(fakeRequest)
@@ -390,8 +390,8 @@ class BankDetailsControllerSpec extends ItSpec {
 
           s"[$regime journey] redirect to the 'cannot set up direct debit' page if the user has said they are not an account holder" in {
             stubCommonActions()
-            EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)(
-              JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = false, origin)
+            EssttpBackend.EnteredCanSetUpDirectDebit.findJourney(testCrypto, origin)(
+              JourneyJsonTemplates.`Entered Can Set Up Direct Debit`(isAccountHolder = false, origin)
             )
 
             val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest.withMethod("POST"))
@@ -403,8 +403,8 @@ class BankDetailsControllerSpec extends ItSpec {
             BarsStub.ValidateStub.success()
             BarsStub.VerifyPersonalStub.success()
             BarsVerifyStatusStub.update()
-            EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)(
-              JourneyJsonTemplates.`Entered Details About Bank Account`(isAccountHolder = true, origin)
+            EssttpBackend.EnteredCanSetUpDirectDebit.findJourney(testCrypto, origin)(
+              JourneyJsonTemplates.`Entered Can Set Up Direct Debit`(isAccountHolder = true, origin)
             )
             EssttpBackend.DirectDebitDetails.stubUpdateDirectDebitDetails(TdAll.journeyId, JourneyJsonTemplates.`Entered Direct Debit Details`(origin))
 
@@ -465,7 +465,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
           s"[$regime journey] show correct error messages when form submitted is empty" in {
             stubCommonActions()
-            EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)()
+            EssttpBackend.EnteredCanSetUpDirectDebit.findJourney(testCrypto, origin)()
 
             val formData: List[(String, String)] = List(
               ("accountType", ""),
@@ -487,7 +487,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
           s"[$regime journey] show correct error messages when submitted sort code and account number are not numeric" in {
             stubCommonActions()
-            EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)()
+            EssttpBackend.EnteredCanSetUpDirectDebit.findJourney(testCrypto, origin)()
 
             val formData: List[(String, String)] = List(
               ("accountType", "Personal"),
@@ -543,7 +543,7 @@ class BankDetailsControllerSpec extends ItSpec {
               case (accountName, errorMessage) =>
                 withClue(s"For accountName $accountName: ") {
                   stubCommonActions()
-                  EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)()
+                  EssttpBackend.EnteredCanSetUpDirectDebit.findJourney(testCrypto, origin)()
                   val formData: List[(String, String)] = List(
                     ("accountType", "Personal"),
                     ("name", accountName),
@@ -567,8 +567,8 @@ class BankDetailsControllerSpec extends ItSpec {
                 BarsStub.ValidateStub.success()
                 BarsStub.VerifyPersonalStub.success()
                 BarsVerifyStatusStub.update()
-                EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)(
-                  JourneyJsonTemplates.`Entered Details About Bank Account`(isAccountHolder = true, origin)
+                EssttpBackend.EnteredCanSetUpDirectDebit.findJourney(testCrypto, origin)(
+                  JourneyJsonTemplates.`Entered Can Set Up Direct Debit`(isAccountHolder = true, origin)
                 )
                 EssttpBackend.DirectDebitDetails.stubUpdateDirectDebitDetails(TdAll.journeyId, JourneyJsonTemplates.`Entered Direct Debit Details`(origin))
 
@@ -621,7 +621,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
           s"[$regime journey] show correct error messages when submitted sort code and account number are more than 6 and 8 digits respectively" in {
             stubCommonActions()
-            EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)()
+            EssttpBackend.EnteredCanSetUpDirectDebit.findJourney(testCrypto, origin)()
 
             val formData: List[(String, String)] = List(
               ("accountType", "Personal"),
@@ -644,8 +644,8 @@ class BankDetailsControllerSpec extends ItSpec {
             BarsStub.ValidateStub.success()
             BarsStub.VerifyPersonalStub.success()
             BarsVerifyStatusStub.update()
-            EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)(
-              JourneyJsonTemplates.`Entered Details About Bank Account - Personal`(isAccountHolder = true, origin)
+            EssttpBackend.EnteredCanSetUpDirectDebit.findJourney(testCrypto, origin)(
+              JourneyJsonTemplates.`Entered Can Set Up Direct Debit`(isAccountHolder = true, origin)
             )
             EssttpBackend.DirectDebitDetails.stubUpdateDirectDebitDetails(TdAll.journeyId, JourneyJsonTemplates.`Entered Direct Debit Details`(origin))
 
@@ -774,12 +774,12 @@ class BankDetailsControllerSpec extends ItSpec {
 
             typeOfAccount match {
               case TypesOfBankAccount.Personal =>
-                EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)(
-                  JourneyJsonTemplates.`Entered Details About Bank Account - Personal`(isAccountHolder = true, origin)
+                EssttpBackend.EnteredCanSetUpDirectDebit.findJourney(testCrypto, origin)(
+                  JourneyJsonTemplates.`Entered Can Set Up Direct Debit`(isAccountHolder = true, origin)
                 )
               case TypesOfBankAccount.Business =>
-                EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)(
-                  JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = true, origin)
+                EssttpBackend.EnteredCanSetUpDirectDebit.findJourney(testCrypto, origin)(
+                  JourneyJsonTemplates.`Entered Can Set Up Direct Debit`(isAccountHolder = true, origin)
                 )
             }
           }
@@ -1206,8 +1206,8 @@ class BankDetailsControllerSpec extends ItSpec {
         "GET /you-cannot-set-up-a-direct-debit-online should" - {
           s"[$regime journey] return 200 and Call us about a payment plan page" in {
             stubCommonActions()
-            EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)(
-              JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = false, origin)
+            EssttpBackend.EnteredCanSetUpDirectDebit.findJourney(testCrypto, origin)(
+              JourneyJsonTemplates.`Entered Can Set Up Direct Debit`(isAccountHolder = false, origin)
             )
 
             val result: Future[Result] = controller.cannotSetupDirectDebitOnlinePage(fakeRequest)

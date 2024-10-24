@@ -18,7 +18,7 @@
 @import essttp.rootmodel.bank.TypesOfBankAccount
 @import messages.Messages
 @import models.enumsforforms.IsSoleSignatoryFormValue
-@import models.forms.DetailsAboutBankAccountForm
+@import models.forms.CanSetUpDirectDebitForm
 @import play.api.data.Form
 @import play.api.mvc.Request
 @import requests.RequestSupport
@@ -33,7 +33,7 @@
         requestSupport: RequestSupport
 )
 
-@(form: Form[DetailsAboutBankAccountForm])(implicit request: Request[_])
+@(form: Form[CanSetUpDirectDebitForm])(implicit request: Request[_])
 
 @import requestSupport._
 

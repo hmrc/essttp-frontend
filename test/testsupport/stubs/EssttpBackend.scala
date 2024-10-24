@@ -479,22 +479,22 @@ object EssttpBackend {
     ): StubMapping = findByLatestSessionId(jsonBody)
   }
 
-  object EnteredDetailsAboutBankAccount {
-    def enterDetailsAboutBankAccountUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-can-set-up-direct-debit"
+  object EnteredCanSetUpDirectDebit {
+    def enterCanSetUpDirectDebitUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-can-set-up-direct-debit"
 
-    def stubUpdateEnteredDetailsAboutBankAccount(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
-      WireMockHelpers.stubForPostWithResponseBody(enterDetailsAboutBankAccountUrl(journeyId), updatedJourneyJson)
+    def stubUpdateEnteredCanSetUpDirectDebit(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(enterCanSetUpDirectDebitUrl(journeyId), updatedJourneyJson)
 
-    def verifyUpdateEnteredDetailsAboutBankAccountRequest(journeyId: JourneyId, expectedDetailsAboutBankAccount: CanSetUpDirectDebit): Unit =
-      WireMockHelpers.verifyWithBodyParse(enterDetailsAboutBankAccountUrl(journeyId), expectedDetailsAboutBankAccount)(CanSetUpDirectDebit.format)
+    def verifyUpdateEnteredCanSetUpDirectDebitRequest(journeyId: JourneyId, expectedCanSetUpDirectDebit: CanSetUpDirectDebit): Unit =
+      WireMockHelpers.verifyWithBodyParse(enterCanSetUpDirectDebitUrl(journeyId), expectedCanSetUpDirectDebit)(CanSetUpDirectDebit.format)
 
-    def verifyNoneUpdateEnteredDetailsAboutBankAccountRequest(journeyId: JourneyId): Unit =
-      verify(exactly(0), postRequestedFor(urlPathEqualTo(enterDetailsAboutBankAccountUrl(journeyId))))
+    def verifyNoneUpdateEnteredCanSetUpDirectDebitRequest(journeyId: JourneyId): Unit =
+      verify(exactly(0), postRequestedFor(urlPathEqualTo(enterCanSetUpDirectDebitUrl(journeyId))))
 
     def findJourney(
         encrypter: Encrypter, origin: Origin
     )(
-        jsonBody: String = JourneyJsonTemplates.`Entered Details About Bank Account`(isAccountHolder = true, origin)(encrypter)
+        jsonBody: String = JourneyJsonTemplates.`Entered Can Set Up Direct Debit`(isAccountHolder = true, origin)(encrypter)
     ): StubMapping = {
       findByLatestSessionId(jsonBody)
     }

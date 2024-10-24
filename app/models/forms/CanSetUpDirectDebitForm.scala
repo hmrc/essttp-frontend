@@ -23,15 +23,15 @@ import play.api.data.Forms.mapping
 import play.api.data.{Form, Forms, Mapping}
 import util.EnumFormatter
 
-final case class DetailsAboutBankAccountForm(isSoleSignatory: IsSoleSignatoryFormValue)
+final case class CanSetUpDirectDebitForm(isSoleSignatory: IsSoleSignatoryFormValue)
 
-object DetailsAboutBankAccountForm {
+object CanSetUpDirectDebitForm {
 
-  def form(implicit language: Language): Form[DetailsAboutBankAccountForm] = {
+  def form(implicit language: Language): Form[CanSetUpDirectDebitForm] = {
     Form(
       mapping(
         "isSoleSignatory" -> isSoleSignatoryFormMapping
-      )(DetailsAboutBankAccountForm.apply)(DetailsAboutBankAccountForm.unapply)
+      )(CanSetUpDirectDebitForm.apply)(CanSetUpDirectDebitForm.unapply)
     )
   }
 

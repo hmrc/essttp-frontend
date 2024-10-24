@@ -28,7 +28,7 @@ import models.bars.response._
 import models.enumsforforms.IsSoleSignatoryFormValue
 import models.enumsforforms.TypeOfAccountFormValue.{typeOfBankAccountAsFormValue, typeOfBankAccountFromFormValue}
 import models.forms.helper.FormErrorWithFieldMessageOverrides
-import models.forms.{BankDetailsForm, DetailsAboutBankAccountForm}
+import models.forms.{BankDetailsForm, CanSetUpDirectDebitForm}
 import play.api.data.Form
 import play.api.mvc._
 import requests.RequestSupport
@@ -66,10 +66,10 @@ class BankDetailsController @Inject() (
       implicit
       request: Request[_]
   ): Result = {
-    val maybePrePoppedForm: Form[DetailsAboutBankAccountForm] =
-      existingDetailsFromBankAccount(journey).fold(DetailsAboutBankAccountForm.form)(d =>
-        DetailsAboutBankAccountForm.form.fill(
-          DetailsAboutBankAccountForm(
+    val maybePrePoppedForm: Form[CanSetUpDirectDebitForm] =
+      existingDetailsFromBankAccount(journey).fold(CanSetUpDirectDebitForm.form)(d =>
+        CanSetUpDirectDebitForm.form.fill(
+          CanSetUpDirectDebitForm(
             IsSoleSignatoryFormValue.booleanToIsSoleSignatoryFormValue(d.isAccountHolder)
           )
         ))
@@ -86,12 +86,12 @@ class BankDetailsController @Inject() (
     }
 
   val detailsAboutBankAccountSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
-    DetailsAboutBankAccountForm.form
+    CanSetUpDirectDebitForm.form
       .bindFromRequest()
       .fold(
         formWithErrors =>
           Ok(views.checkYouCanSetUpDDPage(formWithErrors)),
-        { detailsAboutBankAccountForm: DetailsAboutBankAccountForm =>
+        { detailsAboutBankAccountForm: CanSetUpDirectDebitForm =>
           val newDetailsAboutBankAccount = CanSetUpDirectDebit(
             detailsAboutBankAccountForm.isSoleSignatory.asBoolean
           )
