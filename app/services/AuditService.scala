@@ -20,10 +20,10 @@ import actionsmodel.AuthenticatedJourneyRequest
 import cats.syntax.eq._
 import essttp.bars.model.BarsVerifyStatusResponse
 import essttp.crypto.CryptoFormat
-import essttp.journey.model.Journey.AfterEnteredDetailsAboutBankAccount
+import essttp.journey.model.Journey.AfterEnteredCanYouSetUpDirectDebit
 import essttp.journey.model.Journey.Stages._
 import essttp.journey.model.{EmailVerificationAnswers, Journey, Origin}
-import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount}
+import essttp.rootmodel.bank.BankDetails
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
 import essttp.rootmodel.ttp.eligibility.{EligibilityCheckResult, EmailSource}
 import essttp.rootmodel.{Email, GGCredId}
@@ -83,13 +83,12 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
     audit(toPaymentPlanBeforeSubmissionAuditDetail(journey))
 
   def auditBarsCheck(
-      journey:              AfterEnteredDetailsAboutBankAccount,
+      journey:              AfterEnteredCanYouSetUpDirectDebit,
       bankDetails:          BankDetails,
-      typeOfBankAccount:    TypeOfBankAccount,
       result:               Either[BarsError, VerifyResponse],
       verifyStatusResponse: BarsVerifyStatusResponse
   )(implicit hc: HeaderCarrier): Unit =
-    audit(toBarsCheckAuditDetail(journey, bankDetails, typeOfBankAccount, result, verifyStatusResponse))
+    audit(toBarsCheckAuditDetail(journey, bankDetails, result, verifyStatusResponse))
 
   def auditEmailVerificationRequested(journey: Journey, ggCredId: GGCredId, email: Email, result: String)(implicit headerCarrier: HeaderCarrier): Unit =
     audit(toEmailVerificationRequested(journey, ggCredId, email, result))
@@ -179,9 +178,8 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
   }
 
   private def toBarsCheckAuditDetail(
-      journey:              AfterEnteredDetailsAboutBankAccount,
+      journey:              AfterEnteredCanYouSetUpDirectDebit,
       bankDetails:          BankDetails,
-      typeOfBankAccount:    TypeOfBankAccount,
       result:               Either[BarsError, VerifyResponse],
       verifyStatusResponse: BarsVerifyStatusResponse
   ): BarsCheckAuditDetail = {
@@ -196,7 +194,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       toTaxDetail(eligibilityCheckResult),
       BarsAuditRequest(
         BarsAuditAccount(
-          typeOfBankAccount.entryName.toLowerCase(Locale.UK),
+          bankDetails.typeOfBankAccount.entryName.toLowerCase(Locale.UK),
           bankDetails.name.value.decryptedValue,
           bankDetails.sortCode.value.decryptedValue,
           bankDetails.accountNumber.value.decryptedValue

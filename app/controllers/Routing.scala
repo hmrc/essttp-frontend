@@ -125,10 +125,10 @@ object Routing {
       },
       routes.BankDetailsController.detailsAboutBankAccount -> { () =>
         journey match {
-          case _: BeforeEnteredDetailsAboutBankAccount =>
+          case _: BeforeEnteredCanYouSetUpDirectDebit =>
             throw UpstreamErrorResponse("Could not find DetailsAboutBankAccount answer to determine route", INTERNAL_SERVER_ERROR)
-          case j: AfterEnteredDetailsAboutBankAccount =>
-            detailsAboutBankAccountRoute(j.detailsAboutBankAccount.isAccountHolder)
+          case j: AfterEnteredCanYouSetUpDirectDebit =>
+            detailsAboutBankAccountRoute(j.canSetUpDirectDebitAnswer.isAccountHolder)
         }
       },
       routes.BankDetailsController.enterBankDetails -> { () =>
@@ -241,7 +241,7 @@ object Routing {
     case _: Journey.Stages.RetrievedAffordableQuotes            => routes.InstalmentsController.instalmentOptions
     case _: Journey.Stages.ChosenPaymentPlan                    => routes.PaymentScheduleController.checkPaymentSchedule
     case _: Journey.Stages.CheckedPaymentPlan                   => routes.BankDetailsController.detailsAboutBankAccount
-    case j: Journey.Stages.EnteredDetailsAboutBankAccount       => detailsAboutBankAccountRoute(j.detailsAboutBankAccount.isAccountHolder)
+    case j: Journey.Stages.EnteredCanYouSetUpDirectDebit        => detailsAboutBankAccountRoute(j.canSetUpDirectDebitAnswer.isAccountHolder)
     case _: Journey.Stages.EnteredDirectDebitDetails            => routes.BankDetailsController.checkBankDetails
     case _: Journey.Stages.ConfirmedDirectDebitDetails          => routes.TermsAndConditionsController.termsAndConditions
 

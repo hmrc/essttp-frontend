@@ -1537,24 +1537,44 @@ object Messages {
       welsh   = "Ynglŷn â’ch cyfrif banc"
     )
 
-    val `What type of account details are you providing?`: Message = Message(
-      english = "What type of account details are you providing?",
-      welsh   = "Pa fath o fanylion cyfrif yr ydych yn eu rhoi?"
+    val `Check you can set up a Direct Debit`: Message = Message(
+      english = "Check you can set up a Direct Debit",
+      welsh   = "Gwiriwch os allwch sefydlu Debyd Uniongyrchol"
     )
 
-    val `Business bank account`: Message = Message(
-      english = "Business bank account",
-      welsh   = "Cyfrif banc busnes"
+    val `To set up a Direct Debit online, you must be`: Message = Message(
+      english = "To set up a Direct Debit online, you must be:",
+      welsh   = "I sefydlu Debyd Uniongyrchol, mae’n rhaid i’r canlynol fod yn wir:"
     )
 
-    val `Personal bank account`: Message = Message(
-      english = "Personal bank account",
-      welsh   = "Cyfrif banc personol "
+    val `named on the UK bank account...`: Message = Message(
+      english = "named on the UK bank account you'll use to pay",
+      welsh   = "mae’n rhaid eich bod wedi’ch enwi ar gyfrif banc y DU y byddwch yn ei ddefnyddio i dalu"
     )
 
-    val `Select what type of account details you are providing`: Message = Message(
-      english = "Select what type of account details you are providing",
-      welsh   = "Dewiswch pa fath o gyfrif yr ydych yn ei ddarparu"
+    val `authorised to set up a Direct Debit...`: Message = Message(
+      english = "authorised to set up a Direct Debit without a signature from any other account holders",
+      welsh   = "mae’n rhaid eich bod wedi’ch awdurdodi i sefydlu Debyd Uniongyrchol heb lofnod gan unrhyw ddeiliaid cyfrif eraill"
+    )
+
+    val `Can you set up a Direct Debit for this payment plan?`: Message = Message(
+      english = "Can you set up a Direct Debit for this payment plan?",
+      welsh   = "A allwch sefydlu Debyd Uniongyrchol ar gyfer y cynllun talu hwn?"
+    )
+
+    val `Account type`: Message = Message(
+      english = "Account type",
+      welsh   = "Math o gyfrif"
+    )
+
+    val `Business`: Message = Message(
+      english = "Business",
+      welsh   = "Busnes"
+    )
+
+    val `Personal`: Message = Message(
+      english = "Personal",
+      welsh   = "Personol "
     )
 
     val `Are you the account holder`: Message = Message(
@@ -1567,18 +1587,18 @@ object Messages {
       welsh   = "Mae’n rhaid mai chi yw’r talwr a’r unig berson sydd ei angen i awdurdodi Debyd Uniongyrchol o’r cyfrif hwn."
     )
 
-    val `Select yes if you are the account holder`: Message = Message(
-      english = "Select yes if you are the account holder",
-      welsh   = "Dewiswch ‘Iawn’ os mai chi yw deiliad y cyfrif"
+    val `Select yes if you can set up a Direct Debit for this payment plan`: Message = Message(
+      english = "Select yes if you can set up a Direct Debit for this payment plan",
+      welsh   = "Dewiswch ‘Iawn’ os gallwch sefydlu Debyd Uniongyrchol ar gyfer y cynllun talu hwn"
     )
 
   }
 
   object BankDetails {
 
-    val `Set up Direct Debit`: Message = Message(
-      english = "Set up Direct Debit",
-      welsh   = "Trefnu Debyd Uniongyrchol"
+    val `Bank account details`: Message = Message(
+      english = "Bank account details",
+      welsh   = "Manylion cyfrif banc"
     )
 
     val `Name on the account`: Message = Message(
@@ -1691,6 +1711,14 @@ object Messages {
         )
       )
 
+    private val accountTypeErrors: Map[String, Message] =
+      Map(
+        "accountType.error.required" -> Message(
+          english = "Select what type of account details you are providing",
+          welsh   = "Dewiswch pa fath o gyfrif yr ydych yn ei ddarparu"
+        )
+      )
+
     private val barsErrors: Map[String, Message] = {
       val `Enter a valid combination of bank account number and sort code`: Message = Message(
         english = "Enter a valid combination of bank account number and sort code",
@@ -1717,7 +1745,7 @@ object Messages {
 
     val errors: Map[String, (List[String] => Message)] = {
       nameErrors ++ (
-        sortCoderErrors ++ accountNumberErrors ++ barsErrors
+        sortCoderErrors ++ accountNumberErrors ++ barsErrors ++ accountTypeErrors
       ).map { case (k, v) => k -> { _: List[String] => v } }
     }
 

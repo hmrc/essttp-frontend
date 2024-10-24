@@ -106,8 +106,8 @@ GET    /check-your-payment-plan                             controllers.PaymentS
 POST   /check-your-payment-plan                             controllers.PaymentScheduleController.checkPaymentScheduleSubmit
 GET    /check-your-payment-plan/change/:pageId              controllers.PaymentScheduleController.changeFromCheckPaymentSchedule(pageId: String, regime: TaxRegime, lang: Option[Language])
 
-GET    /about-your-bank-account                             controllers.BankDetailsController.detailsAboutBankAccount
-POST   /about-your-bank-account                             controllers.BankDetailsController.detailsAboutBankAccountSubmit
+GET    /check-you-can-set-up-a-direct-debit                 controllers.BankDetailsController.detailsAboutBankAccount
+POST   /check-you-can-set-up-a-direct-debit                 controllers.BankDetailsController.detailsAboutBankAccountSubmit
 GET    /set-up-direct-debit                                 controllers.BankDetailsController.enterBankDetails
 POST   /set-up-direct-debit                                 controllers.BankDetailsController.enterBankDetailsSubmit
 GET    /you-cannot-set-up-a-direct-debit-online             controllers.BankDetailsController.cannotSetupDirectDebitOnlinePage
