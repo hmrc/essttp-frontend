@@ -19,7 +19,7 @@ package controllers
 import controllers.BankDetailsControllerSpec.SummaryRow
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.TaxRegime
-import essttp.rootmodel.bank.{DetailsAboutBankAccount, TypeOfBankAccount, TypesOfBankAccount}
+import essttp.rootmodel.bank.{CanSetUpDirectDebit, TypeOfBankAccount, TypesOfBankAccount}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import play.api.http.Status
@@ -221,7 +221,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
             def testRedirect(
                 formBody: (String, String)
-            )(expectedRedirectUrl: String, expectedDetailsAboutBankAccount: DetailsAboutBankAccount): Unit = {
+            )(expectedRedirectUrl: String, expectedDetailsAboutBankAccount: CanSetUpDirectDebit): Unit = {
               val updatedJourneyJson = JourneyJsonTemplates.`Entered Details About Bank Account`(expectedDetailsAboutBankAccount.isAccountHolder, origin)
 
               stubCommonActions()

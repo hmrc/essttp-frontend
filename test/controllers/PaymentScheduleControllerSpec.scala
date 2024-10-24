@@ -245,7 +245,7 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
 
         s"[$regime journey] POST ${routes.PaymentScheduleController.checkPaymentScheduleSubmit.url}" - {
 
-          "should redirect to ${routes.BankDetailsController.detailsAboutBankAccount.url} if the journey " +
+          "should redirect to ${routes.BankDetailsController.canSetUpDirectDebit.url} if the journey " +
             "has been updated successfully and send an audit event" in {
               stubCommonActions()
               EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, origin)(

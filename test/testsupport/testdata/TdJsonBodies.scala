@@ -562,7 +562,7 @@ object TdJsonBodies {
 
   def detailsAboutBankAccountJourneyInfo(isAccountHolder: Boolean = true): String =
     s"""
-       |"detailsAboutBankAccount": {
+       |"canSetUpDirectDebitAnswer": {
        |  "isAccountHolder": ${isAccountHolder.toString}
        |}""".stripMargin
 

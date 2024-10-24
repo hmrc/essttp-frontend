@@ -459,8 +459,8 @@ object TdAll {
   def typeOfBankAccount(typeOfAccount: String): TypeOfBankAccount =
     if (typeOfAccount == "Business") TypesOfBankAccount.Business else TypesOfBankAccount.Personal
 
-  def detailsAboutBankAccount(isAccountHolder: Boolean): DetailsAboutBankAccount =
-    DetailsAboutBankAccount(isAccountHolder)
+  def detailsAboutBankAccount(isAccountHolder: Boolean): CanSetUpDirectDebit =
+    CanSetUpDirectDebit(isAccountHolder)
 
   def directDebitDetails(name: String, sortCode: String, accountNumber: String): BankDetails =
     BankDetails(TypesOfBankAccount.Personal, AccountName(SensitiveString(name)), SortCode(SensitiveString(sortCode)), AccountNumber(SensitiveString(accountNumber)))
