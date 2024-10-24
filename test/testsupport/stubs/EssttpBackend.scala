@@ -19,16 +19,16 @@ package testsupport.stubs
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.crypto.CryptoFormat
-import essttp.journey.model.{CanPayWithinSixMonthsAnswers, JourneyId, Origin, Origins, PaymentPlanAnswers, WhyCannotPayInFullAnswers}
+import essttp.journey.model._
+import essttp.rootmodel._
 import essttp.rootmodel.bank.DetailsAboutBankAccount
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
 import essttp.rootmodel.dates.startdates.StartDatesResponse
+import essttp.rootmodel.pega.{GetCaseResponse, StartCaseResponse}
 import essttp.rootmodel.ttp.affordability.InstalmentAmounts
 import essttp.rootmodel.ttp.affordablequotes.{AffordableQuotesResponse, PaymentPlan}
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
-import essttp.rootmodel._
-import essttp.rootmodel.pega.{GetCaseResponse, StartCaseResponse}
 import paymentsEmailVerification.models.EmailVerificationResult
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json}
@@ -494,9 +494,10 @@ object EssttpBackend {
     def findJourney(
         encrypter: Encrypter, origin: Origin
     )(
-        jsonBody: String = JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = true, origin)(encrypter)
-    ): StubMapping =
+        jsonBody: String = JourneyJsonTemplates.`Entered Details About Bank Account`(isAccountHolder = true, origin)(encrypter)
+    ): StubMapping = {
       findByLatestSessionId(jsonBody)
+    }
   }
 
   object DirectDebitDetails {

@@ -358,14 +358,20 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
+  def `Entered Details About Bank Account`(isAccountHolder: Boolean, origin: Origin = Origins.Epaye.Bta)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+    stageInfo   = if (isAccountHolder) StageInfo.enteredDetailsAboutBankAccountIsAccountHolder else StageInfo.enteredDetailsAboutBankAccountNotAccountHolder,
+    journeyInfo = JourneyInfo.enteredDetailsAboutBankAccount(isAccountHolder, origin.taxRegime, encrypter),
+    origin      = origin
+  )
+
   def `Entered Details About Bank Account - Business`(isAccountHolder: Boolean, origin: Origin = Origins.Epaye.Bta)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
-    stageInfo   = if (isAccountHolder) StageInfo.enteredDetailsAboutBankAccount else StageInfo.enteredDetailsAboutBankAccountNotAccountHolder,
+    stageInfo   = if (isAccountHolder) StageInfo.enteredDetailsAboutBankAccountIsAccountHolder else StageInfo.enteredDetailsAboutBankAccountNotAccountHolder,
     journeyInfo = JourneyInfo.enteredDetailsAboutBankAccountBusiness(isAccountHolder, origin.taxRegime, encrypter),
     origin      = origin
   )
 
   def `Entered Details About Bank Account - Personal`(isAccountHolder: Boolean, origin: Origin = Origins.Epaye.Bta)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
-    stageInfo   = if (isAccountHolder) StageInfo.enteredDetailsAboutBankAccountPersonal else StageInfo.enteredDetailsAboutBankAccountNotAccountHolder,
+    stageInfo   = if (isAccountHolder) StageInfo.enteredDetailsAboutBankAccountIsAccountHolder else StageInfo.enteredDetailsAboutBankAccountNotAccountHolder,
     journeyInfo = JourneyInfo.enteredDetailsAboutBankAccountPersonal(isAccountHolder, origin.taxRegime, encrypter),
     origin      = origin
   )

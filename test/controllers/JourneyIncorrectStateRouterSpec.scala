@@ -84,7 +84,8 @@ class JourneyIncorrectStateRouterSpec extends ItSpec {
       ("Stages.RetrievedAffordableQuotes", () => EssttpBackend.AffordableQuotes.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.instalmentsUrl),
       ("Stages.ChosenPaymentPlan", () => EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.checkPaymentPlanUrl),
       ("Stages.CheckedPaymentPlan", () => EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto)(), PageUrls.aboutYourBankAccountUrl),
-      ("Stages.EnteredDetailsAboutBankAccount - is account holder", () => EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.directDebitDetailsUrl),
+      ("Stages.EnteredDetailsAboutBankAccount - is account holder",
+        () => EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.directDebitDetailsUrl),
       ("Stages.EnteredDetailsAboutBankAccount - is not account holder",
         () => EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, Origins.Epaye.Bta)(JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = false)),
         PageUrls.cannotSetupDirectDebitOnlineUrl

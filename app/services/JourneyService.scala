@@ -19,7 +19,7 @@ package services
 import com.google.inject.{Inject, Singleton}
 import essttp.journey.JourneyConnector
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Journey, JourneyId, PaymentPlanAnswers}
-import essttp.rootmodel.bank.{BankDetails, DetailsAboutBankAccount}
+import essttp.rootmodel.bank.{BankDetails, CanSetUpDirectDebit}
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
 import essttp.rootmodel.dates.startdates.StartDatesResponse
 import essttp.rootmodel.ttp.affordability.InstalmentAmounts
@@ -88,8 +88,8 @@ class JourneyService @Inject() (journeyConnector: JourneyConnector) extends Logg
   def updateHasCheckedPaymentPlan(journeyId: JourneyId, paymentPlanAnswers: PaymentPlanAnswers)(implicit requestHeader: RequestHeader): Future[Journey] =
     journeyConnector.updateHasCheckedPaymentPlan(journeyId, paymentPlanAnswers)
 
-  def updateDetailsAboutBankAccount(journeyId: JourneyId, detailsAboutBankAccount: DetailsAboutBankAccount)(implicit requestHeader: RequestHeader): Future[Journey] =
-    journeyConnector.updateDetailsAboutBankAccount(journeyId, detailsAboutBankAccount)
+  def updateCanSetUpDirectDebit(journeyId: JourneyId, canSetUpDirectDebit: CanSetUpDirectDebit)(implicit requestHeader: RequestHeader): Future[Journey] =
+    journeyConnector.updateCanSetUpDirectDebit(journeyId, canSetUpDirectDebit)
 
   def updateDirectDebitDetails(journeyId: JourneyId, directDebitDetails: BankDetails)(implicit requestHeader: RequestHeader): Future[Journey] =
     journeyConnector.updateDirectDebitDetails(journeyId, directDebitDetails)

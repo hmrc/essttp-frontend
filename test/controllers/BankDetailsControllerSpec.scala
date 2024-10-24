@@ -36,7 +36,7 @@ import testsupport.testdata.BarsJsonResponses.{ValidateJson, VerifyJson}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
-import java.time.{Instant, LocalDate, LocalDateTime, LocalTime, ZoneOffset}
+import java.time._
 import java.util.Locale
 import scala.concurrent.Future
 import scala.jdk.CollectionConverters.{IterableHasAsScala, IteratorHasAsScala}
@@ -45,14 +45,14 @@ class BankDetailsControllerSpec extends ItSpec {
 
   private val controller: BankDetailsController = app.injector.instanceOf[BankDetailsController]
 
-  object DetailsAboutBankAccountPage {
-    val expectedH1: String = "About your bank account"
+  object CheckYouCanSetupDAccountPage {
+    val expectedH1: String = "Check you can set up a Direct Debit"
 
     val typeOfAccountHeading: String = "What type of account details are you providing?"
     val radioButtonContentBusiness: String = "Business bank account"
     val radioButtonContentPersonal: String = "Personal bank account"
 
-    val accountHolderHeading: String = "Are you the account holder?"
+    val accountHolderHeading: String = "Can you set up a Direct Debit for this payment plan?"
     val accountHolderHintContent: String =
       "You must be the sole account holder, or for multi-signature accounts you must have authority to set up a Direct Debit without additional signatures."
     val accountHolderRadioId: String = "#isSoleSignatory"
@@ -62,8 +62,13 @@ class BankDetailsControllerSpec extends ItSpec {
   }
 
   object EnterDirectDebitDetailsPage {
-    val expectedH1: String = "Set up Direct Debit"
+    val expectedH1: String = "Bank account details"
+    val bankDetails: String = "Bank details"
+    val accountType: String = "Account Type"
+    val businessAccount: String = "Business"
+    val personalAccount: String = "Personal"
     val accountNameContent: String = "Name on the account"
+    val accountTypeFieldId: String = "#accountType"
     val accountNameFieldId: String = "#name"
     val sortCodeContent: String = "Sort code"
     val sortCodeHintContent: String = "Must be 6 digits long"
@@ -97,6 +102,7 @@ class BankDetailsControllerSpec extends ItSpec {
   trait SubmitSuccessSetup {
     stubCommonActions()
     val formData: List[(String, String)] = List(
+      ("accountType", "Personal"),
       ("name", TdAll.testAccountName),
       ("sortCode", "123456"),
       ("accountNumber", "12345678")
@@ -155,9 +161,9 @@ class BankDetailsControllerSpec extends ItSpec {
   ).foreach {
       case (regime, origin, taxRegime) =>
 
-        "GET /about-your-bank-account should" - {
+        "GET /check-you-can-set-up-a-direct-debit should" - {
 
-          s"[$regime journey] return 200 and display the 'about your bank account' page" in {
+          s"[$regime journey] return 200 and display the 'check you can set up a direct debit' page" in {
             stubCommonActions()
             EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, origin)()
 
@@ -168,73 +174,55 @@ class BankDetailsControllerSpec extends ItSpec {
             RequestAssertions.assertGetRequestOk(result)
             ContentAssertions.commonPageChecks(
               doc,
-              expectedH1              = DetailsAboutBankAccountPage.expectedH1,
+              expectedH1              = CheckYouCanSetupDAccountPage.expectedH1,
               shouldBackLinkBePresent = true,
               expectedSubmitUrl       = Some(routes.BankDetailsController.detailsAboutBankAccountSubmit.url),
               regimeBeingTested       = Some(taxRegime)
             )
 
             val formGroups = doc.select(".govuk-form-group").asScala.toList
-            formGroups.size shouldBe 2
+            formGroups.size shouldBe 1
 
-            val typeOfAccountFormGroup = formGroups(0)
-            typeOfAccountFormGroup.select(".govuk-fieldset__legend").text() shouldBe DetailsAboutBankAccountPage.typeOfAccountHeading
-
-            val typeOfAccountRadioContent = typeOfAccountFormGroup.select(".govuk-radios__label").asScala.toList
-            typeOfAccountRadioContent.size shouldBe 2
-            typeOfAccountRadioContent(0).text() shouldBe DetailsAboutBankAccountPage.radioButtonContentBusiness
-            typeOfAccountRadioContent(1).text() shouldBe DetailsAboutBankAccountPage.radioButtonContentPersonal
-
-            val accountHolderFormGroup = formGroups(1)
-            accountHolderFormGroup.select(".govuk-fieldset__legend").text() shouldBe DetailsAboutBankAccountPage.accountHolderHeading
+            val accountHolderFormGroup = formGroups(0)
+            accountHolderFormGroup.select(".govuk-fieldset__legend").text() shouldBe CheckYouCanSetupDAccountPage.accountHolderHeading
 
             val accountHolderRadioContent = accountHolderFormGroup.select(".govuk-radios__label").asScala.toList
             accountHolderRadioContent.size shouldBe 2
             accountHolderRadioContent(0).text() shouldBe "Yes"
             accountHolderRadioContent(1).text() shouldBe "No"
 
-            doc.select(".govuk-button").text() shouldBe DetailsAboutBankAccountPage.buttonContent
+            doc.select(".govuk-button").text() shouldBe CheckYouCanSetupDAccountPage.buttonContent
           }
 
           Seq(
-            ("Business", true, JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = true, origin), 0, 0),
-            ("Business", false, JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = false, origin), 0, 1),
-            ("Personal", true, JourneyJsonTemplates.`Entered Details About Bank Account - Personal`(isAccountHolder = true, origin), 1, 0),
-            ("Personal", false, JourneyJsonTemplates.`Entered Details About Bank Account - Personal`(isAccountHolder = false, origin), 1, 1)
+            (true, JourneyJsonTemplates.`Entered Details About Bank Account`(isAccountHolder = true, origin), 0),
+            (false, JourneyJsonTemplates.`Entered Details About Bank Account`(isAccountHolder = false, origin), 1)
           ).foreach {
-              case (typeOfAccount, isAccountHolder, wiremockJson, accountTypeCheckedElementIndex, isAccountHolderCheckedElementIndex) =>
-                s"[$regime journey] prepopulate the form when the user has a chosen $typeOfAccount bank account type and " +
-                  s"isAccountHolder=${isAccountHolder.toString} in their journey" in {
-                    stubCommonActions()
-                    EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)(wiremockJson)
+              case (isAccountHolder, wiremockJson, isAccountHolderCheckedElementIndex) =>
+                s"[$regime journey] prepopulate the form when the user has isAccountHolder=${isAccountHolder.toString} in their journey" in {
+                  stubCommonActions()
+                  EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)(wiremockJson)
 
-                    val result: Future[Result] = controller.detailsAboutBankAccount(fakeRequest)
-                    val pageContent: String = contentAsString(result)
-                    val doc: Document = Jsoup.parse(pageContent)
+                  val result: Future[Result] = controller.detailsAboutBankAccount(fakeRequest)
+                  val pageContent: String = contentAsString(result)
+                  val doc: Document = Jsoup.parse(pageContent)
 
-                    RequestAssertions.assertGetRequestOk(result)
+                  RequestAssertions.assertGetRequestOk(result)
 
-                    val formGroups = doc.select(".govuk-form-group").asScala.toList
-                    formGroups.size shouldBe 2
+                  val formGroups = doc.select(".govuk-form-group").asScala.toList
+                  formGroups.size shouldBe 1
 
-                    formGroups(0).select(".govuk-radios__input").asScala.toList(accountTypeCheckedElementIndex).hasAttr("checked") shouldBe true
-                    formGroups(1).select(".govuk-radios__input").asScala.toList(isAccountHolderCheckedElementIndex).hasAttr("checked") shouldBe true
-                  }
+                  formGroups(0).select(".govuk-radios__input").asScala.toList(isAccountHolderCheckedElementIndex).hasAttr("checked") shouldBe true
+                }
             }
         }
 
-        "POST /about-your-bank-account should" - {
+        "POST /check-you-can-set-up-a-direct-debit should" - {
 
             def testRedirect(
-                formBody: (String, String)*
-            )(expectedRedirectUrl: String, expectedDetailsAboutBankAccount: DetailsAboutBankAccount) = {
-              val updatedJourneyJson =
-                expectedDetailsAboutBankAccount.typeOfBankAccount match {
-                  case TypesOfBankAccount.Personal =>
-                    JourneyJsonTemplates.`Entered Details About Bank Account - Personal`(expectedDetailsAboutBankAccount.isAccountHolder, origin)
-                  case TypesOfBankAccount.Business =>
-                    JourneyJsonTemplates.`Entered Details About Bank Account - Business`(expectedDetailsAboutBankAccount.isAccountHolder, origin)
-                }
+                formBody: (String, String)
+            )(expectedRedirectUrl: String, expectedDetailsAboutBankAccount: DetailsAboutBankAccount): Unit = {
+              val updatedJourneyJson = JourneyJsonTemplates.`Entered Details About Bank Account`(expectedDetailsAboutBankAccount.isAccountHolder, origin)
 
               stubCommonActions()
               EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, origin)()
@@ -245,7 +233,7 @@ class BankDetailsControllerSpec extends ItSpec {
                 path   = "/what-type-of-account-details-are-you-providing"
               ).withAuthToken()
                 .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-                .withFormUrlEncodedBody(formBody: _*)
+                .withFormUrlEncodedBody(formBody)
 
               val result: Future[Result] = controller.detailsAboutBankAccountSubmit(fakeRequest)
               status(result) shouldBe Status.SEE_OTHER
@@ -254,76 +242,36 @@ class BankDetailsControllerSpec extends ItSpec {
 
             }
 
-          Seq("Business", "Personal").foreach { typeOfAccount =>
-            s"[$regime journey] redirect to /set-up-direct-debit when valid form is submitted and the user is an account holder - $typeOfAccount" in {
-              testRedirect(
-                ("typeOfAccount", typeOfAccount),
-                ("isSoleSignatory", "Yes")
-              )(PageUrls.directDebitDetailsUrl, TdAll.detailsAboutBankAccount(typeOfAccount, isAccountHolder = true))
-            }
+          s"[$regime journey] redirect to /set-up-direct-debit when valid form is submitted and the user is an account holder" in {
+            testRedirect(
+              ("isSoleSignatory", "Yes")
+            )(PageUrls.directDebitDetailsUrl, TdAll.detailsAboutBankAccount(isAccountHolder = true))
           }
 
-          Seq("Business", "Personal").foreach { typeOfAccount =>
-            s"[$regime journey] redirect to /set-up-direct-debit when valid form is submitted and the user is not an account holder - $typeOfAccount" in {
-              testRedirect(
-                ("typeOfAccount", typeOfAccount),
-                ("isSoleSignatory", "No")
-              )(PageUrls.cannotSetupDirectDebitOnlineUrl, TdAll.detailsAboutBankAccount(typeOfAccount, isAccountHolder = false))
-            }
+          s"[$regime journey] redirect to /set-up-direct-debit when valid form is submitted and the user is not an account holder" in {
+            testRedirect(
+              ("isSoleSignatory", "No")
+            )(PageUrls.cannotSetupDirectDebitOnlineUrl, TdAll.detailsAboutBankAccount(isAccountHolder = false))
           }
 
-          Seq(
-            (
-              List(
-                ("typeOfAccount", ""),
-                ("isSoleSignatory", "Yes")
-              ),
-                List(
-                  ("Select what type of account details you are providing", "#typeOfAccount")
-                ),
-                  Some("isSoleSignatory")
-            ),
-            (
-              List(
-                ("typeOfAccount", "Personal"),
-                ("isSoleSignatory", "")
-              ),
-                List(
-                  ("Select yes if you are the account holder", "#isSoleSignatory")
-                ),
-                  Option("typeOfAccount-2")
-            ),
-            (
-              List(
-                ("typeOfAccount", ""),
-                ("isSoleSignatory", "")
-              ), List(
-                  ("Select what type of account details you are providing", "#typeOfAccount"),
-                  ("Select yes if you are the account holder", "#isSoleSignatory")
-                ),
-                  None
+          s"[$regime journey] show correct error messages when form is empty" in {
+
+            val emptyForm = ("isSoleSignatory", "")
+            val expectedErrors: List[(String, String)] = List(
+              ("Select yes if you can set up a Direct Debit for this payment plan", CheckYouCanSetupDAccountPage.accountHolderRadioId),
             )
-          ).foreach {
-              case (formData, expectedErrors, populatedRadioId) =>
-                s"[$regime journey] show correct error messages when ${formData.filter(_._2.isEmpty).map(_._1).mkString("&")} is empty" in {
-                  stubCommonActions()
-                  EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, origin)()
 
-                  testFormError(controller.detailsAboutBankAccountSubmit)(formData: _*)(expectedErrors, { doc =>
-                    val radioInputs = doc.select(".govuk-radios__input")
+            stubCommonActions()
+            EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, origin)()
 
-                    populatedRadioId match {
-                      case Some(id) =>
-                        radioInputs.select(s"#$id").hasAttr("checked") shouldBe true
-                        radioInputs.select(s":not(#$id)").asScala.toList.foreach(_.hasAttr("checked") shouldBe false)
+            testFormError(controller.detailsAboutBankAccountSubmit)(emptyForm)(expectedErrors, { doc =>
+              val radioInputs = doc.select(".govuk-radios__input")
 
-                      case None =>
-                        radioInputs.asScala.toList.foreach(_.hasAttr("checked") shouldBe false)
-                    }
-                  })
-                  EssttpBackend.EnteredDetailsAboutBankAccount.verifyNoneUpdateEnteredDetailsAboutBankAccountRequest(TdAll.journeyId)
-                }
-            }
+              radioInputs.asScala.toList.foreach(_.hasAttr("checked") shouldBe false)
+
+            })
+            EssttpBackend.EnteredDetailsAboutBankAccount.verifyNoneUpdateEnteredDetailsAboutBankAccountRequest(TdAll.journeyId)
+          }
 
         }
 
@@ -361,11 +309,14 @@ class BankDetailsControllerSpec extends ItSpec {
             accountNumberInput.attr("inputmode") shouldBe "numeric"
             accountNumberInput.attr("spellcheck") shouldBe "false"
 
-            val subheadings = doc.select(".govuk-label--m").asScala.toList
-            subheadings.size shouldBe 3
-            subheadings(0).text() shouldBe EnterDirectDebitDetailsPage.accountNameContent
-            subheadings(1).text() shouldBe EnterDirectDebitDetailsPage.sortCodeContent
-            subheadings(2).text() shouldBe EnterDirectDebitDetailsPage.accountNumberContent
+            val subheadings = doc.select(".govuk-label").asScala.toList
+            subheadings.size shouldBe 6
+            subheadings(0).text() shouldBe EnterDirectDebitDetailsPage.businessAccount
+            subheadings(1).text() shouldBe EnterDirectDebitDetailsPage.personalAccount
+            subheadings(2).text() shouldBe EnterDirectDebitDetailsPage.accountNameContent
+            subheadings(3).text() shouldBe EnterDirectDebitDetailsPage.bankDetails
+            subheadings(4).text() shouldBe EnterDirectDebitDetailsPage.sortCodeContent
+            subheadings(5).text() shouldBe EnterDirectDebitDetailsPage.accountNumberContent
 
             doc.select("#sortCode-hint").text() shouldBe EnterDirectDebitDetailsPage.sortCodeHintContent
             doc.select("#accountNumber-hint").text() shouldBe EnterDirectDebitDetailsPage.accountNumberHintContent
@@ -396,7 +347,7 @@ class BankDetailsControllerSpec extends ItSpec {
           s"[$regime journey] redirect to the 'cannot set up direct debit' page if the user has said they are not an account holder" in {
             stubCommonActions()
             EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)(
-              JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = false, origin)
+              JourneyJsonTemplates.`Entered Details About Bank Account`(isAccountHolder = false, origin)
             )
 
             val result: Future[Result] = controller.enterBankDetails(fakeRequest)
@@ -414,7 +365,16 @@ class BankDetailsControllerSpec extends ItSpec {
                 textAndHrefContent: List[(String, String)],
                 fieldErrors:        Seq[(String, String)]  = Seq.empty
             ): Unit = {
+
+                def assertRadioButtonsChecked(doc: Document, form: Seq[(String, String)]): Unit = {
+                  Seq("Business", "Personal").foreach { value =>
+                    doc.select(s".govuk-radios__input[value=\"$value\"]").hasAttr("checked") shouldBe
+                      form.exists { case (k, v) => k == "accountType" && v == value }
+                  }
+                }
+
                 def assertFieldsPopulated(doc: Document, form: Seq[(String, String)], fieldErrors: Seq[(String, String)]): Unit = {
+                  assertRadioButtonsChecked(doc, form)
                   doc.select(EnterDirectDebitDetailsPage.accountNameFieldId).`val`() shouldBe getExpectedFormValue("name", form)
                   doc.select(EnterDirectDebitDetailsPage.sortCodeFieldId).`val`() shouldBe getExpectedFormValue("sortCode", form)
                   doc.select(EnterDirectDebitDetailsPage.accountNumberFieldId).`val`() shouldBe getExpectedFormValue("accountNumber", form)
@@ -444,7 +404,7 @@ class BankDetailsControllerSpec extends ItSpec {
             BarsStub.VerifyPersonalStub.success()
             BarsVerifyStatusStub.update()
             EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)(
-              JourneyJsonTemplates.`Entered Details About Bank Account - Personal`(isAccountHolder = true, origin)
+              JourneyJsonTemplates.`Entered Details About Bank Account`(isAccountHolder = true, origin)
             )
             EssttpBackend.DirectDebitDetails.stubUpdateDirectDebitDetails(TdAll.journeyId, JourneyJsonTemplates.`Entered Direct Debit Details`(origin))
 
@@ -508,11 +468,13 @@ class BankDetailsControllerSpec extends ItSpec {
             EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)()
 
             val formData: List[(String, String)] = List(
+              ("accountType", ""),
               ("name", ""),
               ("sortCode", ""),
               ("accountNumber", "")
             )
             val expectedContentAndHref: List[(String, String)] = List(
+              ("Select what type of account details you are providing", EnterDirectDebitDetailsPage.accountTypeFieldId),
               ("Enter the name on the account", EnterDirectDebitDetailsPage.accountNameFieldId),
               ("Enter sort code", EnterDirectDebitDetailsPage.sortCodeFieldId),
               ("Enter account number", EnterDirectDebitDetailsPage.accountNumberFieldId)
@@ -528,6 +490,7 @@ class BankDetailsControllerSpec extends ItSpec {
             EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)()
 
             val formData: List[(String, String)] = List(
+              ("accountType", "Personal"),
               ("name", "Bob Ross"),
               ("sortCode", "12E456"),
               ("accountNumber", "12E45678")
@@ -582,6 +545,7 @@ class BankDetailsControllerSpec extends ItSpec {
                   stubCommonActions()
                   EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)()
                   val formData: List[(String, String)] = List(
+                    ("accountType", "Personal"),
                     ("name", accountName),
                     ("sortCode", "123456"),
                     ("accountNumber", "12345678")
@@ -604,11 +568,12 @@ class BankDetailsControllerSpec extends ItSpec {
                 BarsStub.VerifyPersonalStub.success()
                 BarsVerifyStatusStub.update()
                 EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)(
-                  JourneyJsonTemplates.`Entered Details About Bank Account - Personal`(isAccountHolder = true, origin)
+                  JourneyJsonTemplates.`Entered Details About Bank Account`(isAccountHolder = true, origin)
                 )
                 EssttpBackend.DirectDebitDetails.stubUpdateDirectDebitDetails(TdAll.journeyId, JourneyJsonTemplates.`Entered Direct Debit Details`(origin))
 
                 val formDataWithUnallowedCharacters: List[(String, String)] = List(
+                  ("accountType", "Personal"),
                   ("name", accountName),
                   ("sortCode", "123456"),
                   ("accountNumber", "12345678")
@@ -659,6 +624,7 @@ class BankDetailsControllerSpec extends ItSpec {
             EssttpBackend.EnteredDetailsAboutBankAccount.findJourney(testCrypto, origin)()
 
             val formData: List[(String, String)] = List(
+              ("accountType", "Personal"),
               ("name", "Bob Ross"),
               ("sortCode", "1234567"),
               ("accountNumber", "123456789")
@@ -684,6 +650,7 @@ class BankDetailsControllerSpec extends ItSpec {
             EssttpBackend.DirectDebitDetails.stubUpdateDirectDebitDetails(TdAll.journeyId, JourneyJsonTemplates.`Entered Direct Debit Details`(origin))
 
             val formDataWithUnallowedCharacters: List[(String, String)] = List(
+              ("accountType", "Personal"),
               ("name", "Bob Ross"),
               ("sortCode", "1 2-3–4−5—6"),
               ("accountNumber", "1-2–3−4—5678")
@@ -705,6 +672,7 @@ class BankDetailsControllerSpec extends ItSpec {
             )(testOperationCryptoFormat)
 
             val expectedFormData: List[(String, String)] = List(
+              ("accountType", "Personal"),
               ("name", "Bob Ross"),
               ("sortCode", "123456"),
               ("accountNumber", "12345678")
@@ -743,12 +711,13 @@ class BankDetailsControllerSpec extends ItSpec {
             )
           }
 
-          abstract class BarsErrorSetup(typeOfAccount: TypeOfBankAccount) {
+          abstract class BarsErrorSetup(typeOfAccount: TypeOfBankAccount = TypesOfBankAccount.Personal) {
             stubCommonActions()
             BarsVerifyStatusStub.update(numberOfAttempts = 2)
             EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
 
             val formData: List[(String, String)] = List(
+              ("accountType", s"${typeOfAccount.toString}"),
               ("name", "Bob Ross"),
               ("sortCode", "123456"),
               ("accountNumber", "12345678")
@@ -819,6 +788,14 @@ class BankDetailsControllerSpec extends ItSpec {
             extends BarsErrorSetup(typeOfAccount) {
 
             val validForm: List[(String, String)] = formData
+
+            val validFormBusiness: List[(String, String)] =
+              List(
+                ("accountType", "Business"),
+                ("name", "Bob Ross"),
+                ("sortCode", "123456"),
+                ("accountNumber", "12345678")
+              )
 
             private val sortCodeAndAccountNumberFieldError: List[(String, String)] =
               List("sort-code-and-account-number" -> "Enter a valid combination of bank account number and sort code")
@@ -968,9 +945,9 @@ class BankDetailsControllerSpec extends ItSpec {
 
           s"[$regime journey] show correct error message when BARs verify response is nameDoesNotMatch with a business bank account" in
             new BarsFormErrorSetup("nameDoesNotMatch", typeOfAccount = TypesOfBankAccount.Business) {
-              testBankDetailsFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedErrorSummaryContentAndHref, expectedFieldErrors)
+              testBankDetailsFormError(controller.enterBankDetailsSubmit)(validFormBusiness: _*)(expectedErrorSummaryContentAndHref, expectedFieldErrors)
 
-              BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validForm)
+              BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validFormBusiness)
               AuditConnectorStub.verifyEventAudited(
                 auditType  = "BarsCheck",
                 auditEvent = expectedBarsAuditDetailJson(numberOfBarsVerifyAttempts = 2)
@@ -987,17 +964,17 @@ class BankDetailsControllerSpec extends ItSpec {
 
           s"[$regime journey] show correct error message when bars verify-business responds with accountExists is No" in
             new BarsFormErrorSetup("accountDoesNotExist", typeOfAccount = TypesOfBankAccount.Business) {
-              testBankDetailsFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedErrorSummaryContentAndHref, expectedFieldErrors)
+              testBankDetailsFormError(controller.enterBankDetailsSubmit)(validFormBusiness: _*)(expectedErrorSummaryContentAndHref, expectedFieldErrors)
 
-              BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validForm)
+              BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validFormBusiness)
               BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
             }
 
           s"[$regime journey] show correct error message when bars validate response is 400 sortCodeOnDenyList" in
             new BarsFormErrorSetup("sortCodeOnDenyList", typeOfAccount = TypesOfBankAccount.Business) {
-              testBankDetailsFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedErrorSummaryContentAndHref, expectedFieldErrors)
+              testBankDetailsFormError(controller.enterBankDetailsSubmit)(validFormBusiness: _*)(expectedErrorSummaryContentAndHref, expectedFieldErrors)
 
-              BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
+              BarsStub.ValidateStub.ensureBarsValidateCalled(validFormBusiness)
               BarsStub.VerifyStub.ensureBarsVerifyNotCalled()
               BarsVerifyStatusStub.ensureVerifyUpdateStatusIsNotCalled()
             }
@@ -1012,8 +989,8 @@ class BankDetailsControllerSpec extends ItSpec {
 
           s"[$regime journey] show correct error message when bars verify-business is an undocumented error response" in
             new BarsFormErrorSetup("otherBarsError", typeOfAccount = TypesOfBankAccount.Business) {
-              testBankDetailsFormError(controller.enterBankDetailsSubmit)(validForm: _*)(expectedErrorSummaryContentAndHref, expectedFieldErrors)
-              BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validForm)
+              testBankDetailsFormError(controller.enterBankDetailsSubmit)(validFormBusiness: _*)(expectedErrorSummaryContentAndHref, expectedFieldErrors)
+              BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validFormBusiness)
               BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
             }
 

@@ -18,24 +18,18 @@ package models.forms
 
 import messages.Messages
 import models.Language
-import models.enumsforforms.{IsSoleSignatoryFormValue, TypeOfAccountFormValue}
+import models.enumsforforms.IsSoleSignatoryFormValue
 import play.api.data.Forms.mapping
 import play.api.data.{Form, Forms, Mapping}
 import util.EnumFormatter
 
-final case class DetailsAboutBankAccountForm(typeOfAccount: TypeOfAccountFormValue, isSoleSignatory: IsSoleSignatoryFormValue)
+final case class DetailsAboutBankAccountForm(isSoleSignatory: IsSoleSignatoryFormValue)
 
 object DetailsAboutBankAccountForm {
 
   def form(implicit language: Language): Form[DetailsAboutBankAccountForm] = {
-    val typeOfAccountFormMapping: Mapping[TypeOfAccountFormValue] = Forms.of(EnumFormatter.format(
-      `enum`                  = TypeOfAccountFormValue,
-      errorMessageIfMissing   = Messages.AboutYourBankAccount.`Select what type of account details you are providing`.show,
-      errorMessageIfEnumError = Messages.AboutYourBankAccount.`Select what type of account details you are providing`.show
-    ))
     Form(
       mapping(
-        "typeOfAccount" -> typeOfAccountFormMapping,
         "isSoleSignatory" -> isSoleSignatoryFormMapping
       )(DetailsAboutBankAccountForm.apply)(DetailsAboutBankAccountForm.unapply)
     )
@@ -43,7 +37,7 @@ object DetailsAboutBankAccountForm {
 
   private def isSoleSignatoryFormMapping(implicit language: Language): Mapping[IsSoleSignatoryFormValue] = Forms.of(EnumFormatter.format(
     `enum`                  = IsSoleSignatoryFormValue,
-    errorMessageIfMissing   = Messages.AboutYourBankAccount.`Select yes if you are the account holder`.show,
-    errorMessageIfEnumError = Messages.AboutYourBankAccount.`Select yes if you are the account holder`.show
+    errorMessageIfMissing   = Messages.AboutYourBankAccount.`Select yes if you can set up a Direct Debit for this payment plan`.show,
+    errorMessageIfEnumError = Messages.AboutYourBankAccount.`Select yes if you can set up a Direct Debit for this payment plan`.show
   ))
 }

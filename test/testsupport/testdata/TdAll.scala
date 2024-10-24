@@ -459,11 +459,11 @@ object TdAll {
   def typeOfBankAccount(typeOfAccount: String): TypeOfBankAccount =
     if (typeOfAccount == "Business") TypesOfBankAccount.Business else TypesOfBankAccount.Personal
 
-  def detailsAboutBankAccount(typeOfAccount: String, isAccountHolder: Boolean): DetailsAboutBankAccount =
-    DetailsAboutBankAccount(typeOfBankAccount(typeOfAccount), isAccountHolder)
+  def detailsAboutBankAccount(isAccountHolder: Boolean): DetailsAboutBankAccount =
+    DetailsAboutBankAccount(isAccountHolder)
 
   def directDebitDetails(name: String, sortCode: String, accountNumber: String): BankDetails =
-    BankDetails(AccountName(SensitiveString(name)), SortCode(SensitiveString(sortCode)), AccountNumber(SensitiveString(accountNumber)))
+    BankDetails(TypesOfBankAccount.Personal, AccountName(SensitiveString(name)), SortCode(SensitiveString(sortCode)), AccountNumber(SensitiveString(accountNumber)))
 
   //string including & ' / which are the allowed symbols according to IF
   val testAccountName = "Mr. Bob Ross &'/ With Symbols"
