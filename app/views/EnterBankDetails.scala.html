@@ -24,11 +24,13 @@
 @import requests.RequestSupport
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import views.Views
+@import essttp.rootmodel.bank.TypesOfBankAccount
 
 @this(
         layout: templates.Layout,
         govukButton: GovukButton,
         govukInput: GovukInput,
+        govukRadios: GovukRadios,
         formWithCSRF: FormWithCSRF,
         govukErrorSummary: GovukErrorSummary,
         requestSupport: RequestSupport
@@ -43,6 +45,10 @@
 
 @import requestSupport._
 
+@typeOfAccountKey = @{
+    "accountType"
+}
+
 @nameKey = @{
     "name"
 }
@@ -54,14 +60,14 @@
 }
 
 @title = @{
-    Messages.BankDetails.`Set up Direct Debit`.show
+    Messages.BankDetails.`Bank account details`.show
 }
 
 @fieldErrorMessage(key: String, form: Form[BankDetailsForm], overrides: Seq[FormError]) = @{
     if (overrides.exists(_.key === key)) {
         None
     } else {
-        (form.error(key))
+        form.error(key)
                 .map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
             content = Text(Messages.BankDetails.errors(s"$key.${e.message}")(Views.formErrorArgsStringList(e)).show)
         ))
@@ -86,11 +92,38 @@
     </h1>
     @formWithCSRF(action = routes.BankDetailsController.enterBankDetailsSubmit) {
 
+        @govukRadios(Radios(
+            fieldset = Some(Fieldset(
+            legend = Some(Legend(
+            content = Text(Messages.AboutYourBankAccount.`Account type`.show),
+            classes = "govuk-fieldset__legend",
+            isPageHeading = false
+                ))
+            )),
+            idPrefix = Some(typeOfAccountKey),
+            name = typeOfAccountKey,
+            items = Seq(
+        RadioItem(
+            id = Some("business"),
+            content = Text(Messages.AboutYourBankAccount.`Business`.show),
+            value = Some(TypesOfBankAccount.Business.entryName),
+            checked = form.data.get(typeOfAccountKey).contains(TypesOfBankAccount.Business.entryName)
+            ),
+        RadioItem(
+            id = Some("personal"),
+            content = Text(Messages.AboutYourBankAccount.`Personal`.show),
+            value = Some(TypesOfBankAccount.Personal.entryName),
+            checked = form.data.get(typeOfAccountKey).contains(TypesOfBankAccount.Personal.entryName)
+                )
+            ),
+        errorMessage = fieldErrorMessage(typeOfAccountKey, form, errorMessageOverrides))
+        )
+
         @govukInput(Input(
             id = nameKey,
             name = nameKey,
             label = Label(
-                classes = "govuk-label--m",
+                classes = "govuk-label",
                 content = Text(Messages.BankDetails.`Name on the account`.show)
             ),
             classes = "govuk-!-width-two-thirds",
@@ -116,7 +149,7 @@
                     id = sortCodeKey,
                     name = sortCodeKey,
                     label = Label(
-                        classes = "govuk-label--m",
+                        classes = "govuk-label",
                         content = Text(Messages.BankDetails.`Sort code`.show)
                     ),
                     hint = Some(Hint(
@@ -134,7 +167,7 @@
                     id = accountNumberKey,
                     name = accountNumberKey,
                     label = Label(
-                        classes = "govuk-label--m",
+                        classes = "govuk-label",
                         content = Text(Messages.BankDetails.`Account number`.show)
                     ),
                     hint = Some(Hint(

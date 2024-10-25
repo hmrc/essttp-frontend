@@ -560,16 +560,16 @@ object TdJsonBodies {
          |""".stripMargin
     }
 
-  def detailsAboutBankAccountJourneyInfo(typeOfAccount: String = "Business", isAccountHolder: Boolean = true): String =
+  def detailsAboutBankAccountJourneyInfo(isAccountHolder: Boolean = true): String =
     s"""
-       |"detailsAboutBankAccount": {
-       |  "typeOfBankAccount" : "$typeOfAccount",
+       |"canSetUpDirectDebitAnswer": {
        |  "isAccountHolder": ${isAccountHolder.toString}
        |}""".stripMargin
 
   def directDebitDetailsJourneyInfo(encrypter: Encrypter): String =
     s"""
        |"directDebitDetails" : {
+       |  "typeOfBankAccount" :  "Personal",
        |  "name" : "${encryptString(TdAll.testAccountName, encrypter)}",
        |  "sortCode" : "${encryptString("123456", encrypter)}",
        |  "accountNumber" : "${encryptString("12345678", encrypter)}"
@@ -578,6 +578,7 @@ object TdJsonBodies {
   def paddedDirectDebitDetailsJourneyInfo(encrypter: Encrypter): String =
     s"""
        |"directDebitDetails" : {
+       |  "typeOfBankAccount" : "Personal",
        |  "name" : "${encryptString(TdAll.testAccountName, encrypter)}",
        |  "sortCode" : "${encryptString("123456", encrypter)}",
        |  "accountNumber" : "${encryptString("345678", encrypter)}"

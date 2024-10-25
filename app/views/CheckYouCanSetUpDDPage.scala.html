@@ -18,7 +18,7 @@
 @import essttp.rootmodel.bank.TypesOfBankAccount
 @import messages.Messages
 @import models.enumsforforms.IsSoleSignatoryFormValue
-@import models.forms.DetailsAboutBankAccountForm
+@import models.forms.CanSetUpDirectDebitForm
 @import play.api.data.Form
 @import play.api.mvc.Request
 @import requests.RequestSupport
@@ -33,56 +33,24 @@
         requestSupport: RequestSupport
 )
 
-@(form: Form[DetailsAboutBankAccountForm])(implicit request: Request[_])
+@(form: Form[CanSetUpDirectDebitForm])(implicit request: Request[_])
 
 @import requestSupport._
-
-@typeOfAccountKey = @{"typeOfAccount"}
 
 @soleSignatoryKey = @{"isSoleSignatory"}
 
 @title = @{
-    Messages.AboutYourBankAccount.`About your bank account`.show
-}
-
-@typeOfBankAccountRadios = @{
-    govukRadios(Radios(
-        fieldset = Some(Fieldset(
-            legend = Some(Legend(
-                content = Text(Messages.AboutYourBankAccount.`What type of account details are you providing?`.show),
-                classes = "govuk-fieldset__legend--m",
-                isPageHeading = false
-            ))
-        )),
-        idPrefix = Some(typeOfAccountKey),
-        name = typeOfAccountKey,
-        items = Seq(
-            RadioItem(
-                content = Text(Messages.AboutYourBankAccount.`Business bank account`.show),
-                value = Some(TypesOfBankAccount.Business.entryName),
-                checked = form.data.get(typeOfAccountKey).contains(TypesOfBankAccount.Business.entryName)
-            ),
-            RadioItem(
-                content = Text(Messages.AboutYourBankAccount.`Personal bank account`.show),
-                value = Some(TypesOfBankAccount.Personal.entryName),
-                checked = form.data.get(typeOfAccountKey).contains(TypesOfBankAccount.Personal.entryName)
-            )
-        ),
-        errorMessage = form.error(typeOfAccountKey).map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(content = Text(e.message)))
-    ))
+    Messages.AboutYourBankAccount.`Check you can set up a Direct Debit`.show
 }
 
 @soleSignatoryRadios = @{
     govukRadios(Radios(
         fieldset = Some(Fieldset(
             legend = Some(Legend(
-                content = Text(Messages.AboutYourBankAccount.`Are you the account holder`.show),
-                classes = "govuk-label--m",
+                content = Text(Messages.AboutYourBankAccount.`Can you set up a Direct Debit for this payment plan?`.show),
+                classes = "govuk-fieldset__legend--m",
                 isPageHeading = false
             ))
-        )),
-        hint = Some(Hint(
-            content = Text(Messages.AboutYourBankAccount.`You must be the sole account holder...`.show)
         )),
         idPrefix = Some(soleSignatoryKey),
         name = soleSignatoryKey,
@@ -98,7 +66,7 @@
                 checked = form.data.get(soleSignatoryKey).contains(IsSoleSignatoryFormValue.No.entryName)
             )
         ),
-        classes = "govuk-radios",
+        classes = "govuk-radios govuk-radios--inline",
         errorMessage = form.error(soleSignatoryKey).map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(content = Text(e.message)))
     ))
 }
@@ -118,8 +86,13 @@
 
     <h1 class="govuk-heading-xl">@title</h1>
 
+    <p class="govuk-body">@{Messages.AboutYourBankAccount.`To set up a Direct Debit online, you must be`.show}</p>
+    <ul class="govuk-list govuk-list--bullet">
+        <li class="govuk-body">@{Messages.AboutYourBankAccount.`named on the UK bank account...`.show}</li>
+        <li class="govuk-body">@{Messages.AboutYourBankAccount.`authorised to set up a Direct Debit...`.show}</li>
+    </ul>
+
     @formWithCSRF(action = routes.BankDetailsController.detailsAboutBankAccountSubmit) {
-        @typeOfBankAccountRadios
 
         @soleSignatoryRadios
 

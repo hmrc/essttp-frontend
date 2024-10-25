@@ -19,16 +19,16 @@ package testsupport.stubs
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.crypto.CryptoFormat
-import essttp.journey.model.{CanPayWithinSixMonthsAnswers, JourneyId, Origin, Origins, PaymentPlanAnswers, WhyCannotPayInFullAnswers}
-import essttp.rootmodel.bank.DetailsAboutBankAccount
+import essttp.journey.model._
+import essttp.rootmodel._
+import essttp.rootmodel.bank.CanSetUpDirectDebit
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
 import essttp.rootmodel.dates.startdates.StartDatesResponse
+import essttp.rootmodel.pega.{GetCaseResponse, StartCaseResponse}
 import essttp.rootmodel.ttp.affordability.InstalmentAmounts
 import essttp.rootmodel.ttp.affordablequotes.{AffordableQuotesResponse, PaymentPlan}
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
-import essttp.rootmodel._
-import essttp.rootmodel.pega.{GetCaseResponse, StartCaseResponse}
 import paymentsEmailVerification.models.EmailVerificationResult
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json}
@@ -479,24 +479,25 @@ object EssttpBackend {
     ): StubMapping = findByLatestSessionId(jsonBody)
   }
 
-  object EnteredDetailsAboutBankAccount {
-    def enterDetailsAboutBankAccountUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-details-about-bank-account"
+  object EnteredCanSetUpDirectDebit {
+    def enterCanSetUpDirectDebitUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-can-set-up-direct-debit"
 
-    def stubUpdateEnteredDetailsAboutBankAccount(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
-      WireMockHelpers.stubForPostWithResponseBody(enterDetailsAboutBankAccountUrl(journeyId), updatedJourneyJson)
+    def stubUpdateEnteredCanSetUpDirectDebit(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(enterCanSetUpDirectDebitUrl(journeyId), updatedJourneyJson)
 
-    def verifyUpdateEnteredDetailsAboutBankAccountRequest(journeyId: JourneyId, expectedDetailsAboutBankAccount: DetailsAboutBankAccount): Unit =
-      WireMockHelpers.verifyWithBodyParse(enterDetailsAboutBankAccountUrl(journeyId), expectedDetailsAboutBankAccount)(DetailsAboutBankAccount.format)
+    def verifyUpdateEnteredCanSetUpDirectDebitRequest(journeyId: JourneyId, expectedCanSetUpDirectDebit: CanSetUpDirectDebit): Unit =
+      WireMockHelpers.verifyWithBodyParse(enterCanSetUpDirectDebitUrl(journeyId), expectedCanSetUpDirectDebit)(CanSetUpDirectDebit.format)
 
-    def verifyNoneUpdateEnteredDetailsAboutBankAccountRequest(journeyId: JourneyId): Unit =
-      verify(exactly(0), postRequestedFor(urlPathEqualTo(enterDetailsAboutBankAccountUrl(journeyId))))
+    def verifyNoneUpdateEnteredCanSetUpDirectDebitRequest(journeyId: JourneyId): Unit =
+      verify(exactly(0), postRequestedFor(urlPathEqualTo(enterCanSetUpDirectDebitUrl(journeyId))))
 
     def findJourney(
         encrypter: Encrypter, origin: Origin
     )(
-        jsonBody: String = JourneyJsonTemplates.`Entered Details About Bank Account - Business`(isAccountHolder = true, origin)(encrypter)
-    ): StubMapping =
+        jsonBody: String = JourneyJsonTemplates.`Entered Can Set Up Direct Debit`(isAccountHolder = true, origin)(encrypter)
+    ): StubMapping = {
       findByLatestSessionId(jsonBody)
+    }
   }
 
   object DirectDebitDetails {
