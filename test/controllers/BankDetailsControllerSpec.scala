@@ -68,7 +68,7 @@ class BankDetailsControllerSpec extends ItSpec {
     val businessAccount: String = "Business"
     val personalAccount: String = "Personal"
     val accountNameContent: String = "Name on the account"
-    val accountTypeFieldId: String = "#accountType"
+    val accountTypeFieldId: String = "#business"
     val accountNameFieldId: String = "#name"
     val sortCodeContent: String = "Sort code"
     val sortCodeHintContent: String = "Must be 6 digits long"
@@ -109,7 +109,7 @@ class BankDetailsControllerSpec extends ItSpec {
     )
     val fakeRequest: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
       method = "POST",
-      path   = "/set-up-direct-debit"
+      path   = "/bank-account-details"
     ).withAuthToken()
       .withSession(SessionKeys.sessionId -> "IamATestSessionId")
       .withFormUrlEncodedBody(formData: _*)
@@ -242,13 +242,13 @@ class BankDetailsControllerSpec extends ItSpec {
 
             }
 
-          s"[$regime journey] redirect to /set-up-direct-debit when valid form is submitted and the user is an account holder" in {
+          s"[$regime journey] redirect to /bank-account-details when valid form is submitted and the user is an account holder" in {
             testRedirect(
               ("isSoleSignatory", "Yes")
             )(PageUrls.directDebitDetailsUrl, TdAll.detailsAboutBankAccount(isAccountHolder = true))
           }
 
-          s"[$regime journey] redirect to /set-up-direct-debit when valid form is submitted and the user is not an account holder" in {
+          s"[$regime journey] redirect to /bank-account-details when valid form is submitted and the user is not an account holder" in {
             testRedirect(
               ("isSoleSignatory", "No")
             )(PageUrls.cannotSetupDirectDebitOnlineUrl, TdAll.detailsAboutBankAccount(isAccountHolder = false))
@@ -275,7 +275,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
         }
 
-        "GET /set-up-direct-debit should" - {
+        "GET /bank-account-details should" - {
 
           s"[$regime journey] should return 200 and the bank details page" in {
             stubCommonActions()
@@ -357,7 +357,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
         }
 
-        "POST /set-up-direct-debit should" - {
+        "POST /bank-account-details should" - {
 
             def testBankDetailsFormError(
                 action: Action[AnyContent]
@@ -580,7 +580,7 @@ class BankDetailsControllerSpec extends ItSpec {
                 )
                 val fakeRequest: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
                   method = "POST",
-                  path   = "/set-up-direct-debit"
+                  path   = "/bank-account-details"
                 ).withAuthToken()
                   .withSession(SessionKeys.sessionId -> "IamATestSessionId")
                   .withFormUrlEncodedBody(formDataWithUnallowedCharacters: _*)
@@ -657,7 +657,7 @@ class BankDetailsControllerSpec extends ItSpec {
             )
             val fakeRequest: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
               method = "POST",
-              path   = "/set-up-direct-debit"
+              path   = "/bank-account-details"
             ).withAuthToken()
               .withSession(SessionKeys.sessionId -> "IamATestSessionId")
               .withFormUrlEncodedBody(formDataWithUnallowedCharacters: _*)
@@ -765,7 +765,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
             val fakeRequest = FakeRequest(
               method = "POST",
-              path   = "/set-up-direct-debit"
+              path   = "/bank-account-details"
             ).withAuthToken()
               .withSession(SessionKeys.sessionId -> "IamATestSessionId")
               .withFormUrlEncodedBody(formData: _*)

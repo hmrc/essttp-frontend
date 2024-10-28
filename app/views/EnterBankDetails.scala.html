@@ -81,43 +81,46 @@
     @if(form.errors.nonEmpty) {
         @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
             ErrorLink(
-                href = Some(s"#${e.key}"),
+                href = Some(s"#${if (e.key == typeOfAccountKey) "business" else e.key}"),
                 content = Text(Messages.BankDetails.errors(s"${e.key}.${e.message}")(Views.formErrorArgsStringList(e)).show)
             )
         ),
             title = Text(Messages.`There is a problem`.show)))
     }
+
     <h1 class="govuk-heading-xl">
-    @title
+        @title
     </h1>
+
     @formWithCSRF(action = routes.BankDetailsController.enterBankDetailsSubmit) {
 
+        <fieldset id="accountType-fieldset" class="govuk-fieldset" role="group">
+            <legend class="govuk-fieldset__legend">
+                <span class="govuk-fieldset__heading">
+                    @{Messages.AboutYourBankAccount.`Account type`.show}
+                </span>
+            </legend>
+
         @govukRadios(Radios(
-            fieldset = Some(Fieldset(
-            legend = Some(Legend(
-            content = Text(Messages.AboutYourBankAccount.`Account type`.show),
-            classes = "govuk-fieldset__legend",
-            isPageHeading = false
-                ))
-            )),
             idPrefix = Some(typeOfAccountKey),
             name = typeOfAccountKey,
             items = Seq(
-        RadioItem(
-            id = Some("business"),
-            content = Text(Messages.AboutYourBankAccount.`Business`.show),
-            value = Some(TypesOfBankAccount.Business.entryName),
-            checked = form.data.get(typeOfAccountKey).contains(TypesOfBankAccount.Business.entryName)
-            ),
-        RadioItem(
-            id = Some("personal"),
-            content = Text(Messages.AboutYourBankAccount.`Personal`.show),
-            value = Some(TypesOfBankAccount.Personal.entryName),
-            checked = form.data.get(typeOfAccountKey).contains(TypesOfBankAccount.Personal.entryName)
+                RadioItem(
+                    id = Some("business"),
+                    content = Text(Messages.AboutYourBankAccount.`Business`.show),
+                    value = Some(TypesOfBankAccount.Business.entryName),
+                    checked = form.data.get(typeOfAccountKey).contains(TypesOfBankAccount.Business.entryName)
+                ),
+                RadioItem(
+                    id = Some("personal"),
+                    content = Text(Messages.AboutYourBankAccount.`Personal`.show),
+                    value = Some(TypesOfBankAccount.Personal.entryName),
+                    checked = form.data.get(typeOfAccountKey).contains(TypesOfBankAccount.Personal.entryName)
                 )
             ),
-        errorMessage = fieldErrorMessage(typeOfAccountKey, form, errorMessageOverrides))
-        )
+            errorMessage = fieldErrorMessage(typeOfAccountKey, form, errorMessageOverrides)
+        ))
+        </fieldset>
 
         @govukInput(Input(
             id = nameKey,

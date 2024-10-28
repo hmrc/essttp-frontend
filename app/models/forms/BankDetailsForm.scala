@@ -132,6 +132,11 @@ object BankDetailsForm {
       fieldMessageOverrides = sortCodeAndAccountNumberOverrides
     )
 
+  val typeOfAccountEmpty: FormErrorWithFieldMessageOverrides =
+    FormErrorWithFieldMessageOverrides(
+      formError = FormError("accountType", "error.required")
+    )
+
   val form: Form[BankDetailsForm] =
     Form(
       mapping(
