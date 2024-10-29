@@ -1762,9 +1762,14 @@ object Messages {
       welsh   = "Gwiriwch fanylion eich Debyd Uniongyrchol"
     )
 
-    val `Account name`: Message = Message(
-      english = "Account name",
-      welsh   = "Enw’r cyfrif"
+    val `Account type`: Message = Message(
+      english = "Account type",
+      welsh   = "Math o gyfrif"
+    )
+
+    val `Name on the account`: Message = Message(
+      english = "Name on the account",
+      welsh   = "Yr enw sydd ar y cyfrif"
     )
 
     val `The Direct Debit Guarantee`: Message = Message(
