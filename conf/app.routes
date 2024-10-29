@@ -108,8 +108,8 @@ GET    /check-your-payment-plan/change/:pageId              controllers.PaymentS
 
 GET    /check-you-can-set-up-a-direct-debit                 controllers.BankDetailsController.detailsAboutBankAccount
 POST   /check-you-can-set-up-a-direct-debit                 controllers.BankDetailsController.detailsAboutBankAccountSubmit
-GET    /set-up-direct-debit                                 controllers.BankDetailsController.enterBankDetails
-POST   /set-up-direct-debit                                 controllers.BankDetailsController.enterBankDetailsSubmit
+GET    /bank-account-details                                controllers.BankDetailsController.enterBankDetails
+POST   /bank-account-details                                controllers.BankDetailsController.enterBankDetailsSubmit
 GET    /you-cannot-set-up-a-direct-debit-online             controllers.BankDetailsController.cannotSetupDirectDebitOnlinePage
 
 GET    /lockout                                             controllers.BankDetailsController.barsLockout
