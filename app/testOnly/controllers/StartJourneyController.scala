@@ -20,6 +20,7 @@ import actions.Actions
 import _root_.essttp.rootmodel.ttp._
 import _root_.testOnly.controllers.{routes => testOnlyRoutes}
 import _root_.testOnly.views.html._
+import cats.implicits.catsSyntaxEq
 import config.AppConfig
 import essttp.journey.JourneyConnector
 import essttp.journey.model.{Origins, SjRequest}
@@ -328,7 +329,7 @@ class StartJourneyController @Inject() (
   }
 
 }
-
+//noinspection ScalaStyle
 object StartJourneyController {
 
   def affinityGroup(auth: String): uk.gov.hmrc.auth.core.AffinityGroup = auth match {
@@ -460,11 +461,16 @@ object StartJourneyController {
         dmSpecialOfficeProcessingRequiredCESA = Some(containsError(DmSpecialOfficeProcessingRequiredCESA))
       )
     }
+
+    val postcode: Option[List[CustomerPostcode]] =
+      if (form.taxReference.value === "1010101010") None // this is just a UTR chosen to result in None to test optional customerPostcodes
+      else Some(List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate(LocalDate.of(2022, 1, 1)))))
+
     EligibilityCheckResult(
       processingDateTime              = ProcessingDateTime(LocalDate.now().toString),
       identification                  = makeIdentificationForTaxType(taxRegime, form),
       invalidSignals                  = Some(List(InvalidSignals(signalType        = "xyz", signalValue = "123", signalDescription = "Description"))),
-      customerPostcodes               = Some(List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate(LocalDate.of(2022, 1, 1))))),
+      customerPostcodes               = postcode,
       customerType                    = Some(CustomerTypes.MTDITSA),
       regimePaymentFrequency          = PaymentPlanFrequencies.Monthly,
       paymentPlanFrequency            = PaymentPlanFrequencies.Monthly,
