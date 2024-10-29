@@ -1164,17 +1164,16 @@ class BankDetailsControllerSpec extends ItSpec {
             )
 
             val summaries = doc.select(".govuk-summary-list").select(".govuk-summary-list__row").iterator().asScala.toList
-            summaries.size shouldBe 3
+            summaries.size shouldBe 4
             val changeLinks = summaries.map(_.select(".govuk-summary-list__actions").select(".govuk-link"))
-            changeLinks.size shouldBe 3
-            changeLinks.foreach(_.attr("href") shouldBe routes.BankDetailsController.enterBankDetails.url)
+            changeLinks.size shouldBe 4
+            changeLinks.foreach(_.attr("href") shouldBe routes.BankDetailsController.detailsAboutBankAccount.url)
 
-            val expectedAccountNameRow =
-              SummaryRow("Account name", TdAll.testAccountName, routes.BankDetailsController.enterBankDetails.url)
-            val expectedSortCodeRow = SummaryRow("Sort code", "123456", routes.BankDetailsController.enterBankDetails.url)
-            val expectedAccountNumberRow =
-              SummaryRow("Account number", "12345678", routes.BankDetailsController.enterBankDetails.url)
-            val expectedSummaryRows = List(expectedAccountNameRow, expectedSortCodeRow, expectedAccountNumberRow)
+            val expectedAccountTypeRow = SummaryRow("Account type", TdAll.typeOfBankAccount("Personal").toString, routes.BankDetailsController.detailsAboutBankAccount.url)
+            val expectedAccountNameRow = SummaryRow("Name on the account", TdAll.testAccountName, routes.BankDetailsController.detailsAboutBankAccount.url)
+            val expectedSortCodeRow = SummaryRow("Sort code", "123456", routes.BankDetailsController.detailsAboutBankAccount.url)
+            val expectedAccountNumberRow = SummaryRow("Account number", "12345678", routes.BankDetailsController.detailsAboutBankAccount.url)
+            val expectedSummaryRows = List(expectedAccountTypeRow, expectedAccountNameRow, expectedSortCodeRow, expectedAccountNumberRow)
             extractSummaryRows(summaries) shouldBe expectedSummaryRows
 
             doc.select(".govuk-heading-m").text() shouldBe "The Direct Debit Guarantee"

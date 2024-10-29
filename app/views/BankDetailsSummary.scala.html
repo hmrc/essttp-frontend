@@ -67,7 +67,26 @@
         SummaryListRow(
           classes = "grouped-row",
           key = Key(
-            content = HtmlContent(Html(Messages.CheckBankDetails.`Account name`.show)),
+            content = HtmlContent(Html(Messages.CheckBankDetails.`Account type`.show)),
+            classes = "govuk-!-width-one-half"
+          ),
+          value = Value(
+            content = Text(directDebitDetails.typeOfBankAccount.entryName)
+          ),
+          actions = Some(Actions(
+            items = Seq(
+              ActionItem(
+                href = routes.BankDetailsController.detailsAboutBankAccount.url,
+                content = Text(Messages.change.show),
+                visuallyHiddenText = Some(Messages.CheckBankDetails.`Account type`.show)
+              )
+            )
+          ))
+        ),
+        SummaryListRow(
+          classes = "grouped-row",
+          key = Key(
+            content = HtmlContent(Html(Messages.CheckBankDetails.`Name on the account`.show)),
             classes = "govuk-!-width-one-half"
           ),
           value = Value(
@@ -76,9 +95,9 @@
           actions = Some(Actions(
             items = Seq(
               ActionItem(
-                href = routes.BankDetailsController.enterBankDetails.url,
+                href = routes.BankDetailsController.detailsAboutBankAccount.url,
                 content = Text(Messages.change.show),
-                visuallyHiddenText = Some(Messages.CheckBankDetails.`Account name`.show)
+                visuallyHiddenText = Some(Messages.CheckBankDetails.`Name on the account`.show)
               )
             )
           ))
@@ -95,7 +114,7 @@
           actions = Some(Actions(
             items = Seq(
               ActionItem(
-                href = routes.BankDetailsController.enterBankDetails.url,
+                href = routes.BankDetailsController.detailsAboutBankAccount.url,
                 content = Text(Messages.change.show),
                 visuallyHiddenText = Some(Messages.BankDetails.`Sort code`.show)
               )
@@ -114,7 +133,7 @@
           actions = Some(Actions(
             items = Seq(
               ActionItem(
-                href = routes.BankDetailsController.enterBankDetails.url,
+                href = routes.BankDetailsController.detailsAboutBankAccount.url,
                 content = Text(Messages.change.show),
                 visuallyHiddenText = Some(Messages.BankDetails.`Account number`.show)
               )
