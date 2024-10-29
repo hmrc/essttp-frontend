@@ -751,7 +751,7 @@ appConfig: AppConfig
         classes = "govuk-input--width-10",
         spellcheck = Some(false),
         value = form.data.get("saTaxReference"),
-        hint = Some(Hint(content = Text("SAUTR is 10 digits e.g. 1234567895. If left empty, it will be a random one.")))
+        hint = Some(Hint(content = Text("SAUTR is 10 digits e.g. 1234567895. If left empty, it will be a random one. UTR 1010101010 will result in customerPostcodes return None.")))
     ))
 
     @mainTransInput
