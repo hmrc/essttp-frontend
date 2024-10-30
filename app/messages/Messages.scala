@@ -1113,47 +1113,47 @@ object Messages {
 
     val `Set up a Simple Assessment payment plan`: Message = Message(
       english = "Set up a Simple Assessment payment plan",
-      welsh   = "Set up a Welsh Simple Assessment payment plan"
+      welsh   = "Trefnu cynllun talu Asesiad Syml"
     )
 
     val `You can use this service to pay overdue payments in instalments.`: Message = Message(
       english = "You can use this service to pay overdue payments in instalments.",
-      welsh   = "You can use this service to pay overdue payments in Welsh instalments."
+      welsh   = "Gallwch ddefnyddio’r gwasanaeth hwn i dalu taliadau hwyr fesul rhandaliad."
     )
 
     val `You are eligible to set up an online payment plan if:`: Message = Message(
       english = "You are eligible to set up an online payment plan if:",
-      welsh   = "You are eligible to set up a Welsh online payment plan if:"
+      welsh   = "Rydych chi’n gymwys i drefnu cynllun talu ar-lein os yw’r canlynol yn wir:"
     )
 
     def `you owe ... or less`(maxAmountOfDebt: AmountInPence): Message = Message(
       english = s"you owe ${maxAmountOfDebt.gdsFormatInPounds} or less",
-      welsh   = s"Welsh you owe ${maxAmountOfDebt.gdsFormatInPounds} or less",
+      welsh   = s"mae arnoch ${maxAmountOfDebt.gdsFormatInPounds} neu lai",
     )
 
     val `you do not have any other debts with HMRC`: Message = Message(
       english = "you do not have any other debts with HMRC",
-      welsh   = "you do not have any other Welsh debts with HMRC"
+      welsh   = "does gennych chi ddim dyledion eraill gyda CThEF"
     )
 
     val `you do not have any payment plans with HMRC`: Message = Message(
       english = "you do not have any payment plans with HMRC",
-      welsh   = "you do not have any Welsh payment plans with HMRC"
+      welsh   = "does gennych chi ddim cynlluniau talu gyda CThEF"
     )
 
     val `You can choose to pay:`: Message = Message(
       english = "You can choose to pay:",
-      welsh   = "Welsh you can choose to pay:"
+      welsh   = "Gallwch ddewis talu:"
     )
 
     val `part of the payment upfront and part in monthly instalments`: Message = Message(
       english = "part of the payment upfront and part in monthly instalments",
-      welsh   = "part of the payment upfront and part in Welsh monthly instalments"
+      welsh   = "rhan o’r taliad ymlaen llaw a rhan ohono fesul rhandaliad"
     )
 
     val `monthly instalments only`: Message = Message(
       english = "monthly instalments only",
-      welsh   = "Welsh monthly instalments only"
+      welsh   = "fesul rhandaliad misol yn unig"
     )
 
     val `Before you start`: Message = Message(
@@ -1163,24 +1163,23 @@ object Messages {
 
     val `You must be:`: Message = Message(
       english = "You must be:",
-      welsh   = "Welsh you must be:"
+      welsh   = "Mae’n rhaid i chi fod:"
     )
 
     val `a named account holder for the UK bank account you intend to use`: Message = Message(
       english = "a named account holder for the UK bank account you intend to use",
-      welsh   = "a Welsh named account holder for the UK bank account you intend to use"
+      welsh   = "wedi’ch enwi’n ddeiliad y cyfrif ar gyfer y cyfrif banc yn y DU rydych yn bwriadu ei ddefnyddio"
     )
 
     val `able to authorise a Direct Debit`: Message = Message(
       english = "able to authorise a Direct Debit",
-      welsh   = "able to authorise a Welsh Direct Debit"
+      welsh   = "yn gallu awdurdodi Debyd Uniongyrchol"
     )
 
     val `You must keep up to date with your payments...`: Message = Message(
       english = "You must keep up to date with your payments. HMRC may ask you to pay the total outstanding amount if you do not. " +
         "HMRC intend this as a one off payment plan to give you extra support.",
-      welsh   = "You must keep up to date with your Welsh payments. Welsh HMRC may ask you to pay the total outstanding amount if you do not. " +
-        "HMRC intend this as a one off payment plan to give you extra Welsh support."
+      welsh   = "Mae’n rhaid i chi sicrhau eich bod chi’n gwneud eich taliadau mewn pryd. Mae’n bosibl y bydd CThEF yn gofyn i chi dalu’r cyfanswm sy’n ddyledus os na fyddwch chi’n gwneud eich taliadau mewn pryd. Bwriad CThEF yw y bydd hwn yn gynllun talu untro er mwyn rhoi cymorth ychwanegol i chi."
     )
 
   }
