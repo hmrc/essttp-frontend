@@ -53,7 +53,12 @@
                 Messages.NotEligible.`your bank details`
             )
         }
-        case TaxRegime.Sia => List()
+        case TaxRegime.Sia => List(
+            Messages.NotEligible.`your National Insurance number`,
+            Messages.NotEligible.`information on any savings or investments you have`,
+            Messages.NotEligible.`your bank details`,
+            Messages.NotEligible.`details of your income and spending`
+        )
     }}
 
 <div id="common-eligibility">

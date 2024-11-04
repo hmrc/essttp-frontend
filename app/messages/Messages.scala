@@ -340,6 +340,11 @@ object Messages {
       welsh   = "eich Cyfeirnod Unigryw y Trethdalwr (UTR) ar gyfer Hunanasesiad a allai fod yn 10 neu 13 digid o hyd "
     )
 
+    val `your National Insurance number`: Message = Message(
+      english = "your National Insurance number",
+      welsh   = "eich rhif Yswiriant Gwladol"
+    )
+
     val `information on any savings or investments you have`: Message = Message(
       english = "information on any savings or investments you have",
       welsh   = "gwybodaeth am unrhyw gynilion neu fuddsoddiadau sydd gennych"

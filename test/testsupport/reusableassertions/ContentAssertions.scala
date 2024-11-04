@@ -267,7 +267,12 @@ object ContentAssertions extends RichMatchers {
                 )
               }
               case TaxRegime.Sia =>
-                List()
+                List(
+                  "your National Insurance number",
+                  "information on any savings or investments you have",
+                  "your bank details",
+                  "details of your income and spending"
+                )
             }
           case Languages.Welsh =>
             taxRegime match {
