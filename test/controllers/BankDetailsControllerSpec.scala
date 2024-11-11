@@ -847,7 +847,7 @@ class BankDetailsControllerSpec extends ItSpec {
                     case TypesOfBankAccount.Business => BarsStub.VerifyBusinessStub.nameDoesNotMatch()
                   }
                   (
-                    List(("Enter the name on the account as it appears on bank statements. Do not copy and paste it.", "#name")),
+                    List(("Enter the name on the account as it appears on bank statements.", "#name")),
                     nameFieldError,
                     VerifyJson.nameDoesNotMatch
                   )
