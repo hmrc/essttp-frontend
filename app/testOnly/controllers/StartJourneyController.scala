@@ -342,7 +342,7 @@ object StartJourneyController {
     val debtAmountFromForm: AmountInPence = AmountInPence(form.debtTotalAmount)
     val interestAmount: AmountInPence = AmountInPence(form.interestAmount.getOrElse(BigDecimal(0)))
 
-    val maybeCustomerDetail = if (form.emailAddressPresent)
+    val maybeCustomerDetail = if (form.emailAddressPresent && form.newTtpApi)
       Some(List(CustomerDetail(
         Some(Email(SensitiveString("bobross@joyofpainting.com"))),
         Some(EmailSource.ETMP)
