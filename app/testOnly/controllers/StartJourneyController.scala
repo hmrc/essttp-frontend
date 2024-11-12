@@ -342,45 +342,50 @@ object StartJourneyController {
     val debtAmountFromForm: AmountInPence = AmountInPence(form.debtTotalAmount)
     val interestAmount: AmountInPence = AmountInPence(form.interestAmount.getOrElse(BigDecimal(0)))
 
+    val maybeCustomerDetail = if (form.emailAddressPresent)
+      Some(List(CustomerDetail(
+        Some(Email(SensitiveString("bobross@joyofpainting.com"))),
+        Some(EmailSource.ETMP)
+      )))
+    else None
+
     //TODO OPS-12584 - Clean this up when TTP has implemented the changes to the Eligibility API. The email address will be coming from the addresses field only
-    val (maybeCustomerDetail, maybeAddresses) =
-      if (form.emailAddressPresent && form.newTtpApi) {
-        (
-          Some(List(CustomerDetail(
-            None,
-            None,
-            Some(Title("Lord")),
-            Some(FirstName("Jamie")),
-            Some(LastName("North")),
-            Some(DateOfBirth(LocalDate.of(2000, 1, 1))),
-            Some(DateOfDeath(LocalDate.of(3000, 1, 1))),
-            Some(DistrictNumber("666"))
-          ))),
-          Some(List(Address(
-            Some(AddressType("Residential")),
-            Some(AddressLine("His Castle")), None, None, None,
-            Some(IsReturnedLetterService(value = false)),
-            Some(List(ContactDetail(
-              Some(TelNumber("12345678910")),
-              None,
-              None,
-              Some(Email(SensitiveString("jamienorth@email.com"))),
-              Some(AltLetterFormat(1))
-            ))),
-            Some(Postcode(SensitiveString("NO1HERE"))),
-            Some(Country("UK")),
-            Some(List(PostCodeHistory(
-              Some(Postcode(SensitiveString("NO2HERE"))),
-              Some(PostcodeDate(LocalDate.of(2500, 1, 1)))
-            )))
-          )))
-        )
-      } else if (form.emailAddressPresent) {
-        (
-          Some(List(CustomerDetail(Some(Email(SensitiveString("bobross@joyofpainting.com"))), Some(EmailSource.ETMP), None, None, None, None, None, None))),
-          None
-        )
-      } else (None, None)
+    val maybeAddresses = if (form.newTtpApi) {
+      Some(List(Address(
+        Some(AddressType("Residential")),
+        Some(AddressLine("His Castle")), None, None, None,
+        Some(IsReturnedLetterService(value = false)),
+        Some(List(ContactDetail(
+          Some(TelNumber("12345678910")),
+          None,
+          None,
+          Some(Email(SensitiveString("jamienorth@email.com"))),
+          Some(AltLetterFormat(1))
+        ))),
+        Some(Postcode(SensitiveString("NO1HERE"))),
+        Some(Country("UK")),
+        Some(List(PostcodeHistory(
+          Some(Postcode(SensitiveString("NO2HERE"))),
+          Some(PostcodeDate(LocalDate.of(2500, 1, 1)))
+        )))
+      )))
+    } else None
+
+    val individualDetails = if (form.newTtpApi)
+      Some(IndividualDetails(
+        Some(Title("Lord")),
+        Some(FirstName("Jamie")),
+        Some(LastName("North")),
+        Some(DateOfBirth(LocalDate.of(2000, 1, 1))),
+        Some(DistrictNumber("666")),
+        Some(CustomerTypes.MTDITSA),
+        form.transitionToCDCS.map(TransitionToCDCS(_))
+      ))
+    else None
+
+    val customerType = if (form.newTtpApi) None else Some(CustomerTypes.MTDITSA)
+
+    val transitionToCDCS = if (form.newTtpApi) None else form.transitionToCDCS.map(TransitionToCDCS(_))
 
     val maybeRegimeDigitalCorrespondence = Some(RegimeDigitalCorrespondence(form.regimeDigitalCorrespondence))
 
@@ -471,7 +476,7 @@ object StartJourneyController {
       identification                  = makeIdentificationForTaxType(taxRegime, form),
       invalidSignals                  = Some(List(InvalidSignals(signalType        = "xyz", signalValue = "123", signalDescription = "Description"))),
       customerPostcodes               = postcode,
-      customerType                    = Some(CustomerTypes.MTDITSA),
+      customerType                    = customerType,
       regimePaymentFrequency          = PaymentPlanFrequencies.Monthly,
       paymentPlanFrequency            = PaymentPlanFrequencies.Monthly,
       paymentPlanMinLength            = PaymentPlanMinLength(form.planMinLength),
@@ -480,11 +485,12 @@ object StartJourneyController {
       eligibilityRules                = eligibilityRules,
       chargeTypeAssessment            = chargeTypeAssessments,
       customerDetails                 = maybeCustomerDetail,
+      individualDetails               = individualDetails,
       addresses                       = maybeAddresses,
       regimeDigitalCorrespondence     = maybeRegimeDigitalCorrespondence,
       futureChargeLiabilitiesExcluded = false,
       chargeTypesExcluded             = None,
-      transitionToCDCS                = form.transitionToCDCS.map(TransitionToCDCS(_))
+      transitionToCDCS                = transitionToCDCS
     )
   }
 
