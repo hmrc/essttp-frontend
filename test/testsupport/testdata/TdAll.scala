@@ -299,6 +299,7 @@ object TdAll {
         ))
       )),
       customerDetails                 = None,
+      individualDetails               = None,
       addresses                       = None,
       regimeDigitalCorrespondence     = regimeDigitalCorrespondence,
       futureChargeLiabilitiesExcluded = false,
@@ -555,7 +556,7 @@ object TdAll {
   }
 
   def customerDetail(email: String = "bobross@joyofpainting.com", source: EmailSource = EmailSource.ETMP): Option[List[CustomerDetail]] =
-    Some(List(CustomerDetail(Some(Email(SensitiveString(email))), Some(source), None, None, None, None, None, None)))
+    Some(List(CustomerDetail(Some(Email(SensitiveString(email))), Some(source))))
 
   val someRegimeDigitalCorrespondenceFalse: Option[RegimeDigitalCorrespondence] = Some(RegimeDigitalCorrespondence(value = false))
   val someRegimeDigitalCorrespondenceTrue: Option[RegimeDigitalCorrespondence] = Some(RegimeDigitalCorrespondence(value = true))

@@ -342,7 +342,7 @@ object Messages {
 
     val `your National Insurance number`: Message = Message(
       english = "your National Insurance number",
-      welsh   = "eich rhif Yswiriant Gwladol"
+      welsh   = "eich rhif Yswiriant Gwladolƒƒ"
     )
 
     val `information on any savings or investments you have`: Message = Message(
