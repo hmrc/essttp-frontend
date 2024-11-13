@@ -342,7 +342,7 @@ object StartJourneyController {
     val debtAmountFromForm: AmountInPence = AmountInPence(form.debtTotalAmount)
     val interestAmount: AmountInPence = AmountInPence(form.interestAmount.getOrElse(BigDecimal(0)))
 
-    val maybeCustomerDetail = if (form.emailAddressPresent && form.newTtpApi)
+    val maybeCustomerDetail = if (form.emailAddressPresent && !form.newTtpApi)
       Some(List(CustomerDetail(
         Some(Email(SensitiveString("bobross@joyofpainting.com"))),
         Some(EmailSource.ETMP)
@@ -351,17 +351,20 @@ object StartJourneyController {
 
     //TODO OPS-12584 - Clean this up when TTP has implemented the changes to the Eligibility API. The email address will be coming from the addresses field only
     val maybeAddresses = if (form.newTtpApi) {
+      val contactDetail = ContactDetail(
+        Some(TelNumber("12345678910")),
+        None,
+        None,
+        if (form.emailAddressPresent) Some(Email(SensitiveString("jamienorth@email.com"))) else None,
+        Some(AltLetterFormat(1))
+      )
+
       Some(List(Address(
         Some(AddressType("Residential")),
-        Some(AddressLine("His Castle")), None, None, None,
+        Some(AddressLine("His Castle")),
+        None, None, None,
         Some(IsReturnedLetterService(value = false)),
-        Some(List(ContactDetail(
-          Some(TelNumber("12345678910")),
-          None,
-          None,
-          Some(Email(SensitiveString("jamienorth@email.com"))),
-          Some(AltLetterFormat(1))
-        ))),
+        Some(List(contactDetail)),
         Some(Postcode(SensitiveString("NO1HERE"))),
         Some(Country("UK")),
         Some(List(PostcodeHistory(
