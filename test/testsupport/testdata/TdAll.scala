@@ -538,7 +538,19 @@ object TdAll {
             debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-03-07")),
             accruedInterest         = AccruedInterest(AmountInPence(1597)),
             isInterestBearingCharge = Some(IsInterestBearingCharge(value = true)),
-            useChargeReference      = Some(UseChargeReference(value = true))
+            useChargeReference      = Some(UseChargeReference(value = true)),
+            mainTrans               = Some(MainTrans("mainTrans")),
+            subTrans                = Some(SubTrans("subTrans")),
+            parentChargeReference   = None,
+            parentMainTrans         = None,
+            creationDate            = None,
+            originalCreationDate    = None,
+            saTaxYearEnd            = None,
+            tieBreaker              = None,
+            originalTieBreaker      = None,
+            chargeType              = Some(ChargeType("InYearRTICharge-Tax")),
+            originalChargeType      = None,
+            chargeSource            = None
           ),
           DebtItemCharges(
             outstandingDebtAmount   = OutstandingDebtAmount(AmountInPence(100000)),
@@ -546,11 +558,25 @@ object TdAll {
             debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-02-07")),
             accruedInterest         = AccruedInterest(AmountInPence(1597)),
             isInterestBearingCharge = Some(IsInterestBearingCharge(value = true)),
-            useChargeReference      = Some(UseChargeReference(value = true))
+            useChargeReference      = Some(UseChargeReference(value = true)),
+            mainTrans               = Some(MainTrans("mainTrans")),
+            subTrans                = Some(SubTrans("subTrans")),
+            parentChargeReference   = None,
+            parentMainTrans         = None,
+            creationDate            = None,
+            originalCreationDate    = None,
+            saTaxYearEnd            = None,
+            tieBreaker              = None,
+            originalTieBreaker      = None,
+            chargeType              = Some(ChargeType("InYearRTICharge-Tax")),
+            originalChargeType      = None,
+            chargeSource            = None
           )
         )
       ),
       customerDetails             = customerDetails,
+      individualDetails           = None,
+      addresses                   = None,
       regimeDigitalCorrespondence = regimeDigitalCorrespondence
     )
   }
