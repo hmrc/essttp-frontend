@@ -20,6 +20,7 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.crypto.CryptoFormat
 import essttp.journey.model._
+import scala.jdk.CollectionConverters._
 import essttp.rootmodel._
 import essttp.rootmodel.bank.CanSetUpDirectDebit
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
@@ -636,7 +637,9 @@ object EssttpBackend {
 
     type HttpStatus = Int
 
-    private def caseUrl(journeyId: JourneyId) = s"/essttp-backend/pega/case/${journeyId.value}"
+    private def startCaseUrl(journeyId: JourneyId) = s"/essttp-backend/pega/case/${journeyId.value}"
+
+    private def getCaseUrl(journeyId: JourneyId) = s"/essttp-backend/pega/case/${journeyId.value}"
 
     private def saveJourneyUrl(journeyId: JourneyId): String = s"/essttp-backend/pega/journey/${journeyId.value}"
 
@@ -651,9 +654,12 @@ object EssttpBackend {
       s"/essttp-backend/pega/recreate-session/$regime"
     }
 
-    def stubStartCase(journeyId: JourneyId, result: Either[HttpStatus, StartCaseResponse]): StubMapping =
+    def stubStartCase(journeyId: JourneyId, result: Either[HttpStatus, StartCaseResponse], recalculationNeeded: Boolean): StubMapping =
       stubFor(
-        post(caseUrl(journeyId))
+        post(urlPathEqualTo(startCaseUrl(journeyId)))
+          .withQueryParams(Map(
+            "recalculationNeeded" -> equalTo(recalculationNeeded.toString)
+          ).asJava)
           .willReturn(
             result.fold(
               aResponse().withStatus(_),
@@ -670,7 +676,7 @@ object EssttpBackend {
 
     def stubGetCase(journeyId: JourneyId, result: Either[HttpStatus, GetCaseResponse]): StubMapping =
       stubFor(
-        get(caseUrl(journeyId))
+        get(getCaseUrl(journeyId))
           .willReturn(
             result.fold(
               aResponse().withStatus(_),
@@ -704,13 +710,13 @@ object EssttpBackend {
       )
 
     def verifyStartCaseCalled(journeyId: JourneyId): Unit =
-      verify(exactly(1), postRequestedFor(urlPathEqualTo(caseUrl(journeyId))))
+      verify(exactly(1), postRequestedFor(urlPathEqualTo(startCaseUrl(journeyId))))
 
     def verifyStartCaseNotCalled(journeyId: JourneyId): Unit =
-      verify(exactly(0), postRequestedFor(urlPathEqualTo(caseUrl(journeyId))))
+      verify(exactly(0), postRequestedFor(urlPathEqualTo(startCaseUrl(journeyId))))
 
     def verifyGetCaseCalled(journeyId: JourneyId): Unit =
-      verify(exactly(1), getRequestedFor(urlPathEqualTo(caseUrl(journeyId))))
+      verify(exactly(1), getRequestedFor(urlPathEqualTo(getCaseUrl(journeyId))))
 
     def verifySaveJourneyForPegaCalled(journeyId: JourneyId): Unit =
       verify(exactly(1), postRequestedFor(urlPathEqualTo(saveJourneyUrl(journeyId))))

@@ -32,10 +32,10 @@ class PegaService @Inject() (
     journeyConnector: JourneyConnector
 )(implicit ec: ExecutionContext) {
 
-  def startCase(journey: Journey)(implicit rh: RequestHeader): Future[(Journey, StartCaseResponse)] = {
+  def startCase(journey: Journey, recalculationNeeded: Boolean)(implicit rh: RequestHeader): Future[(Journey, StartCaseResponse)] = {
       def doStartCase(): Future[(Journey, StartCaseResponse)] =
         for {
-          startCaseResponse <- essttpConnector.startPegaCase(journey.journeyId)
+          startCaseResponse <- essttpConnector.startPegaCase(journey.journeyId, recalculationNeeded)
           updatedJourney <- journeyConnector.updatePegaStartCaseResponse(journey.journeyId, startCaseResponse)
           _ <- essttpConnector.saveJourneyForPega(journey.journeyId)
         } yield (updatedJourney, startCaseResponse)

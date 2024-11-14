@@ -119,7 +119,7 @@ class WhyCannotPayInFullController @Inject() (
           WhyCannotPayInFullAnswers.WhyCannotPayInFull(newAnswers)
         )
         updatedJourney <- if (needToStartPegaCase) {
-          pegaService.startCase(journey).map(_._1)
+          pegaService.startCase(journey, recalculationNeeded = false).map(_._1)
         } else {
           Future.successful(j)
         }

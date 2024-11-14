@@ -70,13 +70,13 @@ class JourneyIncorrectStateRouterSpec extends ItSpec {
       ("Stages.EnteredUpfrontPaymentAmount", () => EssttpBackend.UpfrontPaymentAmount.findJourney(testCrypto)(), PageUrls.upfrontPaymentSummaryUrl),
       ("Stages.RetrievedExtremeDates", () => EssttpBackend.Dates.findJourneyExtremeDates(testCrypto, Origins.Epaye.Bta)(), PageUrls.determineAffordabilityUrl),
       ("Stages.RetrievedAffordabilityResult", () => EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.howMuchCanYouPayEachMonthUrl),
-      ("Stages.ObtainedCanPayWithinSixMonthsAnswers - not required", () => EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.howMuchCanYouPayEachMonthUrl),
+      ("Stages.ObtainedCanPayWithinSixMonthsAnswers - not required", () => EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.canPayWithinSixMonthsUrl(Epaye, None)),
       ("Stages.ObtainedCanPayWithinSixMonthsAnswers - no ", () => EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(
         JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
-      ), PageUrls.startPegaCaseUrl),
+      ), PageUrls.canPayWithinSixMonthsUrl(Epaye, None))),
       ("Stages.ObtainedCanPayWithinSixMonthsAnswers - yes", () => EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(
         JourneyJsonTemplates.`Obtained Can Pay Within 6 months - yes`(Origins.Epaye.Bta)(testCrypto)
-      ), PageUrls.howMuchCanYouPayEachMonthUrl),
+      ), PageUrls.canPayWithinSixMonthsUrl(Epaye, None)),
       ("Stages.StartedPegaCase", () => EssttpBackend.StartedPegaCase.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.canPayWithinSixMonthsUrl(Epaye, None)),
       ("Stages.EnteredMonthlyPaymentAmount", () => EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.whichDayDoYouWantToPayUrl),
       ("Stages.EnteredDayOfMonth", () => EssttpBackend.DayOfMonth.findJourney(TdAll.dayOfMonth(), testCrypto, Origins.Epaye.Bta)(), PageUrls.retrieveStartDatesUrl),
