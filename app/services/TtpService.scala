@@ -139,6 +139,8 @@ class TtpService @Inject() (
     val correlationId = journey.fold(_.correlationId, _.correlationId)
     val regimeDigitalCorrespondence = journey.fold(_.eligibilityCheckResult.regimeDigitalCorrespondence, _.eligibilityCheckResult.regimeDigitalCorrespondence)
     val customerDetail = journey.fold(_.eligibilityCheckResult.customerDetails, deriveCustomerDetail)
+    val individualDetails = journey.fold(_.eligibilityCheckResult.individualDetails, _.eligibilityCheckResult.individualDetails)
+    val addresses = journey.fold(_.eligibilityCheckResult.addresses, _.eligibilityCheckResult.addresses)
 
     val directDebitDetails = journey.fold(_.directDebitDetails, _.directDebitDetails)
     val accountNumberPaddedWithZero: AccountNumber = directDebitDetails.accountNumber
@@ -152,7 +154,19 @@ class TtpService @Inject() (
             debtItemOriginalDueDate = DebtItemOriginalDueDate(charge.charges1.dueDate.value),
             accruedInterest         = charge.charges1.accruedInterest,
             isInterestBearingCharge = charge.charges1.isInterestBearingCharge,
-            useChargeReference      = charge.charges2.useChargeReference
+            useChargeReference      = charge.charges2.useChargeReference,
+            mainTrans               = Some(charge.charges1.mainTrans),
+            subTrans                = Some(charge.charges1.subTrans),
+            parentChargeReference   = charge.charges2.parentChargeReference,
+            parentMainTrans         = charge.charges2.parentMainTrans,
+            creationDate            = charge.charges2.creationDate,
+            originalCreationDate    = charge.charges2.originalCreationDate,
+            saTaxYearEnd            = charge.charges2.saTaxYearEnd,
+            tieBreaker              = charge.charges2.tieBreaker,
+            originalTieBreaker      = charge.charges2.originalTieBreaker,
+            chargeType              = Some(charge.charges1.chargeType),
+            originalChargeType      = charge.charges2.originalChargeType,
+            chargeSource            = charge.charges2.chargeSource
           )
         }
 
@@ -194,6 +208,8 @@ class TtpService @Inject() (
         debtItemCharges      = debtItemCharges
       ),
       customerDetails             = customerDetail,
+      individualDetails           = individualDetails,
+      addresses                   = addresses,
       regimeDigitalCorrespondence = regimeDigitalCorrespondence
     )
 
