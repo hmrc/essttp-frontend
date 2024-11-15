@@ -308,7 +308,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
       val request = fakeRequest.withFormUrlEncodedBody("CanPayWithinSixMonths" -> "No").withMethod("POST")
       val result = controller.canPayWithinSixMonthsSubmit(request)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.PegaController.startPegaJourney.url)
+      redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/test-only/pega?regime=epaye")
 
       EssttpBackend.CanPayWithinSixMonths.verifyUpdateCanPayWithinSixMonthsRequest(
         TdAll.journeyId,

@@ -73,7 +73,7 @@ class JourneyIncorrectStateRouterSpec extends ItSpec {
       ("Stages.ObtainedCanPayWithinSixMonthsAnswers - not required", () => EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(), PageUrls.canPayWithinSixMonthsUrl(Epaye, None)),
       ("Stages.ObtainedCanPayWithinSixMonthsAnswers - no ", () => EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(
         JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
-      ), PageUrls.canPayWithinSixMonthsUrl(Epaye, None))),
+      ), PageUrls.canPayWithinSixMonthsUrl(Epaye, None)),
       ("Stages.ObtainedCanPayWithinSixMonthsAnswers - yes", () => EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(
         JourneyJsonTemplates.`Obtained Can Pay Within 6 months - yes`(Origins.Epaye.Bta)(testCrypto)
       ), PageUrls.canPayWithinSixMonthsUrl(Epaye, None)),
