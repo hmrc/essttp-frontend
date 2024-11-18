@@ -18,8 +18,8 @@ package controllers
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.crypto.CryptoFormat
-import essttp.journey.model.{Origin, Origins}
-import essttp.rootmodel.TaxRegime
+import essttp.journey.model.{Origin, Origins, WhyCannotPayInFullAnswers}
+import essttp.rootmodel.{CannotPayReason, TaxRegime}
 import essttp.rootmodel.ttp.eligibility.{CustomerDetail, EmailSource}
 import paymentsEmailVerification.models.EmailVerificationResult
 import play.api.http.Status
@@ -52,7 +52,12 @@ class SubmitArrangementControllerSpec extends ItSpec {
             (
               "T&C's accepted, no email required",
               () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto, origin, etmpEmail = Some(TdAll.etmpEmail))(),
-              None, None, false, None
+              None,
+              None,
+              false,
+              None,
+              None,
+              None
             ),
             (
               "email verification success - same email as ETMP",
@@ -62,7 +67,12 @@ class SubmitArrangementControllerSpec extends ItSpec {
                 testCrypto,
                 origin
               )(),
-              Some("bobross@joyofpainting.com"), Some(EmailSource.ETMP), false, None
+              Some("bobross@joyofpainting.com"),
+              Some(EmailSource.ETMP),
+              false,
+              None,
+              None,
+              None
             ),
             (
               "email verification success - new email",
@@ -72,7 +82,12 @@ class SubmitArrangementControllerSpec extends ItSpec {
                 testCrypto,
                 origin
               )(),
-              Some("grogu@mandalorian.com"), Some(EmailSource.TEMP), false, None
+              Some("grogu@mandalorian.com"),
+              Some(EmailSource.TEMP),
+              false,
+              None,
+              None,
+              None
             ),
             (
               "email verification success - ETMP - same email with different casing",
@@ -82,15 +97,39 @@ class SubmitArrangementControllerSpec extends ItSpec {
                 testCrypto,
                 origin
               )(),
-              Some("BobRoss@joyofpainting.com"), Some(EmailSource.ETMP), false, None
+              Some("BobRoss@joyofpainting.com"),
+              Some(EmailSource.ETMP),
+              false,
+              None,
+              None,
+              None
             ),
             (
               "T&C's accepted, no email required with affordability enabled",
-              () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto, origin, etmpEmail = Some(TdAll.etmpEmail), withAffordability = true)(),
-              None, None, true, Some(TdAll.pegaStartCaseResponse.caseId)
+              () => EssttpBackend.TermsAndConditions.findJourney(
+                isEmailAddressRequired = false,
+                testCrypto, origin,
+                etmpEmail                 = Some(TdAll.etmpEmail),
+                withAffordability         = true,
+                whyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(Set(CannotPayReason.NoMoneySetAside))
+              )(),
+              None,
+              None,
+              true,
+              Some(TdAll.pegaStartCaseResponse.caseId),
+              Some(false),
+              Some(Set[CannotPayReason](CannotPayReason.NoMoneySetAside))
             )
           ).foreach {
-              case (journeyDescription, journeyStubMapping, expectedEmail, expectedEmailSource, affordabilityEnabled, caseId) =>
+              case (
+                journeyDescription,
+                journeyStubMapping,
+                expectedEmail,
+                expectedEmailSource,
+                affordabilityEnabled,
+                caseId,
+                canPayWithinSixMonths,
+                whyCannotPayInFullReasons) =>
                 s"[taxRegime: ${taxRegime.toString}] trigger call to ttp enact arrangement api, send an audit event " +
                   s"and also update backend for $journeyDescription" in {
                     stubCommonActions()
@@ -124,6 +163,15 @@ class SubmitArrangementControllerSpec extends ItSpec {
                       case TaxRegime.Sa    => "Sa"
                       case TaxRegime.Sia   => "Sia"
                     }
+
+                    val whyCannotPayInFullJson =
+                      whyCannotPayInFullReasons.fold("")(reasons =>
+                        s""" "unableToPayReason": ${Json.toJson(reasons).toString},""")
+
+                    val canPayWithinSixMonthsJson =
+                      canPayWithinSixMonths.fold(""){ canPay =>
+                        s""" "canPayInSixMonths": ${canPay.toString},"""
+                      }
 
                     AuditConnectorStub.verifyEventAudited(
                       "PlanSetUp",
@@ -163,6 +211,8 @@ class SubmitArrangementControllerSpec extends ItSpec {
                      |	"authProviderId": "authId-999",
                      |  ${expectedEmail.fold("")(email => s""" "emailAddress":"$email", """)}
                      |  ${expectedEmailSource.fold("")(source => s""" "emailSource":"${source.value}", """)}
+                     |  $whyCannotPayInFullJson
+                     |  $canPayWithinSixMonthsJson
                      |  "regimeDigitalCorrespondence": true
                      |}
                      |""".stripMargin

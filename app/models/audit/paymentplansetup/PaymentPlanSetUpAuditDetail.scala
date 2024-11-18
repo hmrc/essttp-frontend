@@ -18,7 +18,7 @@ package models.audit.paymentplansetup
 
 import essttp.crypto.CryptoFormat
 import essttp.journey.model.CorrelationId
-import essttp.rootmodel.Email
+import essttp.rootmodel.{CannotPayReason, Email}
 import essttp.rootmodel.bank.BankDetails
 import essttp.rootmodel.ttp.eligibility.{EmailSource, RegimeDigitalCorrespondence}
 import models.audit.{AuditDetail, Schedule, TaxDetail}
@@ -37,7 +37,9 @@ final case class PaymentPlanSetUpAuditDetail(
     authProviderId:              String,
     regimeDigitalCorrespondence: Option[RegimeDigitalCorrespondence],
     emailAddress:                Option[Email],
-    emailSource:                 Option[EmailSource]
+    emailSource:                 Option[EmailSource],
+    canPayInSixMonths:           Option[Boolean],
+    unableToPayReason:           Option[Set[CannotPayReason]]
 ) extends AuditDetail {
   val auditType: String = "PlanSetUp"
 }
