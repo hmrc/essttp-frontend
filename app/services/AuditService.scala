@@ -20,13 +20,14 @@ import actionsmodel.AuthenticatedJourneyRequest
 import cats.syntax.eq._
 import essttp.bars.model.BarsVerifyStatusResponse
 import essttp.crypto.CryptoFormat
-import essttp.journey.model.Journey.AfterEnteredCanYouSetUpDirectDebit
+import essttp.journey.model.Journey.{AfterCheckedPaymentPlan, AfterEnteredCanYouSetUpDirectDebit, AfterStartedPegaCase}
 import essttp.journey.model.Journey.Stages._
-import essttp.journey.model.{EmailVerificationAnswers, Journey, Origin}
+import essttp.journey.model.{CanPayWithinSixMonthsAnswers, EmailVerificationAnswers, Journey, Origin, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.bank.BankDetails
+import essttp.rootmodel.pega.GetCaseResponse
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
 import essttp.rootmodel.ttp.eligibility.{EligibilityCheckResult, EmailSource}
-import essttp.rootmodel.{Email, GGCredId}
+import essttp.rootmodel.{CannotPayReason, Email, GGCredId}
 import essttp.utils.Errors
 import models.audit.bars._
 import models.audit.ddinprogress.DdInProgressAuditDetail
@@ -81,6 +82,12 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       journey: ChosenPaymentPlan
   )(implicit headerCarrier: HeaderCarrier): Unit =
     audit(toPaymentPlanBeforeSubmissionAuditDetail(journey))
+
+  def auditPaymentPlanBeforeSubmission(
+      journey:         Either[AfterStartedPegaCase, AfterCheckedPaymentPlan],
+      getCaseResponse: GetCaseResponse
+  )(implicit headerCarrier: HeaderCarrier): Unit =
+    audit(toPaymentPlanBeforeSubmissionAuditDetail(journey, getCaseResponse))
 
   def auditBarsCheck(
       journey:              AfterEnteredCanYouSetUpDirectDebit,
@@ -166,14 +173,52 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
     )
   }
 
-  private def toPaymentPlanBeforeSubmissionAuditDetail(journey: ChosenPaymentPlan): PaymentPlanBeforeSubmissionAuditDetail = {
+  private def toPaymentPlanBeforeSubmissionAuditDetail(journey: ChosenPaymentPlan): PaymentPlanBeforeSubmissionAuditDetail =
     PaymentPlanBeforeSubmissionAuditDetail(
       schedule                    = Schedule.createSchedule(journey.selectedPaymentPlan, journey.dayOfMonth),
       correlationId               = journey.correlationId,
       origin                      = toAuditString(journey.origin),
       taxType                     = journey.taxRegime.toString,
       taxDetail                   = toTaxDetail(journey.eligibilityCheckResult),
-      regimeDigitalCorrespondence = journey.eligibilityCheckResult.regimeDigitalCorrespondence
+      regimeDigitalCorrespondence = journey.eligibilityCheckResult.regimeDigitalCorrespondence,
+      canPayInSixMonths           = canPayWithinSixMonthsAnswersToBoolean(journey.canPayWithinSixMonthsAnswers),
+      unableToPayReason           = whyCannotPayInFullAnswersToSet(journey.whyCannotPayInFullAnswers)
+    )
+
+  private def toPaymentPlanBeforeSubmissionAuditDetail(
+      journey:         Either[AfterStartedPegaCase, AfterCheckedPaymentPlan],
+      getCaseResponse: GetCaseResponse
+  ): PaymentPlanBeforeSubmissionAuditDetail = {
+    val eligibilityCheckResult = journey.merge match {
+      case j: Journey.AfterEligibilityChecked =>
+        j.eligibilityCheckResult
+      case _ =>
+        Errors.throwServerErrorException("Trying to get eligibility check result for audit event, but they haven't been retrieved yet.")
+    }
+
+    val canPayWithinSixMonthsAnswers = journey.merge match {
+      case j: Journey.AfterCanPayWithinSixMonthsAnswers =>
+        j.canPayWithinSixMonthsAnswers
+      case _ =>
+        Errors.throwServerErrorException("Trying to get can pay within 6 months answers for audit event, but they haven't been retrieved yet.")
+    }
+
+    val whyCannotPayInFullAnswers = journey.merge match {
+      case j: Journey.AfterWhyCannotPayInFullAnswers =>
+        j.whyCannotPayInFullAnswers
+      case _ =>
+        Errors.throwServerErrorException("Trying to get why cannot pay in full answers for audit event, but they haven't been retrieved yet.")
+    }
+
+    PaymentPlanBeforeSubmissionAuditDetail(
+      schedule                    = Schedule.createSchedule(getCaseResponse.paymentPlan, getCaseResponse.paymentDay),
+      correlationId               = journey.fold(_.correlationId, _.correlationId),
+      origin                      = toAuditString(journey.fold(_.origin, _.origin)),
+      taxType                     = journey.fold(_.taxRegime, _.taxRegime).toString,
+      taxDetail                   = toTaxDetail(eligibilityCheckResult),
+      regimeDigitalCorrespondence = eligibilityCheckResult.regimeDigitalCorrespondence,
+      canPayInSixMonths           = canPayWithinSixMonthsAnswersToBoolean(canPayWithinSixMonthsAnswers),
+      unableToPayReason           = whyCannotPayInFullAnswersToSet(whyCannotPayInFullAnswers)
     )
   }
 
@@ -241,6 +286,8 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
     val eligibilityCheckResult = journey.fold(_.eligibilityCheckResult, _.eligibilityCheckResult)
     val correlationId = journey.fold(_.correlationId, _.correlationId)
     val (maybeEmail, maybeEmailSource) = journey.fold(_ => (None, None), toEmailInfo)
+    val canPayWithinSixMonthsAnswers = journey.fold(_.canPayWithinSixMonthsAnswers, _.canPayWithinSixMonthsAnswers)
+    val whyCannotPayInFullAnswers = journey.fold(_.whyCannotPayInFullAnswers, _.whyCannotPayInFullAnswers)
 
     PaymentPlanSetUpAuditDetail(
       bankDetails                 = directDebitDetails,
@@ -255,7 +302,9 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       authProviderId              = r.ggCredId.value,
       regimeDigitalCorrespondence = eligibilityCheckResult.regimeDigitalCorrespondence,
       emailAddress                = maybeEmail,
-      emailSource                 = maybeEmailSource
+      emailSource                 = maybeEmailSource,
+      canPayInSixMonths           = canPayWithinSixMonthsAnswersToBoolean(canPayWithinSixMonthsAnswers),
+      unableToPayReason           = whyCannotPayInFullAnswersToSet(whyCannotPayInFullAnswers)
     )
   }
 
@@ -342,6 +391,18 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
     case j: Journey.AfterEligibilityChecked => j.eligibilityCheckResult
     case _                                  => Errors.throwServerErrorException("Trying to get eligibility check result for audit event, but it hasn't been retrieved yet.")
   }
+
+  private def canPayWithinSixMonthsAnswersToBoolean(answers: CanPayWithinSixMonthsAnswers): Option[Boolean] =
+    answers match {
+      case CanPayWithinSixMonthsAnswers.AnswerNotRequired             => None
+      case CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths(canPay) => Some(canPay)
+    }
+
+  private def whyCannotPayInFullAnswersToSet(answers: WhyCannotPayInFullAnswers): Option[Set[CannotPayReason]] =
+    answers match {
+      case WhyCannotPayInFullAnswers.AnswerNotRequired           => None
+      case WhyCannotPayInFullAnswers.WhyCannotPayInFull(reasons) => Some(reasons)
+    }
 
   private def toAuditString(origin: Origin) =
     origin.toString.split('.').lastOption.getOrElse(origin.toString)

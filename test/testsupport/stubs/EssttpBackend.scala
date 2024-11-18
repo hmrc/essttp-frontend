@@ -561,12 +561,15 @@ object EssttpBackend {
       )
 
     def findJourney(
-        isEmailAddressRequired: Boolean,
-        encrypter:              Encrypter,
-        origin:                 Origin,
-        etmpEmail:              Option[String],
-        withAffordability:      Boolean        = false
-    )(jsonBody: String = JourneyJsonTemplates.`Agreed Terms and Conditions`(isEmailAddressRequired, origin, etmpEmail, withAffordability)(encrypter)): StubMapping =
+        isEmailAddressRequired:    Boolean,
+        encrypter:                 Encrypter,
+        origin:                    Origin,
+        etmpEmail:                 Option[String],
+        withAffordability:         Boolean                   = false,
+        whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
+    )(jsonBody: String = JourneyJsonTemplates.`Agreed Terms and Conditions`(
+        isEmailAddressRequired, origin, etmpEmail, withAffordability, whyCannotPayInFullAnswers
+      )(encrypter)): StubMapping =
       findByLatestSessionId(jsonBody)
   }
 

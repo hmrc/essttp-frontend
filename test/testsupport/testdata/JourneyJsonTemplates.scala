@@ -304,7 +304,11 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
-  def `Chosen Payment Plan`(upfrontPaymentAmountJsonString: String = """{"DeclaredUpfrontPayment": {"amount": 12312}}""", regimeDigitalCorrespondence: Boolean = true, origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Chosen Payment Plan`(
+      upfrontPaymentAmountJsonString: String  = """{"DeclaredUpfrontPayment": {"amount": 12312}}""",
+      regimeDigitalCorrespondence:    Boolean = true,
+      origin:                         Origin
+  )(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.chosenPaymentPlan,
     journeyInfo = List(
       TdJsonBodies.taxIdJourneyInfo(),
@@ -382,9 +386,15 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
-  def `Agreed Terms and Conditions`(isEmailAddresRequired: Boolean, origin: Origin, etmpEmail: Option[String], withAffordability: Boolean = false)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Agreed Terms and Conditions`(
+      isEmailAddresRequired:     Boolean,
+      origin:                    Origin,
+      etmpEmail:                 Option[String],
+      withAffordability:         Boolean                   = false,
+      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
+  )(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = if (isEmailAddresRequired) StageInfo.agreedTermsAndConditionsEmailAddressRequired else StageInfo.agreedTermsAndConditionsEmailAddressNotRequired,
-    journeyInfo = JourneyInfo.agreedTermsAndConditions(isEmailAddresRequired, origin.taxRegime, encrypter, etmpEmail, withAffordability),
+    journeyInfo = JourneyInfo.agreedTermsAndConditions(isEmailAddresRequired, origin.taxRegime, encrypter, etmpEmail, withAffordability, whyCannotPayInFullAnswers),
     origin      = origin
   )
 

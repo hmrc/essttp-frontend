@@ -398,13 +398,20 @@ object JourneyInfo {
     canSetUpDirectDebit(isAccountHolder) :: hasCheckedPaymentPlan(withAffordability, taxRegime, encrypter, etmpEmail)
 
   def enteredDetailsAboutBankAccountBusiness(
-      isAccountHolder:   Boolean,
-      taxRegime:         TaxRegime,
-      encrypter:         Encrypter,
-      etmpEmail:         Option[String] = Some(TdAll.etmpEmail),
-      withAffordability: Boolean        = false
+      isAccountHolder:           Boolean,
+      taxRegime:                 TaxRegime,
+      encrypter:                 Encrypter,
+      etmpEmail:                 Option[String]            = Some(TdAll.etmpEmail),
+      withAffordability:         Boolean                   = false,
+      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
   ): List[JourneyInfoAsJson] =
-    canSetUpDirectDebit(isAccountHolder) :: hasCheckedPaymentPlan(withAffordability, taxRegime, encrypter, etmpEmail)
+    canSetUpDirectDebit(isAccountHolder) :: hasCheckedPaymentPlan(
+      withAffordability,
+      taxRegime,
+      encrypter,
+      etmpEmail,
+      whyCannotPayInFullAnswers = whyCannotPayInFullAnswers
+    )
 
   def enteredDetailsAboutBankAccountPersonal(
       isAccountHolder:   Boolean,
@@ -415,35 +422,38 @@ object JourneyInfo {
     canSetUpDirectDebit(isAccountHolder) :: hasCheckedPaymentPlan(withAffordability, taxRegime, encrypter)
 
   def enteredDirectDebitDetails(
-      taxRegime:         TaxRegime,
-      encrypter:         Encrypter,
-      etmpEmail:         Option[String] = Some(TdAll.etmpEmail),
-      withAffordability: Boolean        = false
+      taxRegime:                 TaxRegime,
+      encrypter:                 Encrypter,
+      etmpEmail:                 Option[String]            = Some(TdAll.etmpEmail),
+      withAffordability:         Boolean                   = false,
+      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
   ): List[JourneyInfoAsJson] =
-    directDebitDetails(encrypter) :: enteredDetailsAboutBankAccountBusiness(isAccountHolder = true, taxRegime, encrypter, etmpEmail, withAffordability)
+    directDebitDetails(encrypter) :: enteredDetailsAboutBankAccountBusiness(isAccountHolder = true, taxRegime, encrypter, etmpEmail, withAffordability, whyCannotPayInFullAnswers)
 
   def enteredDirectDebitDetailsPaddedAccountNumber(taxRegime: TaxRegime, encrypter: Encrypter, etmpEmail: Option[String] = Some(TdAll.etmpEmail)): List[JourneyInfoAsJson] =
     directDebitDetailsPaddedAccountNumber(encrypter) :: enteredDetailsAboutBankAccountBusiness(isAccountHolder = true, taxRegime, encrypter, etmpEmail)
 
   def confirmedDirectDebitDetails(
-      taxRegime:         TaxRegime,
-      encrypter:         Encrypter,
-      etmpEmail:         Option[String] = Some(TdAll.etmpEmail),
-      withAffordability: Boolean        = false
+      taxRegime:                 TaxRegime,
+      encrypter:                 Encrypter,
+      etmpEmail:                 Option[String]            = Some(TdAll.etmpEmail),
+      withAffordability:         Boolean                   = false,
+      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
   ): List[JourneyInfoAsJson] =
-    enteredDirectDebitDetails(taxRegime, encrypter, etmpEmail, withAffordability)
+    enteredDirectDebitDetails(taxRegime, encrypter, etmpEmail, withAffordability, whyCannotPayInFullAnswers)
 
   def `confirmedDirectDebitDetails - padded account number`(taxRegime: TaxRegime, encrypter: Encrypter, etmpEmail: Option[String] = Some(TdAll.etmpEmail)): List[JourneyInfoAsJson] =
     enteredDirectDebitDetailsPaddedAccountNumber(taxRegime, encrypter, etmpEmail)
 
   def agreedTermsAndConditions(
-      isEmailAddressRequired: Boolean,
-      taxRegime:              TaxRegime,
-      encrypter:              Encrypter,
-      etmpEmail:              Option[String] = Some(TdAll.etmpEmail),
-      withAffordability:      Boolean        = false
+      isEmailAddressRequired:    Boolean,
+      taxRegime:                 TaxRegime,
+      encrypter:                 Encrypter,
+      etmpEmail:                 Option[String]            = Some(TdAll.etmpEmail),
+      withAffordability:         Boolean                   = false,
+      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
   ): List[JourneyInfoAsJson] =
-    emailAddressRequired(isEmailAddressRequired) :: confirmedDirectDebitDetails(taxRegime, encrypter, etmpEmail, withAffordability)
+    emailAddressRequired(isEmailAddressRequired) :: confirmedDirectDebitDetails(taxRegime, encrypter, etmpEmail, withAffordability, whyCannotPayInFullAnswers)
 
   def `agreedTermsAndConditions - padded account number`(isEmailAddressRequired: Boolean, taxRegime: TaxRegime, encrypter: Encrypter, etmpEmail: Option[String] = None): List[JourneyInfoAsJson] =
     emailAddressRequired(isEmailAddressRequired) :: `confirmedDirectDebitDetails - padded account number`(taxRegime, encrypter, etmpEmail)

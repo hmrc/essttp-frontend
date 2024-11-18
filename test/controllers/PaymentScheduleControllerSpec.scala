@@ -269,6 +269,8 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
                  |{
                  |        "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
                  |        "origin": "${origin.toString().split('.').last}",
+                 |        "canPayInSixMonths": true,
+                 |        "unableToPayReason": [],
                  |        "schedule": {
                  |            "collectionDate": 28,
                  |            "collectionLengthCalendarMonths": 2,
