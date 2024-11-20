@@ -342,12 +342,19 @@ object StartJourneyController {
     val debtAmountFromForm: AmountInPence = AmountInPence(form.debtTotalAmount)
     val interestAmount: AmountInPence = AmountInPence(form.interestAmount.getOrElse(BigDecimal(0)))
 
-    val maybeCustomerDetail = if (form.emailAddressPresent && !form.newTtpApi)
-      Some(List(CustomerDetail(
-        Some(Email(SensitiveString("bobross@joyofpainting.com"))),
-        Some(EmailSource.ETMP)
-      )))
-    else None
+    val maybeCustomerDetail = {
+      val showValue = taxRegime match {
+        case TaxRegime.Sa => form.emailAddressPresent && !form.newTtpApi
+        case _            => form.emailAddressPresent
+      }
+
+      if (showValue)
+        Some(List(CustomerDetail(
+          Some(Email(SensitiveString("bobross@joyofpainting.com"))),
+          Some(EmailSource.ETMP)
+        )))
+      else None
+    }
 
     //TODO OPS-12584 - Clean this up when TTP has implemented the changes to the Eligibility API. The email address will be coming from the addresses field only
     val maybeAddresses = if (form.newTtpApi) {
