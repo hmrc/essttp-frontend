@@ -206,7 +206,6 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
         Some(Languages.Welsh)
       ).url shouldBe "/set-up-a-payment-plan/paying-within-six-months?regime=vat&lang=cy"
     }
-
   }
 
   List(TaxRegime.Epaye, TaxRegime.Vat, TaxRegime.Sa)
@@ -238,7 +237,6 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
           EssttpBackend.verifyFindByLatestSessionId()
           EssttpBackend.Pega.verifyRecreateSessionCalled(regime)
         }
-
       })
 
   "POST /paying-within-six-months should" - {
@@ -275,7 +273,6 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
       "an unrecognised option is submitted" in {
         testFormError("CanPayWithinSixMonths" -> "Unknown")("Select yes if you can pay within 6 months")
       }
-
     }
 
     "redirect to the 'monthly payment amount' page when the user submits 'yes'" in {
@@ -315,6 +312,28 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
         CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths(value = false)
       )
     }
+    "not redirect to the PEGA start endpoint if the user has not changed their answer after the pega journey has been started" in {
+      stubCommonActions()
+      EssttpBackend.Dates.findJourneyExtremeDates(testCrypto, Origins.Epaye.Bta)()
+      EssttpBackend.CanPayWithinSixMonths.stubUpdateCanPayWithinSixMonths(
+        TdAll.journeyId,
+        JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
+      )
+      EssttpBackend.StartedPegaCase.findJourney(testCrypto, Origins.Epaye.Bta)(
+        JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(
+          Origins.Epaye.Bta
+        )(testCrypto)
+      )
 
+      val request = fakeRequest.withFormUrlEncodedBody("CanPayWithinSixMonths" -> "No").withMethod("POST")
+      val result = controller.canPayWithinSixMonthsSubmit(request)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/test-only/pega?regime=epaye")
+
+      EssttpBackend.CanPayWithinSixMonths.verifyUpdateCanPayWithinSixMonthsRequest(
+        TdAll.journeyId,
+        CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths(value = false)
+      )
+    }
   }
 }

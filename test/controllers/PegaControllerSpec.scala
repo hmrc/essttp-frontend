@@ -74,7 +74,7 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
           EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(
             JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
           )
-          EssttpBackend.Pega.stubStartCase(TdAll.journeyId, Left(500))
+          EssttpBackend.Pega.stubStartCase(TdAll.journeyId, Left(500), recalculationNeeded = true)
 
           val exception = intercept[Exception](await(controller.startPegaJourney(fakeRequest)))
           exception.getMessage should include("returned 500")
@@ -85,7 +85,7 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
           EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(
             JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
           )
-          EssttpBackend.Pega.stubStartCase(TdAll.journeyId, Right(TdAll.pegaStartCaseResponse))
+          EssttpBackend.Pega.stubStartCase(TdAll.journeyId, Right(TdAll.pegaStartCaseResponse), recalculationNeeded = true)
           EssttpBackend.StartedPegaCase.stubUpdateStartPegaCaseResponse(
             TdAll.journeyId,
             JourneyJsonTemplates.`Started PEGA case`(Origins.Epaye.Bta)(testCrypto)
@@ -103,7 +103,7 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
         EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(
           JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
         )
-        EssttpBackend.Pega.stubStartCase(TdAll.journeyId, Right(TdAll.pegaStartCaseResponse))
+        EssttpBackend.Pega.stubStartCase(TdAll.journeyId, Right(TdAll.pegaStartCaseResponse), recalculationNeeded = true)
         EssttpBackend.StartedPegaCase.stubUpdateStartPegaCaseResponse(
           TdAll.journeyId,
           JourneyJsonTemplates.`Started PEGA case`(Origins.Epaye.Bta)(testCrypto)
@@ -319,7 +319,7 @@ class PegaControllerRedirectInConfigSpec extends ItSpec {
           EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, origin)(
             JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(origin)(testCrypto)
           )
-          EssttpBackend.Pega.stubStartCase(TdAll.journeyId, Right(TdAll.pegaStartCaseResponse))
+          EssttpBackend.Pega.stubStartCase(TdAll.journeyId, Right(TdAll.pegaStartCaseResponse), recalculationNeeded = true)
           EssttpBackend.StartedPegaCase.stubUpdateStartPegaCaseResponse(
             TdAll.journeyId,
             JourneyJsonTemplates.`Started PEGA case`(Origins.Epaye.Bta)(testCrypto)

@@ -40,7 +40,7 @@ class PegaController @Inject() (
 )(implicit ex: ExecutionContext, appConfig: AppConfig) extends FrontendController(mcc) {
 
   val startPegaJourney: Action[AnyContent] = as.authenticatedJourneyAction.async{ implicit request =>
-    pegaService.startCase(request.journey).map{ _ =>
+    pegaService.startCase(request.journey, recalculationNeeded = true).map{ _ =>
       SeeOther(appConfig.pegaStartRedirectUrl(request.journey.taxRegime, requestSupport.languageFromRequest))
     }
   }

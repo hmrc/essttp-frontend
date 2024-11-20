@@ -27,10 +27,11 @@ import essttp.rootmodel.pega.{GetCaseResponse, StartCaseResponse}
 import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
 import requests.RequestSupport._
-import uk.gov.hmrc.http.{StringContextOps, UpstreamErrorResponse}
-import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.http.HttpReadsInstances._
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{StringContextOps, UpstreamErrorResponse}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -59,9 +60,11 @@ class EssttpBackendConnector @Inject() (
       .withBody(Json.toJson(extremeDatesRequest))
       .execute[ExtremeDatesResponse]
 
-  def startPegaCase(journeyId: JourneyId)(implicit requestHeader: RequestHeader): Future[StartCaseResponse] =
-    httpClient.post(url"$pegaCaseUrl/${journeyId.value}")
+  def startPegaCase(journeyId: JourneyId, recalculationNeeded: Boolean)(implicit requestHeader: RequestHeader): Future[StartCaseResponse] = {
+    val url = s"$pegaCaseUrl/${journeyId.value}?recalculationNeeded=${recalculationNeeded.toString}"
+    httpClient.post(url"$url")
       .execute[StartCaseResponse]
+  }
 
   def getPegaCase(journeyId: JourneyId)(implicit requestHeader: RequestHeader): Future[GetCaseResponse] =
     httpClient.get(url"$pegaCaseUrl/${journeyId.value}")
