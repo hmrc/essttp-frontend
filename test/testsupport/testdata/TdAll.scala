@@ -431,7 +431,10 @@ object TdAll {
 
   val pegaGetCaseResponse: GetCaseResponse = GetCaseResponse(
     dayOfMonth(),
-    paymentPlan(1, AmountDue(AmountInPence(14323)))
+    paymentPlan(1, AmountDue(AmountInPence(14323))),
+    Map("expenditure" -> BigDecimal(0)),
+    Map("income" -> BigDecimal(1.23)),
+    "testCorrelationId"
   )
 
   val monthlyPaymentAmount: MonthlyPaymentAmount = MonthlyPaymentAmount(AmountInPence(30000))

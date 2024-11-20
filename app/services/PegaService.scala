@@ -71,6 +71,7 @@ class PegaService @Inject() (
           )
           _ <- journeyConnector.updateHasCheckedPaymentPlan(journey.journeyId, paymentPlanAnswers)
           _ = auditService.auditPaymentPlanBeforeSubmission(j, getCaseResponse)
+          _ = auditService.auditReturnFromAffordability(j, startCaseResponse, getCaseResponse)
         } yield getCaseResponse
 
     journey match {

@@ -24,7 +24,7 @@ import essttp.journey.model.Journey.{AfterCheckedPaymentPlan, AfterEnteredCanYou
 import essttp.journey.model.Journey.Stages._
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, EmailVerificationAnswers, Journey, Origin, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.bank.BankDetails
-import essttp.rootmodel.pega.GetCaseResponse
+import essttp.rootmodel.pega.{GetCaseResponse, StartCaseResponse}
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
 import essttp.rootmodel.ttp.eligibility.{EligibilityCheckResult, EmailSource}
 import essttp.rootmodel.{CannotPayReason, Email, GGCredId}
@@ -35,6 +35,7 @@ import models.audit.eligibility.{EligibilityCheckAuditDetail, EligibilityResult,
 import models.audit.emailverification.{EmailVerificationRequestedAuditDetail, EmailVerificationResultAuditDetail}
 import models.audit.paymentplansetup.PaymentPlanSetUpAuditDetail
 import models.audit.planbeforesubmission.PaymentPlanBeforeSubmissionAuditDetail
+import models.audit.returnFromAffordability.{Collections, PlanDetails, ReturnFromAffordabilityAuditDetail}
 import models.audit.{AuditDetail, Schedule, TaxDetail}
 import models.bars.response.{BarsError, VerifyResponse}
 import paymentsEmailVerification.models.EmailVerificationResult
@@ -88,6 +89,13 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       getCaseResponse: GetCaseResponse
   )(implicit headerCarrier: HeaderCarrier): Unit =
     audit(toPaymentPlanBeforeSubmissionAuditDetail(journey, getCaseResponse))
+
+  def auditReturnFromAffordability(
+      journey:           Either[AfterStartedPegaCase, AfterCheckedPaymentPlan],
+      startCaseResponse: StartCaseResponse,
+      getCaseResponse:   GetCaseResponse
+  )(implicit headerCarrier: HeaderCarrier): Unit =
+    audit(toReturnFromAffordabilityAuditDetail(journey, startCaseResponse, getCaseResponse))
 
   def auditBarsCheck(
       journey:              AfterEnteredCanYouSetUpDirectDebit,
@@ -219,6 +227,54 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       regimeDigitalCorrespondence = eligibilityCheckResult.regimeDigitalCorrespondence,
       canPayInSixMonths           = canPayWithinSixMonthsAnswersToBoolean(canPayWithinSixMonthsAnswers),
       unableToPayReason           = whyCannotPayInFullAnswersToSet(whyCannotPayInFullAnswers)
+    )
+  }
+
+  private def toReturnFromAffordabilityAuditDetail(
+      journey:           Either[AfterStartedPegaCase, AfterCheckedPaymentPlan],
+      startCaseResponse: StartCaseResponse,
+      getCaseResponse:   GetCaseResponse
+  ): ReturnFromAffordabilityAuditDetail = {
+    val taxId = journey.merge match {
+      case j: Journey.AfterComputedTaxId => j.taxId
+      case _                             => sys.error("Could not find tax ID in journey")
+    }
+
+    val eligibilityCheckResult = journey.merge match {
+      case j: Journey.AfterEligibilityChecked => j.eligibilityCheckResult
+      case _                                  => sys.error("Could not find eligibility check result")
+    }
+
+    val paymentPlan = getCaseResponse.paymentPlan
+
+    val sortedCollections = paymentPlan.collections.regularCollections.sortBy(_.dueDate.value)
+    val firstCollection = sortedCollections.headOption
+    val lastCollection = sortedCollections.lastOption
+
+    val planDetails = PlanDetails(
+      paymentPlan.totalDebt.value.inPounds,
+      paymentPlan.collections.initialCollection.map(_.amountDue.value.inPounds),
+      paymentPlan.collections.initialCollection.map(_.dueDate.value.toString),
+      eligibilityCheckResult.customerPostcodes.flatMap(_.headOption).map(_.addressPostcode.value.decryptedValue).getOrElse(""),
+      paymentPlan.numberOfInstalments.value,
+      paymentPlan.planInterest.value.inPounds,
+      Collections(
+        paymentPlan.collections.regularCollections.size,
+        firstCollection.map(_.dueDate.value.toString).getOrElse(""),
+        firstCollection.map(_.amountDue.value.inPounds).getOrElse(BigDecimal(0)),
+        lastCollection.map(_.amountDue.value.inPounds).getOrElse(BigDecimal(0))
+      )
+    )
+
+    ReturnFromAffordabilityAuditDetail(
+      journey.fold(_.correlationId, _.correlationId).value.toString,
+      journey.fold(_.taxRegime, _.taxRegime).entryName,
+      taxId.value,
+      startCaseResponse.caseId.value,
+      getCaseResponse.correlationId,
+      getCaseResponse.expenditure,
+      getCaseResponse.income,
+      planDetails
     )
   }
 

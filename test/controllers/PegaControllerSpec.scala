@@ -201,6 +201,41 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
             """.stripMargin
               ).as[JsObject]
             )
+
+            AuditConnectorStub.verifyEventAudited(
+              auditType  = "ReturnFromAffordabilityAssessment",
+              auditEvent = Json.parse(
+                s"""
+                   |{
+                   |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+                   |  "regime" : "Epaye",
+                   |  "taxIdentifier" : "864FZ00049",
+                   |  "pegaCaseId" : "case",
+                   |  "pegaCorrelationId" : "testCorrelationId",
+                   |  "expenditure" : {
+                   |    "expenditure" : 0
+                   |  },
+                   |  "income" : {
+                   |    "income" : 1.23
+                   |  },
+                   |  "planDetails" : {
+                   |    "debtAmount" : 10,
+                   |    "initialPaymentAmount" : 10,
+                   |    "initialPaymentDate" : "2022-02-01",
+                   |    "customerPostcode" : "AA11AA",
+                   |    "numberOfInstalments" : 1,
+                   |    "planInterest" : 10,
+                   |    "collections" : {
+                   |      "numberOfCollections" : 1,
+                   |      "regularCollectionStartDate" : "2022-02-01",
+                   |      "regularCollectionAmount" : 143.23,
+                   |      "finalCollectionAmount" : 143.23
+                   |    }
+                   |  }
+                   |}
+            """.stripMargin
+              ).as[JsObject]
+            )
           }
 
         "a journey can be found" in {
