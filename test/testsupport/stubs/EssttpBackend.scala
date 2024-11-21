@@ -470,12 +470,17 @@ object EssttpBackend {
         origin:                    Origin                    = Origins.Epaye.Bta,
         eligibilityMinPlanLength:  Int                       = 1,
         eligibilityMaxPlanLength:  Int                       = 12,
-        whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
+        whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired,
+        affordabilityEnabled:      Boolean                   = false
     )(
         jsonBody: String = if (withAffordability) {
-          JourneyJsonTemplates.`Has Checked Payment Plan - With Affordability`(origin, eligibilityMinPlanLength, eligibilityMaxPlanLength, whyCannotPayInFullAnswers)(encrypter)
+          JourneyJsonTemplates.`Has Checked Payment Plan - With Affordability`(
+            origin, eligibilityMinPlanLength, eligibilityMaxPlanLength, whyCannotPayInFullAnswers, affordabilityEnabled = affordabilityEnabled
+          )(encrypter)
         } else {
-          JourneyJsonTemplates.`Has Checked Payment Plan - No Affordability`(origin, eligibilityMinPlanLength, eligibilityMaxPlanLength, whyCannotPayInFullAnswers)(encrypter)
+          JourneyJsonTemplates.`Has Checked Payment Plan - No Affordability`(
+            origin, eligibilityMinPlanLength, eligibilityMaxPlanLength, whyCannotPayInFullAnswers, affordabilityEnabled = affordabilityEnabled
+          )(encrypter)
         }
     ): StubMapping = findByLatestSessionId(jsonBody)
   }
