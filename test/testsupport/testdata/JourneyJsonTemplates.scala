@@ -331,10 +331,11 @@ object JourneyJsonTemplates {
       origin:                    Origin,
       eligibilityMinPlanLength:  Int                       = 1,
       eligibilityMaxPlanLength:  Int                       = 12,
-      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
+      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired,
+      affordabilityEnabled:      Boolean                   = false
   )(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
-    stageInfo   = StageInfo.hasCheckedPaymentPlan,
-    journeyInfo = JourneyInfo.hasCheckedPaymentPlan(
+    stageInfo            = StageInfo.hasCheckedPaymentPlan,
+    journeyInfo          = JourneyInfo.hasCheckedPaymentPlan(
       withAffordability = false,
       origin.taxRegime,
       encrypter,
@@ -342,24 +343,27 @@ object JourneyJsonTemplates {
       eligibilityMaxPlanLength  = eligibilityMaxPlanLength,
       whyCannotPayInFullAnswers = whyCannotPayInFullAnswers
     ),
-    origin      = origin
+    origin               = origin,
+    affordabilityEnabled = affordabilityEnabled
   )
 
   def `Has Checked Payment Plan - With Affordability`(
       origin:                    Origin,
       eligibilityMinPlanLength:  Int                       = 1,
       eligibilityMaxPlanLength:  Int                       = 12,
-      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
+      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired,
+      affordabilityEnabled:      Boolean                   = false
   )(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
-    stageInfo   = StageInfo.hasCheckedPaymentPlan,
-    journeyInfo = JourneyInfo.hasCheckedPaymentPlan(
+    stageInfo            = StageInfo.hasCheckedPaymentPlan,
+    journeyInfo          = JourneyInfo.hasCheckedPaymentPlan(
       withAffordability = true,
       origin.taxRegime, encrypter,
       eligibilityMinPlanLength  = eligibilityMinPlanLength,
       eligibilityMaxPlanLength  = eligibilityMaxPlanLength,
       whyCannotPayInFullAnswers = whyCannotPayInFullAnswers
     ),
-    origin      = origin
+    origin               = origin,
+    affordabilityEnabled = affordabilityEnabled
   )
 
   def `Entered Can Set Up Direct Debit`(isAccountHolder: Boolean, origin: Origin = Origins.Epaye.Bta)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(

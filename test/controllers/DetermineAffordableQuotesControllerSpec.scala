@@ -73,10 +73,10 @@ class DetermineAffordableQuotesControllerSpec extends ItSpec {
 
           s"[$regime journey] trigger call to ttp microservice affordable quotes endpoint and update backend when" - {
 
-              def test(stubFindJourney: () => StubMapping): Unit = {
+              def test(stubFindJourney: () => StubMapping, expectedMaxPlanLength: Int = 24): Unit = {
                 val expectedAffordableQuotesRequest = TdAll.affordableQuotesRequest(origin.taxRegime).copy(
                   paymentPlanMinLength = PaymentPlanMinLength(2),
-                  paymentPlanMaxLength = PaymentPlanMaxLength(24)
+                  paymentPlanMaxLength = PaymentPlanMaxLength(expectedMaxPlanLength)
                 )
 
                 stubCommonActions()
@@ -105,6 +105,21 @@ class DetermineAffordableQuotesControllerSpec extends ItSpec {
                 () => EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, origin, eligibilityMinPlanLength = 2, eligibilityMaxPlanLength = 24)()
               )
             }
+
+            "the user has affordability enabled on their journey but isn't on an affordability journey" in {
+              test(
+                () => EssttpBackend.HasCheckedPlan.findJourney(
+                  withAffordability = false,
+                  testCrypto,
+                  origin,
+                  eligibilityMinPlanLength = 2,
+                  eligibilityMaxPlanLength = 24,
+                  affordabilityEnabled     = true
+                )(),
+                expectedMaxPlanLength = 6
+              )
+            }
+
           }
         }
     }

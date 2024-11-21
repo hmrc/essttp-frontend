@@ -327,7 +327,7 @@ object TdAll {
     instalmentStartDate = InstalmentStartDate(LocalDate.parse("2022-07-28"))
   )
 
-  def instalmentAmountRequest(taxRegime: TaxRegime): InstalmentAmountRequest = {
+  def instalmentAmountRequest(taxRegime: TaxRegime, maxPlanLength: Int): InstalmentAmountRequest = {
     val regimeType = taxRegime match {
       case TaxRegime.Epaye => RegimeType.EPAYE
       case TaxRegime.Vat   => RegimeType.VAT
@@ -340,7 +340,7 @@ object TdAll {
       regimeType                   = regimeType,
       paymentPlanFrequency         = PaymentPlanFrequencies.Monthly,
       paymentPlanMinLength         = PaymentPlanMinLength(1),
-      paymentPlanMaxLength         = PaymentPlanMaxLength(12),
+      paymentPlanMaxLength         = PaymentPlanMaxLength(maxPlanLength),
       earliestPaymentPlanStartDate = EarliestPaymentPlanStartDate(LocalDate.parse("2022-07-14")),
       latestPaymentPlanStartDate   = LatestPaymentPlanStartDate(LocalDate.parse("2022-08-13")),
       initialPaymentDate           = Some(InitialPaymentDate(LocalDate.parse("2022-06-24"))),
