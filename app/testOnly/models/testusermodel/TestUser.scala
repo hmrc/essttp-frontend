@@ -73,7 +73,7 @@ object TestUser {
         epayeEnrolment  = maybeEpayeEnrolment(form),
         vatEnrolment    = maybeVatEnrolment(form),
         irSaEnrolment   = maybeIrSaEnrolment(form),
-        authorityId     = RandomDataGenerator.nextAuthorityId(),
+        authorityId     = form.credId.map(AuthorityId(_)).getOrElse(RandomDataGenerator.nextAuthorityId()),
         affinityGroup   = affinityGroup,
         confidenceLevel = form.confidenceLevelAndNino.confidenceLevel
       )

@@ -95,6 +95,22 @@ appConfig: AppConfig
     .map(toCheckboxItem)
 }
 
+@credIdInput = {
+  @govukInput(Input(
+      id = "credId",
+      name = "credId",
+      label = Label(
+          isPageHeading = false,
+          classes = "govuk-label--m",
+          content = Text("Cred Id")
+      ),
+      classes = "govuk-input--width-10",
+      spellcheck = Some(false),
+      value = form.data.get("credId"),
+      hint = Some(Hint(content = Text("optional, random value will be generated if left blank")))
+  ))
+}
+
 @ninoInput = @{
     govukInput(Input(
         id = "nino",
@@ -467,6 +483,7 @@ appConfig: AppConfig
 
 @payeContent = {
 @formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneyEpayeSubmit) {
+    @credIdInput
     @signInAsContent
     @confidenceLevelRadios
     @ninoInput
@@ -586,6 +603,7 @@ appConfig: AppConfig
 
 @vatContent = {
 @formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneyVatSubmit) {
+    @credIdInput
     @signInAsContent
     @confidenceLevelRadios
     @ninoInput
@@ -712,7 +730,7 @@ appConfig: AppConfig
 
 @saContent = {
 @formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneySaSubmit) {
-
+    @credIdInput
     @signInAsContent
     @confidenceLevelRadios
     @ninoInput
@@ -838,7 +856,7 @@ appConfig: AppConfig
 
 @siaContent = {
 @formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneySiaSubmit) {
-
+    @credIdInput
     @signInAsContent
     @confidenceLevelRadios
     @ninoInput
