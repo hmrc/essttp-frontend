@@ -36,7 +36,7 @@ import essttp.rootmodel.ttp.eligibility._
 import essttp.utils.Errors
 import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
-import services.TtpService.{deriveCustomerDetail, padLeftWithZeros, toDebtItemCharge}
+import services.TtpService.{deriveCustomerDetail, maxPlanLength, padLeftWithZeros, toDebtItemCharge}
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 import uk.gov.hmrc.http.{HttpException, UpstreamErrorResponse}
 import util.JourneyLogger
@@ -90,7 +90,7 @@ class TtpService @Inject() (
     }
     val upfrontPaymentAmount: Option[UpfrontPaymentAmount] = TtpService.deriveUpfrontPaymentAmount(journey.upfrontPaymentAnswers)
     val instalmentAmountRequest: InstalmentAmountRequest =
-      TtpService.buildInstalmentRequest(upfrontPaymentAmount, eligibilityCheckResult, extremeDatesResponse, journey.taxRegime)
+      TtpService.buildInstalmentRequest(upfrontPaymentAmount, eligibilityCheckResult, extremeDatesResponse, journey)
 
     ttpConnector.callAffordabilityApi(instalmentAmountRequest, journey.correlationId)
   }
@@ -111,7 +111,7 @@ class TtpService @Inject() (
       regimeType                  = RegimeType.fromTaxRegime(journeyMerged.taxRegime),
       paymentPlanAffordableAmount = PaymentPlanAffordableAmount(monthlyPaymentAmount.value),
       paymentPlanFrequency        = PaymentPlanFrequencies.Monthly,
-      paymentPlanMaxLength        = eligibilityCheckResult.paymentPlanMaxLength,
+      paymentPlanMaxLength        = maxPlanLength(eligibilityCheckResult, journeyMerged),
       paymentPlanMinLength        = eligibilityCheckResult.paymentPlanMinLength,
       accruedDebtInterest         = AccruedDebtInterest(TtpService.calculateCumulativeInterest(eligibilityCheckResult)),
       paymentPlanStartDate        = startDatesResponse.instalmentStartDate,
@@ -275,7 +275,7 @@ object TtpService {
       upfrontPaymentAmount:   Option[UpfrontPaymentAmount],
       eligibilityCheckResult: EligibilityCheckResult,
       extremeDatesResponse:   ExtremeDatesResponse,
-      taxRegime:              TaxRegime
+      journey:                Journey
   ): InstalmentAmountRequest = {
     val allInterestAccrued: AmountInPence = AmountInPence(
       eligibilityCheckResult.chargeTypeAssessment
@@ -290,9 +290,9 @@ object TtpService {
 
     InstalmentAmountRequest(
       channelIdentifier            = ChannelIdentifiers.eSSTTP,
-      regimeType                   = RegimeType.fromTaxRegime(taxRegime),
+      regimeType                   = RegimeType.fromTaxRegime(journey.taxRegime),
       paymentPlanMinLength         = eligibilityCheckResult.paymentPlanMinLength,
-      paymentPlanMaxLength         = eligibilityCheckResult.paymentPlanMaxLength,
+      paymentPlanMaxLength         = maxPlanLength(eligibilityCheckResult, journey),
       paymentPlanFrequency         = PaymentPlanFrequencies.Monthly,
       earliestPaymentPlanStartDate = extremeDatesResponse.earliestPlanStartDate,
       latestPaymentPlanStartDate   = extremeDatesResponse.latestPlanStartDate,
@@ -367,5 +367,12 @@ object TtpService {
     .reverse
     .padTo(8, '0')
     .reverse
+
+  private def maxPlanLength(
+      eligibilityCheckResult: EligibilityCheckResult,
+      journey:                Journey
+  ): PaymentPlanMaxLength =
+    if (journey.affordabilityEnabled.contains(true)) PaymentPlanMaxLength(6)
+    else eligibilityCheckResult.paymentPlanMaxLength
 
 }

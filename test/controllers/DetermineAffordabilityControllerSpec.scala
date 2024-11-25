@@ -72,7 +72,7 @@ class DetermineAffordabilityControllerSpec extends ItSpec {
               redirectLocation(result) shouldBe Some(PageUrls.canPayWithinSixMonthsUrl(origin.taxRegime, None))
               EssttpBackend.AffordabilityMinMaxApi.verifyUpdateAffordabilityRequest(TdAll.journeyId, TdAll.instalmentAmounts)
               EssttpBackend.CanPayWithinSixMonths.verifyNoneUpdateCanPayWithinSixMonthsRequest(TdAll.journeyId)
-              Ttp.Affordability.verifyTtpAffordabilityRequest(origin.taxRegime)(CryptoFormat.NoOpCryptoFormat)
+              Ttp.Affordability.verifyTtpAffordabilityRequest(origin.taxRegime, maxPlanLength = 6)(CryptoFormat.NoOpCryptoFormat)
             }
 
           }

@@ -304,7 +304,11 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
-  def `Chosen Payment Plan`(upfrontPaymentAmountJsonString: String = """{"DeclaredUpfrontPayment": {"amount": 12312}}""", regimeDigitalCorrespondence: Boolean = true, origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Chosen Payment Plan`(
+      upfrontPaymentAmountJsonString: String  = """{"DeclaredUpfrontPayment": {"amount": 12312}}""",
+      regimeDigitalCorrespondence:    Boolean = true,
+      origin:                         Origin
+  )(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.chosenPaymentPlan,
     journeyInfo = List(
       TdJsonBodies.taxIdJourneyInfo(),
@@ -327,10 +331,11 @@ object JourneyJsonTemplates {
       origin:                    Origin,
       eligibilityMinPlanLength:  Int                       = 1,
       eligibilityMaxPlanLength:  Int                       = 12,
-      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
+      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired,
+      affordabilityEnabled:      Boolean                   = false
   )(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
-    stageInfo   = StageInfo.hasCheckedPaymentPlan,
-    journeyInfo = JourneyInfo.hasCheckedPaymentPlan(
+    stageInfo            = StageInfo.hasCheckedPaymentPlan,
+    journeyInfo          = JourneyInfo.hasCheckedPaymentPlan(
       withAffordability = false,
       origin.taxRegime,
       encrypter,
@@ -338,24 +343,27 @@ object JourneyJsonTemplates {
       eligibilityMaxPlanLength  = eligibilityMaxPlanLength,
       whyCannotPayInFullAnswers = whyCannotPayInFullAnswers
     ),
-    origin      = origin
+    origin               = origin,
+    affordabilityEnabled = affordabilityEnabled
   )
 
   def `Has Checked Payment Plan - With Affordability`(
       origin:                    Origin,
       eligibilityMinPlanLength:  Int                       = 1,
       eligibilityMaxPlanLength:  Int                       = 12,
-      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
+      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired,
+      affordabilityEnabled:      Boolean                   = false
   )(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
-    stageInfo   = StageInfo.hasCheckedPaymentPlan,
-    journeyInfo = JourneyInfo.hasCheckedPaymentPlan(
+    stageInfo            = StageInfo.hasCheckedPaymentPlan,
+    journeyInfo          = JourneyInfo.hasCheckedPaymentPlan(
       withAffordability = true,
       origin.taxRegime, encrypter,
       eligibilityMinPlanLength  = eligibilityMinPlanLength,
       eligibilityMaxPlanLength  = eligibilityMaxPlanLength,
       whyCannotPayInFullAnswers = whyCannotPayInFullAnswers
     ),
-    origin      = origin
+    origin               = origin,
+    affordabilityEnabled = affordabilityEnabled
   )
 
   def `Entered Can Set Up Direct Debit`(isAccountHolder: Boolean, origin: Origin = Origins.Epaye.Bta)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
@@ -382,9 +390,15 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
-  def `Agreed Terms and Conditions`(isEmailAddresRequired: Boolean, origin: Origin, etmpEmail: Option[String], withAffordability: Boolean = false)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Agreed Terms and Conditions`(
+      isEmailAddresRequired:     Boolean,
+      origin:                    Origin,
+      etmpEmail:                 Option[String],
+      withAffordability:         Boolean                   = false,
+      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
+  )(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = if (isEmailAddresRequired) StageInfo.agreedTermsAndConditionsEmailAddressRequired else StageInfo.agreedTermsAndConditionsEmailAddressNotRequired,
-    journeyInfo = JourneyInfo.agreedTermsAndConditions(isEmailAddresRequired, origin.taxRegime, encrypter, etmpEmail, withAffordability),
+    journeyInfo = JourneyInfo.agreedTermsAndConditions(isEmailAddresRequired, origin.taxRegime, encrypter, etmpEmail, withAffordability, whyCannotPayInFullAnswers),
     origin      = origin
   )
 

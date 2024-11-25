@@ -16,18 +16,18 @@
 
 package controllers
 
-import essttp.journey.model.Origins
-import essttp.rootmodel.TaxRegime
+import essttp.journey.model.{Origins, WhyCannotPayInFullAnswers}
+import essttp.rootmodel.{CannotPayReason, TaxRegime}
 import models.Languages
 import models.Languages.{English, Welsh}
 import play.api.http.HeaderNames
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.PegaRecreateSessionAssertions
-import testsupport.stubs.EssttpBackend
+import testsupport.stubs.{AuditConnectorStub, EssttpBackend}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
@@ -74,7 +74,7 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
           EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(
             JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
           )
-          EssttpBackend.Pega.stubStartCase(TdAll.journeyId, Left(500))
+          EssttpBackend.Pega.stubStartCase(TdAll.journeyId, Left(500), recalculationNeeded = true)
 
           val exception = intercept[Exception](await(controller.startPegaJourney(fakeRequest)))
           exception.getMessage should include("returned 500")
@@ -85,7 +85,7 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
           EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(
             JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
           )
-          EssttpBackend.Pega.stubStartCase(TdAll.journeyId, Right(TdAll.pegaStartCaseResponse))
+          EssttpBackend.Pega.stubStartCase(TdAll.journeyId, Right(TdAll.pegaStartCaseResponse), recalculationNeeded = true)
           EssttpBackend.StartedPegaCase.stubUpdateStartPegaCaseResponse(
             TdAll.journeyId,
             JourneyJsonTemplates.`Started PEGA case`(Origins.Epaye.Bta)(testCrypto)
@@ -103,7 +103,7 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
         EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(
           JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
         )
-        EssttpBackend.Pega.stubStartCase(TdAll.journeyId, Right(TdAll.pegaStartCaseResponse))
+        EssttpBackend.Pega.stubStartCase(TdAll.journeyId, Right(TdAll.pegaStartCaseResponse), recalculationNeeded = true)
         EssttpBackend.StartedPegaCase.stubUpdateStartPegaCaseResponse(
           TdAll.journeyId,
           JourneyJsonTemplates.`Started PEGA case`(Origins.Epaye.Bta)(testCrypto)
@@ -157,7 +157,7 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
 
       "get a case, update the journey and redirect to the next page when" - {
 
-          def test(): Unit = {
+          def test(whyCannotPayReasons: Set[CannotPayReason]): Unit = {
             stubCommonActions()
             EssttpBackend.Pega.stubGetCase(TdAll.journeyId, Right(TdAll.pegaGetCaseResponse))
             EssttpBackend.HasCheckedPlan.stubUpdateHasCheckedPlan(
@@ -171,22 +171,99 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
 
             EssttpBackend.Pega.verifyGetCaseCalled(TdAll.journeyId)
             EssttpBackend.HasCheckedPlan.verifyUpdateHasCheckedPlanRequest(TdAll.journeyId)
+
+            AuditConnectorStub.verifyEventAudited(
+              auditType  = "PlanDetails",
+              auditEvent = Json.parse(
+                s"""
+                   |{
+                   |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+                   |  "origin": "Bta",
+                   |  "canPayInSixMonths": false,
+                   |  "unableToPayReason": ${Json.toJson(whyCannotPayReasons).toString()},
+                   |  "schedule": {
+                   |    "initialPaymentAmount" : 10,
+                   |    "collectionDate" : 28,
+                   |    "collectionLengthCalendarMonths" : 1,
+                   |    "collections" : [ {
+                   |      "collectionNumber" : 1,
+                   |      "amount" : 10,
+                   |      "paymentDate" : "2022-02-01"
+                   |    } ],
+                   |    "totalNoPayments" : 2,
+                   |    "totalInterestCharged" : 10,
+                   |    "totalPayable" : 20,
+                   |    "totalPaymentWithoutInterest" : 10
+                   |  },
+                   |  "taxDetail": ${TdAll.taxDetailJsonString(TaxRegime.Epaye)},
+                   |  "taxType": "Epaye"
+                   |}
+            """.stripMargin
+              ).as[JsObject]
+            )
+
+            AuditConnectorStub.verifyEventAudited(
+              auditType  = "ReturnFromAffordabilityAssessment",
+              auditEvent = Json.parse(
+                s"""
+                   |{
+                   |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+                   |  "regime" : "Epaye",
+                   |  "taxIdentifier" : "864FZ00049",
+                   |  "pegaCaseId" : "case",
+                   |  "pegaCorrelationId" : "testCorrelationId",
+                   |  "expenditure" : {
+                   |    "expenditure" : 0
+                   |  },
+                   |  "income" : {
+                   |    "income" : 1.23
+                   |  },
+                   |  "planDetails" : {
+                   |    "debtAmount" : 10,
+                   |    "initialPaymentAmount" : 10,
+                   |    "initialPaymentDate" : "2022-02-01",
+                   |    "customerPostcode" : "AA11AA",
+                   |    "numberOfInstalments" : 1,
+                   |    "planInterest" : 10,
+                   |    "collections" : {
+                   |      "numberOfCollections" : 1,
+                   |      "regularCollectionStartDate" : "2022-02-01",
+                   |      "regularCollectionAmount" : 143.23,
+                   |      "finalCollectionAmount" : 143.23
+                   |    }
+                   |  }
+                   |}
+            """.stripMargin
+              ).as[JsObject]
+            )
           }
 
         "a journey can be found" in {
-          EssttpBackend.StartedPegaCase.findJourney(testCrypto, Origins.Epaye.Bta)()
+          val whyCannotPayReasons = Set(CannotPayReason.WaitingForRefund, CannotPayReason.NoMoneySetAside)
 
-          test()
+          EssttpBackend.StartedPegaCase.findJourney(
+            testCrypto,
+            Origins.Epaye.Bta,
+            whyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(whyCannotPayReasons)
+          )()
+
+          test(whyCannotPayReasons)
         }
 
         "a journey is successfully reconstructed" in {
+          val whyCannotPayReasons =
+            Set(CannotPayReason.LostOrReducedAbilityToEarnOrTrade, CannotPayReason.UnexpectedReductionOfIncome)
+
           EssttpBackend.findByLatestSessionNotFound()
           EssttpBackend.Pega.stubRecreateSession(
             TaxRegime.Epaye,
-            Right(Json.parse(JourneyJsonTemplates.`Started PEGA case`(Origins.Epaye.Bta)(testCrypto)))
+            Right(Json.parse(JourneyJsonTemplates.`Started PEGA case`(
+              Origins.Epaye.Bta,
+              whyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(whyCannotPayReasons)
+            )(testCrypto)))
           )
 
-          test()
+          test(whyCannotPayReasons)
 
           EssttpBackend.verifyFindByLatestSessionId()
           EssttpBackend.Pega.verifyRecreateSessionCalled(TaxRegime.Epaye)
@@ -277,7 +354,7 @@ class PegaControllerRedirectInConfigSpec extends ItSpec {
           EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, origin)(
             JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(origin)(testCrypto)
           )
-          EssttpBackend.Pega.stubStartCase(TdAll.journeyId, Right(TdAll.pegaStartCaseResponse))
+          EssttpBackend.Pega.stubStartCase(TdAll.journeyId, Right(TdAll.pegaStartCaseResponse), recalculationNeeded = true)
           EssttpBackend.StartedPegaCase.stubUpdateStartPegaCaseResponse(
             TdAll.journeyId,
             JourneyJsonTemplates.`Started PEGA case`(Origins.Epaye.Bta)(testCrypto)

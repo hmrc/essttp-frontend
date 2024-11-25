@@ -327,7 +327,7 @@ object TdAll {
     instalmentStartDate = InstalmentStartDate(LocalDate.parse("2022-07-28"))
   )
 
-  def instalmentAmountRequest(taxRegime: TaxRegime): InstalmentAmountRequest = {
+  def instalmentAmountRequest(taxRegime: TaxRegime, maxPlanLength: Int): InstalmentAmountRequest = {
     val regimeType = taxRegime match {
       case TaxRegime.Epaye => RegimeType.EPAYE
       case TaxRegime.Vat   => RegimeType.VAT
@@ -340,7 +340,7 @@ object TdAll {
       regimeType                   = regimeType,
       paymentPlanFrequency         = PaymentPlanFrequencies.Monthly,
       paymentPlanMinLength         = PaymentPlanMinLength(1),
-      paymentPlanMaxLength         = PaymentPlanMaxLength(12),
+      paymentPlanMaxLength         = PaymentPlanMaxLength(maxPlanLength),
       earliestPaymentPlanStartDate = EarliestPaymentPlanStartDate(LocalDate.parse("2022-07-14")),
       latestPaymentPlanStartDate   = LatestPaymentPlanStartDate(LocalDate.parse("2022-08-13")),
       initialPaymentDate           = Some(InitialPaymentDate(LocalDate.parse("2022-06-24"))),
@@ -431,7 +431,10 @@ object TdAll {
 
   val pegaGetCaseResponse: GetCaseResponse = GetCaseResponse(
     dayOfMonth(),
-    paymentPlan(1, AmountDue(AmountInPence(14323)))
+    paymentPlan(1, AmountDue(AmountInPence(14323))),
+    Map("expenditure" -> BigDecimal(0)),
+    Map("income" -> BigDecimal(1.23)),
+    "testCorrelationId"
   )
 
   val monthlyPaymentAmount: MonthlyPaymentAmount = MonthlyPaymentAmount(AmountInPence(30000))

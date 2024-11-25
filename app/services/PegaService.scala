@@ -22,6 +22,7 @@ import essttp.journey.model.Journey.{AfterCanPayWithinSixMonthsAnswers, AfterChe
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Journey, PaymentPlanAnswers}
 import essttp.rootmodel.pega.{GetCaseResponse, StartCaseResponse}
 import play.api.mvc.RequestHeader
+import uk.gov.hmrc.http.HeaderCarrier
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -29,13 +30,14 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class PegaService @Inject() (
     essttpConnector:  EssttpBackendConnector,
-    journeyConnector: JourneyConnector
+    journeyConnector: JourneyConnector,
+    auditService:     AuditService
 )(implicit ec: ExecutionContext) {
 
-  def startCase(journey: Journey)(implicit rh: RequestHeader): Future[(Journey, StartCaseResponse)] = {
+  def startCase(journey: Journey, recalculationNeeded: Boolean)(implicit rh: RequestHeader): Future[(Journey, StartCaseResponse)] = {
       def doStartCase(): Future[(Journey, StartCaseResponse)] =
         for {
-          startCaseResponse <- essttpConnector.startPegaCase(journey.journeyId)
+          startCaseResponse <- essttpConnector.startPegaCase(journey.journeyId, recalculationNeeded)
           updatedJourney <- journeyConnector.updatePegaStartCaseResponse(journey.journeyId, startCaseResponse)
           _ <- essttpConnector.saveJourneyForPega(journey.journeyId)
         } yield (updatedJourney, startCaseResponse)
@@ -57,19 +59,24 @@ class PegaService @Inject() (
     }
   }
 
-  def getCase(journey: Journey)(implicit rh: RequestHeader): Future[GetCaseResponse] = {
-      def doGetCase(startCaseResponse: StartCaseResponse): Future[GetCaseResponse] =
+  def getCase(journey: Journey)(implicit rh: RequestHeader, hc: HeaderCarrier): Future[GetCaseResponse] = {
+      def doGetCase(
+          startCaseResponse: StartCaseResponse,
+          j:                 Either[AfterStartedPegaCase, AfterCheckedPaymentPlan]
+      ): Future[GetCaseResponse] =
         for {
           getCaseResponse <- essttpConnector.getPegaCase(journey.journeyId)
           paymentPlanAnswers = PaymentPlanAnswers.PaymentPlanAfterAffordability(
             startCaseResponse, getCaseResponse.paymentDay, getCaseResponse.paymentPlan
           )
           _ <- journeyConnector.updateHasCheckedPaymentPlan(journey.journeyId, paymentPlanAnswers)
+          _ = auditService.auditPaymentPlanBeforeSubmission(j, getCaseResponse)
+          _ = auditService.auditReturnFromAffordability(j, startCaseResponse, getCaseResponse)
         } yield getCaseResponse
 
     journey match {
       case j: AfterStartedPegaCase =>
-        doGetCase(j.startCaseResponse)
+        doGetCase(j.startCaseResponse, Left(j))
 
       case j: AfterCheckedPaymentPlan =>
         j.paymentPlanAnswers match {
@@ -77,7 +84,7 @@ class PegaService @Inject() (
             sys.error("Trying to get PEGA case on non-affordability journey")
 
           case p: PaymentPlanAnswers.PaymentPlanAfterAffordability =>
-            doGetCase(p.startCaseResponse)
+            doGetCase(p.startCaseResponse, Right(j))
         }
 
       case other =>

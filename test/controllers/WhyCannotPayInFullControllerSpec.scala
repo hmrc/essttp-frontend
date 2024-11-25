@@ -226,7 +226,7 @@ class WhyCannotPayInFullControllerSpec extends ItSpec with UnchangedFromCYALinkA
         newWhyCannotPayInFullAnswers,
         JourneyJsonTemplates.`Started PEGA case`(Origins.Epaye.Bta, newWhyCannotPayInFullAnswers)(testCrypto)
       )
-      EssttpBackend.Pega.stubStartCase(TdAll.journeyId, Right(TdAll.pegaStartCaseResponse))
+      EssttpBackend.Pega.stubStartCase(TdAll.journeyId, Right(TdAll.pegaStartCaseResponse), recalculationNeeded = false)
       EssttpBackend.Pega.stubSaveJourneyForPega(TdAll.journeyId, Right(()))
       EssttpBackend.StartedPegaCase.stubUpdateStartPegaCaseResponse(
         TdAll.journeyId,
