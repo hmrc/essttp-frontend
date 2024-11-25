@@ -63,7 +63,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
         val summaryListRows = summaryList.select(".govuk-summary-list__row").asScala.toList
         val summaryListRowKeysAndValues = summaryListRows.map(row => row.select(".govuk-summary-list__key").text() -> row.select(".govuk-summary-list__value").text())
 
-        summaryListRowKeysAndValues shouldBe List("Remaining amount to pay" -> "£1,498")
+        summaryListRowKeysAndValues shouldBe List("Remaining amount to pay" -> "£2,998")
 
         doc.select(".govuk-form-group > .govuk-fieldset > legend").text() shouldBe "Can you pay within 6 months?"
 
@@ -179,7 +179,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
       val summaryListRows = summaryList.select(".govuk-summary-list__row").asScala.toList
       val summaryListRowKeysAndValues = summaryListRows.map(row => row.select(".govuk-summary-list__key").text() -> row.select(".govuk-summary-list__value").text())
 
-      summaryListRowKeysAndValues shouldBe List("Swm sy’n weddill i’w dalu" -> "£1,498")
+      summaryListRowKeysAndValues shouldBe List("Swm sy’n weddill i’w dalu" -> "£2,998")
 
       doc.select(".govuk-form-group > .govuk-fieldset > legend").text() shouldBe "A allwch dalu cyn pen 6 mis?"
 

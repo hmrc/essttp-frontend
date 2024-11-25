@@ -129,7 +129,7 @@ class CanPayWithinSixMonthsController @Inject() (
     }
 
     UpfrontPaymentController.deriveRemainingAmountToPay(
-      UpfrontPaymentController.determineTotalAmountToPayWithoutInterest(eligibilityCheckResult),
+      UpfrontPaymentController.determineTotalAmountToPayWithInterest(eligibilityCheckResult),
       upfrontPaymentAmount
     )
   }
