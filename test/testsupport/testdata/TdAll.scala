@@ -23,7 +23,7 @@ import essttp.rootmodel.bank._
 import essttp.rootmodel.dates.extremedates.{EarliestPaymentPlanStartDate, ExtremeDatesRequest, ExtremeDatesResponse, LatestPaymentPlanStartDate}
 import essttp.rootmodel.dates.startdates.{InstalmentStartDate, PreferredDayOfMonth, StartDatesRequest, StartDatesResponse}
 import essttp.rootmodel.dates.{InitialPayment, InitialPaymentDate}
-import essttp.rootmodel.pega.{GetCaseResponse, PegaAssigmentId, PegaCaseId, StartCaseResponse}
+import essttp.rootmodel.pega.{GetCaseResponse, PegaCaseId, StartCaseResponse}
 import essttp.rootmodel.ttp._
 import essttp.rootmodel.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
 import essttp.rootmodel.ttp.affordablequotes._
@@ -424,10 +424,7 @@ object TdAll {
 
   val instalmentAmounts: InstalmentAmounts = InstalmentAmounts(AmountInPence(33333), AmountInPence(100000))
 
-  val pegaStartCaseResponse: StartCaseResponse = StartCaseResponse(
-    PegaCaseId("case"),
-    PegaAssigmentId("assignment")
-  )
+  val pegaStartCaseResponse: StartCaseResponse = StartCaseResponse(PegaCaseId("case"))
 
   val pegaGetCaseResponse: GetCaseResponse = GetCaseResponse(
     dayOfMonth(),
