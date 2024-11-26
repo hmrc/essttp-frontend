@@ -363,13 +363,16 @@ object StartJourneyController {
         None,
         None,
         if (form.emailAddressPresent) Some(Email(SensitiveString("jamienorth@email.com"))) else None,
+        Some(EmailSource.ETMP),
         Some(AltLetterFormat(1))
       )
 
       Some(List(Address(
         Some(AddressType("Residential")),
         Some(AddressLine("His Castle")),
-        None, None, None,
+        Some(AddressLine("Left wing")),
+        Some(AddressLine("Top floor")),
+        Some(AddressLine("Attic")),
         Some(IsReturnedLetterService(value = false)),
         Some(List(contactDetail)),
         Some(Postcode(SensitiveString("NO1HERE"))),
