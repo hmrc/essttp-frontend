@@ -175,7 +175,7 @@ class WhyCannotPayInFullControllerSpec extends ItSpec with UnchangedFromCYALinkA
           val errorSummary = doc.select(".govuk-error-summary")
           val errorLink = errorSummary.select("a")
           errorLink.text() shouldBe expectedError
-          errorLink.attr("href") shouldBe "#WhyCannotPayInFull"
+          errorLink.attr("href") shouldBe "#option-UnexpectedReductionOfIncome"
           EssttpBackend.WhyCannotPayInFull.verifyNoneUpdateWhyCannotPayInFullRequest(TdAll.journeyId)
         }
 
