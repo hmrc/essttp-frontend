@@ -42,8 +42,6 @@ class RequestSupport @Inject() (i18nSupport: I18nSupport) {
   implicit def legacyMessages(implicit requestHeader: RequestHeader): Messages = {
     i18nSupport.request2Messages(requestHeader)
   }
-
-  implicit def hc(implicit request: RequestHeader): HeaderCarrier = RequestSupport.hc
 }
 
 object RequestSupport {

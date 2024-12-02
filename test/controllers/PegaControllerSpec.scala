@@ -99,6 +99,7 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
       }
 
       "start a case, update the journey and redirect to PEGA" in {
+
         stubCommonActions()
         EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(
           JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(testCrypto)
@@ -106,7 +107,7 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
         EssttpBackend.Pega.stubStartCase(TdAll.journeyId, Right(TdAll.pegaStartCaseResponse), recalculationNeeded = true)
         EssttpBackend.StartedPegaCase.stubUpdateStartPegaCaseResponse(
           TdAll.journeyId,
-          JourneyJsonTemplates.`Started PEGA case`(Origins.Epaye.Bta)(testCrypto)
+          JourneyJsonTemplates.`Started PEGA case`(Origins.Epaye.Bta, pegaCaseId = Some("case"))(testCrypto)
         )
         EssttpBackend.Pega.stubSaveJourneyForPega(TdAll.journeyId, Right(()))
 
@@ -117,8 +118,28 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
         EssttpBackend.Pega.verifyStartCaseCalled(TdAll.journeyId)
         EssttpBackend.StartedPegaCase.verifyUpdateStartPegaCaseResponseRequest(TdAll.journeyId, TdAll.pegaStartCaseResponse)
         EssttpBackend.Pega.verifySaveJourneyForPegaCalled(TdAll.journeyId)
-      }
 
+        AuditConnectorStub.verifyEventAudited(
+          auditType  = "CanUserPayInSixMonths",
+          auditEvent = Json.parse(
+            s"""
+                 |{
+                 |  "regime" : "Epaye",
+                 |  "taxIdentifier" : "864FZ00049",
+                 |  "pegaCaseId" : "case",
+                 |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+                 |   "userEnteredDetails" : {
+                 |     "unableToPayReason": ["WaitingForRefund", "NoMoneySetAside"],
+                 |     "payUpfront" : true,
+                 |     "upfrontPaymentAmount" : 2,
+                 |     "canPayInSixMonths" : false
+                 |   }
+                 |}
+            """.stripMargin
+          ).as[JsObject]
+        )
+
+      }
     }
 
     "handling callbacks must" - {

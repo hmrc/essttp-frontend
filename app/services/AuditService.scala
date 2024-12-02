@@ -20,16 +20,18 @@ import actionsmodel.AuthenticatedJourneyRequest
 import cats.syntax.eq._
 import essttp.bars.model.BarsVerifyStatusResponse
 import essttp.crypto.CryptoFormat
-import essttp.journey.model.Journey.{AfterCheckedPaymentPlan, AfterEnteredCanYouSetUpDirectDebit, AfterStartedPegaCase}
+import essttp.journey.model.CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths
 import essttp.journey.model.Journey.Stages._
-import essttp.journey.model.{CanPayWithinSixMonthsAnswers, EmailVerificationAnswers, Journey, Origin, WhyCannotPayInFullAnswers}
+import essttp.journey.model.Journey.{AfterCheckedPaymentPlan, AfterEnteredCanYouSetUpDirectDebit, AfterStartedPegaCase}
+import essttp.journey.model._
+import essttp.rootmodel._
 import essttp.rootmodel.bank.BankDetails
 import essttp.rootmodel.pega.{GetCaseResponse, StartCaseResponse}
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
 import essttp.rootmodel.ttp.eligibility.{EligibilityCheckResult, EmailSource}
-import essttp.rootmodel.{CannotPayReason, Email, GGCredId}
 import essttp.utils.Errors
 import models.audit.bars._
+import models.audit.canUserPayInSixMonths.{CanUserPayInSixMonthsAuditDetail, UserEnteredDetails}
 import models.audit.ddinprogress.DdInProgressAuditDetail
 import models.audit.eligibility.{EligibilityCheckAuditDetail, EligibilityResult, EnrollmentReasons}
 import models.audit.emailverification.{EmailVerificationRequestedAuditDetail, EmailVerificationResultAuditDetail}
@@ -125,6 +127,43 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       hasChosenToContinue: Boolean
   )(implicit r: AuthenticatedJourneyRequest[_], hc: HeaderCarrier): Unit =
     audit(toDdinProgressAuditDetail(journey, hasChosenToContinue))
+
+  def auditCanUserPayInSixMonths(journey: Journey, canPay: CanPayWithinSixMonths)(implicit hc: HeaderCarrier): Unit = {
+    audit(toCanUserPayInSixMonths(journey, canPay))
+  }
+
+  private def toCanUserPayInSixMonths(journey: Journey, canPay: CanPayWithinSixMonths): CanUserPayInSixMonthsAuditDetail = {
+    CanUserPayInSixMonthsAuditDetail(
+      regime             = journey.taxRegime.entryName,
+      taxIdentifier      = taxIdentifierToAudit(journey),
+      pegaCaseId         = journey.pegaCaseId,
+      correlationId      = journey.correlationId,
+      userEnteredDetails = UserEnteredDetails(
+        unableToPayReason    = unableToPayReasonToAudit(journey),
+        payUpfront           = upfrontPaymentToAudit(journey)._1,
+        upfrontPaymentAmount = upfrontPaymentToAudit(journey)._2,
+        canPayInSixMonths    = canPay.value
+      )
+    )
+  }
+
+  private def unableToPayReasonToAudit(journey: Journey): Option[Set[CannotPayReason]] = journey match {
+    case j: Journey.AfterWhyCannotPayInFullAnswers => whyCannotPayInFullAnswersToSet(j.whyCannotPayInFullAnswers)
+    case _                                         => sys.error("Could not find why cannot pay in full answers in journey")
+  }
+
+  private def taxIdentifierToAudit(journey: Journey): String = journey match {
+    case j: Journey.AfterComputedTaxId => j.taxId.value
+    case _                             => sys.error("Could not find tax ID in journey")
+  }
+
+  private def upfrontPaymentToAudit(journey: Journey): (Boolean, BigDecimal) = journey match {
+    case j: Journey.AfterUpfrontPaymentAnswers => j.upfrontPaymentAnswers match {
+      case UpfrontPaymentAnswers.NoUpfrontPayment               => (false, BigDecimal(0))
+      case UpfrontPaymentAnswers.DeclaredUpfrontPayment(amount) => (true, amount.value.inPounds)
+    }
+    case _ => sys.error("Could not find upfrontPaymentAmount in journey")
+  }
 
   private def toEligibilityCheck(
       journey:          Started,

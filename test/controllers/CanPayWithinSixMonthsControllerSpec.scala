@@ -24,14 +24,14 @@ import models.Languages.{English, Welsh}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.http.HeaderNames
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, PegaRecreateSessionAssertions, RequestAssertions}
-import testsupport.stubs.EssttpBackend
+import testsupport.stubs.{AuditConnectorStub, EssttpBackend}
 import testsupport.testdata.{JourneyJsonTemplates, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
@@ -275,7 +275,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
       }
     }
 
-    "redirect to the 'monthly payment amount' page when the user submits 'yes'" in {
+    "redirect to the 'monthly payment amount' page when the user submits 'yes' and audit event" in {
       stubCommonActions()
       EssttpBackend.Dates.findJourneyExtremeDates(testCrypto, Origins.Epaye.Bta)()
       EssttpBackend.CanPayWithinSixMonths.stubUpdateCanPayWithinSixMonths(
@@ -292,9 +292,29 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
         TdAll.journeyId,
         CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths(value = true)
       )
+
+      AuditConnectorStub.verifyEventAudited(
+        auditType  = "CanUserPayInSixMonths",
+        auditEvent = Json.parse(
+          s"""
+             |{
+             |  "regime" : "Epaye",
+             |  "taxIdentifier" : "864FZ00049",
+             |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+             |   "userEnteredDetails" : {
+             |     "unableToPayReason": ["WaitingForRefund", "NoMoneySetAside"],
+             |     "payUpfront" : true,
+             |     "upfrontPaymentAmount" : 2,
+             |     "canPayInSixMonths" : true
+             |   }
+             |}
+            """.stripMargin
+        ).as[JsObject]
+      )
+
     }
 
-    "redirect to the PEGA start endpoint when the user submits 'no'" in {
+    "redirect to the PEGA start endpoint when the user submits 'no' and no audit event" in {
       stubCommonActions()
       EssttpBackend.Dates.findJourneyExtremeDates(testCrypto, Origins.Epaye.Bta)()
       EssttpBackend.CanPayWithinSixMonths.stubUpdateCanPayWithinSixMonths(
@@ -311,6 +331,8 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec with PegaRecreateSessio
         TdAll.journeyId,
         CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths(value = false)
       )
+
+      AuditConnectorStub.verifyNoAuditEvent()
     }
     "not redirect to the PEGA start endpoint if the user has not changed their answer after the pega journey has been started" in {
       stubCommonActions()

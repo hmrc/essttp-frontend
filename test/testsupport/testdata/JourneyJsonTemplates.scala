@@ -18,7 +18,7 @@ package testsupport.testdata
 
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Origin, Origins, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.CannotPayReason.{ChangeToPersonalCircumstances, NoMoneySetAside}
-import essttp.rootmodel.DayOfMonth
+import essttp.rootmodel.{CannotPayReason, DayOfMonth}
 import paymentsEmailVerification.models.EmailVerificationResult
 import uk.gov.hmrc.crypto.Encrypter
 
@@ -233,9 +233,10 @@ object JourneyJsonTemplates {
     origin      = origin
   )
 
-  def `Retrieved Extreme Dates Response`(origin: Origin, affordabilityEnabled: Boolean = false)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
+  def `Retrieved Extreme Dates Response`(origin: Origin, affordabilityEnabled: Boolean = false,
+                                         whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(Set(CannotPayReason.WaitingForRefund, CannotPayReason.NoMoneySetAside)))(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo            = StageInfo.retrievedExtremeDates,
-    journeyInfo          = JourneyInfo.retrievedExtremeDates(origin.taxRegime, encrypter),
+    journeyInfo          = JourneyInfo.retrievedExtremeDates(origin.taxRegime, encrypter, whyCannotPayInFullAnswers = whyCannotPayInFullAnswers),
     origin               = origin,
     affordabilityEnabled = affordabilityEnabled
   )
@@ -273,11 +274,13 @@ object JourneyJsonTemplates {
 
   def `Started PEGA case`(
       origin:                    Origin,
-      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
+      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(Set(CannotPayReason.WaitingForRefund, CannotPayReason.NoMoneySetAside)),
+      pegaCaseId:                Option[String]            = None
   )(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.startedPegaCase,
     journeyInfo = JourneyInfo.startedPegaCase(origin.taxRegime, encrypter, whyCannotPayInFullAnswers = whyCannotPayInFullAnswers),
-    origin      = origin
+    origin      = origin,
+    pegaCaseId  = pegaCaseId
   )
 
   def `Entered Monthly Payment Amount`(origin: Origin)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
