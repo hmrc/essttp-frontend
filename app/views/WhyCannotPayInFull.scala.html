@@ -74,12 +74,17 @@
   reasons :+ divider :+ other
 }
 
+@firstCheckbox = @{
+    checkboxItems.headOption.flatMap(_.id).getOrElse("Error no id")
+}
+
 @layout(pageTitle = Some(title), hasErrors = form.hasErrors, showBackLink = true) {
+
     @if(form.errors.nonEmpty) {
         @govukErrorSummary(
             ErrorSummary(errorList = form.errors.map(e =>
                 ErrorLink(
-                    href = Some(s"#option-UnexpectedReductionOfIncome"),
+                    href = Some(s"#$firstCheckbox"),
                     content = Text(e.message)
                 )
             ),
