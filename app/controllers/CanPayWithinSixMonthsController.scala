@@ -31,6 +31,7 @@ import play.api.http.HeaderNames
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import requests.RequestSupport
+import services.AuditService
 import uk.gov.hmrc.hmrcfrontend.controllers.LanguageController
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
@@ -47,7 +48,8 @@ class CanPayWithinSixMonthsController @Inject() (
     requestSupport:     RequestSupport,
     views:              Views,
     journeyConnector:   JourneyConnector,
-    languageController: LanguageController
+    languageController: LanguageController,
+    auditService:       AuditService
 )(implicit ec: ExecutionContext, appConfig: AppConfig)
   extends FrontendController(mcc) with I18nSupport
   with Logging {
@@ -92,6 +94,8 @@ class CanPayWithinSixMonthsController @Inject() (
       { canPayFormValue =>
         val canPay = canPayFormValue.asCanPayWithinSixMonths
         val valueUnchanged = existingAnswersInJourney(request.journey).exists(_.value === canPay.value)
+
+        if (canPay.value) auditService.auditCanUserPayInSixMonths(request.journey, canPay, maybeStartCaseResponse = None)
 
         journeyConnector.updateCanPayWithinSixMonthsAnswers(
           request.journeyId,

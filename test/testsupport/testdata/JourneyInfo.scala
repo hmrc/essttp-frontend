@@ -285,18 +285,20 @@ object JourneyInfo {
     )
 
   def obtainedCanPayWithinSixMonthsYes(
-      taxRegime:                TaxRegime,
-      encrypter:                Encrypter,
-      etmpEmail:                Option[String] = Some(TdAll.etmpEmail),
-      eligibilityMinPlanLength: Int            = 1,
-      eligibilityMaxPlanLength: Int            = 12
+      taxRegime:                 TaxRegime,
+      encrypter:                 Encrypter,
+      etmpEmail:                 Option[String]            = Some(TdAll.etmpEmail),
+      eligibilityMinPlanLength:  Int                       = 1,
+      eligibilityMaxPlanLength:  Int                       = 12,
+      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
   ): List[JourneyInfoAsJson] =
     obtainedCanPayWithinSixMonthsYes :: retrievedAffordabilityResult(
-      taxRegime                = taxRegime,
-      encrypter                = encrypter,
-      etmpEmail                = etmpEmail,
-      eligibilityMinPlanLength = eligibilityMinPlanLength,
-      eligibilityMaxPlanLength = eligibilityMaxPlanLength
+      taxRegime                 = taxRegime,
+      encrypter                 = encrypter,
+      etmpEmail                 = etmpEmail,
+      eligibilityMinPlanLength  = eligibilityMinPlanLength,
+      eligibilityMaxPlanLength  = eligibilityMaxPlanLength,
+      whyCannotPayInFullAnswers = whyCannotPayInFullAnswers
     )
 
   def obtainedCanPayWithinSixMonthsNo(

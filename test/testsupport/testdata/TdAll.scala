@@ -424,7 +424,7 @@ object TdAll {
 
   val instalmentAmounts: InstalmentAmounts = InstalmentAmounts(AmountInPence(33333), AmountInPence(100000))
 
-  val pegaStartCaseResponse: StartCaseResponse = StartCaseResponse(PegaCaseId("case"))
+  val pegaStartCaseResponse: StartCaseResponse = StartCaseResponse(PegaCaseId("case"), "testCorrelationId")
 
   val pegaGetCaseResponse: GetCaseResponse = GetCaseResponse(
     dayOfMonth(),

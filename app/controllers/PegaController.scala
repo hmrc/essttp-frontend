@@ -18,12 +18,14 @@ package controllers
 
 import actions.Actions
 import config.AppConfig
+import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Journey}
 import essttp.rootmodel.TaxRegime
+import essttp.rootmodel.pega.StartCaseResponse
 import models.Language
 import play.api.http.HeaderNames
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import requests.RequestSupport
-import services.PegaService
+import services.{AuditService, PegaService}
 import uk.gov.hmrc.hmrcfrontend.controllers.LanguageController
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
@@ -36,12 +38,19 @@ class PegaController @Inject() (
     mcc:                MessagesControllerComponents,
     pegaService:        PegaService,
     requestSupport:     RequestSupport,
-    languageController: LanguageController
+    languageController: LanguageController,
+    auditService:       AuditService
 )(implicit ex: ExecutionContext, appConfig: AppConfig) extends FrontendController(mcc) {
 
   val startPegaJourney: Action[AnyContent] = as.authenticatedJourneyAction.async{ implicit request =>
-    pegaService.startCase(request.journey, recalculationNeeded = true).map{ _ =>
-      SeeOther(appConfig.pegaStartRedirectUrl(request.journey.taxRegime, requestSupport.languageFromRequest))
+    pegaService.startCase(request.journey, recalculationNeeded = true).map {
+      case (updatedJourney: Journey, startCaseResponse: StartCaseResponse) =>
+        auditService.auditCanUserPayInSixMonths(
+          updatedJourney,
+          canPay                 = CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths(value = false),
+          maybeStartCaseResponse = Some(startCaseResponse)
+        )
+        SeeOther(appConfig.pegaStartRedirectUrl(request.journey.taxRegime, requestSupport.languageFromRequest))
     }
   }
 
