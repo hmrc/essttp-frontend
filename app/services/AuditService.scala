@@ -128,16 +128,17 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
   )(implicit r: AuthenticatedJourneyRequest[_], hc: HeaderCarrier): Unit =
     audit(toDdinProgressAuditDetail(journey, hasChosenToContinue))
 
-  def auditCanUserPayInSixMonths(journey: Journey, canPay: CanPayWithinSixMonths)(implicit hc: HeaderCarrier): Unit = {
-    audit(toCanUserPayInSixMonths(journey, canPay))
+  def auditCanUserPayInSixMonths(journey: Journey, canPay: CanPayWithinSixMonths, maybeStartCaseResponse: Option[StartCaseResponse])(implicit hc: HeaderCarrier): Unit = {
+    audit(toCanUserPayInSixMonths(journey, canPay, maybeStartCaseResponse))
   }
 
-  private def toCanUserPayInSixMonths(journey: Journey, canPay: CanPayWithinSixMonths): CanUserPayInSixMonthsAuditDetail = {
+  private def toCanUserPayInSixMonths(journey: Journey, canPay: CanPayWithinSixMonths, maybeStartCaseResponse: Option[StartCaseResponse]): CanUserPayInSixMonthsAuditDetail = {
     CanUserPayInSixMonthsAuditDetail(
       regime             = journey.taxRegime.entryName,
       taxIdentifier      = taxIdentifierToAudit(journey),
       pegaCaseId         = journey.pegaCaseId,
       correlationId      = journey.correlationId,
+      pegaCorrelationId  = maybeStartCaseResponse.map(_.pegaCorrelationId),
       userEnteredDetails = UserEnteredDetails(
         unableToPayReason    = unableToPayReasonToAudit(journey),
         payUpfront           = upfrontPaymentToAudit(journey)._1,
@@ -310,7 +311,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       journey.fold(_.taxRegime, _.taxRegime).entryName,
       taxId.value,
       startCaseResponse.caseId.value,
-      getCaseResponse.correlationId,
+      getCaseResponse.pegaCorrelationId,
       getCaseResponse.expenditure,
       getCaseResponse.income,
       planDetails

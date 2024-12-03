@@ -673,7 +673,8 @@ object EssttpBackend {
               aResponse().withStatus(_),
               response => aResponse().withStatus(CREATED).withBody(
                 s"""{
-                   |  "caseId": "${response.caseId.value}"
+                   |  "caseId": "${response.caseId.value}",
+                   |  "pegaCorrelationId": "testCorrelationId"
                    |}
                    |""".stripMargin
               )

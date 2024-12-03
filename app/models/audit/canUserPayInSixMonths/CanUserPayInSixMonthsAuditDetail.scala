@@ -26,6 +26,7 @@ final case class CanUserPayInSixMonthsAuditDetail(
     taxIdentifier:      String,
     pegaCaseId:         Option[PegaCaseId],
     correlationId:      CorrelationId,
+    pegaCorrelationId:  Option[String],
     userEnteredDetails: UserEnteredDetails
 )
   extends AuditDetail {

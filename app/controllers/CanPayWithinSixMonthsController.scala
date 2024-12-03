@@ -95,7 +95,7 @@ class CanPayWithinSixMonthsController @Inject() (
         val canPay = canPayFormValue.asCanPayWithinSixMonths
         val valueUnchanged = existingAnswersInJourney(request.journey).exists(_.value === canPay.value)
 
-        if (canPay.value) auditService.auditCanUserPayInSixMonths(request.journey, canPay)
+        if (canPay.value) auditService.auditCanUserPayInSixMonths(request.journey, canPay, maybeStartCaseResponse = None)
 
         journeyConnector.updateCanPayWithinSixMonthsAnswers(
           request.journeyId,

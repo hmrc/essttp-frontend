@@ -128,6 +128,7 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
                  |  "taxIdentifier" : "864FZ00049",
                  |  "pegaCaseId" : "case",
                  |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+                 |  "pegaCorrelationId": "testCorrelationId",
                  |   "userEnteredDetails" : {
                  |     "unableToPayReason": ["WaitingForRefund", "NoMoneySetAside"],
                  |     "payUpfront" : true,

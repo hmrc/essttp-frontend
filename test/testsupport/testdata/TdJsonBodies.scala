@@ -295,7 +295,8 @@ object TdJsonBodies {
   def startedPegaCaseJourneyInfo: String =
     """
       |"startCaseResponse": {
-      |  "caseId": "case"
+      |  "caseId": "case",
+      |  "pegaCorrelationId": "pegaCorrelationId"
       |}
       |""".stripMargin
 
@@ -540,7 +541,8 @@ object TdJsonBodies {
          | "paymentPlanAnswers": {
          |   "PaymentPlanAfterAffordability": {
          |     "startCaseResponse": {
-         |       "caseId": "case"
+         |       "caseId": "case",
+         |       "pegaCorrelationId": "pegaCorrelationId"
          |     },
          |     ${dayOfMonthJourneyInfo(DayOfMonth(28))},
          |     $selectedPlanJourneyInfo

@@ -44,8 +44,12 @@ class PegaController @Inject() (
 
   val startPegaJourney: Action[AnyContent] = as.authenticatedJourneyAction.async{ implicit request =>
     pegaService.startCase(request.journey, recalculationNeeded = true).map {
-      case (updatedJourney: Journey, _: StartCaseResponse) =>
-        auditService.auditCanUserPayInSixMonths(updatedJourney, canPay = CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths(value = false))
+      case (updatedJourney: Journey, startCaseResponse: StartCaseResponse) =>
+        auditService.auditCanUserPayInSixMonths(
+          updatedJourney,
+          canPay                 = CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths(value = false),
+          maybeStartCaseResponse = Some(startCaseResponse)
+        )
         SeeOther(appConfig.pegaStartRedirectUrl(request.journey.taxRegime, requestSupport.languageFromRequest))
     }
   }
