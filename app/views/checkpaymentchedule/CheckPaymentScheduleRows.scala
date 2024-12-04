@@ -16,6 +16,7 @@
 
 package views.checkpaymentchedule
 
+import cats.implicits.catsSyntaxEq
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, UpfrontPaymentAnswers, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.CannotPayReason
 import messages.Messages
@@ -31,9 +32,11 @@ object CheckPaymentScheduleRows {
       changeLinkCall:            Call
   )(implicit lang: Language): Option[SummaryListRow] = {
       def bullets(reasons: Set[CannotPayReason]) = {
+        val htmlClass = if (reasons.size === 1) "govuk-list" else "govuk-list govuk-list--bullet"
+
         Html(
           s"""
-           |<ul class="govuk-list govuk-list--bullet">
+           |<ul class="$htmlClass">
            |${reasons.map(reason => s"""<li>${Messages.WhyCannotPayInFull.checkboxMessageWithHint(reason)._1.show}</li>""").mkString("\n")}
            |</ul>
            |""".stripMargin
