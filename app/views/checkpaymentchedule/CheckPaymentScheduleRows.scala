@@ -30,14 +30,18 @@ object CheckPaymentScheduleRows {
       whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers,
       changeLinkCall:            Call
   )(implicit lang: Language): Option[SummaryListRow] = {
-      def bullets(reasons: Set[CannotPayReason]) = {
-        Html(
-          s"""
+
+      def formatWhyCannotPayAnswers(reasons: Set[CannotPayReason]) = {
+        reasons.toList match {
+          case oneReason :: Nil => Html(s"${Messages.WhyCannotPayInFull.checkboxMessageWithHint(oneReason)._1.show}")
+          case _ => Html(
+            s"""
            |<ul class="govuk-list govuk-list--bullet">
            |${reasons.map(reason => s"""<li>${Messages.WhyCannotPayInFull.checkboxMessageWithHint(reason)._1.show}</li>""").mkString("\n")}
            |</ul>
            |""".stripMargin
-        )
+          )
+        }
       }
 
     val whyCannotPayInFullReasons =
@@ -53,7 +57,7 @@ object CheckPaymentScheduleRows {
           classes = "govuk-!-width-one-half"
         ),
         value   = Value(
-          content = HtmlContent(bullets(reasons))
+          content = HtmlContent(formatWhyCannotPayAnswers(reasons))
         ),
         actions = Some(Actions(
           items = Seq(
