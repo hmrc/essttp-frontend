@@ -848,7 +848,7 @@ object Messages {
       case CannotPayReason.Other =>
         Message(
           english = "None of these",
-          welsh   = "Dim un o’r uchod"
+          welsh   = "Dim un o’r rhain"
         ) -> None
     }
 
