@@ -784,9 +784,9 @@ object Messages {
       welsh   = "neu"
     )
 
-    val `Select all that apply or 'none of the above'`: Message = Message(
-      english = "Select all that apply or ‘none of the above’",
-      welsh   = "Dewiswch bob un sy’n berthnasol neu ‘Dim un o’r uchod’"
+    val `Select all that apply or 'none of these'`: Message = Message(
+      english = "Select all that apply or ‘None of these’",
+      welsh   = "Dewiswch bob un sy’n berthnasol neu ‘Dim un o’r rhain’"
     )
 
     def checkboxMessageWithHint(cannotPayReason: CannotPayReason): (Message, Option[Message]) = cannotPayReason match {
@@ -806,7 +806,7 @@ object Messages {
           welsh   = "Cynnydd annisgwyl mewn gwariant"
         ) -> Some(
           Message(
-            english = "For example unexpected repairs following theft or damage to premises.",
+            english = "For example, unexpected repairs following theft or damage to premises.",
             welsh   = "Er enghraifft, atgyweiriadau annisgwyl yn dilyn lladrad neu niwed i eiddo."
           )
         )
@@ -821,7 +821,7 @@ object Messages {
           welsh   = "Trychineb lleol neu genedlaethol"
         ) -> Some(
           Message(
-            english = "For example COVID-19, extreme weather conditions.",
+            english = "For example, COVID-19, extreme weather conditions.",
             welsh   = "Er enghraifft COVID 19, amgylchiadau tywydd garw."
           )
         )
@@ -847,7 +847,7 @@ object Messages {
         ) -> None
       case CannotPayReason.Other =>
         Message(
-          english = "None of the above",
+          english = "None of these",
           welsh   = "Dim un o’r uchod"
         ) -> None
     }

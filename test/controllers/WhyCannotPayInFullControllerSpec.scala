@@ -75,7 +75,7 @@ class WhyCannotPayInFullControllerSpec extends ItSpec with UnchangedFromCYALinkA
           CheckBoxInfo(
             "UnexpectedIncreaseInSpending",
             "Unexpected increase in spending",
-            "For example unexpected repairs following theft or damage to premises.",
+            "For example, unexpected repairs following theft or damage to premises.",
             ""
           ),
           CheckBoxInfo(
@@ -87,7 +87,7 @@ class WhyCannotPayInFullControllerSpec extends ItSpec with UnchangedFromCYALinkA
           CheckBoxInfo(
             "NationalOrLocalDisaster",
             "National or local disaster",
-            "For example COVID-19, extreme weather conditions.",
+            "For example, COVID-19, extreme weather conditions.",
             ""
           ),
           CheckBoxInfo(
@@ -110,7 +110,7 @@ class WhyCannotPayInFullControllerSpec extends ItSpec with UnchangedFromCYALinkA
           ),
           CheckBoxInfo(
             "Other",
-            "None of the above",
+            "None of these",
             "",
             "exclusive"
           )
@@ -180,15 +180,15 @@ class WhyCannotPayInFullControllerSpec extends ItSpec with UnchangedFromCYALinkA
         }
 
       "nothing is submitted" in {
-        testFormError()("Select all that apply or ‘none of the above’")
+        testFormError()("Select all that apply or ‘None of these’")
       }
 
       "an unrecognised option is submitted" in {
-        testFormError("WhyCannotPayInFull[]" -> "Unknown")("Select all that apply or ‘none of the above’")
+        testFormError("WhyCannotPayInFull[]" -> "Unknown")("Select all that apply or ‘None of these’")
       }
 
-      "more than one reason is selected and 'None of the above' is selected" in {
-        testFormError("WhyCannotPayInFull[]" -> "Other", "WhyCannotPayInFull[]" -> "Bankrupt")("Select all that apply or ‘none of the above’")
+      "more than one reason is selected and 'None of these' is selected" in {
+        testFormError("WhyCannotPayInFull[]" -> "Other", "WhyCannotPayInFull[]" -> "Bankrupt")("Select all that apply or ‘None of these’")
       }
 
     }

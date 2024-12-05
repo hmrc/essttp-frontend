@@ -135,7 +135,7 @@ object WhyCannotPayInFullController {
       override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], CannotPayReason] = {
         Either.fromOption(
           data.get(key).flatMap(CannotPayReason.withNameInsensitiveOption), {
-            Seq(FormError("WhyCannotPayInFull", Messages.WhyCannotPayInFull.`Select all that apply or 'none of the above'`.show))
+            Seq(FormError("WhyCannotPayInFull", Messages.WhyCannotPayInFull.`Select all that apply or 'none of these'`.show))
           }
         )
       }
@@ -147,7 +147,7 @@ object WhyCannotPayInFullController {
     Form(
       "WhyCannotPayInFull" -> set(of(cannotPayReasonFormatter))
         .verifying(
-          Messages.WhyCannotPayInFull.`Select all that apply or 'none of the above'`.show,
+          Messages.WhyCannotPayInFull.`Select all that apply or 'none of these'`.show,
           set => set.nonEmpty && (set.size === 1 || !set.contains(CannotPayReason.Other))
         )
     )
