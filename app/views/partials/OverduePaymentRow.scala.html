@@ -42,7 +42,7 @@
                     s"${Messages.YourBill.to.show} ${invoicePeriodDateShortMonth(payment.invoicePeriod.end)} ${payment.invoicePeriod.end.getYear.toString}"
         case TaxRegime.Sa =>
             Messages.YourBill.`Due`(payment.invoicePeriod.dueDate).show
-        case TaxRegime.Sia =>
+        case TaxRegime.Simp =>
             s"${invoicePeriodDateShortMonth(payment.invoicePeriod.start)} " + s"${invoicePeriodDateYear(payment.invoicePeriod.start)} " +
                     s"${Messages.YourBill.to.show} ${invoicePeriodDateShortMonth(payment.invoicePeriod.end)} " + s"${invoicePeriodDateYear(payment.invoicePeriod.end)}"
     }
@@ -59,7 +59,7 @@
         case TaxRegime.Sa =>
            Messages.YourBill.`ChargeTypeRow`(payment.mainTrans, payment.invoicePeriod.start.getYear, payment.invoicePeriod.end.getYear).show
 
-        case TaxRegime.Sia =>
+        case TaxRegime.Simp =>
             s"${Messages.YourBill.`Bill due`.show} ${govDateFormat(payment.invoicePeriod.dueDate)}"
 
     }

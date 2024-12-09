@@ -23,7 +23,7 @@ import views.html.emailerrors._
 import views.html.epaye.EPayeLanding
 import views.html.epaye.ineligible.{Ineligible, NotEnrolled}
 import views.html.sa.{NotSaEnrolled, SaLanding}
-import views.html.sia.{NoNinoFound, SiaLanding}
+import views.html.simp.{NoNinoFound, SimpLanding}
 import views.html.vat.{NotVatRegistered, VatLanding}
 import views.partials.Partials
 
@@ -34,7 +34,7 @@ class Views @Inject() (
     val epayeLanding:                   EPayeLanding,
     val vatLanding:                     VatLanding,
     val saLanding:                      SaLanding,
-    val siaLanding:                     SiaLanding,
+    val simpLanding:                    SimpLanding,
     val yourBillIs:                     YourBillIs,
     val notEnrolled:                    NotEnrolled,
     val notVatRegistered:               NotVatRegistered,
@@ -65,7 +65,7 @@ class Views @Inject() (
     val tooManyPasscodeJourneysStarted: TooManyPasscodeJourneysStarted,
     val paymentPlanSetUpPage:           PaymentPlanSetUpPage,
     val saPaymentPlanSetUpPage:         SaPaymentPlanSetUpPage,
-    val siaPaymentPlanSetUpPage:        SiaPaymentPlanSetUpPage,
+    val simpPaymentPlanSetUpPage:       SimpPaymentPlanSetUpPage,
     val printSummaryPage:               PrintSummaryPage,
     val saPrintSummaryPage:             SaPrintSummaryPage,
     val missingInfoPage:                MissingInformation,

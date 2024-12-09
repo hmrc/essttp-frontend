@@ -89,7 +89,7 @@ class BankDetailsControllerSpec extends ItSpec {
         case TaxRegime.Epaye => "You cannot set up an Employers’ PAYE payment plan online if you are not the only account holder."
         case TaxRegime.Vat   => "You cannot set up a VAT payment plan online if you are not the only account holder."
         case TaxRegime.Sa    => "You cannot set up a Self Assessment payment plan online if you are not the only account holder."
-        case TaxRegime.Sia   => "You cannot set up a Simple Assessment payment plan online if you are not the only account holder."
+        case TaxRegime.Simp   => "You cannot set up a Simple Assessment payment plan online if you are not the only account holder."
       }
     val paragraphContent2: String =
       "Call us on 0300 123 1813 if you need to set up a Direct Debit from a joint account. All account holders must be present when calling."
@@ -157,7 +157,7 @@ class BankDetailsControllerSpec extends ItSpec {
     ("EPAYE", Origins.Epaye.Bta, TaxRegime.Epaye),
     ("VAT", Origins.Vat.Bta, TaxRegime.Vat),
     ("SA", Origins.Sa.Bta, TaxRegime.Sa),
-    ("SIA", Origins.Sia.Pta, TaxRegime.Sia)
+    ("SIMP", Origins.Simp.Pta, TaxRegime.Simp)
   ).foreach {
       case (regime, origin, taxRegime) =>
 

@@ -54,7 +54,7 @@ trait UnchangedFromCYALinkAssertions { this: ItSpec =>
                 case TaxRegime.Epaye => "PAYE"
                 case TaxRegime.Vat   => "VAT"
                 case TaxRegime.Sa    => "SA"
-                case TaxRegime.Sia   => throw new NotImplementedError()
+                case TaxRegime.Simp  => throw new NotImplementedError()
               }
               val expecterLang = lang match {
                 case Languages.English => "en"
@@ -111,7 +111,7 @@ trait UnchangedFromCYALinkAssertions { this: ItSpec =>
           )
         }
 
-        if (origin.taxRegime =!= TaxRegime.Sia) {
+        if (origin.taxRegime =!= TaxRegime.Simp) {
           "AfterStartedPegaCase when the user is navigating in" - {
 
             "English" in {

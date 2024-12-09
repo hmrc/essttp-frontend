@@ -120,7 +120,7 @@ object Routing {
       routes.PegaController.callback(TaxRegime.Sa, None) -> { () =>
         routes.BankDetailsController.detailsAboutBankAccount
       },
-      routes.PegaController.callback(TaxRegime.Sia, None) -> { () =>
+      routes.PegaController.callback(TaxRegime.Simp, None) -> { () =>
         routes.BankDetailsController.detailsAboutBankAccount
       },
       routes.BankDetailsController.detailsAboutBankAccount -> { () =>
@@ -215,7 +215,7 @@ object Routing {
         case TaxRegime.Epaye => routes.LandingController.epayeLandingPage
         case TaxRegime.Vat   => routes.LandingController.vatLandingPage
         case TaxRegime.Sa    => routes.LandingController.saLandingPage
-        case TaxRegime.Sia   => routes.LandingController.siaLandingPage
+        case TaxRegime.Simp  => routes.LandingController.simpLandingPage
       }
 
     case _: Journey.Stages.ComputedTaxId =>

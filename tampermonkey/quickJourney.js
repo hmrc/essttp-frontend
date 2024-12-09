@@ -125,11 +125,11 @@ const testOnlyStartPageSa = () => {
     }
 }
 
-const testOnlyStartPageSia = () => {
-    if (currentPageIs('/set-up-a-payment-plan/test-only/start-journey-sia')) {
+const testOnlyStartPageSimp = () => {
+    if (currentPageIs('/set-up-a-payment-plan/test-only/start-journey-simp')) {
         document.getElementById('signInAs').checked = true
         document.getElementById('enrolments-3').checked = true
-        document.getElementById('siaDebtTotalAmount').value = '10000'
+        document.getElementById('simpDebtTotalAmount').value = '10000'
         document.getElementById('interestAmount').value = '0'
         document.getElementById('nino').value = ''
         document.getElementById('regimeDigitalCorrespondence').checked = true
@@ -144,7 +144,7 @@ const landingPage = () => {
     if (currentPageIs('/set-up-a-payment-plan/epaye-payment-plan') ||
         currentPageIs('/set-up-a-payment-plan/vat-payment-plan') ||
         currentPageIs('/set-up-a-payment-plan/sa-payment-plan') ||
-        currentPageIs('/set-up-a-payment-plan/sia-payment-plan')) {
+        currentPageIs('/set-up-a-payment-plan/simple-assessment-payment-plan')) {
         clickContinue()
     }
 }
@@ -213,16 +213,16 @@ const checkPaymentPlan = () => {
     }
 }
 
-const aboutYourBankAccount = () => {
-    if (currentPageIs('/set-up-a-payment-plan/about-your-bank-account')) {
-        document.getElementById('typeOfAccount').checked = true
+const checkYouCanSetUpADirectDebit = () => {
+    if (currentPageIs('/set-up-a-payment-plan/check-you-can-set-up-a-direct-debit')) {
         document.getElementById('isSoleSignatory').checked = true
         clickContinue()
     }
 }
 
 const setUpDirectDebit = () => {
-    if (currentPageIs('/set-up-a-payment-plan/set-up-direct-debit')) {
+    if (currentPageIs('/set-up-a-payment-plan/bank-account-details')) {
+        document.getElementById('business').checked = true
         document.getElementById('name').value = 'Lambent Illumination'
         document.getElementById('sortCode').value = '207102'
         document.getElementById('accountNumber').value = '86563611'
@@ -276,7 +276,7 @@ function continueJourney() {
     testOnlyStartPageEpaye()
     testOnlyStartPageVat()
     testOnlyStartPageSa()
-    testOnlyStartPageSia()
+    testOnlyStartPageSimp()
     landingPage()
     yourBill()
     whyCannotPayInFull()
@@ -287,7 +287,7 @@ function continueJourney() {
     whichDayOfTheMonth()
     howManyMonthsDoYouWantToPayOver()
     checkPaymentPlan()
-    aboutYourBankAccount()
+    checkYouCanSetUpADirectDebit()
     setUpDirectDebit()
     checkDirectDebit()
     termsAndConditions()

@@ -79,7 +79,7 @@ class StartJourneyController @Inject() (
         case TaxRegime.Epaye => Redirect(routes.StartJourneyController.startJourneyEpayeGet)
         case TaxRegime.Vat   => Redirect(routes.StartJourneyController.startJourneyVatGet)
         case TaxRegime.Sa    => Redirect(routes.StartJourneyController.startJourneySaGet)
-        case TaxRegime.Sia   => Redirect(routes.StartJourneyController.startJourneySiaGet)
+        case TaxRegime.Simp  => Redirect(routes.StartJourneyController.startJourneySimpGet)
       }
     )
   }
@@ -97,8 +97,8 @@ class StartJourneyController @Inject() (
     Ok(startPage(TaxRegime.Sa))
   }
 
-  val startJourneySiaGet: Action[AnyContent] = as.default { implicit request =>
-    Ok(startPage(TaxRegime.Sia))
+  val startJourneySimpGet: Action[AnyContent] = as.default { implicit request =>
+    Ok(startPage(TaxRegime.Simp))
   }
 
   private def startPage(taxRegime: TaxRegime)(implicit request: Request[_]) =
@@ -117,8 +117,8 @@ class StartJourneyController @Inject() (
     startJourneySubmit(TaxRegime.Sa)
   }
 
-  val startJourneySiaSubmit: Action[AnyContent] = as.default.async { implicit request =>
-    startJourneySubmit(TaxRegime.Sia)
+  val startJourneySimpSubmit: Action[AnyContent] = as.default.async { implicit request =>
+    startJourneySubmit(TaxRegime.Simp)
   }
 
   private def startJourneySubmit(taxRegime: TaxRegime)(implicit request: Request[_]): Future[Result] = {
@@ -151,10 +151,10 @@ class StartJourneyController @Inject() (
         case Origins.Sa.Mobile          => testOnlyRoutes.StartJourneyController.showMobileSaPage
         case Origins.Sa.GovUk           => testOnlyRoutes.StartJourneyController.showGovukSaPage
         case Origins.Sa.DetachedUrl     => _root_.controllers.routes.StartJourneyController.startDetachedSaJourney
-        case Origins.Sia.Pta            => testOnlyRoutes.StartJourneyController.showPtaSiaPage
-        case Origins.Sia.Mobile         => testOnlyRoutes.StartJourneyController.showMobileSiaPage
-        case Origins.Sia.GovUk          => testOnlyRoutes.StartJourneyController.showGovukSiaPage
-        case Origins.Sia.DetachedUrl    => _root_.controllers.routes.StartJourneyController.startDetachedSiaJourney
+        case Origins.Simp.Pta           => testOnlyRoutes.StartJourneyController.showPtaSimpPage
+        case Origins.Simp.Mobile        => testOnlyRoutes.StartJourneyController.showMobileSimpPage
+        case Origins.Simp.GovUk         => testOnlyRoutes.StartJourneyController.showGovukSimpPage
+        case Origins.Simp.DetachedUrl   => _root_.controllers.routes.StartJourneyController.startDetachedSimpJourney
       }
     } yield Redirect(redirectTo).withSession(session)
   }
@@ -182,9 +182,9 @@ class StartJourneyController @Inject() (
     withSessionId(Future.successful(Ok(iAmPtaPage(testOnlyRoutes.StartJourneyController.startJourneySaPta.url))))
   }
 
-  /** Pretends being a PtaSia page */
-  val showPtaSiaPage: Action[AnyContent] = as.default.async { implicit request =>
-    withSessionId(Future.successful(Ok(iAmPtaPage(testOnlyRoutes.StartJourneyController.startJourneySiaPta.url))))
+  /** Pretends being a PtaSimp page */
+  val showPtaSimpPage: Action[AnyContent] = as.default.async { implicit request =>
+    withSessionId(Future.successful(Ok(iAmPtaPage(testOnlyRoutes.StartJourneyController.startJourneySimpPta.url))))
   }
 
   /** Pretends being a MobileSa page */
@@ -192,9 +192,9 @@ class StartJourneyController @Inject() (
     withSessionId(Future.successful(Ok(iAmMobilePage(testOnlyRoutes.StartJourneyController.startJourneySaMobile.url))))
   }
 
-  /** Pretends being a MobileSia page */
-  val showMobileSiaPage: Action[AnyContent] = as.default.async { implicit request =>
-    withSessionId(Future.successful(Ok(iAmMobilePage(testOnlyRoutes.StartJourneyController.startJourneySiaMobile.url))))
+  /** Pretends being a MobileSimp page */
+  val showMobileSimpPage: Action[AnyContent] = as.default.async { implicit request =>
+    withSessionId(Future.successful(Ok(iAmMobilePage(testOnlyRoutes.StartJourneyController.startJourneySimpMobile.url))))
   }
 
   /** Pretends being a Govuk Epaye page */
@@ -212,9 +212,9 @@ class StartJourneyController @Inject() (
     withSessionId(Future.successful(Ok(iAmGovUkPage(TaxRegime.Sa))))
   }
 
-  /** Pretends being a Govuk Sia page */
-  val showGovukSiaPage: Action[AnyContent] = as.default.async { implicit request =>
-    withSessionId(Future.successful(Ok(iAmGovUkPage(TaxRegime.Sia))))
+  /** Pretends being a Govuk Simp page */
+  val showGovukSimpPage: Action[AnyContent] = as.default.async { implicit request =>
+    withSessionId(Future.successful(Ok(iAmGovUkPage(TaxRegime.Simp))))
   }
 
   /** Pretends being a EPAYE service page */
@@ -310,20 +310,20 @@ class StartJourneyController @Inject() (
     }
   }
 
-  val startJourneySiaPta: Action[AnyContent] = as.default.async { implicit request =>
+  val startJourneySimpPta: Action[AnyContent] = as.default.async { implicit request =>
     withSessionId {
-      journeyConnector.Sia.startJourneyPta(SjRequest.Sia.Simple(
-        returnUrl = ReturnUrl(routes.StartJourneyController.showPtaSiaPage.url + "?return-page"),
-        backUrl   = BackUrl(routes.StartJourneyController.showPtaSiaPage.url + "?starting-page")
+      journeyConnector.Simp.startJourneyPta(SjRequest.Simp.Simple(
+        returnUrl = ReturnUrl(routes.StartJourneyController.showPtaSimpPage.url + "?return-page"),
+        backUrl   = BackUrl(routes.StartJourneyController.showPtaSimpPage.url + "?starting-page")
       )).map(sjResponse => Redirect(sjResponse.nextUrl.value))
     }
   }
 
-  val startJourneySiaMobile: Action[AnyContent] = as.default.async { implicit request =>
+  val startJourneySimpMobile: Action[AnyContent] = as.default.async { implicit request =>
     withSessionId {
-      journeyConnector.Sia.startJourneyMobile(SjRequest.Sia.Simple(
-        returnUrl = ReturnUrl(routes.StartJourneyController.showMobileSiaPage.url + "?return-page"),
-        backUrl   = BackUrl(routes.StartJourneyController.showMobileSiaPage.url + "?starting-page")
+      journeyConnector.Simp.startJourneyMobile(SjRequest.Simp.Simple(
+        returnUrl = ReturnUrl(routes.StartJourneyController.showMobileSimpPage.url + "?return-page"),
+        backUrl   = BackUrl(routes.StartJourneyController.showMobileSimpPage.url + "?starting-page")
       )).map(sjResponse => Redirect(sjResponse.nextUrl.value))
     }
   }
@@ -520,7 +520,7 @@ object StartJourneyController {
       case TaxRegime.Sa =>
         List(Identification(IdType("UTR"), IdValue(form.taxReference.value)))
 
-      case TaxRegime.Sia =>
+      case TaxRegime.Simp =>
         List(Identification(IdType("NINO"), IdValue(form.taxReference.value)))
     }
   }

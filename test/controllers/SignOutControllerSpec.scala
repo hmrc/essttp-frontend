@@ -95,7 +95,7 @@ class SignOutControllerSpec extends ItSpec {
           case TaxRegime.Epaye => Origins.Epaye.Bta -> "/set-up-a-payment-plan/exit-survey/paye"
           case TaxRegime.Vat   => Origins.Vat.Bta -> "/set-up-a-payment-plan/exit-survey/vat"
           case TaxRegime.Sa    => Origins.Sa.Bta -> "/set-up-a-payment-plan/exit-survey/sa"
-          case TaxRegime.Sia   => Origins.Sia.Pta -> "/set-up-a-payment-plan/exit-survey/sia"
+          case TaxRegime.Simp  => Origins.Simp.Pta -> "/set-up-a-payment-plan/exit-survey/simp"
         }
 
         stubCommonActions()

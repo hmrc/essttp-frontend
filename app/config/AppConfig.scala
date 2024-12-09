@@ -35,7 +35,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val appName: String = config.get[String]("appName")
   val emailJourneyEnabled: Boolean = config.get[Boolean]("features.email-journey")
   val saEnabled: Boolean = config.get[Boolean]("features.sa")
-  val siaEnabled: Boolean = config.get[Boolean]("features.sia")
+  val simpEnabled: Boolean = config.get[Boolean]("features.simp")
   val authTimeoutSeconds: Int = config.get[FiniteDuration]("timeout-dialog.timeout").toSeconds.toInt
   val authTimeoutCountdownSeconds: Int = config.get[FiniteDuration]("timeout-dialog.countdown").toSeconds.toInt
   val accessibilityStatementPath: String = config.get[String]("accessibility-statement.service-path")
@@ -102,7 +102,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
 
     val saExitSurveyUrl: String = s"$baseUrl/eSSTTP-SA"
 
-    val siaExitSurveyUrl: String = s"$baseUrl/eSSTTP-SIA"
+    val simpExitSurveyUrl: String = s"$baseUrl/eSSTTP-SIMP"
   }
 
   object Crypto {
@@ -150,8 +150,8 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
       val payOnlineLink: String = getParam[String]("pay-online-link")
     }
 
-    object SIA {
-      private def getParam[A: ConfigLoader](path: String): A = config.get[A](s"policy-parameters.sia.$path")
+    object SIMP {
+      private def getParam[A: ConfigLoader](path: String): A = config.get[A](s"policy-parameters.simp.$path")
 
       val maxAmountOfDebt: AmountInPence = AmountInPence(getParam[Long]("max-amount-of-debt-in-pounds") * 100L)
       val maxPlanDurationInMonths: Int = getParam[Int]("max-plan-duration-in-months")
@@ -176,7 +176,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
       case TaxRegime.Epaye => "PAYE"
       case TaxRegime.Vat   => "VAT"
       case TaxRegime.Sa    => "SA"
-      case TaxRegime.Sia   => sys.error("Should not be trying to construct PEGA redirect URL's for SIA")
+      case TaxRegime.Simp  => sys.error("Should not be trying to construct PEGA redirect URL's for SIMP")
     }
 
     s"?regime=$regimeValue&lang=${lang.code}"

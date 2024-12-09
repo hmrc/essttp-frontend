@@ -69,7 +69,7 @@ class DetermineEligibilityController @Inject() (
             case TaxRegime.Epaye => routes.IneligibleController.payeGenericIneligiblePage.url
             case TaxRegime.Vat   => routes.IneligibleController.vatGenericIneligiblePage.url
             case TaxRegime.Sa    => routes.IneligibleController.saGenericIneligiblePage.url
-            case TaxRegime.Sia   => routes.IneligibleController.siaGenericIneligiblePage.url
+            case TaxRegime.Simp  => routes.IneligibleController.simpGenericIneligiblePage.url
           }
           toFuture(Redirect(redirect))
         } { eligibilityCheckResult =>

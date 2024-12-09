@@ -44,7 +44,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
       TaxRegime.Epaye -> Origins.Epaye.Bta,
       TaxRegime.Vat -> Origins.Vat.Bta,
       TaxRegime.Sa -> Origins.Sa.Bta,
-      TaxRegime.Sia -> Origins.Sia.Pta
+      TaxRegime.Simp -> Origins.Simp.Pta
     ).foreach {
         case (taxRegime, origin) =>
 
@@ -146,7 +146,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
                       case TaxRegime.Epaye => PageUrls.epayeConfirmationUrl
                       case TaxRegime.Vat   => PageUrls.vatConfirmationUrl
                       case TaxRegime.Sa    => PageUrls.saConfirmationUrl
-                      case TaxRegime.Sia   => PageUrls.siaConfirmationUrl
+                      case TaxRegime.Simp  => PageUrls.simpConfirmationUrl
                     })
 
                     Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(
@@ -161,7 +161,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
                       case TaxRegime.Epaye => "Epaye"
                       case TaxRegime.Vat   => "Vat"
                       case TaxRegime.Sa    => "Sa"
-                      case TaxRegime.Sia   => "Sia"
+                      case TaxRegime.Simp  => "Simp"
                     }
 
                     val whyCannotPayInFullJson =

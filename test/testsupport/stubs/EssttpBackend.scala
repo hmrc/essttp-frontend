@@ -98,8 +98,8 @@ object EssttpBackend {
     private val startJourneyDetachedVatUrl = "/essttp-backend/vat/detached-url/journey/start"
     private val startJourneyGovUkSaUrl = "/essttp-backend/sa/gov-uk/journey/start"
     private val startJourneyDetachedSaUrl = "/essttp-backend/sa/detached-url/journey/start"
-    private val startJourneyGovUkSiaUrl = "/essttp-backend/sia/gov-uk/journey/start"
-    private val startJourneyDetachedSiaUrl = "/essttp-backend/sia/detached-url/journey/start"
+    private val startJourneyGovUkSimpUrl = "/essttp-backend/simp/gov-uk/journey/start"
+    private val startJourneyDetachedSimpUrl = "/essttp-backend/simp/detached-url/journey/start"
 
     def startJourneyInBackend(origin: Origin): StubMapping = {
       val (url, expectedRequestBody, responseBody): (String, String, String) = origin match {
@@ -115,10 +115,10 @@ object EssttpBackend {
           (startJourneyGovUkSaUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.govUk(TaxRegime.Sa))
         case Origins.Sa.DetachedUrl =>
           (startJourneyDetachedSaUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.detachedUrl(TaxRegime.Sa))
-        case Origins.Sia.GovUk =>
-          (startJourneyGovUkSiaUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.govUk(TaxRegime.Sia))
-        case Origins.Sia.DetachedUrl =>
-          (startJourneyDetachedSiaUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.detachedUrl(TaxRegime.Sia))
+        case Origins.Simp.GovUk =>
+          (startJourneyGovUkSimpUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.govUk(TaxRegime.Simp))
+        case Origins.Simp.DetachedUrl =>
+          (startJourneyDetachedSimpUrl, TdJsonBodies.StartJourneyRequestBodies.empty, TdJsonBodies.StartJourneyResponses.detachedUrl(TaxRegime.Simp))
         case other => throw new Exception(s"Origin ${other.toString} not handled")
       }
       stubFor(
@@ -136,8 +136,8 @@ object EssttpBackend {
     def startJourneyVatDetached: StubMapping = startJourneyInBackend(Origins.Vat.DetachedUrl)
     def startJourneySaGovUk: StubMapping = startJourneyInBackend(Origins.Sa.GovUk)
     def startJourneySaDetached: StubMapping = startJourneyInBackend(Origins.Sa.DetachedUrl)
-    def startJourneySiaGovUk: StubMapping = startJourneyInBackend(Origins.Sia.GovUk)
-    def startJourneySiaDetached: StubMapping = startJourneyInBackend(Origins.Sia.DetachedUrl)
+    def startJourneySimpGovUk: StubMapping = startJourneyInBackend(Origins.Simp.GovUk)
+    def startJourneySimpDetached: StubMapping = startJourneyInBackend(Origins.Simp.DetachedUrl)
 
     def verifyStartJourney(url: String): Unit = verify(exactly(1), postRequestedFor(urlPathEqualTo(url)))
     def verifyStartJourneyEpayeGovUk(): Unit = verifyStartJourney(startJourneyGovUkEpayeUrl)
@@ -146,8 +146,8 @@ object EssttpBackend {
     def verifyStartJourneyVatDetached(): Unit = verifyStartJourney(startJourneyDetachedVatUrl)
     def verifyStartJourneySaGovUk(): Unit = verifyStartJourney(startJourneyGovUkSaUrl)
     def verifyStartJourneySaDetached(): Unit = verifyStartJourney(startJourneyDetachedSaUrl)
-    def verifyStartJourneySiaGovUk(): Unit = verifyStartJourney(startJourneyGovUkSiaUrl)
-    def verifyStartJourneySiaDetached(): Unit = verifyStartJourney(startJourneyDetachedSiaUrl)
+    def verifyStartJourneySimpGovUk(): Unit = verifyStartJourney(startJourneyGovUkSimpUrl)
+    def verifyStartJourneySimpDetached(): Unit = verifyStartJourney(startJourneyDetachedSimpUrl)
 
     def findJourney(origin: Origin = Origins.Epaye.Bta): StubMapping =
       findByLatestSessionId(JourneyJsonTemplates.Started(origin))
@@ -159,7 +159,7 @@ object EssttpBackend {
                                         case TaxRegime.Epaye=> "864FZ00049"
                                         case TaxRegime.Vat=> "101747001"
                                         case TaxRegime.Sa=> "1234567895"
-                                        case TaxRegime.Sia=> "QQ123456A"
+                                        case TaxRegime.Simp=> "QQ123456A"
                                       }
                                       JourneyJsonTemplates.`Computed Tax Id`(origin, taxReference)
                                     }): StubMapping = findByLatestSessionId(jsonBody)
@@ -656,7 +656,7 @@ object EssttpBackend {
         case TaxRegime.Epaye => "epaye"
         case TaxRegime.Vat   => "vat"
         case TaxRegime.Sa    => "sa"
-        case TaxRegime.Sia   => "sia"
+        case TaxRegime.Simp  => "simp"
       }
 
       s"/essttp-backend/pega/recreate-session/$regime"

@@ -46,9 +46,9 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       ("HasRlsOnAddress - SA", TdAll.notEligibleHasRlsOnAddress, "hasRlsOnAddress", PageUrls.saRLSUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(Origins.Sa.Bta),
         Origins.Sa.Bta),
-      ("HasRlsOnAddress - SIA", TdAll.notEligibleHasRlsOnAddress, "hasRlsOnAddress", PageUrls.siaNotEligibleUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(Origins.Sia.Pta),
-        Origins.Sia.Pta),
+      ("HasRlsOnAddress - SIMP", TdAll.notEligibleHasRlsOnAddress, "hasRlsOnAddress", PageUrls.simpNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(Origins.Simp.Pta),
+        Origins.Simp.Pta),
       ("MarkedAsInsolvent - EPAYE", TdAll.notEligibleMarkedAsInsolvent, "markedAsInsolvent", PageUrls.payeNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - MarkedAsInsolvent`(Origins.Epaye.Bta),
         Origins.Epaye.Bta),
@@ -58,9 +58,9 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       ("MarkedAsInsolvent - SA", TdAll.notEligibleMarkedAsInsolvent, "markedAsInsolvent", PageUrls.saNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - MarkedAsInsolvent`(Origins.Sa.Bta),
         Origins.Sa.Bta),
-      ("MarkedAsInsolvent - SIA", TdAll.notEligibleMarkedAsInsolvent, "markedAsInsolvent", PageUrls.siaNotEligibleUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - MarkedAsInsolvent`(Origins.Sia.Pta),
-        Origins.Sia.Pta),
+      ("MarkedAsInsolvent - SIMP", TdAll.notEligibleMarkedAsInsolvent, "markedAsInsolvent", PageUrls.simpNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - MarkedAsInsolvent`(Origins.Simp.Pta),
+        Origins.Simp.Pta),
       ("IsLessThanMinDebtAllowance - EPAYE", TdAll.notEligibleIsLessThanMinDebtAllowance, "isLessThanMinDebtAllowance", PageUrls.epayeDebtTooSmallUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsLessThanMinDebtAllowance`(Origins.Epaye.Bta),
         Origins.Epaye.Bta),
@@ -70,9 +70,9 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       ("IsLessThanMinDebtAllowance - SA", TdAll.notEligibleIsLessThanMinDebtAllowance, "isLessThanMinDebtAllowance", PageUrls.saDebtTooSmallUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsLessThanMinDebtAllowance`(Origins.Sa.Bta),
         Origins.Sa.Bta),
-      ("IsLessThanMinDebtAllowance - SIA", TdAll.notEligibleIsLessThanMinDebtAllowance, "isLessThanMinDebtAllowance", PageUrls.siaDebtTooSmallUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsLessThanMinDebtAllowance`(Origins.Sia.Pta),
-        Origins.Sia.Pta),
+      ("IsLessThanMinDebtAllowance - SIMP", TdAll.notEligibleIsLessThanMinDebtAllowance, "isLessThanMinDebtAllowance", PageUrls.simpDebtTooSmallUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsLessThanMinDebtAllowance`(Origins.Simp.Pta),
+        Origins.Simp.Pta),
       ("IsMoreThanMaxDebtAllowance - EPAYE", TdAll.notEligibleIsMoreThanMaxDebtAllowance, "isMoreThanMaxDebtAllowance", PageUrls.epayeDebtTooLargeUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(Origins.Epaye.Bta),
         Origins.Epaye.Bta),
@@ -82,9 +82,9 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       ("IsMoreThanMaxDebtAllowance - SA", TdAll.notEligibleIsMoreThanMaxDebtAllowance, "isMoreThanMaxDebtAllowance", PageUrls.saDebtTooLargeUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(Origins.Sa.Bta),
         Origins.Sa.Bta),
-      ("IsMoreThanMaxDebtAllowance - SIA", TdAll.notEligibleIsMoreThanMaxDebtAllowance, "isMoreThanMaxDebtAllowance", PageUrls.siaDebtTooLargeUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(Origins.Sia.Pta),
-        Origins.Sia.Pta),
+      ("IsMoreThanMaxDebtAllowance - SIMP", TdAll.notEligibleIsMoreThanMaxDebtAllowance, "isMoreThanMaxDebtAllowance", PageUrls.simpDebtTooLargeUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(Origins.Simp.Pta),
+        Origins.Simp.Pta),
       ("DisallowedChargeLockTypes - EPAYE", TdAll.notEligibleDisallowedChargeLockTypes, "disallowedChargeLockTypes", PageUrls.payeNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - DisallowedChargeLockTypes`(Origins.Epaye.Bta),
         Origins.Epaye.Bta),
@@ -94,9 +94,9 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       ("DisallowedChargeLockTypes - SA", TdAll.notEligibleDisallowedChargeLockTypes, "disallowedChargeLockTypes", PageUrls.saNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - DisallowedChargeLockTypes`(Origins.Sa.Bta),
         Origins.Sa.Bta),
-      ("DisallowedChargeLockTypes - SIA", TdAll.notEligibleDisallowedChargeLockTypes, "disallowedChargeLockTypes", PageUrls.siaNotEligibleUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - DisallowedChargeLockTypes`(Origins.Sia.Pta),
-        Origins.Sia.Pta),
+      ("DisallowedChargeLockTypes - SIMP", TdAll.notEligibleDisallowedChargeLockTypes, "disallowedChargeLockTypes", PageUrls.simpNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - DisallowedChargeLockTypes`(Origins.Simp.Pta),
+        Origins.Simp.Pta),
       ("ExistingTTP - EPAYE", TdAll.notEligibleExistingTTP, "existingTTP", PageUrls.epayeAlreadyHaveAPaymentPlanUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExistingTTP`(Origins.Epaye.Bta),
         Origins.Epaye.Bta),
@@ -106,9 +106,9 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       ("ExistingTTP - SA", TdAll.notEligibleExistingTTP, "existingTTP", PageUrls.saAlreadyHaveAPaymentPlanUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExistingTTP`(Origins.Sa.Bta),
         Origins.Sa.Bta),
-      ("ExistingTTP - SIA", TdAll.notEligibleExistingTTP, "existingTTP", PageUrls.siaNotEligibleUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExistingTTP`(Origins.Sia.Pta),
-        Origins.Sia.Pta),
+      ("ExistingTTP - SIMP", TdAll.notEligibleExistingTTP, "existingTTP", PageUrls.simpNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExistingTTP`(Origins.Simp.Pta),
+        Origins.Simp.Pta),
       ("ExceedsMaxDebtAge - EPAYE", TdAll.notEligibleExceedsMaxDebtAge, "chargesOverMaxDebtAge", PageUrls.epayeDebtTooOldUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(Origins.Epaye.Bta),
         Origins.Epaye.Bta),
@@ -118,9 +118,9 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       ("ExceedsMaxDebtAge - SA", TdAll.notEligibleExceedsMaxDebtAge, "chargesOverMaxDebtAge", PageUrls.saDebtTooOldUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(Origins.Sa.Bta),
         Origins.Sa.Bta),
-      ("ExceedsMaxDebtAge - SIA", TdAll.notEligibleExceedsMaxDebtAge, "chargesOverMaxDebtAge", PageUrls.siaNotEligibleUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(Origins.Sia.Pta),
-        Origins.Sia.Pta),
+      ("ExceedsMaxDebtAge - SIMP", TdAll.notEligibleExceedsMaxDebtAge, "chargesOverMaxDebtAge", PageUrls.simpNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(Origins.Simp.Pta),
+        Origins.Simp.Pta),
       ("IneligibleChargeType - EPAYE", TdAll.notEligibleEligibleChargeType, "ineligibleChargeTypes", PageUrls.payeNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - EligibleChargeType`(Origins.Epaye.Bta),
         Origins.Epaye.Bta),
@@ -130,9 +130,9 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       ("IneligibleChargeType - SA", TdAll.notEligibleEligibleChargeType, "ineligibleChargeTypes", PageUrls.saNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - EligibleChargeType`(Origins.Sa.Bta),
         Origins.Sa.Bta),
-      ("IneligibleChargeType - SIA", TdAll.notEligibleEligibleChargeType, "ineligibleChargeTypes", PageUrls.siaNotEligibleUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - EligibleChargeType`(Origins.Sia.Pta),
-        Origins.Sia.Pta),
+      ("IneligibleChargeType - SIMP", TdAll.notEligibleEligibleChargeType, "ineligibleChargeTypes", PageUrls.simpNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - EligibleChargeType`(Origins.Simp.Pta),
+        Origins.Simp.Pta),
       ("MissingFiledReturns - EPAYE", TdAll.notEligibleMissingFiledReturns, "missingFiledReturns", PageUrls.epayeFileYourReturnUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - MissingFiledReturns`(Origins.Epaye.Bta),
         Origins.Epaye.Bta),
@@ -142,9 +142,9 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       ("MissingFiledReturns - SA", TdAll.notEligibleMissingFiledReturns, "missingFiledReturns", PageUrls.saFileYourReturnUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - MissingFiledReturns`(Origins.Sa.Bta),
         Origins.Sa.Bta),
-      ("MissingFiledReturns - SIA", TdAll.notEligibleMissingFiledReturns, "missingFiledReturns", PageUrls.siaNotEligibleUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - MissingFiledReturns`(Origins.Sia.Pta),
-        Origins.Sia.Pta),
+      ("MissingFiledReturns - SIMP", TdAll.notEligibleMissingFiledReturns, "missingFiledReturns", PageUrls.simpNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - MissingFiledReturns`(Origins.Simp.Pta),
+        Origins.Simp.Pta),
       ("NoDueDatesReached - EPAYE", TdAll.notEligibleNoDueDatesReached, "noDueDatesReached", PageUrls.payeNoDueDatesReachedUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Epaye.Bta),
         Origins.Epaye.Bta),
@@ -154,9 +154,9 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       ("NoDueDatesReached - SA", TdAll.notEligibleNoDueDatesReached, "noDueDatesReached", PageUrls.saNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Sa.Bta),
         Origins.Sa.Bta),
-      ("NoDueDatesReached - SIA", TdAll.notEligibleNoDueDatesReached, "noDueDatesReached", PageUrls.siaNotEligibleUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Sia.Pta),
-        Origins.Sia.Pta),
+      ("NoDueDatesReached - SIMP", TdAll.notEligibleNoDueDatesReached, "noDueDatesReached", PageUrls.simpNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Simp.Pta),
+        Origins.Simp.Pta),
 
       ("HasInvalidInterestSignals - EPAYE", TdAll.notEligibleHasInvalidInterestSignals, "hasInvalidInterestSignals", PageUrls.payeNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasInvalidInterestSignals`(Origins.Epaye.Bta), Origins.Epaye.Bta),
@@ -164,8 +164,8 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasInvalidInterestSignals`(Origins.Vat.Bta), Origins.Vat.Bta),
       ("HasInvalidInterestSignals - SA", TdAll.notEligibleHasInvalidInterestSignals, "hasInvalidInterestSignals", PageUrls.saNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasInvalidInterestSignals`(Origins.Sa.Bta), Origins.Sa.Bta),
-      ("HasInvalidInterestSignals - SIA", TdAll.notEligibleHasInvalidInterestSignals, "hasInvalidInterestSignals", PageUrls.siaNotEligibleUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasInvalidInterestSignals`(Origins.Sia.Pta), Origins.Sia.Pta),
+      ("HasInvalidInterestSignals - SIMP", TdAll.notEligibleHasInvalidInterestSignals, "hasInvalidInterestSignals", PageUrls.simpNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasInvalidInterestSignals`(Origins.Simp.Pta), Origins.Simp.Pta),
 
       ("HasInvalidInterestSignalsCESA - SA", TdAll.notEligibleHasInvalidInterestSignalsCESA, "hasInvalidInterestSignalsCESA", PageUrls.saNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasInvalidInterestSignalsCESA`(Origins.Sa.Bta), Origins.Sa.Bta),
@@ -176,8 +176,8 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - DmSpecialOfficeProcessingRequired`(Origins.Vat.Bta), Origins.Vat.Bta),
       ("DmSpecialOfficeProcessingRequired - SA", TdAll.notEligibleDmSpecialOfficeProcessingRequired, "dmSpecialOfficeProcessingRequired", PageUrls.saNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - DmSpecialOfficeProcessingRequired`(Origins.Sa.Bta), Origins.Sa.Bta),
-      ("DmSpecialOfficeProcessingRequired - SIA", TdAll.notEligibleDmSpecialOfficeProcessingRequired, "dmSpecialOfficeProcessingRequired", PageUrls.siaNotEligibleUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - DmSpecialOfficeProcessingRequired`(Origins.Sia.Pta), Origins.Sia.Pta),
+      ("DmSpecialOfficeProcessingRequired - SIMP", TdAll.notEligibleDmSpecialOfficeProcessingRequired, "dmSpecialOfficeProcessingRequired", PageUrls.simpNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - DmSpecialOfficeProcessingRequired`(Origins.Simp.Pta), Origins.Simp.Pta),
 
       ("CannotFindLockReason - EPAYE", TdAll.notEligibleCannotFindLockReason, "cannotFindLockReason", PageUrls.payeNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - CannotFindLockReason`(Origins.Epaye.Bta), Origins.Epaye.Bta),
@@ -185,8 +185,8 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - CannotFindLockReason`(Origins.Vat.Bta), Origins.Vat.Bta),
       ("CannotFindLockReason - SA", TdAll.notEligibleCannotFindLockReason, "cannotFindLockReason", PageUrls.saNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - CannotFindLockReason`(Origins.Sa.Bta), Origins.Sa.Bta),
-      ("CannotFindLockReason - SIA", TdAll.notEligibleCannotFindLockReason, "cannotFindLockReason", PageUrls.siaNotEligibleUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - CannotFindLockReason`(Origins.Sia.Pta), Origins.Sia.Pta),
+      ("CannotFindLockReason - SIMP", TdAll.notEligibleCannotFindLockReason, "cannotFindLockReason", PageUrls.simpNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - CannotFindLockReason`(Origins.Simp.Pta), Origins.Simp.Pta),
 
       ("CreditsNotAllowed - EPAYE", TdAll.notEligibleCreditsNotAllowed, "creditsNotAllowed", PageUrls.payeNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - CreditsNotAllowed`(Origins.Epaye.Bta), Origins.Epaye.Bta),
@@ -194,8 +194,8 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - CreditsNotAllowed`(Origins.Vat.Bta), Origins.Vat.Bta),
       ("CreditsNotAllowed - SA", TdAll.notEligibleCreditsNotAllowed, "creditsNotAllowed", PageUrls.saNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - CreditsNotAllowed`(Origins.Sa.Bta), Origins.Sa.Bta),
-      ("CreditsNotAllowed - SIA", TdAll.notEligibleCreditsNotAllowed, "creditsNotAllowed", PageUrls.siaNotEligibleUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - CreditsNotAllowed`(Origins.Sia.Pta), Origins.Sia.Pta),
+      ("CreditsNotAllowed - SIMP", TdAll.notEligibleCreditsNotAllowed, "creditsNotAllowed", PageUrls.simpNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - CreditsNotAllowed`(Origins.Simp.Pta), Origins.Simp.Pta),
 
       ("IsMoreThanMaxPaymentReference - EPAYE", TdAll.notEligibleIsMoreThanMaxPaymentReference, "isMoreThanMaxPaymentReference", PageUrls.payeNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxPaymentReference`(Origins.Epaye.Bta), Origins.Epaye.Bta),
@@ -203,8 +203,8 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxPaymentReference`(Origins.Vat.Bta), Origins.Vat.Bta),
       ("IsMoreThanMaxPaymentReference - SA", TdAll.notEligibleIsMoreThanMaxPaymentReference, "isMoreThanMaxPaymentReference", PageUrls.saNotEligibleUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxPaymentReference`(Origins.Sa.Bta), Origins.Sa.Bta),
-      ("IsMoreThanMaxPaymentReference - SIA", TdAll.notEligibleIsMoreThanMaxPaymentReference, "isMoreThanMaxPaymentReference", PageUrls.siaNotEligibleUrl,
-        JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxPaymentReference`(Origins.Sia.Pta), Origins.Sia.Pta),
+      ("IsMoreThanMaxPaymentReference - SIMP", TdAll.notEligibleIsMoreThanMaxPaymentReference, "isMoreThanMaxPaymentReference", PageUrls.simpNotEligibleUrl,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxPaymentReference`(Origins.Simp.Pta), Origins.Simp.Pta),
       ("ChargesBeforeMaxAccountingDate - VAT", TdAll.notEligibleChargesBeforeMaxAccountingDate, "chargesBeforeMaxAccountingDate", PageUrls.vatDebtBeforeAccountingDateUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - ChargesBeforeMaxAccountingDate`(Origins.Vat.Bta),
         Origins.Vat.Bta),
@@ -270,8 +270,8 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
                 case TaxRegime.Sa =>
                   ("Sa", """{ "utr": "1234567895" }""")
 
-                case TaxRegime.Sia =>
-                  ("Sia", """{ "nino": "QQ123456A" }""")
+                case TaxRegime.Simp =>
+                  ("Simp", """{ "nino": "QQ123456A" }""")
               }
 
             AuditConnectorStub.verifyEventAudited(
@@ -334,7 +334,7 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
           case TaxRegime.Epaye => Origins.Epaye.Bta
           case TaxRegime.Vat   => Origins.Vat.Bta
           case TaxRegime.Sa    => Origins.Sa.Bta
-          case TaxRegime.Sia   => Origins.Sia.Pta
+          case TaxRegime.Simp  => Origins.Simp.Pta
         }
         taxRegime -> origin
       }
@@ -565,23 +565,23 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       )
     }
 
-    "Eligible for Sia: should redirect to your bill and send an audit event" in {
+    "Eligible for SIMP: should redirect to your bill and send an audit event" in {
       val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
-        TaxRegime.Sia,
+        TaxRegime.Simp,
         regimeDigitalCorrespondence        = true,
         maybeChargeBeforeMaxAccountingDate = Some(true)
       )
       // for audit event
       val eligibilityCheckResponseJsonAsPounds = TtpJsonResponses.ttpEligibilityCallJson(
-        TaxRegime.Sia,
+        TaxRegime.Simp,
         poundsInsteadOfPence               = true,
         regimeDigitalCorrespondence        = true,
         maybeChargeBeforeMaxAccountingDate = Some(true)
       )
 
       stubCommonActions()
-      EssttpBackend.DetermineTaxId.findJourney(Origins.Sia.Pta)()
-      Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Sia)(eligibilityCheckResponseJson)
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Simp.Pta)()
+      Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Simp)(eligibilityCheckResponseJson)
       EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(
         TdAll.journeyId,
         JourneyJsonTemplates.`Eligibility Checked - Eligible`()
@@ -592,14 +592,14 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.yourBillIsUrl)
 
-      Ttp.Eligibility.verifyTtpEligibilityRequests(TaxRegime.Sia)
+      Ttp.Eligibility.verifyTtpEligibilityRequests(TaxRegime.Simp)
 
       EssttpBackend.EligibilityCheck.verifyUpdateEligibilityRequest(
         journeyId                      = TdAll.journeyId,
         expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(
           TdAll.eligibleEligibilityPass,
           TdAll.eligibleEligibilityRules,
-          TaxRegime.Sia,
+          TaxRegime.Simp,
           Some(RegimeDigitalCorrespondence(value = true)),
           chargeChargeBeforeMaxAccountingDate = Some(true)
         )
@@ -613,7 +613,7 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
              |  "eligibilityResult" : "eligible",
              |  "noEligibilityReasons": 0,
              |  "origin": "Pta",
-             |  "taxType": "Sia",
+             |  "taxType": "Simp",
              |  "taxDetail": {
              |    "nino": "QQ123456A"
              |  },
@@ -655,7 +655,7 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       Origins.Epaye.Bta -> TaxRegime.Epaye,
       Origins.Vat.Bta -> TaxRegime.Vat,
       Origins.Sa.Bta -> TaxRegime.Sa,
-      Origins.Sia.Pta -> TaxRegime.Sia
+      Origins.Simp.Pta -> TaxRegime.Simp
     ).foreach {
         case (origin, taxRegime) =>
           s"[${taxRegime.entryName}] throw an error when ttp eligibility call returns a legitimate error (not a 422)" in {
@@ -684,7 +684,7 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
                 case TaxRegime.Epaye => PageUrls.payeNotEligibleUrl
                 case TaxRegime.Vat   => PageUrls.vatNotEligibleUrl
                 case TaxRegime.Sa    => PageUrls.saNotEligibleUrl
-                case TaxRegime.Sia   => PageUrls.siaNotEligibleUrl
+                case TaxRegime.Simp  => PageUrls.simpNotEligibleUrl
               }
               redirectLocation(result) shouldBe Some(expectedPageUrl)
 

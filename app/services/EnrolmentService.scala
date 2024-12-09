@@ -59,7 +59,7 @@ class EnrolmentService @Inject() (journeyService: JourneyService, auditService: 
           journey
         )(journeyService.UpdateTaxRef.updateSaTaxId(journey.id, _))
 
-      case TaxRegime.Sia =>
+      case TaxRegime.Simp =>
         throw new RuntimeException("Enrolment cannot exist for Simple Assessment")
     }
   }

@@ -76,7 +76,7 @@ appConfig: AppConfig
     ).map(toCheckboxItem)
 }
 
-@siaEligibilityErrorCheckboxes = @{
+@simpEligibilityErrorCheckboxes = @{
     EligibilityErrors.values
         .filterNot(e => e === EligibilityErrors.MultipleReasons
             || e === EligibilityErrors.ChargesBeforeMaxAccountingDate
@@ -406,7 +406,7 @@ appConfig: AppConfig
         case TaxRegime.Epaye => 2000
         case TaxRegime.Vat   => 4700
         case TaxRegime.Sa    => 4910
-        case TaxRegime.Sia   => 2000
+        case TaxRegime.Simp   => 2000
     }
 }
 
@@ -415,7 +415,7 @@ appConfig: AppConfig
         case TaxRegime.Epaye => 1000
         case TaxRegime.Vat   => 1174
         case TaxRegime.Sa    => 1000
-        case TaxRegime.Sia   => 1000
+        case TaxRegime.Simp   => 1000
     }
 }
 
@@ -854,8 +854,8 @@ appConfig: AppConfig
 }
 }
 
-@siaContent = {
-@formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneySiaSubmit) {
+@simpContent = {
+@formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneySimpSubmit) {
     @credIdInput
     @signInAsContent
     @confidenceLevelRadios
@@ -863,8 +863,8 @@ appConfig: AppConfig
     @enrolmentsContent
 
     @govukInput(Input(
-        id = "siaTotalAmount",
-        name = "siaDebtTotalAmount",
+        id = "simpTotalAmount",
+        name = "simpDebtTotalAmount",
         label = Label(
             isPageHeading = false,
             classes = "govuk-label--m",
@@ -875,11 +875,11 @@ appConfig: AppConfig
         prefix = Some(PrefixOrSuffix(
             content = Text("£")
         )),
-        errorMessage = form.error("siaDebtTotalAmount").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
+        errorMessage = form.error("simpDebtTotalAmount").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
             content = Text(e.message)
         )),
-        value = form.data.get("siaDebtTotalAmount").orElse(Some("10000")),
-        hint = Some(Hint(content = Text(s"Enter an amount between £1 and ${appConfig.PolicyParameters.SIA.maxAmountOfDebt.gdsFormatInPounds} for SIA.")))
+        value = form.data.get("simpDebtTotalAmount").orElse(Some("10000")),
+        hint = Some(Hint(content = Text(s"Enter an amount between £1 and ${appConfig.PolicyParameters.SIMP.maxAmountOfDebt.gdsFormatInPounds} for SIMP.")))
     ))
 
     @interestAmountContent
@@ -902,7 +902,7 @@ appConfig: AppConfig
         )),
         idPrefix = Some("eligibilityErrors"),
         name = "eligibilityErrors[]",
-        items = siaEligibilityErrorCheckboxes,
+        items = simpEligibilityErrorCheckboxes,
         classes = "govuk-checkboxes--small"
     ))
 
@@ -912,7 +912,7 @@ appConfig: AppConfig
 
     @planMinLengthInput(1)
 
-    @planMaxLengthInput(appConfig.PolicyParameters.SIA.maxPlanDurationInMonths)
+    @planMaxLengthInput(appConfig.PolicyParameters.SIMP.maxPlanDurationInMonths)
 
     @govukRadios(Radios(
         fieldset = Some(Fieldset(
@@ -930,23 +930,23 @@ appConfig: AppConfig
         items = Seq(
             RadioItem(
                 content = Text("GOV.UK"),
-                value = Some(Origins.Sia.GovUk.entryName),
-                checked = form.data.exists(_._2 === Origins.Sia.GovUk.entryName)
+                value = Some(Origins.Simp.GovUk.entryName),
+                checked = form.data.exists(_._2 === Origins.Simp.GovUk.entryName)
             ),
             RadioItem(
                 content = Text("Personal Tax Account"),
-                value = Some(Origins.Sia.Pta.entryName),
-                checked = form.data.exists(_._2 === Origins.Sia.Pta.entryName)
+                value = Some(Origins.Simp.Pta.entryName),
+                checked = form.data.exists(_._2 === Origins.Simp.Pta.entryName)
             ),
             RadioItem(
                 content = Text("Detached Url"),
-                value = Some(Origins.Sia.DetachedUrl.entryName),
-                checked = form.data.exists(_._2 === Origins.Sia.DetachedUrl.entryName)
+                value = Some(Origins.Simp.DetachedUrl.entryName),
+                checked = form.data.exists(_._2 === Origins.Simp.DetachedUrl.entryName)
             ),
             RadioItem(
                 content = Text("Mobile service"),
-                value = Some(Origins.Sia.Mobile.entryName),
-                checked = form.data.exists(_._2 === Origins.Sia.Mobile.entryName)
+                value = Some(Origins.Simp.Mobile.entryName),
+                checked = form.data.exists(_._2 === Origins.Simp.Mobile.entryName)
             )
         ),
         classes = "govuk-radios--small"
@@ -974,7 +974,7 @@ appConfig: AppConfig
             case TaxRegime.Epaye    => payeContent
             case TaxRegime.Vat      => vatContent
             case TaxRegime.Sa       => saContent
-            case TaxRegime.Sia      => siaContent
+            case TaxRegime.Simp     => simpContent
         }
 
     }

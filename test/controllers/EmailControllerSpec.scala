@@ -52,7 +52,7 @@ class EmailControllerSpec extends ItSpec {
     TaxRegime.Epaye -> Origins.Epaye.Bta,
     TaxRegime.Vat -> Origins.Vat.Bta,
     TaxRegime.Sa -> Origins.Sa.Bta,
-    TaxRegime.Sia -> Origins.Sia.Pta
+    TaxRegime.Simp -> Origins.Simp.Pta
   ).foreach {
       case (taxRegime, origin) =>
 
@@ -88,7 +88,7 @@ class EmailControllerSpec extends ItSpec {
                     case TaxRegime.Epaye => routes.PaymentPlanSetUpController.epayePaymentPlanSetUp
                     case TaxRegime.Vat   => routes.PaymentPlanSetUpController.vatPaymentPlanSetUp
                     case TaxRegime.Sa    => routes.PaymentPlanSetUpController.saPaymentPlanSetUp
-                    case TaxRegime.Sia   => routes.PaymentPlanSetUpController.siaPaymentPlanSetUp
+                    case TaxRegime.Simp  => routes.PaymentPlanSetUpController.simpPaymentPlanSetUp
                   }
                 )
               }
@@ -410,13 +410,13 @@ class EmailControllerSpec extends ItSpec {
             case TaxRegime.Epaye => "Set up an Employers’ PAYE payment plan"
             case TaxRegime.Vat   => "Set up a VAT payment plan"
             case TaxRegime.Sa    => "Set up a Self Assessment payment plan"
-            case TaxRegime.Sia   => "Set up a Simple Assessment payment plan"
+            case TaxRegime.Simp  => "Set up a Simple Assessment payment plan"
           }
           val expectedPageTitleWelsh = taxRegime match {
             case TaxRegime.Epaye => "Trefnu cynllun talu ar gyfer TWE Cyflogwyr"
             case TaxRegime.Vat   => "Trefnu cynllun talu TAW"
             case TaxRegime.Sa    => "Sefydlu cynllun talu ar gyfer Hunanasesiad"
-            case TaxRegime.Sia   => "Sefydlu cynllun talu ar gyfer Asesiad Syml"
+            case TaxRegime.Simp  => "Sefydlu cynllun talu ar gyfer Asesiad Syml"
           }
 
           "not allow journeys where an email has not been selected" in {

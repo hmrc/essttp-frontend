@@ -60,7 +60,7 @@ class PaymentDayControllerSpec extends ItSpec {
     ("EPAYE", Origins.Epaye.Bta, TaxRegime.Epaye),
     ("VAT", Origins.Vat.Bta, TaxRegime.Vat),
     ("SA", Origins.Sa.Bta, TaxRegime.Sa),
-    ("SIA", Origins.Sia.Pta, TaxRegime.Sia)
+    ("SIMP", Origins.Simp.Pta, TaxRegime.Simp)
   ).foreach {
       case (regime, origin, taxRegime) =>
 

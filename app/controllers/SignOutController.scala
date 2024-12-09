@@ -48,7 +48,7 @@ class SignOutController @Inject() (
         case TaxRegime.Epaye => routes.SignOutController.exitSurveyPaye
         case TaxRegime.Vat   => routes.SignOutController.exitSurveyVat
         case TaxRegime.Sa    => routes.SignOutController.exitSurveySa
-        case TaxRegime.Sia   => routes.SignOutController.exitSurveySia
+        case TaxRegime.Simp  => routes.SignOutController.exitSurveySimp
       }
     }.withNewSession
   }
@@ -65,8 +65,8 @@ class SignOutController @Inject() (
     Redirect(appConfig.ExitSurvey.saExitSurveyUrl).withNewSession
   }
 
-  val exitSurveySia: Action[AnyContent] = Action { _ =>
-    Redirect(appConfig.ExitSurvey.siaExitSurveyUrl).withNewSession
+  val exitSurveySimp: Action[AnyContent] = Action { _ =>
+    Redirect(appConfig.ExitSurvey.simpExitSurveyUrl).withNewSession
   }
 
 }

@@ -108,7 +108,7 @@ object Messages {
       welsh   = "Hunanasesiad"
     )
 
-    val SIA: Message = Message(
+    val SIMP: Message = Message(
       english = "Simple Assessment",
       welsh   = "Asesiad Syml"
     )
@@ -162,7 +162,7 @@ object Messages {
             welsh   = s"Mae’ch bil treth Hunanasesiad yn dod i gyfanswm o ${amount.gdsFormatInPounds}"
           )
 
-        case TaxRegime.Sia =>
+        case TaxRegime.Simp =>
           Message(
             english = s"Your Simple Assessment tax bill is ${amount.gdsFormatInPounds}",
             welsh   = s"Mae’ch bil treth Asesiad Syml yn dod i gyfanswm o ${amount.gdsFormatInPounds}"
@@ -253,7 +253,7 @@ object Messages {
           welsh   = "Sefydlu cynllun talu ar gyfer Hunanasesiad"
         )
 
-      case TaxRegime.Sia =>
+      case TaxRegime.Simp =>
         Message(
           english = "Set up a Simple Assessment payment plan",
           welsh   = "Sefydlu cynllun talu ar gyfer Asesiad Syml"
@@ -401,7 +401,7 @@ object Messages {
           english = s"You cannot set up a Self Assessment payment plan online because you owe more than ${maxAmountOfDebt.gdsFormatInPounds}.",
           welsh   = s"Ni allwch drefnu cynllun talu Hunanasesiad ar-lein oherwydd mae arnoch dros ${maxAmountOfDebt.gdsFormatInPounds}."
         )
-      case TaxRegime.Sia =>
+      case TaxRegime.Simp =>
         Message(
           english = s"You cannot set up a Simple Assessment payment plan online because you owe more than ${maxAmountOfDebt.gdsFormatInPounds}.",
           welsh   = s"Ni allwch drefnu cynllun talu Asesiad Syml ar-lein oherwydd mae arnoch dros ${maxAmountOfDebt.gdsFormatInPounds}."
@@ -413,7 +413,7 @@ object Messages {
         case TaxRegime.Epaye => "PAYE" -> "TWE"
         case TaxRegime.Vat   => "VAT" -> "TAW"
         case TaxRegime.Sa    => "Self Assessment tax" -> "treth Hunanasesiad"
-        case TaxRegime.Sia   => "Simple Assessment tax" -> "treth Asesiad Syml"
+        case TaxRegime.Simp  => "Simple Assessment tax" -> "treth Asesiad Syml"
       }
       Message(
         english = s"Pay your $taxSpecificContentEnglish bill in full",
@@ -442,7 +442,7 @@ object Messages {
           english = "You cannot set up a Self Assessment payment plan online because your bill is too small.",
           welsh   = "Ni allwch drefnu cynllun talu Hunanasesiad ar-lein oherwydd bod eich bil yn rhy fach."
         )
-      case TaxRegime.Sia =>
+      case TaxRegime.Simp =>
         Message(
           english = "You cannot set up a Simple Assessment payment plan online because your bill is too small.",
           welsh   = "Ni allwch drefnu cynllun talu Asesiad Syml ar-lein oherwydd bod eich bil yn rhy fach."
@@ -465,7 +465,7 @@ object Messages {
           english = s"""<a class="govuk-link" href="$link">Make a payment online</a> to cover your Self Assessment tax bill in full.""",
           welsh   = s"""<a class="govuk-link" href="$link">Gwnewch daliad ar-lein</a> i dalu’ch bil Hunanasesiad yn llawn."""
         )
-      case TaxRegime.Sia =>
+      case TaxRegime.Simp =>
         Message(
           english = s"""<a class="govuk-link" href="$link">Make a payment online</a> to cover your Simple Assessment tax bill in full.""",
           welsh   = s"""<a class="govuk-link" href="$link">Gwnewch daliad ar-lein</a> i dalu’ch bil Asesiad Syml yn llawn."""
@@ -492,7 +492,7 @@ object Messages {
         english = s"You cannot set up a Self Assessment payment plan online because your payment deadline was over ${ageOfDebtInYearsOrDays.toString} days ago.",
         welsh   = s"Ni allwch drefnu cynllun talu Hunanasesiad ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros ${ageOfDebtInYearsOrDays.toString} diwrnod yn ôl."
       )
-      case TaxRegime.Sia => Message(
+      case TaxRegime.Simp => Message(
         english = s"You cannot set up a Simple Assessment payment plan online because your payment deadline was over ${ageOfDebtInYearsOrDays.toString} days ago.",
         welsh   = s"Ni allwch drefnu cynllun talu Asesiad Syml ar-lein oherwydd roedd y dyddiad cau ar gyfer talu dros ${ageOfDebtInYearsOrDays.toString} diwrnod yn ôl."
       )
@@ -544,7 +544,7 @@ object Messages {
           english = "You are not eligible to set up a Self Assessment payment plan online.",
           welsh   = "Nid ydych yn gymwys i drefnu cynllun talu Hunanasesiad ar-lein."
         )
-      case TaxRegime.Sia =>
+      case TaxRegime.Simp =>
         Message(
           english = "You are not eligible to set up a Simple Assessment payment plan online.",
           welsh   = "Nid ydych yn gymwys i drefnu cynllun talu Asesiad Syml ar-lein."
@@ -572,7 +572,7 @@ object Messages {
           english = "You cannot set up a Self Assessment payment plan online because some of your personal details are not up to date.",
           welsh   = "Ni allwch drefnu cynllun talu Hunanasesiad ar-lein oherwydd nad yw rhai o’ch manylion personol yn gyfredol."
         )
-      case TaxRegime.Sia =>
+      case TaxRegime.Simp =>
         Message(
           english = "You cannot set up a Simple Assessment payment plan online because some of your personal details are not up to date.",
           welsh   = "Ni allwch drefnu cynllun talu Asesiad Syml ar-lein oherwydd nad yw rhai o’ch manylion personol yn gyfredol."
@@ -600,7 +600,7 @@ object Messages {
           english = "File your Self Assessment tax return to use this service",
           welsh   = "Cyflwynwch eich Ffurflen Dreth Hunanasesiad er mwyn defnyddio’r gwasanaeth hwn"
         )
-      case TaxRegime.Sia =>
+      case TaxRegime.Simp =>
         Message(
           english = "File your Simple Assessment tax return to use this service",
           welsh   = "Cyflwynwch eich Ffurflen Dreth Asesiad Syml er mwyn defnyddio’r gwasanaeth hwn"
@@ -695,8 +695,8 @@ object Messages {
         english = "You already have a Direct Debit set up for VAT.",
         welsh   = "Mae eisoes gennych drefniant Debyd Uniongyrchol er mwyn talu TAW."
       )
-      case TaxRegime.Sa  => throw new NotImplementedError("ddInProgress flag not relevant to SA charges")
-      case TaxRegime.Sia => throw new NotImplementedError("ddInProgress flag not relevant to SIA charges")
+      case TaxRegime.Sa   => throw new NotImplementedError("ddInProgress flag not relevant to SA charges")
+      case TaxRegime.Simp => throw new NotImplementedError("ddInProgress flag Not relevant to SIMP charges")
     }
 
     def `If you set up a payment plan, the following charge.. could be collected twice.`(chargesInPlural: Boolean): Message =
@@ -1136,7 +1136,7 @@ object Messages {
 
   }
 
-  object Sia {
+  object Simp {
 
     val `Set up a Simple Assessment payment plan`: Message = Message(
       english = "Set up a Simple Assessment payment plan",
@@ -1884,7 +1884,7 @@ object Messages {
             english = "Debt Management<br>Self Assessment<br>HM Revenue and Customs<br>BX9 1AS<br>United Kingdom",
             welsh   = "Rheolaeth Dyledion<br>Hunanasesiad<br>Gwasanaeth Cwsmeriaid Cymraeg CThEF<br>HMRC<br>BX9 1ST"
           )
-        case TaxRegime.Sia =>
+        case TaxRegime.Simp =>
           Message(
             english = "Debt Management<br>Simple Assessment<br>HM Revenue and Customs<br>BX9 1AS<br>United Kingdom",
             welsh   = "Rheolaeth Dyledion<br>Asesiad Syml<br>Gwasanaeth Cwsmeriaid Cymraeg CThEF<br>HMRC<br>BX9 1ST"

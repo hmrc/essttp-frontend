@@ -46,7 +46,7 @@ class TermsAndConditionsControllerSpec extends ItSpec {
     ("EPAYE", Origins.Epaye.Bta, TaxRegime.Epaye),
     ("VAT", Origins.Vat.Bta, TaxRegime.Vat),
     ("SA", Origins.Sa.Bta, TaxRegime.Sa),
-    ("SIA", Origins.Sia.Pta, TaxRegime.Sia)
+    ("SIMP", Origins.Simp.Pta, TaxRegime.Simp)
   ).foreach {
       case (regime, origin, taxRegime) =>
 
@@ -73,7 +73,7 @@ class TermsAndConditionsControllerSpec extends ItSpec {
                 case TaxRegime.Epaye => "DM PAYE HM Revenue and Customs BX9 1EW United Kingdom"
                 case TaxRegime.Vat   => "HMRC Direct Debit Support Team VAT 2 DMB 612 BX5 5AB United Kingdom"
                 case TaxRegime.Sa    => "Debt Management Self Assessment HM Revenue and Customs BX9 1AS United Kingdom"
-                case TaxRegime.Sia   => "Debt Management Simple Assessment HM Revenue and Customs BX9 1AS United Kingdom"
+                case TaxRegime.Simp  => "Debt Management Simple Assessment HM Revenue and Customs BX9 1AS United Kingdom"
               }
 
               ContentAssertions.assertListOfContent(
@@ -187,7 +187,7 @@ class TermsAndConditionsControllerSpec extends ItSpec {
                 case TaxRegime.Epaye => "Gwasanaeth Cwsmeriaid Cymraeg CThEF HMRC BX9 1ST"
                 case TaxRegime.Vat   => "Gwasanaeth Cwsmeriaid Cymraeg CThEF HMRC BX9 1ST"
                 case TaxRegime.Sa    => "Rheolaeth Dyledion Hunanasesiad Gwasanaeth Cwsmeriaid Cymraeg CThEF HMRC BX9 1ST"
-                case TaxRegime.Sia   => "Rheolaeth Dyledion Asesiad Syml Gwasanaeth Cwsmeriaid Cymraeg CThEF HMRC BX9 1ST"
+                case TaxRegime.Simp  => "Rheolaeth Dyledion Asesiad Syml Gwasanaeth Cwsmeriaid Cymraeg CThEF HMRC BX9 1ST"
               }
 
               ContentAssertions.assertListOfContent(
@@ -321,7 +321,7 @@ class TermsAndConditionsControllerEmailDisabledSpec extends ItSpec {
     ("EPAYE", Origins.Epaye.Bta),
     ("VAT", Origins.Vat.Bta),
     ("SA", Origins.Sa.Bta),
-    ("SIA", Origins.Sia.Pta)
+    ("SIMP", Origins.Simp.Pta)
   ).foreach {
       case (regime, origin) =>
 

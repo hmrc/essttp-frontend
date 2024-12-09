@@ -36,7 +36,7 @@ object EligibilityRequestDefaults {
     val idType: String = "UTR"
   }
 
-  object Sia {
+  object Simp {
     val idType: String = "NINO"
   }
 

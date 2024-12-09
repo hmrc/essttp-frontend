@@ -49,7 +49,7 @@ object TdJsonBodies {
         case TaxRegime.Epaye => "/epaye-payment-plan"
         case TaxRegime.Vat   => "/vat-payment-plan"
         case TaxRegime.Sa    => "/sa-payment-plan"
-        case TaxRegime.Sia   => "/sia-payment-plan"
+        case TaxRegime.Simp  => "/simple-assessment-payment-plan"
       }
       s"""{
          |  "nextUrl": "http://localhost:19001/set-up-a-payment-plan$relativeUrl",
@@ -618,7 +618,7 @@ object TdJsonBodies {
       case TaxRegime.Epaye => "123PA44545546"
       case TaxRegime.Vat   => "101747001"
       case TaxRegime.Sa    => "1234567895"
-      case TaxRegime.Sia   => "QQ123456A"
+      case TaxRegime.Simp  => "QQ123456A"
     }
     s"""
        |"arrangementResponse" : {

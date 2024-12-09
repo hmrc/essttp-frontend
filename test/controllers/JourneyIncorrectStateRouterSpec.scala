@@ -34,7 +34,7 @@ class JourneyIncorrectStateRouterSpec extends ItSpec {
       ("Stages.Started - EPAYE", () => EssttpBackend.StartJourney.findJourney(), PageUrls.epayeLandingPageUrl),
       ("Stages.Started - VAT", () => EssttpBackend.StartJourney.findJourney(Origins.Vat.GovUk), PageUrls.vatLandingPageUrl),
       ("Stages.Started - SA", () => EssttpBackend.StartJourney.findJourney(Origins.Sa.GovUk), PageUrls.saLandingPageUrl),
-      ("Stages.Started - SIA", () => EssttpBackend.StartJourney.findJourney(Origins.Sia.GovUk), PageUrls.siaLandingPageUrl),
+      ("Stages.Started - SIMP", () => EssttpBackend.StartJourney.findJourney(Origins.Simp.GovUk), PageUrls.simpLandingPageUrl),
       ("Stages.ComputedTaxId", () => EssttpBackend.DetermineTaxId.findJourney(Origins.Epaye.Bta)(), PageUrls.determineEligibilityUrl),
       ("Stages.EligibilityChecked", () => EssttpBackend.EligibilityCheck.findJourney(testCrypto)(), PageUrls.yourBillIsUrl), //check this
       ("Stages.EligibilityChecked - PAYE", () => EssttpBackend.EligibilityCheck.findJourney(testCrypto)(
@@ -58,8 +58,8 @@ class JourneyIncorrectStateRouterSpec extends ItSpec {
         () => EssttpBackend.WhyCannotPayInFull.findJourney(testCrypto)(JourneyJsonTemplates.`Why Cannot Pay in Full - Not Required`(Origins.Sa.Bta)),
         PageUrls.canYouMakeAnUpfrontPaymentUrl
       ),
-      ("Stages.ObtainedWhyCannotPayInFull - SIA",
-        () => EssttpBackend.WhyCannotPayInFull.findJourney(testCrypto)(JourneyJsonTemplates.`Why Cannot Pay in Full - Not Required`(Origins.Sia.Pta)),
+      ("Stages.ObtainedWhyCannotPayInFull - SIMP",
+        () => EssttpBackend.WhyCannotPayInFull.findJourney(testCrypto)(JourneyJsonTemplates.`Why Cannot Pay in Full - Not Required`(Origins.Simp.Pta)),
         PageUrls.canYouMakeAnUpfrontPaymentUrl
       ),
       ("Stages.AnsweredCanPayUpfront - can pay upfront", () => EssttpBackend.CanPayUpfront.findJourney(testCrypto)(), PageUrls.howMuchCanYouPayUpfrontUrl),

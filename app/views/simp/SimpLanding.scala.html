@@ -34,46 +34,46 @@
 
 @import requestSupport._
 
-@title= @{Messages.Sia.`Set up a Simple Assessment payment plan`.show }
+@title= @{Messages.Simp.`Set up a Simple Assessment payment plan`.show }
 
 @layout(
     pageTitle = Some(title),
     backLinkUrlOverride = backUrl.map(_.value),
-    fallBackTaxRegime = Some(TaxRegime.Sia),
+    fallBackTaxRegime = Some(TaxRegime.Simp),
     showServiceNameInHeader = false
 ) {
 
-  <h1 class="govuk-heading-xl">@{Messages.Sia.`Set up a Simple Assessment payment plan`.show}</h1>
+  <h1 class="govuk-heading-xl">@{Messages.Simp.`Set up a Simple Assessment payment plan`.show}</h1>
 
-  <p class="govuk-body">@{Messages.Sia.`You can use this service to pay overdue payments in instalments.`.show}</p>
-  <p class="govuk-body">@{Messages.Sia.`You are eligible to set up an online payment plan if:`.show}</p>
-
-  <ul class="govuk-list govuk-list--bullet">
-      <li>@{Messages.Sia.`you owe ... or less`(appConfig.PolicyParameters.SIA.maxAmountOfDebt).show}</li>
-      <li>@{Messages.Sia.`you do not have any other debts with HMRC`.show}</li>
-      <li>@{Messages.Sia.`you do not have any payment plans with HMRC`.show}</li>
-  </ul>
-
-  <p class="govuk-body">@{Messages.Sia.`You can choose to pay:`.show}</p>
+  <p class="govuk-body">@{Messages.Simp.`You can use this service to pay overdue payments in instalments.`.show}</p>
+  <p class="govuk-body">@{Messages.Simp.`You are eligible to set up an online payment plan if:`.show}</p>
 
   <ul class="govuk-list govuk-list--bullet">
-      <li>@{Messages.Sia.`part of the payment upfront and part in monthly instalments`.show}</li>
-      <li>@{Messages.Sia.`monthly instalments only`.show}</li>
+      <li>@{Messages.Simp.`you owe ... or less`(appConfig.PolicyParameters.SIMP.maxAmountOfDebt).show}</li>
+      <li>@{Messages.Simp.`you do not have any other debts with HMRC`.show}</li>
+      <li>@{Messages.Simp.`you do not have any payment plans with HMRC`.show}</li>
   </ul>
 
-  <h2 class="govuk-heading-m">@{Messages.Sia.`Before you start`.show}</h2>
-
-  <p class="govuk-body">@{Messages.Sia.`You must be:`.show}</p>
+  <p class="govuk-body">@{Messages.Simp.`You can choose to pay:`.show}</p>
 
   <ul class="govuk-list govuk-list--bullet">
-      <li>@{Messages.Sia.`a named account holder for the UK bank account you intend to use`.show}</li>
-      <li>@{Messages.Sia.`able to authorise a Direct Debit`.show}</li>
+      <li>@{Messages.Simp.`part of the payment upfront and part in monthly instalments`.show}</li>
+      <li>@{Messages.Simp.`monthly instalments only`.show}</li>
   </ul>
 
-  <p class="govuk-body">@{Messages.Sia.`You must keep up to date with your payments...`.show}</p>
+  <h2 class="govuk-heading-m">@{Messages.Simp.`Before you start`.show}</h2>
+
+  <p class="govuk-body">@{Messages.Simp.`You must be:`.show}</p>
+
+  <ul class="govuk-list govuk-list--bullet">
+      <li>@{Messages.Simp.`a named account holder for the UK bank account you intend to use`.show}</li>
+      <li>@{Messages.Simp.`able to authorise a Direct Debit`.show}</li>
+  </ul>
+
+  <p class="govuk-body">@{Messages.Simp.`You must keep up to date with your payments...`.show}</p>
 
   @govukButton(Button(
-        href = Some(routes.LandingController.siaLandingPageContinue.url),
+        href = Some(routes.LandingController.simpLandingPageContinue.url),
         content = Text(Messages.`Start now`.show),
         isStartButton = true
     ))

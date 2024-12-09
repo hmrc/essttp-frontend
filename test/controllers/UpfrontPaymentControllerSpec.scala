@@ -49,7 +49,7 @@ class UpfrontPaymentControllerSpec extends ItSpec with UnchangedFromCYALinkAsser
     ("EPAYE", Origins.Epaye.Bta, TaxRegime.Epaye),
     ("VAT", Origins.Vat.Bta, TaxRegime.Vat),
     ("SA", Origins.Sa.Bta, TaxRegime.Sa),
-    ("SIA", Origins.Sia.Pta, TaxRegime.Sia)
+    ("SIMP", Origins.Simp.Pta, TaxRegime.Simp)
   ).foreach {
       case (regime, origin, taxRegime) =>
         "GET /can-you-make-an-upfront-payment" - {
@@ -529,7 +529,7 @@ class UpfrontPaymentControllerPEGARedirectInConfigSpec extends ItSpec with Uncha
     Origins.Epaye.Bta,
     Origins.Vat.Bta,
     Origins.Sa.Bta,
-    Origins.Sia.Pta
+    Origins.Simp.Pta
   ).foreach { origin =>
 
       "When the PEGA change link return URL is defined in config" - {
