@@ -1,0 +1,53 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.AppConfig
+@import messages.Messages
+@import requests.RequestSupport
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import play.twirl.api.Html
+@import play.api.mvc.Request
+
+@this(
+        requestSupport: RequestSupport,
+        appConfig: AppConfig,
+        details: GovukDetails
+)
+
+@()(implicit request: Request[_])
+
+@import requestSupport._
+
+
+@detailsContent = {
+    <p class="govuk-body">@Html(Messages.CallHmrc.`Telephone: ...`.show)</p>
+    <p class="govuk-body">@Html(Messages.CallHmrc.`Outside UK: ...`.show)</p>
+    <p class="govuk-body">@{Messages.CallHmrc.`Our phone line opening hours are:`.show}</p>
+    <p class="govuk-body">@{Messages.CallHmrc.`Monday to Friday: ...`.show}</p>
+    <p class="govuk-body">@{Messages.CallHmrc.`Closed weekends and bank holidays.`.show}</p>
+
+    <h2 class="govuk-heading-m">@{Messages.CallHmrc.`Text service`.show}</h2>
+    <p class="govuk-body">@Html(Messages.CallHmrc.`Use Relay UK if you cannot hear or speak on the telephone...`(appConfig.Urls.relayUrl).show)</p>
+    <p class="govuk-body">@Html(Messages.CallHmrc.`If a health condition or personal circumstances make it difficult to contact us...`(appConfig.Urls.extraSupportUrl).show)</p>
+
+}
+
+@details(
+    Details(
+        summary = Text(Messages.CallHmrc.`If you do not think you can set up a plan online, call HMRC and find out if you can set up a plan over the phone.`.show),
+        content = HtmlContent(detailsContent)
+    )
+)

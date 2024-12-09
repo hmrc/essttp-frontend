@@ -893,21 +893,83 @@ object Messages {
 
   }
 
+  object CallHmrc {
+    val `If you do not think you can set up a plan online, call HMRC and find out if you can set up a plan over the phone.`: Message = Message(
+      english = "If you do not think you can set up a plan online, call HMRC and find out if you can set up a plan over the phone.",
+      welsh   = "Os nad ydych yn credu y gallwch sefydlu cynllun ar-lein, ffoniwch CThEF a dysgwch a allwch sefydlu cynllun dros y ffôn."
+    )
+
+    val `Telephone: ...`: Message = Message(
+      english = "Telephone: <strong>0300 123 1813</strong>",
+      welsh   = "Ffôn: <strong>0300 123 1813</strong>"
+    )
+
+    val `Outside UK: ...`: Message = Message(
+      english = "Outside UK: <strong>+44 2890 538 192</strong>",
+      welsh   = "O’r tu allan i’r DU: <strong>+44 2890 538 192</strong>"
+    )
+
+    val `Our phone line opening hours are:`: Message = Message(
+      english = "Our phone line opening hours are:",
+      welsh   = "Oriau agor ein llinell ffôn yw:"
+    )
+
+    val `Monday to Friday: ...`: Message = Message(
+      english = "Monday to Friday: 8am to 6pm",
+      welsh   = "Dydd Llun i ddydd Gwener: 8:30 i 17:00"
+    )
+
+    val `Closed weekends and bank holidays.`: Message = Message(
+      english = "Closed weekends and bank holidays.",
+      welsh   = "Ar gau ar benwythnosau a gwyliau banc."
+    )
+
+    val `Text service`: Message = Message(
+      english = "Text service",
+      welsh   = "Gwasanaeth Text Relay"
+    )
+
+    def `Use Relay UK if you cannot hear or speak on the telephone...`(linkUrl: String): Message = Message(
+      english = s"""Use Relay UK if you cannot hear or speak on the telephone, dial <strong>18001</strong> then <strong>0345 300 3900</strong>. Find out more on the <a class="govuk-link" href="$linkUrl" rel="noreferrer noopener" target="_blank">Relay UK website (opens in new tab)</a>.""",
+      welsh   = s"""Defnyddiwch wasanaeth Text Relay UK os na allwch glywed na siarad dros y ffôn. Deialwch <strong>18001</strong> ac yna <strong>0345 300 3900</strong>. Dysgwch ragor am hyn ar <a href="$linkUrl" rel="noreferrer noopener" target="_blank">wefan Text Relay UK (yn agor tab newydd)</a>."""
+    )
+
+    def `If a health condition or personal circumstances make it difficult to contact us...`(linkUrl: String): Message = Message(
+      english = s"""<strong>If a health condition or personal circumstances make it difficult to contact us, read our guidance <a class="govuk-link" href="$linkUrl" rel="noreferrer noopener" target="_blank">Get help from HMRC if you need extra support (opens in new tab)</a>.</strong>""",
+      welsh   = s"""<strong>Os yw cyflwr iechyd neu amgylchiadau personol yn ei gwneud hi’n anodd i chi gysylltu â ni, darllenwch ein harweiniad ynghylch <a href="$linkUrl" rel="noreferrer noopener" target="_blank">‘Cael help gan CThEF os oes angen cymorth ychwanegol arnoch’ (yn agor tab newydd)</a>.</strong>"""
+    )
+  }
+
   object Epaye {
 
     val `Set up an Employers' PAYE payment plan`: Message = Message(
       english = "Set up an Employers’ PAYE payment plan",
-      welsh   = "Trefnu cynllun talu ar gyfer TWE Cyflogwyrc"
+      welsh   = "Trefnu cynllun talu ar gyfer TWE cyflogwyr"
     )
 
-    val `You can use this service to pay overdue payments...`: Message = Message(
-      english = "You can use this service to pay overdue payments in instalments. The payments you make may incur interest.",
-      welsh   = "Gallwch ddefnyddio’r gwasanaeth hwn i dalu taliadau hwyr fesul rhandaliad. Efallai y codir llog ar y taliadau a wnewch."
+    val `Use this service to set up a payment plan..`: Message = Message(
+      english = "Use this service to set up a payment plan for your outstanding employers’ PAYE bill. Payments are taken by Direct Debit and include interest charged at the Bank of England base rate plus 2.5% per year.",
+      welsh   = "Defnyddiwch y gwasanaeth hwn i sefydlu cynllun talu ar gyfer eich bil TWE y cyflogwyr sy’n weddill. Mae taliadau’n cael eu cymryd drwy Ddebyd Uniongyrchol ac maent yn cynnwys llog a godir ar gyfradd sylfaenol Banc Lloegr ynghyd â 2.5% y flwyddyn."
     )
 
-    val `You can set up a payment plan online if you:`: Message = Message(
-      english = "You can set up a payment plan online if you:",
-      welsh   = "Gallwch fynd ar-lein i drefnu cynllun talu os yw’r canlynol yn wir:"
+    val `To set up a Direct Debit online, you must be named...`: Message = Message(
+      english = "To set up a Direct Debit online, you must be named on the UK bank account you’ll use to pay. You must be able to authorise a Direct Debit without a signature from any other account holders.",
+      welsh   = "I sefydlu Debyd Uniongyrchol ar-lein, mae’n rhaid i chi fod wedi’ch enwi ar gyfrif banc y DU y byddwch yn ei ddefnyddio i dalu. Mae’n rhaid i chi allu awdurdodi Debyd Uniongyrchol heb lofnod gan unrhyw ddeiliaid cyfrif eraill."
+    )
+
+    val `You’ll need to stay up to date with your payments or we could ask you to pay in full.`: Message = Message(
+      english = "You’ll need to stay up to date with your payments or we could ask you to pay in full.",
+      welsh   = "Bydd angen i chi gael yr wybodaeth ddiweddaraf am eich taliadau neu gallem ofyn i chi dalu’n llawn."
+    )
+
+    val `To set up a plan, your company or partnership must:`: Message = Message(
+      english = "To set up a plan, your company or partnership must:",
+      welsh   = "I sefydlu cynllun, mae’n rhaid i’r canlynol fod yn wir:"
+    )
+
+    val `have missed the deadline to pay a PAYE bill`: Message = Message(
+      english = "have missed the deadline to pay a PAYE bill",
+      welsh   = "mae’ch cwmni neu’ch partneriaeth wedi methu’r dyddiad cau i dalu bil TWE"
     )
 
     def `owe ... or less`(maxAmountOfDebt: AmountInPence): Message = Message(
@@ -915,54 +977,19 @@ object Messages {
       welsh   = s"mae arnoch ${maxAmountOfDebt.gdsFormatInPounds} neu lai"
     )
 
-    def `plan to pay your debt off within the next ... months`(maxPlanDurationInMonths: Int): Message = Message(
-      english = s"plan to pay your debt off within the next ${maxPlanDurationInMonths.toString} months",
-      welsh   = s"rydych yn bwriadu talu’ch dyled cyn pen y ${maxPlanDurationInMonths.toString} mis nesaf"
+    val `have debts that are 5 years old or less`: Message = Message(
+      english = "have debts that are 5 years old or less",
+      welsh   = "mae gan eich cwmni neu’ch partneriaeth ddyledion sy’n 5 blynedd oed neu lai"
     )
 
-    def `have debts that are ... years old or less`(maxDebtAgeInYears: Int): Message = Message(
-      english = s"have debts that are ${maxDebtAgeInYears.toString} years old or less",
-      welsh   = s"mae gennych ddyledion sy’n ${maxDebtAgeInYears.toString} blynedd oed neu lai"
+    val `have no other payment plans or debts with HMRC`: Message = Message(
+      english = "have no other payment plans or debts with HMRC",
+      welsh   = "nid oes gan eich cwmni neu’ch partneriaeth unrhyw gynlluniau talu na dyledion eraill gyda CThEF"
     )
 
-    val `do not have any other payment plans or debts with HMRC`: Message = Message(
-      english = "do not have any other payment plans or debts with HMRC",
-      welsh   = "nid oes gennych unrhyw gynlluniau talu na dyledion eraill gyda CThEF"
-    )
-
-    val `have sent any Employers’ PAYE submissions and Construction Industry Scheme (CIS) returns that are due`: Message = Message(
-      english = "have sent any Employers’ PAYE submissions and Construction Industry Scheme (CIS) returns that are due",
-      welsh   = "rydych wedi anfon unrhyw gyflwyniadau TWE y Cyflogwr a datganiadau Cynllun y Diwydiant Adeiladu (CIS) erbyn y dyddiadau cau"
-    )
-
-    val `have missed the deadline to pay a PAYE bill`: Message = Message(
-      english = "have missed the deadline to pay a PAYE bill",
-      welsh   = "rydych wedi methu’r dyddiad cau i dalu bil TWE"
-    )
-
-    val `Before you start`: Message = Message(
-      english = "Before you start",
-      welsh   = "Cyn i chi ddechrau"
-    )
-
-    val `You must be:`: Message = Message(
-      english = "You must be:",
-      welsh   = "Mae’n rhaid i chi fod:"
-    )
-
-    val `a named account holder for the UK bank account you intend to use`: Message = Message(
-      english = "a named account holder for the UK bank account you intend to use",
-      welsh   = "wedi’ch enwi’n ddeiliad y cyfrif ar gyfer y cyfrif banc yn y DU rydych yn bwriadu ei ddefnyddio"
-    )
-
-    val `able to authorise a Direct Debit`: Message = Message(
-      english = "able to authorise a Direct Debit",
-      welsh   = "yn gallu awdurdodi Debyd Uniongyrchol"
-    )
-
-    val `You must keep up to date with your payments...`: Message = Message(
-      english = "You must keep up to date with your payments. HMRC may ask you to pay the total outstanding amount if you do not. HMRC intend this as a one-off payment plan to give you extra support.",
-      welsh   = "Mae’n rhaid i chi sicrhau eich bod yn gwneud eich taliadau mewn pryd. Mae’n bosibl y bydd CThEF yn gofyn i chi dalu’r cyfanswm sydd heb ei dalu os na fyddwch yn gwneud eich taliadau mewn pryd. Bwriad CThEF yw bod hwn yn gynllun talu untro i roi cymorth ychwanegol i chi."
+    val `have no outstanding employers’ PAYE submissions or Construction Industry Scheme returns`: Message = Message(
+      english = "have no outstanding employers’ PAYE submissions or Construction Industry Scheme returns",
+      welsh   = "nid oes gan eich cwmni neu’ch partneriaeth unrhyw gyflwyniadau TWE y cyflogwr sy’n weddill neu Ffurflenni Treth Cynllun y Diwydiant Adeiladu"
     )
 
   }
@@ -970,84 +997,79 @@ object Messages {
   object Vat {
     val `Set up a VAT payment plan`: Message = Message(
       english = "Set up a VAT payment plan",
-      welsh   = "Trefnu cynllun talu TAW"
+      welsh   = "Trefnu cynllun talu ar gyfer TAW"
     )
-    val `The payment plan covers all appropriate overdue amounts...`: Message = Message(
-      english = "The payment plan covers all appropriate overdue amounts, surcharges, penalties and interest. The payments you make may incur interest.",
-      welsh   = "Mae’r cynllun talu’n cwmpasu pob gordal, cosb, llog a swm gorddyledus priodol. Efallai y codir llog ar y taliadau a wnewch."
+
+    val `Use this service to set up a payment plan..`: Message = Message(
+      english = "Use this service to set up a payment plan for your outstanding VAT bill. Payments are taken by Direct Debit and include interest charged at the Bank of England base rate plus 2.5% per year.",
+      welsh   = "Defnyddiwch y gwasanaeth hwn i drefnu cynllun talu ar gyfer eich bil TAW sy’n weddill. Mae taliadau’n cael eu cymryd drwy Ddebyd Uniongyrchol ac maent yn cynnwys llog a godir ar gyfradd sylfaenol Banc Lloegr ynghyd â 2.5% y flwyddyn."
     )
-    val `Who can use this service`: Message = Message(
-      english = "Who can use this service",
-      welsh   = "Pwy all ddefnyddio’r gwasanaeth hwn"
+
+    val `To set up a Direct Debit online, you must be named...`: Message = Message(
+      english = "To set up a Direct Debit online, you must be named on the UK bank account you’ll use to pay. You must be able to authorise a Direct Debit without a signature from any other account holders.",
+      welsh   = "I sefydlu Debyd Uniongyrchol ar-lein, mae’n rhaid i chi fod wedi’ch enwi ar gyfrif banc y DU y byddwch yn ei ddefnyddio i dalu. Mae’n rhaid i chi allu awdurdodi Debyd Uniongyrchol heb lofnod gan unrhyw ddeiliaid cyfrif eraill."
     )
-    val `You can set up a payment plan online if you:`: Message = Message(
-      english = "You can set up a payment plan online if you:",
-      welsh   = "Gallwch fynd ar-lein i drefnu cynllun talu os yw’r canlynol yn wir:"
+
+    val `You’ll need to stay up to date with your payments or we could ask you to pay in full.`: Message = Message(
+      english = "You’ll need to stay up to date with your payments or we could ask you to pay in full.",
+      welsh   = "Bydd angen i chi gael yr wybodaeth ddiweddaraf am eich taliadau neu gallem ofyn i chi dalu’n llawn."
     )
-    def `owe ... or less`(maxAmountOfDebt: AmountInPence): Message = Message(
-      english = s"owe ${maxAmountOfDebt.gdsFormatInPounds} or less",
-      welsh   = s"mae arnoch ${maxAmountOfDebt.gdsFormatInPounds} neu lai"
+
+    val `To set up a plan, your company or partnership must:`: Message = Message(
+      english = "To set up a plan, your company or partnership must:",
+      welsh   = "I sefydlu cynllun, mae’n rhaid i’r canlynol fod yn wir:"
     )
-    def `plan to pay your debt off within the next ... months`(maxPlanDuration: Int): Message = Message(
-      english = s"plan to pay your debt off within the next ${maxPlanDuration.toString} months",
-      welsh   = s"rydych yn bwriadu talu’ch dyled cyn pen y ${maxPlanDuration.toString} mis nesaf"
-    )
-    val `have a debt for an accounting period that started in 2023 or later`: Message = Message(
-      english = "have a debt for an accounting period that started in 2023 or later",
-      welsh   = "mae gennych ddyled am gyfnod cyfrifyddu a ddechreuodd yn 2023 neu’n hwyrach"
-    )
-    val `do not have any other payment plans or debts with HMRC`: Message = Message(
-      english = "do not have any other payment plans or debts with HMRC",
-      welsh   = "nid oes gennych unrhyw gynlluniau talu na dyledion eraill gyda CThEF"
-    )
-    val `have filed your tax returns`: Message = Message(
-      english = "have filed your tax returns",
-      welsh   = "rydych wedi cyflwyno’ch Ffurflenni TAW"
-    )
+
     val `have missed the deadline to pay a VAT bill`: Message = Message(
       english = "have missed the deadline to pay a VAT bill",
       welsh   = "rydych wedi methu’r dyddiad cau i dalu bil TAW"
     )
+
+    def `owe ... or less`(maxAmountOfDebt: AmountInPence): Message = Message(
+      english = s"owe ${maxAmountOfDebt.gdsFormatInPounds} or less",
+      welsh   = s"mae arnoch ${maxAmountOfDebt.gdsFormatInPounds} neu lai"
+    )
+
+    val `have a debt for an accounting period that started in 2023 or later`: Message = Message(
+      english = "have a debt for an accounting period that started in 2023 or later",
+      welsh   = "mae gennych ddyled am gyfnod cyfrifyddu a ddechreuodd yn 2023 neu’n hwyrach"
+    )
+
+    val `have no other payment plans or debts with HMRC`: Message = Message(
+      english = "have no other payment plans or debts with HMRC",
+      welsh   = "nid oes gan eich cwmni neu’ch partneriaeth unrhyw gynlluniau talu na dyledion eraill gyda CThEF"
+    )
+
+    val `have filed your tax returns`: Message = Message(
+      english = "have filed your tax returns",
+      welsh   = "rydych wedi cyflwyno’ch Ffurflenni TAW"
+    )
+
     val `If you have a Customer Compliance Manager...`: Message = Message(
-      english = "If you have a Customer Compliance Manager, consider discussing your needs with them before using this service.",
-      welsh   = "Os oes gennych chi reolwr cydymffurfiad cwsmeriaid, ystyriwch drafod eich anghenion ag ef cyn defnyddio’r gwasanaeth hwn."
+      english = "If you have a Customer Compliance Manager, discuss your needs with them before using this service.",
+      welsh   = "Os oes gennych chi reolwr cydymffurfiad cwsmeriaid, trafodwch eich anghenion ag ef cyn defnyddio’r gwasanaeth hwn."
     )
-    val `Before you start`: Message = Message(
-      english = "Before you start",
-      welsh   = "Cyn i chi ddechrau"
+
+    val `You cannot use this service if you are:`: Message = Message(
+      english = "You cannot use this service if you are:",
+      welsh   = "Ni allwch ddefnyddio’r gwasanaeth hwn os ydych yn un o’r canlynol:"
     )
-    val `You must be:`: Message = Message(
-      english = "You must be:",
-      welsh   = "Mae’n rhaid i chi fod:"
+
+    val `a cash accounting customer`: Message = Message(
+      english = "a cash accounting customer",
+      welsh   = "cwsmer cyfrifyddu arian parod"
     )
-    val `a named account holder for the UK bank account you intend to use`: Message = Message(
-      english = "a named account holder for the UK bank account you intend to use",
-      welsh   = "wedi’ch enwi’n ddeiliad y cyfrif ar gyfer y cyfrif banc yn y DU rydych yn bwriadu ei ddefnyddio"
+
+    val `an annual accounting scheme member`: Message = Message(
+      english = "an annual accounting scheme member",
+      welsh   = "aelod o’r cynllun cyfrifyddu blynyddol"
     )
-    val `able to authorise a Direct Debit`: Message = Message(
-      english = "able to authorise a Direct Debit",
-      welsh   = "yn gallu awdurdodi Debyd Uniongyrchol"
+
+    val `a payment on account customer`: Message = Message(
+      english = "a payment on account customer",
+      welsh   = "cwsmer taliad ar gyfrif"
     )
-    val `Who cannot use this service:`: Message = Message(
-      english = "Who cannot use this service:",
-      welsh   = "Pwy sy’n methu defnyddio’r gwasanaeth hwn:"
-    )
-    val `cash accounting customers`: Message = Message(
-      english = "cash accounting customers",
-      welsh   = "cwsmeriaid cyfrifyddu arian parod"
-    )
-    val `annual accounting scheme members`: Message = Message(
-      english = "annual accounting scheme members",
-      welsh   = "aelodau o’r cynllun cyfrifyddu blynyddol"
-    )
-    val `payment on account customers`: Message = Message(
-      english = "payment on account customers",
-      welsh   = "cwsmeriaid taliad ar gyfrif"
-    )
-    val `You must keep up to date with your payments...`: Message = Message(
-      english = "You must keep up to date with your payments. HMRC may ask you to pay the total outstanding amount if you do not. HMRC intend this as a one-off payment plan to give you extra support.",
-      welsh   = "Mae’n rhaid i chi sicrhau eich bod yn gwneud eich taliadau mewn pryd. Mae’n bosibl y bydd CThEF yn gofyn i chi dalu’r cyfanswm sydd heb ei dalu os na fyddwch yn gwneud eich taliadau mewn pryd. Bwriad CThEF yw bod hwn yn gynllun talu untro i roi cymorth ychwanegol i chi."
-    )
+
   }
 
   object Sa {
