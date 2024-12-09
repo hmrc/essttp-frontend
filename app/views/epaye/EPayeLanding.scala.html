@@ -21,13 +21,16 @@
 @import play.api.mvc.Request
 @import requests.RequestSupport
 @import uk.gov.hmrc.govukfrontend.views.html.components._
+@import views.html.partials.LandingCallHmrcPartial
 @import views.html.templates.Layout
 
 @this(
   layout: Layout,
   govukButton: GovukButton,
   requestSupport: RequestSupport,
-  appConfig: AppConfig
+  appConfig: AppConfig,
+  insetText: GovukInsetText,
+  landingCallHmrcPartial: LandingCallHmrcPartial
 )
 
 @(backUrl: Option[BackUrl])(implicit request: Request[_])
@@ -42,25 +45,24 @@
   fallBackTaxRegime = Some(TaxRegime.Epaye),
   showServiceNameInHeader = false
 ) {
-  <h1 class="govuk-heading-xl">@title</h1>
-  <p class="govuk-body">@{Messages.Epaye.`You can use this service to pay overdue payments...`.show}</p>
-  <p class="govuk-body">@{Messages.Epaye.`You can set up a payment plan online if you:`.show}</p>
-  <ul class="govuk-list govuk-list--bullet">
-    <li>@{Messages.Epaye.`owe ... or less`(appConfig.PolicyParameters.EPAYE.maxAmountOfDebt).show}</li>
-    <li>@{Messages.Epaye.`plan to pay your debt off within the next ... months`(appConfig.PolicyParameters.EPAYE.maxPlanDurationInMonths).show}</li>
-    <li>@{Messages.Epaye.`have debts that are ... years old or less`(appConfig.PolicyParameters.EPAYE.maxAgeOfDebtInYears).show}</li>
-    <li>@{Messages.Epaye.`do not have any other payment plans or debts with HMRC`.show}</li>
-    <li>@{Messages.Epaye.`have sent any Employers’ PAYE submissions and Construction Industry Scheme (CIS) returns that are due`.show}</li>
-    <li>@{Messages.Epaye.`have missed the deadline to pay a PAYE bill`.show}</li>
-  </ul>
-  <h2 class="govuk-heading-m">@{Messages.Epaye.`Before you start`.show}</h2>
-  <p class="govuk-body">@{Messages.Epaye.`You must be:`.show}</p>
-  <ul class="govuk-list govuk-list--bullet">
-    <li>@{Messages.Epaye.`a named account holder for the UK bank account you intend to use`.show}</li>
-    <li>@{Messages.Epaye.`able to authorise a Direct Debit`.show}</li>
-  </ul>
+    <h1 class="govuk-heading-xl">@title</h1>
+    <p class="govuk-body">@{Messages.Epaye.`Use this service to set up a payment plan..`.show}</p>
 
-  <p class="govuk-body">@{Messages.Epaye.`You must keep up to date with your payments...`.show}</p>
+    @insetText(InsetText(content = Text(Messages.Epaye.`To set up a Direct Debit online, you must be named...`.show)))
+
+    <p class="govuk-body">@{Messages.Epaye.`You’ll need to stay up to date with your payments or we could ask you to pay in full.`.show}</p>
+
+    <p class="govuk-body">@{Messages.Epaye.`To set up a plan, your company or partnership must:`.show}</p>
+
+    <ul class="govuk-list govuk-list--bullet">
+        <li>@{Messages.Epaye.`have missed the deadline to pay a PAYE bill`.show}</li>
+        <li>@{Messages.Epaye.`owe ... or less`(appConfig.PolicyParameters.EPAYE.maxAmountOfDebt).show}</li>
+        <li>@{Messages.Epaye.`have debts that are 5 years old or less`.show}</li>
+        <li>@{Messages.Epaye.`have no other payment plans or debts with HMRC`.show}</li>
+        <li>@{Messages.Epaye.`have no outstanding employers’ PAYE submissions or Construction Industry Scheme returns`.show}</li>
+    </ul>
+
+    @landingCallHmrcPartial()
 
   @govukButton(Button(
     href = Some(routes.LandingController.epayeLandingPageContinue.url),

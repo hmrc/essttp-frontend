@@ -39,6 +39,42 @@ class LandingPageControllerSpec extends ItSpec {
 
   private val controller: LandingController = app.injector.instanceOf[LandingController]
 
+  private def testCallHmrcDetails(doc: Document) = {
+    val details = doc.select("details.govuk-details")
+
+    val detailsSummaryText = details.select(".govuk-details__summary > .govuk-details__summary-text")
+    detailsSummaryText.text() shouldBe "If you do not think you can set up a plan online, call HMRC and find out if you can set up a plan over the phone."
+
+    val detailsText = details.select(".govuk-details__text")
+    val detailsTextParagraphs = detailsText.select(".govuk-body").asScala.toList
+    detailsTextParagraphs.size shouldBe 7
+
+    detailsTextParagraphs(0).text() shouldBe "Telephone: 0300 123 1813"
+    detailsTextParagraphs(1).text() shouldBe "Outside UK: +44 2890 538 192"
+    detailsTextParagraphs(2).text() shouldBe "Our phone line opening hours are:"
+    detailsTextParagraphs(3).text() shouldBe "Monday to Friday: 8am to 6pm"
+    detailsTextParagraphs(4).text() shouldBe "Closed weekends and bank holidays."
+
+    detailsText.select("h2.govuk-heading-m").text() shouldBe "Text service"
+
+    detailsTextParagraphs(5).text() shouldBe "Use Relay UK if you cannot hear or speak on the telephone, dial 18001 then 0345 300 3900. " +
+      "Find out more on the Relay UK website (opens in new tab)."
+    detailsTextParagraphs(6).text() shouldBe "If a health condition or personal circumstances make it difficult to contact us, " +
+      "read our guidance Get help from HMRC if you need extra support (opens in new tab)."
+
+    val detailsLink1 = detailsTextParagraphs(5).select("a.govuk-link")
+    detailsLink1.text() shouldBe "Relay UK website (opens in new tab)"
+    detailsLink1.attr("href") shouldBe "https://www.relayuk.bt.com/"
+    detailsLink1.attr("rel") shouldBe "noreferrer noopener"
+    detailsLink1.attr("target") shouldBe "_blank"
+
+    val detailsLink2 = detailsTextParagraphs(6).select("a.govuk-link")
+    detailsLink2.text() shouldBe "Get help from HMRC if you need extra support (opens in new tab)"
+    detailsLink2.attr("href") shouldBe "https://www.gov.uk/get-help-hmrc-extra-support"
+    detailsLink2.attr("rel") shouldBe "noreferrer noopener"
+    detailsLink2.attr("target") shouldBe "_blank"
+  }
+
   "GET /epaye-payment-plan" - {
     "return 200 and the PAYE landing page when logged in" in {
       EssttpBackend.StartJourney.findJourney()
@@ -59,22 +95,31 @@ class LandingPageControllerSpec extends ItSpec {
         backLinkUrlOverride         = Some("/set-up-a-payment-plan/test-only/bta-page?starting-page")
       )
 
-      val lists = doc.select(".govuk-list").asScala.toList
-      lists.size shouldBe 2
-
       val paragraphs = doc.select("p.govuk-body").asScala.toList
-      paragraphs(0).text() shouldBe "You can use this service to pay overdue payments in instalments. The payments you make may incur interest."
-      paragraphs(1).text() shouldBe "You can set up a payment plan online if you:"
 
-      val firstListBullets = lists(0).select("li").asScala.toList
-      firstListBullets.size shouldBe 6
+      paragraphs(0).text() shouldBe "Use this service to set up a payment plan for your outstanding employers’ PAYE bill. " +
+        "Payments are taken by Direct Debit and include interest charged at the Bank of England base rate plus 2.5% per year."
 
-      firstListBullets(0).text() shouldBe "owe £100,000 or less"
-      firstListBullets(1).text() shouldBe "plan to pay your debt off within the next 12 months"
-      firstListBullets(2).text() shouldBe "have debts that are 5 years old or less"
-      firstListBullets(3).text() shouldBe "do not have any other payment plans or debts with HMRC"
-      firstListBullets(4).text() shouldBe "have sent any Employers’ PAYE submissions and Construction Industry Scheme (CIS) returns that are due"
-      firstListBullets(5).text() shouldBe "have missed the deadline to pay a PAYE bill"
+      val insetText = doc.select(".govuk-inset-text").asScala.toList
+      insetText.size shouldBe 1
+      insetText(0).text() shouldBe "To set up a Direct Debit online, you must be named on the UK bank account you’ll use to pay. " +
+        "You must be able to authorise a Direct Debit without a signature from any other account holders."
+
+      paragraphs(1).text() shouldBe "You’ll need to stay up to date with your payments or we could ask you to pay in full."
+      paragraphs(2).text() shouldBe "To set up a plan, your company or partnership must:"
+
+      val lists = doc.select(".govuk-list").asScala.toList
+      lists.size shouldBe 1
+      val bullets = lists(0).select("li").asScala.toList
+      bullets.size shouldBe 5
+
+      bullets(0).text() shouldBe "have missed the deadline to pay a PAYE bill"
+      bullets(1).text() shouldBe "owe £100,000 or less"
+      bullets(2).text() shouldBe "have debts that are 5 years old or less"
+      bullets(3).text() shouldBe "have no other payment plans or debts with HMRC"
+      bullets(4).text() shouldBe "have no outstanding employers’ PAYE submissions or Construction Industry Scheme returns"
+
+      testCallHmrcDetails(doc)
 
       val button = doc.select(".govuk-button")
       button.attr("href") shouldBe routes.LandingController.epayeLandingPageContinue.url
@@ -160,21 +205,40 @@ class LandingPageControllerSpec extends ItSpec {
         backLinkUrlOverride         = Some("/set-up-a-payment-plan/test-only/bta-page?starting-page")
       )
 
-      val lists = doc.select(".govuk-list").asScala.toList
-      lists.size shouldBe 3
-
       val paragraphs = doc.select("p.govuk-body").asScala.toList
-      paragraphs(1).text() shouldBe "You can set up a payment plan online if you:"
 
-      val firstListBullets = lists(0).select("li").asScala.toList
-      firstListBullets.size shouldBe 6
+      paragraphs(0).text() shouldBe "Use this service to set up a payment plan for your outstanding VAT bill. " +
+        "Payments are taken by Direct Debit and include interest charged at the Bank of England base rate plus 2.5% per year."
 
-      firstListBullets(0).text() shouldBe "owe £100,000 or less"
-      firstListBullets(1).text() shouldBe "plan to pay your debt off within the next 12 months"
-      firstListBullets(2).text() shouldBe "have a debt for an accounting period that started in 2023 or later"
-      firstListBullets(3).text() shouldBe "do not have any other payment plans or debts with HMRC"
-      firstListBullets(4).text() shouldBe "have filed your tax returns"
-      firstListBullets(5).text() shouldBe "have missed the deadline to pay a VAT bill"
+      val insetText = doc.select(".govuk-inset-text").asScala.toList
+      insetText.size shouldBe 1
+      insetText(0).text() shouldBe "To set up a Direct Debit online, you must be named on the UK bank account you’ll use to pay. " +
+        "You must be able to authorise a Direct Debit without a signature from any other account holders."
+
+      paragraphs(1).text() shouldBe "You’ll need to stay up to date with your payments or we could ask you to pay in full."
+      paragraphs(2).text() shouldBe "To set up a plan, your company or partnership must:"
+
+      val lists = doc.select(".govuk-list").asScala.toList
+      lists.size shouldBe 2
+
+      val bullets1 = lists(0).select("li").asScala.toList
+      bullets1.size shouldBe 5
+      bullets1(0).text() shouldBe "have missed the deadline to pay a VAT bill"
+      bullets1(1).text() shouldBe "owe £100,000 or less"
+      bullets1(2).text() shouldBe "have a debt for an accounting period that started in 2023 or later"
+      bullets1(3).text() shouldBe "have no other payment plans or debts with HMRC"
+      bullets1(4).text() shouldBe "have filed your tax returns"
+
+      paragraphs(3).text() shouldBe "If you have a Customer Compliance Manager, discuss your needs with them before using this service."
+      paragraphs(4).text() shouldBe "You cannot use this service if you are:"
+
+      val bullets2 = lists(1).select("li").asScala.toList
+      bullets2.size shouldBe 3
+      bullets2(0).text() shouldBe "a cash accounting customer"
+      bullets2(1).text() shouldBe "an annual accounting scheme member"
+      bullets2(2).text() shouldBe "a payment on account customer"
+
+      testCallHmrcDetails(doc)
 
       val button = doc.select(".govuk-button")
       button.attr("href") shouldBe routes.LandingController.vatLandingPageContinue.url

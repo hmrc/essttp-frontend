@@ -22,13 +22,15 @@
 @import requests.RequestSupport
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import views.html.templates.Layout
+@import views.html.partials.LandingCallHmrcPartial
 
 @this(
-        layout: Layout,
-        govukButton: GovukButton,
-        requestSupport: RequestSupport,
-        appConfig: AppConfig,
-        insetText: GovukInsetText
+  layout: Layout,
+  govukButton: GovukButton,
+  requestSupport: RequestSupport,
+  appConfig: AppConfig,
+  insetText: GovukInsetText,
+  landingCallHmrcPartial: LandingCallHmrcPartial
 )
 
 @(backUrl: Option[BackUrl])(implicit request: Request[_])
@@ -44,39 +46,35 @@
     showServiceNameInHeader = false
 ) {
     <h1 class="govuk-heading-xl">@title</h1>
-    <p class="govuk-body">@{Messages.Vat.`The payment plan covers all appropriate overdue amounts...`.show}</p>
-    <h2 class="govuk-heading-m">@{Messages.Vat.`Who can use this service`.show}</h2>
-    <p class="govuk-body">@{Messages.Vat.`You can set up a payment plan online if you:`.show}</p>
+    <p class="govuk-body">@{Messages.Vat.`Use this service to set up a payment plan..`.show}</p>
+
+    @insetText(InsetText(content = Text(Messages.Vat.`To set up a Direct Debit online, you must be named...`.show)))
+
+    <p class="govuk-body">@{Messages.Vat.`You’ll need to stay up to date with your payments or we could ask you to pay in full.`.show}</p>
+
+    <p class="govuk-body">@{Messages.Vat.`To set up a plan, your company or partnership must:`.show}</p>
     <ul class="govuk-list govuk-list--bullet">
-        <li>@{Messages.Vat.`owe ... or less`(appConfig.PolicyParameters.VAT.maxAmountOfDebt).show}</li>
-        <li>@{Messages.Vat.`plan to pay your debt off within the next ... months`(appConfig.PolicyParameters.VAT.maxPlanDurationInMonths).show}</li>
-        <li>@{Messages.Vat.`have a debt for an accounting period that started in 2023 or later`.show}</li>
-        <li>@{Messages.Vat.`do not have any other payment plans or debts with HMRC`.show}</li>
-        <li>@{Messages.Vat.`have filed your tax returns`.show}</li>
         <li>@{Messages.Vat.`have missed the deadline to pay a VAT bill`.show}</li>
+        <li>@{Messages.Vat.`owe ... or less`(appConfig.PolicyParameters.VAT.maxAmountOfDebt).show}</li>
+        <li>@{Messages.Vat.`have a debt for an accounting period that started in 2023 or later`.show}</li>
+        <li>@{Messages.Vat.`have no other payment plans or debts with HMRC`.show}</li>
+        <li>@{Messages.Vat.`have filed your tax returns`.show}</li>
     </ul>
 
-    @insetText(InsetText(content = Text(Messages.Vat.`If you have a Customer Compliance Manager...`.show)))
+    <p class="govuk-body">@{Messages.Vat.`If you have a Customer Compliance Manager...`.show}</p>
 
-    <h2 class="govuk-heading-m">@{Messages.Vat.`Before you start`.show}</h2>
-    <p class="govuk-body">@{Messages.Vat.`You must be:`.show}</p>
+    <p class="govuk-body">@{Messages.Vat.`You cannot use this service if you are:`.show}</p>
     <ul class="govuk-list govuk-list--bullet">
-        <li>@{Messages.Vat.`a named account holder for the UK bank account you intend to use`.show}</li>
-        <li>@{Messages.Vat.`able to authorise a Direct Debit`.show}</li>
+        <li>@{Messages.Vat.`a cash accounting customer`.show}</li>
+        <li>@{Messages.Vat.`an annual accounting scheme member`.show}</li>
+        <li>@{Messages.Vat.`a payment on account customer`.show}</li>
     </ul>
 
-    <h2 class="govuk-heading-m">@{Messages.Vat.`Who cannot use this service:`.show}</h2>
-    <ul class="govuk-list govuk-list--bullet">
-        <li>@{Messages.Vat.`cash accounting customers`.show}</li>
-        <li>@{Messages.Vat.`annual accounting scheme members`.show}</li>
-        <li>@{Messages.Vat.`payment on account customers`.show}</li>
-    </ul>
+  @landingCallHmrcPartial()
 
-    <p class="govuk-body">@{Messages.Vat.`You must keep up to date with your payments...`.show}</p>
-
-    @govukButton(Button(
-        href = Some(routes.LandingController.vatLandingPageContinue.url),
-        content = Text(Messages.`Start now`.show),
-        isStartButton = true
-    ))
+  @govukButton(Button(
+      href = Some(routes.LandingController.vatLandingPageContinue.url),
+      content = Text(Messages.`Start now`.show),
+      isStartButton = true
+  ))
 }
