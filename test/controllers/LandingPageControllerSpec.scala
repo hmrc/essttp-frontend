@@ -405,11 +405,11 @@ class LandingPageControllerSpec extends ItSpec {
     }
   }
 
-  "GET /sia-payment-plan" - {
-    "return 200 and the SIA landing page when logged in" in {
-      EssttpBackend.StartJourney.findJourney(origin = Origins.Sia.Pta)
+  "GET /simple-assessment-payment-plan" - {
+    "return 200 and the SIMP landing page when logged in" in {
+      EssttpBackend.StartJourney.findJourney(origin = Origins.Simp.Pta)
       val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId").withAuthToken()
-      val result: Future[Result] = controller.siaLandingPage(fakeRequest)
+      val result: Future[Result] = controller.simpLandingPage(fakeRequest)
 
       RequestAssertions.assertGetRequestOk(result)
       val doc: Document = Jsoup.parse(contentAsString(result))
@@ -420,7 +420,7 @@ class LandingPageControllerSpec extends ItSpec {
         shouldBackLinkBePresent     = true,
         expectedSubmitUrl           = None,
         shouldH1BeSameAsServiceName = true,
-        regimeBeingTested           = Some(TaxRegime.Sia),
+        regimeBeingTested           = Some(TaxRegime.Simp),
         shouldServiceNameBeInHeader = false,
         backLinkUrlOverride         = Some("/set-up-a-payment-plan/test-only/bta-page?starting-page")
       )
@@ -448,14 +448,14 @@ class LandingPageControllerSpec extends ItSpec {
       secondListBullets(1).text() shouldBe "monthly instalments only"
 
       val button = doc.select(".govuk-button")
-      button.attr("href") shouldBe routes.LandingController.siaLandingPageContinue.url
+      button.attr("href") shouldBe routes.LandingController.simpLandingPageContinue.url
       button.text() shouldBe Messages.`Start now`.english
     }
 
     "return 200 and the SA landing page when not logged in" in {
-      EssttpBackend.StartJourney.findJourney(origin = Origins.Sia.Pta)
+      EssttpBackend.StartJourney.findJourney(origin = Origins.Simp.Pta)
       val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
-      val result: Future[Result] = controller.siaLandingPage(fakeRequest)
+      val result: Future[Result] = controller.simpLandingPage(fakeRequest)
 
       RequestAssertions.assertGetRequestOk(result)
       val doc: Document = Jsoup.parse(contentAsString(result))
@@ -467,20 +467,20 @@ class LandingPageControllerSpec extends ItSpec {
         expectedSubmitUrl           = None,
         signedIn                    = false,
         shouldH1BeSameAsServiceName = true,
-        regimeBeingTested           = Some(TaxRegime.Sia),
+        regimeBeingTested           = Some(TaxRegime.Simp),
         shouldServiceNameBeInHeader = false
       )
     }
   }
 
-  "GET /sia-payment-plan-continue" - {
+  "GET /simple-assessment-payment-plan-continue" - {
     "should redirect to the login page and continue to the same continue endpoint once login is successful " +
       "if the user is not logged in" in {
-        val result = controller.siaLandingPageContinue(FakeRequest("GET", routes.LandingController.siaLandingPageContinue.url))
+        val result = controller.simpLandingPageContinue(FakeRequest("GET", routes.LandingController.simpLandingPageContinue.url))
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some("http://localhost:9949/auth-login-stub/gg-sign-in?" +
-          "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fsia-payment-plan-continue&origin=essttp-frontend")
+          "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fsimple-assessment-payment-plan-continue&origin=essttp-frontend")
       }
 
     "should redirect to start a detached journey with an updated session if no existing journey is found" in {
@@ -489,10 +489,10 @@ class LandingPageControllerSpec extends ItSpec {
       stubCommonActions()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(existingSessionData.toList: _*)
-      val result = controller.siaLandingPageContinue(fakeRequest)
+      val result = controller.simpLandingPageContinue(fakeRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.StartJourneyController.startDetachedSiaJourney.url)
+      redirectLocation(result) shouldBe Some(routes.StartJourneyController.startDetachedSimpJourney.url)
       session(result).data.get(LandingController.hasSeenLandingPageSessionKey) shouldBe Some("true")
     }
 
@@ -500,10 +500,10 @@ class LandingPageControllerSpec extends ItSpec {
       val existingSessionData = Map(SessionKeys.sessionId -> "IamATestSessionId")
 
       stubCommonActions()
-      EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin = Origins.Sia.Pta)()
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin = Origins.Simp.Pta)()
 
       val fakeRequest = FakeRequest().withAuthToken().withSession(existingSessionData.toList: _*)
-      val result = controller.siaLandingPageContinue(fakeRequest)
+      val result = controller.simpLandingPageContinue(fakeRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.DetermineTaxIdController.determineTaxId.url)
@@ -531,17 +531,17 @@ class LandingPageSaNotEnabledControllerSpec extends ItSpec {
 
 }
 
-class LandingPageSiaNotEnabledControllerSpec extends ItSpec {
+class LandingPageSimpNotEnabledControllerSpec extends ItSpec {
 
-  override lazy val configOverrides: Map[String, Any] = Map("features.sia" -> false)
+  override lazy val configOverrides: Map[String, Any] = Map("features.simp" -> false)
 
   private val controller = app.injector.instanceOf[LandingController]
 
-  "GET /sia-payment-plan should redirect to the SA SUPP service when SA is not enabled" in {
+  "GET /simple-assessment-payment-plan should show an error when SIMP is not enabled" in {
     val fakeRequest = FakeRequest()
       .withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
-    val error = intercept[Exception](await(controller.siaLandingPage(fakeRequest)))
+    val error = intercept[Exception](await(controller.simpLandingPage(fakeRequest)))
     error.getMessage shouldBe "Simple Assessment is not available"
   }
 
@@ -550,7 +550,7 @@ class LandingPageSiaNotEnabledControllerSpec extends ItSpec {
 class LandingPageShutteringControllerSpec extends ItSpec with ShutteringSpec {
 
   override lazy val configOverrides: Map[String, Any] = Map(
-    "shuttering.shuttered-tax-regimes" -> List("epaye", "vat", "sa", "sia")
+    "shuttering.shuttered-tax-regimes" -> List("epaye", "vat", "sa", "SIMP")
   )
 
   private val controller = app.injector.instanceOf[LandingController]
@@ -593,14 +593,14 @@ class LandingPageShutteringControllerSpec extends ItSpec with ShutteringSpec {
       test(controller.saLandingPageContinue(fakeRequest))
     }
 
-    "GET /sia-payment-plan" in {
-      test(controller.siaLandingPage(fakeRequest))
+    "GET /simple-assessment-payment-plan" in {
+      test(controller.simpLandingPage(fakeRequest))
     }
 
-    "GET /sia-payment-plan-continue" in {
+    "GET /simple-assessment-payment-plan-continue" in {
       AuthStub.authorise()
 
-      test(controller.siaLandingPageContinue(fakeRequest))
+      test(controller.simpLandingPageContinue(fakeRequest))
     }
   }
 

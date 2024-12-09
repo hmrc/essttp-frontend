@@ -38,7 +38,7 @@ class DetermineAffordableQuotesControllerSpec extends ItSpec {
     ("EPAYE", Origins.Epaye.Bta),
     ("VAT", Origins.Vat.Bta),
     ("SA", Origins.Sa.Bta),
-    ("SIA", Origins.Sia.Pta)
+    ("SIMP", Origins.Simp.Pta)
   ).foreach {
       case (regime, origin) =>
         "GET /determine-affordable-quotes" - {

@@ -50,7 +50,7 @@ class IneligibleController @Inject() (
 
   val saGenericIneligiblePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericIneligiblePage }
 
-  val siaGenericIneligiblePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericIneligiblePage }
+  val simpGenericIneligiblePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericIneligiblePage }
 
   val epayeDebtTooLargePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     Ok(views.partials.ineligibleTemplatePage(
@@ -73,10 +73,10 @@ class IneligibleController @Inject() (
     ))
   }
 
-  val siaDebtTooLargePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+  val simpDebtTooLargePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     Ok(views.partials.ineligibleTemplatePage(
       pageh1         = Messages.NotEligible.`Call us about a payment plan`,
-      leadingContent = views.partials.debtTooLargePartial(appConfig.PolicyParameters.SIA.maxAmountOfDebt)
+      leadingContent = views.partials.debtTooLargePartial(appConfig.PolicyParameters.SIMP.maxAmountOfDebt)
     ))
   }
 
@@ -102,10 +102,10 @@ class IneligibleController @Inject() (
     ))
   }
 
-  val siaDebtTooSmallPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+  val simpDebtTooSmallPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     Ok(views.partials.ineligibleTemplatePage(
       pageh1                      = Messages.NotEligible.`Pay your ... bill in full`(request.journey.taxRegime),
-      leadingContent              = views.partials.debtTooSmallPartial(appConfig.PolicyParameters.SIA.payOnlineLink),
+      leadingContent              = views.partials.debtTooSmallPartial(appConfig.PolicyParameters.SIMP.payOnlineLink),
       showFullListPreparationTips = false
     ))
   }
@@ -190,7 +190,7 @@ class IneligibleController @Inject() (
     case SjRequest.Epaye.Empty()              => appConfig.Urls.businessTaxAccountUrl
     case SjRequest.Vat.Simple(returnUrl, _)   => returnUrl.value
     case SjRequest.Vat.Empty()                => appConfig.Urls.businessTaxAccountUrl
-    case _: SjRequest.Sia                     => throw new NotImplementedError("determineFileYourReturnUrl not implemented for SIA")
+    case _: SjRequest.Simp                    => throw new NotImplementedError("determineFileYourReturnUrl not implemented for SIMP")
     case _: SjRequest.Sa                      => appConfig.Urls.fileSaReturnUrl
   }
 

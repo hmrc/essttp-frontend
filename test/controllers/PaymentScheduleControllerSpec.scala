@@ -47,7 +47,7 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
     ("Epaye", Origins.Epaye.Bta),
     ("Vat", Origins.Vat.Bta),
     ("Sa", Origins.Sa.Bta),
-    ("Sia", Origins.Sia.Pta)
+    ("Simp", Origins.Simp.Pta)
   ).foreach {
       case (regime, origin) =>
         s"[$regime journey] GET ${routes.PaymentScheduleController.checkPaymentSchedule.url}" - {

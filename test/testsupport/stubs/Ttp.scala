@@ -58,7 +58,7 @@ object Ttp {
         case TaxRegime.Epaye => TdAll.callEligibilityApiRequestEpaye
         case TaxRegime.Vat   => TdAll.callEligibilityApiRequestVat
         case TaxRegime.Sa    => TdAll.callEligibilityApiRequestSa
-        case TaxRegime.Sia   => TdAll.callEligibilityApiRequestSia
+        case TaxRegime.Simp  => TdAll.callEligibilityApiRequestSimp
       }
       ttpVerify(eligibilityUrl, request)(CallEligibilityApiRequest.format)
     }

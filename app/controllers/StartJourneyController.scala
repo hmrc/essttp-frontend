@@ -56,10 +56,10 @@ class StartJourneyController @Inject() (
       as.default(_ => Redirect(appConfig.Urls.saSuppUrl))
     }
 
-  def startGovukSiaJourney: Action[AnyContent] =
-    if (appConfig.siaEnabled) {
+  def startGovukSimpJourney: Action[AnyContent] =
+    if (appConfig.simpEnabled) {
       as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
-        journeyConnector.Sia.startJourneyGovUk(SjRequest.Sia.Empty())
+        journeyConnector.Simp.startJourneyGovUk(SjRequest.Simp.Empty())
           .map(_ => Redirect(routes.DetermineTaxIdController.determineTaxId.url))
       }
     } else {
@@ -87,10 +87,10 @@ class StartJourneyController @Inject() (
       as.default(_ => Redirect(appConfig.Urls.saSuppUrl))
     }
 
-  def startDetachedSiaJourney: Action[AnyContent] =
-    if (appConfig.siaEnabled) {
+  def startDetachedSimpJourney: Action[AnyContent] =
+    if (appConfig.simpEnabled) {
       as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
-        journeyConnector.Sia.startJourneyDetachedUrl(SjRequest.Sia.Empty())
+        journeyConnector.Simp.startJourneyDetachedUrl(SjRequest.Simp.Empty())
           .map(redirectFromDetachedJourneyStarted)
       }
     } else {

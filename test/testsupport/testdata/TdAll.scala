@@ -44,13 +44,13 @@ object TdAll {
   val expectedServiceNamePayeEn: String = "Set up an Employers’ PAYE payment plan"
   val expectedServiceNameVatEn: String = "Set up a VAT payment plan"
   val expectedServiceNameSaEn: String = "Set up a Self Assessment payment plan"
-  val expectedServiceNameSiaEn: String = "Set up a Simple Assessment payment plan"
+  val expectedServiceNameSimpEn: String = "Set up a Simple Assessment payment plan"
   val expectedServiceNameGenericEn: String = "Set up a payment plan"
 
   val expectedServiceNamePayeCy: String = "Trefnu cynllun talu ar gyfer TWE Cyflogwyr"
   val expectedServiceNameVatCy: String = "Trefnu cynllun talu TAW"
   val expectedServiceNameSaCy: String = "Sefydlu cynllun talu ar gyfer Hunanasesiad"
-  val expectedServiceNameSiaCy: String = "Sefydlu cynllun talu ar gyfer Asesiad Syml"
+  val expectedServiceNameSimpCy: String = "Sefydlu cynllun talu ar gyfer Asesiad Syml"
   val expectedServiceNameGenericCy: String = "Trefnu cynllun talu"
 
   val journeyId: JourneyId = JourneyId("6284fcd33c00003d6b1f3903")
@@ -172,10 +172,10 @@ object TdAll {
     returnFinancialAssessment = true
   )
 
-  val callEligibilityApiRequestSia: CallEligibilityApiRequest = CallEligibilityApiRequest(
+  val callEligibilityApiRequestSimp: CallEligibilityApiRequest = CallEligibilityApiRequest(
     channelIdentifier         = "eSSTTP",
     identification            = List(Identification(IdType("NINO"), IdValue("QQ123456A"))),
-    regimeType                = RegimeType.SIA,
+    regimeType                = RegimeType.SIMP,
     returnFinancialAssessment = true
   )
 
@@ -210,7 +210,7 @@ object TdAll {
         |    }
         |  ]""".stripMargin
 
-    case TaxRegime.Sia =>
+    case TaxRegime.Simp =>
       """[
         |    {
         |      "idType": "NINO",
@@ -232,7 +232,7 @@ object TdAll {
     case TaxRegime.Sa =>
       """{ "utr": "1234567895" }"""
 
-    case TaxRegime.Sia =>
+    case TaxRegime.Simp =>
       """{ "nino": "QQ123456A" }"""
   }
 
@@ -332,7 +332,7 @@ object TdAll {
       case TaxRegime.Epaye => RegimeType.EPAYE
       case TaxRegime.Vat   => RegimeType.VAT
       case TaxRegime.Sa    => RegimeType.SA
-      case TaxRegime.Sia   => RegimeType.SIA
+      case TaxRegime.Simp  => RegimeType.SIMP
     }
 
     InstalmentAmountRequest(
@@ -377,13 +377,13 @@ object TdAll {
       case TaxRegime.Epaye => PaymentPlanMaxLength(12)
       case TaxRegime.Vat   => PaymentPlanMaxLength(12)
       case TaxRegime.Sa    => PaymentPlanMaxLength(12)
-      case TaxRegime.Sia   => PaymentPlanMaxLength(12)
+      case TaxRegime.Simp  => PaymentPlanMaxLength(12)
     }
     val regimeType = taxRegime match {
       case TaxRegime.Epaye => RegimeType.EPAYE
       case TaxRegime.Vat   => RegimeType.VAT
       case TaxRegime.Sa    => RegimeType.SA
-      case TaxRegime.Sia   => RegimeType.SIA
+      case TaxRegime.Simp  => RegimeType.SIMP
     }
     AffordableQuotesRequest(
       channelIdentifier           = ChannelIdentifiers.eSSTTP,
@@ -481,7 +481,7 @@ object TdAll {
       case TaxRegime.Epaye => RegimeType.EPAYE
       case TaxRegime.Vat   => RegimeType.VAT
       case TaxRegime.Sa    => RegimeType.SA
-      case TaxRegime.Sia   => RegimeType.SIA
+      case TaxRegime.Simp  => RegimeType.SIMP
     }
     ArrangementRequest(
       channelIdentifier           = ChannelIdentifiers.eSSTTP,
@@ -591,7 +591,7 @@ object TdAll {
     case TaxRegime.Epaye => CustomerReference("123PA44545546")
     case TaxRegime.Vat   => CustomerReference("101747001")
     case TaxRegime.Sa    => CustomerReference("1234567895")
-    case TaxRegime.Sia   => CustomerReference("QQ123456A")
+    case TaxRegime.Simp  => CustomerReference("QQ123456A")
   }
 
   def arrangementResponse(taxRegime: TaxRegime): ArrangementResponse =
@@ -601,6 +601,6 @@ object TdAll {
     case TaxRegime.Epaye => """"employerRef": "864FZ00049", "accountsOfficeRef": "123PA44545546""""
     case TaxRegime.Vat   => """"vrn": "101747001""""
     case TaxRegime.Sa    => """"utr": "1234567895""""
-    case TaxRegime.Sia   => """"nino": "QQ123456A""""
+    case TaxRegime.Simp  => """"nino": "QQ123456A""""
   }
 }
