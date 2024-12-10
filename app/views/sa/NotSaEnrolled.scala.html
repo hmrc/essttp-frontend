@@ -40,6 +40,10 @@
     <p class="govuk-body">
     @{Html(Messages.EnrolmentMissing.`You must request access to Self Assessment before you can set up a Self Assessment payment plan.`(appConfig.Urls.enrolForSaUrl).show)}
     </p>
+    <p class="govuk-body">
+    @{Html(Messages.EnrolmentMissing.`If you already have access, sign in with the Government Gateway user ID that has your enrolment.`.show)}
+    </p>
+
     <p id="call-us-content" class="govuk-body">
     @{Html(Messages.NotEligible.`Call us on 0300 123 1813 as you may be able to set up a plan over the phone`.show)}
     </p>

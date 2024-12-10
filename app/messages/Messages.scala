@@ -315,11 +315,6 @@ object Messages {
 
   object NotEligible {
 
-    val `For further support, you can contact us on 0300 123 1813 to speak to an advisor.`: Message = Message(
-      english = "For further support, you can contact us on <strong>0300 123 1813</strong> to speak to an adviser.",
-      welsh   = "I gael cymorth pellach, gallwch gysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEF ar <strong>0300 200 1900</strong> i siarad ag ymgynghorydd."
-    )
-
     val `Before you call, make sure you have:`: Message = Message(
       english = "Before you call, make sure you have:",
       welsh   = "Cyn i chi ffonio, sicrhewch fod gennych y canlynol:"
@@ -336,8 +331,8 @@ object Messages {
     )
 
     val `your Self Assessment Unique Taxpayer Reference (UTR)...`: Message = Message(
-      english = "your Self Assessment Unique Taxpayer Reference (UTR) which can be 10 or 13 digits long",
-      welsh   = "eich Cyfeirnod Unigryw y Trethdalwr (UTR) ar gyfer Hunanasesiad a allai fod yn 10 neu 13 digid o hyd "
+      english = "your Self Assessment Unique Taxpayer Reference (UTR) which is 10 digits long, like 1234567890",
+      welsh   = "eich Cyfeirnod Unigryw y Trethdalwr (UTR) ar gyfer Hunanasesiad sy’n 10 digid o hyd, fel 1234567890"
     )
 
     val `your National Insurance number`: Message = Message(
@@ -763,6 +758,11 @@ object Messages {
     def `You must request access to Self Assessment before you can set up a Self Assessment payment plan.`(saLink: String): Message = Message(
       english = s"""You must <a href="$saLink" class="govuk-link">request access to Self Assessment</a> before you can set up a Self Assessment payment plan online.""",
       welsh   = s"""Mae’n rhaid i chi <a href="$saLink" class="govuk-link">wneud cais i gael mynediad at eich cyfrif Hunanasesiad</a> cyn i chi allu trefnu cynllun talu ar-lein ar gyfer Hunanasesiad."""
+    )
+
+    val `If you already have access, sign in with the Government Gateway user ID that has your enrolment.`: Message = Message(
+      english = "If you already have access, sign in with the Government Gateway user ID that has your enrolment.",
+      welsh   = "Os oes gennych fynediad yn barod, mae’n rhaid i chi fewngofnodi gan ddefnyddio’r Dynodydd Defnyddiwr (ID) Porth y Llywodraeth sydd â’ch cofrestriad."
     )
 
   }
