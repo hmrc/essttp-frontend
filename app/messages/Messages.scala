@@ -952,9 +952,9 @@ object Messages {
       welsh   = "Defnyddiwch y gwasanaeth hwn i sefydlu cynllun talu ar gyfer eich bil TWE y cyflogwyr sy’n weddill. Mae taliadau’n cael eu cymryd drwy Ddebyd Uniongyrchol ac maent yn cynnwys llog a godir ar gyfradd sylfaenol Banc Lloegr ynghyd â 2.5% y flwyddyn."
     )
 
-    val `To set up a Direct Debit online, you must be named...`: Message = Message(
-      english = "To set up a Direct Debit online, you must be named on the UK bank account you’ll use to pay. You must be able to authorise a Direct Debit without a signature from any other account holders.",
-      welsh   = "I sefydlu Debyd Uniongyrchol ar-lein, mae’n rhaid i chi fod wedi’ch enwi ar gyfrif banc y DU y byddwch yn ei ddefnyddio i dalu. Mae’n rhaid i chi allu awdurdodi Debyd Uniongyrchol heb lofnod gan unrhyw ddeiliaid cyfrif eraill."
+    val `You must be able to authorise a Direct Debit...`: Message = Message(
+      english = "You must be able to authorise a Direct Debit without a signature from any other account holders and be named on the UK bank account you’ll use to pay.",
+      welsh   = "Mae’n rhaid i chi allu awdurdodi Debyd Uniongyrchol heb lofnod gan unrhyw ddeiliaid cyfrif eraill a chael eich enwi ar gyfrif banc y DU y byddwch yn ei ddefnyddio i’w dalu."
     )
 
     val `You’ll need to stay up to date with your payments or we could ask you to pay in full.`: Message = Message(
@@ -1005,9 +1005,9 @@ object Messages {
       welsh   = "Defnyddiwch y gwasanaeth hwn i drefnu cynllun talu ar gyfer eich bil TAW sy’n weddill. Mae taliadau’n cael eu cymryd drwy Ddebyd Uniongyrchol ac maent yn cynnwys llog a godir ar gyfradd sylfaenol Banc Lloegr ynghyd â 2.5% y flwyddyn."
     )
 
-    val `To set up a Direct Debit online, you must be named...`: Message = Message(
-      english = "To set up a Direct Debit online, you must be named on the UK bank account you’ll use to pay. You must be able to authorise a Direct Debit without a signature from any other account holders.",
-      welsh   = "I sefydlu Debyd Uniongyrchol ar-lein, mae’n rhaid i chi fod wedi’ch enwi ar gyfrif banc y DU y byddwch yn ei ddefnyddio i dalu. Mae’n rhaid i chi allu awdurdodi Debyd Uniongyrchol heb lofnod gan unrhyw ddeiliaid cyfrif eraill."
+    val `You must be able to authorise a Direct Debit...`: Message = Message(
+      english = "You must be able to authorise a Direct Debit without a signature from any other account holders and be named on the UK bank account you’ll use to pay.",
+      welsh   = "Mae’n rhaid i chi allu awdurdodi Debyd Uniongyrchol heb lofnod gan unrhyw ddeiliaid cyfrif eraill a chael eich enwi ar gyfrif banc y DU y byddwch yn ei ddefnyddio i’w dalu."
     )
 
     val `You’ll need to stay up to date with your payments or we could ask you to pay in full.`: Message = Message(
