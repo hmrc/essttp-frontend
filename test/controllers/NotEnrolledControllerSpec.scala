@@ -137,11 +137,15 @@ class NotEnrolledControllerSpec extends ItSpec {
         expectedSubmitUrl       = None
       )
 
-      page.select(".govuk-body").asScala.toList(0).html() shouldBe (
+      val paragraphs = page.select("p.govuk-body").asScala.toList
+
+      paragraphs(0).html() shouldBe (
         "You must " +
         """<a href="https://www.tax.service.gov.uk/business-account/add-tax/self-assessment/enter-sa-utr?origin=ssttp-sa" class="govuk-link">request access to Self Assessment</a> """ +
         "before you can set up a Self Assessment payment plan online."
       )
+      paragraphs(1).text shouldBe "If you already have access, sign in with the Government Gateway user ID that has your enrolment."
+
       ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Sa, Languages.English)
     }
 
@@ -161,11 +165,15 @@ class NotEnrolledControllerSpec extends ItSpec {
         language                = Languages.Welsh
       )
 
-      page.select(".govuk-body").asScala.toList(0).html() shouldBe (
+      val paragraphs = page.select("p.govuk-body").asScala.toList
+
+      paragraphs(0).html() shouldBe (
         "Mae’n rhaid i chi " +
         """<a href="https://www.tax.service.gov.uk/business-account/add-tax/self-assessment/enter-sa-utr?origin=ssttp-sa" class="govuk-link">wneud cais i gael mynediad at eich cyfrif Hunanasesiad</a> """ +
         "cyn i chi allu trefnu cynllun talu ar-lein ar gyfer Hunanasesiad."
       )
+      paragraphs(1).text shouldBe "Os oes gennych fynediad yn barod, mae’n rhaid i chi fewngofnodi gan ddefnyddio’r Dynodydd Defnyddiwr (ID) Porth y Llywodraeth sydd â’ch cofrestriad."
+
       ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Sa, Languages.Welsh)
     }
 

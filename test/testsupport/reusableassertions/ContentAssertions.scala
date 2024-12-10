@@ -255,14 +255,14 @@ object ContentAssertions extends RichMatchers {
                 )
               case TaxRegime.Sa => if (showFullListPreparationTips) {
                 List(
-                  "your Self Assessment Unique Taxpayer Reference (UTR) which can be 10 or 13 digits long",
+                  "your Self Assessment Unique Taxpayer Reference (UTR) which is 10 digits long, like 1234567890",
                   "information on any savings or investments you have",
                   "your bank details",
                   "details of your income and spending"
                 )
               } else {
                 List(
-                  "your Self Assessment Unique Taxpayer Reference (UTR) which can be 10 or 13 digits long",
+                  "your Self Assessment Unique Taxpayer Reference (UTR) which is 10 digits long, like 1234567890",
                   "your bank details"
                 )
               }
@@ -287,14 +287,14 @@ object ContentAssertions extends RichMatchers {
                 )
               case TaxRegime.Sa => if (showFullListPreparationTips) {
                 List(
-                  "eich Cyfeirnod Unigryw y Trethdalwr (UTR) ar gyfer Hunanasesiad a allai fod yn 10 neu 13 digid o hyd",
+                  "eich Cyfeirnod Unigryw y Trethdalwr (UTR) ar gyfer Hunanasesiad sy’n 10 digid o hyd, fel 1234567890",
                   "gwybodaeth am unrhyw gynilion neu fuddsoddiadau sydd gennych",
                   "eich manylion banc",
                   "manylion eich incwm a’ch gwariant"
                 )
               } else {
                 List(
-                  "eich Cyfeirnod Unigryw y Trethdalwr (UTR) ar gyfer Hunanasesiad a allai fod yn 10 neu 13 digid o hyd",
+                  "eich Cyfeirnod Unigryw y Trethdalwr (UTR) ar gyfer Hunanasesiad sy’n 10 digid o hyd, fel 1234567890",
                   "eich manylion banc"
                 )
               }
