@@ -59,7 +59,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
               case TaxRegime.Epaye => controller.epayePaymentPlanSetUp(fakeRequest)
               case TaxRegime.Vat   => controller.vatPaymentPlanSetUp(fakeRequest)
               case TaxRegime.Sa    => controller.saPaymentPlanSetUp(fakeRequest)
-              case TaxRegime.Sia   => controller.siaPaymentPlanSetUp(fakeRequest)
+              case TaxRegime.Simp  => controller.simpPaymentPlanSetUp(fakeRequest)
             }
             val pageContent: String = contentAsString(result)
             val doc: Document = Jsoup.parse(pageContent)
@@ -81,7 +81,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
                 "Your payment reference is 101747001"
               case TaxRegime.Sa =>
                 "Your payment reference is 1234567895"
-              case TaxRegime.Sia =>
+              case TaxRegime.Simp =>
                 "Your payment reference is QQ123456A"
             })
 
@@ -114,7 +114,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
             continueButton.attr("href") shouldBe (taxRegime match {
               case TaxRegime.Epaye | TaxRegime.Vat => "http://localhost:9020/business-account"
               case TaxRegime.Sa                    => "http://localhost:9232/personal-account"
-              case TaxRegime.Sia                   => "http://localhost:9056/personal-account"
+              case TaxRegime.Simp                  => "http://localhost:9056/personal-account"
             })
 
             val surveyLink = doc.select(".govuk-body > .govuk-link").asScala.toList(2)
@@ -123,7 +123,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
               case TaxRegime.Epaye => PageUrls.exitSurveyEpayeUrl
               case TaxRegime.Vat   => PageUrls.exitSurveyVatUrl
               case TaxRegime.Sa    => PageUrls.exitSurveySaUrl
-              case TaxRegime.Sia   => PageUrls.exitSurveySiaUrl
+              case TaxRegime.Simp  => PageUrls.exitSurveySimpUrl
             })
             ()
           }
@@ -302,7 +302,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
               case TaxRegime.Epaye => "123PA44545546"
               case TaxRegime.Vat   => "101747001"
               case TaxRegime.Sa    => "1234567895"
-              case TaxRegime.Sia   => "QQ123456A"
+              case TaxRegime.Simp  => "QQ123456A"
             }
             assertKeyAndValue(paymentReferenceSummaryListRows(0), ("Payment reference", expectedPaymentReference))
           }
@@ -356,7 +356,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
             "Your payment reference is 101747001"
           case TaxRegime.Sa =>
             "Your payment reference is 1234567895"
-          case TaxRegime.Sia =>
+          case TaxRegime.Simp =>
             "Your payment reference is QQ123456A"
         })
 
@@ -530,7 +530,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
           case TaxRegime.Epaye => "123PA44545546"
           case TaxRegime.Vat   => "101747001"
           case TaxRegime.Sa    => "1234567895"
-          case TaxRegime.Sia   => "QQ123456A"
+          case TaxRegime.Simp  => "QQ123456A"
         }
         assertKeyAndValue(paymentReferenceSummaryListRows(0), ("Payment reference", expectedPaymentReference))
       }
@@ -551,8 +551,8 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
       }
   }
 
-  //OPS-12345 - TODO these are placeholders, add tests for sia once we have info on how page will look
-  s"[taxRegime: ${Origins.Sia.Pta.taxRegime.toString}] GET /payment-plan-print-summary should" - {
+  //OPS-12345 - TODO these are placeholders, add tests for simp once we have info on how page will look
+  s"[taxRegime: ${Origins.Simp.Pta.taxRegime.toString}] GET /payment-plan-print-summary should" - {
     "return the print payment schedule page with correct content (with upfront payment)" in {
     }
 
@@ -586,7 +586,7 @@ class PaymentPlanSetUpControllerEmailDisabledSpec extends ItSpec {
                 case TaxRegime.Epaye => controller.epayePaymentPlanSetUp(fakeRequest)
                 case TaxRegime.Vat   => controller.vatPaymentPlanSetUp(fakeRequest)
                 case TaxRegime.Sa    => controller.saPaymentPlanSetUp(fakeRequest)
-                case TaxRegime.Sia   => controller.siaPaymentPlanSetUp(fakeRequest)
+                case TaxRegime.Simp  => controller.simpPaymentPlanSetUp(fakeRequest)
               }
               val pageContent: String = contentAsString(result)
               val doc: Document = Jsoup.parse(pageContent)

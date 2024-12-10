@@ -43,19 +43,19 @@ class WhichTaxRegimeController @Inject() (
 
   val whichTaxRegime: Action[AnyContent] =
     as.authenticatedAction { implicit request =>
-      Ok(views.whichTaxRegime(TaxRegimeForm.form, appConfig.saEnabled, appConfig.siaEnabled))
+      Ok(views.whichTaxRegime(TaxRegimeForm.form, appConfig.saEnabled, appConfig.simpEnabled))
     }
 
   val whichTaxRegimeSubmit: Action[AnyContent] =
     as.authenticatedAction { implicit request =>
       TaxRegimeForm.form.bindFromRequest()
         .fold(
-          formWithErrors => Ok(views.whichTaxRegime(formWithErrors, appConfig.saEnabled, appConfig.siaEnabled)),
+          formWithErrors => Ok(views.whichTaxRegime(formWithErrors, appConfig.saEnabled, appConfig.simpEnabled)),
           {
             case TaxRegime.Epaye => Redirect(routes.StartJourneyController.startDetachedEpayeJourney)
             case TaxRegime.Vat   => Redirect(routes.StartJourneyController.startDetachedVatJourney)
             case TaxRegime.Sa    => Redirect(routes.StartJourneyController.startDetachedSaJourney)
-            case TaxRegime.Sia   => Redirect(routes.StartJourneyController.startDetachedSiaJourney)
+            case TaxRegime.Simp  => Redirect(routes.StartJourneyController.startDetachedSimpJourney)
           }
         )
     }

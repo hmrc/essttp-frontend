@@ -31,7 +31,7 @@
   requestSupport: RequestSupport
 )
 
-@(form: Form[TaxRegime], saEnabled: Boolean, siaEnabled: Boolean)(implicit request: Request[_])
+@(form: Form[TaxRegime], saEnabled: Boolean, simpEnabled: Boolean)(implicit request: Request[_])
 
 @import requestSupport._
 
@@ -60,15 +60,15 @@
       value = Some("SA")
   )
 
-  val sia = RadioItem(
-      content = Text(Messages.WhichTaxRegime.SIA.show),
-      value = Some("SIA")
+  val simp = RadioItem(
+      content = Text(Messages.WhichTaxRegime.SIMP.show),
+      value = Some("SIMP")
   )
 
   Seq(
     Some(epaye),
     Some(sa).filter(_ => saEnabled),
-    Some(sia).filter(_ => siaEnabled),
+    Some(simp).filter(_ => simpEnabled),
     Some(vat)
   ).collect{ case Some(regime) => regime }
 }

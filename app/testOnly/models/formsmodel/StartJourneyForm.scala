@@ -129,12 +129,12 @@ object StartJourneyForm {
   private val payeDebtTotalAmountKey: String = "payeDebtTotalAmount"
   private val vatDebtTotalAmountKey: String = "vatDebtTotalAmount"
   private val saDebtTotalAmountKey: String = "saDebtTotalAmount"
-  private val siaDebtTotalAmountKey: String = "siaDebtTotalAmount"
+  private val simpDebtTotalAmountKey: String = "simpDebtTotalAmount"
 
   private val payeTaxReferenceKey: String = "payeTaxReference"
   private val vatTaxReferenceKey: String = "vatTaxReference"
   private val saTaxReferenceKey: String = "saTaxReference"
-  private val siaTaxReferenceKey: String = "nino"
+  private val simpTaxReferenceKey: String = "nino"
 
   private def signInMapping(implicit language: Language): Mapping[SignInAs] = {
     Forms.of(EnumFormatter.format(
@@ -170,7 +170,7 @@ object StartJourneyForm {
           case TaxRegime.Epaye => appConfig.PolicyParameters.EPAYE.maxAmountOfDebt -> payeDebtTotalAmountKey
           case TaxRegime.Vat   => appConfig.PolicyParameters.VAT.maxAmountOfDebt -> vatDebtTotalAmountKey
           case TaxRegime.Sa    => appConfig.PolicyParameters.SA.maxAmountOfDebt -> saDebtTotalAmountKey
-          case TaxRegime.Sia   => appConfig.PolicyParameters.SIA.maxAmountOfDebt -> siaDebtTotalAmountKey
+          case TaxRegime.Simp  => appConfig.PolicyParameters.SIMP.maxAmountOfDebt -> simpDebtTotalAmountKey
         }
         val minAmount = AmountInPence(100)
 
@@ -202,7 +202,7 @@ object StartJourneyForm {
           case TaxRegime.Epaye => payeTaxReferenceKey -> RandomDataGenerator.nextEpayeRefs()(Random)._3
           case TaxRegime.Vat   => vatTaxReferenceKey -> RandomDataGenerator.nextVrn()(Random)
           case TaxRegime.Sa    => saTaxReferenceKey -> RandomDataGenerator.nextSaUtr()(Random)
-          case TaxRegime.Sia   => siaTaxReferenceKey -> RandomDataGenerator.nextNino()(Random)
+          case TaxRegime.Simp  => simpTaxReferenceKey -> RandomDataGenerator.nextNino()(Random)
         }
 
         val taxId: TaxId = data.get(taxReferenceKey)
@@ -212,7 +212,7 @@ object StartJourneyForm {
               case TaxRegime.Epaye => EmpRef(someTaxRef)
               case TaxRegime.Vat   => Vrn(someTaxRef)
               case TaxRegime.Sa    => SaUtr(someTaxRef)
-              case TaxRegime.Sia   => Nino(someTaxRef)
+              case TaxRegime.Simp  => Nino(someTaxRef)
             }
           }
           .getOrElse(defaultTaxRef)
@@ -225,7 +225,7 @@ object StartJourneyForm {
           case EmpRef(value) => Map(payeTaxReferenceKey -> value)
           case Vrn(value)    => Map(vatTaxReferenceKey -> value)
           case SaUtr(value)  => Map(saTaxReferenceKey -> value)
-          case Nino(value)   => Map(siaTaxReferenceKey -> value)
+          case Nino(value)   => Map(simpTaxReferenceKey -> value)
         }
       }
     }

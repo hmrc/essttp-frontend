@@ -316,10 +316,10 @@ class DetermineTaxIdControllerSpec extends ItSpec {
       }
     }
 
-    "for SIA when" - {
+    "for SIMP when" - {
       "the tax id has already been determined" in {
         stubCommonActions(authAllEnrolments = Some(Set()))
-        EssttpBackend.DetermineTaxId.findJourney(Origins.Sia.Pta)(JourneyJsonTemplates.`Computed Tax Id`(Origins.Sia.Pta, "1234567895"))
+        EssttpBackend.DetermineTaxId.findJourney(Origins.Simp.Pta)(JourneyJsonTemplates.`Computed Tax Id`(Origins.Simp.Pta, "1234567895"))
 
         val result = controller.determineTaxId()(fakeRequest)
 
@@ -329,10 +329,10 @@ class DetermineTaxIdControllerSpec extends ItSpec {
 
       "a NINO can be found in the auth retrievals" in {
         stubCommonActions(authNino = Some("AB123456C"))
-        EssttpBackend.DetermineTaxId.findJourney(Origins.Sia.Pta)(JourneyJsonTemplates.Started(Origins.Sia.Pta))
+        EssttpBackend.DetermineTaxId.findJourney(Origins.Simp.Pta)(JourneyJsonTemplates.Started(Origins.Simp.Pta))
         EssttpBackend.DetermineTaxId.stubUpdateTaxId(
           TdAll.journeyId,
-          JourneyJsonTemplates.`Computed Tax Id`(origin       = Origins.Sia.Pta, taxReference = "AB123456C")
+          JourneyJsonTemplates.`Computed Tax Id`(origin       = Origins.Simp.Pta, taxReference = "AB123456C")
         )
         val result = controller.determineTaxId()(fakeRequest)
 
@@ -344,12 +344,12 @@ class DetermineTaxIdControllerSpec extends ItSpec {
 
       "a NINO cannot be found in the auth retrievals" in {
         stubCommonActions()
-        EssttpBackend.DetermineTaxId.findJourney(Origins.Sia.Pta)(JourneyJsonTemplates.Started(Origins.Sia.Pta))
+        EssttpBackend.DetermineTaxId.findJourney(Origins.Simp.Pta)(JourneyJsonTemplates.Started(Origins.Simp.Pta))
 
         val result = controller.determineTaxId()(fakeRequest)
 
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.NotEnrolledController.siaNoNino.url)
+        redirectLocation(result) shouldBe Some(routes.NotEnrolledController.simpNoNino.url)
 
       }
 

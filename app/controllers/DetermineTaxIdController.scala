@@ -60,7 +60,7 @@ class DetermineTaxIdController @Inject() (
   def determineTaxId(): Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     val maybeTaxId: Future[Option[TaxId]] = request.journey match {
       case j: Journey.Stages.Started =>
-        if (j.taxRegime === TaxRegime.Sia) {
+        if (j.taxRegime === TaxRegime.Simp) {
           request.nino.map(nino =>
             journeyConnector.updateTaxId(j.journeyId, nino)
               .map(_ => nino)).sequence
@@ -81,7 +81,7 @@ class DetermineTaxIdController @Inject() (
         case TaxRegime.Epaye => Redirect(routes.NotEnrolledController.notEnrolled)
         case TaxRegime.Vat   => Redirect(routes.NotEnrolledController.notVatRegistered)
         case TaxRegime.Sa    => Redirect(routes.NotEnrolledController.notSaEnrolled)
-        case TaxRegime.Sia   => Redirect(routes.NotEnrolledController.siaNoNino)
+        case TaxRegime.Simp  => Redirect(routes.NotEnrolledController.simpNoNino)
       }
     }
   }

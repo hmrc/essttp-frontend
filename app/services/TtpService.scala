@@ -261,11 +261,11 @@ object TtpService {
         returnFinancialAssessment = true
       )
 
-    case j: Journey.Sia =>
+    case j: Journey.Simp =>
       CallEligibilityApiRequest(
         channelIdentifier         = EligibilityRequestDefaults.essttpChannelIdentifier,
-        identification            = List(Identification(IdType(EligibilityRequestDefaults.Sia.idType), IdValue(j.taxId.value))),
-        regimeType                = RegimeType.SIA,
+        identification            = List(Identification(IdType(EligibilityRequestDefaults.Simp.idType), IdValue(j.taxId.value))),
+        regimeType                = RegimeType.SIMP,
         returnFinancialAssessment = true
       )
 

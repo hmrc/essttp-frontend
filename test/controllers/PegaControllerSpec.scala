@@ -332,9 +332,9 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
           ).url shouldBe "/set-up-a-payment-plan/pega-callback?regime=sa&lang=en"
 
           routes.PegaController.callback(
-            TaxRegime.Sia,
+            TaxRegime.Simp,
             Some(Languages.Welsh)
-          ).url shouldBe "/set-up-a-payment-plan/pega-callback?regime=sia&lang=cy"
+          ).url shouldBe "/set-up-a-payment-plan/pega-callback?regime=simp&lang=cy"
         }
 
       }

@@ -64,7 +64,7 @@ class WhichTaxRegimeControllerSpec extends ItSpec {
         radios(1).select(".govuk-radios__input").`val`() shouldBe "SA"
         radios(1).select(".govuk-radios__label").text() shouldBe "Self Assessment"
 
-        radios(2).select(".govuk-radios__input").`val`() shouldBe "SIA"
+        radios(2).select(".govuk-radios__input").`val`() shouldBe "SIMP"
         radios(2).select(".govuk-radios__label").text() shouldBe "Simple Assessment"
 
         radios(3).select(".govuk-radios__input").`val`() shouldBe "VAT"
@@ -105,7 +105,7 @@ class WhichTaxRegimeControllerSpec extends ItSpec {
       radios(1).select(".govuk-radios__input").`val`() shouldBe "SA"
       radios(1).select(".govuk-radios__label").text() shouldBe "Hunanasesiad"
 
-      radios(2).select(".govuk-radios__input").`val`() shouldBe "SIA"
+      radios(2).select(".govuk-radios__input").`val`() shouldBe "SIMP"
       radios(2).select(".govuk-radios__label").text() shouldBe "Asesiad Syml"
 
       radios(3).select(".govuk-radios__input").`val`() shouldBe "VAT"
@@ -170,14 +170,14 @@ class WhichTaxRegimeControllerSpec extends ItSpec {
       redirectLocation(result) shouldBe Some(routes.StartJourneyController.startDetachedSaJourney.url)
     }
 
-    "redirect to the start SIA journey endpoint if the user selects SIA" in {
+    "redirect to the start SIMP journey endpoint if the user selects SIMP" in {
       stubCommonActions()
-      EssttpBackend.StartJourney.startJourneyInBackend(Origins.Sia.DetachedUrl)
+      EssttpBackend.StartJourney.startJourneyInBackend(Origins.Simp.DetachedUrl)
 
-      val request = fakeRequest.withFormUrlEncodedBody("WhichTaxRegime" -> "SIA")
+      val request = fakeRequest.withFormUrlEncodedBody("WhichTaxRegime" -> "SIMP")
       val result: Future[Result] = controller.whichTaxRegimeSubmit(request)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.StartJourneyController.startDetachedSiaJourney.url)
+      redirectLocation(result) shouldBe Some(routes.StartJourneyController.startDetachedSimpJourney.url)
     }
 
   }
@@ -218,7 +218,7 @@ class WhichTaxRegimeSaDisabledControllerSpec extends ItSpec {
         radios(0).select(".govuk-radios__input").`val`() shouldBe "EPAYE"
         radios(0).select(".govuk-radios__label").text() shouldBe "Employers’ PAYE"
 
-        radios(1).select(".govuk-radios__input").`val`() shouldBe "SIA"
+        radios(1).select(".govuk-radios__input").`val`() shouldBe "SIMP"
         radios(1).select(".govuk-radios__label").text() shouldBe "Simple Assessment"
 
         radios(2).select(".govuk-radios__input").`val`() shouldBe "VAT"
@@ -236,12 +236,12 @@ class WhichTaxRegimeSaDisabledControllerSpec extends ItSpec {
   }
 }
 
-class WhichTaxRegimeSiaDisabledControllerSpec extends ItSpec {
+class WhichTaxRegimeSimpDisabledControllerSpec extends ItSpec {
 
   lazy val controller = app.injector.instanceOf[WhichTaxRegimeController]
 
   override lazy val configOverrides: Map[String, Any] = Map(
-    "features.sia" -> false
+    "features.simp" -> false
   )
 
   val authCredentials: Credentials = Credentials("authId-999", "GovernmentGateway")
@@ -264,7 +264,7 @@ class WhichTaxRegimeSiaDisabledControllerSpec extends ItSpec {
         )
 
         val radios = doc.select(".govuk-radios__item").asScala.toList
-        // SIA shouldn't be an option
+        // SIMP shouldn't be an option
         radios.size shouldBe 3
 
         radios(0).select(".govuk-radios__input").`val`() shouldBe "EPAYE"
@@ -279,7 +279,7 @@ class WhichTaxRegimeSiaDisabledControllerSpec extends ItSpec {
         ()
       }
 
-    "not show the SIA option is SIA is disabled" in {
+    "not show the SIMP option is SIMP is disabled" in {
       AuthStub.authorise(Some(Set(TdAll.saEnrolment)), Some(authCredentials))
 
       val result = controller.whichTaxRegime(fakeRequest)

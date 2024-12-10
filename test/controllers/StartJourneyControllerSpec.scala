@@ -100,26 +100,26 @@ class StartJourneyControllerSpec extends ItSpec {
     }
   }
 
-  "GET /govuk/sia/start" - {
-    "should start a gov uk SIA journey and redirect" in {
+  "GET /govuk/simp/start" - {
+    "should start a gov uk SIMP journey and redirect" in {
       stubCommonActions()
-      EssttpBackend.StartJourney.startJourneySiaGovUk
+      EssttpBackend.StartJourney.startJourneySimpGovUk
 
       val fakeRequest = FakeRequest()
         .withAuthToken()
         .withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
-      val result: Future[Result] = controller.startGovukSiaJourney(fakeRequest)
+      val result: Future[Result] = controller.startGovukSimpJourney(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.DetermineTaxIdController.determineTaxId.url)
-      EssttpBackend.StartJourney.verifyStartJourneySiaGovUk()
+      EssttpBackend.StartJourney.verifyStartJourneySimpGovUk()
     }
 
     "should redirect to login with the correct continue url if the user is not logged in" in {
-      val result = controller.startGovukSiaJourney(FakeRequest("GET", routes.StartJourneyController.startGovukSiaJourney.url))
+      val result = controller.startGovukSimpJourney(FakeRequest("GET", routes.StartJourneyController.startGovukSimpJourney.url))
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some("http://localhost:9949/auth-login-stub/gg-sign-in?" +
-        "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fgovuk%2Fsia%2Fstart&origin=essttp-frontend")
+        "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fgovuk%2Fsimp%2Fstart&origin=essttp-frontend")
     }
   }
 
@@ -240,42 +240,42 @@ class StartJourneyControllerSpec extends ItSpec {
     }
   }
 
-  "GET /sia/start" - {
+  "GET /simp/start" - {
     "should start a detached VAT journey and redirect" in {
       stubCommonActions()
-      EssttpBackend.StartJourney.startJourneySiaDetached
+      EssttpBackend.StartJourney.startJourneySimpDetached
 
       val fakeRequest = FakeRequest()
         .withAuthToken()
         .withSession(SessionKeys.sessionId -> "IamATestSessionId")
 
-      val result: Future[Result] = controller.startDetachedSiaJourney(fakeRequest)
+      val result: Future[Result] = controller.startDetachedSimpJourney(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some("http://localhost:19001/set-up-a-payment-plan/sia-payment-plan")
-      EssttpBackend.StartJourney.verifyStartJourneySiaDetached()
+      redirectLocation(result) shouldBe Some("http://localhost:19001/set-up-a-payment-plan/simple-assessment-payment-plan")
+      EssttpBackend.StartJourney.verifyStartJourneySimpDetached()
     }
 
     "should start a detached VAT journey and redirect if the user has already seen the landing page" in {
       stubCommonActions()
-      EssttpBackend.StartJourney.startJourneySiaDetached
+      EssttpBackend.StartJourney.startJourneySimpDetached
 
       val fakeRequest = FakeRequest()
         .withAuthToken()
         .withSession(SessionKeys.sessionId -> "IamATestSessionId", LandingController.hasSeenLandingPageSessionKey -> "true")
 
-      val result: Future[Result] = controller.startDetachedSiaJourney(fakeRequest)
+      val result: Future[Result] = controller.startDetachedSimpJourney(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.DetermineTaxIdController.determineTaxId.url)
       session(result).data.get(LandingController.hasSeenLandingPageSessionKey) shouldBe empty
 
-      EssttpBackend.StartJourney.verifyStartJourneySiaDetached()
+      EssttpBackend.StartJourney.verifyStartJourneySimpDetached()
     }
 
     "should redirect to login with the correct continue url if the user is not logged in" in {
-      val result = controller.startDetachedSiaJourney(FakeRequest("GET", routes.StartJourneyController.startDetachedSiaJourney.url))
+      val result = controller.startDetachedSimpJourney(FakeRequest("GET", routes.StartJourneyController.startDetachedSimpJourney.url))
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some("http://localhost:9949/auth-login-stub/gg-sign-in?" +
-        "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fsia%2Fstart&origin=essttp-frontend")
+        "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fsimp%2Fstart&origin=essttp-frontend")
     }
   }
 

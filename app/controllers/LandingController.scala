@@ -69,12 +69,12 @@ class LandingController @Inject() (
       as.default(_ => Redirect(appConfig.Urls.saSuppUrl))
     }
 
-  val siaLandingPage: Action[AnyContent] = {
-    if (appConfig.siaEnabled) {
+  val simpLandingPage: Action[AnyContent] = {
+    if (appConfig.simpEnabled) {
       as.default.async { implicit request =>
-        checkNotShuttered(TaxRegime.Sia) {
+        checkNotShuttered(TaxRegime.Simp) {
           getBackUrl().map { maybeBackUrl =>
-            Ok(views.siaLanding(maybeBackUrl))
+            Ok(views.simpLanding(maybeBackUrl))
           }
         }
       }
@@ -103,9 +103,9 @@ class LandingController @Inject() (
     }
   }
 
-  val siaLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
-    checkNotShuttered(TaxRegime.Sia) {
-      handleLandingPageContinue(routes.StartJourneyController.startDetachedSiaJourney)
+  val simpLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
+    checkNotShuttered(TaxRegime.Simp) {
+      handleLandingPageContinue(routes.StartJourneyController.startDetachedSimpJourney)
     }
   }
 
