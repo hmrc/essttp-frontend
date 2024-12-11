@@ -102,8 +102,8 @@ class LandingPageControllerSpec extends ItSpec {
 
       val insetText = doc.select(".govuk-inset-text").asScala.toList
       insetText.size shouldBe 1
-      insetText(0).text() shouldBe "To set up a Direct Debit online, you must be named on the UK bank account you’ll use to pay. " +
-        "You must be able to authorise a Direct Debit without a signature from any other account holders."
+      insetText(0).text() shouldBe "You must be able to authorise a Direct Debit without a signature from any other " +
+        "account holders and be named on the UK bank account you’ll use to pay."
 
       paragraphs(1).text() shouldBe "You’ll need to stay up to date with your payments or we could ask you to pay in full."
       paragraphs(2).text() shouldBe "To set up a plan, your company or partnership must:"
@@ -212,8 +212,8 @@ class LandingPageControllerSpec extends ItSpec {
 
       val insetText = doc.select(".govuk-inset-text").asScala.toList
       insetText.size shouldBe 1
-      insetText(0).text() shouldBe "To set up a Direct Debit online, you must be named on the UK bank account you’ll use to pay. " +
-        "You must be able to authorise a Direct Debit without a signature from any other account holders."
+      insetText(0).text() shouldBe "You must be able to authorise a Direct Debit without a signature from any other " +
+        "account holders and be named on the UK bank account you’ll use to pay."
 
       paragraphs(1).text() shouldBe "You’ll need to stay up to date with your payments or we could ask you to pay in full."
       paragraphs(2).text() shouldBe "To set up a plan, your company or partnership must:"
