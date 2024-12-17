@@ -46,7 +46,7 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       ("HasRlsOnAddress - SA", TdAll.notEligibleHasRlsOnAddress, "hasRlsOnAddress", PageUrls.saRLSUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(Origins.Sa.Bta),
         Origins.Sa.Bta),
-      ("HasRlsOnAddress - SIMP", TdAll.notEligibleHasRlsOnAddress, "hasRlsOnAddress", PageUrls.simpNotEligibleUrl,
+      ("HasRlsOnAddress - SIMP", TdAll.notEligibleHasRlsOnAddress, "hasRlsOnAddress", PageUrls.simpRLSUrl,
         JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(Origins.Simp.Pta),
         Origins.Simp.Pta),
       ("MarkedAsInsolvent - EPAYE", TdAll.notEligibleMarkedAsInsolvent, "markedAsInsolvent", PageUrls.payeNotEligibleUrl,
