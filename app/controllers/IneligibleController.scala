@@ -225,4 +225,6 @@ class IneligibleController @Inject() (
 
   val saRLSPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericRLSIneligiblePage }
 
+  val simpRLSPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericRLSIneligiblePage }
+
 }

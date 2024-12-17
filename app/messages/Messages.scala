@@ -642,6 +642,11 @@ object Messages {
       welsh   = "Ffoniwch ni ar <strong>0300 200 1900</strong> oherwydd mae’n bosibl y gallwch drefnu cynllun dros y ffôn."
     )
 
+    val `Call us on 0300 322 7835 as you may be able to set up a plan over the phone`: Message = Message(
+      english = "Call us on <strong>0300 322 7835</strong> as you may be able to set up a plan over the phone.",
+      welsh   = "Ffoniwch ni ar <strong>0300 322 7835</strong> oherwydd mae’n bosibl y gallwch drefnu cynllun dros y ffôn."
+    )
+
     val `Call us on 0300 123 1813 if you need to speak to an adviser.`: Message = Message(
       english = "Call us on <strong>0300 123 1813</strong> if you need to speak to an adviser.",
       welsh   = "Ffoniwch ni ar <strong>0300 200 1900</strong> os oes angen i chi siarad ag ymgynghorydd."

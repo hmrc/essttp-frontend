@@ -156,6 +156,6 @@ object EligibilityRouter {
     case TaxRegime.Epaye => routes.IneligibleController.epayeRLSPage
     case TaxRegime.Vat   => routes.IneligibleController.vatRLSPage
     case TaxRegime.Sa    => routes.IneligibleController.saRLSPage
-    case TaxRegime.Simp  => routes.IneligibleController.simpGenericIneligiblePage
+    case TaxRegime.Simp  => routes.IneligibleController.simpRLSPage
   }
 }

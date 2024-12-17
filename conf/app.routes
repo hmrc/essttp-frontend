@@ -36,7 +36,7 @@ GET    /determine-eligibility                               controllers.Determin
 GET    /not-enrolled                                        controllers.NotEnrolledController.notEnrolled
 GET    /not-vat-registered                                  controllers.NotEnrolledController.notVatRegistered
 GET    /request-access-to-self-assessment                   controllers.NotEnrolledController.notSaEnrolled
-GET    /no-nino-found-sia                                   controllers.NotEnrolledController.simpNoNino
+GET    /no-nino-found-simp                                  controllers.NotEnrolledController.simpNoNino
 
 GET    /not-eligible-epaye                                  controllers.IneligibleController.payeGenericIneligiblePage
 GET    /not-eligible-vat                                    controllers.IneligibleController.vatGenericIneligiblePage
@@ -67,6 +67,7 @@ GET    /call-us-already-have-direct-debit-vat               controllers.Ineligib
 GET    /update-personal-details-epaye                       controllers.IneligibleController.epayeRLSPage
 GET    /update-personal-details-vat                         controllers.IneligibleController.vatRLSPage
 GET    /update-personal-details-sa                          controllers.IneligibleController.saRLSPage
+GET    /update-personal-details-simple-assessment           controllers.IneligibleController.simpRLSPage
 
 GET    /your-bill                                           controllers.YourBillController.yourBill
 POST   /your-bill                                           controllers.YourBillController.yourBillSubmit
