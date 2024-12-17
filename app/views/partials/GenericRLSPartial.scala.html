@@ -17,6 +17,7 @@
 @import actionsmodel.AuthenticatedJourneyRequest
 @import messages.Messages
 @import play.twirl.api.Html
+@import essttp.rootmodel.TaxRegime
 @import requests.RequestSupport
 
 @this(
@@ -35,4 +36,12 @@
 
 <p id="update-details-content" class="govuk-body">@{Html(Messages.NotEligible.`You must update your details with HMRC`(tellHMRCChangeDetailsLink).show)}</p>
 
-<p id="call-us-content" class="govuk-body">@{Html(Messages.NotEligible.`Call us on 0300 322 7835 as you may be able to set up a plan over the phone`.show)}</p>
+
+@callUsMessage = @{
+ request.journey.taxRegime match {
+  case TaxRegime.Simp => Messages.NotEligible.`Call us on 0300 322 7835 as you may be able to set up a plan over the phone`
+  case _ => Messages.NotEligible.`Call us on 0300 123 1813 as you may be able to set up a plan over the phone`
+ }
+}
+
+<p id="call-us-content" class="govuk-body">@Html(callUsMessage.show)</p>

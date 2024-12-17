@@ -330,7 +330,7 @@ class IneligibleControllerSpec extends ItSpec {
                   "You must <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">update your details with HMRC</a>. After you’ve updated your details, wait 3 working days before trying again online.")
               }
 
-              val expectedCallUsContent = "Call us on <strong>0300 322 7835</strong> as you may be able to set up a plan over the phone."
+              val expectedCallUsContent = "Call us on <strong>0300 123 1813</strong> as you may be able to set up a plan over the phone."
 
               ContentAssertions.commonPageChecks(
                 page,
@@ -782,7 +782,7 @@ class IneligibleControllerSpec extends ItSpec {
                   "Mae’n rhaid i chi <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">roi’ch manylion newydd i CThEF</a>. Ar ôl i chi diweddaru’ch manylion, arhoswch 3 diwrnod gwaith cyn rhoi tro arall arni ar-lein.")
               }
 
-              val expectedCallUsContent = "Ffoniwch ni ar <strong>0300 322 7835</strong> oherwydd mae’n bosibl y gallwch drefnu cynllun dros y ffôn."
+              val expectedCallUsContent = "Ffoniwch ni ar <strong>0300 200 1900</strong> oherwydd mae’n bosibl y gallwch drefnu cynllun dros y ffôn."
 
               ContentAssertions.commonPageChecks(
                 page,
