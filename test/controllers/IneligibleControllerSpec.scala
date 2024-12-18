@@ -184,6 +184,54 @@ class IneligibleControllerSpec extends ItSpec {
             ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English, callUsContentEnglish, showFullListPreparationTips = false)
           }
 
+          s"${taxRegime.entryName} RLS not eligible page correctly" in {
+            stubCommonActions(authAllEnrolments = enrolments)
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(origin))
+
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.epayeRLSPage(fakeRequest)
+              case TaxRegime.Vat   => controller.vatRLSPage(fakeRequest)
+              case TaxRegime.Sa    => controller.saRLSPage(fakeRequest)
+              case TaxRegime.Simp  => controller.simpRLSPage(fakeRequest)
+            }
+            val page = pageContentAsDoc(result)
+
+            val (expectedP1, expectedP2) = taxRegime match {
+              case TaxRegime.Epaye => ("You cannot set up an Employers’ PAYE payment plan online because some of your personal details are not up to date.",
+                "You must <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">update your details with HMRC</a>. After you’ve updated your details, wait 3 working days before trying again online.")
+              case TaxRegime.Vat => ("You cannot set up a VAT payment plan online because some of your personal details are not up to date.",
+                "You must <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">update your details with HMRC</a>. After you’ve updated your details, wait 3 working days before trying again online.")
+              case TaxRegime.Sa => ("You cannot set up a Self Assessment payment plan online because some of your personal details are not up to date.",
+                "You must <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">update your details with HMRC</a>. After you’ve updated your details, wait 3 working days before trying again online.")
+              case TaxRegime.Simp => ("You cannot set up a Simple Assessment payment plan online because some of your personal details are not up to date.",
+                "You must <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">update your details with HMRC</a>. After you’ve updated your details, wait 3 working days before trying again online.")
+            }
+
+            val expectedCallUsContent = taxRegime match {
+              case TaxRegime.Simp => "Call us on <strong>0300 322 7835</strong> as you may be able to set up a plan over the phone."
+              case _              => "Call us on <strong>0300 123 1813</strong> as you may be able to set up a plan over the phone."
+            }
+
+            ContentAssertions.commonPageChecks(
+              page,
+              expectedH1              = "Update your personal details to use this service",
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime)
+            )
+
+            val leadingParagraphs = page.select(".govuk-body").asScala.toList
+            leadingParagraphs(0).html() shouldBe expectedP1
+            leadingParagraphs(1).html() shouldBe expectedP2
+
+            ContentAssertions.commonIneligibilityTextCheck(
+              page,
+              taxRegime,
+              Languages.English,
+              callUsContentEnglish = expectedCallUsContent
+            )
+          }
+
           if (taxRegime != TaxRegime.Simp) {
 
             s"${taxRegime.entryName} Debt too old ineligible page correctly" in {
@@ -307,50 +355,6 @@ class IneligibleControllerSpec extends ItSpec {
               page.select(".govuk-body").asScala.toList(1).text() shouldBe "If you have recently filed your return, your account can take up to 3 days to update. Try again after 3 days."
             }
 
-            s"${taxRegime.entryName} RLS not eligible page correctly" in {
-              stubCommonActions(authAllEnrolments = enrolments)
-              EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(origin))
-
-              val result: Future[Result] = taxRegime match {
-                case TaxRegime.Epaye => controller.epayeRLSPage(fakeRequest)
-                case TaxRegime.Vat   => controller.vatRLSPage(fakeRequest)
-                case TaxRegime.Sa    => controller.saRLSPage(fakeRequest)
-                case TaxRegime.Simp  => controller.simpRLSPage(fakeRequest)
-              }
-              val page = pageContentAsDoc(result)
-
-              val (expectedP1, expectedP2) = taxRegime match {
-                case TaxRegime.Epaye => ("You cannot set up an Employers’ PAYE payment plan online because some of your personal details are not up to date.",
-                  "You must <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">update your details with HMRC</a>. After you’ve updated your details, wait 3 working days before trying again online.")
-                case TaxRegime.Vat => ("You cannot set up a VAT payment plan online because some of your personal details are not up to date.",
-                  "You must <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">update your details with HMRC</a>. After you’ve updated your details, wait 3 working days before trying again online.")
-                case TaxRegime.Sa => ("You cannot set up a Self Assessment payment plan online because some of your personal details are not up to date.",
-                  "You must <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">update your details with HMRC</a>. After you’ve updated your details, wait 3 working days before trying again online.")
-                case TaxRegime.Simp => ("You cannot set up a Simple Assessment payment plan online because some of your personal details are not up to date.",
-                  "You must <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">update your details with HMRC</a>. After you’ve updated your details, wait 3 working days before trying again online.")
-              }
-
-              val expectedCallUsContent = "Call us on <strong>0300 123 1813</strong> as you may be able to set up a plan over the phone."
-
-              ContentAssertions.commonPageChecks(
-                page,
-                expectedH1              = "Update your personal details to use this service",
-                shouldBackLinkBePresent = false,
-                expectedSubmitUrl       = None,
-                regimeBeingTested       = Some(taxRegime)
-              )
-
-              val leadingParagraphs = page.select(".govuk-body").asScala.toList
-              leadingParagraphs(0).html() shouldBe expectedP1
-              leadingParagraphs(1).html() shouldBe expectedP2
-
-              ContentAssertions.commonIneligibilityTextCheck(
-                page,
-                taxRegime,
-                Languages.English,
-                callUsContentEnglish = expectedCallUsContent
-              )
-            }
           }
       }
 
