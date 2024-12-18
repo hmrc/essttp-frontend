@@ -67,6 +67,7 @@ GET    /call-us-already-have-direct-debit-vat               controllers.Ineligib
 GET    /update-personal-details-epaye                       controllers.IneligibleController.epayeRLSPage
 GET    /update-personal-details-vat                         controllers.IneligibleController.vatRLSPage
 GET    /update-personal-details-sa                          controllers.IneligibleController.saRLSPage
+GET    /update-personal-details-simple-assessment           controllers.IneligibleController.simpRLSPage
 
 GET    /your-bill                                           controllers.YourBillController.yourBill
 POST   /your-bill                                           controllers.YourBillController.yourBillSubmit
