@@ -640,6 +640,51 @@ class IneligibleControllerSpec extends ItSpec {
             ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.Welsh, callUsContentWelsh = callUsContentWelsh, showFullListPreparationTips = false)
           }
 
+          s"${taxRegime.entryName} RLS not eligible page correctly" in {
+            stubCommonActions(authAllEnrolments = enrolments)
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(origin))
+
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.epayeRLSPage(fakeRequest.withLangWelsh())
+              case TaxRegime.Vat   => controller.vatRLSPage(fakeRequest.withLangWelsh())
+              case TaxRegime.Sa    => controller.saRLSPage(fakeRequest.withLangWelsh())
+              case TaxRegime.Simp  => controller.simpRLSPage(fakeRequest.withLangWelsh())
+            }
+            val page = pageContentAsDoc(result)
+            val (expectedP1, expectedP2) = taxRegime match {
+              case TaxRegime.Epaye => ("Ni allwch drefnu cynllun talu ar gyfer TWE y Cyflogwr ar-lein oherwydd nad yw rhai o’ch manylion personol yn gyfredol.",
+                "Mae’n rhaid i chi <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">roi’ch manylion newydd i CThEF</a>. Ar ôl i chi diweddaru’ch manylion, arhoswch 3 diwrnod gwaith cyn rhoi tro arall arni ar-lein.")
+              case TaxRegime.Vat => ("Ni allwch drefnu cynllun talu TAW ar-lein oherwydd nad yw rhai o’ch manylion personol yn gyfredol.",
+                "Mae’n rhaid i chi <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">roi’ch manylion newydd i CThEF</a>. Ar ôl i chi diweddaru’ch manylion, arhoswch 3 diwrnod gwaith cyn rhoi tro arall arni ar-lein.")
+              case TaxRegime.Sa => ("Ni allwch drefnu cynllun talu Hunanasesiad ar-lein oherwydd nad yw rhai o’ch manylion personol yn gyfredol.",
+                "Mae’n rhaid i chi <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">roi’ch manylion newydd i CThEF</a>. Ar ôl i chi diweddaru’ch manylion, arhoswch 3 diwrnod gwaith cyn rhoi tro arall arni ar-lein.")
+              case TaxRegime.Simp => ("Ni allwch drefnu cynllun talu Asesiad Syml ar-lein oherwydd nad yw rhai o’ch manylion personol yn gyfredol.",
+                "Mae’n rhaid i chi <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">roi’ch manylion newydd i CThEF</a>. Ar ôl i chi diweddaru’ch manylion, arhoswch 3 diwrnod gwaith cyn rhoi tro arall arni ar-lein.")
+            }
+
+            val expectedCallUsContent = "Ffoniwch ni ar <strong>0300 200 1900</strong> oherwydd mae’n bosibl y gallwch drefnu cynllun dros y ffôn."
+
+            ContentAssertions.commonPageChecks(
+              page,
+              expectedH1              = "Diweddaru’ch manylion personol i ddefnyddio’r gwasanaeth hwn",
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl       = None,
+              regimeBeingTested       = Some(taxRegime),
+              language                = Languages.Welsh
+            )
+
+            val leadingParagraphs = page.select(".govuk-body").asScala.toList
+            leadingParagraphs(0).html() shouldBe expectedP1
+            leadingParagraphs(1).html() shouldBe expectedP2
+
+            ContentAssertions.commonIneligibilityTextCheck(
+              page,
+              taxRegime,
+              language           = Languages.Welsh,
+              callUsContentWelsh = expectedCallUsContent
+            )
+          }
+
           if (taxRegime != TaxRegime.Simp) {
 
             s"${taxRegime.entryName} Debt too old ineligible page correctly" in {
@@ -762,51 +807,6 @@ class IneligibleControllerSpec extends ItSpec {
               fileYourTaxReturnLink.attr("href") shouldBe expectedFileYourReturnLink(taxRegime)
 
               page.select(".govuk-body").asScala.toList(1).text() shouldBe "Os ydych wedi cyflwyno’ch Ffurflen Dreth yn ddiweddar, gall gymryd hyd at 3 diwrnod i ddiweddaru’ch cyfrif. Rhowch gynnig arall arni ar ôl 3 diwrnod."
-            }
-
-            s"${taxRegime.entryName} RLS not eligible page correctly" in {
-              stubCommonActions(authAllEnrolments = enrolments)
-              EssttpBackend.EligibilityCheck.findJourney(testCrypto)(JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(origin))
-
-              val result: Future[Result] = taxRegime match {
-                case TaxRegime.Epaye => controller.epayeRLSPage(fakeRequest.withLangWelsh())
-                case TaxRegime.Vat   => controller.vatRLSPage(fakeRequest.withLangWelsh())
-                case TaxRegime.Sa    => controller.saRLSPage(fakeRequest.withLangWelsh())
-                case TaxRegime.Simp  => controller.simpRLSPage(fakeRequest.withLangWelsh())
-              }
-              val page = pageContentAsDoc(result)
-              val (expectedP1, expectedP2) = taxRegime match {
-                case TaxRegime.Epaye => ("Ni allwch drefnu cynllun talu ar gyfer TWE y Cyflogwr ar-lein oherwydd nad yw rhai o’ch manylion personol yn gyfredol.",
-                  "Mae’n rhaid i chi <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">roi’ch manylion newydd i CThEF</a>. Ar ôl i chi diweddaru’ch manylion, arhoswch 3 diwrnod gwaith cyn rhoi tro arall arni ar-lein.")
-                case TaxRegime.Vat => ("Ni allwch drefnu cynllun talu TAW ar-lein oherwydd nad yw rhai o’ch manylion personol yn gyfredol.",
-                  "Mae’n rhaid i chi <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">roi’ch manylion newydd i CThEF</a>. Ar ôl i chi diweddaru’ch manylion, arhoswch 3 diwrnod gwaith cyn rhoi tro arall arni ar-lein.")
-                case TaxRegime.Sa => ("Ni allwch drefnu cynllun talu Hunanasesiad ar-lein oherwydd nad yw rhai o’ch manylion personol yn gyfredol.",
-                  "Mae’n rhaid i chi <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">roi’ch manylion newydd i CThEF</a>. Ar ôl i chi diweddaru’ch manylion, arhoswch 3 diwrnod gwaith cyn rhoi tro arall arni ar-lein.")
-                case TaxRegime.Simp => ("Ni allwch drefnu cynllun talu Asesiad Syml ar-lein oherwydd nad yw rhai o’ch manylion personol yn gyfredol.",
-                  "Mae’n rhaid i chi <a href=\"https://www.gov.uk/tell-hmrc-change-of-details\" class=\"govuk-link\">roi’ch manylion newydd i CThEF</a>. Ar ôl i chi diweddaru’ch manylion, arhoswch 3 diwrnod gwaith cyn rhoi tro arall arni ar-lein.")
-              }
-
-              val expectedCallUsContent = "Ffoniwch ni ar <strong>0300 200 1900</strong> oherwydd mae’n bosibl y gallwch drefnu cynllun dros y ffôn."
-
-              ContentAssertions.commonPageChecks(
-                page,
-                expectedH1              = "Diweddaru’ch manylion personol i ddefnyddio’r gwasanaeth hwn",
-                shouldBackLinkBePresent = false,
-                expectedSubmitUrl       = None,
-                regimeBeingTested       = Some(taxRegime),
-                language                = Languages.Welsh
-              )
-
-              val leadingParagraphs = page.select(".govuk-body").asScala.toList
-              leadingParagraphs(0).html() shouldBe expectedP1
-              leadingParagraphs(1).html() shouldBe expectedP2
-
-              ContentAssertions.commonIneligibilityTextCheck(
-                page,
-                taxRegime,
-                language           = Languages.Welsh,
-                callUsContentWelsh = expectedCallUsContent
-              )
             }
 
           }
