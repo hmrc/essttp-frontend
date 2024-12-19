@@ -85,6 +85,8 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Simp  => "You are not eligible to set up a Simple Assessment payment plan online."
             }
 
+            val callUsContentEnglish = "Call us on <strong>0300 322 7835</strong> as you may be able to set up a plan over the phone."
+
             ContentAssertions.commonPageChecks(
               page,
               expectedH1              = "Call us about a payment plan",
@@ -96,7 +98,7 @@ class IneligibleControllerSpec extends ItSpec {
               page      = page,
               leadingP1 = expectedLeadingP1
             )
-            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English)
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English, callUsContentEnglish)
           }
 
           s"${taxRegime.entryName} Debt too large ineligible page correctly" in {
@@ -396,6 +398,8 @@ class IneligibleControllerSpec extends ItSpec {
 
       val page = pageContentAsDoc(result)
 
+      val callUsContentEnglish = "Call us on <strong>0300 322 7835</strong> as you may be able to set up a plan over the phone."
+
       ContentAssertions.commonPageChecks(
         page,
         expectedH1              = "Call us about a payment plan",
@@ -407,7 +411,7 @@ class IneligibleControllerSpec extends ItSpec {
         page      = page,
         leadingP1 = "You are not eligible to set up a Self Assessment payment plan online."
       )
-      ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Sa, Languages.English)
+      ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Sa, Languages.English, callUsContentEnglish)
     }
 
     "SA generic ineligible page correctly for DmSpecialOfficeProcessingRequiredCESA eligibility reason" in {
@@ -420,6 +424,8 @@ class IneligibleControllerSpec extends ItSpec {
 
       val page = pageContentAsDoc(result)
 
+      val callUsContentEnglish = "Call us on <strong>0300 322 7835</strong> as you may be able to set up a plan over the phone."
+
       ContentAssertions.commonPageChecks(
         page,
         expectedH1              = "Call us about a payment plan",
@@ -431,7 +437,7 @@ class IneligibleControllerSpec extends ItSpec {
         page      = page,
         leadingP1 = "You are not eligible to set up a Self Assessment payment plan online."
       )
-      ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Sa, Languages.English)
+      ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Sa, Languages.English, callUsContentEnglish)
     }
 
     "Epaye You have chosen not to set up an Employers’ PAYE payment plan online page correctly" in {
