@@ -85,7 +85,10 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Simp  => "You are not eligible to set up a Simple Assessment payment plan online."
             }
 
-            val callUsContentEnglish = "Call us on <strong>0300 322 7835</strong> as you may be able to set up a plan over the phone."
+            val expectedCallUsContent = taxRegime match {
+              case TaxRegime.Simp => "Call us on <strong>0300 322 7835</strong> as you may be able to set up a plan over the phone."
+              case _              => "Call us on <strong>0300 123 1813</strong> as you may be able to set up a plan over the phone."
+            }
 
             ContentAssertions.commonPageChecks(
               page,
@@ -98,7 +101,7 @@ class IneligibleControllerSpec extends ItSpec {
               page      = page,
               leadingP1 = expectedLeadingP1
             )
-            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English, callUsContentEnglish)
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English, expectedCallUsContent)
           }
 
           s"${taxRegime.entryName} Debt too large ineligible page correctly" in {
@@ -398,7 +401,7 @@ class IneligibleControllerSpec extends ItSpec {
 
       val page = pageContentAsDoc(result)
 
-      val callUsContentEnglish = "Call us on <strong>0300 322 7835</strong> as you may be able to set up a plan over the phone."
+      val callUsContentEnglish = "Call us on <strong>0300 123 1813</strong> as you may be able to set up a plan over the phone."
 
       ContentAssertions.commonPageChecks(
         page,
@@ -424,7 +427,7 @@ class IneligibleControllerSpec extends ItSpec {
 
       val page = pageContentAsDoc(result)
 
-      val callUsContentEnglish = "Call us on <strong>0300 322 7835</strong> as you may be able to set up a plan over the phone."
+      val callUsContentEnglish = "Call us on <strong>0300 123 1813</strong> as you may be able to set up a plan over the phone."
 
       ContentAssertions.commonPageChecks(
         page,
