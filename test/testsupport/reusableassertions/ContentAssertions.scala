@@ -269,9 +269,9 @@ object ContentAssertions extends RichMatchers {
               case TaxRegime.Simp =>
                 List(
                   "your National Insurance number",
-                  "information on any savings or investments you have",
                   "your bank details",
-                  "details of your income and spending"
+                  "details of your income and spending",
+                  "information on any savings or investments you have"
                 )
             }
           case Languages.Welsh =>
