@@ -17,6 +17,7 @@
 @import actionsmodel.AuthenticatedJourneyRequest
 @import messages.Messages
 @import play.twirl.api.Html
+@import essttp.rootmodel.TaxRegime
 @import requests.RequestSupport
 
 @this(requestSupport: RequestSupport)
@@ -35,8 +36,13 @@
     Html(Messages.NotEligible.`Make a payment online to cover your ... bill in full.`(request.journey.taxRegime, makeAPaymentOnlineLink).show)
 }
 </p>
-<p id="call-us-content" class="govuk-body">
-@{
-    Html(Messages.NotEligible.`Call us on 0300 123 1813 if you are having difficulty making a payment online.`.show)
+
+@callUsMessage = @{
+ request.journey.taxRegime match {
+  case TaxRegime.Simp => Messages.NotEligible.`Call us on 0300 322 7835 if you are having difficulty making a payment online.`
+  case _ => Messages.NotEligible.`Call us on 0300 123 1813 if you are having difficulty making a payment online.`
+ }
 }
-</p>
+
+
+<p id="call-us-content" class="govuk-body">@Html(callUsMessage.show)</p>

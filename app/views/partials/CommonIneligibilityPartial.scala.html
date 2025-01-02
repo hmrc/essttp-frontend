@@ -26,7 +26,7 @@
 @this(requestSupport: RequestSupport, ifYouNeedExtraSupportPartial: IfYouNeedExtraSupportPartial, ifCallingFromOutsideUKPartial: IfCallingFromOutsideUKPartial)
 
 
-@(taxRegime: TaxRegime, showCallPreparationTips: Boolean = true, showFullListPreparationTips: Boolean = true)(implicit request: Request[_])
+@(taxRegime: TaxRegime, showCallPreparationTips: Boolean = true, showFullListPreparationTips: Boolean = true, showWereLikelyToAsk: Boolean = true)(implicit request: Request[_])
 
 @import requestSupport._
 
@@ -53,12 +53,19 @@
                 Messages.NotEligible.`your bank details`
             )
         }
-        case TaxRegime.Simp => List(
-            Messages.NotEligible.`your National Insurance number`,
-            Messages.NotEligible.`your bank details`,
-            Messages.NotEligible.`details of your income and spending`,
-            Messages.NotEligible.`information on any savings or investments you have`
-        )
+        case TaxRegime.Simp => if(showFullListPreparationTips) {
+            List(
+                Messages.NotEligible.`your National Insurance number`,
+                Messages.NotEligible.`your bank details`,
+                Messages.NotEligible.`details of your income and spending`,
+                Messages.NotEligible.`information on any savings or investments you have`
+            )
+        } else {
+            List(
+                Messages.NotEligible.`your National Insurance number`,
+                Messages.NotEligible.`your bank details`
+            )
+        }
     }}
 
 <div id="common-eligibility">
@@ -73,11 +80,13 @@
         )
     </ul>
 
-    <h2 class="govuk-heading-m">@{Messages.NotEligible.`We're likely to ask:`.show}</h2>
-    <ul class="govuk-list govuk-list--bullet">
-        <li>@{Messages.NotEligible.`what you've done to try to pay the bill`.show}</li>
-        <li>@{Messages.NotEligible.`if you can pay some of the bill now`.show}</li>
-    </ul>
+    @if(showWereLikelyToAsk){
+        <h2 class="govuk-heading-m">@{Messages.NotEligible.`We're likely to ask:`.show}</h2>
+        <ul class="govuk-list govuk-list--bullet">
+            <li>@{Messages.NotEligible.`what you've done to try to pay the bill`.show}</li>
+            <li>@{Messages.NotEligible.`if you can pay some of the bill now`.show}</li>
+        </ul>
+    }
   }
 
     @ifYouNeedExtraSupportPartial()
