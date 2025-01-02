@@ -106,7 +106,8 @@ class IneligibleController @Inject() (
     Ok(views.partials.ineligibleTemplatePage(
       pageh1                      = Messages.NotEligible.`Pay your ... bill in full`(request.journey.taxRegime),
       leadingContent              = views.partials.debtTooSmallPartial(appConfig.PolicyParameters.SIMP.payOnlineLink),
-      showFullListPreparationTips = false
+      showFullListPreparationTips = false,
+      showWereLikelyToAsk         = false
     ))
   }
 

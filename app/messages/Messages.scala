@@ -472,6 +472,11 @@ object Messages {
       welsh   = "Os ydych yn cael anawsterau wrth dalu ar-lein, ffoniwch ni ar <strong>0300 200 1900</strong>."
     )
 
+    def `Call us on 0300 322 7835 if you are having difficulty making a payment online.`: Message = Message(
+      english = "Call us on <strong>0300 322 7835</strong> if you are having difficulty making a payment online.",
+      welsh   = "Os ydych yn cael anawsterau wrth dalu ar-lein, ffoniwch ni ar <strong>0300 200 1900</strong>."
+    )
+
     def `You cannot set up ... debt too old`(taxRegime: TaxRegime, ageOfDebtInYearsOrDays: Int): Message = taxRegime match {
       //years
       case TaxRegime.Epaye => Message(

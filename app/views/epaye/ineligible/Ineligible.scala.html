@@ -31,6 +31,7 @@
   leadingContent: Html,
   showCallPreparationTips: Boolean = true,
   showFullListPreparationTips: Boolean = true,
+  showWereLikelyToAsk: Boolean = true,
   hasBackLink: Boolean = false
 )(implicit request: AuthenticatedJourneyRequest[_])
 
@@ -40,5 +41,5 @@
     <h1 class="govuk-heading-xl">@{pageh1.show}</h1>
     @leadingContent
 
-    @commonIneligibilityPartial(request.journey.taxRegime, showCallPreparationTips, showFullListPreparationTips)
+    @commonIneligibilityPartial(request.journey.taxRegime, showCallPreparationTips, showFullListPreparationTips, showWereLikelyToAsk)
 }

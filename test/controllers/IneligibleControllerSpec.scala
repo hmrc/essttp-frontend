@@ -183,12 +183,20 @@ class IneligibleControllerSpec extends ItSpec {
 
             }
 
-            val callUsContentEnglish = "Call us on <strong>0300 123 1813</strong> if you are having difficulty making a payment online."
+            val expectedCallUsContent = taxRegime match {
+              case TaxRegime.Simp => "Call us on <strong>0300 322 7835</strong> if you are having difficulty making a payment online."
+              case _              => "Call us on <strong>0300 123 1813</strong> if you are having difficulty making a payment online."
+            }
+
+            val showWereLikelyToAsk = taxRegime match {
+              case TaxRegime.Simp => false
+              case _              => true
+            }
 
             val leadingParagraphs = page.select(".govuk-body").asScala.toList
             leadingParagraphs(0).html() shouldBe expectedParagraph1
             leadingParagraphs(1).html() shouldBe expectedParagraph2
-            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English, callUsContentEnglish, showFullListPreparationTips = false)
+            ContentAssertions.commonIneligibilityTextCheck(page, taxRegime, Languages.English, expectedCallUsContent, showFullListPreparationTips = false, showWereLikelyToAsk = showWereLikelyToAsk)
           }
 
           s"${taxRegime.entryName} RLS not eligible page correctly" in {

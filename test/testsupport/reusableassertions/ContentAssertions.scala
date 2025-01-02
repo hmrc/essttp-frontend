@@ -202,7 +202,8 @@ object ContentAssertions extends RichMatchers {
       callUsContentEnglish:        String    = ContentAssertions.defaultCallUsContentEnglish,
       callUsContentWelsh:          String    = ContentAssertions.defaultCallUsContentWelsh,
       expectCallPreparationHints:  Boolean   = true,
-      showFullListPreparationTips: Boolean   = true
+      showFullListPreparationTips: Boolean   = true,
+      showWereLikelyToAsk:         Boolean   = true
   ): Unit = {
 
     val callUsContentFromDoc = doc.select("#call-us-content")
@@ -226,7 +227,7 @@ object ContentAssertions extends RichMatchers {
     val subheadings = commonEligibilityWrapper.select("h2").asScala.toList
     subheadings.size shouldBe {
       language match {
-        case Languages.English => if (expectCallPreparationHints) 4 else 2
+        case Languages.English => if (expectCallPreparationHints & showWereLikelyToAsk) 4 else if (expectCallPreparationHints) 3 else 2
         case Languages.Welsh   => if (expectCallPreparationHints) 3 else 1
       }
     }
@@ -266,13 +267,19 @@ object ContentAssertions extends RichMatchers {
                   "your bank details"
                 )
               }
-              case TaxRegime.Simp =>
+              case TaxRegime.Simp => if (showFullListPreparationTips) {
                 List(
                   "your National Insurance number",
                   "your bank details",
                   "details of your income and spending",
                   "information on any savings or investments you have"
                 )
+              } else {
+                List(
+                  "your National Insurance number",
+                  "your bank details"
+                )
+              }
             }
           case Languages.Welsh =>
             taxRegime match {
@@ -305,32 +312,37 @@ object ContentAssertions extends RichMatchers {
       }
 
       beforeYouCallList.map(_.text()) shouldBe expectedBeforeYouCallBullets
+      if (taxRegime != TaxRegime.Simp) {
+        if (showWereLikelyToAsk) {
+          subheadings(1).text() shouldBe {
+            language match {
+              case Languages.English => "We’re likely to ask:"
+              case Languages.Welsh   => "Rydym yn debygol o ofyn:"
+            }
+          }
+        }
 
-      subheadings(1).text() shouldBe {
-        language match {
-          case Languages.English => "We’re likely to ask:"
-          case Languages.Welsh   => "Rydym yn debygol o ofyn:"
+        val likelyToAskList = bulletLists(1).select("li").asScala.toList
+        likelyToAskList(0).text() shouldBe {
+          language match {
+            case Languages.English => "what you’ve done to try to pay the bill"
+            case Languages.Welsh   => "beth rydych wedi’i wneud i geisio talu’r bil"
+          }
         }
-      }
-      val likelyToAskList = bulletLists(1).select("li").asScala.toList
-      likelyToAskList(0).text() shouldBe {
-        language match {
-          case Languages.English => "what you’ve done to try to pay the bill"
-          case Languages.Welsh   => "beth rydych wedi’i wneud i geisio talu’r bil"
-        }
-      }
-      likelyToAskList(1).text() shouldBe {
-        language match {
-          case Languages.English => "if you can pay some of the bill now"
-          case Languages.Welsh   => "a allwch dalu rhywfaint o’r bil nawr"
+        likelyToAskList(1).text() shouldBe {
+          language match {
+            case Languages.English => "if you can pay some of the bill now"
+            case Languages.Welsh   => "a allwch dalu rhywfaint o’r bil nawr"
+          }
         }
       }
       ()
-
-      subheadings(2).text() shouldBe {
-        language match {
-          case Languages.English => "If you need extra support"
-          case Languages.Welsh   => "Os oes angen cymorth ychwanegol arnoch chi"
+      if (showWereLikelyToAsk) {
+        subheadings(2).text() shouldBe {
+          language match {
+            case Languages.English => "If you need extra support"
+            case Languages.Welsh   => "Os oes angen cymorth ychwanegol arnoch chi"
+          }
         }
       }
       govukBodyElements(1).html() shouldBe {
@@ -348,7 +360,9 @@ object ContentAssertions extends RichMatchers {
       ()
 
       if (language === Languages.English) {
-        subheadings(3).text() shouldBe "If you’re calling from outside the UK"
+        if (taxRegime != TaxRegime.Simp) {
+          subheadings(3).text() shouldBe "If you’re calling from outside the UK"
+        }
         govukBodyElements(3).html() shouldBe "Call us on <strong>+44 2890 538 192</strong>."
         govukBodyElements(4).html() shouldBe "Our opening times are Monday to Friday, 8am to 6pm (UK time). We are closed on weekends and bank holidays."
         ()
