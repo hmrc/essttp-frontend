@@ -163,13 +163,13 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     Some(config.get[String]("pega.start-redirect-url"))
       .filter(_.nonEmpty)
       .map(_ + toPegaQueryParamString(taxRegime, lang))
-      .getOrElse(testOnly.controllers.routes.PegaController.dummyPegaPage(taxRegime).url)
+      .getOrElse(testOnly.controllers.routes.PegaController.start(taxRegime).url)
 
   def pegaChangeLinkReturnUrl(taxRegime: TaxRegime, lang: Language): String =
     Some(config.get[String]("pega.change-link-return-url"))
       .filter(_.nonEmpty)
       .map(_ + toPegaQueryParamString(taxRegime, lang))
-      .getOrElse(testOnly.controllers.routes.PegaController.dummyPegaPage(taxRegime).url)
+      .getOrElse(testOnly.controllers.routes.PegaController.start(taxRegime).url)
 
   private def toPegaQueryParamString(taxRegime: TaxRegime, lang: Language): String = {
     val regimeValue = taxRegime match {

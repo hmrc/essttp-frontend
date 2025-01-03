@@ -304,7 +304,7 @@ object TtpService {
     )
   }
 
-  private def toDebtItemCharge(chargeTypeAssessment: ChargeTypeAssessment): List[DebtItemCharge] = {
+  def toDebtItemCharge(chargeTypeAssessment: ChargeTypeAssessment): List[DebtItemCharge] = {
     chargeTypeAssessment.charges.map { charge: Charges =>
       DebtItemCharge(
         outstandingDebtAmount   = OutstandingDebtAmount(charge.charges1.outstandingAmount.value),
@@ -319,7 +319,7 @@ object TtpService {
     }
   }
 
-  private def calculateCumulativeInterest(eligibilityCheckResult: EligibilityCheckResult): AmountInPence = AmountInPence(
+  def calculateCumulativeInterest(eligibilityCheckResult: EligibilityCheckResult): AmountInPence = AmountInPence(
     eligibilityCheckResult.chargeTypeAssessment
       .flatMap(_.charges)
       .map(_.charges1.accruedInterest.value.value)
@@ -368,7 +368,7 @@ object TtpService {
     .padTo(8, '0')
     .reverse
 
-  private def maxPlanLength(
+  def maxPlanLength(
       eligibilityCheckResult: EligibilityCheckResult,
       journey:                Journey
   ): PaymentPlanMaxLength =
