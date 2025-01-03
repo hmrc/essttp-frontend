@@ -113,7 +113,7 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
 
         val result = controller.startPegaJourney(fakeRequest)
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/test-only/pega?regime=epaye")
+        redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/test-only/pega/start?regime=epaye")
 
         EssttpBackend.Pega.verifyStartCaseCalled(TdAll.journeyId)
         EssttpBackend.StartedPegaCase.verifyUpdateStartPegaCaseResponseRequest(TdAll.journeyId, TdAll.pegaStartCaseResponse)

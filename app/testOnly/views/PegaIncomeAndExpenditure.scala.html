@@ -1,0 +1,99 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import play.api.data.Form
+@import play.api.mvc.Request
+@import play.api.i18n.Messages
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import testOnly.models.formsmodel.IncomeAndExpenditure
+@import testOnly.models.formsmodel.IncomeAndExpenditureForm
+@import testOnly.controllers.routes
+@import testOnly.views.html.TestOnlyLayout
+
+@this(
+testOnlyLayout: TestOnlyLayout,
+govukButton: GovukButton,
+govukInput: GovukInput,
+govukErrorSummary: GovukErrorSummary,
+formWithCSRF: FormWithCSRF
+)
+@(form: Form[IncomeAndExpenditure])(implicit request: Request[_], messages: Messages)
+
+@title = @{
+    "Income and Expenditure"
+}
+
+@moneyInput(key: String, label: String) = {
+    @govukInput(Input(
+        id = key,
+        name = key,
+        label = Label(
+            isPageHeading = false,
+            classes = "govuk-label--m",
+            content = Text(label)
+        ),
+        classes = "govuk-input--width-5",
+        spellcheck = Some(false),
+        prefix = Some(PrefixOrSuffix(
+            content = Text("£")
+        )),
+        errorMessage = form.error(key).map(e => ErrorMessage(content = Text(e.message))),
+        value = form.data.get(key)
+    ))
+}
+
+@testOnlyLayout(pageTitle = Some(title)) {
+    @if(form.errors.nonEmpty) {
+        @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
+            ErrorLink(
+                href = Some(s"#${e.key}"),
+                content = Text(e.message)
+            )
+        ),
+            title = Text("Uh oh, there's a bit of a problem")
+        ))
+    }
+
+
+    <h1 class="govuk-heading-xl">@title</h1>
+
+    @formWithCSRF(action = routes.PegaController.incomeAndExpenditureSubmit) {
+
+      <h2 class="govuk-heading-l">***Income***</h2>
+
+      <p class="govuk-body">Total income should be more than zero</p>
+
+      @moneyInput(IncomeAndExpenditureForm.mainIncomeKey, "Main income")
+      @moneyInput(IncomeAndExpenditureForm.otherIncomeKey, "Other income")
+      <br>
+
+      <h2 class="govuk-heading-l">***Expenditure***</h2>
+
+      <p class="govuk-body">Leaving all expenditure fields equal to zero will simulate the “My company does not have any expenditure” option</p>
+
+      @moneyInput(IncomeAndExpenditureForm.wagesAndSalariesKey, "Wages and salaries")
+      @moneyInput(IncomeAndExpenditureForm.mortgageAndRentKey, "Mortgage and rental payments on business premises")
+      @moneyInput(IncomeAndExpenditureForm.billsKey, "Bills for business premises")
+      @moneyInput(IncomeAndExpenditureForm.materialAndStockCostsKey, "Material and stock costs")
+      @moneyInput(IncomeAndExpenditureForm.businessTravelKey, "Business travel")
+      @moneyInput(IncomeAndExpenditureForm.employeeBenefitsKey, "Employee benefits")
+      @moneyInput(IncomeAndExpenditureForm.otherKey, "Other")
+
+      @govukButton(Button(content = Text("Continue")))
+    }
+
+
+}
