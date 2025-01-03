@@ -48,7 +48,7 @@ trait UnchangedFromCYALinkAssertions { this: ItSpec =>
 
           def expectedPegaRedirectUrl(lang: Language) =
             if (pegaChangeLinkUrl.isEmpty)
-              testOnly.controllers.routes.PegaController.dummyPegaPage(origin.taxRegime).url
+              testOnly.controllers.routes.PegaController.start(origin.taxRegime).url
             else {
               val expectedRegiem = origin.taxRegime match {
                 case TaxRegime.Epaye => "PAYE"
