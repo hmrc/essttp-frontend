@@ -19,7 +19,7 @@ package testOnly.connectors
 import essttp.crypto.CryptoFormat
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import play.api.Configuration
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
@@ -29,7 +29,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class EssttpStubConnector @Inject() (httpClient: HttpClientV2, config: Configuration) extends ServicesConfig(config) {
+class EssttpStubConnector @Inject() (httpClient: HttpClientV2, config: Configuration)(implicit ex: ExecutionContext) extends ServicesConfig(config) {
 
   implicit val cryptoFormat: CryptoFormat = CryptoFormat.NoOpCryptoFormat
 
@@ -37,9 +37,16 @@ class EssttpStubConnector @Inject() (httpClient: HttpClientV2, config: Configura
 
   val insertEligibilityDataUrl: String = s"$stubsBaseUrl/debts/time-to-pay/eligibility/insert"
 
-  def primeStubs(response: EligibilityCheckResult)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] =
+  def storePegaGetCaseResponseUrl(caseId: String): String = s"$stubsBaseUrl/pega/case/$caseId"
+
+  def primeStubs(response: EligibilityCheckResult)(implicit hc: HeaderCarrier): Future[Unit] =
     httpClient.post(url"$insertEligibilityDataUrl")
       .withBody(Json.toJson(response))
+      .execute[Unit]
+
+  def storePegaGetCaseResponse(caseId: String, getCaseResponse: JsValue)(implicit rh: HeaderCarrier): Future[Unit] =
+    httpClient.post(url"${storePegaGetCaseResponseUrl(caseId)}")
+      .withBody(getCaseResponse)
       .execute[Unit]
 
 }

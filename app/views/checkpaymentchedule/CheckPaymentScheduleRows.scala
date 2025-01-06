@@ -16,13 +16,17 @@
 
 package views.checkpaymentchedule
 
+import cats.syntax.eq._
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, UpfrontPaymentAnswers, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.CannotPayReason
-import messages.Messages
+import essttp.rootmodel.ttp.affordablequotes.PaymentPlan
+import messages.{DateMessages, Messages}
 import models.Language
 import play.api.mvc.Call
 import play.twirl.api.Html
 import uk.gov.hmrc.govukfrontend.views.html.components._
+
+import java.time.LocalDate
 
 object CheckPaymentScheduleRows {
 
@@ -159,5 +163,45 @@ object CheckPaymentScheduleRows {
         )
     }
   }
+
+  def paymentPlanMonthRows(paymentPlan: PaymentPlan, changeLinkCall: Call)(implicit lang: Language, ord: Ordering[LocalDate]): List[SummaryListRow] = {
+    paymentPlan.collections.regularCollections.sortBy(_.dueDate.value).zipWithIndex.map {
+      case (p, index) =>
+        SummaryListRow(
+          classes = s"grouped-row ${
+            if (index > (paymentPlan.collections.regularCollections.size - 2)) { "last-grouped-row" } else { "" }
+          }",
+          key     = Key(
+            content = Text(s"${DateMessages.monthName(p.dueDate.value.getMonthValue).show} ${p.dueDate.value.getYear.toString}"),
+            classes = s"govuk-!-width-one-half${if (index === 0) " govuk-!-padding-top-2" else ""}"
+          ),
+          value   = Value(
+            content = Text(p.amountDue.value.gdsFormatInPounds)
+          ),
+          actions = Some(Actions(
+            items = Seq(
+              ActionItem(
+                href               = changeLinkCall.url,
+                classes            = s"${if (index === 0) "" else "grouped-change"}",
+                content            = Text(Messages.change.show),
+                visuallyHiddenText = Some(Messages.PaymentSchedule.`Change months duration`.show)
+              )
+            )
+          ))
+        )
+    }
+  }
+
+  def paymentplanTotalRow(paymentPlan: PaymentPlan)(implicit lang: Language): SummaryListRow =
+    SummaryListRow(
+      key     = Key(
+        content = Text(Messages.PaymentSchedule.`Total to pay`.show),
+        classes = "govuk-!-width-one-half"
+      ),
+      value   = Value(
+        content = Text(paymentPlan.totalDebtIncInt.value.gdsFormatInPounds)
+      ),
+      actions = None
+    )
 
 }

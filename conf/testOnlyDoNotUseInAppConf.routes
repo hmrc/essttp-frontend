@@ -68,8 +68,13 @@ GET  /set-up-a-payment-plan/test-only/start-journey-simp-pta            testOnly
 GET  /set-up-a-payment-plan/test-only/start-journey-simp-mobile         testOnly.controllers.StartJourneyController.startJourneySimpMobile
 
 
-GET  /set-up-a-payment-plan/test-only/pega                              testOnly.controllers.PegaController.dummyPegaPage(regime: TaxRegime)
-POST /set-up-a-payment-plan/test-only/pega                              testOnly.controllers.PegaController.dummyPegaPageContinue(regime: TaxRegime)
-GET  /set-up-a-payment-plan/test-only/pega/back                         testOnly.controllers.PegaController.backFromPegaLanding(regime: TaxRegime)
+GET  /set-up-a-payment-plan/test-only/pega/start                        testOnly.controllers.PegaController.start(regime: TaxRegime)
 
-GET /set-up-a-payment-plan/test-only/pega/change/:pageId                testOnly.controllers.PegaController.change(pageId: String, regime: TaxRegime)
+GET  /set-up-a-payment-plan/test-only/pega/income-expenditure           testOnly.controllers.PegaController.incomeAndExpenditure
+POST /set-up-a-payment-plan/test-only/pega/income-expenditure           testOnly.controllers.PegaController.incomeAndExpenditureSubmit
+
+GET  /set-up-a-payment-plan/test-only/pega/check-your-answers           testOnly.controllers.PegaController.checkYourAnswers
+POST /set-up-a-payment-plan/test-only/pega/check-your-answers           testOnly.controllers.PegaController.checkYourAnswersContinue
+GET  /set-up-a-payment-plan/test-only/pega/back                         testOnly.controllers.PegaController.backFromPegaLanding
+
+GET /set-up-a-payment-plan/test-only/pega/change/:pageId                testOnly.controllers.PegaController.change(pageId: String)
