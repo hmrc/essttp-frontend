@@ -93,7 +93,6 @@ class TermsAndConditionsControllerSpec extends ItSpec {
                     "Use Relay UK if you cannot hear or speak on the telephone, dial 18001 then 0345 300 3900. Find out more on the Relay UK website (opens in new tab).",
                     "If a health condition or personal circumstances make it difficult to contact us",
                     "Our guidance Get help from HMRC if you need extra support (opens in new tab) explains how we can support you.",
-                    "Declaration",
                     "I agree to the terms and conditions of this payment plan. I confirm that this is the earliest I am able to settle this debt."
                   )
                 )
@@ -113,7 +112,8 @@ class TermsAndConditionsControllerSpec extends ItSpec {
               )(
                   expectedContent = List(
                     "Call the debt management helpline",
-                    "Text service"
+                    "Text service",
+                    "Declaration"
                   )
                 )
 
@@ -206,7 +206,6 @@ class TermsAndConditionsControllerSpec extends ItSpec {
                     "Defnyddiwch wasanaeth Text Relay UK os na allwch glywed na siarad dros y ffôn. Deialwch 18001 ac yna 0345 300 3900. Dysgwch ragor am hyn ar wefan Text Relay UK (yn agor tab newydd).",
                     "Os yw cyflwr iechyd neu amgylchiadau personol yn ei gwneud hi’n anodd i chi gysylltu â ni",
                     "Bydd ein harweiniad ynghylch ‘Cael help gan CThEF os oes angen cymorth ychwanegol arnoch’ (yn agor tab newydd) yn esbonio sut y gallwn eich helpu.",
-                    "Datganiad",
                     "Cytunaf â thelerau ac amodau’r cynllun talu hwn. Cadarnhaf mai dyma’r cynharaf y gallaf setlo’r ddyled hon."
                   )
                 )
@@ -226,7 +225,8 @@ class TermsAndConditionsControllerSpec extends ItSpec {
               )(
                   expectedContent = List(
                     "Ffoniwch y llinell gymorth rheoli dyledion",
-                    "Gwasanaeth Text Relay"
+                    "Gwasanaeth Text Relay",
+                    "Datganiad"
                   )
                 )
 
