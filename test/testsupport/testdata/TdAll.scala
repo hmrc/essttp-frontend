@@ -429,8 +429,8 @@ object TdAll {
   val pegaGetCaseResponse: GetCaseResponse = GetCaseResponse(
     dayOfMonth(),
     paymentPlan(1, AmountDue(AmountInPence(14323))),
-    Map("expenditure" -> BigDecimal(0)),
-    Map("income" -> BigDecimal(1.23)),
+    Map("zeroExpenditure" -> BigDecimal(0), "expenditure" -> BigDecimal(2)),
+    Map("zeroIncome" -> BigDecimal(0), "income" -> BigDecimal(1.23)),
     "testCorrelationId"
   )
 

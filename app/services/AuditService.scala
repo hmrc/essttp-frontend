@@ -312,8 +312,8 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       taxId.value,
       startCaseResponse.caseId.value,
       getCaseResponse.pegaCorrelationId,
-      getCaseResponse.expenditure,
-      getCaseResponse.income,
+      getCaseResponse.expenditure.filter(_._2 > 0),
+      getCaseResponse.income.filter(_._2 > 0),
       planDetails
     )
   }

@@ -235,7 +235,7 @@ class PegaControllerSpec extends ItSpec with PegaRecreateSessionAssertions {
                    |  "pegaCaseId" : "case",
                    |  "pegaCorrelationId" : "testCorrelationId",
                    |  "expenditure" : {
-                   |    "expenditure" : 0
+                   |    "expenditure" : 2
                    |  },
                    |  "income" : {
                    |    "income" : 1.23
