@@ -1953,8 +1953,8 @@ object Messages {
     )
 
     val `Declaration`: Message = Message(
-      english = "<strong>Declaration</strong>",
-      welsh   = "<strong>Datganiad</strong>"
+      english = "Declaration",
+      welsh   = "Datganiad"
     )
 
     val `I agree to the terms and conditions...`: Message = Message(
