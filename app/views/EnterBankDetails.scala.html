@@ -94,47 +94,6 @@
 
     @formWithCSRF(action = routes.BankDetailsController.enterBankDetailsSubmit) {
 
-        <fieldset id="accountType-fieldset" class="govuk-fieldset" role="group">
-            <legend class="govuk-fieldset__legend">
-                <span class="govuk-fieldset__heading">
-                    @{Messages.AboutYourBankAccount.`Account type`.show}
-                </span>
-            </legend>
-
-        @govukRadios(Radios(
-            idPrefix = Some(typeOfAccountKey),
-            name = typeOfAccountKey,
-            items = Seq(
-                RadioItem(
-                    id = Some("business"),
-                    content = Text(Messages.AboutYourBankAccount.`Business`.show),
-                    value = Some(TypesOfBankAccount.Business.entryName),
-                    checked = form.data.get(typeOfAccountKey).contains(TypesOfBankAccount.Business.entryName)
-                ),
-                RadioItem(
-                    id = Some("personal"),
-                    content = Text(Messages.AboutYourBankAccount.`Personal`.show),
-                    value = Some(TypesOfBankAccount.Personal.entryName),
-                    checked = form.data.get(typeOfAccountKey).contains(TypesOfBankAccount.Personal.entryName)
-                )
-            ),
-            errorMessage = fieldErrorMessage(typeOfAccountKey, form, errorMessageOverrides)
-        ))
-        </fieldset>
-
-        @govukInput(Input(
-            id = nameKey,
-            name = nameKey,
-            label = Label(
-                classes = "govuk-label",
-                content = Text(Messages.BankDetails.`Name on the account`.show)
-            ),
-            classes = "govuk-!-width-two-thirds",
-            errorMessage = fieldErrorMessage(nameKey, form, errorMessageOverrides),
-            autocomplete = Some("name"),
-            spellcheck = Some(false),
-            value = form.data.get(nameKey)
-        ))
 
         @defining(sortCodeAndAccountNumberFormError) { formError  =>
             <fieldset class="govuk-fieldset" @if(formError.isDefined) {
@@ -147,6 +106,47 @@
                         @Messages.BankDetails.errors(s"sortCode.${error.message}")(Views.formErrorArgsStringList(error)).show
                     </span>
                 }
+
+                @govukRadios(Radios(
+                        fieldset = Some(Fieldset(
+                                legend = Some(Legend(
+                                    content = Text(Messages.AboutYourBankAccount.`Account type`.show),
+                                    classes = "govuk-fieldset__heading--m",
+                                    isPageHeading = true
+                                ))
+                        )),
+                        idPrefix = Some(typeOfAccountKey),
+                        name = typeOfAccountKey,
+                        items = Seq(
+                            RadioItem(
+                                id = Some("business"),
+                                content = Text(Messages.AboutYourBankAccount.`Business`.show),
+                                value = Some(TypesOfBankAccount.Business.entryName),
+                                checked = form.data.get(typeOfAccountKey).contains(TypesOfBankAccount.Business.entryName)
+                            ),
+                            RadioItem(
+                                id = Some("personal"),
+                                content = Text(Messages.AboutYourBankAccount.`Personal`.show),
+                                value = Some(TypesOfBankAccount.Personal.entryName),
+                                checked = form.data.get(typeOfAccountKey).contains(TypesOfBankAccount.Personal.entryName)
+                            )
+                        ),
+                    errorMessage = fieldErrorMessage(typeOfAccountKey, form, errorMessageOverrides)
+                ))
+
+                @govukInput(Input(
+                    id = nameKey,
+                    name = nameKey,
+                    label = Label(
+                        classes = "govuk-label",
+                        content = Text(Messages.BankDetails.`Name on the account`.show)
+                    ),
+                    classes = "govuk-!-width-two-thirds",
+                    errorMessage = fieldErrorMessage(nameKey, form, errorMessageOverrides),
+                    autocomplete = Some("name"),
+                    spellcheck = Some(false),
+                    value = form.data.get(nameKey)
+                ))
 
                 @govukInput(Input(
                     id = sortCodeKey,
