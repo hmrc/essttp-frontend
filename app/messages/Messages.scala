@@ -440,7 +440,7 @@ object Messages {
       case TaxRegime.Simp =>
         Message(
           english = "You cannot set up a Simple Assessment payment plan online because your bill is too small.",
-          welsh   = "Ni allwch drefnu cynllun talu Asesiad Syml ar-lein oherwydd bod eich bil yn rhy fach."
+          welsh   = "Ni allwch drefnu cynllun talu Asesiad Syml oherwydd bod eich bil yn rhy fach."
         )
     }
 
@@ -463,7 +463,7 @@ object Messages {
       case TaxRegime.Simp =>
         Message(
           english = s"""<a class="govuk-link" href="$link">Make a payment online</a> to cover your Simple Assessment tax bill in full.""",
-          welsh   = s"""<a class="govuk-link" href="$link">Gwnewch daliad ar-lein</a> i dalu’ch bil Asesiad Syml yn llawn."""
+          welsh   = s"""<a class="govuk-link" href="$link">Gwnewch daliad ar-lein</a> i dalu’ch bil treth Asesiad Syml yn llawn."""
         )
     }
 
