@@ -76,6 +76,8 @@
 
 @sortCodeAndAccountNumberFormError= @{ errorMessageOverrides.find(_.key === "sortCodeAndAccountNumber") }
 
+@accountTypeFormError = @{ errorMessageOverrides.find(_.key === "accountType") }
+
 
 @layout(pageTitle = Some(title), hasErrors = form.hasErrors) {
     @if(form.errors.nonEmpty) {
@@ -94,33 +96,48 @@
 
     @formWithCSRF(action = routes.BankDetailsController.enterBankDetailsSubmit) {
 
-        <fieldset id="accountType-fieldset" class="govuk-fieldset" role="group">
-            <legend class="govuk-fieldset__legend">
-                <span class="govuk-fieldset__heading">
-                    @{Messages.AboutYourBankAccount.`Account type`.show}
-                </span>
-            </legend>
+        @defining(accountTypeFormError) { formError  =>
+            <fieldset class="govuk-fieldset" @if(formError.isDefined) {
+                aria-describedby="account-type-error"}>
+                <div class="form-field @formError.map { _ => govuk-form-group--error }">
+                    @formError.map { error =>
+                    <span class="govuk-error-message" id="account-type-error">
+                        <span class="govuk-visually-hidden">@Messages.error.show</span>
+                        @Messages.BankDetails.errors(s"accountTypeErrors.${error.message}")(Views.formErrorArgsStringList(error)).show
+                    </span>
+                    }
 
-        @govukRadios(Radios(
-            idPrefix = Some(typeOfAccountKey),
-            name = typeOfAccountKey,
-            items = Seq(
-                RadioItem(
-                    id = Some("business"),
-                    content = Text(Messages.AboutYourBankAccount.`Business`.show),
-                    value = Some(TypesOfBankAccount.Business.entryName),
-                    checked = form.data.get(typeOfAccountKey).contains(TypesOfBankAccount.Business.entryName)
-                ),
-                RadioItem(
-                    id = Some("personal"),
-                    content = Text(Messages.AboutYourBankAccount.`Personal`.show),
-                    value = Some(TypesOfBankAccount.Personal.entryName),
-                    checked = form.data.get(typeOfAccountKey).contains(TypesOfBankAccount.Personal.entryName)
-                )
-            ),
-            errorMessage = fieldErrorMessage(typeOfAccountKey, form, errorMessageOverrides)
-        ))
-        </fieldset>
+                    @govukRadios(Radios(
+                            fieldset = Some(Fieldset(
+                                    legend = Some(Legend(
+                                            content = Text(Messages.AboutYourBankAccount.`Account type`.show),
+                                            classes = "govuk-fieldset__heading--m",
+                                            isPageHeading = false
+                                    ))
+                            )),
+                            idPrefix = Some(typeOfAccountKey),
+                            name = typeOfAccountKey,
+                            items = Seq(
+                                RadioItem(
+                                    id = Some("business"),
+                                    content = Text(Messages.AboutYourBankAccount.`Business`.show),
+                                    value = Some(TypesOfBankAccount.Business.entryName),
+                                    checked = form.data.get(typeOfAccountKey).contains(TypesOfBankAccount.Business.entryName)
+                                ),
+                                RadioItem(
+                                    id = Some("personal"),
+                                    content = Text(Messages.AboutYourBankAccount.`Personal`.show),
+                                    value = Some(TypesOfBankAccount.Personal.entryName),
+                                    checked = form.data.get(typeOfAccountKey).contains(TypesOfBankAccount.Personal.entryName)
+                                )
+                            ),
+                        errorMessage = fieldErrorMessage(typeOfAccountKey, form, errorMessageOverrides)
+                    ))
+
+                </div>
+            </fieldset>
+        }
+
 
         @govukInput(Input(
             id = nameKey,
