@@ -44,6 +44,7 @@ GET  /set-up-a-payment-plan/test-only/vat-penalties                     testOnly
 
 GET  /set-up-a-payment-plan/test-only/pta-sa                            testOnly.controllers.StartJourneyController.showPtaSaPage
 GET  /set-up-a-payment-plan/test-only/mobile-sa                         testOnly.controllers.StartJourneyController.showMobileSaPage
+GET  /set-up-a-payment-plan/test-only/itsa-sa                           testOnly.controllers.StartJourneyController.showItsaViewAndChangePage
 
 GET  /set-up-a-payment-plan/test-only/pta-simp                          testOnly.controllers.StartJourneyController.showPtaSimpPage
 GET  /set-up-a-payment-plan/test-only/mobile-simp                       testOnly.controllers.StartJourneyController.showMobileSimpPage
@@ -63,6 +64,7 @@ GET  /set-up-a-payment-plan/test-only/start-journey-vat-penalties       testOnly
 GET  /set-up-a-payment-plan/test-only/start-journey-sa-bta              testOnly.controllers.StartJourneyController.startJourneySaBta
 GET  /set-up-a-payment-plan/test-only/start-journey-sa-pta              testOnly.controllers.StartJourneyController.startJourneySaPta
 GET  /set-up-a-payment-plan/test-only/start-journey-sa-mobile           testOnly.controllers.StartJourneyController.startJourneySaMobile
+GET  /set-up-a-payment-plan/test-only/start-journey-sa-itsa             testOnly.controllers.StartJourneyController.startJourneySaItsaViewAndChange
 
 GET  /set-up-a-payment-plan/test-only/start-journey-simp-pta            testOnly.controllers.StartJourneyController.startJourneySimpPta
 GET  /set-up-a-payment-plan/test-only/start-journey-simp-mobile         testOnly.controllers.StartJourneyController.startJourneySimpMobile
