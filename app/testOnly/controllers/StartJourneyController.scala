@@ -234,7 +234,7 @@ class StartJourneyController @Inject() (
     withSessionId(Future.successful(Ok(iAmVatPenaltiesPage())))
   }
 
-  /** Pretends being a VAT penalties page */
+  /** Pretends being an ITSA View & Change page */
   val showItsaViewAndChangePage: Action[AnyContent] = as.default.async { implicit request =>
     withSessionId(Future.successful(Ok(iAmItsaViewAndChangePage(testOnlyRoutes.StartJourneyController.startJourneySaItsaViewAndChange.url))))
   }
