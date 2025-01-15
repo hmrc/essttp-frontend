@@ -390,7 +390,7 @@ object StartJourneyController {
         Some(AddressLine("Top floor")),
         Some(AddressLine("Attic")),
         Some(IsReturnedLetterService(value = false)),
-        Some(List(contactDetail)),
+        Some(contactDetail),
         Some(Postcode(SensitiveString("NO1HERE"))),
         Some(Country("UK")),
         Some(List(PostcodeHistory(
