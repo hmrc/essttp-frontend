@@ -47,22 +47,23 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class StartJourneyController @Inject() (
-    as:                  Actions,
-    appConfig:           AppConfig,
-    essttpStubConnector: EssttpStubConnector,
-    mcc:                 MessagesControllerComponents,
-    testOnlyStartPage:   TestOnlyStartPage,
-    journeyConnector:    JourneyConnector,
-    loginService:        AuthLoginApiService,
-    taxRegimePage:       TaxRegimePage,
-    iAmBtaPage:          IAmBtaPage,
-    iAmPtaPage:          IAmPtaPage,
-    iAmEpayePage:        IAmEPAYEPage,
-    iAmVatPage:          IAmVatPage,
-    iAmVatPenaltiesPage: IAmVatPenaltiesPage,
-    iAmGovUkPage:        IAmGovUkPage,
-    iAmMobilePage:       IAmMobilePage,
-    requestSupport:      RequestSupport
+    as:                       Actions,
+    appConfig:                AppConfig,
+    essttpStubConnector:      EssttpStubConnector,
+    mcc:                      MessagesControllerComponents,
+    testOnlyStartPage:        TestOnlyStartPage,
+    journeyConnector:         JourneyConnector,
+    loginService:             AuthLoginApiService,
+    taxRegimePage:            TaxRegimePage,
+    iAmBtaPage:               IAmBtaPage,
+    iAmPtaPage:               IAmPtaPage,
+    iAmEpayePage:             IAmEPAYEPage,
+    iAmVatPage:               IAmVatPage,
+    iAmVatPenaltiesPage:      IAmVatPenaltiesPage,
+    iAmGovUkPage:             IAmGovUkPage,
+    iAmMobilePage:            IAmMobilePage,
+    iAmItsaViewAndChangePage: IAmItsaViewAndChangePage,
+    requestSupport:           RequestSupport
 )(implicit ec: ExecutionContext)
   extends FrontendController(mcc)
   with Logging {
@@ -137,24 +138,25 @@ class StartJourneyController @Inject() (
       maybeTestUser = TestUser.makeTestUser(startJourneyForm)
       session <- maybeTestUser.map(testUser => loginService.logIn(testUser)).getOrElse(Future.successful(Session.emptyCookie))
       redirectTo: Call = startJourneyForm.origin match {
-        case Origins.Epaye.Bta          => testOnlyRoutes.StartJourneyController.showBtaEpayePage
-        case Origins.Epaye.EpayeService => testOnlyRoutes.StartJourneyController.showEpayePage
-        case Origins.Epaye.GovUk        => testOnlyRoutes.StartJourneyController.showGovukEpayePage
-        case Origins.Epaye.DetachedUrl  => _root_.controllers.routes.StartJourneyController.startDetachedEpayeJourney
-        case Origins.Vat.Bta            => testOnlyRoutes.StartJourneyController.showBtaVatPage
-        case Origins.Vat.VatService     => testOnlyRoutes.StartJourneyController.showVatPage
-        case Origins.Vat.GovUk          => testOnlyRoutes.StartJourneyController.showGovukVatPage
-        case Origins.Vat.DetachedUrl    => _root_.controllers.routes.StartJourneyController.startDetachedVatJourney
-        case Origins.Vat.VatPenalties   => testOnlyRoutes.StartJourneyController.showVatPenaltiesPage
-        case Origins.Sa.Bta             => testOnlyRoutes.StartJourneyController.showBtaSaPage
-        case Origins.Sa.Pta             => testOnlyRoutes.StartJourneyController.showPtaSaPage
-        case Origins.Sa.Mobile          => testOnlyRoutes.StartJourneyController.showMobileSaPage
-        case Origins.Sa.GovUk           => testOnlyRoutes.StartJourneyController.showGovukSaPage
-        case Origins.Sa.DetachedUrl     => _root_.controllers.routes.StartJourneyController.startDetachedSaJourney
-        case Origins.Simp.Pta           => testOnlyRoutes.StartJourneyController.showPtaSimpPage
-        case Origins.Simp.Mobile        => testOnlyRoutes.StartJourneyController.showMobileSimpPage
-        case Origins.Simp.GovUk         => testOnlyRoutes.StartJourneyController.showGovukSimpPage
-        case Origins.Simp.DetachedUrl   => _root_.controllers.routes.StartJourneyController.startDetachedSimpJourney
+        case Origins.Epaye.Bta            => testOnlyRoutes.StartJourneyController.showBtaEpayePage
+        case Origins.Epaye.EpayeService   => testOnlyRoutes.StartJourneyController.showEpayePage
+        case Origins.Epaye.GovUk          => testOnlyRoutes.StartJourneyController.showGovukEpayePage
+        case Origins.Epaye.DetachedUrl    => _root_.controllers.routes.StartJourneyController.startDetachedEpayeJourney
+        case Origins.Vat.Bta              => testOnlyRoutes.StartJourneyController.showBtaVatPage
+        case Origins.Vat.VatService       => testOnlyRoutes.StartJourneyController.showVatPage
+        case Origins.Vat.GovUk            => testOnlyRoutes.StartJourneyController.showGovukVatPage
+        case Origins.Vat.DetachedUrl      => _root_.controllers.routes.StartJourneyController.startDetachedVatJourney
+        case Origins.Vat.VatPenalties     => testOnlyRoutes.StartJourneyController.showVatPenaltiesPage
+        case Origins.Sa.Bta               => testOnlyRoutes.StartJourneyController.showBtaSaPage
+        case Origins.Sa.Pta               => testOnlyRoutes.StartJourneyController.showPtaSaPage
+        case Origins.Sa.Mobile            => testOnlyRoutes.StartJourneyController.showMobileSaPage
+        case Origins.Sa.GovUk             => testOnlyRoutes.StartJourneyController.showGovukSaPage
+        case Origins.Sa.DetachedUrl       => _root_.controllers.routes.StartJourneyController.startDetachedSaJourney
+        case Origins.Sa.ItsaViewAndChange => testOnlyRoutes.StartJourneyController.showItsaViewAndChangePage
+        case Origins.Simp.Pta             => testOnlyRoutes.StartJourneyController.showPtaSimpPage
+        case Origins.Simp.Mobile          => testOnlyRoutes.StartJourneyController.showMobileSimpPage
+        case Origins.Simp.GovUk           => testOnlyRoutes.StartJourneyController.showGovukSimpPage
+        case Origins.Simp.DetachedUrl     => _root_.controllers.routes.StartJourneyController.startDetachedSimpJourney
       }
     } yield Redirect(redirectTo).withSession(session)
   }
@@ -232,6 +234,11 @@ class StartJourneyController @Inject() (
     withSessionId(Future.successful(Ok(iAmVatPenaltiesPage())))
   }
 
+  /** Pretends being an ITSA View & Change page */
+  val showItsaViewAndChangePage: Action[AnyContent] = as.default.async { implicit request =>
+    withSessionId(Future.successful(Ok(iAmItsaViewAndChangePage(testOnlyRoutes.StartJourneyController.startJourneySaItsaViewAndChange.url))))
+  }
+
   /**
    * Pretends for testing purposes that journey started from Bta
    */
@@ -304,6 +311,15 @@ class StartJourneyController @Inject() (
   val startJourneySaMobile: Action[AnyContent] = as.default.async { implicit request =>
     withSessionId {
       journeyConnector.Sa.startJourneyMobile(SjRequest.Sa.Simple(
+        returnUrl = ReturnUrl(routes.StartJourneyController.showMobileSaPage.url + "?return-page"),
+        backUrl   = BackUrl(routes.StartJourneyController.showMobileSaPage.url + "?starting-page")
+      )).map(sjResponse => Redirect(sjResponse.nextUrl.value))
+    }
+  }
+
+  val startJourneySaItsaViewAndChange: Action[AnyContent] = as.default.async { implicit request =>
+    withSessionId {
+      journeyConnector.Sa.startJourneyItsaViewAndChange(SjRequest.Sa.Simple(
         returnUrl = ReturnUrl(routes.StartJourneyController.showMobileSaPage.url + "?return-page"),
         backUrl   = BackUrl(routes.StartJourneyController.showMobileSaPage.url + "?starting-page")
       )).map(sjResponse => Redirect(sjResponse.nextUrl.value))

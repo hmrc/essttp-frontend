@@ -846,6 +846,11 @@ appConfig: AppConfig
                 content = Text("Mobile service"),
                 value = Some(Origins.Sa.Mobile.entryName),
                 checked = form.data.exists(_._2 === Origins.Sa.Mobile.entryName)
+            ),
+            RadioItem(
+                content = Text("ITSA View & Change"),
+                value = Some(Origins.Sa.ItsaViewAndChange.entryName),
+                checked = form.data.exists(_._2 === Origins.Sa.ItsaViewAndChange.entryName)
             )
         ),
         classes = "govuk-radios--small"
