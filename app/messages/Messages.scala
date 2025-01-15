@@ -1808,6 +1808,11 @@ object Messages {
       welsh   = "Yr enw sydd ar y cyfrif"
     )
 
+    val `Change your Direct Debit details`: Message = Message(
+      english = "Change your Direct Debit details",
+      welsh   = "Newid manylion Debyd Uniongyrchol"
+    )
+
     val `The Direct Debit Guarantee`: Message = Message(
       english = "The Direct Debit Guarantee",
       welsh   = "Y Warant Debyd Uniongyrchol"
