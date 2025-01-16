@@ -1172,7 +1172,12 @@ class BankDetailsControllerSpec extends ItSpec {
             val expectedSummaryRows = List(expectedAccountTypeRow, expectedAccountNameRow, expectedSortCodeRow, expectedAccountNumberRow)
             extractSummaryRows(summaries) shouldBe expectedSummaryRows
 
-//            val cardTitle = doc.select(".govuk-card__header__text").text()
+            val cardTitle = doc.select(".govuk-card__header__text").text()
+            cardTitle shouldBe "Bank account details"
+
+            val cardTitleLink = doc.select(".govuk-summary-card__actions").select(".govuk-link")
+            cardTitleLink.attr("href") shouldBe "/set-up-a-payment-plan/check-you-can-set-up-a-direct-debit"
+            cardTitleLink.textNodes().get(0).text() shouldBe "Change your Direct Debit details"
 
             doc.select(".govuk-heading-m").text() shouldBe "The Direct Debit Guarantee"
             val directDebitGuaranteeParagraphs = doc.select(".govuk-body").asScala.toList
