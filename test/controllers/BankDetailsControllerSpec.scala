@@ -148,8 +148,7 @@ class BankDetailsControllerSpec extends ItSpec {
   def extractSummaryRows(elements: List[Element]): List[SummaryRow] = elements.map { e =>
     SummaryRow(
       e.select(".govuk-summary-list__key").text(),
-      e.select(".govuk-summary-list__value").text(),
-      e.select(".govuk-summary-list__actions > .govuk-link").attr("href")
+      e.select(".govuk-summary-list__value").text()
     )
   }
 
@@ -1165,16 +1164,20 @@ class BankDetailsControllerSpec extends ItSpec {
 
             val summaries = doc.select(".govuk-summary-list").select(".govuk-summary-list__row").iterator().asScala.toList
             summaries.size shouldBe 4
-            val changeLinks = summaries.map(_.select(".govuk-summary-list__actions").select(".govuk-link"))
-            changeLinks.size shouldBe 4
-            changeLinks.foreach(_.attr("href") shouldBe routes.BankDetailsController.detailsAboutBankAccount.url)
 
-            val expectedAccountTypeRow = SummaryRow("Account type", TdAll.typeOfBankAccount("Personal").toString, routes.BankDetailsController.detailsAboutBankAccount.url)
-            val expectedAccountNameRow = SummaryRow("Name on the account", TdAll.testAccountName, routes.BankDetailsController.detailsAboutBankAccount.url)
-            val expectedSortCodeRow = SummaryRow("Sort code", "123456", routes.BankDetailsController.detailsAboutBankAccount.url)
-            val expectedAccountNumberRow = SummaryRow("Account number", "12345678", routes.BankDetailsController.detailsAboutBankAccount.url)
+            val expectedAccountTypeRow = SummaryRow("Account type", TdAll.typeOfBankAccount("Personal").toString)
+            val expectedAccountNameRow = SummaryRow("Name on the account", TdAll.testAccountName)
+            val expectedSortCodeRow = SummaryRow("Sort code", "123456")
+            val expectedAccountNumberRow = SummaryRow("Account number", "12345678")
             val expectedSummaryRows = List(expectedAccountTypeRow, expectedAccountNameRow, expectedSortCodeRow, expectedAccountNumberRow)
             extractSummaryRows(summaries) shouldBe expectedSummaryRows
+
+            val cardTitle = doc.select(".govuk-card__header__text").text()
+            cardTitle shouldBe "Bank account details"
+
+            val cardTitleLink = doc.select(".govuk-summary-card__actions").select(".govuk-link")
+            cardTitleLink.attr("href") shouldBe "/set-up-a-payment-plan/check-you-can-set-up-a-direct-debit"
+            cardTitleLink.textNodes().get(0).text() shouldBe "Change your Direct Debit details"
 
             doc.select(".govuk-heading-m").text() shouldBe "The Direct Debit Guarantee"
             val directDebitGuaranteeParagraphs = doc.select(".govuk-body").asScala.toList
@@ -1243,5 +1246,5 @@ class BankDetailsControllerSpec extends ItSpec {
 }
 
 object BankDetailsControllerSpec {
-  final case class SummaryRow(question: String, answer: String, changeLink: String)
+  final case class SummaryRow(question: String, answer: String)
 }
