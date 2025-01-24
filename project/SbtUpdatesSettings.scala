@@ -7,7 +7,6 @@ object SbtUpdatesSettings {
 
   lazy val sbtUpdatesSettings = Seq(
     dependencyUpdatesFailBuild := true,
-    //CHANGE THIS BACK BEFORE MERGE
     (Compile / compile) := ((Compile / compile) dependsOn dependencyUpdates).value,
     dependencyUpdatesFilter -= moduleFilter("org.scala-lang"),
     dependencyUpdatesFilter -= moduleFilter("org.playframework"),

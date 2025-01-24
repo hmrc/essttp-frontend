@@ -104,4 +104,5 @@ object PageUrls {
   val vatRLSUrl: String = s"$serviceBaseUrl/update-personal-details-vat"
   val saRLSUrl: String = s"$serviceBaseUrl/update-personal-details-sa"
   val simpRLSUrl: String = s"$serviceBaseUrl/update-personal-details-simple-assessment"
+  val signupMtdUrl: String = s"$serviceBaseUrl/sign-up-for-making-tax-digital-for-income-tax"
 }

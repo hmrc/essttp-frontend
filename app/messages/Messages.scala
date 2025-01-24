@@ -775,6 +775,15 @@ object Messages {
       welsh   = "Os oes gennych fynediad yn barod, mae’n rhaid i chi fewngofnodi gan ddefnyddio’r Dynodydd Defnyddiwr (ID) Porth y Llywodraeth sydd â’ch cofrestriad."
     )
 
+    val `Sign up for Making Tax Digital for Income Tax to use this service`: Message = Message(
+      english = "Sign up for Making Tax Digital for Income Tax to use this service",
+      welsh   = "Cofrestru ar gyfer y cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm er mwyn defnyddio’r gwasanaeth hwn"
+    )
+
+    def `You must sign up for Making Tax Digital for Income Tax before you can set up a Self Assessment payment plan online.`(mtdLink: String): Message = Message(
+      english = s"""You must <a href="$mtdLink" class="govuk-link">sign up for Making Tax Digital for Income Tax</a> before you can set up a Self Assessment payment plan online.""",
+      welsh   = s"""Mae’n rhaid i chi <a href="$mtdLink" class="govuk-link">gofrestru ar gyfer y cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm</a> cyn i chi allu trefnu cynllun talu ar gyfer Hunanasesiad ar-lein."""
+    )
   }
 
   object WhyCannotPayInFull {

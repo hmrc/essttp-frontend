@@ -18,13 +18,15 @@ package controllers
 
 import actions.Actions
 import actionsmodel.AuthenticatedJourneyRequest
+import cats.data.OptionT
 import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheckF
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import controllers.pagerouters.EligibilityRouter
 import essttp.journey.model.Journey
 import essttp.rootmodel.TaxRegime
-import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
+import essttp.rootmodel.TaxRegime.Sa
+import essttp.rootmodel.ttp.eligibility.{EligibilityCheckResult, EligibilityPass, EligibilityStatus}
 import play.api.mvc._
 import services.{AuditService, JourneyService, TtpService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -58,11 +60,29 @@ class DetermineEligibilityController @Inject() (
   }
 
   def determineEligibilityAndUpdateJourney(journey: Journey.Stages.ComputedTaxId)(implicit r: AuthenticatedJourneyRequest[_]): Future[Result] = {
-    val maybeEligibilityCheckResult: Future[Option[EligibilityCheckResult]] = for {
-      eligibilityCheckResult: Option[EligibilityCheckResult] <- ttpService.determineEligibility(journey)
-    } yield eligibilityCheckResult
 
-    maybeEligibilityCheckResult
+    val maybeEligibilityCheckResult: OptionT[Future, EligibilityCheckResult] = for {
+      _ <- journey.taxRegime match {
+        case Sa => OptionT.fromOption[Future](checkNinoExists(journey))
+        case _  => OptionT.some[Future](())
+      }
+      eligibilityCheckResult <- OptionT(ttpService.determineEligibility(journey))
+    } yield {
+      if (eligibilityCheckResult.isEligible) {
+        journey.taxRegime match {
+          case Sa if r.enrolments.getEnrolment("HMRC-MTD-IT").isDefined =>
+            mtdEligibleResult(eligibilityCheckResult)
+          case Sa =>
+            mtdIneligibleResult(eligibilityCheckResult)
+          case _ =>
+            eligibilityCheckResult
+        }
+      } else {
+        eligibilityCheckResult
+      }
+    }
+
+    maybeEligibilityCheckResult.value
       .flatMap {
         _.fold {
           val redirect = journey.taxRegime match {
@@ -81,6 +101,30 @@ class DetermineEligibilityController @Inject() (
           } yield Routing.redirectToNext(routes.DetermineEligibilityController.determineEligibility, updatedJourney, submittedValueUnchanged = false)
         }
       }
+  }
+
+  // if SA users have IR-SA enrollment, but no NINO is found, they are directed to the generic kickout page
+  def checkNinoExists(journey: Journey.Stages.ComputedTaxId)(implicit r: AuthenticatedJourneyRequest[_]): Option[Unit] =
+    journey.taxRegime match {
+      case TaxRegime.Sa => r.nino.map(_ => ())
+      case _            => Some(())
+    }
+  // if SA users have IR-SA enrollment, but no HMRC-MTD-IT enrollment, they are directed to the 'Sign up tp MDT' kickout page
+  private def mtdIneligibleResult(result: EligibilityCheckResult): EligibilityCheckResult = {
+    result.copy(
+      eligibilityRules  = result.eligibilityRules.copy(
+        part2 = result.eligibilityRules.part2.copy(noMtditsaEnrollment = Some(true))
+      ),
+      eligibilityStatus = EligibilityStatus(EligibilityPass(value = false))
+    )
+  }
+
+  private def mtdEligibleResult(result: EligibilityCheckResult): EligibilityCheckResult = {
+    result.copy(
+      eligibilityRules = result.eligibilityRules.copy(
+        part2 = result.eligibilityRules.part2.copy(noMtditsaEnrollment = Some(false))
+      )
+    )
   }
 
 }

@@ -37,6 +37,7 @@ GET    /not-enrolled                                        controllers.NotEnrol
 GET    /not-vat-registered                                  controllers.NotEnrolledController.notVatRegistered
 GET    /request-access-to-self-assessment                   controllers.NotEnrolledController.notSaEnrolled
 GET    /no-nino-found-sia                                   controllers.NotEnrolledController.simpNoNino
+GET    /sign-up-for-making-tax-digital-for-income-tax       controllers.NotEnrolledController.notMdtitsaEnrolled
 
 GET    /not-eligible-epaye                                  controllers.IneligibleController.payeGenericIneligiblePage
 GET    /not-eligible-vat                                    controllers.IneligibleController.vatGenericIneligiblePage

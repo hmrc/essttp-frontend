@@ -75,6 +75,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     val enrolForPayeUrl: String = config.get[String]("govUkUrls.enrolPayeUrl")
     val enrolForVatUrl: String = config.get[String]("govUkUrls.enrolVatUrl")
     val enrolForSaUrl: String = config.get[String]("govUkUrls.enrolSaUrl")
+    val signUpForMtdUrl: String = config.get[String]("govUkUrls.signUpMtdUrl")
     val extraSupportUrl: String = config.get[String]("govUkUrls.extraSupportUrl")
     val relayUrl: String = config.get[String]("govUkUrls.relayUrl")
     val businessTaxAccountUrl: String = s"${BaseUrl.businessTaxAccountFrontend}/business-account"

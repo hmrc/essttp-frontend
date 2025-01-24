@@ -178,4 +178,49 @@ class NotEnrolledControllerSpec extends ItSpec {
     }
 
   }
+
+  "GET /sign-up-for-making-tax-digital-for-income-tax should" - {
+
+    "return the Sign up for Making Tax Digital for Income Tax to use this service page in English" in {
+      stubCommonActions(authAllEnrolments = Some(Set.empty))
+      EssttpBackend.StartJourney.findJourney(Origins.Sa.GovUk)
+
+      val result = controller.notMdtitsaEnrolled(fakeRequest)
+      val page: Document = Jsoup.parse(contentAsString(result))
+
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        page,
+        expectedH1              = "Sign up for Making Tax Digital for Income Tax to use this service",
+        shouldBackLinkBePresent = false,
+        expectedSubmitUrl       = None,
+        regimeBeingTested       = Some(TaxRegime.Sa)
+      )
+
+      page.select(".govuk-body").asScala.toList(0).html() shouldBe s"""You must <a href="https://www.gov.uk/guidance/sign-up-your-business-for-making-tax-digital-for-income-tax" class="govuk-link">sign up for Making Tax Digital for Income Tax</a> before you can set up a Self Assessment payment plan online."""
+      ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Sa, Languages.English)
+    }
+
+    "return the not vat registered page in Welsh" in {
+      stubCommonActions(authAllEnrolments = Some(Set.empty))
+      EssttpBackend.StartJourney.findJourney(Origins.Sa.GovUk)
+
+      val result = controller.notMdtitsaEnrolled(fakeRequest.withLangWelsh())
+      val page: Document = Jsoup.parse(contentAsString(result))
+
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        page,
+        expectedH1              = "Cofrestru ar gyfer y cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm er mwyn defnyddio’r gwasanaeth hwn",
+        shouldBackLinkBePresent = false,
+        expectedSubmitUrl       = None,
+        regimeBeingTested       = Some(TaxRegime.Sa),
+        language                = Languages.Welsh
+      )
+
+      page.select(".govuk-body").asScala.toList(0).html() shouldBe s"""Mae’n rhaid i chi <a href="https://www.gov.uk/guidance/sign-up-your-business-for-making-tax-digital-for-income-tax" class="govuk-link">gofrestru ar gyfer y cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm</a> cyn i chi allu trefnu cynllun talu ar gyfer Hunanasesiad ar-lein."""
+      ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Sa, Languages.Welsh)
+    }
+
+  }
 }

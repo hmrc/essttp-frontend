@@ -21,6 +21,8 @@ import essttp.rootmodel.{SaUtr, Vrn}
 import testOnly.models.formsmodel.{Enrolments, SignInAs, StartJourneyForm}
 import uk.gov.hmrc.auth.core.{AffinityGroup, ConfidenceLevel}
 
+import scala.util.Random
+
 /**
  * Definition of a test user.
  * We use that data to
@@ -31,6 +33,7 @@ final case class TestUser(
     epayeEnrolment:  Option[EpayeEnrolment],
     vatEnrolment:    Option[VatEnrolment],
     irSaEnrolment:   Option[IrSaEnrolment],
+    mtdItEnrolment:  Option[MtdItEnrolment],
     authorityId:     AuthorityId,
     affinityGroup:   AffinityGroup,
     confidenceLevel: ConfidenceLevel
@@ -38,7 +41,7 @@ final case class TestUser(
 
 object TestUser {
 
-  def makeTestUser(form: StartJourneyForm): Option[TestUser] = {
+  def makeTestUser(form: StartJourneyForm)(implicit r: Random): Option[TestUser] = {
     val maybeAffinityGroup: Option[AffinityGroup] = form.signInAs match {
       case SignInAs.NoSignIn     => None
       case SignInAs.Individual   => Some(AffinityGroup.Individual)
@@ -67,12 +70,18 @@ object TestUser {
       else None
     }
 
+    val maybeMdtItEnrolment: StartJourneyForm => Option[MtdItEnrolment] = { form =>
+      if (form.enrolments.contains(Enrolments.MtdIt)) Some(MtdItEnrolment(RandomDataGenerator.nextNumber(8), EnrolmentStatus.Activated))
+      else None
+    }
+
     maybeAffinityGroup.map { affinityGroup: AffinityGroup =>
       TestUser(
         nino            = form.confidenceLevelAndNino.nino.map(Nino),
         epayeEnrolment  = maybeEpayeEnrolment(form),
         vatEnrolment    = maybeVatEnrolment(form),
         irSaEnrolment   = maybeIrSaEnrolment(form),
+        mtdItEnrolment  = maybeMdtItEnrolment(form),
         authorityId     = form.credId.map(AuthorityId(_)).getOrElse(RandomDataGenerator.nextAuthorityId()),
         affinityGroup   = affinityGroup,
         confidenceLevel = form.confidenceLevelAndNino.confidenceLevel

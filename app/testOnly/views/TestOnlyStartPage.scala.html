@@ -63,6 +63,7 @@ appConfig: AppConfig
             || e === EligibilityErrors.HasDisguisedRemuneration
             || e === EligibilityErrors.HasCapacitor
             || e === EligibilityErrors.IsAnMtdCustomer
+            || e === EligibilityErrors.NoMtditsaEnrollment
     ).map(toCheckboxItem)
 }
 
@@ -73,6 +74,7 @@ appConfig: AppConfig
             || e === EligibilityErrors.HasDisguisedRemuneration
             || e === EligibilityErrors.HasCapacitor
             || e === EligibilityErrors.IsAnMtdCustomer
+            || e === EligibilityErrors.NoMtditsaEnrollment
     ).map(toCheckboxItem)
 }
 
@@ -86,13 +88,15 @@ appConfig: AppConfig
             || e === EligibilityErrors.DmSpecialOfficeProcessingRequiredCDCS
             || e === EligibilityErrors.HasCapacitor
             || e === EligibilityErrors.IsAnMtdCustomer
+            || e === EligibilityErrors.NoMtditsaEnrollment
     ).map(toCheckboxItem)
 }
 
 @saEligibilityErrorCheckboxes = @{
     EligibilityErrors.values
-    .filterNot(_ === EligibilityErrors.MultipleReasons)
-    .map(toCheckboxItem)
+    .filterNot(e => e === EligibilityErrors.MultipleReasons
+        || e === EligibilityErrors.NoMtditsaEnrollment
+    ).map(toCheckboxItem)
 }
 
 @credIdInput = {
@@ -196,6 +200,14 @@ appConfig: AppConfig
                     .filter(_._1.startsWith("enrolments"))
                     .find(_._2 === Enrolments.IrSa.entryName)
                     .fold(taxRegime.entryName === "Sa")(_._2 === Enrolments.IrSa.entryName)
+                ),
+                CheckboxItem(
+                    content = Text("HMRC-MTD-IT"),
+                    value = Enrolments.MtdIt.entryName,
+                    checked = form.data.toList
+                    .filter(_._1.startsWith("enrolments"))
+                    .find(_._2 === Enrolments.MtdIt.entryName)
+                    .fold(taxRegime.entryName === "Sa")(_._2 === Enrolments.MtdIt.entryName)
                 )
             )
         },
