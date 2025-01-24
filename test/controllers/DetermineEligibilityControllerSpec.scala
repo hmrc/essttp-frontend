@@ -19,6 +19,7 @@ package controllers
 import config.AppConfig
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.TaxRegime
+import essttp.rootmodel.TaxRegime.Sa
 import essttp.rootmodel.ttp.eligibility.{EligibilityRules, RegimeDigitalCorrespondence}
 import models.EligibilityReqIdentificationFlag
 import org.scalatest.prop.TableDrivenPropertyChecks._
@@ -27,6 +28,7 @@ import play.api.libs.json.{JsObject, Json}
 import play.api.test.Helpers._
 import testsupport.{CombinationsHelper, ItSpec}
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend, Ttp}
+import testsupport.testdata.TdAll.eligibleEligibilityRules
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll, TtpJsonResponses}
 import uk.gov.hmrc.http.UpstreamErrorResponse
 
@@ -238,7 +240,11 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
             val eligibilityCheckResponseJsonAsPounds =
               TtpJsonResponses.ttpEligibilityCallJson(origin.taxRegime, TdAll.notEligibleEligibilityPass, eligibilityRules, poundsInsteadOfPence = true)
 
-            stubCommonActions()
+            origin.taxRegime match {
+              case Sa => stubCommonActions(authNino = Some("QQ123456A")) // NINO required for SA
+              case _  => stubCommonActions()
+            }
+
             EssttpBackend.DetermineTaxId.findJourney(origin)()
             Ttp.Eligibility.stubRetrieveEligibility(origin.taxRegime)(eligibilityCheckResponseJson)
             EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(TdAll.journeyId, updatedJourneyJson)
@@ -302,11 +308,11 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
     "Ineligible: NoDueDatesReached with isLessThanMinDebtAllowance also true should redirect correctly" - {
       forAll(Table(
         ("Scenario flavour", "eligibility rules", "expected redirect", "updated journey json", "origin"),
-        ("NoDueDatesReached - EPAYE", TdAll.notEligibleNoDueDatesReached.copy(isLessThanMinDebtAllowance = true), PageUrls.payeNoDueDatesReachedUrl,
+        ("NoDueDatesReached - EPAYE", TdAll.notEligibleNoDueDatesReached.copy(part1 = eligibleEligibilityRules.part1.copy(isLessThanMinDebtAllowance = true)), PageUrls.payeNoDueDatesReachedUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Epaye.Bta), Origins.Epaye.Bta),
-        ("NoDueDatesReached - VAT", TdAll.notEligibleNoDueDatesReached.copy(isLessThanMinDebtAllowance = true), PageUrls.vatNoDueDatesReachedUrl,
+        ("NoDueDatesReached - VAT", TdAll.notEligibleNoDueDatesReached.copy(part1 = eligibleEligibilityRules.part1.copy(isLessThanMinDebtAllowance = true)), PageUrls.vatNoDueDatesReachedUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Vat.Bta), Origins.Vat.Bta),
-        ("NoDueDatesReached - SA", TdAll.notEligibleNoDueDatesReached.copy(isLessThanMinDebtAllowance = true), PageUrls.saNotEligibleUrl,
+        ("NoDueDatesReached - SA", TdAll.notEligibleNoDueDatesReached.copy(part1 = eligibleEligibilityRules.part1.copy(isLessThanMinDebtAllowance = true)), PageUrls.saNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Sa.Bta), Origins.Sa.Bta)
       )) {
         (sf: String, eligibilityRules: EligibilityRules, expectedRedirect: String, updatedJourneyJson: String, origin: Origin) =>
@@ -505,17 +511,19 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
         TaxRegime.Sa,
         regimeDigitalCorrespondence        = true,
-        maybeChargeBeforeMaxAccountingDate = Some(true)
+        maybeChargeBeforeMaxAccountingDate = Some(true),
+        eligibilityRules                   = TdAll.eligibleEligibilityRules.copy(part2 = eligibleEligibilityRules.part2.copy(noMtditsaEnrollment = Some(false)))
       )
       // for audit event
       val eligibilityCheckResponseJsonAsPounds = TtpJsonResponses.ttpEligibilityCallJson(
         TaxRegime.Sa,
         poundsInsteadOfPence               = true,
         regimeDigitalCorrespondence        = true,
-        maybeChargeBeforeMaxAccountingDate = Some(true)
+        maybeChargeBeforeMaxAccountingDate = Some(true),
+        eligibilityRules                   = TdAll.eligibleEligibilityRules.copy(part2 = eligibleEligibilityRules.part2.copy(noMtditsaEnrollment = Some(false)))
       )
 
-      stubCommonActions()
+      stubCommonActions(authNino          = Some("QQ123456A"), authAllEnrolments = Some(Set(TdAll.mtdEnrolment)))
       EssttpBackend.DetermineTaxId.findJourney(Origins.Sa.Bta)()
       Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Sa)(eligibilityCheckResponseJson)
       EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(
@@ -534,7 +542,7 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
         journeyId                      = TdAll.journeyId,
         expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(
           TdAll.eligibleEligibilityPass,
-          TdAll.eligibleEligibilityRules,
+          TdAll.eligibleEligibilityRules.copy(part2 = eligibleEligibilityRules.part2.copy(noMtditsaEnrollment = Some(false))),
           TaxRegime.Sa,
           Some(RegimeDigitalCorrespondence(value = true)),
           chargeChargeBeforeMaxAccountingDate = Some(true)
@@ -659,7 +667,7 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
     ).foreach {
         case (origin, taxRegime) =>
           s"[${taxRegime.entryName}] throw an error when ttp eligibility call returns a legitimate error (not a 422)" in {
-            stubCommonActions()
+            stubCommonActions(authNino          = Some("QQ123456A"), authAllEnrolments = Some(Set(TdAll.mtdEnrolment)))
             EssttpBackend.DetermineTaxId.findJourney(origin)()
             Ttp.Eligibility.stubServiceUnavailableRetrieveEligibility()
 
@@ -694,7 +702,7 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
             }
           } else {
             s"[${taxRegime.entryName}] Return a technical error  when ttp eligibility call returns a 422 response" in {
-              stubCommonActions()
+              stubCommonActions(authNino          = Some("QQ123456A"), authAllEnrolments = Some(Set(TdAll.mtdEnrolment)))
               EssttpBackend.DetermineTaxId.findJourney(origin)()
               Ttp.Eligibility.stub422RetrieveEligibility()
 
@@ -710,7 +718,7 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       }
 
     "VAT user with a debt below the minimum amount and debt too old should be redirected to generic ineligible page" in {
-      val eligibilityRules = TdAll.notEligibleIsLessThanMinDebtAllowance.copy(chargesOverMaxDebtAge = Some(true))
+      val eligibilityRules = TdAll.notEligibleIsLessThanMinDebtAllowance.copy(part1 = eligibleEligibilityRules.part1.copy(chargesOverMaxDebtAge = Some(true)))
       val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(TaxRegime.Vat, TdAll.notEligibleEligibilityPass, eligibilityRules)
 
       Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Vat)(eligibilityCheckResponseJson)
@@ -725,7 +733,7 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
     }
 
     "EPAYE user with a debt below the minimum amount and debt too old should be redirected to debt too low ineligible page" in {
-      val eligibilityRules = TdAll.notEligibleIsLessThanMinDebtAllowance.copy(chargesOverMaxDebtAge = Some(true))
+      val eligibilityRules = TdAll.notEligibleIsLessThanMinDebtAllowance.copy(part1 = eligibleEligibilityRules.part1.copy(chargesOverMaxDebtAge = Some(true)))
       val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(TaxRegime.Epaye, TdAll.notEligibleEligibilityPass, eligibilityRules)
 
       Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Epaye)(eligibilityCheckResponseJson)
@@ -739,5 +747,34 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
       redirectLocation(result) shouldBe Some(PageUrls.epayeDebtTooSmallUrl)
     }
 
+    "SA user with IR-SA enrolment but no NINO found, should be directed to generic ineligible page" in {
+      val eligibilityRules = TdAll.eligibleEligibilityRules.copy(part2 = eligibleEligibilityRules.part2.copy(noMtditsaEnrollment = Some(false)))
+      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(TaxRegime.Sa, TdAll.eligibleEligibilityPass, eligibilityRules)
+
+      Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Sa)(eligibilityCheckResponseJson)
+      stubCommonActions()
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Sa.Bta)()
+      EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(TdAll.journeyId, JourneyJsonTemplates.`Eligibility Checked - Eligible`())
+
+      val result = controller.determineEligibility(fakeRequest)
+
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.saNotEligibleUrl)
+    }
+
+    "SA user with IR-SA enrolment, NINO found but no HMRC-MTD-IT enrolment should be directed to Sign up for Making Tax Digital page" in {
+      val eligibilityRules = TdAll.eligibleEligibilityRules.copy(part2 = eligibleEligibilityRules.part2.copy(noMtditsaEnrollment = Some(true)))
+      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(TaxRegime.Sa, TdAll.notEligibleEligibilityPass, eligibilityRules)
+
+      Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Sa)(eligibilityCheckResponseJson)
+      stubCommonActions(authNino = Some("QQ123456A"))
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Sa.Bta)()
+      EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(TdAll.journeyId, JourneyJsonTemplates.`Eligibility Checked - Eligible - No HMRC-MTD-IT enrolment`())
+
+      val result = controller.determineEligibility(fakeRequest)
+
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.signupMtdUrl)
+    }
   }
 }

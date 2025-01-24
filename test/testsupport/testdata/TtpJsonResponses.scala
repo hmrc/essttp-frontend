@@ -65,27 +65,28 @@ object TtpJsonResponses {
        |    "eligibilityPass" : ${eligibilityPass.value.toString}
        |  },
        |  "eligibilityRules" : {
-       |    "hasRlsOnAddress" : ${eligibilityRules.hasRlsOnAddress.toString},
-       |    "markedAsInsolvent" : ${eligibilityRules.markedAsInsolvent.toString},
-       |    "isLessThanMinDebtAllowance" : ${eligibilityRules.isLessThanMinDebtAllowance.toString},
-       |    "isMoreThanMaxDebtAllowance" : ${eligibilityRules.isMoreThanMaxDebtAllowance.toString},
-       |    "disallowedChargeLockTypes" : ${eligibilityRules.disallowedChargeLockTypes.toString},
-       |    "existingTTP" : ${eligibilityRules.existingTTP.toString},
-       |    "ineligibleChargeTypes" : ${eligibilityRules.ineligibleChargeTypes.toString},
-       |    "missingFiledReturns" : ${eligibilityRules.missingFiledReturns.toString},
-       |    "noDueDatesReached": ${eligibilityRules.noDueDatesReached.toString}
-       |  ${optionalEligibilityResponsesJson(eligibilityRules.hasInvalidInterestSignals, "hasInvalidInterestSignals")}
-       |  ${optionalEligibilityResponsesJson(eligibilityRules.hasInvalidInterestSignalsCESA, "hasInvalidInterestSignalsCESA")}
-       |  ${optionalEligibilityResponsesJson(eligibilityRules.dmSpecialOfficeProcessingRequired, "dmSpecialOfficeProcessingRequired")}
-       |  ${optionalEligibilityResponsesJson(eligibilityRules.cannotFindLockReason, "cannotFindLockReason")}
-       |  ${optionalEligibilityResponsesJson(eligibilityRules.creditsNotAllowed, "creditsNotAllowed")}
-       |  ${optionalEligibilityResponsesJson(eligibilityRules.isMoreThanMaxPaymentReference, "isMoreThanMaxPaymentReference")}
-       |  ${optionalEligibilityResponsesJson(eligibilityRules.chargesBeforeMaxAccountingDate, "chargesBeforeMaxAccountingDate")}
-       |  ${optionalEligibilityResponsesJson(eligibilityRules.chargesOverMaxDebtAge, "chargesOverMaxDebtAge")}
-       |  ${optionalEligibilityResponsesJson(eligibilityRules.hasDisguisedRemuneration, "hasDisguisedRemuneration")}
-       |  ${optionalEligibilityResponsesJson(eligibilityRules.hasCapacitor, "hasCapacitor")}
-       |  ${optionalEligibilityResponsesJson(eligibilityRules.dmSpecialOfficeProcessingRequiredCDCS, "dmSpecialOfficeProcessingRequiredCDCS")}
-       |  ${optionalEligibilityResponsesJson(eligibilityRules.dmSpecialOfficeProcessingRequiredCESA, "dmSpecialOfficeProcessingRequiredCESA")}
+       |    "hasRlsOnAddress" : ${eligibilityRules.part1.hasRlsOnAddress.toString},
+       |    "markedAsInsolvent" : ${eligibilityRules.part1.markedAsInsolvent.toString},
+       |    "isLessThanMinDebtAllowance" : ${eligibilityRules.part1.isLessThanMinDebtAllowance.toString},
+       |    "isMoreThanMaxDebtAllowance" : ${eligibilityRules.part1.isMoreThanMaxDebtAllowance.toString},
+       |    "disallowedChargeLockTypes" : ${eligibilityRules.part1.disallowedChargeLockTypes.toString},
+       |    "existingTTP" : ${eligibilityRules.part1.existingTTP.toString},
+       |    "ineligibleChargeTypes" : ${eligibilityRules.part1.ineligibleChargeTypes.toString},
+       |    "missingFiledReturns" : ${eligibilityRules.part1.missingFiledReturns.toString},
+       |    "noDueDatesReached": ${eligibilityRules.part1.noDueDatesReached.toString}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.part1.hasInvalidInterestSignals, "hasInvalidInterestSignals")}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.part1.hasInvalidInterestSignalsCESA, "hasInvalidInterestSignalsCESA")}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.part1.dmSpecialOfficeProcessingRequired, "dmSpecialOfficeProcessingRequired")}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.part1.cannotFindLockReason, "cannotFindLockReason")}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.part1.creditsNotAllowed, "creditsNotAllowed")}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.part1.isMoreThanMaxPaymentReference, "isMoreThanMaxPaymentReference")}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.part1.chargesBeforeMaxAccountingDate, "chargesBeforeMaxAccountingDate")}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.part1.chargesOverMaxDebtAge, "chargesOverMaxDebtAge")}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.part1.hasDisguisedRemuneration, "hasDisguisedRemuneration")}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.part1.hasCapacitor, "hasCapacitor")}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.part1.dmSpecialOfficeProcessingRequiredCDCS, "dmSpecialOfficeProcessingRequiredCDCS")}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.part1.dmSpecialOfficeProcessingRequiredCESA, "dmSpecialOfficeProcessingRequiredCESA")}
+       |  ${optionalEligibilityResponsesJson(eligibilityRules.part2.noMtditsaEnrollment, "noMtditsaEnrollment")}
        |  },
        |  "chargeTypeAssessment" : [ {
        |    "taxPeriodFrom" : "2020-08-13",

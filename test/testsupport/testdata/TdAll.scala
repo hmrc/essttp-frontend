@@ -60,6 +60,7 @@ object TdAll {
   private val `IR-PAYE-TaxOfficeReference`: EnrolmentDef = EnrolmentDef(enrolmentKey  = "IR-PAYE", identifierKey = "TaxOfficeReference")
   private val `HMRC-MTD-VAT-Vrn`: EnrolmentDef = EnrolmentDef(enrolmentKey  = "HMRC-MTD-VAT", identifierKey = "VRN")
   private val `IR-SA`: EnrolmentDef = EnrolmentDef(enrolmentKey  = "IR-SA", identifierKey = "UTR")
+  private val `HMRC-MTD-IT`: EnrolmentDef = EnrolmentDef(enrolmentKey  = "HMRC-MTD-IT", identifierKey = "UTR")
 
   val payeEnrolment: Enrolment = Enrolment(
     key               = "IR-PAYE",
@@ -89,6 +90,15 @@ object TdAll {
     delegatedAuthRule = None
   )
 
+  val mtdEnrolment: Enrolment = Enrolment(
+    key               = "HMRC-MTD-IT",
+    identifiers       = List(
+      EnrolmentIdentifier(`HMRC-MTD-IT`.identifierKey, "1234567895"),
+    ),
+    state             = "Activated",
+    delegatedAuthRule = None
+  )
+
   val unactivePayeEnrolment: Enrolment = payeEnrolment.copy(state = "Not Activated")
 
   val canPayUpfront: CanPayUpfront = CanPayUpfront(value = true)
@@ -104,52 +114,58 @@ object TdAll {
   val eligibleEligibilityPass: EligibilityPass = EligibilityPass(value = true)
   val notEligibleEligibilityPass: EligibilityPass = eligibleEligibilityPass.copy(value = false)
   val eligibleEligibilityRules: EligibilityRules = EligibilityRules(
-    hasRlsOnAddress                       = false,
-    markedAsInsolvent                     = false,
-    isLessThanMinDebtAllowance            = false,
-    isMoreThanMaxDebtAllowance            = false,
-    disallowedChargeLockTypes             = false,
-    existingTTP                           = false,
-    chargesOverMaxDebtAge                 = None,
-    ineligibleChargeTypes                 = false,
-    missingFiledReturns                   = false,
-    hasInvalidInterestSignals             = None,
-    hasInvalidInterestSignalsCESA         = None,
-    dmSpecialOfficeProcessingRequired     = None,
-    noDueDatesReached                     = false,
-    cannotFindLockReason                  = None,
-    creditsNotAllowed                     = None,
-    isMoreThanMaxPaymentReference         = None,
-    chargesBeforeMaxAccountingDate        = None,
-    hasDisguisedRemuneration              = None,
-    hasCapacitor                          = None,
-    dmSpecialOfficeProcessingRequiredCDCS = None,
-    isAnMtdCustomer                       = None,
-    dmSpecialOfficeProcessingRequiredCESA = None
+    EligibilityRulesPart1 (
+      hasRlsOnAddress                       = false,
+      markedAsInsolvent                     = false,
+      isLessThanMinDebtAllowance            = false,
+      isMoreThanMaxDebtAllowance            = false,
+      disallowedChargeLockTypes             = false,
+      existingTTP                           = false,
+      chargesOverMaxDebtAge                 = None,
+      ineligibleChargeTypes                 = false,
+      missingFiledReturns                   = false,
+      hasInvalidInterestSignals             = None,
+      hasInvalidInterestSignalsCESA         = None,
+      dmSpecialOfficeProcessingRequired     = None,
+      noDueDatesReached                     = false,
+      cannotFindLockReason                  = None,
+      creditsNotAllowed                     = None,
+      isMoreThanMaxPaymentReference         = None,
+      chargesBeforeMaxAccountingDate        = None,
+      hasDisguisedRemuneration              = None,
+      hasCapacitor                          = None,
+      dmSpecialOfficeProcessingRequiredCDCS = None,
+      isAnMtdCustomer                       = None,
+      dmSpecialOfficeProcessingRequiredCESA = None
+    ),
+    EligibilityRulesPart2(
+      noMtditsaEnrollment = None
+    )
   )
-  val notEligibleHasRlsOnAddress: EligibilityRules = eligibleEligibilityRules.copy(hasRlsOnAddress = true)
-  val notEligibleMarkedAsInsolvent: EligibilityRules = eligibleEligibilityRules.copy(markedAsInsolvent = true)
-  val notEligibleIsLessThanMinDebtAllowance: EligibilityRules = eligibleEligibilityRules.copy(isLessThanMinDebtAllowance = true)
-  val notEligibleIsMoreThanMaxDebtAllowance: EligibilityRules = eligibleEligibilityRules.copy(isMoreThanMaxDebtAllowance = true)
-  val notEligibleDisallowedChargeLockTypes: EligibilityRules = eligibleEligibilityRules.copy(disallowedChargeLockTypes = true)
-  val notEligibleExistingTTP: EligibilityRules = eligibleEligibilityRules.copy(existingTTP = true)
-  val notEligibleExceedsMaxDebtAge: EligibilityRules = eligibleEligibilityRules.copy(chargesOverMaxDebtAge = Some(true))
-  val notEligibleEligibleChargeType: EligibilityRules = eligibleEligibilityRules.copy(ineligibleChargeTypes = true)
-  val notEligibleMissingFiledReturns: EligibilityRules = eligibleEligibilityRules.copy(missingFiledReturns = true)
-  val notEligibleNoDueDatesReached: EligibilityRules = eligibleEligibilityRules.copy(noDueDatesReached = true)
-  val notEligibleHasInvalidInterestSignals: EligibilityRules = eligibleEligibilityRules.copy(hasInvalidInterestSignals = Some(true))
-  val notEligibleHasInvalidInterestSignalsCESA: EligibilityRules = eligibleEligibilityRules.copy(hasInvalidInterestSignalsCESA = Some(true))
-  val notEligibleDmSpecialOfficeProcessingRequired: EligibilityRules = eligibleEligibilityRules.copy(dmSpecialOfficeProcessingRequired = Some(true))
-  val notEligibleCannotFindLockReason: EligibilityRules = eligibleEligibilityRules.copy(cannotFindLockReason = Some(true))
-  val notEligibleCreditsNotAllowed: EligibilityRules = eligibleEligibilityRules.copy(creditsNotAllowed = Some(true))
-  val notEligibleIsMoreThanMaxPaymentReference: EligibilityRules = eligibleEligibilityRules.copy(isMoreThanMaxPaymentReference = Some(true))
-  val notEligibleChargesBeforeMaxAccountingDate: EligibilityRules = eligibleEligibilityRules.copy(chargesBeforeMaxAccountingDate = Some(true))
-  val notEligibleMultipleReasons: EligibilityRules = eligibleEligibilityRules.copy(missingFiledReturns = true).copy(hasRlsOnAddress = true)
-  val notEligibleHasDisguisedRemuneration: EligibilityRules = eligibleEligibilityRules.copy(hasDisguisedRemuneration = Some(true))
-  val notEligibleHasCapacitor: EligibilityRules = eligibleEligibilityRules.copy(hasCapacitor = Some(true))
-  val notEligibleDmSpecialOfficeProcessingRequiredCDCS: EligibilityRules = eligibleEligibilityRules.copy(dmSpecialOfficeProcessingRequiredCDCS = Some(true))
-  val notEligibleIsAnMtdCustomer: EligibilityRules = eligibleEligibilityRules.copy(isAnMtdCustomer = Some(true))
-  val notEligibleDmSpecialOfficeProcessingRequiredCESA: EligibilityRules = eligibleEligibilityRules.copy(dmSpecialOfficeProcessingRequiredCESA = Some(true))
+  val notEligibleHasRlsOnAddress: EligibilityRules = eligibleEligibilityRules.copy(part1 = eligibleEligibilityRules.part1.copy(hasRlsOnAddress = true))
+  val notEligibleMarkedAsInsolvent: EligibilityRules = eligibleEligibilityRules.copy(part1 = eligibleEligibilityRules.part1.copy(markedAsInsolvent = true))
+  val notEligibleIsLessThanMinDebtAllowance: EligibilityRules = eligibleEligibilityRules.copy(part1 = eligibleEligibilityRules.part1.copy(isLessThanMinDebtAllowance = true))
+  val notEligibleIsMoreThanMaxDebtAllowance: EligibilityRules = eligibleEligibilityRules.copy(part1 = eligibleEligibilityRules.part1.copy(isMoreThanMaxDebtAllowance = true))
+  val notEligibleDisallowedChargeLockTypes: EligibilityRules = eligibleEligibilityRules.copy(part1 = eligibleEligibilityRules.part1.copy(disallowedChargeLockTypes = true))
+  val notEligibleExistingTTP: EligibilityRules = eligibleEligibilityRules.copy(part1 = eligibleEligibilityRules.part1.copy(existingTTP = true))
+  val notEligibleExceedsMaxDebtAge: EligibilityRules = eligibleEligibilityRules.copy(part1 = eligibleEligibilityRules.part1.copy(chargesOverMaxDebtAge = Some(true)))
+  val notEligibleEligibleChargeType: EligibilityRules = eligibleEligibilityRules.copy(part1 = eligibleEligibilityRules.part1.copy(ineligibleChargeTypes = true))
+  val notEligibleMissingFiledReturns: EligibilityRules = eligibleEligibilityRules.copy(part1 = eligibleEligibilityRules.part1.copy(missingFiledReturns = true))
+  val notEligibleNoDueDatesReached: EligibilityRules = eligibleEligibilityRules.copy(part1 = eligibleEligibilityRules.part1.copy(noDueDatesReached = true))
+  val notEligibleHasInvalidInterestSignals: EligibilityRules = eligibleEligibilityRules.copy(part1 = eligibleEligibilityRules.part1.copy(hasInvalidInterestSignals = Some(true)))
+  val notEligibleHasInvalidInterestSignalsCESA: EligibilityRules = eligibleEligibilityRules.copy(part1 = eligibleEligibilityRules.part1.copy(hasInvalidInterestSignalsCESA = Some(true)))
+  val notEligibleDmSpecialOfficeProcessingRequired: EligibilityRules = eligibleEligibilityRules.copy(part1 = eligibleEligibilityRules.part1.copy(dmSpecialOfficeProcessingRequired = Some(true)))
+  val notEligibleCannotFindLockReason: EligibilityRules = eligibleEligibilityRules.copy(part1 = eligibleEligibilityRules.part1.copy(cannotFindLockReason = Some(true)))
+  val notEligibleCreditsNotAllowed: EligibilityRules = eligibleEligibilityRules.copy(part1 = eligibleEligibilityRules.part1.copy(creditsNotAllowed = Some(true)))
+  val notEligibleIsMoreThanMaxPaymentReference: EligibilityRules = eligibleEligibilityRules.copy(part1 = eligibleEligibilityRules.part1.copy(isMoreThanMaxPaymentReference = Some(true)))
+  val notEligibleChargesBeforeMaxAccountingDate: EligibilityRules = eligibleEligibilityRules.copy(part1 = eligibleEligibilityRules.part1.copy(chargesBeforeMaxAccountingDate = Some(true)))
+  val notEligibleMultipleReasons: EligibilityRules = eligibleEligibilityRules.copy(part1 = eligibleEligibilityRules.part1.copy(missingFiledReturns = true).copy(hasRlsOnAddress = true))
+  val notEligibleHasDisguisedRemuneration: EligibilityRules = eligibleEligibilityRules.copy(part1 = eligibleEligibilityRules.part1.copy(hasDisguisedRemuneration = Some(true)))
+  val notEligibleHasCapacitor: EligibilityRules = eligibleEligibilityRules.copy(part1 = eligibleEligibilityRules.part1.copy(hasCapacitor = Some(true)))
+  val notEligibleDmSpecialOfficeProcessingRequiredCDCS: EligibilityRules = eligibleEligibilityRules.copy(part1 = eligibleEligibilityRules.part1.copy(dmSpecialOfficeProcessingRequiredCDCS = Some(true)))
+  val notEligibleIsAnMtdCustomer: EligibilityRules = eligibleEligibilityRules.copy(part1 = eligibleEligibilityRules.part1.copy(isAnMtdCustomer = Some(true)))
+  val notEligibleDmSpecialOfficeProcessingRequiredCESA: EligibilityRules = eligibleEligibilityRules.copy(part1 = eligibleEligibilityRules.part1.copy(dmSpecialOfficeProcessingRequiredCESA = Some(true)))
+  val noMtditsaEnrollment: EligibilityRules = eligibleEligibilityRules.copy(part2 = eligibleEligibilityRules.part2.copy(noMtditsaEnrollment = Some(true)))
 
   val callEligibilityApiRequestEpaye: CallEligibilityApiRequest = CallEligibilityApiRequest(
     channelIdentifier         = "eSSTTP",

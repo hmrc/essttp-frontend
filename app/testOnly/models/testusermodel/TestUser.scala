@@ -31,6 +31,7 @@ final case class TestUser(
     epayeEnrolment:  Option[EpayeEnrolment],
     vatEnrolment:    Option[VatEnrolment],
     irSaEnrolment:   Option[IrSaEnrolment],
+    mtdItEnrolment:  Option[MtdItEnrolment],
     authorityId:     AuthorityId,
     affinityGroup:   AffinityGroup,
     confidenceLevel: ConfidenceLevel
@@ -67,12 +68,18 @@ object TestUser {
       else None
     }
 
+    val maybeMdtItEnrolment: StartJourneyForm => Option[MtdItEnrolment] = { form =>
+      if (form.enrolments.contains(Enrolments.MtdIt)) Some(MtdItEnrolment(Nino(form.taxReference.value), EnrolmentStatus.Activated))
+      else None
+    }
+
     maybeAffinityGroup.map { affinityGroup: AffinityGroup =>
       TestUser(
         nino            = form.confidenceLevelAndNino.nino.map(Nino),
         epayeEnrolment  = maybeEpayeEnrolment(form),
         vatEnrolment    = maybeVatEnrolment(form),
         irSaEnrolment   = maybeIrSaEnrolment(form),
+        mtdItEnrolment  = maybeMdtItEnrolment(form),
         authorityId     = form.credId.map(AuthorityId(_)).getOrElse(RandomDataGenerator.nextAuthorityId()),
         affinityGroup   = affinityGroup,
         confidenceLevel = form.confidenceLevelAndNino.confidenceLevel

@@ -16,10 +16,10 @@
 
 package testOnly.controllers
 
-import actions.Actions
 import _root_.essttp.rootmodel.ttp._
 import _root_.testOnly.controllers.{routes => testOnlyRoutes}
 import _root_.testOnly.views.html._
+import actions.Actions
 import cats.implicits.catsSyntaxEq
 import config.AppConfig
 import essttp.journey.JourneyConnector
@@ -345,7 +345,7 @@ class StartJourneyController @Inject() (
   }
 
 }
-//noinspection ScalaStyle
+
 object StartJourneyController {
 
   def affinityGroup(auth: String): uk.gov.hmrc.auth.core.AffinityGroup = auth match {
@@ -471,28 +471,33 @@ object StartJourneyController {
     val containsError: EligibilityError => Boolean = (ee: EligibilityError) => form.eligibilityErrors.contains(ee)
     val eligibilityRules: EligibilityRules = {
       EligibilityRules(
-        hasRlsOnAddress                       = containsError(HasRlsOnAddress),
-        markedAsInsolvent                     = containsError(MarkedAsInsolvent),
-        isLessThanMinDebtAllowance            = containsError(IsLessThanMinDebtAllowance),
-        isMoreThanMaxDebtAllowance            = containsError(IsMoreThanMaxDebtAllowance),
-        disallowedChargeLockTypes             = containsError(EligibilityErrors.DisallowedChargeLockTypes),
-        existingTTP                           = containsError(ExistingTtp),
-        chargesOverMaxDebtAge                 = Some(containsError(ChargesOverMaxDebtAge)),
-        ineligibleChargeTypes                 = containsError(IneligibleChargeTypes),
-        missingFiledReturns                   = containsError(MissingFiledReturns),
-        hasInvalidInterestSignals             = Some(containsError(HasInvalidInterestSignals)),
-        hasInvalidInterestSignalsCESA         = Some(containsError(HasInvalidInterestSignalsCESA)),
-        dmSpecialOfficeProcessingRequired     = Some(containsError(DmSpecialOfficeProcessingRequired)),
-        noDueDatesReached                     = containsError(NoDueDatesReached),
-        cannotFindLockReason                  = Some(containsError(CannotFindLockReason)),
-        creditsNotAllowed                     = Some(containsError(CreditsNotAllowed)),
-        isMoreThanMaxPaymentReference         = Some(containsError(IsMoreThanMaxPaymentReference)),
-        chargesBeforeMaxAccountingDate        = Some(containsError(ChargesBeforeMaxAccountingDate)),
-        hasDisguisedRemuneration              = Some(containsError(HasDisguisedRemuneration)),
-        hasCapacitor                          = Some(containsError(HasCapacitor)),
-        dmSpecialOfficeProcessingRequiredCDCS = Some(containsError(DmSpecialOfficeProcessingRequiredCDCS)),
-        isAnMtdCustomer                       = Some(containsError(IsAnMtdCustomer)),
-        dmSpecialOfficeProcessingRequiredCESA = Some(containsError(DmSpecialOfficeProcessingRequiredCESA))
+        EligibilityRulesPart1(
+          hasRlsOnAddress                       = containsError(HasRlsOnAddress),
+          markedAsInsolvent                     = containsError(MarkedAsInsolvent),
+          isLessThanMinDebtAllowance            = containsError(IsLessThanMinDebtAllowance),
+          isMoreThanMaxDebtAllowance            = containsError(IsMoreThanMaxDebtAllowance),
+          disallowedChargeLockTypes             = containsError(EligibilityErrors.DisallowedChargeLockTypes),
+          existingTTP                           = containsError(ExistingTtp),
+          chargesOverMaxDebtAge                 = Some(containsError(ChargesOverMaxDebtAge)),
+          ineligibleChargeTypes                 = containsError(IneligibleChargeTypes),
+          missingFiledReturns                   = containsError(MissingFiledReturns),
+          hasInvalidInterestSignals             = Some(containsError(HasInvalidInterestSignals)),
+          hasInvalidInterestSignalsCESA         = Some(containsError(HasInvalidInterestSignalsCESA)),
+          dmSpecialOfficeProcessingRequired     = Some(containsError(DmSpecialOfficeProcessingRequired)),
+          noDueDatesReached                     = containsError(NoDueDatesReached),
+          cannotFindLockReason                  = Some(containsError(CannotFindLockReason)),
+          creditsNotAllowed                     = Some(containsError(CreditsNotAllowed)),
+          isMoreThanMaxPaymentReference         = Some(containsError(IsMoreThanMaxPaymentReference)),
+          chargesBeforeMaxAccountingDate        = Some(containsError(ChargesBeforeMaxAccountingDate)),
+          hasDisguisedRemuneration              = Some(containsError(HasDisguisedRemuneration)),
+          hasCapacitor                          = Some(containsError(HasCapacitor)),
+          dmSpecialOfficeProcessingRequiredCDCS = Some(containsError(DmSpecialOfficeProcessingRequiredCDCS)),
+          isAnMtdCustomer                       = Some(containsError(EligibilityErrors.IsAnMtdCustomer)),
+          dmSpecialOfficeProcessingRequiredCESA = Some(containsError(DmSpecialOfficeProcessingRequiredCESA))
+        ),
+        EligibilityRulesPart2(
+          noMtditsaEnrollment = Some(containsError(EligibilityErrors.NoMtditsaEnrollment))
+        )
       )
     }
 

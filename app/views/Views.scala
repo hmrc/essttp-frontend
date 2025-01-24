@@ -22,7 +22,7 @@ import views.html.checkpaymentchedule._
 import views.html.emailerrors._
 import views.html.epaye.EPayeLanding
 import views.html.epaye.ineligible.{Ineligible, NotEnrolled}
-import views.html.sa.{NotSaEnrolled, SaLanding}
+import views.html.sa.{NotSaEnrolled, SaLanding, NoMtditsaEnrollment}
 import views.html.simp.{NoNinoFound, SimpLanding}
 import views.html.vat.{NotVatRegistered, VatLanding}
 import views.partials.Partials
@@ -71,7 +71,8 @@ class Views @Inject() (
     val missingInfoPage:                MissingInformation,
     val timedOutPage:                   TimedOut,
     val shuttered:                      shuttering.Shuttered,
-    val youAlreadyHaveDirectDebit:      YouAlreadyHaveDirectDebit
+    val youAlreadyHaveDirectDebit:      YouAlreadyHaveDirectDebit,
+    val noMtditsaEnrollement:           NoMtditsaEnrollment
 )
 
 object Views {
