@@ -97,7 +97,7 @@ object LoginRequestMaker {
     "key" -> "HMRC-MTD-IT",
     "identifiers" -> Json.arr(
       Json.obj(
-        "key" -> "NINO",
+        "key" -> "MTDITID",
         "value" -> mtdItEnrolment.nino.value
       )
     ),
