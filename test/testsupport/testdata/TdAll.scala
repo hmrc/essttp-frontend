@@ -60,7 +60,7 @@ object TdAll {
   private val `IR-PAYE-TaxOfficeReference`: EnrolmentDef = EnrolmentDef(enrolmentKey  = "IR-PAYE", identifierKey = "TaxOfficeReference")
   private val `HMRC-MTD-VAT-Vrn`: EnrolmentDef = EnrolmentDef(enrolmentKey  = "HMRC-MTD-VAT", identifierKey = "VRN")
   private val `IR-SA`: EnrolmentDef = EnrolmentDef(enrolmentKey  = "IR-SA", identifierKey = "UTR")
-  private val `HMRC-MTD-IT`: EnrolmentDef = EnrolmentDef(enrolmentKey  = "HMRC-MTD-IT", identifierKey = "UTR")
+  private val `HMRC-MTD-IT`: EnrolmentDef = EnrolmentDef(enrolmentKey  = "HMRC-MTD-IT", identifierKey = "MTDITID")
 
   val payeEnrolment: Enrolment = Enrolment(
     key               = "IR-PAYE",
