@@ -16,4 +16,4 @@
 
 package testOnly.models.testusermodel
 
-final case class MtdItEnrolment(nino: Nino, enrolmentStatus: EnrolmentStatus)
+final case class MtdItEnrolment(mtdItId: String, enrolmentStatus: EnrolmentStatus)

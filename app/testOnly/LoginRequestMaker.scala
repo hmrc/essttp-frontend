@@ -98,7 +98,7 @@ object LoginRequestMaker {
     "identifiers" -> Json.arr(
       Json.obj(
         "key" -> "MTDITID",
-        "value" -> mtdItEnrolment.nino.value
+        "value" -> mtdItEnrolment.mtdItId
       )
     ),
     "state" -> mtdItEnrolment.enrolmentStatus.toString

@@ -21,6 +21,8 @@ import essttp.rootmodel.{SaUtr, Vrn}
 import testOnly.models.formsmodel.{Enrolments, SignInAs, StartJourneyForm}
 import uk.gov.hmrc.auth.core.{AffinityGroup, ConfidenceLevel}
 
+import scala.util.Random
+
 /**
  * Definition of a test user.
  * We use that data to
@@ -39,7 +41,7 @@ final case class TestUser(
 
 object TestUser {
 
-  def makeTestUser(form: StartJourneyForm): Option[TestUser] = {
+  def makeTestUser(form: StartJourneyForm)(implicit r: Random): Option[TestUser] = {
     val maybeAffinityGroup: Option[AffinityGroup] = form.signInAs match {
       case SignInAs.NoSignIn     => None
       case SignInAs.Individual   => Some(AffinityGroup.Individual)
@@ -69,7 +71,7 @@ object TestUser {
     }
 
     val maybeMdtItEnrolment: StartJourneyForm => Option[MtdItEnrolment] = { form =>
-      if (form.enrolments.contains(Enrolments.MtdIt)) Some(MtdItEnrolment(Nino(form.taxReference.value), EnrolmentStatus.Activated))
+      if (form.enrolments.contains(Enrolments.MtdIt)) Some(MtdItEnrolment(RandomDataGenerator.nextNumber(8), EnrolmentStatus.Activated))
       else None
     }
 

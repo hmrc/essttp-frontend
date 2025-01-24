@@ -748,8 +748,7 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
     }
 
     "SA user with IR-SA enrolment but no NINO found, should be directed to generic ineligible page" in {
-      val eligibilityRules = TdAll.eligibleEligibilityRules.copy(part2 = eligibleEligibilityRules.part2.copy(noMtditsaEnrollment = Some(false)))
-      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(TaxRegime.Sa, TdAll.eligibleEligibilityPass, eligibilityRules)
+      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(TaxRegime.Sa, TdAll.eligibleEligibilityPass, TdAll.eligibleEligibilityRules)
 
       Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Sa)(eligibilityCheckResponseJson)
       stubCommonActions()
@@ -763,8 +762,7 @@ class DetermineEligibilityControllerSpec extends ItSpec with CombinationsHelper 
     }
 
     "SA user with IR-SA enrolment, NINO found but no HMRC-MTD-IT enrolment should be directed to Sign up for Making Tax Digital page" in {
-      val eligibilityRules = TdAll.eligibleEligibilityRules.copy(part2 = eligibleEligibilityRules.part2.copy(noMtditsaEnrollment = Some(true)))
-      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(TaxRegime.Sa, TdAll.notEligibleEligibilityPass, eligibilityRules)
+      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(TaxRegime.Sa, TdAll.notEligibleEligibilityPass, TdAll.eligibleEligibilityRules)
 
       Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Sa)(eligibilityCheckResponseJson)
       stubCommonActions(authNino = Some("QQ123456A"))

@@ -44,6 +44,7 @@ import util.Logging
 import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Random
 
 @Singleton
 class StartJourneyController @Inject() (
@@ -64,7 +65,7 @@ class StartJourneyController @Inject() (
     iAmMobilePage:            IAmMobilePage,
     iAmItsaViewAndChangePage: IAmItsaViewAndChangePage,
     requestSupport:           RequestSupport
-)(implicit ec: ExecutionContext)
+)(implicit ec: ExecutionContext, r: Random)
   extends FrontendController(mcc)
   with Logging {
 
