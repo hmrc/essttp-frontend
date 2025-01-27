@@ -905,6 +905,11 @@ object Messages {
       welsh   = "A allwch wneud taliad ymlaen llaw?"
     )
 
+    val `...whether you can make an upfront payment`: Message = Message(
+      english = "whether you can make an upfront payment",
+      welsh   = "p’un a allwch wneud taliad ymlaen llaw"
+    )
+
     val `Select yes if you can make an upfront payment`: Message = Message(
       english = "Select yes if you can make an upfront payment",
       welsh   = "Dewiswch ‘Iawn’ os gallwch wneud taliad ymlaen llaw"
@@ -1277,8 +1282,8 @@ object Messages {
     )
 
     val `Change Payment`: Message = Message(
-      english = "upfront payment",
-      welsh   = "Taliad ymlaen llaw"
+      english = "whether you can make an upfront payment",
+      welsh   = "p’un a allwch wneud taliad ymlaen llaw"
     )
 
     val `Upfront payment`: Message = Message(
@@ -1287,8 +1292,8 @@ object Messages {
     )
 
     val `Upfront payment-visually-hidden-message`: Message = Message(
-      english = "payment amount",
-      welsh   = "swm y taliad"
+      english = "your upfront payment amount",
+      welsh   = "swm eich taliad ymlaen llaw"
     )
 
     val `Remaining amount to pay`: Message = Message(
@@ -1545,13 +1550,13 @@ object Messages {
     )
 
     val `payment day`: Message = Message(
-      english = "payment day",
-      welsh   = "y diwrnod talu"
+      english = "which day your payments will be collected on",
+      welsh   = "ar ba ddiwrnod y bydd eich taliadau’n cael eu casglu"
     )
 
     val `Change months duration`: Message = Message(
-      english = "how many months you want to pay over",
-      welsh   = "dros sawl mis yr hoffech dalu"
+      english = "your payment plan",
+      welsh   = "eich cynllun talu"
     )
 
     val `Estimated total interest`: Message = Message(
