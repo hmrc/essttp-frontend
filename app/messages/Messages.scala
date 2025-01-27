@@ -780,6 +780,11 @@ object Messages {
       welsh   = "Cofrestru ar gyfer y cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm er mwyn defnyddio’r gwasanaeth hwn"
     )
 
+    val `If you’ve already signed up, sign in with the Government Gateway user ID that has your enrolment.`: Message = Message(
+      english = "If you’ve already signed up, sign in with the Government Gateway user ID that has your enrolment.",
+      welsh   = "Os ydych chi eisoes wedi cofrestru, mae’n rhaid i chi fewngofnodi gan ddefnyddio’r Dynodydd Defnyddiwr (ID) Porth y Llywodraeth sydd â’ch cofrestriad."
+    )
+
     def `You must sign up for Making Tax Digital for Income Tax before you can set up a Self Assessment payment plan online.`(mtdLink: String): Message = Message(
       english = s"""You must <a href="$mtdLink" class="govuk-link">sign up for Making Tax Digital for Income Tax</a> before you can set up a Self Assessment payment plan online.""",
       welsh   = s"""Mae’n rhaid i chi <a href="$mtdLink" class="govuk-link">gofrestru ar gyfer y cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm</a> cyn i chi allu trefnu cynllun talu ar gyfer Hunanasesiad ar-lein."""
