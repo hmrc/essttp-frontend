@@ -70,7 +70,9 @@ trait AuthenticatedActionRefiner { this: ActionRefiner[Request, AuthenticatedReq
           }
 
       }.recover {
-        case _: NoActiveSession => Left(redirectToLoginPage(request))
+        case e: NoActiveSession =>
+          logger.info(s"Authorising but found NoActiveSession exception of type ${e.getClass.getSimpleName} with reason: ${e.reason}. Redirecting to login")
+          Left(redirectToLoginPage(request))
         case e: AuthorisationException =>
           logger.warn(s"Unauthorised because of ${e.reason}, please investigate why", e)
           Left(Redirect(controllers.routes.NotEnrolledController.notEnrolled))
