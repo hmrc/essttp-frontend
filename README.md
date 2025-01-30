@@ -57,7 +57,6 @@ In pre-production environments, there is a test only page that can be used to st
 | Environment     | Url                                                                                      |
 |-----------------|------------------------------------------------------------------------------------------|
 | **Local**       | http://localhost:9215/set-up-a-payment-plan/test-only/tax-regime                         |
-| **Development** | https://www.development.tax.service.gov.uk/set-up-a-payment-plan/test-only/tax-regime    |
 | **QA**          | https://www.qa.tax.service.gov.uk/set-up-a-payment-plan/test-only/tax-regime             |
 | **Staging**     | https://www.staging.tax.service.gov.uk/set-up-a-payment-plan/test-only/tax-regime        |
 
