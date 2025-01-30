@@ -55,12 +55,14 @@ class LandingPageControllerSpec extends ItSpec {
     detailsTextParagraphs(3).text() shouldBe "Monday to Friday: 8am to 6pm"
     detailsTextParagraphs(4).text() shouldBe "Closed weekends and bank holidays."
 
-    detailsText.select("h2.govuk-heading-m").text() shouldBe "Text service"
+    detailsText.select("h2.govuk-heading-m").eq(0).text() shouldBe "Text service"
 
     detailsTextParagraphs(5).text() shouldBe "Use Relay UK if you cannot hear or speak on the telephone, dial 18001 then 0345 300 3900. " +
       "Find out more on the Relay UK website (opens in new tab)."
-    detailsTextParagraphs(6).text() shouldBe "If a health condition or personal circumstances make it difficult to contact us, " +
-      "read our guidance Get help from HMRC if you need extra support (opens in new tab)."
+
+    detailsText.select("h2.govuk-heading-m").eq(1).text() shouldBe "If a health condition or personal circumstances make it difficult to contact us"
+
+    detailsTextParagraphs(6).text() shouldBe "Our guidance Get help from HMRC if you need extra support (opens in new tab) explains how we can support you."
 
     val detailsLink1 = detailsTextParagraphs(5).select("a.govuk-link")
     detailsLink1.text() shouldBe "Relay UK website (opens in new tab)"

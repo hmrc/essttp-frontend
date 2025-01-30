@@ -963,9 +963,14 @@ object Messages {
       welsh   = s"""Defnyddiwch wasanaeth Text Relay UK os na allwch glywed na siarad dros y ffôn. Deialwch <strong>18001</strong> ac yna <strong>0345 300 3900</strong>. Dysgwch ragor am hyn ar <a href="$linkUrl" rel="noreferrer noopener" target="_blank">wefan Text Relay UK (yn agor tab newydd)</a>."""
     )
 
-    def `If a health condition or personal circumstances make it difficult to contact us...`(linkUrl: String): Message = Message(
-      english = s"""<strong>If a health condition or personal circumstances make it difficult to contact us, read our guidance <a class="govuk-link" href="$linkUrl" rel="noreferrer noopener" target="_blank">Get help from HMRC if you need extra support (opens in new tab)</a>.</strong>""",
-      welsh   = s"""<strong>Os yw cyflwr iechyd neu amgylchiadau personol yn ei gwneud hi’n anodd i chi gysylltu â ni, darllenwch ein harweiniad ynghylch <a href="$linkUrl" rel="noreferrer noopener" target="_blank">‘Cael help gan CThEF os oes angen cymorth ychwanegol arnoch’ (yn agor tab newydd)</a>.</strong>"""
+    def `If a health condition or personal circumstances make it difficult to contact us...`: Message = Message(
+      english = s"""If a health condition or personal circumstances make it difficult to contact us""",
+      welsh   = s"""Os yw cyflwr iechyd neu amgylchiadau personol yn ei gwneud hi’n anodd i chi gysylltu â ni"""
+    )
+
+    def `Our guidance Get help from HMRC...`(link: String): Message = Message(
+      english = s"""Our guidance <a href="$link" class="govuk-link" rel="noreferrer noopener" target="_blank">Get help from HMRC if you need extra support (opens in new tab)</a> explains how we can support you.""",
+      welsh   = s"""Bydd ein harweiniad ynghylch <a href="$link" class="govuk-link" rel="noreferrer noopener" target="_blank">‘Cael help gan CThEF os oes angen cymorth ychwanegol arnoch’ (yn agor tab newydd)</a> yn esbonio sut y gallwn eich helpu."""
     )
   }
 
@@ -1967,8 +1972,8 @@ object Messages {
     )
 
     val `If a health condition...`: Message = Message(
-      english = "<strong>If a health condition or personal circumstances make it difficult to contact us</strong>",
-      welsh   = "<strong>Os yw cyflwr iechyd neu amgylchiadau personol yn ei gwneud hi’n anodd i chi gysylltu â ni</strong>"
+      english = "If a health condition or personal circumstances make it difficult to contact us",
+      welsh   = "Os yw cyflwr iechyd neu amgylchiadau personol yn ei gwneud hi’n anodd i chi gysylltu â ni"
     )
 
     def `Our guidance Get help from HMRC...`(link: String): Message = Message(
