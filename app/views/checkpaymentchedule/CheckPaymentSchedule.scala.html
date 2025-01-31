@@ -107,15 +107,10 @@
   )
 }
 
-@monthRows = @{
-  CheckPaymentScheduleRows.paymentPlanMonthRows(paymentPlan, CheckPaymentPlanChangeLink.PaymentPlan.changeLink(taxRegime))
+@instalmentRows = @{
+  CheckPaymentScheduleRows.paymentPlanInstalmentsRows(paymentPlan, CheckPaymentPlanChangeLink.PaymentPlan.changeLink(taxRegime))
 }
 
-@totalRow = @{
-  CheckPaymentScheduleRows.paymentplanTotalRow(paymentPlan)
-}
-
-@monthlyPaymentRows = @{ paymentDayRow :: monthRows ::: List(totalRow) }
 
 @layout(pageTitle = Some(title)) {
 
@@ -134,9 +129,13 @@
     @{Messages.PaymentSchedule.`Monthly payments`.show}
   </h2>
 
-  @govukSummaryList(SummaryList(rows = montlyAmountRow :: monthlyPaymentRows, classes = "govuk-!-margin-top-6"))
+  @govukSummaryList(SummaryList(rows = List(montlyAmountRow, paymentDayRow), classes = "govuk-!-margin-top-6"))
 
+  <h2 class="govuk-heading-m">
+  @{Messages.PaymentSchedule.`Payment plan instalments`.show}
+  </h2>
 
+  @govukSummaryList(SummaryList(rows = instalmentRows, classes = "govuk-!-margin-top-6"))
 
   @formWithCSRF(action = routes.PaymentScheduleController.checkPaymentScheduleSubmit) {
     @govukButton(Button(content = Text(Messages.continue.show)))
