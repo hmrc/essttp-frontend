@@ -316,7 +316,8 @@ object JourneyJsonTemplates {
   def `Chosen Payment Plan`(
       upfrontPaymentAmountJsonString: String  = """{"DeclaredUpfrontPayment": {"amount": 12312}}""",
       regimeDigitalCorrespondence:    Boolean = true,
-      origin:                         Origin
+      origin:                         Origin,
+      selectedPlanJourneyInfo:        String  = TdJsonBodies.selectedPlanTwoMonthsJourneyInfo
   )(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo   = StageInfo.chosenPaymentPlan,
     journeyInfo = List(
@@ -331,7 +332,7 @@ object JourneyJsonTemplates {
       TdJsonBodies.dayOfMonthJourneyInfo(TdAll.dayOfMonth()),
       TdJsonBodies.startDatesJourneyInfo,
       TdJsonBodies.affordableQuotesJourneyInfo,
-      TdJsonBodies.selectedPlanJourneyInfo
+      selectedPlanJourneyInfo
     ),
     origin      = origin
   )

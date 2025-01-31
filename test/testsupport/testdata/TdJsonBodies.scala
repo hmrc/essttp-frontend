@@ -489,7 +489,41 @@ object TdJsonBodies {
        |        }
        |""".stripMargin
 
-  def selectedPlanJourneyInfo: String =
+  def selectedPlanOneMonthJourneyInfo: String =
+    s"""
+       |"selectedPaymentPlan": {
+       |  "numberOfInstalments" : 1,
+       |  "planDuration" : 1,
+       |  "totalDebt" : 111141,
+       |  "totalDebtIncInt" : 111147,
+       |  "planInterest" : 6,
+       |  "collections" : {
+       |      "initialCollection" : {
+       |          "dueDate" : "2022-07-03",
+       |          "amountDue" : 12312
+       |      },
+       |      "regularCollections" : [
+       |          {
+       |              "dueDate" : "2022-08-28",
+       |              "amountDue" : 55573
+       |          }
+       |      ]
+       |  },
+       |  "instalments" : [
+       |      {
+       |          "instalmentNumber" : 1,
+       |          "dueDate" : "2022-08-28",
+       |          "instalmentInterestAccrued" : 3,
+       |          "instalmentBalance" : 111141,
+       |          "debtItemChargeId" : "A00000000001",
+       |          "amountDue" : 55573,
+       |          "debtItemOriginalDueDate" : "2021-07-28"
+       |      }
+       |  ]
+       |}
+       |""".stripMargin
+
+  def selectedPlanTwoMonthsJourneyInfo: String =
     s"""
        |"selectedPaymentPlan": {
        |                   "numberOfInstalments" : 2,
@@ -536,6 +570,66 @@ object TdJsonBodies {
        |               }
        |""".stripMargin
 
+  def selectedPlanThreeMonthsJourneyInfo: String =
+    s"""
+       |"selectedPaymentPlan": {
+       |  "numberOfInstalments" : 3,
+       |  "planDuration" : 3,
+       |  "totalDebt" : 111141,
+       |  "totalDebtIncInt" : 111151,
+       |  "planInterest" : 10,
+       |  "collections" : {
+       |      "initialCollection" : {
+       |          "dueDate" : "2022-07-03",
+       |          "amountDue" : 12312
+       |      },
+       |      "regularCollections" : [
+       |          {
+       |              "dueDate" : "2022-08-28",
+       |              "amountDue" : 37050
+       |          },
+       |          {
+       |              "dueDate" : "2022-09-28",
+       |              "amountDue" : 37050
+       |          },
+       |          {
+       |              "dueDate" : "2022-10-28",
+       |              "amountDue" : 37051
+       |          }
+       |      ]
+       |  },
+       |  "instalments" : [
+       |      {
+       |          "instalmentNumber" : 3,
+       |          "dueDate" : "2022-10-28",
+       |          "instalmentInterestAccrued" : 4,
+       |          "instalmentBalance" : 37047,
+       |          "debtItemChargeId" : "A00000000001",
+       |          "amountDue" : 37047,
+       |          "debtItemOriginalDueDate" : "2021-07-28"
+       |      },
+       |      {
+       |          "instalmentNumber" : 2,
+       |          "dueDate" : "2022-09-28",
+       |          "instalmentInterestAccrued" : 3,
+       |          "instalmentBalance" : 74094,
+       |          "debtItemChargeId" : "A00000000001",
+       |          "amountDue" : 37047,
+       |          "debtItemOriginalDueDate" : "2021-07-28"
+       |      },
+       |      {
+       |          "instalmentNumber" : 1,
+       |          "dueDate" : "2022-08-28",
+       |          "instalmentInterestAccrued" : 3,
+       |          "instalmentBalance" : 111141,
+       |          "debtItemChargeId" : "A00000000001",
+       |          "amountDue" : 37047,
+       |          "debtItemOriginalDueDate" : "2021-07-28"
+       |      }
+       |  ]
+       |}
+       |""".stripMargin
+
   def paymentPlanAnswers(withAffordability: Boolean): String =
     if (withAffordability) {
       s"""
@@ -546,7 +640,7 @@ object TdJsonBodies {
          |       "pegaCorrelationId": "pegaCorrelationId"
          |     },
          |     ${dayOfMonthJourneyInfo(DayOfMonth(28))},
-         |     $selectedPlanJourneyInfo
+         |     $selectedPlanTwoMonthsJourneyInfo
          |   }
          | }
          |""".stripMargin
@@ -558,7 +652,7 @@ object TdJsonBodies {
          |     ${dayOfMonthJourneyInfo(DayOfMonth(28))},
          |     $startDatesJourneyInfo,
          |     $affordableQuotesJourneyInfo,
-         |     $selectedPlanJourneyInfo
+         |     $selectedPlanTwoMonthsJourneyInfo
          |   }
          | }
          |""".stripMargin

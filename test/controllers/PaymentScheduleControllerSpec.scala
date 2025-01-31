@@ -33,7 +33,7 @@ import testsupport.ItSpec
 import testsupport.TdRequest.FakeRequestOps
 import testsupport.reusableassertions.{ContentAssertions, PegaRecreateSessionAssertions, RequestAssertions}
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend}
-import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
+import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll, TdJsonBodies}
 import uk.gov.hmrc.http.{SessionKeys, UpstreamErrorResponse}
 
 import scala.concurrent.Future
@@ -102,13 +102,11 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
               extractSummaryRows(upfrontPaymentSummaryRows) shouldBe expectedSummaryRows
             }
 
-            def testPaymentPlanRows(summary: Element)(
+            def testMonthlyPaymentsRows(summary: Element)(
                 affordableMonthlyPaymentAmount: String,
-                paymentDayValue:                String,
-                datesToAmountsValues:           List[(String, String)],
-                totalToPayValue:                String
+                paymentDayValue:                String
             ) = {
-              val paymentPlanRows = summary.select(".govuk-summary-list__row").iterator().asScala.toList
+              val monthlyPaymentsRows = summary.select(".govuk-summary-list__row").iterator().asScala.toList
 
               val monthlyPaymentAmountRow = SummaryRow(
                 "How much can you afford to pay each month?",
@@ -122,16 +120,129 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
                 PageUrls.checkPaymentPlanChangeUrl("PaymentDay", origin.taxRegime, None)
               )
 
-              val paymentAmountRows = datesToAmountsValues.map {
-                case (date, amount) =>
-                  SummaryRow(date, amount, PageUrls.checkPaymentPlanChangeUrl("PaymentPlan", origin.taxRegime, None))
-              }
+              extractSummaryRows(monthlyPaymentsRows) shouldBe List(monthlyPaymentAmountRow, paymentDayRow)
+            }
 
-              val totalToPayRow = SummaryRow("Total to pay", totalToPayValue, "")
+            def testPaymentPlanRowsOneMonth(summary: Element)(
+                datesToAmountsValues: List[(String, String)],
+                totalToPayValue:      String,
+                interestValue:        String
+            ) = {
+              val paymentPlanRows = summary.select(".govuk-summary-list__row").iterator().asScala.toList
 
-              val expectedRows = monthlyPaymentAmountRow :: paymentDayRow :: paymentAmountRows ::: List(totalToPayRow)
+              val paymentPlanDurationRow =
+                SummaryRow(
+                  "Payment plan duration",
+                  "1 month",
+                  PageUrls.checkPaymentPlanChangeUrl("PaymentPlan", origin.taxRegime, None)
+                )
 
-              extractSummaryRows(paymentPlanRows) shouldBe expectedRows
+              val startMonthRow =
+                SummaryRow("Start month", datesToAmountsValues(0)._1, "")
+
+              val paymentRow =
+                SummaryRow("Payment", datesToAmountsValues(0)._2, "")
+
+              val totalToPayRow =
+                SummaryRow("Total to pay", s"$totalToPayValue including $interestValue interest", "")
+
+              extractSummaryRows(paymentPlanRows) shouldBe List(
+                paymentPlanDurationRow,
+                startMonthRow,
+                paymentRow,
+                totalToPayRow
+              )
+            }
+
+            def testPaymentPlanRowsTwoMonths(summary: Element)(
+                datesToAmountsValues: List[(String, String)],
+                totalToPayValue:      String,
+                interestValue:        String
+            ) = {
+              val paymentPlanRows = summary.select(".govuk-summary-list__row").iterator().asScala.toList
+
+              val paymentPlanDurationRow =
+                SummaryRow(
+                  "Payment plan duration",
+                  "2 months",
+                  PageUrls.checkPaymentPlanChangeUrl("PaymentPlan", origin.taxRegime, None)
+                )
+
+              val startMonthRow =
+                SummaryRow("Start month", datesToAmountsValues(0)._1, "")
+
+              val firstPaymentRow =
+                SummaryRow("First monthly payment", datesToAmountsValues(0)._2, "")
+
+              val finalMonthRow =
+                SummaryRow("Final month", datesToAmountsValues(1)._1, "")
+
+              val finalPaymentRow =
+                SummaryRow("Final payment", datesToAmountsValues(1)._2, "")
+
+              val totalToPayRow =
+                SummaryRow("Total to pay", s"$totalToPayValue including $interestValue interest", "")
+
+              extractSummaryRows(paymentPlanRows) shouldBe List(
+                paymentPlanDurationRow,
+                startMonthRow,
+                firstPaymentRow,
+                finalMonthRow,
+                finalPaymentRow,
+                totalToPayRow
+              )
+            }
+
+            def testPaymentPlanRowsMoreThanTwoMonths(summary: Element)(
+                datesToAmountsValues: List[(String, String)],
+                totalToPayValue:      String,
+                interestValue:        String
+            ) = {
+              val paymentPlanRows = summary.select(".govuk-summary-list__row").iterator().asScala.toList
+
+              val paymentPlanDurationRow =
+                SummaryRow(
+                  "Payment plan duration",
+                  s"${datesToAmountsValues.size.toString} months",
+                  PageUrls.checkPaymentPlanChangeUrl("PaymentPlan", origin.taxRegime, None)
+                )
+
+              val startMonthRow =
+                SummaryRow("Start month", datesToAmountsValues(0)._1, "")
+
+              val firstPaymentRow =
+                SummaryRow(s"First ${(datesToAmountsValues.size - 1).toString} monthly payments", datesToAmountsValues(0)._2, "")
+
+              val finalMonthRow =
+                SummaryRow("Final month", datesToAmountsValues(datesToAmountsValues.size - 1)._1, "")
+
+              val finalPaymentRow =
+                SummaryRow("Final payment", datesToAmountsValues(datesToAmountsValues.size - 1)._2, "")
+
+              val totalToPayRow =
+                SummaryRow("Total to pay", s"$totalToPayValue including $interestValue interest", "")
+
+              extractSummaryRows(paymentPlanRows) shouldBe List(
+                paymentPlanDurationRow,
+                startMonthRow,
+                firstPaymentRow,
+                finalMonthRow,
+                finalPaymentRow,
+                totalToPayRow
+              )
+            }
+
+            def testPaymentPlanRows(summary: Element)(
+                datesToAmountsValues: List[(String, String)],
+                totalToPayValue:      String,
+                interestValue:        String
+            ) = {
+              if (datesToAmountsValues.size === 1)
+                testPaymentPlanRowsOneMonth(summary)(datesToAmountsValues, totalToPayValue, interestValue)
+              else if (datesToAmountsValues.size === 2)
+                testPaymentPlanRowsTwoMonths(summary)(datesToAmountsValues, totalToPayValue, interestValue)
+              else
+                testPaymentPlanRowsMoreThanTwoMonths(summary)(datesToAmountsValues, totalToPayValue, interestValue)
             }
 
           "should return 200 and the can you make an upfront payment page when" - {
@@ -143,7 +254,8 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
                   upfrontPaymentAmountValue: Option[String],
                   paymentDayValue:           String,
                   datesToAmountsValues:      List[(String, String)],
-                  totalToPayValue:           String
+                  totalToPayValue:           String,
+                  interestValue:             String
               ) = {
                 stubCommonActions()
                 EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin)(journeyJsonBody)
@@ -162,7 +274,7 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
                 )
 
                 val summaries = doc.select(".govuk-summary-list").iterator().asScala.toList
-                summaries.size shouldBe 2
+                summaries.size shouldBe 3
 
                 testUpfrontPaymentSummaryRows(summaries(0))(
                   canPayUpfrontValue,
@@ -170,10 +282,13 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
                   List("Change to personal circumstances", "No money set aside to pay"),
                   canPayWithinSixMonths = "Yes"
                 )
-                testPaymentPlanRows(summaries(1))("£300", paymentDayValue, datesToAmountsValues, totalToPayValue)
+
+                testMonthlyPaymentsRows(summaries(1))("£300", paymentDayValue)
+
+                testPaymentPlanRows(summaries(2))(datesToAmountsValues, totalToPayValue, interestValue)
               }
 
-            s"[$regime journey] there is an upfrontPayment amount" in {
+            s"[$regime journey] there is an upfrontPayment amount with a two month plan" in {
               test(
                 JourneyJsonTemplates.`Chosen Payment Plan`(origin = origin)
               )(
@@ -184,11 +299,12 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
                     "August 2022" -> "£555.73",
                     "September 2022" -> "£555.73"
                   ),
-                  "£1,111.47"
+                  "£1,111.47",
+                  "£0.06"
                 )
             }
 
-            s"[$regime journey] there is no upfrontPayment amount" in {
+            s"[$regime journey] there is no upfrontPayment amount with a two month plan" in {
               test(
                 JourneyJsonTemplates.`Chosen Payment Plan`("""{ "NoUpfrontPayment" : { } }""", origin = origin)
               )(
@@ -199,9 +315,47 @@ class PaymentScheduleControllerSpec extends ItSpec with PegaRecreateSessionAsser
                     "August 2022" -> "£555.73",
                     "September 2022" -> "£555.73"
                   ),
-                  "£1,111.47"
+                  "£1,111.47",
+                  "£0.06"
                 )
             }
+
+            s"[$regime journey] there is an upfrontPayment amount with a one month plan" in {
+              test(
+                JourneyJsonTemplates.`Chosen Payment Plan`(
+                  origin                  = origin,
+                  selectedPlanJourneyInfo = TdJsonBodies.selectedPlanOneMonthJourneyInfo
+                )
+              )(
+                  "Yes",
+                  Some("£123.12"),
+                  "28th or next working day",
+                  List("August 2022" -> "£555.73"),
+                  "£1,111.47",
+                  "£0.06"
+                )
+            }
+
+            s"[$regime journey] there is an upfrontPayment amount with more than two months in the plan" in {
+              test(
+                JourneyJsonTemplates.`Chosen Payment Plan`(
+                  origin                  = origin,
+                  selectedPlanJourneyInfo = TdJsonBodies.selectedPlanThreeMonthsJourneyInfo
+                )
+              )(
+                  "Yes",
+                  Some("£123.12"),
+                  "28th or next working day",
+                  List(
+                    "August 2022" -> "£370.50",
+                    "September 2022" -> "£370.50",
+                    "October 2022" -> "£370.51"
+                  ),
+                  "£1,111.51",
+                  "£0.10"
+                )
+            }
+
           }
 
           "redirect to the missing info page if no payment plan has been selected yet" in {

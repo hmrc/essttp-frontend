@@ -16,6 +16,7 @@
 
 package messages
 
+import cats.syntax.eq._
 import essttp.rootmodel.ttp.eligibility.MainTrans
 import essttp.rootmodel.{AmountInPence, CannotPayReason, Email, TaxRegime}
 import models.Languages
@@ -74,11 +75,6 @@ object Messages {
   val `There is a problem`: Message = Message(
     english = "There is a problem",
     welsh   = "Mae problem wedi codi"
-  )
-
-  val `full stop`: Message = Message(
-    english = ".",
-    welsh   = "."
   )
 
   val `Start now`: Message = Message(
@@ -630,16 +626,6 @@ object Messages {
     def `You must file your tax return before you can set up a Simple Assessment payment plan online`(fileReturnUrl: String): Message = Message(
       english = s"""You must <a class="govuk-link" href="$fileReturnUrl">file your tax return</a> before you can set up a Simple Assessment payment plan online.""",
       welsh   = s"""Mae’n rhaid i chi <a class="govuk-link" href="$fileReturnUrl">gyflwyno’ch Ffurflen Dreth</a> cyn i chi allu trefnu cynllun talu ar-lein ar gyfer Asesiad Syml ar-lein."""
-    )
-
-    val `Go to your tax account`: Message = Message(
-      english = "Go to your tax account",
-      welsh   = "Ewch i’ch cyfrif treth"
-    )
-
-    val `to file your tax return.`: Message = Message(
-      english = " to file your tax return.",
-      welsh   = " er mwyn cyflwyno’ch Ffurflen Dreth."
     )
 
     val `Call us on 0300 123 1813 as you may be able to set up a plan over the phone`: Message = Message(
@@ -1564,19 +1550,64 @@ object Messages {
       welsh   = "ar ba ddiwrnod y bydd eich taliadau’n cael eu casglu"
     )
 
+    val `Payment plan instalments`: Message = Message(
+      english = "Payment plan instalments",
+      welsh   = "Cynllun talu ar ffurf rhandaliadau"
+    )
+
+    val `Payment plan duration`: Message = Message(
+      english = "Payment plan duration",
+      welsh   = "Hyd y cynllun talu"
+    )
+
+    def `... months`(i: Int): Message = Message(
+      english = if (i === 1) "1 month" else s"${i.toString} months",
+      welsh   = s"${i.toString} mis"
+    )
+
     val `Change months duration`: Message = Message(
-      english = "your payment plan",
-      welsh   = "eich cynllun talu"
+      english = "payment plan duration",
+      welsh   = "hyd y cynllun talu"
+    )
+
+    val `Start month`: Message = Message(
+      english = "Start month",
+      welsh   = "Mis cyntaf"
+    )
+
+    def `First ... montly payments`(i: Int): Message = Message(
+      english = s"First ${i.toString} monthly payments",
+      welsh   = s"Y ${i.toString} taliad misol cyntaf"
+    )
+
+    val `First monthly payment`: Message = Message(
+      english = "First monthly payment",
+      welsh   = "Taliad misol cyntaf"
+    )
+
+    val `Final month`: Message = Message(
+      english = "Final month",
+      welsh   = "Mis olaf"
+    )
+
+    val `Final payment`: Message = Message(
+      english = "Final payment",
+      welsh   = "Taliad olaf"
+    )
+
+    def `including ... interest`(amountInPence: AmountInPence): Message = Message(
+      english = s"including ${amountInPence.gdsFormatInPounds} interest",
+      welsh   = s"gan gynnwys ${amountInPence.gdsFormatInPounds} o log"
+    )
+
+    val Payment: Message = Message(
+      english = "Payment",
+      welsh   = "Taliad"
     )
 
     val `Estimated total interest`: Message = Message(
       english = "Estimated total interest<br><span class=\"govuk-body-s\">Included in your plan</span>",
       welsh   = "Amcangyfrif o gyfanswm y llog<br><span class=\"govuk-body-s\">TYn gynwysedig yn eich cynllun</span>"
-    )
-
-    val `Included in your plan`: Message = Message(
-      english = "Included in your plan",
-      welsh   = "Yn gynwysedig yn eich cynllun"
     )
 
     val `Total to pay`: Message = Message(
@@ -1591,11 +1622,6 @@ object Messages {
   }
 
   object AboutYourBankAccount {
-
-    val `About your bank account`: Message = Message(
-      english = "About your bank account",
-      welsh   = "Ynglŷn â’ch cyfrif banc"
-    )
 
     val `Check you can set up a Direct Debit`: Message = Message(
       english = "Check you can set up a Direct Debit",
@@ -1635,16 +1661,6 @@ object Messages {
     val `Personal`: Message = Message(
       english = "Personal",
       welsh   = "Personol "
-    )
-
-    val `Are you the account holder`: Message = Message(
-      english = "Are you the account holder?",
-      welsh   = "Ai chi yw deiliad y cyfrif?"
-    )
-
-    val `You must be the sole account holder...`: Message = Message(
-      english = "You must be the sole account holder, or for multi-signature accounts you must have authority to set up a Direct Debit without additional signatures.",
-      welsh   = "Mae’n rhaid mai chi yw’r talwr a’r unig berson sydd ei angen i awdurdodi Debyd Uniongyrchol o’r cyfrif hwn."
     )
 
     val `Select yes if you can set up a Direct Debit for this payment plan`: Message = Message(
@@ -2028,11 +2044,6 @@ object Messages {
       welsh   = "Cyfeiriad e-bost"
     )
 
-    val `Select which email address you want to use`: Message = Message(
-      english = "Select which email address you want to use",
-      welsh   = "Pa e-bost rydych am ei ddefnyddio?"
-    )
-
     def getError(key: String): Message = key match {
       case "selectAnEmailToUseRadio.error.required" =>
         Message(
@@ -2402,25 +2413,6 @@ object Messages {
     val `HM Revenue and Customs`: Message = Message(
       english = "<strong>HM Revenue & Customs</strong>",
       welsh   = "<strong>Cyllid a Thollau EF</strong>"
-    )
-
-  }
-
-  object GiveFeedback {
-
-    val `Do you want to give feedback?`: Message = Message(
-      english = "Do you want to give feedback on this service?",
-      welsh   = "A ydych am roi adborth am y gwasanaeth hwn?"
-    )
-
-    val `If you select no`: Message = Message(
-      english = "If you select no, you will be directed to GOV.UK.",
-      welsh   = "Os ydych yn dewis ‘Na’, byddwch yn cael eich cyfeirio at GOV.UK."
-    )
-
-    val `Select yes if you want to give feedback`: Message = Message(
-      english = "Select yes if you want to give feedback on this service",
-      welsh   = "Dewiswch ‘Iawn’ os ydych am roi adborth am y gwasanaeth hwn"
     )
 
   }

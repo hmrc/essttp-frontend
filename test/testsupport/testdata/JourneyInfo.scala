@@ -92,7 +92,7 @@ object JourneyInfo {
   def dayOfMonth(dayOfMonth: DayOfMonth = TdAll.dayOfMonth()): JourneyInfoAsJson = TdJsonBodies.dayOfMonthJourneyInfo(dayOfMonth)
   val startDates: JourneyInfoAsJson = TdJsonBodies.startDatesJourneyInfo
   val affordableQuotes: JourneyInfoAsJson = TdJsonBodies.affordableQuotesJourneyInfo
-  val selectedPlan: JourneyInfoAsJson = TdJsonBodies.selectedPlanJourneyInfo
+  val selectedPlan: JourneyInfoAsJson = TdJsonBodies.selectedPlanTwoMonthsJourneyInfo
   def paymentPlanAnswers(withAffordability: Boolean): JourneyInfoAsJson = TdJsonBodies.paymentPlanAnswers(withAffordability)
   def canSetUpDirectDebit(isAccountHolder: Boolean): JourneyInfoAsJson = TdJsonBodies.detailsAboutBankAccountJourneyInfo(isAccountHolder)
   def directDebitDetails(encrypter: Encrypter): JourneyInfoAsJson = TdJsonBodies.directDebitDetailsJourneyInfo(encrypter)

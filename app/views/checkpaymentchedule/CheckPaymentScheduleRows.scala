@@ -16,11 +16,10 @@
 
 package views.checkpaymentchedule
 
-import cats.syntax.eq._
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, UpfrontPaymentAnswers, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.CannotPayReason
-import essttp.rootmodel.ttp.affordablequotes.PaymentPlan
-import messages.{DateMessages, Messages}
+import essttp.rootmodel.ttp.affordablequotes.{DueDate, PaymentPlan}
+import messages.{DateMessages, Message, Messages}
 import models.Language
 import play.api.mvc.Call
 import play.twirl.api.Html
@@ -164,44 +163,89 @@ object CheckPaymentScheduleRows {
     }
   }
 
-  def paymentPlanMonthRows(paymentPlan: PaymentPlan, changeLinkCall: Call)(implicit lang: Language, ord: Ordering[LocalDate]): List[SummaryListRow] = {
-    paymentPlan.collections.regularCollections.sortBy(_.dueDate.value).zipWithIndex.map {
-      case (p, index) =>
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  def paymentPlanInstalmentsRows(
+      paymentPlan:    PaymentPlan,
+      changeLinkCall: Call
+  )(implicit lang: Language, ord: Ordering[LocalDate]): List[SummaryListRow] = {
+      def row(key: Message, value: String) =
         SummaryListRow(
-          classes = s"grouped-row ${
-            if (index > (paymentPlan.collections.regularCollections.size - 2)) { "last-grouped-row" } else { "" }
-          }",
-          key     = Key(
-            content = Text(s"${DateMessages.monthName(p.dueDate.value.getMonthValue).show} ${p.dueDate.value.getYear.toString}"),
-            classes = s"govuk-!-width-one-half${if (index === 0) " govuk-!-padding-top-2" else ""}"
-          ),
-          value   = Value(
-            content = Text(p.amountDue.value.gdsFormatInPounds)
-          ),
-          actions = Some(Actions(
-            items = Seq(
-              ActionItem(
-                href               = changeLinkCall.url,
-                classes            = s"${if (index === 0) "" else "grouped-change"}",
-                content            = Text(Messages.change.show),
-                visuallyHiddenText = Some(Messages.PaymentSchedule.`Change months duration`.show)
-              )
-            )
-          ))
+          key   = Key(content = Text(key.show), classes = "govuk-!-width-one-half"),
+          value = Value(content = Text(value))
+        )
+
+      def monthAndYear(d: DueDate): String =
+        s"${DateMessages.monthName(d.value.getMonthValue).show} ${d.value.getYear.toString}"
+
+    // compiler doesn't deal with :+ and +: very well and can't tell the pattern match is
+    // actually exhaustive - @unchecked suppresses that warning
+    (paymentPlan.collections.regularCollections.sortBy(_.dueDate.value): @unchecked) match {
+      case Nil =>
+        List.empty
+
+      case onlyCollection :: Nil =>
+        List(
+          paymentPlanDurationRow(1, changeLinkCall),
+          row(Messages.PaymentSchedule.`Start month`, monthAndYear(onlyCollection.dueDate)),
+          row(Messages.PaymentSchedule.Payment, onlyCollection.amountDue.value.gdsFormatInPounds),
+          totalToPayRow(paymentPlan)
+        )
+
+      case firstCollection :: secondCollection :: Nil =>
+        List(
+          paymentPlanDurationRow(2, changeLinkCall),
+          row(Messages.PaymentSchedule.`Start month`, monthAndYear(firstCollection.dueDate)),
+          row(Messages.PaymentSchedule.`First monthly payment`, firstCollection.amountDue.value.gdsFormatInPounds),
+          row(Messages.PaymentSchedule.`Final month`, monthAndYear(secondCollection.dueDate)),
+          row(Messages.PaymentSchedule.`Final payment`, secondCollection.amountDue.value.gdsFormatInPounds),
+          totalToPayRow(paymentPlan)
+        )
+
+      case firstCollection +: _ :+ lastCollection =>
+        val numberOfCollections = paymentPlan.collections.regularCollections.size
+
+        List(
+          paymentPlanDurationRow(numberOfCollections, changeLinkCall),
+          row(Messages.PaymentSchedule.`Start month`, monthAndYear(firstCollection.dueDate)),
+          row(Messages.PaymentSchedule.`First ... montly payments`(numberOfCollections - 1), firstCollection.amountDue.value.gdsFormatInPounds),
+          row(Messages.PaymentSchedule.`Final month`, monthAndYear(lastCollection.dueDate)),
+          row(Messages.PaymentSchedule.`Final payment`, lastCollection.amountDue.value.gdsFormatInPounds),
+          totalToPayRow(paymentPlan)
         )
     }
   }
 
-  def paymentplanTotalRow(paymentPlan: PaymentPlan)(implicit lang: Language): SummaryListRow =
+  private def totalToPayRow(paymentPlan: PaymentPlan)(implicit lang: Language) =
     SummaryListRow(
-      key     = Key(
+      key   = Key(
         content = Text(Messages.PaymentSchedule.`Total to pay`.show),
         classes = "govuk-!-width-one-half"
       ),
-      value   = Value(
-        content = Text(paymentPlan.totalDebtIncInt.value.gdsFormatInPounds)
+      value = Value(
+        content = Text(
+          s"${paymentPlan.totalDebtIncInt.value.gdsFormatInPounds} ${Messages.PaymentSchedule.`including ... interest`(paymentPlan.planInterest.value).show}"
+        )
+      )
+    )
+
+  private def paymentPlanDurationRow(planDuration: Int, changeLinkCall: Call)(implicit lang: Language) =
+    SummaryListRow(
+      Key(
+        content = Text(Messages.PaymentSchedule.`Payment plan duration`.show),
+        classes = "govuk-!-width-one-half"
       ),
-      actions = None
+      value   = Value(
+        content = Text(Messages.PaymentSchedule.`... months`(planDuration).show)
+      ),
+      actions = Some(Actions(
+        items = Seq(
+          ActionItem(
+            href               = changeLinkCall.url,
+            content            = Text(Messages.change.show),
+            visuallyHiddenText = Some(Messages.PaymentSchedule.`Change months duration`.show)
+          )
+        )
+      ))
     )
 
 }

@@ -149,15 +149,10 @@ requestSupport: RequestSupport
     )
 }
 
-@paymentPlanMonthRows = @{
-    CheckPaymentScheduleRows.paymentPlanMonthRows(paymentPlan, routes.PegaController.incomeAndExpenditure)
+@paymentPlanInstalmentsRows = @{
+    CheckPaymentScheduleRows.paymentPlanInstalmentsRows(paymentPlan, routes.PegaController.incomeAndExpenditure)
 }
 
-@paymentPlanTotalRow = @{
-    CheckPaymentScheduleRows.paymentplanTotalRow(paymentPlan)
-}
-
-@monthlyPaymentRows = @{ paymentPlanMonthRows ::: List(paymentPlanTotalRow) }
 
 @testOnlyLayout(
     pageTitle = Some(title),
@@ -203,7 +198,7 @@ requestSupport: RequestSupport
                 upfrontPaymentRows :::
                 canPayWithinSixMonthsRow.toList :::
                 List(incomeRow, expenditureRow) :::
-                monthlyPaymentRows,
+                paymentPlanInstalmentsRows,
             classes = "govuk-!-margin-bottom-9"
         )
     )
