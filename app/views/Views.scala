@@ -65,7 +65,6 @@ class Views @Inject() (
     val tooManyPasscodeJourneysStarted: TooManyPasscodeJourneysStarted,
     val paymentPlanSetUpPage:           PaymentPlanSetUpPage,
     val saPaymentPlanSetUpPage:         SaPaymentPlanSetUpPage,
-    val simpPaymentPlanSetUpPage:       SimpPaymentPlanSetUpPage,
     val printSummaryPage:               PrintSummaryPage,
     val saPrintSummaryPage:             SaPrintSummaryPage,
     val missingInfoPage:                MissingInformation,

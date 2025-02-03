@@ -42,23 +42,19 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
 
   List(
     Origins.Epaye.Bta,
-    Origins.Vat.Bta
+    Origins.Vat.Bta,
+    Origins.Simp.Pta
   ).foreach { origin =>
       val taxRegime = origin.taxRegime
 
       s"[taxRegime: ${taxRegime.toString}] GET /payment-plan-set-up should" - {
-
-          def test(
-              stubActions:            () => Unit,
-              hasUpfrontPayment:      Boolean,
-              isEmailAddressRequired: Boolean
-          ): Unit = {
+          def test(stubActions: () => Unit): Unit = {
             stubActions()
 
             val result: Future[Result] = taxRegime match {
               case TaxRegime.Epaye => controller.epayePaymentPlanSetUp(fakeRequest)
               case TaxRegime.Vat   => controller.vatPaymentPlanSetUp(fakeRequest)
-              case TaxRegime.Sa    => controller.saPaymentPlanSetUp(fakeRequest)
+              case TaxRegime.Sa    => sys.error("Not expecting SA here")
               case TaxRegime.Simp  => controller.simpPaymentPlanSetUp(fakeRequest)
             }
             val pageContent: String = contentAsString(result)
@@ -80,7 +76,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
               case TaxRegime.Vat =>
                 "Your payment reference is 101747001"
               case TaxRegime.Sa =>
-                "Your payment reference is 1234567895"
+                sys.error("Not expecting SA here")
               case TaxRegime.Simp =>
                 "Your payment reference is QQ123456A"
             })
@@ -89,99 +85,92 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
             val paragraphs = doc.select(".govuk-body").asScala.toList
 
             subheadings(0).text() shouldBe "What happens next"
-            paragraphs(0).text() shouldBe "HMRC will send you a letter within 5 working days with your payment dates."
+            subheadings(0).tagName() shouldBe "h2"
 
-            if (isEmailAddressRequired) paragraphs(1).text() shouldBe "We will send a secure message with payment due dates to your business tax account inbox within 24 hours."
+            paragraphs(0).text() shouldBe "In the next 24 hours we’ll:"
 
-            val emailParagraphOffset = if (isEmailAddressRequired) 0 else -1
+            val list = doc.select("ul.govuk-list").asScala.toList
+            val listItems = list(0).select("li").asScala.toList
+            listItems(0).text() shouldBe "update your tax account with your payment plan"
+            listItems(1).text() shouldBe "send payment due dates to your business tax account inbox"
 
-            if (hasUpfrontPayment) {
-              paragraphs(emailParagraphOffset + 2).text() shouldBe "Your upfront payment will be taken within 6 working days. Your next payment will be taken on 28 August 2022 or the next working day."
-            } else {
-              paragraphs(emailParagraphOffset + 2).text() shouldBe "Your next payment will be taken on 28 August 2022 or the next working day."
-            }
-            paragraphs(emailParagraphOffset + 3).text() shouldBe "Your tax account will be updated with your payment plan within 24 hours."
-            paragraphs(emailParagraphOffset + 4).text() shouldBe "View your payment plan"
+            paragraphs(1).text() shouldBe "You’ll also receive a letter with your payment dates. We’ll send this out within 5 days."
 
-            doc.select("#print-plan-link").attr("href") shouldBe PageUrls.epayeVatPrintPlanUrl
+            paragraphs(2).text() shouldBe "If you’ve made an upfront payment, we’ll take it from your bank account within 6 working days."
 
-            subheadings(1).text() shouldBe "If you need to change your payment plan"
-            paragraphs(emailParagraphOffset + 5).text() shouldBe "Call the HMRC Helpline on 0300 123 1813."
+            val viewPaymentPlanLink = paragraphs(3)
+            viewPaymentPlanLink.text() shouldBe "View your payment plan"
+            viewPaymentPlanLink.select("a").text() shouldBe "View your payment plan"
+            viewPaymentPlanLink.select("a").attr("href") shouldBe (taxRegime match {
+              case TaxRegime.Epaye => routes.PaymentPlanSetUpController.epayeVatPrintSummary.url
+              case TaxRegime.Vat   => routes.PaymentPlanSetUpController.epayeVatPrintSummary.url
+              case TaxRegime.Sa    => sys.error("Not expecting SA here")
+              case TaxRegime.Simp  => routes.PaymentPlanSetUpController.simpPrintSummary.url
+            })
+
+            paragraphs(4).text() shouldBe "You can call HMRC to update your payment plan. Make sure you have your payment reference number ready."
+
+            subheadings(1).text() shouldBe "Call the debt management helpline"
+            subheadings(1).tagName() shouldBe "h3"
+
+            paragraphs(5).text() shouldBe "Telephone: 0300 123 1813"
+            paragraphs(5).select("strong").text() shouldBe "0300 123 1813"
+
+            paragraphs(6).text() shouldBe "Outside UK: +44 2890 538 192"
+            paragraphs(6).select("strong").text() shouldBe "+44 2890 538 192"
+
+            paragraphs(7).text() shouldBe "Our phone line opening hours are:"
+            paragraphs(8).text() shouldBe "Monday to Friday: 8am to 6pm"
+            paragraphs(9).text() shouldBe "Closed weekends and bank holidays."
+
+            subheadings(2).text() shouldBe "Text service"
+            subheadings(2).tagName() shouldBe "h3"
+
+            paragraphs(10).text() shouldBe "Use Relay UK if you cannot hear or speak on the telephone, dial 18001 then 0345 300 3900. Find out more on the Relay UK website (opens in new tab)."
+            paragraphs(10).select("strong").asScala.toList.map(_.text()) shouldBe List("18001", "0345 300 3900")
+            val relayLink = paragraphs(10).select("a")
+            relayLink.text() shouldBe "Relay UK website (opens in new tab)"
+            relayLink.attr("href") shouldBe "https://www.relayuk.bt.com/"
+            relayLink.attr("rel") shouldBe "noreferrer noopener"
+            relayLink.attr("target") shouldBe "_blank"
+
+            subheadings(3).text() shouldBe "If a health condition or personal circumstances make it difficult to contact us"
+            subheadings(3).tagName() shouldBe "h3"
+
+            paragraphs(11).text() shouldBe "Our guidance Get help from HMRC if you need extra support (opens in new tab) explains how we can support you."
+            val extraSupportLink = paragraphs(11).select("a")
+            extraSupportLink.text() shouldBe "Get help from HMRC if you need extra support (opens in new tab)"
+            extraSupportLink.attr("href") shouldBe "https://www.gov.uk/get-help-hmrc-extra-support"
+            extraSupportLink.attr("rel") shouldBe "noreferrer noopener"
+            extraSupportLink.attr("target") shouldBe "_blank"
 
             val continueButton = doc.select(".govuk-button")
             continueButton.text() shouldBe "Go to tax account"
             continueButton.attr("role") shouldBe "button"
             continueButton.attr("href") shouldBe (taxRegime match {
               case TaxRegime.Epaye | TaxRegime.Vat => "http://localhost:9020/business-account"
-              case TaxRegime.Sa                    => "http://localhost:9232/personal-account"
-              case TaxRegime.Simp                  => "http://localhost:9056/personal-account"
+              case TaxRegime.Sa                    => sys.error("Not expceting SA here")
+              case TaxRegime.Simp                  => "http://localhost:9232/personal-account"
             })
 
-            val surveyLink = doc.select(".govuk-body > .govuk-link").asScala.toList(2)
+            val surveyLink = doc.select(".govuk-body > .govuk-link").asScala.toList(3)
             surveyLink.parent().text() shouldBe "What did you think of this service? (takes 30 seconds)"
             surveyLink.attr("href") shouldBe (taxRegime match {
               case TaxRegime.Epaye => PageUrls.exitSurveyEpayeUrl
               case TaxRegime.Vat   => PageUrls.exitSurveyVatUrl
-              case TaxRegime.Sa    => PageUrls.exitSurveySaUrl
+              case TaxRegime.Sa    => sys.error("Not expceting SA here")
               case TaxRegime.Simp  => PageUrls.exitSurveySimpUrl
             })
             ()
           }
 
-        "return the confirmation page with correct content when there is an upfront payment" in {
+        "return the confirmation page with correct content" in {
           test(
             { () =>
               stubCommonActions()
               EssttpBackend.SubmitArrangement.findJourney(origin, testCrypto)()
               ()
-            },
-            hasUpfrontPayment      = true,
-            isEmailAddressRequired = true
-          )
-        }
-
-        "return the confirmation page with correct content when there is no upfront payment" in {
-          test(
-            { () =>
-              stubCommonActions()
-              EssttpBackend.SubmitArrangement.findJourney(origin, testCrypto)(
-                JourneyJsonTemplates.`Arrangement Submitted - No upfront payment`(origin)
-              )
-              ()
-            },
-            hasUpfrontPayment      = false,
-            isEmailAddressRequired = true
-          )
-        }
-
-        "return the confirmation page with correct content when an email address wasn't required" in {
-          test(
-            { () =>
-              stubCommonActions()
-              EssttpBackend.SubmitArrangement.findJourney(origin, testCrypto)(
-                JsonUtils.replace(
-                  List("SubmittedArrangement", "eligibilityCheckResult", "regimeDigitalCorrespondence"),
-                  JsBoolean(false)
-                )(
-                    Json.parse(JourneyJsonTemplates.`Arrangement Submitted - with upfront payment`(origin)).as[JsObject]
-                  ).toString
-              )
-              ()
-            },
-            hasUpfrontPayment      = true,
-            isEmailAddressRequired = false
-          )
-        }
-
-        "return the confirmation page with correct content when the user had gone through an affordability journey" in {
-          test(
-            { () =>
-              stubCommonActions()
-              EssttpBackend.SubmitArrangement.findJourney(origin, testCrypto, withAffordability = true)()
-              ()
-            },
-            hasUpfrontPayment      = true,
-            isEmailAddressRequired = true
+            }
           )
         }
 
@@ -551,14 +540,6 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
       }
   }
 
-  //OPS-12345 - TODO these are placeholders, add tests for simp once we have info on how page will look
-  s"[taxRegime: ${Origins.Simp.Pta.taxRegime.toString}] GET /payment-plan-print-summary should" - {
-    "return the print payment schedule page with correct content (with upfront payment)" in {
-    }
-
-    "return the print payment schedule page with correct content (without upfront payment)" in {
-    }
-  }
 }
 
 class PaymentPlanSetUpControllerEmailDisabledSpec extends ItSpec {
@@ -569,71 +550,6 @@ class PaymentPlanSetUpControllerEmailDisabledSpec extends ItSpec {
 
   "When email is disabled" - {
 
-    List(
-      Origins.Epaye.Bta,
-      Origins.Vat.Bta,
-    ).foreach { origin =>
-        val taxRegime = origin.taxRegime
-
-        s"[taxRegime: ${taxRegime.toString}] GET /payment-plan-set-up should" - {
-
-            def test(
-                stubActions: () => Unit
-            ): Unit = {
-              stubActions()
-
-              val result: Future[Result] = taxRegime match {
-                case TaxRegime.Epaye => controller.epayePaymentPlanSetUp(fakeRequest)
-                case TaxRegime.Vat   => controller.vatPaymentPlanSetUp(fakeRequest)
-                case TaxRegime.Sa    => controller.saPaymentPlanSetUp(fakeRequest)
-                case TaxRegime.Simp  => controller.simpPaymentPlanSetUp(fakeRequest)
-              }
-              val pageContent: String = contentAsString(result)
-              val doc: Document = Jsoup.parse(pageContent)
-
-              RequestAssertions.assertGetRequestOk(result)
-              ContentAssertions.commonPageChecks(
-                doc,
-                expectedH1              = "Your payment plan is set up",
-                shouldBackLinkBePresent = false,
-                expectedSubmitUrl       = None,
-                regimeBeingTested       = Some(taxRegime)
-              )
-
-              val subheadings = doc.select(".govuk-heading-m").asScala.toList
-              val paragraphs = doc.select(".govuk-body").asScala.toList
-
-              subheadings(0).text() shouldBe "What happens next"
-              paragraphs(0).text() shouldBe "HMRC will send you a letter within 5 working days with your payment dates."
-              paragraphs(1).text() shouldBe "Your upfront payment will be taken within 6 working days. Your next payment will be taken on 28 August 2022 or the next working day."
-              ()
-            }
-
-          "not display the email text when regimeDigitalCorrespondence=true" in {
-            test { () =>
-              stubCommonActions()
-              EssttpBackend.SubmitArrangement.findJourney(origin, testCrypto)()
-              ()
-            }
-          }
-
-          "not display the email text when regimeDigitalCorrespondence=false" in {
-            test { () =>
-              stubCommonActions()
-              EssttpBackend.SubmitArrangement.findJourney(origin, testCrypto)(
-                JsonUtils.replace(
-                  List("SubmittedArrangement", "eligibilityCheckResult", "regimeDigitalCorrespondence"),
-                  JsBoolean(false)
-                )(
-                    Json.parse(JourneyJsonTemplates.`Arrangement Submitted - with upfront payment`(origin)).as[JsObject]
-                  ).toString
-              )
-              ()
-            }
-          }
-
-        }
-      }
     s"[taxRegime: ${Origins.Sa.Bta.toString()}] GET /payment-plan-set-up should" - {
 
         def test(

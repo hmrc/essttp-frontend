@@ -2236,6 +2236,86 @@ object Messages {
       welsh   = "Yr hyn sy’n digwydd nesaf"
     )
 
+    val `In the next 24 hours we'll:`: Message = Message(
+      english = "In the next 24 hours we’ll:",
+      welsh   = "Yn ystod y 24 awr nesaf, byddwn yn gwneud y canlynol:"
+    )
+
+    val `update your tax account with your payment plan`: Message = Message(
+      english = "update your tax account with your payment plan",
+      welsh   = "diweddaru’ch cyfrif treth gyda’ch cynllun talu"
+    )
+
+    val `send payment due dates to your business tax account inbox`: Message = Message(
+      english = "send payment due dates to your business tax account inbox",
+      welsh   = "anfon dyddiadau dyledus talu i’ch mewnflwch cyfrif treth busnes"
+    )
+
+    val `You'll also receive a letter with your payment dates. We'll send this out within 5 days.`: Message = Message(
+      english = "You’ll also receive a letter with your payment dates. We’ll send this out within 5 days.",
+      welsh   = "Byddwch hefyd yn cael llythyr gyda’ch dyddiadau talu. Byddwn yn anfon hwn cyn pen 5 diwrnod."
+    )
+
+    val `If you've made an upfront payment, we'll take it from your bank account within 6 working days.`: Message = Message(
+      english = "If you’ve made an upfront payment, we’ll take it from your bank account within 6 working days.",
+      welsh   = "Os ydych wedi gwneud taliad ymlaen llaw, byddwn yn ei gymryd o’ch cyfrif banc cyn pen 6 diwrnod gwaith."
+    )
+
+    val `You can call HMRC to update your payment plan. Make sure you have your payment reference number ready.`: Message = Message(
+      english = "You can call HMRC to update your payment plan. Make sure you have your payment reference number ready.",
+      welsh   = "Gallwch ffonio CThEF i ddiweddaru’ch cynllun talu. Gwnewch yn siŵr bod eich cyfeirnod talu yn barod."
+    )
+
+    val `Call the debt management helpline`: Message = Message(
+      english = "Call the debt management helpline",
+      welsh   = "Ffoniwch y llinell gymorth rheoli dyledion"
+    )
+
+    val `Telephone: 0300 123 1813`: Message = Message(
+      english = "Telephone: <strong>0300 123 1813</strong>",
+      welsh   = "Ffôn: <strong>0300 123 1813</strong>"
+    )
+
+    val `Outside UK: +44 2890 538 192`: Message = Message(
+      english = "Outside UK: <strong>+44 2890 538 192</strong>",
+      welsh   = "O’r tu allan i’r DU: <strong>+44 2890 538 192</strong>"
+    )
+
+    val `Our phone line opening hours are:`: Message = Message(
+      english = "Our phone line opening hours are:",
+      welsh   = "Oriau agor ein llinell ffôn yw:"
+    )
+
+    val `Monday to Friday: 8am to 6pm`: Message = Message(
+      english = "Monday to Friday: 8am to 6pm",
+      welsh   = "Dydd Llun i ddydd Gwener: 8:30 i 17:00"
+    )
+
+    val `Closed weekends and bank holidays.`: Message = Message(
+      english = "Closed weekends and bank holidays.",
+      welsh   = "Ar gau ar benwythnosau a gwyliau banc."
+    )
+
+    val `Text service`: Message = Message(
+      english = "Text service",
+      welsh   = "Gwasanaeth Text Relay"
+    )
+
+    def `Use Relay UK if you cannot hear or speak on the telephone...`(link: String): Message = Message(
+      english = s"""Use Relay UK if you cannot hear or speak on the telephone, dial <strong>18001</strong> then <strong>0345 300 3900</strong>. Find out more on the <a href="$link" class="govuk-link" rel="noreferrer noopener" target="_blank">Relay UK website (opens in new tab)</a>.""",
+      welsh   = s"""Defnyddiwch wasanaeth Text Relay UK os na allwch glywed na siarad dros y ffôn. Deialwch <strong>18001</strong> ac yna <strong>0345 300 3900</strong>. Dysgwch ragor am hyn ar <a href="$link" class="govuk-link" rel="noreferrer noopener" target="_blank">wefan Text Relay UK (yn agor tab newydd)</a>."""
+    )
+
+    val `If a health condition or personal circumstances make it difficult to contact us`: Message = Message(
+      english = "If a health condition or personal circumstances make it difficult to contact us",
+      welsh   = "Os yw cyflwr iechyd neu amgylchiadau personol yn ei gwneud hi’n anodd i chi gysylltu â ni"
+    )
+
+    def `Our guidance Get help from HMRC if you need extra support...`(link: String): Message = Message(
+      english = s"""Our guidance <a href="$link" class="govuk-link" rel="noreferrer noopener" target="_blank">Get help from HMRC if you need extra support (opens in new tab)</a> explains how we can support you.""",
+      welsh   = s"""Bydd ein harweiniad ynghylch <a href="$link" class="govuk-link" rel="noreferrer noopener" target="_blank"‘Cael help gan CThEF os oes angen cymorth ychwanegol arnoch’ (yn agor tab newydd)</a> yn esbonio sut y gallwn eich helpu."""
+    )
+
     val `What you need to do next`: Message = Message(
       english = "What you need to do next",
       welsh   = "Yr hyn y mae angen i chi ei wneud nesaf"
@@ -2254,11 +2334,6 @@ object Messages {
     val `About your payment plan`: Message = Message(
       english = "About your payment plan",
       welsh   = "Ynglŷn â’ch cynllun talu"
-    )
-
-    val `HMRC will send you a letter within 5 working days with your payment dates.`: Message = Message(
-      english = "HMRC will send you a letter within 5 working days with your payment dates.",
-      welsh   = "Bydd CThEF yn anfon llythyr atoch cyn pen 5 diwrnod gwaith gyda’ch dyddiadau talu."
     )
 
     val `We will send a secure message with payment due dates to your business tax account inbox within 24 hours.`: Message = Message(
