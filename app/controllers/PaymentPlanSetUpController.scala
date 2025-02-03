@@ -112,26 +112,9 @@ class PaymentPlanSetUpController @Inject() (
             regimeDigitalCorrespondence = correspondence
           )
         )
-      case TaxRegime.Simp =>
+      case TaxRegime.Epaye | TaxRegime.Vat | TaxRegime.Simp =>
         Ok(
-          views.simpPaymentPlanSetUpPage(
-            customerPaymentReference    = journey.arrangementResponse.customerReference.value,
-            paymentDay                  = firstPaymentDay,
-            hasUpfrontPayment           = hasUpfrontPayment,
-            wasEmailAddressRequired     = request.isEmailAddressRequired(appConfig),
-            regimeDigitalCorrespondence = correspondence
-          )
-        )
-      case _ =>
-        Ok(
-          views.paymentPlanSetUpPage(
-            customerPaymentReference    = journey.arrangementResponse.customerReference.value,
-            paymentDay                  = firstPaymentDay,
-            hasUpfrontPayment           = hasUpfrontPayment,
-            taxRegime                   = journey.taxRegime,
-            wasEmailAddressRequired     = request.isEmailAddressRequired(appConfig),
-            regimeDigitalCorrespondence = correspondence
-          )
+          views.paymentPlanSetUpPage(journey.arrangementResponse.customerReference.value, journey.taxRegime)
         )
     }
 

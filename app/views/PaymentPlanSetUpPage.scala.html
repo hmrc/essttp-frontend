@@ -33,11 +33,7 @@
 
 @(
         customerPaymentReference: String,
-        paymentDay: DueDate,
-        hasUpfrontPayment: Boolean,
-        taxRegime: TaxRegime,
-        wasEmailAddressRequired: Boolean,
-        regimeDigitalCorrespondence: Boolean
+        taxRegime: TaxRegime
 )(
         implicit
         request: Request[_]
@@ -48,13 +44,15 @@
 @title = @{
     Messages.Confirmation.`Your payment plan is set up`.show
 }
-@nextPayment = @{
-    val day: String = paymentDay.value.getDayOfMonth.toString
-    val month: String = DateMessages.monthName(paymentDay.value.getMonth.getValue).show
-    val year: String = paymentDay.value.getYear.toString
-    s"$day $month $year"
-}
 
+@viewPaymentPlanUrl = @{
+    taxRegime match {
+        case TaxRegime.Epaye => routes.PaymentPlanSetUpController.epayeVatPrintSummary.url
+        case TaxRegime.Vat => routes.PaymentPlanSetUpController.epayeVatPrintSummary.url
+        case TaxRegime.Sa => routes.PaymentPlanSetUpController.saPrintSummary.url
+        case TaxRegime.Simp => routes.PaymentPlanSetUpController.simpPrintSummary.url
+    }
+}
 @surveyUrl = @{
     taxRegime match {
         case TaxRegime.Epaye => routes.SignOutController.exitSurveyPaye.url
@@ -65,7 +63,12 @@
 }
 
 @buttonUrl = @{
-    appConfig.Urls.businessTaxAccountUrl
+    taxRegime match {
+        case TaxRegime.Epaye => appConfig.Urls.businessTaxAccountUrl
+        case TaxRegime.Vat => appConfig.Urls.businessTaxAccountUrl
+        case TaxRegime.Sa => appConfig.Urls.personalTaxAccountUrl
+        case TaxRegime.Simp => appConfig.Urls.personalTaxAccountUrl
+    }
 }
 
 @layout(pageTitle = Some(title), showBackLink = false) {
@@ -75,60 +78,40 @@
         classes = "govuk-!-margin-bottom-7",
         content = HtmlContent(s"""${Messages.Confirmation.`Your payment reference is`.show}<br><strong>$customerPaymentReference</strong>""")
     ))
-    <h2 class="govuk-heading-m">
-    @{
-        Messages.Confirmation.`What happens next`.show
-    }
-    </h2>
-    <p class="govuk-body">@{
-        Messages.Confirmation.`HMRC will send you a letter within 5 working days with your payment dates.`.show
-    }</p>
 
-    @{if(wasEmailAddressRequired && regimeDigitalCorrespondence) {
-        <p class="govuk-body">
-            {Messages.Confirmation.`We will send a secure message with payment due dates to your business tax account inbox within 24 hours.`.show}
-        </p>
-    }}
-
-    <p class="govuk-body">@{
-        Messages.Confirmation.paymentInfo(hasUpfrontPayment = hasUpfrontPayment, nextPayment).show
-    }</p>
-    <p class="govuk-body">@{
-        Messages.Confirmation.`Your tax account will be updated with your payment plan within 24 hours.`.show
-    }</p>
+    <h2 class="govuk-heading-m">@{Messages.Confirmation.`What happens next`.show}</h2>
+    <p class="govuk-body">@{Messages.Confirmation.`In the next 24 hours we'll:`.show}</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>@{Messages.Confirmation.`update your tax account with your payment plan`.show}</li>
+      <li>@{Messages.Confirmation.`send payment due dates to your business tax account inbox`.show}</li>
+    </ul>
+    <p class="govuk-body">@{Messages.Confirmation.`You'll also receive a letter with your payment dates. We'll send this out within 5 days.`.show}</p>
+    <p class="govuk-body">@{Messages.Confirmation.`If you've made an upfront payment, we'll take it from your bank account within 6 working days.`.show}</p>
     <p class="govuk-body">
-        <a href="@{
-            routes.PaymentPlanSetUpController.epayeVatPrintSummary.url
-        }" class="govuk-link" id="print-plan-link">
-        @{
-            Messages.Confirmation.`View your payment plan`.show
-        }
+        <a href="@viewPaymentPlanUrl" class="govuk-link" id="print-plan-link">
+        @{Messages.Confirmation.`View your payment plan`.show}
         </a>
     </p>
+    <p class="govuk-body">@{Messages.Confirmation.`You can call HMRC to update your payment plan. Make sure you have your payment reference number ready.`.show}</p>
 
-    <h2 class="govuk-heading-m">
-    @{
-        Messages.Confirmation.`If you need to change your payment plan`.show
-    }
-    </h2>
 
-    <p class="govuk-body">@{
-        Messages.Confirmation.`Call the HMRC Helpline on 0300 123 1813.`.show
-    }</p>
+    <h3 class="govuk-heading-m">@{Messages.Confirmation.`Call the debt management helpline`.show}</h3>
+    <p class="govuk-body">@{Html(Messages.Confirmation.`Telephone: 0300 123 1813`.show)}</p>
+    <p class="govuk-body">@{Html(Messages.Confirmation.`Outside UK: +44 2890 538 192`.show)}</p>
+    <p class="govuk-body">@{Messages.Confirmation.`Our phone line opening hours are:`.show}</p>
+    <p class="govuk-body">@{Messages.Confirmation.`Monday to Friday: 8am to 6pm`.show}</p>
+    <p class="govuk-body">@{Messages.Confirmation.`Closed weekends and bank holidays.`.show}</p>
 
-    <p class="govuk-body">@{
-        Messages.NotEligible.`Our opening times are Monday to Friday, 8am to 6pm. We are closed on weekends and bank holidays.`.show
-    }</p>
+    <h3 class="govuk-heading-m">@{Messages.Confirmation.`Text service`.show}</h3>
+    <p class="govuk-body">@{Html(Messages.Confirmation.`Use Relay UK if you cannot hear or speak on the telephone...`(appConfig.Urls.relayUrl).show)}</p>
 
-    <p class="govuk-body">@{Html(
-        Messages.ExtraSupport.`You can also use Relay UK...`(appConfig.Urls.relayUrl).show)
-    }</p>
+    <h3 class="govuk-heading-m">@{Messages.Confirmation.`If a health condition or personal circumstances make it difficult to contact us`.show}</h3>
+    <p class="govuk-body">@{Html(Messages.Confirmation.`Our guidance Get help from HMRC if you need extra support...`(appConfig.Urls.extraSupportUrl).show)}</p>
+
 
     <p class="govuk-body">
         <a href=@{buttonUrl} class="govuk-button" role="button" data-module="govuk-button">
-        @{
-            Messages.Confirmation.`Go to tax account`.show
-        }
+        @{Messages.Confirmation.`Go to tax account`.show}
         </a>
     </p>
 
