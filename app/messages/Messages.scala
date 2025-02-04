@@ -2313,7 +2313,7 @@ object Messages {
 
     def `Our guidance Get help from HMRC if you need extra support...`(link: String): Message = Message(
       english = s"""Our guidance <a href="$link" class="govuk-link" rel="noreferrer noopener" target="_blank">Get help from HMRC if you need extra support (opens in new tab)</a> explains how we can support you.""",
-      welsh   = s"""Bydd ein harweiniad ynghylch <a href="$link" class="govuk-link" rel="noreferrer noopener" target="_blank"‘Cael help gan CThEF os oes angen cymorth ychwanegol arnoch’ (yn agor tab newydd)</a> yn esbonio sut y gallwn eich helpu."""
+      welsh   = s"""Bydd ein harweiniad ynghylch <a href="$link" class="govuk-link" rel="noreferrer noopener" target="_blank">‘Cael help gan CThEF os oes angen cymorth ychwanegol arnoch’ (yn agor tab newydd)</a> yn esbonio sut y gallwn eich helpu."""
     )
 
     val `What you need to do next`: Message = Message(
