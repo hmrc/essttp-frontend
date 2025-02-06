@@ -1530,6 +1530,21 @@ object Messages {
       welsh   = "Gwirio’ch cynllun talu"
     )
 
+    val `why you are unable to pay in full`: Message = Message(
+      english = "why you are unable to pay in full",
+      welsh   = "pam nad oes modd i chi dalu’n llawn"
+    )
+
+    val `whether you can pay within 6 months`: Message = Message(
+      english = "whether you can pay within 6 months",
+      welsh   = "a ydych yn gallu talu cyn pen 6 mis"
+    )
+
+    val `how much you can afford to pay each month`: Message = Message(
+      english = "how much you can afford to pay each month",
+      welsh   = "faint y gallwch fforddio ei dalu bob mis"
+    )
+
     val `Monthly payments`: Message = Message(
       english = "Monthly payments",
       welsh   = "Taliadau misol"
@@ -1562,7 +1577,7 @@ object Messages {
 
     def `... months`(i: Int): Message = Message(
       english = if (i === 1) "1 month" else s"${i.toString} months",
-      welsh   = s"${i.toString} mis"
+      welsh   = s"${i.toString} ${if (i === 2) "fis" else "mis"}"
     )
 
     val `Change months duration`: Message = Message(
