@@ -28,7 +28,6 @@ import play.api.mvc.{PathBindable, QueryStringBindable}
 import scala.collection.immutable
 
 sealed trait Language extends EnumEntry with Product with Serializable {
-  val toPlayLang: Lang = Lang(code)
 
   def code: String
 
@@ -56,6 +55,15 @@ object Language {
       override def unbind(key: String, language: Language): String = s"$key=${language.code}"
     }
 
+  implicit class LanguageOps(private val l: Language) extends AnyVal {
+
+    def fold[A](ifEnglish: => A, ifWelsh: => A): A = l match {
+      case Languages.English => ifEnglish
+      case Languages.Welsh   => ifWelsh
+    }
+
+  }
+
   def apply(lang: Lang): Language = lang.code match {
     case "en" => English
     case "cy" => Welsh
@@ -64,8 +72,6 @@ object Language {
 }
 
 object Languages extends Enum[Language] {
-
-  val availableLanguages: List[Language] = List(English, Welsh)
 
   override def values: immutable.IndexedSeq[Language] = findValues
 

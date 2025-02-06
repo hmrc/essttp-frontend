@@ -67,7 +67,7 @@ object CheckPaymentScheduleRows {
             ActionItem(
               href               = changeLinkCall.url,
               content            = Text(Messages.change.show),
-              visuallyHiddenText = Some(Messages.WhyCannotPayInFull.`Why are you unable to pay in full?`.show)
+              visuallyHiddenText = Some(Messages.PaymentSchedule.`why you are unable to pay in full`.show)
             )
           )
         ))
@@ -155,7 +155,7 @@ object CheckPaymentScheduleRows {
               ActionItem(
                 href               = changeLinkCall.url,
                 content            = Text(Messages.change.show),
-                visuallyHiddenText = Some(Messages.CanPayWithinSixMonths.`Can you pay within 6 months?`.show)
+                visuallyHiddenText = Some(Messages.PaymentSchedule.`whether you can pay within 6 months`.show)
               )
             )
           ))
