@@ -1649,7 +1649,7 @@ object Messages {
     )
 
     val `named on the UK bank account...`: Message = Message(
-      english = "named on the UK bank account you'll use to pay",
+      english = "named on the UK bank account you’ll use to pay",
       welsh   = "mae’n rhaid eich bod wedi’ch enwi ar gyfrif banc y DU y byddwch yn ei ddefnyddio i dalu"
     )
 
