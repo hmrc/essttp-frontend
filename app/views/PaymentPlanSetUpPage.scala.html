@@ -33,7 +33,8 @@
 
 @(
         customerPaymentReference: String,
-        taxRegime: TaxRegime
+        taxRegime: TaxRegime,
+        wasAffordabilityJourney: Boolean
 )(
         implicit
         request: Request[_]
@@ -71,7 +72,7 @@
     }
 }
 
-@layout(pageTitle = Some(title), showBackLink = false) {
+@layout(pageTitle = Some(title), showBackLink = false, showUserResearchBanner = wasAffordabilityJourney) {
     @govukPanel(Panel(
         headingLevel = 1,
         title = Text(title),

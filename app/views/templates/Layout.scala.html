@@ -26,6 +26,7 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
 @import views.html.helper.CSPNonce
+@import views.html.templates.UserResearchBanner
 
 @this(
         appConfig: AppConfig,
@@ -39,7 +40,8 @@
         hmrcLanguageSelectHelper: HmrcLanguageSelectHelper,
         hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
         hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper,
-        requestSupport: RequestSupport
+        requestSupport: RequestSupport,
+        userResearchBanner: UserResearchBanner
 )
 
 @(
@@ -51,7 +53,8 @@
   hasErrors: Boolean = false,
   showSignOutOverride: Option[Boolean] = None,
   fallBackTaxRegime: Option[TaxRegime] = None,
-  showServiceNameInHeader: Boolean = true
+  showServiceNameInHeader: Boolean = true,
+  showUserResearchBanner: Boolean = false
 )(
   contentBlock: Html)(implicit
   request: RequestHeader
@@ -94,15 +97,19 @@
         content = HtmlContent(Messages.ServicePhase.bannerText(appConfig.Urls.betaFeedbackUrl(request)).show)
     ))
 
-   @hmrcLanguageSelectHelper()
+    @if(showUserResearchBanner) {
+      @userResearchBanner()
+    }
 
-   @{
+    @hmrcLanguageSelectHelper()
+
+    @{
        if(showBackLink) {
            backLinkUrlOverride.fold(
                govukBackLink(BackLink(href = "#", classes = "js-visible", content = Text(Messages.back.show)))
            )(url => govukBackLink(BackLink(href = url, content = Text(Messages.back.show))))
        }
-   }
+    }
   </div>
 }
 
@@ -145,11 +152,11 @@
 @documentTitle = @{if(hasErrors) { s"${Messages.error.show} $govTitle" } else { govTitle }}
 
 @header = @{
-     hmrcStandardHeader(
-         serviceName = if(showServiceNameInHeader) Some(serviceName) else None,
-         serviceUrl = serviceUrl,
-         signOutUrl = if(showSignOut) Some(routes.SignOutController.signOut.url) else None
-     )
+  hmrcStandardHeader(
+      serviceName = if(showServiceNameInHeader) Some(serviceName) else None,
+      serviceUrl = serviceUrl,
+      signOutUrl = if(showSignOut) Some(routes.SignOutController.signOut.url) else None
+   )
  }
 
 @govukLayout(

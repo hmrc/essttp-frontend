@@ -88,6 +88,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     }
     val fileSaReturnUrl: String = config.get[String]("govUkUrls.fileSaReturnUrl")
     val tellHMRCChangeDetailsUrl: String = config.get[String]("govUkUrls.changeDetails")
+    val userResearchBannerLink: String = config.get[String]("govUkUrls.userResearchBannerLink")
   }
 
   object TtpHeaders {

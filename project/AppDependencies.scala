@@ -2,7 +2,7 @@ import sbt.*
 
 object AppDependencies {
 
-  val bootstrapVersion = "9.8.0"
+  val bootstrapVersion = "9.9.0"
 
   val compile: Seq[ModuleID] = Seq(
     // format: OFF
@@ -24,7 +24,7 @@ object AppDependencies {
     "org.jsoup"               %  "jsoup"                   % "1.18.3",
     "uk.gov.hmrc"             %% "bootstrap-test-play-30"  % bootstrapVersion,
     "org.scalacheck"          %% "scalacheck"              % "1.18.1",
-    "org.wiremock"            %  "wiremock-standalone"     % "3.11.0"
+    "org.wiremock"            %  "wiremock-standalone"     % "3.12.0"
   // format: ON
   ).map(_ % Test)
 }
