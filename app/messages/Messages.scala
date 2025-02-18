@@ -2540,5 +2540,19 @@ object Messages {
 
   }
 
+  object UserResearchBanner {
+
+    val `Tell us what you think about this service`: Message = Message(
+      english = "Tell us what you think about this service",
+      welsh   = "Rhowch wybod i ni beth yw eich barn am y gwasanaeth hwn"
+    )
+
+    val `Complete our short survey (opens in new tab)`: Message = Message(
+      english = "Complete our short survey (opens in new tab)",
+      welsh   = "Llenwch ein harolwg byr (yn agor tab newydd)"
+    )
+
+  }
+
 }
 

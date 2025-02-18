@@ -20,6 +20,7 @@ import actions.Actions
 import actionsmodel.EligibleJourneyRequest
 import config.AppConfig
 import essttp.journey.model.Journey.Stages
+import essttp.journey.model.PaymentPlanAnswers.{PaymentPlanAfterAffordability, PaymentPlanNoAffordability}
 import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
 import essttp.rootmodel.{AmountInPence, TaxRegime}
 import essttp.utils.Errors
@@ -84,6 +85,11 @@ class PaymentPlanSetUpController @Inject() (
     }
   }
 
+  private def wasAffordabilityJourney(journey: Journey.Stages.SubmittedArrangement): Boolean = journey.paymentPlanAnswers match {
+    case _: PaymentPlanNoAffordability    => false
+    case _: PaymentPlanAfterAffordability => true
+  }
+
   def displayConfirmationPage(journey: Journey.Stages.SubmittedArrangement)(implicit request: EligibleJourneyRequest[_]): Result = {
     val firstPaymentDay = journey.paymentPlanAnswers.selectedPaymentPlan.collections.regularCollections
       .sortBy(_.dueDate.value)
@@ -109,12 +115,17 @@ class PaymentPlanSetUpController @Inject() (
             paymentDay                  = firstPaymentDay,
             hasUpfrontPayment           = hasUpfrontPayment,
             wasEmailAddressRequired     = request.isEmailAddressRequired(appConfig),
-            regimeDigitalCorrespondence = correspondence
+            regimeDigitalCorrespondence = correspondence,
+            wasAffordabilityJourney     = wasAffordabilityJourney(journey)
           )
         )
       case TaxRegime.Epaye | TaxRegime.Vat | TaxRegime.Simp =>
         Ok(
-          views.paymentPlanSetUpPage(journey.arrangementResponse.customerReference.value, journey.taxRegime)
+          views.paymentPlanSetUpPage(
+            journey.arrangementResponse.customerReference.value,
+            journey.taxRegime,
+            wasAffordabilityJourney(journey)
+          )
         )
     }
 

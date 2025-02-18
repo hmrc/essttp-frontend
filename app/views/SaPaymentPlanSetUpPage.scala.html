@@ -35,7 +35,9 @@
         paymentDay: DueDate,
         hasUpfrontPayment: Boolean,
         wasEmailAddressRequired: Boolean,
-        regimeDigitalCorrespondence: Boolean
+        regimeDigitalCorrespondence: Boolean,
+        wasAffordabilityJourney: Boolean
+
 )(
         implicit
         request: Request[_]
@@ -61,7 +63,7 @@
     appConfig.Urls.personalTaxAccountUrl
 }
 
-@layout(pageTitle = Some(title), showBackLink = false) {
+@layout(pageTitle = Some(title), showBackLink = false, showUserResearchBanner = wasAffordabilityJourney) {
     @govukPanel(Panel(
         headingLevel = 1,
         title = Text(title),

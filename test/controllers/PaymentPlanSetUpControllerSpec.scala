@@ -40,6 +40,27 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
   private val expectedH1PaymentPlanPrintPage: String = "Your payment plan"
   private val expectedH1PaymentPlanPrintPageSa: String = "Confirmation of plan to pay £1,111.47"
 
+  def testUserResearchBannerIsPresent(doc: Document): Unit = {
+    val bannerContainer = doc.select("div.hmrc-user-research-banner > div.hmrc-user-research-banner__container")
+    val bannerText = bannerContainer.select("div.hmrc-user-research-banner__text")
+
+    val title = bannerText.select(".hmrc-user-research-banner__title")
+    title.text() shouldBe "Tell us what you think about this service"
+
+    val link = bannerText.select("a.hmrc-user-research-banner__link")
+    link.attr("href") shouldBe "https://s.userzoom.com/m/MSBDMTU1M1MxMDAw"
+    link.attr("rel") shouldBe "noopener noreferrer"
+    link.attr("target") shouldBe "_blank"
+    link.text() shouldBe "Complete our short survey (opens in new tab)"
+
+    ()
+  }
+
+  def testUserResearchBannerIsNotPresent(doc: Document): Unit = {
+    doc.select("div.hmrc-user-research-banner").isEmpty shouldBe true
+    ()
+  }
+
   List(
     Origins.Epaye.Bta,
     Origins.Vat.Bta,
@@ -172,6 +193,40 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
               ()
             }
           )
+        }
+
+        "show the user research banner if the user went through an affordability journey" in {
+          stubCommonActions()
+          EssttpBackend.SubmitArrangement.findJourney(origin, testCrypto, withAffordability = true)()
+
+          val result: Future[Result] = taxRegime match {
+            case TaxRegime.Epaye => controller.epayePaymentPlanSetUp(fakeRequest)
+            case TaxRegime.Vat   => controller.vatPaymentPlanSetUp(fakeRequest)
+            case TaxRegime.Sa    => sys.error("Not expecting SA here")
+            case TaxRegime.Simp  => controller.simpPaymentPlanSetUp(fakeRequest)
+          }
+          val pageContent: String = contentAsString(result)
+          val doc: Document = Jsoup.parse(pageContent)
+
+          doc.select(".govuk-panel__title").text() shouldBe "Your payment plan is set up"
+          testUserResearchBannerIsPresent(doc)
+        }
+
+        "not show the user research banner if the user did not go through an affordability journey" in {
+          stubCommonActions()
+          EssttpBackend.SubmitArrangement.findJourney(origin, testCrypto, withAffordability = false)()
+
+          val result: Future[Result] = taxRegime match {
+            case TaxRegime.Epaye => controller.epayePaymentPlanSetUp(fakeRequest)
+            case TaxRegime.Vat   => controller.vatPaymentPlanSetUp(fakeRequest)
+            case TaxRegime.Sa    => sys.error("Not expecting SA here")
+            case TaxRegime.Simp  => controller.simpPaymentPlanSetUp(fakeRequest)
+          }
+          val pageContent: String = contentAsString(result)
+          val doc: Document = Jsoup.parse(pageContent)
+
+          doc.select(".govuk-panel__title").text() shouldBe "Your payment plan is set up"
+          testUserResearchBannerIsNotPresent(doc)
         }
 
       }
@@ -428,6 +483,31 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
         isEmailAddressRequired = false
       )
     }
+
+    "show the user research banner if the user went through an affordability journey" in {
+      stubCommonActions()
+      EssttpBackend.SubmitArrangement.findJourney(Origins.Sa.Bta, testCrypto, withAffordability = true)()
+
+      val result: Future[Result] = controller.saPaymentPlanSetUp(fakeRequest)
+      val pageContent: String = contentAsString(result)
+      val doc: Document = Jsoup.parse(pageContent)
+
+      doc.select(".govuk-panel__title").text() shouldBe "Your payment plan is set up"
+      testUserResearchBannerIsPresent(doc)
+    }
+
+    "not show the user research banner if the user did not go through an affordability journey" in {
+      stubCommonActions()
+      EssttpBackend.SubmitArrangement.findJourney(Origins.Sa.Bta, testCrypto, withAffordability = false)()
+
+      val result: Future[Result] = controller.saPaymentPlanSetUp(fakeRequest)
+      val pageContent: String = contentAsString(result)
+      val doc: Document = Jsoup.parse(pageContent)
+
+      doc.select(".govuk-panel__title").text() shouldBe "Your payment plan is set up"
+      testUserResearchBannerIsNotPresent(doc)
+    }
+
   }
 
   s"[taxRegime: ${Origins.Sa.Bta.taxRegime.toString}] GET /payment-plan-print-summary should" - {
