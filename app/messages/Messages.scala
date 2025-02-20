@@ -2361,9 +2361,9 @@ object Messages {
       welsh   = s"${if (hasUpfrontPayment) "Caiff eich taliad ymlaen llaw ei gymryd cyn pen 6 diwrnod gwaith. " else ""}Caiff eich taliad nesaf ei gymryd ar $paymentDate neu’r diwrnod gwaith nesaf."
     )
 
-    val `Your tax account will be updated with your payment plan within 24 hours.`: Message = Message(
-      english = "Your tax account will be updated with your payment plan within 24 hours.",
-      welsh   = "Bydd eich cyfrif treth yn cael ei ddiweddaru gyda’ch cynllun talu cyn pen 24 awr."
+    val `HMRC records will be updated with your payment plan details within 24 hours.`: Message = Message(
+      english = "HMRC records will be updated with your payment plan details within 24 hours.",
+      welsh   = "Bydd cofnodion CThEF yn cael eu diweddaru gyda manylion eich cynllun talu cyn pen 24 awr."
     )
 
     val `Print a copy of your payment plan`: Message = Message(
