@@ -110,23 +110,18 @@
         Messages.Confirmation.`HMRC records will be updated with your payment plan details within 24 hours.`.show
     }</p>
 
-    <h2 class="govuk-heading-m">
-    @{
-        Messages.Confirmation.`If you need to change your payment plan`.show
-    }
-    </h2>
+    <h3 class="govuk-heading-m">@{Messages.Confirmation.`Call the debt management helpline`.show}</h3>
+    <p class="govuk-body">@{Html(Messages.Confirmation.`Telephone: 0300 123 1813`.show)}</p>
+    <p class="govuk-body">@{Html(Messages.Confirmation.`Outside UK: +44 2890 538 192`.show)}</p>
+    <p class="govuk-body">@{Messages.Confirmation.`Our phone line opening hours are:`.show}</p>
+    <p class="govuk-body">@{Messages.Confirmation.`Monday to Friday: 8am to 6pm`.show}</p>
+    <p class="govuk-body">@{Messages.Confirmation.`Closed weekends and bank holidays.`.show}</p>
 
-    <p class="govuk-body">@{
-        Messages.Confirmation.`Call the HMRC Helpline on 0300 123 1813.`.show
-    }</p>
+    <h3 class="govuk-heading-m">@{Messages.Confirmation.`Text service`.show}</h3>
+    <p class="govuk-body">@{Html(Messages.Confirmation.`Use Relay UK if you cannot hear or speak on the telephone...`(appConfig.Urls.relayUrl).show)}</p>
 
-    <p class="govuk-body">@{
-        Messages.NotEligible.`Our opening times are Monday to Friday, 8am to 6pm. We are closed on weekends and bank holidays.`.show
-    }</p>
-
-    <p class="govuk-body">@{Html(
-        Messages.ExtraSupport.`You can also use Relay UK...`(appConfig.Urls.relayUrl).show)
-    }</p>
+    <h3 class="govuk-heading-m">@{Messages.Confirmation.`If a health condition or personal circumstances make it difficult to contact us`.show}</h3>
+    <p class="govuk-body">@{Html(Messages.Confirmation.`Our guidance Get help from HMRC if you need extra support...`(appConfig.Urls.extraSupportUrl).show)}</p>
 
     <p class="govuk-body">
         <a href=@{buttonUrl} class="govuk-button" role="button" data-module="govuk-button">
