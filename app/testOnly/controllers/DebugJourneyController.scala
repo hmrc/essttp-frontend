@@ -29,14 +29,14 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class DebugJourneyController @Inject() (
-    as:               Actions,
-    mcc:              MessagesControllerComponents,
-    journeyConnector: JourneyConnector
-)(implicit ec: ExecutionContext)
-  extends FrontendController(mcc)
-  with Logging {
+  as:               Actions,
+  mcc:              MessagesControllerComponents,
+  journeyConnector: JourneyConnector
+)(using ExecutionContext)
+    extends FrontendController(mcc),
+      Logging {
 
-  implicit val cryptoFormat: CryptoFormat = CryptoFormat.NoOpCryptoFormat
+  given CryptoFormat = CryptoFormat.NoOpCryptoFormat
 
   val showJourney: Action[AnyContent] = as.default.async { implicit request =>
     if (hc.sessionId.isEmpty) {

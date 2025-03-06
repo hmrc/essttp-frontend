@@ -22,6 +22,6 @@ import scala.concurrent.Future
 
 object ImplicitConversions {
 
-  implicit def toFutureResult(result: Result): Future[Result] = Future.successful(result)
+  given Conversion[Result, Future[Result]] = Future.successful(_)
 
 }

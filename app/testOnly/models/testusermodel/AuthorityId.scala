@@ -16,11 +16,8 @@
 
 package testOnly.models.testusermodel
 
-/**
- * The same as CredId
- */
+/** The same as CredId
+  */
 final case class AuthorityId(value: String)
 
-object AuthorityId {
-
-}
+object AuthorityId {}

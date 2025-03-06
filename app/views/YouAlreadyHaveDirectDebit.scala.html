@@ -34,9 +34,9 @@
   overduePaymentRow: OverduePaymentRow
 )
 
-@(overduePayments: OverDuePayments, taxRegime: TaxRegime)(implicit request: Request[_])
+@(overduePayments: OverDuePayments, taxRegime: TaxRegime)(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.{languageFromRequest, legacyMessages}
 
 @title= @{Messages.DualChargeWarning.`You already have a Direct Debit`.show}
 @chargesInPlural = @{overduePayments.payments.size > 1}

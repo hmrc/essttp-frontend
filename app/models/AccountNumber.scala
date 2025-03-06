@@ -21,5 +21,5 @@ import play.api.libs.json.{Format, Json}
 final case class AccountNumber(value: String) extends AnyVal
 
 object AccountNumber {
-  implicit val format: Format[AccountNumber] = Json.valueFormat
+  given Format[AccountNumber] = Json.valueFormat
 }

@@ -24,9 +24,9 @@
         requestSupport: RequestSupport
 )
 
-@()(implicit request: AuthenticatedJourneyRequest[_])
+@()(implicit request: AuthenticatedJourneyRequest[?])
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 <p class="govuk-body">
 @{

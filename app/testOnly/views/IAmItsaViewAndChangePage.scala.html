@@ -14,8 +14,6 @@
  * limitations under the License.
  *@
 
-@import controllers.routes
-@import essttp.rootmodel.TaxRegime
 @import play.api.mvc.Request
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 
@@ -23,7 +21,7 @@
         testOnlyLayout: TestOnlyLayout,
         govukButton: GovukButton
 )
-@(journeyStartUrl: String)(implicit request: Request[_])
+@(journeyStartUrl: String)(implicit request: Request[?])
 
 @title = @{
     "I am ITSA View & Change Page"

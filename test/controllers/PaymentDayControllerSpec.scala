@@ -27,7 +27,7 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
-import testsupport.TdRequest.FakeRequestOps
+import testsupport.TdRequest._
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.EssttpBackend
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
@@ -39,7 +39,7 @@ import scala.jdk.CollectionConverters.{IterableHasAsScala, IteratorHasAsScala}
 class PaymentDayControllerSpec extends ItSpec {
 
   private val controller: PaymentDayController = app.injector.instanceOf[PaymentDayController]
-  private val expectedH1: String = "Which day do you want to pay each month?"
+  private val expectedH1: String               = "Which day do you want to pay each month?"
 
   def assertPaymentDayPageContent(doc: Document): Unit = {
     doc.select("#PaymentDay").size() shouldBe 1
@@ -61,318 +61,317 @@ class PaymentDayControllerSpec extends ItSpec {
     ("VAT", Origins.Vat.Bta, TaxRegime.Vat),
     ("SA", Origins.Sa.Bta, TaxRegime.Sa),
     ("SIMP", Origins.Simp.Pta, TaxRegime.Simp)
-  ).foreach {
-      case (regime, origin, taxRegime) =>
+  ).foreach { case (regime, origin, taxRegime) =>
+    "GET /which-day-do-you-want-to-pay-each-month" - {
 
-        "GET /which-day-do-you-want-to-pay-each-month" - {
+      s"[regime $regime] return an error when" - {
 
-          s"[regime $regime] return an error when" - {
+        "the journey is in state" - {
 
-            "the journey is in state" - {
+          "AfterStartedPegaCase" in {
+            stubCommonActions()
+            EssttpBackend.StartedPegaCase.findJourney(testCrypto, origin)()
 
-              "AfterStartedPegaCase" in {
-                stubCommonActions()
-                EssttpBackend.StartedPegaCase.findJourney(testCrypto, origin)()
+            val exception = intercept[UpstreamErrorResponse](await(controller.paymentDay(fakeRequest)))
 
-                val exception = intercept[UpstreamErrorResponse](await(controller.paymentDay(fakeRequest)))
-
-                exception.statusCode shouldBe INTERNAL_SERVER_ERROR
-                exception.message shouldBe "Not expecting to select payment plan option when started PEGA case"
-              }
-
-              "AfterCheckedPaymentPlan on an affordability journey" in {
-                stubCommonActions()
-                EssttpBackend.HasCheckedPlan.findJourney(withAffordability = true, testCrypto, origin)()
-
-                val exception = intercept[UpstreamErrorResponse](await(controller.paymentDay(fakeRequest)))
-
-                exception.statusCode shouldBe INTERNAL_SERVER_ERROR
-                exception.message shouldBe "Not expecting to select payment plan option when payment plan has been checked on affordability journey"
-              }
-
-            }
-
+            exception.statusCode shouldBe INTERNAL_SERVER_ERROR
+            exception.message shouldBe "Not expecting to select payment plan option when started PEGA case"
           }
 
-          s"[$regime journey] should return the 200 and the what day do you want to pay page when" - {
+          "AfterCheckedPaymentPlan on an affordability journey" in {
+            stubCommonActions()
+            EssttpBackend.HasCheckedPlan.findJourney(withAffordability = true, testCrypto, origin)()
 
-              def test(stubFindJourney: () => StubMapping): Unit = {
-                stubCommonActions()
-                stubFindJourney()
+            val exception = intercept[UpstreamErrorResponse](await(controller.paymentDay(fakeRequest)))
 
-                val result: Future[Result] = controller.paymentDay(fakeRequest)
-                val pageContent: String = contentAsString(result)
-                val doc: Document = Jsoup.parse(pageContent)
-
-                RequestAssertions.assertGetRequestOk(result)
-                ContentAssertions.commonPageChecks(
-                  doc,
-                  expectedH1              = expectedH1,
-                  shouldBackLinkBePresent = true,
-                  expectedSubmitUrl       = Some(routes.PaymentDayController.paymentDaySubmit.url),
-                  regimeBeingTested       = Some(taxRegime)
-                )
-
-                assertPaymentDayPageContent(doc)
-                ()
-              }
-
-            "the user has not checked their payment plan yet" in {
-              test(() => EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto, origin)())
-            }
-
-            "the user has checked their payment plan on a non-affordability journey" in {
-              test(() => EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, origin)())
-            }
+            exception.statusCode shouldBe INTERNAL_SERVER_ERROR
+            exception.message shouldBe "Not expecting to select payment plan option when payment plan has been checked on affordability journey"
           }
 
-          s"[$regime journey] should prepopulate the form" - {
-
-            "when user navigates back and they have a chosen the 28th of each month in their journey" in {
-              stubCommonActions()
-              EssttpBackend.DayOfMonth.findJourney(DayOfMonth(28), testCrypto, origin)()
-
-              val result: Future[Result] = controller.paymentDay(fakeRequest)
-              val doc: Document = Jsoup.parse(contentAsString(result))
-
-              RequestAssertions.assertGetRequestOk(result)
-
-              val radioInputs = doc.select(".govuk-radios__input").iterator().asScala.toList
-              radioInputs.size shouldBe 2
-              radioInputs(0).select("[checked]").`val`() shouldBe "28"
-              radioInputs(1).select("[checked]").isEmpty shouldBe true
-            }
-
-            "when user navigates back and they have a chosen a day different from the 28th of each month in their journey" in {
-              stubCommonActions()
-              EssttpBackend.DayOfMonth.findJourney(DayOfMonth(5), testCrypto, origin)()
-
-              val result: Future[Result] = controller.paymentDay(fakeRequest)
-              val doc: Document = Jsoup.parse(contentAsString(result))
-
-              RequestAssertions.assertGetRequestOk(result)
-
-              val radioInputs = doc.select(".govuk-radios__input").iterator().asScala.toList
-              radioInputs.size shouldBe 2
-              radioInputs(0).select("[checked]").isEmpty shouldBe true
-              radioInputs(1).select("[checked]").isEmpty shouldBe false
-
-              doc.select(".govuk-radios__conditional > .govuk-form-group > .govuk-input").`val`() shouldBe "5"
-
-            }
-
-          }
         }
 
-        "POST /which-day-do-you-want-to-pay-each-month" - {
+      }
 
-          s"[regime $regime] return an error when" - {
+      s"[$regime journey] should return the 200 and the what day do you want to pay page when" - {
 
-            "the journey is in state" - {
+        def test(stubFindJourney: () => StubMapping): Unit = {
+          stubCommonActions()
+          stubFindJourney()
 
-              "AfterStartedPegaCase" in {
-                stubCommonActions()
-                EssttpBackend.StartedPegaCase.findJourney(testCrypto, origin)()
+          val result: Future[Result] = controller.paymentDay(fakeRequest)
+          val pageContent: String    = contentAsString(result)
+          val doc: Document          = Jsoup.parse(pageContent)
 
-                val exception = intercept[UpstreamErrorResponse](await(controller.paymentDaySubmit(fakeRequest)))
+          RequestAssertions.assertGetRequestOk(result)
+          ContentAssertions.commonPageChecks(
+            doc,
+            expectedH1 = expectedH1,
+            shouldBackLinkBePresent = true,
+            expectedSubmitUrl = Some(routes.PaymentDayController.paymentDaySubmit.url),
+            regimeBeingTested = Some(taxRegime)
+          )
 
-                exception.statusCode shouldBe INTERNAL_SERVER_ERROR
-                exception.message shouldBe "Not expecting to select payment plan option when started PEGA case"
-              }
-
-              "AfterCheckedPaymentPlan on an affordability journey" in {
-                stubCommonActions()
-                EssttpBackend.HasCheckedPlan.findJourney(withAffordability = true, testCrypto, origin)()
-
-                val exception = intercept[UpstreamErrorResponse](await(controller.paymentDaySubmit(fakeRequest)))
-
-                exception.statusCode shouldBe INTERNAL_SERVER_ERROR
-                exception.message shouldBe "Not expecting to select payment plan option when payment plan has been checked on affordability journey"
-              }
-
-            }
-
-          }
-
-          s"[$regime journey] should update journey with dayOfMonth and redirect to instalment page when 28th selected when" - {
-
-              def test(stubFindJourney: () => StubMapping): Unit = {
-                stubCommonActions()
-                stubFindJourney()
-                EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(
-                  TdAll.journeyId,
-                  JourneyJsonTemplates.`Entered Day of Month`(DayOfMonth(28), origin)
-                )
-
-                val fakeRequest = FakeRequest(
-                  method = "POST",
-                  path   = "/which-day-do-you-want-to-pay-each-month"
-                ).withAuthToken()
-                  .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-                  .withFormUrlEncodedBody(("PaymentDay", "28"))
-
-                val result: Future[Result] = controller.paymentDaySubmit(fakeRequest)
-                status(result) shouldBe Status.SEE_OTHER
-                redirectLocation(result) shouldBe Some(PageUrls.retrieveStartDatesUrl)
-                EssttpBackend.DayOfMonth.verifyUpdateDayOfMonthRequest(TdAll.journeyId)
-                ()
-              }
-
-            "the user has not checked their payment plan yet" in {
-              test(() => EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto, origin)())
-            }
-
-            "the user has checked their payment plan on a non-affordability journey" in {
-              test(() => EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, origin)())
-            }
-          }
-
-          s"[$regime journey] should update journey with dayOfMonth and redirect to instalment page when other day selected" in {
-            stubCommonActions()
-            EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto, origin)()
-            EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(
-              TdAll.journeyId,
-              JourneyJsonTemplates.`Entered Day of Month`(DayOfMonth(1), origin)
-            )
-
-            val fakeRequest = FakeRequest(
-              method = "POST",
-              path   = "/which-day-do-you-want-to-pay-each-month"
-            ).withAuthToken()
-              .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-              .withFormUrlEncodedBody(
-                ("PaymentDay", "other"),
-                ("DifferentDay", "1")
-              )
-
-            val result: Future[Result] = controller.paymentDaySubmit(fakeRequest)
-            status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(PageUrls.retrieveStartDatesUrl)
-            EssttpBackend.DayOfMonth.verifyUpdateDayOfMonthRequest(TdAll.journeyId, TdAll.dayOfMonth(1))
-          }
-
-          s"[$regime journey] should allow for other days with spaces added to be submitted" in {
-            stubCommonActions()
-            EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto, origin)()
-            EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(
-              TdAll.journeyId,
-              JourneyJsonTemplates.`Entered Day of Month`(DayOfMonth(12), origin)
-            )
-
-            val fakeRequest = FakeRequest(
-              method = "POST",
-              path   = "/which-day-do-you-want-to-pay-each-month"
-            ).withAuthToken()
-              .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-              .withFormUrlEncodedBody(
-                ("PaymentDay", "other"),
-                ("DifferentDay", "1 2")
-              )
-
-            val result: Future[Result] = controller.paymentDaySubmit(fakeRequest)
-            status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(PageUrls.retrieveStartDatesUrl)
-            EssttpBackend.DayOfMonth.verifyUpdateDayOfMonthRequest(TdAll.journeyId, TdAll.dayOfMonth(12))
-          }
-
-          s"[$regime journey] should update journey with dayOfMonth and redirect to instalment page when other day selected and 28 entered" in {
-            stubCommonActions()
-            EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto, origin)()
-            EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(
-              TdAll.journeyId,
-              JourneyJsonTemplates.`Entered Day of Month`(DayOfMonth(28), origin)
-            )
-
-            val fakeRequest = FakeRequest(
-              method = "POST",
-              path   = "/which-day-do-you-want-to-pay-each-month"
-            ).withAuthToken()
-              .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-              .withFormUrlEncodedBody(
-                ("PaymentDay", "other"),
-                ("DifferentDay", "28")
-              )
-
-            val result: Future[Result] = controller.paymentDaySubmit(fakeRequest)
-            status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(PageUrls.retrieveStartDatesUrl)
-            EssttpBackend.DayOfMonth.verifyUpdateDayOfMonthRequest(TdAll.journeyId)
-          }
-
-          s"[$regime journey] should redirect to the specified url in session if the user came from a change link and did not change their answer" in {
-            stubCommonActions()
-            EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, origin)()
-            EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(
-              TdAll.journeyId,
-              JourneyJsonTemplates.`Has Checked Payment Plan - No Affordability`(origin)(testCrypto)
-            )
-
-            val fakeRequest = FakeRequest(
-              method = "POST",
-              path   = "/which-day-do-you-want-to-pay-each-month"
-            ).withAuthToken()
-              .withSession(SessionKeys.sessionId -> "IamATestSessionId", Routing.clickedChangeFromSessionKey -> "true")
-              .withFormUrlEncodedBody(("PaymentDay", "28"))
-
-            val result: Future[Result] = controller.paymentDaySubmit(fakeRequest)
-            status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(routes.PaymentScheduleController.checkPaymentSchedule.url)
-            session(result).get(Routing.clickedChangeFromSessionKey) shouldBe None
-
-            EssttpBackend.DayOfMonth.verifyUpdateDayOfMonthRequest(TdAll.journeyId)
-          }
-
-          forAll(Table(
-            ("Input Scenario", "inputValue", "expected error message"),
-            ("No option selected", "", "Enter the day you want to pay each month"),
-            ("Non number", "first", "The day you want to pay must be a number"),
-            ("Less than 1", "0", "The day you want to pay must be between 1 and 28"),
-            ("Greater than 28", "29", "The day you want to pay must be between 1 and 28"),
-            ("Decimal", "1.8", "The day you want to pay must be a number")
-          )) {
-            (scenario: String, inputValue: String, expectedErrorMessage: String) =>
-              s"[$regime journey] When input is: [ $scenario: [ $inputValue ]] error message should be $expectedErrorMessage" in {
-                stubCommonActions()
-                EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto, origin)()
-
-                val fakeRequest = FakeRequest(
-                  method = "POST",
-                  path   = "/which-day-do-you-want-to-pay-each-month"
-                ).withAuthToken()
-                  .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-                  .withFormUrlEncodedBody(
-                    ("PaymentDay", "other"),
-                    ("DifferentDay", inputValue)
-                  )
-
-                val result: Future[Result] = controller.paymentDaySubmit(fakeRequest)
-                val pageContent: String = contentAsString(result)
-                val doc: Document = Jsoup.parse(pageContent)
-
-                RequestAssertions.assertGetRequestOk(result)
-                ContentAssertions.commonPageChecks(
-                  doc,
-                  expectedH1              = expectedH1,
-                  shouldBackLinkBePresent = true,
-                  expectedSubmitUrl       = Some(routes.PaymentDayController.paymentDaySubmit.url),
-                  hasFormError            = true,
-                  regimeBeingTested       = Some(taxRegime)
-                )
-
-                assertPaymentDayPageContent(doc)
-
-                val radioInputs = doc.select(".govuk-radios__input").asScala.toList
-                radioInputs.size shouldBe 2
-                radioInputs(0).hasAttr("checked") shouldBe false
-                radioInputs(1).hasAttr("checked") shouldBe true
-
-                val errorSummary = doc.select(".govuk-error-summary")
-                val errorLink = errorSummary.select("a")
-                errorLink.text() shouldBe expectedErrorMessage
-                errorLink.attr("href") shouldBe "#DifferentDay"
-                EssttpBackend.MonthlyPaymentAmount.verifyNoneUpdateMonthlyAmountRequest(TdAll.journeyId)
-              }
-          }
+          assertPaymentDayPageContent(doc)
+          ()
         }
+
+        "the user has not checked their payment plan yet" in {
+          test(() => EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto, origin)())
+        }
+
+        "the user has checked their payment plan on a non-affordability journey" in {
+          test(() => EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, origin)())
+        }
+      }
+
+      s"[$regime journey] should prepopulate the form" - {
+
+        "when user navigates back and they have a chosen the 28th of each month in their journey" in {
+          stubCommonActions()
+          EssttpBackend.DayOfMonth.findJourney(DayOfMonth(28), testCrypto, origin)()
+
+          val result: Future[Result] = controller.paymentDay(fakeRequest)
+          val doc: Document          = Jsoup.parse(contentAsString(result))
+
+          RequestAssertions.assertGetRequestOk(result)
+
+          val radioInputs = doc.select(".govuk-radios__input").iterator().asScala.toList
+          radioInputs.size shouldBe 2
+          radioInputs(0).select("[checked]").`val`() shouldBe "28"
+          radioInputs(1).select("[checked]").isEmpty shouldBe true
+        }
+
+        "when user navigates back and they have a chosen a day different from the 28th of each month in their journey" in {
+          stubCommonActions()
+          EssttpBackend.DayOfMonth.findJourney(DayOfMonth(5), testCrypto, origin)()
+
+          val result: Future[Result] = controller.paymentDay(fakeRequest)
+          val doc: Document          = Jsoup.parse(contentAsString(result))
+
+          RequestAssertions.assertGetRequestOk(result)
+
+          val radioInputs = doc.select(".govuk-radios__input").iterator().asScala.toList
+          radioInputs.size shouldBe 2
+          radioInputs(0).select("[checked]").isEmpty shouldBe true
+          radioInputs(1).select("[checked]").isEmpty shouldBe false
+
+          doc.select(".govuk-radios__conditional > .govuk-form-group > .govuk-input").`val`() shouldBe "5"
+
+        }
+
+      }
     }
+
+    "POST /which-day-do-you-want-to-pay-each-month" - {
+
+      s"[regime $regime] return an error when" - {
+
+        "the journey is in state" - {
+
+          "AfterStartedPegaCase" in {
+            stubCommonActions()
+            EssttpBackend.StartedPegaCase.findJourney(testCrypto, origin)()
+
+            val exception = intercept[UpstreamErrorResponse](await(controller.paymentDaySubmit(fakeRequest)))
+
+            exception.statusCode shouldBe INTERNAL_SERVER_ERROR
+            exception.message shouldBe "Not expecting to select payment plan option when started PEGA case"
+          }
+
+          "AfterCheckedPaymentPlan on an affordability journey" in {
+            stubCommonActions()
+            EssttpBackend.HasCheckedPlan.findJourney(withAffordability = true, testCrypto, origin)()
+
+            val exception = intercept[UpstreamErrorResponse](await(controller.paymentDaySubmit(fakeRequest)))
+
+            exception.statusCode shouldBe INTERNAL_SERVER_ERROR
+            exception.message shouldBe "Not expecting to select payment plan option when payment plan has been checked on affordability journey"
+          }
+
+        }
+
+      }
+
+      s"[$regime journey] should update journey with dayOfMonth and redirect to instalment page when 28th selected when" - {
+
+        def test(stubFindJourney: () => StubMapping): Unit = {
+          stubCommonActions()
+          stubFindJourney()
+          EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(
+            TdAll.journeyId,
+            JourneyJsonTemplates.`Entered Day of Month`(DayOfMonth(28), origin)
+          )
+
+          val fakeRequest = FakeRequest(
+            method = "POST",
+            path = "/which-day-do-you-want-to-pay-each-month"
+          ).withAuthToken()
+            .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+            .withFormUrlEncodedBody(("PaymentDay", "28"))
+
+          val result: Future[Result] = controller.paymentDaySubmit(fakeRequest)
+          status(result) shouldBe Status.SEE_OTHER
+          redirectLocation(result) shouldBe Some(PageUrls.retrieveStartDatesUrl)
+          EssttpBackend.DayOfMonth.verifyUpdateDayOfMonthRequest(TdAll.journeyId)
+          ()
+        }
+
+        "the user has not checked their payment plan yet" in {
+          test(() => EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto, origin)())
+        }
+
+        "the user has checked their payment plan on a non-affordability journey" in {
+          test(() => EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, origin)())
+        }
+      }
+
+      s"[$regime journey] should update journey with dayOfMonth and redirect to instalment page when other day selected" in {
+        stubCommonActions()
+        EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto, origin)()
+        EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(
+          TdAll.journeyId,
+          JourneyJsonTemplates.`Entered Day of Month`(DayOfMonth(1), origin)
+        )
+
+        val fakeRequest = FakeRequest(
+          method = "POST",
+          path = "/which-day-do-you-want-to-pay-each-month"
+        ).withAuthToken()
+          .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+          .withFormUrlEncodedBody(
+            ("PaymentDay", "other"),
+            ("DifferentDay", "1")
+          )
+
+        val result: Future[Result] = controller.paymentDaySubmit(fakeRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(PageUrls.retrieveStartDatesUrl)
+        EssttpBackend.DayOfMonth.verifyUpdateDayOfMonthRequest(TdAll.journeyId, TdAll.dayOfMonth(1))
+      }
+
+      s"[$regime journey] should allow for other days with spaces added to be submitted" in {
+        stubCommonActions()
+        EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto, origin)()
+        EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(
+          TdAll.journeyId,
+          JourneyJsonTemplates.`Entered Day of Month`(DayOfMonth(12), origin)
+        )
+
+        val fakeRequest = FakeRequest(
+          method = "POST",
+          path = "/which-day-do-you-want-to-pay-each-month"
+        ).withAuthToken()
+          .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+          .withFormUrlEncodedBody(
+            ("PaymentDay", "other"),
+            ("DifferentDay", "1 2")
+          )
+
+        val result: Future[Result] = controller.paymentDaySubmit(fakeRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(PageUrls.retrieveStartDatesUrl)
+        EssttpBackend.DayOfMonth.verifyUpdateDayOfMonthRequest(TdAll.journeyId, TdAll.dayOfMonth(12))
+      }
+
+      s"[$regime journey] should update journey with dayOfMonth and redirect to instalment page when other day selected and 28 entered" in {
+        stubCommonActions()
+        EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto, origin)()
+        EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(
+          TdAll.journeyId,
+          JourneyJsonTemplates.`Entered Day of Month`(DayOfMonth(28), origin)
+        )
+
+        val fakeRequest = FakeRequest(
+          method = "POST",
+          path = "/which-day-do-you-want-to-pay-each-month"
+        ).withAuthToken()
+          .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+          .withFormUrlEncodedBody(
+            ("PaymentDay", "other"),
+            ("DifferentDay", "28")
+          )
+
+        val result: Future[Result] = controller.paymentDaySubmit(fakeRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(PageUrls.retrieveStartDatesUrl)
+        EssttpBackend.DayOfMonth.verifyUpdateDayOfMonthRequest(TdAll.journeyId)
+      }
+
+      s"[$regime journey] should redirect to the specified url in session if the user came from a change link and did not change their answer" in {
+        stubCommonActions()
+        EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, origin)()
+        EssttpBackend.DayOfMonth.stubUpdateDayOfMonth(
+          TdAll.journeyId,
+          JourneyJsonTemplates.`Has Checked Payment Plan - No Affordability`(origin)(using testCrypto)
+        )
+
+        val fakeRequest = FakeRequest(
+          method = "POST",
+          path = "/which-day-do-you-want-to-pay-each-month"
+        ).withAuthToken()
+          .withSession(SessionKeys.sessionId -> "IamATestSessionId", Routing.clickedChangeFromSessionKey -> "true")
+          .withFormUrlEncodedBody(("PaymentDay", "28"))
+
+        val result: Future[Result] = controller.paymentDaySubmit(fakeRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.PaymentScheduleController.checkPaymentSchedule.url)
+        session(result).get(Routing.clickedChangeFromSessionKey) shouldBe None
+
+        EssttpBackend.DayOfMonth.verifyUpdateDayOfMonthRequest(TdAll.journeyId)
+      }
+
+      forAll(
+        Table(
+          ("Input Scenario", "inputValue", "expected error message"),
+          ("No option selected", "", "Enter the day you want to pay each month"),
+          ("Non number", "first", "The day you want to pay must be a number"),
+          ("Less than 1", "0", "The day you want to pay must be between 1 and 28"),
+          ("Greater than 28", "29", "The day you want to pay must be between 1 and 28"),
+          ("Decimal", "1.8", "The day you want to pay must be a number")
+        )
+      ) { (scenario: String, inputValue: String, expectedErrorMessage: String) =>
+        s"[$regime journey] When input is: [ $scenario: [ $inputValue ]] error message should be $expectedErrorMessage" in {
+          stubCommonActions()
+          EssttpBackend.MonthlyPaymentAmount.findJourney(testCrypto, origin)()
+
+          val fakeRequest = FakeRequest(
+            method = "POST",
+            path = "/which-day-do-you-want-to-pay-each-month"
+          ).withAuthToken()
+            .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+            .withFormUrlEncodedBody(
+              ("PaymentDay", "other"),
+              ("DifferentDay", inputValue)
+            )
+
+          val result: Future[Result] = controller.paymentDaySubmit(fakeRequest)
+          val pageContent: String    = contentAsString(result)
+          val doc: Document          = Jsoup.parse(pageContent)
+
+          RequestAssertions.assertGetRequestOk(result)
+          ContentAssertions.commonPageChecks(
+            doc,
+            expectedH1 = expectedH1,
+            shouldBackLinkBePresent = true,
+            expectedSubmitUrl = Some(routes.PaymentDayController.paymentDaySubmit.url),
+            hasFormError = true,
+            regimeBeingTested = Some(taxRegime)
+          )
+
+          assertPaymentDayPageContent(doc)
+
+          val radioInputs = doc.select(".govuk-radios__input").asScala.toList
+          radioInputs.size shouldBe 2
+          radioInputs(0).hasAttr("checked") shouldBe false
+          radioInputs(1).hasAttr("checked") shouldBe true
+
+          val errorSummary = doc.select(".govuk-error-summary")
+          val errorLink    = errorSummary.select("a")
+          errorLink.text() shouldBe expectedErrorMessage
+          errorLink.attr("href") shouldBe "#DifferentDay"
+          EssttpBackend.MonthlyPaymentAmount.verifyNoneUpdateMonthlyAmountRequest(TdAll.journeyId)
+        }
+      }
+    }
+  }
 }

@@ -29,9 +29,9 @@
         requestSupport: RequestSupport
 )
 
-@(localDateTime: LocalDateTime)(implicit request: Request[_])
+@(localDateTime: LocalDateTime)(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 @lockOutExpiryTimeString = @{
     val dateString = s"${localDateTime.getDayOfMonth.toString} ${DateMessages.monthName(localDateTime.getMonthValue).show} ${localDateTime.getYear.toString}"

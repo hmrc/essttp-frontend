@@ -28,9 +28,9 @@
 @(
   pageh1: Message,
   leadingContent: Html
-)(implicit request: AuthenticatedJourneyRequest[_])
+)(implicit request: AuthenticatedJourneyRequest[?])
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 @layout(pageTitle = Some(pageh1.show), showBackLink = false) {
     <h1 class="govuk-heading-xl">@{pageh1.show}</h1>

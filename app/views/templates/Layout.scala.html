@@ -26,7 +26,6 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
 @import views.html.helper.CSPNonce
-@import views.html.templates.UserResearchBanner
 
 @this(
         appConfig: AppConfig,
@@ -60,7 +59,7 @@
   request: RequestHeader
 )
 
-@import requestSupport._
+@import requestSupport.{languageFromRequest, legacyMessages}
 
 @showSignOut = @{ showSignOutOverride.getOrElse(RequestSupport.isLoggedIn) }
 
@@ -94,7 +93,7 @@
         tag = Some(Tag(
             content = Text(Messages.ServicePhase.beta.show)
         )),
-        content = HtmlContent(Messages.ServicePhase.bannerText(appConfig.Urls.betaFeedbackUrl(request)).show)
+        content = HtmlContent(Messages.ServicePhase.bannerText(appConfig.Urls.betaFeedbackUrl(using request)).show)
     ))
 
     @if(showUserResearchBanner) {
@@ -103,13 +102,12 @@
 
     @hmrcLanguageSelectHelper()
 
-    @{
-       if(showBackLink) {
-           backLinkUrlOverride.fold(
-               govukBackLink(BackLink(href = "#", classes = "js-visible", content = Text(Messages.back.show)))
-           )(url => govukBackLink(BackLink(href = url, content = Text(Messages.back.show))))
-       }
+    @if(showBackLink) {
+        @backLinkUrlOverride.fold(
+            govukBackLink(BackLink(href = "#", classes = "js-visible", content = Text(Messages.back.show)))
+        )(url => govukBackLink(BackLink(href = url, content = Text(Messages.back.show))))
     }
+
   </div>
 }
 
@@ -125,8 +123,8 @@
 
 @taxRegime = @{
     (request: AnyRef) match {
-        case r: AuthenticatedJourneyRequest[_] => Some(r.journey.taxRegime)
-        case r: BarsLockedOutRequest[_] => Some(r.journey.taxRegime)
+        case r: AuthenticatedJourneyRequest[?] => Some(r.journey.taxRegime)
+        case r: BarsLockedOutRequest[?] => Some(r.journey.taxRegime)
         case _ => fallBackTaxRegime
     }
 }

@@ -23,5 +23,5 @@ import java.time.LocalDate
 final case class AuditCollections(collectionNumber: Int, amount: BigDecimal, paymentDate: LocalDate)
 
 object AuditCollections {
-  implicit val writes: OWrites[AuditCollections] = Json.writes
+  given OWrites[AuditCollections] = Json.writes
 }

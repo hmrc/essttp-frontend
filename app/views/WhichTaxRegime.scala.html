@@ -31,9 +31,9 @@
   requestSupport: RequestSupport
 )
 
-@(form: Form[TaxRegime], saEnabled: Boolean, simpEnabled: Boolean)(implicit request: Request[_])
+@(form: Form[TaxRegime], saEnabled: Boolean, simpEnabled: Boolean)(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.{languageFromRequest, legacyMessages}
 
 @key = @{
     "WhichTaxRegime"

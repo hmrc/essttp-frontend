@@ -19,7 +19,7 @@ package testOnly.models.testusermodel
 import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
 
 final case class EpayeEnrolment(
-    taxOfficeNumber:    TaxOfficeNumber,
-    taxOfficeReference: TaxOfficeReference,
-    enrolmentStatus:    EnrolmentStatus
+  taxOfficeNumber:    TaxOfficeNumber,
+  taxOfficeReference: TaxOfficeReference,
+  enrolmentStatus:    EnrolmentStatus
 )

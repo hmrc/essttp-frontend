@@ -21,9 +21,9 @@ import actionsmodel.AuthenticatedRequest
 import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheckF
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
-import essttp.journey.model.{Journey, PaymentPlanAnswers}
+import essttp.journey.model.{Journey, JourneyStage, PaymentPlanAnswers}
 import essttp.utils.Errors
-import play.api.mvc._
+import play.api.mvc.*
 import services.{DatesService, JourneyService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.{JourneyLogger, Logging}
@@ -33,57 +33,70 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class DatesApiController @Inject() (
-    as:             Actions,
-    mcc:            MessagesControllerComponents,
-    datesService:   DatesService,
-    journeyService: JourneyService
-)(implicit ec: ExecutionContext, appConfig: AppConfig)
-  extends FrontendController(mcc)
-  with Logging {
+  as:             Actions,
+  mcc:            MessagesControllerComponents,
+  datesService:   DatesService,
+  journeyService: JourneyService
+)(using ExecutionContext, AppConfig)
+    extends FrontendController(mcc),
+      Logging {
 
   val retrieveExtremeDates: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     request.journey match {
-      case j: Journey.BeforeAnsweredCanPayUpfront        => logErrorAndRouteToDefaultPageF(j)
-      case j: Journey.Stages.EnteredUpfrontPaymentAmount => getExtremeDatesAndUpdateJourney(Left(j))
-      case j: Journey.Stages.AnsweredCanPayUpfront       => getExtremeDatesAndUpdateJourney(Right(j))
-      case j: Journey.AfterExtremeDatesResponse =>
+      case j: JourneyStage.BeforeAnsweredCanPayUpfront => logErrorAndRouteToDefaultPageF(j)
+      case j: Journey.EnteredUpfrontPaymentAmount      => getExtremeDatesAndUpdateJourney(Left(j))
+      case j: Journey.AnsweredCanPayUpfront            => getExtremeDatesAndUpdateJourney(Right(j))
+      case j: JourneyStage.AfterExtremeDatesResponse   =>
         JourneyLogger.info("ExtremeDates already determined, skipping.") // we will want to update the journey perhaps?
         finalStateCheckF(j, Redirect(routes.DetermineAffordabilityController.determineAffordability))
     }
   }
 
   def getExtremeDatesAndUpdateJourney(
-      journey: Either[Journey.Stages.EnteredUpfrontPaymentAmount, Journey.Stages.AnsweredCanPayUpfront]
-  )(implicit request: AuthenticatedRequest[_]): Future[Result] = {
+    journey: Either[Journey.EnteredUpfrontPaymentAmount, Journey.AnsweredCanPayUpfront]
+  )(using AuthenticatedRequest[?]): Future[Result] = {
     val j = journey.merge
     for {
       extremeDatesResponse <- datesService.extremeDates(j)
-      updatedJourney <- journeyService.updateExtremeDatesResult(j.id, extremeDatesResponse)
-    } yield Routing.redirectToNext(routes.DatesApiController.retrieveExtremeDates, updatedJourney, submittedValueUnchanged = false)
+      updatedJourney       <- journeyService.updateExtremeDatesResult(j.id, extremeDatesResponse)
+    } yield Routing.redirectToNext(
+      routes.DatesApiController.retrieveExtremeDates,
+      updatedJourney,
+      submittedValueUnchanged = false
+    )
   }
 
   val retrieveStartDates: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     request.journey match {
-      case j: Journey.BeforeEnteredDayOfMonth => logErrorAndRouteToDefaultPageF(j)
-      case _: Journey.AfterStartedPegaCase    => Errors.throwServerErrorException("Not expecting to retrieve start dates when started PEGA case")
-      case j: Journey.AfterEnteredDayOfMonth  => finalStateCheckF(j, getStartDatesAndUpdateJourney(Left(j)))
-      case j: Journey.AfterCheckedPaymentPlan =>
+      case j: JourneyStage.BeforeEnteredDayOfMonth => logErrorAndRouteToDefaultPageF(j)
+      case _: JourneyStage.AfterStartedPegaCase    =>
+        Errors.throwServerErrorException("Not expecting to retrieve start dates when started PEGA case")
+      case j: JourneyStage.AfterEnteredDayOfMonth  => finalStateCheckF(j, getStartDatesAndUpdateJourney(Left(j)))
+      case j: JourneyStage.AfterCheckedPaymentPlan =>
         j.paymentPlanAnswers match {
-          case p: PaymentPlanAnswers.PaymentPlanNoAffordability =>
+          case p: PaymentPlanAnswers.PaymentPlanNoAffordability    =>
             finalStateCheckF(j, getStartDatesAndUpdateJourney(Right(j -> p)))
           case _: PaymentPlanAnswers.PaymentPlanAfterAffordability =>
-            Errors.throwServerErrorException("Not expecting to retrieve start dates after checked payment plan on affordability journey")
+            Errors.throwServerErrorException(
+              "Not expecting to retrieve start dates after checked payment plan on affordability journey"
+            )
         }
     }
   }
 
   private def getStartDatesAndUpdateJourney(
-      journey: Either[Journey.AfterEnteredDayOfMonth, (Journey.AfterCheckedPaymentPlan, PaymentPlanAnswers.PaymentPlanNoAffordability)]
-  )(implicit request: AuthenticatedRequest[_]): Future[Result] = {
+    journey: Either[
+      JourneyStage.AfterEnteredDayOfMonth & Journey,
+      (JourneyStage.AfterCheckedPaymentPlan & Journey, PaymentPlanAnswers.PaymentPlanNoAffordability)
+    ]
+  )(using AuthenticatedRequest[?]): Future[Result] =
     for {
       startDatesResponse <- datesService.startDates(journey)
-      updatedJourney <- journeyService.updateStartDates(journey.map(_._1).merge.id, startDatesResponse)
-    } yield Routing.redirectToNext(routes.DatesApiController.retrieveStartDates, updatedJourney, submittedValueUnchanged = false)
-  }
+      updatedJourney     <- journeyService.updateStartDates(journey.map[Journey](_._1).merge.id, startDatesResponse)
+    } yield Routing.redirectToNext(
+      routes.DatesApiController.retrieveStartDates,
+      updatedJourney,
+      submittedValueUnchanged = false
+    )
 
 }

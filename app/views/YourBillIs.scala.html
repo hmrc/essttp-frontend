@@ -32,9 +32,9 @@
   overduePaymentRow: OverduePaymentRow
 )
 
-@(overduePayments: OverDuePayments, taxRegime: TaxRegime)(implicit request: Request[_])
+@(overduePayments: OverDuePayments, taxRegime: TaxRegime)(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.{languageFromRequest, legacyMessages}
 
 @title= @{Messages.YourBill.yourBillIs(overduePayments.total, taxRegime).show}
 

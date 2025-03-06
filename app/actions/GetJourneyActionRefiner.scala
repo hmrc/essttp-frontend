@@ -20,7 +20,7 @@ import actionsmodel.{AuthenticatedJourneyRequest, AuthenticatedRequest}
 import cats.data.OptionT
 import cats.syntax.traverse._
 import connectors.EssttpBackendConnector
-import controllers.support.RequestSupport.hc
+import requests.RequestSupport.hc
 import essttp.journey.JourneyConnector
 import essttp.journey.model.Journey
 import essttp.rootmodel.TaxRegime
@@ -32,22 +32,32 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class GetJourneyActionRefiner @Inject() (
-    journeyConnector:       JourneyConnector,
-    essttpBackendConnector: EssttpBackendConnector
-)(
-    implicit
-    ec: ExecutionContext
+  journeyConnector:       JourneyConnector,
+  essttpBackendConnector: EssttpBackendConnector
+)(using
+  ec:                     ExecutionContext
 ) extends ActionRefiner[AuthenticatedRequest, AuthenticatedJourneyRequest] {
 
   private val logger = Logger(getClass)
 
-  override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, AuthenticatedJourneyRequest[A]]] = {
-    implicit val r: Request[A] = request
+  override protected def refine[A](
+    request: AuthenticatedRequest[A]
+  ): Future[Either[Result, AuthenticatedJourneyRequest[A]]] = {
+    given Request[A] = request
 
-    findJourney(request).map{
+    findJourney(request).map {
       case Some(journey) =>
-        Right(new AuthenticatedJourneyRequest(request, request.enrolments, journey, request.ggCredId, request.nino, request.lang))
-      case None =>
+        Right(
+          new AuthenticatedJourneyRequest(
+            request,
+            request.enrolments,
+            journey,
+            request.ggCredId,
+            request.nino,
+            request.lang
+          )
+        )
+      case None          =>
         logger.error(s"No journey found for sessionId: [ ${hc.sessionId.toString} ]")
         Left(Results.Redirect(controllers.routes.WhichTaxRegimeController.whichTaxRegime))
     }
@@ -55,7 +65,7 @@ class GetJourneyActionRefiner @Inject() (
 
   // if no journey is found for the session id, the user have have just come back from PEGA. In this case the
   // session id would change - see if the backend can reconstruct the session data saved just before going to PEGA
-  private def findJourney[A](request: AuthenticatedRequest[A])(implicit rh: Request[_]): Future[Option[Journey]] =
+  private def findJourney[A](request: AuthenticatedRequest[A])(using Request[?]): Future[Option[Journey]] =
     OptionT(journeyConnector.findLatestJourneyBySessionId())
       .orElseF(
         taxRegime(request)

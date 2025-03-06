@@ -18,7 +18,7 @@ package models.bars
 
 import enumeratum._
 
-sealed trait BarsTypeOfBankAccount extends EnumEntry
+sealed trait BarsTypeOfBankAccount extends EnumEntry derives CanEqual
 
 object BarsTypesOfBankAccount extends Enum[BarsTypeOfBankAccount] {
 

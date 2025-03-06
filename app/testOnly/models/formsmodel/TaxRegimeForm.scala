@@ -26,10 +26,10 @@ object TaxRegimeForm {
   val form: Form[TaxRegime] = {
     val taxRegimeMapping: Mapping[TaxRegime] = Forms.of(
       EnumFormatter.format(
-        `enum`                  = TaxRegime,
-        errorMessageIfMissing   = "Select a tax regime",
+        `enum` = TaxRegime,
+        errorMessageIfMissing = "Select a tax regime",
         errorMessageIfEnumError = "Select a tax regime",
-        insensitive             = true
+        insensitive = true
       )
     )
 

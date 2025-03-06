@@ -39,11 +39,11 @@
         paymentPlan: PaymentPlan
 )(
         implicit
-        request: Request[_],
+        request: Request[?],
         ord: Ordering[LocalDate]
 )
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 @title = @{
     Messages.PrintSummary.`Your payment plan`.show

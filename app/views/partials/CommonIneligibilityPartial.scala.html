@@ -14,21 +14,19 @@
  * limitations under the License.
  *@
 
-@import cats.syntax.eq._
 @import essttp.rootmodel.TaxRegime
 @import messages.Messages
 @import models.Languages.English
 @import play.api.mvc.Request
 @import play.twirl.api.Html
 @import requests.RequestSupport
-@import views.html.partials.{IfCallingFromOutsideUKPartial, IfYouNeedExtraSupportPartial}
 
 @this(requestSupport: RequestSupport, ifYouNeedExtraSupportPartial: IfYouNeedExtraSupportPartial, ifCallingFromOutsideUKPartial: IfCallingFromOutsideUKPartial)
 
 
-@(taxRegime: TaxRegime, showCallPreparationTips: Boolean = true, showFullListPreparationTips: Boolean = true, showWereLikelyToAsk: Boolean = true)(implicit request: Request[_])
+@(taxRegime: TaxRegime, showCallPreparationTips: Boolean = true, showFullListPreparationTips: Boolean = true, showWereLikelyToAsk: Boolean = true)(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 @makeSureYouHaveItems = @{
     taxRegime match {
@@ -92,7 +90,7 @@
 
     @ifYouNeedExtraSupportPartial()
 
-    @if(languageFromRequest === English) {
+    @if(languageFromRequest == English) {
         @ifCallingFromOutsideUKPartial()
     }
 

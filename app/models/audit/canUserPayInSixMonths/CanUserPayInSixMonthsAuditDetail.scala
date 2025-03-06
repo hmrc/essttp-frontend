@@ -22,19 +22,18 @@ import models.audit.AuditDetail
 import play.api.libs.json.{Json, OWrites}
 
 final case class CanUserPayInSixMonthsAuditDetail(
-    regime:             String,
-    taxIdentifier:      String,
-    pegaCaseId:         Option[PegaCaseId],
-    correlationId:      CorrelationId,
-    pegaCorrelationId:  Option[String],
-    userEnteredDetails: UserEnteredDetails
-)
-  extends AuditDetail {
+  regime:             String,
+  taxIdentifier:      String,
+  pegaCaseId:         Option[PegaCaseId],
+  correlationId:      CorrelationId,
+  pegaCorrelationId:  Option[String],
+  userEnteredDetails: UserEnteredDetails
+) extends AuditDetail {
 
   override val auditType: String = "CanUserPayInSixMonths"
 
 }
 
 object CanUserPayInSixMonthsAuditDetail {
-  implicit val writes: OWrites[CanUserPayInSixMonthsAuditDetail] = Json.writes
+  given OWrites[CanUserPayInSixMonthsAuditDetail] = Json.writes
 }

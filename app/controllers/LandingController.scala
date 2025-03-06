@@ -31,13 +31,14 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class LandingController @Inject() (
-    as:               Actions,
-    journeyConnector: JourneyConnector,
-    mcc:              MessagesControllerComponents,
-    views:            Views,
-    appConfig:        AppConfig
-)(implicit ec: ExecutionContext) extends FrontendController(mcc)
-  with Logging {
+  as:               Actions,
+  journeyConnector: JourneyConnector,
+  mcc:              MessagesControllerComponents,
+  views:            Views,
+  appConfig:        AppConfig
+)(using ExecutionContext)
+    extends FrontendController(mcc),
+      Logging {
 
   val epayeLandingPage: Action[AnyContent] = as.default.async { implicit request =>
     checkNotShuttered(TaxRegime.Epaye) {
@@ -69,7 +70,7 @@ class LandingController @Inject() (
       as.default(_ => Redirect(appConfig.Urls.saSuppUrl))
     }
 
-  val simpLandingPage: Action[AnyContent] = {
+  val simpLandingPage: Action[AnyContent] =
     if (appConfig.simpEnabled) {
       as.default.async { implicit request =>
         checkNotShuttered(TaxRegime.Simp) {
@@ -83,34 +84,37 @@ class LandingController @Inject() (
         throw new RuntimeException("Simple Assessment is not available")
       }
     }
+
+  val epayeLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async {
+    implicit request =>
+      checkNotShuttered(TaxRegime.Epaye) {
+        handleLandingPageContinue(routes.StartJourneyController.startDetachedEpayeJourney)
+      }
   }
 
-  val epayeLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
-    checkNotShuttered(TaxRegime.Epaye) {
-      handleLandingPageContinue(routes.StartJourneyController.startDetachedEpayeJourney)
-    }
+  val vatLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async {
+    implicit request =>
+      checkNotShuttered(TaxRegime.Vat) {
+        handleLandingPageContinue(routes.StartJourneyController.startDetachedVatJourney)
+      }
   }
 
-  val vatLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
-    checkNotShuttered(TaxRegime.Vat) {
-      handleLandingPageContinue(routes.StartJourneyController.startDetachedVatJourney)
-    }
+  val saLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async {
+    implicit request =>
+      checkNotShuttered(TaxRegime.Sa) {
+        handleLandingPageContinue(routes.StartJourneyController.startDetachedSaJourney)
+      }
   }
 
-  val saLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
-    checkNotShuttered(TaxRegime.Sa) {
-      handleLandingPageContinue(routes.StartJourneyController.startDetachedSaJourney)
-    }
+  val simpLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async {
+    implicit request =>
+      checkNotShuttered(TaxRegime.Simp) {
+        handleLandingPageContinue(routes.StartJourneyController.startDetachedSimpJourney)
+      }
   }
 
-  val simpLandingPageContinue: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
-    checkNotShuttered(TaxRegime.Simp) {
-      handleLandingPageContinue(routes.StartJourneyController.startDetachedSimpJourney)
-    }
-  }
-
-  private def handleLandingPageContinue(startDetachedJourney: Call)(implicit r: Request[_]): Future[Result] =
-    journeyConnector.findLatestJourneyBySessionId().map{
+  private def handleLandingPageContinue(startDetachedJourney: Call)(using r: Request[?]): Future[Result] =
+    journeyConnector.findLatestJourneyBySessionId().map {
       case None =>
         Redirect(startDetachedJourney).withSession(
           r.session + (LandingController.hasSeenLandingPageSessionKey -> "true")
@@ -120,12 +124,13 @@ class LandingController @Inject() (
         Redirect(routes.DetermineTaxIdController.determineTaxId)
     }
 
-  private def checkNotShuttered(taxRegime: TaxRegime)(f: => Future[Result])(implicit request: Request[_]): Future[Result] =
+  private def checkNotShuttered(taxRegime: TaxRegime)(f: => Future[Result])(using Request[?]): Future[Result] =
     if (appConfig.shutteredTaxRegimes.contains(taxRegime)) Future.successful(Ok(views.shuttered())) else f
 
-  private def getBackUrl()(implicit request: Request[AnyContent]): Future[Option[BackUrl]] =
+  private def getBackUrl()(using Request[AnyContent]): Future[Option[BackUrl]] =
     if (RequestSupport.isLoggedIn) {
-      journeyConnector.findLatestJourneyBySessionId()
+      journeyConnector
+        .findLatestJourneyBySessionId()
         .map(maybeJourney => maybeJourney.flatMap(_.backUrl))
     } else {
       Future.successful[Option[BackUrl]](None)

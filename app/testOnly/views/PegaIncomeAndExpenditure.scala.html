@@ -21,7 +21,6 @@
 @import testOnly.models.formsmodel.IncomeAndExpenditure
 @import testOnly.models.formsmodel.IncomeAndExpenditureForm
 @import testOnly.controllers.routes
-@import testOnly.views.html.TestOnlyLayout
 
 @this(
 testOnlyLayout: TestOnlyLayout,
@@ -30,7 +29,7 @@ govukInput: GovukInput,
 govukErrorSummary: GovukErrorSummary,
 formWithCSRF: FormWithCSRF
 )
-@(form: Form[IncomeAndExpenditure])(implicit request: Request[_], messages: Messages)
+@(form: Form[IncomeAndExpenditure])(implicit request: Request[?], messages: Messages)
 
 @title = @{
     "Income and Expenditure"

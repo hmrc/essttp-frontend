@@ -33,9 +33,9 @@
   landingCallHmrcPartial: LandingCallHmrcPartial
 )
 
-@(backUrl: Option[BackUrl])(implicit request: Request[_])
+@(backUrl: Option[BackUrl])(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 @title= @{Messages.Epaye.`Set up an Employers' PAYE payment plan`.show}
 

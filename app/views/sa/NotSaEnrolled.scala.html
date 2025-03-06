@@ -29,9 +29,9 @@
         commonIneligibilityPartial: CommonIneligibilityPartial
 )
 
-@()(implicit request: Request[_])
+@()(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 @layout(pageTitle = Some(Messages.EnrolmentMissing.`Request access to Self Assessment to use this service`.show), showBackLink = false) {
     <h1 class="govuk-heading-xl">

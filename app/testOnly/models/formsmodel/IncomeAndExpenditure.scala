@@ -21,8 +21,8 @@ import play.api.libs.json.{Json, OFormat}
 import testOnly.models.formsmodel.IncomeAndExpenditure.{Expenditure, Income}
 
 final case class IncomeAndExpenditure(
-    income:      Income,
-    expenditure: Expenditure
+  income:      Income,
+  expenditure: Expenditure
 )
 
 object IncomeAndExpenditure {
@@ -32,29 +32,29 @@ object IncomeAndExpenditure {
   object Income {
 
     @SuppressWarnings(Array("org.wartremover.warts.Any"))
-    implicit val formaat: OFormat[Income] = Json.format
+    given OFormat[Income] = Json.format
 
   }
 
   final case class Expenditure(
-      wagesAndSalaries:      AmountInPence,
-      mortgageAndRent:       AmountInPence,
-      bills:                 AmountInPence,
-      materialAndStockCosts: AmountInPence,
-      businessTravel:        AmountInPence,
-      employeeBenefits:      AmountInPence,
-      other:                 AmountInPence
+    wagesAndSalaries:      AmountInPence,
+    mortgageAndRent:       AmountInPence,
+    bills:                 AmountInPence,
+    materialAndStockCosts: AmountInPence,
+    businessTravel:        AmountInPence,
+    employeeBenefits:      AmountInPence,
+    other:                 AmountInPence
   )
 
   object Expenditure {
 
     @SuppressWarnings(Array("org.wartremover.warts.Any"))
-    implicit val formaat: OFormat[Expenditure] = Json.format
+    given OFormat[Expenditure] = Json.format
 
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  implicit val formaat: OFormat[IncomeAndExpenditure] = Json.format
+  given OFormat[IncomeAndExpenditure] = Json.format
 
   val default: IncomeAndExpenditure = IncomeAndExpenditure(
     Income(

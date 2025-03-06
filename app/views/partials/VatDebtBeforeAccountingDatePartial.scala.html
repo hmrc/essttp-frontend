@@ -25,9 +25,9 @@
         requestSupport: RequestSupport
 )
 
-@(vatAccountingPeriodStart: LocalDate)(implicit request: AuthenticatedJourneyRequest[_])
+@(vatAccountingPeriodStart: LocalDate)(implicit request: AuthenticatedJourneyRequest[?])
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 @accountingPeriodStart = @{
  val dayOfMonth: Int = vatAccountingPeriodStart.getDayOfMonth

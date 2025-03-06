@@ -27,62 +27,61 @@ import uk.gov.hmrc.auth.core.Enrolments
 
 import java.time.Instant
 
-/**
- * Authenticated Journey requests have two stages:
- * AuthenticatedJourneyRequest -> User has some enrolments (may not be correct) and there is a journey found
- * EligibleJourneyRequest -> User has correct enrolments, eligibility has been checking in ttp api for journey and there is a journey in backend
- */
+/** Authenticated Journey requests have two stages: AuthenticatedJourneyRequest -> User has some enrolments (may not be
+  * correct) and there is a journey found EligibleJourneyRequest -> User has correct enrolments, eligibility has been
+  * checking in ttp api for journey and there is a journey in backend
+  */
 
 class AuthenticatedJourneyRequest[A](
-    override val request:    Request[A],
-    override val enrolments: Enrolments,
-    val journey:             Journey,
-    ggCredId:                GGCredId,
-    nino:                    Option[Nino],
-    override val lang:       Language
+  override val request:    Request[A],
+  override val enrolments: Enrolments,
+  val journey:             Journey,
+  ggCredId:                GGCredId,
+  nino:                    Option[Nino],
+  override val lang:       Language
 ) extends AuthenticatedRequest[A](request, enrolments, ggCredId, nino, lang) {
   val journeyId: JourneyId = journey._id
 }
 
 class BarsLockedOutRequest[A](
-    override val request:           Request[A],
-    override val enrolments:        Enrolments,
-    val journey:                    Journey,
-    ggCredId:                       GGCredId,
-    nino:                           Option[Nino],
-    val numberOfBarsVerifyAttempts: NumberOfBarsVerifyAttempts,
-    val barsLockoutExpiryTime:      Instant,
-    override val lang:              Language
+  override val request:           Request[A],
+  override val enrolments:        Enrolments,
+  val journey:                    Journey,
+  ggCredId:                       GGCredId,
+  nino:                           Option[Nino],
+  val numberOfBarsVerifyAttempts: NumberOfBarsVerifyAttempts,
+  val barsLockoutExpiryTime:      Instant,
+  override val lang:              Language
 ) extends AuthenticatedRequest[A](request, enrolments, ggCredId, nino, lang) {
   val journeyId: JourneyId = journey._id
 }
 
 class BarsNotLockedOutRequest[A](
-    override val request:           Request[A],
-    override val enrolments:        Enrolments,
-    val journey:                    Journey,
-    ggCredId:                       GGCredId,
-    nino:                           Option[Nino],
-    val numberOfBarsVerifyAttempts: NumberOfBarsVerifyAttempts,
-    override val lang:              Language
+  override val request:           Request[A],
+  override val enrolments:        Enrolments,
+  val journey:                    Journey,
+  ggCredId:                       GGCredId,
+  nino:                           Option[Nino],
+  val numberOfBarsVerifyAttempts: NumberOfBarsVerifyAttempts,
+  override val lang:              Language
 ) extends AuthenticatedRequest[A](request, enrolments, ggCredId, nino, lang) {
   val journeyId: JourneyId = journey._id
 }
 
 final class EligibleJourneyRequest[A](
-    override val journey:           Journey,
-    override val enrolments:        Enrolments,
-    override val request:           Request[A],
-    ggCredId:                       GGCredId,
-    nino:                           Option[Nino],
-    val numberOfBarsVerifyAttempts: NumberOfBarsVerifyAttempts,
-    val eligibilityCheckResult:     EligibilityCheckResult,
-    override val lang:              Language
+  override val journey:           Journey,
+  override val enrolments:        Enrolments,
+  override val request:           Request[A],
+  ggCredId:                       GGCredId,
+  nino:                           Option[Nino],
+  val numberOfBarsVerifyAttempts: NumberOfBarsVerifyAttempts,
+  val eligibilityCheckResult:     EligibilityCheckResult,
+  override val lang:              Language
 ) extends AuthenticatedJourneyRequest[A](request, enrolments, journey, ggCredId, nino, lang)
 
 object EligibleJourneyRequest {
 
-  implicit class EligibleJourneyRequestOps[A](private val e: EligibleJourneyRequest[A]) extends AnyVal {
+  extension [A](e: EligibleJourneyRequest[A]) {
 
     def isEmailAddressRequired(appConfig: AppConfig): Boolean =
       appConfig.emailJourneyEnabled && e.eligibilityCheckResult.regimeDigitalCorrespondence.value

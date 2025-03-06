@@ -33,9 +33,9 @@
   showFullListPreparationTips: Boolean = true,
   showWereLikelyToAsk: Boolean = true,
   hasBackLink: Boolean = false
-)(implicit request: AuthenticatedJourneyRequest[_])
+)(implicit request: AuthenticatedJourneyRequest[?])
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 @layout(pageTitle = Some(pageh1.show), showBackLink = hasBackLink) {
     <h1 class="govuk-heading-xl">@{pageh1.show}</h1>

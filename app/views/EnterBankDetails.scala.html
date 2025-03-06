@@ -20,7 +20,6 @@
 @import models.forms.BankDetailsForm
 @import play.api.data.{Form, FormError}
 @import play.api.mvc.Request
-@import play.twirl.api.TwirlFeatureImports.defining
 @import requests.RequestSupport
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import views.Views
@@ -40,10 +39,10 @@
         form: Form[BankDetailsForm],
         errorMessageOverrides: Seq[FormError] = Seq.empty
 )(implicit
-        request: Request[_]
+        request: Request[?]
 )
 
-@import requestSupport._
+@import requestSupport.{languageFromRequest, legacyMessages}
 
 @typeOfAccountKey = @{
     "accountType"
@@ -79,6 +78,99 @@
 @accountTypeFormError = @{ errorMessageOverrides.find(_.key === "accountType") }
 
 
+@accountTypeFieldSet(formError: Option[FormError]) = {
+    <fieldset class="govuk-fieldset" @if(formError.isDefined) {
+        aria-describedby="account-type-error"}>
+        <div class="form-field @formError.map { _ => govuk-form-group--error }">
+            @formError.map { error =>
+                <span class="govuk-error-message" id="account-type-error">
+                    <span class="govuk-visually-hidden">@Messages.error.show</span>
+                    @Messages.BankDetails.errors(s"accountTypeErrors.${error.message}")(Views.formErrorArgsStringList(error)).show
+                </span>
+            }
+
+            @govukRadios(Radios(
+                fieldset = Some(Fieldset(
+                    legend = Some(Legend(
+                        content = Text(Messages.AboutYourBankAccount.`Account type`.show),
+                        classes = "govuk-fieldset__heading--m",
+                        isPageHeading = false
+                    ))
+                )),
+                idPrefix = Some(typeOfAccountKey),
+                name = typeOfAccountKey,
+                items = Seq(
+                    RadioItem(
+                        id = Some("business"),
+                        content = Text(Messages.AboutYourBankAccount.`Business`.show),
+                        value = Some(TypesOfBankAccount.Business.entryName),
+                        checked = form.data.get(typeOfAccountKey).contains(TypesOfBankAccount.Business.entryName)
+                    ),
+                    RadioItem(
+                        id = Some("personal"),
+                        content = Text(Messages.AboutYourBankAccount.`Personal`.show),
+                        value = Some(TypesOfBankAccount.Personal.entryName),
+                        checked = form.data.get(typeOfAccountKey).contains(TypesOfBankAccount.Personal.entryName)
+                    )
+                ),
+                errorMessage = fieldErrorMessage(typeOfAccountKey, form, errorMessageOverrides)
+            ))
+
+        </div>
+    </fieldset>
+}
+
+@sortCodeAndAccountNumberFieldSet(formError: Option[FormError]) = {
+    <fieldset class="govuk-fieldset" @if(formError.isDefined) {
+        aria-describedby="sort-code-and-account-number-error"}>
+        <legend class="govuk-label govuk-visually-hidden">@{Messages.BankDetails.`Bank details`.show}</legend>
+        <div class="form-field @formError.map { _ => govuk-form-group--error }">
+            @formError.map { error =>
+                <span class="govuk-error-message" id="sort-code-and-account-number-error">
+                    <span class="govuk-visually-hidden">@Messages.error.show</span>
+                    @Messages.BankDetails.errors(s"sortCode.${error.message}")(Views.formErrorArgsStringList(error)).show
+                </span>
+            }
+
+            @govukInput(Input(
+                id = sortCodeKey,
+                name = sortCodeKey,
+                label = Label(
+                    classes = "govuk-label",
+                    content = Text(Messages.BankDetails.`Sort code`.show)
+                ),
+                hint = Some(Hint(
+                    content = Text(Messages.BankDetails.`Must be 6 digits long`.show)
+                )),
+                classes = s"govuk-input--width-5 ${errorMessageOverrides.find(_.key === sortCodeKey).fold("")(_ => "govuk-input--error")}",
+                errorMessage = fieldErrorMessage(sortCodeKey, form, errorMessageOverrides),
+                spellcheck = Some(false),
+                inputmode = Some("numeric"),
+                autocomplete = Some("off"),
+                value = form.data.get(sortCodeKey)
+            ))
+
+            @govukInput(Input(
+                id = accountNumberKey,
+                name = accountNumberKey,
+                label = Label(
+                    classes = "govuk-label",
+                    content = Text(Messages.BankDetails.`Account number`.show)
+                ),
+                hint = Some(Hint(
+                    content = Text(Messages.BankDetails.`Must be between 6 and 8 digits long`.show)
+                )),
+                classes = s"govuk-!-width-two-thirds ${errorMessageOverrides.find(_.key === accountNumberKey).fold("")(_ => "govuk-input--error")}",
+                errorMessage = fieldErrorMessage(accountNumberKey, form, errorMessageOverrides),
+                spellcheck = Some(false),
+                inputmode = Some("numeric"),
+                autocomplete = Some("off"),
+                value = form.data.get(accountNumberKey)
+            ))
+        </div>
+    </fieldset>
+}
+
 @layout(pageTitle = Some(title), hasErrors = form.hasErrors) {
     @if(form.errors.nonEmpty) {
         @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
@@ -96,48 +188,7 @@
 
     @formWithCSRF(action = routes.BankDetailsController.enterBankDetailsSubmit) {
 
-        @defining(accountTypeFormError) { formError  =>
-            <fieldset class="govuk-fieldset" @if(formError.isDefined) {
-                aria-describedby="account-type-error"}>
-                <div class="form-field @formError.map { _ => govuk-form-group--error }">
-                    @formError.map { error =>
-                    <span class="govuk-error-message" id="account-type-error">
-                        <span class="govuk-visually-hidden">@Messages.error.show</span>
-                        @Messages.BankDetails.errors(s"accountTypeErrors.${error.message}")(Views.formErrorArgsStringList(error)).show
-                    </span>
-                    }
-
-                    @govukRadios(Radios(
-                            fieldset = Some(Fieldset(
-                                    legend = Some(Legend(
-                                            content = Text(Messages.AboutYourBankAccount.`Account type`.show),
-                                            classes = "govuk-fieldset__heading--m",
-                                            isPageHeading = false
-                                    ))
-                            )),
-                            idPrefix = Some(typeOfAccountKey),
-                            name = typeOfAccountKey,
-                            items = Seq(
-                                RadioItem(
-                                    id = Some("business"),
-                                    content = Text(Messages.AboutYourBankAccount.`Business`.show),
-                                    value = Some(TypesOfBankAccount.Business.entryName),
-                                    checked = form.data.get(typeOfAccountKey).contains(TypesOfBankAccount.Business.entryName)
-                                ),
-                                RadioItem(
-                                    id = Some("personal"),
-                                    content = Text(Messages.AboutYourBankAccount.`Personal`.show),
-                                    value = Some(TypesOfBankAccount.Personal.entryName),
-                                    checked = form.data.get(typeOfAccountKey).contains(TypesOfBankAccount.Personal.entryName)
-                                )
-                            ),
-                        errorMessage = fieldErrorMessage(typeOfAccountKey, form, errorMessageOverrides)
-                    ))
-
-                </div>
-            </fieldset>
-        }
-
+        @accountTypeFieldSet(accountTypeFormError)
 
         @govukInput(Input(
             id = nameKey,
@@ -153,56 +204,7 @@
             value = form.data.get(nameKey)
         ))
 
-        @defining(sortCodeAndAccountNumberFormError) { formError  =>
-            <fieldset class="govuk-fieldset" @if(formError.isDefined) {
-                aria-describedby="sort-code-and-account-number-error"}>
-                <legend class="govuk-label govuk-visually-hidden">@{Messages.BankDetails.`Bank details`.show}</legend>
-            <div class="form-field @formError.map { _ => govuk-form-group--error }">
-                @formError.map { error =>
-                    <span class="govuk-error-message" id="sort-code-and-account-number-error">
-                        <span class="govuk-visually-hidden">@Messages.error.show</span>
-                        @Messages.BankDetails.errors(s"sortCode.${error.message}")(Views.formErrorArgsStringList(error)).show
-                    </span>
-                }
-
-                @govukInput(Input(
-                    id = sortCodeKey,
-                    name = sortCodeKey,
-                    label = Label(
-                        classes = "govuk-label",
-                        content = Text(Messages.BankDetails.`Sort code`.show)
-                    ),
-                    hint = Some(Hint(
-                        content = Text(Messages.BankDetails.`Must be 6 digits long`.show)
-                    )),
-                    classes = s"govuk-input--width-5 ${errorMessageOverrides.find(_.key === sortCodeKey).fold("")(_ => "govuk-input--error")}",
-                    errorMessage = fieldErrorMessage(sortCodeKey, form, errorMessageOverrides),
-                    spellcheck = Some(false),
-                    inputmode = Some("numeric"),
-                    autocomplete = Some("off"),
-                    value = form.data.get(sortCodeKey)
-                ))
-
-                @govukInput(Input(
-                    id = accountNumberKey,
-                    name = accountNumberKey,
-                    label = Label(
-                        classes = "govuk-label",
-                        content = Text(Messages.BankDetails.`Account number`.show)
-                    ),
-                    hint = Some(Hint(
-                        content = Text(Messages.BankDetails.`Must be between 6 and 8 digits long`.show)
-                    )),
-                    classes = s"govuk-!-width-two-thirds ${errorMessageOverrides.find(_.key === accountNumberKey).fold("")(_ => "govuk-input--error")}",
-                    errorMessage = fieldErrorMessage(accountNumberKey, form, errorMessageOverrides),
-                    spellcheck = Some(false),
-                    inputmode = Some("numeric"),
-                    autocomplete = Some("off"),
-                    value = form.data.get(accountNumberKey)
-                ))
-            </div>
-            </fieldset>
-        }
+        @sortCodeAndAccountNumberFieldSet(sortCodeAndAccountNumberFormError)
 
         @govukButton(Button(content = Text(Messages.continue.show)))
     }

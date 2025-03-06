@@ -20,6 +20,6 @@ import scala.concurrent.Future
 
 package object controllers {
 
-  implicit def toFuture(result: Result): Future[Result] = Future.successful(result)
+  given resultToFutureResult: Conversion[Result, Future[Result]] = Future.successful(_)
 
 }

@@ -16,6 +16,7 @@
 
 package models.forms
 
+import cats.implicits.catsSyntaxOptionId
 import messages.Messages
 import models.Language
 import models.enumsforforms.IsSoleSignatoryFormValue
@@ -27,17 +28,20 @@ final case class CanSetUpDirectDebitForm(isSoleSignatory: IsSoleSignatoryFormVal
 
 object CanSetUpDirectDebitForm {
 
-  def form(implicit language: Language): Form[CanSetUpDirectDebitForm] = {
+  def form(implicit language: Language): Form[CanSetUpDirectDebitForm] =
     Form(
       mapping(
         "isSoleSignatory" -> isSoleSignatoryFormMapping
-      )(CanSetUpDirectDebitForm.apply)(CanSetUpDirectDebitForm.unapply)
+      )(CanSetUpDirectDebitForm.apply)(_.isSoleSignatory.some)
     )
-  }
 
-  private def isSoleSignatoryFormMapping(implicit language: Language): Mapping[IsSoleSignatoryFormValue] = Forms.of(EnumFormatter.format(
-    `enum`                  = IsSoleSignatoryFormValue,
-    errorMessageIfMissing   = Messages.AboutYourBankAccount.`Select yes if you can set up a Direct Debit for this payment plan`.show,
-    errorMessageIfEnumError = Messages.AboutYourBankAccount.`Select yes if you can set up a Direct Debit for this payment plan`.show
-  ))
+  private def isSoleSignatoryFormMapping(implicit language: Language): Mapping[IsSoleSignatoryFormValue] = Forms.of(
+    EnumFormatter.format(
+      `enum` = IsSoleSignatoryFormValue,
+      errorMessageIfMissing =
+        Messages.AboutYourBankAccount.`Select yes if you can set up a Direct Debit for this payment plan`.show,
+      errorMessageIfEnumError =
+        Messages.AboutYourBankAccount.`Select yes if you can set up a Direct Debit for this payment plan`.show
+    )
+  )
 }

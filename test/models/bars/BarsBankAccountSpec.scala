@@ -34,14 +34,14 @@ class BarsBankAccountSpec extends UnitSpec {
           (AccountNumber(SensitiveString("2345678")), "02345678"),
           (AccountNumber(SensitiveString("345678")), "00345678"),
           (AccountNumber(SensitiveString("123456789")), "123456789"), // frontend prevents this
-          (AccountNumber(SensitiveString("")), "00000000") // frontend prevents this
+          (AccountNumber(SensitiveString("")), "00000000")            // frontend prevents this
         )
       ) { (inputAccountNumber: AccountNumber, barsAccountNumber: String) =>
-          val bankAccount = BarsBankAccount.padded(sortCode.value.decryptedValue, inputAccountNumber.value.decryptedValue)
+        val bankAccount = BarsBankAccount.padded(sortCode.value.decryptedValue, inputAccountNumber.value.decryptedValue)
 
-          bankAccount.sortCode shouldBe sortCode.value.decryptedValue
-          bankAccount.accountNumber shouldBe barsAccountNumber
-        }
+        bankAccount.sortCode shouldBe sortCode.value.decryptedValue
+        bankAccount.accountNumber shouldBe barsAccountNumber
+      }
     }
   }
 

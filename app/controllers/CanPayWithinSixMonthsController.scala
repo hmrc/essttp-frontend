@@ -17,12 +17,11 @@
 package controllers
 
 import actions.Actions
-import cats.syntax.eq._
 import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import essttp.journey.JourneyConnector
 import essttp.journey.model.CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths
-import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Journey, UpfrontPaymentAnswers}
+import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Journey, JourneyStage, UpfrontPaymentAnswers}
 import essttp.rootmodel.{AmountInPence, TaxRegime, UpfrontPaymentAmount}
 import models.Language
 import models.enumsforforms.CanPayWithinSixMonthsFormValue
@@ -43,34 +42,37 @@ import scala.concurrent.ExecutionContext
 
 @Singleton
 class CanPayWithinSixMonthsController @Inject() (
-    as:                 Actions,
-    mcc:                MessagesControllerComponents,
-    requestSupport:     RequestSupport,
-    views:              Views,
-    journeyConnector:   JourneyConnector,
-    languageController: LanguageController,
-    auditService:       AuditService
-)(implicit ec: ExecutionContext, appConfig: AppConfig)
-  extends FrontendController(mcc) with I18nSupport
-  with Logging {
+  as:                 Actions,
+  mcc:                MessagesControllerComponents,
+  requestSupport:     RequestSupport,
+  views:              Views,
+  journeyConnector:   JourneyConnector,
+  languageController: LanguageController,
+  auditService:       AuditService
+)(using ExecutionContext, AppConfig)
+    extends FrontendController(mcc),
+      I18nSupport,
+      Logging {
 
-  import requestSupport._
+  import requestSupport.languageFromRequest
 
   def canPayWithinSixMonths(@unused regime: TaxRegime, lang: Option[Language]): Action[AnyContent] =
     as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
       lang match {
         case None =>
           request.journey match {
-            case j: Journey.BeforeRetrievedAffordabilityResult =>
+            case j: JourneyStage.BeforeRetrievedAffordabilityResult =>
               JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
 
-            case j: Journey.AfterRetrievedAffordabilityResult =>
+            case j: JourneyStage.AfterRetrievedAffordabilityResult =>
               finalStateCheck(
-                j,
-                {
+                j, {
                   val previousAnswers = existingAnswersInJourney(request.journey)
-                  val form = previousAnswers.fold(CanPayWithinSixMonthsForm.form)(value =>
-                    CanPayWithinSixMonthsForm.form.fill(CanPayWithinSixMonthsFormValue.canPayWithinSixMonthsToFormValue(value)))
+                  val form            = previousAnswers.fold(CanPayWithinSixMonthsForm.form)(value =>
+                    CanPayWithinSixMonthsForm.form.fill(
+                      CanPayWithinSixMonthsFormValue.canPayWithinSixMonthsToFormValue(value)
+                    )
+                  )
                   Ok(views.canPayWithinSixMonthsPage(form, remainingAmountToPay(j)))
                 }
               )
@@ -81,7 +83,9 @@ class CanPayWithinSixMonthsController @Inject() (
             request.withHeaders(
               request.headers
                 .remove(HeaderNames.REFERER)
-                .add(HeaderNames.REFERER -> routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(regime, None).url)
+                .add(
+                  HeaderNames.REFERER -> routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(regime, None).url
+                )
             )
           )
 
@@ -89,47 +93,57 @@ class CanPayWithinSixMonthsController @Inject() (
     }
 
   val canPayWithinSixMonthsSubmit: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
-    CanPayWithinSixMonthsForm.form.bindFromRequest().fold(
-      formWithErrors => Ok(views.canPayWithinSixMonthsPage(formWithErrors, remainingAmountToPay(request.journey))),
-      { canPayFormValue =>
-        val canPay = canPayFormValue.asCanPayWithinSixMonths
-        val valueUnchanged = existingAnswersInJourney(request.journey).exists(_.value === canPay.value)
+    CanPayWithinSixMonthsForm.form
+      .bindFromRequest()
+      .fold(
+        formWithErrors => Ok(views.canPayWithinSixMonthsPage(formWithErrors, remainingAmountToPay(request.journey))),
+        { canPayFormValue =>
+          val canPay         = canPayFormValue.asCanPayWithinSixMonths
+          val valueUnchanged = existingAnswersInJourney(request.journey).exists(_.value == canPay.value)
 
-        if (canPay.value) auditService.auditCanUserPayInSixMonths(request.journey, canPay, maybeStartCaseResponse = None)
+          if (canPay.value)
+            auditService.auditCanUserPayInSixMonths(request.journey, canPay, maybeStartCaseResponse = None)
 
-        journeyConnector.updateCanPayWithinSixMonthsAnswers(
-          request.journeyId,
-          canPay
-        ).map(updatedJourney =>
-            Routing.redirectToNext(
-              routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(request.journey.taxRegime, None),
-              updatedJourney,
-              valueUnchanged
-            ))
-      }
-    )
+          journeyConnector
+            .updateCanPayWithinSixMonthsAnswers(
+              request.journeyId,
+              canPay
+            )
+            .map(updatedJourney =>
+              Routing.redirectToNext(
+                routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(request.journey.taxRegime, None),
+                updatedJourney,
+                valueUnchanged
+              )
+            )
+        }
+      )
   }
 
   private def existingAnswersInJourney(journey: Journey): Option[CanPayWithinSixMonths] = journey match {
-    case _: Journey.BeforeCanPayWithinSixMonthsAnswers => None
-    case j: Journey.AfterCanPayWithinSixMonthsAnswers => j.canPayWithinSixMonthsAnswers match {
-      case CanPayWithinSixMonthsAnswers.AnswerNotRequired        => None
-      case c: CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths => Some(c)
-    }
+    case _: JourneyStage.BeforeCanPayWithinSixMonthsAnswers => None
+    case j: JourneyStage.AfterCanPayWithinSixMonthsAnswers  =>
+      j.canPayWithinSixMonthsAnswers match {
+        case CanPayWithinSixMonthsAnswers.AnswerNotRequired        => None
+        case c: CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths => Some(c)
+      }
   }
 
   private def remainingAmountToPay(journey: Journey): AmountInPence = {
     val eligibilityCheckResult = journey match {
-      case _: Journey.BeforeEligibilityChecked => sys.error("Could not find eligbility check result to calculate remaining amount to pay")
-      case j: Journey.AfterEligibilityChecked  => j.eligibilityCheckResult
+      case _: JourneyStage.BeforeEligibilityChecked =>
+        sys.error("Could not find eligbility check result to calculate remaining amount to pay")
+      case j: JourneyStage.AfterEligibilityChecked  => j.eligibilityCheckResult
     }
 
     val upfrontPaymentAmount = journey match {
-      case _: Journey.BeforeUpfrontPaymentAnswers => sys.error("Could not find upfront payment answers to calculate remaining amount to pay")
-      case j: Journey.AfterUpfrontPaymentAnswers => j.upfrontPaymentAnswers match {
-        case UpfrontPaymentAnswers.NoUpfrontPayment               => UpfrontPaymentAmount(AmountInPence.zero)
-        case UpfrontPaymentAnswers.DeclaredUpfrontPayment(amount) => amount
-      }
+      case _: JourneyStage.BeforeUpfrontPaymentAnswers =>
+        sys.error("Could not find upfront payment answers to calculate remaining amount to pay")
+      case j: JourneyStage.AfterUpfrontPaymentAnswers  =>
+        j.upfrontPaymentAnswers match {
+          case UpfrontPaymentAnswers.NoUpfrontPayment               => UpfrontPaymentAmount(AmountInPence.zero)
+          case UpfrontPaymentAnswers.DeclaredUpfrontPayment(amount) => amount
+        }
     }
 
     UpfrontPaymentController.deriveRemainingAmountToPay(
@@ -139,4 +153,3 @@ class CanPayWithinSixMonthsController @Inject() (
   }
 
 }
-

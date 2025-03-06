@@ -16,82 +16,82 @@
 
 package testsupport.reusableassertions
 
-import cats.syntax.eq._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import controllers.{Routing, routes}
 import essttp.journey.model.{Origin, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.TaxRegime
 import models.{Language, Languages}
+import org.scalatest.freespec.AnyFreeSpecLike
 import play.api.http.Status
 import play.api.mvc.{Action, AnyContent, Result}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import testsupport.ItSpec
-import testsupport.TdRequest.FakeRequestOps
+import testsupport.TdRequest._
 import testsupport.stubs.EssttpBackend
 import testsupport.testdata.{JourneyJsonTemplates, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.Future
 
-trait UnchangedFromCYALinkAssertions { this: ItSpec =>
+trait UnchangedFromCYALinkAssertions extends AnyFreeSpecLike { this: ItSpec =>
 
   def unchangedAnswerAfterClickingCYAChangeBehaviuor(
-      origin:            Origin,
-      action:            Action[AnyContent],
-      formData:          Seq[(String, String)],
-      stubUpdateJourney: String => StubMapping,
-      pegaChangeLinkUrl: String                = ""
+    origin:            Origin,
+    action:            Action[AnyContent],
+    formData:          Seq[(String, String)],
+    stubUpdateJourney: String => StubMapping,
+    pegaChangeLinkUrl: String = ""
   ): Unit = {
     s"[${origin.taxRegime.toString} journey] should redirect to correct place if the user came from a change link and did not " +
       "change their answer and the journey state is" - {
 
-          def expectedPegaRedirectUrl(lang: Language) =
-            if (pegaChangeLinkUrl.isEmpty)
-              testOnly.controllers.routes.PegaController.start(origin.taxRegime).url
-            else {
-              val expectedRegiem = origin.taxRegime match {
-                case TaxRegime.Epaye => "PAYE"
-                case TaxRegime.Vat   => "VAT"
-                case TaxRegime.Sa    => "SA"
-                case TaxRegime.Simp  => throw new NotImplementedError()
-              }
-              val expecterLang = lang match {
-                case Languages.English => "en"
-                case Languages.Welsh   => "cy"
-              }
-
-              s"$pegaChangeLinkUrl?regime=$expectedRegiem&lang=$expecterLang"
+        def expectedPegaRedirectUrl(lang: Language) =
+          if (pegaChangeLinkUrl.isEmpty)
+            testOnly.controllers.routes.PegaController.start(origin.taxRegime).url
+          else {
+            val expectedRegiem = origin.taxRegime match {
+              case TaxRegime.Epaye => "PAYE"
+              case TaxRegime.Vat   => "VAT"
+              case TaxRegime.Sa    => "SA"
+              case TaxRegime.Simp  => throw new NotImplementedError()
+            }
+            val expecterLang   = lang match {
+              case Languages.English => "en"
+              case Languages.Welsh   => "cy"
             }
 
-          def test(
-              stubGetJourney:        () => StubMapping,
-              updateJourneyResponse: String,
-              lang:                  Language,
-              expectedRedirectUrl:   String
-          ) = {
-            stubCommonActions()
-            stubGetJourney()
-            stubUpdateJourney(updateJourneyResponse)
-
-            val fakeRequest = FakeRequest(
-              method = "POST",
-              path   = "/blah"
-            ).withAuthToken()
-              .withSession(SessionKeys.sessionId -> "IamATestSessionId", Routing.clickedChangeFromSessionKey -> "true")
-              .withFormUrlEncodedBody(formData: _*)
-              .withLang(lang)
-
-            val result: Future[Result] = action(fakeRequest)
-            status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(expectedRedirectUrl)
-            session(result).get(Routing.clickedChangeFromSessionKey) shouldBe None
+            s"$pegaChangeLinkUrl?regime=$expectedRegiem&lang=$expecterLang"
           }
+
+        def test(
+          stubGetJourney:        () => StubMapping,
+          updateJourneyResponse: String,
+          lang:                  Language,
+          expectedRedirectUrl:   String
+        ) = {
+          stubCommonActions()
+          stubGetJourney()
+          stubUpdateJourney(updateJourneyResponse)
+
+          val fakeRequest = FakeRequest(
+            method = "POST",
+            path = "/blah"
+          ).withAuthToken()
+            .withSession(SessionKeys.sessionId -> "IamATestSessionId", Routing.clickedChangeFromSessionKey -> "true")
+            .withFormUrlEncodedBody(formData*)
+            .withLang(lang)
+
+          val result: Future[Result] = action(fakeRequest)
+          status(result) shouldBe Status.SEE_OTHER
+          redirectLocation(result) shouldBe Some(expectedRedirectUrl)
+          session(result).get(Routing.clickedChangeFromSessionKey) shouldBe None
+        }
 
         "AfterSelectedPaymentPlan" in {
           test(
             () => EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, origin)(),
-            JourneyJsonTemplates.`Chosen Payment Plan`(origin = origin)(testCrypto),
+            JourneyJsonTemplates.`Chosen Payment Plan`(origin = origin)(using testCrypto),
             Languages.English,
             routes.PaymentScheduleController.checkPaymentSchedule.url
           )
@@ -99,29 +99,31 @@ trait UnchangedFromCYALinkAssertions { this: ItSpec =>
 
         "AfterCheckedPaymentPlan without affordability" in {
           test(
-            () => EssttpBackend.HasCheckedPlan.findJourney(
-              withAffordability = false,
-              testCrypto,
-              origin,
-              whyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(TdAll.whyCannotPayReasons)
-            )(),
-            JourneyJsonTemplates.`Has Checked Payment Plan - No Affordability`(origin)(testCrypto),
+            () =>
+              EssttpBackend.HasCheckedPlan.findJourney(
+                withAffordability = false,
+                testCrypto,
+                origin,
+                whyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(TdAll.whyCannotPayReasons)
+              )(),
+            JourneyJsonTemplates.`Has Checked Payment Plan - No Affordability`(origin)(using testCrypto),
             Languages.English,
             routes.PaymentScheduleController.checkPaymentSchedule.url
           )
         }
 
-        if (origin.taxRegime =!= TaxRegime.Simp) {
+        if (origin.taxRegime != TaxRegime.Simp) {
           "AfterStartedPegaCase when the user is navigating in" - {
 
             "English" in {
               test(
-                () => EssttpBackend.StartedPegaCase.findJourney(
-                  testCrypto,
-                  origin,
-                  whyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(TdAll.whyCannotPayReasons)
-                )(),
-                JourneyJsonTemplates.`Started PEGA case`(origin)(testCrypto),
+                () =>
+                  EssttpBackend.StartedPegaCase.findJourney(
+                    testCrypto,
+                    origin,
+                    whyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(TdAll.whyCannotPayReasons)
+                  )(),
+                JourneyJsonTemplates.`Started PEGA case`(origin)(using testCrypto),
                 Languages.English,
                 expectedPegaRedirectUrl(Languages.English)
               )
@@ -129,12 +131,13 @@ trait UnchangedFromCYALinkAssertions { this: ItSpec =>
 
             "Welsh" in {
               test(
-                () => EssttpBackend.StartedPegaCase.findJourney(
-                  testCrypto,
-                  origin,
-                  whyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(TdAll.whyCannotPayReasons)
-                )(),
-                JourneyJsonTemplates.`Started PEGA case`(origin)(testCrypto),
+                () =>
+                  EssttpBackend.StartedPegaCase.findJourney(
+                    testCrypto,
+                    origin,
+                    whyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(TdAll.whyCannotPayReasons)
+                  )(),
+                JourneyJsonTemplates.`Started PEGA case`(origin)(using testCrypto),
                 Languages.Welsh,
                 expectedPegaRedirectUrl(Languages.Welsh)
               )
@@ -146,13 +149,14 @@ trait UnchangedFromCYALinkAssertions { this: ItSpec =>
 
             "Engish" in {
               test(
-                () => EssttpBackend.HasCheckedPlan.findJourney(
-                  withAffordability = true,
-                  testCrypto,
-                  origin,
-                  whyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(TdAll.whyCannotPayReasons)
-                )(),
-                JourneyJsonTemplates.`Has Checked Payment Plan - With Affordability`(origin)(testCrypto),
+                () =>
+                  EssttpBackend.HasCheckedPlan.findJourney(
+                    withAffordability = true,
+                    testCrypto,
+                    origin,
+                    whyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(TdAll.whyCannotPayReasons)
+                  )(),
+                JourneyJsonTemplates.`Has Checked Payment Plan - With Affordability`(origin)(using testCrypto),
                 Languages.English,
                 expectedPegaRedirectUrl(Languages.English)
               )
@@ -160,13 +164,14 @@ trait UnchangedFromCYALinkAssertions { this: ItSpec =>
 
             "Welsh" in {
               test(
-                () => EssttpBackend.HasCheckedPlan.findJourney(
-                  withAffordability = true,
-                  testCrypto,
-                  origin,
-                  whyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(TdAll.whyCannotPayReasons)
-                )(),
-                JourneyJsonTemplates.`Has Checked Payment Plan - With Affordability`(origin)(testCrypto),
+                () =>
+                  EssttpBackend.HasCheckedPlan.findJourney(
+                    withAffordability = true,
+                    testCrypto,
+                    origin,
+                    whyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(TdAll.whyCannotPayReasons)
+                  )(),
+                JourneyJsonTemplates.`Has Checked Payment Plan - With Affordability`(origin)(using testCrypto),
                 Languages.Welsh,
                 expectedPegaRedirectUrl(Languages.Welsh)
               )

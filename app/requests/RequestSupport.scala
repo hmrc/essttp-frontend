@@ -24,42 +24,37 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendHeaderCarrierProvi
 
 import javax.inject.Inject
 
-/**
- * I'm repeating a pattern which was brought originally by play-framework
- * and putting some more data which can be derived from a request
- *
- * Use it to provide HeaderCarrier, Lang, or Messages
- */
+/** I'm repeating a pattern which was brought originally by play-framework and putting some more data which can be
+  * derived from a request
+  *
+  * Use it to provide HeaderCarrier, Lang, or Messages
+  */
 class RequestSupport @Inject() (i18nSupport: I18nSupport) {
 
-  def lang(implicit requestHeader: RequestHeader): Lang = i18nSupport.request2Messages(requestHeader).lang
+  def lang(using requestHeader: RequestHeader): Lang = i18nSupport.request2Messages(requestHeader).lang
 
-  implicit def languageFromRequest(implicit requestHeader: RequestHeader): Language = {
+  given languageFromRequest(using requestHeader: RequestHeader): Language = {
     val lang: Lang = i18nSupport.request2Messages(requestHeader).lang
     Language(lang)
   }
 
-  implicit def legacyMessages(implicit requestHeader: RequestHeader): Messages = {
+  given legacyMessages(using requestHeader: RequestHeader): Messages =
     i18nSupport.request2Messages(requestHeader)
-  }
 }
 
 object RequestSupport {
 
-  implicit def hc(implicit request: RequestHeader): HeaderCarrier = HcProvider.headerCarrier
+  given hc(using RequestHeader): HeaderCarrier = HcProvider.headerCarrier
 
-  /**
-   * Naive way of checking if user is logged in. Use it in views only.
-   * For more real check see auth.AuthService
-   */
-  def isLoggedIn(implicit request: RequestHeader): Boolean = request.session.get(SessionKeys.authToken).isDefined
+  /** Naive way of checking if user is logged in. Use it in views only. For more real check see auth.AuthService
+    */
+  def isLoggedIn(using request: RequestHeader): Boolean = request.session.get(SessionKeys.authToken).isDefined
 
-  /**
-   * This is because we want to give responsibility of creation of HeaderCarrier to the platform code.
-   * If they refactor how hc is created our code will pick it up automatically.
-   */
+  /** This is because we want to give responsibility of creation of HeaderCarrier to the platform code. If they refactor
+    * how hc is created our code will pick it up automatically.
+    */
   private object HcProvider extends FrontendHeaderCarrierProvider {
-    def headerCarrier(implicit request: RequestHeader): HeaderCarrier = hc(request)
+    def headerCarrier(using request: RequestHeader): HeaderCarrier = super.hc(request)
   }
 
 }

@@ -26,9 +26,9 @@
   requestSupport: RequestSupport
 )
 
-@()(implicit request: Request[_])
+@()(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 @title = @{Messages.MissingInformation.`Some information is missing`.show}
 

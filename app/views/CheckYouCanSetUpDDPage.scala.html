@@ -15,7 +15,6 @@
  *@
 
 @import controllers.routes
-@import essttp.rootmodel.bank.TypesOfBankAccount
 @import messages.Messages
 @import models.enumsforforms.IsSoleSignatoryFormValue
 @import models.forms.CanSetUpDirectDebitForm
@@ -33,9 +32,9 @@
         requestSupport: RequestSupport
 )
 
-@(form: Form[CanSetUpDirectDebitForm])(implicit request: Request[_])
+@(form: Form[CanSetUpDirectDebitForm])(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.{languageFromRequest, legacyMessages}
 
 @soleSignatoryKey = @{"isSoleSignatory"}
 

@@ -22,6 +22,6 @@ final case class BarsAuditRequest(account: BarsAuditAccount)
 
 object BarsAuditRequest {
 
-  implicit val writes: OWrites[BarsAuditRequest] = Json.writes
+  given OWrites[BarsAuditRequest] = Json.writes
 
 }

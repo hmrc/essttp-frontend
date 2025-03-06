@@ -26,9 +26,9 @@ requestSupport: RequestSupport,
 commonIneligibilityPartial: CommonIneligibilityPartial
 )
 
-@()(implicit request: Request[_])
+@()(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 @layout(pageTitle = Some(Messages.`No NINO has been found`.show), showBackLink = false) {
 

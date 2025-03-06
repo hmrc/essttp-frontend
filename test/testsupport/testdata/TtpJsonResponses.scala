@@ -85,18 +85,42 @@ object TtpJsonResponses {
        |    "ineligibleChargeTypes" : ${eligibilityRules.part1.ineligibleChargeTypes.toString},
        |    "missingFiledReturns" : ${eligibilityRules.part1.missingFiledReturns.toString},
        |    "noDueDatesReached": ${eligibilityRules.part1.noDueDatesReached.toString}
-       |  ${optionalEligibilityResponsesJson(eligibilityRules.part1.hasInvalidInterestSignals, "hasInvalidInterestSignals")}
-       |  ${optionalEligibilityResponsesJson(eligibilityRules.part1.hasInvalidInterestSignalsCESA, "hasInvalidInterestSignalsCESA")}
-       |  ${optionalEligibilityResponsesJson(eligibilityRules.part1.dmSpecialOfficeProcessingRequired, "dmSpecialOfficeProcessingRequired")}
+       |  ${optionalEligibilityResponsesJson(
+        eligibilityRules.part1.hasInvalidInterestSignals,
+        "hasInvalidInterestSignals"
+      )}
+       |  ${optionalEligibilityResponsesJson(
+        eligibilityRules.part1.hasInvalidInterestSignalsCESA,
+        "hasInvalidInterestSignalsCESA"
+      )}
+       |  ${optionalEligibilityResponsesJson(
+        eligibilityRules.part1.dmSpecialOfficeProcessingRequired,
+        "dmSpecialOfficeProcessingRequired"
+      )}
        |  ${optionalEligibilityResponsesJson(eligibilityRules.part1.cannotFindLockReason, "cannotFindLockReason")}
        |  ${optionalEligibilityResponsesJson(eligibilityRules.part1.creditsNotAllowed, "creditsNotAllowed")}
-       |  ${optionalEligibilityResponsesJson(eligibilityRules.part1.isMoreThanMaxPaymentReference, "isMoreThanMaxPaymentReference")}
-       |  ${optionalEligibilityResponsesJson(eligibilityRules.part1.chargesBeforeMaxAccountingDate, "chargesBeforeMaxAccountingDate")}
+       |  ${optionalEligibilityResponsesJson(
+        eligibilityRules.part1.isMoreThanMaxPaymentReference,
+        "isMoreThanMaxPaymentReference"
+      )}
+       |  ${optionalEligibilityResponsesJson(
+        eligibilityRules.part1.chargesBeforeMaxAccountingDate,
+        "chargesBeforeMaxAccountingDate"
+      )}
        |  ${optionalEligibilityResponsesJson(eligibilityRules.part1.chargesOverMaxDebtAge, "chargesOverMaxDebtAge")}
-       |  ${optionalEligibilityResponsesJson(eligibilityRules.part1.hasDisguisedRemuneration, "hasDisguisedRemuneration")}
+       |  ${optionalEligibilityResponsesJson(
+        eligibilityRules.part1.hasDisguisedRemuneration,
+        "hasDisguisedRemuneration"
+      )}
        |  ${optionalEligibilityResponsesJson(eligibilityRules.part1.hasCapacitor, "hasCapacitor")}
-       |  ${optionalEligibilityResponsesJson(eligibilityRules.part1.dmSpecialOfficeProcessingRequiredCDCS, "dmSpecialOfficeProcessingRequiredCDCS")}
-       |  ${optionalEligibilityResponsesJson(eligibilityRules.part1.dmSpecialOfficeProcessingRequiredCESA, "dmSpecialOfficeProcessingRequiredCESA")}
+       |  ${optionalEligibilityResponsesJson(
+        eligibilityRules.part1.dmSpecialOfficeProcessingRequiredCDCS,
+        "dmSpecialOfficeProcessingRequiredCDCS"
+      )}
+       |  ${optionalEligibilityResponsesJson(
+        eligibilityRules.part1.dmSpecialOfficeProcessingRequiredCESA,
+        "dmSpecialOfficeProcessingRequiredCESA"
+      )}
        |  ${optionalEligibilityResponsesJson(eligibilityRules.part2.noMtditsaEnrollment, "noMtditsaEnrollment")}
        |  },
        |  "chargeTypeAssessment" : [ {
@@ -133,9 +157,9 @@ object TtpJsonResponses {
   }
 
   def optionalEligibilityResponsesJson(flag: Option[Boolean], flagName: String): String =
-    flag.fold(""){ f => s""",  "$flagName": ${f.toString} """ }
+    flag.fold("")(f => s""",  "$flagName": ${f.toString} """)
 
-  def ttpAffordabilityResponseJson(): String = {
+  def ttpAffordabilityResponseJson(): String =
     s"""
        |{
        |    "processingDateTime": "2022-03-23T13:49:51.141Z",
@@ -143,7 +167,6 @@ object TtpJsonResponses {
        |    "maximumInstalmentAmount": 100000
        |}
        |""".stripMargin
-  }
 
   def ttpAffordableQuotesResponseJson(): String =
     """

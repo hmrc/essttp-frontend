@@ -46,6 +46,6 @@ final case class PaymentPlanSetUpAuditDetail(
 
 object PaymentPlanSetUpAuditDetail {
 
-  implicit def writes(implicit crypto: CryptoFormat): OWrites[PaymentPlanSetUpAuditDetail] = Json.writes
+  given (using CryptoFormat): OWrites[PaymentPlanSetUpAuditDetail] = Json.writes
 
 }

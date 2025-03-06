@@ -20,10 +20,9 @@ import java.time._
 
 class ClockProvider {
 
-  /**
-   * Get's the clock instance, which can be overriden in session (for testing purposes)
-   */
-  implicit def getClock: Clock = defaultClock
+  /** Get's the clock instance, which can be overriden in session (for testing purposes)
+    */
+  given getClock: Clock = defaultClock
 
   def now(): LocalDateTime = LocalDateTime.now(getClock)
   def nowDate(): LocalDate = LocalDate.now(getClock)
@@ -31,4 +30,3 @@ class ClockProvider {
   protected val defaultClock: Clock = Clock.systemDefaultZone.withZone(ZoneOffset.UTC)
 
 }
-

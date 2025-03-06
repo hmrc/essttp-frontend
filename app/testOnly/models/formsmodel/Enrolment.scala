@@ -25,8 +25,8 @@ sealed trait Enrolment extends EnumEntry
 object Enrolments extends Enum[Enrolment] {
 
   case object Epaye extends Enrolment
-  case object Vat extends Enrolment
-  case object IrSa extends Enrolment
+  case object Vat   extends Enrolment
+  case object IrSa  extends Enrolment
   case object MtdIt extends Enrolment
 
   override def values: immutable.IndexedSeq[Enrolment] = findValues

@@ -19,17 +19,17 @@ package models.audit
 import play.api.libs.json.{Json, OWrites}
 
 final case class TaxDetail(
-    utr:               Option[String],
-    taxOfficeNo:       Option[String],
-    taxOfficeRef:      Option[String],
-    employerRef:       Option[String],
-    accountsOfficeRef: Option[String],
-    vrn:               Option[String],
-    nino:              Option[String]
+  utr:               Option[String],
+  taxOfficeNo:       Option[String],
+  taxOfficeRef:      Option[String],
+  employerRef:       Option[String],
+  accountsOfficeRef: Option[String],
+  vrn:               Option[String],
+  nino:              Option[String]
 )
 
 object TaxDetail {
 
-  implicit val writes: OWrites[TaxDetail] = Json.writes
+  given OWrites[TaxDetail] = Json.writes
 
 }

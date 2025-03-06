@@ -40,10 +40,10 @@
 
 )(
         implicit
-        request: Request[_]
+        request: Request[?]
 )
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 @title = @{
     Messages.Confirmation.`Your payment plan is set up`.show
@@ -99,11 +99,11 @@
         Messages.Confirmation.paymentInfo(hasUpfrontPayment = hasUpfrontPayment, nextPayment).show
     }</p>
 
-    @{if(wasEmailAddressRequired && regimeDigitalCorrespondence) {
+    @if(wasEmailAddressRequired && regimeDigitalCorrespondence) {
         <p class="govuk-body">
-            {Messages.Confirmation.`We will send a secure message with payment due dates to your business tax account inbox within 24 hours.`.show}
+            @{Messages.Confirmation.`We will send a secure message with payment due dates to your business tax account inbox within 24 hours.`.show}
         </p>
-    }}
+    }
 
 
     <p class="govuk-body">@{

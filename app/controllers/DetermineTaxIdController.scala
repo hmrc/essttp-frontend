@@ -33,13 +33,12 @@
 package controllers
 
 import actions.Actions
-import cats.syntax.traverse._
-import cats.syntax.eq._
+import cats.syntax.traverse.*
 import config.AppConfig
 import essttp.journey.JourneyConnector
-import essttp.journey.model.Journey
+import essttp.journey.model.{Journey, JourneyStage}
 import essttp.rootmodel.{TaxId, TaxRegime}
-import play.api.mvc._
+import play.api.mvc.*
 import services.EnrolmentService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.{JourneyLogger, Logging}
@@ -49,40 +48,49 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class DetermineTaxIdController @Inject() (
-    as:               Actions,
-    mcc:              MessagesControllerComponents,
-    journeyConnector: JourneyConnector,
-    enrolmentService: EnrolmentService
-)(implicit ec: ExecutionContext, appConfig: AppConfig)
-  extends FrontendController(mcc)
-  with Logging {
+  as:               Actions,
+  mcc:              MessagesControllerComponents,
+  journeyConnector: JourneyConnector,
+  enrolmentService: EnrolmentService
+)(using ExecutionContext, AppConfig)
+    extends FrontendController(mcc),
+      Logging {
 
-  def determineTaxId(): Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
+  val determineTaxId: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     val maybeTaxId: Future[Option[TaxId]] = request.journey match {
-      case j: Journey.Stages.Started =>
-        if (j.taxRegime === TaxRegime.Simp) {
-          request.nino.map(nino =>
-            journeyConnector.updateTaxId(j.journeyId, nino)
-              .map(_ => nino)).sequence
+      case j: Journey.Started                 =>
+        if (j.taxRegime == TaxRegime.Simp) {
+          request.nino
+            .map(nino =>
+              journeyConnector
+                .updateTaxId(j.journeyId, nino)
+                .map(_ => nino)
+            )
+            .sequence
 
         } else {
           enrolmentService.determineTaxIdAndUpdateJourney(j, request.enrolments)
         }
-      case j: Journey.AfterComputedTaxId =>
+      case j: JourneyStage.AfterComputedTaxId =>
         JourneyLogger.info("TaxId already determined, skipping.")
         Future.successful(Some(j.taxId))
     }
 
     maybeTaxId.map {
       case Some(_) =>
-        Routing.redirectToNext(routes.DetermineTaxIdController.determineTaxId, request.journey, submittedValueUnchanged = false)
+        Routing.redirectToNext(
+          routes.DetermineTaxIdController.determineTaxId,
+          request.journey,
+          submittedValueUnchanged = false
+        )
 
-      case None => request.journey.taxRegime match {
-        case TaxRegime.Epaye => Redirect(routes.NotEnrolledController.notEnrolled)
-        case TaxRegime.Vat   => Redirect(routes.NotEnrolledController.notVatRegistered)
-        case TaxRegime.Sa    => Redirect(routes.NotEnrolledController.notSaEnrolled)
-        case TaxRegime.Simp  => Redirect(routes.NotEnrolledController.simpNoNino)
-      }
+      case None =>
+        request.journey.taxRegime match {
+          case TaxRegime.Epaye => Redirect(routes.NotEnrolledController.notEnrolled)
+          case TaxRegime.Vat   => Redirect(routes.NotEnrolledController.notVatRegistered)
+          case TaxRegime.Sa    => Redirect(routes.NotEnrolledController.notSaEnrolled)
+          case TaxRegime.Simp  => Redirect(routes.NotEnrolledController.simpNoNino)
+        }
     }
   }
 }

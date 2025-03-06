@@ -24,13 +24,15 @@ import play.api.data.{Form, Forms, Mapping}
 import util.EnumFormatter
 
 object CanPayUpfrontForm {
-  def form(implicit language: Language): Form[CanPayUpfrontFormValue] = {
+  def form(using Language): Form[CanPayUpfrontFormValue] = {
 
-    val canPayUpfrontMapping: Mapping[CanPayUpfrontFormValue] = Forms.of(EnumFormatter.format(
-      `enum`                  = CanPayUpfrontFormValue,
-      errorMessageIfMissing   = Messages.UpfrontPayment.`Select yes if you can make an upfront payment`.show,
-      errorMessageIfEnumError = Messages.UpfrontPayment.`Select yes if you can make an upfront payment`.show
-    ))
+    val canPayUpfrontMapping: Mapping[CanPayUpfrontFormValue] = Forms.of(
+      EnumFormatter.format(
+        `enum` = CanPayUpfrontFormValue,
+        errorMessageIfMissing = Messages.UpfrontPayment.`Select yes if you can make an upfront payment`.show,
+        errorMessageIfEnumError = Messages.UpfrontPayment.`Select yes if you can make an upfront payment`.show
+      )
+    )
 
     Form(
       mapping(

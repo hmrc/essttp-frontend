@@ -24,9 +24,9 @@ object implicits extends ImplicitConversions
 
 trait ImplicitConversions {
 
-  implicit def stringToText(string: String)(implicit messages: Messages): Text =
+  implicit def stringToText(string: String)(using messages: Messages): Text =
     Text(messages(string))
 
-  implicit def stringToKey(string: String)(implicit messages: Messages): Key =
+  implicit def stringToKey(string: String)(using messages: Messages): Key =
     Key(content = Text(messages(string)))
 }

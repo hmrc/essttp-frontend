@@ -16,7 +16,6 @@
 
 package models
 
-import cats.Eq
 import enumeratum.{Enum, EnumEntry}
 import essttp.utils.EnumFormat
 import essttp.utils.ValueClassBinder.valueClassBinder
@@ -27,7 +26,7 @@ import play.api.mvc.{PathBindable, QueryStringBindable}
 
 import scala.collection.immutable
 
-sealed trait Language extends EnumEntry with Product with Serializable {
+sealed trait Language extends EnumEntry, Product, Serializable derives CanEqual {
 
   def code: String
 
@@ -35,27 +34,27 @@ sealed trait Language extends EnumEntry with Product with Serializable {
 }
 
 object Language {
-  implicit val eq: Eq[Language] = Eq.fromUniversalEquals
 
-  implicit val format: Format[Language] = EnumFormat(Languages)
+  given Format[Language] = EnumFormat(Languages)
 
-  implicit val languagePathBinder: PathBindable[Language] = valueClassBinder(_.toString)
+  given PathBindable[Language] = valueClassBinder(_.toString)
 
-  implicit val languageQueryStringBindable: QueryStringBindable[Language] =
+  given QueryStringBindable[Language] =
     new QueryStringBindable[Language] {
 
-      override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, Language]] = {
-        params.get(key).map(_.toList match {
-          case "en" :: Nil => Right(English)
-          case "cy" :: Nil => Right(Welsh)
-          case error       => Left(s"invalid query parameters for language ${error.toString()}")
-        })
-      }
+      override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, Language]] =
+        params
+          .get(key)
+          .map(_.toList match {
+            case "en" :: Nil => Right(English)
+            case "cy" :: Nil => Right(Welsh)
+            case error       => Left(s"invalid query parameters for language ${error.toString()}")
+          })
 
       override def unbind(key: String, language: Language): String = s"$key=${language.code}"
     }
 
-  implicit class LanguageOps(private val l: Language) extends AnyVal {
+  extension (l: Language) {
 
     def fold[A](ifEnglish: => A, ifWelsh: => A): A = l match {
       case Languages.English => ifEnglish
@@ -67,7 +66,7 @@ object Language {
   def apply(lang: Lang): Language = lang.code match {
     case "en" => English
     case "cy" => Welsh
-    case _    => English //default language is English
+    case _    => English // default language is English
   }
 }
 

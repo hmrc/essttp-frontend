@@ -24,9 +24,9 @@
         requestSupport: RequestSupport
 )
 
-@(email: String, newEmailLink: String)(implicit request: Request[_])
+@(email: String, newEmailLink: String)(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 @title = @{Messages.TooManyPasscodeJourneys.`You have tried to verify an email address too many times`.show}
 

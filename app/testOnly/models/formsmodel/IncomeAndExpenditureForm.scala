@@ -21,7 +21,6 @@ import cats.data.{NonEmptyList, ValidatedNel}
 import cats.implicits.{catsSyntaxTuple3Semigroupal, catsSyntaxTuple7Semigroupal}
 import cats.syntax.option._
 import cats.syntax.either._
-import cats.syntax.eq._
 import cats.syntax.validated._
 import essttp.rootmodel.AmountInPence
 import play.api.data.Forms.{mapping, of}
@@ -33,40 +32,37 @@ import scala.util.Try
 
 object IncomeAndExpenditureForm {
 
-  val mainIncomeKey = "mainIncome"
-  val otherIncomeKey = "otherIncome"
-  val wagesAndSalariesKey = "wagesAndSalaries"
-  val mortgageAndRentKey = "mortgageAndRent"
-  val billsKey = "bills"
+  val mainIncomeKey            = "mainIncome"
+  val otherIncomeKey           = "otherIncome"
+  val wagesAndSalariesKey      = "wagesAndSalaries"
+  val mortgageAndRentKey       = "mortgageAndRent"
+  val billsKey                 = "bills"
   val materialAndStockCostsKey = "materialAndStockCosts"
-  val businessTravelKey = "businessTravel"
-  val employeeBenefitsKey = "employeeBenefits"
-  val otherKey = "other"
+  val businessTravelKey        = "businessTravel"
+  val employeeBenefitsKey      = "employeeBenefits"
+  val otherKey                 = "other"
 
   private def validateAmountOfMoney(
-      key:  String,
-      data: Map[String, String]
+    key:  String,
+    data: Map[String, String]
   ): ValidatedNel[FormError, AmountInPence] = {
-    {
-      val nonEmptyCheck: ValidatedNel[FormError, String] =
-        data
-          .get(key)
-          .toValidNel(FormError(key, "field is required"))
+    val nonEmptyCheck: ValidatedNel[FormError, String] =
+      data
+        .get(key)
+        .toValidNel(FormError(key, "field is required"))
 
-      nonEmptyCheck
-        .andThen { s =>
-          Try(BigDecimal(s.trim))
-            .toEither
-            .leftMap(_ => "invalid format")
-            .flatMap{ d =>
-              if (!(d * 100).isWhole) Left("number of decimal places must be two or less")
-              else if (d < 0) Left("amount of money must be non-negative")
-              else Right(AmountInPence(d))
-            }
-            .leftMap(FormError(key, _))
-            .toValidatedNel
-        }
-    }
+    nonEmptyCheck
+      .andThen { s =>
+        Try(BigDecimal(s.trim)).toEither
+          .leftMap(_ => "invalid format")
+          .flatMap { d =>
+            if (!(d * 100).isWhole) Left("number of decimal places must be two or less")
+            else if (d < 0) Left("amount of money must be non-negative")
+            else Right(AmountInPence(d))
+          }
+          .leftMap(FormError(key, _))
+          .toValidatedNel
+      }
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
@@ -76,12 +72,12 @@ object IncomeAndExpenditureForm {
     }
 
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], IncomeAndExpenditure] = {
-      val incomeCheck = validateIncome(data)
-      val expenditureCheck = validateExpenditure(data)
+      val incomeCheck                                                            = validateIncome(data)
+      val expenditureCheck                                                       = validateExpenditure(data)
       val incomeAndExpenditureTotalCheck: ValidatedNel[FormError, AmountInPence] = {
-        val totalIncome = incomeCheck.map(i => i.mainIncome + i.otherIncome)
+        val totalIncome              = incomeCheck.map(i => i.mainIncome + i.otherIncome)
         // make the total negative so 'combine' below takes the expenditure away rather than adding it
-        val totalExpenditureNegative = expenditureCheck.map{ e =>
+        val totalExpenditureNegative = expenditureCheck.map { e =>
           val total = e.wagesAndSalaries + e.mortgageAndRent + e.bills + e.materialAndStockCosts +
             e.businessTravel + e.employeeBenefits + e.other
           AmountInPence.zero - total
@@ -98,25 +94,26 @@ object IncomeAndExpenditureForm {
         }
       }
 
-      (incomeCheck, expenditureCheck, incomeAndExpenditureTotalCheck).mapN{
-        case (income, expenditure, _) =>
+      (incomeCheck, expenditureCheck, incomeAndExpenditureTotalCheck)
+        .mapN { case (income, expenditure, _) =>
           IncomeAndExpenditure(income, expenditure)
-      }.toEither
+        }
+        .toEither
         .leftMap(_.toList)
     }
 
     override def unbind(key: String, value: IncomeAndExpenditure): Map[String, String] =
       Map(
-        mainIncomeKey -> value.income.mainIncome,
-        otherIncomeKey -> value.income.otherIncome,
-        wagesAndSalariesKey -> value.expenditure.wagesAndSalaries,
-        mortgageAndRentKey -> value.expenditure.mortgageAndRent,
-        billsKey -> value.expenditure.bills,
+        mainIncomeKey            -> value.income.mainIncome,
+        otherIncomeKey           -> value.income.otherIncome,
+        wagesAndSalariesKey      -> value.expenditure.wagesAndSalaries,
+        mortgageAndRentKey       -> value.expenditure.mortgageAndRent,
+        billsKey                 -> value.expenditure.bills,
         materialAndStockCostsKey -> value.expenditure.materialAndStockCosts,
-        businessTravelKey -> value.expenditure.businessTravel,
-        employeeBenefitsKey -> value.expenditure.employeeBenefits,
-        otherKey -> value.expenditure.other
-      ).map{ case (k, v) => k -> v.inPounds.toString }
+        businessTravelKey        -> value.expenditure.businessTravel,
+        employeeBenefitsKey      -> value.expenditure.employeeBenefits,
+        otherKey                 -> value.expenditure.other
+      ).map { case (k, v) => k -> v.inPounds.toString }
 
     private def validateIncome(data: Map[String, String]): ValidatedNel[FormError, Income] = {
       val mainIncomeCheck: ValidatedNel[FormError, AmountInPence] =
@@ -126,20 +123,22 @@ object IncomeAndExpenditureForm {
         validateAmountOfMoney(otherIncomeKey, data)
 
       val greaterThanZeroCheck =
-        mainIncomeCheck.combine(otherIncomeCheck)
+        mainIncomeCheck
+          .combine(otherIncomeCheck)
           .andThen(total =>
-            if (total === AmountInPence.zero) {
+            if (total == AmountInPence.zero) {
               val errorMessage = "total income must be greater than zero"
               NonEmptyList(
                 FormError(mainIncomeKey, errorMessage),
                 List(FormError(otherIncomeKey, errorMessage))
               ).invalid
             } else
-              total.valid)
+              total.valid
+          )
 
       (mainIncomeCheck, otherIncomeCheck, greaterThanZeroCheck)
-        .mapN {
-          case (mainIncome, otherIncome, _) => Income(mainIncome, otherIncome)
+        .mapN { case (mainIncome, otherIncome, _) =>
+          Income(mainIncome, otherIncome)
         }
     }
 
@@ -152,14 +151,14 @@ object IncomeAndExpenditureForm {
         validateAmountOfMoney(businessTravelKey, data),
         validateAmountOfMoney(employeeBenefitsKey, data),
         validateAmountOfMoney(otherKey, data)
-      ).mapN{ Expenditure.apply }
+      ).mapN(Expenditure.apply)
 
   }
 
   val form: Form[IncomeAndExpenditure] =
     Form(
       mapping(
-        "" -> of(incomeAndExpenditureFormatter),
+        "" -> of(incomeAndExpenditureFormatter)
       )(identity)(Some(_))
     )
 

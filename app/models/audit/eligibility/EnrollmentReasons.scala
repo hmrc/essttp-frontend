@@ -18,7 +18,7 @@ package models.audit.eligibility
 
 import play.api.libs.json.{JsString, Writes}
 
-sealed trait EnrollmentReasons extends Product with Serializable
+sealed trait EnrollmentReasons extends Product, Serializable
 
 object EnrollmentReasons {
 
@@ -28,7 +28,7 @@ object EnrollmentReasons {
 
   final case class DidNotPassEligibilityCheck() extends EnrollmentReasons
 
-  implicit val writes: Writes[EnrollmentReasons] = Writes {
+  given Writes[EnrollmentReasons] = Writes {
     case NotEnrolled()                => JsString("not enrolled")
     case InactiveEnrollment()         => JsString("inactive enrollment")
     case DidNotPassEligibilityCheck() => JsString("did not pass eligibility check")

@@ -18,15 +18,16 @@ package testsupport.reusableassertions
 
 import controllers.routes
 import essttp.rootmodel.TaxRegime
+import org.scalatest.freespec.AnyFreeSpecLike
 import play.api.mvc.{AnyContent, Request, Result}
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import testsupport.ItSpec
 import testsupport.stubs.EssttpBackend
 import uk.gov.hmrc.http.UpstreamErrorResponse
 
 import scala.concurrent.Future
 
-trait PegaRecreateSessionAssertions { this: ItSpec =>
+trait PegaRecreateSessionAssertions extends AnyFreeSpecLike { this: ItSpec =>
 
   def recreateSessionErrorBehaviour(performAction: (TaxRegime, Request[AnyContent]) => Future[Result]): Unit = {
 

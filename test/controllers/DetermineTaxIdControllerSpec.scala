@@ -33,8 +33,8 @@ class DetermineTaxIdControllerSpec extends ItSpec {
 
   "Determine tax id controller endpoint should redirect properly" - {
 
-      def enrolment(key: String, activated: Boolean)(idKeyWithValue: (String, String)*) =
-        Enrolment(key, idKeyWithValue.map(EnrolmentIdentifier.tupled), if (activated) "activated" else "other")
+    def enrolment(key: String, activated: Boolean)(idKeyWithValue: (String, String)*): Enrolment =
+      Enrolment(key, idKeyWithValue.map(EnrolmentIdentifier.apply), if (activated) "activated" else "other")
 
     "for EPAYE when" - {
 
@@ -53,7 +53,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
           Set(
             enrolment(EnrolmentDef.Epaye.`IR-PAYE-TaxOfficeReference`.enrolmentKey, activated = true)(
               EnrolmentDef.Epaye.`IR-PAYE-TaxOfficeReference`.identifierKey -> "Ref",
-              EnrolmentDef.Epaye.`IR-PAYE-TaxOfficeNumber`.identifierKey -> "Number"
+              EnrolmentDef.Epaye.`IR-PAYE-TaxOfficeNumber`.identifierKey    -> "Number"
             )
           )
 
@@ -61,7 +61,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
         EssttpBackend.StartJourney.findJourney()
         EssttpBackend.DetermineTaxId.stubUpdateTaxId(
           TdAll.journeyId,
-          JourneyJsonTemplates.`Computed Tax Id`(origin       = Origins.Epaye.Bta, taxReference = "NumberRef")
+          JourneyJsonTemplates.`Computed Tax Id`(origin = Origins.Epaye.Bta, taxReference = "NumberRef")
         )
 
         val result = controller.determineTaxId()(fakeRequest)
@@ -77,7 +77,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
           Set(
             enrolment(EnrolmentDef.Epaye.`IR-PAYE-TaxOfficeReference`.enrolmentKey, activated = false)(
               EnrolmentDef.Epaye.`IR-PAYE-TaxOfficeReference`.identifierKey -> "Ref",
-              EnrolmentDef.Epaye.`IR-PAYE-TaxOfficeNumber`.identifierKey -> "Number"
+              EnrolmentDef.Epaye.`IR-PAYE-TaxOfficeNumber`.identifierKey    -> "Number"
             )
           )
 
@@ -90,8 +90,9 @@ class DetermineTaxIdControllerSpec extends ItSpec {
         redirectLocation(result) shouldBe Some(routes.NotEnrolledController.notEnrolled.url)
         AuditConnectorStub.verifyEventAudited(
           "EligibilityCheck",
-          Json.parse(
-            s"""
+          Json
+            .parse(
+              s"""
                |{
                |  "eligibilityResult" : "ineligible",
                |  "enrollmentReasons": "inactive enrollment",
@@ -103,9 +104,9 @@ class DetermineTaxIdControllerSpec extends ItSpec {
                |  "authProviderId": "authId-999",
                |  "chargeTypeAssessment" : []
                |}
-               |""".
-              stripMargin
-          ).as[JsObject]
+               |""".stripMargin
+            )
+            .as[JsObject]
         )
       }
 
@@ -115,7 +116,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
             EnrolmentDef.Epaye.`IR-PAYE-TaxOfficeReference`.identifierKey -> "Ref"
           ),
           enrolment(EnrolmentDef.Epaye.`IR-PAYE-TaxOfficeReference`.enrolmentKey, activated = true)(
-            EnrolmentDef.Epaye.`IR-PAYE-TaxOfficeNumber`.identifierKey -> "Number"
+            EnrolmentDef.Epaye.`IR-PAYE-TaxOfficeNumber`.identifierKey    -> "Number"
           ),
           enrolment(EnrolmentDef.Epaye.`IR-PAYE-TaxOfficeReference`.enrolmentKey, activated = true)(),
           enrolment(EnrolmentDef.Epaye.`IR-PAYE-TaxOfficeReference`.enrolmentKey, activated = false)(
@@ -126,15 +127,15 @@ class DetermineTaxIdControllerSpec extends ItSpec {
           ),
           enrolment(EnrolmentDef.Epaye.`IR-PAYE-TaxOfficeReference`.enrolmentKey, activated = false)()
         ).foreach { e =>
-            stubCommonActions(authAllEnrolments = Some(Set(e)))
-            EssttpBackend.StartJourney.findJourney()
-            EssttpBackend.DetermineTaxId.stubUpdateTaxId(
-              TdAll.journeyId,
-              JourneyJsonTemplates.`Computed Tax Id`(origin       = Origins.Epaye.Bta, taxReference = "NumberRef")
-            )
+          stubCommonActions(authAllEnrolments = Some(Set(e)))
+          EssttpBackend.StartJourney.findJourney()
+          EssttpBackend.DetermineTaxId.stubUpdateTaxId(
+            TdAll.journeyId,
+            JourneyJsonTemplates.`Computed Tax Id`(origin = Origins.Epaye.Bta, taxReference = "NumberRef")
+          )
 
-            a[RuntimeException] shouldBe thrownBy(await(controller.determineTaxId()(fakeRequest)))
-          }
+          a[RuntimeException] shouldBe thrownBy(await(controller.determineTaxId()(fakeRequest)))
+        }
 
       }
 
@@ -148,8 +149,9 @@ class DetermineTaxIdControllerSpec extends ItSpec {
         redirectLocation(result) shouldBe Some(routes.NotEnrolledController.notEnrolled.url)
         AuditConnectorStub.verifyEventAudited(
           "EligibilityCheck",
-          Json.parse(
-            s"""
+          Json
+            .parse(
+              s"""
                |{
                |  "eligibilityResult" : "ineligible",
                |  "enrollmentReasons": "not enrolled",
@@ -162,9 +164,9 @@ class DetermineTaxIdControllerSpec extends ItSpec {
                |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
                |  "chargeTypeAssessment" : []
                |}
-               |""".
-              stripMargin
-          ).as[JsObject]
+               |""".stripMargin
+            )
+            .as[JsObject]
         )
       }
 
@@ -173,7 +175,9 @@ class DetermineTaxIdControllerSpec extends ItSpec {
     "for VAT when" - {
       "the tax id has already been determined" in {
         stubCommonActions(authAllEnrolments = Some(Set(TdAll.vatEnrolment)))
-        EssttpBackend.DetermineTaxId.findJourney(Origins.Vat.Bta)(JourneyJsonTemplates.`Computed Tax Id`(Origins.Vat.Bta, "101747001"))
+        EssttpBackend.DetermineTaxId.findJourney(Origins.Vat.Bta)(
+          JourneyJsonTemplates.`Computed Tax Id`(Origins.Vat.Bta, "101747001")
+        )
 
         val result = controller.determineTaxId()(fakeRequest)
 
@@ -193,7 +197,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
         EssttpBackend.StartJourney.findJourney(Origins.Vat.Bta)
         EssttpBackend.DetermineTaxId.stubUpdateTaxId(
           TdAll.journeyId,
-          JourneyJsonTemplates.`Computed Tax Id`(origin       = Origins.Vat.Bta, taxReference = "Ref")
+          JourneyJsonTemplates.`Computed Tax Id`(origin = Origins.Vat.Bta, taxReference = "Ref")
         )
 
         val result = controller.determineTaxId()(fakeRequest)
@@ -222,8 +226,9 @@ class DetermineTaxIdControllerSpec extends ItSpec {
         redirectLocation(result) shouldBe Some(routes.NotEnrolledController.notVatRegistered.url)
         AuditConnectorStub.verifyEventAudited(
           "EligibilityCheck",
-          Json.parse(
-            s"""
+          Json
+            .parse(
+              s"""
                |{
                |  "eligibilityResult" : "ineligible",
                |  "enrollmentReasons": "not enrolled",
@@ -236,9 +241,9 @@ class DetermineTaxIdControllerSpec extends ItSpec {
                |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
                |  "chargeTypeAssessment" : []
                |}
-               |""".
-              stripMargin
-          ).as[JsObject]
+               |""".stripMargin
+            )
+            .as[JsObject]
         )
       }
     }
@@ -246,7 +251,9 @@ class DetermineTaxIdControllerSpec extends ItSpec {
     "for SA when" - {
       "the tax id has already been determined" in {
         stubCommonActions(authAllEnrolments = Some(Set(TdAll.saEnrolment)))
-        EssttpBackend.DetermineTaxId.findJourney(Origins.Sa.Bta)(JourneyJsonTemplates.`Computed Tax Id`(Origins.Sa.Bta, "1234567895"))
+        EssttpBackend.DetermineTaxId.findJourney(Origins.Sa.Bta)(
+          JourneyJsonTemplates.`Computed Tax Id`(Origins.Sa.Bta, "1234567895")
+        )
 
         val result = controller.determineTaxId()(fakeRequest)
 
@@ -266,7 +273,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
         EssttpBackend.StartJourney.findJourney(Origins.Sa.Bta)
         EssttpBackend.DetermineTaxId.stubUpdateTaxId(
           TdAll.journeyId,
-          JourneyJsonTemplates.`Computed Tax Id`(origin       = Origins.Sa.Bta, taxReference = "Ref")
+          JourneyJsonTemplates.`Computed Tax Id`(origin = Origins.Sa.Bta, taxReference = "Ref")
         )
 
         val result = controller.determineTaxId()(fakeRequest)
@@ -295,8 +302,9 @@ class DetermineTaxIdControllerSpec extends ItSpec {
         redirectLocation(result) shouldBe Some(routes.NotEnrolledController.notSaEnrolled.url)
         AuditConnectorStub.verifyEventAudited(
           "EligibilityCheck",
-          Json.parse(
-            s"""
+          Json
+            .parse(
+              s"""
                |{
                |  "eligibilityResult" : "ineligible",
                |  "enrollmentReasons": "not enrolled",
@@ -309,9 +317,9 @@ class DetermineTaxIdControllerSpec extends ItSpec {
                |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
                |  "chargeTypeAssessment" : []
                |}
-               |""".
-              stripMargin
-          ).as[JsObject]
+               |""".stripMargin
+            )
+            .as[JsObject]
         )
       }
     }
@@ -319,7 +327,9 @@ class DetermineTaxIdControllerSpec extends ItSpec {
     "for SIMP when" - {
       "the tax id has already been determined" in {
         stubCommonActions(authAllEnrolments = Some(Set()))
-        EssttpBackend.DetermineTaxId.findJourney(Origins.Simp.Pta)(JourneyJsonTemplates.`Computed Tax Id`(Origins.Simp.Pta, "1234567895"))
+        EssttpBackend.DetermineTaxId.findJourney(Origins.Simp.Pta)(
+          JourneyJsonTemplates.`Computed Tax Id`(Origins.Simp.Pta, "1234567895")
+        )
 
         val result = controller.determineTaxId()(fakeRequest)
 
@@ -332,7 +342,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
         EssttpBackend.DetermineTaxId.findJourney(Origins.Simp.Pta)(JourneyJsonTemplates.Started(Origins.Simp.Pta))
         EssttpBackend.DetermineTaxId.stubUpdateTaxId(
           TdAll.journeyId,
-          JourneyJsonTemplates.`Computed Tax Id`(origin       = Origins.Simp.Pta, taxReference = "AB123456C")
+          JourneyJsonTemplates.`Computed Tax Id`(origin = Origins.Simp.Pta, taxReference = "AB123456C")
         )
         val result = controller.determineTaxId()(fakeRequest)
 

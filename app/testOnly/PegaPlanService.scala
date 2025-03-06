@@ -18,11 +18,11 @@ package testOnly
 
 import javax.inject.{Inject, Singleton}
 import _root_.connectors.{EssttpBackendConnector, TtpConnector}
-import essttp.journey.model.{Journey, PaymentPlanAnswers, UpfrontPaymentAnswers}
+import essttp.journey.model.{Journey, JourneyStage, PaymentPlanAnswers, UpfrontPaymentAnswers}
 import essttp.rootmodel.AmountInPence
 import essttp.rootmodel.dates.InitialPayment
 import essttp.rootmodel.dates.startdates.{PreferredDayOfMonth, StartDatesRequest, StartDatesResponse}
-import essttp.rootmodel.ttp.affordablequotes._
+import essttp.rootmodel.ttp.affordablequotes.*
 import essttp.rootmodel.ttp.{PaymentPlanFrequencies, RegimeType}
 import play.api.libs.json.{JsBoolean, JsObject, JsValue, Json}
 import play.api.mvc.RequestHeader
@@ -37,47 +37,51 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class PegaPlanService @Inject() (
-    datesApiConnector:   EssttpBackendConnector,
-    ttpConnector:        TtpConnector,
-    essttpStubConnector: EssttpStubConnector
-)(implicit ex: ExecutionContext) {
+  datesApiConnector:   EssttpBackendConnector,
+  ttpConnector:        TtpConnector,
+  essttpStubConnector: EssttpStubConnector
+)(using ExecutionContext) {
 
-  def getPlans(journey: Journey, incomeAndExpenditure: IncomeAndExpenditure)(implicit rh: RequestHeader): Future[List[PaymentPlan]] =
+  def getPlans(journey: Journey, incomeAndExpenditure: IncomeAndExpenditure)(using
+    RequestHeader
+  ): Future[List[PaymentPlan]] =
     for {
       startDatesResponse <- callStartDatesApi(journey)
-      plan <- callPlansApi(journey, incomeAndExpenditure, startDatesResponse)
+      plan               <- callPlansApi(journey, incomeAndExpenditure, startDatesResponse)
     } yield plan.paymentPlans
 
   def storePegaGetCaseResponse(
-      journey:         Journey,
-      testOnlyJourney: TestOnlyJourney
-  )(implicit hc: HeaderCarrier): Future[Unit] = {
+    journey:         Journey,
+    testOnlyJourney: TestOnlyJourney
+  )(using HeaderCarrier): Future[Unit] = {
     val caseId = journey match {
-      case j: Journey.AfterStartedPegaCase => j.startCaseResponse.caseId.value
-      case j: Journey.AfterCheckedPaymentPlan =>
+      case j: JourneyStage.AfterStartedPegaCase    => j.startCaseResponse.caseId.value
+      case j: JourneyStage.AfterCheckedPaymentPlan =>
         j.paymentPlanAnswers match {
           case p: PaymentPlanAnswers.PaymentPlanAfterAffordability => p.startCaseResponse.caseId.value
-          case _: PaymentPlanAnswers.PaymentPlanNoAffordability    => sys.error("Trying to find case ID on non-affordability journey")
+          case _: PaymentPlanAnswers.PaymentPlanNoAffordability    =>
+            sys.error("Trying to find case ID on non-affordability journey")
         }
-      case other => sys.error(s"Could not find PEGA case id for journey in stage ${other.stage.toString}")
+      case other                                   => sys.error(s"Could not find PEGA case id for journey in stage ${other.stage}")
     }
 
-    val incomeAndExpenditure = testOnlyJourney.incomeAndExpenditure.getOrElse(sys.error("Could not find income and expenditure answers"))
-    val paymentPlan = testOnlyJourney.paymentPlan.getOrElse(sys.error("Could not find paymentPlan"))
-    val getCaseResponse = constructPegaGetCaseResponse(incomeAndExpenditure, paymentPlan)
+    val incomeAndExpenditure =
+      testOnlyJourney.incomeAndExpenditure.getOrElse(sys.error("Could not find income and expenditure answers"))
+    val paymentPlan          = testOnlyJourney.paymentPlan.getOrElse(sys.error("Could not find paymentPlan"))
+    val getCaseResponse      = constructPegaGetCaseResponse(incomeAndExpenditure, paymentPlan)
 
     essttpStubConnector.storePegaGetCaseResponse(caseId, getCaseResponse)
   }
 
   private def upfrontPaymentAnswersFromJourney(journey: Journey): UpfrontPaymentAnswers = journey match {
-    case j: Journey.AfterUpfrontPaymentAnswers => j.upfrontPaymentAnswers
-    case other                                 => sys.error(s"Could not find upfront payment answers for journey in stage ${other.stage.toString}")
+    case j: JourneyStage.AfterUpfrontPaymentAnswers => j.upfrontPaymentAnswers
+    case other                                      => sys.error(s"Could not find upfront payment answers for journey in stage ${other.stage}")
   }
 
-  private def callStartDatesApi(journey: Journey)(implicit r: RequestHeader): Future[StartDatesResponse] = {
-    val dayOfMonth: PreferredDayOfMonth = PreferredDayOfMonth(28)
-    val upfrontPaymentAnswers = upfrontPaymentAnswersFromJourney(journey)
-    val initialPayment = upfrontPaymentAnswers match {
+  private def callStartDatesApi(journey: Journey)(using RequestHeader): Future[StartDatesResponse] = {
+    val dayOfMonth: PreferredDayOfMonth      = PreferredDayOfMonth(28)
+    val upfrontPaymentAnswers                = upfrontPaymentAnswersFromJourney(journey)
+    val initialPayment                       = upfrontPaymentAnswers match {
       case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => InitialPayment(value = true)
       case UpfrontPaymentAnswers.NoUpfrontPayment          => InitialPayment(value = false)
     }
@@ -86,10 +90,10 @@ class PegaPlanService @Inject() (
   }
 
   private def callPlansApi(
-      journey:              Journey,
-      incomeAndExpenditure: IncomeAndExpenditure,
-      startDatesResponse:   StartDatesResponse
-  )(implicit rh: RequestHeader): Future[AffordableQuotesResponse] = {
+    journey:              Journey,
+    incomeAndExpenditure: IncomeAndExpenditure,
+    startDatesResponse:   StartDatesResponse
+  )(using RequestHeader): Future[AffordableQuotesResponse] = {
     val initialPaymentAmount = upfrontPaymentAnswersFromJourney(journey) match {
       case UpfrontPaymentAnswers.NoUpfrontPayment               => None
       case UpfrontPaymentAnswers.DeclaredUpfrontPayment(amount) => Some(amount)
@@ -111,37 +115,40 @@ class PegaPlanService @Inject() (
     }
 
     val eligibilityCheckResult = journey match {
-      case j: Journey.AfterEligibilityChecked => j.eligibilityCheckResult
-      case other                              => sys.error(s"Could not find eligibility check result in journey with stage ${other.stage.toString}")
+      case j: JourneyStage.AfterEligibilityChecked => j.eligibilityCheckResult
+      case other                                   => sys.error(s"Could not find eligibility check result in journey with stage ${other.stage}")
     }
 
     val debtItemCharges = eligibilityCheckResult.chargeTypeAssessment.flatMap(toDebtItemCharge)
 
     val affordableQuotesRequest: AffordableQuotesRequest = AffordableQuotesRequest(
-      channelIdentifier           = ChannelIdentifiers.eSSTTP,
-      regimeType                  = RegimeType.fromTaxRegime(journey.taxRegime),
+      channelIdentifier = ChannelIdentifiers.eSSTTP,
+      regimeType = RegimeType.fromTaxRegime(journey.taxRegime),
       paymentPlanAffordableAmount = PaymentPlanAffordableAmount(monthlyPaymentAmount),
-      paymentPlanFrequency        = PaymentPlanFrequencies.Monthly,
-      paymentPlanMaxLength        = maxPlanLength(eligibilityCheckResult, journey),
-      paymentPlanMinLength        = eligibilityCheckResult.paymentPlanMinLength,
-      accruedDebtInterest         = AccruedDebtInterest(TtpService.calculateCumulativeInterest(eligibilityCheckResult)),
-      paymentPlanStartDate        = startDatesResponse.instalmentStartDate,
-      initialPaymentDate          = startDatesResponse.initialPaymentDate,
-      initialPaymentAmount        = initialPaymentAmount,
-      debtItemCharges             = debtItemCharges,
-      customerPostcodes           = eligibilityCheckResult.customerPostcodes
+      paymentPlanFrequency = PaymentPlanFrequencies.Monthly,
+      paymentPlanMaxLength = maxPlanLength(eligibilityCheckResult, journey),
+      paymentPlanMinLength = eligibilityCheckResult.paymentPlanMinLength,
+      accruedDebtInterest = AccruedDebtInterest(TtpService.calculateCumulativeInterest(eligibilityCheckResult)),
+      paymentPlanStartDate = startDatesResponse.instalmentStartDate,
+      initialPaymentDate = startDatesResponse.initialPaymentDate,
+      initialPaymentAmount = initialPaymentAmount,
+      debtItemCharges = debtItemCharges,
+      customerPostcodes = eligibilityCheckResult.customerPostcodes
     )
 
     ttpConnector.callAffordableQuotesApi(affordableQuotesRequest, journey.correlationId)
   }
 
-  private def constructPegaGetCaseResponse(incomeAndExpenditure: IncomeAndExpenditure, paymentPlan: PaymentPlan): JsValue = {
-    val paymentPlanJsonString = {
+  private def constructPegaGetCaseResponse(
+    incomeAndExpenditure: IncomeAndExpenditure,
+    paymentPlan:          PaymentPlan
+  ): JsValue = {
+    val paymentPlanJsonString                                    = {
       val json = Json.toJson(paymentPlan).as[JsObject] + ("planSelected", JsBoolean(true))
       json.toString
     }
-      def toAmountOfMoneyItem(value: AmountInPence, label: String) =
-        s"""{
+    def toAmountOfMoneyItem(value: AmountInPence, label: String) =
+      s"""{
          |  "amountValue": "${value.formatInPounds}",
          |  "pyLabel": "$label"
          |}
@@ -149,9 +156,9 @@ class PegaPlanService @Inject() (
 
     val incomeArray = {
       val items: List[String] = List(
-        incomeAndExpenditure.income.mainIncome -> "Main income",
+        incomeAndExpenditure.income.mainIncome  -> "Main income",
         incomeAndExpenditure.income.otherIncome -> "Other income"
-      ).map{ (toAmountOfMoneyItem _).tupled }
+      ).map((toAmountOfMoneyItem _).tupled)
 
       s"""[ ${items.mkString(",")} ]"""
     }
@@ -159,15 +166,15 @@ class PegaPlanService @Inject() (
     val expenditureArray = {
       val items: List[String] =
         List(
-          incomeAndExpenditure.expenditure.wagesAndSalaries -> "Wages and salaries",
-          incomeAndExpenditure.expenditure.mortgageAndRent -> "Mortgage and rental payments on business premises",
-          incomeAndExpenditure.expenditure.bills -> "Bills for business premises",
+          incomeAndExpenditure.expenditure.wagesAndSalaries      -> "Wages and salaries",
+          incomeAndExpenditure.expenditure.mortgageAndRent       -> "Mortgage and rental payments on business premises",
+          incomeAndExpenditure.expenditure.bills                 -> "Bills for business premises",
           incomeAndExpenditure.expenditure.materialAndStockCosts -> "Material and stock costs",
-          incomeAndExpenditure.expenditure.businessTravel -> "Business travel",
-          incomeAndExpenditure.expenditure.employeeBenefits -> "Employee benefits",
-          incomeAndExpenditure.expenditure.other -> "Other",
-          AmountInPence.zero -> "My company or partnership does not have any expenditure"
-        ).map{ (toAmountOfMoneyItem _).tupled }
+          incomeAndExpenditure.expenditure.businessTravel        -> "Business travel",
+          incomeAndExpenditure.expenditure.employeeBenefits      -> "Employee benefits",
+          incomeAndExpenditure.expenditure.other                 -> "Other",
+          AmountInPence.zero                                     -> "My company or partnership does not have any expenditure"
+        ).map((toAmountOfMoneyItem _).tupled)
 
       s"""[ ${items.mkString(",")} ]"""
     }

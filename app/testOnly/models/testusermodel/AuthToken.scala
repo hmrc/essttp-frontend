@@ -16,7 +16,6 @@
 
 package testOnly.models.testusermodel
 
-/**
- * The same as bearer token
- */
+/** The same as bearer token
+  */
 final case class AuthToken(value: String)

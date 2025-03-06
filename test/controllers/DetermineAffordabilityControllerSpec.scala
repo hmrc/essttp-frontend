@@ -35,47 +35,58 @@ class DetermineAffordabilityControllerSpec extends ItSpec {
     ("VAT", Origins.Vat.Bta),
     ("SA", Origins.Sa.Bta),
     ("SIMP", Origins.Simp.Pta)
-  ).foreach {
-      case (regime, origin) =>
-        "GET /determine-affordability" - {
-          s"[$regime journey] trigger call to ttp microservice affordability endpoint and update backend when" - {
+  ).foreach { case (regime, origin) =>
+    "GET /determine-affordability" - {
+      s"[$regime journey] trigger call to ttp microservice affordability endpoint and update backend when" - {
 
-            "affordability is not enabled" in {
-              stubCommonActions()
-              EssttpBackend.Dates.findJourneyExtremeDates(testCrypto, origin)()
-              EssttpBackend.AffordabilityMinMaxApi.stubUpdateAffordability(TdAll.journeyId, JourneyJsonTemplates.`Retrieved Affordability`(origin))
-              EssttpBackend.CanPayWithinSixMonths.stubUpdateCanPayWithinSixMonths(TdAll.journeyId, JourneyJsonTemplates `Obtained Can Pay Within 6 months - not required` (origin))
-              Ttp.Affordability.stubRetrieveAffordability()
+        "affordability is not enabled" in {
+          stubCommonActions()
+          EssttpBackend.Dates.findJourneyExtremeDates(testCrypto, origin)()
+          EssttpBackend.AffordabilityMinMaxApi
+            .stubUpdateAffordability(TdAll.journeyId, JourneyJsonTemplates.`Retrieved Affordability`(origin))
+          EssttpBackend.CanPayWithinSixMonths.stubUpdateCanPayWithinSixMonths(
+            TdAll.journeyId,
+            JourneyJsonTemplates `Obtained Can Pay Within 6 months - not required` origin
+          )
+          Ttp.Affordability.stubRetrieveAffordability()
 
-              val result: Future[Result] = controller.determineAffordability(fakeRequest)
+          val result: Future[Result] = controller.determineAffordability(fakeRequest)
 
-              status(result) shouldBe Status.SEE_OTHER
-              redirectLocation(result) shouldBe Some(PageUrls.howMuchCanYouPayEachMonthUrl)
-              EssttpBackend.AffordabilityMinMaxApi.verifyUpdateAffordabilityRequest(TdAll.journeyId, TdAll.instalmentAmounts)
-              EssttpBackend.CanPayWithinSixMonths.verifyUpdateCanPayWithinSixMonthsRequest(TdAll.journeyId, CanPayWithinSixMonthsAnswers.AnswerNotRequired)
-              Ttp.Affordability.verifyTtpAffordabilityRequest(origin.taxRegime)(CryptoFormat.NoOpCryptoFormat)
-            }
-
-            "affordability is enabled" in {
-              stubCommonActions()
-              EssttpBackend.Dates.findJourneyExtremeDates(testCrypto, origin)(
-                JourneyJsonTemplates.`Retrieved Extreme Dates Response`(origin, affordabilityEnabled = true)(testCrypto)
-              )
-              EssttpBackend.AffordabilityMinMaxApi.stubUpdateAffordability(
-                TdAll.journeyId, JourneyJsonTemplates.`Retrieved Affordability`(origin, affordabilityEnabled = true)
-              )
-              Ttp.Affordability.stubRetrieveAffordability()
-
-              val result: Future[Result] = controller.determineAffordability(fakeRequest)
-
-              status(result) shouldBe Status.SEE_OTHER
-              redirectLocation(result) shouldBe Some(PageUrls.canPayWithinSixMonthsUrl(origin.taxRegime, None))
-              EssttpBackend.AffordabilityMinMaxApi.verifyUpdateAffordabilityRequest(TdAll.journeyId, TdAll.instalmentAmounts)
-              EssttpBackend.CanPayWithinSixMonths.verifyNoneUpdateCanPayWithinSixMonthsRequest(TdAll.journeyId)
-              Ttp.Affordability.verifyTtpAffordabilityRequest(origin.taxRegime, maxPlanLength = 6)(CryptoFormat.NoOpCryptoFormat)
-            }
-
-          }
+          status(result) shouldBe Status.SEE_OTHER
+          redirectLocation(result) shouldBe Some(PageUrls.howMuchCanYouPayEachMonthUrl)
+          EssttpBackend.AffordabilityMinMaxApi
+            .verifyUpdateAffordabilityRequest(TdAll.journeyId, TdAll.instalmentAmounts)
+          EssttpBackend.CanPayWithinSixMonths
+            .verifyUpdateCanPayWithinSixMonthsRequest(TdAll.journeyId, CanPayWithinSixMonthsAnswers.AnswerNotRequired)
+          Ttp.Affordability.verifyTtpAffordabilityRequest(origin.taxRegime)(using CryptoFormat.NoOpCryptoFormat)
         }
+
+        "affordability is enabled" in {
+          stubCommonActions()
+          EssttpBackend.Dates.findJourneyExtremeDates(testCrypto, origin)(
+            JourneyJsonTemplates.`Retrieved Extreme Dates Response`(origin, affordabilityEnabled = true)(using
+              testCrypto
+            )
+          )
+          EssttpBackend.AffordabilityMinMaxApi.stubUpdateAffordability(
+            TdAll.journeyId,
+            JourneyJsonTemplates.`Retrieved Affordability`(origin, affordabilityEnabled = true)
+          )
+          Ttp.Affordability.stubRetrieveAffordability()
+
+          val result: Future[Result] = controller.determineAffordability(fakeRequest)
+
+          status(result) shouldBe Status.SEE_OTHER
+          redirectLocation(result) shouldBe Some(PageUrls.canPayWithinSixMonthsUrl(origin.taxRegime, None))
+          EssttpBackend.AffordabilityMinMaxApi
+            .verifyUpdateAffordabilityRequest(TdAll.journeyId, TdAll.instalmentAmounts)
+          EssttpBackend.CanPayWithinSixMonths.verifyNoneUpdateCanPayWithinSixMonthsRequest(TdAll.journeyId)
+          Ttp.Affordability.verifyTtpAffordabilityRequest(origin.taxRegime, maxPlanLength = 6)(using
+            CryptoFormat.NoOpCryptoFormat
+          )
+        }
+
+      }
     }
+  }
 }

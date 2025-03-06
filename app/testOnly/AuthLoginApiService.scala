@@ -20,6 +20,7 @@ import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.http.HeaderNames
 import play.api.libs.json.JsObject
+import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 import play.api.mvc.Session
 import testOnly.models.testusermodel.{AuthToken, TestUser}
 import uk.gov.hmrc.http.HttpReads.Implicits._
@@ -31,14 +32,13 @@ import java.time.Clock
 import java.util.UUID.randomUUID
 import scala.concurrent.{ExecutionContext, Future}
 
-/**
- * Test Login Service.
- */
+/** Test Login Service.
+  */
 @Singleton
 class AuthLoginApiService @Inject() (
-    httpClient:     HttpClientV2,
-    servicesConfig: ServicesConfig
-)(implicit ec: ExecutionContext) {
+  httpClient:     HttpClientV2,
+  servicesConfig: ServicesConfig
+)(using ExecutionContext) {
 
   def logIn(testUser: TestUser): Future[Session] = for {
     authToken: AuthToken <- callAuthLoginApi(LoginRequestMaker.makeLoginRequestBody(testUser))
@@ -47,7 +47,8 @@ class AuthLoginApiService @Inject() (
   private def callAuthLoginApi(requestBody: JsObject): Future[AuthToken] = {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    httpClient.post(url"$authLoginApiUrl/government-gateway/session/login")
+    httpClient
+      .post(url"$authLoginApiUrl/government-gateway/session/login")
       .withBody(requestBody)
       .execute[HttpResponse]
       .map(r =>
@@ -59,17 +60,19 @@ class AuthLoginApiService @Inject() (
           )
         } else {
           throw UpstreamErrorResponse(s"Got response with status ${r.status.toString} and body ${r.body}", 500)
-        })
+        }
+      )
   }
 
   private def buildAuthenticatedSession(authToken: AuthToken) =
-    Session(Map(
-      SessionKeys.sessionId -> s"session-${randomUUID.toString}",
-      SessionKeys.authToken -> authToken.value,
-      SessionKeys.lastRequestTimestamp -> realClock.millis().toString
-    ))
+    Session(
+      Map(
+        SessionKeys.sessionId            -> s"session-${randomUUID.toString}",
+        SessionKeys.authToken            -> authToken.value,
+        SessionKeys.lastRequestTimestamp -> realClock.millis().toString
+      )
+    )
 
   private val realClock: Clock = Clock.systemUTC()
-  private val authLoginApiUrl = servicesConfig.baseUrl("auth-login-api")
+  private val authLoginApiUrl  = servicesConfig.baseUrl("auth-login-api")
 }
-

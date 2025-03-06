@@ -34,17 +34,17 @@ class BarsSubjectSpec extends UnitSpec {
           (Some("fullName"), Some("andFirstName"), Some("andLastName"))
         )
       ) { (fullName: Option[String], firstName: Option[String], lastName: Option[String]) =>
-          assertThrows[IllegalArgumentException] {
-            BarsSubject(
-              title     = None,
-              name      = fullName,
-              firstName = firstName,
-              lastName  = lastName,
-              dob       = None,
-              address   = None
-            )
-          }
+        assertThrows[IllegalArgumentException] {
+          BarsSubject(
+            title = None,
+            name = fullName,
+            firstName = firstName,
+            lastName = lastName,
+            dob = None,
+            address = None
+          )
         }
+      }
     }
   }
 }

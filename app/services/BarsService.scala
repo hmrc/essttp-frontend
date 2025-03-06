@@ -16,7 +16,6 @@
 
 package services
 
-import cats.implicits.catsSyntaxEq
 import connectors.BarsConnector
 import essttp.utils.Errors
 import models.bars.request._
@@ -25,7 +24,7 @@ import models.bars.response._
 import models.bars.{BarsTypeOfBankAccount, BarsTypesOfBankAccount}
 import play.api.Logging
 import play.api.http.Status._
-import util.HttpResponseUtils.HttpResponseOps
+import util.HttpResponseUtils._
 import play.api.libs.json._
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.{HttpResponse, UpstreamErrorResponse}
@@ -33,27 +32,27 @@ import uk.gov.hmrc.http.{HttpResponse, UpstreamErrorResponse}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-/**
- * Bank Account Reputation service (BARs).
- */
+/** Bank Account Reputation service (BARs).
+  */
 @Singleton
-class BarsService @Inject() (barsConnector: BarsConnector)(implicit ec: ExecutionContext) extends Logging {
+class BarsService @Inject() (barsConnector: BarsConnector)(using ExecutionContext) extends Logging {
 
   // NOTE: if the validate call is removed in the future (it is said to be deprecated)
   // then implement the "SORT_CODE_ON_DENY_LIST" handling in the verify calls below
-  def validateBankAccount(bankAccount: BarsBankAccount)(implicit requestHeader: RequestHeader): Future[BarsResponse] = {
-
-    barsConnector.validateBankDetails(BarsValidateRequest(bankAccount)).map { httpResponse: HttpResponse =>
+  def validateBankAccount(bankAccount: BarsBankAccount)(using RequestHeader): Future[BarsResponse] =
+    barsConnector.validateBankDetails(BarsValidateRequest(bankAccount)).map { (httpResponse: HttpResponse) =>
       httpResponse.status match {
         case OK =>
-          httpResponse.parseJSON[BarsValidateResponse].map(ValidateResponse.apply)
+          httpResponse
+            .parseJSON[BarsValidateResponse]
+            .map(ValidateResponse.apply)
             .getOrElse(throw UpstreamErrorResponse(httpResponse.body, httpResponse.status))
 
         case BAD_REQUEST =>
           httpResponse.json.validate[BarsErrorResponse] match {
-            case JsSuccess(barsErrorResponse, _) if barsErrorResponse.code === "SORT_CODE_ON_DENY_LIST" =>
+            case JsSuccess(barsErrorResponse, _) if barsErrorResponse.code == "SORT_CODE_ON_DENY_LIST" =>
               SortCodeOnDenyList(barsErrorResponse)
-            case _ =>
+            case _                                                                                     =>
               throw UpstreamErrorResponse(httpResponse.body, httpResponse.status)
           }
 
@@ -61,45 +60,37 @@ class BarsService @Inject() (barsConnector: BarsConnector)(implicit ec: Executio
           throw UpstreamErrorResponse(httpResponse.body, httpResponse.status)
       }
     }
-  }
 
   // implement sortCodeOnDenyList (if validate is removed)
-  def verifyPersonal(bankAccount: BarsBankAccount, subject: BarsSubject)(
-      implicit
-      requestHeader: RequestHeader
-  ): Future[VerifyResponse] =
+  def verifyPersonal(bankAccount: BarsBankAccount, subject: BarsSubject)(using RequestHeader): Future[VerifyResponse] =
     barsConnector.verifyPersonal(BarsVerifyPersonalRequest(bankAccount, subject)).map(VerifyResponse.apply)
 
   // implement sortCodeOnDenyList (if validate is removed)
-  def verifyBusiness(bankAccount: BarsBankAccount, business: BarsBusiness)(
-      implicit
-      requestHeader: RequestHeader
+  def verifyBusiness(bankAccount: BarsBankAccount, business: BarsBusiness)(using
+    RequestHeader
   ): Future[VerifyResponse] =
     barsConnector.verifyBusiness(BarsVerifyBusinessRequest(bankAccount, business)).map(VerifyResponse.apply)
 
-  /**
-   * Call Validate first and if that fails, then Return the failing response
-   * Otherwise, call either Verify/Personal or Verify/Business
-   */
+  /** Call Validate first and if that fails, then Return the failing response Otherwise, call either Verify/Personal or
+    * Verify/Business
+    */
   def verifyBankDetails(
-      bankAccount:       BarsBankAccount,
-      subject:           BarsSubject,
-      business:          BarsBusiness,
-      typeOfBankAccount: BarsTypeOfBankAccount
-  )(implicit requestHeader: RequestHeader, ec: ExecutionContext): Future[Either[BarsError, VerifyResponse]] = {
-
+    bankAccount:       BarsBankAccount,
+    subject:           BarsSubject,
+    business:          BarsBusiness,
+    typeOfBankAccount: BarsTypeOfBankAccount
+  )(using RequestHeader): Future[Either[BarsError, VerifyResponse]] =
     validateBankAccount(bankAccount).flatMap {
       case validateResponse @ validateFailure() =>
         Future.successful(Left(handleValidateErrorResponse(validateResponse)))
-      case response: SortCodeOnDenyList =>
+      case response: SortCodeOnDenyList         =>
         Future.successful(Left(SortCodeOnDenyListErrorResponse(response)))
-      case _ =>
+      case _                                    =>
         (typeOfBankAccount match {
           case BarsTypesOfBankAccount.Personal => verifyPersonal(bankAccount, subject)
           case BarsTypesOfBankAccount.Business => verifyBusiness(bankAccount, business)
         }).map(handleVerifyResponse)
     }
-  }
 
   private def handleValidateErrorResponse(response: ValidateResponse): BarsError = {
     import ValidateResponse._
@@ -107,7 +98,10 @@ class BarsService @Inject() (barsConnector: BarsConnector)(implicit ec: Executio
       case accountNumberIsWellFormattedNo() => AccountNumberNotWellFormattedValidateResponse(response)
       case sortCodeIsPresentOnEiscdNo()     => SortCodeNotPresentOnEiscdValidateResponse(response)
       case sortCodeSupportsDirectDebitNo()  => SortCodeDoesNotSupportDirectDebitValidateResponse(response)
-      case ValidateResponse(_)              => Errors.throwServerErrorException("Fell into case ValidateResponse(_) in handleValidateErrorResponse. This should never happen, debug.")
+      case ValidateResponse(_)              =>
+        Errors.throwServerErrorException(
+          "Fell into case ValidateResponse(_) in handleValidateErrorResponse. This should never happen, debug."
+        )
     }
   }
 

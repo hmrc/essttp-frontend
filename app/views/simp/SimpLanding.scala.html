@@ -30,9 +30,9 @@
   appConfig: AppConfig
 )
 
-@(backUrl: Option[BackUrl])(implicit request: Request[_])
+@(backUrl: Option[BackUrl])(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 @title= @{Messages.Simp.`Set up a Simple Assessment payment plan`.show }
 

@@ -24,19 +24,19 @@ import models.audit.{AuditDetail, TaxDetail}
 import play.api.libs.json.{Json, OWrites}
 
 final case class EmailVerificationResultAuditDetail(
-    origin:         String,
-    taxType:        String,
-    taxDetail:      TaxDetail,
-    correlationId:  CorrelationId,
-    emailAddress:   Email,
-    emailSource:    EmailSource,
-    result:         String,
-    failureReason:  Option[String],
-    authProviderId: String
+  origin:         String,
+  taxType:        String,
+  taxDetail:      TaxDetail,
+  correlationId:  CorrelationId,
+  emailAddress:   Email,
+  emailSource:    EmailSource,
+  result:         String,
+  failureReason:  Option[String],
+  authProviderId: String
 ) extends AuditDetail {
   val auditType: String = "EmailVerificationResult"
 }
 
 object EmailVerificationResultAuditDetail {
-  implicit def writes(implicit cryptoFormat: CryptoFormat): OWrites[EmailVerificationResultAuditDetail] = Json.writes
+  given (using CryptoFormat): OWrites[EmailVerificationResultAuditDetail] = Json.writes
 }

@@ -32,9 +32,9 @@
         requestSupport: RequestSupport
 )
 
-@(userEmail: String, form: Form[ChooseEmailForm])(implicit request: Request[_])
+@(userEmail: String, form: Form[ChooseEmailForm])(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.{languageFromRequest, legacyMessages}
 
 @key = @{
     "selectAnEmailToUseRadio"

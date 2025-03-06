@@ -23,18 +23,18 @@ import paymentsEmailVerification.models.Email
 import play.api.libs.json.{Json, OWrites}
 
 final case class EmailVerificationRequestedAuditDetail(
-    origin:         String,
-    taxType:        String,
-    taxDetail:      TaxDetail,
-    correlationId:  CorrelationId,
-    emailAddress:   Email,
-    emailSource:    EmailSource,
-    result:         String,
-    authProviderId: String
+  origin:         String,
+  taxType:        String,
+  taxDetail:      TaxDetail,
+  correlationId:  CorrelationId,
+  emailAddress:   Email,
+  emailSource:    EmailSource,
+  result:         String,
+  authProviderId: String
 ) extends AuditDetail {
   val auditType: String = "EmailVerificationRequested"
 }
 
 object EmailVerificationRequestedAuditDetail {
-  implicit def writes: OWrites[EmailVerificationRequestedAuditDetail] = Json.writes
+  given OWrites[EmailVerificationRequestedAuditDetail] = Json.writes
 }

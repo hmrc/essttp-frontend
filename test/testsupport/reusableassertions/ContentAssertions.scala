@@ -30,17 +30,17 @@ import scala.jdk.CollectionConverters.IterableHasAsScala
 
 object ContentAssertions extends RichMatchers {
 
-  def assertListOfContent(elements: Elements)(expectedContent: List[String]) = {
-    elements.asScala.toList.zip(expectedContent)
+  def assertListOfContent(elements: Elements)(expectedContent: List[String]) =
+    elements.asScala.toList
+      .zip(expectedContent)
       .map { case (element, expectedText) => element.text() shouldBe expectedText }
-  }
 
-  def assertListOfLinks(elements: Elements)(expectedContent: List[String]) = {
-    elements.asScala.toList.zip(expectedContent)
+  def assertListOfLinks(elements: Elements)(expectedContent: List[String]) =
+    elements.asScala.toList
+      .zip(expectedContent)
       .map { case (element, expectedHref) => element.attr("href") shouldBe expectedHref }
-  }
 
-  //used for summary lists
+  // used for summary lists
   def assertKeyAndValue(element: Element, keyValue: (String, String)): Assertion = {
     element.select(".govuk-summary-list__key").text() shouldBe keyValue._1
     element.select(".govuk-summary-list__value").text() shouldBe keyValue._2
@@ -51,7 +51,7 @@ object ContentAssertions extends RichMatchers {
     langToggleItems.size shouldBe 2
 
     val englishOption = langToggleItems(0)
-    val welshOption = langToggleItems(1)
+    val welshOption   = langToggleItems(1)
 
     selectedLanguage match {
       case Languages.English =>
@@ -74,17 +74,17 @@ object ContentAssertions extends RichMatchers {
 
   @nowarn
   def commonPageChecks(
-      page:                        Document,
-      expectedH1:                  String,
-      shouldBackLinkBePresent:     Boolean,
-      expectedSubmitUrl:           Option[String],
-      signedIn:                    Boolean           = true,
-      hasFormError:                Boolean           = false,
-      shouldH1BeSameAsServiceName: Boolean           = false,
-      regimeBeingTested:           Option[TaxRegime] = Some(TaxRegime.Epaye),
-      language:                    Language          = Languages.English,
-      shouldServiceNameBeInHeader: Boolean           = true,
-      backLinkUrlOverride:         Option[String]    = None
+    page:                        Document,
+    expectedH1:                  String,
+    shouldBackLinkBePresent:     Boolean,
+    expectedSubmitUrl:           Option[String],
+    signedIn:                    Boolean = true,
+    hasFormError:                Boolean = false,
+    shouldH1BeSameAsServiceName: Boolean = false,
+    regimeBeingTested:           Option[TaxRegime] = Some(TaxRegime.Epaye),
+    language:                    Language = Languages.English,
+    shouldServiceNameBeInHeader: Boolean = true,
+    backLinkUrlOverride:         Option[String] = None
   ): Unit = {
     val titlePrefix = if (hasFormError) {
       language match {
@@ -103,7 +103,7 @@ object ContentAssertions extends RichMatchers {
             case Some(TaxRegime.Simp)  => TdAll.expectedServiceNameSimpEn
             case None                  => TdAll.expectedServiceNameGenericEn
           }
-        case Languages.Welsh =>
+        case Languages.Welsh   =>
           regimeBeingTested match {
             case Some(TaxRegime.Epaye) => TdAll.expectedServiceNamePayeCy
             case Some(TaxRegime.Vat)   => TdAll.expectedServiceNameVatCy
@@ -126,13 +126,13 @@ object ContentAssertions extends RichMatchers {
     serviceName.is("a") shouldBe regimeBeingTested.isDefined && shouldServiceNameBeInHeader
     serviceName.text() shouldBe (if (shouldServiceNameBeInHeader) regimeServiceName else "")
     serviceName.attr("href") shouldBe (if (shouldServiceNameBeInHeader) regimeBeingTested match {
-      case Some(TaxRegime.Epaye) => routes.LandingController.epayeLandingPage.url
-      case Some(TaxRegime.Vat)   => routes.LandingController.vatLandingPage.url
-      case Some(TaxRegime.Sa)    => routes.LandingController.saLandingPage.url
-      case Some(TaxRegime.Simp)  => routes.LandingController.simpLandingPage.url
-      case None                  => ""
-    }
-    else "")
+                                         case Some(TaxRegime.Epaye) => routes.LandingController.epayeLandingPage.url
+                                         case Some(TaxRegime.Vat)   => routes.LandingController.vatLandingPage.url
+                                         case Some(TaxRegime.Sa)    => routes.LandingController.saLandingPage.url
+                                         case Some(TaxRegime.Simp)  => routes.LandingController.simpLandingPage.url
+                                         case None                  => ""
+                                       }
+                                       else "")
 
     page.select("h1").text() shouldBe expectedH1
     ContentAssertions.languageToggleExists(page, language)
@@ -147,7 +147,7 @@ object ContentAssertions extends RichMatchers {
         case Some(url) =>
           backLink.hasClass("js-visible") shouldBe false
           backLink.attr("href") shouldBe url
-        case None =>
+        case None      =>
           backLink.hasClass("js-visible") shouldBe true
           backLink.attr("href") shouldBe "#"
       }
@@ -184,26 +184,25 @@ object ContentAssertions extends RichMatchers {
     ()
   }
 
-  def welshOrEnglish(language: Language, expectedEnglish: String, expectedWelsh: String): String = {
+  def welshOrEnglish(language: Language, expectedEnglish: String, expectedWelsh: String): String =
     language match {
       case Languages.English => expectedEnglish
       case Languages.Welsh   => expectedWelsh
     }
-  }
 
   val (defaultCallUsContentEnglish, defaultCallUsContentWelsh) =
     "Call us on <strong>0300 123 1813</strong> as you may be able to set up a plan over the phone." ->
       "Ffoniwch ni ar <strong>0300 200 1900</strong> oherwydd mae’n bosibl y gallwch drefnu cynllun dros y ffôn."
 
   def commonIneligibilityTextCheck(
-      doc:                         Document,
-      taxRegime:                   TaxRegime,
-      language:                    Language,
-      callUsContentEnglish:        String    = ContentAssertions.defaultCallUsContentEnglish,
-      callUsContentWelsh:          String    = ContentAssertions.defaultCallUsContentWelsh,
-      expectCallPreparationHints:  Boolean   = true,
-      showFullListPreparationTips: Boolean   = true,
-      showWereLikelyToAsk:         Boolean   = true
+    doc:                         Document,
+    taxRegime:                   TaxRegime,
+    language:                    Language,
+    callUsContentEnglish:        String = ContentAssertions.defaultCallUsContentEnglish,
+    callUsContentWelsh:          String = ContentAssertions.defaultCallUsContentWelsh,
+    expectCallPreparationHints:  Boolean = true,
+    showFullListPreparationTips: Boolean = true,
+    showWereLikelyToAsk:         Boolean = true
   ): Unit = {
 
     val callUsContentFromDoc = doc.select("#call-us-content")
@@ -215,19 +214,22 @@ object ContentAssertions extends RichMatchers {
     }
 
     val commonEligibilityWrapper = doc.select("#common-eligibility")
-    val govukBodyElements = commonEligibilityWrapper.select(".govuk-body").asScala.toList
+    val govukBodyElements        = commonEligibilityWrapper.select(".govuk-body").asScala.toList
 
     govukBodyElements(0).html() shouldBe {
       language match {
-        case Languages.English => "Our opening times are Monday to Friday, 8am to 6pm. We are closed on weekends and bank holidays."
-        case Languages.Welsh   => "Ein horiau agor yw Dydd Llun i Ddydd Gwener, 08:30 i 17:00. Rydym ar gau ar benwythnosau a gwyliau banc."
+        case Languages.English =>
+          "Our opening times are Monday to Friday, 8am to 6pm. We are closed on weekends and bank holidays."
+        case Languages.Welsh   =>
+          "Ein horiau agor yw Dydd Llun i Ddydd Gwener, 08:30 i 17:00. Rydym ar gau ar benwythnosau a gwyliau banc."
       }
     }
 
     val subheadings = commonEligibilityWrapper.select("h2").asScala.toList
     subheadings.size shouldBe {
       language match {
-        case Languages.English => if (expectCallPreparationHints & showWereLikelyToAsk) 4 else if (expectCallPreparationHints) 3 else 2
+        case Languages.English =>
+          if (expectCallPreparationHints & showWereLikelyToAsk) 4 else if (expectCallPreparationHints) 3 else 2
         case Languages.Welsh   => if (expectCallPreparationHints) 3 else 1
       }
     }
@@ -239,82 +241,86 @@ object ContentAssertions extends RichMatchers {
           case Languages.Welsh   => "Cyn i chi ffonio, sicrhewch fod gennych y canlynol:"
         }
       }
-      val bulletLists = commonEligibilityWrapper.select(".govuk-list").asScala.toList
-      val beforeYouCallList = bulletLists(0).select("li").asScala.toList
-      val expectedBeforeYouCallBullets = {
+      val bulletLists                  = commonEligibilityWrapper.select(".govuk-list").asScala.toList
+      val beforeYouCallList            = bulletLists(0).select("li").asScala.toList
+      val expectedBeforeYouCallBullets =
         language match {
           case Languages.English =>
             taxRegime match {
-              case TaxRegime.Epaye => List(
-                "your Accounts Office reference which is 13 characters long, like 123PX00123456",
-                "your bank details"
-              )
-              case TaxRegime.Vat =>
+              case TaxRegime.Epaye =>
+                List(
+                  "your Accounts Office reference which is 13 characters long, like 123PX00123456",
+                  "your bank details"
+                )
+              case TaxRegime.Vat   =>
                 List(
                   "your VAT registration number which is 9 digits long, like 123456789",
                   "your bank details"
                 )
-              case TaxRegime.Sa => if (showFullListPreparationTips) {
-                List(
-                  "your Self Assessment Unique Taxpayer Reference (UTR) which is 10 digits long, like 1234567890",
-                  "your bank details",
-                  "details of your income and spending",
-                  "information on any savings or investments you have"
-                )
-              } else {
-                List(
-                  "your Self Assessment Unique Taxpayer Reference (UTR) which is 10 digits long, like 1234567890",
-                  "your bank details"
-                )
-              }
-              case TaxRegime.Simp => if (showFullListPreparationTips) {
-                List(
-                  "your National Insurance number",
-                  "your bank details",
-                  "details of your income and spending",
-                  "information on any savings or investments you have"
-                )
-              } else {
-                List(
-                  "your National Insurance number",
-                  "your bank details"
-                )
-              }
+              case TaxRegime.Sa    =>
+                if (showFullListPreparationTips) {
+                  List(
+                    "your Self Assessment Unique Taxpayer Reference (UTR) which is 10 digits long, like 1234567890",
+                    "your bank details",
+                    "details of your income and spending",
+                    "information on any savings or investments you have"
+                  )
+                } else {
+                  List(
+                    "your Self Assessment Unique Taxpayer Reference (UTR) which is 10 digits long, like 1234567890",
+                    "your bank details"
+                  )
+                }
+              case TaxRegime.Simp  =>
+                if (showFullListPreparationTips) {
+                  List(
+                    "your National Insurance number",
+                    "your bank details",
+                    "details of your income and spending",
+                    "information on any savings or investments you have"
+                  )
+                } else {
+                  List(
+                    "your National Insurance number",
+                    "your bank details"
+                  )
+                }
             }
-          case Languages.Welsh =>
+          case Languages.Welsh   =>
             taxRegime match {
-              case TaxRegime.Epaye => List(
-                "eich cyfeirnod Swyddfa Gyfrifon, sy’n 13 o gymeriadau o hyd, er enghraifft 123PX00123456",
-                "eich manylion banc"
-              )
-              case TaxRegime.Vat =>
+              case TaxRegime.Epaye =>
+                List(
+                  "eich cyfeirnod Swyddfa Gyfrifon, sy’n 13 o gymeriadau o hyd, er enghraifft 123PX00123456",
+                  "eich manylion banc"
+                )
+              case TaxRegime.Vat   =>
                 List(
                   "eich rhif cofrestru TAW, sy’n 9 digid o hyd, er enghraifft 123456789",
                   "eich manylion banc"
                 )
-              case TaxRegime.Sa => if (showFullListPreparationTips) {
-                List(
-                  "eich Cyfeirnod Unigryw y Trethdalwr (UTR) ar gyfer Hunanasesiad sy’n 10 digid o hyd, fel 1234567890",
-                  "eich manylion banc",
-                  "manylion eich incwm a’ch gwariant",
-                  "gwybodaeth am unrhyw gynilion neu fuddsoddiadau sydd gennych"
-                )
-              } else {
-                List(
-                  "eich Cyfeirnod Unigryw y Trethdalwr (UTR) ar gyfer Hunanasesiad sy’n 10 digid o hyd, fel 1234567890",
-                  "eich manylion banc"
-                )
-              }
-              case TaxRegime.Simp =>
+              case TaxRegime.Sa    =>
+                if (showFullListPreparationTips) {
+                  List(
+                    "eich Cyfeirnod Unigryw y Trethdalwr (UTR) ar gyfer Hunanasesiad sy’n 10 digid o hyd, fel 1234567890",
+                    "eich manylion banc",
+                    "manylion eich incwm a’ch gwariant",
+                    "gwybodaeth am unrhyw gynilion neu fuddsoddiadau sydd gennych"
+                  )
+                } else {
+                  List(
+                    "eich Cyfeirnod Unigryw y Trethdalwr (UTR) ar gyfer Hunanasesiad sy’n 10 digid o hyd, fel 1234567890",
+                    "eich manylion banc"
+                  )
+                }
+              case TaxRegime.Simp  =>
                 List()
             }
         }
-      }
 
       beforeYouCallList.map(_.text()) shouldBe expectedBeforeYouCallBullets
-      if (taxRegime != TaxRegime.Simp) {
+      val _ = if (taxRegime != TaxRegime.Simp) {
         if (showWereLikelyToAsk) {
-          subheadings(1).text() shouldBe {
+          val _ = subheadings(1).text() shouldBe {
             language match {
               case Languages.English => "We’re likely to ask:"
               case Languages.Welsh   => "Rydym yn debygol o ofyn:"
@@ -329,16 +335,16 @@ object ContentAssertions extends RichMatchers {
             case Languages.Welsh   => "beth rydych wedi’i wneud i geisio talu’r bil"
           }
         }
-        likelyToAskList(1).text() shouldBe {
+        val _               = likelyToAskList(1).text() shouldBe {
           language match {
             case Languages.English => "if you can pay some of the bill now"
             case Languages.Welsh   => "a allwch dalu rhywfaint o’r bil nawr"
           }
         }
       }
-      ()
+
       if (showWereLikelyToAsk) {
-        subheadings(2).text() shouldBe {
+        val _ = subheadings(2).text() shouldBe {
           language match {
             case Languages.English => "If you need extra support"
             case Languages.Welsh   => "Os oes angen cymorth ychwanegol arnoch chi"
@@ -347,24 +353,28 @@ object ContentAssertions extends RichMatchers {
       }
       govukBodyElements(1).html() shouldBe {
         language match {
-          case Languages.English => """Find out the different ways to <a href="https://www.gov.uk/get-help-hmrc-extra-support" class="govuk-link">deal with HMRC if you need some help</a>."""
-          case Languages.Welsh   => """Dysgwch am y ffyrdd gwahanol o <a href="https://www.gov.uk/get-help-hmrc-extra-support" class="govuk-link">ddelio â CThEF os oes angen help arnoch chi</a>."""
+          case Languages.English =>
+            """Find out the different ways to <a href="https://www.gov.uk/get-help-hmrc-extra-support" class="govuk-link">deal with HMRC if you need some help</a>."""
+          case Languages.Welsh   =>
+            """Dysgwch am y ffyrdd gwahanol o <a href="https://www.gov.uk/get-help-hmrc-extra-support" class="govuk-link">ddelio â CThEF os oes angen help arnoch chi</a>."""
         }
       }
       govukBodyElements(2).html() shouldBe {
         language match {
-          case Languages.English => """You can also use <a href="https://www.relayuk.bt.com/" class="govuk-link">Relay UK</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>."""
-          case Languages.Welsh   => """Gallwch hefyd ddefnyddio <a href="https://www.relayuk.bt.com/" class="govuk-link">Relay UK</a> os na allwch glywed na siarad dros y ffôn: deialwch <strong>18001</strong> ac yna <strong>0345 300 3900</strong>. Sylwer – dim ond galwadau ffôn Saesneg eu hiaith y mae Relay UK yn gallu ymdrin â nhw."""
+          case Languages.English =>
+            """You can also use <a href="https://www.relayuk.bt.com/" class="govuk-link">Relay UK</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>."""
+          case Languages.Welsh   =>
+            """Gallwch hefyd ddefnyddio <a href="https://www.relayuk.bt.com/" class="govuk-link">Relay UK</a> os na allwch glywed na siarad dros y ffôn: deialwch <strong>18001</strong> ac yna <strong>0345 300 3900</strong>. Sylwer – dim ond galwadau ffôn Saesneg eu hiaith y mae Relay UK yn gallu ymdrin â nhw."""
         }
       }
-      ()
 
       if (language === Languages.English) {
         if (taxRegime != TaxRegime.Simp) {
-          subheadings(3).text() shouldBe "If you’re calling from outside the UK"
+          val _ = subheadings(3).text() shouldBe "If you’re calling from outside the UK"
         }
         govukBodyElements(3).html() shouldBe "Call us on <strong>+44 2890 538 192</strong>."
-        govukBodyElements(4).html() shouldBe "Our opening times are Monday to Friday, 8am to 6pm (UK time). We are closed on weekends and bank holidays."
+        govukBodyElements(4)
+          .html() shouldBe "Our opening times are Monday to Friday, 8am to 6pm (UK time). We are closed on weekends and bank holidays."
         ()
       }
     }

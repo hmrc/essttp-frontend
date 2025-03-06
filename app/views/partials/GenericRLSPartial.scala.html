@@ -24,9 +24,9 @@
         requestSupport: RequestSupport
 )
 
-@(tellHMRCChangeDetailsLink: String)(implicit request: AuthenticatedJourneyRequest[_])
+@(tellHMRCChangeDetailsLink: String)(implicit request: AuthenticatedJourneyRequest[?])
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 <p class="govuk-body">
 @{

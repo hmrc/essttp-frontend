@@ -14,7 +14,6 @@
  * limitations under the License.
  *@
 
-@import cats.implicits.catsSyntaxEq
 @import config.AppConfig
 @import controllers.routes
 @import essttp.rootmodel.TaxRegime
@@ -33,9 +32,9 @@
         requestSupport: RequestSupport)
 
 
-@(taxRegime: TaxRegime, isEmailAddressRequired: Boolean)(implicit request: Request[_])
+@(taxRegime: TaxRegime, isEmailAddressRequired: Boolean)(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.{languageFromRequest, legacyMessages}
 
 @title = @{Messages.TermsAndConditions.`Terms and conditions`.show}
 
@@ -59,7 +58,7 @@
 
   <p class="govuk-body">@{Html(Messages.TermsAndConditions.`Telephone...`.show)}</p>
 
-    @if(languageFromRequest === English) {
+    @if(languageFromRequest == English) {
         <p class="govuk-body">@{
             Html(Messages.TermsAndConditions.`Outside UK...`.show)
         }</p>
@@ -84,7 +83,7 @@
 
     @formWithCSRF(
         action = routes.TermsAndConditionsController.termsAndConditionsSubmit,
-        (if(isEmailAddressRequired) List.empty else List(Symbol("class") -> "prevent-multiple-submits")): _*) {
+        (if(isEmailAddressRequired) List.empty else List(Symbol("class") -> "prevent-multiple-submits"))*) {
         @govukButton(
             Button(
                 content = Text(Messages.TermsAndConditions.`Agree and continue`.show),

@@ -27,15 +27,19 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ShutteringActionFilter @Inject() (
-    appConfig: AppConfig,
-    views:     Views
-)(implicit ec: ExecutionContext) extends ActionFilter[AuthenticatedJourneyRequest] with Logging with Results {
+  appConfig: AppConfig,
+  views:     Views
+)(using ec: ExecutionContext)
+    extends ActionFilter[AuthenticatedJourneyRequest],
+      Logging,
+      Results {
 
   override protected def filter[A](request: AuthenticatedJourneyRequest[A]): Future[Option[Result]] = {
-    val result = if (appConfig.shutteredTaxRegimes.contains(request.journey.taxRegime)) Some(Ok(views.shuttered()(request))) else None
+    val result =
+      if (appConfig.shutteredTaxRegimes.contains(request.journey.taxRegime)) Some(Ok(views.shuttered()(request)))
+      else None
     Future.successful(result)
   }
 
   override protected def executionContext: ExecutionContext = ec
 }
-

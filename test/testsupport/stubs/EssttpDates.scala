@@ -22,14 +22,14 @@ import essttp.rootmodel.dates.startdates.StartDatesRequest
 import testsupport.testdata.TdEssttpDatesBodies
 
 object EssttpDates {
-  private val startDatesUrl: String = "/essttp-backend/start-dates"
+  private val startDatesUrl: String   = "/essttp-backend/start-dates"
   private val extremeDatesUrl: String = "/essttp-backend/extreme-dates"
 
   def verifyStartDates(expectedStartDatesRequest: StartDatesRequest): Unit =
-    WireMockHelpers.verifyWithBodyParse(startDatesUrl, expectedStartDatesRequest)(StartDatesRequest.format)
+    WireMockHelpers.verifyWithBodyParse(startDatesUrl, expectedStartDatesRequest)
 
   def verifyExtremeDates(expectedExtremeDatesRequest: ExtremeDatesRequest): Unit =
-    WireMockHelpers.verifyWithBodyParse(extremeDatesUrl, expectedExtremeDatesRequest)(ExtremeDatesRequest.format)
+    WireMockHelpers.verifyWithBodyParse(extremeDatesUrl, expectedExtremeDatesRequest)
 
   def stubExtremeDatesCall(jsonBody: String = TdEssttpDatesBodies.extremeDatesResponse()): StubMapping =
     WireMockHelpers.stubForPostWithResponseBody(extremeDatesUrl, jsonBody)

@@ -19,14 +19,14 @@ package models.audit.bars
 import play.api.libs.json.{Json, OWrites}
 
 final case class BarsAuditAccount(
-    accountType:       String,
-    accountHolderName: String,
-    sortCode:          String,
-    accountNumber:     String
+  accountType:       String,
+  accountHolderName: String,
+  sortCode:          String,
+  accountNumber:     String
 )
 
 object BarsAuditAccount {
 
-  implicit val writes: OWrites[BarsAuditAccount] = Json.writes
+  given OWrites[BarsAuditAccount] = Json.writes
 
 }

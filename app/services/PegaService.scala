@@ -18,7 +18,7 @@ package services
 
 import connectors.EssttpBackendConnector
 import essttp.journey.JourneyConnector
-import essttp.journey.model.Journey.{AfterCanPayWithinSixMonthsAnswers, AfterCheckedPaymentPlan, AfterStartedPegaCase}
+import essttp.journey.model.JourneyStage.{AfterCanPayWithinSixMonthsAnswers, AfterCheckedPaymentPlan, AfterStartedPegaCase}
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Journey, PaymentPlanAnswers}
 import essttp.rootmodel.pega.{GetCaseResponse, StartCaseResponse}
 import play.api.mvc.RequestHeader
@@ -29,18 +29,20 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class PegaService @Inject() (
-    essttpConnector:  EssttpBackendConnector,
-    journeyConnector: JourneyConnector,
-    auditService:     AuditService
-)(implicit ec: ExecutionContext) {
+  essttpConnector:  EssttpBackendConnector,
+  journeyConnector: JourneyConnector,
+  auditService:     AuditService
+)(using ExecutionContext) {
 
-  def startCase(journey: Journey, recalculationNeeded: Boolean)(implicit rh: RequestHeader): Future[(Journey, StartCaseResponse)] = {
-      def doStartCase(): Future[(Journey, StartCaseResponse)] =
-        for {
-          startCaseResponse <- essttpConnector.startPegaCase(journey.journeyId, recalculationNeeded)
-          updatedJourney <- journeyConnector.updatePegaStartCaseResponse(journey.journeyId, startCaseResponse)
-          _ <- essttpConnector.saveJourneyForPega(journey.journeyId)
-        } yield (updatedJourney, startCaseResponse)
+  def startCase(journey: Journey, recalculationNeeded: Boolean)(using
+    RequestHeader
+  ): Future[(Journey, StartCaseResponse)] = {
+    def doStartCase(): Future[(Journey, StartCaseResponse)] =
+      for {
+        startCaseResponse <- essttpConnector.startPegaCase(journey.journeyId, recalculationNeeded)
+        updatedJourney    <- journeyConnector.updatePegaStartCaseResponse(journey.journeyId, startCaseResponse)
+        _                 <- essttpConnector.saveJourneyForPega(journey.journeyId)
+      } yield (updatedJourney, startCaseResponse)
 
     journey match {
       case j: AfterCanPayWithinSixMonthsAnswers =>
@@ -59,20 +61,22 @@ class PegaService @Inject() (
     }
   }
 
-  def getCase(journey: Journey)(implicit rh: RequestHeader, hc: HeaderCarrier): Future[GetCaseResponse] = {
-      def doGetCase(
-          startCaseResponse: StartCaseResponse,
-          j:                 Either[AfterStartedPegaCase, AfterCheckedPaymentPlan]
-      ): Future[GetCaseResponse] =
-        for {
-          getCaseResponse <- essttpConnector.getPegaCase(journey.journeyId)
-          paymentPlanAnswers = PaymentPlanAnswers.PaymentPlanAfterAffordability(
-            startCaseResponse, getCaseResponse.paymentDay, getCaseResponse.paymentPlan
-          )
-          _ <- journeyConnector.updateHasCheckedPaymentPlan(journey.journeyId, paymentPlanAnswers)
-          _ = auditService.auditPaymentPlanBeforeSubmission(j, getCaseResponse)
-          _ = auditService.auditReturnFromAffordability(j, startCaseResponse, getCaseResponse)
-        } yield getCaseResponse
+  def getCase(journey: Journey)(using RequestHeader, HeaderCarrier): Future[GetCaseResponse] = {
+    def doGetCase(
+      startCaseResponse: StartCaseResponse,
+      j:                 Either[AfterStartedPegaCase & Journey, AfterCheckedPaymentPlan & Journey]
+    ): Future[GetCaseResponse] =
+      for {
+        getCaseResponse   <- essttpConnector.getPegaCase(journey.journeyId)
+        paymentPlanAnswers = PaymentPlanAnswers.PaymentPlanAfterAffordability(
+                               startCaseResponse,
+                               getCaseResponse.paymentDay,
+                               getCaseResponse.paymentPlan
+                             )
+        _                 <- journeyConnector.updateHasCheckedPaymentPlan(journey.journeyId, paymentPlanAnswers)
+        _                  = auditService.auditPaymentPlanBeforeSubmission(j, getCaseResponse)
+        _                  = auditService.auditReturnFromAffordability(j, startCaseResponse, getCaseResponse)
+      } yield getCaseResponse
 
     journey match {
       case j: AfterStartedPegaCase =>

@@ -18,6 +18,4 @@ package testsupport
 
 import org.scalatest.freespec.AnyFreeSpec
 
-trait UnitSpec
-  extends AnyFreeSpec
-  with RichMatchers
+trait UnitSpec extends AnyFreeSpec, RichMatchers

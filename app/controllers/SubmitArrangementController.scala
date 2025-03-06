@@ -20,10 +20,10 @@ import actions.Actions
 import actionsmodel.AuthenticatedJourneyRequest
 import config.AppConfig
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
-import essttp.journey.model.Journey
+import essttp.journey.model.{Journey, JourneyStage}
 import essttp.rootmodel.TaxRegime
 import paymentsEmailVerification.models.EmailVerificationResult
-import play.api.mvc._
+import play.api.mvc.*
 import services.{JourneyService, TtpService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.{JourneyLogger, Logging}
@@ -33,45 +33,48 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class SubmitArrangementController @Inject() (
-    as:             Actions,
-    mcc:            MessagesControllerComponents,
-    ttpService:     TtpService,
-    journeyService: JourneyService
-)(implicit ec: ExecutionContext, appConfig: AppConfig)
-  extends FrontendController(mcc)
-  with Logging {
+  as:             Actions,
+  mcc:            MessagesControllerComponents,
+  ttpService:     TtpService,
+  journeyService: JourneyService
+)(using ExecutionContext, AppConfig)
+    extends FrontendController(mcc),
+      Logging {
 
   val submitArrangement: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     request.journey match {
-      case j: Journey.BeforeAgreedTermsAndConditions =>
+      case j: JourneyStage.BeforeAgreedTermsAndConditions =>
         logErrorAndRouteToDefaultPageF(j)
 
-      case j: Journey.Stages.AgreedTermsAndConditions =>
+      case j: Journey.AgreedTermsAndConditions =>
         if (j.isEmailAddressRequired) logErrorAndRouteToDefaultPageF(j) else submitArrangementAndUpdateJourney(Left(j))
 
-      case j: Journey.Stages.SelectedEmailToBeVerified =>
+      case j: Journey.SelectedEmailToBeVerified =>
         logErrorAndRouteToDefaultPageF(j)
 
-      case j: Journey.Stages.EmailVerificationComplete =>
+      case j: Journey.EmailVerificationComplete =>
         j.emailVerificationResult match {
           case EmailVerificationResult.Verified => submitArrangementAndUpdateJourney(Right(j))
           case EmailVerificationResult.Locked   => logErrorAndRouteToDefaultPageF(j)
         }
 
-      case j: Journey.AfterArrangementSubmitted =>
+      case j: JourneyStage.AfterArrangementSubmitted =>
         JourneyLogger.info("Already submitted arrangement to ttp, showing user the success page")
         Redirect(SubmitArrangementController.whichPaymentPlanSetupPage(j.taxRegime))
     }
   }
 
   private def submitArrangementAndUpdateJourney(
-      journey: Either[Journey.Stages.AgreedTermsAndConditions, Journey.Stages.EmailVerificationComplete]
-  )(implicit request: AuthenticatedJourneyRequest[_]): Future[Result] = {
+    journey: Either[Journey.AgreedTermsAndConditions, Journey.EmailVerificationComplete]
+  )(using AuthenticatedJourneyRequest[?]): Future[Result] =
     for {
       arrangementResponse <- ttpService.submitArrangement(journey)
-      updatedJourney <- journeyService.updateArrangementResponse(journey.fold(_.id, _.id), arrangementResponse)
-    } yield Routing.redirectToNext(routes.SubmitArrangementController.submitArrangement, updatedJourney, submittedValueUnchanged = false)
-  }
+      updatedJourney      <- journeyService.updateArrangementResponse(journey.fold(_.id, _.id), arrangementResponse)
+    } yield Routing.redirectToNext(
+      routes.SubmitArrangementController.submitArrangement,
+      updatedJourney,
+      submittedValueUnchanged = false
+    )
 
 }
 

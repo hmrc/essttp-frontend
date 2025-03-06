@@ -22,9 +22,9 @@
 
 @this(requestSupport: RequestSupport)
 
-@(taxRegime: TaxRegime)(implicit request: Request[_])
+@(taxRegime: TaxRegime)(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 <p class="govuk-body">
 @{
@@ -34,7 +34,7 @@
    case TaxRegime.Sa => Messages.NotEligible.`You cannot set up a Self Assessment payment plan online.`
    case TaxRegime.Simp => Messages.NotEligible.`You cannot set up a Simple Assessment payment plan online.`
   }
- Html(message.show)
+  Html(message.show)
 }
 </p>
 

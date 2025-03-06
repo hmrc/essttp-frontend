@@ -23,7 +23,7 @@ object LoginRequestMaker {
 
   def makeLoginRequestBody(testUser: TestUser): JsObject = {
     val credId: String = testUser.authorityId.value
-    val maybeNino = testUser.nino.fold(Json.obj())(v => Json.obj("nino" -> v.value))
+    val maybeNino      = testUser.nino.fold(Json.obj())(v => Json.obj("nino" -> v.value))
 
     val affinityGroup: JsObject = testUser.affinityGroup.toJson match {
       case o: JsObject => o
@@ -41,67 +41,67 @@ object LoginRequestMaker {
     }
 
     Json.obj(
-      "credId" -> credId,
-      "affinityGroup" -> testUser.affinityGroup.toString,
-      "confidenceLevel" -> testUser.confidenceLevel,
-      "credentialStrength" -> "strong",
-      "credentialRole" -> "User",
-      "usersName" -> JsNull,
-      "enrolments" -> enrolments,
+      "credId"              -> credId,
+      "affinityGroup"       -> testUser.affinityGroup.toString,
+      "confidenceLevel"     -> testUser.confidenceLevel,
+      "credentialStrength"  -> "strong",
+      "credentialRole"      -> "User",
+      "usersName"           -> JsNull,
+      "enrolments"          -> enrolments,
       "delegatedEnrolments" -> Json.arr(),
-      "email" -> "user@test.com",
-      "gatewayInformation" -> Json.obj()
+      "email"               -> "user@test.com",
+      "gatewayInformation"  -> Json.obj()
     ) ++
       maybeNino ++
       affinityGroup
   }
 
   private def makeEpayeEnrolmentJson(epayeEnrolment: EpayeEnrolment): JsObject = Json.obj(
-    "key" -> "IR-PAYE",
+    "key"         -> "IR-PAYE",
     "identifiers" -> Json.arr(
       Json.obj(
-        "key" -> "TaxOfficeNumber",
+        "key"   -> "TaxOfficeNumber",
         "value" -> epayeEnrolment.taxOfficeNumber.value
       ),
       Json.obj(
-        "key" -> "TaxOfficeReference",
+        "key"   -> "TaxOfficeReference",
         "value" -> epayeEnrolment.taxOfficeReference.value
       )
     ),
-    "state" -> epayeEnrolment.enrolmentStatus.toString
+    "state"       -> epayeEnrolment.enrolmentStatus.toString
   )
 
   private def makeVatEnrolmentJson(vatEnrolment: VatEnrolment): JsObject = Json.obj(
-    "key" -> "HMRC-MTD-VAT",
+    "key"         -> "HMRC-MTD-VAT",
     "identifiers" -> Json.arr(
       Json.obj(
-        "key" -> "VRN",
+        "key"   -> "VRN",
         "value" -> vatEnrolment.vrn.value
       )
     ),
-    "state" -> vatEnrolment.enrolmentStatus.toString
+    "state"       -> vatEnrolment.enrolmentStatus.toString
   )
 
   private def makeIrSaEnrolmentJson(irSaEnrolment: IrSaEnrolment): JsObject = Json.obj(
-    "key" -> "IR-SA",
+    "key"         -> "IR-SA",
     "identifiers" -> Json.arr(
       Json.obj(
-        "key" -> "UTR",
+        "key"   -> "UTR",
         "value" -> irSaEnrolment.saUtr.value
       )
     ),
-    "state" -> irSaEnrolment.enrolmentStatus.toString
+    "state"       -> irSaEnrolment.enrolmentStatus.toString
   )
 
   private def makeIrSaAndMtdItEnrolmentJson(mtdItEnrolment: MtdItEnrolment): JsObject = Json.obj(
-    "key" -> "HMRC-MTD-IT",
+    "key"         -> "HMRC-MTD-IT",
     "identifiers" -> Json.arr(
       Json.obj(
-        "key" -> "MTDITID",
+        "key"   -> "MTDITID",
         "value" -> mtdItEnrolment.mtdItId
       )
     ),
-    "state" -> mtdItEnrolment.enrolmentStatus.toString
+    "state"       -> mtdItEnrolment.enrolmentStatus.toString
   )
 
 }

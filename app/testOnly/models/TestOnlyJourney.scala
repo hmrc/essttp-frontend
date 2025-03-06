@@ -27,20 +27,19 @@ import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import java.time.Instant
 
 final case class TestOnlyJourney(
-    journeyId:            JourneyId,
-    taxRegime:            TaxRegime,
-    updatedAt:            Instant,
-    incomeAndExpenditure: Option[IncomeAndExpenditure],
-    paymentPlan:          Option[PaymentPlan]
+  journeyId:            JourneyId,
+  taxRegime:            TaxRegime,
+  updatedAt:            Instant,
+  incomeAndExpenditure: Option[IncomeAndExpenditure],
+  paymentPlan:          Option[PaymentPlan]
 )
 
 object TestOnlyJourney {
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  implicit val format: OFormat[TestOnlyJourney] = {
-    implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
-
-    implicit val taxRegimeFormat: Format[TaxRegime] = EnumFormat(TaxRegime)
+  given format: OFormat[TestOnlyJourney] = {
+    given Format[Instant]   = MongoJavatimeFormats.instantFormat
+    given Format[TaxRegime] = EnumFormat(TaxRegime)
 
     Json.format
   }

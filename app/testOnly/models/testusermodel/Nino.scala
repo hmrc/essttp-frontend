@@ -17,4 +17,3 @@
 package testOnly.models.testusermodel
 
 final case class Nino(value: String)
-

@@ -29,18 +29,20 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class EnrolmentService @Inject() (journeyService: JourneyService, auditService: AuditService)(implicit ec: ExecutionContext) {
+class EnrolmentService @Inject() (journeyService: JourneyService, auditService: AuditService)(using
+  ec: ExecutionContext
+) {
 
   def determineTaxIdAndUpdateJourney(
-      journey:    Journey.Stages.Started,
-      enrolments: Enrolments
-  )(implicit r: AuthenticatedJourneyRequest[_], hc: HeaderCarrier): Future[Option[TaxId]] = {
+    journey:    Journey.Started,
+    enrolments: Enrolments
+  )(using AuthenticatedJourneyRequest[?], HeaderCarrier): Future[Option[TaxId]] =
     journey.taxRegime match {
       case TaxRegime.Epaye =>
-        val enrolmentDefResult = EnrolmentDef.Epaye.findEnrolmentValues(enrolments).map {
-          case (taxOfficeNumber, taxOfficeReference) =>
+        val enrolmentDefResult =
+          EnrolmentDef.Epaye.findEnrolmentValues(enrolments).map { case (taxOfficeNumber, taxOfficeReference) =>
             EmpRef.makeEmpRef(taxOfficeNumber, taxOfficeReference)
-        }
+          }
 
         handleTaxRegime[EmpRef](
           enrolmentDefResult,
@@ -62,12 +64,11 @@ class EnrolmentService @Inject() (journeyService: JourneyService, auditService: 
       case TaxRegime.Simp =>
         throw new RuntimeException("Enrolment cannot exist for Simple Assessment")
     }
-  }
 
   private def handleTaxRegime[ID <: TaxId](
-      idResult: EnrolmentDefResult[ID],
-      journey:  Journey.Stages.Started
-  )(update: ID => Future[Journey])(implicit r: AuthenticatedJourneyRequest[_], hc: HeaderCarrier): Future[Option[ID]] = {
+    idResult: EnrolmentDefResult[ID],
+    journey:  Journey.Started
+  )(update: ID => Future[Journey])(implicit r: AuthenticatedJourneyRequest[?], hc: HeaderCarrier): Future[Option[ID]] =
     idResult match {
       case Success(id) =>
         update(id).map(_ => Some(id))
@@ -81,11 +82,11 @@ class EnrolmentService @Inject() (journeyService: JourneyService, auditService: 
         Future.successful(None)
 
       case IdentifierNotFound(enrolmentDefs) =>
-        throw new RuntimeException("Identifiers not found for [(id key, enrolment key)] = " +
-          s"[${enrolmentDefs.map(e => s"(${e.identifierKey}, ${e.enrolmentKey})").mkString(",")}]")
+        throw new RuntimeException(
+          "Identifiers not found for [(id key, enrolment key)] = " +
+            s"[${enrolmentDefs.map(e => s"(${e.identifierKey}, ${e.enrolmentKey})").mkString(",")}]"
+        )
 
     }
-
-  }
 
 }

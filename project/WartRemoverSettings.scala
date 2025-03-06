@@ -10,6 +10,7 @@ object WartRemoverSettings {
     Seq(
       (Compile / compile / wartremoverErrors) ++= Warts.allBut(
         Wart.DefaultArguments,
+        Wart.Equals,
         Wart.ImplicitConversion,
         Wart.ImplicitParameter,
         Wart.Nothing,

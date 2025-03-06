@@ -20,7 +20,7 @@ import java.net.URLEncoder
 
 object StringUtils {
 
-  implicit class StringOps(private val s: String) extends AnyVal {
+  extension (s: String) {
 
     def removeWhitespace: String = s.replaceAll("\\s", "")
 

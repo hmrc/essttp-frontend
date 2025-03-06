@@ -36,80 +36,103 @@ import scala.concurrent.Future
 @Singleton
 class JourneyService @Inject() (journeyConnector: JourneyConnector) extends Logging {
 
-  def updateEligibilityCheckResult(journeyId: JourneyId, eligibilityCheckResult: EligibilityCheckResult)(
-      implicit
-      requestHeader: RequestHeader
+  def updateEligibilityCheckResult(journeyId: JourneyId, eligibilityCheckResult: EligibilityCheckResult)(using
+    RequestHeader
   ): Future[Journey] =
     journeyConnector.updateEligibilityCheckResult(journeyId, eligibilityCheckResult)
 
   object UpdateTaxRef {
 
-    def updateEpayeTaxId(journeyId: JourneyId, empRef: EmpRef)(implicit requestHeader: RequestHeader): Future[Journey] =
+    def updateEpayeTaxId(journeyId: JourneyId, empRef: EmpRef)(using RequestHeader): Future[Journey] =
       journeyConnector.updateTaxId(journeyId, empRef)
 
-    def updateVatTaxId(journeyId: JourneyId, vrn: Vrn)(implicit requestHeader: RequestHeader): Future[Journey] =
+    def updateVatTaxId(journeyId: JourneyId, vrn: Vrn)(using RequestHeader): Future[Journey] =
       journeyConnector.updateTaxId(journeyId, vrn)
 
-    def updateSaTaxId(journeyId: JourneyId, saTaxId: SaUtr)(implicit requestHeader: RequestHeader): Future[Journey] =
+    def updateSaTaxId(journeyId: JourneyId, saTaxId: SaUtr)(using RequestHeader): Future[Journey] =
       journeyConnector.updateTaxId(journeyId, saTaxId)
 
   }
 
-  def updateCanPayUpfront(journeyId: JourneyId, canPayUpfront: CanPayUpfront)(implicit requestHeader: RequestHeader): Future[Journey] =
+  def updateCanPayUpfront(journeyId: JourneyId, canPayUpfront: CanPayUpfront)(using RequestHeader): Future[Journey] =
     journeyConnector.updateCanPayUpfront(journeyId, canPayUpfront)
 
-  def updateUpfrontPaymentAmount(journeyId: JourneyId, upfrontPaymentAmount: UpfrontPaymentAmount)(implicit requestHeader: RequestHeader): Future[Journey] =
+  def updateUpfrontPaymentAmount(journeyId: JourneyId, upfrontPaymentAmount: UpfrontPaymentAmount)(using
+    RequestHeader
+  ): Future[Journey] =
     journeyConnector.updateUpfrontPaymentAmount(journeyId, upfrontPaymentAmount)
 
-  def updateExtremeDatesResult(journeyId: JourneyId, extremeDatesResponse: ExtremeDatesResponse)(implicit requestHeader: RequestHeader): Future[Journey] =
+  def updateExtremeDatesResult(journeyId: JourneyId, extremeDatesResponse: ExtremeDatesResponse)(using
+    RequestHeader
+  ): Future[Journey] =
     journeyConnector.updateExtremeDates(journeyId, extremeDatesResponse)
 
-  def updateAffordabilityResult(journeyId: JourneyId, instalmentAmounts: InstalmentAmounts)(implicit requestHeader: RequestHeader): Future[Journey] =
+  def updateAffordabilityResult(journeyId: JourneyId, instalmentAmounts: InstalmentAmounts)(using
+    RequestHeader
+  ): Future[Journey] =
     journeyConnector.updateAffordabilityResult(journeyId, instalmentAmounts)
 
-  def updateCanPayWithinSixMonths(journeyId: JourneyId, canPayWithinSixMonths: CanPayWithinSixMonthsAnswers)(implicit requestHeader: RequestHeader): Future[Journey] =
+  def updateCanPayWithinSixMonths(journeyId: JourneyId, canPayWithinSixMonths: CanPayWithinSixMonthsAnswers)(using
+    RequestHeader
+  ): Future[Journey] =
     journeyConnector.updateCanPayWithinSixMonthsAnswers(journeyId, canPayWithinSixMonths)
 
-  def updateMonthlyPaymentAmount(journeyId: JourneyId, monthlyPaymentAmount: MonthlyPaymentAmount)(implicit requestHeader: RequestHeader): Future[Journey] =
+  def updateMonthlyPaymentAmount(journeyId: JourneyId, monthlyPaymentAmount: MonthlyPaymentAmount)(using
+    RequestHeader
+  ): Future[Journey] =
     journeyConnector.updateMonthlyPaymentAmount(journeyId, monthlyPaymentAmount)
 
-  def updateDayOfMonth(journeyId: JourneyId, dayOfMonth: DayOfMonth)(implicit requestHeader: RequestHeader): Future[Journey] =
+  def updateDayOfMonth(journeyId: JourneyId, dayOfMonth: DayOfMonth)(using RequestHeader): Future[Journey] =
     journeyConnector.updateDayOfMonth(journeyId, dayOfMonth)
 
-  def updateStartDates(journeyId: JourneyId, startDatesResponse: StartDatesResponse)(implicit requestHeader: RequestHeader): Future[Journey] =
+  def updateStartDates(journeyId: JourneyId, startDatesResponse: StartDatesResponse)(using
+    RequestHeader
+  ): Future[Journey] =
     journeyConnector.updateStartDates(journeyId, startDatesResponse)
 
-  def updateAffordableQuotes(journeyId: JourneyId, affordableQuotesResponse: AffordableQuotesResponse)(implicit requestHeader: RequestHeader): Future[Journey] =
+  def updateAffordableQuotes(journeyId: JourneyId, affordableQuotesResponse: AffordableQuotesResponse)(using
+    RequestHeader
+  ): Future[Journey] =
     journeyConnector.updateAffordableQuotes(journeyId, affordableQuotesResponse)
 
-  def updateChosenPaymentPlan(journeyId: JourneyId, paymentPlan: PaymentPlan)(implicit requestHeader: RequestHeader): Future[Journey] =
+  def updateChosenPaymentPlan(journeyId: JourneyId, paymentPlan: PaymentPlan)(using RequestHeader): Future[Journey] =
     journeyConnector.updateChosenPaymentPlan(journeyId, paymentPlan)
 
-  def updateHasCheckedPaymentPlan(journeyId: JourneyId, paymentPlanAnswers: PaymentPlanAnswers)(implicit requestHeader: RequestHeader): Future[Journey] =
+  def updateHasCheckedPaymentPlan(journeyId: JourneyId, paymentPlanAnswers: PaymentPlanAnswers)(using
+    RequestHeader
+  ): Future[Journey] =
     journeyConnector.updateHasCheckedPaymentPlan(journeyId, paymentPlanAnswers)
 
-  def updateCanSetUpDirectDebit(journeyId: JourneyId, canSetUpDirectDebit: CanSetUpDirectDebit)(implicit requestHeader: RequestHeader): Future[Journey] =
+  def updateCanSetUpDirectDebit(journeyId: JourneyId, canSetUpDirectDebit: CanSetUpDirectDebit)(using
+    RequestHeader
+  ): Future[Journey] =
     journeyConnector.updateCanSetUpDirectDebit(journeyId, canSetUpDirectDebit)
 
-  def updateDirectDebitDetails(journeyId: JourneyId, directDebitDetails: BankDetails)(implicit requestHeader: RequestHeader): Future[Journey] =
+  def updateDirectDebitDetails(journeyId: JourneyId, directDebitDetails: BankDetails)(using
+    RequestHeader
+  ): Future[Journey] =
     journeyConnector.updateDirectDebitDetails(journeyId, directDebitDetails)
 
-  def updateHasConfirmedDirectDebitDetails(journeyId: JourneyId)(implicit requestHeader: RequestHeader): Future[Journey] =
+  def updateHasConfirmedDirectDebitDetails(journeyId: JourneyId)(using RequestHeader): Future[Journey] =
     journeyConnector.updateHasConfirmedDirectDebitDetails(journeyId)
 
   def updateAgreedTermsAndConditions(
-      journeyId:              JourneyId,
-      isEmailAddressRequired: IsEmailAddressRequired
-  )(implicit requestHeader: RequestHeader): Future[Journey] =
+    journeyId:              JourneyId,
+    isEmailAddressRequired: IsEmailAddressRequired
+  )(using RequestHeader): Future[Journey] =
     journeyConnector.updateHasAgreedTermsAndConditions(journeyId, isEmailAddressRequired)
 
-  def updateSelectedEmailToBeVerified(journeyId: JourneyId, email: Email)(implicit requestHeader: RequestHeader): Future[Journey] =
+  def updateSelectedEmailToBeVerified(journeyId: JourneyId, email: Email)(using RequestHeader): Future[Journey] =
     journeyConnector.updateSelectedEmailToBeVerified(journeyId, email)
 
-  def updateEmailVerificationResult(journeyId: JourneyId, emailVerificationResult: EmailVerificationResult)(implicit requestHeader: RequestHeader): Future[Journey] =
+  def updateEmailVerificationResult(journeyId: JourneyId, emailVerificationResult: EmailVerificationResult)(using
+    RequestHeader
+  ): Future[Journey] =
     journeyConnector.updateEmailVerificationResult(journeyId, emailVerificationResult)
 
-  def updateArrangementResponse(journeyId: JourneyId, arrangementResponse: ArrangementResponse)(implicit requestHeader: RequestHeader): Future[Journey] =
+  def updateArrangementResponse(journeyId: JourneyId, arrangementResponse: ArrangementResponse)(using
+    RequestHeader
+  ): Future[Journey] =
     journeyConnector.updateArrangement(journeyId, arrangementResponse)
 
 }

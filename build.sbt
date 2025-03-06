@@ -5,35 +5,26 @@ lazy val appName: String = "essttp-frontend"
 
 lazy val scalaCompilerOptions = Seq(
   "-Xfatal-warnings",
-  "-Xlint:-missing-interpolator,_",
-  "-Xlint:adapted-args",
-  "-Ypatmat-exhaust-depth:40",
-  "-Ywarn-unused:implicits",
-  "-Ywarn-unused:imports",
-  "-Ywarn-unused:locals",
-  "-Ywarn-unused:params",
-  "-Ywarn-unused:patvars",
-  "-Ywarn-unused:privates",
-  "-Ywarn-value-discard",
-  "-Ywarn-dead-code",
+  "-Wvalue-discard",
   "-deprecation",
   "-feature",
   "-unchecked",
   "-language:implicitConversions",
+  "-language:strictEquality",
   // required in place of silencer plugin
-  "-Wconf:cat=unused-imports&src=html/.*:s",
+  "-Wconf:msg=unused-imports&src=html/.*:s",
   "-Wconf:src=routes/.*:s"
 )
 
 lazy val root = (project in file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
-  .settings(DefaultBuildSettings.scalaSettings: _*)
-  .settings(DefaultBuildSettings.defaultSettings(): _*)
-  .settings(majorVersion := 0)
+  .settings(DefaultBuildSettings.scalaSettings*)
+  .settings(DefaultBuildSettings.defaultSettings()*)
+  .settings(majorVersion := 1)
   .settings(ThisBuild / useSuperShell:= false)
   .settings(
-    scalaVersion := "2.13.13",
+    scalaVersion := "3.5.1",
     name := appName,
     PlayKeys.playDefaultPort := 9215,
     scalacOptions ++= Seq("-feature"),
@@ -46,7 +37,8 @@ lazy val root = (project in file("."))
     pipelineStages := Seq(digest),
     scalacOptions ++= scalaCompilerOptions,
     (Compile / doc / sources) := Seq.empty,
-    routesImport ++= Seq("essttp.rootmodel.TaxRegime", "models.Language")
+    routesImport ++= Seq("essttp.rootmodel.TaxRegime", "models.Language"),
+    scalafmtOnCompile := true
   )
   .settings(
     commands += Command.command("runTestOnly") { state =>
@@ -58,7 +50,6 @@ lazy val root = (project in file("."))
     }
   )
   .settings(TwirlKeys.templateImports := Seq.empty)
-  .settings(ScalariformSettings.scalariformSettings *)
   .settings(WartRemoverSettings.wartRemoverSettings *)
   .settings(ScoverageSettings.scoverageSettings *)
   .settings(
@@ -66,9 +57,5 @@ lazy val root = (project in file("."))
   )
   .settings(SbtUpdatesSettings.sbtUpdatesSettings *)
 
-//Hint: Uncomment below lines if you want to work on both projects in tandem from intellj
-//  .dependsOn(cor)
-//  .aggregate(cor)
-//lazy val cor = RootProject(file("../essttp-backend"))
 
 

@@ -20,7 +20,7 @@ import enumeratum.Enum
 
 import scala.collection.immutable
 
-sealed trait GiveFeedbackFormValue extends enumeratum.EnumEntry {
+sealed trait GiveFeedbackFormValue extends enumeratum.EnumEntry derives CanEqual {
   def asBoolean: Boolean = this match {
     case GiveFeedbackFormValue.Yes => true
     case GiveFeedbackFormValue.No  => false
@@ -29,7 +29,7 @@ sealed trait GiveFeedbackFormValue extends enumeratum.EnumEntry {
 
 object GiveFeedbackFormValue extends Enum[GiveFeedbackFormValue] {
   case object Yes extends GiveFeedbackFormValue
-  case object No extends GiveFeedbackFormValue
+  case object No  extends GiveFeedbackFormValue
   override def values: immutable.IndexedSeq[GiveFeedbackFormValue] = findValues
 
 }

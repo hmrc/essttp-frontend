@@ -17,18 +17,18 @@
 package controllers
 
 import actions.Actions
-import cats.implicits.{catsSyntaxEq, catsSyntaxOptionId}
+import cats.implicits.catsSyntaxOptionId
 import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
 import controllers.PaymentDayController.{PaymentDayForm, paymentDayForm}
-import essttp.journey.model.{Journey, PaymentPlanAnswers}
+import essttp.journey.model.{Journey, JourneyStage, PaymentPlanAnswers}
 import essttp.rootmodel.DayOfMonth
 import essttp.utils.Errors
 import play.api.data.Forms.{mapping, nonEmptyText}
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError, Forms}
-import play.api.mvc._
+import play.api.mvc.*
 import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
@@ -40,26 +40,29 @@ import scala.util.Try
 
 @Singleton
 class PaymentDayController @Inject() (
-    as:             Actions,
-    views:          Views,
-    journeyService: JourneyService,
-    mcc:            MessagesControllerComponents
-)(implicit executionContext: ExecutionContext, appConfig: AppConfig)
-  extends FrontendController(mcc)
-  with Logging {
+  as:             Actions,
+  views:          Views,
+  journeyService: JourneyService,
+  mcc:            MessagesControllerComponents
+)(using ExecutionContext, AppConfig)
+    extends FrontendController(mcc),
+      Logging {
 
   val paymentDay: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
-    withJourneyInCorrectState(request.journey){ j =>
+    withJourneyInCorrectState(request.journey) { j =>
       finalStateCheck(request.journey, displayPaymentDayPage(j))
     }
   }
 
   private def displayPaymentDayPage(
-      journey: Either[Journey.AfterEnteredMonthlyPaymentAmount, (Journey.AfterCheckedPaymentPlan, PaymentPlanAnswers.PaymentPlanNoAffordability)]
-  )(implicit request: Request[_]): Result = {
+    journey: Either[
+      JourneyStage.AfterEnteredMonthlyPaymentAmount,
+      (JourneyStage.AfterCheckedPaymentPlan, PaymentPlanAnswers.PaymentPlanNoAffordability)
+    ]
+  )(implicit request: Request[?]): Result = {
     val maybePrePopForm: Form[PaymentDayForm] =
-      existingPaymentDay(journey).fold(paymentDayForm()){ day =>
-        if (day.value === 28) {
+      existingPaymentDay(journey).fold(paymentDayForm()) { day =>
+        if (day.value == 28) {
           paymentDayForm().fill(PaymentDayForm("28", None))
         } else {
           paymentDayForm().fill(PaymentDayForm("", Some(day.value)))
@@ -70,19 +73,21 @@ class PaymentDayController @Inject() (
   }
 
   private def existingPaymentDay(
-      journey: Either[Journey.AfterEnteredMonthlyPaymentAmount, (Journey.AfterCheckedPaymentPlan, PaymentPlanAnswers.PaymentPlanNoAffordability)]
-  ): Option[DayOfMonth] = {
+    journey: Either[
+      JourneyStage.AfterEnteredMonthlyPaymentAmount,
+      (JourneyStage.AfterCheckedPaymentPlan, PaymentPlanAnswers.PaymentPlanNoAffordability)
+    ]
+  ): Option[DayOfMonth] =
     journey.fold(
       {
-        case j: Journey.AfterEnteredDayOfMonth  => Some(j.dayOfMonth)
-        case _: Journey.BeforeEnteredDayOfMonth => None
+        case j: JourneyStage.AfterEnteredDayOfMonth  => Some(j.dayOfMonth)
+        case _: JourneyStage.BeforeEnteredDayOfMonth => None
       },
       _._2.dayOfMonth.some
     )
-  }
 
   val paymentDaySubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
-    withJourneyInCorrectState(request.journey){ j =>
+    withJourneyInCorrectState(request.journey) { j =>
       paymentDayForm()
         .bindFromRequest()
         .fold(
@@ -92,35 +97,42 @@ class PaymentDayController @Inject() (
               case Some(otherDay) => DayOfMonth(otherDay)
               case None           => DayOfMonth(form.paymentDay.toInt)
             }
-            journeyService.updateDayOfMonth(request.journeyId, dayOfMonth)
+            journeyService
+              .updateDayOfMonth(request.journeyId, dayOfMonth)
               .map(updatedJourney =>
                 Routing.redirectToNext(
                   routes.PaymentDayController.paymentDay,
                   updatedJourney,
                   existingPaymentDay(j).contains(dayOfMonth)
-                ))
+                )
+              )
           }
         )
     }
   }
 
-  private def withJourneyInCorrectState[A](journey: Journey)(
-      f: Either[Journey.AfterEnteredMonthlyPaymentAmount, (Journey.AfterCheckedPaymentPlan, PaymentPlanAnswers.PaymentPlanNoAffordability)] => Future[Result]
-  )(implicit r: Request[_]): Future[Result] =
+  private def withJourneyInCorrectState(journey: Journey)(
+    f: Either[
+      JourneyStage.AfterEnteredMonthlyPaymentAmount,
+      (JourneyStage.AfterCheckedPaymentPlan, PaymentPlanAnswers.PaymentPlanNoAffordability)
+    ] => Future[Result]
+  )(using Request[?]): Future[Result] =
     journey match {
-      case j: Journey.BeforeEnteredMonthlyPaymentAmount =>
+      case j: JourneyStage.BeforeEnteredMonthlyPaymentAmount =>
         logErrorAndRouteToDefaultPageF(j)
-      case j: Journey.AfterEnteredMonthlyPaymentAmount =>
+      case j: JourneyStage.AfterEnteredMonthlyPaymentAmount  =>
         f(Left(j))
-      case j: Journey.AfterCheckedPaymentPlan =>
+      case j: JourneyStage.AfterCheckedPaymentPlan           =>
         j.paymentPlanAnswers match {
-          case p: PaymentPlanAnswers.PaymentPlanNoAffordability =>
+          case p: PaymentPlanAnswers.PaymentPlanNoAffordability    =>
             f(Right(j -> p))
           case _: PaymentPlanAnswers.PaymentPlanAfterAffordability =>
-            Errors.throwServerErrorException("Not expecting to select payment plan option when payment plan has been checked on affordability journey")
+            Errors.throwServerErrorException(
+              "Not expecting to select payment plan option when payment plan has been checked on affordability journey"
+            )
         }
 
-      case _: Journey.AfterStartedPegaCase =>
+      case _: JourneyStage.AfterStartedPegaCase =>
         Errors.throwServerErrorException("Not expecting to select payment plan option when started PEGA case")
     }
 
@@ -136,15 +148,15 @@ object PaymentDayController {
 
   def paymentDayForm(): Form[PaymentDayForm] = Form(
     mapping(
-      "PaymentDay" -> nonEmptyText,
+      "PaymentDay"   -> nonEmptyText,
       "DifferentDay" -> mandatoryIfEqual("PaymentDay", "other", Forms.of(dayOfMonthFormatter))
-    )(PaymentDayForm.apply)(PaymentDayForm.unapply)
+    )(PaymentDayForm.apply)(p => Some(Tuple.fromProductTyped(p)))
   )
 
   def readValue[T](
-      key:  String,
-      data: Map[String, String],
-      f:    String => T
+    key:  String,
+    data: Map[String, String],
+    f:    String => T
   ): Either[FormError, T] =
     data
       .get(key)
@@ -159,14 +171,14 @@ object PaymentDayController {
   val dayOfMonthFormatter: Formatter[Int] = {
     val key = "DifferentDay"
 
-      def validateDayOfMonth(day: Int): Either[FormError, Int] =
-        if (day < 1 || day > 28) Left(FormError(key, "error.outOfRange"))
-        else Right(day)
+    def validateDayOfMonth(day: Int): Either[FormError, Int] =
+      if (day < 1 || day > 28) Left(FormError(key, "error.outOfRange"))
+      else Right(day)
 
     new Formatter[Int] {
       override def bind(
-          key:  String,
-          data: Map[String, String]
+        key:  String,
+        data: Map[String, String]
       ): Either[Seq[FormError], Int] = {
         val result =
           readValue(key, data, _.replaceAll(" ", "").toInt)

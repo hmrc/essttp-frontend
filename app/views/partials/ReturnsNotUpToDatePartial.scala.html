@@ -23,9 +23,9 @@
 @this(requestSupport: RequestSupport)
 
 
-@(fileReturnLink: => String, taxRegime: TaxRegime)(implicit request: Request[_])
+@(fileReturnLink: => String, taxRegime: TaxRegime)(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 @epayeContent = {
     <p class="govuk-body">

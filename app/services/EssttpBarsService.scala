@@ -19,54 +19,54 @@ package services
 import actionsmodel.EligibleJourneyRequest
 import essttp.bars.BarsVerifyStatusConnector
 import essttp.bars.model.BarsVerifyStatusResponse
-import essttp.journey.model.Journey.{AfterComputedTaxId, AfterEnteredCanYouSetUpDirectDebit}
+import essttp.journey.model.Journey
+import essttp.journey.model.JourneyStage.{AfterComputedTaxId, AfterEnteredCanYouSetUpDirectDebit}
 import essttp.rootmodel.TaxId
 import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount, TypesOfBankAccount}
-import essttp.utils.RequestSupport._
+import essttp.utils.RequestSupport.hc
 import models.bars.request.{BarsBankAccount, BarsBusiness, BarsSubject}
-import models.bars.response._
+import models.bars.response.*
 import models.bars.{BarsTypeOfBankAccount, BarsTypesOfBankAccount}
 import play.api.mvc.RequestHeader
-import services.EssttpBarsService._
+import services.EssttpBarsServiceUtils.*
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-/**
- * essttp-specific interface to Bank Account Reputation service (BARs).
- */
+/** essttp-specific interface to Bank Account Reputation service (BARs).
+  */
 @Singleton
 class EssttpBarsService @Inject() (
-    barsService:               BarsService,
-    barsVerifyStatusConnector: BarsVerifyStatusConnector,
-    auditService:              AuditService
-)(implicit ec: ExecutionContext) {
+  barsService:               BarsService,
+  barsVerifyStatusConnector: BarsVerifyStatusConnector,
+  auditService:              AuditService
+)(using ExecutionContext) {
 
   def verifyBankDetails(
-      bankDetails: BankDetails,
-      journey:     AfterEnteredCanYouSetUpDirectDebit
-  )(implicit request: EligibleJourneyRequest[_]): Future[Either[BarsError, VerifyResponse]] = {
+    bankDetails: BankDetails,
+    journey:     AfterEnteredCanYouSetUpDirectDebit & Journey
+  )(using request: EligibleJourneyRequest[?]): Future[Either[BarsError, VerifyResponse]] = {
     val taxId = journey match {
       case j: AfterComputedTaxId => j.taxId
-      case _                     => throw new RuntimeException("Expected to find a taxId but none found")
     }
 
     barsService
       .verifyBankDetails(
-        bankAccount       = toBarsBankAccount(bankDetails),
-        subject           = toBarsSubject(bankDetails),
-        business          = toBarsBusiness(bankDetails),
+        bankAccount = toBarsBankAccount(bankDetails),
+        subject = toBarsSubject(bankDetails),
+        business = toBarsBusiness(bankDetails),
         typeOfBankAccount = toBarsTypeOfBankAccount(bankDetails.typeOfBankAccount)
       )
       .flatMap { result =>
-          def auditBars(barsVerifyStatusResponse: BarsVerifyStatusResponse): Unit =
-            auditService.auditBarsCheck(journey, bankDetails, result, barsVerifyStatusResponse)
+        def auditBars(barsVerifyStatusResponse: BarsVerifyStatusResponse): Unit =
+          auditService.auditBarsCheck(journey, bankDetails, result, barsVerifyStatusResponse)
 
         result match {
           case Right(_) | Left(_: BarsValidateError) =>
             // don't update the verify count on success or validate error
             auditBars(BarsVerifyStatusResponse(request.numberOfBarsVerifyAttempts, None))
             Future.successful(result)
+
           case Left(bve: BarsVerifyError) =>
             updateVerifyStatus(taxId, result, bve.barsResponse, auditBars)
         }
@@ -74,11 +74,11 @@ class EssttpBarsService @Inject() (
   }
 
   private def updateVerifyStatus(
-      taxId:     TaxId,
-      result:    Either[BarsError, VerifyResponse],
-      br:        BarsResponse,
-      auditBars: BarsVerifyStatusResponse => Unit
-  )(implicit requestHeader: RequestHeader): Future[Either[BarsError, VerifyResponse]] =
+    taxId:     TaxId,
+    result:    Either[BarsError, VerifyResponse],
+    br:        BarsResponse,
+    auditBars: BarsVerifyStatusResponse => Unit
+  )(using RequestHeader): Future[Either[BarsError, VerifyResponse]] =
     barsVerifyStatusConnector
       .update(taxId)
       .map { verifyStatus =>
@@ -93,17 +93,17 @@ class EssttpBarsService @Inject() (
 
 }
 
-object EssttpBarsService {
+object EssttpBarsServiceUtils {
   def toBarsBankAccount(bankDetails: BankDetails): BarsBankAccount =
     BarsBankAccount.padded(bankDetails.sortCode.value.decryptedValue, bankDetails.accountNumber.value.decryptedValue)
 
   def toBarsSubject(bankDetails: BankDetails): BarsSubject = BarsSubject(
-    title     = None,
-    name      = Some(bankDetails.name.value.decryptedValue),
+    title = None,
+    name = Some(bankDetails.name.value.decryptedValue),
     firstName = None,
-    lastName  = None,
-    dob       = None,
-    address   = None
+    lastName = None,
+    dob = None,
+    address = None
   )
 
   def toBarsBusiness(bankDetails: BankDetails): BarsBusiness =

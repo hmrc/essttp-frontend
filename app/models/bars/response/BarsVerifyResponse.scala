@@ -19,20 +19,19 @@ package models.bars.response
 import play.api.libs.json.{Json, OFormat}
 
 final case class BarsVerifyResponse(
-    accountNumberIsWellFormatted:             BarsAssessmentType,
-    accountExists:                            BarsAssessmentType,
-    nameMatches:                              BarsAssessmentType,
-    nonStandardAccountDetailsRequiredForBacs: BarsAssessmentType,
-    sortCodeIsPresentOnEISCD:                 BarsAssessmentType,
-    sortCodeSupportsDirectDebit:              BarsAssessmentType,
-    sortCodeSupportsDirectCredit:             BarsAssessmentType,
-    accountName:                              Option[String],
-    sortCodeBankName:                         Option[String],
-    iban:                                     Option[String]
+  accountNumberIsWellFormatted:             BarsAssessmentType,
+  accountExists:                            BarsAssessmentType,
+  nameMatches:                              BarsAssessmentType,
+  nonStandardAccountDetailsRequiredForBacs: BarsAssessmentType,
+  sortCodeIsPresentOnEISCD:                 BarsAssessmentType,
+  sortCodeSupportsDirectDebit:              BarsAssessmentType,
+  sortCodeSupportsDirectCredit:             BarsAssessmentType,
+  accountName:                              Option[String],
+  sortCodeBankName:                         Option[String],
+  iban:                                     Option[String]
 )
 
 object BarsVerifyResponse {
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  implicit val format: OFormat[BarsVerifyResponse] = Json.format
+  given format: OFormat[BarsVerifyResponse] = Json.format
 }
-

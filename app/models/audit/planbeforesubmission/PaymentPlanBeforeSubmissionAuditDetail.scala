@@ -36,5 +36,5 @@ final case class PaymentPlanBeforeSubmissionAuditDetail(
 }
 
 object PaymentPlanBeforeSubmissionAuditDetail {
-  implicit val writes: OWrites[PaymentPlanBeforeSubmissionAuditDetail] = Json.writes
+  given OWrites[PaymentPlanBeforeSubmissionAuditDetail] = Json.writes
 }

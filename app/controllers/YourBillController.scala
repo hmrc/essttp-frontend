@@ -17,16 +17,15 @@
 package controllers
 
 import actions.Actions
-import cats.syntax.eq._
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import essttp.journey.JourneyConnector
-import essttp.journey.model.{Journey, WhyCannotPayInFullAnswers}
+import essttp.journey.model.{Journey, JourneyStage, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.AmountInPence
 import essttp.rootmodel.ttp.eligibility.{ChargeTypeAssessment, Charges, EligibilityCheckResult, MainTrans}
 import essttp.rootmodel.ttp.{DdInProgress, IsInterestBearingCharge}
 import models.{InvoicePeriod, OverDuePayments, OverduePayment}
-import play.api.mvc._
+import play.api.mvc.*
 import services.AuditService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
@@ -39,39 +38,42 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class YourBillController @Inject() (
-    as:               Actions,
-    mcc:              MessagesControllerComponents,
-    views:            Views,
-    auditService:     AuditService,
-    journeyConnector: JourneyConnector
-)(implicit ec: ExecutionContext)
-  extends FrontendController(mcc)
-  with Logging {
+  as:               Actions,
+  mcc:              MessagesControllerComponents,
+  views:            Views,
+  auditService:     AuditService,
+  journeyConnector: JourneyConnector
+)(using ExecutionContext)
+    extends FrontendController(mcc),
+      Logging {
 
   val yourBill: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
-      case j: Journey.BeforeEligibilityChecked => logErrorAndRouteToDefaultPage(j)
-      case j: Journey.AfterEligibilityChecked  => finalStateCheck(j, displayPage(j))
+      case j: JourneyStage.BeforeEligibilityChecked => logErrorAndRouteToDefaultPage(j)
+      case j: JourneyStage.AfterEligibilityChecked  => finalStateCheck(j, displayPage(j))
     }
   }
 
-  private def displayPage(journey: Journey.AfterEligibilityChecked)(implicit request: Request[_]): Result = {
-    try {
+  private def displayPage(
+    journey: JourneyStage.AfterEligibilityChecked & Journey
+  )(using Request[?]): Result =
+    try
       Ok(
         views.yourBillIs(
           YourBillController.overDuePayments(journey.eligibilityCheckResult),
           journey.taxRegime
         )
       )
-    } catch {
-      case e: MainTrans.UnknownMainTransException =>
+    catch {
+      case e: MainTrans.UnknownMainTransException                      =>
         logger.warn(s"${e.getClass.getName}: MainTrans with no corresponding charge type: ${e.mTrans.value}")
         Redirect(routes.IneligibleController.saGenericIneligiblePage)
       case e: ChargeTypeAssessment.ChargesWithDifferentMTransException =>
-        logger.warn(s"${e.getClass.getName}: ChargeTypeAssessment has charges with different MainTrans: ${e.charges.map(_.charges1.mainTrans).toString}")
+        logger.warn(
+          s"${e.getClass.getName}: ChargeTypeAssessment has charges with different MainTrans: ${e.charges.map(_.charges1.mainTrans).toString}"
+        )
         Redirect(routes.IneligibleController.saGenericIneligiblePage)
     }
-  }
 
   val yourBillSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit eligibilityRequest =>
     if (YourBillController.hasAnyChargesWithDdInProgress(eligibilityRequest.eligibilityCheckResult))
@@ -82,12 +84,14 @@ class YourBillController @Inject() (
 
   val youAlreadyHaveDirectDebit: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
-      case j: Journey.BeforeEligibilityChecked => logErrorAndRouteToDefaultPage(j)
-      case j: Journey.AfterEligibilityChecked  => finalStateCheck(j, displayYouAlreadyHaveDirectDebitPage(j))
+      case j: JourneyStage.BeforeEligibilityChecked => logErrorAndRouteToDefaultPage(j)
+      case j: JourneyStage.AfterEligibilityChecked  => finalStateCheck(j, displayYouAlreadyHaveDirectDebitPage(j))
     }
   }
 
-  private def displayYouAlreadyHaveDirectDebitPage(journey: Journey.AfterEligibilityChecked)(implicit request: Request[_]): Result =
+  private def displayYouAlreadyHaveDirectDebitPage(
+    journey: JourneyStage.AfterEligibilityChecked & Journey
+  )(using Request[?]): Result =
     Ok(
       views.youAlreadyHaveDirectDebit(
         YourBillController.overDuePaymentsWithDdInProgress(journey.eligibilityCheckResult),
@@ -100,69 +104,79 @@ class YourBillController @Inject() (
     computeNext(request.journey).map(Redirect(_))
   }
 
-  private def computeNext(journey: Journey)(implicit rh: RequestHeader): Future[Call] = {
+  private def computeNext(journey: Journey)(using RequestHeader): Future[Call] =
     if (journey.affordabilityEnabled.contains(true))
       Future.successful(routes.WhyCannotPayInFullController.whyCannotPayInFull)
     else
       journeyConnector
         .updateWhyCannotPayInFullAnswers(journey.journeyId, WhyCannotPayInFullAnswers.AnswerNotRequired)
         .map(_ => routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment)
-  }
 
 }
 
 object YourBillController {
-  def chargeDueDate(chargeTypeAssessments: List[ChargeTypeAssessment]): LocalDate = {
-    chargeTypeAssessments.headOption.map { (chargeTypeAssessment: ChargeTypeAssessment) =>
-      chargeTypeAssessment.charges.headOption.map { charges: Charges =>
-        parseLocalDate(charges.charges1.dueDate.value.toString)
+  def chargeDueDate(chargeTypeAssessments: List[ChargeTypeAssessment]): LocalDate =
+    chargeTypeAssessments.headOption
+      .map { (chargeTypeAssessment: ChargeTypeAssessment) =>
+        chargeTypeAssessment.charges.headOption.map { (charges: Charges) =>
+          parseLocalDate(charges.charges1.dueDate.value.toString)
+        }
       }
-    }.getOrElse(throw new IllegalArgumentException("missing charge list")).getOrElse(throw new IllegalArgumentException("missing charge list"))
-  }
+      .getOrElse(throw new IllegalArgumentException("missing charge list"))
+      .getOrElse(throw new IllegalArgumentException("missing charge list"))
 
   val LocalDateTimeFmt: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
   def parseLocalDate(s: String): LocalDate = LocalDateTimeFmt.parse(s, LocalDate.from)
 
   def invoicePeriod(ass: ChargeTypeAssessment): InvoicePeriod = {
-    val dueDate: LocalDate = chargeDueDate(List(ass))
+    val dueDate: LocalDate   = chargeDueDate(List(ass))
     val startDate: LocalDate = parseLocalDate(ass.taxPeriodFrom.value)
-    val endDate: LocalDate = parseLocalDate(ass.taxPeriodTo.value)
+    val endDate: LocalDate   = parseLocalDate(ass.taxPeriodTo.value)
     InvoicePeriod(monthNumberInTaxYear(startDate), startDate, endDate, dueDate)
   }
 
   private def chargeBearsInterest(ass: ChargeTypeAssessment): Option[IsInterestBearingCharge] =
-    ass.charges.headOption.flatMap { charges: Charges =>
-      charges.charges1.isInterestBearingCharge
-    }
+    ass.charges.headOption.flatMap(_.charges1.isInterestBearingCharge)
 
   private def ddInProgress(ass: ChargeTypeAssessment): Option[DdInProgress] =
-    ass.charges.headOption.flatMap { charges: Charges =>
-      charges.charges2.ddInProgress
-    }
+    ass.charges.headOption.flatMap(_.charges2.ddInProgress)
 
   private def hasAnyChargesWithDdInProgress(eligibilityResult: EligibilityCheckResult) =
-    eligibilityResult.chargeTypeAssessment.map(overDuePaymentOf).exists(_.ddInProgress.contains(DdInProgress(value = true)))
+    eligibilityResult.chargeTypeAssessment
+      .map(overDuePaymentOf)
+      .exists(_.ddInProgress.contains(DdInProgress(value = true)))
 
   private val taxMonthStartDay: Int = 6
 
   def monthNumberInTaxYear(date: LocalDate): Int = {
-    val day: Int = date.getDayOfMonth
-    val month: Int = if (day >= taxMonthStartDay) date.getMonthValue else {
-      date.getMonthValue - 1
-    }
+    val day: Int   = date.getDayOfMonth
+    val month: Int =
+      if (day >= taxMonthStartDay) date.getMonthValue
+      else {
+        date.getMonthValue - 1
+      }
     if (month >= 4) month - 3 else month + 9
   }
 
   private def overDuePaymentOf(ass: ChargeTypeAssessment): OverduePayment = {
-    val maybeMainTrans = ass.charges.map(_.charges1.mainTrans).reduceOption((a, b) =>
-      if (a === b) a else throw ChargeTypeAssessment.ChargesWithDifferentMTransException(ass.charges))
+    val maybeMainTrans = ass.charges
+      .map(_.charges1.mainTrans)
+      .reduceOption((a, b) =>
+        if (a == b) a else throw ChargeTypeAssessment.ChargesWithDifferentMTransException(ass.charges)
+      )
 
     val mainTrans = maybeMainTrans.getOrElse(
       throw new RuntimeException("This should not be possible: A charge did not have a MainTrans")
     )
 
-    OverduePayment(invoicePeriod(ass), ass.debtTotalAmount.value, chargeBearsInterest(ass), ddInProgress(ass), mainTrans)
+    OverduePayment(
+      invoicePeriod(ass),
+      ass.debtTotalAmount.value,
+      chargeBearsInterest(ass),
+      ddInProgress(ass),
+      mainTrans
+    )
   }
 
   private def qualifyingDebt(eligibilityResult: EligibilityCheckResult): AmountInPence =
@@ -175,8 +189,7 @@ object YourBillController {
 
   private def overDuePaymentsWithDdInProgress(eligibilityResult: EligibilityCheckResult): OverDuePayments = {
     val paymentsWithDdInProgress =
-      eligibilityResult
-        .chargeTypeAssessment
+      eligibilityResult.chargeTypeAssessment
         .map(overDuePaymentOf)
         .filter(_.ddInProgress.contains(DdInProgress(value = true)))
 

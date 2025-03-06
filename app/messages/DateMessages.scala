@@ -21,36 +21,36 @@ import models.{Language, Languages}
 object DateMessages {
 
   val monthName: Map[Int, Message] = Map(
-    1 -> Message(english = "January", welsh = "Ionawr"),
-    2 -> Message(english = "February", welsh = "Chwefror"),
-    3 -> Message(english = "March", welsh = "Mawrth"),
-    4 -> Message(english = "April", welsh = "Ebrill"),
-    5 -> Message(english = "May", welsh = "Mai"),
-    6 -> Message(english = "June", welsh = "Mehefin"),
-    7 -> Message(english = "July", welsh = "Gorffennaf"),
-    8 -> Message(english = "August", welsh = "Awst"),
-    9 -> Message(english = "September", welsh = "Medi"),
+    1  -> Message(english = "January", welsh = "Ionawr"),
+    2  -> Message(english = "February", welsh = "Chwefror"),
+    3  -> Message(english = "March", welsh = "Mawrth"),
+    4  -> Message(english = "April", welsh = "Ebrill"),
+    5  -> Message(english = "May", welsh = "Mai"),
+    6  -> Message(english = "June", welsh = "Mehefin"),
+    7  -> Message(english = "July", welsh = "Gorffennaf"),
+    8  -> Message(english = "August", welsh = "Awst"),
+    9  -> Message(english = "September", welsh = "Medi"),
     10 -> Message(english = "October", welsh = "Hydref"),
     11 -> Message(english = "November", welsh = "Tachwedd"),
     12 -> Message(english = "December", welsh = "Rhagfyr")
   )
 
   val shortMonthName: Map[Int, Message] = Map(
-    1 -> Message(english = "Jan", welsh = "Ion"),
-    2 -> Message(english = "Feb", welsh = "Chwef"),
-    3 -> Message(english = "Mar", welsh = "Maw"),
-    4 -> Message(english = "Apr", welsh = "Ebr"),
-    5 -> Message(english = "May", welsh = "Mai"),
-    6 -> Message(english = "Jun", welsh = "Meh"),
-    7 -> Message(english = "Jul", welsh = "Gorff"),
-    8 -> Message(english = "Aug", welsh = "Awst"),
-    9 -> Message(english = "Sep", welsh = "Medi"),
+    1  -> Message(english = "Jan", welsh = "Ion"),
+    2  -> Message(english = "Feb", welsh = "Chwef"),
+    3  -> Message(english = "Mar", welsh = "Maw"),
+    4  -> Message(english = "Apr", welsh = "Ebr"),
+    5  -> Message(english = "May", welsh = "Mai"),
+    6  -> Message(english = "Jun", welsh = "Meh"),
+    7  -> Message(english = "Jul", welsh = "Gorff"),
+    8  -> Message(english = "Aug", welsh = "Awst"),
+    9  -> Message(english = "Sep", welsh = "Medi"),
     10 -> Message(english = "Oct", welsh = "Hyd"),
     11 -> Message(english = "Nov", welsh = "Tach"),
     12 -> Message(english = "Dec", welsh = "Rhag")
   )
 
-  def getSuffix(day: Int)(implicit lang: Language): String = {
+  def getSuffix(day: Int)(using lang: Language): String =
     if (day > 31)
       throw new IllegalArgumentException("day cannot be greater than 31")
     else if (day < 1)
@@ -75,7 +75,5 @@ object DateMessages {
           else "eg"
       }
     }
-
-  }
 
 }

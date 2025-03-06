@@ -17,19 +17,19 @@
 package controllers
 
 import actions.Actions
-import cats.syntax.eq._
-import cats.syntax.option._
+import cats.syntax.eq.*
+import cats.syntax.option.*
 import config.AppConfig
 import controllers.InstalmentsController.instalmentsForm
 import controllers.JourneyFinalStateCheck.finalStateCheckF
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
-import essttp.journey.model.{Journey, PaymentPlanAnswers}
+import essttp.journey.model.{Journey, JourneyStage, PaymentPlanAnswers}
 import essttp.rootmodel.ttp.affordablequotes.PaymentPlan
 import essttp.utils.Errors
 import models.InstalmentOption
 import play.api.data.Form
 import play.api.data.Forms.{mapping, nonEmptyText}
-import play.api.mvc._
+import play.api.mvc.*
 import services.JourneyService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
@@ -40,83 +40,97 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class InstalmentsController @Inject() (
-    as:             Actions,
-    mcc:            MessagesControllerComponents,
-    journeyService: JourneyService,
-    views:          Views
-)(implicit executionContext: ExecutionContext, appConfig: AppConfig) extends FrontendController(mcc)
-  with Logging {
+  as:             Actions,
+  mcc:            MessagesControllerComponents,
+  journeyService: JourneyService,
+  views:          Views
+)(using ExecutionContext, AppConfig)
+    extends FrontendController(mcc),
+      Logging {
 
   val instalmentOptions: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
-    withJourneyInCorrectState(request.journey)(j =>
-      finalStateCheckF(request.journey, displayInstalmentOptionsPage(j)))
+    withJourneyInCorrectState(request.journey)(j => finalStateCheckF(request.journey, displayInstalmentOptionsPage(j)))
   }
 
-  private def displayInstalmentOptionsPage(journey: Either[Journey.AfterAffordableQuotesResponse, (Journey.AfterCheckedPaymentPlan, PaymentPlanAnswers.PaymentPlanNoAffordability)])(implicit request: Request[_]): Future[Result] = {
+  private def displayInstalmentOptionsPage(
+    journey: Either[
+      JourneyStage.AfterAffordableQuotesResponse,
+      (JourneyStage.AfterCheckedPaymentPlan, PaymentPlanAnswers.PaymentPlanNoAffordability)
+    ]
+  )(using Request[?]): Future[Result] = {
     val maybePrePopForm: Form[String] = {
       val existingValue = journey.fold(existingSelectedPaymentPlan, _._2.selectedPaymentPlan.some)
 
-      existingValue.fold(InstalmentsController.instalmentsForm()){ plan =>
+      existingValue.fold(InstalmentsController.instalmentsForm()) { plan =>
         InstalmentsController.instalmentsForm().fill(plan.numberOfInstalments.value.toString)
       }
     }
 
     val affordableQuotesResponse = journey.fold(_.affordableQuotesResponse, _._2.affordableQuotesResponse)
-    val instalmentOptions = InstalmentsController.retrieveInstalmentOptions(affordableQuotesResponse.paymentPlans)
+    val instalmentOptions        = InstalmentsController.retrieveInstalmentOptions(affordableQuotesResponse.paymentPlans)
     Ok(views.instalmentOptionsPage(maybePrePopForm, instalmentOptions))
   }
 
-  private def existingSelectedPaymentPlan(journey: Journey.AfterAffordableQuotesResponse): Option[PaymentPlan] = journey match {
-    case j: Journey.AfterSelectedPaymentPlan => Some(j.selectedPaymentPlan)
-    case _                                   => None
-  }
+  private def existingSelectedPaymentPlan(journey: JourneyStage.AfterAffordableQuotesResponse): Option[PaymentPlan] =
+    journey match {
+      case j: JourneyStage.AfterSelectedPaymentPlan => Some(j.selectedPaymentPlan)
+      case _                                        => None
+    }
 
   val instalmentOptionsSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
-    withJourneyInCorrectState(request.journey){ j =>
+    withJourneyInCorrectState(request.journey) { j =>
       val affordableQuotesResponse = j.fold(_.affordableQuotesResponse, _._2.affordableQuotesResponse)
 
       instalmentsForm()
         .bindFromRequest()
         .fold(
           { formWithErrors =>
-            val instalmentOptions = InstalmentsController.retrieveInstalmentOptions(affordableQuotesResponse.paymentPlans)
+            val instalmentOptions =
+              InstalmentsController.retrieveInstalmentOptions(affordableQuotesResponse.paymentPlans)
             Ok(views.instalmentOptionsPage(formWithErrors, instalmentOptions))
           },
-          {
-            (option: String) =>
-              val maybePaymentPlan: Option[PaymentPlan] =
-                affordableQuotesResponse.paymentPlans.find(_.collections.regularCollections.length === option.toInt)
+          { (option: String) =>
+            val maybePaymentPlan: Option[PaymentPlan] =
+              affordableQuotesResponse.paymentPlans.find(_.collections.regularCollections.length === option.toInt)
 
-              maybePaymentPlan.fold[Future[Result]](Errors.throwBadRequestExceptionF("There was no payment plan"))(plan =>
-                journeyService.updateChosenPaymentPlan(request.journeyId, plan)
-                  .map(updatedJourney =>
-                    Routing.redirectToNext(
-                      routes.InstalmentsController.instalmentOptions,
-                      updatedJourney,
-                      j.fold(existingSelectedPaymentPlan, _._2.selectedPaymentPlan.some).contains(plan)
-                    )))
+            maybePaymentPlan.fold[Future[Result]](Errors.throwBadRequestExceptionF("There was no payment plan"))(plan =>
+              journeyService
+                .updateChosenPaymentPlan(request.journeyId, plan)
+                .map(updatedJourney =>
+                  Routing.redirectToNext(
+                    routes.InstalmentsController.instalmentOptions,
+                    updatedJourney,
+                    j.fold(existingSelectedPaymentPlan, _._2.selectedPaymentPlan.some).contains(plan)
+                  )
+                )
+            )
           }
         )
     }
   }
 
-  private def withJourneyInCorrectState[A](journey: Journey)(
-      f: Either[Journey.AfterAffordableQuotesResponse, (Journey.AfterCheckedPaymentPlan, PaymentPlanAnswers.PaymentPlanNoAffordability)] => Future[Result]
-  )(implicit r: Request[_]): Future[Result] =
+  private def withJourneyInCorrectState(journey: Journey)(
+    f: Either[
+      JourneyStage.AfterAffordableQuotesResponse,
+      (JourneyStage.AfterCheckedPaymentPlan, PaymentPlanAnswers.PaymentPlanNoAffordability)
+    ] => Future[Result]
+  )(using Request[?]): Future[Result] =
     journey match {
-      case j: Journey.BeforeAffordableQuotesResponse =>
+      case j: JourneyStage.BeforeAffordableQuotesResponse =>
         logErrorAndRouteToDefaultPageF(j)
-      case j: Journey.AfterAffordableQuotesResponse =>
+      case j: JourneyStage.AfterAffordableQuotesResponse  =>
         f(Left(j))
-      case j: Journey.AfterCheckedPaymentPlan =>
+      case j: JourneyStage.AfterCheckedPaymentPlan        =>
         j.paymentPlanAnswers match {
-          case p: PaymentPlanAnswers.PaymentPlanNoAffordability =>
+          case p: PaymentPlanAnswers.PaymentPlanNoAffordability    =>
             f(Right(j -> p))
           case _: PaymentPlanAnswers.PaymentPlanAfterAffordability =>
-            Errors.throwServerErrorException("Not expecting to select payment plan option when payment plan has been checked on affordability journey")
+            Errors.throwServerErrorException(
+              "Not expecting to select payment plan option when payment plan has been checked on affordability journey"
+            )
         }
 
-      case _: Journey.AfterStartedPegaCase =>
+      case _: JourneyStage.AfterStartedPegaCase =>
         Errors.throwServerErrorException("Not expecting to select payment plan option when started PEGA case")
     }
 
@@ -134,16 +148,19 @@ object InstalmentsController {
 
   val backUrl: Option[String] = Some(routes.PaymentDayController.paymentDay.url)
 
-  /**
-   * We should not show the user any plan that has a monthly payment of less than £1.00
-   * We filter here and return instalment options that have a regular collection greater than £1.
-   */
-  def retrieveInstalmentOptions(paymentPlans: List[PaymentPlan]): List[InstalmentOption] = paymentPlans.map { plan =>
-    InstalmentOption(
-      numberOfMonths       = plan.collections.regularCollections.length,
-      amountToPayEachMonth = plan.collections.regularCollections
-        .headOption.getOrElse(throw new RuntimeException("There were no regular collections")).amountDue.value,
-      interestPayment      = plan.planInterest.value
-    )
-  }.filter(_.amountToPayEachMonth.value >= 100)
+  /** We should not show the user any plan that has a monthly payment of less than £1.00 We filter here and return
+    * instalment options that have a regular collection greater than £1.
+    */
+  def retrieveInstalmentOptions(paymentPlans: List[PaymentPlan]): List[InstalmentOption] = paymentPlans
+    .map { plan =>
+      InstalmentOption(
+        numberOfMonths = plan.collections.regularCollections.length,
+        amountToPayEachMonth = plan.collections.regularCollections.headOption
+          .getOrElse(throw new RuntimeException("There were no regular collections"))
+          .amountDue
+          .value,
+        interestPayment = plan.planInterest.value
+      )
+    }
+    .filter(_.amountToPayEachMonth.value >= 100)
 }

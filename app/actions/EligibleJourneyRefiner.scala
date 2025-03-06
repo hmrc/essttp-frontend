@@ -19,33 +19,35 @@ package actions
 import actionsmodel.{BarsNotLockedOutRequest, EligibleJourneyRequest}
 import controllers.JourneyIncorrectStateRouter
 import controllers.pagerouters.EligibilityRouter
-import essttp.journey.model.Journey
+import essttp.journey.model.{Journey, JourneyStage}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, Request, Result}
+
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class EligibleJourneyRefiner @Inject() (ec: ExecutionContext) extends ActionRefiner[BarsNotLockedOutRequest, EligibleJourneyRequest] {
+class EligibleJourneyRefiner @Inject() (ec: ExecutionContext)
+    extends ActionRefiner[BarsNotLockedOutRequest, EligibleJourneyRequest] {
 
   override protected def refine[A](
-      request: BarsNotLockedOutRequest[A]
+    request: BarsNotLockedOutRequest[A]
   ): Future[Either[Result, EligibleJourneyRequest[A]]] = {
-    implicit val r: Request[A] = request
+    given Request[A]                                      = request
     val result: Either[Result, EligibleJourneyRequest[A]] = request.journey match {
-      case j: Journey.Stages.Started =>
+      case j: Journey.Started =>
         Left(JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j))
 
-      case j: Journey.Stages.ComputedTaxId =>
+      case j: Journey.ComputedTaxId =>
         Left(JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j))
 
-      case j: Journey.AfterEligibilityChecked =>
+      case j: JourneyStage.AfterEligibilityChecked =>
         if (j.eligibilityCheckResult.isEligible) {
           Right(
             new EligibleJourneyRequest[A](
-              journey    = j,
+              journey = j,
               enrolments = request.enrolments,
-              request    = request,
+              request = request,
               request.ggCredId,
               request.nino,
               request.numberOfBarsVerifyAttempts,

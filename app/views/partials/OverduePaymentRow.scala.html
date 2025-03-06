@@ -25,9 +25,9 @@
 @this(requestSupport: RequestSupport)
 
 
-@(payment: OverduePayment, taxRegime: TaxRegime)(implicit request: Request[_])
+@(payment: OverduePayment, taxRegime: TaxRegime)(implicit request: Request[?])
 
-    @import requestSupport._
+@import requestSupport.languageFromRequest
 
 @invoicePeriodDateShortMonth(date: LocalDate) = @{s"${date.getDayOfMonth.toString} ${DateMessages.shortMonthName(date.getMonthValue).show}"}
 @invoicePeriodDateYear(date: LocalDate) = @{date.getYear.toString}

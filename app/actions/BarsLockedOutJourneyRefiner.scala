@@ -19,25 +19,28 @@ package actions
 import actionsmodel.{AuthenticatedJourneyRequest, BarsLockedOutRequest}
 import controllers.JourneyIncorrectStateRouter
 import essttp.bars.BarsVerifyStatusConnector
-import essttp.journey.model.Journey
+import essttp.journey.model.JourneyStage
 import play.api.Logging
 import play.api.mvc.{ActionRefiner, Request, Result, Results}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class BarsLockedOutJourneyRefiner @Inject() (barsVerifyStatusConnector: BarsVerifyStatusConnector)(
-    implicit
-    ec: ExecutionContext
-) extends ActionRefiner[AuthenticatedJourneyRequest, BarsLockedOutRequest] with Logging with Results {
+class BarsLockedOutJourneyRefiner @Inject() (barsVerifyStatusConnector: BarsVerifyStatusConnector)(using
+  ec: ExecutionContext
+) extends ActionRefiner[AuthenticatedJourneyRequest, BarsLockedOutRequest],
+      Logging,
+      Results {
 
-  override protected def refine[A](request: AuthenticatedJourneyRequest[A]): Future[Either[Result, BarsLockedOutRequest[A]]] = {
-    implicit val rh: Request[A] = request.request
+  override protected def refine[A](
+    request: AuthenticatedJourneyRequest[A]
+  ): Future[Either[Result, BarsLockedOutRequest[A]]] = {
+    given Request[A] = request.request
 
     request.journey match {
-      case j: Journey.BeforeComputedTaxId =>
+      case j: JourneyStage.BeforeComputedTaxId =>
         JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF(j).map(Left(_))
-      case j: Journey.AfterComputedTaxId =>
+      case j: JourneyStage.AfterComputedTaxId  =>
         barsVerifyStatusConnector.status(j.taxId).map { status =>
           status.lockoutExpiryDateTime match {
             case Some(expiresAt) =>

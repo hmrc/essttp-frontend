@@ -21,9 +21,8 @@ import java.time.{Clock, ZoneOffset}
 
 class Module extends AbstractModule {
 
-  override def configure(): Unit = {
+  override def configure(): Unit =
     ()
-  }
 
   @Provides
   @Singleton

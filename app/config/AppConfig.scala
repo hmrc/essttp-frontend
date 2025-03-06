@@ -16,7 +16,6 @@
 
 package config
 
-import configs.syntax._
 import essttp.rootmodel.{AmountInPence, TaxRegime}
 import models.{EligibilityReqIdentificationFlag, Language}
 import play.api.mvc.RequestHeader
@@ -32,63 +31,69 @@ import scala.concurrent.duration.FiniteDuration
 @Singleton
 class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
 
-  val appName: String = config.get[String]("appName")
-  val emailJourneyEnabled: Boolean = config.get[Boolean]("features.email-journey")
-  val saEnabled: Boolean = config.get[Boolean]("features.sa")
-  val simpEnabled: Boolean = config.get[Boolean]("features.simp")
-  val authTimeoutSeconds: Int = config.get[FiniteDuration]("timeout-dialog.timeout").toSeconds.toInt
-  val authTimeoutCountdownSeconds: Int = config.get[FiniteDuration]("timeout-dialog.countdown").toSeconds.toInt
-  val accessibilityStatementPath: String = config.get[String]("accessibility-statement.service-path")
-  val shutteredTaxRegimes: List[TaxRegime] = config.underlying.get[List[String]]("shuttering.shuttered-tax-regimes").value.map(TaxRegime.withNameInsensitive)
-  implicit val eligibilityReqIdentificationFlag: EligibilityReqIdentificationFlag = EligibilityReqIdentificationFlag(config.get[Boolean]("features.eligibilityReqIdentificationFlag"))
+  val appName: String                                                      = config.get[String]("appName")
+  val emailJourneyEnabled: Boolean                                         = config.get[Boolean]("features.email-journey")
+  val saEnabled: Boolean                                                   = config.get[Boolean]("features.sa")
+  val simpEnabled: Boolean                                                 = config.get[Boolean]("features.simp")
+  val authTimeoutSeconds: Int                                              = config.get[FiniteDuration]("timeout-dialog.timeout").toSeconds.toInt
+  val authTimeoutCountdownSeconds: Int                                     = config.get[FiniteDuration]("timeout-dialog.countdown").toSeconds.toInt
+  val accessibilityStatementPath: String                                   = config.get[String]("accessibility-statement.service-path")
+  val shutteredTaxRegimes: List[TaxRegime]                                 =
+    config.get[Seq[String]]("shuttering.shuttered-tax-regimes").map(TaxRegime.withNameInsensitive).toList
+  given eligibilityReqIdentificationFlag: EligibilityReqIdentificationFlag = EligibilityReqIdentificationFlag(
+    config.get[Boolean]("features.eligibilityReqIdentificationFlag")
+  )
 
   object BaseUrl {
-    val platformHost: Option[String] = config.getOptional[String]("platform.frontend.host")
-    val essttpBackendUrl: String = servicesConfig.baseUrl("essttp-backend")
-    val essttpFrontend: String = platformHost.getOrElse(config.get[String]("baseUrl.essttp-frontend"))
-    val essttpFrontendHost: String = new URI(essttpFrontend).toURL.getHost
-    val contactFrontend: String = platformHost.getOrElse(config.get[String]("baseUrl.contact-frontend"))
-    val feedbackFrontend: String = platformHost.getOrElse(config.get[String]("baseUrl.feedback-frontend"))
-    val gg: String = config.get[String]("baseUrl.gg")
-    val businessTaxAccountFrontend: String = platformHost.getOrElse(config.get[String]("baseUrl.business-tax-account-frontend"))
-    val personalTaxAccountFrontend: String = platformHost.getOrElse(config.get[String]("baseUrl.pertax-frontend"))
-    val timeToPayUrl: String = servicesConfig.baseUrl("time-to-pay")
-    val timeToPayEligibilityUrl: String = servicesConfig.baseUrl("time-to-pay-eligibility")
-    val barsUrl: String = servicesConfig.baseUrl("bank-account-reputation")
-    val emailVerificationUrl: String = servicesConfig.baseUrl("email-verification")
-    val accessibilityStatementFrontendUrl: String = platformHost.getOrElse(config.get[String]("baseUrl.accessibility-statement-frontend"))
-    val paymentsEmailVerificationUrl: String = servicesConfig.baseUrl("payments-email-verification")
+    val platformHost: Option[String]              = config.getOptional[String]("platform.frontend.host")
+    val essttpBackendUrl: String                  = servicesConfig.baseUrl("essttp-backend")
+    val essttpFrontend: String                    = platformHost.getOrElse(config.get[String]("baseUrl.essttp-frontend"))
+    val essttpFrontendHost: String                = new URI(essttpFrontend).toURL.getHost
+    val contactFrontend: String                   = platformHost.getOrElse(config.get[String]("baseUrl.contact-frontend"))
+    val feedbackFrontend: String                  = platformHost.getOrElse(config.get[String]("baseUrl.feedback-frontend"))
+    val gg: String                                = config.get[String]("baseUrl.gg")
+    val businessTaxAccountFrontend: String        =
+      platformHost.getOrElse(config.get[String]("baseUrl.business-tax-account-frontend"))
+    val personalTaxAccountFrontend: String        = platformHost.getOrElse(config.get[String]("baseUrl.pertax-frontend"))
+    val timeToPayUrl: String                      = servicesConfig.baseUrl("time-to-pay")
+    val timeToPayEligibilityUrl: String           = servicesConfig.baseUrl("time-to-pay-eligibility")
+    val barsUrl: String                           = servicesConfig.baseUrl("bank-account-reputation")
+    val emailVerificationUrl: String              = servicesConfig.baseUrl("email-verification")
+    val accessibilityStatementFrontendUrl: String =
+      platformHost.getOrElse(config.get[String]("baseUrl.accessibility-statement-frontend"))
+    val paymentsEmailVerificationUrl: String      = servicesConfig.baseUrl("payments-email-verification")
   }
 
   object Urls {
-    val loginUrl: String = BaseUrl.gg
+    val loginUrl: String   = BaseUrl.gg
     val signOutUrl: String = config.get[String]("baseUrl.sign-out")
 
-    def betaFeedbackUrl(implicit request: RequestHeader): String = {
+    def betaFeedbackUrl(using request: RequestHeader): String = {
       import uk.gov.hmrc.http.StringContextOps
       s"${BaseUrl.contactFrontend}/contact/beta-feedback?" +
         s"service=$appName&" +
         s"backUrl=${url"${BaseUrl.essttpFrontend + request.uri}".toString}"
     }
 
-    val govUkUrl: String = config.get[String]("govUkUrls.govUk")
-    val enrolForPayeUrl: String = config.get[String]("govUkUrls.enrolPayeUrl")
-    val enrolForVatUrl: String = config.get[String]("govUkUrls.enrolVatUrl")
-    val enrolForSaUrl: String = config.get[String]("govUkUrls.enrolSaUrl")
-    val signUpForMtdUrl: String = config.get[String]("govUkUrls.signUpMtdUrl")
-    val extraSupportUrl: String = config.get[String]("govUkUrls.extraSupportUrl")
-    val relayUrl: String = config.get[String]("govUkUrls.relayUrl")
-    val businessTaxAccountUrl: String = s"${BaseUrl.businessTaxAccountFrontend}/business-account"
-    val personalTaxAccountUrl: String = s"${BaseUrl.personalTaxAccountFrontend}/personal-account"
-    val businessPaymentSupportService: String = config.get[String]("govUkUrls.businessPaymentSupportService")
-    val welshLanguageHelplineForDebtManagement: String = config.get[String]("govUkUrls.welshLanguageHelplineForDebtManagement")
-    val saSuppUrl: String = {
+    val govUkUrl: String                               = config.get[String]("govUkUrls.govUk")
+    val enrolForPayeUrl: String                        = config.get[String]("govUkUrls.enrolPayeUrl")
+    val enrolForVatUrl: String                         = config.get[String]("govUkUrls.enrolVatUrl")
+    val enrolForSaUrl: String                          = config.get[String]("govUkUrls.enrolSaUrl")
+    val signUpForMtdUrl: String                        = config.get[String]("govUkUrls.signUpMtdUrl")
+    val extraSupportUrl: String                        = config.get[String]("govUkUrls.extraSupportUrl")
+    val relayUrl: String                               = config.get[String]("govUkUrls.relayUrl")
+    val businessTaxAccountUrl: String                  = s"${BaseUrl.businessTaxAccountFrontend}/business-account"
+    val personalTaxAccountUrl: String                  = s"${BaseUrl.personalTaxAccountFrontend}/personal-account"
+    val businessPaymentSupportService: String          = config.get[String]("govUkUrls.businessPaymentSupportService")
+    val welshLanguageHelplineForDebtManagement: String =
+      config.get[String]("govUkUrls.welshLanguageHelplineForDebtManagement")
+    val saSuppUrl: String                              = {
       val baseUrl = BaseUrl.platformHost.getOrElse("http://localhost:9063")
       s"$baseUrl/pay-what-you-owe-in-instalments"
     }
-    val fileSaReturnUrl: String = config.get[String]("govUkUrls.fileSaReturnUrl")
-    val tellHMRCChangeDetailsUrl: String = config.get[String]("govUkUrls.changeDetails")
-    val userResearchBannerLink: String = config.get[String]("govUkUrls.userResearchBannerLink")
+    val fileSaReturnUrl: String                        = config.get[String]("govUkUrls.fileSaReturnUrl")
+    val tellHMRCChangeDetailsUrl: String               = config.get[String]("govUkUrls.changeDetails")
+    val userResearchBannerLink: String                 = config.get[String]("govUkUrls.userResearchBannerLink")
   }
 
   object TtpHeaders {
@@ -113,7 +118,9 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
 
   object PolicyParameters {
 
-    val minimumUpfrontPaymentAmountInPence: AmountInPence = AmountInPence(config.get[Long]("policy-parameters.minimumUpfrontPaymentAmountInPence"))
+    val minimumUpfrontPaymentAmountInPence: AmountInPence = AmountInPence(
+      config.get[Long]("policy-parameters.minimumUpfrontPaymentAmountInPence")
+    )
 
     object InterestRates {
       val baseRate: BigDecimal = config.get[Double]("policy-parameters.interest-rates.base-rate")
@@ -124,20 +131,20 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
       private def getParam[A: ConfigLoader](path: String): A = config.get[A](s"policy-parameters.epaye.$path")
 
       val maxAmountOfDebt: AmountInPence = AmountInPence(getParam[Long]("max-amount-of-debt-in-pounds") * 100L)
-      val maxPlanDurationInMonths: Int = getParam[Int]("max-plan-duration-in-months")
-      val maxAgeOfDebtInYears: Int = getParam[Int]("max-age-of-debt-in-years")
-      val payOnlineLink: String = getParam[String]("pay-online-link")
+      val maxPlanDurationInMonths: Int   = getParam[Int]("max-plan-duration-in-months")
+      val maxAgeOfDebtInYears: Int       = getParam[Int]("max-age-of-debt-in-years")
+      val payOnlineLink: String          = getParam[String]("pay-online-link")
     }
 
     object VAT {
       private def getParam[A: ConfigLoader](path: String): A = config.get[A](s"policy-parameters.vat.$path")
 
-      val maxAmountOfDebt: AmountInPence = AmountInPence(getParam[Long]("max-amount-of-debt-in-pounds") * 100L)
-      val maxPlanDurationInMonths: Int = getParam[Int]("max-plan-duration-in-months")
-      val maxAgeOfDebtInDays: Int = getParam[Int]("max-age-of-debt-in-days")
-      val payOnlineLink: String = getParam[String]("pay-online-link")
+      val maxAmountOfDebt: AmountInPence      = AmountInPence(getParam[Long]("max-amount-of-debt-in-pounds") * 100L)
+      val maxPlanDurationInMonths: Int        = getParam[Int]("max-plan-duration-in-months")
+      val maxAgeOfDebtInDays: Int             = getParam[Int]("max-age-of-debt-in-days")
+      val payOnlineLink: String               = getParam[String]("pay-online-link")
       val vatAccountingPeriodStart: LocalDate = {
-        val string = getParam[String]("vat-accounting-period-start")
+        val string    = getParam[String]("vat-accounting-period-start")
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         LocalDate.parse(string, formatter)
       }
@@ -147,17 +154,17 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
       private def getParam[A: ConfigLoader](path: String): A = config.get[A](s"policy-parameters.sa.$path")
 
       val maxAmountOfDebt: AmountInPence = AmountInPence(getParam[Long]("max-amount-of-debt-in-pounds") * 100L)
-      val maxPlanDurationInMonths: Int = getParam[Int]("max-plan-duration-in-months")
-      val maxAgeOfDebtInDays: Int = getParam[Int]("max-age-of-debt-in-days")
-      val payOnlineLink: String = getParam[String]("pay-online-link")
+      val maxPlanDurationInMonths: Int   = getParam[Int]("max-plan-duration-in-months")
+      val maxAgeOfDebtInDays: Int        = getParam[Int]("max-age-of-debt-in-days")
+      val payOnlineLink: String          = getParam[String]("pay-online-link")
     }
 
     object SIMP {
       private def getParam[A: ConfigLoader](path: String): A = config.get[A](s"policy-parameters.simp.$path")
 
       val maxAmountOfDebt: AmountInPence = AmountInPence(getParam[Long]("max-amount-of-debt-in-pounds") * 100L)
-      val maxPlanDurationInMonths: Int = getParam[Int]("max-plan-duration-in-months")
-      val payOnlineLink: String = getParam[String]("pay-online-link")
+      val maxPlanDurationInMonths: Int   = getParam[Int]("max-plan-duration-in-months")
+      val payOnlineLink: String          = getParam[String]("pay-online-link")
     }
   }
 

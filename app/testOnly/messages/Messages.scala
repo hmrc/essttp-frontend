@@ -20,6 +20,7 @@ import messages.Message
 
 object Messages {
 
-  val `Select how to be signed in`: Message = Message(english = "Select how to be signed in")
-  val `Select which origin the journey should start from`: Message = Message(english = "Select which origin the journey should start from")
+  val `Select how to be signed in`: Message                        = Message(english = "Select how to be signed in")
+  val `Select which origin the journey should start from`: Message =
+    Message(english = "Select which origin the journey should start from")
 }

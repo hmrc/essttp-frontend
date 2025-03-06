@@ -22,9 +22,9 @@
 
 @this(requestSupport: RequestSupport, appConfig: AppConfig)
 
-@()(implicit request: Request[_])
+@()(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 <h2 class="govuk-heading-m">@{Messages.ExtraSupport.`If you need extra support`.show}</h2>
 <p class="govuk-body">@{Html(Messages.ExtraSupport.`Find out the different ways to deal with HMRC...`(appConfig.Urls.extraSupportUrl).show)}</p>

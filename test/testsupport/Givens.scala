@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package viewmodels
+package testsupport
 
-sealed trait LabelSize
+import play.api.libs.json.JsValue
+import play.api.mvc.Session
 
-object LabelSize {
-  case object ExtraLarge extends WithCssClass("govuk-label--xl") with LabelSize
-  case object Large extends WithCssClass("govuk-label--l") with LabelSize
-  case object Medium extends WithCssClass("govuk-label--m") with LabelSize
-  case object Small extends WithCssClass("govuk-label--s") with LabelSize
+object Givens {
+
+  given canEqualPlaySession: CanEqual[Session, Session] = CanEqual.derived
+
+  given canEqualJsValue: CanEqual[JsValue, JsValue] = CanEqual.derived
+
 }

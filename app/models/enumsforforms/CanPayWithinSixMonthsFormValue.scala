@@ -21,7 +21,7 @@ import essttp.journey.model.CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths
 
 import scala.collection.immutable
 
-sealed trait CanPayWithinSixMonthsFormValue extends enumeratum.EnumEntry {
+sealed trait CanPayWithinSixMonthsFormValue extends enumeratum.EnumEntry derives CanEqual {
 
   def asCanPayWithinSixMonths: CanPayWithinSixMonths = this match {
     case CanPayWithinSixMonthsFormValue.Yes => CanPayWithinSixMonths(value = true)
@@ -43,4 +43,3 @@ object CanPayWithinSixMonthsFormValue extends Enum[CanPayWithinSixMonthsFormValu
       case CanPayWithinSixMonths(false) => CanPayWithinSixMonthsFormValue.No
     }
 }
-

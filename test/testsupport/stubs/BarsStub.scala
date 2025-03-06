@@ -29,11 +29,14 @@ object BarsStub {
 
     def success(): StubMapping = stubForPostWithResponseBody(validateUrl, ValidateJson.success)
 
-    def accountNumberNotWellFormatted(): StubMapping = stubForPostWithResponseBody(validateUrl, ValidateJson.accountNumberNotWellFormatted)
+    def accountNumberNotWellFormatted(): StubMapping =
+      stubForPostWithResponseBody(validateUrl, ValidateJson.accountNumberNotWellFormatted)
 
-    def sortCodeNotPresentOnEiscd(): StubMapping = stubForPostWithResponseBody(validateUrl, ValidateJson.sortCodeNotPresentOnEiscd)
+    def sortCodeNotPresentOnEiscd(): StubMapping =
+      stubForPostWithResponseBody(validateUrl, ValidateJson.sortCodeNotPresentOnEiscd)
 
-    def sortCodeDoesNotSupportsDirectDebit(): StubMapping = stubForPostWithResponseBody(validateUrl, ValidateJson.sortCodeDoesNotSupportsDirectDebit)
+    def sortCodeDoesNotSupportsDirectDebit(): StubMapping =
+      stubForPostWithResponseBody(validateUrl, ValidateJson.sortCodeDoesNotSupportsDirectDebit)
 
     def sortCodeOnDenyList(): StubMapping =
       stubForPostWithResponseBody(validateUrl, ValidateJson.sortCodeOnDenyList, BAD_REQUEST)
@@ -42,20 +45,22 @@ object BarsStub {
       verify(exactly(0), postRequestedFor(urlPathEqualTo(validateUrl)))
 
     def ensureBarsValidateCalled(formData: List[(String, String)]): Unit = {
-      val sortCode = getExpectedFormValue("sortCode", formData)
+      val sortCode      = getExpectedFormValue("sortCode", formData)
       val accountNumber = getExpectedFormValue("accountNumber", formData)
 
       verify(
         exactly(1),
         postRequestedFor(urlPathEqualTo(validateUrl))
-          .withRequestBody(equalToJson(
-            s"""{
+          .withRequestBody(
+            equalToJson(
+              s"""{
             |  "account" : {
             |    "sortCode" : "$sortCode",
             |    "accountNumber" : "$accountNumber"
             |  }
             |}""".stripMargin
-          ))
+            )
+          )
       )
     }
   }
@@ -72,9 +77,11 @@ object BarsStub {
 
     def success(): StubMapping = stubForPostWithResponseBody(verifyPersonalUrl, VerifyJson.success)
 
-    def accountExistsError(): StubMapping = stubForPostWithResponseBody(verifyPersonalUrl, VerifyJson.accountExistsError)
+    def accountExistsError(): StubMapping =
+      stubForPostWithResponseBody(verifyPersonalUrl, VerifyJson.accountExistsError)
 
-    def accountDoesNotExist(): StubMapping = stubForPostWithResponseBody(verifyPersonalUrl, VerifyJson.accountDoesNotExist)
+    def accountDoesNotExist(): StubMapping =
+      stubForPostWithResponseBody(verifyPersonalUrl, VerifyJson.accountDoesNotExist)
 
     def nameMatchesError(): StubMapping = stubForPostWithResponseBody(verifyPersonalUrl, VerifyJson.nameMatchesError)
 
@@ -89,15 +96,16 @@ object BarsStub {
       BarsStub.ValidateStub.ensureBarsValidateCalled(formData)
       BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessNotCalled()
 
-      val sortCode = getExpectedFormValue("sortCode", formData)
+      val sortCode      = getExpectedFormValue("sortCode", formData)
       val accountNumber = getExpectedFormValue("accountNumber", formData)
-      val name = getExpectedFormValue("name", formData)
+      val name          = getExpectedFormValue("name", formData)
 
       verify(
         exactly(1),
         postRequestedFor(urlPathEqualTo(verifyPersonalUrl))
-          .withRequestBody(equalToJson(
-            s"""{
+          .withRequestBody(
+            equalToJson(
+              s"""{
                |  "account" : {
                |    "sortCode" : "$sortCode",
                |    "accountNumber" : "$accountNumber"
@@ -106,7 +114,8 @@ object BarsStub {
                |    "name" : "$name"
                |  }
                |}""".stripMargin
-          ))
+            )
+          )
       )
     }
   }
@@ -116,9 +125,11 @@ object BarsStub {
 
     def success(): StubMapping = stubForPostWithResponseBody(verifyBusinessUrl, VerifyJson.success)
 
-    def accountExistsError(): StubMapping = stubForPostWithResponseBody(verifyBusinessUrl, VerifyJson.accountExistsError)
+    def accountExistsError(): StubMapping =
+      stubForPostWithResponseBody(verifyBusinessUrl, VerifyJson.accountExistsError)
 
-    def accountDoesNotExist(): StubMapping = stubForPostWithResponseBody(verifyBusinessUrl, VerifyJson.accountDoesNotExist)
+    def accountDoesNotExist(): StubMapping =
+      stubForPostWithResponseBody(verifyBusinessUrl, VerifyJson.accountDoesNotExist)
 
     def nameMatchesError(): StubMapping = stubForPostWithResponseBody(verifyBusinessUrl, VerifyJson.nameMatchesError)
 
@@ -133,15 +144,16 @@ object BarsStub {
       BarsStub.ValidateStub.ensureBarsValidateCalled(formData)
       BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalNotCalled()
 
-      val sortCode = getExpectedFormValue("sortCode", formData)
+      val sortCode      = getExpectedFormValue("sortCode", formData)
       val accountNumber = getExpectedFormValue("accountNumber", formData)
-      val companyName = getExpectedFormValue("name", formData)
+      val companyName   = getExpectedFormValue("name", formData)
 
       verify(
         exactly(1),
         postRequestedFor(urlPathEqualTo(verifyBusinessUrl))
-          .withRequestBody(equalToJson(
-            s"""{
+          .withRequestBody(
+            equalToJson(
+              s"""{
                |  "account" : {
                |    "sortCode" : "$sortCode",
                |    "accountNumber" : "$accountNumber"
@@ -150,7 +162,8 @@ object BarsStub {
                |    "companyName" : "$companyName"
                |  }
                |}""".stripMargin
-          ))
+            )
+          )
       )
     }
   }
@@ -162,7 +175,8 @@ object BarsStub {
   }
 
   private def getExpectedFormValue(field: String, formData: List[(String, String)]): String =
-    formData.collectFirst{ case (x, value) if x == field => value }
+    formData
+      .collectFirst { case (x, value) if x == field => value }
       .getOrElse(throw new Exception(s"Field: $field, not present in form: ${formData.toString}"))
 
 }

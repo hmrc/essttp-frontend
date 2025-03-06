@@ -31,126 +31,171 @@ import javax.inject.{Inject, Singleton}
 
 @Singleton()
 class IneligibleController @Inject() (
-    mcc:          MessagesControllerComponents,
-    views:        Views,
-    as:           Actions,
-    appConfig:    AppConfig,
-    auditService: AuditService
-) extends FrontendController(mcc) with Logging {
+  mcc:          MessagesControllerComponents,
+  views:        Views,
+  as:           Actions,
+  appConfig:    AppConfig,
+  auditService: AuditService
+) extends FrontendController(mcc),
+      Logging {
 
   def genericIneligiblePage(implicit request: AuthenticatedJourneyRequest[AnyContent]): Result =
-    Ok(views.partials.ineligibleTemplatePage(
-      pageh1         = Messages.NotEligible.`Call us about a payment plan`,
-      leadingContent = views.partials.genericIneligiblePartial()
-    ))
+    Ok(
+      views.partials.ineligibleTemplatePage(
+        pageh1 = Messages.NotEligible.`Call us about a payment plan`,
+        leadingContent = views.partials.genericIneligiblePartial()
+      )
+    )
 
-  val payeGenericIneligiblePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericIneligiblePage }
+  val payeGenericIneligiblePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    genericIneligiblePage
+  }
 
-  val vatGenericIneligiblePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericIneligiblePage }
+  val vatGenericIneligiblePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    genericIneligiblePage
+  }
 
-  val saGenericIneligiblePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericIneligiblePage }
+  val saGenericIneligiblePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    genericIneligiblePage
+  }
 
-  val simpGenericIneligiblePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericIneligiblePage }
+  val simpGenericIneligiblePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    genericIneligiblePage
+  }
 
   val epayeDebtTooLargePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    Ok(views.partials.ineligibleTemplatePage(
-      pageh1         = Messages.NotEligible.`Call us about a payment plan`,
-      leadingContent = views.partials.debtTooLargePartial(appConfig.PolicyParameters.EPAYE.maxAmountOfDebt)
-    ))
+    Ok(
+      views.partials.ineligibleTemplatePage(
+        pageh1 = Messages.NotEligible.`Call us about a payment plan`,
+        leadingContent = views.partials.debtTooLargePartial(appConfig.PolicyParameters.EPAYE.maxAmountOfDebt)
+      )
+    )
   }
 
   val vatDebtTooLargePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    Ok(views.partials.ineligibleTemplatePage(
-      pageh1         = Messages.NotEligible.`Call us about a payment plan`,
-      leadingContent = views.partials.debtTooLargePartial(appConfig.PolicyParameters.VAT.maxAmountOfDebt)
-    ))
+    Ok(
+      views.partials.ineligibleTemplatePage(
+        pageh1 = Messages.NotEligible.`Call us about a payment plan`,
+        leadingContent = views.partials.debtTooLargePartial(appConfig.PolicyParameters.VAT.maxAmountOfDebt)
+      )
+    )
   }
 
   val saDebtTooLargePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    Ok(views.partials.ineligibleTemplatePage(
-      pageh1         = Messages.NotEligible.`Call us about a payment plan`,
-      leadingContent = views.partials.debtTooLargePartial(appConfig.PolicyParameters.SA.maxAmountOfDebt)
-    ))
+    Ok(
+      views.partials.ineligibleTemplatePage(
+        pageh1 = Messages.NotEligible.`Call us about a payment plan`,
+        leadingContent = views.partials.debtTooLargePartial(appConfig.PolicyParameters.SA.maxAmountOfDebt)
+      )
+    )
   }
 
   val simpDebtTooLargePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    Ok(views.partials.ineligibleTemplatePage(
-      pageh1         = Messages.NotEligible.`Call us about a payment plan`,
-      leadingContent = views.partials.debtTooLargePartial(appConfig.PolicyParameters.SIMP.maxAmountOfDebt)
-    ))
+    Ok(
+      views.partials.ineligibleTemplatePage(
+        pageh1 = Messages.NotEligible.`Call us about a payment plan`,
+        leadingContent = views.partials.debtTooLargePartial(appConfig.PolicyParameters.SIMP.maxAmountOfDebt)
+      )
+    )
   }
 
   val epayeDebtTooSmallPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    Ok(views.partials.ineligibleTemplatePage(
-      pageh1         = Messages.NotEligible.`Pay your ... bill in full`(request.journey.taxRegime),
-      leadingContent = views.partials.debtTooSmallPartial(appConfig.PolicyParameters.EPAYE.payOnlineLink)
-    ))
+    Ok(
+      views.partials.ineligibleTemplatePage(
+        pageh1 = Messages.NotEligible.`Pay your ... bill in full`(request.journey.taxRegime),
+        leadingContent = views.partials.debtTooSmallPartial(appConfig.PolicyParameters.EPAYE.payOnlineLink)
+      )
+    )
   }
 
   val vatDebtTooSmallPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    Ok(views.partials.ineligibleTemplatePage(
-      pageh1         = Messages.NotEligible.`Pay your ... bill in full`(request.journey.taxRegime),
-      leadingContent = views.partials.debtTooSmallPartial(appConfig.PolicyParameters.VAT.payOnlineLink)
-    ))
+    Ok(
+      views.partials.ineligibleTemplatePage(
+        pageh1 = Messages.NotEligible.`Pay your ... bill in full`(request.journey.taxRegime),
+        leadingContent = views.partials.debtTooSmallPartial(appConfig.PolicyParameters.VAT.payOnlineLink)
+      )
+    )
   }
 
   val saDebtTooSmallPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    Ok(views.partials.ineligibleTemplatePage(
-      pageh1                      = Messages.NotEligible.`Pay your ... bill in full`(request.journey.taxRegime),
-      leadingContent              = views.partials.debtTooSmallPartial(appConfig.PolicyParameters.SA.payOnlineLink),
-      showFullListPreparationTips = false
-    ))
+    Ok(
+      views.partials.ineligibleTemplatePage(
+        pageh1 = Messages.NotEligible.`Pay your ... bill in full`(request.journey.taxRegime),
+        leadingContent = views.partials.debtTooSmallPartial(appConfig.PolicyParameters.SA.payOnlineLink),
+        showFullListPreparationTips = false
+      )
+    )
   }
 
   val simpDebtTooSmallPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    Ok(views.partials.ineligibleTemplatePage(
-      pageh1                      = Messages.NotEligible.`Pay your ... bill in full`(request.journey.taxRegime),
-      leadingContent              = views.partials.debtTooSmallPartial(appConfig.PolicyParameters.SIMP.payOnlineLink),
-      showFullListPreparationTips = false,
-      showWereLikelyToAsk         = false
-    ))
+    Ok(
+      views.partials.ineligibleTemplatePage(
+        pageh1 = Messages.NotEligible.`Pay your ... bill in full`(request.journey.taxRegime),
+        leadingContent = views.partials.debtTooSmallPartial(appConfig.PolicyParameters.SIMP.payOnlineLink),
+        showFullListPreparationTips = false,
+        showWereLikelyToAsk = false
+      )
+    )
   }
 
   val epayeDebtTooOldPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    Ok(views.partials.ineligibleTemplatePage(
-      pageh1         = Messages.NotEligible.`Call us about a payment plan`,
-      leadingContent = views.partials.debtTooOldPartial(appConfig.PolicyParameters.EPAYE.maxAgeOfDebtInYears)
-    ))
+    Ok(
+      views.partials.ineligibleTemplatePage(
+        pageh1 = Messages.NotEligible.`Call us about a payment plan`,
+        leadingContent = views.partials.debtTooOldPartial(appConfig.PolicyParameters.EPAYE.maxAgeOfDebtInYears)
+      )
+    )
   }
 
   val vatDebtTooOldPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    Ok(views.partials.ineligibleTemplatePage(
-      pageh1         = Messages.NotEligible.`Call us about a payment plan`,
-      leadingContent = views.partials.debtTooOldPartial(appConfig.PolicyParameters.VAT.maxAgeOfDebtInDays)
-    ))
+    Ok(
+      views.partials.ineligibleTemplatePage(
+        pageh1 = Messages.NotEligible.`Call us about a payment plan`,
+        leadingContent = views.partials.debtTooOldPartial(appConfig.PolicyParameters.VAT.maxAgeOfDebtInDays)
+      )
+    )
   }
 
   val saDebtTooOldPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    Ok(views.partials.ineligibleTemplatePage(
-      pageh1         = Messages.NotEligible.`Call us about a payment plan`,
-      leadingContent = views.partials.debtTooOldPartial(appConfig.PolicyParameters.SA.maxAgeOfDebtInDays)
-    ))
+    Ok(
+      views.partials.ineligibleTemplatePage(
+        pageh1 = Messages.NotEligible.`Call us about a payment plan`,
+        leadingContent = views.partials.debtTooOldPartial(appConfig.PolicyParameters.SA.maxAgeOfDebtInDays)
+      )
+    )
   }
 
   val vatDebtBeforeAccountingDatePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    Ok(views.partials.ineligibleTemplatePage(
-      pageh1         = Messages.NotEligible.`Call us about a payment plan`,
-      leadingContent = views.partials.vatDebtBeforeAccountingDatePartial(appConfig.PolicyParameters.VAT.vatAccountingPeriodStart)
-    ))
+    Ok(
+      views.partials.ineligibleTemplatePage(
+        pageh1 = Messages.NotEligible.`Call us about a payment plan`,
+        leadingContent =
+          views.partials.vatDebtBeforeAccountingDatePartial(appConfig.PolicyParameters.VAT.vatAccountingPeriodStart)
+      )
+    )
   }
 
   def genericFileReturnPage(implicit request: AuthenticatedJourneyRequest[AnyContent]): Result =
-    Ok(views.partials.ineligibleTemplatePage(
-      pageh1                  = Messages.NotEligible.`File your return to use this service`(request.journey.taxRegime),
-      leadingContent          = views.partials.returnsNotUpToDatePartial(determineFileYourReturnUrl, request.journey.taxRegime),
-      showCallPreparationTips = false
-    ))
+    Ok(
+      views.partials.ineligibleTemplatePage(
+        pageh1 = Messages.NotEligible.`File your return to use this service`(request.journey.taxRegime),
+        leadingContent =
+          views.partials.returnsNotUpToDatePartial(determineFileYourReturnUrl, request.journey.taxRegime),
+        showCallPreparationTips = false
+      )
+    )
 
-  val epayeFileYourReturnPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericFileReturnPage }
+  val epayeFileYourReturnPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    genericFileReturnPage
+  }
 
-  val vatFileYourReturnPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericFileReturnPage }
+  val vatFileYourReturnPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    genericFileReturnPage
+  }
 
-  val saFileYourReturnPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericFileReturnPage }
+  val saFileYourReturnPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    genericFileReturnPage
+  }
 
   def genericAlreadyHaveAPaymentPlanPage(implicit request: AuthenticatedJourneyRequest[AnyContent]): Result =
     Ok(
@@ -163,10 +208,10 @@ class IneligibleController @Inject() (
   val epayeAlreadyHaveAPaymentPlanPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     genericAlreadyHaveAPaymentPlanPage
   }
-  val vatAlreadyHaveAPaymentPlanPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+  val vatAlreadyHaveAPaymentPlanPage: Action[AnyContent]   = as.authenticatedJourneyAction { implicit request =>
     genericAlreadyHaveAPaymentPlanPage
   }
-  val saAlreadyHaveAPaymentPlanPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+  val saAlreadyHaveAPaymentPlanPage: Action[AnyContent]    = as.authenticatedJourneyAction { implicit request =>
     genericAlreadyHaveAPaymentPlanPage
   }
 
@@ -186,14 +231,15 @@ class IneligibleController @Inject() (
     genericNoDueDatesReachedPage
   }
 
-  private def determineFileYourReturnUrl(implicit request: AuthenticatedJourneyRequest[AnyContent]): String = request.journey.sjRequest match {
-    case SjRequest.Epaye.Simple(returnUrl, _) => returnUrl.value
-    case SjRequest.Epaye.Empty()              => appConfig.Urls.businessTaxAccountUrl
-    case SjRequest.Vat.Simple(returnUrl, _)   => returnUrl.value
-    case SjRequest.Vat.Empty()                => appConfig.Urls.businessTaxAccountUrl
-    case _: SjRequest.Simp                    => throw new NotImplementedError("determineFileYourReturnUrl not implemented for SIMP")
-    case _: SjRequest.Sa                      => appConfig.Urls.fileSaReturnUrl
-  }
+  private def determineFileYourReturnUrl(using request: AuthenticatedJourneyRequest[AnyContent]): String =
+    request.journey.sjRequest match {
+      case SjRequest.Epaye.Simple(returnUrl, _) => returnUrl.value
+      case SjRequest.Epaye.Empty()              => appConfig.Urls.businessTaxAccountUrl
+      case SjRequest.Vat.Simple(returnUrl, _)   => returnUrl.value
+      case SjRequest.Vat.Empty()                => appConfig.Urls.businessTaxAccountUrl
+      case _: SjRequest.Simp                    => throw new NotImplementedError("determineFileYourReturnUrl not implemented for SIMP")
+      case _: SjRequest.Sa                      => appConfig.Urls.fileSaReturnUrl
+    }
 
   private def genericYouHaveChosenNotToSetUpPage(implicit request: AuthenticatedJourneyRequest[AnyContent]): Result =
     Ok(
@@ -215,17 +261,19 @@ class IneligibleController @Inject() (
   }
 
   def genericRLSIneligiblePage(implicit request: AuthenticatedJourneyRequest[AnyContent]): Result =
-    Ok(views.partials.ineligibleTemplatePage(
-      pageh1         = Messages.NotEligible.`Update your personal details to use this service`,
-      leadingContent = views.partials.genericRLSPartial(appConfig.Urls.tellHMRCChangeDetailsUrl)
-    ))
+    Ok(
+      views.partials.ineligibleTemplatePage(
+        pageh1 = Messages.NotEligible.`Update your personal details to use this service`,
+        leadingContent = views.partials.genericRLSPartial(appConfig.Urls.tellHMRCChangeDetailsUrl)
+      )
+    )
 
-  val epayeRLSPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericRLSIneligiblePage }
+  val epayeRLSPage: Action[AnyContent] = as.authenticatedJourneyAction(implicit request => genericRLSIneligiblePage)
 
-  val vatRLSPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericRLSIneligiblePage }
+  val vatRLSPage: Action[AnyContent] = as.authenticatedJourneyAction(implicit request => genericRLSIneligiblePage)
 
-  val saRLSPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericRLSIneligiblePage }
+  val saRLSPage: Action[AnyContent] = as.authenticatedJourneyAction(implicit request => genericRLSIneligiblePage)
 
-  val simpRLSPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request => genericRLSIneligiblePage }
+  val simpRLSPage: Action[AnyContent] = as.authenticatedJourneyAction(implicit request => genericRLSIneligiblePage)
 
 }

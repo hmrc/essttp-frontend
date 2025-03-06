@@ -25,26 +25,27 @@ import uk.gov.hmrc.auth.core.retrieve.Credentials
 
 object AuthStub {
   def authorise(
-      allEnrolments: Option[Set[Enrolment]] = Some(Set(TdAll.payeEnrolment)),
-      credentials:   Option[Credentials]    = Some(Credentials("authId-999", "GovernmentGateway")),
-      authNino:      Option[String]         = None
+    allEnrolments: Option[Set[Enrolment]] = Some(Set(TdAll.payeEnrolment)),
+    credentials:   Option[Credentials] = Some(Credentials("authId-999", "GovernmentGateway")),
+    authNino:      Option[String] = None
   ): StubMapping = {
 
-    implicit val enrolmentFormat: OFormat[Enrolment] = {
-      implicit val f: OFormat[EnrolmentIdentifier] = Json.format[EnrolmentIdentifier]
+    given OFormat[Enrolment] = {
+      given OFormat[EnrolmentIdentifier] = Json.format[EnrolmentIdentifier]
       Json.format[Enrolment]
     }
 
-    val optionalCredentialsPart = credentials.fold(
+    val optionalCredentialsPart         = credentials.fold(
       Json.obj()
     )(credential =>
-        Json.obj(
-          "optionalCredentials" -> Json.obj(
-            "providerId" -> credential.providerId,
-            "providerType" -> credential.providerType
-          )
-        ))
-    val enrolments: Set[Enrolment] = allEnrolments.getOrElse(Set())
+      Json.obj(
+        "optionalCredentials" -> Json.obj(
+          "providerId"   -> credential.providerId,
+          "providerType" -> credential.providerType
+        )
+      )
+    )
+    val enrolments: Set[Enrolment]      = allEnrolments.getOrElse(Set())
     val allEnrolmentsJsonPart: JsObject = Json.obj("allEnrolments" -> enrolments)
 
     val ninoPart = authNino.fold(Json.obj())(nino => Json.obj("nino" -> nino))
@@ -53,9 +54,11 @@ object AuthStub {
 
     stubFor(
       post(urlPathEqualTo("/auth/authorise"))
-        .willReturn(aResponse()
-          .withStatus(200)
-          .withBody(Json.prettyPrint(authoriseJsonBody)))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withBody(Json.prettyPrint(authoriseJsonBody))
+        )
     )
   }
 }

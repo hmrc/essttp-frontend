@@ -21,7 +21,7 @@ import essttp.rootmodel.bank.{TypeOfBankAccount, TypesOfBankAccount}
 
 import scala.collection.immutable
 
-sealed trait TypeOfAccountFormValue extends enumeratum.EnumEntry
+sealed trait TypeOfAccountFormValue extends enumeratum.EnumEntry derives CanEqual
 
 object TypeOfAccountFormValue extends Enum[TypeOfAccountFormValue] {
   case object Business extends TypeOfAccountFormValue
@@ -35,8 +35,9 @@ object TypeOfAccountFormValue extends Enum[TypeOfAccountFormValue] {
     case TypesOfBankAccount.Personal => Personal
   }
 
-  def typeOfBankAccountFromFormValue(typeOfAccountFormValue: TypeOfAccountFormValue): TypeOfBankAccount = typeOfAccountFormValue match {
-    case Business => TypesOfBankAccount.Business
-    case Personal => TypesOfBankAccount.Personal
-  }
+  def typeOfBankAccountFromFormValue(typeOfAccountFormValue: TypeOfAccountFormValue): TypeOfBankAccount =
+    typeOfAccountFormValue match {
+      case Business => TypesOfBankAccount.Business
+      case Personal => TypesOfBankAccount.Personal
+    }
 }

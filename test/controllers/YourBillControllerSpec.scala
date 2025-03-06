@@ -28,7 +28,7 @@ import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Result
 import play.api.test.Helpers._
 import testsupport.ItSpec
-import testsupport.TdRequest.FakeRequestOps
+import testsupport.TdRequest._
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend}
 import testsupport.testdata.{JourneyInfo, JourneyJsonTemplates, PageUrls, StageInfo, TdAll, TdJsonBodies}
@@ -48,21 +48,23 @@ class YourBillControllerSpec extends ItSpec {
       EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Epaye.Bta)()
 
       val result: Future[Result] = controller.yourBill(fakeRequest)
-      val pageContent: String = contentAsString(result)
-      val doc: Document = Jsoup.parse(pageContent)
+      val pageContent: String    = contentAsString(result)
+      val doc: Document          = Jsoup.parse(pageContent)
 
       RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1              = "Your PAYE bill is £3,000",
+        expectedH1 = "Your PAYE bill is £3,000",
         shouldBackLinkBePresent = true,
-        expectedSubmitUrl       = Some(routes.YourBillController.yourBillSubmit.url)
+        expectedSubmitUrl = Some(routes.YourBillController.yourBillSubmit.url)
       )
 
       val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
       tableRows.size shouldBe 2
 
-      tableRows(0).select(".govuk-summary-list__key").text() shouldBe "13 Jul 2020 to 14 Jul 2020 Bill due 7 February 2017"
+      tableRows(0)
+        .select(".govuk-summary-list__key")
+        .text() shouldBe "13 Jul 2020 to 14 Jul 2020 Bill due 7 February 2017"
       tableRows(0).select(".govuk-summary-list__value").text() shouldBe "£2,000 (includes interest added to date)"
 
       tableRows(1).select(".govuk-summary-list__key").text() shouldBe "13 Aug 2020 to 14 Aug 2020 Bill due 7 March 2017"
@@ -74,21 +76,23 @@ class YourBillControllerSpec extends ItSpec {
       EssttpBackend.EligibilityCheck.findJourneyWithNoInterestBearingCharges(testCrypto, Origins.Epaye.Bta)()
 
       val result: Future[Result] = controller.yourBill(fakeRequest)
-      val pageContent: String = contentAsString(result)
-      val doc: Document = Jsoup.parse(pageContent)
+      val pageContent: String    = contentAsString(result)
+      val doc: Document          = Jsoup.parse(pageContent)
 
       RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1              = "Your PAYE bill is £3,000",
+        expectedH1 = "Your PAYE bill is £3,000",
         shouldBackLinkBePresent = true,
-        expectedSubmitUrl       = Some(routes.YourBillController.yourBillSubmit.url)
+        expectedSubmitUrl = Some(routes.YourBillController.yourBillSubmit.url)
       )
 
       val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
       tableRows.size shouldBe 2
 
-      tableRows(0).select(".govuk-summary-list__key").text() shouldBe "13 Jul 2020 to 14 Jul 2020 Bill due 7 February 2017"
+      tableRows(0)
+        .select(".govuk-summary-list__key")
+        .text() shouldBe "13 Jul 2020 to 14 Jul 2020 Bill due 7 February 2017"
       tableRows(0).select(".govuk-summary-list__value").text() shouldBe "£2,000"
 
       tableRows(1).select(".govuk-summary-list__key").text() shouldBe "13 Aug 2020 to 14 Aug 2020 Bill due 7 March 2017"
@@ -100,22 +104,24 @@ class YourBillControllerSpec extends ItSpec {
       EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Vat.Bta)()
 
       val result: Future[Result] = controller.yourBill(fakeRequest)
-      val pageContent: String = contentAsString(result)
-      val doc: Document = Jsoup.parse(pageContent)
+      val pageContent: String    = contentAsString(result)
+      val doc: Document          = Jsoup.parse(pageContent)
 
       RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1              = "Your VAT bill is £3,000",
+        expectedH1 = "Your VAT bill is £3,000",
         shouldBackLinkBePresent = true,
-        expectedSubmitUrl       = Some(routes.YourBillController.yourBillSubmit.url),
-        regimeBeingTested       = Some(TaxRegime.Vat)
+        expectedSubmitUrl = Some(routes.YourBillController.yourBillSubmit.url),
+        regimeBeingTested = Some(TaxRegime.Vat)
       )
 
       val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
       tableRows.size shouldBe 2
 
-      tableRows(0).select(".govuk-summary-list__key").text() shouldBe "13 Jul 2020 to 14 Jul 2020 Bill due 7 February 2017"
+      tableRows(0)
+        .select(".govuk-summary-list__key")
+        .text() shouldBe "13 Jul 2020 to 14 Jul 2020 Bill due 7 February 2017"
       tableRows(0).select(".govuk-summary-list__value").text() shouldBe "£2,000 (includes interest added to date)"
 
       tableRows(1).select(".govuk-summary-list__key").text() shouldBe "13 Aug 2020 to 14 Aug 2020 Bill due 7 March 2017"
@@ -127,22 +133,24 @@ class YourBillControllerSpec extends ItSpec {
       EssttpBackend.EligibilityCheck.findJourneyWithNoInterestBearingCharges(testCrypto, Origins.Vat.Bta)()
 
       val result: Future[Result] = controller.yourBill(fakeRequest)
-      val pageContent: String = contentAsString(result)
-      val doc: Document = Jsoup.parse(pageContent)
+      val pageContent: String    = contentAsString(result)
+      val doc: Document          = Jsoup.parse(pageContent)
 
       RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1              = "Your VAT bill is £3,000",
+        expectedH1 = "Your VAT bill is £3,000",
         shouldBackLinkBePresent = true,
-        expectedSubmitUrl       = Some(routes.YourBillController.yourBillSubmit.url),
-        regimeBeingTested       = Some(TaxRegime.Vat)
+        expectedSubmitUrl = Some(routes.YourBillController.yourBillSubmit.url),
+        regimeBeingTested = Some(TaxRegime.Vat)
       )
 
       val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
       tableRows.size shouldBe 2
 
-      tableRows(0).select(".govuk-summary-list__key").text() shouldBe "13 Jul 2020 to 14 Jul 2020 Bill due 7 February 2017"
+      tableRows(0)
+        .select(".govuk-summary-list__key")
+        .text() shouldBe "13 Jul 2020 to 14 Jul 2020 Bill due 7 February 2017"
       tableRows(0).select(".govuk-summary-list__value").text() shouldBe "£2,000"
 
       tableRows(1).select(".govuk-summary-list__key").text() shouldBe "13 Aug 2020 to 14 Aug 2020 Bill due 7 March 2017"
@@ -150,23 +158,60 @@ class YourBillControllerSpec extends ItSpec {
     }
 
     "return your bill page for SA for known MainTrans code" in {
-      val mTransCodes = List("5060", "4910", "5050", "4950", "4990", "5210", "4920", "4930", "5190", "4960", "4970", "5010", "5020",
-        "6010", "5110", "5120", "5130", "5080", "5100", "5070", "5140", "4940", "5150", "5160", "4980", "5170", "5200", "5071",
-        "5180", "5090", "5030", "5040", "5073", "4000", "4001", "4002", "4003", "4026")
+      val mTransCodes = List(
+        "5060",
+        "4910",
+        "5050",
+        "4950",
+        "4990",
+        "5210",
+        "4920",
+        "4930",
+        "5190",
+        "4960",
+        "4970",
+        "5010",
+        "5020",
+        "6010",
+        "5110",
+        "5120",
+        "5130",
+        "5080",
+        "5100",
+        "5070",
+        "5140",
+        "4940",
+        "5150",
+        "5160",
+        "4980",
+        "5170",
+        "5200",
+        "5071",
+        "5180",
+        "5090",
+        "5030",
+        "5040",
+        "5073",
+        "4000",
+        "4001",
+        "4002",
+        "4003",
+        "4026"
+      )
 
       mTransCodes.size shouldBe chargeFromMTrans.size
 
       for {
         code <- mTransCodes
       } {
-        val origin = Origins.Sa.Bta
+        val origin      = Origins.Sa.Bta
         val journeyJson = eligibleJsonWithChargeTypeAssessmentItems(
           chargeTypeAssessmentItemJson(
-            taxPeriodFrom           = LocalDate.of(2020, 4, 4),
-            taxPeriodTo             = LocalDate.of(2021, 4, 4),
+            taxPeriodFrom = LocalDate.of(2020, 4, 4),
+            taxPeriodTo = LocalDate.of(2021, 4, 4),
             isInterestBearingCharge = true,
-            dueDate                 = LocalDate.of(2020, 6, 15),
-            mainTrans               = MainTrans(code)
+            dueDate = LocalDate.of(2020, 6, 15),
+            mainTrans = MainTrans(code)
           )
         )(origin)
 
@@ -174,36 +219,38 @@ class YourBillControllerSpec extends ItSpec {
         EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin)(journeyJson)
 
         val result: Future[Result] = controller.yourBill(fakeRequest)
-        val pageContent: String = contentAsString(result)
-        val doc: Document = Jsoup.parse(pageContent)
+        val pageContent: String    = contentAsString(result)
+        val doc: Document          = Jsoup.parse(pageContent)
 
         RequestAssertions.assertGetRequestOk(result)
         ContentAssertions.commonPageChecks(
           doc,
-          expectedH1              = "Your Self Assessment tax bill is £10,000",
+          expectedH1 = "Your Self Assessment tax bill is £10,000",
           shouldBackLinkBePresent = true,
-          expectedSubmitUrl       = Some(routes.YourBillController.yourBillSubmit.url),
-          regimeBeingTested       = Some(TaxRegime.Sa)
+          expectedSubmitUrl = Some(routes.YourBillController.yourBillSubmit.url),
+          regimeBeingTested = Some(TaxRegime.Sa)
         )
 
         val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
         tableRows.size shouldBe 1
 
-        tableRows(0).select(".govuk-summary-list__key").text() shouldBe s"Due 15 June 2020 ${chargeFromMTrans(MainTrans(code)).english} for tax year 2020 to 2021"
+        tableRows(0)
+          .select(".govuk-summary-list__key")
+          .text() shouldBe s"Due 15 June 2020 ${chargeFromMTrans(MainTrans(code)).english} for tax year 2020 to 2021"
         tableRows(0).select(".govuk-summary-list__value").text() shouldBe "£10,000 (includes interest added to date)"
       }
     }
 
     "return sa generic ineligible page" - {
       "for unknown MainTrans code" in {
-        val origin = Origins.Sa.Bta
+        val origin      = Origins.Sa.Bta
         val journeyJson = eligibleJsonWithChargeTypeAssessmentItems(
           chargeTypeAssessmentItemJson(
-            taxPeriodFrom           = LocalDate.of(2020, 4, 4),
-            taxPeriodTo             = LocalDate.of(2021, 4, 4),
+            taxPeriodFrom = LocalDate.of(2020, 4, 4),
+            taxPeriodTo = LocalDate.of(2021, 4, 4),
             isInterestBearingCharge = true,
-            dueDate                 = LocalDate.of(2020, 6, 15),
-            mainTrans               = MainTrans("mainTransNotInTable")
+            dueDate = LocalDate.of(2020, 6, 15),
+            mainTrans = MainTrans("mainTransNotInTable")
           )
         )(origin)
 
@@ -217,15 +264,15 @@ class YourBillControllerSpec extends ItSpec {
       }
 
       "for ChargeTypeAssessment containing charges with different MainTrans" in {
-        val origin = Origins.Sa.Bta
+        val origin      = Origins.Sa.Bta
         val journeyJson = eligibleJsonWithChargeTypeAssessmentItems(
           chargeTypeAssessmentWithMultipleChargesItemJson(
-            taxPeriodFrom           = LocalDate.of(2020, 4, 4),
-            taxPeriodTo             = LocalDate.of(2021, 4, 4),
+            taxPeriodFrom = LocalDate.of(2020, 4, 4),
+            taxPeriodTo = LocalDate.of(2021, 4, 4),
             isInterestBearingCharge = true,
-            dueDate                 = LocalDate.of(2020, 6, 15),
-            mainTrans1              = MainTrans("4910"),
-            mainTrans2              = MainTrans("4920")
+            dueDate = LocalDate.of(2020, 6, 15),
+            mainTrans1 = MainTrans("4910"),
+            mainTrans2 = MainTrans("4920")
           )
         )(origin)
 
@@ -247,21 +294,22 @@ class YourBillControllerSpec extends ItSpec {
       EssttpBackend.WhyCannotPayInFull.stubUpdateWhyCannotPayInFull(
         TdAll.journeyId,
         WhyCannotPayInFullAnswers.AnswerNotRequired,
-        JourneyJsonTemplates.`Why Cannot Pay in Full - Not Required`(Origins.Vat.Bta)(testCrypto)
+        JourneyJsonTemplates.`Why Cannot Pay in Full - Not Required`(Origins.Vat.Bta)(using testCrypto)
       )
 
       val result = controller.yourBillSubmit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.canYouMakeAnUpfrontPaymentUrl)
 
-      EssttpBackend.WhyCannotPayInFull.verifyUpdateWhyCannotPayInFullRequest(TdAll.journeyId, WhyCannotPayInFullAnswers.AnswerNotRequired)
+      EssttpBackend.WhyCannotPayInFull
+        .verifyUpdateWhyCannotPayInFullRequest(TdAll.journeyId, WhyCannotPayInFullAnswers.AnswerNotRequired)
     }
 
     "redirect to the 'why can't you pay in full' page when affordability is enabled in the journey" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Vat.Bta)(
         TdJsonBodies.createJourneyJson(
-          stageInfo   = StageInfo.eligibilityCheckedEligible,
+          stageInfo = StageInfo.eligibilityCheckedEligible,
           journeyInfo = JourneyInfo.eligibilityCheckedEligible(TaxRegime.Vat, testCrypto),
           Origins.Vat.Bta,
           affordabilityEnabled = true
@@ -288,43 +336,43 @@ class YourBillControllerSpec extends ItSpec {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourneyWithDdInProgress(testCrypto, Origins.Epaye.Bta)()
 
-      val result = controller.youAlreadyHaveDirectDebit(fakeRequest)
+      val result              = controller.youAlreadyHaveDirectDebit(fakeRequest)
       val pageContent: String = contentAsString(result)
-      val doc: Document = Jsoup.parse(pageContent)
+      val doc: Document       = Jsoup.parse(pageContent)
 
       RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1              = "You already have a Direct Debit",
+        expectedH1 = "You already have a Direct Debit",
         shouldBackLinkBePresent = true,
-        expectedSubmitUrl       = Some(routes.YourBillController.youAlreadyHaveDirectDebitSubmit.url)
+        expectedSubmitUrl = Some(routes.YourBillController.youAlreadyHaveDirectDebitSubmit.url)
       )
 
       ContentAssertions.assertListOfContent(
         elements = doc.select(".govuk-body")
       )(
-          expectedContent = List(
-            "You already have a Direct Debit set up for Employers’ PAYE.",
-            "If you set up a payment plan, the following charges could be collected twice.",
-            "If you select ‘continue’ you understand that you may be charged twice if you do not contact your bank."
-          )
+        expectedContent = List(
+          "You already have a Direct Debit set up for Employers’ PAYE.",
+          "If you set up a payment plan, the following charges could be collected twice.",
+          "If you select ‘continue’ you understand that you may be charged twice if you do not contact your bank."
         )
+      )
 
       ContentAssertions.assertListOfContent(
         elements = doc.select(".govuk-warning-text__text")
       )(
-          expectedContent = List(
-            "Warning Contact your bank to discuss your payment options before setting up a payment plan."
-          )
+        expectedContent = List(
+          "Warning Contact your bank to discuss your payment options before setting up a payment plan."
         )
+      )
 
       ContentAssertions.assertListOfContent(
         elements = doc.select("#link")
       )(
-          expectedContent = List(
-            "I do not want to set up a payment plan"
-          )
+        expectedContent = List(
+          "I do not want to set up a payment plan"
         )
+      )
 
       val backLink = doc.select("#kickout")
       backLink.attr("href") shouldBe routes.IneligibleController.epayeYouHaveChosenNotToSetUpPage.url
@@ -332,7 +380,9 @@ class YourBillControllerSpec extends ItSpec {
       val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
       tableRows.size shouldBe 2
 
-      tableRows(0).select(".govuk-summary-list__key").text() shouldBe "13 Jul 2020 to 14 Jul 2020 Bill due 7 February 2017"
+      tableRows(0)
+        .select(".govuk-summary-list__key")
+        .text() shouldBe "13 Jul 2020 to 14 Jul 2020 Bill due 7 February 2017"
       tableRows(0).select(".govuk-summary-list__value").text() shouldBe "£2,000 (includes interest added to date)"
 
       tableRows(1).select(".govuk-summary-list__key").text() shouldBe "13 Aug 2020 to 14 Aug 2020 Bill due 7 March 2017"
@@ -343,53 +393,61 @@ class YourBillControllerSpec extends ItSpec {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourneyWithDdInProgress(testCrypto, Origins.Epaye.Bta)()
 
-      val result = controller.youAlreadyHaveDirectDebit(fakeRequest.withLangWelsh())
+      val result              = controller.youAlreadyHaveDirectDebit(fakeRequest.withLangWelsh())
       val pageContent: String = contentAsString(result)
-      val doc: Document = Jsoup.parse(pageContent)
+      val doc: Document       = Jsoup.parse(pageContent)
 
       RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1              = "Mae eisoes gennych drefniant Debyd Uniongyrchol",
+        expectedH1 = "Mae eisoes gennych drefniant Debyd Uniongyrchol",
         shouldBackLinkBePresent = true,
-        expectedSubmitUrl       = Some(routes.YourBillController.youAlreadyHaveDirectDebitSubmit.url),
-        language                = Languages.Welsh
+        expectedSubmitUrl = Some(routes.YourBillController.youAlreadyHaveDirectDebitSubmit.url),
+        language = Languages.Welsh
       )
 
       ContentAssertions.assertListOfContent(
         elements = doc.select(".govuk-body")
       )(
-          expectedContent = List(
-            "Mae eisoes gennych drefniant Debyd Uniongyrchol er mwyn talu TWE y Cyflogwr.",
-            "Os ydych yn trefnu cynllun talu, mae’n bosibl y gall y taliadau hyn gael eu casglu ddwywaith.",
-            "Os dewiswch yr opsiwn i fynd yn eich blaen cyn cysylltu â’ch banc, rydych yn deall ei bod yn bosibl y gall taliadau gael eu casglu ddwywaith."
-          )
+        expectedContent = List(
+          "Mae eisoes gennych drefniant Debyd Uniongyrchol er mwyn talu TWE y Cyflogwr.",
+          "Os ydych yn trefnu cynllun talu, mae’n bosibl y gall y taliadau hyn gael eu casglu ddwywaith.",
+          "Os dewiswch yr opsiwn i fynd yn eich blaen cyn cysylltu â’ch banc, rydych yn deall ei bod yn bosibl y gall taliadau gael eu casglu ddwywaith."
         )
+      )
 
       ContentAssertions.assertListOfContent(
         elements = doc.select(".govuk-warning-text__text")
       )(
-          expectedContent = List(
-            "Rhybudd Dylech gysylltu â’ch banc i drafod eich opsiynau talu cyn i chi drefnu cynllun talu."
-          )
+        expectedContent = List(
+          "Rhybudd Dylech gysylltu â’ch banc i drafod eich opsiynau talu cyn i chi drefnu cynllun talu."
         )
+      )
 
       ContentAssertions.assertListOfContent(
         elements = doc.select("#link")
       )(
-          expectedContent = List(
-            "Nid wyf am drefnu cynllun talu"
-          )
+        expectedContent = List(
+          "Nid wyf am drefnu cynllun talu"
         )
+      )
 
       val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
       tableRows.size shouldBe 2
 
-      tableRows(0).select(".govuk-summary-list__key").text() shouldBe "13 Gorff 2020 i 14 Gorff 2020 Bil yn ddyledus 7 Chwefror 2017"
-      tableRows(0).select(".govuk-summary-list__value").text() shouldBe "£2,000 (yn cynnwys llog a ychwanegwyd hyd yn hyn)"
+      tableRows(0)
+        .select(".govuk-summary-list__key")
+        .text() shouldBe "13 Gorff 2020 i 14 Gorff 2020 Bil yn ddyledus 7 Chwefror 2017"
+      tableRows(0)
+        .select(".govuk-summary-list__value")
+        .text() shouldBe "£2,000 (yn cynnwys llog a ychwanegwyd hyd yn hyn)"
 
-      tableRows(1).select(".govuk-summary-list__key").text() shouldBe "13 Awst 2020 i 14 Awst 2020 Bil yn ddyledus 7 Mawrth 2017"
-      tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£1,000 (yn cynnwys llog a ychwanegwyd hyd yn hyn)"
+      tableRows(1)
+        .select(".govuk-summary-list__key")
+        .text() shouldBe "13 Awst 2020 i 14 Awst 2020 Bil yn ddyledus 7 Mawrth 2017"
+      tableRows(1)
+        .select(".govuk-summary-list__value")
+        .text() shouldBe "£1,000 (yn cynnwys llog a ychwanegwyd hyd yn hyn)"
     }
   }
 
@@ -401,7 +459,7 @@ class YourBillControllerSpec extends ItSpec {
       EssttpBackend.WhyCannotPayInFull.stubUpdateWhyCannotPayInFull(
         TdAll.journeyId,
         WhyCannotPayInFullAnswers.AnswerNotRequired,
-        JourneyJsonTemplates.`Why Cannot Pay in Full - Not Required`(Origins.Vat.Bta)(testCrypto)
+        JourneyJsonTemplates.`Why Cannot Pay in Full - Not Required`(Origins.Vat.Bta)(using testCrypto)
       )
 
       val result = controller.youAlreadyHaveDirectDebitSubmit(fakeRequest)
@@ -412,8 +470,9 @@ class YourBillControllerSpec extends ItSpec {
 
       AuditConnectorStub.verifyEventAudited(
         "DirectDebitInProgress",
-        Json.parse(
-          s"""
+        Json
+          .parse(
+            s"""
              |{
              |  "origin": "Bta",
              |  "taxType": "Vat",
@@ -422,20 +481,23 @@ class YourBillControllerSpec extends ItSpec {
              |  "authProviderId": "GGCredId(authId-999)",
              |  "continueOrExit": "continue"
              |}
-             |""".
-            stripMargin
-        ).as[JsObject]
+             |""".stripMargin
+          )
+          .as[JsObject]
       )
-      EssttpBackend.WhyCannotPayInFull.verifyUpdateWhyCannotPayInFullRequest(TdAll.journeyId, WhyCannotPayInFullAnswers.AnswerNotRequired)
+      EssttpBackend.WhyCannotPayInFull
+        .verifyUpdateWhyCannotPayInFullRequest(TdAll.journeyId, WhyCannotPayInFullAnswers.AnswerNotRequired)
     }
   }
 
   def eligibleJsonWithChargeTypeAssessmentItems(chargeTypeAssessmentItemJsons: String*)(origin: Origin): String = {
-    val json = Json.parse(JourneyJsonTemplates.`Eligibility Checked - Eligible`(origin)(testCrypto)).as[JsObject]
+    val json = Json.parse(JourneyJsonTemplates.`Eligibility Checked - Eligible`(origin)(using testCrypto)).as[JsObject]
 
-    json.deepMerge(
-      Json.parse(
-        s"""{
+    json
+      .deepMerge(
+        Json
+          .parse(
+            s"""{
            |  "EligibilityChecked": {
            |    "eligibilityCheckResult": {
            |      "chargeTypeAssessment": [ ${chargeTypeAssessmentItemJsons.mkString(", ")} ]
@@ -443,16 +505,18 @@ class YourBillControllerSpec extends ItSpec {
            |  }
            |}
            |""".stripMargin
-      ).as[JsObject]
-    ).toString
+          )
+          .as[JsObject]
+      )
+      .toString
   }
 
   def chargeTypeAssessmentItemJson(
-      taxPeriodFrom:           LocalDate,
-      taxPeriodTo:             LocalDate,
-      isInterestBearingCharge: Boolean,
-      dueDate:                 LocalDate,
-      mainTrans:               MainTrans
+    taxPeriodFrom:           LocalDate,
+    taxPeriodTo:             LocalDate,
+    isInterestBearingCharge: Boolean,
+    dueDate:                 LocalDate,
+    mainTrans:               MainTrans
   ): String =
     s"""{
        |  "taxPeriodFrom" : "${DateTimeFormatter.ISO_DATE.format(taxPeriodFrom)}",
@@ -487,12 +551,12 @@ class YourBillControllerSpec extends ItSpec {
        |""".stripMargin
 
   def chargeTypeAssessmentWithMultipleChargesItemJson(
-      taxPeriodFrom:           LocalDate,
-      taxPeriodTo:             LocalDate,
-      isInterestBearingCharge: Boolean,
-      dueDate:                 LocalDate,
-      mainTrans1:              MainTrans,
-      mainTrans2:              MainTrans
+    taxPeriodFrom:           LocalDate,
+    taxPeriodTo:             LocalDate,
+    isInterestBearingCharge: Boolean,
+    dueDate:                 LocalDate,
+    mainTrans1:              MainTrans,
+    mainTrans2:              MainTrans
   ): String =
     s"""{
          |  "taxPeriodFrom" : "${DateTimeFormatter.ISO_DATE.format(taxPeriodFrom)}",
@@ -549,4 +613,3 @@ class YourBillControllerSpec extends ItSpec {
          |""".stripMargin
 
 }
-

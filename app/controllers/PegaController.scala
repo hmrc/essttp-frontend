@@ -34,43 +34,46 @@ import scala.concurrent.ExecutionContext
 
 @Singleton
 class PegaController @Inject() (
-    as:                 Actions,
-    mcc:                MessagesControllerComponents,
-    pegaService:        PegaService,
-    requestSupport:     RequestSupport,
-    languageController: LanguageController,
-    auditService:       AuditService
-)(implicit ex: ExecutionContext, appConfig: AppConfig) extends FrontendController(mcc) {
+  as:                 Actions,
+  mcc:                MessagesControllerComponents,
+  pegaService:        PegaService,
+  requestSupport:     RequestSupport,
+  languageController: LanguageController,
+  auditService:       AuditService
+)(using ex: ExecutionContext, appConfig: AppConfig)
+    extends FrontendController(mcc) {
 
-  val startPegaJourney: Action[AnyContent] = as.authenticatedJourneyAction.async{ implicit request =>
+  val startPegaJourney: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     pegaService.startCase(request.journey, recalculationNeeded = true).map {
       case (updatedJourney: Journey, startCaseResponse: StartCaseResponse) =>
         auditService.auditCanUserPayInSixMonths(
           updatedJourney,
-          canPay                 = CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths(value = false),
+          canPay = CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths(value = false),
           maybeStartCaseResponse = Some(startCaseResponse)
         )
         SeeOther(appConfig.pegaStartRedirectUrl(request.journey.taxRegime, requestSupport.languageFromRequest))
     }
   }
 
-  def callback(regime: TaxRegime, lang: Option[Language]): Action[AnyContent] = as.continueToSameEndpointAuthenticatedJourneyAction.async{ implicit request =>
-    lang match {
-      case None => pegaService.getCase(request.journey).map { _ =>
-        Routing.redirectToNext(
-          routes.PegaController.callback(regime, None),
-          request.journey,
-          submittedValueUnchanged = true
-        )
-      }
-      case Some(language) =>
-        languageController.switchToLanguage(language.code)(
-          request.withHeaders(
-            request.headers
-              .remove(HeaderNames.REFERER)
-              .add(HeaderNames.REFERER -> routes.PegaController.callback(regime, None).url)
+  def callback(regime: TaxRegime, lang: Option[Language]): Action[AnyContent] =
+    as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
+      lang match {
+        case None           =>
+          pegaService.getCase(request.journey).map { _ =>
+            Routing.redirectToNext(
+              routes.PegaController.callback(regime, None),
+              request.journey,
+              submittedValueUnchanged = true
+            )
+          }
+        case Some(language) =>
+          languageController.switchToLanguage(language.code)(
+            request.withHeaders(
+              request.headers
+                .remove(HeaderNames.REFERER)
+                .add(HeaderNames.REFERER -> routes.PegaController.callback(regime, None).url)
+            )
           )
-        )
+      }
     }
-  }
 }
