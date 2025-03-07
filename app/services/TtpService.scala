@@ -207,10 +207,10 @@ class TtpService @Inject() (
         instalments          = selectedPaymentPlan.instalments,
         debtItemCharges      = debtItemCharges
       ),
-      customerDetails             = customerDetail,
+      customerDetails             = Some(customerDetail),
       individualDetails           = individualDetails,
-      addresses                   = addresses,
-      regimeDigitalCorrespondence = regimeDigitalCorrespondence
+      addresses                   = Some(addresses),
+      regimeDigitalCorrespondence = Some(regimeDigitalCorrespondence)
     )
 
     ttpConnector.callArrangementApi(arrangementRequest, correlationId)
@@ -300,7 +300,7 @@ object TtpService {
       initialPaymentAmount         = upfrontPaymentAmount.map(_.value),
       accruedDebtInterest          = AccruedDebtInterest(allInterestAccrued),
       debtItemCharges              = debtChargeItemsFromEligibilityCheck,
-      customerPostcodes            = eligibilityCheckResult.customerPostcodes
+      customerPostcodes            = Some(eligibilityCheckResult.customerPostcodes)
     )
   }
 
@@ -335,7 +335,7 @@ object TtpService {
    * If email matches the one from the eligibility API - ETMP
    * If new email entered on the screen which doesn't match the ETMP one - TEMP
    */
-  private def deriveCustomerDetail(journey: Journey.Stages.EmailVerificationComplete): Option[List[CustomerDetail]] = {
+  private def deriveCustomerDetail(journey: Journey.Stages.EmailVerificationComplete): List[CustomerDetail] = {
     val emailThatsBeenVerified: Email = journey.emailToBeVerified
     val customerDetail = journey.eligibilityCheckResult.email match {
       case None =>
@@ -349,7 +349,7 @@ object TtpService {
         }
     }
 
-    Some(List(customerDetail))
+    List(customerDetail)
   }
 
   private def upfrontPaymentAnswersFromJourney(journey: Journey): UpfrontPaymentAnswers = journey match {

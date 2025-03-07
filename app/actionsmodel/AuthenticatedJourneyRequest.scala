@@ -85,7 +85,7 @@ object EligibleJourneyRequest {
   implicit class EligibleJourneyRequestOps[A](private val e: EligibleJourneyRequest[A]) extends AnyVal {
 
     def isEmailAddressRequired(appConfig: AppConfig): Boolean =
-      appConfig.emailJourneyEnabled && e.eligibilityCheckResult.regimeDigitalCorrespondence.exists(_.value)
+      appConfig.emailJourneyEnabled && e.eligibilityCheckResult.regimeDigitalCorrespondence.value
 
   }
 

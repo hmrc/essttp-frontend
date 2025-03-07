@@ -230,10 +230,13 @@ class EmailController @Inject() (
 
   val tooManyPasscodeAttempts: Action[AnyContent] = withEmailEnabled {
     as.eligibleJourneyAction { implicit request =>
-      val emailEntryEndpoint = request.eligibilityCheckResult.email.fold(
+      val maybeEmail: Option[Email] = request.eligibilityCheckResult.email
+
+      val emailEntryEndpoint: Call = maybeEmail.fold(
         routes.EmailController.enterEmail
-      )(_ =>
-          routes.EmailController.whichEmailDoYouWantToUse)
+      ) { _ =>
+          routes.EmailController.whichEmailDoYouWantToUse
+        }
 
       Ok(views.tooManyPasscodes(emailEntryEndpoint))
     }

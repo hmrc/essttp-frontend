@@ -240,12 +240,13 @@ object JourneyJsonTemplates {
   )
 
   def `Retrieved Extreme Dates Response`(origin: Origin, affordabilityEnabled: Boolean = false,
-                                         whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(Set(CannotPayReason.WaitingForRefund, CannotPayReason.NoMoneySetAside)))(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
-    stageInfo            = StageInfo.retrievedExtremeDates,
-    journeyInfo          = JourneyInfo.retrievedExtremeDates(origin.taxRegime, encrypter, whyCannotPayInFullAnswers = whyCannotPayInFullAnswers),
-    origin               = origin,
-    affordabilityEnabled = affordabilityEnabled
-  )
+                                         whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(Set(CannotPayReason.WaitingForRefund, CannotPayReason.NoMoneySetAside)))(implicit encrypter: Encrypter): String =
+    TdJsonBodies.createJourneyJson(
+      stageInfo            = StageInfo.retrievedExtremeDates,
+      journeyInfo          = JourneyInfo.retrievedExtremeDates(origin.taxRegime, encrypter, whyCannotPayInFullAnswers = whyCannotPayInFullAnswers),
+      origin               = origin,
+      affordabilityEnabled = affordabilityEnabled
+    )
 
   def `Retrieved Affordability`(origin: Origin, minimumInstalmentAmount: Int = 29997, affordabilityEnabled: Boolean = false)(implicit encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo            = StageInfo.retrievedAffordabilityResult,

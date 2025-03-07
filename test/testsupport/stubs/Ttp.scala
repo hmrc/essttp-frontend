@@ -25,7 +25,7 @@ import essttp.rootmodel.pega.PegaCaseId
 import essttp.rootmodel.ttp.affordability.InstalmentAmountRequest
 import essttp.rootmodel.ttp.affordablequotes.AffordableQuotesRequest
 import essttp.rootmodel.ttp.arrangement.ArrangementRequest
-import essttp.rootmodel.ttp.eligibility.{CustomerDetail, RegimeDigitalCorrespondence}
+import essttp.rootmodel.ttp.eligibility.{ContactDetail, CustomerDetail, RegimeDigitalCorrespondence}
 import models.EligibilityReqIdentificationFlag
 import play.api.http.Status
 import play.api.libs.json.Format
@@ -43,7 +43,7 @@ object Ttp {
     WireMockHelpers.verifyWithBodyParse(url, ttpCorrelationIdHeader, expectedPayload)
 
   object Eligibility {
-    def stubRetrieveEligibility(taxRegime: TaxRegime)(jsonBody: String = TtpJsonResponses.ttpEligibilityCallJson(taxRegime)): StubMapping =
+    def stubRetrieveEligibility(taxRegime: TaxRegime)(jsonBody: String = TtpJsonResponses.ttpEligibilityCallJson(taxRegime, regimeDigitalCorrespondence = true)): StubMapping =
       WireMockHelpers.stubForPostWithResponseBody(eligibilityUrl, jsonBody)
 
     def stubServiceUnavailableRetrieveEligibility(): StubMapping =
@@ -93,6 +93,7 @@ object Ttp {
 
     def verifyTtpEnactArrangementRequest(
         customerDetails:             Option[List[CustomerDetail]],
+        contactDetails:              Option[ContactDetail],
         regimeDigitalCorrespondence: Option[RegimeDigitalCorrespondence],
         taxRegime:                   TaxRegime,
         accountNumber:               String                              = "12345678",
@@ -101,7 +102,7 @@ object Ttp {
     )(implicit cryptoFormat: CryptoFormat): Unit =
       ttpVerify(
         enactArrangementUrl,
-        TdAll.arrangementRequest(customerDetails, regimeDigitalCorrespondence, taxRegime, accountNumber, hasAffordability, caseId)
+        TdAll.arrangementRequest(customerDetails, contactDetails, regimeDigitalCorrespondence, taxRegime, accountNumber, hasAffordability, caseId)
       )(ArrangementRequest.format)
   }
 
