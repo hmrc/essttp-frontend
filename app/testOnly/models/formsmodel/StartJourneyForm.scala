@@ -54,7 +54,6 @@ final case class StartJourneyForm(
     planMaxLength:                 Int,
     mainTrans:                     String,
     subTrans:                      String,
-    newTtpApi:                     Boolean,
     confidenceLevelAndNino:        ConfidenceLevelAndNino,
     credId:                        Option[String]
 )
@@ -86,7 +85,6 @@ object StartJourneyForm {
         "planMaxLength" -> number,
         "mainTrans" -> textWithFourDigitsMapping("mainTrans"),
         "subTrans" -> textWithFourDigitsMapping("subTrans"),
-        "newTtpApi" -> optionalBooleanMappingDefaultTrue,
         "" -> Forms.of(confidenceLevelAndNinoFormatter),
         "credId" -> optional(text).transform[Option[String]](_.filter(_.nonEmpty), identity)
       )(StartJourneyForm.apply)(StartJourneyForm.unapply)

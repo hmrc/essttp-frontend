@@ -20,7 +20,6 @@ import _root_.essttp.rootmodel.ttp._
 import _root_.testOnly.controllers.{routes => testOnlyRoutes}
 import _root_.testOnly.views.html._
 import actions.Actions
-import cats.implicits.catsSyntaxEq
 import config.AppConfig
 import essttp.journey.JourneyConnector
 import essttp.journey.model.{Origins, SjRequest}
@@ -359,49 +358,40 @@ object StartJourneyController {
     val debtAmountFromForm: AmountInPence = AmountInPence(form.debtTotalAmount)
     val interestAmount: AmountInPence = AmountInPence(form.interestAmount.getOrElse(BigDecimal(0)))
 
-    val maybeCustomerDetail = {
-      val showValue = taxRegime match {
-        case TaxRegime.Sa => form.emailAddressPresent && !form.newTtpApi
-        case _            => form.emailAddressPresent
-      }
-
-      if (showValue)
-        Some(List(CustomerDetail(
+    val customerDetail =
+      if (form.emailAddressPresent)
+        List(CustomerDetail(
           Some(Email(SensitiveString("bobross@joyofpainting.com"))),
           Some(EmailSource.ETMP)
-        )))
-      else None
-    }
+        ))
+      else List(CustomerDetail(None, None))
 
-    //TODO OPS-12584 - Clean this up when TTP has implemented the changes to the Eligibility API. The email address will be coming from the addresses field only
-    val maybeAddresses = if (form.newTtpApi) {
-      val contactDetail = ContactDetail(
-        Some(TelNumber("12345678910")),
-        None,
-        None,
-        if (form.emailAddressPresent) Some(Email(SensitiveString("jamienorth@email.com"))) else None,
-        Some(EmailSource.ETMP),
-        Some(AltLetterFormat(1))
-      )
+    val contactDetail = ContactDetail(
+      Some(TelNumber("12345678910")),
+      None,
+      None,
+      if (form.emailAddressPresent) Some(Email(SensitiveString("jamienorth@email.com"))) else None,
+      Some(EmailSource.ETMP),
+      Some(AltLetterFormat(1))
+    )
 
-      Some(List(Address(
-        Some(AddressType("Residential")),
-        Some(AddressLine("His Castle")),
-        Some(AddressLine("Left wing")),
-        Some(AddressLine("Top floor")),
-        Some(AddressLine("Attic")),
-        Some(IsReturnedLetterService(value = false)),
-        Some(contactDetail),
-        Some(Postcode(SensitiveString("NO1HERE"))),
-        Some(Country("UK")),
-        Some(List(PostcodeHistory(
-          Some(Postcode(SensitiveString("NO2HERE"))),
-          Some(PostcodeDate(LocalDate.of(2500, 1, 1)))
-        )))
-      )))
-    } else None
+    val addresses = List(Address(
+      AddressType("Residential"),
+      Some(AddressLine("His Castle")),
+      Some(AddressLine("Left wing")),
+      Some(AddressLine("Top floor")),
+      Some(AddressLine("Attic")),
+      Some(IsReturnedLetterService(value = false)),
+      Some(contactDetail),
+      Some(Postcode(SensitiveString("NO1HERE"))),
+      Some(Country("UK")),
+      List(PostcodeHistory(
+        Postcode(SensitiveString("NO2HERE")),
+        PostcodeDate(LocalDate.of(2500, 1, 1))
+      ))
+    ))
 
-    val individualDetails = if (form.newTtpApi)
+    val individualDetails =
       Some(IndividualDetails(
         Some(Title("Lord")),
         Some(FirstName("Jamie")),
@@ -411,13 +401,6 @@ object StartJourneyController {
         Some(CustomerTypes.MTDITSA),
         form.transitionToCDCS.map(TransitionToCDCS(_))
       ))
-    else None
-
-    val customerType = if (form.newTtpApi) None else Some(CustomerTypes.MTDITSA)
-
-    val transitionToCDCS = if (form.newTtpApi) None else form.transitionToCDCS.map(TransitionToCDCS(_))
-
-    val maybeRegimeDigitalCorrespondence = Some(RegimeDigitalCorrespondence(form.regimeDigitalCorrespondence))
 
     val charges: Charges = Charges(
       Charges1(
@@ -502,16 +485,11 @@ object StartJourneyController {
       )
     }
 
-    val postcode: Option[List[CustomerPostcode]] =
-      if (form.taxReference.value === "1010101010") None // this is just a UTR chosen to result in None to test optional customerPostcodes
-      else Some(List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate(LocalDate.of(2022, 1, 1)))))
-
     EligibilityCheckResult(
       processingDateTime              = ProcessingDateTime(LocalDate.now().toString),
       identification                  = makeIdentificationForTaxType(taxRegime, form),
       invalidSignals                  = Some(List(InvalidSignals(signalType        = "xyz", signalValue = "123", signalDescription = "Description"))),
-      customerPostcodes               = postcode,
-      customerType                    = customerType,
+      customerPostcodes               = List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate(LocalDate.of(2022, 1, 1)))),
       regimePaymentFrequency          = PaymentPlanFrequencies.Monthly,
       paymentPlanFrequency            = PaymentPlanFrequencies.Monthly,
       paymentPlanMinLength            = PaymentPlanMinLength(form.planMinLength),
@@ -519,13 +497,12 @@ object StartJourneyController {
       eligibilityStatus               = EligibilityStatus(EligibilityPass(eligibilityRules.isEligible)),
       eligibilityRules                = eligibilityRules,
       chargeTypeAssessment            = chargeTypeAssessments,
-      customerDetails                 = maybeCustomerDetail,
+      customerDetails                 = customerDetail,
       individualDetails               = individualDetails,
-      addresses                       = maybeAddresses,
-      regimeDigitalCorrespondence     = maybeRegimeDigitalCorrespondence,
+      addresses                       = addresses,
+      regimeDigitalCorrespondence     = RegimeDigitalCorrespondence(form.regimeDigitalCorrespondence),
       futureChargeLiabilitiesExcluded = false,
-      chargeTypesExcluded             = None,
-      transitionToCDCS                = transitionToCDCS
+      chargeTypesExcluded             = None
     )
   }
 

@@ -19,14 +19,16 @@ package testsupport.testdata
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.ttp.eligibility.{EligibilityPass, EligibilityRules}
 
+import java.time.LocalDate
+
 object TtpJsonResponses {
 
   def ttpEligibilityCallJson(
       taxRegime:                          TaxRegime,
       eligibilityPass:                    EligibilityPass  = TdAll.eligibleEligibilityPass,
       eligibilityRules:                   EligibilityRules = TdAll.eligibleEligibilityRules,
+      regimeDigitalCorrespondence:        Boolean,
       poundsInsteadOfPence:               Boolean          = false,
-      regimeDigitalCorrespondence:        Boolean          = false,
       maybeChargeIsInterestBearingCharge: Option[Boolean]  = None,
       maybeChargeUseChargeReference:      Option[Boolean]  = None,
       maybeChargeBeforeMaxAccountingDate: Option[Boolean]  = None
@@ -57,6 +59,15 @@ object TtpJsonResponses {
        |          "postcodeDate": "2022-01-31"
        |        }
        |  ],
+       |  "customerDetails": [{}],
+       |  "addresses": [{
+       |      "addressType" : "Residential",
+       |      "contactDetails": { "emailAddress": "some@email" },
+       |      "postcodeHistory" : [ {
+       |         "addressPostcode" : "AA11AA",
+       |          "postcodeDate" : "${LocalDate.now.toString}"
+       |         } ]
+       |   }],
        |  "regimePaymentFrequency": "Monthly",
        |  "paymentPlanFrequency": "Monthly",
        |  "paymentPlanMinLength": 1,
@@ -115,7 +126,7 @@ object TtpJsonResponses {
        |       } ]
        |    } ]
        |  } ],
-       |  ${if (regimeDigitalCorrespondence) { s""""regimeDigitalCorrespondence":true,""" } else ""}
+       |  "regimeDigitalCorrespondence": ${regimeDigitalCorrespondence.toString},
        |  "futureChargeLiabilitiesExcluded": false
        |}
        |""".stripMargin

@@ -101,11 +101,6 @@ class PaymentPlanSetUpController @Inject() (
       case UpfrontPaymentAnswers.NoUpfrontPayment          => false
     }
 
-    val correspondence: Boolean = request.eligibilityCheckResult.regimeDigitalCorrespondence match {
-      case Some(correspondence) => correspondence.value
-      case _                    => false
-    }
-
     journey.taxRegime match {
       //OPS-12246 sa page differs from the others due to these changes, split off into two
       case TaxRegime.Sa =>
@@ -115,7 +110,7 @@ class PaymentPlanSetUpController @Inject() (
             paymentDay                  = firstPaymentDay,
             hasUpfrontPayment           = hasUpfrontPayment,
             wasEmailAddressRequired     = request.isEmailAddressRequired(appConfig),
-            regimeDigitalCorrespondence = correspondence,
+            regimeDigitalCorrespondence = request.eligibilityCheckResult.regimeDigitalCorrespondence.value,
             wasAffordabilityJourney     = wasAffordabilityJourney(journey)
           )
         )

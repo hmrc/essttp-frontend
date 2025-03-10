@@ -463,36 +463,6 @@ appConfig: AppConfig
     ))
 }
 
-@newTtpApi = @{
-    govukRadios(Radios(
-        fieldset = Some(Fieldset(
-            legend = Some(Legend(
-                content = Text("New TTP API for Contact details and Addresses"),
-                classes = "govuk-fieldset__legend--m",
-                isPageHeading = false
-            ))
-        )),
-        idPrefix = Some("newTtpApi"),
-        name = "newTtpApi",
-        errorMessage = form.error("newTtpApi").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
-            content = Text(e.message)
-        )),
-        items = Seq(
-            RadioItem(
-                content = Text("Yes"),
-                value = Some("true"),
-                checked = form.data.get("newTtpApi").fold(true)(_ === "true")
-            ),
-            RadioItem(
-                content = Text("No"),
-                value = Some("false"),
-                checked = form.data.get("newTtpApi").fold(false)(_ === "false")
-            )
-        ),
-        classes = "govuk-radios--small govuk-radios--inline"
-    ))
-}
-
 @payeContent = {
 @formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneyEpayeSubmit) {
     @credIdInput
@@ -781,7 +751,7 @@ appConfig: AppConfig
         classes = "govuk-input--width-10",
         spellcheck = Some(false),
         value = form.data.get("saTaxReference"),
-        hint = Some(Hint(content = Text("SAUTR is 10 digits e.g. 1234567895. If left empty, it will be a random one. UTR 1010101010 will result in customerPostcodes return None.")))
+        hint = Some(Hint(content = Text("SAUTR is 10 digits e.g. 1234567895. If left empty, it will be a random one.")))
     ))
 
     @mainTransInput
@@ -791,8 +761,6 @@ appConfig: AppConfig
     @regimeDigitalCorrespondenceRadios
 
     @emailAddressPresentRadios
-
-    @newTtpApi
 
     @govukCheckboxes(Checkboxes(
         fieldset = Some(Fieldset(

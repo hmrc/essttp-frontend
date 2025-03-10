@@ -151,6 +151,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
 
                     Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(
                       TdAll.customerDetail(expectedEmail.getOrElse(TdAll.etmpEmail).toLowerCase(Locale.UK), expectedEmailSource.getOrElse(EmailSource.ETMP)),
+                      TdAll.contactDetails(TdAll.etmpEmail, EmailSource.ETMP),
                       TdAll.someRegimeDigitalCorrespondenceTrue,
                       taxRegime,
                       hasAffordability = affordabilityEnabled,
@@ -288,6 +289,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
 
       Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(
         Some(List.empty[CustomerDetail]),
+        None,
         TdAll.someRegimeDigitalCorrespondenceTrue,
         taxRegime,
         "00345678"
@@ -346,6 +348,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
       assertThrows[UpstreamErrorResponse](await(result))
       Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(
         TdAll.customerDetail(),
+        TdAll.contactDetails(),
         TdAll.someRegimeDigitalCorrespondenceTrue,
         TaxRegime.Epaye
       )(CryptoFormat.NoOpCryptoFormat)

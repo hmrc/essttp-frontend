@@ -34,7 +34,7 @@ final case class EligibilityCheckAuditDetail(
     chargeTypeAssessment:            List[ChargeTypeAssessment],
     correlationId:                   String,
     futureChargeLiabilitiesExcluded: Option[Boolean],
-    regimeDigitalCorrespondence:     Option[Boolean]
+    regimeDigitalCorrespondence:     Boolean
 ) extends AuditDetail {
   val auditType: String = "EligibilityCheck"
 }

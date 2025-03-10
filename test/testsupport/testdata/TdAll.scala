@@ -256,19 +256,18 @@ object TdAll {
       eligibilityPass:                     EligibilityPass,
       eligibilityRules:                    EligibilityRules,
       taxRegime:                           TaxRegime,
-      regimeDigitalCorrespondence:         Option[RegimeDigitalCorrespondence],
-      chargeIsInterestBearingCharge:       Option[Boolean]                     = None,
-      chargeUseChargeReference:            Option[Boolean]                     = None,
-      chargeChargeBeforeMaxAccountingDate: Option[Boolean]                     = None,
-      ddInProgress:                        Option[Boolean]                     = None
+      regimeDigitalCorrespondence:         RegimeDigitalCorrespondence,
+      chargeIsInterestBearingCharge:       Option[Boolean]             = None,
+      chargeUseChargeReference:            Option[Boolean]             = None,
+      chargeChargeBeforeMaxAccountingDate: Option[Boolean]             = None,
+      ddInProgress:                        Option[Boolean]             = None
   ): EligibilityCheckResult = {
 
     EligibilityCheckResult(
       processingDateTime              = ProcessingDateTime("2022-03-23T13:49:51.141Z"),
       identification                  = identification(taxRegime),
       invalidSignals                  = None,
-      customerPostcodes               = Some(List(CustomerPostcode(customerPostcode, PostcodeDate(LocalDate.of(2022, 1, 31))))),
-      customerType                    = None,
+      customerPostcodes               = List(CustomerPostcode(customerPostcode, PostcodeDate(LocalDate.of(2022, 1, 31)))),
       regimePaymentFrequency          = PaymentPlanFrequencies.Monthly,
       paymentPlanFrequency            = PaymentPlanFrequencies.Monthly,
       paymentPlanMinLength            = PaymentPlanMinLength(1),
@@ -314,13 +313,37 @@ object TdAll {
           )
         ))
       )),
-      customerDetails                 = None,
+      customerDetails                 = List(CustomerDetail(None, None)),
       individualDetails               = None,
-      addresses                       = None,
+      addresses                       = List(
+        Address(
+          addressType     = AddressType("Residential"),
+          addressLine1    = None,
+          addressLine2    = None,
+          addressLine3    = None,
+          addressLine4    = None,
+          rls             = None,
+          contactDetails  = Some(ContactDetail(
+            telephoneNumber = None,
+            fax             = None,
+            mobile          = None,
+            emailAddress    = Some(Email(SensitiveString("some@email"))),
+            emailSource     = None,
+            altFormat       = None
+          )),
+          postCode        = None,
+          country         = None,
+          postcodeHistory = List(
+            PostcodeHistory(
+              addressPostcode = Postcode(SensitiveString("AA11AA")),
+              postcodeDate    = PostcodeDate(LocalDate.now())
+            )
+          )
+        )
+      ),
       regimeDigitalCorrespondence     = regimeDigitalCorrespondence,
       futureChargeLiabilitiesExcluded = false,
-      chargeTypesExcluded             = None,
-      transitionToCDCS                = None
+      chargeTypesExcluded             = None
     )
   }
 
@@ -432,7 +455,7 @@ object TdAll {
           debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-02-07"))
         )
       ),
-      customerPostcodes           = Some(List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate(LocalDate.of(2022, 1, 31))))),
+      customerPostcodes           = List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate(LocalDate.of(2022, 1, 31)))),
       paymentPlanAffordableAmount = PaymentPlanAffordableAmount(AmountInPence(30000)),
       paymentPlanStartDate        = InstalmentStartDate(LocalDate.parse("2022-07-28"))
     )
@@ -487,6 +510,7 @@ object TdAll {
 
   def arrangementRequest(
       customerDetails:             Option[List[CustomerDetail]],
+      contactDetails:              Option[ContactDetail],
       regimeDigitalCorrespondence: Option[RegimeDigitalCorrespondence],
       taxRegime:                   TaxRegime,
       accountNumber:               String                              = "12345678",
@@ -592,13 +616,34 @@ object TdAll {
       ),
       customerDetails             = customerDetails,
       individualDetails           = None,
-      addresses                   = None,
+      addresses                   = Some(List(
+        Address(
+          addressType     = AddressType("Residential"),
+          addressLine1    = None,
+          addressLine2    = None,
+          addressLine3    = None,
+          addressLine4    = None,
+          rls             = None,
+          contactDetails  = contactDetails,
+          postCode        = None,
+          country         = None,
+          postcodeHistory = List(
+            PostcodeHistory(
+              addressPostcode = Postcode(SensitiveString("AA11AA")),
+              postcodeDate    = PostcodeDate(LocalDate.now())
+            )
+          )
+        )
+      )),
       regimeDigitalCorrespondence = regimeDigitalCorrespondence
     )
   }
 
   def customerDetail(email: String = "bobross@joyofpainting.com", source: EmailSource = EmailSource.ETMP): Option[List[CustomerDetail]] =
     Some(List(CustomerDetail(Some(Email(SensitiveString(email))), Some(source))))
+
+  def contactDetails(email: String = "bobross@joyofpainting.com", source: EmailSource = EmailSource.ETMP): Option[ContactDetail] =
+    Some(ContactDetail(None, None, None, Some(Email(SensitiveString(email))), Some(source), None))
 
   val someRegimeDigitalCorrespondenceFalse: Option[RegimeDigitalCorrespondence] = Some(RegimeDigitalCorrespondence(value = false))
   val someRegimeDigitalCorrespondenceTrue: Option[RegimeDigitalCorrespondence] = Some(RegimeDigitalCorrespondence(value = true))

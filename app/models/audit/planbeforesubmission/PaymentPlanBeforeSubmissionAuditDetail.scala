@@ -28,7 +28,7 @@ final case class PaymentPlanBeforeSubmissionAuditDetail(
     origin:                      String,
     taxType:                     String,
     taxDetail:                   TaxDetail,
-    regimeDigitalCorrespondence: Option[RegimeDigitalCorrespondence],
+    regimeDigitalCorrespondence: RegimeDigitalCorrespondence,
     canPayInSixMonths:           Option[Boolean],
     unableToPayReason:           Option[Set[CannotPayReason]]
 ) extends AuditDetail {

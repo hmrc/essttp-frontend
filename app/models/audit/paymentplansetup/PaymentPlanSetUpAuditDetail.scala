@@ -35,7 +35,7 @@ final case class PaymentPlanSetUpAuditDetail(
     correlationId:               CorrelationId,
     ppReferenceNo:               String,
     authProviderId:              String,
-    regimeDigitalCorrespondence: Option[RegimeDigitalCorrespondence],
+    regimeDigitalCorrespondence: RegimeDigitalCorrespondence,
     emailAddress:                Option[Email],
     emailSource:                 Option[EmailSource],
     canPayInSixMonths:           Option[Boolean],
