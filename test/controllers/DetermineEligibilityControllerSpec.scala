@@ -38,7 +38,8 @@ import uk.gov.hmrc.http.UpstreamErrorResponse
 import scala.jdk.CollectionConverters.IterableHasAsScala
 
 class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
-  given EligibilityReqIdentificationFlag                 = app.injector.instanceOf[AppConfig].eligibilityReqIdentificationFlag
+  given EligibilityReqIdentificationFlag = app.injector.instanceOf[AppConfig].eligibilityReqIdentificationFlag
+
   private val controller: DetermineEligibilityController = app.injector.instanceOf[DetermineEligibilityController]
 
   "Determine eligibility endpoint should route user correctly and send an audit event" - {
@@ -587,25 +588,31 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
           Origins.Sa.Bta
         )
       )
-    )) {
-      (sf: String, eligibilityRules: EligibilityRules, auditIneligibilityReason: String, expectedRedirect: String, updatedJourneyJson: String, origin: Origin) =>
-        {
-          s"Ineligible: [$sf] should redirect to $expectedRedirect" in {
-            val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
-              taxRegime                   = origin.taxRegime,
-              eligibilityPass             = TdAll.notEligibleEligibilityPass,
-              eligibilityRules            = eligibilityRules,
+    ) {
+      (
+        sf: String,
+        eligibilityRules: EligibilityRules,
+        auditIneligibilityReason: String,
+        expectedRedirect: String,
+        updatedJourneyJson: String,
+        origin: Origin
+      ) =>
+        s"Ineligible: [$sf] should redirect to $expectedRedirect" in {
+          val eligibilityCheckResponseJson         = TtpJsonResponses.ttpEligibilityCallJson(
+            taxRegime = origin.taxRegime,
+            eligibilityPass = TdAll.notEligibleEligibilityPass,
+            eligibilityRules = eligibilityRules,
+            regimeDigitalCorrespondence = true
+          )
+          // for audit event
+          val eligibilityCheckResponseJsonAsPounds =
+            TtpJsonResponses.ttpEligibilityCallJson(
+              taxRegime = origin.taxRegime,
+              eligibilityPass = TdAll.notEligibleEligibilityPass,
+              eligibilityRules = eligibilityRules,
+              poundsInsteadOfPence = true,
               regimeDigitalCorrespondence = true
             )
-            // for audit event
-            val eligibilityCheckResponseJsonAsPounds =
-              TtpJsonResponses.ttpEligibilityCallJson(
-                taxRegime                   = origin.taxRegime,
-                eligibilityPass             = TdAll.notEligibleEligibilityPass,
-                eligibilityRules            = eligibilityRules,
-                poundsInsteadOfPence        = true,
-                regimeDigitalCorrespondence = true,
-              )
 
           origin.taxRegime match {
             case Sa => stubCommonActions(authNino = Some("QQ123456A")) // NINO required for SA
@@ -622,10 +629,15 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
           redirectLocation(result) shouldBe Some(expectedRedirect)
           Ttp.Eligibility.verifyTtpEligibilityRequests(origin.taxRegime)
 
-            EssttpBackend.EligibilityCheck.verifyUpdateEligibilityRequest(
-              journeyId                      = TdAll.journeyId,
-              expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(TdAll.notEligibleEligibilityPass, eligibilityRules, origin.taxRegime, RegimeDigitalCorrespondence(value = true))
-            )(testOperationCryptoFormat)
+          EssttpBackend.EligibilityCheck.verifyUpdateEligibilityRequest(
+            journeyId = TdAll.journeyId,
+            expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(
+              TdAll.notEligibleEligibilityPass,
+              eligibilityRules,
+              origin.taxRegime,
+              RegimeDigitalCorrespondence(value = true)
+            )
+          )(using testOperationCryptoFormat)
 
           val (expectedTaxType, expectedTaxDetailsJson) =
             origin.taxRegime match {
@@ -633,9 +645,9 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
                 (
                   "Epaye",
                   """{
-                      |    "employerRef": "864FZ00049",
-                      |    "accountsOfficeRef": "123PA44545546"
-                      |  }""".stripMargin
+                    |    "employerRef": "864FZ00049",
+                    |    "accountsOfficeRef": "123PA44545546"
+                    |  }""".stripMargin
                 )
               case TaxRegime.Vat   =>
                 ("Vat", """{ "vrn": "101747001" }""")
@@ -652,22 +664,22 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
             Json
               .parse(
                 s"""
-                   |{
-                   |  "eligibilityResult" : "ineligible",
-                   |  "enrollmentReasons": "did not pass eligibility check",
-                   |  "noEligibilityReasons": 1,
-                   |  "eligibilityReasons" : [ "$auditIneligibilityReason" ],
-                   |  "origin": "${origin.toString().split('.').last}",
-                   |  "taxType": "$expectedTaxType",
-                   |  "taxDetail": $expectedTaxDetailsJson,
-                   |  "authProviderId": "authId-999",
-                   |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-                   |  "chargeTypeAssessment" :${(Json
+                 |{
+                 |  "eligibilityResult" : "ineligible",
+                 |  "enrollmentReasons": "did not pass eligibility check",
+                 |  "noEligibilityReasons": 1,
+                 |  "eligibilityReasons" : [ "$auditIneligibilityReason" ],
+                 |  "origin": "${origin.toString().split('.').last}",
+                 |  "taxType": "$expectedTaxType",
+                 |  "taxDetail": $expectedTaxDetailsJson,
+                 |  "authProviderId": "authId-999",
+                 |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+                 |  "chargeTypeAssessment" :${(Json
                     .parse(eligibilityCheckResponseJsonAsPounds)
                     .as[JsObject] \ "chargeTypeAssessment").get.toString},
-                   |  "futureChargeLiabilitiesExcluded": false
-                   |}
-                   |""".stripMargin
+                 |  "futureChargeLiabilitiesExcluded": false
+                 |}
+                 |""".stripMargin
               )
               .as[JsObject]
           )
@@ -675,19 +687,49 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
     }
 
     "Ineligible: NoDueDatesReached with isLessThanMinDebtAllowance also true should redirect correctly" - {
-      forAll(Table(
-        ("Scenario flavour", "eligibility rules", "expected redirect", "updated journey json", "origin"),
-        ("NoDueDatesReached - EPAYE", TdAll.notEligibleNoDueDatesReached.copy(part1 = eligibleEligibilityRules.part1.copy(isLessThanMinDebtAllowance = true)), PageUrls.payeNoDueDatesReachedUrl,
-          JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Epaye.Bta), Origins.Epaye.Bta),
-        ("NoDueDatesReached - VAT", TdAll.notEligibleNoDueDatesReached.copy(part1 = eligibleEligibilityRules.part1.copy(isLessThanMinDebtAllowance = true)), PageUrls.vatNoDueDatesReachedUrl,
-          JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Vat.Bta), Origins.Vat.Bta),
-        ("NoDueDatesReached - SA", TdAll.notEligibleNoDueDatesReached.copy(part1 = eligibleEligibilityRules.part1.copy(isLessThanMinDebtAllowance = true)), PageUrls.saNotEligibleUrl,
-          JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Sa.Bta), Origins.Sa.Bta)
-      )) {
-        (sf: String, eligibilityRules: EligibilityRules, expectedRedirect: String, updatedJourneyJson: String, origin: Origin) =>
-          {
-            s"[$sf] should redirect to noDueDatesReached page" in {
-              val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(origin.taxRegime, TdAll.notEligibleEligibilityPass, eligibilityRules, regimeDigitalCorrespondence = true)
+      forAll(
+        Table(
+          ("Scenario flavour", "eligibility rules", "expected redirect", "updated journey json", "origin"),
+          (
+            "NoDueDatesReached - EPAYE",
+            TdAll.notEligibleNoDueDatesReached
+              .copy(part1 = eligibleEligibilityRules.part1.copy(isLessThanMinDebtAllowance = true)),
+            PageUrls.payeNoDueDatesReachedUrl,
+            JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Epaye.Bta),
+            Origins.Epaye.Bta
+          ),
+          (
+            "NoDueDatesReached - VAT",
+            TdAll.notEligibleNoDueDatesReached
+              .copy(part1 = eligibleEligibilityRules.part1.copy(isLessThanMinDebtAllowance = true)),
+            PageUrls.vatNoDueDatesReachedUrl,
+            JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Vat.Bta),
+            Origins.Vat.Bta
+          ),
+          (
+            "NoDueDatesReached - SA",
+            TdAll.notEligibleNoDueDatesReached
+              .copy(part1 = eligibleEligibilityRules.part1.copy(isLessThanMinDebtAllowance = true)),
+            PageUrls.saNotEligibleUrl,
+            JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Sa.Bta),
+            Origins.Sa.Bta
+          )
+        )
+      ) {
+        (
+          sf: String,
+          eligibilityRules: EligibilityRules,
+          expectedRedirect: String,
+          updatedJourneyJson: String,
+          origin: Origin
+        ) =>
+          s"[$sf] should redirect to noDueDatesReached page" in {
+            val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
+              origin.taxRegime,
+              TdAll.notEligibleEligibilityPass,
+              eligibilityRules,
+              regimeDigitalCorrespondence = true
+            )
 
             stubCommonActions()
             EssttpBackend.DetermineTaxId.findJourney(origin)()
@@ -713,16 +755,15 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         taxRegime -> origin
       }
 
-      taxRegimesAndOrigins.filter(p => p._1 !== TaxRegime.Sa).foreach{
-        case (taxRegime, origin) =>
-          withClue(s"For tax regime ${taxRegime.entryName} and origin ${origin.toString}: "){
-            val eligibilityResponseJson =
-              TtpJsonResponses.ttpEligibilityCallJson(
-                taxRegime,
-                TdAll.notEligibleEligibilityPass,
-                TdAll.notEligibleDmSpecialOfficeProcessingRequiredCDCS,
-                regimeDigitalCorrespondence = true
-              )
+      taxRegimesAndOrigins.filter(p => p._1 !== TaxRegime.Sa).foreach { case (taxRegime, origin) =>
+        withClue(s"For tax regime ${taxRegime.entryName} and origin ${origin.toString}: ") {
+          val eligibilityResponseJson =
+            TtpJsonResponses.ttpEligibilityCallJson(
+              taxRegime,
+              TdAll.notEligibleEligibilityPass,
+              TdAll.notEligibleDmSpecialOfficeProcessingRequiredCDCS,
+              regimeDigitalCorrespondence = true
+            )
 
           stubCommonActions()
           EssttpBackend.DetermineTaxId.findJourney(origin)()
@@ -865,23 +906,23 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         Json
           .parse(
             s"""
-           |{
-           |  "eligibilityResult" : "eligible",
-           |  "noEligibilityReasons": 0,
-           |  "origin": "Bta",
-           |  "taxType": "Vat",
-           |  "taxDetail": {
-           |    "vrn":"101747001"
-           |  },
-           |  "authProviderId": "authId-999",
-           |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-           |  "regimeDigitalCorrespondence": true,
-           |  "futureChargeLiabilitiesExcluded": false,
-           |  "chargeTypeAssessment" : ${(Json
+             |{
+             |  "eligibilityResult" : "eligible",
+             |  "noEligibilityReasons": 0,
+             |  "origin": "Bta",
+             |  "taxType": "Vat",
+             |  "taxDetail": {
+             |    "vrn":"101747001"
+             |  },
+             |  "authProviderId": "authId-999",
+             |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+             |  "regimeDigitalCorrespondence": true,
+             |  "futureChargeLiabilitiesExcluded": false,
+             |  "chargeTypeAssessment" : ${(Json
                 .parse(eligibilityCheckResponseJsonAsPounds)
                 .as[JsObject] \ "chargeTypeAssessment").get.toString}
-           |}
-           |""".stripMargin
+             |}
+             |""".stripMargin
           )
           .as[JsObject]
       )
@@ -1110,8 +1151,15 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
     }
 
     "VAT user with a debt below the minimum amount and debt too old should be redirected to generic ineligible page" in {
-      val eligibilityRules = TdAll.notEligibleIsLessThanMinDebtAllowance.copy(part1 = eligibleEligibilityRules.part1.copy(chargesOverMaxDebtAge = Some(true)))
-      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(TaxRegime.Vat, TdAll.notEligibleEligibilityPass, eligibilityRules, regimeDigitalCorrespondence = true)
+      val eligibilityRules             = TdAll.notEligibleIsLessThanMinDebtAllowance.copy(part1 =
+        eligibleEligibilityRules.part1.copy(chargesOverMaxDebtAge = Some(true))
+      )
+      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
+        TaxRegime.Vat,
+        TdAll.notEligibleEligibilityPass,
+        eligibilityRules,
+        regimeDigitalCorrespondence = true
+      )
 
       Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Vat)(eligibilityCheckResponseJson)
       stubCommonActions()
@@ -1130,8 +1178,15 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
     }
 
     "EPAYE user with a debt below the minimum amount and debt too old should be redirected to debt too low ineligible page" in {
-      val eligibilityRules = TdAll.notEligibleIsLessThanMinDebtAllowance.copy(part1 = eligibleEligibilityRules.part1.copy(chargesOverMaxDebtAge = Some(true)))
-      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(TaxRegime.Epaye, TdAll.notEligibleEligibilityPass, eligibilityRules, regimeDigitalCorrespondence = true)
+      val eligibilityRules             = TdAll.notEligibleIsLessThanMinDebtAllowance.copy(part1 =
+        eligibleEligibilityRules.part1.copy(chargesOverMaxDebtAge = Some(true))
+      )
+      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
+        TaxRegime.Epaye,
+        TdAll.notEligibleEligibilityPass,
+        eligibilityRules,
+        regimeDigitalCorrespondence = true
+      )
 
       Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Epaye)(eligibilityCheckResponseJson)
       stubCommonActions()
@@ -1148,7 +1203,12 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
     }
 
     "SA user with IR-SA enrolment but no NINO found, should be directed to generic ineligible page" in {
-      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(TaxRegime.Sa, TdAll.eligibleEligibilityPass, TdAll.eligibleEligibilityRules, regimeDigitalCorrespondence = true)
+      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
+        TaxRegime.Sa,
+        TdAll.eligibleEligibilityPass,
+        TdAll.eligibleEligibilityRules,
+        regimeDigitalCorrespondence = true
+      )
 
       Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Sa)(eligibilityCheckResponseJson)
       stubCommonActions()
@@ -1163,7 +1223,12 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
     }
 
     "SA user with IR-SA enrolment, NINO found but no HMRC-MTD-IT enrolment should be directed to Sign up for Making Tax Digital page with content in English" in {
-      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(TaxRegime.Sa, TdAll.notEligibleEligibilityPass, TdAll.eligibleEligibilityRules, regimeDigitalCorrespondence = true)
+      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
+        TaxRegime.Sa,
+        TdAll.notEligibleEligibilityPass,
+        TdAll.eligibleEligibilityRules,
+        regimeDigitalCorrespondence = true
+      )
 
       Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Sa)(eligibilityCheckResponseJson)
       stubCommonActions(authNino = Some("QQ123456A"))
@@ -1204,7 +1269,12 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
     }
 
     "SA user with IR-SA enrolment, NINO found but no HMRC-MTD-IT enrolment should be directed to Sign up for Making Tax Digital page with content in Welsh" in {
-      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(TaxRegime.Sa, TdAll.notEligibleEligibilityPass, TdAll.eligibleEligibilityRules, regimeDigitalCorrespondence = true)
+      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
+        TaxRegime.Sa,
+        TdAll.notEligibleEligibilityPass,
+        TdAll.eligibleEligibilityRules,
+        regimeDigitalCorrespondence = true
+      )
 
       Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Sa)(eligibilityCheckResponseJson)
       stubCommonActions(authNino = Some("QQ123456A"))

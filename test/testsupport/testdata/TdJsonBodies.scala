@@ -166,11 +166,15 @@ object TdJsonBodies {
       |          "postcodeDate": "2022-01-31"
       |        }
       |  ],
-      |  "customerDetails": [ ${email.fold(""){ e => s"""{ "emailAddress" : "${encryptString(e, encrypter)}", "emailSource" : "ETMP"}""" }} ],
+      |  "customerDetails": [ ${email.fold("") { e =>
+        s"""{ "emailAddress" : "${encryptString(e, encrypter)}", "emailSource" : "ETMP"}"""
+      }} ],
       |  "addresses": [
       |  {
       |    "addressType": "Residential"
-      |     ${email.fold("") { e => s""","contactDetails": {"emailAddress": "${encryptString(e, encrypter)}", "emailSource": "ETMP"}""" }},
+      |     ${email.fold("") { e =>
+        s""","contactDetails": {"emailAddress": "${encryptString(e, encrypter)}", "emailSource": "ETMP"}"""
+      }},
       |    "postcodeHistory": [
       |      {
       |        "addressPostcode": "${encryptString("AA11AA", encrypter)}",

@@ -62,7 +62,7 @@ object CallEligibilityApiRequest {
     } else {
       ((__ \ "channelIdentifier").read[String] and
         ((__ \ "idType").read[IdType] and (__ \ "idValue")
-          .read[IdValue]).tupled.map((Identification.apply _).tupled).map(List(_)) and
+          .read[IdValue]).tupled.map(Identification.apply.tupled).map(List(_)) and
         (__ \ "regimeType").read[RegimeType] and
         (__ \ "returnFinancialAssessment").read[Boolean])(CallEligibilityApiRequest(_, _, _, _))
     }

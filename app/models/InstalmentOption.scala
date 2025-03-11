@@ -17,14 +17,9 @@
 package models
 
 import essttp.rootmodel.AmountInPence
-import play.api.libs.json.{Format, Json}
 
 final case class InstalmentOption(
   numberOfMonths:       Int,
   amountToPayEachMonth: AmountInPence,
   interestPayment:      AmountInPence
 )
-object InstalmentOption {
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  given Format[InstalmentOption] = Json.format
-}

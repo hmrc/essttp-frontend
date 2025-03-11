@@ -24,14 +24,14 @@ import java.time.LocalDate
 object TtpJsonResponses {
 
   def ttpEligibilityCallJson(
-      taxRegime:                          TaxRegime,
-      eligibilityPass:                    EligibilityPass  = TdAll.eligibleEligibilityPass,
-      eligibilityRules:                   EligibilityRules = TdAll.eligibleEligibilityRules,
-      regimeDigitalCorrespondence:        Boolean,
-      poundsInsteadOfPence:               Boolean          = false,
-      maybeChargeIsInterestBearingCharge: Option[Boolean]  = None,
-      maybeChargeUseChargeReference:      Option[Boolean]  = None,
-      maybeChargeBeforeMaxAccountingDate: Option[Boolean]  = None
+    taxRegime:                          TaxRegime,
+    eligibilityPass:                    EligibilityPass = TdAll.eligibleEligibilityPass,
+    eligibilityRules:                   EligibilityRules = TdAll.eligibleEligibilityRules,
+    regimeDigitalCorrespondence:        Boolean,
+    poundsInsteadOfPence:               Boolean = false,
+    maybeChargeIsInterestBearingCharge: Option[Boolean] = None,
+    maybeChargeUseChargeReference:      Option[Boolean] = None,
+    maybeChargeBeforeMaxAccountingDate: Option[Boolean] = None
   ): String = {
 
     val isInterestBearingChargeValue = maybeChargeIsInterestBearingCharge match {

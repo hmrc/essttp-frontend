@@ -16,7 +16,7 @@
 
 package testsupport
 
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsResult, JsValue}
 import play.api.mvc.Session
 
 object Givens {
@@ -24,5 +24,7 @@ object Givens {
   given canEqualPlaySession: CanEqual[Session, Session] = CanEqual.derived
 
   given canEqualJsValue: CanEqual[JsValue, JsValue] = CanEqual.derived
+
+  given canEqualJsResult[A]: CanEqual[JsResult[A], JsResult[A]] = CanEqual.derived
 
 }

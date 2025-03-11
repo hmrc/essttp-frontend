@@ -17,8 +17,6 @@
 package models
 
 import enumeratum.{Enum, EnumEntry}
-import play.api.libs.functional.syntax._
-import play.api.libs.json.Format
 import essttp.rootmodel.ttp.eligibility.{EligibilityRules, EligibilityRulesPart1, EligibilityRulesPart2}
 
 import scala.collection.immutable
@@ -201,8 +199,5 @@ object EligibilityErrors extends Enum[EligibilityError] {
           ) =>
         None // all false
     }
-
-  given Format[EligibilityError] =
-    summon[Format[String]].inmap(EligibilityErrors.withName, _.entryName)
 
 }

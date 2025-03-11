@@ -158,7 +158,7 @@ class PegaPlanService @Inject() (
       val items: List[String] = List(
         incomeAndExpenditure.income.mainIncome  -> "Main income",
         incomeAndExpenditure.income.otherIncome -> "Other income"
-      ).map((toAmountOfMoneyItem _).tupled)
+      ).map(toAmountOfMoneyItem.tupled)
 
       s"""[ ${items.mkString(",")} ]"""
     }
@@ -174,7 +174,7 @@ class PegaPlanService @Inject() (
           incomeAndExpenditure.expenditure.employeeBenefits      -> "Employee benefits",
           incomeAndExpenditure.expenditure.other                 -> "Other",
           AmountInPence.zero                                     -> "My company or partnership does not have any expenditure"
-        ).map((toAmountOfMoneyItem _).tupled)
+        ).map(toAmountOfMoneyItem.tupled)
 
       s"""[ ${items.mkString(",")} ]"""
     }

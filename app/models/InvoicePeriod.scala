@@ -16,8 +16,6 @@
 
 package models
 
-import play.api.libs.json.{Format, Json}
-
 import java.time.LocalDate
 
 final case class InvoicePeriod(
@@ -26,8 +24,3 @@ final case class InvoicePeriod(
   end:         LocalDate,
   dueDate:     LocalDate
 )
-
-object InvoicePeriod {
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  given Format[InvoicePeriod] = Json.format[InvoicePeriod]
-}

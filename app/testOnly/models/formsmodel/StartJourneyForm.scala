@@ -35,27 +35,27 @@ import scala.util.{Random, Try}
 
 //TODO OPS-12584 - Clean this up when TTP has implemented the changes to the Eligibility API. The newTtpApi option in start page will not be needed
 final case class StartJourneyForm(
-    signInAs:                      SignInAs,
-    enrolments:                    Seq[Enrolment],
-    origin:                        Origin,
-    eligibilityErrors:             Seq[EligibilityError],
-    debtTotalAmount:               BigDecimal,
-    interestAmount:                Option[BigDecimal],
-    taxReference:                  TaxId,
-    regimeDigitalCorrespondence:   Boolean,
-    emailAddressPresent:           Boolean,
-    isInterestBearingCharge:       Option[Boolean],
-    useChargeReference:            Option[Boolean],
-    chargeBeforeMaxAccountingDate: Option[Boolean],
-    ddInProgress:                  Option[Boolean],
-    transitionToCDCS:              Option[Boolean],
-    chargeSource:                  Option[String],
-    planMinLength:                 Int,
-    planMaxLength:                 Int,
-    mainTrans:                     String,
-    subTrans:                      String,
-    confidenceLevelAndNino:        ConfidenceLevelAndNino,
-    credId:                        Option[String]
+  signInAs:                      SignInAs,
+  enrolments:                    Seq[Enrolment],
+  origin:                        Origin,
+  eligibilityErrors:             Seq[EligibilityError],
+  debtTotalAmount:               BigDecimal,
+  interestAmount:                Option[BigDecimal],
+  taxReference:                  TaxId,
+  regimeDigitalCorrespondence:   Boolean,
+  emailAddressPresent:           Boolean,
+  isInterestBearingCharge:       Option[Boolean],
+  useChargeReference:            Option[Boolean],
+  chargeBeforeMaxAccountingDate: Option[Boolean],
+  ddInProgress:                  Option[Boolean],
+  transitionToCDCS:              Option[Boolean],
+  chargeSource:                  Option[String],
+  planMinLength:                 Int,
+  planMaxLength:                 Int,
+  mainTrans:                     String,
+  subTrans:                      String,
+  confidenceLevelAndNino:        ConfidenceLevelAndNino,
+  credId:                        Option[String]
 )
 
 object StartJourneyForm {
@@ -78,16 +78,16 @@ object StartJourneyForm {
         "isInterestBearingCharge"       -> chargesOptionalFieldsMapping,
         "useChargeReference"            -> chargesOptionalFieldsMapping,
         "chargeBeforeMaxAccountingDate" -> chargesOptionalFieldsMapping,
-        "ddInProgress" -> chargesOptionalFieldsMapping,
-        "transitionToCDCS" -> chargesOptionalFieldsMapping,
-        "chargeSource" -> chargesOptionalStringMapping,
-        "planMinLength" -> number,
-        "planMaxLength" -> number,
-        "mainTrans" -> textWithFourDigitsMapping("mainTrans"),
-        "subTrans" -> textWithFourDigitsMapping("subTrans"),
-        "" -> Forms.of(confidenceLevelAndNinoFormatter),
-        "credId" -> optional(text).transform[Option[String]](_.filter(_.nonEmpty), identity)
-      )(StartJourneyForm.apply)(StartJourneyForm.unapply)
+        "ddInProgress"                  -> chargesOptionalFieldsMapping,
+        "transitionToCDCS"              -> chargesOptionalFieldsMapping,
+        "chargeSource"                  -> chargesOptionalStringMapping,
+        "planMinLength"                 -> number,
+        "planMaxLength"                 -> number,
+        "mainTrans"                     -> textWithFourDigitsMapping("mainTrans"),
+        "subTrans"                      -> textWithFourDigitsMapping("subTrans"),
+        ""                              -> Forms.of(confidenceLevelAndNinoFormatter),
+        "credId"                        -> optional(text).transform[Option[String]](_.filter(_.nonEmpty), identity)
+      )(StartJourneyForm.apply)(Tuple.fromProductTyped[StartJourneyForm](_).some)
     )
 
   private def textWithFourDigitsMapping(key: String) =

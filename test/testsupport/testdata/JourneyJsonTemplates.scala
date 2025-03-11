@@ -296,12 +296,18 @@ object JourneyJsonTemplates {
       origin = origin
     )
 
-  def `Retrieved Extreme Dates Response`(origin: Origin, affordabilityEnabled: Boolean = false,
-                                         whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(Set(CannotPayReason.WaitingForRefund, CannotPayReason.NoMoneySetAside)))(implicit encrypter: Encrypter): String =
+  def `Retrieved Extreme Dates Response`(
+    origin:                    Origin,
+    affordabilityEnabled:      Boolean = false,
+    whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(
+      Set(CannotPayReason.WaitingForRefund, CannotPayReason.NoMoneySetAside)
+    )
+  )(implicit encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
-      stageInfo            = StageInfo.retrievedExtremeDates,
-      journeyInfo          = JourneyInfo.retrievedExtremeDates(origin.taxRegime, encrypter, whyCannotPayInFullAnswers = whyCannotPayInFullAnswers),
-      origin               = origin,
+      stageInfo = StageInfo.retrievedExtremeDates,
+      journeyInfo = JourneyInfo
+        .retrievedExtremeDates(origin.taxRegime, encrypter, whyCannotPayInFullAnswers = whyCannotPayInFullAnswers),
+      origin = origin,
       affordabilityEnabled = affordabilityEnabled
     )
 

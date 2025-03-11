@@ -45,7 +45,7 @@ class ItSpec extends UnitSpec, GuiceOneServerPerSuite, WireMockSupport, HttpRead
 
   protected lazy val configOverrides: Map[String, Any] = Map()
 
-  given testCrypto: (Encrypter with Decrypter) = new AesCrypto {
+  given testCrypto: (Encrypter & Decrypter) = new AesCrypto {
     override protected val encryptionKey: String = "P5xsJ9Nt+quxGZzB4DeLfw=="
   }
 

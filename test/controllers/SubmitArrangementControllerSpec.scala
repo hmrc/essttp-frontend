@@ -157,14 +157,17 @@ class SubmitArrangementControllerSpec extends ItSpec {
                 case TaxRegime.Simp  => PageUrls.simpConfirmationUrl
               })
 
-                    Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(
-                      TdAll.customerDetail(expectedEmail.getOrElse(TdAll.etmpEmail).toLowerCase(Locale.UK), expectedEmailSource.getOrElse(EmailSource.ETMP)),
-                      TdAll.contactDetails(TdAll.etmpEmail, EmailSource.ETMP),
-                      TdAll.someRegimeDigitalCorrespondenceTrue,
-                      taxRegime,
-                      hasAffordability = affordabilityEnabled,
-                      caseId           = caseId
-                    )(CryptoFormat.NoOpCryptoFormat)
+              Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(
+                TdAll.customerDetail(
+                  expectedEmail.getOrElse(TdAll.etmpEmail).toLowerCase(Locale.UK),
+                  expectedEmailSource.getOrElse(EmailSource.ETMP)
+                ),
+                TdAll.contactDetails(TdAll.etmpEmail, EmailSource.ETMP),
+                TdAll.someRegimeDigitalCorrespondenceTrue,
+                taxRegime,
+                hasAffordability = affordabilityEnabled,
+                caseId = caseId
+              )(using CryptoFormat.NoOpCryptoFormat)
 
               val taxType = taxRegime match {
                 case TaxRegime.Epaye => "Epaye"

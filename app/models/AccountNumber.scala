@@ -16,10 +16,4 @@
 
 package models
 
-import play.api.libs.json.{Format, Json}
-
 final case class AccountNumber(value: String) extends AnyVal
-
-object AccountNumber {
-  given Format[AccountNumber] = Json.valueFormat
-}

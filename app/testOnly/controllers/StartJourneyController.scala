@@ -417,10 +417,12 @@ object StartJourneyController {
 
     val customerDetail =
       if (form.emailAddressPresent)
-        List(CustomerDetail(
-          Some(Email(SensitiveString("bobross@joyofpainting.com"))),
-          Some(EmailSource.ETMP)
-        ))
+        List(
+          CustomerDetail(
+            Some(Email(SensitiveString("bobross@joyofpainting.com"))),
+            Some(EmailSource.ETMP)
+          )
+        )
       else List(CustomerDetail(None, None))
 
     val contactDetail = ContactDetail(
@@ -432,32 +434,38 @@ object StartJourneyController {
       Some(AltLetterFormat(1))
     )
 
-    val addresses = List(Address(
-      AddressType("Residential"),
-      Some(AddressLine("His Castle")),
-      Some(AddressLine("Left wing")),
-      Some(AddressLine("Top floor")),
-      Some(AddressLine("Attic")),
-      Some(IsReturnedLetterService(value = false)),
-      Some(contactDetail),
-      Some(Postcode(SensitiveString("NO1HERE"))),
-      Some(Country("UK")),
-      List(PostcodeHistory(
-        Postcode(SensitiveString("NO2HERE")),
-        PostcodeDate(LocalDate.of(2500, 1, 1))
-      ))
-    ))
+    val addresses = List(
+      Address(
+        AddressType("Residential"),
+        Some(AddressLine("His Castle")),
+        Some(AddressLine("Left wing")),
+        Some(AddressLine("Top floor")),
+        Some(AddressLine("Attic")),
+        Some(IsReturnedLetterService(value = false)),
+        Some(contactDetail),
+        Some(Postcode(SensitiveString("NO1HERE"))),
+        Some(Country("UK")),
+        List(
+          PostcodeHistory(
+            Postcode(SensitiveString("NO2HERE")),
+            PostcodeDate(LocalDate.of(2500, 1, 1))
+          )
+        )
+      )
+    )
 
     val individualDetails =
-      Some(IndividualDetails(
-        Some(Title("Lord")),
-        Some(FirstName("Jamie")),
-        Some(LastName("North")),
-        Some(DateOfBirth(LocalDate.of(2000, 1, 1))),
-        Some(DistrictNumber("666")),
-        Some(CustomerTypes.MTDITSA),
-        form.transitionToCDCS.map(TransitionToCDCS(_))
-      ))
+      Some(
+        IndividualDetails(
+          Some(Title("Lord")),
+          Some(FirstName("Jamie")),
+          Some(LastName("North")),
+          Some(DateOfBirth(LocalDate.of(2000, 1, 1))),
+          Some(DistrictNumber("666")),
+          Some(CustomerTypes.MTDITSA),
+          form.transitionToCDCS.map(TransitionToCDCS(_))
+        )
+      )
 
     val charges: Charges = Charges(
       Charges1(
@@ -543,23 +551,25 @@ object StartJourneyController {
       )
 
     EligibilityCheckResult(
-      processingDateTime              = ProcessingDateTime(LocalDate.now().toString),
-      identification                  = makeIdentificationForTaxType(taxRegime, form),
-      invalidSignals                  = Some(List(InvalidSignals(signalType        = "xyz", signalValue = "123", signalDescription = "Description"))),
-      customerPostcodes               = List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate(LocalDate.of(2022, 1, 1)))),
-      regimePaymentFrequency          = PaymentPlanFrequencies.Monthly,
-      paymentPlanFrequency            = PaymentPlanFrequencies.Monthly,
-      paymentPlanMinLength            = PaymentPlanMinLength(form.planMinLength),
-      paymentPlanMaxLength            = PaymentPlanMaxLength(form.planMaxLength),
-      eligibilityStatus               = EligibilityStatus(EligibilityPass(eligibilityRules.isEligible)),
-      eligibilityRules                = eligibilityRules,
-      chargeTypeAssessment            = chargeTypeAssessments,
-      customerDetails                 = customerDetail,
-      individualDetails               = individualDetails,
-      addresses                       = addresses,
-      regimeDigitalCorrespondence     = RegimeDigitalCorrespondence(form.regimeDigitalCorrespondence),
+      processingDateTime = ProcessingDateTime(LocalDate.now().toString),
+      identification = makeIdentificationForTaxType(taxRegime, form),
+      invalidSignals =
+        Some(List(InvalidSignals(signalType = "xyz", signalValue = "123", signalDescription = "Description"))),
+      customerPostcodes =
+        List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate(LocalDate.of(2022, 1, 1)))),
+      regimePaymentFrequency = PaymentPlanFrequencies.Monthly,
+      paymentPlanFrequency = PaymentPlanFrequencies.Monthly,
+      paymentPlanMinLength = PaymentPlanMinLength(form.planMinLength),
+      paymentPlanMaxLength = PaymentPlanMaxLength(form.planMaxLength),
+      eligibilityStatus = EligibilityStatus(EligibilityPass(eligibilityRules.isEligible)),
+      eligibilityRules = eligibilityRules,
+      chargeTypeAssessment = chargeTypeAssessments,
+      customerDetails = customerDetail,
+      individualDetails = individualDetails,
+      addresses = addresses,
+      regimeDigitalCorrespondence = RegimeDigitalCorrespondence(form.regimeDigitalCorrespondence),
       futureChargeLiabilitiesExcluded = false,
-      chargeTypesExcluded             = None
+      chargeTypesExcluded = None
     )
   }
 

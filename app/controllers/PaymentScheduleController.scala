@@ -50,7 +50,7 @@ class PaymentScheduleController @Inject() (
     extends FrontendController(mcc),
       Logging {
 
-  given Ordering[LocalDate] = _ compareTo _
+  given Ordering[LocalDate] = _.compareTo(_)
 
   val checkPaymentSchedule: Action[AnyContent] = as.eligibleJourneyAction.async {
     implicit request: EligibleJourneyRequest[?] =>

@@ -216,9 +216,9 @@ class TtpService @Inject() (
         instalments = selectedPaymentPlan.instalments,
         debtItemCharges = debtItemCharges
       ),
-      customerDetails             = Some(customerDetail),
-      individualDetails           = individualDetails,
-      addresses                   = Some(addresses),
+      customerDetails = Some(customerDetail),
+      individualDetails = individualDetails,
+      addresses = Some(addresses),
       regimeDigitalCorrespondence = Some(regimeDigitalCorrespondence)
     )
 
@@ -311,12 +311,12 @@ object TtpService {
       paymentPlanMaxLength = maxPlanLength(eligibilityCheckResult, journey),
       paymentPlanFrequency = PaymentPlanFrequencies.Monthly,
       earliestPaymentPlanStartDate = extremeDatesResponse.earliestPlanStartDate,
-      latestPaymentPlanStartDate   = extremeDatesResponse.latestPlanStartDate,
-      initialPaymentDate           = extremeDatesResponse.initialPaymentDate,
-      initialPaymentAmount         = upfrontPaymentAmount.map(_.value),
-      accruedDebtInterest          = AccruedDebtInterest(allInterestAccrued),
-      debtItemCharges              = debtChargeItemsFromEligibilityCheck,
-      customerPostcodes            = Some(eligibilityCheckResult.customerPostcodes)
+      latestPaymentPlanStartDate = extremeDatesResponse.latestPlanStartDate,
+      initialPaymentDate = extremeDatesResponse.initialPaymentDate,
+      initialPaymentAmount = upfrontPaymentAmount.map(_.value),
+      accruedDebtInterest = AccruedDebtInterest(allInterestAccrued),
+      debtItemCharges = debtChargeItemsFromEligibilityCheck,
+      customerPostcodes = Some(eligibilityCheckResult.customerPostcodes)
     )
   }
 
@@ -347,11 +347,10 @@ object TtpService {
       case UpfrontPaymentAnswers.NoUpfrontPayment                   => None
     }
 
-  /**
-   * If email matches the one from the eligibility API - ETMP
-   * If new email entered on the screen which doesn't match the ETMP one - TEMP
-   */
-  private def deriveCustomerDetail(journey: Journey.Stages.EmailVerificationComplete): List[CustomerDetail] = {
+  /** If email matches the one from the eligibility API - ETMP If new email entered on the screen which doesn't match
+    * the ETMP one - TEMP
+    */
+  private def deriveCustomerDetail(journey: Journey.EmailVerificationComplete): List[CustomerDetail] = {
     val emailThatsBeenVerified: Email = journey.emailToBeVerified
     val customerDetail                = journey.eligibilityCheckResult.email match {
       case None =>

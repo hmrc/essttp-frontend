@@ -254,8 +254,8 @@ class EmailController @Inject() (
       val emailEntryEndpoint: Call = maybeEmail.fold(
         routes.EmailController.enterEmail
       ) { _ =>
-          routes.EmailController.whichEmailDoYouWantToUse
-        }
+        routes.EmailController.whichEmailDoYouWantToUse
+      }
 
       Ok(views.tooManyPasscodes(emailEntryEndpoint))
     }

@@ -30,7 +30,6 @@ sealed trait Language extends EnumEntry, Product, Serializable derives CanEqual 
 
   def code: String
 
-  def label: String
 }
 
 object Language {
@@ -76,13 +75,9 @@ object Languages extends Enum[Language] {
 
   case object English extends Language {
     override def code: String = "en"
-
-    override def label: String = "English"
   }
 
   case object Welsh extends Language {
     override def code: String = "cy"
-
-    override def label: String = "Cymraeg"
   }
 }

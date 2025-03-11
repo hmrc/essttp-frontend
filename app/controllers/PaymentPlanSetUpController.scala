@@ -40,7 +40,7 @@ class PaymentPlanSetUpController @Inject() (
     extends FrontendController(mcc),
       Logging {
 
-  given Ordering[LocalDate] = _ compareTo _
+  given Ordering[LocalDate] = _.compareTo(_)
 
   val epayePaymentPlanSetUp: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     paymentPlanSetup(request)
@@ -111,12 +111,12 @@ class PaymentPlanSetUpController @Inject() (
       case TaxRegime.Sa                                     =>
         Ok(
           views.saPaymentPlanSetUpPage(
-            customerPaymentReference    = journey.arrangementResponse.customerReference.value,
-            paymentDay                  = firstPaymentDay,
-            hasUpfrontPayment           = hasUpfrontPayment,
-            wasEmailAddressRequired     = request.isEmailAddressRequired(appConfig),
+            customerPaymentReference = journey.arrangementResponse.customerReference.value,
+            paymentDay = firstPaymentDay,
+            hasUpfrontPayment = hasUpfrontPayment,
+            wasEmailAddressRequired = request.isEmailAddressRequired(appConfig),
             regimeDigitalCorrespondence = request.eligibilityCheckResult.regimeDigitalCorrespondence.value,
-            wasAffordabilityJourney     = wasAffordabilityJourney(journey)
+            wasAffordabilityJourney = wasAffordabilityJourney(journey)
           )
         )
       case TaxRegime.Epaye | TaxRegime.Vat | TaxRegime.Simp =>

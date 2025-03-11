@@ -193,7 +193,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       chargeTypeAssessment = List.empty,
       correlationId = journey.correlationId.value.toString,
       futureChargeLiabilitiesExcluded = None,
-      regimeDigitalCorrespondence     = true
+      regimeDigitalCorrespondence = true
     )
 
   private given CanEqual[Boolean, Any] = CanEqual.derived
@@ -238,7 +238,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       chargeTypeAssessment = eligibilityCheckResult.chargeTypeAssessment,
       correlationId = journey.correlationId.value.toString,
       futureChargeLiabilitiesExcluded = Some(eligibilityCheckResult.futureChargeLiabilitiesExcluded),
-      regimeDigitalCorrespondence     = eligibilityCheckResult.regimeDigitalCorrespondence.value
+      regimeDigitalCorrespondence = eligibilityCheckResult.regimeDigitalCorrespondence.value
     )
   }
 
@@ -324,7 +324,11 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       paymentPlan.totalDebt.value.inPounds,
       paymentPlan.collections.initialCollection.map(_.amountDue.value.inPounds),
       paymentPlan.collections.initialCollection.map(_.dueDate.value.toString),
-      eligibilityCheckResult.customerPostcodes.map(_.addressPostcode).headOption.map(_.value.decryptedValue).getOrElse(""),
+      eligibilityCheckResult.customerPostcodes
+        .map(_.addressPostcode)
+        .headOption
+        .map(_.value.decryptedValue)
+        .getOrElse(""),
       paymentPlan.numberOfInstalments.value,
       paymentPlan.planInterest.value.inPounds,
       Collections(

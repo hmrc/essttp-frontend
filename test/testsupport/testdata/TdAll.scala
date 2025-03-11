@@ -287,97 +287,103 @@ object TdAll {
   }
 
   def eligibilityCheckResult(
-      eligibilityPass:                     EligibilityPass,
-      eligibilityRules:                    EligibilityRules,
-      taxRegime:                           TaxRegime,
-      regimeDigitalCorrespondence:         RegimeDigitalCorrespondence,
-      chargeIsInterestBearingCharge:       Option[Boolean]             = None,
-      chargeUseChargeReference:            Option[Boolean]             = None,
-      chargeChargeBeforeMaxAccountingDate: Option[Boolean]             = None,
-      ddInProgress:                        Option[Boolean]             = None
-  ): EligibilityCheckResult = {
-
+    eligibilityPass:                     EligibilityPass,
+    eligibilityRules:                    EligibilityRules,
+    taxRegime:                           TaxRegime,
+    regimeDigitalCorrespondence:         RegimeDigitalCorrespondence,
+    chargeIsInterestBearingCharge:       Option[Boolean] = None,
+    chargeUseChargeReference:            Option[Boolean] = None,
+    chargeChargeBeforeMaxAccountingDate: Option[Boolean] = None,
+    ddInProgress:                        Option[Boolean] = None
+  ): EligibilityCheckResult =
     EligibilityCheckResult(
-      processingDateTime              = ProcessingDateTime("2022-03-23T13:49:51.141Z"),
-      identification                  = identification(taxRegime),
-      invalidSignals                  = None,
-      customerPostcodes               = List(CustomerPostcode(customerPostcode, PostcodeDate(LocalDate.of(2022, 1, 31)))),
-      regimePaymentFrequency          = PaymentPlanFrequencies.Monthly,
-      paymentPlanFrequency            = PaymentPlanFrequencies.Monthly,
-      paymentPlanMinLength            = PaymentPlanMinLength(1),
-      paymentPlanMaxLength            = PaymentPlanMaxLength(12),
-      eligibilityStatus               = EligibilityStatus(eligibilityPass),
-      eligibilityRules                = eligibilityRules,
-      chargeTypeAssessment            = List(ChargeTypeAssessment(
-        taxPeriodFrom   = TaxPeriodFrom("2020-08-13"),
-        taxPeriodTo     = TaxPeriodTo("2020-08-14"),
-        debtTotalAmount = DebtTotalAmount(AmountInPence(300000)),
-        chargeReference = ChargeReference("A00000000001"),
-        charges         = List(Charges(
-          Charges1(
-            chargeType              = ChargeType("InYearRTICharge-Tax"),
-            mainType                = MainType("InYearRTICharge(FPS)"),
-            mainTrans               = MainTrans("mainTrans"),
-            subTrans                = SubTrans("subTrans"),
-            outstandingAmount       = OutstandingAmount(AmountInPence(100000)),
-            interestStartDate       = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
-            dueDate                 = DueDate(LocalDate.parse("2017-03-07")),
-            accruedInterest         = AccruedInterest(AmountInPence(1597)),
-            ineligibleChargeType    = IneligibleChargeType(value = false),
-            chargeOverMaxDebtAge    = Some(ChargeOverMaxDebtAge(value = false)),
-            locks                   = Some(
-              List(Lock(LockType("Payment"), LockReason("Risk/Fraud"), DisallowedChargeLockType(value = false)))
-            ),
-            dueDateNotReached       = false,
-            isInterestBearingCharge = chargeIsInterestBearingCharge.map(IsInterestBearingCharge(_))
-          ),
-          Charges2(
-            useChargeReference            = chargeUseChargeReference.map(UseChargeReference(_)),
-            chargeBeforeMaxAccountingDate = chargeChargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_)),
-            ddInProgress                  = ddInProgress.map(DdInProgress(_)),
-            chargeSource                  = None,
-            parentChargeReference         = None,
-            parentMainTrans               = None,
-            originalCreationDate          = None,
-            tieBreaker                    = None,
-            originalTieBreaker            = None,
-            saTaxYearEnd                  = None,
-            creationDate                  = None,
-            originalChargeType            = None
-          )
-        ))
-      )),
-      customerDetails                 = List(CustomerDetail(None, None)),
-      individualDetails               = None,
-      addresses                       = List(
-        Address(
-          addressType     = AddressType("Residential"),
-          addressLine1    = None,
-          addressLine2    = None,
-          addressLine3    = None,
-          addressLine4    = None,
-          rls             = None,
-          contactDetails  = Some(ContactDetail(
-            telephoneNumber = None,
-            fax             = None,
-            mobile          = None,
-            emailAddress    = Some(Email(SensitiveString("some@email"))),
-            emailSource     = None,
-            altFormat       = None
-          )),
-          postCode        = None,
-          country         = None,
-          postcodeHistory = List(
-            PostcodeHistory(
-              addressPostcode = Postcode(SensitiveString("AA11AA")),
-              postcodeDate    = PostcodeDate(LocalDate.now())
+      processingDateTime = ProcessingDateTime("2022-03-23T13:49:51.141Z"),
+      identification = identification(taxRegime),
+      invalidSignals = None,
+      customerPostcodes = List(CustomerPostcode(customerPostcode, PostcodeDate(LocalDate.of(2022, 1, 31)))),
+      regimePaymentFrequency = PaymentPlanFrequencies.Monthly,
+      paymentPlanFrequency = PaymentPlanFrequencies.Monthly,
+      paymentPlanMinLength = PaymentPlanMinLength(1),
+      paymentPlanMaxLength = PaymentPlanMaxLength(12),
+      eligibilityStatus = EligibilityStatus(eligibilityPass),
+      eligibilityRules = eligibilityRules,
+      chargeTypeAssessment = List(
+        ChargeTypeAssessment(
+          taxPeriodFrom = TaxPeriodFrom("2020-08-13"),
+          taxPeriodTo = TaxPeriodTo("2020-08-14"),
+          debtTotalAmount = DebtTotalAmount(AmountInPence(300000)),
+          chargeReference = ChargeReference("A00000000001"),
+          charges = List(
+            Charges(
+              Charges1(
+                chargeType = ChargeType("InYearRTICharge-Tax"),
+                mainType = MainType("InYearRTICharge(FPS)"),
+                mainTrans = MainTrans("mainTrans"),
+                subTrans = SubTrans("subTrans"),
+                outstandingAmount = OutstandingAmount(AmountInPence(100000)),
+                interestStartDate = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
+                dueDate = DueDate(LocalDate.parse("2017-03-07")),
+                accruedInterest = AccruedInterest(AmountInPence(1597)),
+                ineligibleChargeType = IneligibleChargeType(value = false),
+                chargeOverMaxDebtAge = Some(ChargeOverMaxDebtAge(value = false)),
+                locks = Some(
+                  List(Lock(LockType("Payment"), LockReason("Risk/Fraud"), DisallowedChargeLockType(value = false)))
+                ),
+                dueDateNotReached = false,
+                isInterestBearingCharge = chargeIsInterestBearingCharge.map(IsInterestBearingCharge(_))
+              ),
+              Charges2(
+                useChargeReference = chargeUseChargeReference.map(UseChargeReference(_)),
+                chargeBeforeMaxAccountingDate =
+                  chargeChargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_)),
+                ddInProgress = ddInProgress.map(DdInProgress(_)),
+                chargeSource = None,
+                parentChargeReference = None,
+                parentMainTrans = None,
+                originalCreationDate = None,
+                tieBreaker = None,
+                originalTieBreaker = None,
+                saTaxYearEnd = None,
+                creationDate = None,
+                originalChargeType = None
+              )
             )
           )
         )
       ),
-      regimeDigitalCorrespondence     = regimeDigitalCorrespondence,
+      customerDetails = List(CustomerDetail(None, None)),
+      individualDetails = None,
+      addresses = List(
+        Address(
+          addressType = AddressType("Residential"),
+          addressLine1 = None,
+          addressLine2 = None,
+          addressLine3 = None,
+          addressLine4 = None,
+          rls = None,
+          contactDetails = Some(
+            ContactDetail(
+              telephoneNumber = None,
+              fax = None,
+              mobile = None,
+              emailAddress = Some(Email(SensitiveString("some@email"))),
+              emailSource = None,
+              altFormat = None
+            )
+          ),
+          postCode = None,
+          country = None,
+          postcodeHistory = List(
+            PostcodeHistory(
+              addressPostcode = Postcode(SensitiveString("AA11AA")),
+              postcodeDate = PostcodeDate(LocalDate.now())
+            )
+          )
+        )
+      ),
+      regimeDigitalCorrespondence = regimeDigitalCorrespondence,
       futureChargeLiabilitiesExcluded = false,
-      chargeTypesExcluded             = None
+      chargeTypesExcluded = None
     )
 
   val whyCannotPayReasons: Set[CannotPayReason] =
@@ -492,7 +498,8 @@ object TdAll {
           debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2017-02-07"))
         )
       ),
-      customerPostcodes           = List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate(LocalDate.of(2022, 1, 31)))),
+      customerPostcodes =
+        List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate(LocalDate.of(2022, 1, 31)))),
       paymentPlanAffordableAmount = PaymentPlanAffordableAmount(AmountInPence(30000)),
       paymentPlanStartDate = InstalmentStartDate(LocalDate.parse("2022-07-28"))
     )
@@ -501,14 +508,6 @@ object TdAll {
   val instalmentAmounts: InstalmentAmounts = InstalmentAmounts(AmountInPence(33333), AmountInPence(100000))
 
   val pegaStartCaseResponse: StartCaseResponse = StartCaseResponse(PegaCaseId("case"), "testCorrelationId")
-
-  val pegaGetCaseResponse: GetCaseResponse = GetCaseResponse(
-    dayOfMonth(),
-    paymentPlan(1, AmountDue(AmountInPence(14323))),
-    Map("zeroExpenditure" -> BigDecimal(0), "expenditure" -> BigDecimal(2)),
-    Map("zeroIncome"      -> BigDecimal(0), "income"      -> BigDecimal(1.23)),
-    "testCorrelationId"
-  )
 
   val monthlyPaymentAmount: MonthlyPaymentAmount = MonthlyPaymentAmount(AmountInPence(30000))
 
@@ -519,8 +518,9 @@ object TdAll {
     totalDebtIncInt = TotalDebtIncludingInterest(amountInPence.+(amountInPence)),
     planInterest = PlanInterest(amountInPence),
     collections = Collection(
-      initialCollection =
-        Some(InitialCollection(dueDate = DueDate(LocalDate.parse("2022-02-01")), amountDue = AmountDue(amountInPence))),
+      initialCollection = Some(
+        InitialCollection(dueDate = DueDate(LocalDate.parse("2022-02-01")), amountDue = AmountDue(amountInPence))
+      ),
       regularCollections =
         List(RegularCollection(dueDate = DueDate(LocalDate.parse("2022-02-01")), amountDue = amountDue))
     ),
@@ -535,6 +535,14 @@ object TdAll {
         debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2022-01-01"))
       )
     )
+  )
+
+  val pegaGetCaseResponse: GetCaseResponse = GetCaseResponse(
+    dayOfMonth(),
+    paymentPlan(1, AmountDue(AmountInPence(14323))),
+    Map("zeroExpenditure" -> BigDecimal(0), "expenditure" -> BigDecimal(2)),
+    Map("zeroIncome"      -> BigDecimal(0), "income"      -> BigDecimal(1.23)),
+    "testCorrelationId"
   )
 
   def typeOfBankAccount(typeOfAccount: String): TypeOfBankAccount =
@@ -555,13 +563,13 @@ object TdAll {
   val testAccountName = "Mr. Bob Ross &'/ With Symbols"
 
   def arrangementRequest(
-      customerDetails:             Option[List[CustomerDetail]],
-      contactDetails:              Option[ContactDetail],
-      regimeDigitalCorrespondence: Option[RegimeDigitalCorrespondence],
-      taxRegime:                   TaxRegime,
-      accountNumber:               String                              = "12345678",
-      hasAffordabilityAssessment:  Boolean                             = false,
-      caseID:                      Option[PegaCaseId]                  = None
+    customerDetails:             Option[List[CustomerDetail]],
+    contactDetails:              Option[ContactDetail],
+    regimeDigitalCorrespondence: Option[RegimeDigitalCorrespondence],
+    taxRegime:                   TaxRegime,
+    accountNumber:               String = "12345678",
+    hasAffordabilityAssessment:  Boolean = false,
+    caseID:                      Option[PegaCaseId] = None
   ): ArrangementRequest = {
     val regimeType = taxRegime match {
       case TaxRegime.Epaye => RegimeType.EPAYE
@@ -671,27 +679,29 @@ object TdAll {
           )
         )
       ),
-      customerDetails             = customerDetails,
-      individualDetails           = None,
-      addresses                   = Some(List(
-        Address(
-          addressType     = AddressType("Residential"),
-          addressLine1    = None,
-          addressLine2    = None,
-          addressLine3    = None,
-          addressLine4    = None,
-          rls             = None,
-          contactDetails  = contactDetails,
-          postCode        = None,
-          country         = None,
-          postcodeHistory = List(
-            PostcodeHistory(
-              addressPostcode = Postcode(SensitiveString("AA11AA")),
-              postcodeDate    = PostcodeDate(LocalDate.now())
+      customerDetails = customerDetails,
+      individualDetails = None,
+      addresses = Some(
+        List(
+          Address(
+            addressType = AddressType("Residential"),
+            addressLine1 = None,
+            addressLine2 = None,
+            addressLine3 = None,
+            addressLine4 = None,
+            rls = None,
+            contactDetails = contactDetails,
+            postCode = None,
+            country = None,
+            postcodeHistory = List(
+              PostcodeHistory(
+                addressPostcode = Postcode(SensitiveString("AA11AA")),
+                postcodeDate = PostcodeDate(LocalDate.now())
+              )
             )
           )
         )
-      )),
+      ),
       regimeDigitalCorrespondence = regimeDigitalCorrespondence
     )
   }
@@ -702,11 +712,18 @@ object TdAll {
   ): Option[List[CustomerDetail]] =
     Some(List(CustomerDetail(Some(Email(SensitiveString(email))), Some(source))))
 
-  def contactDetails(email: String = "bobross@joyofpainting.com", source: EmailSource = EmailSource.ETMP): Option[ContactDetail] =
+  def contactDetails(
+    email:  String = "bobross@joyofpainting.com",
+    source: EmailSource = EmailSource.ETMP
+  ): Option[ContactDetail] =
     Some(ContactDetail(None, None, None, Some(Email(SensitiveString(email))), Some(source), None))
 
-  val someRegimeDigitalCorrespondenceFalse: Option[RegimeDigitalCorrespondence] = Some(RegimeDigitalCorrespondence(value = false))
-  val someRegimeDigitalCorrespondenceTrue: Option[RegimeDigitalCorrespondence] = Some(RegimeDigitalCorrespondence(value = true))
+  val someRegimeDigitalCorrespondenceFalse: Option[RegimeDigitalCorrespondence] = Some(
+    RegimeDigitalCorrespondence(value = false)
+  )
+  val someRegimeDigitalCorrespondenceTrue: Option[RegimeDigitalCorrespondence]  = Some(
+    RegimeDigitalCorrespondence(value = true)
+  )
 
   def customerReference(taxRegime: TaxRegime): CustomerReference = taxRegime match {
     case TaxRegime.Epaye => CustomerReference("123PA44545546")

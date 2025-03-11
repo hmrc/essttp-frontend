@@ -42,7 +42,9 @@ object Ttp {
     WireMockHelpers.verifyWithBodyParse(url, ttpCorrelationIdHeader, expectedPayload)
 
   object Eligibility {
-    def stubRetrieveEligibility(taxRegime: TaxRegime)(jsonBody: String = TtpJsonResponses.ttpEligibilityCallJson(taxRegime, regimeDigitalCorrespondence = true)): StubMapping =
+    def stubRetrieveEligibility(taxRegime: TaxRegime)(
+      jsonBody: String = TtpJsonResponses.ttpEligibilityCallJson(taxRegime, regimeDigitalCorrespondence = true)
+    ): StubMapping =
       WireMockHelpers.stubForPostWithResponseBody(eligibilityUrl, jsonBody)
 
     def stubServiceUnavailableRetrieveEligibility(): StubMapping =
@@ -97,17 +99,25 @@ object Ttp {
     )
 
     def verifyTtpEnactArrangementRequest(
-        customerDetails:             Option[List[CustomerDetail]],
-        contactDetails:              Option[ContactDetail],
-        regimeDigitalCorrespondence: Option[RegimeDigitalCorrespondence],
-        taxRegime:                   TaxRegime,
-        accountNumber:               String                              = "12345678",
-        hasAffordability:            Boolean                             = false,
-        caseId:                      Option[PegaCaseId]                  = None
+      customerDetails:             Option[List[CustomerDetail]],
+      contactDetails:              Option[ContactDetail],
+      regimeDigitalCorrespondence: Option[RegimeDigitalCorrespondence],
+      taxRegime:                   TaxRegime,
+      accountNumber:               String = "12345678",
+      hasAffordability:            Boolean = false,
+      caseId:                      Option[PegaCaseId] = None
     )(using CryptoFormat): Unit =
       ttpVerify(
         enactArrangementUrl,
-        TdAll.arrangementRequest(customerDetails, contactDetails, regimeDigitalCorrespondence, taxRegime, accountNumber, hasAffordability, caseId)
+        TdAll.arrangementRequest(
+          customerDetails,
+          contactDetails,
+          regimeDigitalCorrespondence,
+          taxRegime,
+          accountNumber,
+          hasAffordability,
+          caseId
+        )
       )
   }
 
