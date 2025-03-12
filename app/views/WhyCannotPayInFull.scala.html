@@ -31,9 +31,9 @@
   requestSupport: RequestSupport
 )
 
-@(form: Form[Set[CannotPayReason]])(implicit request: Request[_])
+@(form: Form[Set[CannotPayReason]])(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.{languageFromRequest, legacyMessages}
 
 @key = @{
     "WhyCannotPayInFull"

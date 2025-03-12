@@ -19,17 +19,11 @@ package models
 import essttp.rootmodel.AmountInPence
 import essttp.rootmodel.ttp.eligibility.MainTrans
 import essttp.rootmodel.ttp.{DdInProgress, IsInterestBearingCharge}
-import play.api.libs.json.{Format, Json}
 
 final case class OverduePayment(
-    invoicePeriod:         InvoicePeriod,
-    amount:                AmountInPence,
-    interestBearingCharge: Option[IsInterestBearingCharge],
-    ddInProgress:          Option[DdInProgress]            = None,
-    mainTrans:             MainTrans
+  invoicePeriod:         InvoicePeriod,
+  amount:                AmountInPence,
+  interestBearingCharge: Option[IsInterestBearingCharge],
+  ddInProgress:          Option[DdInProgress] = None,
+  mainTrans:             MainTrans
 )
-
-object OverduePayment {
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  implicit val format: Format[OverduePayment] = Json.format[OverduePayment]
-}

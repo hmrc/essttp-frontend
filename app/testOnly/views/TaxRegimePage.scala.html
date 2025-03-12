@@ -20,7 +20,6 @@
 @import play.api.mvc.Request
 @import requests.RequestSupport
 @import testOnly.controllers.routes
-@import testOnly.views.html.TestOnlyLayout
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
@@ -32,9 +31,9 @@
   requestSupport: RequestSupport
 )
 
-@(form: Form[TaxRegime])(implicit request: Request[_])
+@(form: Form[TaxRegime])(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.{languageFromRequest, legacyMessages}
 
 @key = @{
     "taxRegime"

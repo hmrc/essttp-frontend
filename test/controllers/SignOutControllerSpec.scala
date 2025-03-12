@@ -22,6 +22,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.mvc.{Result, Session}
 import play.api.test.Helpers._
+import testsupport.Givens.canEqualPlaySession
 import testsupport.ItSpec
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.EssttpBackend
@@ -37,17 +38,17 @@ class SignOutControllerSpec extends ItSpec {
     "return the timed out page" in {
 
       val result: Future[Result] = controller.signOutFromTimeout(fakeRequest)
-      val pageContent: String = contentAsString(result)
-      val doc: Document = Jsoup.parse(pageContent)
+      val pageContent: String    = contentAsString(result)
+      val doc: Document          = Jsoup.parse(pageContent)
 
       RequestAssertions.assertGetRequestOk(result)
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1              = "For your security, we signed you out",
+        expectedH1 = "For your security, we signed you out",
         shouldBackLinkBePresent = false,
-        expectedSubmitUrl       = None,
-        signedIn                = false,
-        regimeBeingTested       = None
+        expectedSubmitUrl = None,
+        signedIn = false,
+        regimeBeingTested = None
       )
     }
   }
@@ -93,9 +94,9 @@ class SignOutControllerSpec extends ItSpec {
       s"[taxRegime = ${taxRegime.toString}] redirect to the tax regime specific exist survey route with no sessionId" in {
         val (origin, expectedRedirectLocation) = taxRegime match {
           case TaxRegime.Epaye => Origins.Epaye.Bta -> "/set-up-a-payment-plan/exit-survey/paye"
-          case TaxRegime.Vat   => Origins.Vat.Bta -> "/set-up-a-payment-plan/exit-survey/vat"
-          case TaxRegime.Sa    => Origins.Sa.Bta -> "/set-up-a-payment-plan/exit-survey/sa"
-          case TaxRegime.Simp  => Origins.Simp.Pta -> "/set-up-a-payment-plan/exit-survey/simp"
+          case TaxRegime.Vat   => Origins.Vat.Bta   -> "/set-up-a-payment-plan/exit-survey/vat"
+          case TaxRegime.Sa    => Origins.Sa.Bta    -> "/set-up-a-payment-plan/exit-survey/sa"
+          case TaxRegime.Simp  => Origins.Simp.Pta  -> "/set-up-a-payment-plan/exit-survey/simp"
         }
 
         stubCommonActions()

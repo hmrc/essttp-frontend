@@ -29,9 +29,9 @@
         requestSupport: RequestSupport
 )
 
-@(email: Email)(implicit request: Request[_])
+@(email: Email)(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.{languageFromRequest, legacyMessages}
 
 
 @title = @{Messages.EmailConfirmed.`Email address confirmed`.show}

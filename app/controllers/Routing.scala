@@ -37,34 +37,37 @@ object Routing {
   val clickedChangeFromSessionKey: String = "essttpClickedChangeFrom"
 
   def redirectToNext(
-      current:                 Call,
-      journey:                 Journey,
-      submittedValueUnchanged: Boolean
-  )(implicit request: AuthenticatedRequest[_], config: AppConfig): Result = {
+    current:                 Call,
+    journey:                 Journey,
+    submittedValueUnchanged: Boolean
+  )(using request: AuthenticatedRequest[?], config: AppConfig): Result = {
     val journeyRoutes: Map[Call, () => Call] = Map(
-      routes.LandingController.epayeLandingPage -> { () =>
+      routes.LandingController.epayeLandingPage                                                      -> { () =>
         routes.DetermineTaxIdController.determineTaxId
       },
-      routes.LandingController.vatLandingPage -> { () =>
+      routes.LandingController.vatLandingPage                                                        -> { () =>
         routes.DetermineTaxIdController.determineTaxId
       },
-      routes.DetermineTaxIdController.determineTaxId -> { () =>
+      routes.DetermineTaxIdController.determineTaxId                                                 -> { () =>
         routes.DetermineEligibilityController.determineEligibility
       },
-      routes.DetermineEligibilityController.determineEligibility -> { () =>
+      routes.DetermineEligibilityController.determineEligibility                                     -> { () =>
         journey match {
-          case _: BeforeEligibilityChecked => throw UpstreamErrorResponse("Could not find eligibility response to determine route", INTERNAL_SERVER_ERROR)
-          case j: AfterEligibilityChecked  => EligibilityRouter.nextPage(j.eligibilityCheckResult, j.taxRegime)
+          case _: JourneyStage.BeforeEligibilityChecked =>
+            throw UpstreamErrorResponse("Could not find eligibility response to determine route", INTERNAL_SERVER_ERROR)
+          case j: JourneyStage.AfterEligibilityChecked  =>
+            EligibilityRouter.nextPage(j.eligibilityCheckResult, j.taxRegime)
         }
       },
-      routes.WhyCannotPayInFullController.whyCannotPayInFull -> { () =>
+      routes.WhyCannotPayInFullController.whyCannotPayInFull                                         -> { () =>
         routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment
       },
-      routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment -> { () =>
+      routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment                                     -> { () =>
         journey match {
-          case _: BeforeAnsweredCanPayUpfront => throw UpstreamErrorResponse("Could not find CanPayUpfront answer to determine route", INTERNAL_SERVER_ERROR)
-          case j: AfterAnsweredCanPayUpfront  => canPayUpfrontRoute(j.canPayUpfront)
-          case j: AfterUpfrontPaymentAnswers =>
+          case _: JourneyStage.BeforeAnsweredCanPayUpfront =>
+            throw UpstreamErrorResponse("Could not find CanPayUpfront answer to determine route", INTERNAL_SERVER_ERROR)
+          case j: JourneyStage.AfterAnsweredCanPayUpfront  => canPayUpfrontRoute(j.canPayUpfront)
+          case j: JourneyStage.AfterUpfrontPaymentAnswers  =>
             val canPayUpfront = j.upfrontPaymentAnswers match {
               case UpfrontPaymentAnswers.NoUpfrontPayment          => CanPayUpfront(value = false)
               case _: UpfrontPaymentAnswers.DeclaredUpfrontPayment => CanPayUpfront(value = true)
@@ -72,105 +75,124 @@ object Routing {
             canPayUpfrontRoute(canPayUpfront)
         }
       },
-      routes.UpfrontPaymentController.upfrontPaymentAmount -> { () =>
+      routes.UpfrontPaymentController.upfrontPaymentAmount                                           -> { () =>
         routes.UpfrontPaymentController.upfrontPaymentSummary
       },
-      routes.UpfrontPaymentController.upfrontPaymentSummary -> { () =>
+      routes.UpfrontPaymentController.upfrontPaymentSummary                                          -> { () =>
         routes.DatesApiController.retrieveExtremeDates
       },
-      routes.DatesApiController.retrieveExtremeDates -> { () =>
+      routes.DatesApiController.retrieveExtremeDates                                                 -> { () =>
         routes.DetermineAffordabilityController.determineAffordability
       },
-      routes.DetermineAffordabilityController.determineAffordability -> { () =>
+      routes.DetermineAffordabilityController.determineAffordability                                 -> { () =>
         affordabilityRoute(journey)
       },
       routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(journey.taxRegime, Some(English)) -> { () =>
         canPayWithinSixMonthsRoute(journey, submittedValueUnchanged)
       },
-      routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(journey.taxRegime, Some(Welsh)) -> { () =>
+      routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(journey.taxRegime, Some(Welsh))   -> { () =>
         canPayWithinSixMonthsRoute(journey, submittedValueUnchanged)
       },
-      routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(journey.taxRegime, None) -> { () =>
+      routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(journey.taxRegime, None)          -> { () =>
         canPayWithinSixMonthsRoute(journey, submittedValueUnchanged)
       },
-      routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount -> { () =>
+      routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount                              -> { () =>
         routes.PaymentDayController.paymentDay
       },
-      routes.PaymentDayController.paymentDay -> { () =>
+      routes.PaymentDayController.paymentDay                                                         -> { () =>
         routes.DatesApiController.retrieveStartDates
       },
-      routes.DatesApiController.retrieveStartDates -> { () =>
+      routes.DatesApiController.retrieveStartDates                                                   -> { () =>
         routes.DetermineAffordableQuotesController.retrieveAffordableQuotes
       },
-      routes.DetermineAffordableQuotesController.retrieveAffordableQuotes -> { () =>
+      routes.DetermineAffordableQuotesController.retrieveAffordableQuotes                            -> { () =>
         routes.InstalmentsController.instalmentOptions
       },
-      routes.InstalmentsController.instalmentOptions -> { () =>
+      routes.InstalmentsController.instalmentOptions                                                 -> { () =>
         routes.PaymentScheduleController.checkPaymentSchedule
       },
-      routes.PaymentScheduleController.checkPaymentSchedule -> { () =>
+      routes.PaymentScheduleController.checkPaymentSchedule                                          -> { () =>
         routes.BankDetailsController.detailsAboutBankAccount
       },
-      routes.PegaController.callback(TaxRegime.Epaye, None) -> { () =>
+      routes.PegaController.callback(TaxRegime.Epaye, None)                                          -> { () =>
         routes.BankDetailsController.detailsAboutBankAccount
       },
-      routes.PegaController.callback(TaxRegime.Vat, None) -> { () =>
+      routes.PegaController.callback(TaxRegime.Vat, None)                                            -> { () =>
         routes.BankDetailsController.detailsAboutBankAccount
       },
-      routes.PegaController.callback(TaxRegime.Sa, None) -> { () =>
+      routes.PegaController.callback(TaxRegime.Sa, None)                                             -> { () =>
         routes.BankDetailsController.detailsAboutBankAccount
       },
-      routes.PegaController.callback(TaxRegime.Simp, None) -> { () =>
+      routes.PegaController.callback(TaxRegime.Simp, None)                                           -> { () =>
         routes.BankDetailsController.detailsAboutBankAccount
       },
-      routes.BankDetailsController.detailsAboutBankAccount -> { () =>
+      routes.BankDetailsController.detailsAboutBankAccount                                           -> { () =>
         journey match {
-          case _: BeforeEnteredCanYouSetUpDirectDebit =>
-            throw UpstreamErrorResponse("Could not find DetailsAboutBankAccount answer to determine route", INTERNAL_SERVER_ERROR)
-          case j: AfterEnteredCanYouSetUpDirectDebit =>
+          case _: JourneyStage.BeforeEnteredCanYouSetUpDirectDebit =>
+            throw UpstreamErrorResponse(
+              "Could not find DetailsAboutBankAccount answer to determine route",
+              INTERNAL_SERVER_ERROR
+            )
+          case j: JourneyStage.AfterEnteredCanYouSetUpDirectDebit  =>
             detailsAboutBankAccountRoute(j.canSetUpDirectDebitAnswer.isAccountHolder)
         }
       },
-      routes.BankDetailsController.enterBankDetails -> { () =>
+      routes.BankDetailsController.enterBankDetails                                                  -> { () =>
         routes.BankDetailsController.checkBankDetails
       },
-      routes.BankDetailsController.checkBankDetails -> { () =>
+      routes.BankDetailsController.checkBankDetails                                                  -> { () =>
         routes.TermsAndConditionsController.termsAndConditions
       },
-      routes.TermsAndConditionsController.termsAndConditions -> { () =>
+      routes.TermsAndConditionsController.termsAndConditions                                         -> { () =>
         journey match {
-          case _: BeforeAgreedTermsAndConditions =>
-            throw UpstreamErrorResponse("Could not find IsEmailAddressRequired answer to determine route", INTERNAL_SERVER_ERROR)
+          case _: JourneyStage.BeforeAgreedTermsAndConditions =>
+            throw UpstreamErrorResponse(
+              "Could not find IsEmailAddressRequired answer to determine route",
+              INTERNAL_SERVER_ERROR
+            )
 
-          case j: AfterAgreedTermsAndConditions =>
+          case j: JourneyStage.AfterAgreedTermsAndConditions =>
             val eligibilityCheckResult = j match {
-              case e: AfterEligibilityChecked => e.eligibilityCheckResult
+              case e: JourneyStage.AfterEligibilityChecked => e.eligibilityCheckResult
             }
-            termsAndConditionsRoute(j.isEmailAddressRequired, eligibilityCheckResult, allowSubmitArrangement = true, j.taxRegime)
+            termsAndConditionsRoute(
+              j.isEmailAddressRequired,
+              eligibilityCheckResult,
+              allowSubmitArrangement = true,
+              j.taxRegime
+            )
         }
       },
-      routes.EmailController.enterEmail -> { () =>
+      routes.EmailController.enterEmail                                                              -> { () =>
         routes.EmailController.requestVerification
       },
-      routes.EmailController.whichEmailDoYouWantToUse -> { () =>
+      routes.EmailController.whichEmailDoYouWantToUse                                                -> { () =>
         routes.EmailController.requestVerification
       },
-      routes.EmailController.emailCallback -> { () =>
+      routes.EmailController.emailCallback                                                           -> { () =>
         journey match {
-          case _: BeforeEmailAddressVerificationResult => throw UpstreamErrorResponse("Could not find EmailVerificationResult answer to determine route", INTERNAL_SERVER_ERROR)
-          case j: AfterEmailAddressVerificationResult  => emailVerificationResultRoute(j.emailVerificationResult)
-          case j: AfterEmailVerificationPhase =>
+          case _: JourneyStage.BeforeEmailAddressVerificationResult =>
+            throw UpstreamErrorResponse(
+              "Could not find EmailVerificationResult answer to determine route",
+              INTERNAL_SERVER_ERROR
+            )
+          case j: JourneyStage.AfterEmailAddressVerificationResult  =>
+            emailVerificationResultRoute(j.emailVerificationResult)
+          case j: JourneyStage.AfterEmailVerificationPhase          =>
             j.emailVerificationAnswers match {
-              case EmailVerificationAnswers.NoEmailJourney =>
-                throw UpstreamErrorResponse("Trying to determine next for email callback endpoint but no email journey required in session", INTERNAL_SERVER_ERROR)
+              case EmailVerificationAnswers.NoEmailJourney   =>
+                throw UpstreamErrorResponse(
+                  "Trying to determine next for email callback endpoint but no email journey required in session",
+                  INTERNAL_SERVER_ERROR
+                )
               case e: EmailVerificationAnswers.EmailVerified => emailVerificationResultRoute(e.emailVerificationResult)
             }
         }
       },
-      routes.EmailController.emailAddressConfirmed -> { () =>
+      routes.EmailController.emailAddressConfirmed                                                   -> { () =>
         routes.SubmitArrangementController.submitArrangement
       },
-      routes.SubmitArrangementController.submitArrangement -> { () =>
+      routes.SubmitArrangementController.submitArrangement                                           -> { () =>
         SubmitArrangementController.whichPaymentPlanSetupPage(journey.taxRegime)
       }
     )
@@ -182,7 +204,10 @@ object Routing {
       case _ =>
         val next = journeyRoutes.getOrElse(
           current,
-          throw UpstreamErrorResponse(s"Could not determine next page for current call ${current.toString}", INTERNAL_SERVER_ERROR)
+          throw UpstreamErrorResponse(
+            s"Could not determine next page for current call ${current.toString}",
+            INTERNAL_SERVER_ERROR
+          )
         )()
         Redirect(next)
     }
@@ -190,27 +215,32 @@ object Routing {
     redirect.removingFromSession(clickedChangeFromSessionKey)
   }
 
-  private def redirectToAfterUnchangedAnswerFromCYA(journey: Journey)(implicit request: AuthenticatedRequest[_], config: AppConfig): String = {
+  private def redirectToAfterUnchangedAnswerFromCYA(
+    journey: Journey
+  )(using request: AuthenticatedRequest[?], config: AppConfig): String =
     journey match {
-      case _: Journey.AfterStartedPegaCase =>
+      case _: JourneyStage.AfterStartedPegaCase =>
         config.pegaChangeLinkReturnUrl(journey.taxRegime, request.lang)
 
-      case _: Journey.AfterSelectedPaymentPlan =>
+      case _: JourneyStage.AfterSelectedPaymentPlan =>
         routes.PaymentScheduleController.checkPaymentSchedule.url
 
-      case j: Journey.AfterCheckedPaymentPlan =>
+      case j: JourneyStage.AfterCheckedPaymentPlan =>
         j.paymentPlanAnswers match {
-          case _: PaymentPlanAnswers.PaymentPlanNoAffordability    => routes.PaymentScheduleController.checkPaymentSchedule.url
-          case _: PaymentPlanAnswers.PaymentPlanAfterAffordability => config.pegaChangeLinkReturnUrl(journey.taxRegime, request.lang)
+          case _: PaymentPlanAnswers.PaymentPlanNoAffordability    =>
+            routes.PaymentScheduleController.checkPaymentSchedule.url
+          case _: PaymentPlanAnswers.PaymentPlanAfterAffordability =>
+            config.pegaChangeLinkReturnUrl(journey.taxRegime, request.lang)
         }
 
       case other =>
-        Errors.throwServerErrorException(s"Cannot change answer from check your payment plan page in journey state ${other.name}")
+        Errors.throwServerErrorException(
+          s"Cannot change answer from check your payment plan page in journey state ${other.name}"
+        )
     }
-  }
 
   def latestPossiblePage(journey: Journey): Call = journey match {
-    case j: Journey.Stages.Started =>
+    case j: Journey.Started =>
       j.taxRegime match {
         case TaxRegime.Epaye => routes.LandingController.epayeLandingPage
         case TaxRegime.Vat   => routes.LandingController.vatLandingPage
@@ -218,62 +248,75 @@ object Routing {
         case TaxRegime.Simp  => routes.LandingController.simpLandingPage
       }
 
-    case _: Journey.Stages.ComputedTaxId =>
+    case _: Journey.ComputedTaxId =>
       routes.DetermineEligibilityController.determineEligibility
 
-    case j: Journey.Stages.EligibilityChecked =>
+    case j: Journey.EligibilityChecked =>
       EligibilityRouter.nextPage(j.eligibilityCheckResult, j.taxRegime)
 
-    case _: Journey.Stages.ObtainedWhyCannotPayInFullAnswers =>
+    case _: Journey.ObtainedWhyCannotPayInFullAnswers =>
       routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment
 
-    case j: Journey.Stages.AnsweredCanPayUpfront =>
+    case j: Journey.AnsweredCanPayUpfront =>
       canPayUpfrontRoute(j.canPayUpfront)
 
-    case _: Journey.Stages.EnteredUpfrontPaymentAmount          => routes.UpfrontPaymentController.upfrontPaymentSummary
-    case _: Journey.Stages.RetrievedExtremeDates                => routes.DetermineAffordabilityController.determineAffordability
-    case j: Journey.Stages.RetrievedAffordabilityResult         => affordabilityRoute(j)
-    case _: Journey.Stages.ObtainedCanPayWithinSixMonthsAnswers => routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(journey.taxRegime, None)
-    case _: Journey.Stages.StartedPegaCase                      => routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(journey.taxRegime, None)
-    case _: Journey.Stages.EnteredMonthlyPaymentAmount          => routes.PaymentDayController.paymentDay
-    case _: Journey.Stages.EnteredDayOfMonth                    => routes.DatesApiController.retrieveStartDates
-    case _: Journey.Stages.RetrievedStartDates                  => routes.DetermineAffordableQuotesController.retrieveAffordableQuotes
-    case _: Journey.Stages.RetrievedAffordableQuotes            => routes.InstalmentsController.instalmentOptions
-    case _: Journey.Stages.ChosenPaymentPlan                    => routes.PaymentScheduleController.checkPaymentSchedule
-    case _: Journey.Stages.CheckedPaymentPlan                   => routes.BankDetailsController.detailsAboutBankAccount
-    case j: Journey.Stages.EnteredCanYouSetUpDirectDebit        => detailsAboutBankAccountRoute(j.canSetUpDirectDebitAnswer.isAccountHolder)
-    case _: Journey.Stages.EnteredDirectDebitDetails            => routes.BankDetailsController.checkBankDetails
-    case _: Journey.Stages.ConfirmedDirectDebitDetails          => routes.TermsAndConditionsController.termsAndConditions
+    case _: Journey.EnteredUpfrontPaymentAmount          => routes.UpfrontPaymentController.upfrontPaymentSummary
+    case _: Journey.RetrievedExtremeDates                => routes.DetermineAffordabilityController.determineAffordability
+    case j: Journey.RetrievedAffordabilityResult         => affordabilityRoute(j)
+    case _: Journey.ObtainedCanPayWithinSixMonthsAnswers =>
+      routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(journey.taxRegime, None)
+    case _: Journey.StartedPegaCase                      =>
+      routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(journey.taxRegime, None)
+    case _: Journey.EnteredMonthlyPaymentAmount          => routes.PaymentDayController.paymentDay
+    case _: Journey.EnteredDayOfMonth                    => routes.DatesApiController.retrieveStartDates
+    case _: Journey.RetrievedStartDates                  => routes.DetermineAffordableQuotesController.retrieveAffordableQuotes
+    case _: Journey.RetrievedAffordableQuotes            => routes.InstalmentsController.instalmentOptions
+    case _: Journey.ChosenPaymentPlan                    => routes.PaymentScheduleController.checkPaymentSchedule
+    case _: Journey.CheckedPaymentPlan                   => routes.BankDetailsController.detailsAboutBankAccount
+    case j: Journey.EnteredCanYouSetUpDirectDebit        =>
+      detailsAboutBankAccountRoute(j.canSetUpDirectDebitAnswer.isAccountHolder)
+    case _: Journey.EnteredDirectDebitDetails            => routes.BankDetailsController.checkBankDetails
+    case _: Journey.ConfirmedDirectDebitDetails          => routes.TermsAndConditionsController.termsAndConditions
 
-    case j: Journey.Stages.AgreedTermsAndConditions =>
-      termsAndConditionsRoute(j.isEmailAddressRequired, j.eligibilityCheckResult, allowSubmitArrangement = false, j.taxRegime)
+    case j: Journey.AgreedTermsAndConditions =>
+      termsAndConditionsRoute(
+        j.isEmailAddressRequired,
+        j.eligibilityCheckResult,
+        allowSubmitArrangement = false,
+        j.taxRegime
+      )
 
-    case _: Journey.Stages.SelectedEmailToBeVerified =>
+    case _: Journey.SelectedEmailToBeVerified =>
       routes.EmailController.requestVerification
 
-    case j: Journey.Stages.EmailVerificationComplete =>
+    case j: Journey.EmailVerificationComplete =>
       emailVerificationResultRoute(j.emailVerificationResult)
 
-    case j: Journey.Stages.SubmittedArrangement =>
+    case j: Journey.SubmittedArrangement =>
       SubmitArrangementController.whichPaymentPlanSetupPage(j.taxRegime)
   }
 
-  private def canPayWithinSixMonthsRoute(journey: Journey, submittedValueUnchanged: Boolean)
-    (implicit request: AuthenticatedRequest[_], config: AppConfig): Call = {
+  private def canPayWithinSixMonthsRoute(journey: Journey, submittedValueUnchanged: Boolean)(using
+    AuthenticatedRequest[?],
+    AppConfig
+  ): Call =
     journey match {
-      case _: BeforeCanPayWithinSixMonthsAnswers =>
-        throw UpstreamErrorResponse("Could not find CanPayWithinSixMonths answer to determine route", INTERNAL_SERVER_ERROR)
-      case j: AfterCanPayWithinSixMonthsAnswers =>
+      case _: JourneyStage.BeforeCanPayWithinSixMonthsAnswers =>
+        throw UpstreamErrorResponse(
+          "Could not find CanPayWithinSixMonths answer to determine route",
+          INTERNAL_SERVER_ERROR
+        )
+      case j: JourneyStage.AfterCanPayWithinSixMonthsAnswers  =>
         canPayWithinSixMonthsRoute(j.canPayWithinSixMonthsAnswers, submittedValueUnchanged, journey)
     }
-  }
 
   private def canPayUpfrontRoute(canPayUpfront: CanPayUpfront): Call =
     if (canPayUpfront.value) routes.UpfrontPaymentController.upfrontPaymentAmount
     else routes.DatesApiController.retrieveExtremeDates
 
   private def affordabilityRoute(journey: Journey): Call =
-    if (journey.affordabilityEnabled.contains(true)) routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(journey.taxRegime, None)
+    if (journey.affordabilityEnabled.contains(true))
+      routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(journey.taxRegime, None)
     else routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount
 
   private def detailsAboutBankAccountRoute(isAccountHolder: Boolean): Call =
@@ -282,10 +325,10 @@ object Routing {
 
   // prevent accidentally submitting arrangement twice
   private def termsAndConditionsRoute(
-      isEmailAddressRequired: IsEmailAddressRequired,
-      eligibilityCheckResult: EligibilityCheckResult,
-      allowSubmitArrangement: Boolean,
-      taxRegime:              TaxRegime
+    isEmailAddressRequired: IsEmailAddressRequired,
+    eligibilityCheckResult: EligibilityCheckResult,
+    allowSubmitArrangement: Boolean,
+    taxRegime:              TaxRegime
   ): Call =
     if (isEmailAddressRequired) {
       if (eligibilityCheckResult.email.isDefined) routes.EmailController.whichEmailDoYouWantToUse
@@ -302,10 +345,13 @@ object Routing {
       case EmailVerificationResult.Locked   => routes.EmailController.tooManyPasscodeAttempts
     }
 
-  private def canPayWithinSixMonthsRoute(canPayWithinSixMonths: CanPayWithinSixMonthsAnswers, submittedValueUnchanged: Boolean, journey: Journey)
-    (implicit request: AuthenticatedRequest[_], config: AppConfig): Call =
+  private def canPayWithinSixMonthsRoute(
+    canPayWithinSixMonths:   CanPayWithinSixMonthsAnswers,
+    submittedValueUnchanged: Boolean,
+    journey:                 Journey
+  )(using request: AuthenticatedRequest[?], config: AppConfig): Call =
     canPayWithinSixMonths match {
-      case CanPayWithinSixMonthsAnswers.AnswerNotRequired =>
+      case CanPayWithinSixMonthsAnswers.AnswerNotRequired             =>
         routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount
       case CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths(canPay) =>
         if (canPay) routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount

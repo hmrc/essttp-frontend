@@ -16,33 +16,31 @@
 
 package models.audit.eligibility
 
-import cats.implicits.catsSyntaxEq
-import cats.instances.string._
 import essttp.rootmodel.ttp.eligibility.ChargeTypeAssessment
 import models.audit.{AuditDetail, TaxDetail}
 import play.api.libs.json._
 
 final case class EligibilityCheckAuditDetail(
-    eligibilityResult:               EligibilityResult,
-    enrollmentReasons:               Option[EnrollmentReasons],
-    noEligibilityReasons:            Int,
-    eligibilityReasons:              List[String],
-    origin:                          String,
-    taxType:                         String,
-    taxDetail:                       TaxDetail,
-    authProviderId:                  String,
-    chargeTypeAssessment:            List[ChargeTypeAssessment],
-    correlationId:                   String,
-    futureChargeLiabilitiesExcluded: Option[Boolean],
-    regimeDigitalCorrespondence:     Boolean
+  eligibilityResult:               EligibilityResult,
+  enrollmentReasons:               Option[EnrollmentReasons],
+  noEligibilityReasons:            Int,
+  eligibilityReasons:              List[String],
+  origin:                          String,
+  taxType:                         String,
+  taxDetail:                       TaxDetail,
+  authProviderId:                  String,
+  chargeTypeAssessment:            List[ChargeTypeAssessment],
+  correlationId:                   String,
+  futureChargeLiabilitiesExcluded: Option[Boolean],
+  regimeDigitalCorrespondence:     Boolean
 ) extends AuditDetail {
   val auditType: String = "EligibilityCheck"
 }
 
 object EligibilityCheckAuditDetail {
-  implicit val writes: OWrites[EligibilityCheckAuditDetail] = {
+  given OWrites[EligibilityCheckAuditDetail] = {
     val w: OWrites[EligibilityCheckAuditDetail] = Json.writes[EligibilityCheckAuditDetail]
-    w.transform { jsObject: JsObject =>
+    w.transform { (jsObject: JsObject) =>
       jsObject
         .transformIfFieldName("debtTotalAmount", penceToPounds)
         .transformIfFieldName("accruedInterest", penceToPounds)
@@ -55,31 +53,31 @@ object EligibilityCheckAuditDetail {
     case e           => throw new IllegalArgumentException(s"Expected JsNumber but got ${e.getClass.toString}")
   }
 
-  implicit class JsObjectStuff(private val jsObject: JsObject) extends AnyVal {
+  extension (jsObject: JsObject) {
     def transformIfFieldName(fieldName: String, transformation: JsValue => JsValue): JsObject = {
-        @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
-        def transform(currentFieldNameAndJsValue: (String, JsValue)): (String, JsValue) = {
-          val (currentFieldName, currentJsValue) = currentFieldNameAndJsValue
-          currentJsValue match {
-            case JsObject(underlying) =>
-              val transformedJsObject = JsObject(underlying.map(transform))
-              if (currentFieldName === fieldName) {
-                (currentFieldName, transformation(transformedJsObject))
-              } else {
-                (currentFieldName, transformedJsObject)
-              }
-            case JsArray(arr) =>
-              val transformedJsArray: JsArray = JsArray(arr.map(j => transform((currentFieldName, j))._2))
-              if (currentFieldName === fieldName) {
-                (currentFieldName, transformation(transformedJsArray))
-              } else {
-                (currentFieldName, transformedJsArray)
-              }
-            case value if currentFieldName === fieldName => (currentFieldName, transformation(value))
-            case value if currentFieldName =!= fieldName => (currentFieldName, value)
-            case value: JsValue                          => (currentFieldName, value)
-          }
+      @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
+      def transform(currentFieldNameAndJsValue: (String, JsValue)): (String, JsValue) = {
+        val (currentFieldName, currentJsValue) = currentFieldNameAndJsValue
+        currentJsValue match {
+          case JsObject(underlying)                   =>
+            val transformedJsObject = JsObject(underlying.map(transform))
+            if (currentFieldName == fieldName) {
+              (currentFieldName, transformation(transformedJsObject))
+            } else {
+              (currentFieldName, transformedJsObject)
+            }
+          case JsArray(arr)                           =>
+            val transformedJsArray: JsArray = JsArray(arr.map(j => transform((currentFieldName, j))._2))
+            if (currentFieldName == fieldName) {
+              (currentFieldName, transformation(transformedJsArray))
+            } else {
+              (currentFieldName, transformedJsArray)
+            }
+          case value if currentFieldName == fieldName => (currentFieldName, transformation(value))
+          case value if currentFieldName != fieldName => (currentFieldName, value)
+          case value: JsValue                         => (currentFieldName, value)
         }
+      }
 
       JsObject(jsObject.fieldSet.map(transform).toSeq)
     }

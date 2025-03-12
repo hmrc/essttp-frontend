@@ -22,9 +22,9 @@
 
 @this(requestSupport: RequestSupport)
 
-@(maxAmountOfDebt: AmountInPence)(implicit request: AuthenticatedJourneyRequest[_])
+@(maxAmountOfDebt: AmountInPence)(implicit request: AuthenticatedJourneyRequest[?])
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 <p class="govuk-body">
 @{

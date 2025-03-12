@@ -23,7 +23,7 @@ import play.api.data.Forms.mapping
 import play.api.data.{Form, Forms}
 
 object UpfrontPaymentAmountForm {
-  def form(maximumDebtAmount: DebtTotalAmount, minimumPaymentAmount: AmountInPence): Form[BigDecimal] = {
+  def form(maximumDebtAmount: DebtTotalAmount, minimumPaymentAmount: AmountInPence): Form[BigDecimal] =
     Form(
       mapping(
         "UpfrontPaymentAmount" -> Forms.of(
@@ -31,5 +31,4 @@ object UpfrontPaymentAmountForm {
         )
       )(identity)(Some(_))
     )
-  }
 }

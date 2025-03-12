@@ -28,9 +28,9 @@
         requestSupport: RequestSupport
 )
 
-@()(implicit request: Request[_])
+@()(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 @title = @{Messages.Shuttered.`Sorry the service is unavailable`.show}
 

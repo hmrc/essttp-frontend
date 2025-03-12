@@ -16,7 +16,6 @@
 
 package controllers.pagerouters
 
-import cats.syntax.eq._
 import controllers.routes
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.TaxRegime.{Sa, Simp}
@@ -27,13 +26,12 @@ import play.api.mvc.Call
 
 object EligibilityRouter {
 
-  def nextPage(eligibilityResult: EligibilityCheckResult, taxRegime: TaxRegime): Call = {
-
+  def nextPage(eligibilityResult: EligibilityCheckResult, taxRegime: TaxRegime): Call =
     if (eligibilityResult.isEligible) {
       routes.YourBillController.yourBill
     } else {
       EligibilityErrors.toEligibilityError(eligibilityResult.eligibilityRules) match {
-        case ee @ Some(MultipleReasons) =>
+        case ee @ Some(MultipleReasons)                  =>
           determineWhereToGoBasedOnHierarchy(
             ee,
             eligibilityResult.eligibilityRules.part1.isLessThanMinDebtAllowance,
@@ -41,45 +39,53 @@ object EligibilityRouter {
             eligibilityResult.eligibilityRules.part1.hasRlsOnAddress,
             taxRegime
           )
-        case None                                    => whichGenericIneligiblePage(taxRegime)
-        case Some(HasRlsOnAddress)                   => whichGenericRLSPage(taxRegime)
-        case Some(MarkedAsInsolvent)                 => whichGenericIneligiblePage(taxRegime)
-        case Some(IsLessThanMinDebtAllowance)        => whichDebtTooSmallPage(taxRegime)
-        case Some(IsMoreThanMaxDebtAllowance)        => whichDebtTooLargePage(taxRegime)
-        case Some(DisallowedChargeLockTypes)         => whichGenericIneligiblePage(taxRegime)
-        case Some(ChargesOverMaxDebtAge)             => whichDebtTooOldPage(taxRegime)
-        case Some(ExistingTtp)                       => whichExistingPlanPage(taxRegime)
-        case Some(IneligibleChargeTypes)             => whichGenericIneligiblePage(taxRegime)
-        case Some(MissingFiledReturns)               => whichFileYourReturnsPage(taxRegime)
-        case Some(HasInvalidInterestSignals)         => whichGenericIneligiblePage(taxRegime)
-        case Some(HasInvalidInterestSignalsCESA)     => whichGenericIneligiblePage(taxRegime)
-        case Some(DmSpecialOfficeProcessingRequired) => whichGenericIneligiblePage(taxRegime)
-        case Some(NoDueDatesReached) => if (taxRegime =!= Sa) {
-          whichNoDueDatesReachedPage(taxRegime)
-        } else { whichGenericIneligiblePage(taxRegime) }
-        case Some(CannotFindLockReason)           => whichGenericIneligiblePage(taxRegime)
-        case Some(CreditsNotAllowed)              => whichGenericIneligiblePage(taxRegime)
-        case Some(IsMoreThanMaxPaymentReference)  => whichGenericIneligiblePage(taxRegime)
-        case Some(ChargesBeforeMaxAccountingDate) => whichDebtBeforeAccountingDatePage(taxRegime)
-        case Some(HasDisguisedRemuneration)       => whichGenericIneligiblePage(taxRegime)
-        case Some(HasCapacitor)                   => whichGenericIneligiblePage(taxRegime)
+        case None                                        => whichGenericIneligiblePage(taxRegime)
+        case Some(HasRlsOnAddress)                       => whichGenericRLSPage(taxRegime)
+        case Some(MarkedAsInsolvent)                     => whichGenericIneligiblePage(taxRegime)
+        case Some(IsLessThanMinDebtAllowance)            => whichDebtTooSmallPage(taxRegime)
+        case Some(IsMoreThanMaxDebtAllowance)            => whichDebtTooLargePage(taxRegime)
+        case Some(DisallowedChargeLockTypes)             => whichGenericIneligiblePage(taxRegime)
+        case Some(ChargesOverMaxDebtAge)                 => whichDebtTooOldPage(taxRegime)
+        case Some(ExistingTtp)                           => whichExistingPlanPage(taxRegime)
+        case Some(IneligibleChargeTypes)                 => whichGenericIneligiblePage(taxRegime)
+        case Some(MissingFiledReturns)                   => whichFileYourReturnsPage(taxRegime)
+        case Some(HasInvalidInterestSignals)             => whichGenericIneligiblePage(taxRegime)
+        case Some(HasInvalidInterestSignalsCESA)         => whichGenericIneligiblePage(taxRegime)
+        case Some(DmSpecialOfficeProcessingRequired)     => whichGenericIneligiblePage(taxRegime)
+        case Some(NoDueDatesReached)                     =>
+          if (taxRegime != Sa) {
+            whichNoDueDatesReachedPage(taxRegime)
+          } else { whichGenericIneligiblePage(taxRegime) }
+        case Some(CannotFindLockReason)                  => whichGenericIneligiblePage(taxRegime)
+        case Some(CreditsNotAllowed)                     => whichGenericIneligiblePage(taxRegime)
+        case Some(IsMoreThanMaxPaymentReference)         => whichGenericIneligiblePage(taxRegime)
+        case Some(ChargesBeforeMaxAccountingDate)        => whichDebtBeforeAccountingDatePage(taxRegime)
+        case Some(HasDisguisedRemuneration)              => whichGenericIneligiblePage(taxRegime)
+        case Some(HasCapacitor)                          => whichGenericIneligiblePage(taxRegime)
         case Some(DmSpecialOfficeProcessingRequiredCDCS) =>
-          if (taxRegime === Sa) whichGenericIneligiblePage(taxRegime)
-          else throw new NotImplementedError(s"dmSpecialOfficeProcessingRequiredCDCS ineligibility reason not relevant to ${taxRegime.entryName}")
-        case Some(IsAnMtdCustomer) => whichGenericIneligiblePage(taxRegime)
+          if (taxRegime == Sa) whichGenericIneligiblePage(taxRegime)
+          else
+            throw new NotImplementedError(
+              s"dmSpecialOfficeProcessingRequiredCDCS ineligibility reason not relevant to ${taxRegime.entryName}"
+            )
+        case Some(IsAnMtdCustomer)                       => whichGenericIneligiblePage(taxRegime)
         case Some(DmSpecialOfficeProcessingRequiredCESA) =>
-          if (taxRegime === Simp) throw new NotImplementedError(s"DmSpecialOfficeProcessingRequiredCESA ineligibility reason not relevant to ${taxRegime.entryName}")
+          if (taxRegime == Simp)
+            throw new NotImplementedError(
+              s"DmSpecialOfficeProcessingRequiredCESA ineligibility reason not relevant to ${taxRegime.entryName}"
+            )
           else whichGenericIneligiblePage(taxRegime)
-        case Some(NoMtditsaEnrollment) =>
-          if (taxRegime === Sa) routes.NotEnrolledController.notMdtitsaEnrolled
-          else throw new NotImplementedError(s"NoMtditsaEnrollment ineligibility reason not relevant to ${taxRegime.entryName}")
+        case Some(NoMtditsaEnrollment)                   =>
+          if (taxRegime == Sa) routes.NotEnrolledController.notMdtitsaEnrolled
+          else
+            throw new NotImplementedError(
+              s"NoMtditsaEnrollment ineligibility reason not relevant to ${taxRegime.entryName}"
+            )
       }
     }
-  }
 
-  /**
-   * To be used when there are more than one 'flavour' of a lockout page. Design want them to have different urls.
-   */
+  /** To be used when there are more than one 'flavour' of a lockout page. Design want them to have different urls.
+    */
   private def whichGenericIneligiblePage(taxRegime: TaxRegime): Call = taxRegime match {
     case TaxRegime.Epaye => routes.IneligibleController.payeGenericIneligiblePage
     case TaxRegime.Vat   => routes.IneligibleController.vatGenericIneligiblePage
@@ -133,19 +139,19 @@ object EligibilityRouter {
   Requirement from business is that if multiple reasons exist but any of them are isLessThanMinDebtAllowance,
   go to debt too small page, unless reason is also NoDueDatesReached. If neither of these two are true, then hasRlsOnAddress
   takes precedence over all other eligibility rules.
-  */
+   */
   private def determineWhereToGoBasedOnHierarchy(
-      maybeEligibilityError:      Option[EligibilityError],
-      isLessThanMinDebtAllowance: Boolean,
-      dueDatesReached:            Boolean,
-      hasRlsOnAddress:            Boolean,
-      taxRegime:                  TaxRegime
+    maybeEligibilityError:      Option[EligibilityError],
+    isLessThanMinDebtAllowance: Boolean,
+    dueDatesReached:            Boolean,
+    hasRlsOnAddress:            Boolean,
+    taxRegime:                  TaxRegime
   ): Call = (maybeEligibilityError, isLessThanMinDebtAllowance, dueDatesReached, hasRlsOnAddress, taxRegime) match {
-    case (Some(MultipleReasons), _, true, _, Sa) => routes.IneligibleController.saGenericIneligiblePage
-    case (Some(MultipleReasons), _, true, _, _) => whichNoDueDatesReachedPage(taxRegime)
-    case (Some(MultipleReasons), true, false, _, _) => whichDebtTooSmallPage(taxRegime)
+    case (Some(MultipleReasons), _, true, _, Sa)        => routes.IneligibleController.saGenericIneligiblePage
+    case (Some(MultipleReasons), _, true, _, _)         => whichNoDueDatesReachedPage(taxRegime)
+    case (Some(MultipleReasons), true, false, _, _)     => whichDebtTooSmallPage(taxRegime)
     case (Some(MultipleReasons), false, false, true, _) => whichGenericRLSPage(taxRegime)
-    case _ => whichGenericIneligiblePage(taxRegime)
+    case _                                              => whichGenericIneligiblePage(taxRegime)
   }
 
   private def whichNoDueDatesReachedPage(taxRegime: TaxRegime): Call = taxRegime match {

@@ -22,9 +22,9 @@
 
 @this(requestSupport: RequestSupport)
 
-@(makeAPaymentOnlineLink: String)(implicit request: AuthenticatedJourneyRequest[_])
+@(makeAPaymentOnlineLink: String)(implicit request: AuthenticatedJourneyRequest[?])
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 <p class="govuk-body">
 @{

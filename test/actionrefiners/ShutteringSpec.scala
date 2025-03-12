@@ -26,7 +26,7 @@ import org.jsoup.nodes.Document
 import play.api.http.Status
 import play.api.test.Helpers._
 import testsupport.ItSpec
-import testsupport.TdRequest.FakeRequestOps
+import testsupport.TdRequest._
 import testsupport.reusableassertions.ContentAssertions
 import testsupport.stubs.{AuthStub, EssttpBackend}
 
@@ -35,15 +35,15 @@ trait ShutteringSpec { this: ItSpec =>
   lazy val appConfig = app.injector.instanceOf[AppConfig]
 
   def assertShutteringPageContent(
-      doc:       Document,
-      taxRegime: Option[TaxRegime],
-      language:  Language
+    doc:       Document,
+    taxRegime: Option[TaxRegime],
+    language:  Language
   ): Unit = {
 
     val (expectedH1, expectedLink) = language match {
       case Languages.English =>
         ("Sorry, the service is unavailable", appConfig.Urls.businessPaymentSupportService)
-      case Languages.Welsh =>
+      case Languages.Welsh   =>
         ("Mae’n ddrwg gennym – nid yw’r gwasanaeth ar gael", appConfig.Urls.welshLanguageHelplineForDebtManagement)
     }
 
@@ -51,9 +51,9 @@ trait ShutteringSpec { this: ItSpec =>
       doc,
       expectedH1,
       shouldBackLinkBePresent = false,
-      expectedSubmitUrl       = None,
-      regimeBeingTested       = taxRegime,
-      language                = language
+      expectedSubmitUrl = None,
+      regimeBeingTested = taxRegime,
+      language = language
     )
 
     val link = doc.select("p.govuk-body > a.govuk-link")
@@ -63,7 +63,7 @@ trait ShutteringSpec { this: ItSpec =>
 
 }
 
-class EpayeShutteringSpec extends ItSpec with ShutteringSpec {
+class EpayeShutteringSpec extends ItSpec, ShutteringSpec {
 
   override lazy val configOverrides: Map[String, Any] = Map(
     "shuttering.shuttered-tax-regimes" -> List("epaye")
@@ -80,7 +80,7 @@ class EpayeShutteringSpec extends ItSpec with ShutteringSpec {
 
         val result = controller.yourBill(fakeRequest)
         status(result) shouldBe Status.OK
-        val doc = Jsoup.parse(contentAsString(result))
+        val doc    = Jsoup.parse(contentAsString(result))
 
         assertShutteringPageContent(doc, Some(TaxRegime.Epaye), Languages.English)
       }
@@ -91,7 +91,7 @@ class EpayeShutteringSpec extends ItSpec with ShutteringSpec {
 
         val result = controller.yourBill(fakeRequest.withLang(Languages.Welsh))
         status(result) shouldBe Status.OK
-        val doc = Jsoup.parse(contentAsString(result))
+        val doc    = Jsoup.parse(contentAsString(result))
 
         assertShutteringPageContent(doc, Some(TaxRegime.Epaye), Languages.Welsh)
       }
@@ -104,21 +104,21 @@ class EpayeShutteringSpec extends ItSpec with ShutteringSpec {
 
       val result = controller.yourBill(fakeRequest)
       status(result) shouldBe Status.OK
-      val doc = Jsoup.parse(contentAsString(result))
+      val doc    = Jsoup.parse(contentAsString(result))
 
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1              = "Your VAT bill is £3,000",
+        expectedH1 = "Your VAT bill is £3,000",
         shouldBackLinkBePresent = true,
-        expectedSubmitUrl       = Some(routes.YourBillController.yourBillSubmit.url),
-        regimeBeingTested       = Some(TaxRegime.Vat)
+        expectedSubmitUrl = Some(routes.YourBillController.yourBillSubmit.url),
+        regimeBeingTested = Some(TaxRegime.Vat)
       )
     }
 
   }
 }
 
-class VatShutteringSpec extends ItSpec with ShutteringSpec {
+class VatShutteringSpec extends ItSpec, ShutteringSpec {
 
   override lazy val configOverrides: Map[String, Any] = Map(
     "shuttering.shuttered-tax-regimes" -> List("VAT")
@@ -135,7 +135,7 @@ class VatShutteringSpec extends ItSpec with ShutteringSpec {
 
         val result = controller.yourBill(fakeRequest)
         status(result) shouldBe Status.OK
-        val doc = Jsoup.parse(contentAsString(result))
+        val doc    = Jsoup.parse(contentAsString(result))
 
         assertShutteringPageContent(doc, Some(TaxRegime.Vat), Languages.English)
       }
@@ -146,7 +146,7 @@ class VatShutteringSpec extends ItSpec with ShutteringSpec {
 
         val result = controller.yourBill(fakeRequest.withLang(Languages.Welsh))
         status(result) shouldBe Status.OK
-        val doc = Jsoup.parse(contentAsString(result))
+        val doc    = Jsoup.parse(contentAsString(result))
 
         assertShutteringPageContent(doc, Some(TaxRegime.Vat), Languages.Welsh)
       }
@@ -159,14 +159,14 @@ class VatShutteringSpec extends ItSpec with ShutteringSpec {
 
       val result = controller.yourBill(fakeRequest)
       status(result) shouldBe Status.OK
-      val doc = Jsoup.parse(contentAsString(result))
+      val doc    = Jsoup.parse(contentAsString(result))
 
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1              = "Your PAYE bill is £3,000",
+        expectedH1 = "Your PAYE bill is £3,000",
         shouldBackLinkBePresent = true,
-        expectedSubmitUrl       = Some(routes.YourBillController.yourBillSubmit.url),
-        regimeBeingTested       = Some(TaxRegime.Epaye)
+        expectedSubmitUrl = Some(routes.YourBillController.yourBillSubmit.url),
+        regimeBeingTested = Some(TaxRegime.Epaye)
       )
     }
 

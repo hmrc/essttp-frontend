@@ -24,9 +24,9 @@
         requestSupport: RequestSupport
 )
 
-@(emailEntryCall: Call)(implicit request: Request[_])
+@(emailEntryCall: Call)(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 @title = @{Messages.TooManyPasscodes.`Email verification code entered too many times`.show}
 

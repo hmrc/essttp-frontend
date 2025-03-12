@@ -19,6 +19,7 @@ package testOnly.repos
 import com.mongodb.client.model.ReplaceOptions
 import essttp.journey.model.JourneyId
 import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions, Indexes}
+import org.mongodb.scala.SingleObservableFuture
 import testOnly.models.TestOnlyJourney
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
@@ -29,29 +30,34 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class TestOnlyJourneyRepo @Inject() (mongoComponent: MongoComponent)(implicit ec: ExecutionContext) extends PlayMongoRepository[TestOnlyJourney](
-  mongoComponent,
-  "test-only-journey",
-  TestOnlyJourney.format,
-  TestOnlyJourneyRepo.indexes(30.minutes)
-) {
+class TestOnlyJourneyRepo @Inject() (mongoComponent: MongoComponent)(using ExecutionContext)
+    extends PlayMongoRepository[TestOnlyJourney](
+      mongoComponent,
+      "test-only-journey",
+      TestOnlyJourney.format,
+      TestOnlyJourneyRepo.indexes(30.minutes)
+    ) {
 
   def insert(journey: TestOnlyJourney): Future[Unit] =
-    collection.replaceOne(
-      Filters.equal("journeyId", journey.journeyId.value),
-      journey,
-      new ReplaceOptions().upsert(true)
-    )
+    collection
+      .replaceOne(
+        Filters.equal("journeyId", journey.journeyId.value),
+        journey,
+        new ReplaceOptions().upsert(true)
+      )
       .toFuture()
-      .map{ updateResult =>
-        if (!updateResult.wasAcknowledged()) sys.error(s"Error inserting journey with journey id ${journey.journeyId.value}")
+      .map { updateResult =>
+        if (!updateResult.wasAcknowledged())
+          sys.error(s"Error inserting journey with journey id ${journey.journeyId.value}")
         else ()
       }
 
   def get(journeyId: JourneyId): Future[Option[TestOnlyJourney]] =
-    collection.find(
-      Filters.equal("journeyId", journeyId.value),
-    ).headOption()
+    collection
+      .find(
+        Filters.equal("journeyId", journeyId.value)
+      )
+      .headOption()
 
 }
 
@@ -62,7 +68,7 @@ object TestOnlyJourneyRepo {
       keys = Indexes.ascending("journeyId")
     ),
     IndexModel(
-      keys         = Indexes.ascending("updatedAt"),
+      keys = Indexes.ascending("updatedAt"),
       indexOptions = IndexOptions().expireAfter(cacheTtl.toSeconds, TimeUnit.SECONDS).name("updateAtIdx")
     )
   )

@@ -18,68 +18,68 @@ package util
 
 import actionsmodel.JourneyRequest
 import cats.syntax.eq._
-import essttp.utils.RequestSupport._
+import essttp.utils.RequestSupport.hc
 import play.api.Logger
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.CookieNames
 
-/**
- * Journey Logger is a contextual logger. It will append to the message some extra bits of information
- * like journeyId origin, path method, etc.
- * Use it everywhere
- */
+/** Journey Logger is a contextual logger. It will append to the message some extra bits of information like journeyId
+  * origin, path method, etc. Use it everywhere
+  */
 object JourneyLogger {
 
   private val log: Logger = Logger("journey")
 
-  def debug(message: => String)(implicit request: RequestHeader): Unit = logMessage(message, Debug)
+  def debug(message: => String)(using RequestHeader): Unit = logMessage(message, Debug)
 
-  def info(message: => String)(implicit request: RequestHeader): Unit = logMessage(message, Info)
+  def info(message: => String)(using RequestHeader): Unit = logMessage(message, Info)
 
-  def warn(message: => String)(implicit request: RequestHeader): Unit = logMessage(message, Warn)
+  def warn(message: => String)(using RequestHeader): Unit = logMessage(message, Warn)
 
-  def error(message: => String)(implicit request: RequestHeader): Unit = logMessage(message, Error)
+  def error(message: => String)(using RequestHeader): Unit = logMessage(message, Error)
 
-  def debug(message: => String, ex: Throwable)(implicit request: RequestHeader): Unit = logMessage(message, ex, Debug)
+  def debug(message: => String, ex: Throwable)(using RequestHeader): Unit = logMessage(message, ex, Debug)
 
-  def info(message: => String, ex: Throwable)(implicit request: RequestHeader): Unit = logMessage(message, ex, Info)
+  def info(message: => String, ex: Throwable)(using RequestHeader): Unit = logMessage(message, ex, Info)
 
-  def warn(message: => String, ex: Throwable)(implicit request: RequestHeader): Unit = logMessage(message, ex, Warn)
+  def warn(message: => String, ex: Throwable)(using RequestHeader): Unit = logMessage(message, ex, Warn)
 
-  def error(message: => String, ex: Throwable)(implicit request: RequestHeader): Unit = logMessage(message, ex, Error)
+  def error(message: => String, ex: Throwable)(using RequestHeader): Unit = logMessage(message, ex, Error)
 
-  private def context(implicit request: RequestHeader) = s"[context: ${request.method} ${request.path}] $sessionId $requestId $referer $deviceId"
+  private def context(using request: RequestHeader) =
+    s"[context: ${request.method} ${request.path}] $sessionId $requestId $referer $deviceId"
 
-  private def sessionId(implicit request: RequestHeader) = s"[${hc.sessionId.toString}]"
+  private def sessionId(using RequestHeader) = s"[${hc.sessionId.toString}]"
 
-  private def requestId(implicit request: RequestHeader) = s"[${hc.requestId.toString}]"
+  private def requestId(using RequestHeader) = s"[${hc.requestId.toString}]"
 
-  private def referer(implicit r: RequestHeader) = s"[Referer: ${r.headers.headers.find(_._1 === "Referer").map(_._2).getOrElse("")}]"
+  private def referer(using r: RequestHeader) =
+    s"[Referer: ${r.headers.headers.find(_._1 === "Referer").map(_._2).getOrElse("")}]"
 
-  private def deviceId(implicit r: RequestHeader) = s"[deviceId: ${r.cookies.find(_.name === CookieNames.deviceID).map(_.value).getOrElse("")}]"
+  private def deviceId(using r: RequestHeader) =
+    s"[deviceId: ${r.cookies.find(_.name === CookieNames.deviceID).map(_.value).getOrElse("")}]"
 
-  private def origin(implicit r: JourneyRequest[_]) = s"[${r.journey.origin.toString}]"
+  private def origin(using r: JourneyRequest[?]) = s"[${r.journey.origin.toString}]"
 
-  private def journeyId(implicit r: JourneyRequest[_]) = s"[${r.journey.id.toString}]"
+  private def journeyId(using r: JourneyRequest[?]) = s"[${r.journey.id.toString}]"
 
-  private def taxRegime(implicit r: JourneyRequest[_]) = s"[${r.journey.taxRegime.toString}]"
+  private def taxRegime(using r: JourneyRequest[?]) = s"[${r.journey.taxRegime.toString}]"
 
-  private def stage(implicit r: JourneyRequest[_]) = s"[${r.journey.stage.toString}]"
+  private def stage(using r: JourneyRequest[?]) = s"[${r.journey.stage}]"
 
-  private def journeyName(implicit r: JourneyRequest[_]) = s"[${r.journey.name}]"
+  private def journeyName(using r: JourneyRequest[?]) = s"[${r.journey.name}]"
 
-  private def makeRichMessage(message: String)(implicit request: RequestHeader): String = {
+  private def makeRichMessage(message: String)(using request: RequestHeader): String =
     request match {
-      case r: JourneyRequest[_] =>
-        implicit val req: JourneyRequest[_] = r
-        //Warn, don't log whole journey as it might contain sensitive data (PII)
+      case r: JourneyRequest[?] =>
+        given JourneyRequest[?] = r
+        // Warn, don't log whole journey as it might contain sensitive data (PII)
         s"$message $taxRegime $origin $journeyName $stage $journeyId $context"
-      case _ =>
+      case _                    =>
         s"$message $context "
     }
-  }
 
-  private sealed trait LogLevel
+  private sealed trait LogLevel derives CanEqual
 
   private case object Debug extends LogLevel
 
@@ -89,7 +89,7 @@ object JourneyLogger {
 
   private case object Error extends LogLevel
 
-  private def logMessage(message: => String, level: LogLevel)(implicit request: RequestHeader): Unit = {
+  private def logMessage(message: => String, level: LogLevel)(using RequestHeader): Unit = {
     lazy val richMessage = makeRichMessage(message)
     level match {
       case Debug => log.debug(richMessage)
@@ -99,7 +99,7 @@ object JourneyLogger {
     }
   }
 
-  private def logMessage(message: => String, ex: Throwable, level: LogLevel)(implicit request: RequestHeader): Unit = {
+  private def logMessage(message: => String, ex: Throwable, level: LogLevel)(using RequestHeader): Unit = {
     lazy val richMessage = makeRichMessage(message)
     level match {
       case Debug => log.debug(richMessage, ex)

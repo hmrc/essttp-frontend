@@ -22,6 +22,6 @@ sealed trait ChooseEmailFormValue extends enumeratum.EnumEntry
 
 object ChooseEmailFormValue extends enumeratum.Enum[ChooseEmailFormValue] {
   case object Existing extends ChooseEmailFormValue
-  case object New extends ChooseEmailFormValue
+  case object New      extends ChooseEmailFormValue
   override def values: immutable.IndexedSeq[ChooseEmailFormValue] = findValues
 }

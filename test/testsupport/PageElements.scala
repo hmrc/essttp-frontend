@@ -21,19 +21,17 @@ import org.jsoup.nodes.Document
 import play.twirl.api.Html
 
 trait PageElements {
-  //see https://jsoup.org/cookbook/extracting-data/selector-syntax
-  //for advanced selections
+  // see https://jsoup.org/cookbook/extracting-data/selector-syntax
+  // for advanced selections
 
-  /**
-   * Html representig rendered view.
-   * Override is as a `val`
-   */
+  /** Html representig rendered view. Override is as a `val`
+    */
   def html: Html
 
   protected lazy val document: Document = Jsoup.parse(html.toString())
 
   def headerTitle: String = {
-    val nav = document.getElementById("proposition-menu")
+    val nav  = document.getElementById("proposition-menu")
     val span = nav.children.first
     span.text
   }

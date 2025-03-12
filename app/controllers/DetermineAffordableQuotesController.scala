@@ -21,10 +21,10 @@ import actionsmodel.AuthenticatedRequest
 import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheckF
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
-import essttp.journey.model.{Journey, PaymentPlanAnswers}
+import essttp.journey.model.{Journey, JourneyStage, PaymentPlanAnswers}
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import essttp.utils.Errors
-import play.api.mvc._
+import play.api.mvc.*
 import services.{JourneyService, TtpService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
@@ -34,42 +34,53 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class DetermineAffordableQuotesController @Inject() (
-    as:             Actions,
-    mcc:            MessagesControllerComponents,
-    ttpService:     TtpService,
-    journeyService: JourneyService
-)(implicit ec: ExecutionContext, appConfig: AppConfig)
-  extends FrontendController(mcc)
-  with Logging {
+  as:             Actions,
+  mcc:            MessagesControllerComponents,
+  ttpService:     TtpService,
+  journeyService: JourneyService
+)(using ExecutionContext, AppConfig)
+    extends FrontendController(mcc),
+      Logging {
 
   val retrieveAffordableQuotes: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     request.journey match {
-      case j: Journey.BeforeStartDatesResponse =>
+      case j: JourneyStage.BeforeStartDatesResponse =>
         logErrorAndRouteToDefaultPageF(j)
-      case j: Journey.AfterStartDatesResponse =>
+      case j: JourneyStage.AfterStartDatesResponse  =>
         finalStateCheckF(j, determineAffordableQuotesAndUpdateJourney(Left(j), request.eligibilityCheckResult))
-      case j: Journey.AfterCheckedPaymentPlan =>
+      case j: JourneyStage.AfterCheckedPaymentPlan  =>
         j.paymentPlanAnswers match {
-          case p: PaymentPlanAnswers.PaymentPlanNoAffordability =>
-            finalStateCheckF(j, determineAffordableQuotesAndUpdateJourney(Right(j -> p), request.eligibilityCheckResult))
+          case p: PaymentPlanAnswers.PaymentPlanNoAffordability    =>
+            finalStateCheckF(
+              j,
+              determineAffordableQuotesAndUpdateJourney(Right((j, p)), request.eligibilityCheckResult)
+            )
           case _: PaymentPlanAnswers.PaymentPlanAfterAffordability =>
-            Errors.throwServerErrorException("Not expecting to retrieve affordable quotes when payment plan has been checked on affordability journey")
+            Errors.throwServerErrorException(
+              "Not expecting to retrieve affordable quotes when payment plan has been checked on affordability journey"
+            )
         }
 
-      case _: Journey.AfterStartedPegaCase =>
+      case _: JourneyStage.AfterStartedPegaCase =>
         Errors.throwServerErrorException("Not expecting to retrieve affordable quotes when started PEGA case")
 
     }
   }
 
   def determineAffordableQuotesAndUpdateJourney(
-      journey:                Either[Journey.AfterStartDatesResponse, (Journey.AfterCheckedPaymentPlan, PaymentPlanAnswers.PaymentPlanNoAffordability)],
-      eligibilityCheckResult: EligibilityCheckResult
-  )(implicit request: AuthenticatedRequest[_]): Future[Result] = {
+    journey:                Either[
+      JourneyStage.AfterStartDatesResponse & Journey,
+      (JourneyStage.AfterCheckedPaymentPlan & Journey, PaymentPlanAnswers.PaymentPlanNoAffordability)
+    ],
+    eligibilityCheckResult: EligibilityCheckResult
+  )(using AuthenticatedRequest[?]): Future[Result] =
     for {
       affordableQuotes <- ttpService.determineAffordableQuotes(journey, eligibilityCheckResult)
-      updatedJourney <- journeyService.updateAffordableQuotes(journey.fold(_.id, _._1.id), affordableQuotes)
-    } yield Routing.redirectToNext(routes.DetermineAffordableQuotesController.retrieveAffordableQuotes, updatedJourney, submittedValueUnchanged = false)
-  }
+      updatedJourney   <- journeyService.updateAffordableQuotes(journey.fold(_.id, _._1.id), affordableQuotes)
+    } yield Routing.redirectToNext(
+      routes.DetermineAffordableQuotesController.retrieveAffordableQuotes,
+      updatedJourney,
+      submittedValueUnchanged = false
+    )
 
 }

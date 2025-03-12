@@ -17,4 +17,3 @@
 package models
 
 final case class EligibilityReqIdentificationFlag(value: Boolean) extends AnyVal
-

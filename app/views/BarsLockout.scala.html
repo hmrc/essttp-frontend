@@ -29,9 +29,9 @@
         extraSupportRelayPartial: ExtraSupportRelayPartial
 )
 
-@(lockoutExpires: Instant)(implicit request: Request[_])
+@(lockoutExpires: Instant)(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 @expiryTimeString = @{
   val zonedDateTime = lockoutExpires.atZone(ZoneId.of("Europe/London"))

@@ -23,9 +23,9 @@
         requestSupport: RequestSupport
 )
 
-@(ageOfDebtInYearsOrDays: Int)(implicit request: AuthenticatedJourneyRequest[_])
+@(ageOfDebtInYearsOrDays: Int)(implicit request: AuthenticatedJourneyRequest[?])
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 <p class="govuk-body">
 @{

@@ -32,96 +32,96 @@ import testsupport.testdata.{JourneyJsonTemplates, TdAll}
 import scala.concurrent.Future
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
-class WhyCannotPayInFullControllerSpec extends ItSpec with UnchangedFromCYALinkAssertions {
+class WhyCannotPayInFullControllerSpec extends ItSpec, UnchangedFromCYALinkAssertions {
 
   val controller = app.injector.instanceOf[WhyCannotPayInFullController]
 
   "GET /why-are-you-unable-to-pay-in-full should" - {
 
-      def testPageIsDisplayed(result: Future[Result], expectedPreselectedOptions: Set[CannotPayReason]): Unit = {
-        RequestAssertions.assertGetRequestOk(result)
+    def testPageIsDisplayed(result: Future[Result], expectedPreselectedOptions: Set[CannotPayReason]): Unit = {
+      RequestAssertions.assertGetRequestOk(result)
 
-        val doc = Jsoup.parse(contentAsString(result))
+      val doc = Jsoup.parse(contentAsString(result))
 
-        ContentAssertions.commonPageChecks(
-          doc,
-          "Why are you unable to pay in full?",
-          shouldBackLinkBePresent = true,
-          expectedSubmitUrl       = Some(routes.WhyCannotPayInFullController.whyCannotPayInFullSubmit.url)
+      ContentAssertions.commonPageChecks(
+        doc,
+        "Why are you unable to pay in full?",
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl = Some(routes.WhyCannotPayInFullController.whyCannotPayInFullSubmit.url)
+      )
+
+      val hint = doc.select(".govuk-form-group > .govuk-fieldset > .govuk-hint").text()
+      hint shouldBe "Your answers help us plan services in the future. Select all that apply."
+
+      val checkboxes: List[Element] = doc.select(".govuk-checkboxes__item").asScala.toList
+      checkboxes.size shouldBe 8
+
+      val valuesWithLabelsHintsAndDataBehaviour = checkboxes.map { checkbox =>
+        CheckBoxInfo(
+          checkbox.select(".govuk-checkboxes__input").`val`(),
+          checkbox.select(".govuk-checkboxes__label").text(),
+          checkbox.select(".govuk-checkboxes__hint").text(),
+          checkbox.select(".govuk-checkboxes__input").attr("data-behaviour")
         )
-
-        val hint = doc.select(".govuk-form-group > .govuk-fieldset > .govuk-hint").text()
-        hint shouldBe "Your answers help us plan services in the future. Select all that apply."
-
-        val checkboxes: List[Element] = doc.select(".govuk-checkboxes__item").asScala.toList
-        checkboxes.size shouldBe 8
-
-        val valuesWithLabelsHintsAndDataBehaviour = checkboxes.map { checkbox =>
-          CheckBoxInfo(
-            checkbox.select(".govuk-checkboxes__input").`val`(),
-            checkbox.select(".govuk-checkboxes__label").text(),
-            checkbox.select(".govuk-checkboxes__hint").text(),
-            checkbox.select(".govuk-checkboxes__input").attr("data-behaviour")
-          )
-        }
-
-        valuesWithLabelsHintsAndDataBehaviour shouldBe List(
-          CheckBoxInfo(
-            "UnexpectedReductionOfIncome",
-            "Unexpected reduction of income",
-            "For example, lost or reduced business or unemployment.",
-            ""
-          ),
-          CheckBoxInfo(
-            "UnexpectedIncreaseInSpending",
-            "Unexpected increase in spending",
-            "For example, unexpected repairs following theft or damage to premises.",
-            ""
-          ),
-          CheckBoxInfo(
-            "LostOrReducedAbilityToEarnOrTrade",
-            "Lost or reduced ability to earn or trade",
-            "",
-            ""
-          ),
-          CheckBoxInfo(
-            "NationalOrLocalDisaster",
-            "National or local disaster",
-            "For example, COVID-19, extreme weather conditions.",
-            ""
-          ),
-          CheckBoxInfo(
-            "ChangeToPersonalCircumstances",
-            "Change to personal circumstances",
-            "For example, ill health or bereavement.",
-            ""
-          ),
-          CheckBoxInfo(
-            "NoMoneySetAside",
-            "No money set aside to pay",
-            "",
-            ""
-          ),
-          CheckBoxInfo(
-            "WaitingForRefund",
-            "Waiting for a refund from HMRC",
-            "",
-            ""
-          ),
-          CheckBoxInfo(
-            "Other",
-            "None of these",
-            "",
-            "exclusive"
-          )
-        )
-
-        CannotPayReason.values.foreach{ reason =>
-          val checkboxInput = doc.select(s"#option-${reason.entryName}")
-          checkboxInput.hasClass("govuk-checkboxes__input") shouldBe true
-          checkboxInput.hasAttr("checked") shouldBe expectedPreselectedOptions.contains(reason)
-        }
       }
+
+      valuesWithLabelsHintsAndDataBehaviour shouldBe List(
+        CheckBoxInfo(
+          "UnexpectedReductionOfIncome",
+          "Unexpected reduction of income",
+          "For example, lost or reduced business or unemployment.",
+          ""
+        ),
+        CheckBoxInfo(
+          "UnexpectedIncreaseInSpending",
+          "Unexpected increase in spending",
+          "For example, unexpected repairs following theft or damage to premises.",
+          ""
+        ),
+        CheckBoxInfo(
+          "LostOrReducedAbilityToEarnOrTrade",
+          "Lost or reduced ability to earn or trade",
+          "",
+          ""
+        ),
+        CheckBoxInfo(
+          "NationalOrLocalDisaster",
+          "National or local disaster",
+          "For example, COVID-19, extreme weather conditions.",
+          ""
+        ),
+        CheckBoxInfo(
+          "ChangeToPersonalCircumstances",
+          "Change to personal circumstances",
+          "For example, ill health or bereavement.",
+          ""
+        ),
+        CheckBoxInfo(
+          "NoMoneySetAside",
+          "No money set aside to pay",
+          "",
+          ""
+        ),
+        CheckBoxInfo(
+          "WaitingForRefund",
+          "Waiting for a refund from HMRC",
+          "",
+          ""
+        ),
+        CheckBoxInfo(
+          "Other",
+          "None of these",
+          "",
+          "exclusive"
+        )
+      )
+
+      CannotPayReason.values.foreach { reason =>
+        val checkboxInput = doc.select(s"#option-${reason.entryName}")
+        checkboxInput.hasClass("govuk-checkboxes__input") shouldBe true
+        checkboxInput.hasAttr("checked") shouldBe expectedPreselectedOptions.contains(reason)
+      }
+    }
 
     "not show the page if eligibility has not been checked yet" in {
       stubCommonActions()
@@ -143,7 +143,7 @@ class WhyCannotPayInFullControllerSpec extends ItSpec with UnchangedFromCYALinkA
     "display the page when options have been previously selected" in {
       stubCommonActions()
       EssttpBackend.WhyCannotPayInFull.findJourney(testCrypto, Origins.Epaye.Bta)(
-        JourneyJsonTemplates.`Why Cannot Pay in Full - Required`(Origins.Epaye.Bta)(testCrypto)
+        JourneyJsonTemplates.`Why Cannot Pay in Full - Required`(Origins.Epaye.Bta)(using testCrypto)
       )
 
       val result = controller.whyCannotPayInFull(fakeRequest)
@@ -156,28 +156,28 @@ class WhyCannotPayInFullControllerSpec extends ItSpec with UnchangedFromCYALinkA
 
     "return a form error when" - {
 
-        def testFormError(formData: (String, String)*)(expectedError: String): Unit = {
-          stubCommonActions()
-          EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Epaye.Bta)()
+      def testFormError(formData: (String, String)*)(expectedError: String): Unit = {
+        stubCommonActions()
+        EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Epaye.Bta)()
 
-          val request = fakeRequest.withFormUrlEncodedBody(formData: _*).withMethod("POST")
-          val result = controller.whyCannotPayInFullSubmit(request)
-          val doc = Jsoup.parse(contentAsString(result))
+        val request = fakeRequest.withFormUrlEncodedBody(formData*).withMethod("POST")
+        val result  = controller.whyCannotPayInFullSubmit(request)
+        val doc     = Jsoup.parse(contentAsString(result))
 
-          ContentAssertions.commonPageChecks(
-            doc,
-            "Why are you unable to pay in full?",
-            shouldBackLinkBePresent = true,
-            expectedSubmitUrl       = Some(routes.WhyCannotPayInFullController.whyCannotPayInFullSubmit.url),
-            hasFormError            = true
-          )
+        ContentAssertions.commonPageChecks(
+          doc,
+          "Why are you unable to pay in full?",
+          shouldBackLinkBePresent = true,
+          expectedSubmitUrl = Some(routes.WhyCannotPayInFullController.whyCannotPayInFullSubmit.url),
+          hasFormError = true
+        )
 
-          val errorSummary = doc.select(".govuk-error-summary")
-          val errorLink = errorSummary.select("a")
-          errorLink.text() shouldBe expectedError
-          errorLink.attr("href") shouldBe "#option-UnexpectedReductionOfIncome"
-          EssttpBackend.WhyCannotPayInFull.verifyNoneUpdateWhyCannotPayInFullRequest(TdAll.journeyId)
-        }
+        val errorSummary = doc.select(".govuk-error-summary")
+        val errorLink    = errorSummary.select("a")
+        errorLink.text() shouldBe expectedError
+        errorLink.attr("href") shouldBe "#option-UnexpectedReductionOfIncome"
+        EssttpBackend.WhyCannotPayInFull.verifyNoneUpdateWhyCannotPayInFullRequest(TdAll.journeyId)
+      }
 
       "nothing is submitted" in {
         testFormError()("Select all that apply or ‘None of these’")
@@ -188,7 +188,9 @@ class WhyCannotPayInFullControllerSpec extends ItSpec with UnchangedFromCYALinkA
       }
 
       "more than one reason is selected and 'None of these' is selected" in {
-        testFormError("WhyCannotPayInFull[]" -> "Other", "WhyCannotPayInFull[]" -> "Bankrupt")("Select all that apply or ‘None of these’")
+        testFormError("WhyCannotPayInFull[]" -> "Other", "WhyCannotPayInFull[]" -> "Bankrupt")(
+          "Select all that apply or ‘None of these’"
+        )
       }
 
     }
@@ -199,13 +201,13 @@ class WhyCannotPayInFullControllerSpec extends ItSpec with UnchangedFromCYALinkA
       EssttpBackend.WhyCannotPayInFull.stubUpdateWhyCannotPayInFull(
         TdAll.journeyId,
         WhyCannotPayInFullAnswers.WhyCannotPayInFull(TdAll.whyCannotPayReasons),
-        JourneyJsonTemplates.`Why Cannot Pay in Full - Required`(Origins.Epaye.Bta)(testCrypto)
+        JourneyJsonTemplates.`Why Cannot Pay in Full - Required`(Origins.Epaye.Bta)(using testCrypto)
       )
 
       val formData = TdAll.whyCannotPayReasons.map(reason => "WhyCannotPayInFull[]" -> reason.entryName)
 
-      val request = fakeRequest.withFormUrlEncodedBody(formData.toSeq: _*).withMethod("POST")
-      val result = controller.whyCannotPayInFullSubmit(request)
+      val request = fakeRequest.withFormUrlEncodedBody(formData.toSeq*).withMethod("POST")
+      val result  = controller.whyCannotPayInFullSubmit(request)
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url)
 
@@ -224,24 +226,26 @@ class WhyCannotPayInFullControllerSpec extends ItSpec with UnchangedFromCYALinkA
       EssttpBackend.WhyCannotPayInFull.stubUpdateWhyCannotPayInFull(
         TdAll.journeyId,
         newWhyCannotPayInFullAnswers,
-        JourneyJsonTemplates.`Started PEGA case`(Origins.Epaye.Bta, newWhyCannotPayInFullAnswers)(testCrypto)
+        JourneyJsonTemplates.`Started PEGA case`(Origins.Epaye.Bta, newWhyCannotPayInFullAnswers)(using testCrypto)
       )
       EssttpBackend.Pega.stubStartCase(TdAll.journeyId, Right(TdAll.pegaStartCaseResponse), recalculationNeeded = false)
       EssttpBackend.Pega.stubSaveJourneyForPega(TdAll.journeyId, Right(()))
       EssttpBackend.StartedPegaCase.stubUpdateStartPegaCaseResponse(
         TdAll.journeyId,
-        JourneyJsonTemplates.`Started PEGA case`(Origins.Epaye.Bta)(testCrypto)
+        JourneyJsonTemplates.`Started PEGA case`(Origins.Epaye.Bta)(using testCrypto)
       )
 
       val request = fakeRequest.withFormUrlEncodedBody("WhyCannotPayInFull[]" -> "Other").withMethod("POST")
-      val result = controller.whyCannotPayInFullSubmit(request)
+      val result  = controller.whyCannotPayInFullSubmit(request)
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url)
 
-      EssttpBackend.WhyCannotPayInFull.verifyUpdateWhyCannotPayInFullRequest(TdAll.journeyId, newWhyCannotPayInFullAnswers)
+      EssttpBackend.WhyCannotPayInFull
+        .verifyUpdateWhyCannotPayInFullRequest(TdAll.journeyId, newWhyCannotPayInFullAnswers)
       EssttpBackend.Pega.verifyStartCaseCalled(TdAll.journeyId)
       EssttpBackend.Pega.verifySaveJourneyForPegaCalled(TdAll.journeyId)
-      EssttpBackend.StartedPegaCase.verifyUpdateStartPegaCaseResponseRequest(TdAll.journeyId, TdAll.pegaStartCaseResponse)
+      EssttpBackend.StartedPegaCase
+        .verifyUpdateStartPegaCaseResponseRequest(TdAll.journeyId, TdAll.pegaStartCaseResponse)
 
     }
 
@@ -251,13 +255,13 @@ class WhyCannotPayInFullControllerSpec extends ItSpec with UnchangedFromCYALinkA
         JourneyJsonTemplates.`Started PEGA case`(
           Origins.Epaye.Bta,
           whyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(TdAll.whyCannotPayReasons)
-        )(testCrypto)
+        )(using testCrypto)
       )
 
       val formData = TdAll.whyCannotPayReasons.map(reason => "WhyCannotPayInFull[]" -> reason.entryName)
 
-      val request = fakeRequest.withFormUrlEncodedBody(formData.toSeq: _*).withMethod("POST")
-      val result = controller.whyCannotPayInFullSubmit(request)
+      val request = fakeRequest.withFormUrlEncodedBody(formData.toSeq*).withMethod("POST")
+      val result  = controller.whyCannotPayInFullSubmit(request)
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment.url)
 
@@ -277,11 +281,11 @@ class WhyCannotPayInFullControllerSpec extends ItSpec with UnchangedFromCYALinkA
 
 object WhyCannotPayInFullControllerSpec {
 
-  final case class CheckBoxInfo(value: String, label: String, hint: String, dataBehaviour: String)
+  final case class CheckBoxInfo(value: String, label: String, hint: String, dataBehaviour: String) derives CanEqual
 
 }
 
-class WhyCannotPayInFullControllerPEGARedirectInConfigSpec extends ItSpec with UnchangedFromCYALinkAssertions {
+class WhyCannotPayInFullControllerPEGARedirectInConfigSpec extends ItSpec, UnchangedFromCYALinkAssertions {
 
   val pegaChangeLinkReturnUrl = "/abc"
 

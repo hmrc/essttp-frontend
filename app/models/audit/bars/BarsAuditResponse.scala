@@ -20,14 +20,14 @@ import models.bars.response._
 import play.api.libs.json.{Json, OWrites}
 
 final case class BarsAuditResponse(
-    isBankAccountValid: Boolean,
-    barsResponse:       Either[BarsError, VerifyResponse]
+  isBankAccountValid: Boolean,
+  barsResponse:       Either[BarsError, VerifyResponse]
 )
 
 object BarsAuditResponse {
 
-  implicit val responseWrites: OWrites[Either[BarsError, VerifyResponse]] = {
-    OWrites{
+  given OWrites[Either[BarsError, VerifyResponse]] =
+    OWrites {
       case Left(e: BarsError) =>
         e.barsResponse match {
           case ValidateResponse(barsValidateResponse) => BarsValidateResponse.format.writes(barsValidateResponse)
@@ -35,10 +35,10 @@ object BarsAuditResponse {
           case SortCodeOnDenyList(barsErrorResponse)  => BarsErrorResponse.format.writes(barsErrorResponse)
         }
 
-      case Right(VerifyResponse(barsVerifyResponse: BarsVerifyResponse)) => BarsVerifyResponse.format.writes(barsVerifyResponse)
+      case Right(VerifyResponse(barsVerifyResponse: BarsVerifyResponse)) =>
+        BarsVerifyResponse.format.writes(barsVerifyResponse)
     }
-  }
 
-  implicit val writes: OWrites[BarsAuditResponse] = Json.writes
+  given OWrites[BarsAuditResponse] = Json.writes
 
 }

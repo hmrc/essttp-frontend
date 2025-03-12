@@ -33,9 +33,9 @@
         requestSupport: RequestSupport
 )
 
-@(form: Form[String], options: Seq[InstalmentOption])(implicit request: Request[_])
+@(form: Form[String], options: Seq[InstalmentOption])(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.{languageFromRequest, legacyMessages}
 
 @key = @{
     "Instalments"

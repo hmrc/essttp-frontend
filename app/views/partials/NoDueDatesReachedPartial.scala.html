@@ -23,9 +23,9 @@
 
 @this(requestSupport: RequestSupport)
 
-@(taxRegime: TaxRegime)(implicit request: Request[_])
+@(taxRegime: TaxRegime)(implicit request: Request[?])
 
- @import requestSupport._
+@import requestSupport.languageFromRequest
 
  <p class="govuk-body">
  @{

@@ -18,12 +18,12 @@ package controllers
 
 import actions.Actions
 import actionsmodel.AuthenticatedJourneyRequest
-import cats.syntax.either._
-import cats.syntax.eq._
+import cats.syntax.either.*
+import cats.syntax.eq.*
 import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import essttp.journey.JourneyConnector
-import essttp.journey.model.{Journey, WhyCannotPayInFullAnswers}
+import essttp.journey.model.{Journey, JourneyStage, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.CannotPayReason
 import messages.Messages
 import models.Language
@@ -42,29 +42,28 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class WhyCannotPayInFullController @Inject() (
-    as:               Actions,
-    mcc:              MessagesControllerComponents,
-    requestSupport:   RequestSupport,
-    views:            Views,
-    journeyConnector: JourneyConnector,
-    pegaService:      PegaService
-)(implicit ec: ExecutionContext, appConfig: AppConfig)
-  extends FrontendController(mcc)
-  with Logging {
+  as:               Actions,
+  mcc:              MessagesControllerComponents,
+  requestSupport:   RequestSupport,
+  views:            Views,
+  journeyConnector: JourneyConnector,
+  pegaService:      PegaService
+)(using ExecutionContext, AppConfig)
+    extends FrontendController(mcc),
+      Logging {
 
-  import requestSupport._
+  import requestSupport.languageFromRequest
 
   val whyCannotPayInFull: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     request.journey match {
-      case j: Journey.BeforeEligibilityChecked =>
+      case j: JourneyStage.BeforeEligibilityChecked =>
         JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
 
-      case j: Journey.AfterEligibilityChecked =>
+      case j: JourneyStage.AfterEligibilityChecked =>
         finalStateCheck(
-          j,
-          {
+          j, {
             val previousAnswers = existingAnswersInJourney(request.journey)
-            val form = previousAnswers.fold(WhyCannotPayInFullController.form)(WhyCannotPayInFullController.form.fill)
+            val form            = previousAnswers.fold(WhyCannotPayInFullController.form)(WhyCannotPayInFullController.form.fill)
 
             Ok(views.whyCannotPayInFull(form))
           }
@@ -73,56 +72,57 @@ class WhyCannotPayInFullController @Inject() (
   }
 
   private def existingAnswersInJourney(journey: Journey): Option[Set[CannotPayReason]] = journey match {
-    case _: Journey.BeforeWhyCannotPayInFullAnswers => None
-    case j: Journey.AfterWhyCannotPayInFullAnswers => j.whyCannotPayInFullAnswers match {
-      case WhyCannotPayInFullAnswers.AnswerNotRequired           => None
-      case WhyCannotPayInFullAnswers.WhyCannotPayInFull(reasons) => Some(reasons)
-    }
+    case _: JourneyStage.BeforeWhyCannotPayInFullAnswers => None
+    case j: JourneyStage.AfterWhyCannotPayInFullAnswers  =>
+      j.whyCannotPayInFullAnswers match {
+        case WhyCannotPayInFullAnswers.AnswerNotRequired           => None
+        case WhyCannotPayInFullAnswers.WhyCannotPayInFull(reasons) => Some(reasons)
+      }
   }
 
   val whyCannotPayInFullSubmit: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
-    WhyCannotPayInFullController.form.bindFromRequest().fold(
-      formWithErrors => Ok(views.whyCannotPayInFull(formWithErrors)),
-      { reasons =>
-
-        updateJourney(request.journey, existingAnswersInJourney(request.journey), reasons)
-          .map{ updatedJourney =>
-            Routing.redirectToNext(
-              routes.WhyCannotPayInFullController.whyCannotPayInFull,
-              updatedJourney,
-              //even if the value is changed we still want to go to cya page
-              submittedValueUnchanged = true
-            )
-          }
-      }
-    )
+    WhyCannotPayInFullController.form
+      .bindFromRequest()
+      .fold(
+        formWithErrors => Ok(views.whyCannotPayInFull(formWithErrors)),
+        reasons =>
+          updateJourney(request.journey, existingAnswersInJourney(request.journey), reasons)
+            .map { updatedJourney =>
+              Routing.redirectToNext(
+                routes.WhyCannotPayInFullController.whyCannotPayInFull,
+                updatedJourney,
+                // even if the value is changed we still want to go to cya page
+                submittedValueUnchanged = true
+              )
+            }
+      )
   }
 
   private def updateJourney(
-      journey:    Journey,
-      oldAnswers: Option[Set[CannotPayReason]],
-      newAnswers: Set[CannotPayReason]
-  )(implicit r: AuthenticatedJourneyRequest[_]): Future[Journey] =
+    journey:    Journey,
+    oldAnswers: Option[Set[CannotPayReason]],
+    newAnswers: Set[CannotPayReason]
+  )(using r: AuthenticatedJourneyRequest[?]): Future[Journey] =
     if (oldAnswers.contains(newAnswers)) {
       // don't need to call BE to update journey if nothing has changed
       Future.successful(journey)
     } else {
       // need to start a PEGA case if one has already been started and the answers have changed
       val needToStartPegaCase = journey match {
-        case _: Journey.AfterStartedPegaCase => true
-        case _                               => false
+        case _: JourneyStage.AfterStartedPegaCase => true
+        case _                                    => false
       }
 
       for {
-        j <- journeyConnector.updateWhyCannotPayInFullAnswers(
-          r.journeyId,
-          WhyCannotPayInFullAnswers.WhyCannotPayInFull(newAnswers)
-        )
+        j              <- journeyConnector.updateWhyCannotPayInFullAnswers(
+                            r.journeyId,
+                            WhyCannotPayInFullAnswers.WhyCannotPayInFull(newAnswers)
+                          )
         updatedJourney <- if (needToStartPegaCase) {
-          pegaService.startCase(journey, recalculationNeeded = false).map(_._1)
-        } else {
-          Future.successful(j)
-        }
+                            pegaService.startCase(journey, recalculationNeeded = false).map(_._1)
+                          } else {
+                            Future.successful(j)
+                          }
       } yield updatedJourney
     }
 
@@ -130,15 +130,15 @@ class WhyCannotPayInFullController @Inject() (
 
 object WhyCannotPayInFullController {
 
-  def form(implicit lang: Language): Form[Set[CannotPayReason]] = {
+  def form(using Language): Form[Set[CannotPayReason]] = {
     val cannotPayReasonFormatter = new Formatter[CannotPayReason] {
-      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], CannotPayReason] = {
+      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], CannotPayReason] =
         Either.fromOption(
-          data.get(key).flatMap(CannotPayReason.withNameInsensitiveOption), {
-            Seq(FormError("WhyCannotPayInFull", Messages.WhyCannotPayInFull.`Select all that apply or 'none of these'`.show))
-          }
+          data.get(key).flatMap(CannotPayReason.withNameInsensitiveOption),
+          Seq(
+            FormError("WhyCannotPayInFull", Messages.WhyCannotPayInFull.`Select all that apply or 'none of these'`.show)
+          )
         )
-      }
 
       override def unbind(key: String, value: CannotPayReason): Map[String, String] =
         Map(key -> value.entryName)

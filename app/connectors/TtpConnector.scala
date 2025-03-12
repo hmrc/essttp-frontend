@@ -26,7 +26,8 @@ import essttp.rootmodel.ttp.arrangement.{ArrangementRequest, ArrangementResponse
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
-import requests.RequestSupport._
+import play.api.libs.ws.writeableOf_JsValue
+import requests.RequestSupport.hc
 import uk.gov.hmrc.http.HttpReads.Implicits.readFromJson
 import uk.gov.hmrc.http.StringContextOps
 import uk.gov.hmrc.http.client.HttpClientV2
@@ -34,66 +35,67 @@ import uk.gov.hmrc.http.client.HttpClientV2
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class TtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2)(implicit ec: ExecutionContext) {
+class TtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2)(using ExecutionContext) {
 
   import appConfig.eligibilityReqIdentificationFlag
   implicit val cryptoFormat: CryptoFormat = CryptoFormat.NoOpCryptoFormat
 
   private val correlationIdHeaderKey: String = appConfig.TtpHeaders.correlationId
 
-  /**
-   * Eligibility Api implemented by Ttp service.
-   * https://confluence.tools.tax.service.gov.uk/display/DTDT/Eligibility+API
-   */
+  /** Eligibility Api implemented by Ttp service.
+    * https://confluence.tools.tax.service.gov.uk/display/DTDT/Eligibility+API
+    */
   private val eligibilityUrl: String = appConfig.BaseUrl.timeToPayEligibilityUrl + "/debts/time-to-pay/eligibility"
 
-  def callEligibilityApi(eligibilityRequest: CallEligibilityApiRequest, correlationId: CorrelationId)
-    (implicit requestHeader: RequestHeader): Future[EligibilityCheckResult] = {
-    httpClient.post(url"$eligibilityUrl")
+  def callEligibilityApi(eligibilityRequest: CallEligibilityApiRequest, correlationId: CorrelationId)(implicit
+    requestHeader: RequestHeader
+  ): Future[EligibilityCheckResult] =
+    httpClient
+      .post(url"$eligibilityUrl")
       .withBody(Json.toJson(eligibilityRequest))
       .setHeader((correlationIdHeaderKey, correlationId.value.toString))
       .execute[EligibilityCheckResult]
-  }
 
-  /**
-   * Affordability Api (min/max) implemented by Ttp service.
-   * https://confluence.tools.tax.service.gov.uk/pages/viewpage.action?pageId=433455297
-   */
+  /** Affordability Api (min/max) implemented by Ttp service.
+    * https://confluence.tools.tax.service.gov.uk/pages/viewpage.action?pageId=433455297
+    */
   private val affordabilityUrl: String = appConfig.BaseUrl.timeToPayUrl + "/debts/time-to-pay/self-serve/affordability"
 
-  def callAffordabilityApi(instalmentAmountRequest: InstalmentAmountRequest, correlationId: CorrelationId)
-    (implicit requestHeader: RequestHeader): Future[InstalmentAmounts] = {
-    httpClient.post(url"$affordabilityUrl")
+  def callAffordabilityApi(instalmentAmountRequest: InstalmentAmountRequest, correlationId: CorrelationId)(implicit
+    requestHeader: RequestHeader
+  ): Future[InstalmentAmounts] =
+    httpClient
+      .post(url"$affordabilityUrl")
       .withBody(Json.toJson(instalmentAmountRequest))
       .setHeader((correlationIdHeaderKey, correlationId.value.toString))
       .execute[InstalmentAmounts]
-  }
 
-  /**
-   * Affordable Quotes API (for instalments) implemented by ttp service.
-   * https://confluence.tools.tax.service.gov.uk/display/DTDT/Affordable+quotes+API
-   */
-  private val affordableQuotesUrl: String = appConfig.BaseUrl.timeToPayUrl + "/debts/time-to-pay/affordability/affordable-quotes"
+  /** Affordable Quotes API (for instalments) implemented by ttp service.
+    * https://confluence.tools.tax.service.gov.uk/display/DTDT/Affordable+quotes+API
+    */
+  private val affordableQuotesUrl: String =
+    appConfig.BaseUrl.timeToPayUrl + "/debts/time-to-pay/affordability/affordable-quotes"
 
-  def callAffordableQuotesApi(affordableQuotesRequest: AffordableQuotesRequest, correlationId: CorrelationId)
-    (implicit requestHeader: RequestHeader): Future[AffordableQuotesResponse] = {
-    httpClient.post(url"$affordableQuotesUrl")
+  def callAffordableQuotesApi(affordableQuotesRequest: AffordableQuotesRequest, correlationId: CorrelationId)(implicit
+    requestHeader: RequestHeader
+  ): Future[AffordableQuotesResponse] =
+    httpClient
+      .post(url"$affordableQuotesUrl")
       .withBody(Json.toJson(affordableQuotesRequest))
       .setHeader((correlationIdHeaderKey, correlationId.value.toString))
       .execute[AffordableQuotesResponse]
-  }
 
-  /**
-   * Enact arrangement API (for setting up the arrangement) implemented by ttp service.
-   * https://confluence.tools.tax.service.gov.uk/display/DTDT/Enact+arrangement+API
-   */
+  /** Enact arrangement API (for setting up the arrangement) implemented by ttp service.
+    * https://confluence.tools.tax.service.gov.uk/display/DTDT/Enact+arrangement+API
+    */
   private val arrangementUrl: String = appConfig.BaseUrl.timeToPayUrl + "/debts/time-to-pay/self-serve/arrangement"
 
-  def callArrangementApi(arrangementRequest: ArrangementRequest, correlationId: CorrelationId)
-    (implicit requestHeader: RequestHeader): Future[ArrangementResponse] = {
-    httpClient.post(url"$arrangementUrl")
+  def callArrangementApi(arrangementRequest: ArrangementRequest, correlationId: CorrelationId)(implicit
+    requestHeader: RequestHeader
+  ): Future[ArrangementResponse] =
+    httpClient
+      .post(url"$arrangementUrl")
       .withBody(Json.toJson(arrangementRequest))
       .setHeader((correlationIdHeaderKey, correlationId.value.toString))
       .execute[ArrangementResponse]
-  }
 }

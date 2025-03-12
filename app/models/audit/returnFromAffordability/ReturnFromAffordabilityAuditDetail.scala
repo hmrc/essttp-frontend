@@ -20,20 +20,20 @@ import models.audit.AuditDetail
 import play.api.libs.json.{Json, OWrites}
 
 final case class ReturnFromAffordabilityAuditDetail(
-    correlationId:     String,
-    regime:            String,
-    taxIdentifier:     String,
-    pegaCaseId:        String,
-    pegaCorrelationId: String,
-    expenditure:       Map[String, BigDecimal],
-    income:            Map[String, BigDecimal],
-    planDetails:       PlanDetails
+  correlationId:     String,
+  regime:            String,
+  taxIdentifier:     String,
+  pegaCaseId:        String,
+  pegaCorrelationId: String,
+  expenditure:       Map[String, BigDecimal],
+  income:            Map[String, BigDecimal],
+  planDetails:       PlanDetails
 ) extends AuditDetail {
   val auditType: String = "ReturnFromAffordabilityAssessment"
 }
 
 object ReturnFromAffordabilityAuditDetail {
 
-  implicit val writes: OWrites[ReturnFromAffordabilityAuditDetail] = Json.writes
+  given OWrites[ReturnFromAffordabilityAuditDetail] = Json.writes
 
 }

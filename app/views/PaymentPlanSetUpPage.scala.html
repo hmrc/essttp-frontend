@@ -17,8 +17,7 @@
 @import config.AppConfig
 @import controllers.routes
 @import essttp.rootmodel.TaxRegime
-@import essttp.rootmodel.ttp.affordablequotes.DueDate
-@import messages.{DateMessages, Messages}
+@import messages.Messages
 @import play.api.mvc.Request
 @import play.twirl.api.Html
 @import requests.RequestSupport
@@ -37,10 +36,10 @@
         wasAffordabilityJourney: Boolean
 )(
         implicit
-        request: Request[_]
+        request: Request[?]
 )
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 @title = @{
     Messages.Confirmation.`Your payment plan is set up`.show

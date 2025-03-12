@@ -32,27 +32,63 @@ object ChargeTypeMessages {
     MainTrans("5190") -> Message(english = "Enquiry Amendment", welsh = "Diwygiad ymholiad"),
     MainTrans("4960") -> Message(english = "6 month late filing penalty", welsh = "Cosb am gyflwyno 6 mis yn hwyr"),
     MainTrans("4970") -> Message(english = "12 month late filing penalty", welsh = "Cosb am gyflwyno 12 mis yn hwyr"),
-    MainTrans("5010") -> Message(english = "Partnership 6 months late filing penalty", welsh = "Cosb i bartneriaeth am gyflwyno 6 mis yn hwyr"),
-    MainTrans("5020") -> Message(english = "Partnership 12 months late filing penalty", welsh = "Cosb i bartneriaeth am gyflwyno 12 mis yn hwyr"),
+    MainTrans("5010") -> Message(
+      english = "Partnership 6 months late filing penalty",
+      welsh = "Cosb i bartneriaeth am gyflwyno 6 mis yn hwyr"
+    ),
+    MainTrans("5020") -> Message(
+      english = "Partnership 12 months late filing penalty",
+      welsh = "Cosb i bartneriaeth am gyflwyno 12 mis yn hwyr"
+    ),
     MainTrans("6010") -> Message(english = "Late Payment interest", welsh = "Llog ar daliadau hwyr"),
     MainTrans("5110") -> Message(english = "30 days late payment penalty", welsh = "Cosb am dalu 30 diwrnod yn hwyr"),
     MainTrans("5120") -> Message(english = "6 months late payment penalty", welsh = "Cosb am dalu 6 mis yn hwyr"),
     MainTrans("5130") -> Message(english = "12 months late payment penalty", welsh = "Cosb am dalu 12 mis yn hwyr"),
     MainTrans("5080") -> Message(english = "Penalty", welsh = "Cosb"),
-    MainTrans("5100") -> Message(english = "Amount no longer included in Tax Code", welsh = "Swm sydd heb ei gynnwys yn y Cod Treth mwyach"),
+    MainTrans("5100") -> Message(
+      english = "Amount no longer included in Tax Code",
+      welsh = "Swm sydd heb ei gynnwys yn y Cod Treth mwyach"
+    ),
     MainTrans("5070") -> Message(english = "Repayment supplement", welsh = "Atodiad ad-daliad"),
-    MainTrans("5140") -> Message(english = "First penalty for late tax return", welsh = "Cosb gyntaf ar gyfer Ffurflen Dreth hwyr"),
-    MainTrans("4940") -> Message(english = "First penalty for late tax return", welsh = "Cosb gyntaf ar gyfer Ffurflen Dreth hwyr"),
-    MainTrans("5150") -> Message(english = "Second penalty for late tax return", welsh = "Ail gosb ar gyfer Ffurflen Dreth hwy"),
-    MainTrans("5160") -> Message(english = "First penalty for late partnership tax return", welsh = "Cosb gyntaf ar gyfer Ffurflen Dreth Partneriae hwyr"),
-    MainTrans("4980") -> Message(english = "First penalty for late partnership tax return", welsh = "Cosb gyntaf ar gyfer Ffurflen Dreth Partneriae hwyr"),
-    MainTrans("5170") -> Message(english = "Second penalty for late partnership tax return", welsh = "Ail gosb ar gyfer Ffurflen Dreth Partneriaeth hwr"),
+    MainTrans("5140") -> Message(
+      english = "First penalty for late tax return",
+      welsh = "Cosb gyntaf ar gyfer Ffurflen Dreth hwyr"
+    ),
+    MainTrans("4940") -> Message(
+      english = "First penalty for late tax return",
+      welsh = "Cosb gyntaf ar gyfer Ffurflen Dreth hwyr"
+    ),
+    MainTrans("5150") -> Message(
+      english = "Second penalty for late tax return",
+      welsh = "Ail gosb ar gyfer Ffurflen Dreth hwy"
+    ),
+    MainTrans("5160") -> Message(
+      english = "First penalty for late partnership tax return",
+      welsh = "Cosb gyntaf ar gyfer Ffurflen Dreth Partneriae hwyr"
+    ),
+    MainTrans("4980") -> Message(
+      english = "First penalty for late partnership tax return",
+      welsh = "Cosb gyntaf ar gyfer Ffurflen Dreth Partneriae hwyr"
+    ),
+    MainTrans("5170") -> Message(
+      english = "Second penalty for late partnership tax return",
+      welsh = "Ail gosb ar gyfer Ffurflen Dreth Partneriaeth hwr"
+    ),
     MainTrans("5200") -> Message(english = "Tax return amendment", welsh = "Diwygiad i'r Ffurflen Dreth"),
     MainTrans("5071") -> Message(english = "Repayment", welsh = "Ad-daliad"),
     MainTrans("5180") -> Message(english = "Enquiry amendment", welsh = "Diwygiad ymholiad"),
-    MainTrans("5090") -> Message(english = "Amount no longer included in tax code", welsh = "Swm sydd heb ei gynnwys yn y cod treth mwyach"),
-    MainTrans("5030") -> Message(english = "First surcharge for late payment", welsh = "Gordal cyntaf ar gyfer taliad hwyr"),
-    MainTrans("5040") -> Message(english = "Second surcharge for late payment", welsh = "Ail ordal ar gyfer taliad hwyr"),
+    MainTrans("5090") -> Message(
+      english = "Amount no longer included in tax code",
+      welsh = "Swm sydd heb ei gynnwys yn y cod treth mwyach"
+    ),
+    MainTrans("5030") -> Message(
+      english = "First surcharge for late payment",
+      welsh = "Gordal cyntaf ar gyfer taliad hwyr"
+    ),
+    MainTrans("5040") -> Message(
+      english = "Second surcharge for late payment",
+      welsh = "Ail ordal ar gyfer taliad hwyr"
+    ),
     MainTrans("5073") -> Message(english = "Transfer to OAS", welsh = "Trosglwyddo i OAS"),
     MainTrans("4000") -> Message(english = "HMRC adjustment", welsh = "Addasiad gan CThEF"),
     MainTrans("4001") -> Message(english = "HMRC adjustment", welsh = "Addasiad gan CThEF"),

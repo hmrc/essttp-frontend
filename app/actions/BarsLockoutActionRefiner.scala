@@ -19,7 +19,7 @@ package actions
 import actionsmodel.{AuthenticatedJourneyRequest, BarsNotLockedOutRequest}
 import controllers.{JourneyIncorrectStateRouter, routes}
 import essttp.bars.BarsVerifyStatusConnector
-import essttp.journey.model.Journey
+import essttp.journey.model.JourneyStage
 import play.api.Logging
 import play.api.mvc.{ActionRefiner, Request, Result, Results}
 import requests.RequestSupport
@@ -29,25 +29,27 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class BarsLockoutActionRefiner @Inject() (
-    barsVerifyStatusConnector: BarsVerifyStatusConnector,
-    requestSupport:            RequestSupport
-)(
-    implicit
-    ec: ExecutionContext
-) extends ActionRefiner[AuthenticatedJourneyRequest, BarsNotLockedOutRequest] with Logging with Results {
+  barsVerifyStatusConnector: BarsVerifyStatusConnector,
+  requestSupport:            RequestSupport
+)(using ec: ExecutionContext)
+    extends ActionRefiner[AuthenticatedJourneyRequest, BarsNotLockedOutRequest],
+      Logging,
+      Results {
 
-  override protected def refine[A](request: AuthenticatedJourneyRequest[A]): Future[Either[Result, BarsNotLockedOutRequest[A]]] = {
-    implicit val rh: Request[A] = request.request
+  override protected def refine[A](
+    request: AuthenticatedJourneyRequest[A]
+  ): Future[Either[Result, BarsNotLockedOutRequest[A]]] = {
+    given Request[A] = request.request
 
     request.journey match {
-      case j: Journey.BeforeComputedTaxId =>
+      case j: JourneyStage.BeforeComputedTaxId =>
         JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF(j).map(Left(_))
-      case j: Journey.AfterComputedTaxId =>
+      case j: JourneyStage.AfterComputedTaxId  =>
         barsVerifyStatusConnector.status(j.taxId).map { status =>
           status.lockoutExpiryDateTime match {
             case Some(_) =>
               Left(Redirect(routes.BankDetailsController.barsLockout))
-            case None =>
+            case None    =>
               Right(
                 new BarsNotLockedOutRequest(
                   request.request,

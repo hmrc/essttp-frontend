@@ -40,52 +40,59 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class PaymentScheduleController @Inject() (
-    as:                  Actions,
-    mcc:                 MessagesControllerComponents,
-    paymentSchedulePage: CheckPaymentSchedule,
-    journeyService:      JourneyService,
-    auditService:        AuditService,
-    languageController:  LanguageController
-)(implicit ec: ExecutionContext, appConfig: AppConfig) extends FrontendController(mcc)
-  with Logging {
+  as:                  Actions,
+  mcc:                 MessagesControllerComponents,
+  paymentSchedulePage: CheckPaymentSchedule,
+  journeyService:      JourneyService,
+  auditService:        AuditService,
+  languageController:  LanguageController
+)(using ExecutionContext, AppConfig)
+    extends FrontendController(mcc),
+      Logging {
 
-  implicit val localDateOrdering: Ordering[LocalDate] = _ compareTo _
+  given Ordering[LocalDate] = _.compareTo(_)
 
-  val checkPaymentSchedule: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request: EligibleJourneyRequest[_] =>
-    withJourneyInCorrectState(request.journey){ j =>
-      finalStateCheck(request.journey, displayPage(j))
-    }
+  val checkPaymentSchedule: Action[AnyContent] = as.eligibleJourneyAction.async {
+    implicit request: EligibleJourneyRequest[?] =>
+      withJourneyInCorrectState(request.journey) { j =>
+        finalStateCheck(request.journey, displayPage(j))
+      }
   }
 
   private def displayPage(
-      journey: Either[Journey.AfterSelectedPaymentPlan, (Journey.AfterCheckedPaymentPlan, PaymentPlanAnswers.PaymentPlanNoAffordability)]
-  )(implicit r: EligibleJourneyRequest[_]): Result = {
-    val journeyMerged = journey.map(_._1).merge
+    journey: Either[
+      JourneyStage.AfterSelectedPaymentPlan & Journey,
+      (JourneyStage.AfterCheckedPaymentPlan & Journey, PaymentPlanAnswers.PaymentPlanNoAffordability)
+    ]
+  )(using EligibleJourneyRequest[?]): Result = {
+    val journeyMerged         = journey.map[Journey](_._1).merge
     val upfrontPaymentAnswers = upfrontPaymentAnswersFromJourney(journeyMerged)
-    val dayOfMonth = journey.fold(dayOfMonthFromJourney, _._2.dayOfMonth)
-    val selectedPaymentPlan = journey.fold(_.selectedPaymentPlan, _._2.selectedPaymentPlan)
-    val monthlyPaymentAmount = journey.fold(
-      { case j1: Journey.AfterEnteredMonthlyPaymentAmount => j1.monthlyPaymentAmount },
+    val dayOfMonth            = journey.fold(dayOfMonthFromJourney, _._2.dayOfMonth)
+    val selectedPaymentPlan   = journey.fold(_.selectedPaymentPlan, _._2.selectedPaymentPlan)
+    val monthlyPaymentAmount  = journey.fold(
+      { case j1: JourneyStage.AfterEnteredMonthlyPaymentAmount => j1.monthlyPaymentAmount },
       _._2.monthlyPaymentAmount
     )
 
-    Ok(paymentSchedulePage(
-      upfrontPaymentAnswers,
-      dayOfMonth,
-      selectedPaymentPlan,
-      monthlyPaymentAmount.value,
-      whyCannotPayInFullAnswersFromJourney(journeyMerged),
-      canPayWithinSixMonthsFromJourney(journeyMerged),
-      journeyMerged.taxRegime
-    ))
+    Ok(
+      paymentSchedulePage(
+        upfrontPaymentAnswers,
+        dayOfMonth,
+        selectedPaymentPlan,
+        monthlyPaymentAmount.value,
+        whyCannotPayInFullAnswersFromJourney(journeyMerged),
+        canPayWithinSixMonthsFromJourney(journeyMerged),
+        journeyMerged.taxRegime
+      )
+    )
   }
 
   val checkPaymentScheduleSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
-    withJourneyInCorrectState(request.journey){
+    withJourneyInCorrectState(request.journey) {
 
       case Left(j) =>
         j match {
-          case j1: Journey.Stages.ChosenPaymentPlan =>
+          case j1: Journey.ChosenPaymentPlan =>
             auditService.auditPaymentPlanBeforeSubmission(j1)
 
             val paymentPlanAnswers = PaymentPlanAnswers.PaymentPlanNoAffordability(
@@ -96,56 +103,77 @@ class PaymentScheduleController @Inject() (
               j.selectedPaymentPlan
             )
 
-            journeyService.updateHasCheckedPaymentPlan(j.journeyId, paymentPlanAnswers)
+            journeyService
+              .updateHasCheckedPaymentPlan(j.journeyId, paymentPlanAnswers)
               .map(updatedJourney =>
-                Routing.redirectToNext(routes.PaymentScheduleController.checkPaymentSchedule, updatedJourney, submittedValueUnchanged = false))
+                Routing.redirectToNext(
+                  routes.PaymentScheduleController.checkPaymentSchedule,
+                  updatedJourney,
+                  submittedValueUnchanged = false
+                )
+              )
         }
 
       case Right((j, _)) =>
-        JourneyLogger.debug(s"Nothing to audit for stage: ${j.stage.toString}")
-        Routing.redirectToNext(routes.PaymentScheduleController.checkPaymentSchedule, j, submittedValueUnchanged = false)
+        JourneyLogger.debug(s"Nothing to audit for stage: ${j.stage}")
+        Routing.redirectToNext(
+          routes.PaymentScheduleController.checkPaymentSchedule,
+          j,
+          submittedValueUnchanged = false
+        )
     }
   }
 
   def changeFromCheckPaymentSchedule(pageId: String, regime: TaxRegime, lang: Option[Language]): Action[AnyContent] =
     as.continueToSameEndpointAuthenticatedJourneyAction.async { implicit request =>
-
       lang match {
-        case None => request.journey match {
-          case _: Journey.AfterStartedPegaCase | _: Journey.AfterSelectedPaymentPlan | _: Journey.AfterCheckedPaymentPlan =>
-            Redirect(CheckPaymentPlanChangeLink.withName(pageId).targetPage(regime)).addingToSession(Routing.clickedChangeFromSessionKey -> "true")
-          case other =>
-            Errors.throwServerErrorException(s"Cannot change answer from check your payment plan page in journey state ${other.name}")
-        }
+        case None           =>
+          request.journey match {
+            case _: JourneyStage.AfterStartedPegaCase | _: JourneyStage.AfterSelectedPaymentPlan |
+                _: JourneyStage.AfterCheckedPaymentPlan =>
+              Redirect(CheckPaymentPlanChangeLink.withName(pageId).targetPage(regime))
+                .addingToSession(Routing.clickedChangeFromSessionKey -> "true")
+            case other =>
+              Errors.throwServerErrorException(
+                s"Cannot change answer from check your payment plan page in journey state ${other.name}"
+              )
+          }
         case Some(language) =>
           languageController.switchToLanguage(language.code)(
             request
               .withHeaders(
                 request.headers
                   .remove(HeaderNames.REFERER)
-                  .add(HeaderNames.REFERER -> routes.PaymentScheduleController.changeFromCheckPaymentSchedule(pageId, regime, None).url)
+                  .add(
+                    HeaderNames.REFERER -> routes.PaymentScheduleController
+                      .changeFromCheckPaymentSchedule(pageId, regime, None)
+                      .url
+                  )
               )
           )
       }
     }
 
-  private def withJourneyInCorrectState[A](journey: Journey)(
-      f: Either[Journey.AfterSelectedPaymentPlan, (Journey.AfterCheckedPaymentPlan, PaymentPlanAnswers.PaymentPlanNoAffordability)] => Future[Result]
-  )(implicit r: Request[_]): Future[Result] =
+  private def withJourneyInCorrectState(journey: Journey)(
+    f: Either[
+      JourneyStage.AfterSelectedPaymentPlan & Journey,
+      (JourneyStage.AfterCheckedPaymentPlan & Journey, PaymentPlanAnswers.PaymentPlanNoAffordability)
+    ] => Future[Result]
+  )(using Request[?]): Future[Result] =
     journey match {
-      case _: Journey.BeforeSelectedPaymentPlan =>
+      case _: JourneyStage.BeforeSelectedPaymentPlan =>
         MissingInfoController.redirectToMissingInfoPage()
-      case j: Journey.AfterSelectedPaymentPlan =>
+      case j: JourneyStage.AfterSelectedPaymentPlan  =>
         f(Left(j))
-      case j: Journey.AfterCheckedPaymentPlan =>
+      case j: JourneyStage.AfterCheckedPaymentPlan   =>
         j.paymentPlanAnswers match {
-          case p: PaymentPlanAnswers.PaymentPlanNoAffordability =>
+          case p: PaymentPlanAnswers.PaymentPlanNoAffordability    =>
             f(Right(j -> p))
           case _: PaymentPlanAnswers.PaymentPlanAfterAffordability =>
             Errors.throwServerErrorException("Not expecting to check payment plan here on affordability journey")
         }
 
-      case _: Journey.AfterStartedPegaCase =>
+      case _: JourneyStage.AfterStartedPegaCase =>
         Errors.throwServerErrorException("Not expecting to check payment plan here when started PEGA case")
     }
 
@@ -153,23 +181,24 @@ class PaymentScheduleController @Inject() (
 
 object PaymentScheduleController {
   private def upfrontPaymentAnswersFromJourney(journey: Journey): UpfrontPaymentAnswers = journey match {
-    case j: Journey.AfterUpfrontPaymentAnswers => j.upfrontPaymentAnswers
-    case _                                     => Errors.throwServerErrorException("Trying to get upfront payment answers for journey before they exist..")
+    case j: JourneyStage.AfterUpfrontPaymentAnswers => j.upfrontPaymentAnswers
+    case _                                          => Errors.throwServerErrorException("Trying to get upfront payment answers for journey before they exist..")
   }
 
   private def whyCannotPayInFullAnswersFromJourney(journey: Journey): WhyCannotPayInFullAnswers = journey match {
-    case j: Journey.AfterWhyCannotPayInFullAnswers => j.whyCannotPayInFullAnswers
-    case _                                         => Errors.throwServerErrorException("Trying to get why cannot pay in full answer for journey before it exists..")
+    case j: JourneyStage.AfterWhyCannotPayInFullAnswers => j.whyCannotPayInFullAnswers
+    case _                                              =>
+      Errors.throwServerErrorException("Trying to get why cannot pay in full answer for journey before it exists..")
   }
 
   private def canPayWithinSixMonthsFromJourney(journey: Journey): CanPayWithinSixMonthsAnswers = journey match {
-    case j: Journey.AfterCanPayWithinSixMonthsAnswers => j.canPayWithinSixMonthsAnswers
-    case _ => Errors.throwServerErrorException("Trying to get can pay within six months answer for journey before it exists...")
+    case j: JourneyStage.AfterCanPayWithinSixMonthsAnswers => j.canPayWithinSixMonthsAnswers
+    case _                                                 =>
+      Errors.throwServerErrorException("Trying to get can pay within six months answer for journey before it exists...")
   }
 
-  private def dayOfMonthFromJourney(journey: Journey.AfterSelectedPaymentPlan): DayOfMonth = journey match {
-    case j: Journey.AfterEnteredDayOfMonth => j.dayOfMonth
-    case _                                 => Errors.throwServerErrorException("Trying to get day of month answer for journey before it exists..")
-  }
+  private def dayOfMonthFromJourney(journey: JourneyStage.AfterSelectedPaymentPlan & Journey): DayOfMonth =
+    journey match {
+      case j: JourneyStage.AfterEnteredDayOfMonth => j.dayOfMonth
+    }
 }
-

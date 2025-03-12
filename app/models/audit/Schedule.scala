@@ -22,39 +22,40 @@ import models.audit.planbeforesubmission.AuditCollections
 import play.api.libs.json.{Json, OWrites}
 
 final case class Schedule(
-    initialPaymentAmount:           BigDecimal,
-    collectionDate:                 DayOfMonth,
-    collectionLengthCalendarMonths: Int,
-    collections:                    List[AuditCollections],
-    totalNoPayments:                Int,
-    totalInterestCharged:           BigDecimal,
-    totalPayable:                   BigDecimal,
-    totalPaymentWithoutInterest:    BigDecimal
+  initialPaymentAmount:           BigDecimal,
+  collectionDate:                 DayOfMonth,
+  collectionLengthCalendarMonths: Int,
+  collections:                    List[AuditCollections],
+  totalNoPayments:                Int,
+  totalInterestCharged:           BigDecimal,
+  totalPayable:                   BigDecimal,
+  totalPaymentWithoutInterest:    BigDecimal
 )
 
 object Schedule {
-  implicit val writes: OWrites[Schedule] = Json.writes
+  given OWrites[Schedule] = Json.writes
 
   def createSchedule(selectedPaymentPlan: PaymentPlan, dayOfMonth: DayOfMonth): Schedule = {
     val totalNumberOfPaymentsIncludingUpfrontPayment: Int =
       selectedPaymentPlan.collections.regularCollections.size +
         selectedPaymentPlan.collections.initialCollection.fold(0)(_ => 1)
-    val auditCollections: List[AuditCollections] = selectedPaymentPlan.instalments.map { instalment =>
+    val auditCollections: List[AuditCollections]          = selectedPaymentPlan.instalments.map { instalment =>
       AuditCollections(
         collectionNumber = instalment.instalmentNumber.value,
-        amount           = instalment.amountDue.value.inPounds,
-        paymentDate      = instalment.dueDate.value
+        amount = instalment.amountDue.value.inPounds,
+        paymentDate = instalment.dueDate.value
       )
     }
     Schedule(
-      initialPaymentAmount           = selectedPaymentPlan.collections.initialCollection.fold(AmountInPence.zero)(_.amountDue.value).inPounds,
-      collectionDate                 = dayOfMonth,
+      initialPaymentAmount =
+        selectedPaymentPlan.collections.initialCollection.fold(AmountInPence.zero)(_.amountDue.value).inPounds,
+      collectionDate = dayOfMonth,
       collectionLengthCalendarMonths = selectedPaymentPlan.numberOfInstalments.value,
-      collections                    = auditCollections,
-      totalNoPayments                = totalNumberOfPaymentsIncludingUpfrontPayment,
-      totalInterestCharged           = selectedPaymentPlan.planInterest.value.inPounds,
-      totalPayable                   = selectedPaymentPlan.totalDebtIncInt.value.inPounds,
-      totalPaymentWithoutInterest    = selectedPaymentPlan.totalDebt.value.inPounds
+      collections = auditCollections,
+      totalNoPayments = totalNumberOfPaymentsIncludingUpfrontPayment,
+      totalInterestCharged = selectedPaymentPlan.planInterest.value.inPounds,
+      totalPayable = selectedPaymentPlan.totalDebtIncInt.value.inPounds,
+      totalPaymentWithoutInterest = selectedPaymentPlan.totalDebt.value.inPounds
     )
   }
 }

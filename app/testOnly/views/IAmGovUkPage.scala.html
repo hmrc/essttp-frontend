@@ -24,7 +24,7 @@ testOnlyLayout: TestOnlyLayout,
 govukButton: GovukButton
 )
 @(taxRegime: TaxRegime)(implicit
-        request: Request[_]
+        request: Request[?]
 )
 
 @title = @{

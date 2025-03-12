@@ -32,9 +32,9 @@ govukErrorSummary: GovukErrorSummary,
 requestSupport: RequestSupport
 )
 
-@(form: Form[CanPayWithinSixMonthsFormValue], remainingAmountToPay: AmountInPence)(implicit request: Request[_])
+@(form: Form[CanPayWithinSixMonthsFormValue], remainingAmountToPay: AmountInPence)(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.{languageFromRequest, legacyMessages}
 
 @key = @{
     "CanPayWithinSixMonths"

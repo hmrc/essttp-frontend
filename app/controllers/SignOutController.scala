@@ -28,13 +28,13 @@ import views.Views
 
 @Singleton
 class SignOutController @Inject() (
-    as:        Actions,
-    mcc:       MessagesControllerComponents,
-    views:     Views,
-    appConfig: AppConfig
-) extends FrontendController(mcc)
-  with I18nSupport
-  with Logging {
+  as:        Actions,
+  mcc:       MessagesControllerComponents,
+  views:     Views,
+  appConfig: AppConfig
+) extends FrontendController(mcc),
+      I18nSupport,
+      Logging {
 
   def signOutFromTimeout: Action[AnyContent] = Action { implicit request =>
     // N.B. the implicit request being passed into the page here may still have the auth

@@ -32,9 +32,9 @@
   requestSupport: RequestSupport
 )
 
-@(form: Form[PaymentDayForm])(implicit request: Request[_])
+@(form: Form[PaymentDayForm])(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.{languageFromRequest, legacyMessages}
 
 @key = @{"PaymentDay"}
 @differentDayKey = @{"DifferentDay"}

@@ -29,9 +29,9 @@
         commonIneligibilityPartial: CommonIneligibilityPartial
 )
 
-@()(implicit request: Request[_])
+@()(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 @layout(pageTitle = Some(Messages.EnrolmentMissing.`Sign up for Making Tax Digital for Income Tax to use this service`.show), showBackLink = false) {
     <h1 class="govuk-heading-xl">

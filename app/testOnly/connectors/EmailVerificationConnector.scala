@@ -28,13 +28,17 @@ import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps, UpstreamErrorResponse}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class EmailVerificationConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2)(implicit ec: ExecutionContext) {
+class EmailVerificationConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2)(implicit
+  ec: ExecutionContext
+) {
 
   private val getPasscodesUrl: String = appConfig.BaseUrl.emailVerificationUrl + "/test-only/passcodes"
 
   def requestEmailVerification()(implicit hc: HeaderCarrier): Future[EmailVerificationPasscodes] =
-    httpClient.get(url"$getPasscodesUrl").execute[EmailVerificationPasscodes]
-      .recover{
+    httpClient
+      .get(url"$getPasscodesUrl")
+      .execute[EmailVerificationPasscodes]
+      .recover {
         case e: UpstreamErrorResponse if e.statusCode === NOT_FOUND => EmailVerificationPasscodes(List.empty)
       }
 

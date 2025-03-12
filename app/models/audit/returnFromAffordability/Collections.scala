@@ -19,14 +19,14 @@ package models.audit.returnFromAffordability
 import play.api.libs.json.{Json, OWrites}
 
 final case class Collections(
-    numberOfCollections:        Int,
-    regularCollectionStartDate: String,
-    regularCollectionAmount:    BigDecimal,
-    finalCollectionAmount:      BigDecimal
+  numberOfCollections:        Int,
+  regularCollectionStartDate: String,
+  regularCollectionAmount:    BigDecimal,
+  finalCollectionAmount:      BigDecimal
 )
 
 object Collections {
 
-  implicit val writes: OWrites[Collections] = Json.writes
+  given OWrites[Collections] = Json.writes
 
 }

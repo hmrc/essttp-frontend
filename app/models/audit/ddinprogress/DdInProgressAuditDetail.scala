@@ -20,19 +20,18 @@ import models.audit.{AuditDetail, TaxDetail}
 import play.api.libs.json.{Json, OWrites}
 
 final case class DdInProgressAuditDetail(
-    origin:         String,
-    taxType:        String,
-    taxDetail:      TaxDetail,
-    correlationId:  String,
-    authProviderId: String,
-    continueOrExit: String
-)
-  extends AuditDetail {
+  origin:         String,
+  taxType:        String,
+  taxDetail:      TaxDetail,
+  correlationId:  String,
+  authProviderId: String,
+  continueOrExit: String
+) extends AuditDetail {
 
   override val auditType: String = "DirectDebitInProgress"
 
 }
 
 object DdInProgressAuditDetail {
-  implicit val writes: OWrites[DdInProgressAuditDetail] = Json.writes
+  given OWrites[DdInProgressAuditDetail] = Json.writes
 }

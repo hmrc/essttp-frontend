@@ -21,5 +21,5 @@ import play.api.libs.json.{Json, OFormat}
 final case class BarsValidateRequest(account: BarsBankAccount)
 
 object BarsValidateRequest {
-  implicit val format: OFormat[BarsValidateRequest] = Json.format
+  given OFormat[BarsValidateRequest] = Json.format
 }

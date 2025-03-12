@@ -45,9 +45,9 @@
   whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers,
   canPayWithinSixMonthsAnswers: CanPayWithinSixMonthsAnswers,
   taxRegime: TaxRegime
-)(implicit request: EligibleJourneyRequest[_], ord: Ordering[LocalDate])
+)(implicit request: EligibleJourneyRequest[?], ord: Ordering[LocalDate])
 
-@import requestSupport._
+@import requestSupport.{languageFromRequest, legacyMessages}
 
 @title = @{Messages.PaymentSchedule.`Check your payment plan`.show}
 

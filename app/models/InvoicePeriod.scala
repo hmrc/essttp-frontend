@@ -16,18 +16,11 @@
 
 package models
 
-import play.api.libs.json.{Format, Json}
-
 import java.time.LocalDate
 
 final case class InvoicePeriod(
-    monthNumber: Int,
-    start:       LocalDate,
-    end:         LocalDate,
-    dueDate:     LocalDate
+  monthNumber: Int,
+  start:       LocalDate,
+  end:         LocalDate,
+  dueDate:     LocalDate
 )
-
-object InvoicePeriod {
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  implicit val format: Format[InvoicePeriod] = Json.format[InvoicePeriod]
-}

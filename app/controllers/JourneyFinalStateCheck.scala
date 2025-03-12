@@ -16,10 +16,7 @@
 
 package controllers
 
-import cats.Eq
-import cats.implicits.catsSyntaxEq
-import essttp.journey.model.Stage.AfterSubmittedArrangement
-import essttp.journey.model.{Journey, Stage}
+import essttp.journey.model.{Journey, JourneyStage}
 import essttp.rootmodel.TaxRegime
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{Request, RequestHeader, Result}
@@ -28,30 +25,34 @@ import util.JourneyLogger
 import scala.concurrent.Future
 
 object JourneyFinalStateCheck {
-  implicit val eq: Eq[Stage] = Eq.fromUniversalEquals
 
-  private val endStateConditional: Journey => Boolean = journey => journey.stage === AfterSubmittedArrangement.Submitted
+  private val endStateConditional: Journey => Boolean = {
+    case _: JourneyStage.AfterArrangementSubmitted => true
+    case _                                         => false
+  }
 
-  private def logMessage(implicit requestHeader: RequestHeader): Unit =
-    JourneyLogger.info("User tried to force browser to a page in the journey, but they have finished their journey. Redirecting to confirmation page")
+  private def logMessage(using RequestHeader): Unit =
+    JourneyLogger.info(
+      "User tried to force browser to a page in the journey, but they have finished their journey. Redirecting to confirmation page"
+    )
 
-  private def confirmationRedirect(taxRegime: TaxRegime): Result = Redirect(SubmitArrangementController.whichPaymentPlanSetupPage(taxRegime))
+  private def confirmationRedirect(taxRegime: TaxRegime): Result = Redirect(
+    SubmitArrangementController.whichPaymentPlanSetupPage(taxRegime)
+  )
 
-  def finalStateCheckF(journey: Journey, result: => Future[Result])(implicit request: Request[_]): Future[Result] = {
+  def finalStateCheckF(journey: Journey, result: => Future[Result])(using Request[?]): Future[Result] =
     if (endStateConditional(journey)) {
       logMessage
       confirmationRedirect(journey.taxRegime)
     } else {
       result
     }
-  }
 
-  def finalStateCheck(journey: Journey, result: => Result)(implicit request: Request[_]): Result = {
+  def finalStateCheck(journey: Journey, result: => Result)(using Request[?]): Result =
     if (endStateConditional(journey)) {
       logMessage
       confirmationRedirect(journey.taxRegime)
     } else {
       result
     }
-  }
 }

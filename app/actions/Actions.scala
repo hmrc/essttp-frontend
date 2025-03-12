@@ -23,14 +23,14 @@ import javax.inject.{Inject, Singleton}
 
 @Singleton
 class Actions @Inject() (
-    actionBuilder:                                    DefaultActionBuilder,
-    continueToLandingPagesAuthenticatedActionRefiner: ContinueToLandingPagesAuthenticatedActionRefiner,
-    continueToSameEndpointAuthenticatedActionRefiner: ContinueToSameEndpointAuthenticatedActionRefiner,
-    getJourneyActionRefiner:                          GetJourneyActionRefiner,
-    barsLockoutActionFilter:                          BarsLockoutActionRefiner,
-    barsLockedOutJourneyRefiner:                      BarsLockedOutJourneyRefiner,
-    eligibleJourneyRefiner:                           EligibleJourneyRefiner,
-    shutteringActionFilter:                           ShutteringActionFilter
+  actionBuilder:                                    DefaultActionBuilder,
+  continueToLandingPagesAuthenticatedActionRefiner: ContinueToLandingPagesAuthenticatedActionRefiner,
+  continueToSameEndpointAuthenticatedActionRefiner: ContinueToSameEndpointAuthenticatedActionRefiner,
+  getJourneyActionRefiner:                          GetJourneyActionRefiner,
+  barsLockoutActionFilter:                          BarsLockoutActionRefiner,
+  barsLockedOutJourneyRefiner:                      BarsLockedOutJourneyRefiner,
+  eligibleJourneyRefiner:                           EligibleJourneyRefiner,
+  shutteringActionFilter:                           ShutteringActionFilter
 ) {
 
   val default: ActionBuilder[Request, AnyContent] = actionBuilder

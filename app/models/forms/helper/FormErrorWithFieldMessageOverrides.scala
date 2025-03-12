@@ -19,6 +19,6 @@ package models.forms.helper
 import play.api.data.FormError
 
 final case class FormErrorWithFieldMessageOverrides(
-    formError:             FormError,
-    fieldMessageOverrides: Seq[FormError] = Seq.empty
+  formError:             FormError,
+  fieldMessageOverrides: Seq[FormError] = Seq.empty
 )

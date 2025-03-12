@@ -26,10 +26,11 @@ import javax.inject.{Inject, Singleton}
 
 @Singleton()
 class NotEnrolledController @Inject() (
-    mcc:   MessagesControllerComponents,
-    views: Views,
-    as:    Actions
-) extends FrontendController(mcc) with Logging {
+  mcc:   MessagesControllerComponents,
+  views: Views,
+  as:    Actions
+) extends FrontendController(mcc),
+      Logging {
 
   def notEnrolled: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     Ok(views.notEnrolled())
@@ -52,4 +53,3 @@ class NotEnrolledController @Inject() (
   }
 
 }
-

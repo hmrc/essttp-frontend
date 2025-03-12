@@ -31,9 +31,9 @@
         requestSupport: RequestSupport
 )
 
-@(form: Form[CanPayUpfrontFormValue])(implicit request: Request[_])
+@(form: Form[CanPayUpfrontFormValue])(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.{languageFromRequest, legacyMessages}
 
 @key = @{
     "CanYouMakeAnUpFrontPayment"

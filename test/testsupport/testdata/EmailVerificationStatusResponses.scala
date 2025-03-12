@@ -20,18 +20,19 @@ import paymentsEmailVerification.models.EmailVerificationState
 
 object EmailVerificationStatusResponses {
 
-  val okToBeVerified = """{"OkToBeVerified":{}}"""
-  val alreadyVerified = """{"AlreadyVerified":{}}"""
-  val tooManyPasscodeAttempts = """{"TooManyPasscodeAttempts":{}}"""
+  val okToBeVerified                 = """{"OkToBeVerified":{}}"""
+  val alreadyVerified                = """{"AlreadyVerified":{}}"""
+  val tooManyPasscodeAttempts        = """{"TooManyPasscodeAttempts":{}}"""
   val tooManyPasscodeJourneysStarted = """{"TooManyPasscodeJourneysStarted":{}}"""
   val tooManyDifferentEmailAddresses = """{"TooManyDifferentEmailAddresses":{}}"""
 
-  def emailVerificationStatusJson(emailVerificationState: EmailVerificationState): String = emailVerificationState match {
-    case EmailVerificationState.OkToBeVerified                 => okToBeVerified
-    case EmailVerificationState.AlreadyVerified                => alreadyVerified
-    case EmailVerificationState.TooManyPasscodeAttempts        => tooManyPasscodeAttempts
-    case EmailVerificationState.TooManyPasscodeJourneysStarted => tooManyPasscodeJourneysStarted
-    case EmailVerificationState.TooManyDifferentEmailAddresses => tooManyDifferentEmailAddresses
-  }
+  def emailVerificationStatusJson(emailVerificationState: EmailVerificationState): String =
+    emailVerificationState match {
+      case EmailVerificationState.OkToBeVerified                 => okToBeVerified
+      case EmailVerificationState.AlreadyVerified                => alreadyVerified
+      case EmailVerificationState.TooManyPasscodeAttempts        => tooManyPasscodeAttempts
+      case EmailVerificationState.TooManyPasscodeJourneysStarted => tooManyPasscodeJourneysStarted
+      case EmailVerificationState.TooManyDifferentEmailAddresses => tooManyDifferentEmailAddresses
+    }
 
 }

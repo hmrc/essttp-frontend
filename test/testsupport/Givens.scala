@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package viewmodels
+package testsupport
 
-import play.api.i18n.Messages
-import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
-import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.Key
+import play.api.libs.json.{JsResult, JsValue}
+import play.api.mvc.Session
 
-object implicits extends ImplicitConversions
+object Givens {
 
-trait ImplicitConversions {
+  given canEqualPlaySession: CanEqual[Session, Session] = CanEqual.derived
 
-  implicit def stringToText(string: String)(implicit messages: Messages): Text =
-    Text(messages(string))
+  given canEqualJsValue: CanEqual[JsValue, JsValue] = CanEqual.derived
 
-  implicit def stringToKey(string: String)(implicit messages: Messages): Key =
-    Key(content = Text(messages(string)))
+  given canEqualJsResult[A]: CanEqual[JsResult[A], JsResult[A]] = CanEqual.derived
+
 }

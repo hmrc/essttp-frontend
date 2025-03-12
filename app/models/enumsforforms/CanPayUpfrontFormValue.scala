@@ -21,15 +21,16 @@ import essttp.rootmodel.CanPayUpfront
 
 import scala.collection.immutable
 
-sealed trait CanPayUpfrontFormValue extends enumeratum.EnumEntry {
+sealed trait CanPayUpfrontFormValue extends enumeratum.EnumEntry derives CanEqual {
   def asCanPayUpfront: CanPayUpfront = this match {
     case CanPayUpfrontFormValue.Yes => CanPayUpfront(value = true)
     case CanPayUpfrontFormValue.No  => CanPayUpfront(value = false)
   }
 }
+
 object CanPayUpfrontFormValue extends Enum[CanPayUpfrontFormValue] {
   case object Yes extends CanPayUpfrontFormValue
-  case object No extends CanPayUpfrontFormValue
+  case object No  extends CanPayUpfrontFormValue
   override def values: immutable.IndexedSeq[CanPayUpfrontFormValue] = findValues
 
   def canPayUpfrontToFormValue(canPayUpfront: CanPayUpfront): CanPayUpfrontFormValue = canPayUpfront match {

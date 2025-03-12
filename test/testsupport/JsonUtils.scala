@@ -21,35 +21,35 @@ import play.api.libs.json.{JsObject, JsValue}
 
 object JsonUtils {
 
-  /**
-   * Find the value at the specified `fieldPath` in the given `json` and replace the value with `replaceWith`.
-   * Key names in `fieldPath` should have outer keys first and inner keys last. If the specified path cannot be
-   * found, this method throws an error.
-   */
+  /** Find the value at the specified `fieldPath` in the given `json` and replace the value with `replaceWith`. Key
+    * names in `fieldPath` should have outer keys first and inner keys last. If the specified path cannot be found, this
+    * method throws an error.
+    */
   @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
   def replace(fieldPath: List[String], replaceWith: JsValue)(json: JsObject): JsObject = {
 
-      def loop(path: List[String], j: JsObject): JsObject = {
-        path match {
-          case Nil => j
-          case head :: tail =>
-            j.value.get(head) match {
-              case None =>
-                sys.error(s"Could not find value for field $head in path ${fieldPath.mkString(".")}. " +
-                  s"Found fields [${j.value.keys.mkString(", ")}]")
+    def loop(path: List[String], j: JsObject): JsObject =
+      path match {
+        case Nil          => j
+        case head :: tail =>
+          j.value.get(head) match {
+            case None =>
+              sys.error(
+                s"Could not find value for field $head in path ${fieldPath.mkString(".")}. " +
+                  s"Found fields [${j.value.keys.mkString(", ")}]"
+              )
 
-              case Some(_) =>
-                tail match {
-                  case Nil =>
-                    JsObject(j.value.toMap.updated(head, replaceWith))
-                  case remainder =>
-                    JsObject(j.value.map{
-                      case (key, jsObject: JsObject) if (key === head) => key -> loop(remainder, jsObject)
-                      case (key, value)                                => key -> value
-                    })
-                }
-            }
-        }
+            case Some(_) =>
+              tail match {
+                case Nil       =>
+                  JsObject(j.value.toMap.updated(head, replaceWith))
+                case remainder =>
+                  JsObject(j.value.map {
+                    case (key, jsObject: JsObject) if key === head => key -> loop(remainder, jsObject)
+                    case (key, value)                              => key -> value
+                  })
+              }
+          }
       }
 
     loop(fieldPath, json)

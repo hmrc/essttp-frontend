@@ -22,9 +22,9 @@ import uk.gov.hmrc.http.HttpResponse
 import scala.util.{Failure, Success, Try}
 
 object HttpResponseUtils {
-  implicit class HttpResponseOps(private val response: HttpResponse) extends AnyVal {
+  extension (response: HttpResponse) {
 
-    def parseJSON[A](implicit reads: Reads[A]): Either[String, A] =
+    def parseJSON[A](using Reads[A]): Either[String, A] =
       Try(response.json) match {
         case Success(jsValue) =>
           jsValue

@@ -23,18 +23,18 @@ import models.audit.{AuditDetail, Schedule, TaxDetail}
 import play.api.libs.json.{Json, OWrites}
 
 final case class PaymentPlanBeforeSubmissionAuditDetail(
-    schedule:                    Schedule,
-    correlationId:               CorrelationId,
-    origin:                      String,
-    taxType:                     String,
-    taxDetail:                   TaxDetail,
-    regimeDigitalCorrespondence: RegimeDigitalCorrespondence,
-    canPayInSixMonths:           Option[Boolean],
-    unableToPayReason:           Option[Set[CannotPayReason]]
+  schedule:                    Schedule,
+  correlationId:               CorrelationId,
+  origin:                      String,
+  taxType:                     String,
+  taxDetail:                   TaxDetail,
+  regimeDigitalCorrespondence: RegimeDigitalCorrespondence,
+  canPayInSixMonths:           Option[Boolean],
+  unableToPayReason:           Option[Set[CannotPayReason]]
 ) extends AuditDetail {
   val auditType: String = "PlanDetails"
 }
 
 object PaymentPlanBeforeSubmissionAuditDetail {
-  implicit val writes: OWrites[PaymentPlanBeforeSubmissionAuditDetail] = Json.writes
+  given OWrites[PaymentPlanBeforeSubmissionAuditDetail] = Json.writes
 }

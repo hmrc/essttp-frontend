@@ -20,12 +20,12 @@ import essttp.rootmodel.CannotPayReason
 import play.api.libs.json.{Json, OWrites}
 
 final case class UserEnteredDetails(
-    unableToPayReason:    Option[Set[CannotPayReason]],
-    payUpfront:           Boolean,
-    upfrontPaymentAmount: BigDecimal,
-    canPayInSixMonths:    Boolean
+  unableToPayReason:    Option[Set[CannotPayReason]],
+  payUpfront:           Boolean,
+  upfrontPaymentAmount: BigDecimal,
+  canPayInSixMonths:    Boolean
 )
 
 object UserEnteredDetails {
-  implicit val writes: OWrites[UserEnteredDetails] = Json.writes
+  given OWrites[UserEnteredDetails] = Json.writes
 }

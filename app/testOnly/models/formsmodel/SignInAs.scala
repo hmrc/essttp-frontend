@@ -20,7 +20,7 @@ import enumeratum._
 
 import scala.collection.immutable
 
-sealed trait SignInAs extends EnumEntry
+sealed trait SignInAs extends EnumEntry derives CanEqual
 
 object SignInAs extends Enum[SignInAs] {
 

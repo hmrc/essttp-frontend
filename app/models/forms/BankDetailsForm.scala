@@ -16,6 +16,7 @@
 
 package models.forms
 
+import cats.implicits.catsSyntaxOptionId
 import essttp.rootmodel.bank.{AccountName, AccountNumber, SortCode}
 import models.enumsforforms.TypeOfAccountFormValue
 import models.forms.helper.FormErrorWithFieldMessageOverrides
@@ -26,24 +27,26 @@ import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 import util.EnumFormatter
 
 final case class BankDetailsForm(
-    typeOfBankAccount: TypeOfAccountFormValue,
-    name:              AccountName,
-    sortCode:          SortCode,
-    accountNumber:     AccountNumber
+  typeOfBankAccount: TypeOfAccountFormValue,
+  name:              AccountName,
+  sortCode:          SortCode,
+  accountNumber:     AccountNumber
 )
 
 object BankDetailsForm {
 
-  private val accountNameMinLength: Int = 2
-  private val accountNameMaxLength: Int = 39
+  private val accountNameMinLength: Int                      = 2
+  private val accountNameMaxLength: Int                      = 39
   private val accountNameAllowedSpecialCharacters: Set[Char] =
     Set(' ', '&', '@', '(', ')', '!', ':', ',', '+', '`', '-', '\\', '\'', '.', '/', '^')
 
-  val typeOfBankAccountMapping: Mapping[TypeOfAccountFormValue] = Forms.of(EnumFormatter.format(
-    `enum`                  = TypeOfAccountFormValue,
-    errorMessageIfMissing   = "error.required",
-    errorMessageIfEnumError = "error.required"
-  ))
+  val typeOfBankAccountMapping: Mapping[TypeOfAccountFormValue] = Forms.of(
+    EnumFormatter.format(
+      `enum` = TypeOfAccountFormValue,
+      errorMessageIfMissing = "error.required",
+      errorMessageIfEnumError = "error.required"
+    )
+  )
 
   val accountNameConstraintRegex: Constraint[AccountName] = Constraint { encryptedAccountName =>
     val accountName = encryptedAccountName.value.decryptedValue.filter(!_.isControl).trim
@@ -52,32 +55,37 @@ object BankDetailsForm {
     else if (accountName.length < accountNameMinLength) Invalid("error.minLength")
     else if (accountName.length > accountNameMaxLength) Invalid("error.maxLength")
     else {
-      val disallowedCharacters = accountName.filterNot(
-        c => c.isLetter || c.isDigit || accountNameAllowedSpecialCharacters.contains(c)
-      ).toList.distinct
+      val disallowedCharacters = accountName
+        .filterNot(c => c.isLetter || c.isDigit || accountNameAllowedSpecialCharacters.contains(c))
+        .toList
+        .distinct
 
-      if (disallowedCharacters.nonEmpty) Invalid("error.disallowedCharacters", disallowedCharacters: _*)
+      if (disallowedCharacters.nonEmpty) Invalid("error.disallowedCharacters", disallowedCharacters*)
       else Valid
     }
   }
 
   val accountNameMapping: Mapping[AccountName] =
-    nonEmptyText.transform[AccountName](name => AccountName(SensitiveString.apply(name)), _.value.decryptedValue).verifying(accountNameConstraintRegex)
+    nonEmptyText
+      .transform[AccountName](name => AccountName(SensitiveString.apply(name)), _.value.decryptedValue)
+      .verifying(accountNameConstraintRegex)
 
   val allowedSeparators: Set[Char] = Set(' ', '-', '–', '−', '—')
 
-  val sortCodeRegex: String = "^[0-9]{6}$"
+  val sortCodeRegex: String                    = "^[0-9]{6}$"
   val sortCodeConstraint: Constraint[SortCode] =
     Constraint(sortCode =>
       if (!sortCode.value.decryptedValue.forall(_.isDigit)) Invalid("error.nonNumeric")
       else if (sortCode.value.decryptedValue.matches(sortCodeRegex)) Valid
-      else Invalid("error.invalid"))
+      else Invalid("error.invalid")
+    )
 
   val sortCodeMapping: Mapping[SortCode] = nonEmptyText
     .transform[SortCode](
       sortCode => SortCode(SensitiveString.apply(sortCode.filterNot(allowedSeparators.contains))),
       _.value.decryptedValue
-    ).verifying(sortCodeConstraint)
+    )
+    .verifying(sortCodeConstraint)
 
   val accountNumberRegex: String = "^[0-9]{6,8}$"
 
@@ -85,50 +93,52 @@ object BankDetailsForm {
     Constraint(accountNumber =>
       if (!accountNumber.value.decryptedValue.forall(_.isDigit)) Invalid("error.nonNumeric")
       else if (accountNumber.value.decryptedValue.matches(accountNumberRegex)) Valid
-      else Invalid("error.invalid"))
+      else Invalid("error.invalid")
+    )
 
   val accountNumberMapping: Mapping[AccountNumber] = nonEmptyText
     .transform[AccountNumber](
       accountNumber => AccountNumber(SensitiveString.apply(accountNumber.filterNot(allowedSeparators.contains))),
       _.value.decryptedValue
-    ).verifying(accountNumberConstraint)
+    )
+    .verifying(accountNumberConstraint)
 
-  private val sortCodeAndAccountNumberOverrides: Seq[FormError] = Seq(
-    FormError("sortCode", ""), // 'turns off' the sortCode field error
+  private val sortCodeAndAccountNumberOverrides: Seq[FormError]              = Seq(
+    FormError("sortCode", ""),      // 'turns off' the sortCode field error
     FormError("accountNumber", ""), // 'turns off' the accountNumber field error
     FormError("sortCodeAndAccountNumber", "sortCode.validate.accountNumberIsWellFormatted.no")
   )
-  val accountNumberNotWellFormatted: FormErrorWithFieldMessageOverrides =
+  val accountNumberNotWellFormatted: FormErrorWithFieldMessageOverrides      =
     FormErrorWithFieldMessageOverrides(
-      formError             = FormError("sortCode", "sortCode.validate.accountNumberIsWellFormatted.no"),
+      formError = FormError("sortCode", "sortCode.validate.accountNumberIsWellFormatted.no"),
       fieldMessageOverrides = sortCodeAndAccountNumberOverrides
     )
-  val sortCodeNotPresentOnEiscd: FormErrorWithFieldMessageOverrides =
+  val sortCodeNotPresentOnEiscd: FormErrorWithFieldMessageOverrides          =
     FormErrorWithFieldMessageOverrides(
-      formError             = FormError("sortCode", "sortCode.validate.sortCodeIsPresentOnEISCD.no"),
+      formError = FormError("sortCode", "sortCode.validate.sortCodeIsPresentOnEISCD.no"),
       fieldMessageOverrides = sortCodeAndAccountNumberOverrides
     )
   val sortCodeDoesNotSupportsDirectDebit: FormErrorWithFieldMessageOverrides =
     FormErrorWithFieldMessageOverrides(
       formError = FormError("sortCode", "sortCode.validate.sortCodeSupportsDirectDebit.no")
     )
-  val nameDoesNotMatch: FormErrorWithFieldMessageOverrides =
+  val nameDoesNotMatch: FormErrorWithFieldMessageOverrides                   =
     FormErrorWithFieldMessageOverrides(
       formError = FormError("name", "name.verify.nameMatches.no")
     )
-  val accountDoesNotExist: FormErrorWithFieldMessageOverrides =
+  val accountDoesNotExist: FormErrorWithFieldMessageOverrides                =
     FormErrorWithFieldMessageOverrides(
-      formError             = FormError("sortCode", "sortCode.verify.accountExists.no"),
+      formError = FormError("sortCode", "sortCode.verify.accountExists.no"),
       fieldMessageOverrides = sortCodeAndAccountNumberOverrides
     )
-  val sortCodeOnDenyList: FormErrorWithFieldMessageOverrides =
+  val sortCodeOnDenyList: FormErrorWithFieldMessageOverrides                 =
     FormErrorWithFieldMessageOverrides(
-      formError             = FormError("sortCode", "sortCode.verify.sortCodeOnDenyList"),
+      formError = FormError("sortCode", "sortCode.verify.sortCodeOnDenyList"),
       fieldMessageOverrides = sortCodeAndAccountNumberOverrides
     )
-  val otherBarsError: FormErrorWithFieldMessageOverrides =
+  val otherBarsError: FormErrorWithFieldMessageOverrides                     =
     FormErrorWithFieldMessageOverrides(
-      formError             = FormError("sortCode", "sortCode.verify.otherError"),
+      formError = FormError("sortCode", "sortCode.verify.otherError"),
       fieldMessageOverrides = sortCodeAndAccountNumberOverrides
     )
 
@@ -140,11 +150,11 @@ object BankDetailsForm {
   val form: Form[BankDetailsForm] =
     Form(
       mapping(
-        "accountType" -> typeOfBankAccountMapping,
-        "name" -> accountNameMapping,
-        "sortCode" -> sortCodeMapping,
+        "accountType"   -> typeOfBankAccountMapping,
+        "name"          -> accountNameMapping,
+        "sortCode"      -> sortCodeMapping,
         "accountNumber" -> accountNumberMapping
-      )(BankDetailsForm.apply)(BankDetailsForm.unapply)
+      )(BankDetailsForm.apply)(Tuple.fromProductTyped(_).some)
     )
 
 }

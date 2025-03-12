@@ -19,9 +19,8 @@ package controllers
 import actions.Actions
 import actionsmodel.EligibleJourneyRequest
 import config.AppConfig
-import essttp.journey.model.Journey.Stages
 import essttp.journey.model.PaymentPlanAnswers.{PaymentPlanAfterAffordability, PaymentPlanNoAffordability}
-import essttp.journey.model.{Journey, UpfrontPaymentAnswers}
+import essttp.journey.model.{Journey, JourneyStage, UpfrontPaymentAnswers}
 import essttp.rootmodel.{AmountInPence, TaxRegime}
 import essttp.utils.Errors
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
@@ -34,14 +33,14 @@ import javax.inject.{Inject, Singleton}
 
 @Singleton
 class PaymentPlanSetUpController @Inject() (
-    as:    Actions,
-    mcc:   MessagesControllerComponents,
-    views: Views
-)(implicit appConfig: AppConfig)
-  extends FrontendController(mcc)
-  with Logging {
+  as:    Actions,
+  mcc:   MessagesControllerComponents,
+  views: Views
+)(using appConfig: AppConfig)
+    extends FrontendController(mcc),
+      Logging {
 
-  implicit val localDateOrdering: Ordering[LocalDate] = _ compareTo _
+  given Ordering[LocalDate] = _.compareTo(_)
 
   val epayePaymentPlanSetUp: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     paymentPlanSetup(request)
@@ -71,29 +70,35 @@ class PaymentPlanSetUpController @Inject() (
     printSummarySetup(request)
   }
 
-  private def printSummarySetup(request: EligibleJourneyRequest[AnyContent])(implicit eligibleJourneyRequest: EligibleJourneyRequest[_]): Result = {
+  private def printSummarySetup(
+    request: EligibleJourneyRequest[AnyContent]
+  )(using EligibleJourneyRequest[?]): Result =
     request.journey match {
-      case j: Journey.BeforeArrangementSubmitted => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
-      case j: Stages.SubmittedArrangement        => printSummary(j)
+      case j: JourneyStage.BeforeArrangementSubmitted => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
+      case j: Journey.SubmittedArrangement            => printSummary(j)
     }
-  }
 
-  private def paymentPlanSetup(request: EligibleJourneyRequest[AnyContent])(implicit eligibleJourneyRequest: EligibleJourneyRequest[_]): Result = {
+  private def paymentPlanSetup(
+    request: EligibleJourneyRequest[AnyContent]
+  )(using EligibleJourneyRequest[?]): Result =
     request.journey match {
-      case j: Journey.BeforeArrangementSubmitted => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
-      case j: Stages.SubmittedArrangement        => displayConfirmationPage(j)
+      case j: JourneyStage.BeforeArrangementSubmitted => JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
+      case j: Journey.SubmittedArrangement            => displayConfirmationPage(j)
     }
-  }
 
-  private def wasAffordabilityJourney(journey: Journey.Stages.SubmittedArrangement): Boolean = journey.paymentPlanAnswers match {
-    case _: PaymentPlanNoAffordability    => false
-    case _: PaymentPlanAfterAffordability => true
-  }
+  private def wasAffordabilityJourney(journey: Journey.SubmittedArrangement): Boolean =
+    journey.paymentPlanAnswers match {
+      case _: PaymentPlanNoAffordability    => false
+      case _: PaymentPlanAfterAffordability => true
+    }
 
-  def displayConfirmationPage(journey: Journey.Stages.SubmittedArrangement)(implicit request: EligibleJourneyRequest[_]): Result = {
+  def displayConfirmationPage(
+    journey: Journey.SubmittedArrangement
+  )(using request: EligibleJourneyRequest[?]): Result = {
     val firstPaymentDay = journey.paymentPlanAnswers.selectedPaymentPlan.collections.regularCollections
       .sortBy(_.dueDate.value)
-      .headOption.getOrElse(Errors.throwServerErrorException("There are no regular collection dates, this should never happen..."))
+      .headOption
+      .getOrElse(Errors.throwServerErrorException("There are no regular collection dates, this should never happen..."))
       .dueDate
 
     val hasUpfrontPayment: Boolean = journey.upfrontPaymentAnswers match {
@@ -102,16 +107,16 @@ class PaymentPlanSetUpController @Inject() (
     }
 
     journey.taxRegime match {
-      //OPS-12246 sa page differs from the others due to these changes, split off into two
-      case TaxRegime.Sa =>
+      // OPS-12246 sa page differs from the others due to these changes, split off into two
+      case TaxRegime.Sa                                     =>
         Ok(
           views.saPaymentPlanSetUpPage(
-            customerPaymentReference    = journey.arrangementResponse.customerReference.value,
-            paymentDay                  = firstPaymentDay,
-            hasUpfrontPayment           = hasUpfrontPayment,
-            wasEmailAddressRequired     = request.isEmailAddressRequired(appConfig),
+            customerPaymentReference = journey.arrangementResponse.customerReference.value,
+            paymentDay = firstPaymentDay,
+            hasUpfrontPayment = hasUpfrontPayment,
+            wasEmailAddressRequired = request.isEmailAddressRequired(appConfig),
             regimeDigitalCorrespondence = request.eligibilityCheckResult.regimeDigitalCorrespondence.value,
-            wasAffordabilityJourney     = wasAffordabilityJourney(journey)
+            wasAffordabilityJourney = wasAffordabilityJourney(journey)
           )
         )
       case TaxRegime.Epaye | TaxRegime.Vat | TaxRegime.Simp =>
@@ -126,30 +131,36 @@ class PaymentPlanSetUpController @Inject() (
 
   }
 
-  def printSummary(journey: Journey.Stages.SubmittedArrangement)(implicit request: EligibleJourneyRequest[_]): Result = {
+  def printSummary(journey: Journey.SubmittedArrangement)(using EligibleJourneyRequest[?]): Result =
     journey.taxRegime match {
       case TaxRegime.Sa =>
-        Ok(views.saPrintSummaryPage(
-          paymentReference     = journey.arrangementResponse.customerReference.value,
-          upfrontPaymentAmount = PaymentPlanSetUpController.deriveUpfrontPaymentFromAnswers(journey.upfrontPaymentAnswers),
-          dayOfMonth           = journey.paymentPlanAnswers.dayOfMonth.value,
-          paymentPlan          = journey.paymentPlanAnswers.selectedPaymentPlan
-        ))
-      case _ =>
-        Ok(views.printSummaryPage(
-          paymentReference     = journey.arrangementResponse.customerReference.value,
-          upfrontPaymentAmount = PaymentPlanSetUpController.deriveUpfrontPaymentFromAnswers(journey.upfrontPaymentAnswers),
-          dayOfMonth           = journey.paymentPlanAnswers.dayOfMonth.value,
-          paymentPlan          = journey.paymentPlanAnswers.selectedPaymentPlan
-        ))
+        Ok(
+          views.saPrintSummaryPage(
+            paymentReference = journey.arrangementResponse.customerReference.value,
+            upfrontPaymentAmount =
+              PaymentPlanSetUpController.deriveUpfrontPaymentFromAnswers(journey.upfrontPaymentAnswers),
+            dayOfMonth = journey.paymentPlanAnswers.dayOfMonth.value,
+            paymentPlan = journey.paymentPlanAnswers.selectedPaymentPlan
+          )
+        )
+      case _            =>
+        Ok(
+          views.printSummaryPage(
+            paymentReference = journey.arrangementResponse.customerReference.value,
+            upfrontPaymentAmount =
+              PaymentPlanSetUpController.deriveUpfrontPaymentFromAnswers(journey.upfrontPaymentAnswers),
+            dayOfMonth = journey.paymentPlanAnswers.dayOfMonth.value,
+            paymentPlan = journey.paymentPlanAnswers.selectedPaymentPlan
+          )
+        )
     }
-  }
 
 }
 
 object PaymentPlanSetUpController {
-  private def deriveUpfrontPaymentFromAnswers(upfrontPaymentAnswers: UpfrontPaymentAnswers): Option[AmountInPence] = upfrontPaymentAnswers match {
-    case j: UpfrontPaymentAnswers.DeclaredUpfrontPayment => Some(j.amount.value)
-    case UpfrontPaymentAnswers.NoUpfrontPayment          => None
-  }
+  private def deriveUpfrontPaymentFromAnswers(upfrontPaymentAnswers: UpfrontPaymentAnswers): Option[AmountInPence] =
+    upfrontPaymentAnswers match {
+      case j: UpfrontPaymentAnswers.DeclaredUpfrontPayment => Some(j.amount.value)
+      case UpfrontPaymentAnswers.NoUpfrontPayment          => None
+    }
 }

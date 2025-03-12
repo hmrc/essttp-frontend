@@ -45,10 +45,11 @@
         showBackLink: Boolean = false
 )(
         contentBlock: Html)(implicit
-        request: Request[_]
+        request: Request[?]
 )
 
-@import requestSupport._
+@import requestSupport.{languageFromRequest, legacyMessages}
+
 @showSignOut = @{RequestSupport.isLoggedIn}
 
 @head = {
@@ -69,18 +70,16 @@
     tag = Some(Tag(
         content = Text(Messages.ServicePhase.beta.show)
     )),
-    content = HtmlContent(Messages.ServicePhase.bannerText(appConfig.Urls.betaFeedbackUrl(request)).show)
+    content = HtmlContent(Messages.ServicePhase.bannerText(appConfig.Urls.betaFeedbackUrl(using request)).show)
   ))
 
   @backUrl.map(url => govukBackLink(BackLink(href = url, content = Text(Messages.back.show))))
 
-@{
-    if(showBackLink) {
-        backLinkUrlOverride.fold(
-            govukBackLink(BackLink(href = "#", classes = "js-visible", content = Text(Messages.back.show)))
-        )(url => govukBackLink(BackLink(href = url, content = Text(Messages.back.show))))
-    }
-}
+  @if(showBackLink) {
+      @backLinkUrlOverride.fold(
+        govukBackLink(BackLink(href = "#", classes = "js-visible", content = Text(Messages.back.show)))
+      )(url => govukBackLink(BackLink(href = url, content = Text(Messages.back.show))))
+  }
 }
 
 @content = {
@@ -91,7 +90,7 @@
 
 @serviceName = @{
     (request: AnyRef) match {
-        case r: JourneyRequest[_] =>
+        case r: JourneyRequest[?] =>
           Messages.ServicePhase.serviceName(r.journey.taxRegime).show
 
         case _ =>

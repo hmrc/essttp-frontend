@@ -23,29 +23,33 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
 final case class CallEligibilityApiRequest(
-    channelIdentifier:         String,
-    identification:            List[Identification],
-    regimeType:                RegimeType,
-    returnFinancialAssessment: Boolean
+  channelIdentifier:         String,
+  identification:            List[Identification],
+  regimeType:                RegimeType,
+  returnFinancialAssessment: Boolean
 )
 
 object CallEligibilityApiRequest {
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  implicit def format(implicit e: EligibilityReqIdentificationFlag): Format[CallEligibilityApiRequest] = {
+  given format(using e: EligibilityReqIdentificationFlag): Format[CallEligibilityApiRequest] = {
     val writes = if (e.value) {
       Json.writes[CallEligibilityApiRequest]
     } else {
-      OWrites { callEligibilityApiRequest: CallEligibilityApiRequest =>
+      OWrites { (callEligibilityApiRequest: CallEligibilityApiRequest) =>
         callEligibilityApiRequest.identification match {
-          case Nil => sys.error("There should be something in the identification list and there was nothing")
-          case head :: Nil => Json.obj(
-            "channelIdentifier" -> callEligibilityApiRequest.channelIdentifier,
-            "idType" -> head.idType,
-            "idValue" -> head.idValue,
-            "regimeType" -> RegimeType.format.writes(callEligibilityApiRequest.regimeType),
-            "returnFinancialAssessment" -> callEligibilityApiRequest.returnFinancialAssessment
-          )
-          case _ => sys.error("There was more than one Identification in the identification list. We don't know what to do with that")
+          case Nil         => sys.error("There should be something in the identification list and there was nothing")
+          case head :: Nil =>
+            Json.obj(
+              "channelIdentifier"         -> callEligibilityApiRequest.channelIdentifier,
+              "idType"                    -> head.idType,
+              "idValue"                   -> head.idValue,
+              "regimeType"                -> RegimeType.given_Format_RegimeType.writes(callEligibilityApiRequest.regimeType),
+              "returnFinancialAssessment" -> callEligibilityApiRequest.returnFinancialAssessment
+            )
+          case _           =>
+            sys.error(
+              "There was more than one Identification in the identification list. We don't know what to do with that"
+            )
         }
       }
     }
@@ -57,7 +61,8 @@ object CallEligibilityApiRequest {
         (__ \ "returnFinancialAssessment").read[Boolean])(CallEligibilityApiRequest(_, _, _, _))
     } else {
       ((__ \ "channelIdentifier").read[String] and
-        ((__ \ "idType").read[IdType] and (__ \ "idValue").read[IdValue]).tupled.map((Identification.apply _).tupled).map(List(_)) and
+        ((__ \ "idType").read[IdType] and (__ \ "idValue")
+          .read[IdValue]).tupled.map(Identification.apply.tupled).map(List(_)) and
         (__ \ "regimeType").read[RegimeType] and
         (__ \ "returnFinancialAssessment").read[Boolean])(CallEligibilityApiRequest(_, _, _, _))
     }
@@ -66,4 +71,3 @@ object CallEligibilityApiRequest {
   }
 
 }
-

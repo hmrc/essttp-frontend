@@ -19,24 +19,27 @@ package messages
 import models.{Language, Languages}
 
 final case class Message private (
-    english: String,
-    welsh:   Option[String]
+  english: String,
+  welsh:   Option[String]
 ) {
 
-  def show(implicit language: Language): String = language match {
+  def show(using language: Language): String = language match {
     case Languages.English => english
     case Languages.Welsh   => welsh.getOrElse(english)
   }
 
   def ++(other: Message): Message = Message(
     english = s"$english${other.english}",
-    welsh   = for { thisWelsh <- welsh; thatWelsh <- other.welsh } yield s"$thisWelsh$thatWelsh"
+    welsh = for {
+      thisWelsh <- welsh
+      thatWelsh <- other.welsh
+    } yield s"$thisWelsh$thatWelsh"
   )
 }
 
 object Message {
 
-  private def apply(english: String, welsh: Option[String]) = new Message(english, welsh)
-  def apply(english: String, welsh: String): Message = Message(english, Option(welsh))
-  def apply(english: String): Message = Message(english, None)
+  private def apply(english: String, welsh: Option[String])  = new Message(english, welsh)
+  def apply(english:         String, welsh: String): Message = Message(english, Option(welsh))
+  def apply(english:         String): Message = Message(english, None)
 }

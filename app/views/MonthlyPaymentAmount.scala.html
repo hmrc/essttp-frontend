@@ -38,10 +38,10 @@
         maximumPayment: AmountInPence,
         minimumPayment: AmountInPence
 )(implicit
-        request: Request[_]
+        request: Request[?]
 )
 
-@import requestSupport._
+@import requestSupport.{languageFromRequest, legacyMessages}
 
 @key = @{
     "MonthlyPaymentAmount"

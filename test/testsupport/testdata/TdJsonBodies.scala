@@ -29,19 +29,26 @@ import java.time.LocalDate
 object TdJsonBodies {
 
   def encryptString(s: String, encrypter: Encrypter): String =
-    encrypter.encrypt(
-      PlainText("\"" + SensitiveString(s).decryptedValue + "\"")
-    ).value
+    encrypter
+      .encrypt(
+        PlainText("\"" + SensitiveString(s).decryptedValue + "\"")
+      )
+      .value
 
   object StartJourneyRequestBodies {
-    val empty: String =
-      """{
-        |   "Empty": {}
+    def empty(taxRegime: TaxRegime): String =
+      s"""{
+        |   "${taxRegime.entryName}": {
+        |     "Empty": { }
+        |   }
         |}""".stripMargin
-    val simple: String =
-      """{
-        |  "returnUrl": "http://localhost:9066/return",
-        |  "backUrl":   "http://localhost:9066/back"
+
+    def simple(taxRegime: TaxRegime): String =
+      s"""{
+        |  "${taxRegime.entryName}": {
+        |    "returnUrl": "http://localhost:9066/return",
+        |    "backUrl":   "http://localhost:9066/back"
+        |  }
         |}""".stripMargin
   }
 
@@ -59,20 +66,20 @@ object TdJsonBodies {
          |}""".stripMargin
     }
 
-    def epaye(taxRegime: TaxRegime): String = response(taxRegime)
-    def vat(taxRegime: TaxRegime): String = response(taxRegime)
-    def govUk(taxRegime: TaxRegime): String = response(taxRegime)
+    def epaye(taxRegime:       TaxRegime): String = response(taxRegime)
+    def vat(taxRegime:         TaxRegime): String = response(taxRegime)
+    def govUk(taxRegime:       TaxRegime): String = response(taxRegime)
     def detachedUrl(taxRegime: TaxRegime): String = response(taxRegime)
   }
 
   def createJourneyJson(
-      stageInfo:            StageInfo,
-      journeyInfo:          List[String],
-      origin:               Origin         = Origins.Epaye.Bta,
-      affordabilityEnabled: Boolean        = false,
-      pegaCaseId:           Option[String] = None
+    stageInfo:            StageInfo,
+    journeyInfo:          List[String],
+    origin:               Origin = Origins.Epaye.Bta,
+    affordabilityEnabled: Boolean = false,
+    pegaCaseId:           Option[String] = None
   ): String = {
-    val jsonFormatted: String = if (journeyInfo.isEmpty) "" else s",\n${journeyInfo.mkString(",")}"
+    val jsonFormatted: String  = if (journeyInfo.isEmpty) "" else s",\n${journeyInfo.mkString(",")}"
     val pegaCaseIdJson: String = pegaCaseId.fold("")(id => s""", "pegaCaseId": "$id" """)
 
     s"""
@@ -86,9 +93,11 @@ object TdJsonBodies {
       |    "_id": "6284fcd33c00003d6b1f3903",
       |    "origin": "${origin.toString()}",
       |    "sjRequest": {
-      |      "Simple": {
-      |        "returnUrl" : "/set-up-a-payment-plan/test-only/bta-page?return-page",
-      |        "backUrl" : "/set-up-a-payment-plan/test-only/bta-page?starting-page"
+      |      "${origin.taxRegime.entryName}": {
+      |        "Simple": {
+      |          "returnUrl" : "/set-up-a-payment-plan/test-only/bta-page?return-page",
+      |          "backUrl" : "/set-up-a-payment-plan/test-only/bta-page?starting-page"
+      |        }
       |      }
       |    },
       |    "affordabilityEnabled" : ${affordabilityEnabled.toString},
@@ -102,25 +111,34 @@ object TdJsonBodies {
       |""".stripMargin
   }
 
-  def taxIdJourneyInfo(taxId: String = "864FZ00049"): JourneyInfoAsJson =
+  def taxIdJourneyInfo(taxId: String = "864FZ00049", taxRegime: TaxRegime): JourneyInfoAsJson = {
+    val taxIdType = taxRegime match
+      case TaxRegime.Epaye => "EmpRef"
+      case TaxRegime.Vat   => "Vrn"
+      case TaxRegime.Sa    => "SaUtr"
+      case TaxRegime.Simp  => "Nino"
+
     s"""
-      |"taxId": {
-      |      "value": "$taxId"
-      |}
-      |""".stripMargin
+       |"taxId": {
+       |  "$taxIdType": {
+       |      "value": "$taxId"
+       |  }
+       |}
+       |""".stripMargin
+  }
 
   def eligibilityCheckJourneyInfo(
-      eligibilityPass:                    EligibilityPass  = TdAll.eligibleEligibilityPass,
-      eligibilityRules:                   EligibilityRules = TdAll.eligibleEligibilityRules,
-      taxRegime:                          TaxRegime,
-      encrypter:                          Encrypter,
-      regimeDigitalCorrespondence:        Boolean          = true,
-      email:                              Option[String]   = Some(TdAll.etmpEmail),
-      maybeChargeIsInterestBearingCharge: Option[Boolean]  = None,
-      maybeChargeUseChargeReference:      Option[Boolean]  = None,
-      maybeDdInProgress:                  Option[Boolean]  = None,
-      eligibilityMinPlanLength:           Int              = 1,
-      eligibilityMaxPlanLength:           Int              = 12
+    eligibilityPass:                    EligibilityPass = TdAll.eligibleEligibilityPass,
+    eligibilityRules:                   EligibilityRules = TdAll.eligibleEligibilityRules,
+    taxRegime:                          TaxRegime,
+    encrypter:                          Encrypter,
+    regimeDigitalCorrespondence:        Boolean = true,
+    email:                              Option[String] = Some(TdAll.etmpEmail),
+    maybeChargeIsInterestBearingCharge: Option[Boolean] = None,
+    maybeChargeUseChargeReference:      Option[Boolean] = None,
+    maybeDdInProgress:                  Option[Boolean] = None,
+    eligibilityMinPlanLength:           Int = 1,
+    eligibilityMaxPlanLength:           Int = 12
   ): JourneyInfoAsJson = {
 
     val isInterestBearingChargeValue = maybeChargeIsInterestBearingCharge match {
@@ -148,11 +166,15 @@ object TdJsonBodies {
       |          "postcodeDate": "2022-01-31"
       |        }
       |  ],
-      |  "customerDetails": [ ${email.fold(""){ e => s"""{ "emailAddress" : "${encryptString(e, encrypter)}", "emailSource" : "ETMP"}""" }} ],
+      |  "customerDetails": [ ${email.fold("") { e =>
+        s"""{ "emailAddress" : "${encryptString(e, encrypter)}", "emailSource" : "ETMP"}"""
+      }} ],
       |  "addresses": [
       |  {
       |    "addressType": "Residential"
-      |     ${email.fold("") { e => s""","contactDetails": {"emailAddress": "${encryptString(e, encrypter)}", "emailSource": "ETMP"}""" }},
+      |     ${email.fold("") { e =>
+        s""","contactDetails": {"emailAddress": "${encryptString(e, encrypter)}", "emailSource": "ETMP"}"""
+      }},
       |    "postcodeHistory": [
       |      {
       |        "addressPostcode": "${encryptString("AA11AA", encrypter)}",
@@ -179,13 +201,21 @@ object TdJsonBodies {
       |    "ineligibleChargeTypes" : ${eligibilityRules.part1.ineligibleChargeTypes.toString},
       |    "missingFiledReturns" : ${eligibilityRules.part1.missingFiledReturns.toString},
       |    "hasInvalidInterestSignals": ${eligibilityRules.part1.hasInvalidInterestSignals.getOrElse(false).toString},
-      |    "dmSpecialOfficeProcessingRequired": ${eligibilityRules.part1.dmSpecialOfficeProcessingRequired.getOrElse(false).toString},
+      |    "dmSpecialOfficeProcessingRequired": ${eligibilityRules.part1.dmSpecialOfficeProcessingRequired
+        .getOrElse(false)
+        .toString},
       |    "noDueDatesReached": ${eligibilityRules.part1.noDueDatesReached.toString},
       |    "cannotFindLockReason": ${eligibilityRules.part1.cannotFindLockReason.getOrElse(false).toString},
       |    "creditsNotAllowed": ${eligibilityRules.part1.creditsNotAllowed.getOrElse(false).toString},
-      |    "isMoreThanMaxPaymentReference": ${eligibilityRules.part1.isMoreThanMaxPaymentReference.getOrElse(false).toString},
-      |    "chargesBeforeMaxAccountingDate": ${eligibilityRules.part1.chargesBeforeMaxAccountingDate.getOrElse(false).toString},
-      |    "dmSpecialOfficeProcessingRequiredCDCS": ${eligibilityRules.part1.dmSpecialOfficeProcessingRequiredCDCS.getOrElse(false).toString},
+      |    "isMoreThanMaxPaymentReference": ${eligibilityRules.part1.isMoreThanMaxPaymentReference
+        .getOrElse(false)
+        .toString},
+      |    "chargesBeforeMaxAccountingDate": ${eligibilityRules.part1.chargesBeforeMaxAccountingDate
+        .getOrElse(false)
+        .toString},
+      |    "dmSpecialOfficeProcessingRequiredCDCS": ${eligibilityRules.part1.dmSpecialOfficeProcessingRequiredCDCS
+        .getOrElse(false)
+        .toString},
       |    "noMtditsaEnrollment": ${eligibilityRules.part2.noMtditsaEnrollment.getOrElse(false).toString}
       |  },
       |  "chargeTypeAssessment" : [
@@ -252,7 +282,7 @@ object TdJsonBodies {
 
   def whyCannotPayInFull(answers: WhyCannotPayInFullAnswers): String = {
     val value = answers match {
-      case WhyCannotPayInFullAnswers.AnswerNotRequired =>
+      case WhyCannotPayInFullAnswers.AnswerNotRequired           =>
         """{
           |  "AnswerNotRequired": { }
           |}""".stripMargin
@@ -269,9 +299,12 @@ object TdJsonBodies {
 
   def canPayUpfrontJourneyInfo(canPayUpfront: Boolean): String = s""""canPayUpfront": ${canPayUpfront.toString}"""
 
-  def upfrontPaymentAmountJourneyInfo(upfrontPaymentAmount: UpfrontPaymentAmount): String = s""""upfrontPaymentAmount": ${upfrontPaymentAmount.value.value.toString}"""
+  def upfrontPaymentAmountJourneyInfo(upfrontPaymentAmount: UpfrontPaymentAmount): String =
+    s""""upfrontPaymentAmount": ${upfrontPaymentAmount.value.value.toString}"""
 
-  def upfrontPaymentAnswersJourneyInfo(upfrontPaymentAmountJsonString: String = """{"DeclaredUpfrontPayment": {"amount": 200}}"""): String =
+  def upfrontPaymentAnswersJourneyInfo(
+    upfrontPaymentAmountJsonString: String = """{"DeclaredUpfrontPayment": {"amount": 200}}"""
+  ): String =
     s""""upfrontPaymentAnswers" : $upfrontPaymentAmountJsonString"""
 
   def extremeDatesJourneyInfo(): String =
@@ -292,7 +325,7 @@ object TdJsonBodies {
 
   def canPayWithinSixMonthsJourneyInfo(answers: CanPayWithinSixMonthsAnswers): String = {
     val value = answers match {
-      case CanPayWithinSixMonthsAnswers.AnswerNotRequired =>
+      case CanPayWithinSixMonthsAnswers.AnswerNotRequired            =>
         """{
             |  "AnswerNotRequired": { }
             |}""".stripMargin
@@ -714,7 +747,11 @@ object TdJsonBodies {
   def emailVerificationAnswersNoEmailJourney: String =
     s""""emailVerificationAnswers" : { "NoEmailJourney": {}}"""
 
-  def emailVerificationAnswersEmailRequired(email: String, result: EmailVerificationResult, encrypter: Encrypter): String =
+  def emailVerificationAnswersEmailRequired(
+    email:     String,
+    result:    EmailVerificationResult,
+    encrypter: Encrypter
+  ): String =
     s""""emailVerificationAnswers" : {
        |  "EmailVerified": {
        |     "email" : "${encryptString(email, encrypter)}",

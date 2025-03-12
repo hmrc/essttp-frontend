@@ -19,11 +19,11 @@ package models.bars.request
 import play.api.libs.json.{Json, OFormat}
 
 final case class BarsVerifyBusinessRequest(
-    account:  BarsBankAccount,
-    business: BarsBusiness
+  account:  BarsBankAccount,
+  business: BarsBusiness
 )
 
 object BarsVerifyBusinessRequest {
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  implicit val format: OFormat[BarsVerifyBusinessRequest] = Json.format
+  given OFormat[BarsVerifyBusinessRequest] = Json.format
 }

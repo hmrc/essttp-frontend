@@ -30,16 +30,15 @@ import javax.inject.{Inject, Singleton}
 
 @Singleton
 class WhichTaxRegimeController @Inject() (
-    appConfig:      AppConfig,
-    as:             Actions,
-    mcc:            MessagesControllerComponents,
-    requestSupport: RequestSupport,
-    views:          Views
-)
-  extends FrontendController(mcc)
-  with Logging {
+  appConfig:      AppConfig,
+  as:             Actions,
+  mcc:            MessagesControllerComponents,
+  requestSupport: RequestSupport,
+  views:          Views
+) extends FrontendController(mcc),
+      Logging {
 
-  import requestSupport._
+  import requestSupport.languageFromRequest
 
   val whichTaxRegime: Action[AnyContent] =
     as.authenticatedAction { implicit request =>
@@ -48,7 +47,8 @@ class WhichTaxRegimeController @Inject() (
 
   val whichTaxRegimeSubmit: Action[AnyContent] =
     as.authenticatedAction { implicit request =>
-      TaxRegimeForm.form.bindFromRequest()
+      TaxRegimeForm.form
+        .bindFromRequest()
         .fold(
           formWithErrors => Ok(views.whichTaxRegime(formWithErrors, appConfig.saEnabled, appConfig.simpEnabled)),
           {

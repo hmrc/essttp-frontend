@@ -25,13 +25,15 @@ import util.EnumFormatter
 
 object CanPayWithinSixMonthsForm {
 
-  def form(implicit language: Language): Form[CanPayWithinSixMonthsFormValue] = {
+  def form(using Language): Form[CanPayWithinSixMonthsFormValue] = {
 
-    val canPayMapping: Mapping[CanPayWithinSixMonthsFormValue] = Forms.of(EnumFormatter.format(
-      `enum`                  = CanPayWithinSixMonthsFormValue,
-      errorMessageIfMissing   = Messages.CanPayWithinSixMonths.`Select yes if you can pay within 6 months`.show,
-      errorMessageIfEnumError = Messages.CanPayWithinSixMonths.`Select yes if you can pay within 6 months`.show
-    ))
+    val canPayMapping: Mapping[CanPayWithinSixMonthsFormValue] = Forms.of(
+      EnumFormatter.format(
+        `enum` = CanPayWithinSixMonthsFormValue,
+        errorMessageIfMissing = Messages.CanPayWithinSixMonths.`Select yes if you can pay within 6 months`.show,
+        errorMessageIfEnumError = Messages.CanPayWithinSixMonths.`Select yes if you can pay within 6 months`.show
+      )
+    )
 
     Form(
       mapping(

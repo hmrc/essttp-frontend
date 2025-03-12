@@ -20,7 +20,7 @@ import enumeratum.Enum
 
 import scala.collection.immutable
 
-sealed trait IsSoleSignatoryFormValue extends enumeratum.EnumEntry {
+sealed trait IsSoleSignatoryFormValue extends enumeratum.EnumEntry derives CanEqual {
   def asBoolean: Boolean = this match {
     case IsSoleSignatoryFormValue.Yes => true
     case IsSoleSignatoryFormValue.No  => false
@@ -29,7 +29,7 @@ sealed trait IsSoleSignatoryFormValue extends enumeratum.EnumEntry {
 
 object IsSoleSignatoryFormValue extends Enum[IsSoleSignatoryFormValue] {
   case object Yes extends IsSoleSignatoryFormValue
-  case object No extends IsSoleSignatoryFormValue
+  case object No  extends IsSoleSignatoryFormValue
   override def values: immutable.IndexedSeq[IsSoleSignatoryFormValue] = findValues
 
   def booleanToIsSoleSignatoryFormValue(isSoleSignatory: Boolean): IsSoleSignatoryFormValue = if (isSoleSignatory) {

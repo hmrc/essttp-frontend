@@ -19,22 +19,21 @@ package models.bars.request
 import play.api.libs.json.{Json, OFormat}
 
 final case class BarsBankAccount(
-    sortCode:      String,
-    accountNumber: String
+  sortCode:      String,
+  accountNumber: String
 )
 
 object BarsBankAccount {
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  implicit val format: OFormat[BarsBankAccount] = Json.format
+  given OFormat[BarsBankAccount] = Json.format
 
   def padded(sortCode: String, accountNumber: String): BarsBankAccount =
     BarsBankAccount(sortCode, leftPad(accountNumber))
 
-  private val minimumLength = 8
-  private val padStr = '0'
+  private val minimumLength                          = 8
+  private val padStr                                 = '0'
   private def leftPad(accountNumber: String): String =
-    accountNumber
-      .reverse
+    accountNumber.reverse
       .padTo(minimumLength, padStr)
       .reverse
 

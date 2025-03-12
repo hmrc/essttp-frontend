@@ -30,9 +30,9 @@
         govukButton: GovukButton
 )
 
-@(upfrontPayment: UpfrontPaymentAmount, remainingAmountToPay: AmountInPence)(implicit request: Request[_])
+@(upfrontPayment: UpfrontPaymentAmount, remainingAmountToPay: AmountInPence)(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 @title = @{
     Messages.UpfrontPaymentSummary.`Payment summary`.show

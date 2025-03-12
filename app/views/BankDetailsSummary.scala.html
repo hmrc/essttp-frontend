@@ -30,9 +30,9 @@
   govukButton: GovukButton
 )
 
-@(directDebitDetails: BankDetails)(implicit request: Request[_])
+@(directDebitDetails: BankDetails)(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.{languageFromRequest, legacyMessages}
 
 @title = @{Messages.CheckBankDetails.`Check your Direct Debit details`.show}
 @detailsContent = {

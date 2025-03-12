@@ -17,20 +17,20 @@
 package services
 
 import actionsmodel.AuthenticatedJourneyRequest
-import cats.syntax.eq._
+import cats.syntax.eq.*
 import essttp.bars.model.BarsVerifyStatusResponse
 import essttp.crypto.CryptoFormat
 import essttp.journey.model.CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths
-import essttp.journey.model.Journey.Stages._
-import essttp.journey.model.Journey.{AfterCheckedPaymentPlan, AfterEnteredCanYouSetUpDirectDebit, AfterStartedPegaCase}
-import essttp.journey.model._
-import essttp.rootmodel._
+import essttp.journey.model.Journey.*
+import essttp.journey.model.JourneyStage.{AfterCheckedPaymentPlan, AfterEnteredCanYouSetUpDirectDebit, AfterStartedPegaCase}
+import essttp.journey.model.*
+import essttp.rootmodel.*
 import essttp.rootmodel.bank.BankDetails
 import essttp.rootmodel.pega.{GetCaseResponse, StartCaseResponse}
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
 import essttp.rootmodel.ttp.eligibility.{EligibilityCheckResult, EmailSource}
 import essttp.utils.Errors
-import models.audit.bars._
+import models.audit.bars.*
 import models.audit.canUserPayInSixMonths.{CanUserPayInSixMonthsAuditDetail, UserEnteredDetails}
 import models.audit.ddinprogress.DdInProgressAuditDetail
 import models.audit.eligibility.{EligibilityCheckAuditDetail, EligibilityResult, EnrollmentReasons}
@@ -42,7 +42,7 @@ import models.audit.{AuditDetail, Schedule, TaxDetail}
 import models.bars.response.{BarsError, VerifyResponse}
 import paymentsEmailVerification.models.EmailVerificationResult
 import play.api.http.Status
-import play.api.libs.json._
+import play.api.libs.json.*
 import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
 import uk.gov.hmrc.play.audit.AuditExtensions.auditHeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -53,155 +53,167 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: ExecutionContext) {
+class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionContext) {
 
-  implicit val cryptoFormat: CryptoFormat = CryptoFormat.NoOpCryptoFormat
+  given CryptoFormat = CryptoFormat.NoOpCryptoFormat
 
-  private def audit[A <: AuditDetail: Writes](a: A)(implicit hc: HeaderCarrier): Unit = {
+  private def audit[A <: AuditDetail: Writes](a: A)(using hc: HeaderCarrier): Unit = {
     val _ = auditConnector.sendExtendedEvent(
       ExtendedDataEvent(
         auditSource = auditSource,
-        auditType   = a.auditType,
-        eventId     = UUID.randomUUID().toString,
-        tags        = hc.toAuditTags(),
-        detail      = Json.toJson(a)
+        auditType = a.auditType,
+        eventId = UUID.randomUUID().toString,
+        tags = hc.toAuditTags(),
+        detail = Json.toJson(a)
       )
     )
   }
 
   def auditEligibilityCheck(
-      journey:  ComputedTaxId,
-      response: EligibilityCheckResult
-  )(implicit r: AuthenticatedJourneyRequest[_], hc: HeaderCarrier): Unit =
+    journey:  ComputedTaxId,
+    response: EligibilityCheckResult
+  )(using AuthenticatedJourneyRequest[?], HeaderCarrier): Unit =
     audit(toEligibilityCheck(journey, response))
 
   def auditEligibilityCheck(
-      journey:          Started,
-      enrollmentReason: Either[EnrollmentReasons.NotEnrolled, EnrollmentReasons.InactiveEnrollment]
-  )(implicit r: AuthenticatedJourneyRequest[_], hc: HeaderCarrier): Unit =
+    journey:          Started,
+    enrollmentReason: Either[EnrollmentReasons.NotEnrolled, EnrollmentReasons.InactiveEnrollment]
+  )(using AuthenticatedJourneyRequest[?], HeaderCarrier): Unit =
     audit(toEligibilityCheck(journey, enrollmentReason))
 
   def auditPaymentPlanBeforeSubmission(
-      journey: ChosenPaymentPlan
-  )(implicit headerCarrier: HeaderCarrier): Unit =
+    journey: ChosenPaymentPlan
+  )(using HeaderCarrier): Unit =
     audit(toPaymentPlanBeforeSubmissionAuditDetail(journey))
 
   def auditPaymentPlanBeforeSubmission(
-      journey:         Either[AfterStartedPegaCase, AfterCheckedPaymentPlan],
-      getCaseResponse: GetCaseResponse
-  )(implicit headerCarrier: HeaderCarrier): Unit =
+    journey:         Either[AfterStartedPegaCase & Journey, AfterCheckedPaymentPlan & Journey],
+    getCaseResponse: GetCaseResponse
+  )(using HeaderCarrier): Unit =
     audit(toPaymentPlanBeforeSubmissionAuditDetail(journey, getCaseResponse))
 
   def auditReturnFromAffordability(
-      journey:           Either[AfterStartedPegaCase, AfterCheckedPaymentPlan],
-      startCaseResponse: StartCaseResponse,
-      getCaseResponse:   GetCaseResponse
-  )(implicit headerCarrier: HeaderCarrier): Unit =
+    journey:           Either[AfterStartedPegaCase & Journey, AfterCheckedPaymentPlan & Journey],
+    startCaseResponse: StartCaseResponse,
+    getCaseResponse:   GetCaseResponse
+  )(using HeaderCarrier): Unit =
     audit(toReturnFromAffordabilityAuditDetail(journey, startCaseResponse, getCaseResponse))
 
   def auditBarsCheck(
-      journey:              AfterEnteredCanYouSetUpDirectDebit,
-      bankDetails:          BankDetails,
-      result:               Either[BarsError, VerifyResponse],
-      verifyStatusResponse: BarsVerifyStatusResponse
-  )(implicit hc: HeaderCarrier): Unit =
+    journey:              AfterEnteredCanYouSetUpDirectDebit & Journey,
+    bankDetails:          BankDetails,
+    result:               Either[BarsError, VerifyResponse],
+    verifyStatusResponse: BarsVerifyStatusResponse
+  )(using HeaderCarrier): Unit =
     audit(toBarsCheckAuditDetail(journey, bankDetails, result, verifyStatusResponse))
 
-  def auditEmailVerificationRequested(journey: Journey, ggCredId: GGCredId, email: Email, result: String)(implicit headerCarrier: HeaderCarrier): Unit =
+  def auditEmailVerificationRequested(journey: Journey, ggCredId: GGCredId, email: Email, result: String)(using
+    HeaderCarrier
+  ): Unit =
     audit(toEmailVerificationRequested(journey, ggCredId, email, result))
 
   def auditEmailVerificationResult(
-      journey: Journey, ggCredId: GGCredId, email: Email, result: EmailVerificationResult
-  )(implicit headerCarrier: HeaderCarrier): Unit =
+    journey:  Journey,
+    ggCredId: GGCredId,
+    email:    Email,
+    result:   EmailVerificationResult
+  )(using HeaderCarrier): Unit =
     audit(toEmailVerificationResult(journey, ggCredId, email: Email, result))
 
   def auditPaymentPlanSetUp(
-      journey:         Either[AgreedTermsAndConditions, EmailVerificationComplete],
-      responseFromTtp: Either[HttpException, ArrangementResponse]
-  )(implicit authenticatedJourneyRequest: AuthenticatedJourneyRequest[_], headerCarrier: HeaderCarrier): Unit = {
+    journey:         Either[AgreedTermsAndConditions, EmailVerificationComplete],
+    responseFromTtp: Either[HttpException, ArrangementResponse]
+  )(using AuthenticatedJourneyRequest[?], HeaderCarrier): Unit =
     audit(toPaymentPlanSetupAuditDetail(journey, responseFromTtp))
-  }
 
   def auditDdInProgress(
-      journey:             Journey,
-      hasChosenToContinue: Boolean
-  )(implicit r: AuthenticatedJourneyRequest[_], hc: HeaderCarrier): Unit =
+    journey:             Journey,
+    hasChosenToContinue: Boolean
+  )(using AuthenticatedJourneyRequest[?], HeaderCarrier): Unit =
     audit(toDdinProgressAuditDetail(journey, hasChosenToContinue))
 
-  def auditCanUserPayInSixMonths(journey: Journey, canPay: CanPayWithinSixMonths, maybeStartCaseResponse: Option[StartCaseResponse])(implicit hc: HeaderCarrier): Unit = {
+  def auditCanUserPayInSixMonths(
+    journey:                Journey,
+    canPay:                 CanPayWithinSixMonths,
+    maybeStartCaseResponse: Option[StartCaseResponse]
+  )(using HeaderCarrier): Unit =
     audit(toCanUserPayInSixMonths(journey, canPay, maybeStartCaseResponse))
-  }
 
-  private def toCanUserPayInSixMonths(journey: Journey, canPay: CanPayWithinSixMonths, maybeStartCaseResponse: Option[StartCaseResponse]): CanUserPayInSixMonthsAuditDetail = {
+  private def toCanUserPayInSixMonths(
+    journey:                Journey,
+    canPay:                 CanPayWithinSixMonths,
+    maybeStartCaseResponse: Option[StartCaseResponse]
+  ): CanUserPayInSixMonthsAuditDetail =
     CanUserPayInSixMonthsAuditDetail(
-      regime             = journey.taxRegime.entryName,
-      taxIdentifier      = taxIdentifierToAudit(journey),
-      pegaCaseId         = journey.pegaCaseId,
-      correlationId      = journey.correlationId,
-      pegaCorrelationId  = maybeStartCaseResponse.map(_.pegaCorrelationId),
+      regime = journey.taxRegime.entryName,
+      taxIdentifier = taxIdentifierToAudit(journey),
+      pegaCaseId = journey.pegaCaseId,
+      correlationId = journey.correlationId,
+      pegaCorrelationId = maybeStartCaseResponse.map(_.pegaCorrelationId),
       userEnteredDetails = UserEnteredDetails(
-        unableToPayReason    = unableToPayReasonToAudit(journey),
-        payUpfront           = upfrontPaymentToAudit(journey)._1,
+        unableToPayReason = unableToPayReasonToAudit(journey),
+        payUpfront = upfrontPaymentToAudit(journey)._1,
         upfrontPaymentAmount = upfrontPaymentToAudit(journey)._2,
-        canPayInSixMonths    = canPay.value
+        canPayInSixMonths = canPay.value
       )
     )
-  }
 
   private def unableToPayReasonToAudit(journey: Journey): Option[Set[CannotPayReason]] = journey match {
-    case j: Journey.AfterWhyCannotPayInFullAnswers => whyCannotPayInFullAnswersToSet(j.whyCannotPayInFullAnswers)
-    case _                                         => sys.error("Could not find why cannot pay in full answers in journey")
+    case j: JourneyStage.AfterWhyCannotPayInFullAnswers => whyCannotPayInFullAnswersToSet(j.whyCannotPayInFullAnswers)
+    case _                                              => sys.error("Could not find why cannot pay in full answers in journey")
   }
 
   private def taxIdentifierToAudit(journey: Journey): String = journey match {
-    case j: Journey.AfterComputedTaxId => j.taxId.value
-    case _                             => sys.error("Could not find tax ID in journey")
+    case j: JourneyStage.AfterComputedTaxId => j.taxId.value
+    case _                                  => sys.error("Could not find tax ID in journey")
   }
 
   private def upfrontPaymentToAudit(journey: Journey): (Boolean, BigDecimal) = journey match {
-    case j: Journey.AfterUpfrontPaymentAnswers => j.upfrontPaymentAnswers match {
-      case UpfrontPaymentAnswers.NoUpfrontPayment               => (false, BigDecimal(0))
-      case UpfrontPaymentAnswers.DeclaredUpfrontPayment(amount) => (true, amount.value.inPounds)
-    }
-    case _ => sys.error("Could not find upfrontPaymentAmount in journey")
+    case j: JourneyStage.AfterUpfrontPaymentAnswers =>
+      j.upfrontPaymentAnswers match {
+        case UpfrontPaymentAnswers.NoUpfrontPayment               => (false, BigDecimal(0))
+        case UpfrontPaymentAnswers.DeclaredUpfrontPayment(amount) => (true, amount.value.inPounds)
+      }
+    case _                                          => sys.error("Could not find upfrontPaymentAmount in journey")
   }
 
   private def toEligibilityCheck(
-      journey:          Started,
-      enrollmentReason: Either[EnrollmentReasons.NotEnrolled, EnrollmentReasons.InactiveEnrollment]
-  )(implicit r: AuthenticatedJourneyRequest[_]): EligibilityCheckAuditDetail = {
+    journey:          Started,
+    enrollmentReason: Either[EnrollmentReasons.NotEnrolled, EnrollmentReasons.InactiveEnrollment]
+  )(using r: AuthenticatedJourneyRequest[?]): EligibilityCheckAuditDetail =
     EligibilityCheckAuditDetail(
-      eligibilityResult               = EligibilityResult.Ineligible,
-      enrollmentReasons               = Some(enrollmentReason.merge),
-      noEligibilityReasons            = 0,
-      eligibilityReasons              = List.empty,
-      origin                          = toAuditString(journey.origin),
-      taxType                         = journey.taxRegime.toString,
-      taxDetail                       = TaxDetail(None, None, None, None, None, None, None),
-      authProviderId                  = r.ggCredId.value,
-      chargeTypeAssessment            = List.empty,
-      correlationId                   = journey.correlationId.value.toString,
+      eligibilityResult = EligibilityResult.Ineligible,
+      enrollmentReasons = Some(enrollmentReason.merge),
+      noEligibilityReasons = 0,
+      eligibilityReasons = List.empty,
+      origin = toAuditString(journey.origin),
+      taxType = journey.taxRegime.toString,
+      taxDetail = TaxDetail(None, None, None, None, None, None, None),
+      authProviderId = r.ggCredId.value,
+      chargeTypeAssessment = List.empty,
+      correlationId = journey.correlationId.value.toString,
       futureChargeLiabilitiesExcluded = None,
-      regimeDigitalCorrespondence     = true
+      regimeDigitalCorrespondence = true
     )
-  }
 
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  private given CanEqual[Boolean, Any] = CanEqual.derived
+
+  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.Product"))
   private def toEligibilityCheck(
-      journey:                ComputedTaxId,
-      eligibilityCheckResult: EligibilityCheckResult
-  )(implicit r: AuthenticatedJourneyRequest[_]): EligibilityCheckAuditDetail = {
+    journey:                ComputedTaxId,
+    eligibilityCheckResult: EligibilityCheckResult
+  )(using r: AuthenticatedJourneyRequest[?]): EligibilityCheckAuditDetail = {
 
-    val eligibilityResult =
+    val eligibilityResult  =
       if (eligibilityCheckResult.isEligible) EligibilityResult.Eligible else EligibilityResult.Ineligible
-    val enrollmentReasons =
+    val enrollmentReasons  =
       if (eligibilityCheckResult.isEligible) None else Some(EnrollmentReasons.DidNotPassEligibilityCheck())
     val eligibilityReasons = {
-        def extractFields(obj: Product): List[(String, Any)] = {
-          val fieldNames = obj.getClass.getDeclaredFields.map(_.getName).toList
-          val fieldValues = obj.productIterator.toList
-          fieldNames.zip(fieldValues)
-        }
+      def extractFields(obj: Product): List[(String, Any)] = {
+        val fieldNames  = obj.getClass.getDeclaredFields.map(_.getName).toList
+        val fieldValues = obj.productIterator.toList
+        fieldNames.zip(fieldValues)
+      }
 
       val reasonsPart1 = extractFields(eligibilityCheckResult.eligibilityRules.part1)
       val reasonsPart2 = extractFields(eligibilityCheckResult.eligibilityRules.part2)
@@ -215,96 +227,108 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
     }
 
     EligibilityCheckAuditDetail(
-      eligibilityResult               = eligibilityResult,
-      enrollmentReasons               = enrollmentReasons,
-      noEligibilityReasons            = eligibilityReasons.size,
-      eligibilityReasons              = eligibilityReasons,
-      origin                          = toAuditString(journey.origin),
-      taxType                         = journey.taxRegime.toString,
-      taxDetail                       = toTaxDetail(eligibilityCheckResult),
-      authProviderId                  = r.ggCredId.value,
-      chargeTypeAssessment            = eligibilityCheckResult.chargeTypeAssessment,
-      correlationId                   = journey.correlationId.value.toString,
+      eligibilityResult = eligibilityResult,
+      enrollmentReasons = enrollmentReasons,
+      noEligibilityReasons = eligibilityReasons.size,
+      eligibilityReasons = eligibilityReasons,
+      origin = toAuditString(journey.origin),
+      taxType = journey.taxRegime.toString,
+      taxDetail = toTaxDetail(eligibilityCheckResult),
+      authProviderId = r.ggCredId.value,
+      chargeTypeAssessment = eligibilityCheckResult.chargeTypeAssessment,
+      correlationId = journey.correlationId.value.toString,
       futureChargeLiabilitiesExcluded = Some(eligibilityCheckResult.futureChargeLiabilitiesExcluded),
-      regimeDigitalCorrespondence     = eligibilityCheckResult.regimeDigitalCorrespondence.value
+      regimeDigitalCorrespondence = eligibilityCheckResult.regimeDigitalCorrespondence.value
     )
   }
 
-  private def toPaymentPlanBeforeSubmissionAuditDetail(journey: ChosenPaymentPlan): PaymentPlanBeforeSubmissionAuditDetail =
+  private def toPaymentPlanBeforeSubmissionAuditDetail(
+    journey: ChosenPaymentPlan
+  ): PaymentPlanBeforeSubmissionAuditDetail =
     PaymentPlanBeforeSubmissionAuditDetail(
-      schedule                    = Schedule.createSchedule(journey.selectedPaymentPlan, journey.dayOfMonth),
-      correlationId               = journey.correlationId,
-      origin                      = toAuditString(journey.origin),
-      taxType                     = journey.taxRegime.toString,
-      taxDetail                   = toTaxDetail(journey.eligibilityCheckResult),
+      schedule = Schedule.createSchedule(journey.selectedPaymentPlan, journey.dayOfMonth),
+      correlationId = journey.correlationId,
+      origin = toAuditString(journey.origin),
+      taxType = journey.taxRegime.toString,
+      taxDetail = toTaxDetail(journey.eligibilityCheckResult),
       regimeDigitalCorrespondence = journey.eligibilityCheckResult.regimeDigitalCorrespondence,
-      canPayInSixMonths           = canPayWithinSixMonthsAnswersToBoolean(journey.canPayWithinSixMonthsAnswers),
-      unableToPayReason           = whyCannotPayInFullAnswersToSet(journey.whyCannotPayInFullAnswers)
+      canPayInSixMonths = canPayWithinSixMonthsAnswersToBoolean(journey.canPayWithinSixMonthsAnswers),
+      unableToPayReason = whyCannotPayInFullAnswersToSet(journey.whyCannotPayInFullAnswers)
     )
 
   private def toPaymentPlanBeforeSubmissionAuditDetail(
-      journey:         Either[AfterStartedPegaCase, AfterCheckedPaymentPlan],
-      getCaseResponse: GetCaseResponse
+    journey:         Either[AfterStartedPegaCase & Journey, AfterCheckedPaymentPlan & Journey],
+    getCaseResponse: GetCaseResponse
   ): PaymentPlanBeforeSubmissionAuditDetail = {
     val eligibilityCheckResult = journey.merge match {
-      case j: Journey.AfterEligibilityChecked =>
+      case j: JourneyStage.AfterEligibilityChecked =>
         j.eligibilityCheckResult
-      case _ =>
-        Errors.throwServerErrorException("Trying to get eligibility check result for audit event, but they haven't been retrieved yet.")
+      case _                                       =>
+        Errors.throwServerErrorException(
+          "Trying to get eligibility check result for audit event, but they haven't been retrieved yet."
+        )
     }
 
     val canPayWithinSixMonthsAnswers = journey.merge match {
-      case j: Journey.AfterCanPayWithinSixMonthsAnswers =>
+      case j: JourneyStage.AfterCanPayWithinSixMonthsAnswers =>
         j.canPayWithinSixMonthsAnswers
-      case _ =>
-        Errors.throwServerErrorException("Trying to get can pay within 6 months answers for audit event, but they haven't been retrieved yet.")
+      case _                                                 =>
+        Errors.throwServerErrorException(
+          "Trying to get can pay within 6 months answers for audit event, but they haven't been retrieved yet."
+        )
     }
 
     val whyCannotPayInFullAnswers = journey.merge match {
-      case j: Journey.AfterWhyCannotPayInFullAnswers =>
+      case j: JourneyStage.AfterWhyCannotPayInFullAnswers =>
         j.whyCannotPayInFullAnswers
-      case _ =>
-        Errors.throwServerErrorException("Trying to get why cannot pay in full answers for audit event, but they haven't been retrieved yet.")
+      case _                                              =>
+        Errors.throwServerErrorException(
+          "Trying to get why cannot pay in full answers for audit event, but they haven't been retrieved yet."
+        )
     }
 
     PaymentPlanBeforeSubmissionAuditDetail(
-      schedule                    = Schedule.createSchedule(getCaseResponse.paymentPlan, getCaseResponse.paymentDay),
-      correlationId               = journey.fold(_.correlationId, _.correlationId),
-      origin                      = toAuditString(journey.fold(_.origin, _.origin)),
-      taxType                     = journey.fold(_.taxRegime, _.taxRegime).toString,
-      taxDetail                   = toTaxDetail(eligibilityCheckResult),
+      schedule = Schedule.createSchedule(getCaseResponse.paymentPlan, getCaseResponse.paymentDay),
+      correlationId = journey.fold(_.correlationId, _.correlationId),
+      origin = toAuditString(journey.fold(_.origin, _.origin)),
+      taxType = journey.fold(_.taxRegime, _.taxRegime).toString,
+      taxDetail = toTaxDetail(eligibilityCheckResult),
       regimeDigitalCorrespondence = eligibilityCheckResult.regimeDigitalCorrespondence,
-      canPayInSixMonths           = canPayWithinSixMonthsAnswersToBoolean(canPayWithinSixMonthsAnswers),
-      unableToPayReason           = whyCannotPayInFullAnswersToSet(whyCannotPayInFullAnswers)
+      canPayInSixMonths = canPayWithinSixMonthsAnswersToBoolean(canPayWithinSixMonthsAnswers),
+      unableToPayReason = whyCannotPayInFullAnswersToSet(whyCannotPayInFullAnswers)
     )
   }
 
   private def toReturnFromAffordabilityAuditDetail(
-      journey:           Either[AfterStartedPegaCase, AfterCheckedPaymentPlan],
-      startCaseResponse: StartCaseResponse,
-      getCaseResponse:   GetCaseResponse
+    journey:           Either[AfterStartedPegaCase & Journey, AfterCheckedPaymentPlan & Journey],
+    startCaseResponse: StartCaseResponse,
+    getCaseResponse:   GetCaseResponse
   ): ReturnFromAffordabilityAuditDetail = {
     val taxId = journey.merge match {
-      case j: Journey.AfterComputedTaxId => j.taxId
-      case _                             => sys.error("Could not find tax ID in journey")
+      case j: JourneyStage.AfterComputedTaxId => j.taxId
+      case _                                  => sys.error("Could not find tax ID in journey")
     }
 
     val eligibilityCheckResult = journey.merge match {
-      case j: Journey.AfterEligibilityChecked => j.eligibilityCheckResult
-      case _                                  => sys.error("Could not find eligibility check result")
+      case j: JourneyStage.AfterEligibilityChecked => j.eligibilityCheckResult
+      case _                                       => sys.error("Could not find eligibility check result")
     }
 
     val paymentPlan = getCaseResponse.paymentPlan
 
     val sortedCollections = paymentPlan.collections.regularCollections.sortBy(_.dueDate.value)
-    val firstCollection = sortedCollections.headOption
-    val lastCollection = sortedCollections.lastOption
+    val firstCollection   = sortedCollections.headOption
+    val lastCollection    = sortedCollections.lastOption
 
     val planDetails = PlanDetails(
       paymentPlan.totalDebt.value.inPounds,
       paymentPlan.collections.initialCollection.map(_.amountDue.value.inPounds),
       paymentPlan.collections.initialCollection.map(_.dueDate.value.toString),
-      eligibilityCheckResult.customerPostcodes.map(_.addressPostcode).headOption.map(_.value.decryptedValue).getOrElse(""),
+      eligibilityCheckResult.customerPostcodes
+        .map(_.addressPostcode)
+        .headOption
+        .map(_.value.decryptedValue)
+        .getOrElse(""),
       paymentPlan.numberOfInstalments.value,
       paymentPlan.planInterest.value.inPounds,
       Collections(
@@ -328,14 +352,13 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
   }
 
   private def toBarsCheckAuditDetail(
-      journey:              AfterEnteredCanYouSetUpDirectDebit,
-      bankDetails:          BankDetails,
-      result:               Either[BarsError, VerifyResponse],
-      verifyStatusResponse: BarsVerifyStatusResponse
+    journey:              AfterEnteredCanYouSetUpDirectDebit & Journey,
+    bankDetails:          BankDetails,
+    result:               Either[BarsError, VerifyResponse],
+    verifyStatusResponse: BarsVerifyStatusResponse
   ): BarsCheckAuditDetail = {
     val eligibilityCheckResult = journey match {
-      case j: Journey.AfterEligibilityChecked => j.eligibilityCheckResult
-      case _                                  => Errors.throwServerErrorException("Trying to get eligibility check result for audit event, but they haven't been retrieved yet.")
+      case j: JourneyStage.AfterEligibilityChecked => j.eligibilityCheckResult
     }
 
     BarsCheckAuditDetail(
@@ -362,9 +385,9 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
     )
   }
 
-  private def toDdinProgressAuditDetail(journey: Journey, hasChosenToContinue: Boolean)
-    (implicit r: AuthenticatedJourneyRequest[_]): DdInProgressAuditDetail = {
-
+  private def toDdinProgressAuditDetail(journey: Journey, hasChosenToContinue: Boolean)(using
+    r: AuthenticatedJourneyRequest[?]
+  ): DdInProgressAuditDetail =
     DdInProgressAuditDetail(
       toAuditString(journey.origin),
       journey.taxRegime.toString,
@@ -373,106 +396,107 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
       r.ggCredId.toString,
       if (hasChosenToContinue) "continue" else "exit"
     )
-  }
 
   private def toPaymentPlanSetupAuditDetail(
-      journey:         Either[AgreedTermsAndConditions, EmailVerificationComplete],
-      responseFromTtp: Either[HttpException, ArrangementResponse]
-  )(implicit r: AuthenticatedJourneyRequest[_]): PaymentPlanSetUpAuditDetail = {
+    journey:         Either[AgreedTermsAndConditions, EmailVerificationComplete],
+    responseFromTtp: Either[HttpException, ArrangementResponse]
+  )(using r: AuthenticatedJourneyRequest[?]): PaymentPlanSetUpAuditDetail = {
     val maybeArrangementResponse: Option[ArrangementResponse] = responseFromTtp.toOption
-    val status: Int = responseFromTtp.fold(_.responseCode, _ => Status.ACCEPTED)
+    val status: Int                                           = responseFromTtp.fold(_.responseCode, _ => Status.ACCEPTED)
 
-    val directDebitDetails = journey.fold(_.directDebitDetails, _.directDebitDetails)
-    val paymentPlanAnswers = journey.fold(_.paymentPlanAnswers, _.paymentPlanAnswers)
-    val selectedPaymentPlan = paymentPlanAnswers.selectedPaymentPlan
-    val dayOfMonth = paymentPlanAnswers.dayOfMonth
-    val origin = journey.fold(_.origin, _.origin)
-    val taxRegime = journey.fold(_.taxRegime, _.taxRegime)
-    val eligibilityCheckResult = journey.fold(_.eligibilityCheckResult, _.eligibilityCheckResult)
-    val correlationId = journey.fold(_.correlationId, _.correlationId)
+    val directDebitDetails             = journey.fold(_.directDebitDetails, _.directDebitDetails)
+    val paymentPlanAnswers             = journey.fold(_.paymentPlanAnswers, _.paymentPlanAnswers)
+    val selectedPaymentPlan            = paymentPlanAnswers.selectedPaymentPlan
+    val dayOfMonth                     = paymentPlanAnswers.dayOfMonth
+    val origin                         = journey.fold(_.origin, _.origin)
+    val taxRegime                      = journey.fold(_.taxRegime, _.taxRegime)
+    val eligibilityCheckResult         = journey.fold(_.eligibilityCheckResult, _.eligibilityCheckResult)
+    val correlationId                  = journey.fold(_.correlationId, _.correlationId)
     val (maybeEmail, maybeEmailSource) = journey.fold(_ => (None, None), toEmailInfo)
-    val canPayWithinSixMonthsAnswers = journey.fold(_.canPayWithinSixMonthsAnswers, _.canPayWithinSixMonthsAnswers)
-    val whyCannotPayInFullAnswers = journey.fold(_.whyCannotPayInFullAnswers, _.whyCannotPayInFullAnswers)
+    val canPayWithinSixMonthsAnswers   = journey.fold(_.canPayWithinSixMonthsAnswers, _.canPayWithinSixMonthsAnswers)
+    val whyCannotPayInFullAnswers      = journey.fold(_.whyCannotPayInFullAnswers, _.whyCannotPayInFullAnswers)
 
     PaymentPlanSetUpAuditDetail(
-      bankDetails                 = directDebitDetails,
-      schedule                    = Schedule.createSchedule(selectedPaymentPlan, dayOfMonth),
-      status                      = if (Status.isSuccessful(status)) "successfully sent to TTP" else "failed",
-      failedSubmissionReason      = status,
-      origin                      = toAuditString(origin),
-      taxType                     = taxRegime.toString,
-      taxDetail                   = toTaxDetail(eligibilityCheckResult),
-      correlationId               = correlationId,
-      ppReferenceNo               = maybeArrangementResponse.map(_.customerReference.value).getOrElse("N/A"),
-      authProviderId              = r.ggCredId.value,
+      bankDetails = directDebitDetails,
+      schedule = Schedule.createSchedule(selectedPaymentPlan, dayOfMonth),
+      status = if (Status.isSuccessful(status)) "successfully sent to TTP" else "failed",
+      failedSubmissionReason = status,
+      origin = toAuditString(origin),
+      taxType = taxRegime.toString,
+      taxDetail = toTaxDetail(eligibilityCheckResult),
+      correlationId = correlationId,
+      ppReferenceNo = maybeArrangementResponse.map(_.customerReference.value).getOrElse("N/A"),
+      authProviderId = r.ggCredId.value,
       regimeDigitalCorrespondence = eligibilityCheckResult.regimeDigitalCorrespondence,
-      emailAddress                = maybeEmail,
-      emailSource                 = maybeEmailSource,
-      canPayInSixMonths           = canPayWithinSixMonthsAnswersToBoolean(canPayWithinSixMonthsAnswers),
-      unableToPayReason           = whyCannotPayInFullAnswersToSet(whyCannotPayInFullAnswers)
+      emailAddress = maybeEmail,
+      emailSource = maybeEmailSource,
+      canPayInSixMonths = canPayWithinSixMonthsAnswersToBoolean(canPayWithinSixMonthsAnswers),
+      unableToPayReason = whyCannotPayInFullAnswersToSet(whyCannotPayInFullAnswers)
     )
   }
 
   private def toEmailVerificationRequested(
-      journey:  Journey,
-      ggCredId: GGCredId,
-      email:    Email,
-      result:   String
-  ): EmailVerificationRequestedAuditDetail = {
+    journey:  Journey,
+    ggCredId: GGCredId,
+    email:    Email,
+    result:   String
+  ): EmailVerificationRequestedAuditDetail =
     EmailVerificationRequestedAuditDetail(
-      origin         = toAuditString(journey.origin),
-      taxType        = journey.taxRegime.toString,
-      taxDetail      = toTaxDetail(toEligibilityCheckResult(journey)),
-      correlationId  = journey.correlationId,
-      emailAddress   = paymentsEmailVerification.models.Email(email.value.decryptedValue),
-      emailSource    = deriveEmailSource(journey, email),
-      result         = result,
+      origin = toAuditString(journey.origin),
+      taxType = journey.taxRegime.toString,
+      taxDetail = toTaxDetail(toEligibilityCheckResult(journey)),
+      correlationId = journey.correlationId,
+      emailAddress = paymentsEmailVerification.models.Email(email.value.decryptedValue),
+      emailSource = deriveEmailSource(journey, email),
+      result = result,
       authProviderId = ggCredId.value
     )
-  }
 
   private def toEmailVerificationResult(
-      journey:  Journey,
-      ggCredId: GGCredId,
-      email:    Email,
-      result:   EmailVerificationResult
-  ): EmailVerificationResultAuditDetail = {
+    journey:  Journey,
+    ggCredId: GGCredId,
+    email:    Email,
+    result:   EmailVerificationResult
+  ): EmailVerificationResultAuditDetail =
     EmailVerificationResultAuditDetail(
-      origin         = toAuditString(journey.origin),
-      taxType        = journey.taxRegime.toString,
-      taxDetail      = toTaxDetail(toEligibilityCheckResult(journey)),
-      correlationId  = journey.correlationId,
-      emailAddress   = email,
-      emailSource    = deriveEmailSource(journey, email),
-      result         = result match {
+      origin = toAuditString(journey.origin),
+      taxType = journey.taxRegime.toString,
+      taxDetail = toTaxDetail(toEligibilityCheckResult(journey)),
+      correlationId = journey.correlationId,
+      emailAddress = email,
+      emailSource = deriveEmailSource(journey, email),
+      result = result match {
         case EmailVerificationResult.Verified => "Success"
         case EmailVerificationResult.Locked   => "Failed"
       },
-      failureReason  = result match {
+      failureReason = result match {
         case EmailVerificationResult.Verified => None
         case EmailVerificationResult.Locked   => Some("TooManyPasscodeAttempts")
       },
       authProviderId = ggCredId.value
     )
-  }
 
   private def toTaxDetail(eligibilityCheckResult: EligibilityCheckResult): TaxDetail =
     TaxDetail(
-      utr               = getTaxId("UTR")(eligibilityCheckResult),
-      taxOfficeNo       = None,
-      taxOfficeRef      = None,
-      employerRef       = getTaxId("EMPREF")(eligibilityCheckResult),
+      utr = getTaxId("UTR")(eligibilityCheckResult),
+      taxOfficeNo = None,
+      taxOfficeRef = None,
+      employerRef = getTaxId("EMPREF")(eligibilityCheckResult),
       accountsOfficeRef = getTaxId("BROCS")(eligibilityCheckResult),
-      vrn               = getTaxId("VRN")(eligibilityCheckResult),
-      nino              = getTaxId("NINO")(eligibilityCheckResult)
+      vrn = getTaxId("VRN")(eligibilityCheckResult),
+      nino = getTaxId("NINO")(eligibilityCheckResult)
     )
 
   private def toEmailInfo(journey: EmailVerificationComplete): (Option[Email], Option[EmailSource]) = {
     val emailFromEligibility: Option[Email] = journey.eligibilityCheckResult.email
     journey.emailVerificationAnswers match {
-      case EmailVerificationAnswers.NoEmailJourney => None -> None
+      case EmailVerificationAnswers.NoEmailJourney          => None -> None
       case EmailVerificationAnswers.EmailVerified(email, _) =>
-        if (emailFromEligibility.map(_.value.decryptedValue.toLowerCase(Locale.UK)).contains(email.value.decryptedValue.toLowerCase(Locale.UK))) {
+        if (
+          emailFromEligibility
+            .map(_.value.decryptedValue.toLowerCase(Locale.UK))
+            .contains(email.value.decryptedValue.toLowerCase(Locale.UK))
+        ) {
           Some(email) -> Some(EmailSource.ETMP)
         } else {
           Some(email) -> Some(EmailSource.TEMP)
@@ -485,7 +509,11 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
 
   private def deriveEmailSource(journey: Journey, email: Email): EmailSource = {
     val emailFromEligibility = toEligibilityCheckResult(journey).email
-    if (emailFromEligibility.map(_.value.decryptedValue.toLowerCase(Locale.UK)).contains(email.value.decryptedValue.toLowerCase(Locale.UK))) {
+    if (
+      emailFromEligibility
+        .map(_.value.decryptedValue.toLowerCase(Locale.UK))
+        .contains(email.value.decryptedValue.toLowerCase(Locale.UK))
+    ) {
       EmailSource.ETMP
     } else {
       EmailSource.TEMP
@@ -493,8 +521,11 @@ class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: Execu
   }
 
   private def toEligibilityCheckResult(journey: Journey) = journey match {
-    case j: Journey.AfterEligibilityChecked => j.eligibilityCheckResult
-    case _                                  => Errors.throwServerErrorException("Trying to get eligibility check result for audit event, but it hasn't been retrieved yet.")
+    case j: JourneyStage.AfterEligibilityChecked => j.eligibilityCheckResult
+    case _                                       =>
+      Errors.throwServerErrorException(
+        "Trying to get eligibility check result for audit event, but it hasn't been retrieved yet."
+      )
   }
 
   private def canPayWithinSixMonthsAnswersToBoolean(answers: CanPayWithinSixMonthsAnswers): Option[Boolean] =

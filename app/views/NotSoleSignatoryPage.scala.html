@@ -14,7 +14,6 @@
  * limitations under the License.
  *@
 
-@import cats.implicits.catsSyntaxEq
 @import essttp.rootmodel.TaxRegime
 @import messages.Messages
 @import models.Languages.English
@@ -31,9 +30,9 @@
 )
 
 
-@(taxRegime: TaxRegime)(implicit request: Request[_])
+@(taxRegime: TaxRegime)(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.languageFromRequest
 
 @title = @{Messages.NotSoleSignatory.`Call us about a payment plan`.show}
 
@@ -59,7 +58,7 @@
     @ifYouNeedExtraSupportPartial()
 
 
-    @if(languageFromRequest === English) {
+    @if(languageFromRequest == English) {
         @ifCallingFromOutsideUKPartial()
     }
 

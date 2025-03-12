@@ -29,27 +29,33 @@ import scala.concurrent.ExecutionContext
 
 @Singleton()
 class StartJourneyController @Inject() (
-    cc:               MessagesControllerComponents,
-    journeyConnector: JourneyConnector,
-    as:               Actions,
-    appConfig:        AppConfig
-)(implicit ec: ExecutionContext) extends FrontendController(cc) with Logging {
+  cc:               MessagesControllerComponents,
+  journeyConnector: JourneyConnector,
+  as:               Actions,
+  appConfig:        AppConfig
+)(using ExecutionContext)
+    extends FrontendController(cc),
+      Logging {
 
-  def startGovukEpayeJourney: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
-    journeyConnector.Epaye.startJourneyGovUk(SjRequest.Epaye.Empty())
-      .map(_ => Redirect(routes.DetermineTaxIdController.determineTaxId.url))
+  def startGovukEpayeJourney: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async {
+    implicit request =>
+      journeyConnector.Epaye
+        .startJourneyGovUk(SjRequest.Epaye.Empty())
+        .map(_ => Redirect(routes.DetermineTaxIdController.determineTaxId.url))
   }
 
   def startGovukVatJourney: Action[AnyContent] =
     as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
-      journeyConnector.Vat.startJourneyGovUk(SjRequest.Vat.Empty())
+      journeyConnector.Vat
+        .startJourneyGovUk(SjRequest.Vat.Empty())
         .map(_ => Redirect(routes.DetermineTaxIdController.determineTaxId.url))
     }
 
   def startGovukSaJourney: Action[AnyContent] =
     if (appConfig.saEnabled) {
       as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
-        journeyConnector.Sa.startJourneyGovUk(SjRequest.Sa.Empty())
+        journeyConnector.Sa
+          .startJourneyGovUk(SjRequest.Sa.Empty())
           .map(_ => Redirect(routes.DetermineTaxIdController.determineTaxId.url))
       }
     } else {
@@ -59,28 +65,33 @@ class StartJourneyController @Inject() (
   def startGovukSimpJourney: Action[AnyContent] =
     if (appConfig.simpEnabled) {
       as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
-        journeyConnector.Simp.startJourneyGovUk(SjRequest.Simp.Empty())
+        journeyConnector.Simp
+          .startJourneyGovUk(SjRequest.Simp.Empty())
           .map(_ => Redirect(routes.DetermineTaxIdController.determineTaxId.url))
       }
     } else {
       throw new RuntimeException("Simple Assessment is not available")
     }
 
-  def startDetachedEpayeJourney: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
-    journeyConnector.Epaye.startJourneyDetachedUrl(SjRequest.Epaye.Empty())
-      .map(redirectFromDetachedJourneyStarted)
+  def startDetachedEpayeJourney: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async {
+    implicit request =>
+      journeyConnector.Epaye
+        .startJourneyDetachedUrl(SjRequest.Epaye.Empty())
+        .map(redirectFromDetachedJourneyStarted)
   }
 
   def startDetachedVatJourney: Action[AnyContent] =
     as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
-      journeyConnector.Vat.startJourneyDetachedUrl(SjRequest.Vat.Empty())
+      journeyConnector.Vat
+        .startJourneyDetachedUrl(SjRequest.Vat.Empty())
         .map(redirectFromDetachedJourneyStarted)
     }
 
   def startDetachedSaJourney: Action[AnyContent] =
     if (appConfig.saEnabled) {
       as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
-        journeyConnector.Sa.startJourneyDetachedUrl(SjRequest.Sa.Empty())
+        journeyConnector.Sa
+          .startJourneyDetachedUrl(SjRequest.Sa.Empty())
           .map(redirectFromDetachedJourneyStarted)
       }
     } else {
@@ -90,14 +101,15 @@ class StartJourneyController @Inject() (
   def startDetachedSimpJourney: Action[AnyContent] =
     if (appConfig.simpEnabled) {
       as.continueToSameEndpointAuthenticatedAction.async { implicit request =>
-        journeyConnector.Simp.startJourneyDetachedUrl(SjRequest.Simp.Empty())
+        journeyConnector.Simp
+          .startJourneyDetachedUrl(SjRequest.Simp.Empty())
           .map(redirectFromDetachedJourneyStarted)
       }
     } else {
       throw new RuntimeException("Simple Assessment is not available")
     }
 
-  private def redirectFromDetachedJourneyStarted(sjResponse: SjResponse)(implicit r: Request[_]): Result = {
+  private def redirectFromDetachedJourneyStarted(sjResponse: SjResponse)(using r: Request[?]): Result = {
     val next = if (r.session.get(LandingController.hasSeenLandingPageSessionKey).isEmpty) {
       sjResponse.nextUrl.value
     } else {

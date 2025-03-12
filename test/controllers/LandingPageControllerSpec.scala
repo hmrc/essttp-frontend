@@ -27,7 +27,7 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testsupport.ItSpec
-import testsupport.TdRequest.FakeRequestOps
+import testsupport.TdRequest._
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.{AuthStub, EssttpBackend}
 import uk.gov.hmrc.http.SessionKeys
@@ -43,9 +43,10 @@ class LandingPageControllerSpec extends ItSpec {
     val details = doc.select("details.govuk-details")
 
     val detailsSummaryText = details.select(".govuk-details__summary > .govuk-details__summary-text")
-    detailsSummaryText.text() shouldBe "If you do not think you can set up a plan online, call HMRC and find out if you can set up a plan over the phone."
+    detailsSummaryText
+      .text() shouldBe "If you do not think you can set up a plan online, call HMRC and find out if you can set up a plan over the phone."
 
-    val detailsText = details.select(".govuk-details__text")
+    val detailsText           = details.select(".govuk-details__text")
     val detailsTextParagraphs = detailsText.select(".govuk-body").asScala.toList
     detailsTextParagraphs.size shouldBe 7
 
@@ -57,12 +58,17 @@ class LandingPageControllerSpec extends ItSpec {
 
     detailsText.select("h2.govuk-heading-m").eq(0).text() shouldBe "Text service"
 
-    detailsTextParagraphs(5).text() shouldBe "Use Relay UK if you cannot hear or speak on the telephone, dial 18001 then 0345 300 3900. " +
+    detailsTextParagraphs(5)
+      .text() shouldBe "Use Relay UK if you cannot hear or speak on the telephone, dial 18001 then 0345 300 3900. " +
       "Find out more on the Relay UK website (opens in new tab)."
 
-    detailsText.select("h2.govuk-heading-m").eq(1).text() shouldBe "If a health condition or personal circumstances make it difficult to contact us"
+    detailsText
+      .select("h2.govuk-heading-m")
+      .eq(1)
+      .text() shouldBe "If a health condition or personal circumstances make it difficult to contact us"
 
-    detailsTextParagraphs(6).text() shouldBe "Our guidance Get help from HMRC if you need extra support (opens in new tab) explains how we can support you."
+    detailsTextParagraphs(6)
+      .text() shouldBe "Our guidance Get help from HMRC if you need extra support (opens in new tab) explains how we can support you."
 
     val detailsLink1 = detailsTextParagraphs(5).select("a.govuk-link")
     detailsLink1.text() shouldBe "Relay UK website (opens in new tab)"
@@ -80,7 +86,7 @@ class LandingPageControllerSpec extends ItSpec {
   "GET /epaye-payment-plan" - {
     "return 200 and the PAYE landing page when logged in" in {
       EssttpBackend.StartJourney.findJourney()
-      val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId").withAuthToken()
+      val fakeRequest            = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId").withAuthToken()
       val result: Future[Result] = controller.epayeLandingPage(fakeRequest)
 
       RequestAssertions.assertGetRequestOk(result)
@@ -88,18 +94,19 @@ class LandingPageControllerSpec extends ItSpec {
 
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1                  = "Set up an Employers’ PAYE payment plan",
-        shouldBackLinkBePresent     = true,
-        expectedSubmitUrl           = None,
+        expectedH1 = "Set up an Employers’ PAYE payment plan",
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl = None,
         shouldH1BeSameAsServiceName = true,
-        regimeBeingTested           = Some(TaxRegime.Epaye),
+        regimeBeingTested = Some(TaxRegime.Epaye),
         shouldServiceNameBeInHeader = false,
-        backLinkUrlOverride         = Some("/set-up-a-payment-plan/test-only/bta-page?starting-page")
+        backLinkUrlOverride = Some("/set-up-a-payment-plan/test-only/bta-page?starting-page")
       )
 
       val paragraphs = doc.select("p.govuk-body").asScala.toList
 
-      paragraphs(0).text() shouldBe "Use this service to set up a payment plan for your outstanding employers’ PAYE bill. " +
+      paragraphs(0)
+        .text() shouldBe "Use this service to set up a payment plan for your outstanding employers’ PAYE bill. " +
         "Payments are taken by Direct Debit and include interest charged at the Bank of England base rate plus 2.5% per year."
 
       val insetText = doc.select(".govuk-inset-text").asScala.toList
@@ -107,10 +114,11 @@ class LandingPageControllerSpec extends ItSpec {
       insetText(0).text() shouldBe "You must be able to authorise a Direct Debit without a signature from any other " +
         "account holders and be named on the UK bank account you’ll use to pay."
 
-      paragraphs(1).text() shouldBe "You’ll need to stay up to date with your payments or we could ask you to pay in full."
+      paragraphs(1)
+        .text() shouldBe "You’ll need to stay up to date with your payments or we could ask you to pay in full."
       paragraphs(2).text() shouldBe "To set up a plan, your company or partnership must:"
 
-      val lists = doc.select(".govuk-list").asScala.toList
+      val lists   = doc.select(".govuk-list").asScala.toList
       lists.size shouldBe 1
       val bullets = lists(0).select("li").asScala.toList
       bullets.size shouldBe 5
@@ -119,7 +127,8 @@ class LandingPageControllerSpec extends ItSpec {
       bullets(1).text() shouldBe "owe £100,000 or less"
       bullets(2).text() shouldBe "have debts that are 5 years old or less"
       bullets(3).text() shouldBe "have no other payment plans or debts with HMRC"
-      bullets(4).text() shouldBe "have no outstanding employers’ PAYE submissions or Construction Industry Scheme returns"
+      bullets(4)
+        .text() shouldBe "have no outstanding employers’ PAYE submissions or Construction Industry Scheme returns"
 
       testCallHmrcDetails(doc)
 
@@ -130,7 +139,7 @@ class LandingPageControllerSpec extends ItSpec {
 
     "return 200 and the PAYE landing page when not logged in" in {
       EssttpBackend.StartJourney.findJourney()
-      val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val fakeRequest            = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.epayeLandingPage(fakeRequest)
 
       RequestAssertions.assertGetRequestOk(result)
@@ -138,12 +147,12 @@ class LandingPageControllerSpec extends ItSpec {
 
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1                  = "Set up an Employers’ PAYE payment plan",
-        shouldBackLinkBePresent     = true,
-        expectedSubmitUrl           = None,
-        signedIn                    = false,
+        expectedH1 = "Set up an Employers’ PAYE payment plan",
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl = None,
+        signedIn = false,
         shouldH1BeSameAsServiceName = true,
-        regimeBeingTested           = Some(TaxRegime.Epaye),
+        regimeBeingTested = Some(TaxRegime.Epaye),
         shouldServiceNameBeInHeader = false
       )
     }
@@ -152,11 +161,14 @@ class LandingPageControllerSpec extends ItSpec {
   "GET /epaye-payment-plan-continue" - {
     "should redirect to the login page and continue to the same continue endpoint once login is successful " +
       "if the user is not logged in" in {
-        val result = controller.epayeLandingPageContinue(FakeRequest("GET", routes.LandingController.epayeLandingPageContinue.url))
+        val result =
+          controller.epayeLandingPageContinue(FakeRequest("GET", routes.LandingController.epayeLandingPageContinue.url))
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some("http://localhost:9949/auth-login-stub/gg-sign-in?" +
-          "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fepaye-payment-plan-continue&origin=essttp-frontend")
+        redirectLocation(result) shouldBe Some(
+          "http://localhost:9949/auth-login-stub/gg-sign-in?" +
+            "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fepaye-payment-plan-continue&origin=essttp-frontend"
+        )
       }
 
     "should redirect to start a detached journey with an updated session if no existing journey is found" in {
@@ -164,8 +176,8 @@ class LandingPageControllerSpec extends ItSpec {
 
       stubCommonActions()
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(existingSessionData.toList: _*)
-      val result = controller.epayeLandingPageContinue(fakeRequest)
+      val fakeRequest = FakeRequest().withAuthToken().withSession(existingSessionData.toList*)
+      val result      = controller.epayeLandingPageContinue(fakeRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.StartJourneyController.startDetachedEpayeJourney.url)
@@ -178,8 +190,8 @@ class LandingPageControllerSpec extends ItSpec {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(existingSessionData.toList: _*)
-      val result = controller.epayeLandingPageContinue(fakeRequest)
+      val fakeRequest = FakeRequest().withAuthToken().withSession(existingSessionData.toList*)
+      val result      = controller.epayeLandingPageContinue(fakeRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.DetermineTaxIdController.determineTaxId.url)
@@ -190,7 +202,7 @@ class LandingPageControllerSpec extends ItSpec {
   "GET /vat-payment-plan" - {
     "return 200 and the VAT landing page when logged in" in {
       EssttpBackend.StartJourney.findJourney(Origins.Vat.DetachedUrl)
-      val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId").withAuthToken()
+      val fakeRequest            = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId").withAuthToken()
       val result: Future[Result] = controller.vatLandingPage(fakeRequest)
 
       RequestAssertions.assertGetRequestOk(result)
@@ -198,13 +210,13 @@ class LandingPageControllerSpec extends ItSpec {
 
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1                  = "Set up a VAT payment plan",
-        shouldBackLinkBePresent     = true,
-        expectedSubmitUrl           = None,
+        expectedH1 = "Set up a VAT payment plan",
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl = None,
         shouldH1BeSameAsServiceName = true,
-        regimeBeingTested           = Some(TaxRegime.Vat),
+        regimeBeingTested = Some(TaxRegime.Vat),
         shouldServiceNameBeInHeader = false,
-        backLinkUrlOverride         = Some("/set-up-a-payment-plan/test-only/bta-page?starting-page")
+        backLinkUrlOverride = Some("/set-up-a-payment-plan/test-only/bta-page?starting-page")
       )
 
       val paragraphs = doc.select("p.govuk-body").asScala.toList
@@ -217,7 +229,8 @@ class LandingPageControllerSpec extends ItSpec {
       insetText(0).text() shouldBe "You must be able to authorise a Direct Debit without a signature from any other " +
         "account holders and be named on the UK bank account you’ll use to pay."
 
-      paragraphs(1).text() shouldBe "You’ll need to stay up to date with your payments or we could ask you to pay in full."
+      paragraphs(1)
+        .text() shouldBe "You’ll need to stay up to date with your payments or we could ask you to pay in full."
       paragraphs(2).text() shouldBe "To set up a plan, your company or partnership must:"
 
       val lists = doc.select(".govuk-list").asScala.toList
@@ -231,7 +244,8 @@ class LandingPageControllerSpec extends ItSpec {
       bullets1(3).text() shouldBe "have no other payment plans or debts with HMRC"
       bullets1(4).text() shouldBe "have filed your tax returns"
 
-      paragraphs(3).text() shouldBe "If you have a Customer Compliance Manager, discuss your needs with them before using this service."
+      paragraphs(3)
+        .text() shouldBe "If you have a Customer Compliance Manager, discuss your needs with them before using this service."
       paragraphs(4).text() shouldBe "You cannot use this service if you are:"
 
       val bullets2 = lists(1).select("li").asScala.toList
@@ -248,7 +262,7 @@ class LandingPageControllerSpec extends ItSpec {
     }
     "return 200 and the VAT landing page when not logged in" in {
       EssttpBackend.StartJourney.findJourney(Origins.Vat.DetachedUrl)
-      val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val fakeRequest            = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.vatLandingPage(fakeRequest)
 
       RequestAssertions.assertGetRequestOk(result)
@@ -256,12 +270,12 @@ class LandingPageControllerSpec extends ItSpec {
 
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1                  = "Set up a VAT payment plan",
-        shouldBackLinkBePresent     = true,
-        expectedSubmitUrl           = None,
-        signedIn                    = false,
+        expectedH1 = "Set up a VAT payment plan",
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl = None,
+        signedIn = false,
         shouldH1BeSameAsServiceName = true,
-        regimeBeingTested           = Some(TaxRegime.Vat),
+        regimeBeingTested = Some(TaxRegime.Vat),
         shouldServiceNameBeInHeader = false
       )
     }
@@ -270,11 +284,14 @@ class LandingPageControllerSpec extends ItSpec {
   "GET /vat-payment-plan-continue" - {
     "should redirect to the login page and continue to the same continue endpoint once login is successful " +
       "if the user is not logged in" in {
-        val result = controller.vatLandingPageContinue(FakeRequest("GET", routes.LandingController.vatLandingPageContinue.url))
+        val result =
+          controller.vatLandingPageContinue(FakeRequest("GET", routes.LandingController.vatLandingPageContinue.url))
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some("http://localhost:9949/auth-login-stub/gg-sign-in?" +
-          "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fvat-payment-plan-continue&origin=essttp-frontend")
+        redirectLocation(result) shouldBe Some(
+          "http://localhost:9949/auth-login-stub/gg-sign-in?" +
+            "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fvat-payment-plan-continue&origin=essttp-frontend"
+        )
       }
 
     "should redirect to start a detached journey with an updated session if no existing journey is found" in {
@@ -282,8 +299,8 @@ class LandingPageControllerSpec extends ItSpec {
 
       stubCommonActions()
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(existingSessionData.toList: _*)
-      val result = controller.vatLandingPageContinue(fakeRequest)
+      val fakeRequest = FakeRequest().withAuthToken().withSession(existingSessionData.toList*)
+      val result      = controller.vatLandingPageContinue(fakeRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.StartJourneyController.startDetachedVatJourney.url)
@@ -296,8 +313,8 @@ class LandingPageControllerSpec extends ItSpec {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(existingSessionData.toList: _*)
-      val result = controller.vatLandingPageContinue(fakeRequest)
+      val fakeRequest = FakeRequest().withAuthToken().withSession(existingSessionData.toList*)
+      val result      = controller.vatLandingPageContinue(fakeRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.DetermineTaxIdController.determineTaxId.url)
@@ -308,7 +325,7 @@ class LandingPageControllerSpec extends ItSpec {
   "GET /sa-payment-plan" - {
     "return 200 and the SA landing page when logged in" in {
       EssttpBackend.StartJourney.findJourney(origin = Origins.Sa.Bta)
-      val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId").withAuthToken()
+      val fakeRequest            = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId").withAuthToken()
       val result: Future[Result] = controller.saLandingPage(fakeRequest)
 
       RequestAssertions.assertGetRequestOk(result)
@@ -316,21 +333,23 @@ class LandingPageControllerSpec extends ItSpec {
 
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1                  = "Set up a Self Assessment payment plan",
-        shouldBackLinkBePresent     = true,
-        expectedSubmitUrl           = None,
+        expectedH1 = "Set up a Self Assessment payment plan",
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl = None,
         shouldH1BeSameAsServiceName = true,
-        regimeBeingTested           = Some(TaxRegime.Sa),
+        regimeBeingTested = Some(TaxRegime.Sa),
         shouldServiceNameBeInHeader = false,
-        backLinkUrlOverride         = Some("/set-up-a-payment-plan/test-only/bta-page?starting-page")
+        backLinkUrlOverride = Some("/set-up-a-payment-plan/test-only/bta-page?starting-page")
       )
 
       val lists = doc.select(".govuk-list").asScala.toList
       lists.size shouldBe 1
 
       val paragraphs = doc.select("p.govuk-body").asScala.toList
-      paragraphs(0).text() shouldBe "A payment plan allows you to pay your tax charges in instalments over a period of time."
-      paragraphs(1).text() shouldBe "Your plan covers the tax you owe and, if applicable, the 2 advance payments towards your tax bill. " +
+      paragraphs(0)
+        .text() shouldBe "A payment plan allows you to pay your tax charges in instalments over a period of time."
+      paragraphs(1)
+        .text() shouldBe "Your plan covers the tax you owe and, if applicable, the 2 advance payments towards your tax bill. " +
         "It also covers any penalties or charges against your account. You’ll have to pay interest on the amount you pay late."
       paragraphs(2).text() shouldBe "To be eligible to set up an online payment plan you need to:"
 
@@ -350,7 +369,7 @@ class LandingPageControllerSpec extends ItSpec {
     }
     "return 200 and the SA landing page when not logged in" in {
       EssttpBackend.StartJourney.findJourney(origin = Origins.Sa.Bta)
-      val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val fakeRequest            = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.saLandingPage(fakeRequest)
 
       RequestAssertions.assertGetRequestOk(result)
@@ -358,12 +377,12 @@ class LandingPageControllerSpec extends ItSpec {
 
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1                  = "Set up a Self Assessment payment plan",
-        shouldBackLinkBePresent     = true,
-        expectedSubmitUrl           = None,
-        signedIn                    = false,
+        expectedH1 = "Set up a Self Assessment payment plan",
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl = None,
+        signedIn = false,
         shouldH1BeSameAsServiceName = true,
-        regimeBeingTested           = Some(TaxRegime.Sa),
+        regimeBeingTested = Some(TaxRegime.Sa),
         shouldServiceNameBeInHeader = false
       )
     }
@@ -372,11 +391,14 @@ class LandingPageControllerSpec extends ItSpec {
   "GET /sa-payment-plan-continue" - {
     "should redirect to the login page and continue to the same continue endpoint once login is successful " +
       "if the user is not logged in" in {
-        val result = controller.saLandingPageContinue(FakeRequest("GET", routes.LandingController.saLandingPageContinue.url))
+        val result =
+          controller.saLandingPageContinue(FakeRequest("GET", routes.LandingController.saLandingPageContinue.url))
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some("http://localhost:9949/auth-login-stub/gg-sign-in?" +
-          "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fsa-payment-plan-continue&origin=essttp-frontend")
+        redirectLocation(result) shouldBe Some(
+          "http://localhost:9949/auth-login-stub/gg-sign-in?" +
+            "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fsa-payment-plan-continue&origin=essttp-frontend"
+        )
       }
 
     "should redirect to start a detached journey with an updated session if no existing journey is found" in {
@@ -384,8 +406,8 @@ class LandingPageControllerSpec extends ItSpec {
 
       stubCommonActions()
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(existingSessionData.toList: _*)
-      val result = controller.saLandingPageContinue(fakeRequest)
+      val fakeRequest = FakeRequest().withAuthToken().withSession(existingSessionData.toList*)
+      val result      = controller.saLandingPageContinue(fakeRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.StartJourneyController.startDetachedSaJourney.url)
@@ -398,8 +420,8 @@ class LandingPageControllerSpec extends ItSpec {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin = Origins.Sa.Bta)()
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(existingSessionData.toList: _*)
-      val result = controller.saLandingPageContinue(fakeRequest)
+      val fakeRequest = FakeRequest().withAuthToken().withSession(existingSessionData.toList*)
+      val result      = controller.saLandingPageContinue(fakeRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.DetermineTaxIdController.determineTaxId.url)
@@ -410,7 +432,7 @@ class LandingPageControllerSpec extends ItSpec {
   "GET /simple-assessment-payment-plan" - {
     "return 200 and the SIMP landing page when logged in" in {
       EssttpBackend.StartJourney.findJourney(origin = Origins.Simp.Pta)
-      val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId").withAuthToken()
+      val fakeRequest            = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId").withAuthToken()
       val result: Future[Result] = controller.simpLandingPage(fakeRequest)
 
       RequestAssertions.assertGetRequestOk(result)
@@ -418,13 +440,13 @@ class LandingPageControllerSpec extends ItSpec {
 
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1                  = "Set up a Simple Assessment payment plan",
-        shouldBackLinkBePresent     = true,
-        expectedSubmitUrl           = None,
+        expectedH1 = "Set up a Simple Assessment payment plan",
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl = None,
         shouldH1BeSameAsServiceName = true,
-        regimeBeingTested           = Some(TaxRegime.Simp),
+        regimeBeingTested = Some(TaxRegime.Simp),
         shouldServiceNameBeInHeader = false,
-        backLinkUrlOverride         = Some("/set-up-a-payment-plan/test-only/bta-page?starting-page")
+        backLinkUrlOverride = Some("/set-up-a-payment-plan/test-only/bta-page?starting-page")
       )
 
       val lists = doc.select(".govuk-list").asScala.toList
@@ -456,7 +478,7 @@ class LandingPageControllerSpec extends ItSpec {
 
     "return 200 and the SA landing page when not logged in" in {
       EssttpBackend.StartJourney.findJourney(origin = Origins.Simp.Pta)
-      val fakeRequest = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      val fakeRequest            = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
       val result: Future[Result] = controller.simpLandingPage(fakeRequest)
 
       RequestAssertions.assertGetRequestOk(result)
@@ -464,12 +486,12 @@ class LandingPageControllerSpec extends ItSpec {
 
       ContentAssertions.commonPageChecks(
         doc,
-        expectedH1                  = "Set up a Simple Assessment payment plan",
-        shouldBackLinkBePresent     = true,
-        expectedSubmitUrl           = None,
-        signedIn                    = false,
+        expectedH1 = "Set up a Simple Assessment payment plan",
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl = None,
+        signedIn = false,
         shouldH1BeSameAsServiceName = true,
-        regimeBeingTested           = Some(TaxRegime.Simp),
+        regimeBeingTested = Some(TaxRegime.Simp),
         shouldServiceNameBeInHeader = false
       )
     }
@@ -478,11 +500,14 @@ class LandingPageControllerSpec extends ItSpec {
   "GET /simple-assessment-payment-plan-continue" - {
     "should redirect to the login page and continue to the same continue endpoint once login is successful " +
       "if the user is not logged in" in {
-        val result = controller.simpLandingPageContinue(FakeRequest("GET", routes.LandingController.simpLandingPageContinue.url))
+        val result =
+          controller.simpLandingPageContinue(FakeRequest("GET", routes.LandingController.simpLandingPageContinue.url))
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some("http://localhost:9949/auth-login-stub/gg-sign-in?" +
-          "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fsimple-assessment-payment-plan-continue&origin=essttp-frontend")
+        redirectLocation(result) shouldBe Some(
+          "http://localhost:9949/auth-login-stub/gg-sign-in?" +
+            "continue=http%3A%2F%2Flocalhost%3A9215%2Fset-up-a-payment-plan%2Fsimple-assessment-payment-plan-continue&origin=essttp-frontend"
+        )
       }
 
     "should redirect to start a detached journey with an updated session if no existing journey is found" in {
@@ -490,8 +515,8 @@ class LandingPageControllerSpec extends ItSpec {
 
       stubCommonActions()
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(existingSessionData.toList: _*)
-      val result = controller.simpLandingPageContinue(fakeRequest)
+      val fakeRequest = FakeRequest().withAuthToken().withSession(existingSessionData.toList*)
+      val result      = controller.simpLandingPageContinue(fakeRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.StartJourneyController.startDetachedSimpJourney.url)
@@ -504,8 +529,8 @@ class LandingPageControllerSpec extends ItSpec {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin = Origins.Simp.Pta)()
 
-      val fakeRequest = FakeRequest().withAuthToken().withSession(existingSessionData.toList: _*)
-      val result = controller.simpLandingPageContinue(fakeRequest)
+      val fakeRequest = FakeRequest().withAuthToken().withSession(existingSessionData.toList*)
+      val result      = controller.simpLandingPageContinue(fakeRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.DetermineTaxIdController.determineTaxId.url)
@@ -549,7 +574,7 @@ class LandingPageSimpNotEnabledControllerSpec extends ItSpec {
 
 }
 
-class LandingPageShutteringControllerSpec extends ItSpec with ShutteringSpec {
+class LandingPageShutteringControllerSpec extends ItSpec, ShutteringSpec {
 
   override lazy val configOverrides: Map[String, Any] = Map(
     "shuttering.shuttered-tax-regimes" -> List("epaye", "vat", "sa", "SIMP")
@@ -559,11 +584,11 @@ class LandingPageShutteringControllerSpec extends ItSpec with ShutteringSpec {
 
   "When shuttering is enabled the shutter page should show for" - {
 
-      def test(result: Future[Result]): Unit = {
-        RequestAssertions.assertGetRequestOk(result)
-        val doc: Document = Jsoup.parse(contentAsString(result))
-        assertShutteringPageContent(doc, None, Languages.English)
-      }
+    def test(result: Future[Result]): Unit = {
+      RequestAssertions.assertGetRequestOk(result)
+      val doc: Document = Jsoup.parse(contentAsString(result))
+      assertShutteringPageContent(doc, None, Languages.English)
+    }
 
     "GET /epaye-payment-plan" in {
       test(controller.epayeLandingPage(fakeRequest))

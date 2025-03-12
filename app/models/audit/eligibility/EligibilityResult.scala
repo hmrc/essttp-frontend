@@ -18,7 +18,7 @@ package models.audit.eligibility
 
 import play.api.libs.json.{JsString, Writes}
 
-sealed trait EligibilityResult extends Product with Serializable
+sealed trait EligibilityResult extends Product, Serializable derives CanEqual
 
 object EligibilityResult {
 
@@ -26,7 +26,7 @@ object EligibilityResult {
 
   case object Ineligible extends EligibilityResult
 
-  implicit val writes: Writes[EligibilityResult] = Writes {
+  given Writes[EligibilityResult] = Writes {
     case Eligible   => JsString("eligible")
     case Ineligible => JsString("ineligible")
   }

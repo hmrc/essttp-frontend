@@ -27,10 +27,9 @@
         details: GovukDetails
 )
 
-@()(implicit request: Request[_])
+@()(implicit request: Request[?])
 
-@import requestSupport._
-
+@import requestSupport.languageFromRequest
 
 @detailsContent = {
     <p class="govuk-body">@Html(Messages.CallHmrc.`Telephone: ...`.show)</p>

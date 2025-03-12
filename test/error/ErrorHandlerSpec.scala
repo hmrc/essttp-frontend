@@ -28,7 +28,7 @@ class ErrorHandlerSpec extends ItSpec {
   "The standard error template" - {
 
     "must not have a back link" in {
-      implicit val request: Request[_] = FakeRequest()
+      given Request[?] = FakeRequest()
       whenReady(errorHandler.standardErrorTemplate("title", "heading", "message")) { html =>
 
         val doc = Jsoup.parse(html.body)

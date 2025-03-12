@@ -29,8 +29,8 @@ import java.time.LocalDateTime
 object EmailVerificationStub {
 
   private val startVerificationJourneyUrl: String = "/payments-email-verification/start"
-  private val getVerificationResultUrl: String = "/payments-email-verification/status"
-  private val getLockoutCreatedAtUrl = "/payments-email-verification/earliest-created-at"
+  private val getVerificationResultUrl: String    = "/payments-email-verification/status"
+  private val getLockoutCreatedAtUrl              = "/payments-email-verification/earliest-created-at"
 
   type HttpStatus = Int
 
@@ -43,12 +43,12 @@ object EmailVerificationStub {
     )
 
   def verifyRequestEmailVerification(
-      emailAddress:                      Email,
-      expectedAccessibilityStatementUrl: String,
-      expectedPageTitle:                 String,
-      expectedLanguageCode:              String,
-      urlPrefix:                         String,
-      backLocation:                      String
+    emailAddress:                      Email,
+    expectedAccessibilityStatementUrl: String,
+    expectedPageTitle:                 String,
+    expectedLanguageCode:              String,
+    urlPrefix:                         String,
+    backLocation:                      String
   ): Unit =
     verify(
       exactly(1),
@@ -74,13 +74,13 @@ object EmailVerificationStub {
   def getVerificationStatus(result: EmailVerificationResult): StubMapping =
     stubFor(
       post(urlPathEqualTo(getVerificationResultUrl))
-        .willReturn{
+        .willReturn {
           aResponse().withStatus(OK).withBody(Json.prettyPrint(Json.toJson(result)))
         }
     )
 
   def verifyGetEmailVerificationResult(
-      emailAddress: Email
+    emailAddress: Email
   ): Unit =
     verify(
       exactly(1),
@@ -98,12 +98,15 @@ object EmailVerificationStub {
   def getLockoutCreatedAt(dateTime: Option[LocalDateTime]): StubMapping = stubFor(
     get(urlPathEqualTo(getLockoutCreatedAtUrl))
       .willReturn(
-        aResponse().withStatus(OK).withBody(
-          Json.prettyPrint(dateTime.fold[JsValue](
-            Json.parse("{}")
-          )(d =>
-              Json.parse(s"""{ "earliestCreatedAtTime": ${Json.toJson(d).toString}  } """)))
-        )
+        aResponse()
+          .withStatus(OK)
+          .withBody(
+            Json.prettyPrint(
+              dateTime.fold[JsValue](
+                Json.parse("{}")
+              )(d => Json.parse(s"""{ "earliestCreatedAtTime": ${Json.toJson(d).toString}  } """))
+            )
+          )
       )
   )
 

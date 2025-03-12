@@ -32,9 +32,9 @@
         requestSupport: RequestSupport
 )
 
-@(form: Form[Email])(implicit request: Request[_])
+@(form: Form[Email])(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.{languageFromRequest, legacyMessages}
 
 @key = @{"newEmailInput"}
 

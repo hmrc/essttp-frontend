@@ -16,14 +16,8 @@
 
 package models
 import essttp.rootmodel.AmountInPence
-import play.api.libs.json.{Format, Json}
 
 final case class OverDuePayments(
-    total:    AmountInPence,
-    payments: List[OverduePayment]
+  total:    AmountInPence,
+  payments: List[OverduePayment]
 )
-
-object OverDuePayments {
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  implicit val format: Format[OverDuePayments] = Json.format[OverDuePayments]
-}

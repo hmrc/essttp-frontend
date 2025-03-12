@@ -26,7 +26,8 @@ import essttp.rootmodel.dates.startdates.{StartDatesRequest, StartDatesResponse}
 import essttp.rootmodel.pega.{GetCaseResponse, StartCaseResponse}
 import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
-import requests.RequestSupport._
+import play.api.libs.ws.writeableOf_JsValue
+import requests.RequestSupport.hc
 import uk.gov.hmrc.http.HttpReadsInstances._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{StringContextOps, UpstreamErrorResponse}
@@ -36,9 +37,9 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class EssttpBackendConnector @Inject() (
-    config:     EssttpBackendConfig,
-    httpClient: HttpClientV2
-)(implicit ec: ExecutionContext, cryptoFormat: OperationalCryptoFormat) {
+  config:     EssttpBackendConfig,
+  httpClient: HttpClientV2
+)(using ExecutionContext, OperationalCryptoFormat) {
 
   private val startDatesUrl: String = config.baseUrl + "/essttp-backend/start-dates"
 
@@ -50,42 +51,51 @@ class EssttpBackendConnector @Inject() (
 
   private val recreatedSessionUrl: String = config.baseUrl + "/essttp-backend/pega/recreate-session"
 
-  def startDates(startDatesRequest: StartDatesRequest)(implicit request: RequestHeader): Future[StartDatesResponse] =
-    httpClient.post(url"$startDatesUrl")
+  def startDates(startDatesRequest: StartDatesRequest)(using RequestHeader): Future[StartDatesResponse] =
+    httpClient
+      .post(url"$startDatesUrl")
       .withBody(Json.toJson(startDatesRequest))
       .execute[StartDatesResponse]
 
-  def extremeDates(extremeDatesRequest: ExtremeDatesRequest)(implicit request: RequestHeader): Future[ExtremeDatesResponse] =
-    httpClient.post(url"$extremeDatesUrl")
+  def extremeDates(
+    extremeDatesRequest: ExtremeDatesRequest
+  )(using RequestHeader): Future[ExtremeDatesResponse] =
+    httpClient
+      .post(url"$extremeDatesUrl")
       .withBody(Json.toJson(extremeDatesRequest))
       .execute[ExtremeDatesResponse]
 
-  def startPegaCase(journeyId: JourneyId, recalculationNeeded: Boolean)(implicit requestHeader: RequestHeader): Future[StartCaseResponse] = {
+  def startPegaCase(journeyId: JourneyId, recalculationNeeded: Boolean)(using
+    RequestHeader
+  ): Future[StartCaseResponse] = {
     val url = s"$pegaCaseUrl/${journeyId.value}?recalculationNeeded=${recalculationNeeded.toString}"
-    httpClient.post(url"$url")
+    httpClient
+      .post(url"$url")
       .execute[StartCaseResponse]
   }
 
-  def getPegaCase(journeyId: JourneyId)(implicit requestHeader: RequestHeader): Future[GetCaseResponse] =
-    httpClient.get(url"$pegaCaseUrl/${journeyId.value}")
+  def getPegaCase(journeyId: JourneyId)(using RequestHeader): Future[GetCaseResponse] =
+    httpClient
+      .get(url"$pegaCaseUrl/${journeyId.value}")
       .execute[GetCaseResponse]
 
-  def saveJourneyForPega(journeyId: JourneyId)(implicit requestHeader: RequestHeader): Future[Unit] =
-    httpClient.post(url"$saveJourneyForPegaUrl/${journeyId.value}")
+  def saveJourneyForPega(journeyId: JourneyId)(using RequestHeader): Future[Unit] =
+    httpClient
+      .post(url"$saveJourneyForPegaUrl/${journeyId.value}")
       .execute[Either[UpstreamErrorResponse, Unit]]
       .map(_.leftMap(throw _).merge)
 
-  def recreateSession(taxRegime: TaxRegime)(implicit requestHeader: RequestHeader): Future[Option[Journey]] =
-    httpClient.get(url"$recreatedSessionUrl/${TaxRegime.pathBindable.unbind("taxRegime", taxRegime)}")
+  def recreateSession(taxRegime: TaxRegime)(using RequestHeader): Future[Option[Journey]] =
+    httpClient
+      .get(url"$recreatedSessionUrl/${TaxRegime.pathBindable.unbind("taxRegime", taxRegime)}")
       .execute[Option[Journey]]
 
 }
 
 final case class EssttpBackendConfig(baseUrl: String) {
   @Inject()
-  def this(config: ServicesConfig) = {
+  def this(config: ServicesConfig) =
     this(
       baseUrl = config.baseUrl("essttp-backend")
     )
-  }
 }

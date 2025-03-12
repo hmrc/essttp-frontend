@@ -21,9 +21,9 @@
 
 @this(requestSupport: RequestSupport)
 
-@()(implicit request: Request[_])
+@()(implicit request: Request[?])
 
- @import requestSupport._
+@import requestSupport.languageFromRequest
 
 <h2 class="govuk-heading-m">@{Messages.ExtraSupport.`If you're calling from outside the UK`.show}</h2>
 

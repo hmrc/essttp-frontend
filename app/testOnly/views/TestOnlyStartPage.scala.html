@@ -14,7 +14,6 @@
  * limitations under the License.
  *@
 
-@import cats.syntax.eq._
 @import config.AppConfig
 @import essttp.journey.model.Origins
 @import essttp.rootmodel.TaxRegime
@@ -24,7 +23,6 @@
 @import requests.RequestSupport
 @import testOnly.controllers.{routes => testOnlyRoutes}
 @import testOnly.models.formsmodel.{Enrolments, SignInAs, StartJourneyForm}
-@import testOnly.views.html.TestOnlyLayout
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
@@ -39,9 +37,9 @@ govukInput: GovukInput,
 appConfig: AppConfig
 )
 
-@(taxRegime: TaxRegime, form: Form[StartJourneyForm])(implicit request: Request[_])
+@(taxRegime: TaxRegime, form: Form[StartJourneyForm])(implicit request: Request[?])
 
-@import requestSupport._
+@import requestSupport.legacyMessages
 
 @title = @{
     "Test only starter page"
@@ -51,51 +49,51 @@ appConfig: AppConfig
     CheckboxItem(
     content = Text(eligibilityError.entryName),
     value = eligibilityError.entryName,
-    checked = form.data.exists(_._2 === eligibilityError.entryName)
+    checked = form.data.exists(_._2 == eligibilityError.entryName)
     )
 }
 
 @epayeEligibilityErrorCheckboxes = @{
     EligibilityErrors.values
-      .filterNot(e => e === EligibilityErrors.MultipleReasons
-            || e === EligibilityErrors.ChargesBeforeMaxAccountingDate
-            || e === EligibilityErrors.HasInvalidInterestSignalsCESA
-            || e === EligibilityErrors.HasDisguisedRemuneration
-            || e === EligibilityErrors.HasCapacitor
-            || e === EligibilityErrors.IsAnMtdCustomer
-            || e === EligibilityErrors.NoMtditsaEnrollment
+      .filterNot(e => e == EligibilityErrors.MultipleReasons
+            || e == EligibilityErrors.ChargesBeforeMaxAccountingDate
+            || e == EligibilityErrors.HasInvalidInterestSignalsCESA
+            || e == EligibilityErrors.HasDisguisedRemuneration
+            || e == EligibilityErrors.HasCapacitor
+            || e == EligibilityErrors.IsAnMtdCustomer
+            || e == EligibilityErrors.NoMtditsaEnrollment
     ).map(toCheckboxItem)
 }
 
 @vatEligibilityErrorCheckboxes = @{
     EligibilityErrors.values
-      .filterNot(e => e === EligibilityErrors.MultipleReasons
-            || e === EligibilityErrors.HasInvalidInterestSignalsCESA
-            || e === EligibilityErrors.HasDisguisedRemuneration
-            || e === EligibilityErrors.HasCapacitor
-            || e === EligibilityErrors.IsAnMtdCustomer
-            || e === EligibilityErrors.NoMtditsaEnrollment
+      .filterNot(e => e == EligibilityErrors.MultipleReasons
+            || e == EligibilityErrors.HasInvalidInterestSignalsCESA
+            || e == EligibilityErrors.HasDisguisedRemuneration
+            || e == EligibilityErrors.HasCapacitor
+            || e == EligibilityErrors.IsAnMtdCustomer
+            || e == EligibilityErrors.NoMtditsaEnrollment
     ).map(toCheckboxItem)
 }
 
 @simpEligibilityErrorCheckboxes = @{
     EligibilityErrors.values
-        .filterNot(e => e === EligibilityErrors.MultipleReasons
-            || e === EligibilityErrors.ChargesBeforeMaxAccountingDate
-            || e === EligibilityErrors.HasInvalidInterestSignalsCESA
-            || e === EligibilityErrors.HasDisguisedRemuneration
-            || e === EligibilityErrors.DmSpecialOfficeProcessingRequiredCESA
-            || e === EligibilityErrors.DmSpecialOfficeProcessingRequiredCDCS
-            || e === EligibilityErrors.HasCapacitor
-            || e === EligibilityErrors.IsAnMtdCustomer
-            || e === EligibilityErrors.NoMtditsaEnrollment
+        .filterNot(e => e == EligibilityErrors.MultipleReasons
+            || e == EligibilityErrors.ChargesBeforeMaxAccountingDate
+            || e == EligibilityErrors.HasInvalidInterestSignalsCESA
+            || e == EligibilityErrors.HasDisguisedRemuneration
+            || e == EligibilityErrors.DmSpecialOfficeProcessingRequiredCESA
+            || e == EligibilityErrors.DmSpecialOfficeProcessingRequiredCDCS
+            || e == EligibilityErrors.HasCapacitor
+            || e == EligibilityErrors.IsAnMtdCustomer
+            || e == EligibilityErrors.NoMtditsaEnrollment
     ).map(toCheckboxItem)
 }
 
 @saEligibilityErrorCheckboxes = @{
     EligibilityErrors.values
-    .filterNot(e => e === EligibilityErrors.MultipleReasons
-        || e === EligibilityErrors.NoMtditsaEnrollment
+    .filterNot(e => e == EligibilityErrors.MultipleReasons
+        || e == EligibilityErrors.NoMtditsaEnrollment
     ).map(toCheckboxItem)
 }
 
@@ -152,12 +150,12 @@ appConfig: AppConfig
             RadioItem(
                 content = Text("50"),
                 value = Some("50"),
-                checked = form.data.get("confidenceLevel").fold(true)(_ === "50")
+                checked = form.data.get("confidenceLevel").fold(true)(_ == "50")
             ),
             RadioItem(
                 content = Text("250"),
                 value = Some("250"),
-                checked = form.data.get("confidenceLevel").fold(false)(_ === "250")
+                checked = form.data.get("confidenceLevel").fold(false)(_ == "250")
             )
         ),
         classes = "govuk-radios--small govuk-radios--inline"
@@ -182,32 +180,32 @@ appConfig: AppConfig
                     value = Enrolments.Epaye.entryName,
                     checked = form.data.toList
                             .filter(_._1.startsWith("enrolments"))
-                            .find(_._2 === Enrolments.Epaye.entryName)
-                            .fold(taxRegime.entryName === "Epaye")(_._2 === Enrolments.Epaye.entryName)
+                            .find(_._2 == Enrolments.Epaye.entryName)
+                            .fold(taxRegime.entryName == "Epaye")(_._2 == Enrolments.Epaye.entryName)
                 ),
                 CheckboxItem(
                     content = Text("VAT"),
                     value = Enrolments.Vat.entryName,
                     checked = form.data.toList
                             .filter(_._1.startsWith("enrolments"))
-                            .find(_._2 === Enrolments.Vat.entryName)
-                            .fold(taxRegime.entryName === "Vat")(_._2 === Enrolments.Vat.entryName)
+                            .find(_._2 == Enrolments.Vat.entryName)
+                            .fold(taxRegime.entryName == "Vat")(_._2 == Enrolments.Vat.entryName)
                 ),
                 CheckboxItem(
                     content = Text("IR-SA"),
                     value = Enrolments.IrSa.entryName,
                     checked = form.data.toList
                     .filter(_._1.startsWith("enrolments"))
-                    .find(_._2 === Enrolments.IrSa.entryName)
-                    .fold(taxRegime.entryName === "Sa")(_._2 === Enrolments.IrSa.entryName)
+                    .find(_._2 == Enrolments.IrSa.entryName)
+                    .fold(taxRegime.entryName == "Sa")(_._2 == Enrolments.IrSa.entryName)
                 ),
                 CheckboxItem(
                     content = Text("HMRC-MTD-IT"),
                     value = Enrolments.MtdIt.entryName,
                     checked = form.data.toList
                     .filter(_._1.startsWith("enrolments"))
-                    .find(_._2 === Enrolments.MtdIt.entryName)
-                    .fold(taxRegime.entryName === "Sa")(_._2 === Enrolments.MtdIt.entryName)
+                    .find(_._2 == Enrolments.MtdIt.entryName)
+                    .fold(taxRegime.entryName == "Sa")(_._2 == Enrolments.MtdIt.entryName)
                 )
             )
         },
@@ -233,17 +231,17 @@ appConfig: AppConfig
           RadioItem(
               content = Text("As an Organisation"),
               value = Some(SignInAs.Organisation.entryName),
-              checked = form.data.get("signInAs").fold(true)(_ === SignInAs.Organisation.entryName)
+              checked = form.data.get("signInAs").fold(true)(_ == SignInAs.Organisation.entryName)
           ),
           RadioItem(
               content = Text("As an Individual"),
               value = Some(SignInAs.Individual.entryName),
-              checked = form.data.get("signInAs").fold(false)(_ === SignInAs.Individual.entryName)
+              checked = form.data.get("signInAs").fold(false)(_ == SignInAs.Individual.entryName)
           ),
           RadioItem(
               content = Text("Not signed in"),
               value = Some(SignInAs.NoSignIn.entryName),
-              checked = form.data.get("signInAs").fold(false)(_ === SignInAs.NoSignIn.entryName)
+              checked = form.data.get("signInAs").fold(false)(_ == SignInAs.NoSignIn.entryName)
           )
       ),
       classes = "govuk-radios--small"
@@ -289,12 +287,12 @@ appConfig: AppConfig
             RadioItem(
                 content = Text("Yes"),
                 value = Some("true"),
-                checked = form.data.get("regimeDigitalCorrespondence").fold(true)(_ === "true")
+                checked = form.data.get("regimeDigitalCorrespondence").fold(true)(_ == "true")
             ),
             RadioItem(
                 content = Text("No"),
                 value = Some("false"),
-                checked = form.data.get("regimeDigitalCorrespondence").fold(false)(_ === "false")
+                checked = form.data.get("regimeDigitalCorrespondence").fold(false)(_ == "false")
             )
         ),
         classes = "govuk-radios--small govuk-radios--inline"
@@ -319,12 +317,12 @@ appConfig: AppConfig
             RadioItem(
                 content = Text("Yes"),
                 value = Some("true"),
-                checked = form.data.get("emailAddressPresent").fold(true)(_ === "true")
+                checked = form.data.get("emailAddressPresent").fold(true)(_ == "true")
             ),
             RadioItem(
                 content = Text("No"),
                 value = Some("false"),
-                checked = form.data.get("emailAddressPresent").fold(false)(_ === "false")
+                checked = form.data.get("emailAddressPresent").fold(false)(_ == "false")
             )
         ),
         classes = "govuk-radios--small govuk-radios--inline"
@@ -349,17 +347,17 @@ appConfig: AppConfig
         RadioItem(
             content = Text("True"),
             value = Some("true"),
-            checked = form.data.get(fieldName).fold(false)(_ === "true")
+            checked = form.data.get(fieldName).fold(false)(_ == "true")
         ),
         RadioItem(
             content = Text("False"),
             value = Some("false"),
-            checked = form.data.get(fieldName).fold(false)(_ === "false")
+            checked = form.data.get(fieldName).fold(false)(_ == "false")
         ),
         RadioItem(
             content = Text("None"),
             value = None,
-            checked = form.data.get(fieldName).fold(true)(_ === "")
+            checked = form.data.get(fieldName).fold(true)(_ == "")
         ),
     ),
     classes = "govuk-radios--small govuk-radios--inline",
@@ -557,24 +555,24 @@ appConfig: AppConfig
                 content = Text("GOV.UK"),
                 value = Some(Origins.Epaye.GovUk.entryName),
                 hint = Some(Hint(content = Text("If you cannot pay your tax bill on time"))),
-                checked = form.data.exists(_._2 === Origins.Epaye.GovUk.entryName)
+                checked = form.data.exists(_._2 == Origins.Epaye.GovUk.entryName)
             ),
             RadioItem(
                 content = Text("Business Tax Account"),
                 value = Some(Origins.Epaye.Bta.entryName),
                 hint = Some(Hint(content = Text("Set up a payment plan if you cannot pay in full"))),
-                checked = form.data.exists(_._2 === Origins.Epaye.Bta.entryName)
+                checked = form.data.exists(_._2 == Origins.Epaye.Bta.entryName)
             ),
             RadioItem(
                 content = Text("Detached Url"),
                 value = Some(Origins.Epaye.DetachedUrl.entryName),
-                checked = form.data.exists(_._2 === Origins.Epaye.DetachedUrl.entryName)
+                checked = form.data.exists(_._2 == Origins.Epaye.DetachedUrl.entryName)
             ),
             RadioItem(
                 content = Text("EPAYE service"),
                 value = Some(Origins.Epaye.EpayeService.entryName),
                 hint = Some(Hint(content = Text("From the EPAYE service"))),
-                checked = form.data.exists(_._2 === Origins.Epaye.EpayeService.entryName)
+                checked = form.data.exists(_._2 == Origins.Epaye.EpayeService.entryName)
             )
         ),
         classes = "govuk-radios--small"
@@ -680,28 +678,28 @@ appConfig: AppConfig
                 content = Text("GOV.UK"),
                 value = Some(Origins.Vat.GovUk.entryName),
                 hint = Some(Hint(content = Text("If you cannot pay your tax bill on time"))),
-                checked = form.data.exists(_._2 === Origins.Vat.GovUk.entryName)
+                checked = form.data.exists(_._2 == Origins.Vat.GovUk.entryName)
             ),
             RadioItem(
                 content = Text("Business Tax Account"),
                 value = Some(Origins.Vat.Bta.entryName),
                 hint = Some(Hint(content = Text("Set up a payment plan if you cannot pay in full"))),
-                checked = form.data.exists(_._2 === Origins.Vat.Bta.entryName)
+                checked = form.data.exists(_._2 == Origins.Vat.Bta.entryName)
             ),
             RadioItem(
                 content = Text("Detached Url"),
                 value = Some(Origins.Vat.DetachedUrl.entryName),
-                checked = form.data.exists(_._2 === Origins.Vat.DetachedUrl.entryName)
+                checked = form.data.exists(_._2 == Origins.Vat.DetachedUrl.entryName)
             ),
             RadioItem(
                 content = Text("VAT service"),
                 value = Some(Origins.Vat.VatService.entryName),
-                checked = form.data.exists(_._2 === Origins.Vat.VatService.entryName)
+                checked = form.data.exists(_._2 == Origins.Vat.VatService.entryName)
             ),
             RadioItem(
                 content = Text("VAT penalties"),
                 value = Some(Origins.Vat.VatPenalties.entryName),
-                checked = form.data.exists(_._2 === Origins.Vat.VatPenalties.entryName)
+                checked = form.data.exists(_._2 == Origins.Vat.VatPenalties.entryName)
             )
         ),
         classes = "govuk-radios--small"
@@ -805,32 +803,32 @@ appConfig: AppConfig
             RadioItem(
                 content = Text("GOV.UK"),
                 value = Some(Origins.Sa.GovUk.entryName),
-                checked = form.data.exists(_._2 === Origins.Sa.GovUk.entryName)
+                checked = form.data.exists(_._2 == Origins.Sa.GovUk.entryName)
             ),
             RadioItem(
                 content = Text("Business Tax Account"),
                 value = Some(Origins.Sa.Bta.entryName),
-                checked = form.data.exists(_._2 === Origins.Sa.Bta.entryName)
+                checked = form.data.exists(_._2 == Origins.Sa.Bta.entryName)
             ),
             RadioItem(
                 content = Text("Personal Tax Account"),
                 value = Some(Origins.Sa.Pta.entryName),
-                checked = form.data.exists(_._2 === Origins.Sa.Pta.entryName)
+                checked = form.data.exists(_._2 == Origins.Sa.Pta.entryName)
             ),
             RadioItem(
                 content = Text("Detached Url"),
                 value = Some(Origins.Sa.DetachedUrl.entryName),
-                checked = form.data.exists(_._2 === Origins.Sa.DetachedUrl.entryName)
+                checked = form.data.exists(_._2 == Origins.Sa.DetachedUrl.entryName)
             ),
             RadioItem(
                 content = Text("Mobile service"),
                 value = Some(Origins.Sa.Mobile.entryName),
-                checked = form.data.exists(_._2 === Origins.Sa.Mobile.entryName)
+                checked = form.data.exists(_._2 == Origins.Sa.Mobile.entryName)
             ),
             RadioItem(
                 content = Text("ITSA View & Change"),
                 value = Some(Origins.Sa.ItsaViewAndChange.entryName),
-                checked = form.data.exists(_._2 === Origins.Sa.ItsaViewAndChange.entryName)
+                checked = form.data.exists(_._2 == Origins.Sa.ItsaViewAndChange.entryName)
             )
         ),
         classes = "govuk-radios--small"
@@ -916,22 +914,22 @@ appConfig: AppConfig
             RadioItem(
                 content = Text("GOV.UK"),
                 value = Some(Origins.Simp.GovUk.entryName),
-                checked = form.data.exists(_._2 === Origins.Simp.GovUk.entryName)
+                checked = form.data.exists(_._2 == Origins.Simp.GovUk.entryName)
             ),
             RadioItem(
                 content = Text("Personal Tax Account"),
                 value = Some(Origins.Simp.Pta.entryName),
-                checked = form.data.exists(_._2 === Origins.Simp.Pta.entryName)
+                checked = form.data.exists(_._2 == Origins.Simp.Pta.entryName)
             ),
             RadioItem(
                 content = Text("Detached Url"),
                 value = Some(Origins.Simp.DetachedUrl.entryName),
-                checked = form.data.exists(_._2 === Origins.Simp.DetachedUrl.entryName)
+                checked = form.data.exists(_._2 == Origins.Simp.DetachedUrl.entryName)
             ),
             RadioItem(
                 content = Text("Mobile service"),
                 value = Some(Origins.Simp.Mobile.entryName),
-                checked = form.data.exists(_._2 === Origins.Simp.Mobile.entryName)
+                checked = form.data.exists(_._2 == Origins.Simp.Mobile.entryName)
             )
         ),
         classes = "govuk-radios--small"

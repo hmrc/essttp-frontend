@@ -25,7 +25,7 @@ import play.api.Logger
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Request, Result}
 import requests.RequestSupport
-import requests.RequestSupport._
+import requests.RequestSupport.hc
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.~
@@ -33,45 +33,48 @@ import uk.gov.hmrc.auth.core._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait AuthenticatedActionRefiner { this: ActionRefiner[Request, AuthenticatedRequest] with AuthorisedFunctions =>
+trait AuthenticatedActionRefiner { this: ActionRefiner[Request, AuthenticatedRequest] & AuthorisedFunctions =>
   val authConnector: AuthConnector
   val appConfig: AppConfig
   val cc: MessagesControllerComponents
-  def loginContinueToUrl(request: Request[_]): String
+  def loginContinueToUrl(request: Request[?]): String
   val requestSupport: RequestSupport
 
   private val logger = Logger(getClass)
 
-  private implicit val ec: ExecutionContext = cc.executionContext
+  private given ExecutionContext = cc.executionContext
 
   override protected def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
-    implicit val r: Request[A] = request
+    given Request[A] = request
 
-    authorised(AuthProviders(GovernmentGateway)).retrieve(
-      Retrievals.allEnrolments and Retrievals.credentials and Retrievals.nino
-    ) {
-        case enrolments ~ credentials ~ nino =>
-          credentials match {
-            case None =>
-              Future.failed(new RuntimeException(s"Could not find credentials"))
+    authorised(AuthProviders(GovernmentGateway))
+      .retrieve(
+        Retrievals.allEnrolments and Retrievals.credentials and Retrievals.nino
+      ) { case enrolments ~ credentials ~ nino =>
+        credentials match {
+          case None =>
+            Future.failed(new RuntimeException(s"Could not find credentials"))
 
-            case Some(ggCredId) =>
-              Future.successful(
-                Right(
-                  new AuthenticatedRequest[A](
-                    request,
-                    enrolments,
-                    GGCredId(ggCredId.providerId),
-                    nino.map(nino => Nino(nino)),
-                    requestSupport.languageFromRequest
-                  )
+          case Some(ggCredId) =>
+            Future.successful(
+              Right(
+                new AuthenticatedRequest[A](
+                  request,
+                  enrolments,
+                  GGCredId(ggCredId.providerId),
+                  nino.map(nino => Nino(nino)),
+                  requestSupport.languageFromRequest
                 )
               )
-          }
+            )
+        }
 
-      }.recover {
-        case e: NoActiveSession =>
-          logger.info(s"Authorising but found NoActiveSession exception of type ${e.getClass.getSimpleName} with reason: ${e.reason}. Redirecting to login")
+      }
+      .recover {
+        case e: NoActiveSession        =>
+          logger.info(
+            s"Authorising but found NoActiveSession exception of type ${e.getClass.getSimpleName} with reason: ${e.reason}. Redirecting to login"
+          )
           Left(redirectToLoginPage(request))
         case e: AuthorisationException =>
           logger.warn(s"Unauthorised because of ${e.reason}, please investigate why", e)
@@ -79,10 +82,13 @@ trait AuthenticatedActionRefiner { this: ActionRefiner[Request, AuthenticatedReq
       }
   }
 
-  private def redirectToLoginPage(request: Request[_]): Result =
+  private def redirectToLoginPage(request: Request[?]): Result =
     Redirect(
       appConfig.BaseUrl.gg,
-      Map("continue" -> Seq(appConfig.BaseUrl.essttpFrontend + loginContinueToUrl(request)), "origin" -> Seq("essttp-frontend"))
+      Map(
+        "continue" -> Seq(appConfig.BaseUrl.essttpFrontend + loginContinueToUrl(request)),
+        "origin"   -> Seq("essttp-frontend")
+      )
     )
 
   override protected def executionContext: ExecutionContext = cc.executionContext
@@ -91,26 +97,30 @@ trait AuthenticatedActionRefiner { this: ActionRefiner[Request, AuthenticatedReq
 
 @Singleton
 class ContinueToLandingPagesAuthenticatedActionRefiner @Inject() (
-    val authConnector:  AuthConnector,
-    val appConfig:      AppConfig,
-    val cc:             MessagesControllerComponents,
-    val requestSupport: RequestSupport
-) extends ActionRefiner[Request, AuthenticatedRequest] with AuthorisedFunctions with AuthenticatedActionRefiner {
+  val authConnector:  AuthConnector,
+  val appConfig:      AppConfig,
+  val cc:             MessagesControllerComponents,
+  val requestSupport: RequestSupport
+) extends ActionRefiner[Request, AuthenticatedRequest],
+      AuthorisedFunctions,
+      AuthenticatedActionRefiner {
 
-  override def loginContinueToUrl(request: Request[_]): String =
+  override def loginContinueToUrl(request: Request[?]): String =
     routes.WhichTaxRegimeController.whichTaxRegime.url
 
 }
 
 @Singleton
 class ContinueToSameEndpointAuthenticatedActionRefiner @Inject() (
-    val authConnector:  AuthConnector,
-    val appConfig:      AppConfig,
-    val cc:             MessagesControllerComponents,
-    val requestSupport: RequestSupport
-) extends ActionRefiner[Request, AuthenticatedRequest] with AuthorisedFunctions with AuthenticatedActionRefiner {
+  val authConnector:  AuthConnector,
+  val appConfig:      AppConfig,
+  val cc:             MessagesControllerComponents,
+  val requestSupport: RequestSupport
+) extends ActionRefiner[Request, AuthenticatedRequest],
+      AuthorisedFunctions,
+      AuthenticatedActionRefiner {
 
-  override def loginContinueToUrl(request: Request[_]): String =
+  override def loginContinueToUrl(request: Request[?]): String =
     request.uri
 
 }

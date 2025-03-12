@@ -27,11 +27,11 @@ import javax.inject.{Inject, Singleton}
 
 @Singleton
 class MissingInfoController @Inject() (
-    as:    Actions,
-    mcc:   MessagesControllerComponents,
-    views: Views
-) extends FrontendController(mcc)
-  with Logging {
+  as:    Actions,
+  mcc:   MessagesControllerComponents,
+  views: Views
+) extends FrontendController(mcc),
+      Logging {
 
   val missingInfo: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     Ok(views.missingInfoPage())
@@ -45,9 +45,11 @@ class MissingInfoController @Inject() (
 
 object MissingInfoController {
 
-  def redirectToMissingInfoPage()(implicit r: Request[_]): Result = {
-    JourneyLogger.warn(s"Not enough information in session to show ${r.uri}. " +
-      "Redirecting to missing info page")
+  def redirectToMissingInfoPage()(using r: Request[?]): Result = {
+    JourneyLogger.warn(
+      s"Not enough information in session to show ${r.uri}. " +
+        "Redirecting to missing info page"
+    )
     Redirect(routes.MissingInfoController.missingInfo)
   }
 

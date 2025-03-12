@@ -18,7 +18,7 @@ package testOnly.controllers
 
 import actions.Actions
 import actionsmodel.AuthenticatedJourneyRequest
-import essttp.journey.model.Journey
+import essttp.journey.model.JourneyStage
 import essttp.rootmodel.TaxRegime
 import essttp.utils.Errors
 import play.api.Configuration
@@ -38,21 +38,25 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class PegaController @Inject() (
-    as:                       Actions,
-    mcc:                      MessagesControllerComponents,
-    testOnlyJourneyRepo:      TestOnlyJourneyRepo,
-    incomeAndExpenditurePage: PegaIncomeAndExpenditure,
-    cyaPage:                  PegaCheckYourAnswers,
-    pegaPlanService:          PegaPlanService,
-    config:                   Configuration
-)(implicit ec: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
+  as:                       Actions,
+  mcc:                      MessagesControllerComponents,
+  testOnlyJourneyRepo:      TestOnlyJourneyRepo,
+  incomeAndExpenditurePage: PegaIncomeAndExpenditure,
+  cyaPage:                  PegaCheckYourAnswers,
+  pegaPlanService:          PegaPlanService,
+  config:                   Configuration
+)(using ExecutionContext)
+    extends FrontendController(mcc),
+      I18nSupport {
 
-  implicit def toFuture(result: Result): Future[Result] = Future.successful(result)
+  given Conversion[Result, Future[Result]] = Future.successful(_)
 
   private val logOutOnReturn = config.get[Boolean]("pega.test-only.log-out-on-return")
 
-  private def withTestOnlyJourney(request: AuthenticatedJourneyRequest[_])(f: TestOnlyJourney => Future[Result]): Future[Result] =
-    testOnlyJourneyRepo.get(request.journeyId).flatMap{
+  private def withTestOnlyJourney(
+    request: AuthenticatedJourneyRequest[?]
+  )(f: TestOnlyJourney => Future[Result]): Future[Result] =
+    testOnlyJourneyRepo.get(request.journeyId).flatMap {
       case None    => sys.error(s"Could not find test-only journey for journey id ${request.journeyId.value}")
       case Some(j) => f(j)
     }
@@ -60,13 +64,13 @@ class PegaController @Inject() (
   // regime is here to allow us to see if query param is populated properly
   def start(@unused regime: TaxRegime): Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     val testOnlyJourney = TestOnlyJourney(request.journeyId, request.journey.taxRegime, Instant.now(), None, None)
-    testOnlyJourneyRepo.insert(testOnlyJourney).map{ _ =>
+    testOnlyJourneyRepo.insert(testOnlyJourney).map { _ =>
       Redirect(routes.PegaController.incomeAndExpenditure)
     }
   }
 
   val incomeAndExpenditure: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
-    withTestOnlyJourney(request){ testOnlyJourney =>
+    withTestOnlyJourney(request) { testOnlyJourney =>
       val form =
         IncomeAndExpenditureForm.form.fill(testOnlyJourney.incomeAndExpenditure.getOrElse(IncomeAndExpenditure.default))
 
@@ -75,31 +79,35 @@ class PegaController @Inject() (
   }
 
   val incomeAndExpenditureSubmit: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
-    withTestOnlyJourney(request){ testOnlyJourney =>
-      IncomeAndExpenditureForm.form.bindFromRequest()
+    withTestOnlyJourney(request) { testOnlyJourney =>
+      IncomeAndExpenditureForm.form
+        .bindFromRequest()
         .fold(
           formWithErrors => Future.successful(BadRequest(incomeAndExpenditurePage(formWithErrors))),
-          { incomeAndExpenditure =>
-            pegaPlanService.getPlans(request.journey, incomeAndExpenditure)
+          incomeAndExpenditure =>
+            pegaPlanService
+              .getPlans(request.journey, incomeAndExpenditure)
               .map(_.sortWith(_.planDuration.value > _.planDuration.value))
-              .flatMap{
+              .flatMap {
                 case Nil =>
                   val formWithErrors =
-                    IncomeAndExpenditureForm.form.fill(incomeAndExpenditure).withError("", "Could not find any plans. Try adjusting the net income")
+                    IncomeAndExpenditureForm.form
+                      .fill(incomeAndExpenditure)
+                      .withError("", "Could not find any plans. Try adjusting the net income")
                   BadRequest(incomeAndExpenditurePage(formWithErrors))
 
                 case head :: tail =>
-                  val plan = tail.maxByOption(_.planDuration.value).getOrElse(head)
+                  val plan       = tail.maxByOption(_.planDuration.value).getOrElse(head)
                   val newJourney = testOnlyJourney.copy(
                     incomeAndExpenditure = Some(incomeAndExpenditure),
-                    paymentPlan          = Some(plan),
-                    updatedAt            = Instant.now()
+                    paymentPlan = Some(plan),
+                    updatedAt = Instant.now()
                   )
-                  testOnlyJourneyRepo.insert(newJourney)
+                  testOnlyJourneyRepo
+                    .insert(newJourney)
                     .map(_ => Redirect(routes.PegaController.checkYourAnswers))
 
               }
-          }
         )
     }
   }
@@ -107,18 +115,25 @@ class PegaController @Inject() (
   val checkYourAnswers: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     withTestOnlyJourney(request) { testOnlyJourney =>
       val whyCannotPayInFullAnswers = request.journey match {
-        case j: Journey.AfterWhyCannotPayInFullAnswers => j.whyCannotPayInFullAnswers
-        case other                                     => Errors.throwServerErrorException(s"Could not find WhyCannotPayInFullAnswers from journey in state ${other.name}")
+        case j: JourneyStage.AfterWhyCannotPayInFullAnswers => j.whyCannotPayInFullAnswers
+        case other                                          =>
+          Errors.throwServerErrorException(
+            s"Could not find WhyCannotPayInFullAnswers from journey in state ${other.name}"
+          )
       }
 
       val upfrontPaymentAnswers = request.journey match {
-        case j: Journey.AfterUpfrontPaymentAnswers => j.upfrontPaymentAnswers
-        case other                                 => Errors.throwServerErrorException(s"Could not find UpfrontPaymentAnswers from journey in state ${other.name}")
+        case j: JourneyStage.AfterUpfrontPaymentAnswers => j.upfrontPaymentAnswers
+        case other                                      =>
+          Errors.throwServerErrorException(s"Could not find UpfrontPaymentAnswers from journey in state ${other.name}")
       }
 
       val canPayWithinSixMonthsAnswers = request.journey match {
-        case j: Journey.AfterCanPayWithinSixMonthsAnswers => j.canPayWithinSixMonthsAnswers
-        case other                                        => Errors.throwServerErrorException(s"Could not find CanPayWithinSixMonthsAnswers from journey in state ${other.name}")
+        case j: JourneyStage.AfterCanPayWithinSixMonthsAnswers => j.canPayWithinSixMonthsAnswers
+        case other                                             =>
+          Errors.throwServerErrorException(
+            s"Could not find CanPayWithinSixMonthsAnswers from journey in state ${other.name}"
+          )
       }
 
       val incomeAndExpenditure =
@@ -131,21 +146,23 @@ class PegaController @Inject() (
           Errors.throwServerErrorException("Could not find payment plan")
         )
 
-      Ok(cyaPage(
-        logOutOnReturn,
-        request.enrolments,
-        whyCannotPayInFullAnswers,
-        upfrontPaymentAnswers,
-        canPayWithinSixMonthsAnswers,
-        incomeAndExpenditure,
-        paymentPlan
-      ))
+      Ok(
+        cyaPage(
+          logOutOnReturn,
+          request.enrolments,
+          whyCannotPayInFullAnswers,
+          upfrontPaymentAnswers,
+          canPayWithinSixMonthsAnswers,
+          incomeAndExpenditure,
+          paymentPlan
+        )
+      )
     }
   }
 
   val checkYourAnswersContinue: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
     withTestOnlyJourney(request) { testOnlyJourney =>
-      pegaPlanService.storePegaGetCaseResponse(request.journey, testOnlyJourney).map{ _ =>
+      pegaPlanService.storePegaGetCaseResponse(request.journey, testOnlyJourney).map { _ =>
         redirectToActualService(
           controllers.routes.PegaController.callback(request.journey.taxRegime, Some(request.lang))
         )
@@ -155,13 +172,15 @@ class PegaController @Inject() (
 
   def change(pageId: String): Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     redirectToActualService(
-      controllers.routes.PaymentScheduleController.changeFromCheckPaymentSchedule(pageId, request.journey.taxRegime, Some(request.lang))
+      controllers.routes.PaymentScheduleController
+        .changeFromCheckPaymentSchedule(pageId, request.journey.taxRegime, Some(request.lang))
     )
   }
 
   val backFromPegaLanding: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     redirectToActualService(
-      controllers.routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(request.journey.taxRegime, Some(request.lang))
+      controllers.routes.CanPayWithinSixMonthsController
+        .canPayWithinSixMonths(request.journey.taxRegime, Some(request.lang))
     )
   }
 

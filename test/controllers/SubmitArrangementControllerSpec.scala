@@ -42,142 +42,155 @@ class SubmitArrangementControllerSpec extends ItSpec {
 
     List[(TaxRegime, Origin)](
       TaxRegime.Epaye -> Origins.Epaye.Bta,
-      TaxRegime.Vat -> Origins.Vat.Bta,
-      TaxRegime.Sa -> Origins.Sa.Bta,
-      TaxRegime.Simp -> Origins.Simp.Pta
-    ).foreach {
-        case (taxRegime, origin) =>
+      TaxRegime.Vat   -> Origins.Vat.Bta,
+      TaxRegime.Sa    -> Origins.Sa.Bta,
+      TaxRegime.Simp  -> Origins.Simp.Pta
+    ).foreach { case (taxRegime, origin) =>
+      List(
+        (
+          "T&C's accepted, no email required",
+          () =>
+            EssttpBackend.TermsAndConditions
+              .findJourney(isEmailAddressRequired = false, testCrypto, origin, etmpEmail = Some(TdAll.etmpEmail))(),
+          None,
+          None,
+          false,
+          None,
+          None,
+          None
+        ),
+        (
+          "email verification success - same email as ETMP",
+          () =>
+            EssttpBackend.EmailVerificationResult.findJourney(
+              "bobross@joyofpainting.com",
+              EmailVerificationResult.Verified,
+              testCrypto,
+              origin
+            )(),
+          Some("bobross@joyofpainting.com"),
+          Some(EmailSource.ETMP),
+          false,
+          None,
+          None,
+          None
+        ),
+        (
+          "email verification success - new email",
+          () =>
+            EssttpBackend.EmailVerificationResult.findJourney(
+              "grogu@mandalorian.com",
+              EmailVerificationResult.Verified,
+              testCrypto,
+              origin
+            )(),
+          Some("grogu@mandalorian.com"),
+          Some(EmailSource.TEMP),
+          false,
+          None,
+          None,
+          None
+        ),
+        (
+          "email verification success - ETMP - same email with different casing",
+          () =>
+            EssttpBackend.EmailVerificationResult.findJourney(
+              "BobRoss@joyofpainting.com",
+              EmailVerificationResult.Verified,
+              testCrypto,
+              origin
+            )(),
+          Some("BobRoss@joyofpainting.com"),
+          Some(EmailSource.ETMP),
+          false,
+          None,
+          None,
+          None
+        ),
+        (
+          "T&C's accepted, no email required with affordability enabled",
+          () =>
+            EssttpBackend.TermsAndConditions.findJourney(
+              isEmailAddressRequired = false,
+              testCrypto,
+              origin,
+              etmpEmail = Some(TdAll.etmpEmail),
+              withAffordability = true,
+              whyCannotPayInFullAnswers =
+                WhyCannotPayInFullAnswers.WhyCannotPayInFull(Set(CannotPayReason.NoMoneySetAside))
+            )(),
+          None,
+          None,
+          true,
+          Some(TdAll.pegaStartCaseResponse.caseId),
+          Some(false),
+          Some(Set[CannotPayReason](CannotPayReason.NoMoneySetAside))
+        )
+      ).foreach {
+        case (
+              journeyDescription,
+              journeyStubMapping,
+              expectedEmail,
+              expectedEmailSource,
+              affordabilityEnabled,
+              caseId,
+              canPayWithinSixMonths,
+              whyCannotPayInFullReasons
+            ) =>
+          s"[taxRegime: ${taxRegime.toString}] trigger call to ttp enact arrangement api, send an audit event " +
+            s"and also update backend for $journeyDescription" in {
+              stubCommonActions()
+              journeyStubMapping()
+              EssttpBackend.SubmitArrangement.stubUpdateSubmitArrangement(
+                TdAll.journeyId,
+                JourneyJsonTemplates
+                  .`Arrangement Submitted - with upfront payment and email`("bobross@joyofpainting.com", origin)
+              )
+              Ttp.EnactArrangement.stubEnactArrangement(taxRegime)()
 
-          List(
-            (
-              "T&C's accepted, no email required",
-              () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto, origin, etmpEmail = Some(TdAll.etmpEmail))(),
-              None,
-              None,
-              false,
-              None,
-              None,
-              None
-            ),
-            (
-              "email verification success - same email as ETMP",
-              () => EssttpBackend.EmailVerificationResult.findJourney(
-                "bobross@joyofpainting.com",
-                EmailVerificationResult.Verified,
-                testCrypto,
-                origin
-              )(),
-              Some("bobross@joyofpainting.com"),
-              Some(EmailSource.ETMP),
-              false,
-              None,
-              None,
-              None
-            ),
-            (
-              "email verification success - new email",
-              () => EssttpBackend.EmailVerificationResult.findJourney(
-                "grogu@mandalorian.com",
-                EmailVerificationResult.Verified,
-                testCrypto,
-                origin
-              )(),
-              Some("grogu@mandalorian.com"),
-              Some(EmailSource.TEMP),
-              false,
-              None,
-              None,
-              None
-            ),
-            (
-              "email verification success - ETMP - same email with different casing",
-              () => EssttpBackend.EmailVerificationResult.findJourney(
-                "BobRoss@joyofpainting.com",
-                EmailVerificationResult.Verified,
-                testCrypto,
-                origin
-              )(),
-              Some("BobRoss@joyofpainting.com"),
-              Some(EmailSource.ETMP),
-              false,
-              None,
-              None,
-              None
-            ),
-            (
-              "T&C's accepted, no email required with affordability enabled",
-              () => EssttpBackend.TermsAndConditions.findJourney(
-                isEmailAddressRequired = false,
-                testCrypto, origin,
-                etmpEmail                 = Some(TdAll.etmpEmail),
-                withAffordability         = true,
-                whyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(Set(CannotPayReason.NoMoneySetAside))
-              )(),
-              None,
-              None,
-              true,
-              Some(TdAll.pegaStartCaseResponse.caseId),
-              Some(false),
-              Some(Set[CannotPayReason](CannotPayReason.NoMoneySetAside))
-            )
-          ).foreach {
-              case (
-                journeyDescription,
-                journeyStubMapping,
-                expectedEmail,
-                expectedEmailSource,
-                affordabilityEnabled,
-                caseId,
-                canPayWithinSixMonths,
-                whyCannotPayInFullReasons) =>
-                s"[taxRegime: ${taxRegime.toString}] trigger call to ttp enact arrangement api, send an audit event " +
-                  s"and also update backend for $journeyDescription" in {
-                    stubCommonActions()
-                    journeyStubMapping()
-                    EssttpBackend.SubmitArrangement.stubUpdateSubmitArrangement(
-                      TdAll.journeyId,
-                      JourneyJsonTemplates.`Arrangement Submitted - with upfront payment and email`("bobross@joyofpainting.com", origin)
-                    )
-                    Ttp.EnactArrangement.stubEnactArrangement(taxRegime)()
+              val result: Future[Result] = controller.submitArrangement(fakeRequest)
+              status(result) shouldBe Status.SEE_OTHER
+              redirectLocation(result) shouldBe Some(taxRegime match {
+                case TaxRegime.Epaye => PageUrls.epayeConfirmationUrl
+                case TaxRegime.Vat   => PageUrls.vatConfirmationUrl
+                case TaxRegime.Sa    => PageUrls.saConfirmationUrl
+                case TaxRegime.Simp  => PageUrls.simpConfirmationUrl
+              })
 
-                    val result: Future[Result] = controller.submitArrangement(fakeRequest)
-                    status(result) shouldBe Status.SEE_OTHER
-                    redirectLocation(result) shouldBe Some(taxRegime match {
-                      case TaxRegime.Epaye => PageUrls.epayeConfirmationUrl
-                      case TaxRegime.Vat   => PageUrls.vatConfirmationUrl
-                      case TaxRegime.Sa    => PageUrls.saConfirmationUrl
-                      case TaxRegime.Simp  => PageUrls.simpConfirmationUrl
-                    })
+              Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(
+                TdAll.customerDetail(
+                  expectedEmail.getOrElse(TdAll.etmpEmail).toLowerCase(Locale.UK),
+                  expectedEmailSource.getOrElse(EmailSource.ETMP)
+                ),
+                TdAll.contactDetails(TdAll.etmpEmail, EmailSource.ETMP),
+                TdAll.someRegimeDigitalCorrespondenceTrue,
+                taxRegime,
+                hasAffordability = affordabilityEnabled,
+                caseId = caseId
+              )(using CryptoFormat.NoOpCryptoFormat)
 
-                    Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(
-                      TdAll.customerDetail(expectedEmail.getOrElse(TdAll.etmpEmail).toLowerCase(Locale.UK), expectedEmailSource.getOrElse(EmailSource.ETMP)),
-                      TdAll.contactDetails(TdAll.etmpEmail, EmailSource.ETMP),
-                      TdAll.someRegimeDigitalCorrespondenceTrue,
-                      taxRegime,
-                      hasAffordability = affordabilityEnabled,
-                      caseId           = caseId
-                    )(CryptoFormat.NoOpCryptoFormat)
+              val taxType = taxRegime match {
+                case TaxRegime.Epaye => "Epaye"
+                case TaxRegime.Vat   => "Vat"
+                case TaxRegime.Sa    => "Sa"
+                case TaxRegime.Simp  => "Simp"
+              }
 
-                    val taxType = taxRegime match {
-                      case TaxRegime.Epaye => "Epaye"
-                      case TaxRegime.Vat   => "Vat"
-                      case TaxRegime.Sa    => "Sa"
-                      case TaxRegime.Simp  => "Simp"
-                    }
+              val whyCannotPayInFullJson =
+                whyCannotPayInFullReasons.fold("")(reasons =>
+                  s""" "unableToPayReason": ${Json.toJson(reasons).toString},"""
+                )
 
-                    val whyCannotPayInFullJson =
-                      whyCannotPayInFullReasons.fold("")(reasons =>
-                        s""" "unableToPayReason": ${Json.toJson(reasons).toString},""")
+              val canPayWithinSixMonthsJson =
+                canPayWithinSixMonths.fold("") { canPay =>
+                  s""" "canPayInSixMonths": ${canPay.toString},"""
+                }
 
-                    val canPayWithinSixMonthsJson =
-                      canPayWithinSixMonths.fold(""){ canPay =>
-                        s""" "canPayInSixMonths": ${canPay.toString},"""
-                      }
-
-                    AuditConnectorStub.verifyEventAudited(
-                      "PlanSetUp",
-                      Json.parse(
-                        s"""
+              AuditConnectorStub.verifyEventAudited(
+                "PlanSetUp",
+                Json
+                  .parse(
+                    s"""
                      |{
                      |	"bankDetails": {
                      |		"name": "${TdAll.testAccountName}",
@@ -217,28 +230,30 @@ class SubmitArrangementControllerSpec extends ItSpec {
                      |  "regimeDigitalCorrespondence": true
                      |}
                      |""".stripMargin
-                      ).as[JsObject]
-                    )
-                    EssttpBackend.SubmitArrangement.verifyUpdateSubmitArrangementRequest(TdAll.journeyId, TdAll.arrangementResponse(taxRegime))
-                  }
+                  )
+                  .as[JsObject]
+              )
+              EssttpBackend.SubmitArrangement
+                .verifyUpdateSubmitArrangementRequest(TdAll.journeyId, TdAll.arrangementResponse(taxRegime))
             }
       }
+    }
 
     "not allow journeys when" - {
 
-        def test(
-            journeyStubMapping:       () => StubMapping,
-            expectedRedirectLocation: Call
-        ) = {
+      def test(
+        journeyStubMapping:       () => StubMapping,
+        expectedRedirectLocation: Call
+      ) = {
 
-          stubCommonActions()
-          journeyStubMapping()
+        stubCommonActions()
+        journeyStubMapping()
 
-          val result = controller.submitArrangement(fakeRequest)
+        val result = controller.submitArrangement(fakeRequest)
 
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(expectedRedirectLocation.url)
-        }
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(expectedRedirectLocation.url)
+      }
 
       "T&C's have not been agreed yet" in {
         test(
@@ -249,7 +264,13 @@ class SubmitArrangementControllerSpec extends ItSpec {
 
       "T&C's have just been agreed but an email is required" in {
         test(
-          () => EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = true, testCrypto, Origins.Epaye.Bta, etmpEmail = Some(TdAll.etmpEmail))(),
+          () =>
+            EssttpBackend.TermsAndConditions.findJourney(
+              isEmailAddressRequired = true,
+              testCrypto,
+              Origins.Epaye.Bta,
+              etmpEmail = Some(TdAll.etmpEmail)
+            )(),
           routes.EmailController.whichEmailDoYouWantToUse
         )
       }
@@ -263,12 +284,13 @@ class SubmitArrangementControllerSpec extends ItSpec {
 
       "there is an email verification status of locked" in {
         test(
-          () => EssttpBackend.EmailVerificationResult.findJourney(
-            "bobross@joyofpainting.com",
-            EmailVerificationResult.Locked,
-            testCrypto,
-            Origins.Vat.Bta
-          )(),
+          () =>
+            EssttpBackend.EmailVerificationResult.findJourney(
+              "bobross@joyofpainting.com",
+              EmailVerificationResult.Locked,
+              testCrypto,
+              Origins.Vat.Bta
+            )(),
           routes.EmailController.tooManyPasscodeAttempts
         )
 
@@ -279,8 +301,13 @@ class SubmitArrangementControllerSpec extends ItSpec {
     "left pad account number when sending to TTP if account number is less than 8 characters" in {
       val (taxRegime, origin) = TaxRegime.Epaye -> Origins.Epaye.Bta
       stubCommonActions()
-      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto, origin, None)(JourneyJsonTemplates.`Agreed Terms and Conditions - padded account number`(false, origin, None))
-      EssttpBackend.SubmitArrangement.stubUpdateSubmitArrangement(TdAll.journeyId, JourneyJsonTemplates.`Arrangement Submitted - padded account number`(origin))
+      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto, origin, None)(
+        JourneyJsonTemplates.`Agreed Terms and Conditions - padded account number`(false, origin, None)
+      )
+      EssttpBackend.SubmitArrangement.stubUpdateSubmitArrangement(
+        TdAll.journeyId,
+        JourneyJsonTemplates.`Arrangement Submitted - padded account number`(origin)
+      )
       Ttp.EnactArrangement.stubEnactArrangement(taxRegime)()
 
       val result: Future[Result] = controller.submitArrangement(fakeRequest)
@@ -293,12 +320,13 @@ class SubmitArrangementControllerSpec extends ItSpec {
         TdAll.someRegimeDigitalCorrespondenceTrue,
         taxRegime,
         "00345678"
-      )(CryptoFormat.NoOpCryptoFormat)
+      )(using CryptoFormat.NoOpCryptoFormat)
 
       AuditConnectorStub.verifyEventAudited(
         "PlanSetUp",
-        Json.parse(
-          s"""
+        Json
+          .parse(
+            s"""
              |{
              |	"bankDetails": {
              |		"name": "${TdAll.testAccountName}",
@@ -334,14 +362,21 @@ class SubmitArrangementControllerSpec extends ItSpec {
              |  "regimeDigitalCorrespondence": true
              |}
              |""".stripMargin
-        ).as[JsObject]
+          )
+          .as[JsObject]
       )
-      EssttpBackend.SubmitArrangement.verifyUpdateSubmitArrangementRequest(TdAll.journeyId, TdAll.arrangementResponse(taxRegime))
+      EssttpBackend.SubmitArrangement
+        .verifyUpdateSubmitArrangementRequest(TdAll.journeyId, TdAll.arrangementResponse(taxRegime))
     }
 
     "should not update backend if call to ttp enact arrangement api fails (anything other than a 202 response)" in {
       stubCommonActions()
-      EssttpBackend.TermsAndConditions.findJourney(isEmailAddressRequired = false, testCrypto, origin = Origins.Epaye.Bta, etmpEmail = Some(TdAll.etmpEmail))()
+      EssttpBackend.TermsAndConditions.findJourney(
+        isEmailAddressRequired = false,
+        testCrypto,
+        origin = Origins.Epaye.Bta,
+        etmpEmail = Some(TdAll.etmpEmail)
+      )()
       Ttp.EnactArrangement.stubEnactArrangementFail()
 
       val result = controller.submitArrangement(fakeRequest)
@@ -351,7 +386,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
         TdAll.contactDetails(),
         TdAll.someRegimeDigitalCorrespondenceTrue,
         TaxRegime.Epaye
-      )(CryptoFormat.NoOpCryptoFormat)
+      )(using CryptoFormat.NoOpCryptoFormat)
       EssttpBackend.SubmitArrangement.verifyNoneUpdateSubmitArrangementRequest(TdAll.journeyId)
     }
 

@@ -5,6 +5,7 @@ object ScoverageSettings {
   lazy val scoverageSettings: Seq[Def.SettingsDefinition] = {
     val excludedFiles = Seq(
       """<empty>""",
+      """Module.*""",
       """Reverse.*""",
       """.*.template.*""",
       """.*components.*""",
@@ -13,11 +14,12 @@ object ScoverageSettings {
       """.*SummaryListFluency""",
       """.*TagFluency""",
       """.*InputFluency""",
-      """.*JourneyLogger"""
+      """.*JourneyLogger""",
+      """.*ClockProvider.*"""
     ).mkString(";") + ";"
 
     Seq(
-      ScoverageKeys.coverageExcludedPackages := """.*.Reverse.*;.*.javascript.*;testOnly.*;.*viewmodels.govuk;.*Reverse.*""",
+      ScoverageKeys.coverageExcludedPackages := """.*.Reverse.*;.*.javascript.*;testOnly.*;.*viewmodels.govuk;.*Reverse.*;<empty>;.*\$anon.*""",
       ScoverageKeys.coverageExcludedFiles := excludedFiles,
       ScoverageKeys.coverageMinimumStmtTotal := 90,
       ScoverageKeys.coverageFailOnMinimum := true,

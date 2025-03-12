@@ -28,10 +28,10 @@ object EmailVerificationPasscodes {
   object EmailVerificationPasscode {
 
     @SuppressWarnings(Array("org.wartremover.warts.Any"))
-    implicit val format: OFormat[EmailVerificationPasscode] = Json.format
+    given OFormat[EmailVerificationPasscode] = Json.format
 
   }
 
-  implicit val format: OFormat[EmailVerificationPasscodes] = Json.format
+  given OFormat[EmailVerificationPasscodes] = Json.format
 
 }

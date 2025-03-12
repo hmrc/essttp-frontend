@@ -22,6 +22,6 @@ final case class BarsVerifyDetails(unsuccessfulAttempts: Int, lockoutExpiryDateT
 
 object BarsVerifyDetails {
 
-  implicit val writes: OWrites[BarsVerifyDetails] = Json.writes
+  given OWrites[BarsVerifyDetails] = Json.writes
 
 }

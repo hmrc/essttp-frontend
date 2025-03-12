@@ -25,7 +25,7 @@ import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import play.api.test.{DefaultTestServerFactory, FakeRequest, RunningServer}
 import play.api.{Application, Mode}
 import play.core.server.ServerConfig
-import testsupport.TdRequest.FakeRequestOps
+import testsupport.TdRequest._
 import testsupport.stubs.{AuthStub, EssttpBackend}
 import testsupport.testdata.TdAll
 import uk.gov.hmrc.auth.core.Enrolment
@@ -35,21 +35,17 @@ import uk.gov.hmrc.http.{HttpReadsInstances, SessionKeys}
 
 import java.time.Instant
 
-class ItSpec
-  extends UnitSpec
-  with GuiceOneServerPerSuite
-  with WireMockSupport
-  with HttpReadsInstances {
+class ItSpec extends UnitSpec, GuiceOneServerPerSuite, WireMockSupport, HttpReadsInstances {
 
-  val testPort: Int = 19001
+  val testPort: Int    = 19001
   val baseUrl: BaseUrl = BaseUrl(s"http://localhost:${testPort.toString}")
 
   implicit override val patienceConfig: PatienceConfig =
-    PatienceConfig(timeout  = scaled(Span(2000, Millis)), interval = scaled(Span(2, Seconds)))
+    PatienceConfig(timeout = scaled(Span(2000, Millis)), interval = scaled(Span(2, Seconds)))
 
   protected lazy val configOverrides: Map[String, Any] = Map()
 
-  implicit val testCrypto: Encrypter with Decrypter = new AesCrypto {
+  given testCrypto: (Encrypter & Decrypter) = new AesCrypto {
     override protected val encryptionKey: String = "P5xsJ9Nt+quxGZzB4DeLfw=="
   }
 
@@ -57,18 +53,18 @@ class ItSpec
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   protected lazy val configMap: Map[String, Any] = Map[String, Any](
-    "microservice.services.auth.port" -> WireMockSupport.port,
-    "microservice.services.essttp-backend.port" -> WireMockSupport.port,
-    "microservice.services.time-to-pay.port" -> WireMockSupport.port,
-    "microservice.services.time-to-pay-eligibility.port" -> WireMockSupport.port,
-    "microservice.services.essttp-dates.port" -> WireMockSupport.port,
-    "microservice.services.bank-account-reputation.port" -> WireMockSupport.port,
-    "microservice.services.email-verification.port" -> WireMockSupport.port,
+    "microservice.services.auth.port"                        -> WireMockSupport.port,
+    "microservice.services.essttp-backend.port"              -> WireMockSupport.port,
+    "microservice.services.time-to-pay.port"                 -> WireMockSupport.port,
+    "microservice.services.time-to-pay-eligibility.port"     -> WireMockSupport.port,
+    "microservice.services.essttp-dates.port"                -> WireMockSupport.port,
+    "microservice.services.bank-account-reputation.port"     -> WireMockSupport.port,
+    "microservice.services.email-verification.port"          -> WireMockSupport.port,
     "microservice.services.payments-email-verification.port" -> WireMockSupport.port,
-    "auditing.consumer.baseUri.port" -> WireMockSupport.port,
-    "journeyVariables.minimumUpfrontPaymentAmountInPence" -> 100L,
-    "auditing.enabled" -> true,
-    "auditing.traceRequests" -> false
+    "auditing.consumer.baseUri.port"                         -> WireMockSupport.port,
+    "journeyVariables.minimumUpfrontPaymentAmountInPence"    -> 100L,
+    "auditing.enabled"                                       -> true,
+    "auditing.traceRequests"                                 -> false
   ) ++ configOverrides
 
   lazy val modules: List[GuiceableModule] =
@@ -76,9 +72,9 @@ class ItSpec
       bind[OperationalCryptoFormat].toInstance(testOperationCryptoFormat)
     )
 
-  //in tests use `app`
+  // in tests use `app`
   override def fakeApplication(): Application = new GuiceApplicationBuilder()
-    .overrides(modules: _*)
+    .overrides(modules*)
     .disable(classOf[essttp.module.CryptoModule])
     .configure(configMap)
     .build()
@@ -93,10 +89,10 @@ class ItSpec
 
   // defaults are suitable for most tests
   def stubCommonActions(
-      authAllEnrolments: Option[Set[Enrolment]] = Some(Set(TdAll.payeEnrolment)),
-      authCredentials:   Option[Credentials]    = Some(Credentials("authId-999", "GovernmentGateway")),
-      barsLockoutExpiry: Option[Instant]        = None,
-      authNino:          Option[String]         = None
+    authAllEnrolments: Option[Set[Enrolment]] = Some(Set(TdAll.payeEnrolment)),
+    authCredentials:   Option[Credentials] = Some(Credentials("authId-999", "GovernmentGateway")),
+    barsLockoutExpiry: Option[Instant] = None,
+    authNino:          Option[String] = None
   ): StubMapping = {
     // stub Authenticated action
     AuthStub.authorise(authAllEnrolments, authCredentials, authNino)
@@ -111,7 +107,7 @@ class ItSpec
 
   object TestServerFactory extends DefaultTestServerFactory {
     override protected def serverConfig(app: Application): ServerConfig = {
-      val sc = ServerConfig(port    = Some(testPort), sslPort = Some(0), mode = Mode.Test, rootDir = app.path)
+      val sc = ServerConfig(port = Some(testPort), sslPort = Some(0), mode = Mode.Test, rootDir = app.path)
       sc.copy(configuration = sc.configuration.withFallback(overrideServerConfiguration(app)))
     }
   }

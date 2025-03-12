@@ -21,12 +21,14 @@ import play.api.libs.json.{Format, JsSuccess, Json}
 
 trait SerialisationSpec { this: UnitSpec =>
 
+  given CanEqual[Any, Any] = CanEqual.derived
+
   def testFormat[A: Format](jsonString: String)(expectedResult: A): Assertion = {
     val (jsonRead, jsonWritten) = Json.parse(jsonString) -> Json.toJson(expectedResult)
 
     jsonRead shouldBe jsonWritten
-    jsonRead.validate[A] should matchPattern {
-      case JsSuccess(`expectedResult`, _) => ()
+    jsonRead.validate[A] should matchPattern { case JsSuccess(`expectedResult`, _) =>
+      ()
     }
   }
 

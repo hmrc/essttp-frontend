@@ -26,27 +26,27 @@ class DateMessagesSpec extends UnitSpec {
     "must have a getSuffix method that" - {
 
       "throws an exception when passed a number less than 1" in {
-        implicit val lang: Language = Languages.English
+        given Language = Languages.English
         an[IllegalArgumentException] shouldBe thrownBy(DateMessages.getSuffix(0))
       }
 
       "throws an exception when passed a number more than 31" in {
-        implicit val lang: Language = Languages.Welsh
+        given Language = Languages.Welsh
         an[IllegalArgumentException] shouldBe thrownBy(DateMessages.getSuffix(32))
       }
 
       "returns the correct suffix in english" in {
-        implicit val lang: Language = Languages.English
+        given Language = Languages.English
         List(
-          1 -> "1st",
-          2 -> "2nd",
-          3 -> "3rd",
-          4 -> "4th",
-          5 -> "5th",
-          6 -> "6th",
-          7 -> "7th",
-          8 -> "8th",
-          9 -> "9th",
+          1  -> "1st",
+          2  -> "2nd",
+          3  -> "3rd",
+          4  -> "4th",
+          5  -> "5th",
+          6  -> "6th",
+          7  -> "7th",
+          8  -> "8th",
+          9  -> "9th",
           10 -> "10th",
           11 -> "11th",
           12 -> "12th",
@@ -68,27 +68,26 @@ class DateMessagesSpec extends UnitSpec {
           29 -> "29th",
           30 -> "30th",
           31 -> "31st"
-        ).foreach{
-            case (day, expectedString) =>
-              withClue(s"For day ${day.toString} and expected string $expectedString: "){
-                val suffix = DateMessages.getSuffix(day)
-                s"${day.toString}$suffix" shouldBe expectedString
-              }
+        ).foreach { case (day, expectedString) =>
+          withClue(s"For day ${day.toString} and expected string $expectedString: ") {
+            val suffix = DateMessages.getSuffix(day)
+            s"${day.toString}$suffix" shouldBe expectedString
           }
+        }
       }
 
       "returns the correct suffix in welsh" in {
-        implicit val lang: Language = Languages.Welsh
+        given Language = Languages.Welsh
         List(
-          1 -> "1af",
-          2 -> "2il",
-          3 -> "3ydd",
-          4 -> "4ydd",
-          5 -> "5ed",
-          6 -> "6ed",
-          7 -> "7fed",
-          8 -> "8fed",
-          9 -> "9fed",
+          1  -> "1af",
+          2  -> "2il",
+          3  -> "3ydd",
+          4  -> "4ydd",
+          5  -> "5ed",
+          6  -> "6ed",
+          7  -> "7fed",
+          8  -> "8fed",
+          9  -> "9fed",
           10 -> "10fed",
           11 -> "11eg",
           12 -> "12fed",
@@ -110,13 +109,12 @@ class DateMessagesSpec extends UnitSpec {
           29 -> "29ain",
           30 -> "30ain",
           31 -> "31ain"
-        ).foreach{
-            case (day, expectedString) =>
-              withClue(s"For day ${day.toString} and expected string $expectedString: "){
-                val suffix: String = DateMessages.getSuffix(day)
-                s"${day.toString}$suffix" shouldBe expectedString
-              }
+        ).foreach { case (day, expectedString) =>
+          withClue(s"For day ${day.toString} and expected string $expectedString: ") {
+            val suffix: String = DateMessages.getSuffix(day)
+            s"${day.toString}$suffix" shouldBe expectedString
           }
+        }
       }
 
     }

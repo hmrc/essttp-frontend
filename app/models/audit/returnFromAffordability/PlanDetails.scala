@@ -19,17 +19,17 @@ package models.audit.returnFromAffordability
 import play.api.libs.json.{Json, OWrites}
 
 final case class PlanDetails(
-    debtAmount:           BigDecimal,
-    initialPaymentAmount: Option[BigDecimal],
-    initialPaymentDate:   Option[String],
-    customerPostcode:     String,
-    numberOfInstalments:  Int,
-    planInterest:         BigDecimal,
-    collections:          Collections
+  debtAmount:           BigDecimal,
+  initialPaymentAmount: Option[BigDecimal],
+  initialPaymentDate:   Option[String],
+  customerPostcode:     String,
+  numberOfInstalments:  Int,
+  planInterest:         BigDecimal,
+  collections:          Collections
 )
 
 object PlanDetails {
 
-  implicit val writes: OWrites[PlanDetails] = Json.writes
+  given OWrites[PlanDetails] = Json.writes
 
 }

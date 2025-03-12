@@ -38,13 +38,35 @@ class RoundingSpec extends UnitSpec {
           (AmountInPence(1001), AmountInPence(1501), AmountInPence(25001), AmountInPence(2000), AmountInPence(25000)),
           (AmountInPence(1001), AmountInPence(1499), AmountInPence(25001), AmountInPence(1000), AmountInPence(25000)),
           (AmountInPence(1001), AmountInPence(1505), AmountInPence(21146), AmountInPence(2000), AmountInPence(21000)),
-          (AmountInPence(10001), AmountInPence(14400), AmountInPence(25001), AmountInPence(14000), AmountInPence(25000)),
-          (AmountInPence(10001), AmountInPence(15500), AmountInPence(25650), AmountInPence(15000), AmountInPence(26000)),
+          (
+            AmountInPence(10001),
+            AmountInPence(14400),
+            AmountInPence(25001),
+            AmountInPence(14000),
+            AmountInPence(25000)
+          ),
+          (
+            AmountInPence(10001),
+            AmountInPence(15500),
+            AmountInPence(25650),
+            AmountInPence(15000),
+            AmountInPence(26000)
+          ),
           (AmountInPence(10001), AmountInPence(15501), AmountInPence(25650), AmountInPence(16000), AmountInPence(26000))
         )
-      ) { (amountLeft: AmountInPence, minAmount: AmountInPence, maxAmount: AmountInPence, roundedMin: AmountInPence, roundedMax: AmountInPence) =>
-          MonthlyPaymentAmountController.roundingForMinMax(amountLeft, minAmount, maxAmount) shouldBe Tuple2(roundedMin, roundedMax)
-        }
+      ) {
+        (
+          amountLeft: AmountInPence,
+          minAmount: AmountInPence,
+          maxAmount: AmountInPence,
+          roundedMin: AmountInPence,
+          roundedMax: AmountInPence
+        ) =>
+          MonthlyPaymentAmountController.roundingForMinMax(amountLeft, minAmount, maxAmount) shouldBe Tuple2(
+            roundedMin,
+            roundedMax
+          )
+      }
     }
   }
 }
