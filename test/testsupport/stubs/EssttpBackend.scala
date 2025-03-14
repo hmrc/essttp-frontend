@@ -234,8 +234,15 @@ object EssttpBackend {
     def verifyNoneUpdateEligibilityRequest(journeyId: JourneyId): Unit =
       verify(exactly(0), postRequestedFor(urlPathEqualTo(updateEligibilityResultUrl(journeyId))))
 
-    def findJourney(encrypter: Encrypter, origin: Origin = Origins.Epaye.Bta)(
-      jsonBody: String = JourneyJsonTemplates.`Eligibility Checked - Eligible`(origin)(using encrypter)
+    def findJourney(
+      encrypter:                          Encrypter,
+      origin:                             Origin = Origins.Epaye.Bta,
+      maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
+    )(
+      jsonBody:                           String =
+        JourneyJsonTemplates.`Eligibility Checked - Eligible`(origin, maybeChargeIsInterestBearingCharge)(using
+          encrypter
+        )
     ): StubMapping =
       findByLatestSessionId(jsonBody)
 
@@ -283,10 +290,14 @@ object EssttpBackend {
       )
 
     def findJourney(
-      encrypter: Encrypter,
-      origin:    Origin = Origins.Epaye.Bta
+      encrypter:                          Encrypter,
+      origin:                             Origin = Origins.Epaye.Bta,
+      maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
     )(
-      jsonBody:  String = JourneyJsonTemplates.`Why Cannot Pay in Full - Not Required`(origin)(using encrypter)
+      jsonBody:                           String =
+        JourneyJsonTemplates.`Why Cannot Pay in Full - Not Required`(origin, maybeChargeIsInterestBearingCharge)(using
+          encrypter
+        )
     ): StubMapping =
       findByLatestSessionId(jsonBody)
 
@@ -344,8 +355,15 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(updateUpfrontPaymentAmountUrl(journeyId)))
       )
 
-    def findJourney(encrypter: Encrypter, origin: Origin = Origins.Epaye.Bta)(
-      jsonBody: String = JourneyJsonTemplates.`Entered Upfront payment amount`(origin)(using encrypter)
+    def findJourney(
+      encrypter:                          Encrypter,
+      origin:                             Origin = Origins.Epaye.Bta,
+      maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
+    )(
+      jsonBody:                           String =
+        JourneyJsonTemplates.`Entered Upfront payment amount`(origin, maybeChargeIsInterestBearingCharge)(using
+          encrypter
+        )
     ): StubMapping =
       findByLatestSessionId(jsonBody)
   }
@@ -529,8 +547,13 @@ object EssttpBackend {
         postRequestedFor(urlPathEqualTo(affordableQuotesUrl(journeyId)))
       )
 
-    def findJourney(encrypter: Encrypter, origin: Origin)(
-      jsonBody: String = JourneyJsonTemplates.`Retrieved Affordable Quotes`(origin)(using encrypter)
+    def findJourney(
+      encrypter:                          Encrypter,
+      origin:                             Origin,
+      maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
+    )(
+      jsonBody:                           String =
+        JourneyJsonTemplates.`Retrieved Affordable Quotes`(origin, maybeChargeIsInterestBearingCharge)(using encrypter)
     ): StubMapping = findByLatestSessionId(jsonBody)
   }
 

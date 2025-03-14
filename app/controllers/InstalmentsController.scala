@@ -17,6 +17,7 @@
 package controllers
 
 import actions.Actions
+import actionsmodel.EligibleJourneyRequest
 import cats.syntax.eq.*
 import cats.syntax.option.*
 import config.AppConfig
@@ -57,7 +58,7 @@ class InstalmentsController @Inject() (
       JourneyStage.AfterAffordableQuotesResponse,
       (JourneyStage.AfterCheckedPaymentPlan, PaymentPlanAnswers.PaymentPlanNoAffordability)
     ]
-  )(using Request[?]): Future[Result] = {
+  )(using request: EligibleJourneyRequest[?]): Future[Result] = {
     val maybePrePopForm: Form[String] = {
       val existingValue = journey.fold(existingSelectedPaymentPlan, _._2.selectedPaymentPlan.some)
 
@@ -68,7 +69,13 @@ class InstalmentsController @Inject() (
 
     val affordableQuotesResponse = journey.fold(_.affordableQuotesResponse, _._2.affordableQuotesResponse)
     val instalmentOptions        = InstalmentsController.retrieveInstalmentOptions(affordableQuotesResponse.paymentPlans)
-    Ok(views.instalmentOptionsPage(maybePrePopForm, instalmentOptions))
+    Ok(
+      views.instalmentOptionsPage(
+        maybePrePopForm,
+        instalmentOptions,
+        request.eligibilityCheckResult.hasInterestBearingCharge
+      )
+    )
   }
 
   private def existingSelectedPaymentPlan(journey: JourneyStage.AfterAffordableQuotesResponse): Option[PaymentPlan] =
@@ -87,7 +94,13 @@ class InstalmentsController @Inject() (
           { formWithErrors =>
             val instalmentOptions =
               InstalmentsController.retrieveInstalmentOptions(affordableQuotesResponse.paymentPlans)
-            Ok(views.instalmentOptionsPage(formWithErrors, instalmentOptions))
+            Ok(
+              views.instalmentOptionsPage(
+                formWithErrors,
+                instalmentOptions,
+                request.eligibilityCheckResult.hasInterestBearingCharge
+              )
+            )
           },
           { (option: String) =>
             val maybePaymentPlan: Option[PaymentPlan] =

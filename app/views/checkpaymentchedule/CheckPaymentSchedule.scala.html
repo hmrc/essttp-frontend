@@ -44,7 +44,8 @@
   affordableMonthlyPaymentAmount: AmountInPence,
   whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers,
   canPayWithinSixMonthsAnswers: CanPayWithinSixMonthsAnswers,
-  taxRegime: TaxRegime
+  taxRegime: TaxRegime,
+  hasInterestBearingCharge: Boolean
 )(implicit request: EligibleJourneyRequest[?], ord: Ordering[LocalDate])
 
 @import requestSupport.{languageFromRequest, legacyMessages}
@@ -108,7 +109,7 @@
 }
 
 @instalmentRows = @{
-  CheckPaymentScheduleRows.paymentPlanInstalmentsRows(paymentPlan, CheckPaymentPlanChangeLink.PaymentPlan.changeLink(taxRegime))
+  CheckPaymentScheduleRows.paymentPlanInstalmentsRows(paymentPlan, hasInterestBearingCharge, CheckPaymentPlanChangeLink.PaymentPlan.changeLink(taxRegime))
 }
 
 

@@ -38,11 +38,9 @@ import scala.jdk.CollectionConverters.{CollectionHasAsScala, IteratorHasAsScala}
 
 class UpfrontPaymentControllerSpec extends ItSpec, UnchangedFromCYALinkAssertions {
 
-  private val controller: UpfrontPaymentController          = app.injector.instanceOf[UpfrontPaymentController]
+  private val controller: UpfrontPaymentController = app.injector.instanceOf[UpfrontPaymentController]
+
   private val expectedH1CanYouPayUpfrontPage: String        = "Upfront payment"
-  private val expectedP1CanYouPayUpfrontPage: String        = "If you pay some of your bill upfront, you’ll:"
-  private val expectedP2CanYouPayUpfrontPage: String        =
-    "An upfront payment is separate to any recent payments you’ve made. We’ll take it from your bank account within 6 working days."
   private val expectedPageLegendCanPayUpfrontPage: String   = "Can you make an upfront payment?"
   private val expectedH1HowMuchCanYouPayUpfrontPage: String = "How much can you pay upfront?"
   private val expectedH1UpfrontSummaryPage: String          = "Payment summary"
@@ -55,33 +53,72 @@ class UpfrontPaymentControllerSpec extends ItSpec, UnchangedFromCYALinkAssertion
   ).foreach { case (regime, origin, taxRegime) =>
     "GET /can-you-make-an-upfront-payment" - {
 
-      s"[$regime journey] should return 200 and the can you make an upfront payment page" in {
-        stubCommonActions()
-        EssttpBackend.WhyCannotPayInFull.findJourney(testCrypto, origin)()
+      s"[$regime journey] should return 200 and the can you make an upfront payment page when" - {
 
-        val result: Future[Result] = controller.canYouMakeAnUpfrontPayment(fakeRequest)
-        val pageContent: String    = contentAsString(result)
-        val doc: Document          = Jsoup.parse(pageContent)
+        "there is an interest bearing charge" in {
+          stubCommonActions()
+          EssttpBackend.WhyCannotPayInFull
+            .findJourney(testCrypto, origin, maybeChargeIsInterestBearingCharge = Some(true))()
 
-        RequestAssertions.assertGetRequestOk(result)
-        ContentAssertions.commonPageChecks(
-          doc,
-          expectedH1 = expectedH1CanYouPayUpfrontPage,
-          shouldBackLinkBePresent = true,
-          expectedSubmitUrl = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit.url),
-          regimeBeingTested = Some(taxRegime)
-        )
-        val radioContent = doc.select(".govuk-radios__label").asScala.toList
-        radioContent(0).text() shouldBe "Yes"
-        radioContent(1).text() shouldBe "No"
+          val result: Future[Result] = controller.canYouMakeAnUpfrontPayment(fakeRequest)
+          val pageContent: String    = contentAsString(result)
+          val doc: Document          = Jsoup.parse(pageContent)
 
-        doc.select("legend").text() shouldBe expectedPageLegendCanPayUpfrontPage
-        doc.select("#upfrontPayment-p1").text() shouldBe expectedP1CanYouPayUpfrontPage
-        doc.select(".govuk-list > li").asScala.toList.map(_.text()) shouldBe List(
-          "have a shorter payment plan",
-          "pay less interest"
-        )
-        doc.select("#upfrontPayment-p2").text() shouldBe expectedP2CanYouPayUpfrontPage
+          RequestAssertions.assertGetRequestOk(result)
+          ContentAssertions.commonPageChecks(
+            doc,
+            expectedH1 = expectedH1CanYouPayUpfrontPage,
+            shouldBackLinkBePresent = true,
+            expectedSubmitUrl = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit.url),
+            regimeBeingTested = Some(taxRegime)
+          )
+          val radioContent = doc.select(".govuk-radios__label").asScala.toList
+          radioContent(0).text() shouldBe "Yes"
+          radioContent(1).text() shouldBe "No"
+
+          doc.select("legend").text() shouldBe expectedPageLegendCanPayUpfrontPage
+          doc.select("#upfrontPayment-p1").text() shouldBe "If you pay some of your bill upfront, you’ll:"
+          doc.select(".govuk-list > li").asScala.toList.map(_.text()) shouldBe List(
+            "have a shorter payment plan",
+            "pay less interest"
+          )
+          doc
+            .select("#upfrontPayment-p2")
+            .text() shouldBe "An upfront payment is separate to any recent payments you’ve made. We’ll take it from your bank account within 6 working days."
+        }
+
+        "there is no interest bearing charge" in {
+          stubCommonActions()
+          EssttpBackend.WhyCannotPayInFull
+            .findJourney(testCrypto, origin, maybeChargeIsInterestBearingCharge = Some(false))()
+
+          val result: Future[Result] = controller.canYouMakeAnUpfrontPayment(fakeRequest)
+          val pageContent: String    = contentAsString(result)
+          val doc: Document          = Jsoup.parse(pageContent)
+
+          RequestAssertions.assertGetRequestOk(result)
+          ContentAssertions.commonPageChecks(
+            doc,
+            expectedH1 = expectedH1CanYouPayUpfrontPage,
+            shouldBackLinkBePresent = true,
+            expectedSubmitUrl = Some(routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit.url),
+            regimeBeingTested = Some(taxRegime)
+          )
+          val radioContent = doc.select(".govuk-radios__label").asScala.toList
+          radioContent(0).text() shouldBe "Yes"
+          radioContent(1).text() shouldBe "No"
+
+          doc.select("legend").text() shouldBe expectedPageLegendCanPayUpfrontPage
+          doc
+            .select("#upfrontPayment-p1")
+            .text() shouldBe "If you pay some of your bill upfront, you’ll have a shorter payment plan."
+          doc
+            .select("#upfrontPayment-p2")
+            .text() shouldBe "This payment will be taken from your bank account within 6 working days."
+          doc
+            .select("#upfrontPayment-p3")
+            .text() shouldBe "An upfront payment is separate to any recent payments you have made."
+        }
       }
 
       s"[$regime journey] should prepopulate the form when user navigates back and they have a chosen way to pay in their journey" in {
@@ -421,15 +458,29 @@ class UpfrontPaymentControllerSpec extends ItSpec, UnchangedFromCYALinkAssertion
 
         }
 
-        "when they have just given an upfront payment amount" in {
+        "when they have just given an upfront payment amount and there is an interest bearing charge" in {
           test(
             { () =>
               stubCommonActions()
-              EssttpBackend.UpfrontPaymentAmount.findJourney(testCrypto, origin)()
+              EssttpBackend.UpfrontPaymentAmount
+                .findJourney(testCrypto, origin, maybeChargeIsInterestBearingCharge = Some(true))()
               ()
             },
             expectedUpfrontPaymentAmountString = "£10",
             expectedRemainingAmountString = "£2,990 (interest may be added to this amount)"
+          )
+        }
+
+        "when they have just given an upfront payment amount and there is no interest bearing charge" in {
+          test(
+            { () =>
+              stubCommonActions()
+              EssttpBackend.UpfrontPaymentAmount
+                .findJourney(testCrypto, origin, maybeChargeIsInterestBearingCharge = Some(false))()
+              ()
+            },
+            expectedUpfrontPaymentAmountString = "£10",
+            expectedRemainingAmountString = "£2,990"
           )
         }
 

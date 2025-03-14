@@ -17,6 +17,7 @@
 package controllers
 
 import actions.Actions
+import actionsmodel.EligibleJourneyRequest
 import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
@@ -55,13 +56,13 @@ class UpfrontPaymentController @Inject() (
     finalStateCheck(request.journey, displayCanYouPayUpfrontPage(request.journey))
   }
 
-  private def displayCanYouPayUpfrontPage(journey: Journey)(using Request[?]): Result = {
+  private def displayCanYouPayUpfrontPage(journey: Journey)(using request: EligibleJourneyRequest[?]): Result = {
     val maybePrePoppedForm: Form[CanPayUpfrontFormValue] =
       existingCanYouPayUpfrontAnswer(journey).fold(CanPayUpfrontForm.form) { canPayUpfront =>
         CanPayUpfrontForm.form.fill(CanPayUpfrontFormValue.canPayUpfrontToFormValue(canPayUpfront))
       }
 
-    Ok(views.canYouMakeAnUpFrontPayment(maybePrePoppedForm))
+    Ok(views.canYouMakeAnUpFrontPayment(maybePrePoppedForm, request.eligibilityCheckResult.hasInterestBearingCharge))
   }
 
   private def existingCanYouPayUpfrontAnswer(journey: Journey): Option[CanPayUpfront] = journey match {
@@ -78,7 +79,8 @@ class UpfrontPaymentController @Inject() (
     CanPayUpfrontForm.form
       .bindFromRequest()
       .fold(
-        formWithErrors => Ok(views.canYouMakeAnUpFrontPayment(formWithErrors)),
+        formWithErrors =>
+          Ok(views.canYouMakeAnUpFrontPayment(formWithErrors, request.eligibilityCheckResult.hasInterestBearingCharge)),
         (canPayUpfrontForm: CanPayUpfrontFormValue) =>
           val canPayUpfront: CanPayUpfront = canPayUpfrontForm.asCanPayUpfront
           journeyService
@@ -217,8 +219,9 @@ class UpfrontPaymentController @Inject() (
 
     Ok(
       views.upfrontSummaryPage(
-        upfrontPayment = declaredUpfrontPayment.amount,
-        remainingAmountToPay = remainingAmountTest
+        declaredUpfrontPayment.amount,
+        remainingAmountTest,
+        eligibilityCheckResult.hasInterestBearingCharge
       )
     )
   }

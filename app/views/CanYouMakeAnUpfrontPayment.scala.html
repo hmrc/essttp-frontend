@@ -31,12 +31,41 @@
         requestSupport: RequestSupport
 )
 
-@(form: Form[CanPayUpfrontFormValue])(implicit request: Request[?])
+@(form: Form[CanPayUpfrontFormValue], hasInterestBearingCharge: Boolean)(implicit request: Request[?])
 
 @import requestSupport.{languageFromRequest, legacyMessages}
 
 @key = @{
     "CanYouMakeAnUpFrontPayment"
+}
+
+@content = @{
+  if(hasInterestBearingCharge){
+    <p class="govuk-body" id="upfrontPayment-p1">
+      {Messages.UpfrontPayment.`If you pay some of your bill upfront, you'll`.show}
+    </p>
+
+    <ul class="govuk-list govuk-list--bullet">
+      <li>{Messages.UpfrontPayment.`have a shorter payment plan`.show}</li>
+      <li>{Messages.UpfrontPayment.`pay less interest`.show}</li>
+    </ul>
+
+    <p class="govuk-body" id="upfrontPayment-p2">
+      {Messages.UpfrontPayment.`An upfront payment is separate to any recent payments you've made...`.show}
+    </p>
+  } else {
+    <p class="govuk-body" id="upfrontPayment-p1">
+    {Messages.UpfrontPayment.`If you pay some of your bill upfront, you'll have a shorter payment plan.`.show}
+    </p>
+
+    <p class="govuk-body" id="upfrontPayment-p2">
+    {Messages.UpfrontPayment.`This payment will be taken from your bank account within 6 working days.`.show}
+    </p>
+
+    <p class="govuk-body" id="upfrontPayment-p3">
+    {Messages.UpfrontPayment.`An upfront payment is separate to any recent payments you have made.`.show}
+    </p>
+  }
 }
 
 @title = @{
@@ -59,19 +88,7 @@
 <h1 class="govuk-heading-xl">
     @{Messages.UpfrontPayment.`Upfront payment`.show}
 </h1>
-
-    <p class="govuk-body" id="upfrontPayment-p1">
-        @{Messages.UpfrontPayment.`If you pay some of your bill upfront, you'll`.show}
-    </p>
-
-    <ul class="govuk-list govuk-list--bullet">
-        <li>@{Messages.UpfrontPayment.`have a shorter payment plan`.show}</li>
-        <li>@{Messages.UpfrontPayment.`pay less interest`.show}</li>
-    </ul>
-
-    <p class="govuk-body" id="upfrontPayment-p2">
-        @{Messages.UpfrontPayment.`An upfront payment is separate to any recent payments you've made...`.show}
-    </p>
+    @content
 
     @formWithCSRF(action = routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit) {
         @govukRadios(Radios(

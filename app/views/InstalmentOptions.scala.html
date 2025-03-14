@@ -33,7 +33,7 @@
         requestSupport: RequestSupport
 )
 
-@(form: Form[String], options: Seq[InstalmentOption])(implicit request: Request[?])
+@(form: Form[String], options: Seq[InstalmentOption], hasInterestBearingCharge: Boolean)(implicit request: Request[?])
 
 @import requestSupport.{languageFromRequest, legacyMessages}
 
@@ -44,14 +44,22 @@
     Messages.Instalments.`Select a payment plan`.show
 }
 @radioOptions = @{
-    options.zipWithIndex.map { case (option: InstalmentOption, _: Int) => RadioItem(
+    options.zipWithIndex.map { case (option: InstalmentOption, _: Int) =>
+      val hint =
+          if(hasInterestBearingCharge)
+            Some(Hint(
+              content = Text(Messages.Instalments.`Estimated total interest of x`(option.interestPayment).show)
+            ))
+          else
+            None
+
+      RadioItem(
         content = Text(Messages.Instalments.getInstalmentOption(option.numberOfMonths, option.amountToPayEachMonth).show),
         value = Some(option.numberOfMonths.toString),
-        hint = Some(Hint(
-            content = Text(Messages.Instalments.`Estimated total interest of x`(option.interestPayment).show)
-        )),
+        hint = hint,
         checked = form.data.values.toList.contains(option.numberOfMonths.toString)
-    )}
+      )
+    }
 }
 
 @detailsContent = {
@@ -74,12 +82,14 @@
 
     <p class="govuk-body">@{Messages.Instalments.`Based on what you can pay each month, you can now select a payment plan.`.show}</p>
 
-    @govukDetails(
-      Details(
-        summary = Text(Messages.Instalments.`How we calculate interest`.show),
+    @if(hasInterestBearingCharge) {
+      @govukDetails(
+        Details(
+          summary = Text(Messages.Instalments.`How we calculate interest`.show),
           content = HtmlContent(detailsContent)
+        )
       )
-    )
+    }
 
     @formWithCSRF(action = routes.InstalmentsController.instalmentOptionsSubmit) {
         @govukRadios(Radios(

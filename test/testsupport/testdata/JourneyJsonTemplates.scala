@@ -37,10 +37,17 @@ object JourneyJsonTemplates {
       origin = origin
     )
 
-  def `Eligibility Checked - Eligible`(origin: Origin = Origins.Epaye.Bta)(using encrypter: Encrypter): String =
+  def `Eligibility Checked - Eligible`(
+    origin:                             Origin = Origins.Epaye.Bta,
+    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
+  )(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
       stageInfo = StageInfo.eligibilityCheckedEligible,
-      journeyInfo = JourneyInfo.eligibilityCheckedEligible(origin.taxRegime, encrypter),
+      journeyInfo = JourneyInfo.eligibilityCheckedEligible(
+        origin.taxRegime,
+        encrypter,
+        maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge
+      ),
       origin
     )
 
@@ -253,10 +260,14 @@ object JourneyJsonTemplates {
     origin = origin
   )
 
-  def `Why Cannot Pay in Full - Not Required`(origin: Origin)(using encrypter: Encrypter): String =
+  def `Why Cannot Pay in Full - Not Required`(
+    origin:                             Origin,
+    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
+  )(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
       stageInfo = StageInfo.whyCannotPayInFullNotRequired,
-      journeyInfo = JourneyInfo.whyCannotPayInFullNotRequired(origin.taxRegime, encrypter),
+      journeyInfo =
+        JourneyInfo.whyCannotPayInFullNotRequired(origin.taxRegime, encrypter, maybeChargeIsInterestBearingCharge),
       origin = origin
     )
 
@@ -289,10 +300,14 @@ object JourneyJsonTemplates {
       origin = origin
     )
 
-  def `Entered Upfront payment amount`(origin: Origin)(using encrypter: Encrypter): String =
+  def `Entered Upfront payment amount`(
+    origin:                             Origin,
+    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
+  )(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
       stageInfo = StageInfo.enteredUpfrontPaymentAmount,
-      journeyInfo = JourneyInfo.answeredUpfrontPaymentAmount(origin.taxRegime, encrypter),
+      journeyInfo =
+        JourneyInfo.answeredUpfrontPaymentAmount(origin.taxRegime, encrypter, maybeChargeIsInterestBearingCharge),
       origin = origin
     )
 
@@ -393,18 +408,25 @@ object JourneyJsonTemplates {
     origin = origin
   )
 
-  def `Retrieved Affordable Quotes`(origin: Origin)(using encrypter: Encrypter): String =
+  def `Retrieved Affordable Quotes`(origin: Origin, maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true))(
+    using encrypter: Encrypter
+  ): String =
     TdJsonBodies.createJourneyJson(
       stageInfo = StageInfo.retrievedAffordableQuotes,
-      journeyInfo = JourneyInfo.retrievedAffordableQuotes(origin.taxRegime, encrypter),
+      journeyInfo = JourneyInfo.retrievedAffordableQuotes(
+        origin.taxRegime,
+        encrypter,
+        maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge
+      ),
       origin = origin
     )
 
   def `Chosen Payment Plan`(
-    upfrontPaymentAmountJsonString: String = """{"DeclaredUpfrontPayment": {"amount": 12312}}""",
-    regimeDigitalCorrespondence:    Boolean = true,
-    origin:                         Origin,
-    selectedPlanJourneyInfo:        String = TdJsonBodies.selectedPlanTwoMonthsJourneyInfo
+    upfrontPaymentAmountJsonString:     String = """{"DeclaredUpfrontPayment": {"amount": 12312}}""",
+    regimeDigitalCorrespondence:        Boolean = true,
+    origin:                             Origin,
+    selectedPlanJourneyInfo:            String = TdJsonBodies.selectedPlanTwoMonthsJourneyInfo,
+    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
   )(using encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo = StageInfo.chosenPaymentPlan,
     journeyInfo = List(
@@ -414,7 +436,8 @@ object JourneyJsonTemplates {
         TdAll.eligibleEligibilityRules,
         origin.taxRegime,
         encrypter,
-        regimeDigitalCorrespondence
+        regimeDigitalCorrespondence,
+        maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge
       ),
       TdJsonBodies.upfrontPaymentAnswersJourneyInfo(upfrontPaymentAmountJsonString),
       TdJsonBodies.whyCannotPayInFull(

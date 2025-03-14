@@ -136,6 +136,14 @@ class PegaController @Inject() (
           )
       }
 
+      val eligibilityCheckResult = request.journey match {
+        case j: JourneyStage.AfterEligibilityChecked => j.eligibilityCheckResult
+        case other                                   =>
+          Errors.throwServerErrorException(
+            s"Could not find EligibilityCheckResult from journey in state ${other.name}"
+          )
+      }
+
       val incomeAndExpenditure =
         testOnlyJourney.incomeAndExpenditure.getOrElse(
           Errors.throwServerErrorException("Could not find income and expenditure answers")
@@ -154,7 +162,8 @@ class PegaController @Inject() (
           upfrontPaymentAnswers,
           canPayWithinSixMonthsAnswers,
           incomeAndExpenditure,
-          paymentPlan
+          paymentPlan,
+          eligibilityCheckResult.hasInterestBearingCharge
         )
       )
     }

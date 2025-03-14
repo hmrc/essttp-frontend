@@ -30,12 +30,19 @@
         govukButton: GovukButton
 )
 
-@(upfrontPayment: UpfrontPaymentAmount, remainingAmountToPay: AmountInPence)(implicit request: Request[?])
+@(upfrontPayment: UpfrontPaymentAmount, remainingAmountToPay: AmountInPence, hasInterestBearingCharge: Boolean)(implicit request: Request[?])
 
 @import requestSupport.languageFromRequest
 
 @title = @{
     Messages.UpfrontPaymentSummary.`Payment summary`.show
+}
+
+@remainingAmounToPayContent = @{
+  if(hasInterestBearingCharge)
+      s"""${remainingAmountToPay.gdsFormatInPounds} <br> ${Messages.UpfrontPaymentSummary.`(interest may be added to this amount)`.show}"""
+  else
+      remainingAmountToPay.gdsFormatInPounds
 }
 
 @layout(pageTitle = Some(title)) {
@@ -88,9 +95,7 @@
                     content = Text(Messages.UpfrontPaymentSummary.`Remaining amount to pay`.show)
                 ),
                 value = Value(
-                    content = HtmlContent(
-                        s"""${remainingAmountToPay.gdsFormatInPounds} <br> ${Messages.UpfrontPaymentSummary.`(interest may be added to this amount)`.show}"""
-                    )
+                    content = HtmlContent(remainingAmounToPayContent)
                 )
             )
         )

@@ -64,15 +64,16 @@ class PaymentScheduleController @Inject() (
       JourneyStage.AfterSelectedPaymentPlan & Journey,
       (JourneyStage.AfterCheckedPaymentPlan & Journey, PaymentPlanAnswers.PaymentPlanNoAffordability)
     ]
-  )(using EligibleJourneyRequest[?]): Result = {
-    val journeyMerged         = journey.map[Journey](_._1).merge
-    val upfrontPaymentAnswers = upfrontPaymentAnswersFromJourney(journeyMerged)
-    val dayOfMonth            = journey.fold(dayOfMonthFromJourney, _._2.dayOfMonth)
-    val selectedPaymentPlan   = journey.fold(_.selectedPaymentPlan, _._2.selectedPaymentPlan)
-    val monthlyPaymentAmount  = journey.fold(
+  )(using request: EligibleJourneyRequest[?]): Result = {
+    val journeyMerged            = journey.map[Journey](_._1).merge
+    val upfrontPaymentAnswers    = upfrontPaymentAnswersFromJourney(journeyMerged)
+    val dayOfMonth               = journey.fold(dayOfMonthFromJourney, _._2.dayOfMonth)
+    val selectedPaymentPlan      = journey.fold(_.selectedPaymentPlan, _._2.selectedPaymentPlan)
+    val monthlyPaymentAmount     = journey.fold(
       { case j1: JourneyStage.AfterEnteredMonthlyPaymentAmount => j1.monthlyPaymentAmount },
       _._2.monthlyPaymentAmount
     )
+    val hasInterestBearingCharge = request.eligibilityCheckResult.hasInterestBearingCharge
 
     Ok(
       paymentSchedulePage(
@@ -82,7 +83,8 @@ class PaymentScheduleController @Inject() (
         monthlyPaymentAmount.value,
         whyCannotPayInFullAnswersFromJourney(journeyMerged),
         canPayWithinSixMonthsFromJourney(journeyMerged),
-        journeyMerged.taxRegime
+        journeyMerged.taxRegime,
+        hasInterestBearingCharge
       )
     )
   }
