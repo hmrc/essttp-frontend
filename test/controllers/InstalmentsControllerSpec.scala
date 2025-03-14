@@ -78,7 +78,7 @@ class InstalmentsControllerSpec extends ItSpec {
 
       s"[$regime journey] return 200 and the instalment selection page when" - {
 
-        def test(stubFindJourney: () => StubMapping): Unit = {
+        def test(stubFindJourney: () => StubMapping, hasInterestBearingCharge: Boolean): Unit = {
           stubCommonActions()
           stubFindJourney()
 
@@ -101,16 +101,20 @@ class InstalmentsControllerSpec extends ItSpec {
             .text() shouldBe "Based on what you can pay each month, you can now select a payment plan."
 
           val details = doc.select(".govuk-details")
-          details.select(".govuk-details__summary-text").text() shouldBe "How we calculate interest"
+          if (hasInterestBearingCharge) {
+            details.select(".govuk-details__summary-text").text() shouldBe "How we calculate interest"
 
-          val detailsParagraphs = details.select("p.govuk-body").asScala.toList
-          detailsParagraphs.size shouldBe 3
+            val detailsParagraphs = details.select("p.govuk-body").asScala.toList
+            detailsParagraphs.size shouldBe 3
 
-          detailsParagraphs(0).text() shouldBe "We charge interest on all overdue amounts."
-          detailsParagraphs(1).text() shouldBe "We charge the Bank of England base rate plus 2.5% per year."
-          detailsParagraphs(2)
-            .text() shouldBe "If the interest rate changes during your payment plan, you may need to settle any difference at the end. " +
-            "We will contact you if this is the case."
+            detailsParagraphs(0).text() shouldBe "We charge interest on all overdue amounts."
+            detailsParagraphs(1).text() shouldBe "We charge the Bank of England base rate plus 2.5% per year."
+            detailsParagraphs(2)
+              .text() shouldBe "If the interest rate changes during your payment plan, you may need to settle any difference at the end. " +
+              "We will contact you if this is the case."
+          } else {
+            details.isEmpty shouldBe true
+          }
 
           doc.select(".govuk-fieldset__legend").text() shouldBe "How many months do you want to pay over?"
 
@@ -119,24 +123,48 @@ class InstalmentsControllerSpec extends ItSpec {
           individualButtons.size shouldBe 3
           individualButtons(0).select(".govuk-radios__input").`val`() shouldBe "2"
           individualButtons(0).select(".govuk-radios__label").text() shouldBe "2 months at £555.73"
-          individualButtons(0).select(".govuk-radios__hint").text() shouldBe "Estimated total interest of £0.06"
+          individualButtons(0).select(".govuk-radios__hint").text() shouldBe (if (hasInterestBearingCharge)
+                                                                                "Estimated total interest of £0.06"
+                                                                              else "")
           individualButtons(1).select(".govuk-radios__input").`val`() shouldBe "3"
           individualButtons(1).select(".govuk-radios__label").text() shouldBe "3 months at £370.50"
-          individualButtons(1).select(".govuk-radios__hint").text() shouldBe "Estimated total interest of £0.09"
+          individualButtons(1).select(".govuk-radios__hint").text() shouldBe (if (hasInterestBearingCharge)
+                                                                                "Estimated total interest of £0.09"
+                                                                              else "")
           individualButtons(2).select(".govuk-radios__input").`val`() shouldBe "4"
           individualButtons(2).select(".govuk-radios__label").text() shouldBe "4 months at £277.88"
-          individualButtons(2).select(".govuk-radios__hint").text() shouldBe "Estimated total interest of £0.12"
+          individualButtons(2).select(".govuk-radios__hint").text() shouldBe (if (hasInterestBearingCharge)
+                                                                                "Estimated total interest of £0.12"
+                                                                              else "")
 
           doc.select(".govuk-button").text().trim shouldBe "Continue"
           ()
         }
 
-        "the user has not checked their payment plan yet" in {
-          test(() => EssttpBackend.AffordableQuotes.findJourney(testCrypto, origin)())
+        "the user has not checked their payment plan yet and" - {
+          "there is an interest bearing charge" in {
+            test(
+              () =>
+                EssttpBackend.AffordableQuotes
+                  .findJourney(testCrypto, origin, maybeChargeIsInterestBearingCharge = Some(true))(),
+              hasInterestBearingCharge = true
+            )
+          }
+          "there is an no interest bearing charge" in {
+            test(
+              () =>
+                EssttpBackend.AffordableQuotes
+                  .findJourney(testCrypto, origin, maybeChargeIsInterestBearingCharge = Some(false))(),
+              hasInterestBearingCharge = false
+            )
+          }
         }
 
         "the user has checked their payment plan yet on a non-affordability journey" in {
-          test(() => EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, origin)())
+          test(
+            () => EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, origin)(),
+            hasInterestBearingCharge = true
+          )
         }
 
       }

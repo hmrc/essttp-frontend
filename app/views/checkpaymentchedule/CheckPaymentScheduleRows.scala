@@ -32,7 +32,7 @@ object CheckPaymentScheduleRows {
   def whyCannotPayInFullRow(
     whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers,
     changeLinkCall:            Call
-  )(implicit lang: Language): Option[SummaryListRow] = {
+  )(using Language): Option[SummaryListRow] = {
 
     def formatWhyCannotPayAnswers(reasons: Set[CannotPayReason]) =
       reasons.toList match {
@@ -83,7 +83,7 @@ object CheckPaymentScheduleRows {
     upfrontPaymentAnswers:          UpfrontPaymentAnswers,
     changeCanPayUpfrontCall:        Call,
     changeUpfrontPaymentAmountCall: Call
-  )(implicit lang: Language): List[SummaryListRow] = {
+  )(using Language): List[SummaryListRow] = {
     val upfrontPaymentAmount =
       upfrontPaymentAnswers match {
         case UpfrontPaymentAnswers.NoUpfrontPayment               => None
@@ -141,7 +141,7 @@ object CheckPaymentScheduleRows {
   def canPayWithinSixMonthsRow(
     canPayWithinSixMonthsAnswers: CanPayWithinSixMonthsAnswers,
     changeLinkCall:               Call
-  )(implicit lang: Language): Option[SummaryListRow] = {
+  )(using Language): Option[SummaryListRow] = {
     val canPayWithinSixMonths =
       canPayWithinSixMonthsAnswers match {
         case CanPayWithinSixMonthsAnswers.AnswerNotRequired             => None
@@ -175,9 +175,10 @@ object CheckPaymentScheduleRows {
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   def paymentPlanInstalmentsRows(
-    paymentPlan:    PaymentPlan,
-    changeLinkCall: Call
-  )(implicit lang: Language, ord: Ordering[LocalDate]): List[SummaryListRow] = {
+    paymentPlan:              PaymentPlan,
+    hasInterestBearingCharge: Boolean,
+    changeLinkCall:           Call
+  )(using Language, Ordering[LocalDate]): List[SummaryListRow] = {
     def row(key: Message, value: String) =
       SummaryListRow(
         key = Key(content = Text(key.show), classes = "govuk-!-width-one-half"),
@@ -198,7 +199,7 @@ object CheckPaymentScheduleRows {
           paymentPlanDurationRow(1, changeLinkCall),
           row(Messages.PaymentSchedule.`Start month`, monthAndYear(onlyCollection.dueDate)),
           row(Messages.PaymentSchedule.Payment, onlyCollection.amountDue.value.gdsFormatInPounds),
-          totalToPayRow(paymentPlan)
+          totalToPayRow(paymentPlan, hasInterestBearingCharge)
         )
 
       case firstCollection :: secondCollection :: Nil =>
@@ -208,7 +209,7 @@ object CheckPaymentScheduleRows {
           row(Messages.PaymentSchedule.`First monthly payment`, firstCollection.amountDue.value.gdsFormatInPounds),
           row(Messages.PaymentSchedule.`Final month`, monthAndYear(secondCollection.dueDate)),
           row(Messages.PaymentSchedule.`Final payment`, secondCollection.amountDue.value.gdsFormatInPounds),
-          totalToPayRow(paymentPlan)
+          totalToPayRow(paymentPlan, hasInterestBearingCharge)
         )
 
       case firstCollection +: _ :+ lastCollection =>
@@ -223,25 +224,28 @@ object CheckPaymentScheduleRows {
           ),
           row(Messages.PaymentSchedule.`Final month`, monthAndYear(lastCollection.dueDate)),
           row(Messages.PaymentSchedule.`Final payment`, lastCollection.amountDue.value.gdsFormatInPounds),
-          totalToPayRow(paymentPlan)
+          totalToPayRow(paymentPlan, hasInterestBearingCharge)
         )
     }
   }
 
-  private def totalToPayRow(paymentPlan: PaymentPlan)(implicit lang: Language) =
+  private def totalToPayRow(paymentPlan: PaymentPlan, hasInterestBearingCharge: Boolean)(using Language) = {
+    val content =
+      if (hasInterestBearingCharge)
+        s"${paymentPlan.totalDebtIncInt.value.gdsFormatInPounds} ${Messages.PaymentSchedule.`including ... interest`(paymentPlan.planInterest.value).show}"
+      else
+        paymentPlan.totalDebtIncInt.value.gdsFormatInPounds
+
     SummaryListRow(
       key = Key(
         content = Text(Messages.PaymentSchedule.`Total to pay`.show),
         classes = "govuk-!-width-one-half"
       ),
-      value = Value(
-        content = Text(
-          s"${paymentPlan.totalDebtIncInt.value.gdsFormatInPounds} ${Messages.PaymentSchedule.`including ... interest`(paymentPlan.planInterest.value).show}"
-        )
-      )
+      value = Value(content = Text(content))
     )
+  }
 
-  private def paymentPlanDurationRow(planDuration: Int, changeLinkCall: Call)(implicit lang: Language) =
+  private def paymentPlanDurationRow(planDuration: Int, changeLinkCall: Call)(using Language) =
     SummaryListRow(
       Key(
         content = Text(Messages.PaymentSchedule.`Payment plan duration`.show),

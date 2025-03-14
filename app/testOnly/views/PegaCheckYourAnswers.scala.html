@@ -40,7 +40,8 @@ requestSupport: RequestSupport
         upfrontPaymentAnswers: UpfrontPaymentAnswers,
         canPayWithinSixMonthsAnswers: CanPayWithinSixMonthsAnswers,
         incomeAndExpenditure: IncomeAndExpenditure,
-        paymentPlan: PaymentPlan
+        paymentPlan: PaymentPlan,
+        hasInterestBearingCharge: Boolean
 )(implicit request: Request[?])
 
 @import requestSupport.{languageFromRequest, legacyMessages}
@@ -150,7 +151,7 @@ requestSupport: RequestSupport
 }
 
 @paymentPlanInstalmentsRows = @{
-    CheckPaymentScheduleRows.paymentPlanInstalmentsRows(paymentPlan, routes.PegaController.incomeAndExpenditure)
+    CheckPaymentScheduleRows.paymentPlanInstalmentsRows(paymentPlan, hasInterestBearingCharge, routes.PegaController.incomeAndExpenditure)
 }
 
 

@@ -140,10 +140,11 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
       }
 
       def testPaymentPlanRowsOneMonth(summary: Element)(
-        datesToAmountsValues: List[(String, String)],
-        totalToPayValue:      String,
-        interestValue:        String,
-        lang:                 Language
+        datesToAmountsValues:     List[(String, String)],
+        totalToPayValue:          String,
+        interestValue:            String,
+        lang:                     Language,
+        hasInterestBearingCharge: Boolean
       ) = {
         val paymentPlanRows = summary.select(".govuk-summary-list__row").iterator().asScala.toList
 
@@ -162,15 +163,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
           SummaryRow(lang.fold("Payment", "Taliad"), datesToAmountsValues(0)._2, "", "")
 
         val totalToPayRow =
-          SummaryRow(
-            lang.fold("Total to pay", "Y cyfanswm i’w dalu"),
-            lang.fold(
-              s"$totalToPayValue including $interestValue interest",
-              s"$totalToPayValue gan gynnwys $interestValue o log"
-            ),
-            "",
-            ""
-          )
+          expectedTotalToPayRow(totalToPayValue, interestValue, lang, hasInterestBearingCharge)
 
         extractSummaryRows(paymentPlanRows) shouldBe List(
           paymentPlanDurationRow,
@@ -181,10 +174,11 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
       }
 
       def testPaymentPlanRowsTwoMonths(summary: Element)(
-        datesToAmountsValues: List[(String, String)],
-        totalToPayValue:      String,
-        interestValue:        String,
-        lang:                 Language
+        datesToAmountsValues:     List[(String, String)],
+        totalToPayValue:          String,
+        interestValue:            String,
+        lang:                     Language,
+        hasInterestBearingCharge: Boolean
       ) = {
         val paymentPlanRows = summary.select(".govuk-summary-list__row").iterator().asScala.toList
 
@@ -212,8 +206,10 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
           SummaryRow(
             lang.fold("Total to pay", "Y cyfanswm i’w dalu"),
             lang.fold(
-              s"$totalToPayValue including $interestValue interest",
-              s"$totalToPayValue gan gynnwys $interestValue o log"
+              if (hasInterestBearingCharge) s"$totalToPayValue including $interestValue interest"
+              else totalToPayValue,
+              if (hasInterestBearingCharge) s"$totalToPayValue gan gynnwys $interestValue o log"
+              else totalToPayValue
             ),
             "",
             ""
@@ -230,10 +226,11 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
       }
 
       def testPaymentPlanRowsMoreThanTwoMonths(summary: Element)(
-        datesToAmountsValues: List[(String, String)],
-        totalToPayValue:      String,
-        interestValue:        String,
-        lang:                 Language
+        datesToAmountsValues:     List[(String, String)],
+        totalToPayValue:          String,
+        interestValue:            String,
+        lang:                     Language,
+        hasInterestBearingCharge: Boolean
       ) = {
         val paymentPlanRows = summary.select(".govuk-summary-list__row").iterator().asScala.toList
 
@@ -276,15 +273,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
           )
 
         val totalToPayRow =
-          SummaryRow(
-            lang.fold("Total to pay", "Y cyfanswm i’w dalu"),
-            lang.fold(
-              s"$totalToPayValue including $interestValue interest",
-              s"$totalToPayValue gan gynnwys $interestValue o log"
-            ),
-            "",
-            ""
-          )
+          expectedTotalToPayRow(totalToPayValue, interestValue, lang, hasInterestBearingCharge)
 
         extractSummaryRows(paymentPlanRows) shouldBe List(
           paymentPlanDurationRow,
@@ -296,18 +285,55 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
         )
       }
 
+      def expectedTotalToPayRow(
+        totalToPayValue:          String,
+        interestValue:            String,
+        lang:                     Language,
+        hasInterestBearingCharge: Boolean
+      ): SummaryRow =
+        SummaryRow(
+          lang.fold("Total to pay", "Y cyfanswm i’w dalu"),
+          lang.fold(
+            if (hasInterestBearingCharge) s"$totalToPayValue including $interestValue interest"
+            else totalToPayValue,
+            if (hasInterestBearingCharge) s"$totalToPayValue gan gynnwys $interestValue o log"
+            else totalToPayValue
+          ),
+          "",
+          ""
+        )
+
       def testPaymentPlanRows(summary: Element)(
-        datesToAmountsValues: List[(String, String)],
-        totalToPayValue:      String,
-        interestValue:        String,
-        lang:                 Language
+        datesToAmountsValues:     List[(String, String)],
+        totalToPayValue:          String,
+        interestValue:            String,
+        lang:                     Language,
+        hasInterestBearingCharge: Boolean
       ) =
         if (datesToAmountsValues.size === 1)
-          testPaymentPlanRowsOneMonth(summary)(datesToAmountsValues, totalToPayValue, interestValue, lang)
+          testPaymentPlanRowsOneMonth(summary)(
+            datesToAmountsValues,
+            totalToPayValue,
+            interestValue,
+            lang,
+            hasInterestBearingCharge
+          )
         else if (datesToAmountsValues.size === 2)
-          testPaymentPlanRowsTwoMonths(summary)(datesToAmountsValues, totalToPayValue, interestValue, lang)
+          testPaymentPlanRowsTwoMonths(summary)(
+            datesToAmountsValues,
+            totalToPayValue,
+            interestValue,
+            lang,
+            hasInterestBearingCharge
+          )
         else
-          testPaymentPlanRowsMoreThanTwoMonths(summary)(datesToAmountsValues, totalToPayValue, interestValue, lang)
+          testPaymentPlanRowsMoreThanTwoMonths(summary)(
+            datesToAmountsValues,
+            totalToPayValue,
+            interestValue,
+            lang,
+            hasInterestBearingCharge
+          )
 
       "should return 200 and the can you make an upfront payment page when" - {
 
@@ -320,10 +346,15 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
           datesToAmountsValues:      List[(String, String)],
           totalToPayValue:           String,
           interestValue:             String,
-          lang:                      Language
+          lang:                      Language,
+          hasInterestBearingCharge:  Boolean
         ) = {
           stubCommonActions()
-          EssttpBackend.EligibilityCheck.findJourney(testCrypto, origin)(journeyJsonBody)
+          EssttpBackend.EligibilityCheck.findJourney(
+            testCrypto,
+            origin,
+            maybeChargeIsInterestBearingCharge = Some(hasInterestBearingCharge)
+          )(journeyJsonBody)
 
           val request                = lang.fold(fakeRequest.withLangEnglish(), fakeRequest.withLangWelsh())
           val result: Future[Result] = controller.checkPaymentSchedule(request)
@@ -356,41 +387,91 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
 
           testMonthlyPaymentsRows(summaries(1))("£300", paymentDayValue, lang)
 
-          testPaymentPlanRows(summaries(2))(datesToAmountsValues, totalToPayValue, interestValue, lang)
-        }
-
-        s"[$regime journey] there is an upfrontPayment amount with a two month plan (English)" in {
-          test(
-            JourneyJsonTemplates.`Chosen Payment Plan`(origin = origin)
-          )(
-            "Yes",
-            Some("£123.12"),
-            "28th or next working day",
-            List(
-              "August 2022"    -> "£555.73",
-              "September 2022" -> "£555.73"
-            ),
-            "£1,111.47",
-            "£0.06",
-            Languages.English
+          testPaymentPlanRows(summaries(2))(
+            datesToAmountsValues,
+            totalToPayValue,
+            interestValue,
+            lang,
+            hasInterestBearingCharge
           )
         }
 
-        s"[$regime journey] there is an upfrontPayment amount with a two month plan (Welsh)" in {
-          test(
-            JourneyJsonTemplates.`Chosen Payment Plan`(origin = origin)
-          )(
-            "Iawn",
-            Some("£123.12"),
-            "28ain neu’r diwrnod gwaith nesaf",
-            List(
-              "Awst 2022" -> "£555.73",
-              "Medi 2022" -> "£555.73"
-            ),
-            "£1,111.47",
-            "£0.06",
-            Languages.Welsh
-          )
+        s"[$regime journey] there is an upfrontPayment amount with a two month plan" - {
+          "(English)(hasInterestBearingCharge = true)" in {
+            test(
+              JourneyJsonTemplates
+                .`Chosen Payment Plan`(origin = origin, maybeChargeIsInterestBearingCharge = Some(true))
+            )(
+              "Yes",
+              Some("£123.12"),
+              "28th or next working day",
+              List(
+                "August 2022"    -> "£555.73",
+                "September 2022" -> "£555.73"
+              ),
+              "£1,111.47",
+              "£0.06",
+              Languages.English,
+              hasInterestBearingCharge = true
+            )
+          }
+
+          "(Welsh)(hasInterestBearingCharge = true)" in {
+            test(
+              JourneyJsonTemplates
+                .`Chosen Payment Plan`(origin = origin, maybeChargeIsInterestBearingCharge = Some(true))
+            )(
+              "Iawn",
+              Some("£123.12"),
+              "28ain neu’r diwrnod gwaith nesaf",
+              List(
+                "Awst 2022" -> "£555.73",
+                "Medi 2022" -> "£555.73"
+              ),
+              "£1,111.47",
+              "£0.06",
+              Languages.Welsh,
+              hasInterestBearingCharge = true
+            )
+          }
+
+          "(English)(hasInterestBearingCharge = false)" in {
+            test(
+              JourneyJsonTemplates
+                .`Chosen Payment Plan`(origin = origin, maybeChargeIsInterestBearingCharge = Some(false))
+            )(
+              "Yes",
+              Some("£123.12"),
+              "28th or next working day",
+              List(
+                "August 2022"    -> "£555.73",
+                "September 2022" -> "£555.73"
+              ),
+              "£1,111.47",
+              "£0.06",
+              Languages.English,
+              hasInterestBearingCharge = false
+            )
+          }
+
+          "(Welsh)(hasInterestBearingCharge = false)" in {
+            test(
+              JourneyJsonTemplates
+                .`Chosen Payment Plan`(origin = origin, maybeChargeIsInterestBearingCharge = Some(false))
+            )(
+              "Iawn",
+              Some("£123.12"),
+              "28ain neu’r diwrnod gwaith nesaf",
+              List(
+                "Awst 2022" -> "£555.73",
+                "Medi 2022" -> "£555.73"
+              ),
+              "£1,111.47",
+              "£0.06",
+              Languages.Welsh,
+              hasInterestBearingCharge = false
+            )
+          }
         }
 
         s"[$regime journey] there is no upfrontPayment amount with a two month plan (English)" in {
@@ -406,7 +487,8 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             ),
             "£1,111.47",
             "£0.06",
-            Languages.English
+            Languages.English,
+            hasInterestBearingCharge = true
           )
         }
 
@@ -423,7 +505,8 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             ),
             "£1,111.47",
             "£0.06",
-            Languages.Welsh
+            Languages.Welsh,
+            hasInterestBearingCharge = true
           )
         }
 
@@ -440,7 +523,8 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             List("August 2022" -> "£555.73"),
             "£1,111.47",
             "£0.06",
-            Languages.English
+            Languages.English,
+            hasInterestBearingCharge = true
           )
         }
 
@@ -457,7 +541,8 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             List("Awst 2022" -> "£555.73"),
             "£1,111.47",
             "£0.06",
-            Languages.Welsh
+            Languages.Welsh,
+            hasInterestBearingCharge = true
           )
         }
 
@@ -478,7 +563,8 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             ),
             "£1,111.51",
             "£0.10",
-            Languages.English
+            Languages.English,
+            hasInterestBearingCharge = true
           )
         }
 
@@ -499,7 +585,8 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             ),
             "£1,111.51",
             "£0.10",
-            Languages.Welsh
+            Languages.Welsh,
+            hasInterestBearingCharge = true
           )
         }
 

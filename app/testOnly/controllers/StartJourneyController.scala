@@ -405,11 +405,6 @@ class StartJourneyController @Inject() (
 
 object StartJourneyController {
 
-  def affinityGroup(auth: String): uk.gov.hmrc.auth.core.AffinityGroup = auth match {
-    case "Organisation" => uk.gov.hmrc.auth.core.AffinityGroup.Organisation
-    case "Individual"   => uk.gov.hmrc.auth.core.AffinityGroup.Individual
-  }
-
   private def makeEligibilityCheckResult(taxRegime: TaxRegime, form: StartJourneyForm): EligibilityCheckResult = {
 
     val debtAmountFromForm: AmountInPence = AmountInPence(form.debtTotalAmount)

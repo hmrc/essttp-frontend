@@ -433,28 +433,45 @@ object JourneyInfo {
   ): List[JourneyInfoAsJson] =
     multipleIneligibleReasonsDebtTooLowAndOld(taxRegime, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
 
-  def whyCannotPayInFullNotRequired(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
-    whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(taxRegime, encrypter)
+  def whyCannotPayInFullNotRequired(
+    taxRegime:                          TaxRegime,
+    encrypter:                          Encrypter,
+    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
+  ): List[JourneyInfoAsJson] =
+    whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(
+      taxRegime,
+      encrypter,
+      maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge
+    )
 
   def whyCannotPayInFullRequired(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
     whyCannotPayInFullRequiredAnswer() :: eligibilityCheckedEligible(taxRegime, encrypter)
 
-  def answeredCanPayUpfrontYes(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
-    canPayUpfront :: whyCannotPayInFullNotRequired(taxRegime, encrypter)
+  def answeredCanPayUpfrontYes(
+    taxRegime:                          TaxRegime,
+    encrypter:                          Encrypter,
+    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
+  ): List[JourneyInfoAsJson] =
+    canPayUpfront :: whyCannotPayInFullNotRequired(taxRegime, encrypter, maybeChargeIsInterestBearingCharge)
 
   def answeredCanPayUpfrontNo(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
     cannotPayUpfront :: whyCannotPayInFullNotRequired(taxRegime, encrypter)
 
-  def answeredUpfrontPaymentAmount(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
-    upfrontPaymentAmount :: answeredCanPayUpfrontYes(taxRegime, encrypter)
+  def answeredUpfrontPaymentAmount(
+    taxRegime:                          TaxRegime,
+    encrypter:                          Encrypter,
+    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
+  ): List[JourneyInfoAsJson] =
+    upfrontPaymentAmount :: answeredCanPayUpfrontYes(taxRegime, encrypter, maybeChargeIsInterestBearingCharge)
 
   def retrievedExtremeDates(
-    taxRegime:                 TaxRegime,
-    encrypter:                 Encrypter,
-    etmpEmail:                 Option[String] = Some(TdAll.etmpEmail),
-    eligibilityMinPlanLength:  Int = 1,
-    eligibilityMaxPlanLength:  Int = 12,
-    whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
+    taxRegime:                          TaxRegime,
+    encrypter:                          Encrypter,
+    etmpEmail:                          Option[String] = Some(TdAll.etmpEmail),
+    eligibilityMinPlanLength:           Int = 1,
+    eligibilityMaxPlanLength:           Int = 12,
+    whyCannotPayInFullAnswers:          WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired,
+    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
   ): List[JourneyInfoAsJson] = {
     val whyCannotPay = whyCannotPayInFullAnswers match {
       case WhyCannotPayInFullAnswers.AnswerNotRequired           => whyCannotPayInFullNotRequiredAnswer
@@ -466,7 +483,8 @@ object JourneyInfo {
       encrypter,
       etmpEmail = etmpEmail,
       eligibilityMinPlanLength = eligibilityMinPlanLength,
-      eligibilityMaxPlanLength = eligibilityMaxPlanLength
+      eligibilityMaxPlanLength = eligibilityMaxPlanLength,
+      maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge
     )
   }
 
@@ -477,13 +495,14 @@ object JourneyInfo {
     )
 
   def retrievedAffordabilityResult(
-    minimumInstalmentAmount:   Int = 29997,
-    taxRegime:                 TaxRegime,
-    encrypter:                 Encrypter,
-    etmpEmail:                 Option[String] = Some(TdAll.etmpEmail),
-    eligibilityMinPlanLength:  Int = 1,
-    eligibilityMaxPlanLength:  Int = 12,
-    whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
+    minimumInstalmentAmount:            Int = 29997,
+    taxRegime:                          TaxRegime,
+    encrypter:                          Encrypter,
+    etmpEmail:                          Option[String] = Some(TdAll.etmpEmail),
+    eligibilityMinPlanLength:           Int = 1,
+    eligibilityMaxPlanLength:           Int = 12,
+    whyCannotPayInFullAnswers:          WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired,
+    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
   ): List[JourneyInfoAsJson] =
     affordableResult(minimumInstalmentAmount) :: retrievedExtremeDates(
       taxRegime,
@@ -491,7 +510,8 @@ object JourneyInfo {
       etmpEmail,
       eligibilityMinPlanLength,
       eligibilityMaxPlanLength,
-      whyCannotPayInFullAnswers
+      whyCannotPayInFullAnswers,
+      maybeChargeIsInterestBearingCharge
     )
 
   def retrievedAffordabilityResultNoUpfrontPayment(
@@ -502,12 +522,13 @@ object JourneyInfo {
     affordableResult(minimumInstalmentAmount) :: retrievedExtremeDatesNoUpfrontPayment(taxRegime, encrypter)
 
   def obtainedCanPayWithinSixMonthsNotRequired(
-    taxRegime:                 TaxRegime,
-    encrypter:                 Encrypter,
-    etmpEmail:                 Option[String] = Some(TdAll.etmpEmail),
-    eligibilityMinPlanLength:  Int = 1,
-    eligibilityMaxPlanLength:  Int = 12,
-    whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
+    taxRegime:                          TaxRegime,
+    encrypter:                          Encrypter,
+    etmpEmail:                          Option[String] = Some(TdAll.etmpEmail),
+    eligibilityMinPlanLength:           Int = 1,
+    eligibilityMaxPlanLength:           Int = 12,
+    whyCannotPayInFullAnswers:          WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired,
+    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
   ): List[JourneyInfoAsJson] =
     obtainedCanPayWithinSixMonthsNotRequired :: retrievedAffordabilityResult(
       taxRegime = taxRegime,
@@ -515,7 +536,8 @@ object JourneyInfo {
       etmpEmail = etmpEmail,
       eligibilityMinPlanLength = eligibilityMinPlanLength,
       eligibilityMaxPlanLength = eligibilityMaxPlanLength,
-      whyCannotPayInFullAnswers = whyCannotPayInFullAnswers
+      whyCannotPayInFullAnswers = whyCannotPayInFullAnswers,
+      maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge
     )
 
   def obtainedCanPayWithinSixMonthsYes(
@@ -570,42 +592,47 @@ object JourneyInfo {
     )
 
   def enteredMonthlyPaymentAmount(
-    taxRegime:                TaxRegime,
-    encrypter:                Encrypter,
-    etmpEmail:                Option[String] = Some(TdAll.etmpEmail),
-    eligibilityMinPlanLength: Int = 1,
-    eligibilityMaxPlanLength: Int = 12
+    taxRegime:                          TaxRegime,
+    encrypter:                          Encrypter,
+    etmpEmail:                          Option[String] = Some(TdAll.etmpEmail),
+    eligibilityMinPlanLength:           Int = 1,
+    eligibilityMaxPlanLength:           Int = 12,
+    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
   ): List[JourneyInfoAsJson] =
     monthlyPaymentAmount :: obtainedCanPayWithinSixMonthsNotRequired(
       taxRegime = taxRegime,
       encrypter = encrypter,
       etmpEmail = etmpEmail,
       eligibilityMinPlanLength = eligibilityMinPlanLength,
-      eligibilityMaxPlanLength = eligibilityMaxPlanLength
+      eligibilityMaxPlanLength = eligibilityMaxPlanLength,
+      maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge
     )
 
   def enteredDayOfMonth(
-    day:                      DayOfMonth,
-    taxRegime:                TaxRegime,
-    encrypter:                Encrypter,
-    etmpEmail:                Option[String] = Some(TdAll.etmpEmail),
-    eligibilityMinPlanLength: Int = 1,
-    eligibilityMaxPlanLength: Int = 12
+    day:                                DayOfMonth,
+    taxRegime:                          TaxRegime,
+    encrypter:                          Encrypter,
+    etmpEmail:                          Option[String] = Some(TdAll.etmpEmail),
+    eligibilityMinPlanLength:           Int = 1,
+    eligibilityMaxPlanLength:           Int = 12,
+    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
   ): List[JourneyInfoAsJson] =
     dayOfMonth(day) :: enteredMonthlyPaymentAmount(
       taxRegime,
       encrypter,
       etmpEmail,
       eligibilityMinPlanLength,
-      eligibilityMaxPlanLength
+      eligibilityMaxPlanLength,
+      maybeChargeIsInterestBearingCharge
     )
 
   def retrievedStartDates(
-    taxRegime:                TaxRegime,
-    encrypter:                Encrypter,
-    etmpEmail:                Option[String] = Some(TdAll.etmpEmail),
-    eligibilityMinPlanLength: Int = 1,
-    eligibilityMaxPlanLength: Int = 12
+    taxRegime:                          TaxRegime,
+    encrypter:                          Encrypter,
+    etmpEmail:                          Option[String] = Some(TdAll.etmpEmail),
+    eligibilityMinPlanLength:           Int = 1,
+    eligibilityMaxPlanLength:           Int = 12,
+    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
   ): List[JourneyInfoAsJson] =
     startDates :: enteredDayOfMonth(
       TdAll.dayOfMonth(),
@@ -613,15 +640,22 @@ object JourneyInfo {
       encrypter,
       etmpEmail,
       eligibilityMinPlanLength,
-      eligibilityMaxPlanLength
+      eligibilityMaxPlanLength,
+      maybeChargeIsInterestBearingCharge
     )
 
   def retrievedAffordableQuotes(
-    taxRegime: TaxRegime,
-    encrypter: Encrypter,
-    etmpEmail: Option[String] = Some(TdAll.etmpEmail)
+    taxRegime:                          TaxRegime,
+    encrypter:                          Encrypter,
+    etmpEmail:                          Option[String] = Some(TdAll.etmpEmail),
+    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
   ): List[JourneyInfoAsJson] =
-    affordableQuotes :: retrievedStartDates(taxRegime, encrypter, etmpEmail)
+    affordableQuotes :: retrievedStartDates(
+      taxRegime,
+      encrypter,
+      etmpEmail,
+      maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge
+    )
 
   def chosenPaymentPlan(
     taxRegime: TaxRegime,
