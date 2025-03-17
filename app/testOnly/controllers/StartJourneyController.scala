@@ -463,44 +463,40 @@ object StartJourneyController {
       )
 
     val charges: Charges = Charges(
-      Charges1(
-        chargeType = ChargeType("InYearRTICharge-Tax"),
-        mainType = MainType("InYearRTICharge(FPS)"),
-        mainTrans = MainTrans(form.mainTrans),
-        subTrans = SubTrans(form.subTrans),
-        outstandingAmount = OutstandingAmount(debtAmountFromForm),
-        interestStartDate = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
-        dueDate = DueDate(LocalDate.parse("2017-03-07")),
-        accruedInterest = AccruedInterest(interestAmount),
-        ineligibleChargeType = IneligibleChargeType(value = false),
-        chargeOverMaxDebtAge =
-          if (form.chargeBeforeMaxAccountingDate.isEmpty) Some(ChargeOverMaxDebtAge(value = false)) else None,
-        locks = Some(
-          List(
-            Lock(
-              lockType = LockType("Payment"),
-              lockReason = LockReason("Risk/Fraud"),
-              disallowedChargeLockType = DisallowedChargeLockType(value = false)
-            )
+      chargeType = ChargeType("InYearRTICharge-Tax"),
+      mainType = MainType("InYearRTICharge(FPS)"),
+      mainTrans = MainTrans(form.mainTrans),
+      subTrans = SubTrans(form.subTrans),
+      outstandingAmount = OutstandingAmount(debtAmountFromForm),
+      interestStartDate = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
+      dueDate = DueDate(LocalDate.parse("2017-03-07")),
+      accruedInterest = AccruedInterest(interestAmount),
+      ineligibleChargeType = IneligibleChargeType(value = false),
+      chargeOverMaxDebtAge =
+        if (form.chargeBeforeMaxAccountingDate.isEmpty) Some(ChargeOverMaxDebtAge(value = false)) else None,
+      locks = Some(
+        List(
+          Lock(
+            lockType = LockType("Payment"),
+            lockReason = LockReason("Risk/Fraud"),
+            disallowedChargeLockType = DisallowedChargeLockType(value = false)
           )
-        ),
-        dueDateNotReached = false,
-        isInterestBearingCharge = form.isInterestBearingCharge.map(IsInterestBearingCharge(_))
+        )
       ),
-      Charges2(
-        useChargeReference = form.useChargeReference.map(UseChargeReference(_)),
-        chargeBeforeMaxAccountingDate = form.chargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_)),
-        ddInProgress = form.ddInProgress.map(DdInProgress(_)),
-        chargeSource = form.chargeSource.map(ChargeSource(_)),
-        parentChargeReference = Some(ParentChargeReference("XW006559808862")),
-        parentMainTrans = Some(ParentMainTrans("4700")),
-        originalCreationDate = Some(OriginalCreationDate(LocalDate.parse("2022-05-17"))),
-        tieBreaker = Some(TieBreaker("xyz")),
-        originalTieBreaker = Some(OriginalTieBreaker("xyz")),
-        saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2022-05-17"))),
-        creationDate = Some(CreationDate(LocalDate.parse("2022-05-17"))),
-        originalChargeType = Some(OriginalChargeType("VAT Return Debit Charge"))
-      )
+      dueDateNotReached = false,
+      isInterestBearingCharge = form.isInterestBearingCharge.map(IsInterestBearingCharge(_)),
+      useChargeReference = form.useChargeReference.map(UseChargeReference(_)),
+      chargeBeforeMaxAccountingDate = form.chargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_)),
+      ddInProgress = form.ddInProgress.map(DdInProgress(_)),
+      chargeSource = form.chargeSource.map(ChargeSource(_)),
+      parentChargeReference = Some(ParentChargeReference("XW006559808862")),
+      parentMainTrans = Some(ParentMainTrans("4700")),
+      originalCreationDate = Some(OriginalCreationDate(LocalDate.parse("2022-05-17"))),
+      tieBreaker = Some(TieBreaker("xyz")),
+      originalTieBreaker = Some(OriginalTieBreaker("xyz")),
+      saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2022-05-17"))),
+      creationDate = Some(CreationDate(LocalDate.parse("2022-05-17"))),
+      originalChargeType = Some(OriginalChargeType("VAT Return Debit Charge"))
     )
 
     val chargeTypeAssessments: List[ChargeTypeAssessment] = List(
@@ -516,33 +512,29 @@ object StartJourneyController {
     val containsError: EligibilityError => Boolean = (ee: EligibilityError) => form.eligibilityErrors.contains(ee)
     val eligibilityRules: EligibilityRules         =
       EligibilityRules(
-        EligibilityRulesPart1(
-          hasRlsOnAddress = containsError(HasRlsOnAddress),
-          markedAsInsolvent = containsError(MarkedAsInsolvent),
-          isLessThanMinDebtAllowance = containsError(IsLessThanMinDebtAllowance),
-          isMoreThanMaxDebtAllowance = containsError(IsMoreThanMaxDebtAllowance),
-          disallowedChargeLockTypes = containsError(EligibilityErrors.DisallowedChargeLockTypes),
-          existingTTP = containsError(ExistingTtp),
-          chargesOverMaxDebtAge = Some(containsError(ChargesOverMaxDebtAge)),
-          ineligibleChargeTypes = containsError(IneligibleChargeTypes),
-          missingFiledReturns = containsError(MissingFiledReturns),
-          hasInvalidInterestSignals = Some(containsError(HasInvalidInterestSignals)),
-          hasInvalidInterestSignalsCESA = Some(containsError(HasInvalidInterestSignalsCESA)),
-          dmSpecialOfficeProcessingRequired = Some(containsError(DmSpecialOfficeProcessingRequired)),
-          noDueDatesReached = containsError(NoDueDatesReached),
-          cannotFindLockReason = Some(containsError(CannotFindLockReason)),
-          creditsNotAllowed = Some(containsError(CreditsNotAllowed)),
-          isMoreThanMaxPaymentReference = Some(containsError(IsMoreThanMaxPaymentReference)),
-          chargesBeforeMaxAccountingDate = Some(containsError(ChargesBeforeMaxAccountingDate)),
-          hasDisguisedRemuneration = Some(containsError(HasDisguisedRemuneration)),
-          hasCapacitor = Some(containsError(HasCapacitor)),
-          dmSpecialOfficeProcessingRequiredCDCS = Some(containsError(DmSpecialOfficeProcessingRequiredCDCS)),
-          isAnMtdCustomer = Some(containsError(EligibilityErrors.IsAnMtdCustomer)),
-          dmSpecialOfficeProcessingRequiredCESA = Some(containsError(DmSpecialOfficeProcessingRequiredCESA))
-        ),
-        EligibilityRulesPart2(
-          noMtditsaEnrollment = Some(containsError(EligibilityErrors.NoMtditsaEnrollment))
-        )
+        hasRlsOnAddress = containsError(HasRlsOnAddress),
+        markedAsInsolvent = containsError(MarkedAsInsolvent),
+        isLessThanMinDebtAllowance = containsError(IsLessThanMinDebtAllowance),
+        isMoreThanMaxDebtAllowance = containsError(IsMoreThanMaxDebtAllowance),
+        disallowedChargeLockTypes = containsError(EligibilityErrors.DisallowedChargeLockTypes),
+        existingTTP = containsError(ExistingTtp),
+        chargesOverMaxDebtAge = Some(containsError(ChargesOverMaxDebtAge)),
+        ineligibleChargeTypes = containsError(IneligibleChargeTypes),
+        missingFiledReturns = containsError(MissingFiledReturns),
+        hasInvalidInterestSignals = Some(containsError(HasInvalidInterestSignals)),
+        hasInvalidInterestSignalsCESA = Some(containsError(HasInvalidInterestSignalsCESA)),
+        dmSpecialOfficeProcessingRequired = Some(containsError(DmSpecialOfficeProcessingRequired)),
+        noDueDatesReached = containsError(NoDueDatesReached),
+        cannotFindLockReason = Some(containsError(CannotFindLockReason)),
+        creditsNotAllowed = Some(containsError(CreditsNotAllowed)),
+        isMoreThanMaxPaymentReference = Some(containsError(IsMoreThanMaxPaymentReference)),
+        chargesBeforeMaxAccountingDate = Some(containsError(ChargesBeforeMaxAccountingDate)),
+        hasDisguisedRemuneration = Some(containsError(HasDisguisedRemuneration)),
+        hasCapacitor = Some(containsError(HasCapacitor)),
+        dmSpecialOfficeProcessingRequiredCDCS = Some(containsError(DmSpecialOfficeProcessingRequiredCDCS)),
+        isAnMtdCustomer = Some(containsError(EligibilityErrors.IsAnMtdCustomer)),
+        dmSpecialOfficeProcessingRequiredCESA = Some(containsError(DmSpecialOfficeProcessingRequiredCESA)),
+        noMtditsaEnrollment = Some(containsError(EligibilityErrors.NoMtditsaEnrollment))
       )
 
     EligibilityCheckResult(

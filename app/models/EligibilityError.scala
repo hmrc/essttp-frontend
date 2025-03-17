@@ -17,7 +17,7 @@
 package models
 
 import enumeratum.{Enum, EnumEntry}
-import essttp.rootmodel.ttp.eligibility.{EligibilityRules, EligibilityRulesPart1, EligibilityRulesPart2}
+import essttp.rootmodel.ttp.eligibility.EligibilityRules
 
 import scala.collection.immutable
 
@@ -77,127 +77,31 @@ object EligibilityErrors extends Enum[EligibilityError] {
 
   def toEligibilityError(eligibilityRules: EligibilityRules): Option[EligibilityError] =
     eligibilityRules match {
-      case eligibilityRules if eligibilityRules.moreThanOneReasonForIneligibility => Some(MultipleReasons)
-      case EligibilityRules(
-            EligibilityRulesPart1(true, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _),
-            EligibilityRulesPart2(_)
-          ) =>
-        Some(HasRlsOnAddress)
-      case EligibilityRules(
-            EligibilityRulesPart1(_, true, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _),
-            EligibilityRulesPart2(_)
-          ) =>
-        Some(MarkedAsInsolvent)
-      case EligibilityRules(
-            EligibilityRulesPart1(_, _, _, _, _, _, _, _, _, _, _, true, _, _, _, _, _, _, _, _, _, _),
-            EligibilityRulesPart2(_)
-          ) =>
-        Some(NoDueDatesReached)
-      case EligibilityRules(
-            EligibilityRulesPart1(_, _, true, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _),
-            EligibilityRulesPart2(_)
-          ) =>
-        Some(IsLessThanMinDebtAllowance)
-      case EligibilityRules(
-            EligibilityRulesPart1(_, _, _, true, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _),
-            EligibilityRulesPart2(_)
-          ) =>
-        Some(IsMoreThanMaxDebtAllowance)
-      case EligibilityRules(
-            EligibilityRulesPart1(_, _, _, _, true, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _),
-            EligibilityRulesPart2(_)
-          ) =>
-        Some(DisallowedChargeLockTypes)
-      case EligibilityRules(
-            EligibilityRulesPart1(_, _, _, _, _, true, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _),
-            EligibilityRulesPart2(_)
-          ) =>
-        Some(ExistingTtp)
-      case EligibilityRules(
-            EligibilityRulesPart1(_, _, _, _, _, _, Some(true), _, _, _, _, _, _, _, _, _, _, _, _, _, _, _),
-            EligibilityRulesPart2(_)
-          ) =>
-        Some(ChargesOverMaxDebtAge)
-      case EligibilityRules(
-            EligibilityRulesPart1(_, _, _, _, _, _, _, true, _, _, _, _, _, _, _, _, _, _, _, _, _, _),
-            EligibilityRulesPart2(_)
-          ) =>
-        Some(IneligibleChargeTypes)
-      case EligibilityRules(
-            EligibilityRulesPart1(_, _, _, _, _, _, _, _, true, _, _, _, _, _, _, _, _, _, _, _, _, _),
-            EligibilityRulesPart2(_)
-          ) =>
-        Some(MissingFiledReturns)
-      case EligibilityRules(
-            EligibilityRulesPart1(_, _, _, _, _, _, _, _, _, Some(true), _, _, _, _, _, _, _, _, _, _, _, _),
-            EligibilityRulesPart2(_)
-          ) =>
-        Some(HasInvalidInterestSignals)
-      case EligibilityRules(
-            EligibilityRulesPart1(_, _, _, _, _, _, _, _, _, _, Some(true), _, _, _, _, _, _, _, _, _, _, _),
-            EligibilityRulesPart2(_)
-          ) =>
-        Some(DmSpecialOfficeProcessingRequired)
-      case EligibilityRules(
-            EligibilityRulesPart1(_, _, _, _, _, _, _, _, _, _, _, _, Some(true), _, _, _, _, _, _, _, _, _),
-            EligibilityRulesPart2(_)
-          ) =>
-        Some(CannotFindLockReason)
-      case EligibilityRules(
-            EligibilityRulesPart1(_, _, _, _, _, _, _, _, _, _, _, _, _, Some(true), _, _, _, _, _, _, _, _),
-            EligibilityRulesPart2(_)
-          ) =>
-        Some(CreditsNotAllowed)
-      case EligibilityRules(
-            EligibilityRulesPart1(_, _, _, _, _, _, _, _, _, _, _, _, _, _, Some(true), _, _, _, _, _, _, _),
-            EligibilityRulesPart2(_)
-          ) =>
-        Some(IsMoreThanMaxPaymentReference)
-      case EligibilityRules(
-            EligibilityRulesPart1(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Some(true), _, _, _, _, _, _),
-            EligibilityRulesPart2(_)
-          ) =>
-        Some(ChargesBeforeMaxAccountingDate)
-      case EligibilityRules(
-            EligibilityRulesPart1(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Some(true), _, _, _, _, _),
-            EligibilityRulesPart2(_)
-          ) =>
-        Some(HasInvalidInterestSignalsCESA)
-      case EligibilityRules(
-            EligibilityRulesPart1(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Some(true), _, _, _, _),
-            EligibilityRulesPart2(_)
-          ) =>
-        Some(HasDisguisedRemuneration)
-      case EligibilityRules(
-            EligibilityRulesPart1(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Some(true), _, _, _),
-            EligibilityRulesPart2(_)
-          ) =>
-        Some(HasCapacitor)
-      case EligibilityRules(
-            EligibilityRulesPart1(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Some(true), _, _),
-            EligibilityRulesPart2(_)
-          ) =>
-        Some(DmSpecialOfficeProcessingRequiredCDCS)
-      case EligibilityRules(
-            EligibilityRulesPart1(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Some(true), _),
-            EligibilityRulesPart2(_)
-          ) =>
-        Some(IsAnMtdCustomer)
-      case EligibilityRules(
-            EligibilityRulesPart1(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Some(true)),
-            EligibilityRulesPart2(_)
-          ) =>
-        Some(DmSpecialOfficeProcessingRequiredCESA)
-      case EligibilityRules(
-            EligibilityRulesPart1(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _),
-            EligibilityRulesPart2(Some(true))
-          ) =>
-        Some(NoMtditsaEnrollment)
-      case EligibilityRules(
-            EligibilityRulesPart1(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _),
-            EligibilityRulesPart2(_)
-          ) =>
-        None // all false
+      case e if e.moreThanOneReasonForIneligibility                    => Some(MultipleReasons)
+      case e if e.hasRlsOnAddress                                      => Some(HasRlsOnAddress)
+      case e if e.markedAsInsolvent                                    => Some(MarkedAsInsolvent)
+      case e if e.noDueDatesReached                                    => Some(NoDueDatesReached)
+      case e if e.isLessThanMinDebtAllowance                           => Some(IsLessThanMinDebtAllowance)
+      case e if e.isMoreThanMaxDebtAllowance                           => Some(IsMoreThanMaxDebtAllowance)
+      case e if e.disallowedChargeLockTypes                            => Some(DisallowedChargeLockTypes)
+      case e if e.existingTTP                                          => Some(ExistingTtp)
+      case e if e.chargesOverMaxDebtAge.contains(true)                 => Some(ChargesOverMaxDebtAge)
+      case e if e.ineligibleChargeTypes                                => Some(IneligibleChargeTypes)
+      case e if e.missingFiledReturns                                  => Some(MissingFiledReturns)
+      case e if e.hasInvalidInterestSignals.contains(true)             => Some(HasInvalidInterestSignals)
+      case e if e.dmSpecialOfficeProcessingRequired.contains(true)     => Some(DmSpecialOfficeProcessingRequired)
+      case e if e.cannotFindLockReason.contains(true)                  => Some(CannotFindLockReason)
+      case e if e.creditsNotAllowed.contains(true)                     => Some(CreditsNotAllowed)
+      case e if e.isMoreThanMaxPaymentReference.contains(true)         => Some(IsMoreThanMaxPaymentReference)
+      case e if e.chargesBeforeMaxAccountingDate.contains(true)        => Some(ChargesBeforeMaxAccountingDate)
+      case e if e.hasInvalidInterestSignalsCESA.contains(true)         => Some(HasInvalidInterestSignalsCESA)
+      case e if e.hasDisguisedRemuneration.contains(true)              => Some(HasDisguisedRemuneration)
+      case e if e.hasCapacitor.contains(true)                          => Some(HasCapacitor)
+      case e if e.dmSpecialOfficeProcessingRequiredCDCS.contains(true) => Some(DmSpecialOfficeProcessingRequiredCDCS)
+      case e if e.isAnMtdCustomer.contains(true)                       => Some(IsAnMtdCustomer)
+      case e if e.dmSpecialOfficeProcessingRequiredCESA.contains(true) => Some(DmSpecialOfficeProcessingRequiredCESA)
+      case e if e.noMtditsaEnrollment.contains(true)                   => Some(NoMtditsaEnrollment)
+      case _                                                           => None // all false
     }
 
 }

@@ -204,23 +204,16 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
     eligibilityCheckResult: EligibilityCheckResult
   )(using r: AuthenticatedJourneyRequest[?]): EligibilityCheckAuditDetail = {
 
-    val eligibilityResult  =
+    val eligibilityResult                =
       if (eligibilityCheckResult.isEligible) EligibilityResult.Eligible else EligibilityResult.Ineligible
-    val enrollmentReasons  =
+    val enrollmentReasons                =
       if (eligibilityCheckResult.isEligible) None else Some(EnrollmentReasons.DidNotPassEligibilityCheck())
-    val eligibilityReasons = {
-      def extractFields(obj: Product): List[(String, Any)] = {
-        val fieldNames  = obj.getClass.getDeclaredFields.map(_.getName).toList
-        val fieldValues = obj.productIterator.toList
-        fieldNames.zip(fieldValues)
-      }
+    val eligibilityReasons: List[String] = {
+      val reasons: List[String] =
+        eligibilityCheckResult.eligibilityRules.productElementNames.toList
+      val values                = eligibilityCheckResult.eligibilityRules.productIterator.toList
 
-      val reasonsPart1 = extractFields(eligibilityCheckResult.eligibilityRules.part1)
-      val reasonsPart2 = extractFields(eligibilityCheckResult.eligibilityRules.part2)
-
-      val allReasons = reasonsPart1 ++ reasonsPart2
-
-      allReasons.collect {
+      (reasons zip values).collect {
         case (reason, true)       => reason
         case (reason, Some(true)) => reason
       }

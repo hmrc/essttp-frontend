@@ -12,7 +12,7 @@ addSbtPlugin("uk.gov.hmrc"         %  "sbt-distributables"    % "2.6.0")
 addSbtPlugin("com.github.sbt"      %  "sbt-concat"            % "1.0.0")
 addSbtPlugin("com.github.sbt"      %  "sbt-uglify"            % "3.0.0")
 addSbtPlugin("com.github.sbt"      %  "sbt-digest"            % "2.0.0")
-addSbtPlugin("org.wartremover"     %  "sbt-wartremover"       % "3.2.5")
+addSbtPlugin("org.wartremover"     %  "sbt-wartremover"       % "3.2.7")
 addSbtPlugin("com.timushev.sbt"    %  "sbt-updates"           % "0.6.4")
 
 addDependencyTreePlugin

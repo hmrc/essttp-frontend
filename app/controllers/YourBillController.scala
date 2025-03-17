@@ -70,7 +70,7 @@ class YourBillController @Inject() (
         Redirect(routes.IneligibleController.saGenericIneligiblePage)
       case e: ChargeTypeAssessment.ChargesWithDifferentMTransException =>
         logger.warn(
-          s"${e.getClass.getName}: ChargeTypeAssessment has charges with different MainTrans: ${e.charges.map(_.charges1.mainTrans).toString}"
+          s"${e.getClass.getName}: ChargeTypeAssessment has charges with different MainTrans: ${e.charges.map(_.mainTrans).toString}"
         )
         Redirect(routes.IneligibleController.saGenericIneligiblePage)
     }
@@ -119,7 +119,7 @@ object YourBillController {
     chargeTypeAssessments.headOption
       .map { (chargeTypeAssessment: ChargeTypeAssessment) =>
         chargeTypeAssessment.charges.headOption.map { (charges: Charges) =>
-          parseLocalDate(charges.charges1.dueDate.value.toString)
+          parseLocalDate(charges.dueDate.value.toString)
         }
       }
       .getOrElse(throw new IllegalArgumentException("missing charge list"))
@@ -137,10 +137,10 @@ object YourBillController {
   }
 
   private def chargeBearsInterest(ass: ChargeTypeAssessment): Option[IsInterestBearingCharge] =
-    ass.charges.headOption.flatMap(_.charges1.isInterestBearingCharge)
+    ass.charges.headOption.flatMap(_.isInterestBearingCharge)
 
   private def ddInProgress(ass: ChargeTypeAssessment): Option[DdInProgress] =
-    ass.charges.headOption.flatMap(_.charges2.ddInProgress)
+    ass.charges.headOption.flatMap(_.ddInProgress)
 
   private def hasAnyChargesWithDdInProgress(eligibilityResult: EligibilityCheckResult) =
     eligibilityResult.chargeTypeAssessment
@@ -161,7 +161,7 @@ object YourBillController {
 
   private def overDuePaymentOf(ass: ChargeTypeAssessment): OverduePayment = {
     val maybeMainTrans = ass.charges
-      .map(_.charges1.mainTrans)
+      .map(_.mainTrans)
       .reduceOption((a, b) =>
         if (a == b) a else throw ChargeTypeAssessment.ChargesWithDifferentMTransException(ass.charges)
       )

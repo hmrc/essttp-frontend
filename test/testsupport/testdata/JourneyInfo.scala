@@ -205,16 +205,14 @@ object JourneyInfo {
   def multipleIneligibleReasons(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                       =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
-      TdAll.notEligibleHasRlsOnAddress
-        .copy(part1 = TdAll.notEligibleHasRlsOnAddress.part1.copy(markedAsInsolvent = true)),
+      TdAll.notEligibleHasRlsOnAddress.copy(markedAsInsolvent = true),
       taxRegime,
       encrypter
     )
   def multipleIneligibleReasonsDebtTooLowAndOld(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson       =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
-      TdAll.notEligibleIsLessThanMinDebtAllowance
-        .copy(part1 = TdAll.notEligibleIsLessThanMinDebtAllowance.part1.copy(chargesOverMaxDebtAge = Some(true))),
+      TdAll.notEligibleIsLessThanMinDebtAllowance.copy(chargesOverMaxDebtAge = Some(true)),
       taxRegime,
       encrypter
     )
