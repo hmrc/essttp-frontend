@@ -191,32 +191,32 @@ object TdJsonBodies {
       |    "eligibilityPass" : ${eligibilityPass.value.toString}
       |  },
       |  "eligibilityRules" : {
-      |    "hasRlsOnAddress" : ${eligibilityRules.part1.hasRlsOnAddress.toString},
-      |    "markedAsInsolvent" : ${eligibilityRules.part1.markedAsInsolvent.toString},
-      |    "isLessThanMinDebtAllowance" : ${eligibilityRules.part1.isLessThanMinDebtAllowance.toString},
-      |    "isMoreThanMaxDebtAllowance" : ${eligibilityRules.part1.isMoreThanMaxDebtAllowance.toString},
-      |    "disallowedChargeLockTypes" : ${eligibilityRules.part1.disallowedChargeLockTypes.toString},
-      |    "existingTTP" : ${eligibilityRules.part1.existingTTP.toString},
-      |    "chargesOverMaxDebtAge" : ${eligibilityRules.part1.chargesOverMaxDebtAge.getOrElse(false).toString},
-      |    "ineligibleChargeTypes" : ${eligibilityRules.part1.ineligibleChargeTypes.toString},
-      |    "missingFiledReturns" : ${eligibilityRules.part1.missingFiledReturns.toString},
-      |    "hasInvalidInterestSignals": ${eligibilityRules.part1.hasInvalidInterestSignals.getOrElse(false).toString},
-      |    "dmSpecialOfficeProcessingRequired": ${eligibilityRules.part1.dmSpecialOfficeProcessingRequired
+      |    "hasRlsOnAddress" : ${eligibilityRules.hasRlsOnAddress.toString},
+      |    "markedAsInsolvent" : ${eligibilityRules.markedAsInsolvent.toString},
+      |    "isLessThanMinDebtAllowance" : ${eligibilityRules.isLessThanMinDebtAllowance.toString},
+      |    "isMoreThanMaxDebtAllowance" : ${eligibilityRules.isMoreThanMaxDebtAllowance.toString},
+      |    "disallowedChargeLockTypes" : ${eligibilityRules.disallowedChargeLockTypes.toString},
+      |    "existingTTP" : ${eligibilityRules.existingTTP.toString},
+      |    "chargesOverMaxDebtAge" : ${eligibilityRules.chargesOverMaxDebtAge.getOrElse(false).toString},
+      |    "ineligibleChargeTypes" : ${eligibilityRules.ineligibleChargeTypes.toString},
+      |    "missingFiledReturns" : ${eligibilityRules.missingFiledReturns.toString},
+      |    "hasInvalidInterestSignals": ${eligibilityRules.hasInvalidInterestSignals.getOrElse(false).toString},
+      |    "dmSpecialOfficeProcessingRequired": ${eligibilityRules.dmSpecialOfficeProcessingRequired
         .getOrElse(false)
         .toString},
-      |    "noDueDatesReached": ${eligibilityRules.part1.noDueDatesReached.toString},
-      |    "cannotFindLockReason": ${eligibilityRules.part1.cannotFindLockReason.getOrElse(false).toString},
-      |    "creditsNotAllowed": ${eligibilityRules.part1.creditsNotAllowed.getOrElse(false).toString},
-      |    "isMoreThanMaxPaymentReference": ${eligibilityRules.part1.isMoreThanMaxPaymentReference
+      |    "noDueDatesReached": ${eligibilityRules.noDueDatesReached.toString},
+      |    "cannotFindLockReason": ${eligibilityRules.cannotFindLockReason.getOrElse(false).toString},
+      |    "creditsNotAllowed": ${eligibilityRules.creditsNotAllowed.getOrElse(false).toString},
+      |    "isMoreThanMaxPaymentReference": ${eligibilityRules.isMoreThanMaxPaymentReference
         .getOrElse(false)
         .toString},
-      |    "chargesBeforeMaxAccountingDate": ${eligibilityRules.part1.chargesBeforeMaxAccountingDate
+      |    "chargesBeforeMaxAccountingDate": ${eligibilityRules.chargesBeforeMaxAccountingDate
         .getOrElse(false)
         .toString},
-      |    "dmSpecialOfficeProcessingRequiredCDCS": ${eligibilityRules.part1.dmSpecialOfficeProcessingRequiredCDCS
+      |    "dmSpecialOfficeProcessingRequiredCDCS": ${eligibilityRules.dmSpecialOfficeProcessingRequiredCDCS
         .getOrElse(false)
         .toString},
-      |    "noMtditsaEnrollment": ${eligibilityRules.part2.noMtditsaEnrollment.getOrElse(false).toString}
+      |    "noMtditsaEnrollment": ${eligibilityRules.noMtditsaEnrollment.getOrElse(false).toString}
       |  },
       |  "chargeTypeAssessment" : [
       |    {

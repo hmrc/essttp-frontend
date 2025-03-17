@@ -34,9 +34,9 @@ object EligibilityRouter {
         case ee @ Some(MultipleReasons)                  =>
           determineWhereToGoBasedOnHierarchy(
             ee,
-            eligibilityResult.eligibilityRules.part1.isLessThanMinDebtAllowance,
-            eligibilityResult.eligibilityRules.part1.noDueDatesReached,
-            eligibilityResult.eligibilityRules.part1.hasRlsOnAddress,
+            eligibilityResult.eligibilityRules.isLessThanMinDebtAllowance,
+            eligibilityResult.eligibilityRules.noDueDatesReached,
+            eligibilityResult.eligibilityRules.hasRlsOnAddress,
             taxRegime
           )
         case None                                        => whichGenericIneligiblePage(taxRegime)

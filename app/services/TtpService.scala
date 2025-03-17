@@ -158,24 +158,24 @@ class TtpService @Inject() (
     def toDebtItemCharges(chargeTypeAssessment: ChargeTypeAssessment): List[DebtItemCharges] =
       chargeTypeAssessment.charges.map { (charge: Charges) =>
         DebtItemCharges(
-          outstandingDebtAmount = OutstandingDebtAmount(charge.charges1.outstandingAmount.value),
+          outstandingDebtAmount = OutstandingDebtAmount(charge.outstandingAmount.value),
           debtItemChargeId = chargeTypeAssessment.chargeReference,
-          debtItemOriginalDueDate = DebtItemOriginalDueDate(charge.charges1.dueDate.value),
-          accruedInterest = charge.charges1.accruedInterest,
-          isInterestBearingCharge = charge.charges1.isInterestBearingCharge,
-          useChargeReference = charge.charges2.useChargeReference,
-          mainTrans = Some(charge.charges1.mainTrans),
-          subTrans = Some(charge.charges1.subTrans),
-          parentChargeReference = charge.charges2.parentChargeReference,
-          parentMainTrans = charge.charges2.parentMainTrans,
-          creationDate = charge.charges2.creationDate,
-          originalCreationDate = charge.charges2.originalCreationDate,
-          saTaxYearEnd = charge.charges2.saTaxYearEnd,
-          tieBreaker = charge.charges2.tieBreaker,
-          originalTieBreaker = charge.charges2.originalTieBreaker,
-          chargeType = Some(charge.charges1.chargeType),
-          originalChargeType = charge.charges2.originalChargeType,
-          chargeSource = charge.charges2.chargeSource
+          debtItemOriginalDueDate = DebtItemOriginalDueDate(charge.dueDate.value),
+          accruedInterest = charge.accruedInterest,
+          isInterestBearingCharge = charge.isInterestBearingCharge,
+          useChargeReference = charge.useChargeReference,
+          mainTrans = Some(charge.mainTrans),
+          subTrans = Some(charge.subTrans),
+          parentChargeReference = charge.parentChargeReference,
+          parentMainTrans = charge.parentMainTrans,
+          creationDate = charge.creationDate,
+          originalCreationDate = charge.originalCreationDate,
+          saTaxYearEnd = charge.saTaxYearEnd,
+          tieBreaker = charge.tieBreaker,
+          originalTieBreaker = charge.originalTieBreaker,
+          chargeType = Some(charge.chargeType),
+          originalChargeType = charge.originalChargeType,
+          chargeSource = charge.chargeSource
         )
       }
 
@@ -295,7 +295,7 @@ object TtpService {
       eligibilityCheckResult.chargeTypeAssessment
         .flatMap(
           _.charges
-            .map(_.charges1.accruedInterest.value.value)
+            .map(_.accruedInterest.value.value)
         )
         .sum
     )
@@ -323,21 +323,21 @@ object TtpService {
   def toDebtItemCharge(chargeTypeAssessment: ChargeTypeAssessment): List[DebtItemCharge] =
     chargeTypeAssessment.charges.map { (charge: Charges) =>
       DebtItemCharge(
-        outstandingDebtAmount = OutstandingDebtAmount(charge.charges1.outstandingAmount.value),
-        mainTrans = charge.charges1.mainTrans,
-        subTrans = charge.charges1.subTrans,
-        isInterestBearingCharge = charge.charges1.isInterestBearingCharge,
-        useChargeReference = charge.charges2.useChargeReference,
+        outstandingDebtAmount = OutstandingDebtAmount(charge.outstandingAmount.value),
+        mainTrans = charge.mainTrans,
+        subTrans = charge.subTrans,
+        isInterestBearingCharge = charge.isInterestBearingCharge,
+        useChargeReference = charge.useChargeReference,
         debtItemChargeId = chargeTypeAssessment.chargeReference,
-        interestStartDate = charge.charges1.interestStartDate,
-        debtItemOriginalDueDate = DebtItemOriginalDueDate(charge.charges1.dueDate.value)
+        interestStartDate = charge.interestStartDate,
+        debtItemOriginalDueDate = DebtItemOriginalDueDate(charge.dueDate.value)
       )
     }
 
   def calculateCumulativeInterest(eligibilityCheckResult: EligibilityCheckResult): AmountInPence = AmountInPence(
     eligibilityCheckResult.chargeTypeAssessment
       .flatMap(_.charges)
-      .map(_.charges1.accruedInterest.value.value)
+      .map(_.accruedInterest.value.value)
       .sum
   )
 

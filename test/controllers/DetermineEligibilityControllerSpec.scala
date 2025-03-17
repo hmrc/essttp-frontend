@@ -30,7 +30,6 @@ import play.api.test.Helpers._
 import testsupport.TdRequest._
 import testsupport.reusableassertions.ContentAssertions
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend, Ttp}
-import testsupport.testdata.TdAll.eligibleEligibilityRules
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll, TtpJsonResponses}
 import testsupport.{CombinationsHelper, ItSpec}
 import uk.gov.hmrc.http.UpstreamErrorResponse
@@ -692,24 +691,21 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
           ("Scenario flavour", "eligibility rules", "expected redirect", "updated journey json", "origin"),
           (
             "NoDueDatesReached - EPAYE",
-            TdAll.notEligibleNoDueDatesReached
-              .copy(part1 = eligibleEligibilityRules.part1.copy(isLessThanMinDebtAllowance = true)),
+            TdAll.notEligibleNoDueDatesReached.copy(isLessThanMinDebtAllowance = true),
             PageUrls.payeNoDueDatesReachedUrl,
             JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Epaye.Bta),
             Origins.Epaye.Bta
           ),
           (
             "NoDueDatesReached - VAT",
-            TdAll.notEligibleNoDueDatesReached
-              .copy(part1 = eligibleEligibilityRules.part1.copy(isLessThanMinDebtAllowance = true)),
+            TdAll.notEligibleNoDueDatesReached.copy(isLessThanMinDebtAllowance = true),
             PageUrls.vatNoDueDatesReachedUrl,
             JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Vat.Bta),
             Origins.Vat.Bta
           ),
           (
             "NoDueDatesReached - SA",
-            TdAll.notEligibleNoDueDatesReached
-              .copy(part1 = eligibleEligibilityRules.part1.copy(isLessThanMinDebtAllowance = true)),
+            TdAll.notEligibleNoDueDatesReached.copy(isLessThanMinDebtAllowance = true),
             PageUrls.saNotEligibleUrl,
             JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Sa.Bta),
             Origins.Sa.Bta
@@ -933,9 +929,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         TaxRegime.Sa,
         regimeDigitalCorrespondence = true,
         maybeChargeBeforeMaxAccountingDate = Some(true),
-        eligibilityRules = TdAll.eligibleEligibilityRules.copy(part2 =
-          eligibleEligibilityRules.part2.copy(noMtditsaEnrollment = Some(false))
-        )
+        eligibilityRules = TdAll.eligibleEligibilityRules.copy(noMtditsaEnrollment = Some(false))
       )
       // for audit event
       val eligibilityCheckResponseJsonAsPounds = TtpJsonResponses.ttpEligibilityCallJson(
@@ -943,9 +937,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         poundsInsteadOfPence = true,
         regimeDigitalCorrespondence = true,
         maybeChargeBeforeMaxAccountingDate = Some(true),
-        eligibilityRules = TdAll.eligibleEligibilityRules.copy(part2 =
-          eligibleEligibilityRules.part2.copy(noMtditsaEnrollment = Some(false))
-        )
+        eligibilityRules = TdAll.eligibleEligibilityRules.copy(noMtditsaEnrollment = Some(false))
       )
 
       stubCommonActions(authNino = Some("QQ123456A"), authAllEnrolments = Some(Set(TdAll.mtdEnrolment)))
@@ -967,8 +959,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         journeyId = TdAll.journeyId,
         expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(
           TdAll.eligibleEligibilityPass,
-          TdAll.eligibleEligibilityRules
-            .copy(part2 = eligibleEligibilityRules.part2.copy(noMtditsaEnrollment = Some(false))),
+          TdAll.eligibleEligibilityRules.copy(noMtditsaEnrollment = Some(false)),
           TaxRegime.Sa,
           RegimeDigitalCorrespondence(value = true),
           chargeChargeBeforeMaxAccountingDate = Some(true)
@@ -1151,9 +1142,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
     }
 
     "VAT user with a debt below the minimum amount and debt too old should be redirected to generic ineligible page" in {
-      val eligibilityRules             = TdAll.notEligibleIsLessThanMinDebtAllowance.copy(part1 =
-        eligibleEligibilityRules.part1.copy(chargesOverMaxDebtAge = Some(true))
-      )
+      val eligibilityRules             = TdAll.notEligibleIsLessThanMinDebtAllowance.copy(chargesOverMaxDebtAge = Some(true))
       val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
         TaxRegime.Vat,
         TdAll.notEligibleEligibilityPass,
@@ -1178,9 +1167,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
     }
 
     "EPAYE user with a debt below the minimum amount and debt too old should be redirected to debt too low ineligible page" in {
-      val eligibilityRules             = TdAll.notEligibleIsLessThanMinDebtAllowance.copy(part1 =
-        eligibleEligibilityRules.part1.copy(chargesOverMaxDebtAge = Some(true))
-      )
+      val eligibilityRules             = TdAll.notEligibleIsLessThanMinDebtAllowance.copy(chargesOverMaxDebtAge = Some(true))
       val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
         TaxRegime.Epaye,
         TdAll.notEligibleEligibilityPass,

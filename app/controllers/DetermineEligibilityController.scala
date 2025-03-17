@@ -119,7 +119,7 @@ class DetermineEligibilityController @Inject() (
   private def mtdIneligibleResult(result: EligibilityCheckResult): EligibilityCheckResult                    =
     result.copy(
       eligibilityRules = result.eligibilityRules.copy(
-        part2 = result.eligibilityRules.part2.copy(noMtditsaEnrollment = Some(true))
+        noMtditsaEnrollment = Some(true)
       ),
       eligibilityStatus = EligibilityStatus(EligibilityPass(value = false))
     )
@@ -127,7 +127,7 @@ class DetermineEligibilityController @Inject() (
   private def mtdEligibleResult(result: EligibilityCheckResult): EligibilityCheckResult =
     result.copy(
       eligibilityRules = result.eligibilityRules.copy(
-        part2 = result.eligibilityRules.part2.copy(noMtditsaEnrollment = Some(false))
+        noMtditsaEnrollment = Some(false)
       )
     )
 
