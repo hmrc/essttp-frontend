@@ -541,7 +541,7 @@ object StartJourneyController {
       processingDateTime = ProcessingDateTime(LocalDate.now().toString),
       identification = makeIdentificationForTaxType(taxRegime, form),
       invalidSignals =
-        Some(List(InvalidSignals(signalType = "xyz", signalValue = "123", signalDescription = "Description"))),
+        Some(List(InvalidSignals(signalType = "xyz", signalValue = "123", signalDescription = Some("Description")))),
       customerPostcodes =
         List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate(LocalDate.of(2022, 1, 1)))),
       regimePaymentFrequency = PaymentPlanFrequencies.Monthly,
