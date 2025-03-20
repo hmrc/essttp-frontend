@@ -269,6 +269,22 @@ appConfig: AppConfig
   ))
 }
 
+@numberOfChargeTypeAssessments = {
+@govukInput(Input(
+    id = "numberOfChargeTypeAssessments",
+    name = "numberOfChargeTypeAssessments",
+    label = Label(
+        isPageHeading = false,
+        classes = "govuk-label--m",
+        content = Text("Enter number of  charge type assessments")
+    ),
+    classes = "govuk-input--width-10",
+    spellcheck = Some(false),
+    value = form.data.get("planMaxLength").orElse(Some("1")),
+    hint = Some(Hint(content = Text("Number of items in the chargeTypeAssessment array in the eligibility response. Total debt + interest will be split roughly evenly between the items")))
+))
+}
+
 @regimeDigitalCorrespondenceRadios = @{
     govukRadios(Radios(
         fieldset = Some(Fieldset(
@@ -491,6 +507,8 @@ appConfig: AppConfig
 
     @interestAmountContent
 
+    @numberOfChargeTypeAssessments
+
     @govukInput(Input(
         id = "payeTaxReference",
         name = "payeTaxReference",
@@ -610,6 +628,8 @@ appConfig: AppConfig
     ))
 
     @interestAmountContent
+
+    @numberOfChargeTypeAssessments
 
     @govukInput(Input(
         id = "vatTaxReference",
@@ -737,6 +757,8 @@ appConfig: AppConfig
     ))
 
     @interestAmountContent
+
+    @numberOfChargeTypeAssessments
 
     @govukInput(Input(
         id = "saTaxReference",
@@ -866,6 +888,8 @@ appConfig: AppConfig
     ))
 
     @interestAmountContent
+
+    @numberOfChargeTypeAssessments
 
     @mainTransInput
 

@@ -16,23 +16,23 @@
 
 package testOnly.controllers
 
-import _root_.essttp.rootmodel.ttp._
-import _root_.testOnly.controllers.{routes => testOnlyRoutes}
-import _root_.testOnly.views.html._
+import _root_.essttp.rootmodel.ttp.*
+import _root_.testOnly.controllers.routes as testOnlyRoutes
+import _root_.testOnly.views.html.*
 import actions.Actions
 import config.AppConfig
 import essttp.journey.JourneyConnector
 import essttp.journey.model.{Origins, SjRequest}
-import essttp.rootmodel._
+import essttp.rootmodel.*
 import essttp.rootmodel.ttp.affordablequotes.DueDate
-import essttp.rootmodel.ttp.eligibility.{DmSpecialOfficeProcessingRequiredCESA => _, _}
-import models.EligibilityErrors._
+import essttp.rootmodel.ttp.eligibility.{DmSpecialOfficeProcessingRequiredCESA as _, *}
+import models.EligibilityErrors.*
 import models.{EligibilityError, EligibilityErrors}
-import play.api.mvc._
+import play.api.mvc.*
 import requests.RequestSupport
 import testOnly.AuthLoginApiService
 import testOnly.connectors.EssttpStubConnector
-import testOnly.controllers.StartJourneyController._
+import testOnly.controllers.StartJourneyController.*
 import testOnly.models.formsmodel.{StartJourneyForm, TaxRegimeForm}
 import testOnly.models.testusermodel.TestUser
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
@@ -41,7 +41,9 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Singleton}
+import scala.annotation.tailrec
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 
@@ -462,52 +464,73 @@ object StartJourneyController {
         )
       )
 
-    val charges: Charges = Charges(
-      chargeType = ChargeType("InYearRTICharge-Tax"),
-      mainType = MainType("InYearRTICharge(FPS)"),
-      mainTrans = MainTrans(form.mainTrans),
-      subTrans = SubTrans(form.subTrans),
-      outstandingAmount = OutstandingAmount(debtAmountFromForm),
-      interestStartDate = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
-      dueDate = DueDate(LocalDate.parse("2017-03-07")),
-      accruedInterest = AccruedInterest(interestAmount),
-      ineligibleChargeType = IneligibleChargeType(value = false),
-      chargeOverMaxDebtAge =
-        if (form.chargeBeforeMaxAccountingDate.isEmpty) Some(ChargeOverMaxDebtAge(value = false)) else None,
-      locks = Some(
-        List(
-          Lock(
-            lockType = LockType("Payment"),
-            lockReason = LockReason("Risk/Fraud"),
-            disallowedChargeLockType = DisallowedChargeLockType(value = false)
+    val chargeTypeAssessments: List[ChargeTypeAssessment] = {
+      def charges(outstandingAmount: AmountInPence, interest: AmountInPence): Charges = Charges(
+        chargeType = ChargeType("InYearRTICharge-Tax"),
+        mainType = MainType("InYearRTICharge(FPS)"),
+        mainTrans = MainTrans(form.mainTrans),
+        subTrans = SubTrans(form.subTrans),
+        outstandingAmount = OutstandingAmount(outstandingAmount),
+        interestStartDate = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
+        dueDate = DueDate(LocalDate.parse("2017-03-07")),
+        accruedInterest = AccruedInterest(interest),
+        ineligibleChargeType = IneligibleChargeType(value = false),
+        chargeOverMaxDebtAge =
+          if (form.chargeBeforeMaxAccountingDate.isEmpty) Some(ChargeOverMaxDebtAge(value = false)) else None,
+        locks = Some(
+          List(
+            Lock(
+              lockType = LockType("Payment"),
+              lockReason = LockReason("Risk/Fraud"),
+              disallowedChargeLockType = DisallowedChargeLockType(value = false)
+            )
           )
-        )
-      ),
-      dueDateNotReached = false,
-      isInterestBearingCharge = form.isInterestBearingCharge.map(IsInterestBearingCharge(_)),
-      useChargeReference = form.useChargeReference.map(UseChargeReference(_)),
-      chargeBeforeMaxAccountingDate = form.chargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_)),
-      ddInProgress = form.ddInProgress.map(DdInProgress(_)),
-      chargeSource = form.chargeSource.map(ChargeSource(_)),
-      parentChargeReference = Some(ParentChargeReference("XW006559808862")),
-      parentMainTrans = Some(ParentMainTrans("4700")),
-      originalCreationDate = Some(OriginalCreationDate(LocalDate.parse("2022-05-17"))),
-      tieBreaker = Some(TieBreaker("xyz")),
-      originalTieBreaker = Some(OriginalTieBreaker("xyz")),
-      saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2022-05-17"))),
-      creationDate = Some(CreationDate(LocalDate.parse("2022-05-17"))),
-      originalChargeType = Some(OriginalChargeType("VAT Return Debit Charge"))
-    )
-
-    val chargeTypeAssessments: List[ChargeTypeAssessment] = List(
-      ChargeTypeAssessment(
-        TaxPeriodFrom("2020-08-13"),
-        TaxPeriodTo("2020-08-14"),
-        DebtTotalAmount(debtAmountFromForm + interestAmount),
-        ChargeReference("A00000000001"),
-        List(charges)
+        ),
+        dueDateNotReached = false,
+        isInterestBearingCharge = form.isInterestBearingCharge.map(IsInterestBearingCharge(_)),
+        useChargeReference = form.useChargeReference.map(UseChargeReference(_)),
+        chargeBeforeMaxAccountingDate = form.chargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_)),
+        ddInProgress = form.ddInProgress.map(DdInProgress(_)),
+        chargeSource = form.chargeSource.map(ChargeSource(_)),
+        parentChargeReference = Some(ParentChargeReference("XW006559808862")),
+        parentMainTrans = Some(ParentMainTrans("4700")),
+        originalCreationDate = Some(OriginalCreationDate(LocalDate.parse("2022-05-17"))),
+        tieBreaker = Some(TieBreaker("xyz")),
+        originalTieBreaker = Some(OriginalTieBreaker("xyz")),
+        saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2022-05-17"))),
+        creationDate = Some(CreationDate(LocalDate.parse("2022-05-17"))),
+        originalChargeType = Some(OriginalChargeType("VAT Return Debit Charge"))
       )
-    )
+
+      def formatDate(d: LocalDate): String = d.format(DateTimeFormatter.ISO_DATE)
+
+      val latestDate = LocalDate.of(2020, 8, 14)
+
+      @tailrec
+      def loop(n: Int, acc: List[ChargeTypeAssessment]): List[ChargeTypeAssessment] =
+        if (n <= 0) acc
+        else {
+          val debtSoFar     = AmountInPence(acc.flatMap(_.charges.map(_.outstandingAmount.value.value)).sum)
+          val interestSoFar = AmountInPence(acc.flatMap(_.charges.map(_.accruedInterest.value.value)).sum)
+          val debt          = AmountInPence((debtAmountFromForm.value - debtSoFar.value) / n)
+          val interest      = AmountInPence((interestAmount.value - interestSoFar.value) / n)
+
+          val charge = ChargeTypeAssessment(
+            TaxPeriodFrom(formatDate(latestDate.minusDays(n))),
+            TaxPeriodTo(formatDate(latestDate.minusDays(n - 1))),
+            DebtTotalAmount(debt + interest),
+            ChargeReference(s"A0000000000${n.toString}"),
+            List(charges(debt, interest))
+          )
+
+          loop(
+            n - 1,
+            charge :: acc
+          )
+        }
+
+      loop(form.numberOfChargeTypeAssessments, List.empty)
+    }
 
     val containsError: EligibilityError => Boolean = (ee: EligibilityError) => form.eligibilityErrors.contains(ee)
     val eligibilityRules: EligibilityRules         =
