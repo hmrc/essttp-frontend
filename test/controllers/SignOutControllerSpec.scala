@@ -18,10 +18,13 @@ package controllers
 
 import essttp.journey.model.Origins
 import essttp.rootmodel.TaxRegime
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import play.api.mvc.{Result, Session}
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import testsupport.Givens.canEqualPlaySession
 import testsupport.ItSpec
+import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.EssttpBackend
 
 import scala.concurrent.Future
@@ -33,6 +36,23 @@ class SignOutControllerSpec extends ItSpec {
   "signOutFromTimeout should" - {
 
     "return the timed out page" in {
+
+      val result: Future[Result] = controller.timedOut(fakeRequest)
+      val pageContent: String    = contentAsString(result)
+      val doc: Document          = Jsoup.parse(pageContent)
+
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1 = "For your security, we signed you out",
+        shouldBackLinkBePresent = false,
+        expectedSubmitUrl = None,
+        signedIn = false,
+        regimeBeingTested = None
+      )
+    }
+
+    "redirect correctly when session times out" in {
 
       val result: Future[Result] = controller.signOutFromTimeout(fakeRequest)
 

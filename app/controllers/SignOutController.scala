@@ -24,20 +24,22 @@ import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
+import views.Views
 
 @Singleton
 class SignOutController @Inject() (
   as:        Actions,
   mcc:       MessagesControllerComponents,
-  appConfig: AppConfig
+  appConfig: AppConfig,
+  views:     Views
 ) extends FrontendController(mcc),
       I18nSupport,
       Logging {
 
-  def signOutFromTimeout: Action[AnyContent] = Action { implicit request =>
+  val signOutFromTimeout: Action[AnyContent] = Action { implicit request =>
     // N.B. the implicit request being passed into the page here may still have the auth
     // token in it so take care to ensure that the sign out link is not shown by mistake
-    val continueUrl = routes.SignOutController.signOutFromTimeout.absoluteURL()
+    val continueUrl = routes.SignOutController.timedOut.absoluteURL()
 
     Redirect(s"${appConfig.Urls.signOutUrl}?continue=$continueUrl")
   }
@@ -67,6 +69,10 @@ class SignOutController @Inject() (
 
   val exitSurveySimp: Action[AnyContent] = Action { _ =>
     Redirect(appConfig.ExitSurvey.simpExitSurveyUrl).withNewSession
+  }
+
+  val timedOut: Action[AnyContent] = Action { implicit request =>
+    Ok(views.timedOutPage()).withNewSession
   }
 
 }
