@@ -151,7 +151,8 @@ GET    /confirmation-of-your-plan-to-pay-simple-assessment  controllers.PaymentP
 
 GET    /assets/*file                                        controllers.Assets.versioned(path="/public", file: Asset)
 
-GET    /timed-out                                           controllers.SignOutController.signOutFromTimeout
+GET    /session-timed-out                                   controllers.SignOutController.signOutFromTimeout
+GET    /timed-out                                           controllers.SignOutController.timedOut
 
 GET    /exit-survey/paye                                    controllers.SignOutController.exitSurveyPaye
 GET    /exit-survey/vat                                     controllers.SignOutController.exitSurveyVat

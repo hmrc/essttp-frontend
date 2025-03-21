@@ -30,27 +30,29 @@ import views.Views
 class SignOutController @Inject() (
   as:        Actions,
   mcc:       MessagesControllerComponents,
-  views:     Views,
-  appConfig: AppConfig
+  appConfig: AppConfig,
+  views:     Views
 ) extends FrontendController(mcc),
       I18nSupport,
       Logging {
 
-  def signOutFromTimeout: Action[AnyContent] = Action { implicit request =>
+  val signOutFromTimeout: Action[AnyContent] = Action { implicit request =>
     // N.B. the implicit request being passed into the page here may still have the auth
     // token in it so take care to ensure that the sign out link is not shown by mistake
-    Ok(views.timedOutPage()).withNewSession
+    val continueUrl = routes.SignOutController.timedOut.absoluteURL()
+
+    Redirect(s"${appConfig.Urls.signOutUrl}?continue=$continueUrl")
   }
 
-  def signOut: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    Redirect {
-      request.journey.taxRegime match {
-        case TaxRegime.Epaye => routes.SignOutController.exitSurveyPaye
-        case TaxRegime.Vat   => routes.SignOutController.exitSurveyVat
-        case TaxRegime.Sa    => routes.SignOutController.exitSurveySa
-        case TaxRegime.Simp  => routes.SignOutController.exitSurveySimp
-      }
-    }.withNewSession
+  val signOut: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    val continueUrl = request.journey.taxRegime match {
+      case TaxRegime.Epaye => appConfig.ExitSurvey.payeExitSurveyUrl
+      case TaxRegime.Vat   => appConfig.ExitSurvey.vatExitSurveyUrl
+      case TaxRegime.Sa    => appConfig.ExitSurvey.saExitSurveyUrl
+      case TaxRegime.Simp  => appConfig.ExitSurvey.simpExitSurveyUrl
+    }
+
+    Redirect(s"${appConfig.Urls.signOutUrl}?continue=$continueUrl")
   }
 
   val exitSurveyPaye: Action[AnyContent] = Action { _ =>
@@ -67,6 +69,10 @@ class SignOutController @Inject() (
 
   val exitSurveySimp: Action[AnyContent] = Action { _ =>
     Redirect(appConfig.ExitSurvey.simpExitSurveyUrl).withNewSession
+  }
+
+  val timedOut: Action[AnyContent] = Action { implicit request =>
+    Ok(views.timedOutPage()).withNewSession
   }
 
 }

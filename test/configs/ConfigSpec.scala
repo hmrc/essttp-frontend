@@ -43,7 +43,7 @@ class ConfigSpec extends ItSpec {
       ("baseUrl.timeToPayUrl", config.BaseUrl.timeToPayUrl, "http://localhost:9218"),
       ("baseUrl.timeToPayEligibilityUrl", config.BaseUrl.timeToPayEligibilityUrl, "http://localhost:9218"),
       ("Urls.loginUrl", config.Urls.loginUrl, "http://localhost:9949/auth-login-stub/gg-sign-in"),
-      ("Urls.signOutUrl", config.Urls.signOutUrl, "http://localhost:9949/auth-login-stub/session/logout"),
+      ("Urls.signOutUrl", config.Urls.signOutUrl, "http://localhost:9553/bas-gateway/sign-out-without-state"),
       ("Urls.firstPageBackUrl", config.Urls.govUkUrl, "https://www.gov.uk"),
       ("Urls.enrolForPayeUrl", config.Urls.enrolForPayeUrl, "https://www.gov.uk/paye-online/enrol"),
       ("Urls.extraSupportUrl", config.Urls.extraSupportUrl, "https://www.gov.uk/get-help-hmrc-extra-support"),

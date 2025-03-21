@@ -21,7 +21,7 @@ import essttp.rootmodel.TaxRegime
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.mvc.{Result, Session}
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import testsupport.Givens.canEqualPlaySession
 import testsupport.ItSpec
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
@@ -37,7 +37,7 @@ class SignOutControllerSpec extends ItSpec {
 
     "return the timed out page" in {
 
-      val result: Future[Result] = controller.signOutFromTimeout(fakeRequest)
+      val result: Future[Result] = controller.timedOut(fakeRequest)
       val pageContent: String    = contentAsString(result)
       val doc: Document          = Jsoup.parse(pageContent)
 
@@ -49,6 +49,16 @@ class SignOutControllerSpec extends ItSpec {
         expectedSubmitUrl = None,
         signedIn = false,
         regimeBeingTested = None
+      )
+    }
+
+    "redirect correctly when session times out" in {
+
+      val result: Future[Result] = controller.signOutFromTimeout(fakeRequest)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(
+        "http://localhost:9553/bas-gateway/sign-out-without-state?continue=http://localhost/set-up-a-payment-plan/timed-out"
       )
     }
   }
@@ -93,10 +103,14 @@ class SignOutControllerSpec extends ItSpec {
     TaxRegime.values.foreach { taxRegime =>
       s"[taxRegime = ${taxRegime.toString}] redirect to the tax regime specific exist survey route with no sessionId" in {
         val (origin, expectedRedirectLocation) = taxRegime match {
-          case TaxRegime.Epaye => Origins.Epaye.Bta -> "/set-up-a-payment-plan/exit-survey/paye"
-          case TaxRegime.Vat   => Origins.Vat.Bta   -> "/set-up-a-payment-plan/exit-survey/vat"
-          case TaxRegime.Sa    => Origins.Sa.Bta    -> "/set-up-a-payment-plan/exit-survey/sa"
-          case TaxRegime.Simp  => Origins.Simp.Pta  -> "/set-up-a-payment-plan/exit-survey/simp"
+          case TaxRegime.Epaye =>
+            Origins.Epaye.Bta -> "http://localhost:9553/bas-gateway/sign-out-without-state?continue=http://localhost:9514/feedback/eSSTTP-PAYE"
+          case TaxRegime.Vat   =>
+            Origins.Vat.Bta -> "http://localhost:9553/bas-gateway/sign-out-without-state?continue=http://localhost:9514/feedback/eSSTTP-VAT"
+          case TaxRegime.Sa    =>
+            Origins.Sa.Bta -> "http://localhost:9553/bas-gateway/sign-out-without-state?continue=http://localhost:9514/feedback/eSSTTP-SA"
+          case TaxRegime.Simp  =>
+            Origins.Simp.Pta -> "http://localhost:9553/bas-gateway/sign-out-without-state?continue=http://localhost:9514/feedback/eSSTTP-SIMP"
         }
 
         stubCommonActions()
