@@ -24,13 +24,11 @@ import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
-import views.Views
 
 @Singleton
 class SignOutController @Inject() (
   as:        Actions,
   mcc:       MessagesControllerComponents,
-  views:     Views,
   appConfig: AppConfig
 ) extends FrontendController(mcc),
       I18nSupport,
@@ -39,18 +37,20 @@ class SignOutController @Inject() (
   def signOutFromTimeout: Action[AnyContent] = Action { implicit request =>
     // N.B. the implicit request being passed into the page here may still have the auth
     // token in it so take care to ensure that the sign out link is not shown by mistake
-    Ok(views.timedOutPage()).withNewSession
+    val continueUrl = routes.SignOutController.signOutFromTimeout.absoluteURL()
+
+    Redirect(s"${appConfig.Urls.signOutUrl}?continue=$continueUrl")
   }
 
-  def signOut: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    Redirect {
-      request.journey.taxRegime match {
-        case TaxRegime.Epaye => routes.SignOutController.exitSurveyPaye
-        case TaxRegime.Vat   => routes.SignOutController.exitSurveyVat
-        case TaxRegime.Sa    => routes.SignOutController.exitSurveySa
-        case TaxRegime.Simp  => routes.SignOutController.exitSurveySimp
-      }
-    }.withNewSession
+  def signOut(): Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+    val continueUrl = request.journey.taxRegime match {
+      case TaxRegime.Epaye => appConfig.ExitSurvey.payeExitSurveyUrl
+      case TaxRegime.Vat   => appConfig.ExitSurvey.vatExitSurveyUrl
+      case TaxRegime.Sa    => appConfig.ExitSurvey.saExitSurveyUrl
+      case TaxRegime.Simp  => appConfig.ExitSurvey.simpExitSurveyUrl
+    }
+
+    Redirect(s"${appConfig.Urls.signOutUrl}?continue=$continueUrl")
   }
 
   val exitSurveyPaye: Action[AnyContent] = Action { _ =>

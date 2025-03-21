@@ -2,7 +2,7 @@
 
 ->     /hmrc-frontend                                       hmrcfrontend.Routes
 
-GET    /sign-out                                            controllers.SignOutController.signOut
+GET    /sign-out                                            controllers.SignOutController.signOut()
 
 GET    /which-tax                                           controllers.WhichTaxRegimeController.whichTaxRegime
 POST   /which-tax                                           controllers.WhichTaxRegimeController.whichTaxRegimeSubmit

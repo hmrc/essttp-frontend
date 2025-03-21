@@ -65,8 +65,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   }
 
   object Urls {
-    val loginUrl: String   = BaseUrl.gg
-    val signOutUrl: String = config.get[String]("baseUrl.sign-out")
+    val loginUrl: String = BaseUrl.gg
 
     def betaFeedbackUrl(using request: RequestHeader): String = {
       import uk.gov.hmrc.http.StringContextOps
@@ -94,6 +93,10 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     val fileSaReturnUrl: String                        = config.get[String]("govUkUrls.fileSaReturnUrl")
     val tellHMRCChangeDetailsUrl: String               = config.get[String]("govUkUrls.changeDetails")
     val userResearchBannerLink: String                 = config.get[String]("govUkUrls.userResearchBannerLink")
+    val signOutUrl: String                             = {
+      val basGatewayBaseUrl = BaseUrl.platformHost.getOrElse(config.get[String]("baseUrl.bas-gateway-frontend"))
+      s"$basGatewayBaseUrl/bas-gateway/sign-out-without-state"
+    }
   }
 
   object TtpHeaders {

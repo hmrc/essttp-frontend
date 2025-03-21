@@ -18,13 +18,10 @@ package controllers
 
 import essttp.journey.model.Origins
 import essttp.rootmodel.TaxRegime
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
 import play.api.mvc.{Result, Session}
 import play.api.test.Helpers._
 import testsupport.Givens.canEqualPlaySession
 import testsupport.ItSpec
-import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.EssttpBackend
 
 import scala.concurrent.Future
@@ -38,17 +35,10 @@ class SignOutControllerSpec extends ItSpec {
     "return the timed out page" in {
 
       val result: Future[Result] = controller.signOutFromTimeout(fakeRequest)
-      val pageContent: String    = contentAsString(result)
-      val doc: Document          = Jsoup.parse(pageContent)
 
-      RequestAssertions.assertGetRequestOk(result)
-      ContentAssertions.commonPageChecks(
-        doc,
-        expectedH1 = "For your security, we signed you out",
-        shouldBackLinkBePresent = false,
-        expectedSubmitUrl = None,
-        signedIn = false,
-        regimeBeingTested = None
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(
+        "http://localhost:9553/bas-gateway/sign-out-without-state?continue=http://localhost/set-up-a-payment-plan/timed-out"
       )
     }
   }
@@ -93,16 +83,20 @@ class SignOutControllerSpec extends ItSpec {
     TaxRegime.values.foreach { taxRegime =>
       s"[taxRegime = ${taxRegime.toString}] redirect to the tax regime specific exist survey route with no sessionId" in {
         val (origin, expectedRedirectLocation) = taxRegime match {
-          case TaxRegime.Epaye => Origins.Epaye.Bta -> "/set-up-a-payment-plan/exit-survey/paye"
-          case TaxRegime.Vat   => Origins.Vat.Bta   -> "/set-up-a-payment-plan/exit-survey/vat"
-          case TaxRegime.Sa    => Origins.Sa.Bta    -> "/set-up-a-payment-plan/exit-survey/sa"
-          case TaxRegime.Simp  => Origins.Simp.Pta  -> "/set-up-a-payment-plan/exit-survey/simp"
+          case TaxRegime.Epaye =>
+            Origins.Epaye.Bta -> "http://localhost:9553/bas-gateway/sign-out-without-state?continue=http://localhost:9514/feedback/eSSTTP-PAYE"
+          case TaxRegime.Vat   =>
+            Origins.Vat.Bta -> "http://localhost:9553/bas-gateway/sign-out-without-state?continue=http://localhost:9514/feedback/eSSTTP-VAT"
+          case TaxRegime.Sa    =>
+            Origins.Sa.Bta -> "http://localhost:9553/bas-gateway/sign-out-without-state?continue=http://localhost:9514/feedback/eSSTTP-SA"
+          case TaxRegime.Simp  =>
+            Origins.Simp.Pta -> "http://localhost:9553/bas-gateway/sign-out-without-state?continue=http://localhost:9514/feedback/eSSTTP-SIMP"
         }
 
         stubCommonActions()
         EssttpBackend.StartJourney.findJourney(origin)
 
-        val result: Future[Result] = controller.signOut(fakeRequest)
+        val result: Future[Result] = controller.signOut()(fakeRequest)
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(expectedRedirectLocation)
         session(result) shouldBe Session(Map.empty)
