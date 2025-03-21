@@ -269,7 +269,7 @@ appConfig: AppConfig
   ))
 }
 
-@numberOfChargeTypeAssessments = {
+@numberOfChargeTypeAssessmentsContent = {
 @govukInput(Input(
     id = "numberOfChargeTypeAssessments",
     name = "numberOfChargeTypeAssessments",
@@ -280,8 +280,24 @@ appConfig: AppConfig
     ),
     classes = "govuk-input--width-10",
     spellcheck = Some(false),
-    value = form.data.get("planMaxLength").orElse(Some("1")),
+    value = form.data.get("numberOfChargeTypeAssessments").orElse(Some("1")),
     hint = Some(Hint(content = Text("Number of items in the chargeTypeAssessment array in the eligibility response. Total debt + interest will be split roughly evenly between the items")))
+))
+}
+
+@numberOfCustomerPostcodesContent = {
+@govukInput(Input(
+    id = "numberOfCustomerPostcodes",
+    name = "numberOfCustomerPostcodes",
+    label = Label(
+        isPageHeading = false,
+        classes = "govuk-label--m",
+        content = Text("Enter number of customerPostcodes")
+    ),
+    classes = "govuk-input--width-10",
+    spellcheck = Some(false),
+    value = form.data.get("numberOfCustomerPostcodes").orElse(Some("1")),
+    hint = Some(Hint(content = Text("Number of postcodes under the customerPostcodes array")))
 ))
 }
 
@@ -507,7 +523,9 @@ appConfig: AppConfig
 
     @interestAmountContent
 
-    @numberOfChargeTypeAssessments
+    @numberOfChargeTypeAssessmentsContent
+
+    @numberOfCustomerPostcodesContent
 
     @govukInput(Input(
         id = "payeTaxReference",
@@ -629,7 +647,9 @@ appConfig: AppConfig
 
     @interestAmountContent
 
-    @numberOfChargeTypeAssessments
+    @numberOfChargeTypeAssessmentsContent
+
+    @numberOfCustomerPostcodesContent
 
     @govukInput(Input(
         id = "vatTaxReference",
@@ -758,7 +778,9 @@ appConfig: AppConfig
 
     @interestAmountContent
 
-    @numberOfChargeTypeAssessments
+    @numberOfChargeTypeAssessmentsContent
+
+    @numberOfCustomerPostcodesContent
 
     @govukInput(Input(
         id = "saTaxReference",
@@ -889,7 +911,9 @@ appConfig: AppConfig
 
     @interestAmountContent
 
-    @numberOfChargeTypeAssessments
+    @numberOfChargeTypeAssessmentsContent
+
+    @numberOfCustomerPostcodesContent
 
     @mainTransInput
 

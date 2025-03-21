@@ -17,16 +17,17 @@
 package testOnly.models.formsmodel
 
 import cats.implicits.catsSyntaxOptionId
-import cats.syntax.either._
+import cats.syntax.either.*
 import config.AppConfig
 import essttp.journey.model.{Origin, Origins}
-import essttp.rootmodel._
+import essttp.rootmodel.*
 import models.MoneyUtil.{amountOfMoneyFormatter, formatAmountOfMoneyWithoutPoundSign}
 import models.{EligibilityError, EligibilityErrors, Language}
-import play.api.data.Forms._
-import play.api.data._
+import play.api.data.Forms.*
+import play.api.data.*
 import play.api.data.format.Formatter
 import testOnly.messages.Messages
+import testOnly.models.formsmodel.StartJourneyForm.{MainAndSubTrans, PlanMinAndMaxLength}
 import testOnly.models.testusermodel.{ConfidenceLevelAndNino, RandomDataGenerator}
 import uk.gov.hmrc.auth.core.ConfidenceLevel
 import util.EnumFormatter
@@ -50,16 +51,33 @@ final case class StartJourneyForm(
   ddInProgress:                  Option[Boolean],
   transitionToCDCS:              Option[Boolean],
   chargeSource:                  Option[String],
-  planMinLength:                 Int,
-  planMaxLength:                 Int,
-  mainTrans:                     String,
-  subTrans:                      String,
+  planLengthMinAndMax:           PlanMinAndMaxLength,
+  mainAndSubTrans:               MainAndSubTrans,
   confidenceLevelAndNino:        ConfidenceLevelAndNino,
   credId:                        Option[String],
-  numberOfChargeTypeAssessments: Int
+  numberOfChargeTypeAssessments: Int,
+  numberOfCustomerPostcodes:     Int
 )
 
 object StartJourneyForm {
+
+  final case class PlanMinAndMaxLength(min: Int, max: Int)
+
+  object PlanMinAndMaxLength {
+    val planMinAndMaxLengthMapping: Mapping[PlanMinAndMaxLength] = mapping(
+      "planMinLength" -> number,
+      "planMaxLength" -> number
+    )(PlanMinAndMaxLength.apply)(Tuple.fromProductTyped[PlanMinAndMaxLength](_).some)
+  }
+
+  final case class MainAndSubTrans(mainTrans: String, subTrans: String)
+
+  object MainAndSubTrans {
+    val mainAndSubTransMapping: Mapping[MainAndSubTrans] = mapping(
+      "mainTrans" -> textWithFourDigitsMapping("mainTrans"),
+      "subTrans"  -> textWithFourDigitsMapping("subTrans")
+    )(MainAndSubTrans.apply)(Tuple.fromProductTyped[MainAndSubTrans](_).some)
+  }
 
   def form(
     taxRegime: TaxRegime,
@@ -82,13 +100,12 @@ object StartJourneyForm {
         "ddInProgress"                  -> chargesOptionalFieldsMapping,
         "transitionToCDCS"              -> chargesOptionalFieldsMapping,
         "chargeSource"                  -> chargesOptionalStringMapping,
-        "planMinLength"                 -> number,
-        "planMaxLength"                 -> number,
-        "mainTrans"                     -> textWithFourDigitsMapping("mainTrans"),
-        "subTrans"                      -> textWithFourDigitsMapping("subTrans"),
+        ""                              -> PlanMinAndMaxLength.planMinAndMaxLengthMapping,
+        ""                              -> MainAndSubTrans.mainAndSubTransMapping,
         ""                              -> Forms.of(confidenceLevelAndNinoFormatter),
         "credId"                        -> optional(text).transform[Option[String]](_.filter(_.nonEmpty), identity),
-        "numberOfChargeTypeAssessments" -> number
+        "numberOfChargeTypeAssessments" -> number,
+        "numberOfCustomerPostcodes"     -> number
       )(StartJourneyForm.apply)(Tuple.fromProductTyped[StartJourneyForm](_).some)
     )
 

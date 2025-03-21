@@ -468,8 +468,8 @@ object StartJourneyController {
       def charges(outstandingAmount: AmountInPence, interest: AmountInPence): Charges = Charges(
         chargeType = ChargeType("InYearRTICharge-Tax"),
         mainType = MainType("InYearRTICharge(FPS)"),
-        mainTrans = MainTrans(form.mainTrans),
-        subTrans = SubTrans(form.subTrans),
+        mainTrans = MainTrans(form.mainAndSubTrans.mainTrans),
+        subTrans = SubTrans(form.mainAndSubTrans.subTrans),
         outstandingAmount = OutstandingAmount(outstandingAmount),
         interestStartDate = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
         dueDate = DueDate(LocalDate.parse("2017-03-07")),
@@ -560,17 +560,23 @@ object StartJourneyController {
         noMtditsaEnrollment = Some(containsError(EligibilityErrors.NoMtditsaEnrollment))
       )
 
+    val customerPostcodes: List[CustomerPostcode] = (0 until form.numberOfCustomerPostcodes).toList.map(i =>
+      CustomerPostcode(
+        Postcode(SensitiveString(s"AA1${i.toString}AA")),
+        PostcodeDate(LocalDate.of(2022, 1, 1).minusDays(i))
+      )
+    )
+
     EligibilityCheckResult(
       processingDateTime = ProcessingDateTime(LocalDate.now().toString),
       identification = makeIdentificationForTaxType(taxRegime, form),
       invalidSignals =
         Some(List(InvalidSignals(signalType = "xyz", signalValue = "123", signalDescription = Some("Description")))),
-      customerPostcodes =
-        List(CustomerPostcode(Postcode(SensitiveString("AA11AA")), PostcodeDate(LocalDate.of(2022, 1, 1)))),
+      customerPostcodes = customerPostcodes,
       regimePaymentFrequency = PaymentPlanFrequencies.Monthly,
       paymentPlanFrequency = PaymentPlanFrequencies.Monthly,
-      paymentPlanMinLength = PaymentPlanMinLength(form.planMinLength),
-      paymentPlanMaxLength = PaymentPlanMaxLength(form.planMaxLength),
+      paymentPlanMinLength = PaymentPlanMinLength(form.planLengthMinAndMax.min),
+      paymentPlanMaxLength = PaymentPlanMaxLength(form.planLengthMinAndMax.max),
       eligibilityStatus = EligibilityStatus(EligibilityPass(eligibilityRules.isEligible)),
       eligibilityRules = eligibilityRules,
       chargeTypeAssessment = chargeTypeAssessments,
