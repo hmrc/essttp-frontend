@@ -116,7 +116,7 @@ class SignOutControllerSpec extends ItSpec {
         stubCommonActions()
         EssttpBackend.StartJourney.findJourney(origin)
 
-        val result: Future[Result] = controller.signOut()(fakeRequest)
+        val result: Future[Result] = controller.signOut(fakeRequest)
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(expectedRedirectLocation)
         session(result) shouldBe Session(Map.empty)

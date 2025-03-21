@@ -44,7 +44,7 @@ class SignOutController @Inject() (
     Redirect(s"${appConfig.Urls.signOutUrl}?continue=$continueUrl")
   }
 
-  def signOut(): Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
+  val signOut: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     val continueUrl = request.journey.taxRegime match {
       case TaxRegime.Epaye => appConfig.ExitSurvey.payeExitSurveyUrl
       case TaxRegime.Vat   => appConfig.ExitSurvey.vatExitSurveyUrl

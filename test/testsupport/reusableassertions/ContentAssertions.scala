@@ -138,7 +138,7 @@ object ContentAssertions extends RichMatchers {
     ContentAssertions.languageToggleExists(page, language)
 
     val signOutLink = page.select(".hmrc-sign-out-nav__link")
-    if (signedIn) signOutLink.attr("href") shouldBe routes.SignOutController.signOut().url
+    if (signedIn) signOutLink.attr("href") shouldBe routes.SignOutController.signOut.url
     else signOutLink.isEmpty shouldBe true
 
     val backLink = page.select(".govuk-back-link")
