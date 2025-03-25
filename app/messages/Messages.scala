@@ -1877,6 +1877,11 @@ object Messages {
       welsh = "Mae’n rhaid iddo fod rhwng 6 ac 8 digid o hyd"
     )
 
+    val `For business accounts, enter the name of the business`: Message = Message(
+      english = "For business accounts, enter the name of the business",
+      welsh = "Ar gyfer cyfrifon busnes, nodwch enw’r busnes"
+    )
+
     /** Separate given list with commas until the last two items which are separated by the given `lastSeparator`, e.g.
       * {{{
       *   commaSeparateList(List("a"), "or")           = "a"

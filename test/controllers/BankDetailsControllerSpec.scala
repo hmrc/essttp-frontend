@@ -68,6 +68,7 @@ class BankDetailsControllerSpec extends ItSpec {
     val businessAccount: String          = "Business"
     val personalAccount: String          = "Personal"
     val accountNameContent: String       = "Name on the account"
+    val accountNameHintContent: String   = "For business accounts, enter the name of the business"
     val accountTypeFieldId: String       = "#business"
     val accountNameFieldId: String       = "#name"
     val sortCodeContent: String          = "Sort code"
@@ -334,6 +335,7 @@ class BankDetailsControllerSpec extends ItSpec {
         subheadings(4).text() shouldBe EnterDirectDebitDetailsPage.sortCodeContent
         subheadings(5).text() shouldBe EnterDirectDebitDetailsPage.accountNumberContent
 
+        doc.select("#name-hint").text() shouldBe EnterDirectDebitDetailsPage.accountNameHintContent
         doc.select("#sortCode-hint").text() shouldBe EnterDirectDebitDetailsPage.sortCodeHintContent
         doc.select("#accountNumber-hint").text() shouldBe EnterDirectDebitDetailsPage.accountNumberHintContent
       }
