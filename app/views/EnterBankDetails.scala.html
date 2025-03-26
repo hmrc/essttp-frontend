@@ -197,6 +197,9 @@
                 classes = "govuk-label",
                 content = Text(Messages.BankDetails.`Name on the account`.show)
             ),
+            hint = Some(Hint(
+                content = Text(Messages.BankDetails.`For business accounts, enter the name of the business`.show)
+            )),
             classes = "govuk-!-width-two-thirds",
             errorMessage = fieldErrorMessage(nameKey, form, errorMessageOverrides),
             autocomplete = Some("name"),
