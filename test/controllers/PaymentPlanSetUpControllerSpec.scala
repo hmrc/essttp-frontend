@@ -113,7 +113,10 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
         val list      = doc.select("ul.govuk-list").asScala.toList
         val listItems = list(0).select("li").asScala.toList
         listItems(0).text() shouldBe "update your tax account with your payment plan"
-        listItems(1).text() shouldBe "send payment due dates to your business tax account inbox"
+        listItems(1).text() shouldBe (
+          if (taxRegime == TaxRegime.Simp) "send payment due dates to your personal tax account inbox"
+          else "send payment due dates to your business tax account inbox"
+        )
 
         paragraphs(1)
           .text() shouldBe "You’ll also receive a letter with your payment dates. We’ll send this out within 5 days."
@@ -417,7 +420,7 @@ class PaymentPlanSetUpControllerSpec extends ItSpec {
 
       if (isEmailAddressRequired) {
         val _ = paragraphs(3)
-          .text() shouldBe "We will send a secure message with payment due dates to your business tax account inbox within 24 hours."
+          .text() shouldBe "We will send a secure message with payment due dates to your personal tax account inbox within 24 hours."
       }
 
       val emailParagraphOffset = if (isEmailAddressRequired) 0 else -1

@@ -2450,10 +2450,22 @@ object Messages {
       welsh = "diweddaru’ch cyfrif treth gyda’ch cynllun talu"
     )
 
-    val `send payment due dates to your business tax account inbox`: Message = Message(
-      english = "send payment due dates to your business tax account inbox",
-      welsh = "anfon dyddiadau dyledus talu i’ch mewnflwch cyfrif treth busnes"
-    )
+    def `send payment due dates to your ... inbox`(taxRegime: TaxRegime): Message = {
+      val btaMessage = Message(
+        english = "send payment due dates to your business tax account inbox",
+        welsh = "anfon dyddiadau dyledus talu i’ch mewnflwch cyfrif treth busnes"
+      )
+      val ptaMessage = Message(
+        english = "send payment due dates to your personal tax account inbox",
+        welsh = "anfon dyddiadau dyledus talu i’ch mewnflwch cyfrif treth personol"
+      )
+
+      taxRegime match
+        case TaxRegime.Epaye => btaMessage
+        case TaxRegime.Vat   => btaMessage
+        case TaxRegime.Sa    => ptaMessage
+        case TaxRegime.Simp  => ptaMessage
+    }
 
     val `You'll also receive a letter with your payment dates. We'll send this out within 5 days.` : Message = Message(
       english = "You’ll also receive a letter with your payment dates. We’ll send this out within 5 days.",
@@ -2552,12 +2564,12 @@ object Messages {
       welsh = "Ynglŷn â’ch cynllun talu"
     )
 
-    val `We will send a secure message with payment due dates to your business tax account inbox within 24 hours.`
+    val `We will send a secure message with payment due dates to your personal tax account inbox within 24 hours.`
       : Message = Message(
       english =
-        "We will send a secure message with payment due dates to your business tax account inbox within 24 hours.",
+        "We will send a secure message with payment due dates to your personal tax account inbox within 24 hours.",
       welsh =
-        "Byddwn yn anfon neges ddiogel gyda dyddiadau cau ar gyfer talu i fewnflwch eich cyfrif treth busnes cyn pen 24 awr."
+        "Byddwn yn anfon neges ddiogel gyda dyddiadau cau ar gyfer talu i fewnflwch eich cyfrif treth personol cyn pen 24 awr."
     )
 
     def paymentInfo(hasUpfrontPayment: Boolean, paymentDate: String): Message = Message(
