@@ -1991,9 +1991,13 @@ object Messages {
           welsh =
             "Rydych wedi nodi cod didoli nad yw’n derbyn y math hwn o daliad. Gwiriwch eich bod wedi nodi cod didoli dilys, neu nodwch fanylion ar gyfer cyfrif gwahanol"
         ),
-        s"name.${nameDoesNotMatch.formError.message}"                       -> Message(
-          english = "Enter the name on the account as it appears on bank statements.",
-          welsh = "Nodwch yr enw ar y cyfrif, fel y mae’n ymddangos ar gyfriflenni banc."
+        s"name.${nameDoesNotMatchPersonal.formError.message}"               -> Message(
+          english = "Enter the name on the account as it appears on bank statements",
+          welsh = "Nodwch yr enw ar y cyfrif fel y mae’n ymddangos ar gyfriflenni banc"
+        ),
+        s"name.${nameDoesNotMatchBusiness.formError.message}"               -> Message(
+          english = "Enter the business name on the account as it appears on bank statements",
+          welsh = "Nodwch enw’r busnes ar y cyfrif fel y mae’n ymddangos ar gyfriflenni banc"
         ),
         s"sortCode.${accountDoesNotExist.formError.message}"                -> `Enter a valid combination of bank account number and sort code`,
         s"sortCode.${sortCodeOnDenyList.formError.message}"                 -> `Enter a valid combination of bank account number and sort code`,

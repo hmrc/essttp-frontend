@@ -122,9 +122,13 @@ object BankDetailsForm {
     FormErrorWithFieldMessageOverrides(
       formError = FormError("sortCode", "sortCode.validate.sortCodeSupportsDirectDebit.no")
     )
-  val nameDoesNotMatch: FormErrorWithFieldMessageOverrides                   =
+  val nameDoesNotMatchPersonal: FormErrorWithFieldMessageOverrides           =
     FormErrorWithFieldMessageOverrides(
-      formError = FormError("name", "name.verify.nameMatches.no")
+      formError = FormError("name", "name.verify.nameMatches.no.personal")
+    )
+  val nameDoesNotMatchBusiness: FormErrorWithFieldMessageOverrides           =
+    FormErrorWithFieldMessageOverrides(
+      formError = FormError("name", "name.verify.nameMatches.no.business")
     )
   val accountDoesNotExist: FormErrorWithFieldMessageOverrides                =
     FormErrorWithFieldMessageOverrides(
