@@ -21,7 +21,7 @@ import actionsmodel.AuthenticatedJourneyRequest
 import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import essttp.journey.model.{Journey, JourneyStage}
-import essttp.rootmodel.bank.{BankDetails, CanSetUpDirectDebit}
+import essttp.rootmodel.bank.{BankDetails, CanSetUpDirectDebit, TypesOfBankAccount}
 import models.bars.response.*
 import models.enumsforforms.IsSoleSignatoryFormValue
 import models.enumsforforms.TypeOfAccountFormValue.{typeOfBankAccountAsFormValue, typeOfBankAccountFromFormValue}
@@ -203,7 +203,10 @@ class BankDetailsController @Inject() (
         case SortCodeNotPresentOnEiscd(_) | SortCodeNotPresentOnEiscdValidateResponse(_)                 =>
           enterBankDetailsPageWithBarsError(sortCodeNotPresentOnEiscd)
         case NameDoesNotMatch(_)                                                                         =>
-          enterBankDetailsPageWithBarsError(nameDoesNotMatch)
+          val error = directDebitDetails.typeOfBankAccount match
+            case TypesOfBankAccount.Personal => nameDoesNotMatchPersonal
+            case TypesOfBankAccount.Business => nameDoesNotMatchBusiness
+          enterBankDetailsPageWithBarsError(error)
         case AccountDoesNotExist(_)                                                                      =>
           enterBankDetailsPageWithBarsError(accountDoesNotExist)
         case SortCodeOnDenyListErrorResponse(_)                                                          =>
