@@ -23,6 +23,7 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import views.html.partials.OverduePaymentRow
 @import views.html.templates.Layout
+@import essttp.rootmodel.TaxRegime.Simp
 
 @this(
   layout: Layout,
@@ -32,11 +33,17 @@
   overduePaymentRow: OverduePaymentRow
 )
 
+
 @(overduePayments: OverDuePayments, taxRegime: TaxRegime)(implicit request: Request[?])
 
 @import requestSupport.{languageFromRequest, legacyMessages}
 
 @title= @{Messages.YourBill.yourBillIs(overduePayments.total, taxRegime).show}
+
+@simpExtraText = @{
+    <p class="govuk-body">{Messages.YourBill.`The figures shown here are accurate but may differ...`.show}</p>
+    <p class="govuk-body">{Messages.YourBill.`Here, you can view the total of all your Simple Assessment debts...`.show}</p>
+}
 
 @subheading = @{
     taxRegime match {
@@ -51,6 +58,9 @@
   pageTitle = Some(title)
 ) {
   <h1 class="govuk-heading-xl">@title</h1>
+
+  @if(taxRegime == Simp) { @simpExtraText }
+
   <h2 class="govuk-heading-m">@{subheading.show}</h2>
   <dl class="govuk-summary-list">
     @overduePayments.payments.sortBy(overduePayment => overduePayment.invoicePeriod.dueDate).map(payment => overduePaymentRow(payment, taxRegime))

@@ -241,6 +241,42 @@ class YourBillControllerSpec extends ItSpec {
       }
     }
 
+    "return your bill page for SIMP" in {
+      stubCommonActions()
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Simp.Pta)()
+
+      val result: Future[Result] = controller.yourBill(fakeRequest)
+      val pageContent: String    = contentAsString(result)
+      val doc: Document          = Jsoup.parse(pageContent)
+
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1 = "Your Simple Assessment tax bill is £3,000",
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl = Some(routes.YourBillController.yourBillSubmit.url),
+        regimeBeingTested = Some(TaxRegime.Simp)
+      )
+
+      val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
+      tableRows.size shouldBe 2
+
+      tableRows(0)
+        .select(".govuk-summary-list__key")
+        .text() shouldBe "13 Jul 2020 to 14 Jul 2020 Bill due 7 February 2017"
+      tableRows(0).select(".govuk-summary-list__value").text() shouldBe "£2,000 (includes interest added to date)"
+
+      tableRows(1).select(".govuk-summary-list__key").text() shouldBe "13 Aug 2020 to 14 Aug 2020 Bill due 7 March 2017"
+      tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£1,000 (includes interest added to date)"
+
+      val extraText = doc.select(".govuk-body").asScala.toSeq
+      extraText.size shouldBe 2
+      extraText(0)
+        .text() shouldBe "The figures shown here are accurate but may differ from those showing in your Personal Tax Account."
+      extraText(1)
+        .text() shouldBe "Here, you can view the total of all your Simple Assessment debts. In your Personal Tax Account, you can only view your debts from the last 2 tax years."
+    }
+
     "return sa generic ineligible page" - {
       "for unknown MainTrans code" in {
         val origin      = Origins.Sa.Bta
