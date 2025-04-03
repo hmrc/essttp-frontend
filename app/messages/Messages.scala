@@ -138,6 +138,19 @@ object Messages {
       welsh = "(yn cynnwys llog a ychwanegwyd hyd yn hyn)"
     )
 
+    val `The figures shown here are accurate but may differ...` : Message = Message(
+      english = "The figures shown here are accurate but may differ from those showing in your Personal Tax Account.",
+      welsh =
+        "Mae’r ffigurau a ddangosir yma yn gywir, ond efallai eu bod yn wahanol i’r ffigurau a ddangosir yn eich Cyfrif Treth Personol."
+    )
+
+    val `Here, you can view the total of all your Simple Assessment debts...` : Message = Message(
+      english =
+        "Here, you can view the total of all your Simple Assessment debts. In your Personal Tax Account, you can only view your debts from the last 2 tax years.",
+      welsh =
+        "Yma, gallwch fwrw golwg dros gyfanswm eich holl ddyledion Asesiad Syml. Bydd eich Cyfrif Treth Personol dim ond yn dangos eich dyledion o’r ddwy flwyddyn dreth ddiwethaf."
+    )
+
     def yourBillIs(amount: AmountInPence, taxRegime: TaxRegime): Message =
       taxRegime match {
         case TaxRegime.Epaye =>

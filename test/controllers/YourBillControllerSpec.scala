@@ -23,15 +23,16 @@ import messages.ChargeTypeMessages.chargeFromMTrans
 import models.Languages
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import org.scalatest.matchers.must.Matchers.must
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Result
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import testsupport.ItSpec
-import testsupport.TdRequest._
+import testsupport.TdRequest.*
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend}
-import testsupport.testdata.{JourneyInfo, JourneyJsonTemplates, PageUrls, StageInfo, TdAll, TdJsonBodies}
+import testsupport.testdata.*
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -58,6 +59,9 @@ class YourBillControllerSpec extends ItSpec {
         shouldBackLinkBePresent = true,
         expectedSubmitUrl = Some(routes.YourBillController.yourBillSubmit.url)
       )
+
+      doc.select("#simp-extra-para1").asScala.toList shouldBe empty
+      doc.select("#simp-extra-para2").asScala.toList shouldBe empty
 
       val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
       tableRows.size shouldBe 2
@@ -86,6 +90,9 @@ class YourBillControllerSpec extends ItSpec {
         shouldBackLinkBePresent = true,
         expectedSubmitUrl = Some(routes.YourBillController.yourBillSubmit.url)
       )
+
+      doc.select("#simp-extra-para1").asScala.toList shouldBe empty
+      doc.select("#simp-extra-para2").asScala.toList shouldBe empty
 
       val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
       tableRows.size shouldBe 2
@@ -116,6 +123,9 @@ class YourBillControllerSpec extends ItSpec {
         regimeBeingTested = Some(TaxRegime.Vat)
       )
 
+      doc.select("#simp-extra-para1").asScala.toList shouldBe empty
+      doc.select("#simp-extra-para2").asScala.toList shouldBe empty
+
       val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
       tableRows.size shouldBe 2
 
@@ -144,6 +154,9 @@ class YourBillControllerSpec extends ItSpec {
         expectedSubmitUrl = Some(routes.YourBillController.yourBillSubmit.url),
         regimeBeingTested = Some(TaxRegime.Vat)
       )
+
+      doc.select("#simp-extra-para1").asScala.toList shouldBe empty
+      doc.select("#simp-extra-para2").asScala.toList shouldBe empty
 
       val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
       tableRows.size shouldBe 2
@@ -231,6 +244,9 @@ class YourBillControllerSpec extends ItSpec {
           regimeBeingTested = Some(TaxRegime.Sa)
         )
 
+        doc.select("#extra-para1").asScala.toList shouldBe empty
+        doc.select("#extra-para2").asScala.toList shouldBe empty
+
         val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
         tableRows.size shouldBe 1
 
@@ -239,6 +255,44 @@ class YourBillControllerSpec extends ItSpec {
           .text() shouldBe s"Due 15 June 2020 ${chargeFromMTrans(MainTrans(code)).english} for tax year 2020 to 2021"
         tableRows(0).select(".govuk-summary-list__value").text() shouldBe "£10,000 (includes interest added to date)"
       }
+    }
+
+    "return your bill page for SIMP" in {
+      stubCommonActions()
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Simp.Pta)()
+
+      val result: Future[Result] = controller.yourBill(fakeRequest)
+      val pageContent: String    = contentAsString(result)
+      val doc: Document          = Jsoup.parse(pageContent)
+
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1 = "Your Simple Assessment tax bill is £3,000",
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl = Some(routes.YourBillController.yourBillSubmit.url),
+        regimeBeingTested = Some(TaxRegime.Simp)
+      )
+
+      val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
+      tableRows.size shouldBe 2
+
+      tableRows(0)
+        .select(".govuk-summary-list__key")
+        .text() shouldBe "13 Jul 2020 to 14 Jul 2020 Bill due 7 February 2017"
+      tableRows(0).select(".govuk-summary-list__value").text() shouldBe "£2,000 (includes interest added to date)"
+
+      tableRows(1).select(".govuk-summary-list__key").text() shouldBe "13 Aug 2020 to 14 Aug 2020 Bill due 7 March 2017"
+      tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£1,000 (includes interest added to date)"
+
+      val simpExtraPara1 = doc.select("#simp-extra-para1").asScala.toList
+      simpExtraPara1.size shouldBe 1
+      val simpExtraPara2 = doc.select("#simp-extra-para2").asScala.toList
+      simpExtraPara2.size shouldBe 1
+      simpExtraPara1(0)
+        .text() shouldBe "The figures shown here are accurate but may differ from those showing in your Personal Tax Account."
+      simpExtraPara2(0)
+        .text() shouldBe "Here, you can view the total of all your Simple Assessment debts. In your Personal Tax Account, you can only view your debts from the last 2 tax years."
     }
 
     "return sa generic ineligible page" - {
