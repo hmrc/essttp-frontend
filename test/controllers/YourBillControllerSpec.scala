@@ -60,8 +60,8 @@ class YourBillControllerSpec extends ItSpec {
         expectedSubmitUrl = Some(routes.YourBillController.yourBillSubmit.url)
       )
 
-      doc.select("#extra-para1").asScala.toList shouldBe empty
-      doc.select("#extra-para2").asScala.toList shouldBe empty
+      doc.select("#simp-extra-para1").asScala.toList shouldBe empty
+      doc.select("#simp-extra-para2").asScala.toList shouldBe empty
 
       val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
       tableRows.size shouldBe 2
@@ -91,8 +91,8 @@ class YourBillControllerSpec extends ItSpec {
         expectedSubmitUrl = Some(routes.YourBillController.yourBillSubmit.url)
       )
 
-      doc.select("#extra-para1").asScala.toList shouldBe empty
-      doc.select("#extra-para2").asScala.toList shouldBe empty
+      doc.select("#simp-extra-para1").asScala.toList shouldBe empty
+      doc.select("#simp-extra-para2").asScala.toList shouldBe empty
 
       val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
       tableRows.size shouldBe 2
@@ -123,8 +123,8 @@ class YourBillControllerSpec extends ItSpec {
         regimeBeingTested = Some(TaxRegime.Vat)
       )
 
-      doc.select("#extra-para1").asScala.toList shouldBe empty
-      doc.select("#extra-para2").asScala.toList shouldBe empty
+      doc.select("#simp-extra-para1").asScala.toList shouldBe empty
+      doc.select("#simp-extra-para2").asScala.toList shouldBe empty
 
       val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
       tableRows.size shouldBe 2
@@ -155,8 +155,8 @@ class YourBillControllerSpec extends ItSpec {
         regimeBeingTested = Some(TaxRegime.Vat)
       )
 
-      doc.select("#extra-para1").asScala.toList shouldBe empty
-      doc.select("#extra-para2").asScala.toList shouldBe empty
+      doc.select("#simp-extra-para1").asScala.toList shouldBe empty
+      doc.select("#simp-extra-para2").asScala.toList shouldBe empty
 
       val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
       tableRows.size shouldBe 2
@@ -285,11 +285,13 @@ class YourBillControllerSpec extends ItSpec {
       tableRows(1).select(".govuk-summary-list__key").text() shouldBe "13 Aug 2020 to 14 Aug 2020 Bill due 7 March 2017"
       tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£1,000 (includes interest added to date)"
 
-      val extraText = doc.select(".govuk-body").asScala.toSeq
-      extraText.size shouldBe 2
-      extraText(0)
+      val simpExtraPara1 = doc.select("#simp-extra-para1").asScala.toList
+      simpExtraPara1.size shouldBe 1
+      val simpExtraPara2 = doc.select("#simp-extra-para2").asScala.toList
+      simpExtraPara2.size shouldBe 1
+      simpExtraPara1(0)
         .text() shouldBe "The figures shown here are accurate but may differ from those showing in your Personal Tax Account."
-      extraText(1)
+      simpExtraPara2(0)
         .text() shouldBe "Here, you can view the total of all your Simple Assessment debts. In your Personal Tax Account, you can only view your debts from the last 2 tax years."
     }
 
