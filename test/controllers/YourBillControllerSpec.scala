@@ -23,15 +23,16 @@ import messages.ChargeTypeMessages.chargeFromMTrans
 import models.Languages
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import org.scalatest.matchers.must.Matchers.must
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Result
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import testsupport.ItSpec
-import testsupport.TdRequest._
+import testsupport.TdRequest.*
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend}
-import testsupport.testdata.{JourneyInfo, JourneyJsonTemplates, PageUrls, StageInfo, TdAll, TdJsonBodies}
+import testsupport.testdata.*
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -58,6 +59,9 @@ class YourBillControllerSpec extends ItSpec {
         shouldBackLinkBePresent = true,
         expectedSubmitUrl = Some(routes.YourBillController.yourBillSubmit.url)
       )
+
+      doc.select("#extra-para1").asScala.toList shouldBe empty
+      doc.select("#extra-para2").asScala.toList shouldBe empty
 
       val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
       tableRows.size shouldBe 2
@@ -86,6 +90,9 @@ class YourBillControllerSpec extends ItSpec {
         shouldBackLinkBePresent = true,
         expectedSubmitUrl = Some(routes.YourBillController.yourBillSubmit.url)
       )
+
+      doc.select("#extra-para1").asScala.toList shouldBe empty
+      doc.select("#extra-para2").asScala.toList shouldBe empty
 
       val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
       tableRows.size shouldBe 2
@@ -116,6 +123,9 @@ class YourBillControllerSpec extends ItSpec {
         regimeBeingTested = Some(TaxRegime.Vat)
       )
 
+      doc.select("#extra-para1").asScala.toList shouldBe empty
+      doc.select("#extra-para2").asScala.toList shouldBe empty
+
       val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
       tableRows.size shouldBe 2
 
@@ -144,6 +154,9 @@ class YourBillControllerSpec extends ItSpec {
         expectedSubmitUrl = Some(routes.YourBillController.yourBillSubmit.url),
         regimeBeingTested = Some(TaxRegime.Vat)
       )
+
+      doc.select("#extra-para1").asScala.toList shouldBe empty
+      doc.select("#extra-para2").asScala.toList shouldBe empty
 
       val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
       tableRows.size shouldBe 2
@@ -230,6 +243,9 @@ class YourBillControllerSpec extends ItSpec {
           expectedSubmitUrl = Some(routes.YourBillController.yourBillSubmit.url),
           regimeBeingTested = Some(TaxRegime.Sa)
         )
+
+        doc.select("#extra-para1").asScala.toList shouldBe empty
+        doc.select("#extra-para2").asScala.toList shouldBe empty
 
         val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
         tableRows.size shouldBe 1
