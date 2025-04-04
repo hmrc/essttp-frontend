@@ -23,22 +23,23 @@ import org.jsoup.nodes.{Document, Element}
 import org.scalatest.Assertion
 import play.api.libs.json.{JsBoolean, JsObject, Json}
 import play.api.mvc.Result
-import play.api.test.Helpers._
-import testsupport.{ItSpec, JsonUtils}
+import play.api.test.Helpers.*
 import testsupport.reusableassertions.ContentAssertions.assertKeyAndValue
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.EssttpBackend
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls}
+import testsupport.{ItSpec, JsonUtils}
 
 import scala.concurrent.Future
 import scala.jdk.CollectionConverters.IterableHasAsScala
 
-class PaymentPlanSetUpControllerSpec extends ItSpec {
+class PaymentPlanSetUpControllerWithResearchBannerSpec extends ItSpec {
 
-  private val controller: PaymentPlanSetUpController   = app.injector.instanceOf[PaymentPlanSetUpController]
-  private val expectedH1PaymentPlanSetUpPage: String   = "Your payment plan is set up"
-  private val expectedH1PaymentPlanPrintPage: String   = "Your payment plan"
-  private val expectedH1PaymentPlanPrintPageSa: String = "Confirmation of plan to pay £1,111.47"
+  override lazy val configOverrides: Map[String, Boolean] = Map("features.user-research-banner-enabled" -> true)
+  private val controller: PaymentPlanSetUpController      = app.injector.instanceOf[PaymentPlanSetUpController]
+  private val expectedH1PaymentPlanSetUpPage: String      = "Your payment plan is set up"
+  private val expectedH1PaymentPlanPrintPage: String      = "Your payment plan"
+  private val expectedH1PaymentPlanPrintPageSa: String    = "Confirmation of plan to pay £1,111.47"
 
   def testUserResearchBannerIsPresent(doc: Document): Unit = {
     val bannerContainer = doc.select("div.hmrc-user-research-banner > div.hmrc-user-research-banner__container")
@@ -706,5 +707,75 @@ class PaymentPlanSetUpControllerEmailDisabledSpec extends ItSpec {
 
     }
   }
+}
 
+class PaymentPlanSetUpControllerNoResearchBannerSpec extends ItSpec {
+
+  override lazy val configOverrides: Map[String, Boolean] = Map("features.user-research-banner-enabled" -> false)
+  private val controller: PaymentPlanSetUpController      = app.injector.instanceOf[PaymentPlanSetUpController]
+
+  def testUserResearchBannerIsPresent(doc: Document): Unit = {
+    val bannerContainer = doc.select("div.hmrc-user-research-banner > div.hmrc-user-research-banner__container")
+    val bannerText      = bannerContainer.select("div.hmrc-user-research-banner__text")
+
+    val title = bannerText.select(".hmrc-user-research-banner__title")
+    title.text() shouldBe "Tell us what you think about this service"
+
+    val link = bannerText.select("a.hmrc-user-research-banner__link")
+    link.attr("href") shouldBe "https://s.userzoom.com/m/MSBDMTU1M1MxMDAw"
+    link.attr("rel") shouldBe "noopener noreferrer"
+    link.attr("target") shouldBe "_blank"
+    link.text() shouldBe "Complete our short survey (opens in new tab)"
+    ()
+  }
+
+  def testUserResearchBannerIsNotPresent(doc: Document): Unit = {
+    doc.select("div.hmrc-user-research-banner").isEmpty shouldBe true
+    ()
+  }
+
+  List(
+    Origins.Epaye.Bta,
+    Origins.Vat.Bta,
+    Origins.Simp.Pta
+  ).foreach { origin =>
+    val taxRegime = origin.taxRegime
+
+    s"[taxRegime: ${taxRegime.toString}] GET /payment-plan-set-up should" - {
+
+      "do not show the user research banner even if the user went through an affordability journey" in {
+        stubCommonActions()
+        EssttpBackend.SubmitArrangement.findJourney(origin, testCrypto, withAffordability = true)()
+
+        val result: Future[Result] = taxRegime match {
+          case TaxRegime.Epaye => controller.epayePaymentPlanSetUp(fakeRequest)
+          case TaxRegime.Vat   => controller.vatPaymentPlanSetUp(fakeRequest)
+          case TaxRegime.Sa    => sys.error("Not expecting SA here")
+          case TaxRegime.Simp  => controller.simpPaymentPlanSetUp(fakeRequest)
+        }
+        val pageContent: String    = contentAsString(result)
+        val doc: Document          = Jsoup.parse(pageContent)
+
+        doc.select(".govuk-panel__title").text() shouldBe "Your payment plan is set up"
+        testUserResearchBannerIsNotPresent(doc)
+      }
+
+      "do not show the user research banner if the user did not go through an affordability journey" in {
+        stubCommonActions()
+        EssttpBackend.SubmitArrangement.findJourney(origin, testCrypto)()
+
+        val result: Future[Result] = taxRegime match {
+          case TaxRegime.Epaye => controller.epayePaymentPlanSetUp(fakeRequest)
+          case TaxRegime.Vat   => controller.vatPaymentPlanSetUp(fakeRequest)
+          case TaxRegime.Sa    => sys.error("Not expecting SA here")
+          case TaxRegime.Simp  => controller.simpPaymentPlanSetUp(fakeRequest)
+        }
+        val pageContent: String    = contentAsString(result)
+        val doc: Document          = Jsoup.parse(pageContent)
+
+        doc.select(".govuk-panel__title").text() shouldBe "Your payment plan is set up"
+        testUserResearchBannerIsNotPresent(doc)
+      }
+    }
+  }
 }
