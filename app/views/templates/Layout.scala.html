@@ -96,7 +96,7 @@
         content = HtmlContent(Messages.ServicePhase.bannerText(appConfig.Urls.betaFeedbackUrl(using request)).show)
     ))
 
-    @if(showUserResearchBanner) {
+    @if(appConfig.userResearchBannerEnabled && showUserResearchBanner) {
       @userResearchBanner()
     }
 
