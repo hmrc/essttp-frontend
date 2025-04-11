@@ -148,7 +148,7 @@ object Messages {
       english =
         "Here, you can view the total of all your Simple Assessment debts. In your Personal Tax Account, you can only view your debts from the last 2 tax years.",
       welsh =
-        "Yma, gallwch fwrw golwg dros gyfanswm eich holl ddyledion Asesiad Syml. Bydd eich Cyfrif Treth Personol dim ond yn dangos eich dyledion o’r ddwy flwyddyn dreth ddiwethaf."
+        "Yma, gallwch fwrw golwg dros gyfanswm eich holl ddyledion Asesiad Syml. Bydd eich Cyfrif Treth Personol dim ond yn dangos eich dyledion o’r 2 flwyddyn dreth ddiwethaf."
     )
 
     def yourBillIs(amount: AmountInPence, taxRegime: TaxRegime): Message =
