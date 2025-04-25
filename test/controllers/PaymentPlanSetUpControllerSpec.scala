@@ -109,70 +109,134 @@ class PaymentPlanSetUpControllerWithResearchBannerSpec extends ItSpec {
         subheadings(0).text() shouldBe "What happens next"
         subheadings(0).tagName() shouldBe "h2"
 
-        paragraphs(0).text() shouldBe "In the next 24 hours we’ll:"
+        taxRegime match {
+          case TaxRegime.Epaye | TaxRegime.Vat =>
+            paragraphs(0).text() shouldBe "Within 24 hours we’ll:"
 
-        val list      = doc.select("ul.govuk-list").asScala.toList
-        val listItems = list(0).select("li").asScala.toList
-        listItems(0).text() shouldBe "update your tax account with your payment plan"
-        listItems(1).text() shouldBe (
-          if (taxRegime == TaxRegime.Simp) "send payment due dates to your personal tax account inbox"
-          else "send payment due dates to your business tax account inbox"
-        )
+            val list      = doc.select("ul.govuk-list").asScala.toList
+            val listItems = list(0).select("li").asScala.toList
+            listItems(0).text() shouldBe "update your tax account with your payment plan"
+            listItems(1).text() shouldBe (
+              if (taxRegime == TaxRegime.Simp) "send payment due dates to your personal tax account inbox"
+              else "send payment due dates to your business tax account inbox"
+            )
 
-        paragraphs(1)
-          .text() shouldBe "You’ll also receive a letter with your payment dates. We’ll send this out within 5 days."
+            paragraphs(1)
+              .text() shouldBe "Within 5 working days, we’ll send you a letter containing your payment dates."
 
-        paragraphs(2)
-          .text() shouldBe "If you’ve made an upfront payment, we’ll take it from your bank account within 6 working days."
+            paragraphs(2)
+              .text() shouldBe "If you’ve made an upfront payment, we’ll take it from your bank account within 6 working days."
 
-        val viewPaymentPlanLink = paragraphs(3)
-        viewPaymentPlanLink.text() shouldBe "View your payment plan"
-        viewPaymentPlanLink.select("a").text() shouldBe "View your payment plan"
-        viewPaymentPlanLink.select("a").attr("href") shouldBe (taxRegime match {
-          case TaxRegime.Epaye => routes.PaymentPlanSetUpController.epayeVatPrintSummary.url
-          case TaxRegime.Vat   => routes.PaymentPlanSetUpController.epayeVatPrintSummary.url
-          case TaxRegime.Sa    => sys.error("Not expecting SA here")
-          case TaxRegime.Simp  => routes.PaymentPlanSetUpController.simpPrintSummary.url
-        })
+            val viewPaymentPlanLink = paragraphs(3)
+            viewPaymentPlanLink.text() shouldBe "View your payment plan"
+            viewPaymentPlanLink.select("a").text() shouldBe "View your payment plan"
+            viewPaymentPlanLink.select("a").attr("href") shouldBe (
+              if taxRegime == TaxRegime.Epaye then routes.PaymentPlanSetUpController.epayeVatPrintSummary.url
+              else routes.PaymentPlanSetUpController.epayeVatPrintSummary.url
+            )
 
-        paragraphs(4)
-          .text() shouldBe "You can call HMRC to update your payment plan. Make sure you have your payment reference number ready."
+            paragraphs(4)
+              .text() shouldBe "You can call HMRC to update your payment plan. Make sure you have your payment reference number ready."
 
-        subheadings(1).text() shouldBe "Call the debt management helpline"
-        subheadings(1).tagName() shouldBe "h3"
+            subheadings(1).text() shouldBe "Call the debt management helpline"
+            subheadings(1).tagName() shouldBe "h3"
 
-        paragraphs(5).text() shouldBe "Telephone: 0300 123 1813"
-        paragraphs(5).select("strong").text() shouldBe "0300 123 1813"
+            paragraphs(5).text() shouldBe "Telephone: 0300 123 1813"
+            paragraphs(5).select("strong").text() shouldBe "0300 123 1813"
 
-        paragraphs(6).text() shouldBe "Outside UK: +44 2890 538 192"
-        paragraphs(6).select("strong").text() shouldBe "+44 2890 538 192"
+            paragraphs(6).text() shouldBe "Outside UK: +44 2890 538 192"
+            paragraphs(6).select("strong").text() shouldBe "+44 2890 538 192"
 
-        paragraphs(7).text() shouldBe "Our phone line opening hours are:"
-        paragraphs(8).text() shouldBe "Monday to Friday: 8am to 6pm"
-        paragraphs(9).text() shouldBe "Closed weekends and bank holidays."
+            paragraphs(7).text() shouldBe "Our phone line opening hours are:"
+            paragraphs(8).text() shouldBe "Monday to Friday: 8am to 6pm"
+            paragraphs(9).text() shouldBe "Closed weekends and bank holidays."
 
-        subheadings(2).text() shouldBe "Text service"
-        subheadings(2).tagName() shouldBe "h3"
+            subheadings(2).text() shouldBe "Text service"
+            subheadings(2).tagName() shouldBe "h3"
 
-        paragraphs(10)
-          .text() shouldBe "Use Relay UK if you cannot hear or speak on the telephone, dial 18001 then 0345 300 3900. Find out more on the Relay UK website (opens in new tab)."
-        paragraphs(10).select("strong").asScala.toList.map(_.text()) shouldBe List("18001", "0345 300 3900")
-        val relayLink = paragraphs(10).select("a")
-        relayLink.text() shouldBe "Relay UK website (opens in new tab)"
-        relayLink.attr("href") shouldBe "https://www.relayuk.bt.com/"
-        relayLink.attr("rel") shouldBe "noreferrer noopener"
-        relayLink.attr("target") shouldBe "_blank"
+            paragraphs(10)
+              .text() shouldBe "Use Relay UK if you cannot hear or speak on the telephone, dial 18001 then 0345 300 3900. Find out more on the Relay UK website (opens in new tab)."
+            paragraphs(10).select("strong").asScala.toList.map(_.text()) shouldBe List("18001", "0345 300 3900")
+            val relayLink = paragraphs(10).select("a")
+            relayLink.text() shouldBe "Relay UK website (opens in new tab)"
+            relayLink.attr("href") shouldBe "https://www.relayuk.bt.com/"
+            relayLink.attr("rel") shouldBe "noreferrer noopener"
+            relayLink.attr("target") shouldBe "_blank"
 
-        subheadings(3).text() shouldBe "If a health condition or personal circumstances make it difficult to contact us"
-        subheadings(3).tagName() shouldBe "h3"
+            subheadings(3)
+              .text() shouldBe "If a health condition or personal circumstances make it difficult to contact us"
+            subheadings(3).tagName() shouldBe "h3"
 
-        paragraphs(11)
-          .text() shouldBe "Our guidance Get help from HMRC if you need extra support (opens in new tab) explains how we can support you."
-        val extraSupportLink = paragraphs(11).select("a")
-        extraSupportLink.text() shouldBe "Get help from HMRC if you need extra support (opens in new tab)"
-        extraSupportLink.attr("href") shouldBe "https://www.gov.uk/get-help-hmrc-extra-support"
-        extraSupportLink.attr("rel") shouldBe "noreferrer noopener"
-        extraSupportLink.attr("target") shouldBe "_blank"
+            paragraphs(11)
+              .text() shouldBe "Our guidance Get help from HMRC if you need extra support (opens in new tab) explains how we can support you."
+            val extraSupportLink = paragraphs(11).select("a")
+            extraSupportLink.text() shouldBe "Get help from HMRC if you need extra support (opens in new tab)"
+            extraSupportLink.attr("href") shouldBe "https://www.gov.uk/get-help-hmrc-extra-support"
+            extraSupportLink.attr("rel") shouldBe "noreferrer noopener"
+            extraSupportLink.attr("target") shouldBe "_blank"
+
+          case TaxRegime.Simp =>
+            paragraphs(0)
+              .text() shouldBe "We do not provide dedicated reference numbers for Simple Assessment payment plans. Instead, your payment reference number is your National Insurance number."
+
+            val list      = doc.select("ul.govuk-list").asScala.toList
+            val listItems = list(0).select("li").asScala.toList
+            listItems(0).text() shouldBe "update your tax account with your payment plan"
+            listItems(1).text() shouldBe "send payment due dates to your personal tax account inbox"
+
+            paragraphs(1)
+              .text() shouldBe "Within 24 hours we’ll:"
+
+            paragraphs(2)
+              .text() shouldBe "Within 5 working days, we’ll send you a letter containing your payment dates."
+
+            val viewPaymentPlanLink = paragraphs(4)
+            viewPaymentPlanLink.text() shouldBe "View your payment plan"
+            viewPaymentPlanLink.select("a").text() shouldBe "View your payment plan"
+            viewPaymentPlanLink.select("a").attr("href") shouldBe routes.PaymentPlanSetUpController.simpPrintSummary.url
+
+            paragraphs(5)
+              .text() shouldBe "If you need to contact HMRC about your payment plan, make sure to have your National Insurance number ready."
+
+            subheadings(1).text() shouldBe "Call the debt management helpline"
+            subheadings(1).tagName() shouldBe "h3"
+
+            paragraphs(6).text() shouldBe "Telephone: 0300 123 1813"
+            paragraphs(6).select("strong").text() shouldBe "0300 123 1813"
+
+            paragraphs(7).text() shouldBe "Outside UK: +44 2890 538 192"
+            paragraphs(7).select("strong").text() shouldBe "+44 2890 538 192"
+
+            paragraphs(8).text() shouldBe "Our phone line opening hours are:"
+            paragraphs(9).text() shouldBe "Monday to Friday: 8am to 6pm"
+            paragraphs(10).text() shouldBe "Closed weekends and bank holidays."
+
+            subheadings(2).text() shouldBe "Text service"
+            subheadings(2).tagName() shouldBe "h3"
+
+            paragraphs(11)
+              .text() shouldBe "Use Relay UK if you cannot hear or speak on the telephone, dial 18001 then 0345 300 3900. Find out more on the Relay UK website (opens in new tab)."
+            paragraphs(11).select("strong").asScala.toList.map(_.text()) shouldBe List("18001", "0345 300 3900")
+            val relayLink = paragraphs(11).select("a")
+            relayLink.text() shouldBe "Relay UK website (opens in new tab)"
+            relayLink.attr("href") shouldBe "https://www.relayuk.bt.com/"
+            relayLink.attr("rel") shouldBe "noreferrer noopener"
+            relayLink.attr("target") shouldBe "_blank"
+
+            subheadings(3)
+              .text() shouldBe "If a health condition or personal circumstances make it difficult to contact us"
+            subheadings(3).tagName() shouldBe "h3"
+
+            paragraphs(12)
+              .text() shouldBe "Our guidance Get help from HMRC if you need extra support (opens in new tab) explains how we can support you."
+            val extraSupportLink = paragraphs(12).select("a")
+            extraSupportLink.text() shouldBe "Get help from HMRC if you need extra support (opens in new tab)"
+            extraSupportLink.attr("href") shouldBe "https://www.gov.uk/get-help-hmrc-extra-support"
+            extraSupportLink.attr("rel") shouldBe "noreferrer noopener"
+            extraSupportLink.attr("target") shouldBe "_blank"
+
+          case TaxRegime.Sa => sys.error("Not expecting SA here")
+        }
 
         val continueButton = doc.select(".govuk-button")
         continueButton.text() shouldBe "Go to tax account"

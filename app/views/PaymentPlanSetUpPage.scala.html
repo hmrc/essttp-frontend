@@ -79,8 +79,12 @@
         content = HtmlContent(s"""${Messages.Confirmation.`Your payment reference is`.show}<br><strong>$customerPaymentReference</strong>""")
     ))
 
+    @if(taxRegime == TaxRegime.Simp) {
+        <p class="govuk-body">@{Messages.Confirmation.`We do not provide dedicated reference numbers for Simple Assessment...`.show}</p>
+    }
+
     <h2 class="govuk-heading-m">@{Messages.Confirmation.`What happens next`.show}</h2>
-    <p class="govuk-body">@{Messages.Confirmation.`In the next 24 hours we'll:`.show}</p>
+    <p class="govuk-body">@{Messages.Confirmation.`Within 24 hours we'll:`.show}</p>
     <ul class="govuk-list govuk-list--bullet">
       <li>@{Messages.Confirmation.`update your tax account with your payment plan`.show}</li>
       <li>@{Messages.Confirmation.`send payment due dates to your ... inbox`(taxRegime).show}</li>
@@ -92,10 +96,17 @@
         @{Messages.Confirmation.`View your payment plan`.show}
         </a>
     </p>
-    <p class="govuk-body">@{Messages.Confirmation.`You can call HMRC to update your payment plan. Make sure you have your payment reference number ready.`.show}</p>
 
+    @if(taxRegime != TaxRegime.Simp) {
+        <p class="govuk-body">@{Messages.Confirmation.`You can call HMRC to update your payment plan. Make sure you have your payment reference number ready.`.show}</p>
+    }
 
     <h3 class="govuk-heading-m">@{Messages.Confirmation.`Call the debt management helpline`.show}</h3>
+
+    @if(taxRegime == TaxRegime.Simp) {
+        <p class="govuk-body">@{Messages.Confirmation.`If you need to contact HMRC about your payment plan, make sure to have your National Insurance number ready.`.show}</p>
+    }
+
     <p class="govuk-body">@{Html(Messages.Confirmation.`Telephone: 0300 123 1813`.show)}</p>
     <p class="govuk-body">@{Html(Messages.Confirmation.`Outside UK: +44 2890 538 192`.show)}</p>
     <p class="govuk-body">@{Messages.Confirmation.`Our phone line opening hours are:`.show}</p>

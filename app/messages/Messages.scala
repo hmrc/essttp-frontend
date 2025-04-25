@@ -2457,14 +2457,21 @@ object Messages {
       welsh = "Eich cyfeirnod talu yw"
     )
 
+    val `We do not provide dedicated reference numbers for Simple Assessment...` : Message = Message(
+      english =
+        "We do not provide dedicated reference numbers for Simple Assessment payment plans. Instead, your payment reference number is your National Insurance number.",
+      welsh =
+        "Nid ydym yn darparu cyfeirnod penodedig ar gyfer cynlluniau talu Asesiad Syml. Yn lle hynny, eich cyfeirnod talu yw’ch rhif Yswiriant Gwladol."
+    )
+
     val `What happens next`: Message = Message(
       english = "What happens next",
       welsh = "Yr hyn sy’n digwydd nesaf"
     )
 
-    val `In the next 24 hours we'll:` : Message = Message(
-      english = "In the next 24 hours we’ll:",
-      welsh = "Yn ystod y 24 awr nesaf, byddwn yn gwneud y canlynol:"
+    val `Within 24 hours we'll:` : Message = Message(
+      english = "Within 24 hours we’ll:",
+      welsh = "O fewn 24 awr, byddwn yn gwneud y canlynol:"
     )
 
     val `update your tax account with your payment plan`: Message = Message(
@@ -2490,8 +2497,8 @@ object Messages {
     }
 
     val `You'll also receive a letter with your payment dates. We'll send this out within 5 days.` : Message = Message(
-      english = "You’ll also receive a letter with your payment dates. We’ll send this out within 5 days.",
-      welsh = "Byddwch hefyd yn cael llythyr gyda’ch dyddiadau talu. Byddwn yn anfon hwn cyn pen 5 diwrnod."
+      english = "Within 5 working days, we’ll send you a letter containing your payment dates.",
+      welsh = "Cyn pen 5 diwrnod gwaith, byddwn yn anfon llythyr atoch sy’n cynnwys eich dyddiadau talu."
     )
 
     val `If you've made an upfront payment, we'll take it from your bank account within 6 working days.` : Message =
@@ -2511,6 +2518,14 @@ object Messages {
     val `Call the debt management helpline`: Message = Message(
       english = "Call the debt management helpline",
       welsh = "Ffoniwch y llinell gymorth rheoli dyledion"
+    )
+
+    val `If you need to contact HMRC about your payment plan, make sure to have your National Insurance number ready.`
+      : Message = Message(
+      english =
+        "If you need to contact HMRC about your payment plan, make sure to have your National Insurance number ready.",
+      welsh =
+        "Os oes angen i chi gysylltu â CThEF ynglŷn â’ch cynllun talu, gwnewch yn siŵr bod eich rhif Yswiriant Gwladol yn barod."
     )
 
     val `Telephone: 0300 123 1813`: Message = Message(
