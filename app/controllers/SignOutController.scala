@@ -36,12 +36,13 @@ class SignOutController @Inject() (
       I18nSupport,
       Logging {
 
-  val signOutFromTimeout: Action[AnyContent] = Action { implicit request =>
-    // N.B. the implicit request being passed into the page here may still have the auth
-    // token in it so take care to ensure that the sign out link is not shown by mistake
-    val continueUrl = routes.SignOutController.timedOut.absoluteURL()
-
+  private lazy val signOutFromTimeoutRedirect = {
+    val continueUrl = s"${appConfig.BaseUrl.essttpFrontend}${routes.SignOutController.timedOut.url}"
     Redirect(s"${appConfig.Urls.signOutUrl}?continue=$continueUrl")
+  }
+
+  val signOutFromTimeout: Action[AnyContent] = Action { implicit request =>
+    signOutFromTimeoutRedirect
   }
 
   val signOut: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
