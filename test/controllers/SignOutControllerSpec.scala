@@ -58,7 +58,7 @@ class SignOutControllerSpec extends ItSpec {
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(
-        "http://localhost:9553/bas-gateway/sign-out-without-state?continue=http://localhost/set-up-a-payment-plan/timed-out"
+        "http://localhost:9553/bas-gateway/sign-out-without-state?continue=http://localhost:9215/set-up-a-payment-plan/timed-out"
       )
     }
   }
