@@ -86,8 +86,8 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
         val upfrontPaymentAmountRow = upfrontPaymentAmountValue.map(amount =>
           SummaryRow(
             lang.fold(
-              "Upfront payment\n<br><span class=\"govuk-body-s\">Taken within 6 working days</span>",
-              "Taliad ymlaen llaw\n<br><span class=\"govuk-body-s\">I’w gymryd cyn pen 6 diwrnod gwaith</span>"
+              "Upfront payment\n<br>\n<span class=\"govuk-body-s\">Taken within 6 working days</span>",
+              "Taliad ymlaen llaw\n<br>\n<span class=\"govuk-body-s\">I’w gymryd cyn pen 6 diwrnod gwaith</span>"
             ),
             amount,
             PageUrls.checkPaymentPlanChangeUrl("UpfrontPaymentAmount", origin.taxRegime, None),
