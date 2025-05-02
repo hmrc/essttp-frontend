@@ -359,8 +359,29 @@ class DetermineTaxIdControllerSpec extends ItSpec {
         val result = controller.determineTaxId()(fakeRequest)
 
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.NotEnrolledController.simpNoNino.url)
+        redirectLocation(result) shouldBe Some(routes.IneligibleController.simpGenericIneligiblePage.url)
 
+        val expectedAuditEvent =
+          Json
+            .parse(
+              """{
+            |  "noEligibilityReasons" : 0,
+            |  "taxDetail" : { },
+            |  "origin" : "Pta",
+            |  "taxType" : "Simp",
+            |  "eligibilityReasons" : [ ],
+            |  "enrollmentReasons" : "no nino found",
+            |  "chargeTypeAssessment" : [ ],
+            |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+            |  "regimeDigitalCorrespondence" : true,
+            |  "authProviderId" : "authId-999",
+            |  "eligibilityResult" : "ineligible"
+            |}
+            |""".stripMargin
+            )
+            .as[JsObject]
+
+        AuditConnectorStub.verifyEventAudited("EligibilityCheck", expectedAuditEvent)
       }
 
     }

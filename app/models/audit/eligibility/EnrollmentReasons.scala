@@ -28,10 +28,13 @@ object EnrollmentReasons {
 
   final case class DidNotPassEligibilityCheck() extends EnrollmentReasons
 
+  final case class NoNino() extends EnrollmentReasons
+
   given Writes[EnrollmentReasons] = Writes {
     case NotEnrolled()                => JsString("not enrolled")
     case InactiveEnrollment()         => JsString("inactive enrollment")
     case DidNotPassEligibilityCheck() => JsString("did not pass eligibility check")
+    case NoNino()                     => JsString("no nino found")
   }
 
 }

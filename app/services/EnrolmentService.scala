@@ -74,11 +74,11 @@ class EnrolmentService @Inject() (journeyService: JourneyService, auditService: 
         update(id).map(_ => Some(id))
 
       case Inactive() =>
-        auditService.auditEligibilityCheck(journey, Right(EnrollmentReasons.InactiveEnrollment()))
+        auditService.auditEligibilityCheck(journey, EnrollmentReasons.InactiveEnrollment())
         Future.successful(None)
 
       case EnrolmentNotFound() =>
-        auditService.auditEligibilityCheck(journey, Left(EnrollmentReasons.NotEnrolled()))
+        auditService.auditEligibilityCheck(journey, EnrollmentReasons.NotEnrolled())
         Future.successful(None)
 
       case IdentifierNotFound(enrolmentDefs) =>
