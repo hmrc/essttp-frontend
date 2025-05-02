@@ -33,13 +33,13 @@
 package controllers
 
 import actions.Actions
-import cats.syntax.traverse.*
 import config.AppConfig
 import essttp.journey.JourneyConnector
 import essttp.journey.model.{Journey, JourneyStage}
 import essttp.rootmodel.{TaxId, TaxRegime}
+import models.audit.eligibility.EnrollmentReasons
 import play.api.mvc.*
-import services.EnrolmentService
+import services.{AuditService, EnrolmentService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.{JourneyLogger, Logging}
 
@@ -51,7 +51,8 @@ class DetermineTaxIdController @Inject() (
   as:               Actions,
   mcc:              MessagesControllerComponents,
   journeyConnector: JourneyConnector,
-  enrolmentService: EnrolmentService
+  enrolmentService: EnrolmentService,
+  auditService:     AuditService
 )(using ExecutionContext, AppConfig)
     extends FrontendController(mcc),
       Logging {
@@ -60,14 +61,16 @@ class DetermineTaxIdController @Inject() (
     val maybeTaxId: Future[Option[TaxId]] = request.journey match {
       case j: Journey.Started                 =>
         if (j.taxRegime == TaxRegime.Simp) {
-          request.nino
-            .map(nino =>
+          request.nino match {
+            case None =>
+              auditService.auditEligibilityCheck(j, EnrollmentReasons.NoNino())
+              Future.successful(None)
+
+            case Some(nino) =>
               journeyConnector
                 .updateTaxId(j.journeyId, nino)
-                .map(_ => nino)
-            )
-            .sequence
-
+                .map(_ => Some(nino))
+          }
         } else {
           enrolmentService.determineTaxIdAndUpdateJourney(j, request.enrolments)
         }
@@ -89,7 +92,7 @@ class DetermineTaxIdController @Inject() (
           case TaxRegime.Epaye => Redirect(routes.NotEnrolledController.notEnrolled)
           case TaxRegime.Vat   => Redirect(routes.NotEnrolledController.notVatRegistered)
           case TaxRegime.Sa    => Redirect(routes.NotEnrolledController.notSaEnrolled)
-          case TaxRegime.Simp  => Redirect(routes.NotEnrolledController.simpNoNino)
+          case TaxRegime.Simp  => Redirect(routes.IneligibleController.simpGenericIneligiblePage)
         }
     }
   }

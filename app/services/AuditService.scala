@@ -77,7 +77,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
 
   def auditEligibilityCheck(
     journey:          Started,
-    enrollmentReason: Either[EnrollmentReasons.NotEnrolled, EnrollmentReasons.InactiveEnrollment]
+    enrollmentReason: EnrollmentReasons.NotEnrolled | EnrollmentReasons.InactiveEnrollment | EnrollmentReasons.NoNino
   )(using AuthenticatedJourneyRequest[?], HeaderCarrier): Unit =
     audit(toEligibilityCheck(journey, enrollmentReason))
 
@@ -179,11 +179,11 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
 
   private def toEligibilityCheck(
     journey:          Started,
-    enrollmentReason: Either[EnrollmentReasons.NotEnrolled, EnrollmentReasons.InactiveEnrollment]
+    enrollmentReason: EnrollmentReasons.NotEnrolled | EnrollmentReasons.InactiveEnrollment | EnrollmentReasons.NoNino
   )(using r: AuthenticatedJourneyRequest[?]): EligibilityCheckAuditDetail =
     EligibilityCheckAuditDetail(
       eligibilityResult = EligibilityResult.Ineligible,
-      enrollmentReasons = Some(enrollmentReason.merge),
+      enrollmentReasons = Some(enrollmentReason),
       noEligibilityReasons = 0,
       eligibilityReasons = List.empty,
       origin = toAuditString(journey.origin),
