@@ -22,7 +22,7 @@ import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.bind
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
-import play.api.test.{DefaultTestServerFactory, FakeRequest, RunningServer}
+import play.api.test.{DefaultTestServerFactory, FakeRequest, TestServerFactory}
 import play.api.{Application, Mode}
 import play.core.server.ServerConfig
 import testsupport.TdRequest._
@@ -102,10 +102,9 @@ class ItSpec extends UnitSpec, GuiceOneServerPerSuite, WireMockSupport, HttpRead
     }
   }
 
-  override implicit protected lazy val runningServer: RunningServer =
-    TestServerFactory.start(app)
+  override protected def testServerFactory: TestServerFactory = CustomTestServerFactory // Override the factory
 
-  object TestServerFactory extends DefaultTestServerFactory {
+  object CustomTestServerFactory extends DefaultTestServerFactory {
     override protected def serverConfig(app: Application): ServerConfig = {
       val sc = ServerConfig(port = Some(testPort), sslPort = None, mode = Mode.Test, rootDir = app.path)
       sc.copy(configuration = sc.configuration.withFallback(overrideServerConfiguration(app)))
