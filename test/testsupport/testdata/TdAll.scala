@@ -539,7 +539,8 @@ object TdAll {
         instalmentBalance = InstalmentBalance(amountInPence),
         debtItemChargeId = ChargeReference("testchargeid"),
         amountDue = AmountDue(amountInPence),
-        debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2022-01-01"))
+        debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2022-01-01")),
+        expectedPayment = None
       )
     )
   )
@@ -631,7 +632,8 @@ object TdAll {
             instalmentBalance = InstalmentBalance(AmountInPence(55571)),
             debtItemChargeId = ChargeReference("A00000000001"),
             amountDue = AmountDue(AmountInPence(55570)),
-            debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2021-07-28"))
+            debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2021-07-28")),
+            expectedPayment = None
           ),
           Instalment(
             instalmentNumber = InstalmentNumber(1),
@@ -640,7 +642,8 @@ object TdAll {
             instalmentBalance = InstalmentBalance(AmountInPence(111141)),
             debtItemChargeId = ChargeReference("A00000000001"),
             amountDue = AmountDue(AmountInPence(55570)),
-            debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2021-07-28"))
+            debtItemOriginalDueDate = DebtItemOriginalDueDate(LocalDate.parse("2021-07-28")),
+            expectedPayment = None
           )
         ),
         debtItemCharges = List(
