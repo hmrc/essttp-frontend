@@ -355,7 +355,7 @@ class EmailControllerSpec extends ItSpec {
         RequestAssertions.assertGetRequestOk(result)
         ContentAssertions.commonPageChecks(
           doc,
-          expectedH1 = "Enter your email address",
+          expectedH1 = "Set up email notifications for your payment plan",
           shouldBackLinkBePresent = true,
           expectedSubmitUrl = Some(routes.EmailController.enterEmailSubmit.url),
           regimeBeingTested = Some(taxRegime),
@@ -478,7 +478,7 @@ class EmailControllerSpec extends ItSpec {
           RequestAssertions.assertGetRequestOk(result)
           ContentAssertions.commonPageChecks(
             doc,
-            expectedH1 = "Enter your email address",
+            expectedH1 = "Set up email notifications for your payment plan",
             shouldBackLinkBePresent = true,
             expectedSubmitUrl = Some(routes.EmailController.enterEmailSubmit.url),
             hasFormError = true,

@@ -2232,6 +2232,11 @@ object Messages {
       welsh = "Pa e-bost rydych am ei ddefnyddio?"
     )
 
+    val `Set up email notifications for your payment plan`: Message = Message(
+      english = "Set up email notifications for your payment plan",
+      welsh = "Trefnu hysbysiadau e-bost ar gyfer eich cynllun talu"
+    )
+
     val `Enter your email address`: Message = Message(
       english = "Enter your email address",
       welsh = "Nodwch eich cyfeiriad e-bost"

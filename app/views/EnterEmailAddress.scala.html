@@ -39,7 +39,7 @@
 @key = @{"newEmailInput"}
 
 
-@title = @{Messages.EmailEntry.`Enter your email address`.show}
+@title = @{Messages.EmailEntry.`Set up email notifications for your payment plan`.show}
 
 
 @layout(
@@ -69,6 +69,12 @@
         name = key,
         inputType = "email",
         classes = "govuk-input--width-30",
+        label = Label(
+            content = Text(Messages.EmailEntry.`Enter your email address`.show),
+            classes = "govuk-label--m",
+            isPageHeading = false,
+            attributes = Map("for" -> key)
+        ),
         hint = Some(Hint(content = Text(Messages.EmailEntry.`For example, myname@sample.com`.show))),
         spellcheck = Some(false),
         errorMessage = form.error(key).map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
