@@ -366,7 +366,7 @@ class EmailControllerSpec extends ItSpec {
           .select(".govuk-body")
           .html shouldBe "We will use this email address to send you information about your payment plan. " +
           "It may take <strong>up to 24 hours</strong> to receive notifications after you set up your plan."
-
+        doc.select(".govuk-label--m").text() shouldBe "Enter your email address"
         doc.select("#newEmailInput-hint").text() shouldBe "For example, myname@sample.com"
         doc.select("#newEmailInput").attr("type") shouldBe "email"
       }
