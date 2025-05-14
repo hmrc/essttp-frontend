@@ -107,7 +107,7 @@ class LandingPageControllerSpec extends ItSpec {
 
       paragraphs(0)
         .text() shouldBe "Use this service to set up a payment plan for your outstanding employers’ PAYE bill. " +
-        "Payments are taken by Direct Debit and include interest charged at the Bank of England base rate plus 2.5% per year."
+        "Payments are taken by Direct Debit and include interest charged at the Bank of England base rate plus 4% per year."
 
       val insetText = doc.select(".govuk-inset-text").asScala.toList
       insetText.size shouldBe 1
@@ -222,7 +222,7 @@ class LandingPageControllerSpec extends ItSpec {
       val paragraphs = doc.select("p.govuk-body").asScala.toList
 
       paragraphs(0).text() shouldBe "Use this service to set up a payment plan for your outstanding VAT bill. " +
-        "Payments are taken by Direct Debit and include interest charged at the Bank of England base rate plus 2.5% per year."
+        "Payments are taken by Direct Debit and include interest charged at the Bank of England base rate plus 4% per year."
 
       val insetText = doc.select(".govuk-inset-text").asScala.toList
       insetText.size shouldBe 1

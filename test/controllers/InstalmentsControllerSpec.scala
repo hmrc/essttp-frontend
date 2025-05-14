@@ -108,7 +108,7 @@ class InstalmentsControllerSpec extends ItSpec {
             detailsParagraphs.size shouldBe 3
 
             detailsParagraphs(0).text() shouldBe "We charge interest on all overdue amounts."
-            detailsParagraphs(1).text() shouldBe "We charge the Bank of England base rate plus 2.5% per year."
+            detailsParagraphs(1).text() shouldBe "We charge the Bank of England base rate plus 4% per year."
             detailsParagraphs(2)
               .text() shouldBe "If the interest rate changes during your payment plan, you may need to settle any difference at the end. " +
               "We will contact you if this is the case."
@@ -199,7 +199,7 @@ class InstalmentsControllerSpec extends ItSpec {
         detailsParagraphs.size shouldBe 3
 
         detailsParagraphs(0).text() shouldBe "Rydym yn codi llog ar bob swm sy’n hwyr."
-        detailsParagraphs(1).text() shouldBe "Rydym yn codi cyfradd sylfaenol Banc Lloegr ynghyd â 2.5% y flwyddyn."
+        detailsParagraphs(1).text() shouldBe "Rydym yn codi cyfradd sylfaenol Banc Lloegr ynghyd â 4% y flwyddyn."
         detailsParagraphs(2)
           .text() shouldBe "Os bydd y gyfradd llog yn newid yn ystod eich cynllun talu, efallai bydd yn rhaid i chi setlo unrhyw wahaniaeth ar y diwedd. " +
           "Byddwn yn cysylltu â chi os yw hyn yn wir."

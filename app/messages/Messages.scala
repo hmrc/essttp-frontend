@@ -1115,9 +1115,9 @@ object Messages {
 
     val `Use this service to set up a payment plan..` : Message = Message(
       english =
-        "Use this service to set up a payment plan for your outstanding employers’ PAYE bill. Payments are taken by Direct Debit and include interest charged at the Bank of England base rate plus 2.5% per year.",
+        "Use this service to set up a payment plan for your outstanding employers’ PAYE bill. Payments are taken by Direct Debit and include interest charged at the Bank of England base rate plus 4% per year.",
       welsh =
-        "Defnyddiwch y gwasanaeth hwn i sefydlu cynllun talu ar gyfer eich bil TWE y cyflogwyr sy’n weddill. Mae taliadau’n cael eu cymryd drwy Ddebyd Uniongyrchol ac maent yn cynnwys llog a godir ar gyfradd sylfaenol Banc Lloegr ynghyd â 2.5% y flwyddyn."
+        "Defnyddiwch y gwasanaeth hwn i sefydlu cynllun talu ar gyfer eich bil TWE y cyflogwyr sy’n weddill. Mae taliadau’n cael eu cymryd drwy Ddebyd Uniongyrchol ac maent yn cynnwys llog a godir ar gyfradd sylfaenol Banc Lloegr ynghyd â 4% y flwyddyn."
     )
 
     val `You must be able to authorise a Direct Debit...` : Message = Message(
@@ -1173,9 +1173,9 @@ object Messages {
 
     val `Use this service to set up a payment plan..` : Message = Message(
       english =
-        "Use this service to set up a payment plan for your outstanding VAT bill. Payments are taken by Direct Debit and include interest charged at the Bank of England base rate plus 2.5% per year.",
+        "Use this service to set up a payment plan for your outstanding VAT bill. Payments are taken by Direct Debit and include interest charged at the Bank of England base rate plus 4% per year.",
       welsh =
-        "Defnyddiwch y gwasanaeth hwn i drefnu cynllun talu ar gyfer eich bil TAW sy’n weddill. Mae taliadau’n cael eu cymryd drwy Ddebyd Uniongyrchol ac maent yn cynnwys llog a godir ar gyfradd sylfaenol Banc Lloegr ynghyd â 2.5% y flwyddyn."
+        "Defnyddiwch y gwasanaeth hwn i drefnu cynllun talu ar gyfer eich bil TAW sy’n weddill. Mae taliadau’n cael eu cymryd drwy Ddebyd Uniongyrchol ac maent yn cynnwys llog a godir ar gyfradd sylfaenol Banc Lloegr ynghyd â 4% y flwyddyn."
     )
 
     val `You must be able to authorise a Direct Debit...` : Message = Message(
@@ -1642,9 +1642,9 @@ object Messages {
       welsh = "Rydym yn codi llog ar bob swm sy’n hwyr."
     )
 
-    val `We charge the Bank of England base rate plus 2.5% per year`: Message = Message(
-      english = "We charge the <strong>Bank of England base rate plus 2.5%</strong> per year.",
-      welsh = "Rydym yn codi <strong>cyfradd sylfaenol Banc Lloegr ynghyd â 2.5%</strong> y flwyddyn."
+    val `We charge the Bank of England base rate plus 4% per year`: Message = Message(
+      english = "We charge the <strong>Bank of England base rate plus 4%</strong> per year.",
+      welsh = "Rydym yn codi <strong>cyfradd sylfaenol Banc Lloegr ynghyd â 4%</strong> y flwyddyn."
     )
 
     val `If interest rates change...` : Message = Message(
