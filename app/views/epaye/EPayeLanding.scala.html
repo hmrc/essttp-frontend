@@ -46,7 +46,7 @@
   showServiceNameInHeader = false
 ) {
     <h1 class="govuk-heading-xl">@title</h1>
-    <p class="govuk-body">@{Messages.Epaye.`Use this service to set up a payment plan..`.show}</p>
+    <p class="govuk-body">@{Messages.Epaye.`Use this service to set up a payment plan..`(appConfig.PolicyParameters.InterestRates.hmrcRate).show}</p>
 
     @insetText(InsetText(content = Text(Messages.Epaye.`You must be able to authorise a Direct Debit...`.show)))
 

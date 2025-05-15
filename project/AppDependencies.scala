@@ -12,7 +12,7 @@ object AppDependencies {
     "com.beachape"      %% "enumeratum-play"                         % "1.8.2",
     "org.typelevel"     %% "cats-core"                               % "2.13.0",
     "uk.gov.hmrc"       %% "essttp-backend-cor-journey"              % "2.6.0",
-    "uk.gov.hmrc"       %% "domain-play-30"                          % "12.0.0"
+    "uk.gov.hmrc"       %% "domain-play-30"                          % "12.1.0"
   // format: ON
   )
 

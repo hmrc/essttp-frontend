@@ -65,7 +65,7 @@ class ConfigSpec extends ItSpec {
         AmountInPence(100L)
       ),
       ("PolicyParameters.InterestRates.baseRate", config.PolicyParameters.InterestRates.baseRate, 1.0),
-      ("PolicyParameters.InterestRates.hmrcRate", config.PolicyParameters.InterestRates.hmrcRate, 2.5),
+      ("PolicyParameters.InterestRates.hmrcRate", config.PolicyParameters.InterestRates.hmrcRate, 4),
       (
         "PolicyParameters.EPAYE.maxAmountOfDebt",
         config.PolicyParameters.EPAYE.maxAmountOfDebt,
