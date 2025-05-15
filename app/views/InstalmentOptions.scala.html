@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import config.AppConfig
 @import controllers.routes
 @import messages.Messages
 @import models.InstalmentOption
@@ -30,7 +31,8 @@
         formWithCSRF: FormWithCSRF,
         govukErrorSummary: GovukErrorSummary,
         govukDetails: GovukDetails,
-        requestSupport: RequestSupport
+        requestSupport: RequestSupport,
+        appConfig: AppConfig
 )
 
 @(form: Form[String], options: Seq[InstalmentOption], hasInterestBearingCharge: Boolean)(implicit request: Request[?])
@@ -64,7 +66,7 @@
 
 @detailsContent = {
   <p class="govuk-body">@{Messages.Instalments.`We charge interest on all overdue amounts`.show}</p>
-  <p class="govuk-body">@{Html(Messages.Instalments.`We charge the Bank of England base rate plus 4% per year`.show)}</p>
+  <p class="govuk-body">@{Html(Messages.Instalments.`We charge the Bank of England base rate plus...`(appConfig.PolicyParameters.InterestRates.hmrcRate).show)}</p>
   <p class="govuk-body">@{Messages.Instalments.`If interest rates change...`.show}</p>
 }
 
