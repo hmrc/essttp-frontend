@@ -230,7 +230,7 @@ class UpfrontPaymentController @Inject() (
     implicit request =>
       Redirect(UpfrontPaymentSummaryChangeLink.withName(pageId).targetPage)
         .addingToSession(
-          Routing.clickedChangeFromSessionKey -> routes.UpfrontPaymentController.upfrontPaymentSummary.url
+          Routing.clickedChangeFromSessionKey -> "true"
         )
   }
 

@@ -19,8 +19,8 @@ package controllers
 import actionsmodel.AuthenticatedRequest
 import config.AppConfig
 import controllers.pagerouters.EligibilityRouter
-import essttp.journey.model.Journey._
-import essttp.journey.model._
+import essttp.journey.model.Journey.*
+import essttp.journey.model.*
 import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import essttp.rootmodel.{CanPayUpfront, IsEmailAddressRequired, TaxRegime}
 import essttp.utils.Errors
@@ -233,10 +233,19 @@ object Routing {
             config.pegaChangeLinkReturnUrl(journey.taxRegime, request.lang)
         }
 
+      case j: JourneyStage.AfterUpfrontPaymentAnswers if hasDeclaredUpfrontPaymentAmount(j) =>
+        routes.UpfrontPaymentController.upfrontPaymentSummary.url
+
       case other =>
         Errors.throwServerErrorException(
           s"Cannot change answer from check your payment plan page in journey state ${other.name}"
         )
+    }
+
+  private def hasDeclaredUpfrontPaymentAmount(j: JourneyStage.AfterUpfrontPaymentAnswers) =
+    j.upfrontPaymentAnswers match {
+      case UpfrontPaymentAnswers.NoUpfrontPayment               => false
+      case UpfrontPaymentAnswers.DeclaredUpfrontPayment(amount) => true
     }
 
   def latestPossiblePage(journey: Journey): Call = journey match {
