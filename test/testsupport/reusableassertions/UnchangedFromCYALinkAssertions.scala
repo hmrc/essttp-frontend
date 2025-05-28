@@ -178,6 +178,27 @@ trait UnchangedFromCYALinkAssertions extends AnyFreeSpecLike { this: ItSpec =>
             }
           }
 
+          "after upfront payment answers if the user declared an upfront payment" in {
+            test(
+              () =>
+                EssttpBackend.CanPayWithinSixMonths.findJourney(
+                  testCrypto,
+                  origin
+                )(
+                  JourneyJsonTemplates.`Obtained Can Pay Within 6 months - yes`(
+                    origin,
+                    whyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(TdAll.whyCannotPayReasons)
+                  )
+                ),
+              JourneyJsonTemplates.`Obtained Can Pay Within 6 months - yes`(
+                origin,
+                whyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(TdAll.whyCannotPayReasons)
+              )(using testCrypto),
+              Languages.English,
+              routes.UpfrontPaymentController.upfrontPaymentSummary.url
+            )
+          }
+
         }
 
       }

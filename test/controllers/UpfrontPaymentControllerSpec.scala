@@ -543,7 +543,7 @@ class UpfrontPaymentControllerSpec extends ItSpec, UnchangedFromCYALinkAssertion
 
           val expectedUpdatedSession = Session(
             fakeRequest.session.data
-              .updated(Routing.clickedChangeFromSessionKey, routes.UpfrontPaymentController.upfrontPaymentSummary.url)
+              .updated(Routing.clickedChangeFromSessionKey, "true")
           )
           val result                 = controller.changeFromUpfrontPaymentSummary(pageId)(fakeRequest)
 

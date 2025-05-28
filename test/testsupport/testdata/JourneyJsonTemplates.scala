@@ -353,16 +353,23 @@ object JourneyJsonTemplates {
       origin = origin
     )
 
-  def `Obtained Can Pay Within 6 months - yes`(origin: Origin)(using encrypter: Encrypter): String =
+  def `Obtained Can Pay Within 6 months - yes`(
+    origin:                    Origin,
+    whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
+  )(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
-      stageInfo = StageInfo.obtainedCanPayWithinSixMonthsNotRequired,
-      journeyInfo = JourneyInfo.obtainedCanPayWithinSixMonthsYes(origin.taxRegime, encrypter),
+      stageInfo = StageInfo.obtainedCanPayWithinSixMonthsRequired,
+      journeyInfo = JourneyInfo.obtainedCanPayWithinSixMonthsYes(
+        origin.taxRegime,
+        encrypter,
+        whyCannotPayInFullAnswers = whyCannotPayInFullAnswers
+      ),
       origin = origin
     )
 
   def `Obtained Can Pay Within 6 months - no`(origin: Origin)(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
-      stageInfo = StageInfo.obtainedCanPayWithinSixMonthsNotRequired,
+      stageInfo = StageInfo.obtainedCanPayWithinSixMonthsRequired,
       journeyInfo = JourneyInfo.obtainedCanPayWithinSixMonthsNo(origin.taxRegime, encrypter),
       origin = origin
     )
