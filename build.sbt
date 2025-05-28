@@ -19,8 +19,6 @@ lazy val scalaCompilerOptions = Seq(
 lazy val root = (project in file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
-  .settings(DefaultBuildSettings.scalaSettings*)
-  .settings(DefaultBuildSettings.defaultSettings()*)
   .settings(majorVersion := 1)
   .settings(ThisBuild / useSuperShell:= false)
   .settings(
