@@ -665,7 +665,10 @@ object TdAll {
             originalTieBreaker = None,
             chargeType = Some(ChargeType("InYearRTICharge-Tax")),
             originalChargeType = None,
-            chargeSource = None
+            chargeSource = None,
+            interestStartDate = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
+            taxPeriodFrom = Some(TaxPeriodFrom("2020-08-13")),
+            taxPeriodTo = Some(TaxPeriodTo("2020-08-14"))
           ),
           DebtItemCharges(
             outstandingDebtAmount = OutstandingDebtAmount(AmountInPence(100000)),
@@ -685,7 +688,10 @@ object TdAll {
             originalTieBreaker = None,
             chargeType = Some(ChargeType("InYearRTICharge-Tax")),
             originalChargeType = None,
-            chargeSource = None
+            chargeSource = None,
+            interestStartDate = Some(InterestStartDate(LocalDate.parse("2017-02-07"))),
+            taxPeriodFrom = Some(TaxPeriodFrom("2020-07-13")),
+            taxPeriodTo = Some(TaxPeriodTo("2020-07-14"))
           )
         )
       ),
