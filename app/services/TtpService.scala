@@ -175,7 +175,10 @@ class TtpService @Inject() (
           originalTieBreaker = charge.originalTieBreaker,
           chargeType = Some(charge.chargeType),
           originalChargeType = charge.originalChargeType,
-          chargeSource = charge.chargeSource
+          chargeSource = charge.chargeSource,
+          interestStartDate = charge.interestStartDate,
+          taxPeriodFrom = Some(chargeTypeAssessment.taxPeriodFrom),
+          taxPeriodTo = Some(chargeTypeAssessment.taxPeriodTo)
         )
       }
 
