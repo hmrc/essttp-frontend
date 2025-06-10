@@ -347,21 +347,33 @@ class LandingPageControllerSpec extends ItSpec {
 
       val paragraphs = doc.select("p.govuk-body").asScala.toList
       paragraphs(0)
-        .text() shouldBe "A payment plan allows you to pay your tax charges in instalments over a period of time."
+        .text() shouldBe "Use this service to set up a payment plan for your outstanding Self Assessment bill. Payments are taken by Direct Debit and include interest charged at the Bank of England base rate plus 4% per year."
       paragraphs(1)
-        .text() shouldBe "Your plan covers the tax you owe and, if applicable, the 2 advance payments towards your tax bill. " +
-        "It also covers any penalties or charges against your account. You’ll have to pay interest on the amount you pay late."
-      paragraphs(2).text() shouldBe "To be eligible to set up an online payment plan you need to:"
+        .text() shouldBe "You must be able to authorise a Direct Debit without a signature from any other account holders and be named on the UK bank account you'll use to pay."
+      paragraphs(2)
+        .text() shouldBe "You'll need to stay up to date with your payments or we could ask you to pay in full."
+      paragraphs(3)
+        .text() shouldBe "To set up a plan, you must:"
+
+      doc
+        .select(".govuk-inset-text")
+        .text() shouldBe "To avoid or pay less interest, you can pay your bill in full now."
+
+      val insetTextLink = doc.select("p.govuk-inset-text a").first()
+      insetTextLink.attr("href") shouldBe "https://www.tax.service.gov.uk/pay/self-assessment/start-journey"
+
+      doc.select("h2.govuk-heading-m").first().text() shouldBe "Before you start"
 
       val firstListBullets = lists(0).select("li").asScala.toList
-      firstListBullets.size shouldBe 4
+      firstListBullets.size shouldBe 5
 
-      firstListBullets(0).text() shouldBe "ensure your tax returns are up to date"
+      firstListBullets(0).text() shouldBe "be up to date with your tax returns"
       firstListBullets(1).text() shouldBe "owe £30,000 or less"
-      firstListBullets(2).text() shouldBe "have no other tax debts"
-      firstListBullets(3).text() shouldBe "have no other HMRC payment plans set up"
+      firstListBullets(2).text() shouldBe "be within 60 days of the payment deadline"
+      firstListBullets(3).text() shouldBe "have no other tax debts"
+      firstListBullets(4).text() shouldBe "have no other HMRC payment plans set up"
 
-      paragraphs(3).text() shouldBe "You can use this service within 60 days of the payment deadline."
+      testCallHmrcDetails(doc)
 
       val button = doc.select(".govuk-button")
       button.attr("href") shouldBe routes.LandingController.saLandingPageContinue.url
