@@ -1278,13 +1278,13 @@ object Messages {
 
     val `You must be able to authorise a Direct Debit...` : Message = Message(
       english =
-        "You must be able to authorise a Direct Debit without a signature from any other account holders and be named on the UK bank account you'll use to pay.",
+        "You must be able to authorise a Direct Debit without a signature from any other account holders and be named on the UK bank account you’ll use to pay.",
       welsh =
         "Mae’n rhaid i chi allu awdurdodi Debyd Uniongyrchol heb lofnod gan unrhyw ddeiliaid cyfrif eraill a chael eich enwi ar gyfrif banc y DU y byddwch yn ei ddefnyddio i’w dalu."
     )
 
     val `You'll need to stay up to date with your payments...` : Message = Message(
-      english = "You'll need to stay up to date with your payments or we could ask you to pay in full.",
+      english = "You’ll need to stay up to date with your payments or we could ask you to pay in full.",
       welsh = "Bydd angen i chi gael yr wybodaeth ddiweddaraf am eich taliadau neu gallem ofyn i chi dalu’n llawn."
     )
 

@@ -349,9 +349,9 @@ class LandingPageControllerSpec extends ItSpec {
       paragraphs(0)
         .text() shouldBe "Use this service to set up a payment plan for your outstanding Self Assessment bill. Payments are taken by Direct Debit and include interest charged at the Bank of England base rate plus 4% per year."
       paragraphs(1)
-        .text() shouldBe "You must be able to authorise a Direct Debit without a signature from any other account holders and be named on the UK bank account you'll use to pay."
+        .text() shouldBe "You must be able to authorise a Direct Debit without a signature from any other account holders and be named on the UK bank account you’ll use to pay."
       paragraphs(2)
-        .text() shouldBe "You'll need to stay up to date with your payments or we could ask you to pay in full."
+        .text() shouldBe "You’ll need to stay up to date with your payments or we could ask you to pay in full."
       paragraphs(3)
         .text() shouldBe "To set up a plan, you must:"
 
