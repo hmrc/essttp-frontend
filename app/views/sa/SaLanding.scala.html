@@ -19,15 +19,18 @@
 @import essttp.rootmodel.{BackUrl, TaxRegime}
 @import messages.Messages
 @import play.api.mvc.Request
+@import play.twirl.api.Html
 @import requests.RequestSupport
-@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
+@import views.html.partials.LandingCallHmrcPartial
 @import views.html.templates.Layout
 
 @this(
   layout: Layout,
   govukButton: GovukButton,
   requestSupport: RequestSupport,
-  appConfig: AppConfig
+  appConfig: AppConfig,
+  landingCallHmrcPartial: LandingCallHmrcPartial
 )
 
 @(backUrl: Option[BackUrl])(implicit request: Request[?])
@@ -44,26 +47,26 @@
 ) {
     <h1 class="govuk-heading-xl">@title</h1>
 
-    <p class="govuk-body">@{Messages.Sa.`A payment plan allows you to pay your tax charges in instalments over a period of time.`.show}</p>
+    <p class="govuk-body">@{Messages.Sa.`Use this service to set up a payment plan for your outstanding...`(appConfig.PolicyParameters.InterestRates.hmrcRate).show}</p>
 
-    <p class="govuk-body">@{Messages.Sa.`Your plan covers the tax you owe...`.show}</p>
+    <p class="govuk-inset-text">@{Html(Messages.Sa.`To avoid or pay less interest, you can pay your bill in full now.`(appConfig.PolicyParameters.SA.payNowUrl).show)}</p>
 
-    <p class="govuk-body">@{Messages.Sa.`To be eligible to set up an online payment plan you need to:`.show}</p>
+    <h2 class="govuk-heading-m">@{Messages.Sa.`Before you start`.show}</h2>
+
+    <p class="govuk-body">@{Messages.Sa.`You must be able to authorise a Direct Debit...`.show}</p>
+    <p class="govuk-body">@{Messages.Sa.`You'll need to stay up to date with your payments...`.show}</p>
+
+    <p class="govuk-body">@{Messages.Sa.`To set up a plan, you must:`.show}</p>
 
     <ul class="govuk-list govuk-list--bullet">
-        <li>@{Messages.Sa.`ensure your tax returns are up to date`.show}</li>
+        <li>@{Messages.Sa.`be up to date with your tax returns`.show}</li>
         <li>@{Messages.Sa.`owe ... or less`(appConfig.PolicyParameters.SA.maxAmountOfDebt).show}</li>
+        <li>@{Messages.Sa.`be within ... days of the payment deadline`(appConfig.PolicyParameters.SA.maxAgeOfDebtInDays).show}</li>
         <li>@{Messages.Sa.`have no other tax debts`.show}</li>
         <li>@{Messages.Sa.`have no other HMRC payment plans set up`.show}</li>
     </ul>
 
-    <p class="govuk-body">@{Messages.Sa.`You can use this service within ... days of the payment deadline.`(appConfig.PolicyParameters.SA.maxAgeOfDebtInDays).show}</p>
-
-    <h2 class="govuk-heading-m">@{Messages.Sa.`Before you start`.show}</h2>
-
-    <p class="govuk-body">@{Messages.Sa.`HMRC intend this as a one-off payment plan...`.show}</p>
-
-    <p class="govuk-body">@{Messages.Sa.`To set up the payment plan, you’ll need to know your monthly income and spending, and any savings or investments.`.show}</p>
+    @landingCallHmrcPartial()
 
     @govukButton(Button(
         href = Some(routes.LandingController.saLandingPageContinue.url),

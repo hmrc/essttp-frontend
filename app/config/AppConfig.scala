@@ -161,6 +161,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
       val maxPlanDurationInMonths: Int   = getParam[Int]("max-plan-duration-in-months")
       val maxAgeOfDebtInDays: Int        = getParam[Int]("max-age-of-debt-in-days")
       val payOnlineLink: String          = getParam[String]("pay-online-link")
+      val payNowUrl: String              = getParam[String]("pay-now-url")
     }
 
     object SIMP {
