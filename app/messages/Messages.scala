@@ -1120,6 +1120,18 @@ object Messages {
         s"Defnyddiwch y gwasanaeth hwn i sefydlu cynllun talu ar gyfer eich bil TWE y cyflogwyr sy’n weddill. Mae taliadau’n cael eu cymryd drwy Ddebyd Uniongyrchol ac maent yn cynnwys llog a godir ar gyfradd sylfaenol Banc Lloegr ynghyd â ${percent.toString().stripSuffix(".0")}% y flwyddyn."
     )
 
+    def `To avoid or pay less interest, you can pay your bill in full now.`(link: String): Message = Message(
+      english =
+        s"""To avoid or pay less interest, you can <a href="$link" class="govuk-link" rel="noreferrer noopener" target="_blank">pay your bill in full</a> now.""",
+      welsh =
+        s"""Er mwyn talu llai o log, neu ei osgoi yn gyfan gwbl, gallwch <a href="$link" class="govuk-link" rel="noreferrer noopener" target="_blank">dalu’ch bil yn llawn</a> nawr."""
+    )
+
+    val `Before you start`: Message = Message(
+      english = "Before you start",
+      welsh = "Cyn i chi ddechrau"
+    )
+
     val `You must be able to authorise a Direct Debit...` : Message = Message(
       english =
         "You must be able to authorise a Direct Debit without a signature from any other account holders and be named on the UK bank account you’ll use to pay.",

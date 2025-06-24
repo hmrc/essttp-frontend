@@ -19,8 +19,9 @@
 @import essttp.rootmodel.{BackUrl, TaxRegime}
 @import messages.Messages
 @import play.api.mvc.Request
+@import play.twirl.api.Html
 @import requests.RequestSupport
-@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
 @import views.html.partials.LandingCallHmrcPartial
 @import views.html.templates.Layout
 
@@ -29,7 +30,6 @@
   govukButton: GovukButton,
   requestSupport: RequestSupport,
   appConfig: AppConfig,
-  insetText: GovukInsetText,
   landingCallHmrcPartial: LandingCallHmrcPartial
 )
 
@@ -48,10 +48,12 @@
     <h1 class="govuk-heading-xl">@title</h1>
     <p class="govuk-body">@{Messages.Epaye.`Use this service to set up a payment plan..`(appConfig.PolicyParameters.InterestRates.hmrcRate).show}</p>
 
-    @insetText(InsetText(content = Text(Messages.Epaye.`You must be able to authorise a Direct Debit...`.show)))
+    <p class="govuk-inset-text">@{Html(Messages.Epaye.`To avoid or pay less interest, you can pay your bill in full now.`(appConfig.PolicyParameters.EPAYE.payOnlineLink).show)}</p>
 
+    <h2 class="govuk-heading-m">@{Messages.Epaye.`Before you start`.show}</h2>
+
+    <p class="govuk-body">@{Messages.Epaye.`You must be able to authorise a Direct Debit...`.show}</p>
     <p class="govuk-body">@{Messages.Epaye.`You’ll need to stay up to date with your payments or we could ask you to pay in full.`.show}</p>
-
     <p class="govuk-body">@{Messages.Epaye.`To set up a plan, your company or partnership must:`.show}</p>
 
     <ul class="govuk-list govuk-list--bullet">
