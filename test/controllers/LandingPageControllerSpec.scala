@@ -111,12 +111,21 @@ class LandingPageControllerSpec extends ItSpec {
 
       val insetText = doc.select(".govuk-inset-text").asScala.toList
       insetText.size shouldBe 1
-      insetText(0).text() shouldBe "You must be able to authorise a Direct Debit without a signature from any other " +
-        "account holders and be named on the UK bank account you’ll use to pay."
+      insetText(0).text() shouldBe "To avoid or pay less interest, you can pay your bill in full now."
+
+      val insetTextLink = doc.select("p.govuk-inset-text a").first()
+      insetTextLink.attr("href") shouldBe "https://tax.service.gov.uk/business-account/epaye/overdue-payments"
+
+      doc.select("h2.govuk-heading-m").first().text() shouldBe "Before you start"
+      paragraphs(1)
 
       paragraphs(1)
+        .text() shouldBe "You must be able to authorise a Direct Debit without a signature from any other " +
+        "account holders and be named on the UK bank account you’ll use to pay."
+
+      paragraphs(2)
         .text() shouldBe "You’ll need to stay up to date with your payments or we could ask you to pay in full."
-      paragraphs(2).text() shouldBe "To set up a plan, your company or partnership must:"
+      paragraphs(3).text() shouldBe "To set up a plan, your company or partnership must:"
 
       val lists   = doc.select(".govuk-list").asScala.toList
       lists.size shouldBe 1
