@@ -152,7 +152,6 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         LocalDate.parse(string, formatter)
       }
-      val payNowUrl: String                   = getParam[String]("pay-now-url")
     }
 
     object SA {
