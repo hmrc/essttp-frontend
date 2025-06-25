@@ -19,6 +19,7 @@
 @import essttp.rootmodel.{BackUrl, TaxRegime}
 @import messages.Messages
 @import play.api.mvc.Request
+@import play.twirl.api.Html
 @import requests.RequestSupport
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import views.html.templates.Layout
@@ -60,6 +61,8 @@
       <li>@{Messages.Simp.`part of the payment upfront and part in monthly instalments`.show}</li>
       <li>@{Messages.Simp.`monthly instalments only`.show}</li>
   </ul>
+
+  <p class="govuk-body">@{Html(Messages.Simp.`Alternatively, you can pay your bill in full now`(appConfig.PolicyParameters.SIMP.payOnlineLink).show)}</p>
 
   <h2 class="govuk-heading-m">@{Messages.Simp.`Before you start`.show}</h2>
 
