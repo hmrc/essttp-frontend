@@ -499,7 +499,8 @@ class LandingPageControllerSpec extends ItSpec {
 
       paragraphs(3).text() shouldBe "Alternatively, you can pay your bill in full now."
 
-      val payInFullLink = doc.select("p.govuk-body a").first()
+      val payInFullLink = paragraphs(3).select("a.govuk-link")
+      payInFullLink.text shouldBe "pay your bill in full"
       payInFullLink.attr("href") shouldBe "https://www.gov.uk/simple-assessment/pay-online"
 
       val button = doc.select(".govuk-button")
