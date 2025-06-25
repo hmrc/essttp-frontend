@@ -1391,6 +1391,13 @@ object Messages {
       welsh = "fesul rhandaliad misol yn unig"
     )
 
+    def `Alternatively, you can pay your bill in full now`(link: String): Message = Message(
+      english =
+        s"""Alternatively, you can <a href="$link" class="govuk-link" rel="noreferrer noopener" target="_blank">pay your bill in full</a> now.""",
+      welsh =
+        s"""Fel arall, gallwch <a href="$link" class="govuk-link" rel="noreferrer noopener" target="_blank">dalu’ch bil yn llawn</a> nawr."""
+    )
+
     val `Before you start`: Message = Message(
       english = "Before you start",
       welsh = "Cyn i chi ddechrau"

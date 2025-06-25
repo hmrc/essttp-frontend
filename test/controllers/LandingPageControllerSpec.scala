@@ -497,6 +497,11 @@ class LandingPageControllerSpec extends ItSpec {
       secondListBullets(0).text() shouldBe "part of the payment upfront and part in monthly instalments"
       secondListBullets(1).text() shouldBe "monthly instalments only"
 
+      paragraphs(3).text() shouldBe "Alternatively, you can pay your bill in full now."
+
+      val payInFullLink = doc.select("p.govuk-body a").first()
+      payInFullLink.attr("href") shouldBe "https://www.gov.uk/simple-assessment/pay-online"
+
       val button = doc.select(".govuk-button")
       button.attr("href") shouldBe routes.LandingController.simpLandingPageContinue.url
       button.text() shouldBe Messages.`Start now`.english
