@@ -451,9 +451,9 @@ object StartJourneyController {
       )
     )
 
-    val customerType     = Some(form.customerType)
+    val customerType     = form.customerType
     val transitionToCDCS =
-      if customerType.exists(_.entryName == CustomerTypes.ClassicSANonTransitioned.entryName)
+      if form.customerType.exists(_.entryName == CustomerTypes.ClassicSANonTransitioned.entryName)
       then form.transitionToCDCS.map(TransitionToCDCS(_))
       else None
 
