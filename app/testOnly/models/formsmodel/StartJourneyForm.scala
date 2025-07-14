@@ -21,6 +21,7 @@ import cats.syntax.either.*
 import config.AppConfig
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.*
+import essttp.rootmodel.ttp.{CustomerType, CustomerTypes}
 import models.MoneyUtil.{amountOfMoneyFormatter, formatAmountOfMoneyWithoutPoundSign}
 import models.{EligibilityError, EligibilityErrors, Language}
 import play.api.data.Forms.*
@@ -34,7 +35,6 @@ import util.EnumFormatter
 
 import scala.util.{Random, Try}
 
-//TODO OPS-12584 - Clean this up when TTP has implemented the changes to the Eligibility API. The newTtpApi option in start page will not be needed
 final case class StartJourneyForm(
   signInAs:                      SignInAs,
   enrolments:                    Seq[Enrolment],
@@ -49,6 +49,7 @@ final case class StartJourneyForm(
   useChargeReference:            Option[Boolean],
   chargeBeforeMaxAccountingDate: Option[Boolean],
   ddInProgress:                  Option[Boolean],
+  customerType:                  CustomerType,
   transitionToCDCS:              Option[Boolean],
   chargeSource:                  Option[String],
   planLengthMinAndMax:           PlanMinAndMaxLength,
@@ -98,6 +99,7 @@ object StartJourneyForm {
         "useChargeReference"            -> chargesOptionalFieldsMapping,
         "chargeBeforeMaxAccountingDate" -> chargesOptionalFieldsMapping,
         "ddInProgress"                  -> chargesOptionalFieldsMapping,
+        "customerType"                  -> customerTypeMapping,
         "transitionToCDCS"              -> chargesOptionalFieldsMapping,
         "chargeSource"                  -> chargesOptionalStringMapping,
         ""                              -> PlanMinAndMaxLength.planMinAndMaxLengthMapping,
@@ -262,4 +264,12 @@ object StartJourneyForm {
   private val chargesOptionalStringMapping: Mapping[Option[String]] =
     optional(text)
 
+  private def customerTypeMapping(using Language): FieldMapping[CustomerType] =
+    Forms.of(
+      EnumFormatter.format(
+        `enum` = CustomerTypes,
+        errorMessageIfMissing = Messages.`Select a customer type`.show,
+        errorMessageIfEnumError = Messages.`Select a customer type`.show
+      )
+    )
 }
