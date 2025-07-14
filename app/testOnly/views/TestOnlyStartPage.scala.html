@@ -17,13 +17,14 @@
 @import config.AppConfig
 @import essttp.journey.model.Origins
 @import essttp.rootmodel.TaxRegime
+@import essttp.rootmodel.ttp.CustomerTypes
 @import models.{EligibilityError, EligibilityErrors}
 @import play.api.data.Form
 @import play.api.mvc.Request
 @import requests.RequestSupport
-@import testOnly.controllers.{routes => testOnlyRoutes}
+@import testOnly.controllers.routes as testOnlyRoutes
 @import testOnly.models.formsmodel.{Enrolments, SignInAs, StartJourneyForm}
-@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
 
 @this(
 testOnlyLayout: TestOnlyLayout,
@@ -36,6 +37,7 @@ govukErrorSummary: GovukErrorSummary,
 govukInput: GovukInput,
 appConfig: AppConfig
 )
+
 
 @(taxRegime: TaxRegime, form: Form[StartJourneyForm])(implicit request: Request[?])
 
@@ -365,7 +367,7 @@ appConfig: AppConfig
     govukRadios(Radios(
         fieldset = Some(Fieldset(
             legend = Some(Legend(
-                content = Text(s"Optional charges field: $fieldName"),
+                content = Text(s"Optional field: $fieldName"),
                 classes = "govuk-fieldset__legend--m",
                 isPageHeading = false
             ))
@@ -393,7 +395,7 @@ appConfig: AppConfig
         ),
     ),
     classes = "govuk-radios--small govuk-radios--inline",
-    hint = Some(Hint(content = Text("Selection will be applied to all charges")))
+    hint = Some(Hint(content = Text("Only relevant to Classic SA - Non Transitioned customer type. Will be set to None for the other customer types.")))
     ))
 }
 @planMinLengthInput(defaultValue: Int) = {
@@ -492,6 +494,42 @@ appConfig: AppConfig
         hint = Some(Hint(content = Text("subTrans is 4 digits.")))
     ))
 }
+
+@customerTypeContent = {
+@govukRadios(Radios(
+    fieldset = Some(Fieldset(
+        legend = Some(Legend(
+            content = Text("Customer type"),
+            classes = "govuk-fieldset__legend--m",
+            isPageHeading = false
+        ))
+    )),
+    idPrefix = Some("customerType"),
+    name = "customerType",
+    errorMessage = form.error("customerType").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
+        content = Text(e.message)
+    )),
+    items = Seq(
+        RadioItem(
+            content = Text("MTD(ITSA)"),
+            value = Some(CustomerTypes.MTDITSA.entryName),
+            checked = form.data.get("customerType").fold(true)(_ == CustomerTypes.MTDITSA.entryName)
+        ),
+        RadioItem(
+            content = Text("Classic SA - Non Transitioned"),
+            value = Some(CustomerTypes.ClassicSANonTransitioned.entryName),
+            checked = form.data.get("customerType").fold(false)(_ == CustomerTypes.ClassicSANonTransitioned.entryName)
+        ),
+        RadioItem(
+            content = Text("Classic SA - Transitioned"),
+            value = Some(CustomerTypes.ClassicSATransitioned.entryName),
+            checked = form.data.get("customerType").fold(false)(_ == CustomerTypes.ClassicSATransitioned.entryName)
+        )
+    ),
+    classes = "govuk-radios--small"
+))
+}
+
 
 @payeContent = {
 @formWithCSRF(action = testOnlyRoutes.StartJourneyController.startJourneyEpayeSubmit) {
@@ -821,6 +859,8 @@ appConfig: AppConfig
     @chargesOptionalFieldRadios("isInterestBearingCharge")
 
     @chargesOptionalFieldRadios("useChargeReference")
+
+    @customerTypeContent
 
     @chargesOptionalFieldRadios("transitionToCDCS")
 

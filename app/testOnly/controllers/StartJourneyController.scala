@@ -451,6 +451,12 @@ object StartJourneyController {
       )
     )
 
+    val customerType     = Some(form.customerType)
+    val transitionToCDCS =
+      if customerType.exists(_.entryName == CustomerTypes.ClassicSANonTransitioned.entryName)
+      then form.transitionToCDCS.map(TransitionToCDCS(_))
+      else None
+
     val individualDetails =
       Some(
         IndividualDetails(
@@ -459,8 +465,8 @@ object StartJourneyController {
           Some(LastName("North")),
           Some(DateOfBirth(LocalDate.of(2000, 1, 1))),
           Some(DistrictNumber("666")),
-          Some(CustomerTypes.MTDITSA),
-          form.transitionToCDCS.map(TransitionToCDCS(_))
+          customerType,
+          transitionToCDCS
         )
       )
 

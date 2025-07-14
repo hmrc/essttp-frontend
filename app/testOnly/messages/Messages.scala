@@ -23,4 +23,6 @@ object Messages {
   val `Select how to be signed in`: Message                        = Message(english = "Select how to be signed in")
   val `Select which origin the journey should start from`: Message =
     Message(english = "Select which origin the journey should start from")
+  val `Select a customer type`: Message                            =
+    Message(english = "Select a customer type")
 }
