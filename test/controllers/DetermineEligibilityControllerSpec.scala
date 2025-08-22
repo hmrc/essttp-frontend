@@ -20,14 +20,15 @@ import config.AppConfig
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.TaxRegime.Sa
-import essttp.rootmodel.ttp.eligibility.{EligibilityRules, RegimeDigitalCorrespondence}
+import essttp.rootmodel.ttp.CustomerTypes
+import essttp.rootmodel.ttp.eligibility.{EligibilityRules, IndividualDetails, RegimeDigitalCorrespondence}
 import models.{EligibilityReqIdentificationFlag, Languages}
 import org.jsoup.Jsoup
-import org.scalatest.prop.TableDrivenPropertyChecks._
+import org.scalatest.prop.TableDrivenPropertyChecks.*
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
-import play.api.test.Helpers._
-import testsupport.TdRequest._
+import play.api.test.Helpers.*
+import testsupport.TdRequest.*
 import testsupport.reusableassertions.ContentAssertions
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend, Ttp}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll, TtpJsonResponses}
@@ -1209,93 +1210,140 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
       redirectLocation(result) shouldBe Some(PageUrls.saNotEligibleUrl)
     }
 
-    "SA user with IR-SA enrolment, NINO found but no HMRC-MTD-IT enrolment should be directed to Sign up for Making Tax Digital page with content in English" in {
-      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
-        TaxRegime.Sa,
-        TdAll.notEligibleEligibilityPass,
-        TdAll.eligibleEligibilityRules,
-        regimeDigitalCorrespondence = true
-      )
+    CustomerTypes.values
+      .filter(_.value != CustomerTypes.MTDITSA.value)
+      .map(Some(_))
+      .appended(None)
+      .foreach { customerType =>
+        s"SA user (customer type = ${customerType.toString}) with IR-SA enrolment, NINO found but no HMRC-MTD-IT enrolment should be directed " +
+          "to Your Bill" in {
+            val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
+              TaxRegime.Sa,
+              TdAll.eligibleEligibilityPass,
+              TdAll.eligibleEligibilityRules,
+              regimeDigitalCorrespondence = true,
+              maybeCustomerType = customerType
+            )
 
-      Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Sa)(eligibilityCheckResponseJson)
-      stubCommonActions(authNino = Some("QQ123456A"))
-      EssttpBackend.DetermineTaxId.findJourney(Origins.Sa.Bta)()
-      EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(
-        TdAll.journeyId,
-        JourneyJsonTemplates.`Eligibility Checked - Eligible - No HMRC-MTD-IT enrolment`()
-      )
+            Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Sa)(eligibilityCheckResponseJson)
+            stubCommonActions(authNino = Some("QQ123456A"), authAllEnrolments = Some(Set(TdAll.saEnrolment)))
+            EssttpBackend.DetermineTaxId.findJourney(Origins.Sa.Bta)()
+            EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(
+              TdAll.journeyId,
+              JourneyJsonTemplates.`Eligibility Checked - Eligible`()
+            )
 
-      val result = controller.determineEligibility(fakeRequest)
+            val result = controller.determineEligibility(fakeRequest)
 
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.signupMtdUrl)
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(PageUrls.yourBillIsUrl)
 
-      val followRedirectResult = route(app, fakeRequestWithPath(PageUrls.signupMtdUrl)).fold(
-        fail("Redirect route could not be handled")
-      )(identity)
-      status(followRedirectResult) shouldBe Status.OK
+            EssttpBackend.EligibilityCheck.verifyUpdateEligibilityRequest(
+              journeyId = TdAll.journeyId,
+              expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(
+                TdAll.eligibleEligibilityPass,
+                TdAll.eligibleEligibilityRules,
+                TaxRegime.Sa,
+                RegimeDigitalCorrespondence(value = true),
+                maybeIndividalDetails =
+                  customerType.map(c => IndividualDetails(None, None, None, None, None, Some(c), None))
+              )
+            )(using testOperationCryptoFormat)
 
-      val page = Jsoup.parse(contentAsString(followRedirectResult))
+          }
+      }
 
-      ContentAssertions.commonPageChecks(
-        page,
-        expectedH1 = "Sign up for Making Tax Digital for Income Tax to use this service",
-        shouldBackLinkBePresent = false,
-        expectedSubmitUrl = None,
-        regimeBeingTested = Some(TaxRegime.Sa)
-      )
-      val expectedLeadingP1 =
-        "You must sign up for Making Tax Digital for Income Tax before you can set up a Self Assessment payment plan online."
-      val expectedP2        =
-        "If you’ve already signed up, sign in with the Government Gateway user ID that has your enrolment."
+    "SA user (customer type = MTD-ITSA) with IR-SA enrolment, NINO found but no HMRC-MTD-IT enrolment should be directed " +
+      "to Sign up for Making Tax Digital page with content in English" in {
+        val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
+          TaxRegime.Sa,
+          TdAll.eligibleEligibilityPass,
+          TdAll.eligibleEligibilityRules,
+          regimeDigitalCorrespondence = true,
+          maybeCustomerType = Some(CustomerTypes.MTDITSA)
+        )
 
-      page.select(".govuk-body").asScala.toList(0).text() shouldBe expectedLeadingP1
-      page.select(".govuk-body").asScala.toList(1).text() shouldBe expectedP2
+        Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Sa)(eligibilityCheckResponseJson)
+        stubCommonActions(authNino = Some("QQ123456A"), authAllEnrolments = Some(Set(TdAll.saEnrolment)))
+        EssttpBackend.DetermineTaxId.findJourney(Origins.Sa.Bta)()
+        EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(
+          TdAll.journeyId,
+          JourneyJsonTemplates.`Eligibility Checked - Eligible - No HMRC-MTD-IT enrolment`()
+        )
 
-      ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Sa, Languages.English)
-    }
+        val result = controller.determineEligibility(fakeRequest)
 
-    "SA user with IR-SA enrolment, NINO found but no HMRC-MTD-IT enrolment should be directed to Sign up for Making Tax Digital page with content in Welsh" in {
-      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
-        TaxRegime.Sa,
-        TdAll.notEligibleEligibilityPass,
-        TdAll.eligibleEligibilityRules,
-        regimeDigitalCorrespondence = true
-      )
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(PageUrls.signupMtdUrl)
 
-      Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Sa)(eligibilityCheckResponseJson)
-      stubCommonActions(authNino = Some("QQ123456A"))
-      EssttpBackend.DetermineTaxId.findJourney(Origins.Sa.Bta)()
-      EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(
-        TdAll.journeyId,
-        JourneyJsonTemplates.`Eligibility Checked - Eligible - No HMRC-MTD-IT enrolment`()
-      )
+        val followRedirectResult = route(app, fakeRequestWithPath(PageUrls.signupMtdUrl)).fold(
+          fail("Redirect route could not be handled")
+        )(identity)
+        status(followRedirectResult) shouldBe Status.OK
 
-      val followRedirectResult = route(app, fakeRequestWithPath(PageUrls.signupMtdUrl).withLangWelsh()).fold(
-        fail("Redirect route could not be handled")
-      )(identity)
-      status(followRedirectResult) shouldBe Status.OK
+        val page = Jsoup.parse(contentAsString(followRedirectResult))
 
-      val page = Jsoup.parse(contentAsString(followRedirectResult))
+        ContentAssertions.commonPageChecks(
+          page,
+          expectedH1 = "Sign up for Making Tax Digital for Income Tax to use this service",
+          shouldBackLinkBePresent = false,
+          expectedSubmitUrl = None,
+          regimeBeingTested = Some(TaxRegime.Sa)
+        )
+        val expectedLeadingP1 =
+          "You must sign up for Making Tax Digital for Income Tax before you can set up a Self Assessment payment plan online."
+        val expectedP2        =
+          "If you’ve already signed up, sign in with the Government Gateway user ID that has your enrolment."
 
-      ContentAssertions.commonPageChecks(
-        page,
-        expectedH1 =
-          "Cofrestru ar gyfer y cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm er mwyn defnyddio’r gwasanaeth hwn",
-        shouldBackLinkBePresent = false,
-        expectedSubmitUrl = None,
-        regimeBeingTested = Some(TaxRegime.Sa),
-        language = Languages.Welsh
-      )
-      val expectedLeadingP1 =
-        "Mae’n rhaid i chi gofrestru ar gyfer y cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm cyn i chi allu trefnu cynllun talu ar gyfer Hunanasesiad ar-lein."
-      val expectedP2        =
-        "Os ydych chi eisoes wedi cofrestru, mae’n rhaid i chi fewngofnodi gan ddefnyddio’r Dynodydd Defnyddiwr (ID) Porth y Llywodraeth sydd â’ch cofrestriad."
+        page.select(".govuk-body").asScala.toList(0).text() shouldBe expectedLeadingP1
+        page.select(".govuk-body").asScala.toList(1).text() shouldBe expectedP2
 
-      page.select(".govuk-body").asScala.toList(0).text() shouldBe expectedLeadingP1
-      page.select(".govuk-body").asScala.toList(1).text() shouldBe expectedP2
+        ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Sa, Languages.English)
+      }
 
-      ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Sa, Languages.Welsh)
-    }
+    "SA user with IR-SA enrolment (customer type = MTD-ITSA), NINO found but no HMRC-MTD-IT enrolment should be directed to " +
+      "Sign up for Making Tax Digital page with content in Welsh" in {
+        val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
+          TaxRegime.Sa,
+          TdAll.eligibleEligibilityPass,
+          TdAll.eligibleEligibilityRules,
+          regimeDigitalCorrespondence = true,
+          maybeCustomerType = Some(CustomerTypes.MTDITSA)
+        )
+
+        Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Sa)(eligibilityCheckResponseJson)
+        stubCommonActions(authNino = Some("QQ123456A"), authAllEnrolments = Some(Set(TdAll.saEnrolment)))
+        EssttpBackend.DetermineTaxId.findJourney(Origins.Sa.Bta)()
+        EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(
+          TdAll.journeyId,
+          JourneyJsonTemplates.`Eligibility Checked - Eligible - No HMRC-MTD-IT enrolment`()
+        )
+
+        val followRedirectResult = route(app, fakeRequestWithPath(PageUrls.signupMtdUrl).withLangWelsh()).fold(
+          fail("Redirect route could not be handled")
+        )(identity)
+        status(followRedirectResult) shouldBe Status.OK
+
+        val page = Jsoup.parse(contentAsString(followRedirectResult))
+
+        ContentAssertions.commonPageChecks(
+          page,
+          expectedH1 =
+            "Cofrestru ar gyfer y cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm er mwyn defnyddio’r gwasanaeth hwn",
+          shouldBackLinkBePresent = false,
+          expectedSubmitUrl = None,
+          regimeBeingTested = Some(TaxRegime.Sa),
+          language = Languages.Welsh
+        )
+        val expectedLeadingP1 =
+          "Mae’n rhaid i chi gofrestru ar gyfer y cynllun Troi Treth yn Ddigidol ar gyfer Treth Incwm cyn i chi allu trefnu cynllun talu ar gyfer Hunanasesiad ar-lein."
+        val expectedP2        =
+          "Os ydych chi eisoes wedi cofrestru, mae’n rhaid i chi fewngofnodi gan ddefnyddio’r Dynodydd Defnyddiwr (ID) Porth y Llywodraeth sydd â’ch cofrestriad."
+
+        page.select(".govuk-body").asScala.toList(0).text() shouldBe expectedLeadingP1
+        page.select(".govuk-body").asScala.toList(1).text() shouldBe expectedP2
+
+        ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Sa, Languages.Welsh)
+      }
   }
 }

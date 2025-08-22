@@ -17,6 +17,7 @@
 package testsupport.testdata
 
 import essttp.rootmodel.TaxRegime
+import essttp.rootmodel.ttp.CustomerType
 import essttp.rootmodel.ttp.eligibility.{EligibilityPass, EligibilityRules}
 
 import java.time.LocalDate
@@ -31,7 +32,8 @@ object TtpJsonResponses {
     poundsInsteadOfPence:               Boolean = false,
     maybeChargeIsInterestBearingCharge: Option[Boolean] = None,
     maybeChargeUseChargeReference:      Option[Boolean] = None,
-    maybeChargeBeforeMaxAccountingDate: Option[Boolean] = None
+    maybeChargeBeforeMaxAccountingDate: Option[Boolean] = None,
+    maybeCustomerType:                  Option[CustomerType] = None
   ): String = {
 
     val isInterestBearingChargeValue = maybeChargeIsInterestBearingCharge match {
@@ -49,6 +51,11 @@ object TtpJsonResponses {
       case None       => ""
     }
 
+    val individialDetailsValue = maybeCustomerType match {
+      case Some(customerType) => s""""individualDetails": { "customerType": "${customerType.value}" },"""
+      case None               => ""
+    }
+
     s"""
        |{
        |  "processingDateTime": "2022-03-23T13:49:51.141Z",
@@ -59,6 +66,7 @@ object TtpJsonResponses {
        |          "postcodeDate": "2022-01-31"
        |        }
        |  ],
+       |  $individialDetailsValue
        |  "customerDetails": [{}],
        |  "addresses": [{
        |      "addressType" : "Residential",

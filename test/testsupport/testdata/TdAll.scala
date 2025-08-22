@@ -306,7 +306,8 @@ object TdAll {
     chargeIsInterestBearingCharge:       Option[Boolean] = None,
     chargeUseChargeReference:            Option[Boolean] = None,
     chargeChargeBeforeMaxAccountingDate: Option[Boolean] = None,
-    ddInProgress:                        Option[Boolean] = None
+    ddInProgress:                        Option[Boolean] = None,
+    maybeIndividalDetails:               Option[IndividualDetails] = None
   ): EligibilityCheckResult =
     EligibilityCheckResult(
       processingDateTime = ProcessingDateTime("2022-03-23T13:49:51.141Z"),
@@ -359,7 +360,7 @@ object TdAll {
         )
       ),
       customerDetails = List(CustomerDetail(None, None)),
-      individualDetails = None,
+      individualDetails = maybeIndividalDetails,
       addresses = List(
         Address(
           addressType = AddressType("Residential"),

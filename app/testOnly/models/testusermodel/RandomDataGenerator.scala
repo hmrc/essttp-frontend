@@ -16,11 +16,10 @@
 
 package testOnly.models.testusermodel
 
-import cats.syntax.eq._
+import cats.syntax.eq.*
 import essttp.rootmodel.epaye.{TaxOfficeNumber, TaxOfficeReference}
 import essttp.rootmodel.{Email, EmpRef, Nino, SaUtr, Vrn}
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
-import uk.gov.hmrc.domain.SaUtrGenerator
 
 import java.util.UUID
 import scala.annotation.tailrec
@@ -75,7 +74,7 @@ object RandomDataGenerator {
   }
 
   def nextSaUtr()(using r: Random): SaUtr =
-    SaUtr(new SaUtrGenerator(r).nextSaUtr.utr)
+    SaUtrGenerator.nextSaUtr
 
   def nextNino()(using Random): Nino =
     Nino(s"AA${nextNumber(6)}A")

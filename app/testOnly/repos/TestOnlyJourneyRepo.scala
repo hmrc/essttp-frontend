@@ -19,7 +19,6 @@ package testOnly.repos
 import com.mongodb.client.model.ReplaceOptions
 import essttp.journey.model.JourneyId
 import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions, Indexes}
-import org.mongodb.scala.SingleObservableFuture
 import testOnly.models.TestOnlyJourney
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
