@@ -26,6 +26,7 @@ import controllers.pagerouters.EligibilityRouter
 import essttp.journey.model.{Journey, JourneyStage}
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.TaxRegime.Sa
+import essttp.rootmodel.ttp.CustomerTypes
 import essttp.rootmodel.ttp.eligibility.{EligibilityCheckResult, EligibilityPass, EligibilityStatus}
 import play.api.mvc.*
 import services.{AuditService, JourneyService, TtpService}
@@ -72,11 +73,12 @@ class DetermineEligibilityController @Inject() (
     } yield
       if (eligibilityCheckResult.isEligible) {
         journey.taxRegime match {
-          case Sa if r.enrolments.getEnrolment("HMRC-MTD-IT").isDefined =>
-            mtdEligibleResult(eligibilityCheckResult)
-          case Sa                                                       =>
-            mtdIneligibleResult(eligibilityCheckResult)
-          case _                                                        =>
+          case Sa if eligibilityCheckResult.individualDetails.flatMap(_.customerType).contains(CustomerTypes.MTDITSA) =>
+            if (r.enrolments.getEnrolment("HMRC-MTD-IT").isDefined)
+              mtdEligibleResult(eligibilityCheckResult)
+            else
+              mtdIneligibleResult(eligibilityCheckResult)
+          case _                                                                                                      =>
             eligibilityCheckResult
         }
       } else {
@@ -115,8 +117,9 @@ class DetermineEligibilityController @Inject() (
       case TaxRegime.Sa => r.nino.map(_ => ())
       case _            => Some(())
     }
+
   // if SA users have IR-SA enrollment, but no HMRC-MTD-IT enrollment, they are directed to the 'Sign up tp MDT' kickout page
-  private def mtdIneligibleResult(result: EligibilityCheckResult): EligibilityCheckResult                    =
+  private def mtdIneligibleResult(result: EligibilityCheckResult): EligibilityCheckResult =
     result.copy(
       eligibilityRules = result.eligibilityRules.copy(
         noMtditsaEnrollment = Some(true)
