@@ -7,11 +7,11 @@ object AppDependencies {
   val compile: Seq[ModuleID] = Seq(
     // format: OFF
     "uk.gov.hmrc"       %% "bootstrap-frontend-play-30"              % bootstrapVersion,
-    "uk.gov.hmrc"       %% "play-frontend-hmrc-play-30"              % "12.8.0",
+    "uk.gov.hmrc"       %% "play-frontend-hmrc-play-30"              % "12.11.0",
     "uk.gov.hmrc"       %% "play-conditional-form-mapping-play-30"   % "3.3.0",
     "com.beachape"      %% "enumeratum-play"                         % "1.8.2",
     "org.typelevel"     %% "cats-core"                               % "2.13.0",
-    "uk.gov.hmrc"       %% "essttp-backend-cor-journey"              % "2.11.0",
+    "uk.gov.hmrc"       %% "essttp-backend-cor-journey"              % "2.12.0",
     "uk.gov.hmrc"       %% "domain-play-30"                          % "13.0.0"
   // format: ON
   )
@@ -23,7 +23,7 @@ object AppDependencies {
     "org.scalatestplus.play"  %% "scalatestplus-play"      % "7.0.2",
     "org.jsoup"               %  "jsoup"                   % "1.21.2",
     "uk.gov.hmrc"             %% "bootstrap-test-play-30"  % bootstrapVersion,
-    "org.scalacheck"          %% "scalacheck"              % "1.18.1",
+    "org.scalacheck"          %% "scalacheck"              % "1.19.0",
     "org.wiremock"            %  "wiremock-standalone"     % "3.13.1"
   // format: ON
   ).map(_ % Test)
