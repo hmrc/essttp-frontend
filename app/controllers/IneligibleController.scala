@@ -156,15 +156,6 @@ class IneligibleController @Inject() (
     )
   }
 
-  val saDebtTooOldPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
-    Ok(
-      views.partials.ineligibleTemplatePage(
-        pageh1 = Messages.NotEligible.`Call us about a payment plan`,
-        leadingContent = views.partials.debtTooOldPartial(appConfig.PolicyParameters.SA.maxAgeOfDebtInDays)
-      )
-    )
-  }
-
   val vatDebtBeforeAccountingDatePage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     Ok(
       views.partials.ineligibleTemplatePage(

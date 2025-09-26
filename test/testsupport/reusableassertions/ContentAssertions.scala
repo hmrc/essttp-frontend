@@ -58,7 +58,7 @@ object ContentAssertions extends RichMatchers {
         englishOption.text() shouldBe "English"
 
         welshOption.select("a").attr("hreflang") shouldBe "cy"
-        welshOption.select("span.govuk-visually-hidden").text() shouldBe "Newid yr iaith ir Gymraeg"
+        welshOption.select("span.govuk-visually-hidden").text() shouldBe "Newid yr iaith i’r Gymraeg"
         welshOption.select("span[aria-hidden=true]").text() shouldBe "Cymraeg"
 
       case Languages.Welsh =>

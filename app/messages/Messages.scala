@@ -1327,11 +1327,6 @@ object Messages {
       welsh = s"mae arnoch ${maxAmountOfDebt.gdsFormatInPounds} neu lai"
     )
 
-    def `be within ... days of the payment deadline`(maxAgeOfDebtInDays: Int): Message = Message(
-      english = s"be within ${maxAgeOfDebtInDays.toString} days of the payment deadline",
-      welsh = s"rydych o fewn ${maxAgeOfDebtInDays.toString} diwrnod i’r dyddiad cau ar gyfer talu"
-    )
-
     val `have no other tax debts`: Message = Message(
       english = "have no other tax debts",
       welsh = "nid oes gennych unrhyw ddyledion treth eraill"

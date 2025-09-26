@@ -282,7 +282,7 @@ class IneligibleControllerSpec extends ItSpec {
           )
         }
 
-        if (taxRegime != TaxRegime.Simp) {
+        if (taxRegime != TaxRegime.Simp && taxRegime != TaxRegime.Sa) {
 
           s"${taxRegime.entryName} Debt too old ineligible page correctly" in {
             stubCommonActions(authAllEnrolments = enrolments)
@@ -293,7 +293,7 @@ class IneligibleControllerSpec extends ItSpec {
             val result: Future[Result] = taxRegime match {
               case TaxRegime.Epaye => controller.epayeDebtTooOldPage(fakeRequest)
               case TaxRegime.Vat   => controller.vatDebtTooOldPage(fakeRequest)
-              case TaxRegime.Sa    => controller.saDebtTooOldPage(fakeRequest)
+              case TaxRegime.Sa    => throw new NotImplementedError("Not relevant to SA")
               case TaxRegime.Simp  => throw new NotImplementedError("Not relevant to SIMP")
             }
 
@@ -806,7 +806,7 @@ class IneligibleControllerSpec extends ItSpec {
           )
         }
 
-        if (taxRegime != TaxRegime.Simp) {
+        if (taxRegime != TaxRegime.Simp && taxRegime != TaxRegime.Sa) {
 
           s"${taxRegime.entryName} Debt too old ineligible page correctly" in {
             stubCommonActions(authAllEnrolments = enrolments)
@@ -817,7 +817,7 @@ class IneligibleControllerSpec extends ItSpec {
             val result: Future[Result] = taxRegime match {
               case TaxRegime.Epaye => controller.epayeDebtTooOldPage(fakeRequest.withLangWelsh())
               case TaxRegime.Vat   => controller.vatDebtTooOldPage(fakeRequest.withLangWelsh())
-              case TaxRegime.Sa    => controller.saDebtTooOldPage(fakeRequest.withLangWelsh())
+              case TaxRegime.Sa    => throw new NotImplementedError("Not relevant to SA")
               case TaxRegime.Simp  => throw new NotImplementedError("Not relevant to SIMP")
             }
 
