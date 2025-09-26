@@ -265,7 +265,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
           "ExceedsMaxDebtAge - SA",
           TdAll.notEligibleExceedsMaxDebtAge,
           "chargesOverMaxDebtAge",
-          PageUrls.saDebtTooOldUrl,
+          PageUrls.saNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(Origins.Sa.Bta),
           Origins.Sa.Bta
         ),

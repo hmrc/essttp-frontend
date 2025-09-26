@@ -52,7 +52,6 @@ GET    /pay-self-assessment-tax-bill-in-full                controllers.Ineligib
 GET    /pay-simple-assessment-tax-bill-in-full              controllers.IneligibleController.simpDebtTooSmallPage
 GET    /debt-too-old-epaye                                  controllers.IneligibleController.epayeDebtTooOldPage
 GET    /debt-too-old-vat                                    controllers.IneligibleController.vatDebtTooOldPage
-GET    /debt-too-old-sa                                     controllers.IneligibleController.saDebtTooOldPage
 GET    /debt-before-accounting-date-vat                     controllers.IneligibleController.vatDebtBeforeAccountingDatePage
 GET    /file-your-return                                    controllers.IneligibleController.epayeFileYourReturnPage
 GET    /return-not-filed-vat                                controllers.IneligibleController.vatFileYourReturnPage

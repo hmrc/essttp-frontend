@@ -117,7 +117,7 @@ object EligibilityRouter {
   private def whichDebtTooOldPage(taxRegime: TaxRegime): Call = taxRegime match {
     case TaxRegime.Epaye => routes.IneligibleController.epayeDebtTooOldPage
     case TaxRegime.Vat   => routes.IneligibleController.vatDebtTooOldPage
-    case TaxRegime.Sa    => routes.IneligibleController.saDebtTooOldPage
+    case TaxRegime.Sa    => routes.IneligibleController.saGenericIneligiblePage
     case TaxRegime.Simp  => routes.IneligibleController.simpGenericIneligiblePage
   }
 
@@ -131,7 +131,7 @@ object EligibilityRouter {
   private def whichDebtBeforeAccountingDatePage(taxRegime: TaxRegime): Call = taxRegime match {
     case TaxRegime.Epaye => throw new NotImplementedError("Ineligibility reason not relevant to EPAYE")
     case TaxRegime.Vat   => routes.IneligibleController.vatDebtBeforeAccountingDatePage
-    case TaxRegime.Sa    => routes.IneligibleController.saDebtTooOldPage
+    case TaxRegime.Sa    => routes.IneligibleController.saGenericIneligiblePage
     case TaxRegime.Simp  => routes.IneligibleController.simpGenericIneligiblePage
   }
 

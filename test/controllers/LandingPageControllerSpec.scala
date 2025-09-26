@@ -379,13 +379,12 @@ class LandingPageControllerSpec extends ItSpec {
       doc.select("h2.govuk-heading-m").first().text() shouldBe "Before you start"
 
       val firstListBullets = lists(0).select("li").asScala.toList
-      firstListBullets.size shouldBe 5
+      firstListBullets.size shouldBe 4
 
       firstListBullets(0).text() shouldBe "be up to date with your tax returns"
       firstListBullets(1).text() shouldBe "owe £30,000 or less"
-      firstListBullets(2).text() shouldBe "be within 60 days of the payment deadline"
-      firstListBullets(3).text() shouldBe "have no other tax debts"
-      firstListBullets(4).text() shouldBe "have no other HMRC payment plans set up"
+      firstListBullets(2).text() shouldBe "have no other tax debts"
+      firstListBullets(3).text() shouldBe "have no other HMRC payment plans set up"
 
       testCallHmrcDetails(doc)
 
@@ -393,6 +392,7 @@ class LandingPageControllerSpec extends ItSpec {
       button.attr("href") shouldBe routes.LandingController.saLandingPageContinue.url
       button.text() shouldBe Messages.`Start now`.english
     }
+
     "return 200 and the SA landing page when not logged in" in {
       EssttpBackend.StartJourney.findJourney(origin = Origins.Sa.Bta)
       val fakeRequest            = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId")
