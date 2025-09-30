@@ -49,7 +49,7 @@ class PaymentPlanSetUpControllerWithResearchBannerSpec extends ItSpec {
     title.text() shouldBe "Tell us what you think about this service"
 
     val link = bannerText.select("a.hmrc-user-research-banner__link")
-    link.attr("href") shouldBe "https://s.userzoom.com/m/MSBDMTU1M1MxMDAw"
+    link.attr("href") shouldBe "https://s.userzoom.com/m/MSBDMTU1M1MxMjA3"
     link.attr("rel") shouldBe "noopener noreferrer"
     link.attr("target") shouldBe "_blank"
     link.text() shouldBe "Complete our short survey (opens in new tab)"
@@ -786,7 +786,7 @@ class PaymentPlanSetUpControllerNoResearchBannerSpec extends ItSpec {
     title.text() shouldBe "Tell us what you think about this service"
 
     val link = bannerText.select("a.hmrc-user-research-banner__link")
-    link.attr("href") shouldBe "https://s.userzoom.com/m/MSBDMTU1M1MxMDAw"
+    link.attr("href") shouldBe "https://s.userzoom.com/m/MSBDMTU1M1MxMjA3"
     link.attr("rel") shouldBe "noopener noreferrer"
     link.attr("target") shouldBe "_blank"
     link.text() shouldBe "Complete our short survey (opens in new tab)"
