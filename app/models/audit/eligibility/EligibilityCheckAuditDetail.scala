@@ -16,9 +16,10 @@
 
 package models.audit.eligibility
 
+import essttp.rootmodel.ttp.CustomerType
 import essttp.rootmodel.ttp.eligibility.ChargeTypeAssessment
 import models.audit.{AuditDetail, TaxDetail}
-import play.api.libs.json._
+import play.api.libs.json.*
 
 final case class EligibilityCheckAuditDetail(
   eligibilityResult:               EligibilityResult,
@@ -28,6 +29,7 @@ final case class EligibilityCheckAuditDetail(
   origin:                          String,
   taxType:                         String,
   taxDetail:                       TaxDetail,
+  customerType:                    Option[CustomerType],
   authProviderId:                  String,
   chargeTypeAssessment:            List[ChargeTypeAssessment],
   correlationId:                   String,
