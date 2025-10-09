@@ -39,7 +39,7 @@ class BarsConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2)(u
 
   def validateBankDetails(
     barsValidateRequest: BarsValidateRequest
-  )(implicit requestHeader: RequestHeader): Future[HttpResponse] =
+  )(using RequestHeader): Future[HttpResponse] =
     httpClient
       .post(url"$validateUrl")
       .withBody(Json.toJson(barsValidateRequest))
@@ -52,7 +52,7 @@ class BarsConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2)(u
 
   def verifyPersonal(
     barsVerifyPersonalRequest: BarsVerifyPersonalRequest
-  )(implicit requestHeader: RequestHeader): Future[BarsVerifyResponse] =
+  )(using RequestHeader): Future[BarsVerifyResponse] =
     httpClient
       .post(url"$verifyPersonalUrl")
       .withBody(Json.toJson(barsVerifyPersonalRequest))
@@ -65,7 +65,7 @@ class BarsConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2)(u
 
   def verifyBusiness(
     barsVerifyBusinessRequest: BarsVerifyBusinessRequest
-  )(implicit requestHeader: RequestHeader): Future[BarsVerifyResponse] =
+  )(using RequestHeader): Future[BarsVerifyResponse] =
     httpClient
       .post(url"$verifyBusinessUrl")
       .withBody(Json.toJson(barsVerifyBusinessRequest))

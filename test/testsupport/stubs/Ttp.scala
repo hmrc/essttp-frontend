@@ -37,9 +37,10 @@ object Ttp {
   private val affordableQuotesUrl: String              = "/debts/time-to-pay/affordability/affordable-quotes"
   private val enactArrangementUrl: String              = "/debts/time-to-pay/self-serve/arrangement"
   private val ttpCorrelationIdHeader: (String, String) = ("correlationId", TdAll.correlationId.value.toString)
+  private val internalAuthHeader: (String, String)     = ("Authorization", "valid-auth-token")
 
-  def ttpVerify[A](url: String, expectedPayload: A)(using Format[A]): Unit =
-    WireMockHelpers.verifyWithBodyParse(url, ttpCorrelationIdHeader, expectedPayload)
+  def ttpVerify[A: Format](url: String, expectedPayload: A): Unit =
+    WireMockHelpers.verifyWithBodyParse(url, ttpCorrelationIdHeader, internalAuthHeader)(expectedPayload)
 
   object Eligibility {
     def stubRetrieveEligibility(taxRegime: TaxRegime)(

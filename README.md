@@ -94,6 +94,23 @@ installation, a green "Quick submit" button will be visible near the top-left of
 button will autocomplete the inputs on the page (including the test-only start page) and automatically click the continue 
 button on that page.
 
+### Internal auth token for TTP
+TTP are protecting their API endpoints with internal auth. We present an `Authorization` header to our requests to them 
+with the header value read from our config value with key `internal-auth.token`. By default, this is set to `valid-auth-token`.
+To make this work locally, make sure `INTERNAL_AUTH` is running - it should be already running through this service's service manager
+profile. Then run the curl command:
+```
+curl -i -X POST -H 'Content-Type: application/json'  -d '{
+  "token": "valid-auth-token",         
+  "principal": "essttp-frontend",
+  "permissions": [{
+    "resourceType": "time-to-pay-eligibility",
+    "resourceLocation": "*",
+    "actions": ["*"]
+  }]
+}' 'http://localhost:8470/test-only/token'
+```
+
 
 ---
 
