@@ -20,6 +20,7 @@ import essttp.crypto.CryptoFormat
 import essttp.journey.model.CorrelationId
 import essttp.rootmodel.{CannotPayReason, Email}
 import essttp.rootmodel.bank.BankDetails
+import essttp.rootmodel.ttp.CustomerType
 import essttp.rootmodel.ttp.eligibility.{EmailSource, RegimeDigitalCorrespondence}
 import models.audit.{AuditDetail, Schedule, TaxDetail}
 import play.api.libs.json.{Json, OWrites}
@@ -32,6 +33,7 @@ final case class PaymentPlanSetUpAuditDetail(
   origin:                      String,
   taxType:                     String,
   taxDetail:                   TaxDetail,
+  customerType:                Option[CustomerType],
   correlationId:               CorrelationId,
   ppReferenceNo:               String,
   authProviderId:              String,

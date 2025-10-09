@@ -422,6 +422,14 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
     val (maybeEmail, maybeEmailSource) = journey.fold(_ => (None, None), toEmailInfo)
     val canPayWithinSixMonthsAnswers   = journey.fold(_.canPayWithinSixMonthsAnswers, _.canPayWithinSixMonthsAnswers)
     val whyCannotPayInFullAnswers      = journey.fold(_.whyCannotPayInFullAnswers, _.whyCannotPayInFullAnswers)
+    val customerType                   = taxRegime match {
+      case TaxRegime.Sa =>
+        journey.fold(
+          _.eligibilityCheckResult.individualDetails.flatMap(_.customerType),
+          _.eligibilityCheckResult.individualDetails.flatMap(_.customerType)
+        )
+      case _            => None
+    }
 
     PaymentPlanSetUpAuditDetail(
       bankDetails = directDebitDetails,
@@ -431,6 +439,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       origin = toAuditString(origin),
       taxType = taxRegime.toString,
       taxDetail = toTaxDetail(eligibilityCheckResult),
+      customerType = customerType,
       correlationId = correlationId,
       ppReferenceNo = maybeArrangementResponse.map(_.customerReference.value).getOrElse("N/A"),
       authProviderId = r.ggCredId.value,
