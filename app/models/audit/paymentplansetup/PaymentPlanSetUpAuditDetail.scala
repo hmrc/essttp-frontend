@@ -33,7 +33,7 @@ final case class PaymentPlanSetUpAuditDetail(
   origin:                      String,
   taxType:                     String,
   taxDetail:                   TaxDetail,
-  customerType:                Option[CustomerType],
+  saCustomerType:              Option[CustomerType],
   correlationId:               CorrelationId,
   ppReferenceNo:               String,
   authProviderId:              String,

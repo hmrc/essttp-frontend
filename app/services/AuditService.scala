@@ -27,7 +27,6 @@ import essttp.journey.model.*
 import essttp.rootmodel.*
 import essttp.rootmodel.bank.BankDetails
 import essttp.rootmodel.pega.{GetCaseResponse, StartCaseResponse}
-import essttp.rootmodel.ttp.CustomerTypes
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
 import essttp.rootmodel.ttp.eligibility.{EligibilityCheckResult, EmailSource}
 import essttp.utils.Errors
@@ -181,12 +180,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
   private def toEligibilityCheck(
     journey:          Started,
     enrollmentReason: EnrollmentReasons.NotEnrolled | EnrollmentReasons.InactiveEnrollment | EnrollmentReasons.NoNino
-  )(using r: AuthenticatedJourneyRequest[?]): EligibilityCheckAuditDetail = {
-    val customerType = journey.taxRegime match {
-      case TaxRegime.Sa => Some(CustomerTypes.MTDITSA)
-      case _            => None
-    }
-
+  )(using r: AuthenticatedJourneyRequest[?]): EligibilityCheckAuditDetail =
     EligibilityCheckAuditDetail(
       eligibilityResult = EligibilityResult.Ineligible,
       enrollmentReasons = Some(enrollmentReason),
@@ -195,14 +189,13 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       origin = toAuditString(journey.origin),
       taxType = journey.taxRegime.toString,
       taxDetail = TaxDetail(None, None, None, None, None, None, None),
-      customerType = customerType,
+      saCustomerType = None,
       authProviderId = r.ggCredId.value,
       chargeTypeAssessment = List.empty,
       correlationId = journey.correlationId.value.toString,
       futureChargeLiabilitiesExcluded = None,
       regimeDigitalCorrespondence = true
     )
-  }
 
   private given CanEqual[Boolean, Any] = CanEqual.derived
 
@@ -227,11 +220,6 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       }
     }
 
-    val customerType = journey.taxRegime match {
-      case TaxRegime.Sa => eligibilityCheckResult.individualDetails.flatMap(_.customerType)
-      case _            => None
-    }
-
     EligibilityCheckAuditDetail(
       eligibilityResult = eligibilityResult,
       enrollmentReasons = enrollmentReasons,
@@ -240,7 +228,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       origin = toAuditString(journey.origin),
       taxType = journey.taxRegime.toString,
       taxDetail = toTaxDetail(eligibilityCheckResult),
-      customerType = customerType,
+      saCustomerType = eligibilityCheckResult.individualDetails.flatMap(_.customerType),
       authProviderId = r.ggCredId.value,
       chargeTypeAssessment = eligibilityCheckResult.chargeTypeAssessment,
       correlationId = journey.correlationId.value.toString,
@@ -439,7 +427,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       origin = toAuditString(origin),
       taxType = taxRegime.toString,
       taxDetail = toTaxDetail(eligibilityCheckResult),
-      customerType = customerType,
+      saCustomerType = customerType,
       correlationId = correlationId,
       ppReferenceNo = maybeArrangementResponse.map(_.customerReference.value).getOrElse("N/A"),
       authProviderId = r.ggCredId.value,

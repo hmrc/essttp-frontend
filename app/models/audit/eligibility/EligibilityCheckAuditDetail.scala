@@ -29,7 +29,7 @@ final case class EligibilityCheckAuditDetail(
   origin:                          String,
   taxType:                         String,
   taxDetail:                       TaxDetail,
-  customerType:                    Option[CustomerType],
+  saCustomerType:                  Option[CustomerType],
   authProviderId:                  String,
   chargeTypeAssessment:            List[ChargeTypeAssessment],
   correlationId:                   String,
