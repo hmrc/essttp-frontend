@@ -52,12 +52,12 @@ class TtpService @Inject() (
   ttpConnector: TtpConnector,
   auditService: AuditService,
   appConfig:    AppConfig
-)(implicit executionContext: ExecutionContext) {
+)(using ExecutionContext) {
 
   import appConfig.eligibilityReqIdentificationFlag
 
-  implicit val cryptoFormat: CryptoFormat = CryptoFormat.NoOpCryptoFormat
-  implicit val eq: Eq[TaxRegime]          = Eq.fromUniversalEquals
+  given CryptoFormat  = CryptoFormat.NoOpCryptoFormat
+  given Eq[TaxRegime] = Eq.fromUniversalEquals
 
   def determineEligibility(
     journey: ComputedTaxId
@@ -103,7 +103,7 @@ class TtpService @Inject() (
       (JourneyStage.AfterCheckedPaymentPlan & Journey, PaymentPlanAnswers.PaymentPlanNoAffordability)
     ],
     eligibilityCheckResult: EligibilityCheckResult
-  )(implicit requestHeader: RequestHeader): Future[AffordableQuotesResponse] = {
+  )(using RequestHeader): Future[AffordableQuotesResponse] = {
     val journeyMerged                                      = journey.map[Journey](_._1).merge
     val upfrontPaymentAnswers                              = TtpService.upfrontPaymentAnswersFromJourney(journeyMerged)
     val initialPaymentAmount: Option[UpfrontPaymentAmount] =

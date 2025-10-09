@@ -29,9 +29,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class EnrolmentService @Inject() (journeyService: JourneyService, auditService: AuditService)(using
-  ec: ExecutionContext
-) {
+class EnrolmentService @Inject() (journeyService: JourneyService, auditService: AuditService)(using ExecutionContext) {
 
   def determineTaxIdAndUpdateJourney(
     journey:    Journey.Started,
@@ -68,7 +66,7 @@ class EnrolmentService @Inject() (journeyService: JourneyService, auditService: 
   private def handleTaxRegime[ID <: TaxId](
     idResult: EnrolmentDefResult[ID],
     journey:  Journey.Started
-  )(update: ID => Future[Journey])(implicit r: AuthenticatedJourneyRequest[?], hc: HeaderCarrier): Future[Option[ID]] =
+  )(update: ID => Future[Journey])(using AuthenticatedJourneyRequest[?], HeaderCarrier): Future[Option[ID]] =
     idResult match {
       case Success(id) =>
         update(id).map(_ => Some(id))

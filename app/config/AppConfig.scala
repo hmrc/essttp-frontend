@@ -44,6 +44,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     config.get[Boolean]("features.eligibilityReqIdentificationFlag")
   )
   val userResearchBannerEnabled: Boolean                                   = config.get[Boolean]("features.user-research-banner-enabled")
+  val internalAuthToken: String                                            = config.get[String]("internal-auth.token")
 
   object BaseUrl {
     val platformHost: Option[String]              = config.getOptional[String]("platform.frontend.host")

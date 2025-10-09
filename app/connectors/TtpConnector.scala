@@ -29,7 +29,7 @@ import play.api.mvc.RequestHeader
 import play.api.libs.ws.writeableOf_JsValue
 import requests.RequestSupport.hc
 import uk.gov.hmrc.http.HttpReads.Implicits.readFromJson
-import uk.gov.hmrc.http.StringContextOps
+import uk.gov.hmrc.http.{HeaderNames, StringContextOps}
 import uk.gov.hmrc.http.client.HttpClientV2
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -38,7 +38,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class TtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2)(using ExecutionContext) {
 
   import appConfig.eligibilityReqIdentificationFlag
-  implicit val cryptoFormat: CryptoFormat = CryptoFormat.NoOpCryptoFormat
+
+  given CryptoFormat = CryptoFormat.NoOpCryptoFormat
 
   private val correlationIdHeaderKey: String = appConfig.TtpHeaders.correlationId
 
@@ -47,13 +48,16 @@ class TtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2)(us
     */
   private val eligibilityUrl: String = appConfig.BaseUrl.timeToPayEligibilityUrl + "/debts/time-to-pay/eligibility"
 
-  def callEligibilityApi(eligibilityRequest: CallEligibilityApiRequest, correlationId: CorrelationId)(implicit
-    requestHeader: RequestHeader
+  private val internalAuthAuthorisationHeader = HeaderNames.authorisation -> appConfig.internalAuthToken
+
+  def callEligibilityApi(eligibilityRequest: CallEligibilityApiRequest, correlationId: CorrelationId)(using
+    RequestHeader
   ): Future[EligibilityCheckResult] =
     httpClient
       .post(url"$eligibilityUrl")
       .withBody(Json.toJson(eligibilityRequest))
       .setHeader((correlationIdHeaderKey, correlationId.value.toString))
+      .setHeader(internalAuthAuthorisationHeader)
       .execute[EligibilityCheckResult]
 
   /** Affordability Api (min/max) implemented by Ttp service.
@@ -61,13 +65,14 @@ class TtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2)(us
     */
   private val affordabilityUrl: String = appConfig.BaseUrl.timeToPayUrl + "/debts/time-to-pay/self-serve/affordability"
 
-  def callAffordabilityApi(instalmentAmountRequest: InstalmentAmountRequest, correlationId: CorrelationId)(implicit
-    requestHeader: RequestHeader
+  def callAffordabilityApi(instalmentAmountRequest: InstalmentAmountRequest, correlationId: CorrelationId)(using
+    RequestHeader
   ): Future[InstalmentAmounts] =
     httpClient
       .post(url"$affordabilityUrl")
       .withBody(Json.toJson(instalmentAmountRequest))
       .setHeader((correlationIdHeaderKey, correlationId.value.toString))
+      .setHeader(internalAuthAuthorisationHeader)
       .execute[InstalmentAmounts]
 
   /** Affordable Quotes API (for instalments) implemented by ttp service.
@@ -76,13 +81,14 @@ class TtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2)(us
   private val affordableQuotesUrl: String =
     appConfig.BaseUrl.timeToPayUrl + "/debts/time-to-pay/affordability/affordable-quotes"
 
-  def callAffordableQuotesApi(affordableQuotesRequest: AffordableQuotesRequest, correlationId: CorrelationId)(implicit
-    requestHeader: RequestHeader
+  def callAffordableQuotesApi(affordableQuotesRequest: AffordableQuotesRequest, correlationId: CorrelationId)(using
+    RequestHeader
   ): Future[AffordableQuotesResponse] =
     httpClient
       .post(url"$affordableQuotesUrl")
       .withBody(Json.toJson(affordableQuotesRequest))
       .setHeader((correlationIdHeaderKey, correlationId.value.toString))
+      .setHeader(internalAuthAuthorisationHeader)
       .execute[AffordableQuotesResponse]
 
   /** Enact arrangement API (for setting up the arrangement) implemented by ttp service.
@@ -90,12 +96,13 @@ class TtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2)(us
     */
   private val arrangementUrl: String = appConfig.BaseUrl.timeToPayUrl + "/debts/time-to-pay/self-serve/arrangement"
 
-  def callArrangementApi(arrangementRequest: ArrangementRequest, correlationId: CorrelationId)(implicit
-    requestHeader: RequestHeader
+  def callArrangementApi(arrangementRequest: ArrangementRequest, correlationId: CorrelationId)(using
+    RequestHeader
   ): Future[ArrangementResponse] =
     httpClient
       .post(url"$arrangementUrl")
       .withBody(Json.toJson(arrangementRequest))
       .setHeader((correlationIdHeaderKey, correlationId.value.toString))
+      .setHeader(internalAuthAuthorisationHeader)
       .execute[ArrangementResponse]
 }
