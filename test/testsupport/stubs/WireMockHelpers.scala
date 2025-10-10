@@ -58,13 +58,14 @@ object WireMockHelpers {
   /** Same as above, but overloaded with headers to check and also compares a Json serialised expected A with the
     * wiremock request
     */
-  def verifyWithBodyParse[A](url: String, headers: (String, String), expected: A)(using Format[A]): Unit =
-    verify(
-      postRequestedFor(urlPathEqualTo(url))
-        .withHeader(headers._1, equalTo(headers._2))
+  def verifyWithBodyParse[A: Format](url: String, headers: (String, String)*)(expected: A): Unit =
+    verify {
+      val request = postRequestedFor(urlPathEqualTo(url))
         .andMatching((value: Request) => customValueMatcher(url, value))
         .withRequestBody(equalToJson(Json.toJson(expected).toString()))
-    )
+
+      headers.foldLeft(request) { case (acc, (key, value)) => acc.withHeader(key, equalTo(value)) }
+    }
 
   /** Helper method to attempt to parse request body into type, using asOpt. If option is empty, it can't and wiremock
     * verify should fail, else wiremock verify is successful.

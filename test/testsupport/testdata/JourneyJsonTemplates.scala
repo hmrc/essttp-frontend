@@ -317,7 +317,7 @@ object JourneyJsonTemplates {
     whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(
       Set(CannotPayReason.WaitingForRefund, CannotPayReason.NoMoneySetAside)
     )
-  )(implicit encrypter: Encrypter): String =
+  )(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
       stageInfo = StageInfo.retrievedExtremeDates,
       journeyInfo = JourneyInfo
