@@ -235,6 +235,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       futureChargeLiabilitiesExcluded = Some(eligibilityCheckResult.futureChargeLiabilitiesExcluded),
       regimeDigitalCorrespondence = eligibilityCheckResult.regimeDigitalCorrespondence.value
     )
+
   }
 
   private def toPaymentPlanBeforeSubmissionAuditDetail(
@@ -419,7 +420,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       case _            => None
     }
 
-    PaymentPlanSetUpAuditDetail(
+    val c = PaymentPlanSetUpAuditDetail(
       bankDetails = directDebitDetails,
       schedule = Schedule.createSchedule(selectedPaymentPlan, dayOfMonth),
       status = if (Status.isSuccessful(status)) "successfully sent to TTP" else "failed",
@@ -437,6 +438,8 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       canPayInSixMonths = canPayWithinSixMonthsAnswersToBoolean(canPayWithinSixMonthsAnswers),
       unableToPayReason = whyCannotPayInFullAnswersToSet(whyCannotPayInFullAnswers)
     )
+    println(customerType.toString)
+    c
   }
 
   private def toEmailVerificationRequested(

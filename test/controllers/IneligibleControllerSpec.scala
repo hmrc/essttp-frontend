@@ -24,9 +24,9 @@ import org.jsoup.nodes.Document
 import org.scalatest.Assertion
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Result
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import testsupport.ItSpec
-import testsupport.TdRequest._
+import testsupport.TdRequest.*
 import testsupport.reusableassertions.ContentAssertions
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend}
 import testsupport.testdata.{JourneyJsonTemplates, TdAll}
