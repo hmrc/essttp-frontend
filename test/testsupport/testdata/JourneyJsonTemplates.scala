@@ -302,12 +302,17 @@ object JourneyJsonTemplates {
 
   def `Entered Upfront payment amount`(
     origin:                             Origin,
-    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
+    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true),
+    whyCannotPayReasons:                Set[CannotPayReason] = Set.empty
   )(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
       stageInfo = StageInfo.enteredUpfrontPaymentAmount,
-      journeyInfo =
-        JourneyInfo.answeredUpfrontPaymentAmount(origin.taxRegime, encrypter, maybeChargeIsInterestBearingCharge),
+      journeyInfo = JourneyInfo.answeredUpfrontPaymentAmount(
+        origin.taxRegime,
+        encrypter,
+        maybeChargeIsInterestBearingCharge,
+        whyCannotPayReasons
+      ),
       origin = origin
     )
 
