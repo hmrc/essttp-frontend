@@ -20,10 +20,10 @@ import actionsmodel.AuthenticatedJourneyRequest
 import cats.syntax.eq.*
 import essttp.bars.model.BarsVerifyStatusResponse
 import essttp.crypto.CryptoFormat
+import essttp.journey.model.*
 import essttp.journey.model.CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths
 import essttp.journey.model.Journey.*
 import essttp.journey.model.JourneyStage.{AfterCheckedPaymentPlan, AfterEnteredCanYouSetUpDirectDebit, AfterStartedPegaCase}
-import essttp.journey.model.*
 import essttp.rootmodel.*
 import essttp.rootmodel.bank.BankDetails
 import essttp.rootmodel.pega.{GetCaseResponse, StartCaseResponse}
@@ -189,7 +189,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       origin = toAuditString(journey.origin),
       taxType = journey.taxRegime.toString,
       taxDetail = TaxDetail(None, None, None, None, None, None, None),
-      saCustomerType = None,
+      customerType = None,
       authProviderId = r.ggCredId.value,
       chargeTypeAssessment = List.empty,
       correlationId = journey.correlationId.value.toString,
@@ -228,7 +228,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       origin = toAuditString(journey.origin),
       taxType = journey.taxRegime.toString,
       taxDetail = toTaxDetail(eligibilityCheckResult),
-      saCustomerType = eligibilityCheckResult.individualDetails.flatMap(_.customerType),
+      customerType = eligibilityCheckResult.individualDetails.flatMap(_.customerType),
       authProviderId = r.ggCredId.value,
       chargeTypeAssessment = eligibilityCheckResult.chargeTypeAssessment,
       correlationId = journey.correlationId.value.toString,
@@ -427,7 +427,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       origin = toAuditString(origin),
       taxType = taxRegime.toString,
       taxDetail = toTaxDetail(eligibilityCheckResult),
-      saCustomerType = customerType,
+      customerType = customerType,
       correlationId = correlationId,
       ppReferenceNo = maybeArrangementResponse.map(_.customerReference.value).getOrElse("N/A"),
       authProviderId = r.ggCredId.value,

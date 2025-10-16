@@ -21,6 +21,7 @@ import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.TaxRegime.Sa
 import essttp.rootmodel.ttp.CustomerTypes
+import essttp.rootmodel.ttp.CustomerTypes.MTDITSA
 import essttp.rootmodel.ttp.eligibility.{EligibilityRules, IndividualDetails, RegimeDigitalCorrespondence}
 import models.{EligibilityReqIdentificationFlag, Languages}
 import org.jsoup.Jsoup
@@ -930,6 +931,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         TaxRegime.Sa,
         regimeDigitalCorrespondence = true,
         maybeChargeBeforeMaxAccountingDate = Some(true),
+        maybeCustomerType = Some(MTDITSA),
         eligibilityRules = TdAll.eligibleEligibilityRules.copy(noMtditsaEnrollment = Some(false))
       )
       // for audit event
@@ -963,7 +965,9 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
           TdAll.eligibleEligibilityRules.copy(noMtditsaEnrollment = Some(false)),
           TaxRegime.Sa,
           RegimeDigitalCorrespondence(value = true),
-          chargeChargeBeforeMaxAccountingDate = Some(true)
+          chargeChargeBeforeMaxAccountingDate = Some(true),
+          maybeIndividalDetails =
+            Some(IndividualDetails(None, None, None, None, None, customerType = Some(MTDITSA), None))
         )
       )(using testOperationCryptoFormat)
 
@@ -980,6 +984,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
              |  "taxDetail": {
              |    "utr": "1234567895"
              |  },
+             |  "customerType": "MTD(ITSA)",
              |  "authProviderId": "authId-999",
              |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
              |  "regimeDigitalCorrespondence": true,

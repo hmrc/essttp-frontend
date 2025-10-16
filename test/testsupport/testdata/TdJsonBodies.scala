@@ -17,6 +17,7 @@
 package testsupport.testdata
 
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Origin, Origins, WhyCannotPayInFullAnswers}
+import essttp.rootmodel.TaxRegime.Sa
 import essttp.rootmodel.ttp.eligibility.{EligibilityPass, EligibilityRules}
 import essttp.rootmodel.{DayOfMonth, TaxRegime, UpfrontPaymentAmount}
 import paymentsEmailVerification.models.EmailVerificationResult
@@ -169,6 +170,10 @@ object TdJsonBodies {
       |  "customerDetails": [ ${email.fold("") { e =>
         s"""{ "emailAddress" : "${encryptString(e, encrypter)}", "emailSource" : "ETMP"}"""
       }} ],
+      |  ${if taxRegime == Sa then s"""
+      |  "individualDetails" : {
+      |     "customerType" : "MTD(ITSA)"
+      |  },""" else ""}
       |  "addresses": [
       |  {
       |    "addressType": "Residential"
