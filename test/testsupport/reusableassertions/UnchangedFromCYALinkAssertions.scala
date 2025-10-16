@@ -112,6 +112,23 @@ trait UnchangedFromCYALinkAssertions extends AnyFreeSpecLike { this: ItSpec =>
           )
         }
 
+        "after upfront payment amount" in {
+          test(
+            () =>
+              EssttpBackend.UpfrontPaymentAmount.findJourney(
+                testCrypto,
+                origin,
+                whyCannotPayReasons = TdAll.whyCannotPayReasons
+              )(),
+            JourneyJsonTemplates.`Entered Upfront payment amount`(
+              origin,
+              whyCannotPayReasons = TdAll.whyCannotPayReasons
+            )(using testCrypto),
+            Languages.English,
+            routes.UpfrontPaymentController.upfrontPaymentSummary.url
+          )
+        }
+
         if (origin.taxRegime != TaxRegime.Simp) {
           "AfterStartedPegaCase when the user is navigating in" - {
 

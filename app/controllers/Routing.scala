@@ -233,6 +233,9 @@ object Routing {
             config.pegaChangeLinkReturnUrl(journey.taxRegime, request.lang)
         }
 
+      case j: JourneyStage.AfterEnteredUpfrontPaymentAmount =>
+        routes.UpfrontPaymentController.upfrontPaymentSummary.url
+
       case j: JourneyStage.AfterUpfrontPaymentAnswers if hasDeclaredUpfrontPaymentAmount(j) =>
         routes.UpfrontPaymentController.upfrontPaymentSummary.url
 

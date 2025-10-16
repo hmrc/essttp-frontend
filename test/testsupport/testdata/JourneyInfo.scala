@@ -442,15 +442,23 @@ object JourneyInfo {
       maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge
     )
 
-  def whyCannotPayInFullRequired(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
+  def whyCannotPayInFullRequired(
+    taxRegime:           TaxRegime,
+    encrypter:           Encrypter,
+    whyCannotPayReasons: Set[CannotPayReason] = TdAll.whyCannotPayReasons
+  ): List[JourneyInfoAsJson] =
     whyCannotPayInFullRequiredAnswer() :: eligibilityCheckedEligible(taxRegime, encrypter)
 
   def answeredCanPayUpfrontYes(
     taxRegime:                          TaxRegime,
     encrypter:                          Encrypter,
-    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
+    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true),
+    whyCannotPayReasons:                Set[CannotPayReason] = Set.empty
   ): List[JourneyInfoAsJson] =
-    canPayUpfront :: whyCannotPayInFullNotRequired(taxRegime, encrypter, maybeChargeIsInterestBearingCharge)
+    if (whyCannotPayReasons.isEmpty)
+      canPayUpfront :: whyCannotPayInFullNotRequired(taxRegime, encrypter, maybeChargeIsInterestBearingCharge)
+    else
+      canPayUpfront :: whyCannotPayInFullRequired(taxRegime, encrypter, whyCannotPayReasons)
 
   def answeredCanPayUpfrontNo(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
     cannotPayUpfront :: whyCannotPayInFullNotRequired(taxRegime, encrypter)
@@ -458,9 +466,15 @@ object JourneyInfo {
   def answeredUpfrontPaymentAmount(
     taxRegime:                          TaxRegime,
     encrypter:                          Encrypter,
-    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
+    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true),
+    whyCannotPayReasons:                Set[CannotPayReason] = Set.empty
   ): List[JourneyInfoAsJson] =
-    upfrontPaymentAmount :: answeredCanPayUpfrontYes(taxRegime, encrypter, maybeChargeIsInterestBearingCharge)
+    upfrontPaymentAmount :: answeredCanPayUpfrontYes(
+      taxRegime,
+      encrypter,
+      maybeChargeIsInterestBearingCharge,
+      whyCannotPayReasons
+    )
 
   def retrievedExtremeDates(
     taxRegime:                          TaxRegime,

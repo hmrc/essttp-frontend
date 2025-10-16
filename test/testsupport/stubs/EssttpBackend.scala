@@ -358,12 +358,16 @@ object EssttpBackend {
     def findJourney(
       encrypter:                          Encrypter,
       origin:                             Origin = Origins.Epaye.Bta,
-      maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
+      maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true),
+      whyCannotPayReasons:                Set[CannotPayReason] = Set.empty
     )(
-      jsonBody:                           String =
-        JourneyJsonTemplates.`Entered Upfront payment amount`(origin, maybeChargeIsInterestBearingCharge)(using
-          encrypter
-        )
+      jsonBody:                           String = JourneyJsonTemplates.`Entered Upfront payment amount`(
+        origin,
+        maybeChargeIsInterestBearingCharge,
+        whyCannotPayReasons
+      )(using
+        encrypter
+      )
     ): StubMapping =
       findByLatestSessionId(jsonBody)
   }
