@@ -602,7 +602,8 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
             taxRegime = origin.taxRegime,
             eligibilityPass = TdAll.notEligibleEligibilityPass,
             eligibilityRules = eligibilityRules,
-            regimeDigitalCorrespondence = true
+            regimeDigitalCorrespondence = true,
+            maybeCustomerType = Some(CustomerTypes.MTDITSA)
           )
           // for audit event
           val eligibilityCheckResponseJsonAsPounds =
@@ -611,7 +612,8 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
               eligibilityPass = TdAll.notEligibleEligibilityPass,
               eligibilityRules = eligibilityRules,
               poundsInsteadOfPence = true,
-              regimeDigitalCorrespondence = true
+              regimeDigitalCorrespondence = true,
+              maybeCustomerType = Some(CustomerTypes.MTDITSA)
             )
 
           origin.taxRegime match {
@@ -635,7 +637,18 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
               TdAll.notEligibleEligibilityPass,
               eligibilityRules,
               origin.taxRegime,
-              RegimeDigitalCorrespondence(value = true)
+              RegimeDigitalCorrespondence(value = true),
+              maybeIndividalDetails = Some(
+                IndividualDetails(
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  Some(CustomerTypes.MTDITSA),
+                  None
+                )
+              )
             )
           )(using testOperationCryptoFormat)
 
@@ -683,7 +696,58 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
               )
               .as[JsObject]
           )
+
+          if (origin.taxRegime == TaxRegime.Sa) {
+            AuditConnectorStub.verifyEventAudited(
+              auditType = "EligibilityCheck",
+              auditEvent = Json
+                .parse(
+                  s"""
+                     |{
+                     |  "taxDetail": ${TdAll.taxDetailJsonString(TaxRegime.Sa)},
+                     |  "saCustomerType": "MTD(ITSA)",
+                     |  "chargeTypeAssessment" : [ {
+                     |  "taxPeriodFrom" : "2020-08-13",
+                     |  "taxPeriodTo" : "2020-08-14",
+                     |  "debtTotalAmount" : 3000,
+                     |  "chargeReference" : "A00000000001",
+                     |  "charges" : [ {
+                     |    "chargeType" : "InYearRTICharge-Tax",
+                     |    "mainType" : "InYearRTICharge(FPS)",
+                     |    "mainTrans" : "mainTrans",
+                     |    "subTrans" : "subTrans",
+                     |    "outstandingAmount" : 1000,
+                     |    "interestStartDate" : "2017-03-07",
+                     |    "dueDate" : "2017-03-07",
+                     |    "accruedInterest" : 15.97,
+                     |    "ineligibleChargeType" : false,
+                     |    "chargeOverMaxDebtAge" : false,
+                     |    "locks" : [ {
+                     |      "lockType" : "Payment",
+                     |      "lockReason" : "Risk/Fraud",
+                     |      "disallowedChargeLockType" : false
+                     |    } ],
+                     |    "dueDateNotReached" : false
+                     |  } ]
+                     |} ],
+                     |  "noEligibilityReasons" : 1,
+                     |  "eligibilityReasons" : [ "$auditIneligibilityReason" ],
+                     |  "regimeDigitalCorrespondence" : true,
+                     |  "authProviderId" : "authId-999",
+                     |  "eligibilityResult" : "ineligible",
+                     |  "taxType" : "Sa",
+                     |  "origin" : "Bta",
+                     |  "futureChargeLiabilitiesExcluded" : false,
+                     |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+                     |  "enrollmentReasons" : "did not pass eligibility check"
+                     |}
+                     |""".stripMargin
+                )
+                .as[JsObject]
+            )
+          }
         }
+
     }
 
     "Ineligible: NoDueDatesReached with isLessThanMinDebtAllowance also true should redirect correctly" - {

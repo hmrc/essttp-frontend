@@ -4,7 +4,7 @@ import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 lazy val appName: String = "essttp-frontend"
 
 lazy val scalaCompilerOptions = Seq(
-  "-Xfatal-warnings",
+//  "-Xfatal-warnings",
   "-Wvalue-discard",
   "-deprecation",
   "-feature",

@@ -19,17 +19,19 @@ package testsupport.testdata
 import connectors.CallEligibilityApiRequest
 import essttp.enrolments.EnrolmentDef
 import essttp.journey.model.{CorrelationId, JourneyId}
-import essttp.rootmodel.bank._
+import essttp.rootmodel.bank.*
 import essttp.rootmodel.dates.extremedates.{EarliestPaymentPlanStartDate, ExtremeDatesRequest, ExtremeDatesResponse, LatestPaymentPlanStartDate}
 import essttp.rootmodel.dates.startdates.{InstalmentStartDate, PreferredDayOfMonth, StartDatesRequest, StartDatesResponse}
 import essttp.rootmodel.dates.{InitialPayment, InitialPaymentDate}
 import essttp.rootmodel.pega.{GetCaseResponse, PegaCaseId, StartCaseResponse}
-import essttp.rootmodel.ttp._
+import essttp.rootmodel.ttp.*
 import essttp.rootmodel.ttp.affordability.{InstalmentAmountRequest, InstalmentAmounts}
-import essttp.rootmodel.ttp.affordablequotes._
-import essttp.rootmodel.ttp.arrangement._
-import essttp.rootmodel.ttp.eligibility._
-import essttp.rootmodel._
+import essttp.rootmodel.ttp.affordablequotes.*
+import essttp.rootmodel.ttp.arrangement.*
+import essttp.rootmodel.ttp.eligibility.*
+import essttp.rootmodel.*
+import essttp.rootmodel.TaxRegime.Sa
+import essttp.rootmodel.ttp.CustomerTypes.MTDITSA
 import play.api.libs.json.Json
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
@@ -697,7 +699,8 @@ object TdAll {
         )
       ),
       customerDetails = customerDetails,
-      individualDetails = None,
+      individualDetails =
+        if taxRegime == Sa then Some(IndividualDetails(None, None, None, None, None, Some(MTDITSA), None)) else None,
       addresses = Some(
         List(
           Address(
