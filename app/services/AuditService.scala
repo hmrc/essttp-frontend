@@ -420,7 +420,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       case _            => None
     }
 
-    val c = PaymentPlanSetUpAuditDetail(
+    PaymentPlanSetUpAuditDetail(
       bankDetails = directDebitDetails,
       schedule = Schedule.createSchedule(selectedPaymentPlan, dayOfMonth),
       status = if (Status.isSuccessful(status)) "successfully sent to TTP" else "failed",
@@ -438,8 +438,6 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       canPayInSixMonths = canPayWithinSixMonthsAnswersToBoolean(canPayWithinSixMonthsAnswers),
       unableToPayReason = whyCannotPayInFullAnswersToSet(whyCannotPayInFullAnswers)
     )
-    println(customerType.toString)
-    c
   }
 
   private def toEmailVerificationRequested(
