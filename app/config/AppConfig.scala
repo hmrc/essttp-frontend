@@ -196,4 +196,19 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     s"?regime=$regimeValue&lang=${lang.code}"
   }
 
+  val saLegacyPassThroughPercentage: Int = {
+    val percentage = config.get[Int]("sa-legacy.pass-through-percentage")
+
+    if (percentage < 0)
+      throw new IllegalArgumentException("SA legacy pass-through percentage should not be less than zero")
+    else if (percentage > 100)
+      throw new IllegalArgumentException("SA legacy pass-through percentage should not be more than 100")
+    else
+      percentage
+  }
+
+  val saLegacyRedirectUrl: String =
+    BaseUrl.platformHost.fold("http://localhost:9063")(_ => "") +
+      "/pay-what-you-owe-in-instalments/arrangement/determine-eligibility"
+
 }

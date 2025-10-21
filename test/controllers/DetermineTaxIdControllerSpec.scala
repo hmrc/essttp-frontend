@@ -21,13 +21,19 @@ import essttp.journey.model.Origins
 import essttp.rootmodel.{EmpRef, Nino, SaUtr, Vrn}
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import testsupport.ItSpec
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend}
 import testsupport.testdata.{JourneyJsonTemplates, TdAll}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 
+import scala.util.Random
+
 class DetermineTaxIdControllerSpec extends ItSpec {
+
+  override lazy val configOverrides: Map[String, Any] = Map(
+    "sa-legacy.pass-through-percentage" -> 100
+  )
 
   val controller: DetermineTaxIdController = app.injector.instanceOf[DetermineTaxIdController]
 
@@ -386,4 +392,65 @@ class DetermineTaxIdControllerSpec extends ItSpec {
 
     }
   }
+}
+
+class TotalRedirectionToLegacySaSpec extends ItSpec {
+
+  override lazy val configOverrides: Map[String, Any] = Map(
+    "sa-legacy.pass-through-percentage" -> 0
+  )
+
+  lazy val controller: DetermineTaxIdController = app.injector.instanceOf[DetermineTaxIdController]
+
+  "Calls to determine tax id for SA should all redirect to the legacy SA service if configured to do so" in {
+    (1 to 500).foreach { _ =>
+      stubCommonActions(authAllEnrolments = Some(Set(TdAll.saEnrolment)))
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Sa.Bta)(
+        JourneyJsonTemplates.`Computed Tax Id`(Origins.Sa.Bta, "1234567895")
+      )
+
+      val result = controller.determineTaxId()(fakeRequest)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(
+        "http://localhost:9063/pay-what-you-owe-in-instalments/arrangement/determine-eligibility"
+      )
+    }
+
+  }
+
+}
+
+@SuppressWarnings(Array("org.wartremover.warts.ThreadSleep"))
+class PartialRedirectionToLegacySaSpec extends ItSpec {
+
+  override lazy val configOverrides: Map[String, Any] = Map(
+    "sa-legacy.pass-through-percentage" -> 50,
+    "platform.frontend.host"            -> "http://platform-host"
+  )
+
+  lazy val controller: DetermineTaxIdController = app.injector.instanceOf[DetermineTaxIdController]
+
+  "Calls to determine tax id for SA should sometimes redirect to the legacy SA service if configured to do so" in {
+    val redirectToLegacyCount = (1 to 1000).foldLeft(0) { case (acc, _) =>
+      stubCommonActions(authAllEnrolments = Some(Set(TdAll.saEnrolment)))
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Sa.Bta)(
+        JourneyJsonTemplates.`Computed Tax Id`(Origins.Sa.Bta, "1234567895")
+      )
+
+      val result = controller.determineTaxId()(fakeRequest)
+      status(result) shouldBe SEE_OTHER
+
+      if (redirectLocation(result).contains("/pay-what-you-owe-in-instalments/arrangement/determine-eligibility")) {
+        acc + 1
+      } else if (redirectLocation(result).contains(routes.DetermineEligibilityController.determineEligibility.url)) {
+        acc
+      } else {
+        fail(s"Found unexpected redirect location: ${redirectLocation(result).toString}")
+      }
+    }
+
+    redirectToLegacyCount shouldBe 500 +- 10
+
+  }
+
 }
