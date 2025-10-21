@@ -99,6 +99,10 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
       val basGatewayBaseUrl = BaseUrl.platformHost.getOrElse(config.get[String]("baseUrl.bas-gateway-frontend"))
       s"$basGatewayBaseUrl/bas-gateway/sign-out-without-state"
     }
+
+    val saLegacyRedirectUrl: String =
+      BaseUrl.platformHost.fold("http://localhost:9063")(_ => "") +
+        "/pay-what-you-owe-in-instalments/arrangement/determine-eligibility"
   }
 
   object TtpHeaders {

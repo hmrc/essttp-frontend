@@ -33,6 +33,7 @@
 package controllers
 
 import actions.Actions
+import actionsmodel.AuthenticatedJourneyRequest
 import config.AppConfig
 import essttp.journey.JourneyConnector
 import essttp.journey.model.{Journey, JourneyStage}
@@ -53,47 +54,53 @@ class DetermineTaxIdController @Inject() (
   journeyConnector: JourneyConnector,
   enrolmentService: EnrolmentService,
   auditService:     AuditService
-)(using ExecutionContext, AppConfig)
+)(using ec: ExecutionContext, appConfig: AppConfig)
     extends FrontendController(mcc),
       Logging {
 
+  private def redirectToLegacySaOr(f: Future[Result])(using r: AuthenticatedJourneyRequest[?]): Future[Result] =
+    if (r.journey.redirectToLegacySaService.contains(true)) Redirect(appConfig.Urls.saLegacyRedirectUrl) else f
+
   val determineTaxId: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
-    val maybeTaxId: Future[Option[TaxId]] = request.journey match {
-      case j: Journey.Started                 =>
-        if (j.taxRegime == TaxRegime.Simp) {
-          request.nino match {
-            case None =>
-              auditService.auditEligibilityCheck(j, EnrollmentReasons.NoNino())
-              Future.successful(None)
+    redirectToLegacySaOr {
+      val maybeTaxId: Future[Option[TaxId]] = request.journey match {
+        case j: Journey.Started                 =>
+          if (j.taxRegime == TaxRegime.Simp) {
+            request.nino match {
+              case None =>
+                auditService.auditEligibilityCheck(j, EnrollmentReasons.NoNino())
+                Future.successful(None)
 
-            case Some(nino) =>
-              journeyConnector
-                .updateTaxId(j.journeyId, nino)
-                .map(_ => Some(nino))
+              case Some(nino) =>
+                journeyConnector
+                  .updateTaxId(j.journeyId, nino)
+                  .map(_ => Some(nino))
+            }
+          } else {
+            enrolmentService.determineTaxIdAndUpdateJourney(j, request.enrolments)
           }
-        } else {
-          enrolmentService.determineTaxIdAndUpdateJourney(j, request.enrolments)
-        }
-      case j: JourneyStage.AfterComputedTaxId =>
-        JourneyLogger.info("TaxId already determined, skipping.")
-        Future.successful(Some(j.taxId))
-    }
+        case j: JourneyStage.AfterComputedTaxId =>
+          JourneyLogger.info("TaxId already determined, skipping.")
+          Future.successful(Some(j.taxId))
+      }
 
-    maybeTaxId.map {
-      case Some(_) =>
-        Routing.redirectToNext(
-          routes.DetermineTaxIdController.determineTaxId,
-          request.journey,
-          submittedValueUnchanged = false
-        )
+      maybeTaxId.map {
+        case Some(_) =>
+          Routing.redirectToNext(
+            routes.DetermineTaxIdController.determineTaxId,
+            request.journey,
+            submittedValueUnchanged = false
+          )
 
-      case None =>
-        request.journey.taxRegime match {
-          case TaxRegime.Epaye => Redirect(routes.NotEnrolledController.notEnrolled)
-          case TaxRegime.Vat   => Redirect(routes.NotEnrolledController.notVatRegistered)
-          case TaxRegime.Sa    => Redirect(routes.NotEnrolledController.notSaEnrolled)
-          case TaxRegime.Simp  => Redirect(routes.IneligibleController.simpGenericIneligiblePage)
-        }
+        case None =>
+          request.journey.taxRegime match {
+            case TaxRegime.Epaye => Redirect(routes.NotEnrolledController.notEnrolled)
+            case TaxRegime.Vat   => Redirect(routes.NotEnrolledController.notVatRegistered)
+            case TaxRegime.Sa    => Redirect(routes.NotEnrolledController.notSaEnrolled)
+            case TaxRegime.Simp  => Redirect(routes.IneligibleController.simpGenericIneligiblePage)
+          }
+      }
     }
   }
+
 }

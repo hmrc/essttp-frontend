@@ -24,11 +24,13 @@ import uk.gov.hmrc.crypto.Encrypter
 
 object JourneyJsonTemplates {
 
-  def Started(origin: Origin = Origins.Epaye.Bta): String = TdJsonBodies.createJourneyJson(
-    stageInfo = StageInfo.started,
-    journeyInfo = JourneyInfo.started,
-    origin = origin
-  )
+  def Started(origin: Origin = Origins.Epaye.Bta, redirectToLegacySaService: Option[Boolean] = None): String =
+    TdJsonBodies.createJourneyJson(
+      stageInfo = StageInfo.started,
+      journeyInfo = JourneyInfo.started,
+      origin = origin,
+      redirectToLegacySaService = redirectToLegacySaService
+    )
 
   def `Computed Tax Id`(origin: Origin = Origins.Epaye.Bta, taxReference: String = "864FZ00049"): String =
     TdJsonBodies.createJourneyJson(

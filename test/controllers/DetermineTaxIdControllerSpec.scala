@@ -21,7 +21,7 @@ import essttp.journey.model.Origins
 import essttp.rootmodel.{EmpRef, Nino, SaUtr, Vrn}
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import testsupport.ItSpec
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend}
 import testsupport.testdata.{JourneyJsonTemplates, TdAll}
@@ -322,6 +322,40 @@ class DetermineTaxIdControllerSpec extends ItSpec {
             .as[JsObject]
         )
       }
+
+      "the flag for redirectToLegacySaService is Some(false)" in {
+        val enrolments =
+          Set(
+            enrolment(EnrolmentDef.Sa.`IR-SA`.enrolmentKey, activated = true)(
+              EnrolmentDef.Sa.`IR-SA`.identifierKey -> "Ref"
+            )
+          )
+
+        stubCommonActions(authAllEnrolments = Some(enrolments))
+        EssttpBackend.StartJourney.findJourney(Origins.Sa.Bta, redirectToLegacySaService = Some(false))
+        EssttpBackend.DetermineTaxId.stubUpdateTaxId(
+          TdAll.journeyId,
+          JourneyJsonTemplates.`Computed Tax Id`(origin = Origins.Sa.Bta, taxReference = "Ref")
+        )
+
+        val result = controller.determineTaxId()(fakeRequest)
+
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.DetermineEligibilityController.determineEligibility.url)
+      }
+
+      "the flag for redirectToLegacySaService is Some(true)" in {
+        stubCommonActions()
+        EssttpBackend.StartJourney.findJourney(Origins.Sa.Bta, redirectToLegacySaService = Some(true))
+
+        val result = controller.determineTaxId()(fakeRequest)
+
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(
+          "http://localhost:9063/pay-what-you-owe-in-instalments/arrangement/determine-eligibility"
+        )
+      }
+
     }
 
     "for SIMP when" - {
@@ -386,4 +420,28 @@ class DetermineTaxIdControllerSpec extends ItSpec {
 
     }
   }
+}
+
+class NonLocalDetermineTaxIdControllerSpec extends ItSpec {
+
+  override lazy val configOverrides: Map[String, Any] = Map("platform.frontend.host" -> "http://host")
+
+  lazy val controller: DetermineTaxIdController = app.injector.instanceOf[DetermineTaxIdController]
+
+  "DetermineTaxIdController should" - {
+
+    "redirect to the legacy SA service with a relative url if the environment is not local" in {
+      stubCommonActions()
+      EssttpBackend.StartJourney.findJourney(Origins.Sa.Bta, redirectToLegacySaService = Some(true))
+
+      val result = controller.determineTaxId()(fakeRequest)
+
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(
+        "/pay-what-you-owe-in-instalments/arrangement/determine-eligibility"
+      )
+    }
+
+  }
+
 }

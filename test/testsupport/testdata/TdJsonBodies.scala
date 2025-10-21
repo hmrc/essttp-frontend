@@ -74,14 +74,17 @@ object TdJsonBodies {
   }
 
   def createJourneyJson(
-    stageInfo:            StageInfo,
-    journeyInfo:          List[String],
-    origin:               Origin = Origins.Epaye.Bta,
-    affordabilityEnabled: Boolean = false,
-    pegaCaseId:           Option[String] = None
+    stageInfo:                 StageInfo,
+    journeyInfo:               List[String],
+    origin:                    Origin = Origins.Epaye.Bta,
+    affordabilityEnabled:      Boolean = false,
+    pegaCaseId:                Option[String] = None,
+    redirectToLegacySaService: Option[Boolean] = None
   ): String = {
-    val jsonFormatted: String  = if (journeyInfo.isEmpty) "" else s",\n${journeyInfo.mkString(",")}"
-    val pegaCaseIdJson: String = pegaCaseId.fold("")(id => s""", "pegaCaseId": "$id" """)
+    val jsonFormatted: String                 = if (journeyInfo.isEmpty) "" else s",\n${journeyInfo.mkString(",")}"
+    val pegaCaseIdJson: String                = pegaCaseId.fold("")(id => s""", "pegaCaseId": "$id" """)
+    val redirectToLegacySaServiceJson: String =
+      redirectToLegacySaService.fold("")(b => s""", "redirectToLegacySaService": ${b.toString} """)
 
     s"""
       |{
@@ -103,7 +106,7 @@ object TdJsonBodies {
       |    },
       |    "affordabilityEnabled" : ${affordabilityEnabled.toString},
       |    "sessionId": "IamATestSessionId",
-      |    "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059"$jsonFormatted$pegaCaseIdJson
+      |    "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059"$jsonFormatted$pegaCaseIdJson$redirectToLegacySaServiceJson
       |  },
       |  "sessionId": "IamATestSessionId",
       |  "createdAt": "2022-07-22T14:01:06.629Z",
