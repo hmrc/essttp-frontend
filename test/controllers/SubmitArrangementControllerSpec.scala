@@ -57,7 +57,8 @@ class SubmitArrangementControllerSpec extends ItSpec {
           false,
           None,
           None,
-          None
+          None,
+          if (taxRegime == TaxRegime.Sa) Some("MTD(ITSA)") else None
         ),
         (
           "email verification success - same email as ETMP",
@@ -73,7 +74,8 @@ class SubmitArrangementControllerSpec extends ItSpec {
           false,
           None,
           None,
-          None
+          None,
+          if (taxRegime == TaxRegime.Sa) Some("MTD(ITSA)") else None
         ),
         (
           "email verification success - new email",
@@ -89,7 +91,8 @@ class SubmitArrangementControllerSpec extends ItSpec {
           false,
           None,
           None,
-          None
+          None,
+          if (taxRegime == TaxRegime.Sa) Some("MTD(ITSA)") else None
         ),
         (
           "email verification success - ETMP - same email with different casing",
@@ -105,7 +108,8 @@ class SubmitArrangementControllerSpec extends ItSpec {
           false,
           None,
           None,
-          None
+          None,
+          if (taxRegime == TaxRegime.Sa) Some("MTD(ITSA)") else None
         ),
         (
           "T&C's accepted, no email required with affordability enabled",
@@ -124,7 +128,8 @@ class SubmitArrangementControllerSpec extends ItSpec {
           true,
           Some(TdAll.pegaStartCaseResponse.caseId),
           Some(false),
-          Some(Set[CannotPayReason](CannotPayReason.NoMoneySetAside))
+          Some(Set[CannotPayReason](CannotPayReason.NoMoneySetAside)),
+          if (taxRegime == TaxRegime.Sa) Some("MTD(ITSA)") else None
         )
       ).foreach {
         case (
@@ -135,7 +140,8 @@ class SubmitArrangementControllerSpec extends ItSpec {
               affordabilityEnabled,
               caseId,
               canPayWithinSixMonths,
-              whyCannotPayInFullReasons
+              whyCannotPayInFullReasons,
+              expectedCustomerType
             ) =>
           s"[taxRegime: ${taxRegime.toString}] trigger call to ttp enact arrangement api, send an audit event " +
             s"and also update backend for $journeyDescription" in {
@@ -220,6 +226,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
                      |	"origin": "${origin.toString().split('.').last}",
                      |	"taxType": "$taxType",
                      |	"taxDetail": ${TdAll.taxDetailJsonString(taxRegime)},
+                     |  ${expectedCustomerType.fold("")(ct => s""""saCustomerType":"$ct", """)}
                      |	"correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
                      |	"ppReferenceNo": "${TdAll.customerReference(taxRegime).value}",
                      |	"authProviderId": "authId-999",
@@ -233,6 +240,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
                   )
                   .as[JsObject]
               )
+
               EssttpBackend.SubmitArrangement
                 .verifyUpdateSubmitArrangementRequest(TdAll.journeyId, TdAll.arrangementResponse(taxRegime))
             }

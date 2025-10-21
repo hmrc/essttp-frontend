@@ -189,6 +189,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       origin = toAuditString(journey.origin),
       taxType = journey.taxRegime.toString,
       taxDetail = TaxDetail(None, None, None, None, None, None, None),
+      saCustomerType = None,
       authProviderId = r.ggCredId.value,
       chargeTypeAssessment = List.empty,
       correlationId = journey.correlationId.value.toString,
@@ -227,12 +228,14 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       origin = toAuditString(journey.origin),
       taxType = journey.taxRegime.toString,
       taxDetail = toTaxDetail(eligibilityCheckResult),
+      saCustomerType = eligibilityCheckResult.individualDetails.flatMap(_.customerType),
       authProviderId = r.ggCredId.value,
       chargeTypeAssessment = eligibilityCheckResult.chargeTypeAssessment,
       correlationId = journey.correlationId.value.toString,
       futureChargeLiabilitiesExcluded = Some(eligibilityCheckResult.futureChargeLiabilitiesExcluded),
       regimeDigitalCorrespondence = eligibilityCheckResult.regimeDigitalCorrespondence.value
     )
+
   }
 
   private def toPaymentPlanBeforeSubmissionAuditDetail(
@@ -408,6 +411,14 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
     val (maybeEmail, maybeEmailSource) = journey.fold(_ => (None, None), toEmailInfo)
     val canPayWithinSixMonthsAnswers   = journey.fold(_.canPayWithinSixMonthsAnswers, _.canPayWithinSixMonthsAnswers)
     val whyCannotPayInFullAnswers      = journey.fold(_.whyCannotPayInFullAnswers, _.whyCannotPayInFullAnswers)
+    val customerType                   = taxRegime match {
+      case TaxRegime.Sa =>
+        journey.fold(
+          _.eligibilityCheckResult.individualDetails.flatMap(_.customerType),
+          _.eligibilityCheckResult.individualDetails.flatMap(_.customerType)
+        )
+      case _            => None
+    }
 
     PaymentPlanSetUpAuditDetail(
       bankDetails = directDebitDetails,
@@ -417,6 +428,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       origin = toAuditString(origin),
       taxType = taxRegime.toString,
       taxDetail = toTaxDetail(eligibilityCheckResult),
+      saCustomerType = customerType,
       correlationId = correlationId,
       ppReferenceNo = maybeArrangementResponse.map(_.customerReference.value).getOrElse("N/A"),
       authProviderId = r.ggCredId.value,
