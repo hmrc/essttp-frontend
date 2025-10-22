@@ -27,7 +27,6 @@ import essttp.rootmodel.bank.CanSetUpDirectDebit
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
 import essttp.rootmodel.dates.startdates.StartDatesResponse
 import essttp.rootmodel.pega.{GetCaseResponse, StartCaseResponse}
-import essttp.rootmodel.ttp.CustomerType
 import essttp.rootmodel.ttp.affordability.InstalmentAmounts
 import essttp.rootmodel.ttp.affordablequotes.{AffordableQuotesResponse, PaymentPlan}
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
@@ -189,8 +188,11 @@ object EssttpBackend {
     def verifyStartJourneySimpGovUk(): Unit     = verifyStartJourney(startJourneyGovUkSimpUrl)
     def verifyStartJourneySimpDetached(): Unit  = verifyStartJourney(startJourneyDetachedSimpUrl)
 
-    def findJourney(origin: Origin = Origins.Epaye.Bta): StubMapping =
-      findByLatestSessionId(JourneyJsonTemplates.Started(origin))
+    def findJourney(
+      origin:                    Origin = Origins.Epaye.Bta,
+      redirectToLegacySaService: Option[Boolean] = None
+    ): StubMapping =
+      findByLatestSessionId(JourneyJsonTemplates.Started(origin, redirectToLegacySaService = redirectToLegacySaService))
   }
 
   object DetermineTaxId {
