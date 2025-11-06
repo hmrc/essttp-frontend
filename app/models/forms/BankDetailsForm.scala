@@ -18,19 +18,16 @@ package models.forms
 
 import cats.implicits.catsSyntaxOptionId
 import essttp.rootmodel.bank.{AccountName, AccountNumber, SortCode}
-import models.enumsforforms.TypeOfAccountFormValue
 import models.forms.helper.FormErrorWithFieldMessageOverrides
 import play.api.data.Forms.{mapping, nonEmptyText}
 import play.api.data.validation.{Constraint, Invalid, Valid}
-import play.api.data.{Form, FormError, Forms, Mapping}
+import play.api.data.{Form, FormError, Mapping}
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
-import util.EnumFormatter
 
 final case class BankDetailsForm(
-  typeOfBankAccount: TypeOfAccountFormValue,
-  name:              AccountName,
-  sortCode:          SortCode,
-  accountNumber:     AccountNumber
+  name:          AccountName,
+  sortCode:      SortCode,
+  accountNumber: AccountNumber
 )
 
 object BankDetailsForm {
@@ -39,14 +36,6 @@ object BankDetailsForm {
   private val accountNameMaxLength: Int                      = 39
   private val accountNameAllowedSpecialCharacters: Set[Char] =
     Set(' ', '&', '@', '(', ')', '!', ':', ',', '+', '`', '-', '\\', '\'', '.', '/', '^')
-
-  val typeOfBankAccountMapping: Mapping[TypeOfAccountFormValue] = Forms.of(
-    EnumFormatter.format(
-      `enum` = TypeOfAccountFormValue,
-      errorMessageIfMissing = "error.required",
-      errorMessageIfEnumError = "error.required"
-    )
-  )
 
   val accountNameConstraintRegex: Constraint[AccountName] = Constraint { encryptedAccountName =>
     val accountName = encryptedAccountName.value.decryptedValue.filter(!_.isControl).trim
@@ -146,15 +135,9 @@ object BankDetailsForm {
       fieldMessageOverrides = sortCodeAndAccountNumberOverrides
     )
 
-  val typeOfAccountEmpty: FormErrorWithFieldMessageOverrides =
-    FormErrorWithFieldMessageOverrides(
-      formError = FormError("accountType", "error.required")
-    )
-
   val form: Form[BankDetailsForm] =
     Form(
       mapping(
-        "accountType"   -> typeOfBankAccountMapping,
         "name"          -> accountNameMapping,
         "sortCode"      -> sortCodeMapping,
         "accountNumber" -> accountNumberMapping

@@ -46,6 +46,7 @@ object StageInfo {
   val enteredCanSetUpDirectDebitIsAccountHolder: StageInfo       =
     StageInfo("EnteredCanYouSetUpDirectDebit", "CanSetUpDirectDebit")
   val enteredDirectDebitDetails: StageInfo                       = StageInfo("EnteredDirectDebitDetails", "EnteredDirectDebitDetails")
+  val chosenTypeOfBankAccount: StageInfo                         = StageInfo("ChosenTypeOfBankAccount", "ChosenTypeOfBankAccount")
   val confirmedDirectDebitDetails: StageInfo                     = StageInfo("ConfirmedDirectDebitDetails", "ConfirmedDetails")
   val agreedTermsAndConditionsEmailAddressRequired: StageInfo    =
     StageInfo("AgreedTermsAndConditions", "EmailAddressRequired")

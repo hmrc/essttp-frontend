@@ -22,7 +22,7 @@ import essttp.bars.model.BarsVerifyStatusResponse
 import essttp.crypto.CryptoFormat
 import essttp.journey.model.CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths
 import essttp.journey.model.Journey.*
-import essttp.journey.model.JourneyStage.{AfterCheckedPaymentPlan, AfterEnteredCanYouSetUpDirectDebit, AfterStartedPegaCase}
+import essttp.journey.model.JourneyStage.{AfterCheckedPaymentPlan, AfterChosenTypeOfBankAccount, AfterStartedPegaCase}
 import essttp.journey.model.*
 import essttp.rootmodel.*
 import essttp.rootmodel.bank.BankDetails
@@ -100,7 +100,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
     audit(toReturnFromAffordabilityAuditDetail(journey, startCaseResponse, getCaseResponse))
 
   def auditBarsCheck(
-    journey:              AfterEnteredCanYouSetUpDirectDebit & Journey,
+    journey:              AfterChosenTypeOfBankAccount & Journey,
     bankDetails:          BankDetails,
     result:               Either[BarsError, VerifyResponse],
     verifyStatusResponse: BarsVerifyStatusResponse
@@ -348,7 +348,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
   }
 
   private def toBarsCheckAuditDetail(
-    journey:              AfterEnteredCanYouSetUpDirectDebit & Journey,
+    journey:              AfterChosenTypeOfBankAccount & Journey,
     bankDetails:          BankDetails,
     result:               Either[BarsError, VerifyResponse],
     verifyStatusResponse: BarsVerifyStatusResponse
@@ -363,7 +363,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       toTaxDetail(eligibilityCheckResult),
       BarsAuditRequest(
         BarsAuditAccount(
-          bankDetails.typeOfBankAccount.entryName.toLowerCase(Locale.UK),
+          journey.typeOfBankAccount.entryName.toLowerCase(Locale.UK),
           bankDetails.name.value.decryptedValue,
           bankDetails.sortCode.value.decryptedValue,
           bankDetails.accountNumber.value.decryptedValue

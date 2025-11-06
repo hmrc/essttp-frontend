@@ -564,7 +564,6 @@ object TdAll {
 
   def directDebitDetails(name: String, sortCode: String, accountNumber: String): BankDetails =
     BankDetails(
-      TypesOfBankAccount.Personal,
       AccountName(SensitiveString(name)),
       SortCode(SensitiveString(sortCode)),
       AccountNumber(SensitiveString(accountNumber))

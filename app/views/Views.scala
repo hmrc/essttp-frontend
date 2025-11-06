@@ -52,6 +52,7 @@ class Views @Inject() (
   val instalmentOptionsPage:          InstalmentOptions,
   val checkYouCanSetUpDDPage:         CheckYouCanSetUpDDPage,
   val cannotSetupDirectDebitPage:     NotSoleSignatoryPage,
+  val typeOfBankAccountPage:          TypeOfBankAccount,
   val enterBankDetailsPage:           EnterBankDetails,
   val bankDetailsSummary:             BankDetailsSummary,
   val barsLockout:                    BarsLockout,

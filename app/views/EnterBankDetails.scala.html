@@ -23,13 +23,10 @@
 @import requests.RequestSupport
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import views.Views
-@import essttp.rootmodel.bank.TypesOfBankAccount
-
 @this(
         layout: templates.Layout,
         govukButton: GovukButton,
         govukInput: GovukInput,
-        govukRadios: GovukRadios,
         formWithCSRF: FormWithCSRF,
         govukErrorSummary: GovukErrorSummary,
         requestSupport: RequestSupport
@@ -43,10 +40,6 @@
 )
 
 @import requestSupport.{languageFromRequest, legacyMessages}
-
-@typeOfAccountKey = @{
-    "accountType"
-}
 
 @nameKey = @{
     "name"
@@ -74,51 +67,6 @@
 }
 
 @sortCodeAndAccountNumberFormError= @{ errorMessageOverrides.find(_.key === "sortCodeAndAccountNumber") }
-
-@accountTypeFormError = @{ errorMessageOverrides.find(_.key === "accountType") }
-
-
-@accountTypeFieldSet(formError: Option[FormError]) = {
-    <fieldset class="govuk-fieldset" @if(formError.isDefined) {
-        aria-describedby="account-type-error"}>
-        <div class="form-field @formError.map { _ => govuk-form-group--error }">
-            @formError.map { error =>
-                <span class="govuk-error-message" id="account-type-error">
-                    <span class="govuk-visually-hidden">@Messages.error.show</span>
-                    @Messages.BankDetails.errors(s"accountTypeErrors.${error.message}")(Views.formErrorArgsStringList(error)).show
-                </span>
-            }
-
-            @govukRadios(Radios(
-                fieldset = Some(Fieldset(
-                    legend = Some(Legend(
-                        content = Text(Messages.AboutYourBankAccount.`Account type`.show),
-                        classes = "govuk-fieldset__heading--m",
-                        isPageHeading = false
-                    ))
-                )),
-                idPrefix = Some(typeOfAccountKey),
-                name = typeOfAccountKey,
-                items = Seq(
-                    RadioItem(
-                        id = Some("business"),
-                        content = Text(Messages.AboutYourBankAccount.`Business`.show),
-                        value = Some(TypesOfBankAccount.Business.entryName),
-                        checked = form.data.get(typeOfAccountKey).contains(TypesOfBankAccount.Business.entryName)
-                    ),
-                    RadioItem(
-                        id = Some("personal"),
-                        content = Text(Messages.AboutYourBankAccount.`Personal`.show),
-                        value = Some(TypesOfBankAccount.Personal.entryName),
-                        checked = form.data.get(typeOfAccountKey).contains(TypesOfBankAccount.Personal.entryName)
-                    )
-                ),
-                errorMessage = fieldErrorMessage(typeOfAccountKey, form, errorMessageOverrides)
-            ))
-
-        </div>
-    </fieldset>
-}
 
 @sortCodeAndAccountNumberFieldSet(formError: Option[FormError]) = {
     <fieldset class="govuk-fieldset" @if(formError.isDefined) {
@@ -175,7 +123,7 @@
     @if(form.errors.nonEmpty) {
         @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
             ErrorLink(
-                href = Some(s"#${if (e.key == typeOfAccountKey) "business" else e.key}"),
+                href = Some(s"#${e.key}"),
                 content = Text(Messages.BankDetails.errors(s"${e.key}.${e.message}")(Views.formErrorArgsStringList(e)).show)
             )
         ),
@@ -187,8 +135,6 @@
     </h1>
 
     @formWithCSRF(action = routes.BankDetailsController.enterBankDetailsSubmit) {
-
-        @accountTypeFieldSet(accountTypeFormError)
 
         @govukInput(Input(
             id = nameKey,

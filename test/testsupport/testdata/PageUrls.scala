@@ -75,6 +75,7 @@ object PageUrls {
     s"$serviceBaseUrl/check-your-payment-plan/change/$pageId?regime=${taxRegime.entryName
         .toLowerCase(Locale.UK)}${lang.fold("")("&" + _.code)}"
   val aboutYourBankAccountUrl: String                                                                 = s"$serviceBaseUrl/check-you-can-set-up-a-direct-debit"
+  val typeOfBankAccountUrl: String                                                                    = s"$serviceBaseUrl/bank-account-type"
   val directDebitDetailsUrl: String                                                                   = s"$serviceBaseUrl/bank-account-details"
   val cannotSetupDirectDebitOnlineUrl: String                                                         = s"$serviceBaseUrl/you-cannot-set-up-a-direct-debit-online"
   val checkDirectDebitDetailsUrl: String                                                              = s"$serviceBaseUrl/check-your-direct-debit-details"

@@ -21,12 +21,11 @@ import actionsmodel.AuthenticatedJourneyRequest
 import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import essttp.journey.model.{Journey, JourneyStage}
-import essttp.rootmodel.bank.{BankDetails, CanSetUpDirectDebit, TypesOfBankAccount}
+import essttp.rootmodel.bank.{BankDetails, CanSetUpDirectDebit, TypeOfBankAccount, TypesOfBankAccount}
 import models.bars.response.*
-import models.enumsforforms.IsSoleSignatoryFormValue
-import models.enumsforforms.TypeOfAccountFormValue.{typeOfBankAccountAsFormValue, typeOfBankAccountFromFormValue}
+import models.enumsforforms.{IsSoleSignatoryFormValue, TypeOfAccountFormValue}
 import models.forms.helper.FormErrorWithFieldMessageOverrides
-import models.forms.{BankDetailsForm, CanSetUpDirectDebitForm}
+import models.forms.{BankDetailsForm, CanSetUpDirectDebitForm, TypeOfBankAccountForm}
 import play.api.data.Form
 import play.api.mvc.*
 import requests.RequestSupport
@@ -103,13 +102,79 @@ class BankDetailsController @Inject() (
       )
   }
 
+  val typeOfBankAccount: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    request.journey match {
+      case j: JourneyStage.BeforeEnteredCanYouSetUpDirectDebit =>
+        JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
+
+      case j: JourneyStage.AfterEnteredCanYouSetUpDirectDebit =>
+        if (!j.canSetUpDirectDebitAnswer.isAccountHolder)
+          JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
+        else
+          showTypeOfBankAccountPage(j)
+    }
+  }
+
+  private def existingTypeOfBankAccount(j: Journey): Option[TypeOfBankAccount] = j match {
+    case _: JourneyStage.BeforeChosenTypeOfBankAccount => None
+    case j: JourneyStage.AfterChosenTypeOfBankAccount  => Some(j.typeOfBankAccount)
+  }
+
+  private def showTypeOfBankAccountPage(
+    journey: Journey & JourneyStage.AfterEnteredCanYouSetUpDirectDebit
+  )(using Request[?]): Result = {
+    val form =
+      existingTypeOfBankAccount(journey).fold(TypeOfBankAccountForm.form)(typeOfBankAccount =>
+        TypeOfBankAccountForm.form.fill(
+          TypeOfBankAccountForm(TypeOfAccountFormValue.typeOfBankAccountAsFormValue(typeOfBankAccount))
+        )
+      )
+
+    Ok(views.typeOfBankAccountPage(form))
+  }
+
+  val typeOfBankAccountSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
+    request.journey match {
+      case j: JourneyStage.BeforeEnteredCanYouSetUpDirectDebit =>
+        JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
+
+      case j: JourneyStage.AfterEnteredCanYouSetUpDirectDebit =>
+        if (!j.canSetUpDirectDebitAnswer.isAccountHolder)
+          Redirect(routes.BankDetailsController.cannotSetupDirectDebitOnlinePage)
+        else {
+          TypeOfBankAccountForm.form
+            .bindFromRequest()
+            .fold(
+              formWithErrors => Ok(views.typeOfBankAccountPage(formWithErrors)),
+              { typeOfBankAccountForm =>
+                val typeOfBankAccount =
+                  TypeOfAccountFormValue.typeOfBankAccountFromFormValue(typeOfBankAccountForm.typeOfBankAccount)
+
+                journeyService
+                  .updateTypeOfBankAccount(
+                    request.journey.journeyId,
+                    typeOfBankAccount
+                  )
+                  .map(updatedJourney =>
+                    Routing.redirectToNext(
+                      routes.BankDetailsController.typeOfBankAccount,
+                      updatedJourney,
+                      existingTypeOfBankAccount(request.journey).contains(typeOfBankAccount)
+                    )
+                  )
+              }
+            )
+        }
+    }
+  }
+
   val enterBankDetails: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
       case j: JourneyStage.BeforeEnteredCanYouSetUpDirectDebit =>
         JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
       case j: JourneyStage.AfterEnteredCanYouSetUpDirectDebit  =>
         if (!j.canSetUpDirectDebitAnswer.isAccountHolder) {
-          JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
+          Redirect(routes.BankDetailsController.cannotSetupDirectDebitOnlinePage)
         } else {
           finalStateCheck(j, displayEnterBankDetailsPage(j))
         }
@@ -123,7 +188,6 @@ class BankDetailsController @Inject() (
       .fold(BankDetailsForm.form) { directDebitDetails =>
         BankDetailsForm.form.fill(
           BankDetailsForm(
-            typeOfBankAccount = typeOfBankAccountAsFormValue(directDebitDetails.typeOfBankAccount),
             name = directDebitDetails.name,
             sortCode = directDebitDetails.sortCode,
             accountNumber = directDebitDetails.accountNumber
@@ -141,39 +205,34 @@ class BankDetailsController @Inject() (
 
   val enterBankDetailsSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     request.journey match {
-      case j: JourneyStage.BeforeEnteredCanYouSetUpDirectDebit =>
+      case j: JourneyStage.BeforeChosenTypeOfBankAccount =>
         JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
 
-      case j: JourneyStage.AfterEnteredCanYouSetUpDirectDebit =>
-        if (!j.canSetUpDirectDebitAnswer.isAccountHolder) {
-          JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
-        } else {
-          val formFromRequest = BankDetailsForm.form.bindFromRequest()
-          formFromRequest.fold(
-            formWithErrors => Ok(views.enterBankDetailsPage(formWithErrors)),
-            (bankDetailsForm: BankDetailsForm) => {
-              val directDebitDetails: BankDetails =
-                BankDetails(
-                  typeOfBankAccount = typeOfBankAccountFromFormValue(bankDetailsForm.typeOfBankAccount),
-                  name = bankDetailsForm.name,
-                  sortCode = bankDetailsForm.sortCode,
-                  accountNumber = bankDetailsForm.accountNumber
-                )
+      case j: JourneyStage.AfterChosenTypeOfBankAccount =>
+        val formFromRequest = BankDetailsForm.form.bindFromRequest()
+        formFromRequest.fold(
+          formWithErrors => Ok(views.enterBankDetailsPage(formWithErrors)),
+          (bankDetailsForm: BankDetailsForm) => {
+            val directDebitDetails: BankDetails =
+              BankDetails(
+                name = bankDetailsForm.name,
+                sortCode = bankDetailsForm.sortCode,
+                accountNumber = bankDetailsForm.accountNumber
+              )
 
-              currentDirectDebitDetails(request.journey) match {
-                case Some(current) if directDebitDetails == current =>
-                  // nothing changed so don't call BARs and don't update journey
-                  Redirect(routes.BankDetailsController.checkBankDetails)
-                case _                                              =>
-                  barsService
-                    .verifyBankDetails(directDebitDetails, j)
-                    .flatMap { barsResponse =>
-                      handleBars(barsResponse, directDebitDetails, formFromRequest)
-                    }
-              }
+            currentDirectDebitDetails(request.journey) match {
+              case Some(current) if directDebitDetails == current =>
+                // nothing changed so don't call BARs and don't update journey
+                Redirect(routes.BankDetailsController.checkBankDetails)
+              case _                                              =>
+                barsService
+                  .verifyBankDetails(directDebitDetails, j)
+                  .flatMap { barsResponse =>
+                    handleBars(barsResponse, directDebitDetails, formFromRequest, j.typeOfBankAccount)
+                  }
             }
-          )
-        }
+          }
+        )
     }
 
   }
@@ -181,7 +240,8 @@ class BankDetailsController @Inject() (
   private def handleBars(
     resp:               Either[BarsError, VerifyResponse],
     directDebitDetails: BankDetails,
-    form:               Form[BankDetailsForm]
+    form:               Form[BankDetailsForm],
+    typeOfBankAccount:  TypeOfBankAccount
   )(using request: AuthenticatedJourneyRequest[?]): Future[Result] = {
     def enterBankDetailsPageWithBarsError(error: FormErrorWithFieldMessageOverrides): Future[Result] =
       Ok(
@@ -203,7 +263,7 @@ class BankDetailsController @Inject() (
         case SortCodeNotPresentOnEiscd(_) | SortCodeNotPresentOnEiscdValidateResponse(_)                 =>
           enterBankDetailsPageWithBarsError(sortCodeNotPresentOnEiscd)
         case NameDoesNotMatch(_)                                                                         =>
-          val error = directDebitDetails.typeOfBankAccount match
+          val error = typeOfBankAccount match
             case TypesOfBankAccount.Personal => nameDoesNotMatchPersonal
             case TypesOfBankAccount.Business => nameDoesNotMatchBusiness
           enterBankDetailsPageWithBarsError(error)
@@ -231,10 +291,16 @@ class BankDetailsController @Inject() (
 
   val checkBankDetails: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
-      case j: JourneyStage.BeforeEnteredDirectDebitDetails =>
+      case j: JourneyStage.BeforeChosenTypeOfBankAccount =>
         JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
-      case j: JourneyStage.AfterEnteredDirectDebitDetails  =>
-        finalStateCheck(j, Ok(views.bankDetailsSummary(j.directDebitDetails)))
+
+      case j: JourneyStage.AfterChosenTypeOfBankAccount =>
+        j match {
+          case j1: JourneyStage.BeforeEnteredDirectDebitDetails =>
+            JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
+          case j1: JourneyStage.AfterEnteredDirectDebitDetails  =>
+            finalStateCheck(j, Ok(views.bankDetailsSummary(j1.directDebitDetails, j.typeOfBankAccount)))
+        }
     }
   }
 

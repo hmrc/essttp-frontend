@@ -15,7 +15,7 @@
  *@
 
 @import controllers.routes
-@import essttp.rootmodel.bank.BankDetails
+@import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount, TypesOfBankAccount}
 @import messages.Messages
 @import play.api.mvc.Request
 @import play.twirl.api.Html
@@ -30,7 +30,7 @@
   govukButton: GovukButton
 )
 
-@(directDebitDetails: BankDetails)(implicit request: Request[?])
+@(directDebitDetails: BankDetails, typeOfBankAccount: TypeOfBankAccount)(implicit request: Request[?])
 
 @import requestSupport.{languageFromRequest, legacyMessages}
 
@@ -80,7 +80,10 @@
           classes = "govuk-summary-list__key"
         ),
         value = Value(
-          content = Text(directDebitDetails.typeOfBankAccount.entryName)
+          content = Text(typeOfBankAccount match {
+              case TypesOfBankAccount.Personal => Messages.TypeOfBankAccount.Personal.show
+              case TypesOfBankAccount.Business => Messages.TypeOfBankAccount.Business.show
+          })
         )
       ),
       SummaryListRow(

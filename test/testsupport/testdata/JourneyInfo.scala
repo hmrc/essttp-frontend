@@ -17,6 +17,7 @@
 package testsupport.testdata
 
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, WhyCannotPayInFullAnswers}
+import essttp.rootmodel.bank.{TypeOfBankAccount, TypesOfBankAccount}
 import essttp.rootmodel.{CannotPayReason, DayOfMonth, TaxRegime}
 import paymentsEmailVerification.models.EmailVerificationResult
 import uk.gov.hmrc.crypto.Encrypter
@@ -248,6 +249,8 @@ object JourneyInfo {
     TdJsonBodies.paymentPlanAnswers(withAffordability)
   def canSetUpDirectDebit(isAccountHolder: Boolean): JourneyInfoAsJson                                               =
     TdJsonBodies.detailsAboutBankAccountJourneyInfo(isAccountHolder)
+  def typeOfBankAccount(typeOfBankAccount: TypeOfBankAccount): JourneyInfoAsJson                                     =
+    TdJsonBodies.typeOfBankAccount(typeOfBankAccount)
   def directDebitDetails(encrypter: Encrypter): JourneyInfoAsJson                                                    =
     TdJsonBodies.directDebitDetailsJourneyInfo(encrypter)
   def directDebitDetailsNotAccountHolder(encrypter: Encrypter): JourneyInfoAsJson                                    =
@@ -705,15 +708,6 @@ object JourneyInfo {
       )
 
   def enteredDetailsAboutBankAccount(
-    isAccountHolder:   Boolean,
-    taxRegime:         TaxRegime,
-    encrypter:         Encrypter,
-    etmpEmail:         Option[String] = Some(TdAll.etmpEmail),
-    withAffordability: Boolean = false
-  ): List[JourneyInfoAsJson] =
-    canSetUpDirectDebit(isAccountHolder) :: hasCheckedPaymentPlan(withAffordability, taxRegime, encrypter, etmpEmail)
-
-  def enteredDetailsAboutBankAccountBusiness(
     isAccountHolder:           Boolean,
     taxRegime:                 TaxRegime,
     encrypter:                 Encrypter,
@@ -729,13 +723,22 @@ object JourneyInfo {
       whyCannotPayInFullAnswers = whyCannotPayInFullAnswers
     )
 
-  def enteredDetailsAboutBankAccountPersonal(
-    isAccountHolder:   Boolean,
-    taxRegime:         TaxRegime,
-    encrypter:         Encrypter,
-    withAffordability: Boolean = false
+  def chosenTypeOfBankAccount(
+    typeOfAccount:             TypeOfBankAccount,
+    taxRegime:                 TaxRegime,
+    encrypter:                 Encrypter,
+    etmpEmail:                 Option[String] = Some(TdAll.etmpEmail),
+    withAffordability:         Boolean = false,
+    whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
   ): List[JourneyInfoAsJson] =
-    canSetUpDirectDebit(isAccountHolder) :: hasCheckedPaymentPlan(withAffordability, taxRegime, encrypter)
+    typeOfBankAccount(typeOfAccount) :: enteredDetailsAboutBankAccount(
+      isAccountHolder = true,
+      taxRegime,
+      encrypter,
+      etmpEmail,
+      withAffordability,
+      whyCannotPayInFullAnswers
+    )
 
   def enteredDirectDebitDetails(
     taxRegime:                 TaxRegime,
@@ -744,8 +747,8 @@ object JourneyInfo {
     withAffordability:         Boolean = false,
     whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
   ): List[JourneyInfoAsJson] =
-    directDebitDetails(encrypter) :: enteredDetailsAboutBankAccountBusiness(
-      isAccountHolder = true,
+    directDebitDetails(encrypter) :: chosenTypeOfBankAccount(
+      TypesOfBankAccount.Personal,
       taxRegime,
       encrypter,
       etmpEmail,
@@ -758,8 +761,8 @@ object JourneyInfo {
     encrypter: Encrypter,
     etmpEmail: Option[String] = Some(TdAll.etmpEmail)
   ): List[JourneyInfoAsJson] =
-    directDebitDetailsPaddedAccountNumber(encrypter) :: enteredDetailsAboutBankAccountBusiness(
-      isAccountHolder = true,
+    directDebitDetailsPaddedAccountNumber(encrypter) :: chosenTypeOfBankAccount(
+      TypesOfBankAccount.Business,
       taxRegime,
       encrypter,
       etmpEmail
@@ -871,7 +874,9 @@ object JourneyInfo {
     arrangementSubmitted(taxRegime) :: emailVerificationAnswersNoEmailRequired :: emailAddressRequired(
       isEmailAddressRequired = false
     ) :: directDebitDetails(encrypter) ::
-      canSetUpDirectDebit(isAccountHolder = true) :: hasCheckedPaymentPlan(withAffordability, taxRegime, encrypter) :::
+      typeOfBankAccount(TypesOfBankAccount.Personal) :: canSetUpDirectDebit(isAccountHolder =
+        true
+      ) :: hasCheckedPaymentPlan(withAffordability, taxRegime, encrypter) :::
       upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: obtainedCanPayWithinSixMonthsNotRequired ::
       cannotPayUpfront :: whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(taxRegime, encrypter)
 
@@ -883,7 +888,9 @@ object JourneyInfo {
     arrangementSubmitted(taxRegime) :: emailVerificationAnswersNoEmailRequired :: emailAddressRequired(
       isEmailAddressRequired = false
     ) :: directDebitDetailsPaddedAccountNumber(encrypter) ::
-      canSetUpDirectDebit(isAccountHolder = true) :: hasCheckedPaymentPlan(withAffordability, taxRegime, encrypter) :::
+      typeOfBankAccount(TypesOfBankAccount.Personal) :: canSetUpDirectDebit(isAccountHolder =
+        true
+      ) :: hasCheckedPaymentPlan(withAffordability, taxRegime, encrypter) :::
       upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: obtainedCanPayWithinSixMonthsNotRequired ::
       cannotPayUpfront :: whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(taxRegime, encrypter)
 
@@ -899,7 +906,9 @@ object JourneyInfo {
       encrypter
     ) ::
       emailAddressRequired(isEmailAddressRequired = true) :: directDebitDetails(encrypter) ::
-      canSetUpDirectDebit(isAccountHolder = true) :: hasCheckedPaymentPlan(withAffordability, taxRegime, encrypter) :::
+      typeOfBankAccount(TypesOfBankAccount.Personal) :: canSetUpDirectDebit(isAccountHolder =
+        true
+      ) :: hasCheckedPaymentPlan(withAffordability, taxRegime, encrypter) :::
       upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: obtainedCanPayWithinSixMonthsNotRequired ::
       cannotPayUpfront :: whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(taxRegime, encrypter)
 
@@ -910,6 +919,7 @@ object JourneyInfo {
     withAffordability:           Boolean = false
   ): List[JourneyInfoAsJson] =
     directDebitDetails(encrypter) ::
+      typeOfBankAccount(TypesOfBankAccount.Personal) ::
       canSetUpDirectDebit(isAccountHolder = true) :: hasCheckedPaymentPlan(withAffordability, taxRegime, encrypter) :::
       upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: obtainedCanPayWithinSixMonthsNotRequired ::
       cannotPayUpfront :: whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(

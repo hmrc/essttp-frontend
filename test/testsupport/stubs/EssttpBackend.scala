@@ -23,7 +23,7 @@ import essttp.journey.model.*
 
 import scala.jdk.CollectionConverters.*
 import essttp.rootmodel.*
-import essttp.rootmodel.bank.CanSetUpDirectDebit
+import essttp.rootmodel.bank.{CanSetUpDirectDebit, TypeOfBankAccount, TypesOfBankAccount}
 import essttp.rootmodel.dates.extremedates.ExtremeDatesResponse
 import essttp.rootmodel.dates.startdates.StartDatesResponse
 import essttp.rootmodel.pega.{GetCaseResponse, StartCaseResponse}
@@ -648,6 +648,26 @@ object EssttpBackend {
     )(
       jsonBody:  String =
         JourneyJsonTemplates.`Entered Can Set Up Direct Debit`(isAccountHolder = true, origin)(using encrypter)
+    ): StubMapping =
+      findByLatestSessionId(jsonBody)
+  }
+
+  object ChosenTypeOfBankAccount {
+    def typeOfBankAccountUrl(journeyId: JourneyId) =
+      s"/essttp-backend/journey/${journeyId.value}/update-type-of-bank-account"
+
+    def stubUpdateChosenTypeOfBankAccount(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(typeOfBankAccountUrl(journeyId), updatedJourneyJson)
+
+    def verifyUpdateChosenTypeOfBankAccount(journeyId: JourneyId, expectedTypeOfBankAccount: TypeOfBankAccount): Unit =
+      WireMockHelpers.verifyWithBodyParse(typeOfBankAccountUrl(journeyId), expectedTypeOfBankAccount)
+
+    def findJourney(
+      encrypter:         Encrypter,
+      origin:            Origin,
+      typeOfBankAccount: TypeOfBankAccount = TypesOfBankAccount.Business
+    )(
+      jsonBody:          String = JourneyJsonTemplates.`Chosen Type Of Bank Account`(typeOfBankAccount, origin)(using encrypter)
     ): StubMapping =
       findByLatestSessionId(jsonBody)
   }
