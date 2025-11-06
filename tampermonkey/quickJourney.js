@@ -220,6 +220,13 @@ const checkYouCanSetUpADirectDebit = () => {
     }
 }
 
+const typeOfBankAccount = () => {
+    if (currentPageIs('/set-up-a-payment-plan/bank-account-type')) {
+        document.getElementById('accountType').checked = true
+        clickContinue()
+    }
+}
+
 const setUpDirectDebit = () => {
     if (currentPageIs('/set-up-a-payment-plan/bank-account-details')) {
         document.getElementById('business').checked = true
@@ -288,6 +295,7 @@ function continueJourney() {
     howManyMonthsDoYouWantToPayOver()
     checkPaymentPlan()
     checkYouCanSetUpADirectDebit()
+    typeOfBankAccount()
     setUpDirectDebit()
     checkDirectDebit()
     termsAndConditions()
