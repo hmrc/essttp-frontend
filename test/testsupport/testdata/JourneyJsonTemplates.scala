@@ -17,6 +17,7 @@
 package testsupport.testdata
 
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Origin, Origins, WhyCannotPayInFullAnswers}
+import essttp.rootmodel.bank.TypeOfBankAccount
 import essttp.rootmodel.CannotPayReason.{ChangeToPersonalCircumstances, NoMoneySetAside}
 import essttp.rootmodel.{CannotPayReason, DayOfMonth}
 import paymentsEmailVerification.models.EmailVerificationResult
@@ -518,6 +519,15 @@ object JourneyJsonTemplates {
     journeyInfo = JourneyInfo.enteredDetailsAboutBankAccount(isAccountHolder, origin.taxRegime, encrypter),
     origin = origin
   )
+
+  def `Chosen Type Of Bank Account`(typeOfBankAccount: TypeOfBankAccount, origin: Origin)(using
+    encrypter: Encrypter
+  ): String =
+    TdJsonBodies.createJourneyJson(
+      stageInfo = StageInfo.chosenTypeOfBankAccount,
+      journeyInfo = JourneyInfo.chosenTypeOfBankAccount(typeOfBankAccount, origin.taxRegime, encrypter),
+      origin = origin
+    )
 
   def `Entered Direct Debit Details`(origin: Origin)(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(

@@ -201,7 +201,7 @@ class JourneyIncorrectStateRouterSpec extends ItSpec {
         (
           "Stages.EnteredCanSetUpDirectDebit - is account holder",
           () => EssttpBackend.EnteredCanSetUpDirectDebit.findJourney(testCrypto, Origins.Epaye.Bta)(),
-          PageUrls.directDebitDetailsUrl
+          PageUrls.typeOfBankAccountUrl
         ),
         (
           "Stages.EnteredCanSetUpDirectDebit - is not account holder",
@@ -210,6 +210,11 @@ class JourneyIncorrectStateRouterSpec extends ItSpec {
               JourneyJsonTemplates.`Entered Can Set Up Direct Debit`(isAccountHolder = false)
             ),
           PageUrls.cannotSetupDirectDebitOnlineUrl
+        ),
+        (
+          "Stages.ChosenTypeOfBankAccount",
+          () => EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto, Origins.Epaye.Bta)(),
+          PageUrls.directDebitDetailsUrl
         ),
         (
           "Stages.EnteredDirectDebitDetails",

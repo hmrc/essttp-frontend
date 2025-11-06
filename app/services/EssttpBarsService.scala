@@ -20,7 +20,7 @@ import actionsmodel.EligibleJourneyRequest
 import essttp.bars.BarsVerifyStatusConnector
 import essttp.bars.model.BarsVerifyStatusResponse
 import essttp.journey.model.Journey
-import essttp.journey.model.JourneyStage.{AfterComputedTaxId, AfterEnteredCanYouSetUpDirectDebit}
+import essttp.journey.model.JourneyStage.{AfterChosenTypeOfBankAccount, AfterComputedTaxId}
 import essttp.rootmodel.TaxId
 import essttp.rootmodel.bank.{BankDetails, TypeOfBankAccount, TypesOfBankAccount}
 import essttp.utils.RequestSupport.hc
@@ -44,7 +44,7 @@ class EssttpBarsService @Inject() (
 
   def verifyBankDetails(
     bankDetails: BankDetails,
-    journey:     AfterEnteredCanYouSetUpDirectDebit & Journey
+    journey:     AfterChosenTypeOfBankAccount & Journey
   )(using request: EligibleJourneyRequest[?]): Future[Either[BarsError, VerifyResponse]] = {
     val taxId = journey match {
       case j: AfterComputedTaxId => j.taxId
@@ -55,7 +55,7 @@ class EssttpBarsService @Inject() (
         bankAccount = toBarsBankAccount(bankDetails),
         subject = toBarsSubject(bankDetails),
         business = toBarsBusiness(bankDetails),
-        typeOfBankAccount = toBarsTypeOfBankAccount(bankDetails.typeOfBankAccount)
+        typeOfBankAccount = toBarsTypeOfBankAccount(journey.typeOfBankAccount)
       )
       .flatMap { result =>
         def auditBars(barsVerifyStatusResponse: BarsVerifyStatusResponse): Unit =

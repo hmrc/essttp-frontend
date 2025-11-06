@@ -137,6 +137,9 @@ object Routing {
             detailsAboutBankAccountRoute(j.canSetUpDirectDebitAnswer.isAccountHolder)
         }
       },
+      routes.BankDetailsController.typeOfBankAccount                                                 -> { () =>
+        routes.BankDetailsController.enterBankDetails
+      },
       routes.BankDetailsController.enterBankDetails                                                  -> { () =>
         routes.BankDetailsController.checkBankDetails
       },
@@ -287,6 +290,7 @@ object Routing {
     case _: Journey.CheckedPaymentPlan                   => routes.BankDetailsController.detailsAboutBankAccount
     case j: Journey.EnteredCanYouSetUpDirectDebit        =>
       detailsAboutBankAccountRoute(j.canSetUpDirectDebitAnswer.isAccountHolder)
+    case _: Journey.ChosenTypeOfBankAccount              => routes.BankDetailsController.enterBankDetails
     case _: Journey.EnteredDirectDebitDetails            => routes.BankDetailsController.checkBankDetails
     case _: Journey.ConfirmedDirectDebitDetails          => routes.TermsAndConditionsController.termsAndConditions
 
@@ -332,7 +336,7 @@ object Routing {
     else routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount
 
   private def detailsAboutBankAccountRoute(isAccountHolder: Boolean): Call =
-    if (isAccountHolder) routes.BankDetailsController.enterBankDetails
+    if (isAccountHolder) routes.BankDetailsController.typeOfBankAccount
     else routes.BankDetailsController.cannotSetupDirectDebitOnlinePage
 
   // prevent accidentally submitting arrangement twice

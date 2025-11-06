@@ -20,6 +20,7 @@ import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Origin, Origins, WhyC
 import essttp.rootmodel.TaxRegime.Sa
 import essttp.rootmodel.ttp.eligibility.{EligibilityPass, EligibilityRules}
 import essttp.rootmodel.{DayOfMonth, TaxRegime, UpfrontPaymentAmount}
+import essttp.rootmodel.bank.TypeOfBankAccount
 import paymentsEmailVerification.models.EmailVerificationResult
 import testsupport.testdata.JourneyInfo.JourneyInfoAsJson
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
@@ -716,10 +717,14 @@ object TdJsonBodies {
        |  "isAccountHolder": ${isAccountHolder.toString}
        |}""".stripMargin
 
+  def typeOfBankAccount(typeOfBankAccount: TypeOfBankAccount): String =
+    s"""
+       |"typeOfBankAccount": "${typeOfBankAccount.entryName}"
+       |""".stripMargin
+
   def directDebitDetailsJourneyInfo(encrypter: Encrypter): String =
     s"""
        |"directDebitDetails" : {
-       |  "typeOfBankAccount" :  "Personal",
        |  "name" : "${encryptString(TdAll.testAccountName, encrypter)}",
        |  "sortCode" : "${encryptString("123456", encrypter)}",
        |  "accountNumber" : "${encryptString("12345678", encrypter)}"
@@ -728,7 +733,6 @@ object TdJsonBodies {
   def paddedDirectDebitDetailsJourneyInfo(encrypter: Encrypter): String =
     s"""
        |"directDebitDetails" : {
-       |  "typeOfBankAccount" : "Personal",
        |  "name" : "${encryptString(TdAll.testAccountName, encrypter)}",
        |  "sortCode" : "${encryptString("123456", encrypter)}",
        |  "accountNumber" : "${encryptString("345678", encrypter)}"
