@@ -229,7 +229,6 @@ const typeOfBankAccount = () => {
 
 const setUpDirectDebit = () => {
     if (currentPageIs('/set-up-a-payment-plan/bank-account-details')) {
-        document.getElementById('business').checked = true
         document.getElementById('name').value = 'Lambent Illumination'
         document.getElementById('sortCode').value = '207102'
         document.getElementById('accountNumber').value = '86563611'
