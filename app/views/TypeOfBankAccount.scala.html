@@ -75,14 +75,12 @@
                 RadioItem(
                     content = Text(Messages.TypeOfBankAccount.`Business bank account`.show),
                     value = Some(TypesOfBankAccount.Business.entryName),
-                    checked = form.data.values.toList.contains(TypesOfBankAccount.Business.entryName),
-                    id = Some("business")
+                    checked = form.data.values.toList.contains(TypesOfBankAccount.Business.entryName)
                 ),
                 RadioItem(
                     content = Text(Messages.TypeOfBankAccount.`Personal bank account`.show),
                     value = Some(TypesOfBankAccount.Personal.entryName),
-                    checked = form.data.values.toList.contains(TypesOfBankAccount.Personal.entryName),
-                    id = Some("personal")
+                    checked = form.data.values.toList.contains(TypesOfBankAccount.Personal.entryName)
                 )
             ),
             hint = Some(
