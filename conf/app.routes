@@ -22,8 +22,9 @@ GET    /simple-assessment-payment-plan-continue             controllers.LandingC
 GET    /epaye/start                                         controllers.StartJourneyController.startDetachedEpayeJourney
 GET    /vat/start                                           controllers.StartJourneyController.startDetachedVatJourney
 GET    /sa/start                                            controllers.StartJourneyController.startDetachedSaJourney
-GET    /simp/start                                           controllers.StartJourneyController.startDetachedSimpJourney
+GET    /simp/start                                          controllers.StartJourneyController.startDetachedSimpJourney
 
+GET    /govuk/start                                         controllers.StartJourneyController.startGovuk
 GET    /govuk/epaye/start                                   controllers.StartJourneyController.startGovukEpayeJourney
 GET    /govuk/vat/start                                     controllers.StartJourneyController.startGovukVatJourney
 GET    /govuk/sa/start                                      controllers.StartJourneyController.startGovukSaJourney

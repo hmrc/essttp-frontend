@@ -16,19 +16,21 @@
 
 package models.forms
 
-import essttp.rootmodel.TaxRegime
 import messages.Messages
 import models.Language
+import models.enumsforforms.TaxRegimeFormValue
 import play.api.data.Forms.mapping
 import play.api.data.{Form, Forms, Mapping}
 import util.EnumFormatter
 
 object TaxRegimeForm {
 
-  def form(using Language): Form[TaxRegime] = {
-    val taxRegimeMapping: Mapping[TaxRegime] = Forms.of(
+  final case class OtherTaxRegime()
+
+  def form(using Language): Form[TaxRegimeFormValue] = {
+    val taxRegimeMapping: Mapping[TaxRegimeFormValue] = Forms.of(
       EnumFormatter.format(
-        `enum` = TaxRegime,
+        `enum` = TaxRegimeFormValue,
         errorMessageIfMissing = Messages.WhichTaxRegime.`Select which tax you want to set up a payment plan for`.show,
         errorMessageIfEnumError = Messages.WhichTaxRegime.`Select which tax you want to set up a payment plan for`.show,
         insensitive = true

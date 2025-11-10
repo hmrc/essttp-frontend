@@ -27,6 +27,12 @@ import util.Logging
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
+object StartJourneyController {
+
+  val hasStartedFromGovUkKey: String = "is-govuk-origin"
+
+}
+
 @Singleton()
 class StartJourneyController @Inject() (
   cc:               MessagesControllerComponents,
@@ -36,6 +42,11 @@ class StartJourneyController @Inject() (
 )(using ExecutionContext)
     extends FrontendController(cc),
       Logging {
+
+  def startGovuk: Action[AnyContent] = as.authenticatedAction { implicit request =>
+    Redirect(routes.WhichTaxRegimeController.whichTaxRegime)
+      .addingToSession(StartJourneyController.hasStartedFromGovUkKey -> "true")
+  }
 
   def startGovukEpayeJourney: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction.async {
     implicit request =>

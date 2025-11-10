@@ -15,7 +15,7 @@
  *@
 
 @import controllers.routes
-@import essttp.rootmodel.TaxRegime
+@import models.enumsforforms.TaxRegimeFormValue
 @import messages.Messages
 @import play.api.data.Form
 @import play.api.mvc.Request
@@ -23,15 +23,15 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-  layout: templates.Layout,
-  govukButton: GovukButton,
-  govukRadios: GovukRadios,
-  formWithCSRF: FormWithCSRF,
-  govukErrorSummary: GovukErrorSummary,
-  requestSupport: RequestSupport
+layout: templates.Layout,
+govukButton: GovukButton,
+govukRadios: GovukRadios,
+formWithCSRF: FormWithCSRF,
+govukErrorSummary: GovukErrorSummary,
+requestSupport: RequestSupport
 )
 
-@(form: Form[TaxRegime], saEnabled: Boolean, simpEnabled: Boolean)(implicit request: Request[?])
+@(form: Form[TaxRegimeFormValue], saEnabled: Boolean, simpEnabled: Boolean)(implicit request: Request[?])
 
 @import requestSupport.{languageFromRequest, legacyMessages}
 
@@ -65,11 +65,20 @@
       value = Some("SIMP")
   )
 
+  val divider = RadioItem(divider = Some(Messages.or.show))
+
+  val anotherTax = RadioItem(
+    content = Text(Messages.WhichTaxRegime.`A different tax`.show),
+    value = Some("other")
+  )
+
   Seq(
     Some(epaye),
     Some(sa).filter(_ => saEnabled),
     Some(simp).filter(_ => simpEnabled),
-    Some(vat)
+    Some(vat),
+    Some(divider),
+    Some(anotherTax)
   ).collect{ case Some(regime) => regime }
 }
 

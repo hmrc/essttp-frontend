@@ -19,6 +19,7 @@ package controllers
 import actions.Actions
 import config.AppConfig
 import essttp.rootmodel.TaxRegime
+import models.enumsforforms.TaxRegimeFormValue
 import models.forms.TaxRegimeForm
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import requests.RequestSupport
@@ -51,11 +52,31 @@ class WhichTaxRegimeController @Inject() (
         .bindFromRequest()
         .fold(
           formWithErrors => Ok(views.whichTaxRegime(formWithErrors, appConfig.saEnabled, appConfig.simpEnabled)),
-          {
-            case TaxRegime.Epaye => Redirect(routes.StartJourneyController.startDetachedEpayeJourney)
-            case TaxRegime.Vat   => Redirect(routes.StartJourneyController.startDetachedVatJourney)
-            case TaxRegime.Sa    => Redirect(routes.StartJourneyController.startDetachedSaJourney)
-            case TaxRegime.Simp  => Redirect(routes.StartJourneyController.startDetachedSimpJourney)
+          { taxRegimeFormValue =>
+            val redirectTo =
+              TaxRegimeFormValue.toTaxRegime(taxRegimeFormValue) match {
+                case None         => Redirect(appConfig.Urls.paymentProblemEnquiriesUrl)
+                case Some(regime) =>
+                  val call = request.session
+                    .get(StartJourneyController.hasStartedFromGovUkKey)
+                    .fold {
+                      regime match {
+                        case TaxRegime.Epaye => routes.StartJourneyController.startDetachedEpayeJourney
+                        case TaxRegime.Vat   => routes.StartJourneyController.startDetachedVatJourney
+                        case TaxRegime.Sa    => routes.StartJourneyController.startDetachedSaJourney
+                        case TaxRegime.Simp  => routes.StartJourneyController.startDetachedSimpJourney
+                      }
+                    } { _ =>
+                      regime match {
+                        case TaxRegime.Epaye => routes.StartJourneyController.startGovukEpayeJourney
+                        case TaxRegime.Vat   => routes.StartJourneyController.startGovukVatJourney
+                        case TaxRegime.Sa    => routes.StartJourneyController.startGovukSaJourney
+                        case TaxRegime.Simp  => routes.StartJourneyController.startGovukSimpJourney
+                      }
+                    }
+                  Redirect(call)
+              }
+            redirectTo.removingFromSession(StartJourneyController.hasStartedFromGovUkKey)
           }
         )
     }

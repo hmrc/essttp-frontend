@@ -67,7 +67,7 @@
     CannotPayReason.WaitingForRefund
   ).map(toCheckBoxItem)
 
-  val divider = CheckboxItem(divider = Some(Messages.WhyCannotPayInFull.or.show))
+  val divider = CheckboxItem(divider = Some(Messages.or.show))
 
   val other = toCheckBoxItem(CannotPayReason.Other).copy(behaviour = Some(ExclusiveCheckbox))
 

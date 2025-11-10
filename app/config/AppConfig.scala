@@ -83,6 +83,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     val signUpForMtdUrl: String                        = config.get[String]("govUkUrls.signUpMtdUrl")
     val extraSupportUrl: String                        = config.get[String]("govUkUrls.extraSupportUrl")
     val relayUrl: String                               = config.get[String]("govUkUrls.relayUrl")
+    val paymentProblemEnquiriesUrl: String             = config.get[String]("govUkUrls.paymentProblemEnquiries")
     val businessTaxAccountUrl: String                  = s"${BaseUrl.businessTaxAccountFrontend}/business-account"
     val personalTaxAccountUrl: String                  = s"${BaseUrl.personalTaxAccountFrontend}/personal-account"
     val businessPaymentSupportService: String          = config.get[String]("govUkUrls.businessPaymentSupportService")

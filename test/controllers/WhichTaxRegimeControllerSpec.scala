@@ -56,7 +56,7 @@ class WhichTaxRegimeControllerSpec extends ItSpec {
       )
 
       val radios = doc.select(".govuk-radios__item").asScala.toList
-      radios.size shouldBe 4
+      radios.size shouldBe 5
 
       radios(0).select(".govuk-radios__input").`val`() shouldBe "EPAYE"
       radios(0).select(".govuk-radios__label").text() shouldBe "Employers’ PAYE"
@@ -69,6 +69,13 @@ class WhichTaxRegimeControllerSpec extends ItSpec {
 
       radios(3).select(".govuk-radios__input").`val`() shouldBe "VAT"
       radios(3).select(".govuk-radios__label").text() shouldBe "VAT"
+
+      radios(4).select(".govuk-radios__input").`val`() shouldBe "other"
+      radios(4).select(".govuk-radios__label").text() shouldBe "A different tax"
+
+      val or = radios(3).nextElementSibling()
+      or.is("div.govuk-radios__divider") shouldBe true
+      or.text shouldBe "or"
       ()
     }
 
@@ -97,7 +104,7 @@ class WhichTaxRegimeControllerSpec extends ItSpec {
       )
 
       val radios = doc.select(".govuk-radios__item").asScala.toList
-      radios.size shouldBe 4
+      radios.size shouldBe 5
 
       radios(0).select(".govuk-radios__input").`val`() shouldBe "EPAYE"
       radios(0).select(".govuk-radios__label").text() shouldBe "TWE Cyflogwyr"
@@ -110,15 +117,22 @@ class WhichTaxRegimeControllerSpec extends ItSpec {
 
       radios(3).select(".govuk-radios__input").`val`() shouldBe "VAT"
       radios(3).select(".govuk-radios__label").text() shouldBe "TAW"
+
+      radios(4).select(".govuk-radios__input").`val`() shouldBe "other"
+      radios(4).select(".govuk-radios__label").text() shouldBe "Treth wahanol"
+
+      val or = radios(3).nextElementSibling()
+      or.is("div.govuk-radios__divider") shouldBe true
+      or.text shouldBe "neu"
     }
 
   }
 
-  "POST /which-tax should" - {
+  "POST /which-tax" - {
 
     val fakeRequest = FakeRequest(method = "POST", path = "").withAuthToken()
 
-    "show a form error if nothing is submitted" in {
+    "should show a form error if nothing is submitted" in {
       stubCommonActions()
 
       val result: Future[Result] = controller.whichTaxRegimeSubmit(fakeRequest)
@@ -140,44 +154,122 @@ class WhichTaxRegimeControllerSpec extends ItSpec {
       errorLink.attr("href") shouldBe "#WhichTaxRegime"
     }
 
-    "redirect to the start EPAYE journey endpoint if the user selects EPAYE" in {
+    def testRedirect(formValue: String, withGoukOrigin: Boolean, expectedRedirect: String) = {
       stubCommonActions()
       EssttpBackend.StartJourney.startJourneyInBackend(Origins.Epaye.DetachedUrl)
 
-      val request                = fakeRequest.withFormUrlEncodedBody("WhichTaxRegime" -> "EPAYE")
+      val request = fakeRequest
+        .withFormUrlEncodedBody("WhichTaxRegime" -> formValue)
+        .withSession((if (withGoukOrigin) Seq("is-govuk-origin" -> "true") else Seq.empty)*)
+
       val result: Future[Result] = controller.whichTaxRegimeSubmit(request)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.StartJourneyController.startDetachedEpayeJourney.url)
+      redirectLocation(result) shouldBe Some(expectedRedirect)
+      session(result).get("is-govuk-origin") shouldBe None
     }
 
-    "redirect to the start VAT journey endpoint if the user selects VAT" in {
-      stubCommonActions()
-      EssttpBackend.StartJourney.startJourneyInBackend(Origins.Vat.DetachedUrl)
+    "when there is no value for 'is-govuk-origin' in the cookie session should" - {
 
-      val request                = fakeRequest.withFormUrlEncodedBody("WhichTaxRegime" -> "VAT")
-      val result: Future[Result] = controller.whichTaxRegimeSubmit(request)
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.StartJourneyController.startDetachedVatJourney.url)
+      "redirect to the start EPAYE journey endpoint if the user selects EPAYE" in {
+        EssttpBackend.StartJourney.startJourneyInBackend(Origins.Epaye.DetachedUrl)
+
+        testRedirect(
+          "EPAYE",
+          withGoukOrigin = false,
+          routes.StartJourneyController.startDetachedEpayeJourney.url
+        )
+      }
+
+      "redirect to the start VAT journey endpoint if the user selects VAT" in {
+        EssttpBackend.StartJourney.startJourneyInBackend(Origins.Vat.DetachedUrl)
+
+        testRedirect(
+          "VAT",
+          withGoukOrigin = false,
+          routes.StartJourneyController.startDetachedVatJourney.url
+        )
+      }
+
+      "redirect to the start SA journey endpoint if the user selects SA" in {
+        EssttpBackend.StartJourney.startJourneyInBackend(Origins.Sa.DetachedUrl)
+
+        testRedirect(
+          "SA",
+          withGoukOrigin = false,
+          routes.StartJourneyController.startDetachedSaJourney.url
+        )
+      }
+
+      "redirect to the start SIMP journey endpoint if the user selects SIMP" in {
+        EssttpBackend.StartJourney.startJourneyInBackend(Origins.Simp.DetachedUrl)
+
+        testRedirect(
+          "SIMP",
+          withGoukOrigin = false,
+          routes.StartJourneyController.startDetachedSimpJourney.url
+        )
+      }
+
+      "redirect to the govuk payment enquires page if the user selects 'a different tax regime'" in {
+        testRedirect(
+          "other",
+          withGoukOrigin = false,
+          "https://www.gov.uk/find-hmrc-contacts/payment-problems-enquiries"
+        )
+      }
+
     }
 
-    "redirect to the start SA journey endpoint if the user selects SA" in {
-      stubCommonActions()
-      EssttpBackend.StartJourney.startJourneyInBackend(Origins.Sa.DetachedUrl)
+    "when there is a value for 'is-govuk-origin' in the cookie session should" - {
 
-      val request                = fakeRequest.withFormUrlEncodedBody("WhichTaxRegime" -> "SA")
-      val result: Future[Result] = controller.whichTaxRegimeSubmit(request)
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.StartJourneyController.startDetachedSaJourney.url)
-    }
+      "redirect to the start EPAYE journey endpoint if the user selects EPAYE" in {
+        EssttpBackend.StartJourney.startJourneyInBackend(Origins.Epaye.DetachedUrl)
 
-    "redirect to the start SIMP journey endpoint if the user selects SIMP" in {
-      stubCommonActions()
-      EssttpBackend.StartJourney.startJourneyInBackend(Origins.Simp.DetachedUrl)
+        testRedirect(
+          "EPAYE",
+          withGoukOrigin = true,
+          routes.StartJourneyController.startGovukEpayeJourney.url
+        )
+      }
 
-      val request                = fakeRequest.withFormUrlEncodedBody("WhichTaxRegime" -> "SIMP")
-      val result: Future[Result] = controller.whichTaxRegimeSubmit(request)
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.StartJourneyController.startDetachedSimpJourney.url)
+      "redirect to the start VAT journey endpoint if the user selects VAT" in {
+        EssttpBackend.StartJourney.startJourneyInBackend(Origins.Vat.DetachedUrl)
+
+        testRedirect(
+          "VAT",
+          withGoukOrigin = true,
+          routes.StartJourneyController.startGovukVatJourney.url
+        )
+      }
+
+      "redirect to the start SA journey endpoint if the user selects SA" in {
+        EssttpBackend.StartJourney.startJourneyInBackend(Origins.Sa.DetachedUrl)
+
+        testRedirect(
+          "SA",
+          withGoukOrigin = true,
+          routes.StartJourneyController.startGovukSaJourney.url
+        )
+      }
+
+      "redirect to the start SIMP journey endpoint if the user selects SIMP" in {
+        EssttpBackend.StartJourney.startJourneyInBackend(Origins.Simp.DetachedUrl)
+
+        testRedirect(
+          "SIMP",
+          withGoukOrigin = true,
+          routes.StartJourneyController.startGovukSimpJourney.url
+        )
+      }
+
+      "redirect to the govuk payment enquires page if the user selects 'a different tax regime'" in {
+        testRedirect(
+          "other",
+          withGoukOrigin = true,
+          "https://www.gov.uk/find-hmrc-contacts/payment-problems-enquiries"
+        )
+      }
+
     }
 
   }
@@ -213,7 +305,7 @@ class WhichTaxRegimeSaDisabledControllerSpec extends ItSpec {
 
       val radios = doc.select(".govuk-radios__item").asScala.toList
       // SA shouldn't be an option
-      radios.size shouldBe 3
+      radios.size shouldBe 4
 
       radios(0).select(".govuk-radios__input").`val`() shouldBe "EPAYE"
       radios(0).select(".govuk-radios__label").text() shouldBe "Employers’ PAYE"
@@ -224,6 +316,12 @@ class WhichTaxRegimeSaDisabledControllerSpec extends ItSpec {
       radios(2).select(".govuk-radios__input").`val`() shouldBe "VAT"
       radios(2).select(".govuk-radios__label").text() shouldBe "VAT"
 
+      radios(3).select(".govuk-radios__input").`val`() shouldBe "other"
+      radios(3).select(".govuk-radios__label").text() shouldBe "A different tax"
+
+      val or = radios(2).nextElementSibling()
+      or.is("div.govuk-radios__divider") shouldBe true
+      or.text shouldBe "or"
       ()
     }
 
@@ -265,7 +363,7 @@ class WhichTaxRegimeSimpDisabledControllerSpec extends ItSpec {
 
       val radios = doc.select(".govuk-radios__item").asScala.toList
       // SIMP shouldn't be an option
-      radios.size shouldBe 3
+      radios.size shouldBe 4
 
       radios(0).select(".govuk-radios__input").`val`() shouldBe "EPAYE"
       radios(0).select(".govuk-radios__label").text() shouldBe "Employers’ PAYE"
@@ -276,6 +374,12 @@ class WhichTaxRegimeSimpDisabledControllerSpec extends ItSpec {
       radios(2).select(".govuk-radios__input").`val`() shouldBe "VAT"
       radios(2).select(".govuk-radios__label").text() shouldBe "VAT"
 
+      radios(3).select(".govuk-radios__input").`val`() shouldBe "other"
+      radios(3).select(".govuk-radios__label").text() shouldBe "A different tax"
+
+      val or = radios(2).nextElementSibling()
+      or.is("div.govuk-radios__divider") shouldBe true
+      or.text shouldBe "or"
       ()
     }
 

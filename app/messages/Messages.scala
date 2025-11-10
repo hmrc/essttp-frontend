@@ -62,6 +62,11 @@ object Messages {
     welsh = "Na"
   )
 
+  val or: Message = Message(
+    english = "or",
+    welsh = "neu"
+  )
+
   val error: Message = Message(
     english = "Error: ",
     welsh = "Gwall: "
@@ -107,6 +112,11 @@ object Messages {
     val SIMP: Message = Message(
       english = "Simple Assessment",
       welsh = "Asesiad Syml"
+    )
+
+    val `A different tax`: Message = Message(
+      english = "A different tax",
+      welsh = "Treth wahanol"
     )
 
     val `Select which tax you want to set up a payment plan for`: Message = Message(
@@ -909,11 +919,6 @@ object Messages {
     val `Your answers help us plan services in the future...` : Message = Message(
       english = "Your answers help us plan services in the future. Select all that apply.",
       welsh = "Bydd eich atebion yn ein helpu i gynllunio gwasanaethau yn y dyfodol. Dewiswch bob un sy’n berthnasol."
-    )
-
-    val or: Message = Message(
-      english = "or",
-      welsh = "neu"
     )
 
     val `Select all that apply or 'none of these'` : Message = Message(
