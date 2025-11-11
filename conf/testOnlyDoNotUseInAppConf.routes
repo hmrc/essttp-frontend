@@ -32,10 +32,7 @@ GET  /set-up-a-payment-plan/test-only/bta-epaye-page                    testOnly
 GET  /set-up-a-payment-plan/test-only/bta-vat-page                      testOnly.controllers.StartJourneyController.showBtaVatPage
 GET  /set-up-a-payment-plan/test-only/bta-sa-page                       testOnly.controllers.StartJourneyController.showBtaSaPage
 
-GET  /set-up-a-payment-plan/test-only/govuk-epaye-page                  testOnly.controllers.StartJourneyController.showGovukEpayePage
-GET  /set-up-a-payment-plan/test-only/govuk-vat-page                    testOnly.controllers.StartJourneyController.showGovukVatPage
-GET  /set-up-a-payment-plan/test-only/govuk-sa-page                     testOnly.controllers.StartJourneyController.showGovukSaPage
-GET  /set-up-a-payment-plan/test-only/govuk-simp-page                   testOnly.controllers.StartJourneyController.showGovukSimpPage
+GET  /set-up-a-payment-plan/test-only/govuk-page                        testOnly.controllers.StartJourneyController.showGovukPage
 
 GET  /set-up-a-payment-plan/test-only/epaye-page                        testOnly.controllers.StartJourneyController.showEpayePage
 

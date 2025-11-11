@@ -15,7 +15,6 @@
  *@
 
 @import controllers.routes
-@import essttp.rootmodel.TaxRegime
 @import play.api.mvc.Request
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 
@@ -23,30 +22,20 @@
 testOnlyLayout: TestOnlyLayout,
 govukButton: GovukButton
 )
-@(taxRegime: TaxRegime)(implicit
-        request: Request[?]
-)
+@()(implicit request: Request[?])
 
 @title = @{
-    s"I am ${taxRegime.entryName} GOV.Uk Page"
+    s"I am GOV.Uk Page"
 }
 
-@redirectTo = @{
-    taxRegime match {
-        case TaxRegime.Epaye => routes.StartJourneyController.startGovukEpayeJourney
-        case TaxRegime.Vat => routes.StartJourneyController.startGovukVatJourney
-        case TaxRegime.Sa => routes.StartJourneyController.startGovukSaJourney
-        case TaxRegime.Simp => routes.StartJourneyController.startGovukSimpJourney
-    }
-}
 
 @testOnlyLayout(pageTitle = Some(title)) {
 
     <h1 class="govuk-heading-xl">@title</h1>
-    <p class="govuk-body">Set up a @{taxRegime.entryName} payment plan if you cannot pay in full</p>
+    <p class="govuk-body">Set up a payment plan if you cannot pay in full</p>
 
     @govukButton(Button(
-        href = Some(redirectTo.url),
+        href = Some(routes.StartJourneyController.startGovuk.url),
         content = Text("Start now")
     ))
 
