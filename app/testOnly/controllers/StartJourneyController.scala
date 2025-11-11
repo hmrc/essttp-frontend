@@ -146,26 +146,26 @@ class StartJourneyController @Inject() (
       redirectTo: Call = startJourneyForm.origin match {
                            case Origins.Epaye.Bta            => testOnlyRoutes.StartJourneyController.showBtaEpayePage
                            case Origins.Epaye.EpayeService   => testOnlyRoutes.StartJourneyController.showEpayePage
-                           case Origins.Epaye.GovUk          => testOnlyRoutes.StartJourneyController.showGovukEpayePage
+                           case Origins.Epaye.GovUk          => testOnlyRoutes.StartJourneyController.showGovukPage
                            case Origins.Epaye.DetachedUrl    =>
                              _root_.controllers.routes.StartJourneyController.startDetachedEpayeJourney
                            case Origins.Vat.Bta              => testOnlyRoutes.StartJourneyController.showBtaVatPage
                            case Origins.Vat.VatService       => testOnlyRoutes.StartJourneyController.showVatPage
-                           case Origins.Vat.GovUk            => testOnlyRoutes.StartJourneyController.showGovukVatPage
+                           case Origins.Vat.GovUk            => testOnlyRoutes.StartJourneyController.showGovukPage
                            case Origins.Vat.DetachedUrl      =>
                              _root_.controllers.routes.StartJourneyController.startDetachedVatJourney
                            case Origins.Vat.VatPenalties     => testOnlyRoutes.StartJourneyController.showVatPenaltiesPage
                            case Origins.Sa.Bta               => testOnlyRoutes.StartJourneyController.showBtaSaPage
                            case Origins.Sa.Pta               => testOnlyRoutes.StartJourneyController.showPtaSaPage
                            case Origins.Sa.Mobile            => testOnlyRoutes.StartJourneyController.showMobileSaPage
-                           case Origins.Sa.GovUk             => testOnlyRoutes.StartJourneyController.showGovukSaPage
+                           case Origins.Sa.GovUk             => testOnlyRoutes.StartJourneyController.showGovukPage
                            case Origins.Sa.DetachedUrl       =>
                              _root_.controllers.routes.StartJourneyController.startDetachedSaJourney
                            case Origins.Sa.ItsaViewAndChange =>
                              testOnlyRoutes.StartJourneyController.showItsaViewAndChangePage
                            case Origins.Simp.Pta             => testOnlyRoutes.StartJourneyController.showPtaSimpPage
                            case Origins.Simp.Mobile          => testOnlyRoutes.StartJourneyController.showMobileSimpPage
-                           case Origins.Simp.GovUk           => testOnlyRoutes.StartJourneyController.showGovukSimpPage
+                           case Origins.Simp.GovUk           => testOnlyRoutes.StartJourneyController.showGovukPage
                            case Origins.Simp.DetachedUrl     =>
                              _root_.controllers.routes.StartJourneyController.startDetachedSimpJourney
                          }
@@ -213,23 +213,8 @@ class StartJourneyController @Inject() (
   }
 
   /** Pretends being a Govuk Epaye page */
-  val showGovukEpayePage: Action[AnyContent] = as.default.async { implicit request =>
-    withSessionId(Future.successful(Ok(iAmGovUkPage(TaxRegime.Epaye))))
-  }
-
-  /** Pretends being a Govuk Vat page */
-  val showGovukVatPage: Action[AnyContent] = as.default.async { implicit request =>
-    withSessionId(Future.successful(Ok(iAmGovUkPage(TaxRegime.Vat))))
-  }
-
-  /** Pretends being a Govuk Sa page */
-  val showGovukSaPage: Action[AnyContent] = as.default.async { implicit request =>
-    withSessionId(Future.successful(Ok(iAmGovUkPage(TaxRegime.Sa))))
-  }
-
-  /** Pretends being a Govuk Simp page */
-  val showGovukSimpPage: Action[AnyContent] = as.default.async { implicit request =>
-    withSessionId(Future.successful(Ok(iAmGovUkPage(TaxRegime.Simp))))
+  val showGovukPage: Action[AnyContent] = as.default.async { implicit request =>
+    withSessionId(Future.successful(Ok(iAmGovUkPage())))
   }
 
   /** Pretends being a EPAYE service page */

@@ -31,6 +31,23 @@ class StartJourneyControllerSpec extends ItSpec {
 
   private val controller = app.injector.instanceOf[StartJourneyController]
 
+  "GET /govuk/start must" - {
+
+    "redirect to the which tax page adding a marker to the cookie session" in {
+      stubCommonActions()
+
+      val fakeRequest = FakeRequest()
+        .withAuthToken()
+        .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+
+      val result: Future[Result] = controller.startGovuk(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.WhichTaxRegimeController.whichTaxRegime.url)
+      session(result).data.get("is-govuk-origin") shouldBe Some("true")
+    }
+
+  }
+
   "GET /govuk/epaye/start" - {
     "should start a gov uk EPAYE journey and redirect" in {
       stubCommonActions()
