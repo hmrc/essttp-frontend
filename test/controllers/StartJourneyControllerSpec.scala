@@ -33,6 +33,16 @@ class StartJourneyControllerSpec extends ItSpec {
 
   "GET /govuk/start must" - {
 
+    "redirect to the login page with the correct contnue url if the user is logged out" in {
+      stubCommonActions()
+
+      val result: Future[Result] = controller.startGovuk(FakeRequest("GET", "/blah-blah"))
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(
+        "http://localhost:9949/auth-login-stub/gg-sign-in?continue=http%3A%2F%2Flocalhost%3A9215%2Fblah-blah&origin=essttp-frontend"
+      )
+    }
+
     "redirect to the which tax page adding a marker to the cookie session" in {
       stubCommonActions()
 

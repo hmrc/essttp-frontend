@@ -43,7 +43,7 @@ class StartJourneyController @Inject() (
     extends FrontendController(cc),
       Logging {
 
-  def startGovuk: Action[AnyContent] = as.authenticatedAction { implicit request =>
+  def startGovuk: Action[AnyContent] = as.continueToSameEndpointAuthenticatedAction { implicit request =>
     Redirect(routes.WhichTaxRegimeController.whichTaxRegime)
       .addingToSession(StartJourneyController.hasStartedFromGovUkKey -> "true")
   }
