@@ -20,12 +20,12 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import essttp.crypto.CryptoFormat
 import essttp.journey.model.{Origin, Origins, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.{CannotPayReason, TaxRegime}
-import essttp.rootmodel.ttp.eligibility.{CustomerDetail, EmailSource}
+import essttp.rootmodel.ttp.eligibility.{CustomerDetail, EmailSource, IdType, IdValue, Identification}
 import paymentsEmailVerification.models.EmailVerificationResult
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{Call, Result}
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import testsupport.ItSpec
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend, Ttp}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
@@ -145,7 +145,7 @@ class SubmitArrangementControllerSpec extends ItSpec {
             ) =>
           s"[taxRegime: ${taxRegime.toString}] trigger call to ttp enact arrangement api, send an audit event " +
             s"and also update backend for $journeyDescription" in {
-              stubCommonActions()
+              stubCommonActions(authNino = Some("AB123456C"))
               journeyStubMapping()
               EssttpBackend.SubmitArrangement.stubUpdateSubmitArrangement(
                 TdAll.journeyId,
@@ -163,6 +163,11 @@ class SubmitArrangementControllerSpec extends ItSpec {
                 case TaxRegime.Simp  => PageUrls.simpConfirmationUrl
               })
 
+              val expectedAdditionalIdentification = taxRegime match {
+                case TaxRegime.Sa => Some(Identification(IdType("NINO"), IdValue("AB123456C")))
+                case _            => None
+              }
+
               Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(
                 TdAll.customerDetail(
                   expectedEmail.getOrElse(TdAll.etmpEmail).toLowerCase(Locale.UK),
@@ -172,7 +177,8 @@ class SubmitArrangementControllerSpec extends ItSpec {
                 TdAll.someRegimeDigitalCorrespondenceTrue,
                 taxRegime,
                 hasAffordability = affordabilityEnabled,
-                caseId = caseId
+                caseId = caseId,
+                additionalIdentification = expectedAdditionalIdentification
               )(using CryptoFormat.NoOpCryptoFormat)
 
               val taxType = taxRegime match {

@@ -16,7 +16,7 @@
 
 package testsupport.stubs
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import connectors.CallEligibilityApiRequest
 import essttp.crypto.CryptoFormat
@@ -24,7 +24,7 @@ import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.pega.PegaCaseId
 import essttp.rootmodel.ttp.affordablequotes.AffordableQuotesRequest
 import essttp.rootmodel.ttp.arrangement.ArrangementRequest
-import essttp.rootmodel.ttp.eligibility.{ContactDetail, CustomerDetail, RegimeDigitalCorrespondence}
+import essttp.rootmodel.ttp.eligibility.{ContactDetail, CustomerDetail, Identification, RegimeDigitalCorrespondence}
 import models.EligibilityReqIdentificationFlag
 import play.api.http.Status
 import play.api.libs.json.Format
@@ -106,7 +106,8 @@ object Ttp {
       taxRegime:                   TaxRegime,
       accountNumber:               String = "12345678",
       hasAffordability:            Boolean = false,
-      caseId:                      Option[PegaCaseId] = None
+      caseId:                      Option[PegaCaseId] = None,
+      additionalIdentification:    Option[Identification] = None
     )(using CryptoFormat): Unit =
       ttpVerify(
         enactArrangementUrl,
@@ -117,7 +118,8 @@ object Ttp {
           taxRegime,
           accountNumber,
           hasAffordability,
-          caseId
+          caseId,
+          additionalIdentification
         )
       )
   }
