@@ -155,6 +155,16 @@ class TtpService @Inject() (
     val accountNumberPaddedWithZero: AccountNumber = directDebitDetails.accountNumber
       .copy(SensitiveString(padLeftWithZeros(directDebitDetails.accountNumber.value.decryptedValue)))
 
+    val identification = taxRegime match {
+      case TaxRegime.Sa =>
+        val maybeNinoId =
+          authenticatedJourneyRequest.nino.map(nino => Identification(IdType("NINO"), IdValue(nino.value)))
+        maybeNinoId.fold(eligibilityCheckResult.identification)(_ :: eligibilityCheckResult.identification)
+
+      case TaxRegime.Epaye | TaxRegime.Vat | TaxRegime.Simp =>
+        eligibilityCheckResult.identification
+    }
+
     def toDebtItemCharges(chargeTypeAssessment: ChargeTypeAssessment): List[DebtItemCharges] =
       chargeTypeAssessment.charges.map { (charge: Charges) =>
         DebtItemCharges(
@@ -201,7 +211,7 @@ class TtpService @Inject() (
       regimeType = RegimeType.fromTaxRegime(taxRegime),
       regimePaymentFrequency = PaymentPlanFrequencies.Monthly,
       arrangementAgreedDate = ArrangementAgreedDate(LocalDate.now(ZoneOffset.of("Z")).toString),
-      identification = eligibilityCheckResult.identification,
+      identification = identification,
       directDebitInstruction = DirectDebitInstruction(
         sortCode = directDebitDetails.sortCode,
         accountNumber = accountNumberPaddedWithZero,

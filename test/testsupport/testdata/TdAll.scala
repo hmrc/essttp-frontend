@@ -579,7 +579,8 @@ object TdAll {
     taxRegime:                   TaxRegime,
     accountNumber:               String = "12345678",
     hasAffordabilityAssessment:  Boolean = false,
-    caseID:                      Option[PegaCaseId] = None
+    caseID:                      Option[PegaCaseId] = None,
+    additionalIdentification:    Option[Identification] = None
   ): ArrangementRequest = {
     val regimeType = taxRegime match {
       case TaxRegime.Epaye => RegimeType.EPAYE
@@ -587,6 +588,7 @@ object TdAll {
       case TaxRegime.Sa    => RegimeType.SA
       case TaxRegime.Simp  => RegimeType.SIMP
     }
+
     ArrangementRequest(
       channelIdentifier = ChannelIdentifiers.eSSTTP,
       regimeType = regimeType,
@@ -594,7 +596,10 @@ object TdAll {
       caseID = caseID,
       regimePaymentFrequency = PaymentPlanFrequencies.Monthly,
       arrangementAgreedDate = ArrangementAgreedDate(LocalDate.now(ZoneOffset.of("Z")).toString),
-      identification = identification(taxRegime),
+      identification = {
+        val id = identification(taxRegime)
+        additionalIdentification.fold(id)(_ :: id)
+      },
       directDebitInstruction = DirectDebitInstruction(
         sortCode = SortCode(SensitiveString("123456")),
         accountNumber = AccountNumber(SensitiveString(accountNumber)),
