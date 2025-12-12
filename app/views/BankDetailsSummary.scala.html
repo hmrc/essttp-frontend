@@ -63,15 +63,7 @@
   </h1>
 
   @govukSummaryList(SummaryList(
-    card = Some(Card(
-      title = Some(CardTitle(Text(Messages.BankDetails.`Bank account details`.show),
-        classes = "govuk-card__header__text")),
-      actions = Some(Actions(items = Seq(ActionItem(
-        href = routes.BankDetailsController.detailsAboutBankAccount.url,
-        content = Text(Messages.CheckBankDetails.`Change your Direct Debit details`.show),
-        visuallyHiddenText = None))
-         ))
-      )),
+
     rows = Seq(
       SummaryListRow(
         classes = "govuk-summary-list__row",
@@ -116,7 +108,21 @@
           content = Text(directDebitDetails.accountNumber.value.decryptedValue)
         )
       )
-    )))
+    ),
+    card = Some(Card(
+      title = Some(CardTitle(
+        content = Text(Messages.BankDetails.`Bank account details`.show),
+        classes = "govuk-card__header__text"
+      )),
+      actions = Some(Actions(items = Seq(ActionItem(
+        href = routes.BankDetailsController.detailsAboutBankAccount.url,
+        content = Text(Messages.CheckBankDetails.`Change your Direct Debit details`.show),
+        visuallyHiddenText = None
+      ))
+      ))
+    ))
+
+  ))
 
   @detailsContent
 
