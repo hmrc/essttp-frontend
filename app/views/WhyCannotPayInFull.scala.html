@@ -44,15 +44,29 @@
 }
 
 @toCheckBoxItem(reason: CannotPayReason) = @{
+    val reasonNames = CannotPayReason.values.map(_.entryName).toSet
 
-  val (content, hint) = Messages.WhyCannotPayInFull.checkboxMessageWithHint(reason)
+    val selectedFromValue: Set[String] =
+        form.value.map(_.map(_.entryName)).getOrElse(Set.empty)
+
+    val selectedFromData: Set[String] =
+        form.data.values.toSeq
+        .flatMap(_.split(","))
+        .map(_.trim)
+        .filter(reasonNames.contains)
+        .toSet
+
+    val selectedEntryNames: Set[String] =
+        if (selectedFromValue.nonEmpty) selectedFromValue else selectedFromData
+
+    val (content, hint) = Messages.WhyCannotPayInFull.checkboxMessageWithHint(reason)
 
     CheckboxItem(
         content = Text(content.show),
         hint = hint.map(m => Hint(content = Text(m.show))),
         value = reason.entryName,
         id = Some(s"option-${reason.entryName}"),
-        checked = form.value.exists(_.contains(reason))
+        checked = selectedEntryNames.contains(reason.entryName)
     )
 }
 
