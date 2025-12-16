@@ -156,7 +156,9 @@ class WhyCannotPayInFullControllerSpec extends ItSpec, UnchangedFromCYALinkAsser
 
     "return a form error when" - {
 
-      def testFormError(formData: (String, String)*)(expectedError: String): Unit = {
+      def testFormError(
+        formData: (String, String)*
+      )(expectedError: String)(expectedChecked: Set[CannotPayReason] = Set.empty): Unit = {
         stubCommonActions()
         EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Epaye.Bta)()
 
@@ -177,6 +179,12 @@ class WhyCannotPayInFullControllerSpec extends ItSpec, UnchangedFromCYALinkAsser
         errorLink.text() shouldBe expectedError
         errorLink.attr("href") shouldBe "#option-UnexpectedReductionOfIncome"
         EssttpBackend.WhyCannotPayInFull.verifyNoneUpdateWhyCannotPayInFullRequest(TdAll.journeyId)
+
+        CannotPayReason.values.foreach { reason =>
+          val checkboxInput = doc.select(s"#option-${reason.entryName}")
+          checkboxInput.hasClass("govuk-checkboxes__input") shouldBe true
+          checkboxInput.hasAttr("checked") shouldBe expectedChecked(reason)
+        }
       }
 
       "nothing is submitted" in {
@@ -188,9 +196,9 @@ class WhyCannotPayInFullControllerSpec extends ItSpec, UnchangedFromCYALinkAsser
       }
 
       "more than one reason is selected and 'None of these' is selected" in {
-        testFormError("WhyCannotPayInFull[]" -> "Other", "WhyCannotPayInFull[]" -> "Bankrupt")(
+        testFormError("WhyCannotPayInFull[]" -> "Other", "WhyCannotPayInFull[]" -> "NoMoneySetAside")(
           "Select all that apply or ‘None of these’"
-        )
+        )(expectedChecked = TdAll.whyCannotPayReasonsError)
       }
 
     }
