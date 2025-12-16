@@ -399,6 +399,9 @@ object TdAll {
   val whyCannotPayReasons: Set[CannotPayReason] =
     Set(CannotPayReason.ChangeToPersonalCircumstances, CannotPayReason.NoMoneySetAside)
 
+  val whyCannotPayReasonsError: Set[CannotPayReason] =
+    Set(CannotPayReason.NoMoneySetAside, CannotPayReason.Other)
+
   def dayOfMonth(day: Int = 28): DayOfMonth = DayOfMonth(day)
 
   def extremeDatesRequest(initialPayment: Boolean): ExtremeDatesRequest = ExtremeDatesRequest(
