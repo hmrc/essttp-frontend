@@ -139,7 +139,7 @@ class PaymentPlanSetUpControllerWithResearchBannerSpec extends ItSpec {
               .text() shouldBe "You can call HMRC to update your payment plan. Make sure you have your payment reference number ready."
 
             subheadings(1).text() shouldBe "Call the debt management helpline"
-            subheadings(1).tagName() shouldBe "h3"
+            subheadings(1).tagName() shouldBe "h2"
 
             paragraphs(5).text() shouldBe "Telephone: 0300 123 1813"
             paragraphs(5).select("strong").text() shouldBe "0300 123 1813"
@@ -152,7 +152,7 @@ class PaymentPlanSetUpControllerWithResearchBannerSpec extends ItSpec {
             paragraphs(9).text() shouldBe "Closed weekends and bank holidays."
 
             subheadings(2).text() shouldBe "Text service"
-            subheadings(2).tagName() shouldBe "h3"
+            subheadings(2).tagName() shouldBe "h2"
 
             paragraphs(10)
               .text() shouldBe "Use Relay UK if you cannot hear or speak on the telephone, dial 18001 then 0345 300 3900. Find out more on the Relay UK website (opens in new tab)."
@@ -165,7 +165,7 @@ class PaymentPlanSetUpControllerWithResearchBannerSpec extends ItSpec {
 
             subheadings(3)
               .text() shouldBe "If a health condition or personal circumstances make it difficult to contact us"
-            subheadings(3).tagName() shouldBe "h3"
+            subheadings(3).tagName() shouldBe "h2"
 
             paragraphs(11)
               .text() shouldBe "Our guidance Get help from HMRC if you need extra support (opens in new tab) explains how we can support you."
@@ -199,7 +199,7 @@ class PaymentPlanSetUpControllerWithResearchBannerSpec extends ItSpec {
               .text() shouldBe "If you need to contact HMRC about your payment plan, make sure to have your National Insurance number ready."
 
             subheadings(1).text() shouldBe "Call the debt management helpline"
-            subheadings(1).tagName() shouldBe "h3"
+            subheadings(1).tagName() shouldBe "h2"
 
             paragraphs(6).text() shouldBe "Telephone: 0300 123 1813"
             paragraphs(6).select("strong").text() shouldBe "0300 123 1813"
@@ -212,7 +212,7 @@ class PaymentPlanSetUpControllerWithResearchBannerSpec extends ItSpec {
             paragraphs(10).text() shouldBe "Closed weekends and bank holidays."
 
             subheadings(2).text() shouldBe "Text service"
-            subheadings(2).tagName() shouldBe "h3"
+            subheadings(2).tagName() shouldBe "h2"
 
             paragraphs(11)
               .text() shouldBe "Use Relay UK if you cannot hear or speak on the telephone, dial 18001 then 0345 300 3900. Find out more on the Relay UK website (opens in new tab)."
@@ -225,7 +225,7 @@ class PaymentPlanSetUpControllerWithResearchBannerSpec extends ItSpec {
 
             subheadings(3)
               .text() shouldBe "If a health condition or personal circumstances make it difficult to contact us"
-            subheadings(3).tagName() shouldBe "h3"
+            subheadings(3).tagName() shouldBe "h2"
 
             paragraphs(12)
               .text() shouldBe "Our guidance Get help from HMRC if you need extra support (opens in new tab) explains how we can support you."
