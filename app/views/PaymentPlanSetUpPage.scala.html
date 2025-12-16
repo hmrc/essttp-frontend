@@ -101,7 +101,7 @@
         <p class="govuk-body">@{Messages.Confirmation.`You can call HMRC to update your payment plan. Make sure you have your payment reference number ready.`.show}</p>
     }
 
-    <h3 class="govuk-heading-m">@{Messages.Confirmation.`Call the debt management helpline`.show}</h3>
+    <h2 class="govuk-heading-m">@{Messages.Confirmation.`Call the debt management helpline`.show}</h2>
 
     @if(taxRegime == TaxRegime.Simp) {
         <p class="govuk-body">@{Messages.Confirmation.`If you need to contact HMRC about your payment plan, make sure to have your National Insurance number ready.`.show}</p>
@@ -113,10 +113,10 @@
     <p class="govuk-body">@{Messages.Confirmation.`Monday to Friday: 8am to 6pm`.show}</p>
     <p class="govuk-body">@{Messages.Confirmation.`Closed weekends and bank holidays.`.show}</p>
 
-    <h3 class="govuk-heading-m">@{Messages.Confirmation.`Text service`.show}</h3>
+    <h2 class="govuk-heading-m">@{Messages.Confirmation.`Text service`.show}</h2>
     <p class="govuk-body">@{Html(Messages.Confirmation.`Use Relay UK if you cannot hear or speak on the telephone...`(appConfig.Urls.relayUrl).show)}</p>
 
-    <h3 class="govuk-heading-m">@{Messages.Confirmation.`If a health condition or personal circumstances make it difficult to contact us`.show}</h3>
+    <h2 class="govuk-heading-m">@{Messages.Confirmation.`If a health condition or personal circumstances make it difficult to contact us`.show}</h2>
     <p class="govuk-body">@{Html(Messages.Confirmation.`Our guidance Get help from HMRC if you need extra support...`(appConfig.Urls.extraSupportUrl).show)}</p>
 
 
