@@ -1480,8 +1480,8 @@ object Messages {
     )
 
     val `Upfront payment`: Message = Message(
-      english = "Upfront payment<br><span class=\"govuk-body-s\">Taken within 6 working days</span>",
-      welsh = "Taliad ymlaen llaw<br><span class=\"govuk-body-s\">I’w gymryd cyn pen 6 diwrnod gwaith</span>"
+      english = "Upfront payment<br><span class=\"govuk-body-m\">Taken within 6 working days</span>",
+      welsh = "Taliad ymlaen llaw<br><span class=\"govuk-body-m\">I’w gymryd cyn pen 6 diwrnod gwaith</span>"
     )
 
     val `Upfront payment-visually-hidden-message`: Message = Message(
@@ -1495,8 +1495,8 @@ object Messages {
     )
 
     val `(interest may be added to this amount)` : Message = Message(
-      english = """<span class="govuk-body-s">(interest may be added to this amount)</span>""",
-      welsh = """<span class="govuk-body-s">(bydd llog yn cael ei ychwanegu at y swm hwn)</span>"""
+      english = """<span class="govuk-body-m">(interest may be added to this amount)</span>""",
+      welsh = """<span class="govuk-body-m">(bydd llog yn cael ei ychwanegu at y swm hwn)</span>"""
     )
 
   }
@@ -1826,8 +1826,8 @@ object Messages {
     )
 
     val `Estimated total interest`: Message = Message(
-      english = "Estimated total interest<br><span class=\"govuk-body-s\">Included in your plan</span>",
-      welsh = "Amcangyfrif o gyfanswm y llog<br><span class=\"govuk-body-s\">TYn gynwysedig yn eich cynllun</span>"
+      english = "Estimated total interest<br><span class=\"govuk-body-m\">Included in your plan</span>",
+      welsh = "Amcangyfrif o gyfanswm y llog<br><span class=\"govuk-body-m\">TYn gynwysedig yn eich cynllun</span>"
     )
 
     val `Total to pay`: Message = Message(
