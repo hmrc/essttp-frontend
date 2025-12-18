@@ -22,6 +22,7 @@ import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import essttp.journey.model.{Journey, JourneyStage}
 import essttp.rootmodel.bank.{BankDetails, CanSetUpDirectDebit, TypeOfBankAccount, TypesOfBankAccount}
+import essttp.utils.Errors
 import models.bars.response.*
 import models.enumsforforms.{IsSoleSignatoryFormValue, TypeOfAccountFormValue}
 import models.forms.helper.FormErrorWithFieldMessageOverrides
@@ -173,17 +174,25 @@ class BankDetailsController @Inject() (
       case j: JourneyStage.BeforeEnteredCanYouSetUpDirectDebit =>
         JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage(j)
       case j: JourneyStage.AfterEnteredCanYouSetUpDirectDebit  =>
-        if (!j.canSetUpDirectDebitAnswer.isAccountHolder) {
-          Redirect(routes.BankDetailsController.cannotSetupDirectDebitOnlinePage)
-        } else {
-          finalStateCheck(j, displayEnterBankDetailsPage(j))
+        j match {
+          case journey: JourneyStage.BeforeChosenTypeOfBankAccount =>
+            Redirect(routes.BankDetailsController.cannotSetupDirectDebitOnlinePage)
+          case journey: JourneyStage.AfterChosenTypeOfBankAccount  =>
+            if (!j.canSetUpDirectDebitAnswer.isAccountHolder) {
+              Redirect(routes.BankDetailsController.cannotSetupDirectDebitOnlinePage)
+            } else {
+              finalStateCheck(j, displayEnterBankDetailsPage(journey))
+            }
         }
     }
   }
 
   private def displayEnterBankDetailsPage(
-    journey: JourneyStage.AfterEnteredCanYouSetUpDirectDebit & Journey
+    journey: JourneyStage.AfterEnteredCanYouSetUpDirectDebit & JourneyStage.AfterChosenTypeOfBankAccount & Journey
   )(using Request[?]): Result = {
+    val accountType                               = existingTypeOfBankAccount(journey).getOrElse(
+      Errors.throwServerErrorException("Could not find type of bank account in journey")
+    )
     val maybePrePoppedForm: Form[BankDetailsForm] = currentDirectDebitDetails(journey)
       .fold(BankDetailsForm.form) { directDebitDetails =>
         BankDetailsForm.form.fill(
@@ -194,7 +203,7 @@ class BankDetailsController @Inject() (
           )
         )
       }
-    Ok(views.enterBankDetailsPage(form = maybePrePoppedForm))
+    Ok(views.enterBankDetailsPage(form = maybePrePoppedForm, accountType))
   }
 
   private def currentDirectDebitDetails(journey: Journey): Option[BankDetails] =
@@ -211,7 +220,7 @@ class BankDetailsController @Inject() (
       case j: JourneyStage.AfterChosenTypeOfBankAccount =>
         val formFromRequest = BankDetailsForm.form.bindFromRequest()
         formFromRequest.fold(
-          formWithErrors => Ok(views.enterBankDetailsPage(formWithErrors)),
+          formWithErrors => Ok(views.enterBankDetailsPage(formWithErrors, j.typeOfBankAccount)),
           (bankDetailsForm: BankDetailsForm) => {
             val directDebitDetails: BankDetails =
               BankDetails(
@@ -247,6 +256,7 @@ class BankDetailsController @Inject() (
       Ok(
         views.enterBankDetailsPage(
           form = form.withError(error.formError),
+          typeOfBankAccount,
           errorMessageOverrides = error.fieldMessageOverrides
         )
       )
