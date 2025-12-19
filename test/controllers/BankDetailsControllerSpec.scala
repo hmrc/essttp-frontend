@@ -68,7 +68,7 @@ class BankDetailsControllerSpec extends ItSpec {
   }
 
   object EnterDirectDebitDetailsPage {
-    val expectedH1: String               = "Bank account details"
+    val expectedH1: String               = "Direct Debit details"
     val bankDetails: String              = "Bank details"
     val accountNameContent: String       = "Name on the account"
     val accountNameHintContent: String   = "For business accounts, enter the name of the business"
@@ -82,7 +82,7 @@ class BankDetailsControllerSpec extends ItSpec {
   }
 
   object ConfirmDirectDebitDetailsPage {
-    val expectedH1: String = "Check your Direct Debit details"
+    val expectedH1: String = "Check your details"
   }
 
   object CannotSetupDirectDebitPage {
@@ -1370,11 +1370,11 @@ class BankDetailsControllerSpec extends ItSpec {
         extractSummaryRows(summaries) shouldBe expectedSummaryRows
 
         val cardTitle = doc.select(".govuk-card__header__text").text()
-        cardTitle shouldBe "Bank account details"
+        cardTitle shouldBe "Direct Debit details"
 
         val cardTitleLink = doc.select(".govuk-summary-card__actions").select(".govuk-link")
         cardTitleLink.attr("href") shouldBe "/set-up-a-payment-plan/check-you-can-set-up-a-direct-debit"
-        cardTitleLink.textNodes().get(0).text() shouldBe "Change your Direct Debit details"
+        cardTitleLink.textNodes().get(0).text() shouldBe "Change"
 
         doc.select(".govuk-heading-m").text() shouldBe "The Direct Debit Guarantee"
         val directDebitGuaranteeParagraphs = doc.select(".govuk-body").asScala.toList
