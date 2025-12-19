@@ -1922,8 +1922,13 @@ object Messages {
 
   object BankDetails {
 
-    val `Bank account details`: Message = Message(
+    val `Direct Debit details`: Message = Message(
       english = "Direct Debit details",
+      welsh = "Manylion Debyd Uniongyrchol"
+    )
+
+    val `Bank account details`: Message = Message(
+      english = "Bank account details",
       welsh = "Manylion Debyd Uniongyrchol"
     )
 
