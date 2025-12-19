@@ -687,7 +687,7 @@ object Messages {
     }
 
     val `If you have recently filed your return, your account can take up to 3 days to update. Try again after 3 days.`
-      : Message = Message(
+    : Message = Message(
       english =
         "If you have recently filed your return, your account can take up to 3 days to update. Try again after 3 days.",
       welsh =
@@ -695,8 +695,8 @@ object Messages {
     )
 
     def `You must file your tax return before you can set up an Employers’ PAYE payment plan online`(
-      fileReturnUrl: String
-    ): Message = Message(
+                                                                                                      fileReturnUrl: String
+                                                                                                    ): Message = Message(
       english =
         s"""You must <a class="govuk-link" href="$fileReturnUrl">file your tax return</a> before you can set up an Employers’ PAYE payment plan online.""",
       welsh =
@@ -704,8 +704,8 @@ object Messages {
     )
 
     def `You must file your tax return before you can set up a VAT payment plan online`(
-      fileReturnUrl: String
-    ): Message = Message(
+                                                                                         fileReturnUrl: String
+                                                                                       ): Message = Message(
       english =
         s"""You must <a class="govuk-link" href="$fileReturnUrl">file your tax return</a> before you can set up a VAT payment plan online.""",
       welsh =
@@ -713,8 +713,8 @@ object Messages {
     )
 
     def `You must file your tax return before you can set up a Self Assessment payment plan online`(
-      fileReturnUrl: String
-    ): Message = Message(
+                                                                                                     fileReturnUrl: String
+                                                                                                   ): Message = Message(
       english =
         s"""You must <a class="govuk-link" href="$fileReturnUrl">file your tax return</a> before you can set up a Self Assessment payment plan online.""",
       welsh =
@@ -722,8 +722,8 @@ object Messages {
     )
 
     def `You must file your tax return before you can set up a Simple Assessment payment plan online`(
-      fileReturnUrl: String
-    ): Message = Message(
+                                                                                                       fileReturnUrl: String
+                                                                                                     ): Message = Message(
       english =
         s"""You must <a class="govuk-link" href="$fileReturnUrl">file your tax return</a> before you can set up a Simple Assessment payment plan online.""",
       welsh =
@@ -798,8 +798,8 @@ object Messages {
     }
 
     def `If you set up a payment plan, the following charge.. could be collected twice.`(
-      chargesInPlural: Boolean
-    ): Message =
+                                                                                          chargesInPlural: Boolean
+                                                                                        ): Message =
       if (chargesInPlural) {
         Message(
           english = "If you set up a payment plan, the following charges could be collected twice.",
@@ -818,7 +818,7 @@ object Messages {
     )
 
     val `If you select continue you understand that you may be charged twice if you do not contact your bank.`
-      : Message = Message(
+    : Message = Message(
       english =
         "If you select ‘continue’ you understand that you may be charged twice if you do not contact your bank.",
       welsh =
@@ -844,8 +844,8 @@ object Messages {
     )
 
     def `You must enrol for PAYE Online before you can set up an Employers’ PAYE payment plan.`(
-      payeLink: String
-    ): Message = Message(
+                                                                                                 payeLink: String
+                                                                                               ): Message = Message(
       english =
         s"""You must <a href="$payeLink" class="govuk-link">enrol for PAYE Online</a> before you can set up an Employers’ PAYE payment plan online.""",
       welsh =
@@ -871,8 +871,8 @@ object Messages {
     )
 
     def `You must request access to Self Assessment before you can set up a Self Assessment payment plan.`(
-      saLink: String
-    ): Message = Message(
+                                                                                                            saLink: String
+                                                                                                          ): Message = Message(
       english =
         s"""You must <a href="$saLink" class="govuk-link">request access to Self Assessment</a> before you can set up a Self Assessment payment plan online.""",
       welsh =
@@ -900,8 +900,8 @@ object Messages {
       )
 
     def `You must sign up for Making Tax Digital for Income Tax before you can set up a Self Assessment payment plan online.`(
-      mtdLink: String
-    ): Message = Message(
+                                                                                                                               mtdLink: String
+                                                                                                                             ): Message = Message(
       english =
         s"""You must <a href="$mtdLink" class="govuk-link">sign up for Making Tax Digital for Income Tax</a> before you can set up a Self Assessment payment plan online.""",
       welsh =
@@ -1054,7 +1054,7 @@ object Messages {
 
   object CallHmrc {
     val `If you do not think you can set up a plan online, call HMRC and find out if you can set up a plan over the phone.`
-      : Message = Message(
+    : Message = Message(
       english =
         "If you do not think you can set up a plan online, call HMRC and find out if you can set up a plan over the phone.",
       welsh =
@@ -1191,10 +1191,10 @@ object Messages {
     def `Use this service to set up a payment plan..`(percent: BigDecimal): Message = Message(
       english =
         s"Use this service to set up a payment plan for your outstanding VAT bill. Payments are taken by Direct Debit and include interest charged at the Bank of England base rate plus ${percent.toString
-            .stripSuffix(".0")}% per year.",
+          .stripSuffix(".0")}% per year.",
       welsh =
         s"Defnyddiwch y gwasanaeth hwn i drefnu cynllun talu ar gyfer eich bil TAW sy’n weddill. Mae taliadau’n cael eu cymryd drwy Ddebyd Uniongyrchol ac maent yn cynnwys llog a godir ar gyfradd sylfaenol Banc Lloegr ynghyd â ${percent.toString
-            .stripSuffix(".0")}% y flwyddyn."
+          .stripSuffix(".0")}% y flwyddyn."
     )
 
     def `To avoid or pay less interest, you can pay your bill in full now.`(link: String): Message = Message(
@@ -1922,8 +1922,13 @@ object Messages {
 
   object BankDetails {
 
-    val `Bank account details`: Message = Message(
+    val `Direct Debit details`: Message = Message(
       english = "Direct Debit details",
+      welsh = "Manylion Debyd Uniongyrchol"
+    )
+
+    val `Bank account details`: Message = Message(
+      english = "Bank account details",
       welsh = "Manylion Debyd Uniongyrchol"
     )
 
@@ -1958,12 +1963,12 @@ object Messages {
     )
 
     /** Separate given list with commas until the last two items which are separated by the given `lastSeparator`, e.g.
-      * {{{
-      *   commaSeparateList(List("a"), "or")           = "a"
-      *   commaSeparateList(List("a", "b"), "or")      = "a or b"
-      *   commaSeparateList(List("a", "b", "c"), "or") = "a, b or c"
-      * }}}
-      */
+     * {{{
+     *   commaSeparateList(List("a"), "or")           = "a"
+     *   commaSeparateList(List("a", "b"), "or")      = "a or b"
+     *   commaSeparateList(List("a", "b", "c"), "or") = "a, b or c"
+     * }}}
+     */
     private def commaSeparateList(list: List[String], lastSeparator: String): String = {
       @tailrec
       def loop(l: List[String], acc: String): String = l match {
@@ -2075,7 +2080,7 @@ object Messages {
     val errors: Map[String, (List[String] => Message)] =
       nameErrors ++ (
         sortCoderErrors ++ accountNumberErrors ++ barsErrors
-      ).map { case (k, v) => k -> { (_: List[String]) => v } }
+        ).map { case (k, v) => k -> { (_: List[String]) => v } }
 
     val `Bank details`: Message = Message(
       english = "Bank details",
@@ -2415,8 +2420,8 @@ object Messages {
     )
 
     def `You have been locked out because you have tried to verify too many email addresses`(
-      dateAndTime: String
-    ): Message = Message(
+                                                                                              dateAndTime: String
+                                                                                            ): Message = Message(
       english =
         s"""You have been locked out because you have tried to verify too many email addresses. Please try again on <strong>$dateAndTime</strong>.""",
       welsh =
@@ -2461,7 +2466,7 @@ object Messages {
     )
 
     val `Call us on 0300 123 1813 if you need to set up a Direct Debit from a joint account. All account holders must be present when calling.`
-      : Message = Message(
+    : Message = Message(
       english =
         "Call us on <strong>0300 123 1813</strong> if you need to set up a Direct Debit from a joint account. All account holders must be present when calling.",
       welsh =
@@ -2568,7 +2573,7 @@ object Messages {
       )
 
     val `You can call HMRC to update your payment plan. Make sure you have your payment reference number ready.`
-      : Message = Message(
+    : Message = Message(
       english =
         "You can call HMRC to update your payment plan. Make sure you have your payment reference number ready.",
       welsh = "Gallwch ffonio CThEF i ddiweddaru’ch cynllun talu. Gwnewch yn siŵr bod eich cyfeirnod talu yn barod."
@@ -2580,7 +2585,7 @@ object Messages {
     )
 
     val `If you need to contact HMRC about your payment plan, make sure to have your National Insurance number ready.`
-      : Message = Message(
+    : Message = Message(
       english =
         "If you need to contact HMRC about your payment plan, make sure to have your National Insurance number ready.",
       welsh =
@@ -2661,7 +2666,7 @@ object Messages {
     )
 
     val `We will send a secure message with payment due dates to your personal tax account inbox within 24 hours.`
-      : Message = Message(
+    : Message = Message(
       english =
         "We will send a secure message with payment due dates to your personal tax account inbox within 24 hours.",
       welsh =
