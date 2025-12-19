@@ -1923,8 +1923,8 @@ object Messages {
   object BankDetails {
 
     val `Bank account details`: Message = Message(
-      english = "Bank account details",
-      welsh = "Manylion cyfrif banc"
+      english = "Direct Debit details",
+      welsh = "Manylion Debyd Uniongyrchol"
     )
 
     val `Name on the account`: Message = Message(
@@ -2086,8 +2086,8 @@ object Messages {
   object CheckBankDetails {
 
     val `Check your Direct Debit details`: Message = Message(
-      english = "Check your Direct Debit details",
-      welsh = "Gwiriwch fanylion eich Debyd Uniongyrchol"
+      english = "Check your details",
+      welsh = "Gwiriwch eich manylion"
     )
 
     val `Account type`: Message = Message(
@@ -2101,8 +2101,8 @@ object Messages {
     )
 
     val `Change your Direct Debit details`: Message = Message(
-      english = "Change your Direct Debit details",
-      welsh = "Newid manylion Debyd Uniongyrchol"
+      english = "Change",
+      welsh = "Newid"
     )
 
     val `The Direct Debit Guarantee`: Message = Message(
