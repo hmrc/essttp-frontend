@@ -2643,9 +2643,9 @@ object Messages {
 
     def `View your payment plan where`(link: String): Message = Message(
       english =
-        s"""<a href="$link" class="govuk-link">View your payment plan</a> where you will be able to print or save a copy.""",
+        s"""<a href="$link" class="govuk-link">View your payment plan</a> where you will be able to print a copy.""",
       welsh =
-        s"""<a href="$link" class="govuk-link">Bwrw golwg dros eich cynllun talu</a> lle byddwch yn gallu argraffu neu gadw copi ohono."""
+        s"""<a href="$link" class="govuk-link">Bwrw golwg dros eich cynllun talu</a> lle byddwch yn gallu argraffu copi ohono."""
     )
 
     val `We will not send you a copy`: Message = Message(
@@ -2686,8 +2686,8 @@ object Messages {
     )
 
     val `Print or save a copy of your payment plan`: Message = Message(
-      english = "Print or save a copy of your payment plan",
-      welsh = "Argraffwch neu cadwch gopi o’r cynllun talu"
+      english = "Print a copy of your payment plan",
+      welsh = "Argraffu copi o’ch cynllun talu"
     )
 
     val `View your payment plan`: Message = Message(

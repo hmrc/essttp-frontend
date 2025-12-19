@@ -479,7 +479,7 @@ class PaymentPlanSetUpControllerWithResearchBannerSpec extends ItSpec {
       val paragraphs  = doc.select(".govuk-body").asScala.toList
 
       subheadings(0).text() shouldBe "What you need to do next"
-      paragraphs(0).text() shouldBe "View your payment plan where you will be able to print or save a copy."
+      paragraphs(0).text() shouldBe "View your payment plan where you will be able to print a copy."
       paragraphs(1)
         .text() shouldBe "We will not send a copy of your payment plan in the post. This is your only chance to access this information."
 
@@ -693,7 +693,7 @@ class PaymentPlanSetUpControllerWithResearchBannerSpec extends ItSpec {
 
     def assertPrintLink(doc: Document): Assertion = {
       val printLink = doc.select("#printLink")
-      printLink.text() shouldBe "Print or save a copy of your payment plan"
+      printLink.text() shouldBe "Print a copy of your payment plan"
       printLink.attr("href") shouldBe "#print-dialogue"
     }
   }
