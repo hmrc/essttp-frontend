@@ -693,7 +693,7 @@ class PaymentPlanSetUpControllerWithResearchBannerSpec extends ItSpec {
 
     def assertPrintLink(doc: Document): Assertion = {
       val printLink = doc.select("#printLink")
-      printLink.text() shouldBe "Print or save a copy of your payment plan"
+      printLink.text() shouldBe "Print a copy of your payment plan"
       printLink.attr("href") shouldBe "#print-dialogue"
     }
   }
