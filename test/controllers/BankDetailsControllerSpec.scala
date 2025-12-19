@@ -68,7 +68,7 @@ class BankDetailsControllerSpec extends ItSpec {
   }
 
   object EnterDirectDebitDetailsPage {
-    val expectedH1: String               = "Direct Debit details"
+    val expectedH1: String               = "Bank account details"
     val bankDetails: String              = "Bank details"
     val accountNameContent: String       = "Name on the account"
     val accountNameHintContent: String   = "For business accounts, enter the name of the business"
