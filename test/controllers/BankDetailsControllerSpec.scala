@@ -489,7 +489,7 @@ class BankDetailsControllerSpec extends ItSpec {
         doc.select("#sortCode-hint").text() shouldBe EnterDirectDebitDetailsPage.sortCodeHintContent
         doc.select("#accountNumber-hint").text() shouldBe EnterDirectDebitDetailsPage.accountNumberHintContent
       }
-      
+
       s"[$regime journey] should return 200 and the bank details page without the organisation hint for a personal account" in {
         stubCommonActions()
 
@@ -519,7 +519,7 @@ class BankDetailsControllerSpec extends ItSpec {
         val sortCodeInput      = doc.select("input[name=sortCode]")
         val accountNumberInput = doc.select("input[name=accountNumber]")
 
-        nameInput.attr("autocomplete") shouldBe ""
+        nameInput.attr("autocomplete") shouldBe "name"
         nameInput.attr("spellcheck") shouldBe "false"
 
         sortCodeInput.attr("autocomplete") shouldBe "off"
