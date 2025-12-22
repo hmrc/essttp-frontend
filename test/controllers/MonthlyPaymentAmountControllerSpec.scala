@@ -177,13 +177,14 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
       s"[$regime journey] should display the minimum amount as £1 if the minimum amount is less than £1" in {
         stubCommonActions()
         EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, origin)(
-          JourneyJsonTemplates.`Retrieved Affordability`(origin, 1)
+          JourneyJsonTemplates.`Retrieved Affordability`(origin, 1, 600)
         )
 
         val result: Future[Result] = controller.displayMonthlyPaymentAmount(fakeRequest)
 
         RequestAssertions.assertGetRequestOk(result)
         val doc: Document = Jsoup.parse(contentAsString(result))
+        println(doc.toString)
         doc.select("#MonthlyPaymentAmount-hint").text() shouldBe "Enter an amount between £1 and £880"
       }
     }

@@ -321,11 +321,15 @@ object TdJsonBodies {
         |  "latestPlanStartDate": "2022-08-13"
         |}""".stripMargin
 
-  def affordabilityResultJourneyInfo(minimumInstalmentAmount: Int = 29997): String =
+  def affordabilityResultJourneyInfo(
+    minimumInstalmentAmount: Int = 29997,
+    maximumInstalmentAmount: Int = 87944
+  ): String =
+    println(maximumInstalmentAmount.toString)
     s"""
        |"instalmentAmounts": {
        |   "minimumInstalmentAmount": ${minimumInstalmentAmount.toString},
-       |   "maximumInstalmentAmount": 87944
+       |   "maximumInstalmentAmount": ${maximumInstalmentAmount.toString}
        |}
        |""".stripMargin
 

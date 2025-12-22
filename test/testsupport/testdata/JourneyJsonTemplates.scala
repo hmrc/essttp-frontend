@@ -337,10 +337,12 @@ object JourneyJsonTemplates {
   def `Retrieved Affordability`(
     origin:                  Origin,
     minimumInstalmentAmount: Int = 29997,
+    maximumInstalmentAmount: Int = 87944,
     affordabilityEnabled:    Boolean = false
   )(using encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo = StageInfo.retrievedAffordabilityResult,
-    journeyInfo = JourneyInfo.retrievedAffordabilityResult(minimumInstalmentAmount, origin.taxRegime, encrypter),
+    journeyInfo = JourneyInfo
+      .retrievedAffordabilityResult(minimumInstalmentAmount, maximumInstalmentAmount, origin.taxRegime, encrypter),
     origin = origin,
     affordabilityEnabled = affordabilityEnabled
   )

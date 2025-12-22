@@ -81,7 +81,10 @@
             id = key,
             name = key,
             hint = Some(Hint(
-                content = Text(Messages.MonthlyPaymentAmount.getHint(maximumPayment, minimumPayment).show),
+                content = maximumPayment.value match {
+                    case 100 => Text(Messages.MonthlyPaymentAmount.`You must make a monthly payment of £1`.show)
+                    case _ => Text(Messages.MonthlyPaymentAmount.getHint(maximumPayment, minimumPayment).show)
+                },
                 id = Some("HowMuchCanYouPayEachMonth-hint")
             )),
             classes = "govuk-input--width-5",

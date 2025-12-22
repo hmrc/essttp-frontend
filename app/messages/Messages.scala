@@ -1562,6 +1562,11 @@ object Messages {
       welsh = s"Nodwch swm sydd rhwng ${min.gdsFormatInPounds} a ${max.gdsFormatInPounds}"
     )
 
+    val `You must make a monthly payment of £1`: Message = Message(
+      english = "You must make a monthly payment of £1 ",
+      welsh = "Mae’n rhaid i chi wneud taliad misol o £1"
+    )
+
     def getError(key: String, max: AmountInPence, min: AmountInPence): Message = {
       lazy val outOfBoundsMessage = Message(
         english =
