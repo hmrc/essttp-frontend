@@ -1929,7 +1929,7 @@ object Messages {
 
     val `Bank account details`: Message = Message(
       english = "Bank account details",
-      welsh = "Manylion Debyd Uniongyrchol"
+      welsh = "Manylion cyfrif banc"
     )
 
     val `Name on the account`: Message = Message(
