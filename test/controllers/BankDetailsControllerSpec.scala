@@ -446,9 +446,9 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "GET /bank-account-details should" - {
 
-      s"[$regime journey] should return 200 and the bank details page" in {
+      s"[$regime journey] should return 200 and the bank details page with the organisation hint for a business account" in {
         stubCommonActions()
-        EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto, origin)()
+        EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto, origin, TypesOfBankAccount.Business)()
 
         val result: Future[Result] = controller.enterBankDetails(fakeRequest)
         val pageContent: String    = contentAsString(result)
@@ -486,6 +486,58 @@ class BankDetailsControllerSpec extends ItSpec {
         subheadings(3).text() shouldBe EnterDirectDebitDetailsPage.accountNumberContent
 
         doc.select("#name-hint").text() shouldBe EnterDirectDebitDetailsPage.accountNameHintContent
+        doc.select("#sortCode-hint").text() shouldBe EnterDirectDebitDetailsPage.sortCodeHintContent
+        doc.select("#accountNumber-hint").text() shouldBe EnterDirectDebitDetailsPage.accountNumberHintContent
+      }
+
+      s"[$regime journey] should return 200 and the bank details page without the organisation hint for a personal account" in {
+        stubCommonActions()
+
+        val updatedJourneyJson = JourneyJsonTemplates.`Chosen Type Of Bank Account`(
+          TypesOfBankAccount.Personal,
+          origin
+        )
+
+        EssttpBackend.ChosenTypeOfBankAccount
+          .stubUpdateChosenTypeOfBankAccount(TdAll.journeyId, updatedJourneyJson)
+        EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto, origin, TypesOfBankAccount.Personal)()
+
+        val result: Future[Result] = controller.enterBankDetails(fakeRequest)
+        val pageContent: String    = contentAsString(result)
+        val doc: Document          = Jsoup.parse(pageContent)
+
+        RequestAssertions.assertGetRequestOk(result)
+        ContentAssertions.commonPageChecks(
+          doc,
+          expectedH1 = EnterDirectDebitDetailsPage.expectedH1,
+          shouldBackLinkBePresent = true,
+          expectedSubmitUrl = Some(routes.BankDetailsController.enterBankDetailsSubmit.url),
+          regimeBeingTested = Some(taxRegime)
+        )
+
+        val nameInput          = doc.select("input[name=name]")
+        val sortCodeInput      = doc.select("input[name=sortCode]")
+        val accountNumberInput = doc.select("input[name=accountNumber]")
+
+        nameInput.attr("autocomplete") shouldBe "name"
+        nameInput.attr("spellcheck") shouldBe "false"
+
+        sortCodeInput.attr("autocomplete") shouldBe "off"
+        sortCodeInput.attr("inputmode") shouldBe "numeric"
+        sortCodeInput.attr("spellcheck") shouldBe "false"
+
+        accountNumberInput.attr("autocomplete") shouldBe "off"
+        accountNumberInput.attr("inputmode") shouldBe "numeric"
+        accountNumberInput.attr("spellcheck") shouldBe "false"
+
+        val subheadings = doc.select(".govuk-label").asScala.toList
+        subheadings.size shouldBe 4
+        subheadings(0).text() shouldBe EnterDirectDebitDetailsPage.accountNameContent
+        subheadings(1).text() shouldBe EnterDirectDebitDetailsPage.bankDetails
+        subheadings(2).text() shouldBe EnterDirectDebitDetailsPage.sortCodeContent
+        subheadings(3).text() shouldBe EnterDirectDebitDetailsPage.accountNumberContent
+
+        doc.select("#name-hint").text() shouldBe ""
         doc.select("#sortCode-hint").text() shouldBe EnterDirectDebitDetailsPage.sortCodeHintContent
         doc.select("#accountNumber-hint").text() shouldBe EnterDirectDebitDetailsPage.accountNumberHintContent
       }

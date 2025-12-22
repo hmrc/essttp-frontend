@@ -19,6 +19,7 @@
 @import messages.Messages
 @import models.forms.BankDetailsForm
 @import play.api.data.{Form, FormError}
+@import essttp.rootmodel.bank.{TypeOfBankAccount, TypesOfBankAccount}
 @import play.api.mvc.Request
 @import requests.RequestSupport
 @import uk.gov.hmrc.govukfrontend.views.html.components._
@@ -34,6 +35,7 @@
 
 @(
         form: Form[BankDetailsForm],
+        accountType: TypeOfBankAccount,
         errorMessageOverrides: Seq[FormError] = Seq.empty
 )(implicit
         request: Request[?]
@@ -143,12 +145,16 @@
                 classes = "govuk-label",
                 content = Text(Messages.BankDetails.`Name on the account`.show)
             ),
-            hint = Some(Hint(
-                content = Text(Messages.BankDetails.`For business accounts, enter the name of the business`.show)
-            )),
+            hint = accountType match {
+                case TypesOfBankAccount.Business => Some(Hint(content = Text(Messages.BankDetails.`For business accounts, enter the name of the business`.show)))
+                case TypesOfBankAccount.Personal => None
+            },
             classes = "govuk-!-width-two-thirds",
             errorMessage = fieldErrorMessage(nameKey, form, errorMessageOverrides),
-            autocomplete = Some("organisation"),
+            autocomplete = accountType match {
+                case TypesOfBankAccount.Business => Some("organisation")
+                case TypesOfBankAccount.Personal => Some("name")
+            },
             spellcheck = Some(false),
             value = form.data.get(nameKey)
         ))
