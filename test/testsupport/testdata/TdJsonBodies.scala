@@ -325,7 +325,6 @@ object TdJsonBodies {
     minimumInstalmentAmount: Int = 29997,
     maximumInstalmentAmount: Int = 87944
   ): String =
-    println(maximumInstalmentAmount.toString)
     s"""
        |"instalmentAmounts": {
        |   "minimumInstalmentAmount": ${minimumInstalmentAmount.toString},
