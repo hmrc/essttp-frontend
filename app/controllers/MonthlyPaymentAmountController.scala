@@ -165,7 +165,9 @@ object MonthlyPaymentAmountController {
     } else {
       round(minimumAmount.inPounds, maximumAmount.inPounds, (10.0, 5.0))
     }
-    if (min.value < 100) {
+    if (min.value < 100 && max.value <= 100) {
+      (onePound, onePound)
+    } else if (min.value < 100) {
       (onePound, max)
     } else {
       (min, max)

@@ -186,6 +186,19 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
         val doc: Document = Jsoup.parse(contentAsString(result))
         doc.select("#MonthlyPaymentAmount-hint").text() shouldBe "Enter an amount between £1 and £880"
       }
+
+      s"[$regime journey] should display the correct message when the maximum amount is £1" in {
+        stubCommonActions()
+        EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, origin)(
+          JourneyJsonTemplates.`Retrieved Affordability`(origin, 1, 1)
+        )
+
+        val result: Future[Result] = controller.displayMonthlyPaymentAmount(fakeRequest)
+
+        RequestAssertions.assertGetRequestOk(result)
+        val doc: Document = Jsoup.parse(contentAsString(result))
+        doc.select("#MonthlyPaymentAmount-hint").text() shouldBe "You must make a monthly payment of £1"
+      }
     }
 
     "POST /how-much-can-you-pay-each-month should" - {

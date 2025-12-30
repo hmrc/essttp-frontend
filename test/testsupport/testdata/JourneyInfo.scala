@@ -52,225 +52,225 @@ object JourneyInfo {
       eligibilityMaxPlanLength = eligibilityMaxPlanLength
     )
 
-  def ineligibleHasRls(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                                =
+  def ineligibleHasRls(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                                 =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleHasRlsOnAddress,
       taxRegime,
       encrypter
     )
-  def ineligibleMarkedAsInsolvent(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                     =
+  def ineligibleMarkedAsInsolvent(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                      =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleMarkedAsInsolvent,
       taxRegime,
       encrypter
     )
-  def ineligibleMinDebt(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                               =
+  def ineligibleMinDebt(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                                =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleIsLessThanMinDebtAllowance,
       taxRegime,
       encrypter
     )
-  def ineligibleMaxDebt(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                               =
+  def ineligibleMaxDebt(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                                =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleIsMoreThanMaxDebtAllowance,
       taxRegime,
       encrypter
     )
-  def ineligibleDisallowedCharge(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                      =
+  def ineligibleDisallowedCharge(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                       =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleDisallowedChargeLockTypes,
       taxRegime,
       encrypter
     )
-  def ineligibleExistingTtp(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                           = TdJsonBodies
+  def ineligibleExistingTtp(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                            = TdJsonBodies
     .eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleExistingTTP, taxRegime, encrypter)
-  def ineligibleMaxDebtAge(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                            =
+  def ineligibleMaxDebtAge(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                             =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleExceedsMaxDebtAge,
       taxRegime,
       encrypter
     )
-  def ineligibleBeforeMaxAccountingDate(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson               =
+  def ineligibleBeforeMaxAccountingDate(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleChargesBeforeMaxAccountingDate,
       taxRegime,
       encrypter
     )
-  def ineligibleChargeType(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                            =
+  def ineligibleChargeType(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                             =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleEligibleChargeType,
       taxRegime,
       encrypter
     )
-  def ineligibleMissingFiledReturns(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                   =
+  def ineligibleMissingFiledReturns(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                    =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleMissingFiledReturns,
       taxRegime,
       encrypter
     )
-  def ineligibleNoDueDatesReached(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                     =
+  def ineligibleNoDueDatesReached(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                      =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleNoDueDatesReached,
       taxRegime,
       encrypter
     )
-  def ineligibleHasInvalidInterestSignals(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson             =
+  def ineligibleHasInvalidInterestSignals(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson              =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleHasInvalidInterestSignals,
       taxRegime,
       encrypter
     )
-  def ineligibleHasInvalidInterestSignalsCESA(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson         =
+  def ineligibleHasInvalidInterestSignalsCESA(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson          =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleHasInvalidInterestSignalsCESA,
       taxRegime,
       encrypter
     )
-  def ineligibleDmSpecialOfficeProcessingRequired(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson     =
+  def ineligibleDmSpecialOfficeProcessingRequired(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson      =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleDmSpecialOfficeProcessingRequired,
       taxRegime,
       encrypter
     )
-  def ineligibleCannotFindLockResponse(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                =
+  def ineligibleCannotFindLockResponse(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                 =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleCannotFindLockReason,
       taxRegime,
       encrypter
     )
-  def ineligibleCreditsNotAllowed(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                     =
+  def ineligibleCreditsNotAllowed(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                      =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleCreditsNotAllowed,
       taxRegime,
       encrypter
     )
-  def ineligibleIsMoreThanMaxPaymentReference(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson         =
+  def ineligibleIsMoreThanMaxPaymentReference(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson          =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleIsMoreThanMaxPaymentReference,
       taxRegime,
       encrypter
     )
-  def ineligibleChargesBeforeMaxAccountingDate(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson        =
+  def ineligibleChargesBeforeMaxAccountingDate(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson         =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleChargesBeforeMaxAccountingDate,
       taxRegime,
       encrypter
     )
-  def ineligibleHasDisguisedRemuneration(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson              =
+  def ineligibleHasDisguisedRemuneration(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson               =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleHasDisguisedRemuneration,
       taxRegime,
       encrypter
     )
-  def ineligibleHasCapacitor(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                          = TdJsonBodies
+  def ineligibleHasCapacitor(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                           = TdJsonBodies
     .eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.notEligibleHasCapacitor, taxRegime, encrypter)
-  def ineligibleDmSpecialOfficeProcessingRequiredCDCS(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson =
+  def ineligibleDmSpecialOfficeProcessingRequiredCDCS(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson  =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleDmSpecialOfficeProcessingRequiredCDCS,
       taxRegime,
       encrypter
     )
-  def ineligibleisAnMtdCustomer(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                       =
+  def ineligibleisAnMtdCustomer(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                        =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleIsAnMtdCustomer,
       taxRegime,
       encrypter
     )
-  def ineligibleDmSpecialOfficeProcessingRequiredCESA(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson =
+  def ineligibleDmSpecialOfficeProcessingRequiredCESA(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson  =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleDmSpecialOfficeProcessingRequiredCESA,
       taxRegime,
       encrypter
     )
-  def multipleIneligibleReasons(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                       =
+  def multipleIneligibleReasons(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                        =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleHasRlsOnAddress.copy(markedAsInsolvent = true),
       taxRegime,
       encrypter
     )
-  def multipleIneligibleReasonsDebtTooLowAndOld(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson       =
+  def multipleIneligibleReasonsDebtTooLowAndOld(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson        =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleIsLessThanMinDebtAllowance.copy(chargesOverMaxDebtAge = Some(true)),
       taxRegime,
       encrypter
     )
-  def noMtdEnrolment(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                                  = TdJsonBodies
+  def noMtdEnrolment(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                                   = TdJsonBodies
     .eligibilityCheckJourneyInfo(TdAll.notEligibleEligibilityPass, TdAll.noMtditsaEnrollment, taxRegime, encrypter)
-  val whyCannotPayInFullNotRequiredAnswer: JourneyInfoAsJson                                                         =
+  val whyCannotPayInFullNotRequiredAnswer: JourneyInfoAsJson                                                          =
     TdJsonBodies.whyCannotPayInFull(WhyCannotPayInFullAnswers.AnswerNotRequired)
-  def whyCannotPayInFullRequiredAnswer(reasons: Set[CannotPayReason] = TdAll.whyCannotPayReasons): JourneyInfoAsJson =
+  def whyCannotPayInFullRequiredAnswer(reasons: Set[CannotPayReason] = TdAll.whyCannotPayReasons): JourneyInfoAsJson  =
     TdJsonBodies.whyCannotPayInFull(WhyCannotPayInFullAnswers.WhyCannotPayInFull(reasons))
-  val canPayUpfront: JourneyInfoAsJson                                                                               = TdJsonBodies.canPayUpfrontJourneyInfo(true)
-  val cannotPayUpfront: JourneyInfoAsJson                                                                            = TdJsonBodies.canPayUpfrontJourneyInfo(false)
-  val upfrontPaymentAmount: JourneyInfoAsJson                                                                        = TdJsonBodies.upfrontPaymentAmountJourneyInfo(TdAll.upfrontPaymentAmount)
-  val upfrontPaymentAnswers: JourneyInfoAsJson                                                                       = TdJsonBodies.upfrontPaymentAnswersJourneyInfo()
-  val upfrontPaymentAnswersNoUpfrontPayment: JourneyInfoAsJson                                                       =
+  val canPayUpfront: JourneyInfoAsJson                                                                                = TdJsonBodies.canPayUpfrontJourneyInfo(true)
+  val cannotPayUpfront: JourneyInfoAsJson                                                                             = TdJsonBodies.canPayUpfrontJourneyInfo(false)
+  val upfrontPaymentAmount: JourneyInfoAsJson                                                                         = TdJsonBodies.upfrontPaymentAmountJourneyInfo(TdAll.upfrontPaymentAmount)
+  val upfrontPaymentAnswers: JourneyInfoAsJson                                                                        = TdJsonBodies.upfrontPaymentAnswersJourneyInfo()
+  val upfrontPaymentAnswersNoUpfrontPayment: JourneyInfoAsJson                                                        =
     TdJsonBodies.upfrontPaymentAnswersJourneyInfo("""{"NoUpfrontPayment": {}}""")
-  val extremeDates: JourneyInfoAsJson                                                                                = TdJsonBodies.extremeDatesJourneyInfo()
-  def affordableResult(minimumInstalmentAmount: Int = 29997): JourneyInfoAsJson                                      =
-    TdJsonBodies.affordabilityResultJourneyInfo(minimumInstalmentAmount)
-  val obtainedCanPayWithinSixMonthsNotRequired: JourneyInfoAsJson                                                    =
+  val extremeDates: JourneyInfoAsJson                                                                                 = TdJsonBodies.extremeDatesJourneyInfo()
+  def affordableResult(minimumInstalmentAmount: Int = 29997, maximumInstalmentAmount: Int = 87944): JourneyInfoAsJson =
+    TdJsonBodies.affordabilityResultJourneyInfo(minimumInstalmentAmount, maximumInstalmentAmount)
+  val obtainedCanPayWithinSixMonthsNotRequired: JourneyInfoAsJson                                                     =
     TdJsonBodies.canPayWithinSixMonthsJourneyInfo(CanPayWithinSixMonthsAnswers.AnswerNotRequired)
-  val obtainedCanPayWithinSixMonthsYes: JourneyInfoAsJson                                                            =
+  val obtainedCanPayWithinSixMonthsYes: JourneyInfoAsJson                                                             =
     TdJsonBodies.canPayWithinSixMonthsJourneyInfo(CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths(value = true))
-  val obtainedCanPayWithinSixMonthsNo: JourneyInfoAsJson                                                             =
+  val obtainedCanPayWithinSixMonthsNo: JourneyInfoAsJson                                                              =
     TdJsonBodies.canPayWithinSixMonthsJourneyInfo(CanPayWithinSixMonthsAnswers.CanPayWithinSixMonths(value = false))
-  val startPegaCaseResponse: JourneyInfoAsJson                                                                       = TdJsonBodies.startedPegaCaseJourneyInfo
-  val monthlyPaymentAmount: JourneyInfoAsJson                                                                        = TdJsonBodies.monthlyPaymentAmountJourneyInfo
-  def dayOfMonth(dayOfMonth: DayOfMonth = TdAll.dayOfMonth()): JourneyInfoAsJson                                     =
+  val startPegaCaseResponse: JourneyInfoAsJson                                                                        = TdJsonBodies.startedPegaCaseJourneyInfo
+  val monthlyPaymentAmount: JourneyInfoAsJson                                                                         = TdJsonBodies.monthlyPaymentAmountJourneyInfo
+  def dayOfMonth(dayOfMonth: DayOfMonth = TdAll.dayOfMonth()): JourneyInfoAsJson                                      =
     TdJsonBodies.dayOfMonthJourneyInfo(dayOfMonth)
-  val startDates: JourneyInfoAsJson                                                                                  = TdJsonBodies.startDatesJourneyInfo
-  val affordableQuotes: JourneyInfoAsJson                                                                            = TdJsonBodies.affordableQuotesJourneyInfo
-  val selectedPlan: JourneyInfoAsJson                                                                                = TdJsonBodies.selectedPlanTwoMonthsJourneyInfo
-  def paymentPlanAnswers(withAffordability: Boolean): JourneyInfoAsJson                                              =
+  val startDates: JourneyInfoAsJson                                                                                   = TdJsonBodies.startDatesJourneyInfo
+  val affordableQuotes: JourneyInfoAsJson                                                                             = TdJsonBodies.affordableQuotesJourneyInfo
+  val selectedPlan: JourneyInfoAsJson                                                                                 = TdJsonBodies.selectedPlanTwoMonthsJourneyInfo
+  def paymentPlanAnswers(withAffordability: Boolean): JourneyInfoAsJson                                               =
     TdJsonBodies.paymentPlanAnswers(withAffordability)
-  def canSetUpDirectDebit(isAccountHolder: Boolean): JourneyInfoAsJson                                               =
+  def canSetUpDirectDebit(isAccountHolder: Boolean): JourneyInfoAsJson                                                =
     TdJsonBodies.detailsAboutBankAccountJourneyInfo(isAccountHolder)
-  def typeOfBankAccount(typeOfBankAccount: TypeOfBankAccount): JourneyInfoAsJson                                     =
+  def typeOfBankAccount(typeOfBankAccount: TypeOfBankAccount): JourneyInfoAsJson                                      =
     TdJsonBodies.typeOfBankAccount(typeOfBankAccount)
-  def directDebitDetails(encrypter: Encrypter): JourneyInfoAsJson                                                    =
+  def directDebitDetails(encrypter: Encrypter): JourneyInfoAsJson                                                     =
     TdJsonBodies.directDebitDetailsJourneyInfo(encrypter)
-  def directDebitDetailsNotAccountHolder(encrypter: Encrypter): JourneyInfoAsJson                                    =
+  def directDebitDetailsNotAccountHolder(encrypter: Encrypter): JourneyInfoAsJson                                     =
     TdJsonBodies.directDebitDetailsJourneyInfo(encrypter)
-  def directDebitDetailsPaddedAccountNumber(encrypter: Encrypter): JourneyInfoAsJson                                 =
+  def directDebitDetailsPaddedAccountNumber(encrypter: Encrypter): JourneyInfoAsJson                                  =
     TdJsonBodies.paddedDirectDebitDetailsJourneyInfo(encrypter)
-  def emailAddressRequired(isEmailAddressRequired: Boolean): JourneyInfoAsJson                                       =
+  def emailAddressRequired(isEmailAddressRequired: Boolean): JourneyInfoAsJson                                        =
     TdJsonBodies.isEmailAddressRequiredJourneyInfo(isEmailAddressRequired)
-  def emailToBeVerified(email: String, encrypter: Encrypter): JourneyInfoAsJson                                      =
+  def emailToBeVerified(email: String, encrypter: Encrypter): JourneyInfoAsJson                                       =
     TdJsonBodies.emailAddressSelectedToBeVerified(email, encrypter)
-  def emailVerificationResult(result: EmailVerificationResult): JourneyInfoAsJson                                    =
+  def emailVerificationResult(result: EmailVerificationResult): JourneyInfoAsJson                                     =
     TdJsonBodies.emailVerificationResult(result)
-  def emailVerificationAnswersNoEmailRequired: JourneyInfoAsJson                                                     = TdJsonBodies.emailVerificationAnswersNoEmailJourney
+  def emailVerificationAnswersNoEmailRequired: JourneyInfoAsJson                                                      = TdJsonBodies.emailVerificationAnswersNoEmailJourney
   def emailVerificationAnswersEmailRequired(
     email:     String,
     status:    EmailVerificationResult,
     encrypter: Encrypter
   ): JourneyInfoAsJson =
     TdJsonBodies.emailVerificationAnswersEmailRequired(email, status, encrypter)
-  def arrangementSubmitted(taxRegime: TaxRegime): JourneyInfoAsJson                                                  =
+  def arrangementSubmitted(taxRegime: TaxRegime): JourneyInfoAsJson                                                   =
     TdJsonBodies.arrangementResponseJourneyInfo(taxRegime)
 
   /** * *
@@ -511,6 +511,7 @@ object JourneyInfo {
 
   def retrievedAffordabilityResult(
     minimumInstalmentAmount:            Int = 29997,
+    maximumInstalmentAmount:            Int = 87944,
     taxRegime:                          TaxRegime,
     encrypter:                          Encrypter,
     etmpEmail:                          Option[String] = Some(TdAll.etmpEmail),
@@ -519,7 +520,7 @@ object JourneyInfo {
     whyCannotPayInFullAnswers:          WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired,
     maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
   ): List[JourneyInfoAsJson] =
-    affordableResult(minimumInstalmentAmount) :: retrievedExtremeDates(
+    affordableResult(minimumInstalmentAmount, maximumInstalmentAmount) :: retrievedExtremeDates(
       taxRegime,
       encrypter,
       etmpEmail,
