@@ -1563,7 +1563,7 @@ object Messages {
     )
 
     val `You must make a monthly payment of £1`: Message = Message(
-      english = "You must make a monthly payment of £1 ",
+      english = "You must make a monthly payment of £1",
       welsh = "Mae’n rhaid i chi wneud taliad misol o £1"
     )
 
