@@ -467,7 +467,7 @@ class BankDetailsControllerSpec extends ItSpec {
         val sortCodeInput      = doc.select("input[name=sortCode]")
         val accountNumberInput = doc.select("input[name=accountNumber]")
 
-        nameInput.attr("autocomplete") shouldBe "organisation"
+        nameInput.attr("autocomplete") shouldBe "organization"
         nameInput.attr("spellcheck") shouldBe "false"
 
         sortCodeInput.attr("autocomplete") shouldBe "off"

@@ -21,7 +21,7 @@ object AppDependencies {
     "org.scalatest"           %% "scalatest"               % "3.2.19",
     "org.scalatestplus"       %% "scalacheck-1-15"         % "3.2.11.0",
     "org.scalatestplus.play"  %% "scalatestplus-play"      % "7.0.2",
-    "org.jsoup"               %  "jsoup"                   % "1.21.2",
+    "org.jsoup"               %  "jsoup"                   % "1.22.1",
     "uk.gov.hmrc"             %% "bootstrap-test-play-30"  % bootstrapVersion,
     "org.scalacheck"          %% "scalacheck"              % "1.19.0",
     "org.wiremock"            %  "wiremock-standalone"     % "3.13.2"

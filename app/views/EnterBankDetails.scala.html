@@ -152,7 +152,7 @@
             classes = "govuk-!-width-two-thirds",
             errorMessage = fieldErrorMessage(nameKey, form, errorMessageOverrides),
             autocomplete = accountType match {
-                case TypesOfBankAccount.Business => Some("organisation")
+                case TypesOfBankAccount.Business => Some("organization")
                 case TypesOfBankAccount.Personal => Some("name")
             },
             spellcheck = Some(false),
