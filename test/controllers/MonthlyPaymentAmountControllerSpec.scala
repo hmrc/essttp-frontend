@@ -340,6 +340,39 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
         }
       }
 
+      s"[$regime journey] show the page with 'you must enter £1' error message" in {
+        stubCommonActions()
+
+        EssttpBackend.AffordabilityMinMaxApi.findJourneyWithMinMax(testCrypto, origin, 1, 1)()
+
+        val fakeRequest = FakeRequest(
+          method = "POST",
+          path = "/how-much-can-you-pay-each-month"
+        ).withAuthToken()
+          .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+          .withFormUrlEncodedBody(("MonthlyPaymentAmount", "300"))
+
+        val result: Future[Result] = controller.monthlyPaymentAmountSubmit(fakeRequest)
+        val pageContent: String    = contentAsString(result)
+        val doc: Document          = Jsoup.parse(pageContent)
+
+        RequestAssertions.assertGetRequestOk(result)
+        ContentAssertions.commonPageChecks(
+          doc,
+          expectedH1 = expectedH1,
+          shouldBackLinkBePresent = true,
+          expectedSubmitUrl = Some(routes.MonthlyPaymentAmountController.monthlyPaymentAmountSubmit.url),
+          hasFormError = true,
+          regimeBeingTested = Some(taxRegime)
+        )
+
+        val errorSummary = doc.select(".govuk-error-summary")
+        val errorLink    = errorSummary.select("a")
+        errorLink.text() shouldBe "You must enter £1 as the monthly payment amount"
+        errorLink.attr("href") shouldBe "#MonthlyPaymentAmount"
+        EssttpBackend.MonthlyPaymentAmount.verifyNoneUpdateMonthlyAmountRequest(TdAll.journeyId)
+      }
+
     }
   }
 
