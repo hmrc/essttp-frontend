@@ -422,6 +422,14 @@ object EssttpBackend {
     ): StubMapping =
       findByLatestSessionId(jsonBody)
 
+    def findJourneyWithMinMax(encrypter: Encrypter, origin: Origin, min: Int, max: Int)(
+      jsonBody: String = JourneyJsonTemplates.`Retrieved Affordability`(
+        origin,
+        minimumInstalmentAmount = min,
+        maximumInstalmentAmount = max
+      )(using encrypter)
+    ): StubMapping = findByLatestSessionId(jsonBody)
+
     def updateAffordabilityUrl(journeyId: JourneyId) =
       s"/essttp-backend/journey/${journeyId.value}/update-affordability-result"
 
