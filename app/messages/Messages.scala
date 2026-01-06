@@ -1569,19 +1569,16 @@ object Messages {
 
     def getError(key: String, max: AmountInPence, min: AmountInPence): Message = {
       lazy val outOfBoundsMessage =
-        max.value < 101 match {
-          case true =>
-            Message(
-              english = "You must enter £1 as the monthly payment amount",
-              welsh = "Mae’n rhaid i chi nodi £1 fel swm y taliad misol"
-            )
-          case _    =>
-            Message(
-              english =
-                s"How much you can afford to pay each month must be between ${min.gdsFormatInPounds} and ${max.gdsFormatInPounds}",
-              welsh =
-                s"Mae’n rhaid i faint y gallwch fforddio ei dalu bob mis fod rhwng ${min.gdsFormatInPounds} a ${max.gdsFormatInPounds}"
-            )
+        if (max.value < 101) {
+          Message(
+            english = "You must enter £1 as the monthly payment amount",
+            welsh = "Mae’n rhaid i chi nodi £1 fel swm y taliad misol"
+          )
+        } else {
+          Message(
+            english = s"How much you can afford to pay each month must be between ${min.gdsFormatInPounds} and ${max.gdsFormatInPounds}",
+            welsh = s"Mae’n rhaid i faint y gallwch fforddio ei dalu bob mis fod rhwng ${min.gdsFormatInPounds} a ${max.gdsFormatInPounds}"
+          )
         }
 
       key match {
