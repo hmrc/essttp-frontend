@@ -2129,9 +2129,9 @@ object Messages {
 
     val `If there are any changes to the amount...` : Message = Message(
       english =
-        "If there are any changes to the amount, date or frequency of your Direct Debit HMRC NDDS will notify you 10 working days in advance of your account being debited or as otherwise agreed. If you request HMRC NDDS to collect a payment, confirmation of the amount and date will be given to you at the time of the request.",
+        "If there are any changes to the amount, date or frequency of your Direct Debit, the HMRC National Direct Debit System (NDDS) will notify you 10 working days in advance of your account being debited or as otherwise agreed. If you request HMRC NDDS to collect a payment, confirmation of the amount and date will be given to you at the time of the request.",
       welsh =
-        "Os oes unrhyw newidiadau i swm, dyddiad neu amlder eich Debyd Uniongyrchol, bydd NDDS CThEF yn rhoi gwybod i chi 10 diwrnod gwaith cyn i’ch cyfrif gael ei ddebydu, neu fel y cytunwyd fel arall. Os byddwch yn gwneud cais i NDDS CThEF gasglu taliad, rhoddir cadarnhad o’r swm a’r dyddiad i chi ar adeg y cais."
+        "Os oes unrhyw newidiadau i swm, dyddiad neu amlder eich Debyd Uniongyrchol, y System Debyd Uniongyrchol Cenedlaethol (NDDS) CThEF yn rhoi gwybod i chi 10 diwrnod gwaith cyn i’ch cyfrif gael ei ddebydu, neu fel y cytunwyd fel arall. Os byddwch yn gwneud cais i NDDS CThEF gasglu taliad, rhoddir cadarnhad o’r swm a’r dyddiad i chi ar adeg y cais."
     )
 
     val `If an error is made in the payment...` : Message = Message(
@@ -2146,6 +2146,11 @@ object Messages {
         "You can cancel a Direct Debit at any time by simply contacting your bank or building society. Written confirmation may be required. Please also notify us.",
       welsh =
         "Gallwch ganslo Debyd Uniongyrchol ar unrhyw adeg drwy gysylltu â’ch banc neu’ch cymdeithas adeiladu. Efallai y bydd angen cadarnhad ysgrifenedig. Rhowch wybod i ni hefyd."
+    )
+
+    val `Payments will appear on your bank statement as...` : Message = Message(
+      english = "Payments will appear on your bank statement as ‘HMRC NDDS’.",
+      welsh = "Bydd y taliadau’n ymddangos ar eich cyfriflen banc fel ‘HMRC NDDS’."
     )
 
   }

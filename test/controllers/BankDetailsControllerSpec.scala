@@ -1433,11 +1433,13 @@ class BankDetailsControllerSpec extends ItSpec {
         directDebitGuaranteeParagraphs(0)
           .text() shouldBe "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
         directDebitGuaranteeParagraphs(1)
-          .text() shouldBe "If there are any changes to the amount, date or frequency of your Direct Debit HMRC NDDS will notify you 10 working days in advance of your account being debited or as otherwise agreed. If you request HMRC NDDS to collect a payment, confirmation of the amount and date will be given to you at the time of the request."
+          .text() shouldBe "If there are any changes to the amount, date or frequency of your Direct Debit, the HMRC National Direct Debit System (NDDS) will notify you 10 working days in advance of your account being debited or as otherwise agreed. If you request HMRC NDDS to collect a payment, confirmation of the amount and date will be given to you at the time of the request."
         directDebitGuaranteeParagraphs(2)
           .text() shouldBe "If an error is made in the payment of your Direct Debit by HMRC NDDS or your bank or building society you are entitled to a full and immediate refund of the amount paid from your bank or building society. If you receive a refund you are not entitled to, you must pay it back when HMRC NDDS asks you to."
         directDebitGuaranteeParagraphs(3)
           .text() shouldBe "You can cancel a Direct Debit at any time by simply contacting your bank or building society. Written confirmation may be required. Please also notify us."
+        directDebitGuaranteeParagraphs(4)
+          .text() shouldBe "Payments will appear on your bank statement as ‘HMRC NDDS’."
       }
     }
 
