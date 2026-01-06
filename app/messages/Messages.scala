@@ -2129,16 +2129,16 @@ object Messages {
 
     val `If there are any changes to the amount...` : Message = Message(
       english =
-        "If there are any changes to the amount, date or frequency of your Direct Debit, the HMRC National Direct Debit System (NDDS) will notify you 10 working days in advance of your account being debited or as otherwise agreed. If you request HMRC NDDS to collect a payment, confirmation of the amount and date will be given to you at the time of the request.",
+        "If there are any changes to the amount, date or frequency of your Direct Debit, the HMRC National Direct Debit System (NDDS) will notify you 10 working days in advance of your account being debited or as otherwise agreed. If you request HMRC <abbr title=\"National Direct Debit System\">NDDS</abbr> to collect a payment, confirmation of the amount and date will be given to you at the time of the request.",
       welsh =
-        "Os oes unrhyw newidiadau i swm, dyddiad neu amlder eich Debyd Uniongyrchol, y System Debyd Uniongyrchol Cenedlaethol (NDDS) CThEF yn rhoi gwybod i chi 10 diwrnod gwaith cyn i’ch cyfrif gael ei ddebydu, neu fel y cytunwyd fel arall. Os byddwch yn gwneud cais i NDDS CThEF gasglu taliad, rhoddir cadarnhad o’r swm a’r dyddiad i chi ar adeg y cais."
+        "Os oes unrhyw newidiadau i swm, dyddiad neu amlder eich Debyd Uniongyrchol, y System Debyd Uniongyrchol Cenedlaethol (NDDS) CThEF yn rhoi gwybod i chi 10 diwrnod gwaith cyn i’ch cyfrif gael ei ddebydu, neu fel y cytunwyd fel arall. Os byddwch yn gwneud cais i <abbr title=\"System Debyd Uniongyrchol Cenedlaethol\">NDDS</abbr> CThEF gasglu taliad, rhoddir cadarnhad o’r swm a’r dyddiad i chi ar adeg y cais."
     )
 
     val `If an error is made in the payment...` : Message = Message(
       english =
-        "If an error is made in the payment of your Direct Debit by HMRC NDDS or your bank or building society you are entitled to a full and immediate refund of the amount paid from your bank or building society. If you receive a refund you are not entitled to, you must pay it back when HMRC NDDS asks you to.",
+        "If an error is made in the payment of your Direct Debit by HMRC <abbr title=\"National Direct Debit System\">NDDS</abbr> or your bank or building society you are entitled to a full and immediate refund of the amount paid from your bank or building society. If you receive a refund you are not entitled to, you must pay it back when HMRC <abbr title=\"National Direct Debit System\">NDDS</abbr> asks you to.",
       welsh =
-        "Os gwneir camgymeriad gan NDDS CThEF neu eich banc neu’ch cymdeithas adeiladu wrth dalu Debyd Uniongyrchol, mae gennych hawl i ad-daliad llawn a di-oed o’r swm a dalwyd o’ch banc neu’ch cymdeithas adeiladu. Os byddwch yn cael ad-daliad nad oes hawl gennych iddo, bydd yn rhaid i chi ei dalu’n ôl pan fydd NDDS CThEF yn gofyn i chi wneud hynny."
+        "Os gwneir camgymeriad gan <abbr title=\"System Debyd Uniongyrchol Cenedlaethol\">NDDS</abbr> CThEF neu eich banc neu’ch cymdeithas adeiladu wrth dalu Debyd Uniongyrchol, mae gennych hawl i ad-daliad llawn a di-oed o’r swm a dalwyd o’ch banc neu’ch cymdeithas adeiladu. Os byddwch yn cael ad-daliad nad oes hawl gennych iddo, bydd yn rhaid i chi ei dalu’n ôl pan fydd <abbr title=\"System Debyd Uniongyrchol Cenedlaethol\">NDDS</abbr> CThEF yn gofyn i chi wneud hynny."
     )
 
     val `You can cancel a Direct Debit...` : Message = Message(
@@ -2149,8 +2149,10 @@ object Messages {
     )
 
     val `Payments will appear on your bank statement as...` : Message = Message(
-      english = "Payments will appear on your bank statement as ‘HMRC NDDS’.",
-      welsh = "Bydd y taliadau’n ymddangos ar eich cyfriflen banc fel ‘HMRC NDDS’."
+      english =
+        "Payments will appear on your bank statement as ‘HMRC <abbr title=\"National Direct Debit System\">NDDS</abbr>’.",
+      welsh =
+        "Bydd y taliadau’n ymddangos ar eich cyfriflen banc fel ‘HMRC <abbr title=\"System Debyd Uniongyrchol Cenedlaethol\">NDDS</abbr>’."
     )
 
   }
