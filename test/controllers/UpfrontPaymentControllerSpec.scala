@@ -241,7 +241,10 @@ class UpfrontPaymentControllerSpec extends ItSpec, UnchangedFromCYALinkAssertion
           regimeBeingTested = Some(taxRegime)
         )
 
-        doc.select("#UpfrontPaymentAmount").size() shouldBe 1
+        val input = doc.select("#UpfrontPaymentAmount")
+        input.size() shouldBe 1
+        input.hasClass("govuk-input--width-10") shouldBe true
+
         val poundSymbol = doc.select(".govuk-input__prefix")
         poundSymbol.size() shouldBe 1
         poundSymbol.text() shouldBe "£"

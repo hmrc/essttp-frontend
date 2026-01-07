@@ -109,7 +109,10 @@ class MonthlyPaymentAmountControllerSpec extends ItSpec {
 
           doc.select(".govuk-label").text() shouldBe "How much can you afford to pay each month?"
           doc.select("#MonthlyPaymentAmount-hint").text() shouldBe "Enter an amount between £300 and £880"
-          doc.select("#MonthlyPaymentAmount").size() shouldBe 1
+
+          val input = doc.select("#MonthlyPaymentAmount")
+          input.size() shouldBe 1
+          input.hasClass("govuk-input--width-10") shouldBe true
 
           val poundSymbol = doc.select(".govuk-input__prefix")
           poundSymbol.size() shouldBe 1
