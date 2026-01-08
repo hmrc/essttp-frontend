@@ -47,7 +47,8 @@ object ContentAssertions extends RichMatchers {
   }
 
   def languageToggleExists(document: Document, selectedLanguage: Language): Assertion = {
-    val langToggleItems: List[Element] = document.select(".hmrc-language-select__list-item").asScala.toList
+    val langToggleItems: List[Element] =
+      document.select(".hmrc-service-navigation-language-select__list-item").asScala.toList
     langToggleItems.size shouldBe 2
 
     val englishOption = langToggleItems(0)
@@ -55,18 +56,16 @@ object ContentAssertions extends RichMatchers {
 
     selectedLanguage match {
       case Languages.English =>
-        englishOption.text() shouldBe "English"
+        englishOption.text() shouldBe "ENG"
 
         welshOption.select("a").attr("hreflang") shouldBe "cy"
-        welshOption.select("span.govuk-visually-hidden").text() shouldBe "Newid yr iaith i’r Gymraeg"
-        welshOption.select("span[aria-hidden=true]").text() shouldBe "Cymraeg"
+        welshOption.select("span.govuk-visually-hidden").text() shouldBe "– Newid yr iaith i’r Gymraeg"
 
       case Languages.Welsh =>
         englishOption.select("a").attr("hreflang") shouldBe "en"
-        englishOption.select("span.govuk-visually-hidden").text() shouldBe "Change the language to English"
-        englishOption.select("span[aria-hidden=true]").text() shouldBe "English"
+        englishOption.select("span.govuk-visually-hidden").text() shouldBe "– Change the language to English"
 
-        welshOption.text() shouldBe "Cymraeg"
+        welshOption.text() shouldBe "CYM"
 
     }
 
@@ -121,10 +120,16 @@ object ContentAssertions extends RichMatchers {
       page.title() shouldBe s"$titlePrefix$expectedH1 - $regimeServiceName - GOV.UK"
     }
 
-    val serviceName = page.select(".govuk-header__service-name")
+    val serviceName = if (regimeBeingTested.isDefined && shouldServiceNameBeInHeader) {
+      page.select(".govuk-service-navigation__link")
+    } else {
+      page.select(".govuk-header__link--service-name")
+    }
 
     serviceName.is("a") shouldBe regimeBeingTested.isDefined && shouldServiceNameBeInHeader
-    serviceName.text() shouldBe (if (shouldServiceNameBeInHeader) regimeServiceName else "")
+    serviceName.text() should include(
+      if (regimeBeingTested.isDefined && shouldServiceNameBeInHeader) regimeServiceName else ""
+    )
     serviceName.attr("href") shouldBe (if (shouldServiceNameBeInHeader) regimeBeingTested match {
                                          case Some(TaxRegime.Epaye) => routes.LandingController.epayeLandingPage.url
                                          case Some(TaxRegime.Vat)   => routes.LandingController.vatLandingPage.url
