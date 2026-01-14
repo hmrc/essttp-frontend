@@ -3,7 +3,7 @@
 ---
 
 This repository contains the frontend microservice for eSSTTP (Enhanced Self Service Time To Pay). 
-It is built using Scala (2.13) and the Play framework (2.8). We use linting tools such as WartRemover and Sclariform.
+It is built using Scala and the Play framework. We use linting tools such as WartRemover and Scalafmt.
 This microservice allows users to set up an arrangement and recurring direct debit to repay any debts they may have with HMRC.
 
 Current tax regimes supported:
