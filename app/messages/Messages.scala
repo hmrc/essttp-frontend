@@ -1095,7 +1095,7 @@ object Messages {
       english =
         s"""Use Relay UK if you cannot hear or speak on the telephone, dial <strong>18001</strong> then <strong>0345 300 3900</strong>. Find out more on the <a class="govuk-link" href="$linkUrl" rel="noreferrer noopener" target="_blank">Relay UK website (opens in new tab)</a>.""",
       welsh =
-        s"""Defnyddiwch wasanaeth Text Relay UK os na allwch glywed na siarad dros y ffôn. Deialwch <strong>18001</strong> ac yna <strong>0345 300 3900</strong>. Dysgwch ragor am hyn ar <a href="$linkUrl" rel="noreferrer noopener" target="_blank">wefan Text Relay UK (yn agor tab newydd)</a>."""
+        s"""Defnyddiwch wasanaeth Text Relay UK os na allwch glywed na siarad dros y ffôn. Deialwch <strong>18001</strong> ac yna <strong>0345 300 3900</strong>. Dysgwch ragor am hyn ar <a class="govuk-link" href="$linkUrl" rel="noreferrer noopener" target="_blank">wefan Text Relay UK (yn agor tab newydd)</a>."""
     )
 
     def `If a health condition or personal circumstances make it difficult to contact us...` : Message = Message(
