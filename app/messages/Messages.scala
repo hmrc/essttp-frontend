@@ -1295,9 +1295,9 @@ object Messages {
 
     def `To avoid or pay less interest, you can pay your bill in full now.`(link: String): Message = Message(
       english =
-        s"""To avoid or pay less interest, you can <a href="$link" class="govuk-link" rel="noreferrer noopener" target="_blank">pay your bill in full</a> now.""",
+        s"""To avoid or pay less interest, you can <a href="$link" class="govuk-link">pay your bill in full</a> now.""",
       welsh =
-        s"""Er mwyn talu llai o log, neu ei osgoi yn gyfan gwbl, gallwch <a href="$link" class="govuk-link" rel="noreferrer noopener" target="_blank">dalu’ch bil yn llawn</a> nawr."""
+        s"""Er mwyn talu llai o log, neu ei osgoi yn gyfan gwbl, gallwch <a href="$link" class="govuk-link">dalu’ch bil yn llawn</a> nawr."""
     )
 
     val `Before you start`: Message = Message(
