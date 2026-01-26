@@ -63,7 +63,6 @@ class InstalmentsController @Inject() (
       val existingValue = journey.fold(existingSelectedPaymentPlan, _._2.selectedPaymentPlan.some)
 
       existingValue.fold(InstalmentsController.instalmentsForm()) { plan =>
-        println("number of installments is " + plan.numberOfInstalments.value.toString)
         InstalmentsController.instalmentsForm().fill(plan.numberOfInstalments.value.toString)
       }
     }
