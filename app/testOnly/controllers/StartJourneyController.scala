@@ -399,13 +399,15 @@ object StartJourneyController {
 
     val customerDetail =
       if (form.emailAddressPresent)
-        List(
-          CustomerDetail(
-            Some(Email(SensitiveString("bobross@joyofpainting.com"))),
-            Some(EmailSource.ETMP)
+        Some(
+          List(
+            CustomerDetail(
+              Some(Email(SensitiveString("bobross@joyofpainting.com"))),
+              Some(EmailSource.ETMP)
+            )
           )
         )
-      else List(CustomerDetail(None, None))
+      else None
 
     val contactDetail = ContactDetail(
       Some(TelNumber("12345678910")),
@@ -571,7 +573,7 @@ object StartJourneyController {
       eligibilityStatus = EligibilityStatus(EligibilityPass(eligibilityRules.isEligible)),
       eligibilityRules = eligibilityRules,
       chargeTypeAssessment = chargeTypeAssessments,
-      customerDetails = Some(customerDetail),
+      customerDetails = customerDetail,
       individualDetails = individualDetails,
       addresses = addresses,
       regimeDigitalCorrespondence = RegimeDigitalCorrespondence(form.regimeDigitalCorrespondence),
