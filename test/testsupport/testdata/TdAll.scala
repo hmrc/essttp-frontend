@@ -361,7 +361,7 @@ object TdAll {
           )
         )
       ),
-      customerDetails = List(CustomerDetail(None, None)),
+      customerDetails = Some(List(CustomerDetail(None, None))),
       individualDetails = maybeIndividalDetails,
       addresses = List(
         Address(
