@@ -571,7 +571,7 @@ object StartJourneyController {
       eligibilityStatus = EligibilityStatus(EligibilityPass(eligibilityRules.isEligible)),
       eligibilityRules = eligibilityRules,
       chargeTypeAssessment = chargeTypeAssessments,
-      customerDetails = customerDetail,
+      customerDetails = Some(customerDetail),
       individualDetails = individualDetails,
       addresses = addresses,
       regimeDigitalCorrespondence = RegimeDigitalCorrespondence(form.regimeDigitalCorrespondence),
