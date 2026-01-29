@@ -43,15 +43,8 @@ final case class StartJourneyForm(
   debtTotalAmount:               BigDecimal,
   interestAmount:                Option[BigDecimal],
   taxReference:                  TaxId,
-  regimeDigitalCorrespondence:   Boolean,
-  emailAddressPresent:           Boolean,
-  customerDetailPresent:         Boolean,
-  isInterestBearingCharge:       Option[Boolean],
-  useChargeReference:            Option[Boolean],
-  chargeBeforeMaxAccountingDate: Option[Boolean],
-  ddInProgress:                  Option[Boolean],
+  flags:                         Flags,
   customerType:                  Option[CustomerType],
-  transitionToCDCS:              Option[Boolean],
   chargeSource:                  Option[String],
   planLengthMinAndMax:           PlanMinAndMaxLength,
   mainAndSubTrans:               MainAndSubTrans,
@@ -60,6 +53,38 @@ final case class StartJourneyForm(
   numberOfChargeTypeAssessments: Int,
   numberOfCustomerPostcodes:     Int
 )
+
+
+final case class Flags(
+  emailAddressPresent:           Boolean,
+  customerDetailPresent:         Boolean,
+  regimeDigitalCorrespondence:   Boolean,
+  isInterestBearingCharge:       Option[Boolean],
+  useChargeReference:            Option[Boolean],
+  chargeBeforeMaxAccountingDate: Option[Boolean],
+  ddInProgress:                  Option[Boolean],
+  transitionToCDCS:              Option[Boolean]
+)
+
+object Flags {
+
+  private val optionalBooleanMappingDefaultTrue: Mapping[Boolean] =
+    optional(boolean).transform[Boolean](_.getOrElse(true), Some(_))
+
+  private val chargesOptionalFieldsMapping: Mapping[Option[Boolean]] =
+    optional(boolean)
+
+  val flagsMapping: Mapping[Flags] = mapping(
+    "emailAddressPresent"           -> optionalBooleanMappingDefaultTrue,
+    "customerDetailPresent"         -> optionalBooleanMappingDefaultTrue,
+    "regimeDigitalCorrespondence"   -> optionalBooleanMappingDefaultTrue,
+    "isInterestBearingCharge"       -> chargesOptionalFieldsMapping,
+    "useChargeReference"            -> chargesOptionalFieldsMapping,
+    "chargeBeforeMaxAccountingDate" -> chargesOptionalFieldsMapping,
+    "ddInProgress"                  -> chargesOptionalFieldsMapping,
+    "transitionToCDCS"              -> chargesOptionalFieldsMapping
+  )(Flags.apply)(Tuple.fromProductTyped[Flags](_).some)
+}
 
 object StartJourneyForm {
 
@@ -94,15 +119,8 @@ object StartJourneyForm {
         ""                              -> Forms.of(debtTotalAmountFormat(taxRegime, appConfig)),
         "interestAmount"                -> interestAmountMapping,
         ""                              -> Forms.of(taxReferenceFormat(taxRegime)),
-        "regimeDigitalCorrespondence"   -> optionalBooleanMappingDefaultTrue,
-        "emailAddressPresent"           -> optionalBooleanMappingDefaultTrue,
-        "customerDetailPresent"         -> optionalBooleanMappingDefaultTrue,
-        "isInterestBearingCharge"       -> chargesOptionalFieldsMapping,
-        "useChargeReference"            -> chargesOptionalFieldsMapping,
-        "chargeBeforeMaxAccountingDate" -> chargesOptionalFieldsMapping,
-        "ddInProgress"                  -> chargesOptionalFieldsMapping,
+        ""                              -> Flags.flagsMapping,
         "customerType"                  -> optional(customerTypeMapping),
-        "transitionToCDCS"              -> chargesOptionalFieldsMapping,
         "chargeSource"                  -> chargesOptionalStringMapping,
         ""                              -> PlanMinAndMaxLength.planMinAndMaxLengthMapping,
         ""                              -> MainAndSubTrans.mainAndSubTransMapping,
@@ -256,12 +274,6 @@ object StartJourneyForm {
           case Nino(value)   => Map(simpTaxReferenceKey -> value)
         }
     }
-
-  private val optionalBooleanMappingDefaultTrue: Mapping[Boolean] =
-    optional(boolean).transform[Boolean](_.getOrElse(true), Some(_))
-
-  private val chargesOptionalFieldsMapping: Mapping[Option[Boolean]] =
-    optional(boolean)
 
   private val chargesOptionalStringMapping: Mapping[Option[String]] =
     optional(text)

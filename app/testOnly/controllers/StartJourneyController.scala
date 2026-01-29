@@ -397,8 +397,10 @@ object StartJourneyController {
     val debtAmountFromForm: AmountInPence = AmountInPence(form.debtTotalAmount)
     val interestAmount: AmountInPence     = AmountInPence(form.interestAmount.getOrElse(BigDecimal(0)))
 
+    println(form.toString)
+
     val customerDetail =
-      if (form.emailAddressPresent)
+      if (form.flags.emailAddressPresent)
         List(
           CustomerDetail(
             Some(Email(SensitiveString("bobross@joyofpainting.com"))),
@@ -411,7 +413,7 @@ object StartJourneyController {
       Some(TelNumber("12345678910")),
       None,
       None,
-      if (form.emailAddressPresent) Some(Email(SensitiveString("jamienorth@email.com"))) else None,
+      if (form.flags.emailAddressPresent) Some(Email(SensitiveString("jamienorth@email.com"))) else None,
       Some(EmailSource.ETMP),
       Some(AltLetterFormat(1))
     )
@@ -439,7 +441,7 @@ object StartJourneyController {
     val customerType     = form.customerType
     val transitionToCDCS =
       if form.customerType.exists(_.entryName == CustomerTypes.ClassicSANonTransitioned.entryName)
-      then form.transitionToCDCS.map(TransitionToCDCS(_))
+      then form.flags.transitionToCDCS.map(TransitionToCDCS(_))
       else None
 
     val individualDetails =
@@ -467,7 +469,7 @@ object StartJourneyController {
         accruedInterest = AccruedInterest(interest),
         ineligibleChargeType = IneligibleChargeType(value = false),
         chargeOverMaxDebtAge =
-          if (form.chargeBeforeMaxAccountingDate.isEmpty) Some(ChargeOverMaxDebtAge(value = false)) else None,
+          if (form.flags.chargeBeforeMaxAccountingDate.isEmpty) Some(ChargeOverMaxDebtAge(value = false)) else None,
         locks = Some(
           List(
             Lock(
@@ -478,10 +480,10 @@ object StartJourneyController {
           )
         ),
         dueDateNotReached = false,
-        isInterestBearingCharge = form.isInterestBearingCharge.map(IsInterestBearingCharge(_)),
-        useChargeReference = form.useChargeReference.map(UseChargeReference(_)),
-        chargeBeforeMaxAccountingDate = form.chargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_)),
-        ddInProgress = form.ddInProgress.map(DdInProgress(_)),
+        isInterestBearingCharge = form.flags.isInterestBearingCharge.map(IsInterestBearingCharge(_)),
+        useChargeReference = form.flags.useChargeReference.map(UseChargeReference(_)),
+        chargeBeforeMaxAccountingDate = form.flags.chargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_)),
+        ddInProgress = form.flags.ddInProgress.map(DdInProgress(_)),
         chargeSource = form.chargeSource.map(ChargeSource(_)),
         parentChargeReference = Some(ParentChargeReference("XW006559808862")),
         parentMainTrans = Some(ParentMainTrans("4700")),
@@ -571,10 +573,10 @@ object StartJourneyController {
       eligibilityStatus = EligibilityStatus(EligibilityPass(eligibilityRules.isEligible)),
       eligibilityRules = eligibilityRules,
       chargeTypeAssessment = chargeTypeAssessments,
-      customerDetails = Some(customerDetail),
+      customerDetails = if (form.flags.customerDetailPresent) Some(customerDetail) else None,
       individualDetails = individualDetails,
       addresses = addresses,
-      regimeDigitalCorrespondence = RegimeDigitalCorrespondence(form.regimeDigitalCorrespondence),
+      regimeDigitalCorrespondence = RegimeDigitalCorrespondence(form.flags.regimeDigitalCorrespondence),
       futureChargeLiabilitiesExcluded = false,
       chargeTypesExcluded = None
     )
