@@ -363,6 +363,36 @@ appConfig: AppConfig
     ))
 }
 
+@customerDetailPresentRadios = @{
+    govukRadios(Radios(
+        fieldset = Some(Fieldset(
+            legend = Some(Legend(
+                content = Text("Customer details present?"),
+                classes = "govuk-fieldset__legend--m",
+                isPageHeading = false
+            ))
+        )),
+        idPrefix = Some("customerDetailPresent"),
+        name = "customerDetailPresent",
+        errorMessage = form.error("customerDetailPresent").map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
+        content = Text(e.message)
+    )),
+    items = Seq(
+        RadioItem(
+            content = Text("Yes"),
+            value = Some("true"),
+            checked = form.data.get("customerDetailPresent").fold(true)(_ == "true")
+        ),
+        RadioItem(
+            content = Text("No"),
+            value = Some("false"),
+            checked = form.data.get("customerDetailPresent").fold(false)(_ == "false")
+        )
+    ),
+classes = "govuk-radios--small govuk-radios--inline"
+))
+}
+
 @chargesOptionalFieldRadios(fieldName: String) = @{
     govukRadios(Radios(
         fieldset = Some(Fieldset(
@@ -587,6 +617,8 @@ appConfig: AppConfig
 
     @emailAddressPresentRadios
 
+    @customerDetailPresentRadios
+
     @govukCheckboxes(Checkboxes(
         fieldset = Some(Fieldset(
             legend = Some(Legend(
@@ -710,6 +742,8 @@ appConfig: AppConfig
     @regimeDigitalCorrespondenceRadios
 
     @emailAddressPresentRadios
+
+    @customerDetailPresentRadios
 
     @govukCheckboxes(Checkboxes(
         fieldset = Some(Fieldset(
@@ -842,6 +876,8 @@ appConfig: AppConfig
 
     @emailAddressPresentRadios
 
+    @customerDetailPresentRadios
+
     @govukCheckboxes(Checkboxes(
         fieldset = Some(Fieldset(
             legend = Some(Legend(
@@ -962,6 +998,8 @@ appConfig: AppConfig
     @regimeDigitalCorrespondenceRadios
 
     @emailAddressPresentRadios
+
+    @customerDetailPresentRadios
 
     @govukCheckboxes(Checkboxes(
         fieldset = Some(Fieldset(

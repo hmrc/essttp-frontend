@@ -229,7 +229,7 @@ class TtpService @Inject() (
         instalments = selectedPaymentPlan.instalments,
         debtItemCharges = debtItemCharges
       ),
-      customerDetails = Some(customerDetail),
+      customerDetails = customerDetail,
       individualDetails = individualDetails,
       addresses = Some(addresses),
       regimeDigitalCorrespondence = Some(regimeDigitalCorrespondence)
@@ -363,7 +363,7 @@ object TtpService {
   /** If email matches the one from the eligibility API - ETMP If new email entered on the screen which doesn't match
     * the ETMP one - TEMP
     */
-  private def deriveCustomerDetail(journey: Journey.EmailVerificationComplete): List[CustomerDetail] = {
+  private def deriveCustomerDetail(journey: Journey.EmailVerificationComplete): Option[List[CustomerDetail]] = {
     val emailThatsBeenVerified: Email = journey.emailToBeVerified
     val customerDetail                = journey.eligibilityCheckResult.email match {
       case None =>
@@ -379,8 +379,7 @@ object TtpService {
           CustomerDetail(Some(emailThatsBeenVerified), Some(EmailSource.TEMP))
         }
     }
-
-    List(customerDetail)
+    Some(List(customerDetail))
   }
 
   private def upfrontPaymentAnswersFromJourney(journey: Journey): UpfrontPaymentAnswers = journey match {
