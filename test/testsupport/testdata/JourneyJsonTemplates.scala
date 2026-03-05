@@ -33,11 +33,16 @@ object JourneyJsonTemplates {
       redirectToLegacySaService = redirectToLegacySaService
     )
 
-  def `Computed Tax Id`(origin: Origin = Origins.Epaye.Bta, taxReference: String = "864FZ00049"): String =
+  def `Computed Tax Id`(
+    origin:                    Origin = Origins.Epaye.Bta,
+    taxReference:              String = "864FZ00049",
+    redirectToLegacySaService: Option[Boolean] = None
+  ): String =
     TdJsonBodies.createJourneyJson(
       stageInfo = StageInfo.computedTaxId,
       journeyInfo = JourneyInfo.taxIdDetermined(taxReference, origin.taxRegime),
-      origin = origin
+      origin = origin,
+      redirectToLegacySaService = redirectToLegacySaService
     )
 
   def `Eligibility Checked - Eligible`(

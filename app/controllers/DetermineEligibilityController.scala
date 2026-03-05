@@ -32,6 +32,7 @@ import play.api.mvc.*
 import services.{AuditService, JourneyService, TtpService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.{JourneyLogger, Logging}
+import views.Views
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -42,23 +43,43 @@ class DetermineEligibilityController @Inject() (
   mcc:            MessagesControllerComponents,
   ttpService:     TtpService,
   journeyService: JourneyService,
-  auditService:   AuditService
-)(using ExecutionContext, AppConfig)
+  auditService:   AuditService,
+  views:          Views
+)(using ec: ExecutionContext, config: AppConfig)
     extends FrontendController(mcc),
       Logging {
 
   val determineEligibility: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
-    request.journey match {
-      case j: Journey.Started                      => logErrorAndRouteToDefaultPageF(j)
-      case j: Journey.ComputedTaxId                => determineEligibilityAndUpdateJourney(j)
-      case j: JourneyStage.AfterEligibilityChecked =>
-        val proposedResult = {
-          JourneyLogger.info("Eligibility already determined, skipping.")
-          Redirect(EligibilityRouter.nextPage(j.eligibilityCheckResult, j.taxRegime))
-        }
-        finalStateCheckF(j, proposedResult)
+    preventEligibilityOr {
+      request.journey match {
+        case j: Journey.Started                      => logErrorAndRouteToDefaultPageF(j)
+        case j: Journey.ComputedTaxId                => determineEligibilityAndUpdateJourney(j)
+        case j: JourneyStage.AfterEligibilityChecked =>
+          val proposedResult = {
+            JourneyLogger.info("Eligibility already determined, skipping.")
+            Redirect(EligibilityRouter.nextPage(j.eligibilityCheckResult, j.taxRegime))
+          }
+          finalStateCheckF(j, proposedResult)
+      }
     }
   }
+
+  private def preventEligibilityOr(
+    f: => Future[Result]
+  )(using request: AuthenticatedJourneyRequest[?]): Future[Result] =
+    request.journey.taxRegime match {
+      case TaxRegime.Epaye => f
+      case TaxRegime.Vat   => f
+      case TaxRegime.Sa    =>
+        if (config.saEnabled) {
+          if request.journey.redirectToLegacySaService.contains(true) then Redirect(config.Urls.saLegacyRedirectUrl)
+          else f
+        } else {
+          Ok(views.shuttered())
+        }
+      case TaxRegime.Simp  =>
+        if config.simpEnabled then f else Ok(views.shuttered())
+    }
 
   def determineEligibilityAndUpdateJourney(
     journey: Journey.ComputedTaxId

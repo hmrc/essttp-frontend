@@ -396,7 +396,7 @@ object StartJourneyController {
 
     val debtAmountFromForm: AmountInPence = AmountInPence(form.debtTotalAmount)
     val interestAmount: AmountInPence     = AmountInPence(form.interestAmount.getOrElse(BigDecimal(0)))
-    
+
     val customerDetail =
       if (form.flags.emailAddressPresent)
         List(

@@ -1410,4 +1410,70 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Sa, Languages.Welsh)
       }
   }
+
+  "Determine eligibility should prevent eligibility checks" - {
+
+    "when SA is enabled and the journey has been marked to go to the legacy SA service" in {
+      stubCommonActions()
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Sa.Bta, redirectToLegacySaService = Some(true))()
+
+      val result = controller.determineEligibility(fakeRequest)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(
+        "http://localhost:9063/pay-what-you-owe-in-instalments/arrangement/determine-eligibility"
+      )
+    }
+
+  }
+
+}
+
+class DetermineEligibilityControllerSimpDisabledSpec extends ItSpec, CombinationsHelper {
+
+  override lazy val configOverrides: Map[String, Any] = Map(
+    "features.simp" -> false
+  )
+
+  private val controller: DetermineEligibilityController = app.injector.instanceOf[DetermineEligibilityController]
+
+  "Determine eligibility should prevent eligibility checks" - {
+
+    "when SIMP is disabled and the journey is for SIMP" in {
+      stubCommonActions()
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Simp.Pta)()
+
+      val result = controller.determineEligibility(fakeRequest)
+      status(result) shouldBe OK
+      val doc    = Jsoup.parse(contentAsString(result))
+
+      doc.select("h1").text shouldBe "Sorry, the service is unavailable"
+    }
+
+  }
+
+}
+
+class DetermineEligibilityControllerSaDisabledSpec extends ItSpec, CombinationsHelper {
+
+  override lazy val configOverrides: Map[String, Any] = Map(
+    "features.sa" -> false
+  )
+
+  private val controller: DetermineEligibilityController = app.injector.instanceOf[DetermineEligibilityController]
+
+  "Determine eligibility should prevent eligibility checks" - {
+
+    "when SA is disabled and the journey is for SA" in {
+      stubCommonActions()
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Sa.DetachedUrl)()
+
+      val result = controller.determineEligibility(fakeRequest)
+      status(result) shouldBe OK
+      val doc    = Jsoup.parse(contentAsString(result))
+
+      doc.select("h1").text shouldBe "Sorry, the service is unavailable"
+    }
+
+  }
+
 }
