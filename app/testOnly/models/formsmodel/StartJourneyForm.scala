@@ -54,7 +54,6 @@ final case class StartJourneyForm(
   numberOfCustomerPostcodes:     Int
 )
 
-
 final case class Flags(
   emailAddressPresent:           Boolean,
   customerDetailPresent:         Boolean,

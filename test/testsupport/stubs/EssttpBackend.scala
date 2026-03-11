@@ -196,14 +196,14 @@ object EssttpBackend {
   }
 
   object DetermineTaxId {
-    def findJourney(origin: Origin)(jsonBody: String = {
+    def findJourney(origin: Origin, redirectToLegacySaService: Option[Boolean] = None)(jsonBody: String = {
       val taxReference = origin.taxRegime match {
         case TaxRegime.Epaye => "864FZ00049"
         case TaxRegime.Vat   => "101747001"
         case TaxRegime.Sa    => "1234567895"
         case TaxRegime.Simp  => "QQ123456A"
       }
-      JourneyJsonTemplates.`Computed Tax Id`(origin, taxReference)
+      JourneyJsonTemplates.`Computed Tax Id`(origin, taxReference, redirectToLegacySaService)
     }): StubMapping = findByLatestSessionId(jsonBody)
 
     def updateTaxIdUrl(journeyId: JourneyId) = s"/essttp-backend/journey/${journeyId.value}/update-tax-id"
