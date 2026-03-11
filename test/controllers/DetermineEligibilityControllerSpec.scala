@@ -369,7 +369,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
           "NoDueDatesReached - SIMP",
           TdAll.notEligibleNoDueDatesReached,
           "noDueDatesReached",
-          PageUrls.simpNotEligibleUrl,
+          PageUrls.simpNoDueDatesReachedUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Simp.Pta),
           Origins.Simp.Pta
         ),

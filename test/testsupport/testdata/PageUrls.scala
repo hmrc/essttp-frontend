@@ -101,6 +101,7 @@ object PageUrls {
   val exitSurveySimpUrl: String                                                                       = s"$serviceBaseUrl/exit-survey/simp"
   val payeNoDueDatesReachedUrl: String                                                                = s"$serviceBaseUrl/bill-not-overdue-epaye"
   val vatNoDueDatesReachedUrl: String                                                                 = s"$serviceBaseUrl/bill-not-overdue-vat"
+  val simpNoDueDatesReachedUrl: String                                                                = s"$serviceBaseUrl/bill-not-overdue-simple-assessment"
   val epayeRLSUrl: String                                                                             = s"$serviceBaseUrl/update-personal-details-epaye"
   val vatRLSUrl: String                                                                               = s"$serviceBaseUrl/update-personal-details-vat"
   val saRLSUrl: String                                                                                = s"$serviceBaseUrl/update-personal-details-sa"

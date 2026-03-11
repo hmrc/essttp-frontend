@@ -33,10 +33,19 @@
     case TaxRegime.Epaye => Messages.NotEligible.`You cannot set up an Employers' PAYE payment plan online...not overdue`
     case TaxRegime.Vat => Messages.NotEligible.`You cannot set up a VAT payment plan online...not overdue`
     case TaxRegime.Sa => throw new NotImplementedError()
-    case TaxRegime.Simp => throw new NotImplementedError()
+    case TaxRegime.Simp => Messages.NotEligible.`You cannot set up a Simple Assessment payment plan because you do not owe anything right now.`
   }
   Html(message.show)
  }
  </p>
 
- <p id="bill-not-overdue" class="govuk-body">@{Html(Messages.NotEligible.`You may be able to set up a payment plan once the deadline...`.show)}</p>
+ <p id="bill-not-overdue" class="govuk-body">@{
+   val message = taxRegime match {
+    case TaxRegime.Epaye => Messages.NotEligible.`You may be able to set up a payment plan once the deadline...`
+    case TaxRegime.Vat => Messages.NotEligible.`You may be able to set up a payment plan once the deadline...`
+    case TaxRegime.Sa => throw new NotImplementedError()
+    case TaxRegime.Simp => Messages.NotEligible.`If you receive a Simple Assessment letter, it will tell you how and when to pay your tax bill.`
+   }
+   Html(message.show)
+  }
+ </p>
