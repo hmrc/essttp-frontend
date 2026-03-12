@@ -226,21 +226,14 @@ class IneligibleControllerSpec extends ItSpec {
               JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(origin)
             )
 
-            val result: Future[Result] = taxRegime match {
-              case TaxRegime.Epaye => controller.epayeNoDueDatesReachedPage(fakeRequest)
-              case TaxRegime.Vat   => controller.vatNoDueDatesReachedPage(fakeRequest)
-              case TaxRegime.Simp  => controller.simpNoDueDatesReachedPage(fakeRequest)
+            val (result, expectedH1) = taxRegime match {
+              case TaxRegime.Epaye => controller.epayeNoDueDatesReachedPage(fakeRequest) -> "You cannot use this service"
+              case TaxRegime.Vat   => controller.vatNoDueDatesReachedPage(fakeRequest) -> "You cannot use this service"
+              case TaxRegime.Simp  => controller.simpNoDueDatesReachedPage(fakeRequest) -> "You do not owe anything right now"
               case TaxRegime.Sa    => throw new NotImplementedError("Not relevant to SA")
             }
 
             val page = pageContentAsDoc(result)
-
-            val expectedH1 = taxRegime match {
-              case TaxRegime.Epaye => "You cannot use this service"
-              case TaxRegime.Vat   => "You cannot use this service"
-              case TaxRegime.Simp  => "You do not owe anything right now"
-              case TaxRegime.Sa    => "You do not owe anything right now"
-            }
 
             ContentAssertions.commonPageChecks(
               page,
@@ -260,9 +253,7 @@ class IneligibleControllerSpec extends ItSpec {
               case TaxRegime.Simp  =>
                 "You cannot set up a Simple Assessment payment plan because you do not owe anything right now." ->
                   "If you receive a Simple Assessment letter, it will tell you how and when to pay your tax bill."
-              case TaxRegime.Sa    =>
-                "You cannot set up a Simple Assessment payment plan because you do not owe anything right now." ->
-                  "If you receive a Simple Assessment letter, it will tell you how and when to pay your tax bill."
+              case TaxRegime.Sa => throw new NotImplementedError("Not relevant to SA")
             }
 
             val leadingParagraphs = page.select(".govuk-body").asScala.toList

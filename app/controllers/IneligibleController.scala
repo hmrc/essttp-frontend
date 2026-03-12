@@ -20,7 +20,7 @@ import actions.Actions
 import actionsmodel.AuthenticatedJourneyRequest
 import config.AppConfig
 import essttp.journey.model.SjRequest
-import essttp.rootmodel.TaxRegime.{Epaye, Simp, Vat}
+import essttp.rootmodel.TaxRegime.{Epaye, Sa, Simp, Vat}
 import messages.Messages
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import services.AuditService
@@ -212,7 +212,7 @@ class IneligibleController @Inject() (
       case Simp  => Messages.NotEligible.`You do not owe anything right now`
       case Vat   => Messages.NotEligible.`You cannot use this service`
       case Epaye => Messages.NotEligible.`You cannot use this service`
-      case _     => Messages.NotEligible.`You cannot use this service`
+      case Sa    => throw new NotImplementedError("not implemented for SA")
     }
 
     Ok(
