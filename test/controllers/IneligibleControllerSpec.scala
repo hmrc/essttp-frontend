@@ -219,6 +219,59 @@ class IneligibleControllerSpec extends ItSpec {
           )
         }
 
+        if (taxRegime != TaxRegime.Sa) {
+          s"${taxRegime.entryName} No due dates reached page correctly" in {
+            stubCommonActions(authAllEnrolments = enrolments)
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(
+              JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(origin)
+            )
+
+            val result: Future[Result] = taxRegime match {
+              case TaxRegime.Epaye => controller.epayeNoDueDatesReachedPage(fakeRequest)
+              case TaxRegime.Vat   => controller.vatNoDueDatesReachedPage(fakeRequest)
+              case TaxRegime.Simp  => controller.simpNoDueDatesReachedPage(fakeRequest)
+              case TaxRegime.Sa    => throw new NotImplementedError("Not relevant to SA")
+            }
+
+            val page = pageContentAsDoc(result)
+
+            val expectedH1 = taxRegime match {
+              case TaxRegime.Epaye => "You cannot use this service"
+              case TaxRegime.Vat   => "You cannot use this service"
+              case TaxRegime.Simp  => "You do not owe anything right now"
+              case TaxRegime.Sa    => "You do not owe anything right now"
+            }
+
+            ContentAssertions.commonPageChecks(
+              page,
+              expectedH1 = expectedH1,
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl = None,
+              regimeBeingTested = Some(taxRegime)
+            )
+
+            val (expectedParagraph1, expectedParagraph2) = taxRegime match {
+              case TaxRegime.Epaye =>
+                "You cannot set up an Employers’ PAYE payment plan online because your bill is not overdue." ->
+                  "You may be able to set up a payment plan once the deadline has passed to pay your bill."
+              case TaxRegime.Vat   =>
+                "You cannot set up a VAT payment plan online because your bill is not overdue." ->
+                  "You may be able to set up a payment plan once the deadline has passed to pay your bill."
+              case TaxRegime.Simp  =>
+                "You cannot set up a Simple Assessment payment plan because you do not owe anything right now." ->
+                  "If you receive a Simple Assessment letter, it will tell you how and when to pay your tax bill."
+              case TaxRegime.Sa    =>
+                "You cannot set up a Simple Assessment payment plan because you do not owe anything right now." ->
+                  "If you receive a Simple Assessment letter, it will tell you how and when to pay your tax bill."
+            }
+
+            val leadingParagraphs = page.select(".govuk-body").asScala.toList
+            println(leadingParagraphs.toString())
+            leadingParagraphs(0).html() shouldBe expectedParagraph1
+            leadingParagraphs(1).html() shouldBe expectedParagraph2
+          }
+
+        }
         s"${taxRegime.entryName} RLS not eligible page correctly" in {
           stubCommonActions(authAllEnrolments = enrolments)
           EssttpBackend.EligibilityCheck.findJourney(testCrypto)(

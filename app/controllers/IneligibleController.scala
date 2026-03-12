@@ -20,7 +20,7 @@ import actions.Actions
 import actionsmodel.AuthenticatedJourneyRequest
 import config.AppConfig
 import essttp.journey.model.SjRequest
-import essttp.rootmodel.TaxRegime.Simp
+import essttp.rootmodel.TaxRegime.{Epaye, Simp, Vat}
 import messages.Messages
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import services.AuditService
@@ -208,22 +208,19 @@ class IneligibleController @Inject() (
   }
 
   private def genericNoDueDatesReachedPage(implicit request: AuthenticatedJourneyRequest[AnyContent]): Result =
-    request.journey.taxRegime match {
-      case Simp =>
-        Ok(
-          views.partials.noDueDatesTemplatePage(
-            Messages.NotEligible.`You do not owe anything right now`,
-            views.partials.noDueDatesReachedPartial(request.journey.taxRegime)
-          )
-        )
-      case _    =>
-        Ok(
-          views.partials.noDueDatesTemplatePage(
-            Messages.NotEligible.`You cannot use this service`,
-            views.partials.noDueDatesReachedPartial(request.journey.taxRegime)
-          )
-        )
+    val message = request.journey.taxRegime match {
+      case Simp  => Messages.NotEligible.`You do not owe anything right now`
+      case Vat   => Messages.NotEligible.`You cannot use this service`
+      case Epaye => Messages.NotEligible.`You cannot use this service`
+      case _     => Messages.NotEligible.`You cannot use this service`
     }
+
+    Ok(
+      views.partials.noDueDatesTemplatePage(
+        message,
+        views.partials.noDueDatesReachedPartial(request.journey.taxRegime)
+      )
+    )
 
   val epayeNoDueDatesReachedPage: Action[AnyContent] = as.authenticatedJourneyAction { implicit request =>
     genericNoDueDatesReachedPage
