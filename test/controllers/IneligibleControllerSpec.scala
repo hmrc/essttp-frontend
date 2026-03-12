@@ -226,12 +226,37 @@ class IneligibleControllerSpec extends ItSpec {
               JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(origin)
             )
 
-            val (result, expectedH1) = taxRegime match {
-              case TaxRegime.Epaye => controller.epayeNoDueDatesReachedPage(fakeRequest) -> "You cannot use this service"
-              case TaxRegime.Vat   => controller.vatNoDueDatesReachedPage(fakeRequest) -> "You cannot use this service"
-              case TaxRegime.Simp  => controller.simpNoDueDatesReachedPage(fakeRequest) -> "You do not owe anything right now"
+            val (result, expectedH1, expectedParagraph1, expectedParagraph2) = taxRegime match {
+              case TaxRegime.Epaye =>
+                (
+                  controller.epayeNoDueDatesReachedPage(fakeRequest),
+                  "You cannot use this service",
+                  "You cannot set up an Employers’ PAYE payment plan online because your bill is not overdue.",
+                  "You may be able to set up a payment plan once the deadline has passed to pay your bill."
+                )
+              case TaxRegime.Vat   =>
+                (
+                  controller.vatNoDueDatesReachedPage(fakeRequest),
+                  "You cannot use this service",
+                  "You cannot set up a VAT payment plan online because your bill is not overdue.",
+                  "You may be able to set up a payment plan once the deadline has passed to pay your bill."
+                )
+              case TaxRegime.Simp  =>
+                (
+                  controller.simpNoDueDatesReachedPage(fakeRequest),
+                  "You do not owe anything right now",
+                  "You cannot set up a Simple Assessment payment plan because you do not owe anything right now.",
+                  "If you receive a Simple Assessment letter, it will tell you how and when to pay your tax bill."
+                )
               case TaxRegime.Sa    => throw new NotImplementedError("Not relevant to SA")
             }
+
+//            val (result, expectedH1) = taxRegime match {
+//              case TaxRegime.Epaye => controller.epayeNoDueDatesReachedPage(fakeRequest) -> "You cannot use this service"
+//              case TaxRegime.Vat => controller.vatNoDueDatesReachedPage(fakeRequest) -> "You cannot use this service"
+//              case TaxRegime.Simp => controller.simpNoDueDatesReachedPage(fakeRequest) -> "You do not owe anything right now"
+//              case TaxRegime.Sa => throw new NotImplementedError("Not relevant to SA")
+//            }
 
             val page = pageContentAsDoc(result)
 
@@ -243,18 +268,18 @@ class IneligibleControllerSpec extends ItSpec {
               regimeBeingTested = Some(taxRegime)
             )
 
-            val (expectedParagraph1, expectedParagraph2) = taxRegime match {
-              case TaxRegime.Epaye =>
-                "You cannot set up an Employers’ PAYE payment plan online because your bill is not overdue." ->
-                  "You may be able to set up a payment plan once the deadline has passed to pay your bill."
-              case TaxRegime.Vat   =>
-                "You cannot set up a VAT payment plan online because your bill is not overdue." ->
-                  "You may be able to set up a payment plan once the deadline has passed to pay your bill."
-              case TaxRegime.Simp  =>
-                "You cannot set up a Simple Assessment payment plan because you do not owe anything right now." ->
-                  "If you receive a Simple Assessment letter, it will tell you how and when to pay your tax bill."
-              case TaxRegime.Sa => throw new NotImplementedError("Not relevant to SA")
-            }
+//            val (expectedParagraph1, expectedParagraph2) = taxRegime match {
+//              case TaxRegime.Epaye =>
+//                "You cannot set up an Employers’ PAYE payment plan online because your bill is not overdue." ->
+//                  "You may be able to set up a payment plan once the deadline has passed to pay your bill."
+//              case TaxRegime.Vat   =>
+//                "You cannot set up a VAT payment plan online because your bill is not overdue." ->
+//                  "You may be able to set up a payment plan once the deadline has passed to pay your bill."
+//              case TaxRegime.Simp  =>
+//                "You cannot set up a Simple Assessment payment plan because you do not owe anything right now." ->
+//                  "If you receive a Simple Assessment letter, it will tell you how and when to pay your tax bill."
+//              case TaxRegime.Sa => throw new NotImplementedError("Not relevant to SA")
+//            }
 
             val leadingParagraphs = page.select(".govuk-body").asScala.toList
             println(leadingParagraphs.toString())
