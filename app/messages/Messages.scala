@@ -462,6 +462,11 @@ object Messages {
       welsh = "Ni allwch ddefnyddio’r gwasanaeth hwn"
     )
 
+    val `You do not owe anything right now`: Message = Message(
+      english = "You do not owe anything right now",
+      welsh = "Nid oes arnoch ddim byd ar hyn o bryd"
+    )
+
     def `You cannot set up ... debt too small`(taxRegime: TaxRegime): Message = taxRegime match {
       case TaxRegime.Epaye =>
         Message(
@@ -756,6 +761,18 @@ object Messages {
       english = "You cannot set up a VAT payment plan online because your bill is not overdue.",
       welsh = "Ni allwch drefnu cynllun talu TAW ar-lein oherwydd nad yw’ch bil yn hwyr."
     )
+
+    val `You cannot set up a Simple Assessment payment plan because you do not owe anything right now.` : Message =
+      Message(
+        english = "You cannot set up a Simple Assessment payment plan because you do not owe anything right now.",
+        welsh = "Ni allwch drefnu cynllun talu Asesiad Syml oherwydd nad oes arnoch ddim byd ar hyn o bryd."
+      )
+
+    val `If you receive a Simple Assessment letter, it will tell you how and when to pay your tax bill.` : Message =
+      Message(
+        english = "If you receive a Simple Assessment letter, it will tell you how and when to pay your tax bill.",
+        welsh = "Os ydych yn cael llythyr Asesiad Syml, bydd yn rhoi gwybod i chi sut a phryd i dalu’ch bil treth."
+      )
 
     val `You may be able to set up a payment plan once the deadline...` : Message = Message(
       english = "You may be able to set up a payment plan once the deadline has passed to pay your bill.",

@@ -219,6 +219,54 @@ class IneligibleControllerSpec extends ItSpec {
           )
         }
 
+        if (taxRegime != TaxRegime.Sa) {
+          s"${taxRegime.entryName} No due dates reached page correctly" in {
+            stubCommonActions(authAllEnrolments = enrolments)
+            EssttpBackend.EligibilityCheck.findJourney(testCrypto)(
+              JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(origin)
+            )
+
+            val (result, expectedH1, expectedParagraph1, expectedParagraph2) = taxRegime match {
+              case TaxRegime.Epaye =>
+                (
+                  controller.epayeNoDueDatesReachedPage(fakeRequest),
+                  "You cannot use this service",
+                  "You cannot set up an Employers’ PAYE payment plan online because your bill is not overdue.",
+                  "You may be able to set up a payment plan once the deadline has passed to pay your bill."
+                )
+              case TaxRegime.Vat   =>
+                (
+                  controller.vatNoDueDatesReachedPage(fakeRequest),
+                  "You cannot use this service",
+                  "You cannot set up a VAT payment plan online because your bill is not overdue.",
+                  "You may be able to set up a payment plan once the deadline has passed to pay your bill."
+                )
+              case TaxRegime.Simp  =>
+                (
+                  controller.simpNoDueDatesReachedPage(fakeRequest),
+                  "You do not owe anything right now",
+                  "You cannot set up a Simple Assessment payment plan because you do not owe anything right now.",
+                  "If you receive a Simple Assessment letter, it will tell you how and when to pay your tax bill."
+                )
+              case TaxRegime.Sa    => throw new NotImplementedError("Not relevant to SA")
+            }
+
+            val page = pageContentAsDoc(result)
+
+            ContentAssertions.commonPageChecks(
+              page,
+              expectedH1 = expectedH1,
+              shouldBackLinkBePresent = false,
+              expectedSubmitUrl = None,
+              regimeBeingTested = Some(taxRegime)
+            )
+
+            val leadingParagraphs = page.select(".govuk-body").asScala.toList
+            leadingParagraphs(0).html() shouldBe expectedParagraph1
+            leadingParagraphs(1).html() shouldBe expectedParagraph2
+          }
+
+        }
         s"${taxRegime.entryName} RLS not eligible page correctly" in {
           stubCommonActions(authAllEnrolments = enrolments)
           EssttpBackend.EligibilityCheck.findJourney(testCrypto)(

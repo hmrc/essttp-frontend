@@ -158,7 +158,7 @@ object EligibilityRouter {
     case TaxRegime.Epaye => routes.IneligibleController.epayeNoDueDatesReachedPage
     case TaxRegime.Vat   => routes.IneligibleController.vatNoDueDatesReachedPage
     case TaxRegime.Sa    => throw new NotImplementedError("Ineligibility reason not relevant to SA")
-    case TaxRegime.Simp  => routes.IneligibleController.simpGenericIneligiblePage
+    case TaxRegime.Simp  => routes.IneligibleController.simpNoDueDatesReachedPage
   }
 
   private def whichGenericRLSPage(taxRegime: TaxRegime): Call = taxRegime match {
