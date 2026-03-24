@@ -868,6 +868,19 @@ classes = "govuk-radios--small govuk-radios--inline"
         hint = Some(Hint(content = Text("SAUTR is 10 digits e.g. 1234567895. If left empty, it will be a random one.")))
     ))
 
+    @govukInput(Input(
+        id = "safeId",
+        name = "safeId",
+        label = Label(
+            isPageHeading = false,
+            classes = "govuk-label--m",
+            content = Text("Enter a SAFE ID (Optional)")
+        ),
+        classes = "govuk-input--width-10",
+        spellcheck = Some(false),
+        value = form.data.get("safeId")
+    ))
+
     @mainTransInput
 
     @subTransInput

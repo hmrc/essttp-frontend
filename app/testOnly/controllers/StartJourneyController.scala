@@ -592,7 +592,8 @@ object StartJourneyController {
         List(Identification(IdType("VRN"), IdValue(form.taxReference.value)))
 
       case TaxRegime.Sa =>
-        List(Identification(IdType("UTR"), IdValue(form.taxReference.value)))
+        val safeId = form.safeId.map(s => Identification(IdType("SAFEID"), IdValue(s)))
+        List(Identification(IdType("UTR"), IdValue(form.taxReference.value))) ++ safeId.toList
 
       case TaxRegime.Simp =>
         List(Identification(IdType("NINO"), IdValue(form.taxReference.value)))
