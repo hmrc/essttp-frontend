@@ -51,7 +51,8 @@ final case class StartJourneyForm(
   confidenceLevelAndNino:        ConfidenceLevelAndNino,
   credId:                        Option[String],
   numberOfChargeTypeAssessments: Int,
-  numberOfCustomerPostcodes:     Int
+  numberOfCustomerPostcodes:     Int,
+  safeId:                        Option[String]
 )
 
 final case class Flags(
@@ -126,7 +127,8 @@ object StartJourneyForm {
         ""                              -> Forms.of(confidenceLevelAndNinoFormatter),
         "credId"                        -> optional(text).transform[Option[String]](_.filter(_.nonEmpty), identity),
         "numberOfChargeTypeAssessments" -> number,
-        "numberOfCustomerPostcodes"     -> number
+        "numberOfCustomerPostcodes"     -> number,
+        "safeId"                        -> optional(text).transform[Option[String]](_.filter(_.nonEmpty), identity)
       )(StartJourneyForm.apply)(Tuple.fromProductTyped[StartJourneyForm](_).some)
     )
 
