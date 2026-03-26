@@ -36,7 +36,6 @@
         hmrcStandardHeader: HmrcStandardHeader,
         hmrcStandardFooter: HmrcStandardFooter,
         hmrcScripts: HmrcScripts,
-        hmrcLanguageSelectHelper: HmrcLanguageSelectHelper,
         hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
         hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper,
         requestSupport: RequestSupport,
@@ -99,8 +98,6 @@
     @if(appConfig.userResearchBannerEnabled && showUserResearchBanner) {
       @userResearchBanner()
     }
-
-    @hmrcLanguageSelectHelper()
 
     @if(showBackLink) {
         @backLinkUrlOverride.fold(
