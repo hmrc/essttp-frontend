@@ -157,9 +157,11 @@ class TtpService @Inject() (
 
     val identification = taxRegime match {
       case TaxRegime.Sa =>
-        val maybeNinoId =
-          authenticatedJourneyRequest.nino.map(nino => Identification(IdType("NINO"), IdValue(nino.value)))
-        maybeNinoId.fold(eligibilityCheckResult.identification)(_ :: eligibilityCheckResult.identification)
+        if (eligibilityCheckResult.identification.map(_.idType).contains("NINO")) eligibilityCheckResult.identification
+        else
+          val maybeNinoId =
+            authenticatedJourneyRequest.nino.map(nino => Identification(IdType("NINO"), IdValue(nino.value)))
+          maybeNinoId.fold(eligibilityCheckResult.identification)(_ :: eligibilityCheckResult.identification)
 
       case TaxRegime.Epaye | TaxRegime.Vat | TaxRegime.Simp =>
         eligibilityCheckResult.identification
