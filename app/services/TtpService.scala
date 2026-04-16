@@ -155,15 +155,8 @@ class TtpService @Inject() (
     val accountNumberPaddedWithZero: AccountNumber = directDebitDetails.accountNumber
       .copy(SensitiveString(padLeftWithZeros(directDebitDetails.accountNumber.value.decryptedValue)))
 
-    val identification = taxRegime match {
-      case TaxRegime.Sa =>
-        val maybeNinoId =
-          authenticatedJourneyRequest.nino.map(nino => Identification(IdType("NINO"), IdValue(nino.value)))
-        maybeNinoId.fold(eligibilityCheckResult.identification)(_ :: eligibilityCheckResult.identification)
-
-      case TaxRegime.Epaye | TaxRegime.Vat | TaxRegime.Simp =>
-        eligibilityCheckResult.identification
-    }
+    val identification =
+      identificationCheck(taxRegime, eligibilityCheckResult.identification, authenticatedJourneyRequest.nino)
 
     def toDebtItemCharges(chargeTypeAssessment: ChargeTypeAssessment): List[DebtItemCharges] =
       chargeTypeAssessment.charges.map { (charge: Charges) =>
@@ -249,6 +242,24 @@ class TtpService @Inject() (
         Errors.throwServerErrorException(httpException.message)
       }
   }
+
+  def identificationCheck(
+    taxRegime:      TaxRegime,
+    identification: List[Identification],
+    maybeNino:      Option[Nino]
+  ): List[Identification] =
+    taxRegime match {
+      case TaxRegime.Sa =>
+        if (identification.map(_.idType.value).contains("NINO")) identification
+        else
+          val maybeNinoId =
+            maybeNino.map(nino => Identification(IdType("NINO"), IdValue(nino.value)))
+          maybeNinoId.fold(identification)(_ :: identification)
+
+      case TaxRegime.Epaye | TaxRegime.Vat | TaxRegime.Simp =>
+        identification
+    }
+
 }
 
 object TtpService {
