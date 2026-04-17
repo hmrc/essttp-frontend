@@ -18,7 +18,7 @@ package testsupport.testdata
 
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Origin, Origins, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.TaxRegime.Sa
-import essttp.rootmodel.ttp.eligibility.{EligibilityPass, EligibilityRules}
+import essttp.rootmodel.ttp.eligibility.{EligibilityPass, EligibilityRules, Identification}
 import essttp.rootmodel.{DayOfMonth, TaxRegime, UpfrontPaymentAmount}
 import essttp.rootmodel.bank.TypeOfBankAccount
 import paymentsEmailVerification.models.EmailVerificationResult
@@ -143,7 +143,8 @@ object TdJsonBodies {
     maybeChargeUseChargeReference:      Option[Boolean] = None,
     maybeDdInProgress:                  Option[Boolean] = None,
     eligibilityMinPlanLength:           Int = 1,
-    eligibilityMaxPlanLength:           Int = 12
+    eligibilityMaxPlanLength:           Int = 12,
+    additionalIdentifiers:              Seq[Identification] = Seq.empty
   ): JourneyInfoAsJson = {
 
     val isInterestBearingChargeValue = maybeChargeIsInterestBearingCharge match {
@@ -164,7 +165,7 @@ object TdJsonBodies {
     s"""
       |"eligibilityCheckResult" : {
       |  "processingDateTime": "2022-03-23T13:49:51.141Z",
-      |  "identification": ${TdAll.identificationJsonString(taxRegime)},
+      |  "identification": ${TdAll.identificationJsonString(taxRegime, additionalIdentifiers = additionalIdentifiers)},
       |  "customerPostcodes": [
       |        {
       |          "addressPostcode": "${encryptString("AA11AA", encrypter)}",

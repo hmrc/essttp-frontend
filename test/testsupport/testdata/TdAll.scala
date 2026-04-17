@@ -245,42 +245,55 @@ object TdAll {
   def identification(taxRegime: TaxRegime): List[Identification] =
     Json.parse(identificationJsonString(taxRegime)).as[List[Identification]]
 
-  def identificationJsonString(taxRegime: TaxRegime): String = taxRegime match {
-    case TaxRegime.Epaye =>
-      """[
-        |    {
-        |      "idType": "EMPREF",
-        |      "idValue": "864FZ00049"
-        |    },
-        |    {
-        |      "idType": "BROCS",
-        |      "idValue": "123PA44545546"
-        |    }
-        |  ]""".stripMargin
+  def identificationJsonString(taxRegime: TaxRegime, additionalIdentifiers: Seq[Identification] = Seq.empty): String = {
+    val additionalIdentifiersJson =
+      if (additionalIdentifiers.isEmpty)
+        ""
+      else
+        additionalIdentifiers
+          .map(id => s"""{ "idType": "${id.idType.value}",  "idValue": "${id.idValue.value}" }""")
+          .mkString(",")
+          + ","
 
-    case TaxRegime.Vat =>
-      """[
-        |    {
-        |      "idType": "VRN",
-        |      "idValue": "101747001"
-        |    }
-        |  ]""".stripMargin
+    val identifiersJson = taxRegime match {
+      case TaxRegime.Epaye =>
+        """
+          |    {
+          |      "idType": "EMPREF",
+          |      "idValue": "864FZ00049"
+          |    },
+          |    {
+          |      "idType": "BROCS",
+          |      "idValue": "123PA44545546"
+          |    }
+          |""".stripMargin
 
-    case TaxRegime.Sa =>
-      """[
-        |    {
-        |      "idType": "UTR",
-        |      "idValue": "1234567895"
-        |    }
-        |  ]""".stripMargin
+      case TaxRegime.Vat =>
+        """
+          |    {
+          |      "idType": "VRN",
+          |      "idValue": "101747001"
+          |    }
+          | """.stripMargin
 
-    case TaxRegime.Simp =>
-      """[
-        |    {
-        |      "idType": "NINO",
-        |      "idValue": "QQ123456A"
-        |    }
-        |  ]""".stripMargin
+      case TaxRegime.Sa =>
+        """
+          |    {
+          |      "idType": "UTR",
+          |      "idValue": "1234567895"
+          |    }
+          |""".stripMargin
+
+      case TaxRegime.Simp =>
+        """
+          |    {
+          |      "idType": "NINO",
+          |      "idValue": "QQ123456A"
+          |    }
+          |""".stripMargin
+    }
+
+    s"[$additionalIdentifiersJson$identifiersJson]"
   }
 
   def taxDetailJsonString(taxRegime: TaxRegime): String = taxRegime match {

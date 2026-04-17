@@ -19,6 +19,7 @@ package testsupport.testdata
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Origin, Origins, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.bank.TypeOfBankAccount
 import essttp.rootmodel.CannotPayReason.{ChangeToPersonalCircumstances, NoMoneySetAside}
+import essttp.rootmodel.ttp.eligibility.Identification
 import essttp.rootmodel.{CannotPayReason, DayOfMonth}
 import paymentsEmailVerification.models.EmailVerificationResult
 import uk.gov.hmrc.crypto.Encrypter
@@ -566,7 +567,8 @@ object JourneyJsonTemplates {
     origin:                    Origin,
     etmpEmail:                 Option[String],
     withAffordability:         Boolean = false,
-    whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
+    whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired,
+    additionalIdentifiers:     Seq[Identification] = Seq.empty
   )(using encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo =
       if (isEmailAddresRequired) StageInfo.agreedTermsAndConditionsEmailAddressRequired
@@ -577,7 +579,8 @@ object JourneyJsonTemplates {
       encrypter,
       etmpEmail,
       withAffordability,
-      whyCannotPayInFullAnswers
+      whyCannotPayInFullAnswers,
+      additionalIdentifiers
     ),
     origin = origin
   )
@@ -631,11 +634,20 @@ object JourneyJsonTemplates {
       origin = origin
     )
 
-  def `Arrangement Submitted - with upfront payment and email`(email: String, origin: Origin)(using
-    encrypter: Encrypter
+  def `Arrangement Submitted - with upfront payment and email`(
+    email:                 String,
+    origin:                Origin,
+    additionalIdentifiers: Seq[Identification] = Seq.empty
+  )(using
+    encrypter:             Encrypter
   ): String = TdJsonBodies.createJourneyJson(
     stageInfo = StageInfo.submittedArrangement,
-    journeyInfo = JourneyInfo.submittedArrangementWithEmailParams(email, origin.taxRegime, encrypter),
+    journeyInfo = JourneyInfo.submittedArrangementWithEmailParams(
+      email,
+      origin.taxRegime,
+      encrypter,
+      additionalIdentifiers = additionalIdentifiers
+    ),
     origin = origin
   )
 

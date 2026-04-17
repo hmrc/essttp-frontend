@@ -383,6 +383,46 @@ class SubmitArrangementControllerSpec extends ItSpec {
         .verifyUpdateSubmitArrangementRequest(TdAll.journeyId, TdAll.arrangementResponse(taxRegime))
     }
 
+    "should not send an extra NINO for SA if a NINO already exists in the eligibility response" in {
+      val (taxRegime, origin) = TaxRegime.Sa -> Origins.Sa.Bta
+
+      val additionalIdentifier = Identification(IdType("NINO"), IdValue("AB123456C"))
+
+      stubCommonActions(authNino = Some("AB123456C"))
+      EssttpBackend.TermsAndConditions
+        .findJourney(
+          isEmailAddressRequired = false,
+          testCrypto,
+          origin,
+          etmpEmail = Some(TdAll.etmpEmail),
+          additionalIdentifiers = Seq(additionalIdentifier)
+        )()
+
+      EssttpBackend.SubmitArrangement.stubUpdateSubmitArrangement(
+        TdAll.journeyId,
+        JourneyJsonTemplates
+          .`Arrangement Submitted - with upfront payment and email`(
+            "bobross@joyofpainting.com",
+            origin,
+            additionalIdentifiers = Seq(additionalIdentifier)
+          )
+      )
+      Ttp.EnactArrangement.stubEnactArrangement(taxRegime)()
+
+      val result: Future[Result] = controller.submitArrangement(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+
+      redirectLocation(result) shouldBe Some(PageUrls.saConfirmationUrl)
+
+      Ttp.EnactArrangement.verifyTtpEnactArrangementRequest(
+        TdAll.customerDetail(TdAll.etmpEmail, EmailSource.ETMP),
+        TdAll.contactDetails(TdAll.etmpEmail, EmailSource.ETMP),
+        TdAll.someRegimeDigitalCorrespondenceTrue,
+        taxRegime,
+        additionalIdentification = Some(additionalIdentifier)
+      )(using CryptoFormat.NoOpCryptoFormat)
+    }
+
     "should not update backend if call to ttp enact arrangement api fails (anything other than a 202 response)" in {
       stubCommonActions()
       EssttpBackend.TermsAndConditions.findJourney(
