@@ -30,7 +30,7 @@ import essttp.rootmodel.pega.{GetCaseResponse, StartCaseResponse}
 import essttp.rootmodel.ttp.affordability.InstalmentAmounts
 import essttp.rootmodel.ttp.affordablequotes.{AffordableQuotesResponse, PaymentPlan}
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
-import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
+import essttp.rootmodel.ttp.eligibility.{EligibilityCheckResult, Identification}
 import paymentsEmailVerification.models.EmailVerificationResult
 import play.api.http.Status.*
 import play.api.libs.json.{Format, JsValue, Json}
@@ -758,14 +758,16 @@ object EssttpBackend {
       origin:                    Origin,
       etmpEmail:                 Option[String],
       withAffordability:         Boolean = false,
-      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
+      whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired,
+      additionalIdentifiers:     Seq[Identification] = Seq.empty
     )(
       jsonBody:                  String = JourneyJsonTemplates.`Agreed Terms and Conditions`(
         isEmailAddressRequired,
         origin,
         etmpEmail,
         withAffordability,
-        whyCannotPayInFullAnswers
+        whyCannotPayInFullAnswers,
+        additionalIdentifiers = additionalIdentifiers
       )(using encrypter)
     ): StubMapping =
       findByLatestSessionId(jsonBody)
