@@ -111,7 +111,8 @@ class LandingPageControllerSpec extends ItSpec {
 
       val insetText = doc.select(".govuk-inset-text").asScala.toList
       insetText.size shouldBe 1
-      insetText(0).text() shouldBe "To avoid or pay less interest, you can pay your bill in full now."
+      insetText(0)
+        .text() shouldBe "To avoid or pay less interest, you can pay your bill in full (opens in a new tab) now."
 
       val insetTextLink = doc.select("p.govuk-inset-text a").first()
       insetTextLink.attr("href") shouldBe "https://tax.service.gov.uk/business-account/epaye/overdue-payments"
@@ -235,7 +236,8 @@ class LandingPageControllerSpec extends ItSpec {
 
       val insetText = doc.select(".govuk-inset-text").asScala.toList
       insetText.size shouldBe 1
-      insetText(0).text() shouldBe "To avoid or pay less interest, you can pay your bill in full now."
+      insetText(0)
+        .text() shouldBe "To avoid or pay less interest, you can pay your bill in full (opens in a new tab) now."
 
       val insetTextLink = doc.select("p.govuk-inset-text a").first()
       insetTextLink.attr("href") shouldBe "https://tax.service.gov.uk/vat-through-software/what-you-owe"
@@ -371,7 +373,7 @@ class LandingPageControllerSpec extends ItSpec {
 
       doc
         .select(".govuk-inset-text")
-        .text() shouldBe "To avoid or pay less interest, you can pay your bill in full now."
+        .text() shouldBe "To avoid or pay less interest, you can pay your bill in full (opens in a new tab) now."
 
       val insetTextLink = doc.select("p.govuk-inset-text a").first()
       insetTextLink.attr("href") shouldBe "https://www.tax.service.gov.uk/pay/self-assessment/start-journey"
@@ -497,10 +499,10 @@ class LandingPageControllerSpec extends ItSpec {
       secondListBullets(0).text() shouldBe "part of the payment upfront and part in monthly instalments"
       secondListBullets(1).text() shouldBe "monthly instalments only"
 
-      paragraphs(3).text() shouldBe "Alternatively, you can pay your bill in full now."
+      paragraphs(3).text() shouldBe "Alternatively, you can pay your bill in full (opens in a new tab) now."
 
       val payInFullLink = paragraphs(3).select("a.govuk-link")
-      payInFullLink.text shouldBe "pay your bill in full"
+      payInFullLink.text shouldBe "pay your bill in full (opens in a new tab)"
       payInFullLink.attr("href") shouldBe "https://www.gov.uk/simple-assessment/pay-online"
 
       val button = doc.select(".govuk-button")
