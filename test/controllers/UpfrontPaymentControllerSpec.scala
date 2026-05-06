@@ -249,10 +249,9 @@ class UpfrontPaymentControllerSpec extends ItSpec, UnchangedFromCYALinkAssertion
         poundSymbol.size() shouldBe 1
         poundSymbol.text() shouldBe "£"
 
-        val hint           = doc.select(".govuk-hint")
-        val hintParagraphs = hint.select("p.govuk-body").asScala.toList
-        hintParagraphs.size shouldBe 1
-        hintParagraphs(0).text shouldBe "Enter an amount between £1 and £1,499"
+        val hint = doc.select(".govuk-hint")
+        hint.size shouldBe 1
+        hint.text shouldBe "Enter an amount between £1 and £1,499"
       }
 
       s"[$regime journey] should route the user to /retrieve-extreme-dates when they try to force browse without selecting 'Yes' on the previous page" in {
