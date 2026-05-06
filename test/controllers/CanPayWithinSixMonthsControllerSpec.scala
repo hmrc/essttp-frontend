@@ -249,7 +249,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec, PegaRecreateSessionAss
 
           status(result) shouldBe OK
 
-          val pageH1 = pageContentAsDoc(result).getElementsByClass("govuk-heading-xl").text()
+          val pageH1 = pageContentAsDoc(result).getElementsByClass("govuk-heading-l").text()
           pageH1 shouldBe "Paying within 6 months"
 
           EssttpBackend.verifyFindByLatestSessionId()

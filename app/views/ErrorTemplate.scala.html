@@ -22,6 +22,6 @@
 @(pageTitle: String, heading: String, message: String)(implicit request: RequestHeader)
 
 @layout(pageTitle = Some(pageTitle), showBackLink = false) {
-  <h1 class="govuk-heading-xl">@{Text(heading).asHtml}</h1>
+  <h1 class="govuk-heading-l">@{Text(heading).asHtml}</h1>
   <p class="govuk-body">@{Text(message).asHtml}</p>
 }

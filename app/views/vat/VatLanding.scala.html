@@ -45,7 +45,7 @@
     fallBackTaxRegime = Some(TaxRegime.Vat),
     showServiceNameInHeader = false
 ) {
-    <h1 class="govuk-heading-xl">@title</h1>
+    <h1 class="govuk-heading-l">@title</h1>
     <p class="govuk-body">@{Messages.Vat.`Use this service to set up a payment plan..`(appConfig.PolicyParameters.InterestRates.hmrcRate).show}</p>
 
     <p class="govuk-inset-text">@{Html(Messages.Vat.`To avoid or pay less interest, you can pay your bill in full now.`(appConfig.PolicyParameters.VAT.payOnlineLink).show)}</p>
