@@ -15,7 +15,7 @@
  *@
 
 @import controllers.routes
-@import essttp.rootmodel.AmountInPence
+@import essttp.rootmodel.{AmountInPence, TaxRegime}
 @import messages.Messages
 @import models.enumsforforms.CanPayWithinSixMonthsFormValue
 @import play.api.data.Form
@@ -32,7 +32,7 @@ govukErrorSummary: GovukErrorSummary,
 requestSupport: RequestSupport
 )
 
-@(form: Form[CanPayWithinSixMonthsFormValue], remainingAmountToPay: AmountInPence)(implicit request: Request[?])
+@(form: Form[CanPayWithinSixMonthsFormValue], remainingAmountToPay: AmountInPence, regime: TaxRegime)(implicit request: Request[?])
 
 @import requestSupport.{languageFromRequest, legacyMessages}
 
@@ -76,7 +76,7 @@ requestSupport: RequestSupport
         </div>
     </dl>
 
-    @formWithCSRF(action = routes.CanPayWithinSixMonthsController.canPayWithinSixMonthsSubmit) {
+    @formWithCSRF(action = routes.CanPayWithinSixMonthsController.canPayWithinSixMonthsSubmit(regime)) {
         @govukRadios(Radios(
             fieldset = Some(Fieldset(
                 legend = Some(Legend(
