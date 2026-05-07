@@ -73,7 +73,7 @@ class CanPayWithinSixMonthsController @Inject() (
                       CanPayWithinSixMonthsFormValue.canPayWithinSixMonthsToFormValue(value)
                     )
                   )
-                  Ok(views.canPayWithinSixMonthsPage(form, remainingAmountToPay(j)))
+                  Ok(views.canPayWithinSixMonthsPage(form, remainingAmountToPay(j), regime))
                 }
               )
           }
@@ -92,33 +92,35 @@ class CanPayWithinSixMonthsController @Inject() (
       }
     }
 
-  val canPayWithinSixMonthsSubmit: Action[AnyContent] = as.authenticatedJourneyAction.async { implicit request =>
-    CanPayWithinSixMonthsForm.form
-      .bindFromRequest()
-      .fold(
-        formWithErrors => Ok(views.canPayWithinSixMonthsPage(formWithErrors, remainingAmountToPay(request.journey))),
-        { canPayFormValue =>
-          val canPay         = canPayFormValue.asCanPayWithinSixMonths
-          val valueUnchanged = existingAnswersInJourney(request.journey).exists(_.value == canPay.value)
+  def canPayWithinSixMonthsSubmit(@unused regime: TaxRegime): Action[AnyContent] =
+    as.authenticatedJourneyAction.async { implicit request =>
+      CanPayWithinSixMonthsForm.form
+        .bindFromRequest()
+        .fold(
+          formWithErrors =>
+            Ok(views.canPayWithinSixMonthsPage(formWithErrors, remainingAmountToPay(request.journey), regime)),
+          { canPayFormValue =>
+            val canPay         = canPayFormValue.asCanPayWithinSixMonths
+            val valueUnchanged = existingAnswersInJourney(request.journey).exists(_.value == canPay.value)
 
-          if (canPay.value)
-            auditService.auditCanUserPayInSixMonths(request.journey, canPay, maybeStartCaseResponse = None)
+            if (canPay.value)
+              auditService.auditCanUserPayInSixMonths(request.journey, canPay, maybeStartCaseResponse = None)
 
-          journeyConnector
-            .updateCanPayWithinSixMonthsAnswers(
-              request.journeyId,
-              canPay
-            )
-            .map(updatedJourney =>
-              Routing.redirectToNext(
-                routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(request.journey.taxRegime, None),
-                updatedJourney,
-                valueUnchanged
+            journeyConnector
+              .updateCanPayWithinSixMonthsAnswers(
+                request.journeyId,
+                canPay
               )
-            )
-        }
-      )
-  }
+              .map(updatedJourney =>
+                Routing.redirectToNext(
+                  routes.CanPayWithinSixMonthsController.canPayWithinSixMonths(request.journey.taxRegime, None),
+                  updatedJourney,
+                  valueUnchanged
+                )
+              )
+          }
+        )
+    }
 
   private def existingAnswersInJourney(journey: Journey): Option[CanPayWithinSixMonths] = journey match {
     case _: JourneyStage.BeforeCanPayWithinSixMonthsAnswers => None

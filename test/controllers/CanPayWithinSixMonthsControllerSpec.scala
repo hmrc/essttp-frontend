@@ -45,7 +45,11 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec, PegaRecreateSessionAss
 
   "GET /paying-within-six-months should" - {
 
-    def testPageIsDisplayed(result: Future[Result], expectedPreselectedOption: Option[Boolean]): Unit = {
+    def testPageIsDisplayed(
+      result:                    Future[Result],
+      expectedPreselectedOption: Option[Boolean],
+      regime:                    TaxRegime
+    ): Unit = {
       RequestAssertions.assertGetRequestOk(result)
 
       val doc = Jsoup.parse(contentAsString(result))
@@ -54,7 +58,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec, PegaRecreateSessionAss
         doc,
         "Paying within 6 months",
         shouldBackLinkBePresent = true,
-        expectedSubmitUrl = Some(routes.CanPayWithinSixMonthsController.canPayWithinSixMonthsSubmit.url)
+        expectedSubmitUrl = Some(routes.CanPayWithinSixMonthsController.canPayWithinSixMonthsSubmit(regime).url)
       )
 
       doc
@@ -99,7 +103,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec, PegaRecreateSessionAss
       EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, Origins.Epaye.Bta)()
 
       val result = controller.canPayWithinSixMonths(Epaye, None)(fakeRequest)
-      testPageIsDisplayed(result, None)
+      testPageIsDisplayed(result, None, TaxRegime.Epaye)
     }
 
     "display the page when 'yes' has been previously selected" in {
@@ -109,7 +113,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec, PegaRecreateSessionAss
       )
 
       val result = controller.canPayWithinSixMonths(Epaye, None)(fakeRequest)
-      testPageIsDisplayed(result, Some(true))
+      testPageIsDisplayed(result, Some(true), TaxRegime.Epaye)
     }
 
     "display the page when 'no' has been previously selected" in {
@@ -119,7 +123,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec, PegaRecreateSessionAss
       )
 
       val result = controller.canPayWithinSixMonths(Epaye, None)(fakeRequest)
-      testPageIsDisplayed(result, Some(false))
+      testPageIsDisplayed(result, Some(false), TaxRegime.Epaye)
     }
 
     "change the language cookie to english if lang=en is supplied as a query parameter" in {
@@ -178,7 +182,8 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec, PegaRecreateSessionAss
         doc,
         "Talu cyn pen 6 mis",
         shouldBackLinkBePresent = true,
-        expectedSubmitUrl = Some(routes.CanPayWithinSixMonthsController.canPayWithinSixMonthsSubmit.url),
+        expectedSubmitUrl =
+          Some(routes.CanPayWithinSixMonthsController.canPayWithinSixMonthsSubmit(TaxRegime.Epaye).url),
         language = Welsh
       )
 
@@ -267,14 +272,15 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec, PegaRecreateSessionAss
         EssttpBackend.Dates.findJourneyExtremeDates(testCrypto, Origins.Epaye.Bta)()
 
         val request = fakeRequest.withFormUrlEncodedBody(formData*).withMethod("POST")
-        val result  = controller.canPayWithinSixMonthsSubmit(request)
+        val result  = controller.canPayWithinSixMonthsSubmit(TaxRegime.Epaye)(request)
         val doc     = Jsoup.parse(contentAsString(result))
 
         ContentAssertions.commonPageChecks(
           doc,
           "Paying within 6 months",
           shouldBackLinkBePresent = true,
-          expectedSubmitUrl = Some(routes.CanPayWithinSixMonthsController.canPayWithinSixMonthsSubmit.url),
+          expectedSubmitUrl =
+            Some(routes.CanPayWithinSixMonthsController.canPayWithinSixMonthsSubmit(TaxRegime.Epaye).url),
           hasFormError = true
         )
 
@@ -303,7 +309,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec, PegaRecreateSessionAss
       )
 
       val request = fakeRequest.withFormUrlEncodedBody("CanPayWithinSixMonths" -> "Yes").withMethod("POST")
-      val result  = controller.canPayWithinSixMonthsSubmit(request)
+      val result  = controller.canPayWithinSixMonthsSubmit(TaxRegime.Epaye)(request)
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.MonthlyPaymentAmountController.displayMonthlyPaymentAmount.url)
 
@@ -344,7 +350,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec, PegaRecreateSessionAss
       )
 
       val request = fakeRequest.withFormUrlEncodedBody("CanPayWithinSixMonths" -> "No").withMethod("POST")
-      val result  = controller.canPayWithinSixMonthsSubmit(request)
+      val result  = controller.canPayWithinSixMonthsSubmit(TaxRegime.Epaye)(request)
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.PegaController.startPegaJourney.url)
 
@@ -369,7 +375,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec, PegaRecreateSessionAss
       )
 
       val request = fakeRequest.withFormUrlEncodedBody("CanPayWithinSixMonths" -> "No").withMethod("POST")
-      val result  = controller.canPayWithinSixMonthsSubmit(request)
+      val result  = controller.canPayWithinSixMonthsSubmit(TaxRegime.Epaye)(request)
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/test-only/pega/start?regime=epaye")
 
