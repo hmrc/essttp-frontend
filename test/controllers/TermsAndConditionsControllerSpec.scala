@@ -124,7 +124,7 @@ class TermsAndConditionsControllerSpec extends ItSpec {
           )
         )
 
-        doc.select(".govuk-button").text() shouldBe "Agree and continue"
+        doc.select(".govuk-button").text() shouldBe "Agree and send"
 
         extraContentChecks(doc)
       }
@@ -239,7 +239,7 @@ class TermsAndConditionsControllerSpec extends ItSpec {
           )
         )
 
-        doc.select(".govuk-button").text() shouldBe "Cytuno ac yn eich blaen"
+        doc.select(".govuk-button").text() shouldBe "Derbyn ac anfon"
 
         extraContentChecks(doc)
       }
