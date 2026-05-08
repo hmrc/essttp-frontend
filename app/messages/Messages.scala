@@ -2314,9 +2314,9 @@ object Messages {
         "Cytunaf â thelerau ac amodau’r cynllun talu hwn. Cadarnhaf mai dyma’r cynharaf y gallaf setlo’r ddyled hon."
     )
 
-    val `Agree and continue`: Message = Message(
-      english = "Agree and continue",
-      welsh = "Cytuno ac yn eich blaen"
+    val `Agree and send`: Message = Message(
+      english = "Agree and send",
+      welsh = "Derbyn ac anfon"
     )
   }
 
