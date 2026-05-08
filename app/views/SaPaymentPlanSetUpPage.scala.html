@@ -63,7 +63,13 @@
     appConfig.Urls.personalTaxAccountUrl
 }
 
-@layout(pageTitle = Some(title), showBackLink = false, showUserResearchBanner = wasAffordabilityJourney) {
+@urBannerLink = @{
+    if(wasAffordabilityJourney && appConfig.affordabilityUserResearchBannerEnabled) Some(appConfig.Urls.affordabilityUserResearchBannerLink)
+    else None
+}
+
+
+@layout(pageTitle = Some(title), showBackLink = false, urBannerLink = urBannerLink) {
     @govukPanel(Panel(
         headingLevel = 1,
         title = Text(title),

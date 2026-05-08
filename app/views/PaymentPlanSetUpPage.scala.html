@@ -71,7 +71,17 @@
     }
 }
 
-@layout(pageTitle = Some(title), showBackLink = false, showUserResearchBanner = wasAffordabilityJourney) {
+@urBannerLink = @{
+  if(taxRegime == TaxRegime.Simp && appConfig.simpUserResearchBannerEnabled) {
+    Some(appConfig.Urls.simpUserResearchBannerLink)
+  } else if(wasAffordabilityJourney && appConfig.affordabilityUserResearchBannerEnabled) {
+    Some(appConfig.Urls.affordabilityUserResearchBannerLink)
+  } else {
+    None
+  }
+}
+
+@layout(pageTitle = Some(title), showBackLink = false, urBannerLink = urBannerLink) {
     @govukPanel(Panel(
         headingLevel = 1,
         title = Text(title),

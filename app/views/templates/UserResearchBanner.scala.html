@@ -14,14 +14,13 @@
  * limitations under the License.
  *@
 
-@import config.AppConfig
 @import messages.Messages
 @import play.api.mvc.RequestHeader
 @import requests.RequestSupport
 
-@this(appConfig: AppConfig, requestSupport: RequestSupport)
+@this(requestSupport: RequestSupport)
 
-@()(implicit request: RequestHeader)
+@(link: String)(implicit request: RequestHeader)
 
 @import requestSupport.languageFromRequest
 
@@ -31,7 +30,7 @@
             <h2 class="govuk-heading-s hmrc-user-research-banner__title">
                 @{Messages.UserResearchBanner.`Tell us what you think about this service`.show}
             </h2>
-            <a class="govuk-link hmrc-user-research-banner__link" target="_blank" rel="noopener noreferrer" href="@{appConfig.Urls.userResearchBannerLink}">
+            <a class="govuk-link hmrc-user-research-banner__link" target="_blank" rel="noopener noreferrer" href="@link">
             @{Messages.UserResearchBanner.`Complete our short survey (opens in new tab)`.show}
             </a>
         </div>
