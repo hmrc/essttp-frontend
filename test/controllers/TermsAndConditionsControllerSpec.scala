@@ -124,7 +124,7 @@ class TermsAndConditionsControllerSpec extends ItSpec {
           )
         )
 
-        doc.select(".govuk-button").text() shouldBe "Agree and send"
+        doc.select(".govuk-button").text() shouldBe "Accept and send"
 
         extraContentChecks(doc)
       }
