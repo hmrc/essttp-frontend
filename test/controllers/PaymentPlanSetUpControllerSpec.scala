@@ -35,7 +35,7 @@ import scala.jdk.CollectionConverters.IterableHasAsScala
 
 class PaymentPlanSetUpControllerWithResearchBannerSpec extends ItSpec {
 
-  override lazy val configOverrides: Map[String, Boolean] = Map("features.user-research-banner-enabled" -> true)
+  override lazy val configOverrides: Map[String, Boolean] = Map("features.user-research-banner.affordability" -> true)
   private val controller: PaymentPlanSetUpController      = app.injector.instanceOf[PaymentPlanSetUpController]
   private val expectedH1PaymentPlanSetUpPage: String      = "Your payment plan is set up"
   private val expectedH1PaymentPlanPrintPage: String      = "Your payment plan"
@@ -775,7 +775,7 @@ class PaymentPlanSetUpControllerEmailDisabledSpec extends ItSpec {
 
 class PaymentPlanSetUpControllerNoResearchBannerSpec extends ItSpec {
 
-  override lazy val configOverrides: Map[String, Boolean] = Map("features.user-research-banner-enabled" -> false)
+  override lazy val configOverrides: Map[String, Boolean] = Map("features.user-research-banner.affordability" -> false)
   private val controller: PaymentPlanSetUpController      = app.injector.instanceOf[PaymentPlanSetUpController]
 
   def testUserResearchBannerIsPresent(doc: Document): Unit = {

@@ -43,7 +43,9 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   given eligibilityReqIdentificationFlag: EligibilityReqIdentificationFlag = EligibilityReqIdentificationFlag(
     config.get[Boolean]("features.eligibilityReqIdentificationFlag")
   )
-  val userResearchBannerEnabled: Boolean                                   = config.get[Boolean]("features.user-research-banner-enabled")
+  val affordabilityUserResearchBannerEnabled: Boolean                      =
+    config.get[Boolean]("features.user-research-banner.affordability")
+  val simpUserResearchBannerEnabled: Boolean                               = config.get[Boolean]("features.user-research-banner.affordability")
   val internalAuthToken: String                                            = config.get[String]("internal-auth.token")
 
   object BaseUrl {
@@ -95,7 +97,8 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     }
     val fileSaReturnUrl: String                        = config.get[String]("govUkUrls.fileSaReturnUrl")
     val tellHMRCChangeDetailsUrl: String               = config.get[String]("govUkUrls.changeDetails")
-    val userResearchBannerLink: String                 = config.get[String]("govUkUrls.userResearchBannerLink")
+    val affordabilityUserResearchBannerLink: String    =
+      config.get[String]("govUkUrls.affordabilityUserResearchBannerLink")
     val signOutUrl: String                             = {
       val basGatewayBaseUrl = BaseUrl.platformHost.getOrElse(config.get[String]("baseUrl.bas-gateway-frontend"))
       s"$basGatewayBaseUrl/bas-gateway/sign-out-without-state"
