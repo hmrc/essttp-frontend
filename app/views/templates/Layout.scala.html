@@ -52,7 +52,7 @@
   showSignOutOverride: Option[Boolean] = None,
   fallBackTaxRegime: Option[TaxRegime] = None,
   showServiceNameInHeader: Boolean = true,
-  showAffordabilityUserResearchBanner: Boolean = false
+  urBannerLink: Option[String] = None
 )(
   contentBlock: Html)(implicit
   request: RequestHeader
@@ -95,9 +95,7 @@
         content = HtmlContent(Messages.ServicePhase.bannerText(appConfig.Urls.betaFeedbackUrl(using request)).show)
     ))
 
-    @if(appConfig.affordabilityUserResearchBannerEnabled && showAffordabilityUserResearchBanner) {
-      @userResearchBanner(appConfig.Urls.affordabilityUserResearchBannerLink)
-    }
+    @urBannerLink.map(userResearchBanner(_))
 
     @if(showBackLink) {
         @backLinkUrlOverride.fold(
