@@ -16,10 +16,14 @@
 
 package error
 
+import essttp.journey.model.Origins
 import org.jsoup.Jsoup
-import play.api.mvc.Request
+import play.api.mvc.{CookieHeaderEncoding, Request, Session, SessionCookieBaker}
 import play.api.test.FakeRequest
 import testsupport.ItSpec
+import testsupport.stubs.EssttpBackend
+import uk.gov.hmrc.crypto.PlainText
+import uk.gov.hmrc.play.bootstrap.frontend.filters.crypto.SessionCookieCrypto
 
 class ErrorHandlerSpec extends ItSpec {
 
@@ -33,6 +37,32 @@ class ErrorHandlerSpec extends ItSpec {
 
         val doc = Jsoup.parse(html.body)
         doc.select(".govuk-back-link").isEmpty shouldBe true
+        doc.select("span.govuk-service-navigation__service-name").text shouldBe "Set up a payment plan"
+      }
+    }
+
+    "must include the correct service name if a tax regime can be found from a journey" in {
+      val sessionCookieCrypto  = app.injector.instanceOf[SessionCookieCrypto]
+      val cookieBaker          = app.injector.instanceOf[SessionCookieBaker]
+      val cookieHeaderEncoding = app.injector.instanceOf[CookieHeaderEncoding]
+
+      val cookie          = cookieBaker.encodeAsCookie(
+        Session(Map("authToken" -> "Bearer 123", "sessionId" -> "session-ff5d52ad-f14c-4c72-b553-f197633a91ad"))
+      )
+      val encryptedCookie = cookie.copy(value = sessionCookieCrypto.crypto.encrypt(PlainText(cookie.value)).value)
+
+      given Request[?] =
+        FakeRequest().withHeaders("Cookie" -> cookieHeaderEncoding.encodeCookieHeader(Seq(encryptedCookie)))
+
+      stubCommonActions()
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Simp.Pta)()
+
+      whenReady(errorHandler.standardErrorTemplate("title", "heading", "message")) { html =>
+        val doc = Jsoup.parse(html.body)
+        doc.select(".govuk-back-link").isEmpty shouldBe true
+        doc
+          .select("span.govuk-service-navigation__service-name")
+          .text shouldBe "Set up a Simple Assessment payment plan"
       }
     }
   }

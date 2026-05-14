@@ -15,13 +15,14 @@
  *@
 
 @import play.api.mvc.RequestHeader
+@import essttp.rootmodel.TaxRegime
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(layout: templates.Layout)
 
-@(pageTitle: String, heading: String, message: String)(implicit request: RequestHeader)
+@(pageTitle: String, heading: String, message: String, taxRegime: Option[TaxRegime])(implicit request: RequestHeader)
 
-@layout(pageTitle = Some(pageTitle), showBackLink = false) {
+@layout(pageTitle = Some(pageTitle), showBackLink = false, fallBackTaxRegime = taxRegime) {
   <h1 class="govuk-heading-l">@{Text(heading).asHtml}</h1>
   <p class="govuk-body">@{Text(message).asHtml}</p>
 }
