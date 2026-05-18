@@ -1468,8 +1468,7 @@ object Messages {
         case "error.pattern" =>
           Message(
             english = "How much you can pay upfront can only include pounds and pence, like £600 or £600.50",
-            welsh =
-              "Mae’n rhaid i’r hyn y gallwch ei dalu ymlaen llaw gynnwys punnoedd a cheiniogau yn unig, fel £600 neu £600.50"
+            welsh = "Mae’n rhaid i’r hyn y gallwch ei dalu ymlaen llaw gynnwys punnoedd a cheiniogau yn unig, fel £600 neu £600.50"
           )
 
         case "error.tooSmall" => outOfBoundsMessage
