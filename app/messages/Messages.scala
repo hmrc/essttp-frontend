@@ -939,8 +939,8 @@ object Messages {
     )
 
     val `Select all that apply or 'none of these'` : Message = Message(
-      english = "Select all that apply or ‘None of these’",
-      welsh = "Dewiswch bob un sy’n berthnasol neu ‘Dim un o’r rhain’"
+      english = "Select why you are unable to pay in full, or select ‘None of these’",
+      welsh = "Dewiswch y rheswm pam na allwch dalu’r swm llawn, neu dewiswch ‘Dim un o’r rhain’"
     )
 
     def checkboxMessageWithHint(cannotPayReason: CannotPayReason): (Message, Option[Message]) = cannotPayReason match {
@@ -1467,8 +1467,8 @@ object Messages {
 
         case "error.pattern" =>
           Message(
-            english = "How much you can pay upfront must be an amount of money",
-            welsh = "Mae’n rhaid i’r hyn y gallwch ei dalu ymlaen llaw fod yn swm o arian"
+            english = "How much you can pay upfront can only include pounds and pence, like £600 or £600.50",
+            welsh = "Mae’n rhaid i’r hyn y gallwch ei dalu ymlaen llaw gynnwys punnoedd a cheiniogau yn unig, fel £600 neu £600.50"
           )
 
         case "error.tooSmall" => outOfBoundsMessage

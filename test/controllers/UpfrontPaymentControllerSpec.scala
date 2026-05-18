@@ -374,10 +374,10 @@ class UpfrontPaymentControllerSpec extends ItSpec, UnchangedFromCYALinkAssertion
           ("x < 1", "0.99", "Your upfront payment must be between £1 and £1,499"),
           ("x < 0", "-1", "Your upfront payment must be between £1 and £1,499"),
           ("x = 0", "0", "Your upfront payment must be between £1 and £1,499"),
-          ("x = NaN", "one", "How much you can pay upfront must be an amount of money"),
+          ("x = NaN", "one", "How much you can pay upfront can only include pounds and pence, like £600 or £600.50"),
           ("x = null", "", "Enter your upfront payment"),
-          ("scientific notation", "1e2", "How much you can pay upfront must be an amount of money"),
-          ("more than one decimal place", "1.123", "How much you can pay upfront must be an amount of money")
+          ("scientific notation", "1e2", "How much you can pay upfront can only include pounds and pence, like £600 or £600.50"),
+          ("more than one decimal place", "1.123", "How much you can pay upfront can only include pounds and pence, like £600 or £600.50")
         )
       ) { (sf: String, formInput: String, errorMessage: String) =>
         s"[$regime journey][$sf] should redirect to /how-much-can-you-pay-upfront with correct error summary when $formInput is submitted" in {

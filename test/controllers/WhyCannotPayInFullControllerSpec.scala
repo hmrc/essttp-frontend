@@ -188,16 +188,16 @@ class WhyCannotPayInFullControllerSpec extends ItSpec, UnchangedFromCYALinkAsser
       }
 
       "nothing is submitted" in {
-        testFormError()("Select all that apply or ‘None of these’")
+        testFormError()("Select why you are unable to pay in full, or select ‘None of these’")
       }
 
       "an unrecognised option is submitted" in {
-        testFormError("WhyCannotPayInFull[]" -> "Unknown")("Select all that apply or ‘None of these’")
+        testFormError("WhyCannotPayInFull[]" -> "Unknown")("Select why you are unable to pay in full, or select ‘None of these’")
       }
 
       "more than one reason is selected and 'None of these' is selected" in {
         testFormError("WhyCannotPayInFull[]" -> "Other", "WhyCannotPayInFull[]" -> "NoMoneySetAside")(
-          "Select all that apply or ‘None of these’"
+          "Select why you are unable to pay in full, or select ‘None of these’"
         )(expectedChecked = TdAll.whyCannotPayReasonsError)
       }
 
