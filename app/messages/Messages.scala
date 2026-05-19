@@ -1468,7 +1468,8 @@ object Messages {
         case "error.pattern" =>
           Message(
             english = "How much you can pay upfront can only include pounds and pence, like £600 or £600.50",
-            welsh = "Mae’n rhaid i’r hyn y gallwch ei dalu ymlaen llaw gynnwys punnoedd a cheiniogau yn unig, fel £600 neu £600.50"
+            welsh =
+              "Mae’n rhaid i’r hyn y gallwch ei dalu ymlaen llaw gynnwys punnoedd a cheiniogau yn unig, fel £600 neu £600.50"
           )
 
         case "error.tooSmall" => outOfBoundsMessage
@@ -1763,6 +1764,11 @@ object Messages {
     val `Check your payment plan`: Message = Message(
       english = "Check your payment plan",
       welsh = "Gwirio’ch cynllun talu"
+    )
+
+    val `What you can afford to pay`: Message = Message(
+      english = "What you can afford to pay",
+      welsh = "Yr hyn y gallwch fforddio ei dalu"
     )
 
     val `why you are unable to pay in full`: Message = Message(

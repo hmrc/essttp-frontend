@@ -374,6 +374,12 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
           val summaries = doc.select(".govuk-summary-list").iterator().asScala.toList
           summaries.size shouldBe 3
 
+          val whatCanAffordHeading = summaries(0).previousElementSibling()
+          whatCanAffordHeading.tagName() shouldBe "h2"
+          whatCanAffordHeading.className() shouldBe "govuk-heading-m"
+          whatCanAffordHeading.text() shouldBe lang.fold("What you can afford to pay", "Yr hyn y gallwch fforddio ei dalu")
+
+
           testUpfrontPaymentSummaryRows(summaries(0))(
             canPayUpfrontValue,
             upfrontPaymentAmountValue,
@@ -385,7 +391,17 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             lang
           )
 
+          val paymentsHeading = summaries(1).previousElementSibling()
+          paymentsHeading.tagName() shouldBe "h2"
+          paymentsHeading.className() shouldBe "govuk-heading-m"
+          paymentsHeading.text() shouldBe lang.fold("Monthly payments", "Taliadau misol")
+
           testMonthlyPaymentsRows(summaries(1))("£300", paymentDayValue, lang)
+
+          val instalmentsHeading = summaries(2).previousElementSibling()
+          instalmentsHeading.tagName() shouldBe "h2"
+          instalmentsHeading.className() shouldBe "govuk-heading-m"
+          instalmentsHeading.text() shouldBe lang.fold("Payment plan instalments", "Cynllun talu ar ffurf rhandaliadau")
 
           testPaymentPlanRows(summaries(2))(
             datesToAmountsValues,

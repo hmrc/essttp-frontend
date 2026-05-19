@@ -119,6 +119,10 @@
     @title
   </h1>
 
+<h2 class="govuk-heading-m">
+  @{Messages.PaymentSchedule.`What you can afford to pay`.show}
+</h2>
+
   @govukSummaryList(
     SummaryList(
       rows = whyCannotPayInFullRow.toList ::: upfrontPaymentRows ::: canPayWithinSixMonthsRow.toList,
