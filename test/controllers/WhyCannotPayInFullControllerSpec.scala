@@ -192,7 +192,9 @@ class WhyCannotPayInFullControllerSpec extends ItSpec, UnchangedFromCYALinkAsser
       }
 
       "an unrecognised option is submitted" in {
-        testFormError("WhyCannotPayInFull[]" -> "Unknown")("Select why you are unable to pay in full, or select ‘None of these’")
+        testFormError("WhyCannotPayInFull[]" -> "Unknown")(
+          "Select why you are unable to pay in full, or select ‘None of these’"
+        )
       }
 
       "more than one reason is selected and 'None of these' is selected" in {
