@@ -58,7 +58,7 @@ object CheckPaymentScheduleRows {
     whyCannotPayInFullReasons.map { reasons =>
       SummaryListRow(
         key = Key(
-          content = HtmlContent(Html(Messages.WhyCannotPayInFull.`Why are you unable to pay in full?`.show)),
+          content = HtmlContent(Html(Messages.WhyCannotPayInFull.`Tell us why you cannot pay in full`.show)),
           classes = "govuk-!-width-one-half"
         ),
         value = Value(

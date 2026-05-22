@@ -45,7 +45,7 @@ class WhyCannotPayInFullControllerSpec extends ItSpec, UnchangedFromCYALinkAsser
 
       ContentAssertions.commonPageChecks(
         doc,
-        "Why are you unable to pay in full?",
+        "Tell us why you cannot pay in full",
         shouldBackLinkBePresent = true,
         expectedSubmitUrl = Some(routes.WhyCannotPayInFullController.whyCannotPayInFullSubmit.url)
       )
@@ -69,13 +69,13 @@ class WhyCannotPayInFullControllerSpec extends ItSpec, UnchangedFromCYALinkAsser
         CheckBoxInfo(
           "UnexpectedReductionOfIncome",
           "Unexpected reduction of income",
-          "For example, lost or reduced business or unemployment.",
+          "",
           ""
         ),
         CheckBoxInfo(
           "UnexpectedIncreaseInSpending",
           "Unexpected increase in spending",
-          "For example, unexpected repairs following theft or damage to premises.",
+          "",
           ""
         ),
         CheckBoxInfo(
@@ -87,13 +87,13 @@ class WhyCannotPayInFullControllerSpec extends ItSpec, UnchangedFromCYALinkAsser
         CheckBoxInfo(
           "NationalOrLocalDisaster",
           "National or local disaster",
-          "For example, COVID-19, extreme weather conditions.",
+          "",
           ""
         ),
         CheckBoxInfo(
           "ChangeToPersonalCircumstances",
           "Change to personal circumstances",
-          "For example, ill health or bereavement.",
+          "",
           ""
         ),
         CheckBoxInfo(
@@ -168,7 +168,7 @@ class WhyCannotPayInFullControllerSpec extends ItSpec, UnchangedFromCYALinkAsser
 
         ContentAssertions.commonPageChecks(
           doc,
-          "Why are you unable to pay in full?",
+          "Tell us why you cannot pay in full",
           shouldBackLinkBePresent = true,
           expectedSubmitUrl = Some(routes.WhyCannotPayInFullController.whyCannotPayInFullSubmit.url),
           hasFormError = true

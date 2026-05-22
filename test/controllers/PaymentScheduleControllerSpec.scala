@@ -71,7 +71,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
         val upfrontPaymentSummaryRows = summary.select(".govuk-summary-list__row").iterator().asScala.toList
 
         val whyCannotPayInFullRow = SummaryRow(
-          lang.fold("Why are you unable to pay in full?", "Pam nad oes modd i chi dalu’ch llawn?"),
+          lang.fold("Tell us why you cannot pay in full", "Rhowch wybod i ni pam na allwch dalu’r swm llawn"),
           reasonsToNotPayInFull.mkString(" "),
           PageUrls.checkPaymentPlanChangeUrl("WhyUnableInFull", origin.taxRegime, None),
           lang.fold("why you are unable to pay in full", "pam nad oes modd i chi dalu’n llawn")
@@ -377,8 +377,8 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
           val whatCanAffordHeading = summaries(0).previousElementSibling()
           whatCanAffordHeading.tagName() shouldBe "h2"
           whatCanAffordHeading.className() shouldBe "govuk-heading-m"
-          whatCanAffordHeading.text() shouldBe lang.fold("What you can afford to pay", "Yr hyn y gallwch fforddio ei dalu")
-
+          whatCanAffordHeading
+            .text() shouldBe lang.fold("What you can afford to pay", "Yr hyn y gallwch fforddio ei dalu")
 
           testUpfrontPaymentSummaryRows(summaries(0))(
             canPayUpfrontValue,
