@@ -50,8 +50,20 @@ class WhyCannotPayInFullControllerSpec extends ItSpec, UnchangedFromCYALinkAsser
         expectedSubmitUrl = Some(routes.WhyCannotPayInFullController.whyCannotPayInFullSubmit.url)
       )
 
+      val listStart = doc.select("#reasons").text()
+      listStart shouldBe "Reasons could include:"
+      val lists     = doc.select(".govuk-list").asScala.toList
+      lists.size shouldBe 1
+      val bullets   = lists(0).select("li").asScala.toList
+      bullets.size shouldBe 4
+
+      bullets(0).text() shouldBe "lost or reduced income, business or employment"
+      bullets(1).text() shouldBe "unexpected costs such as repairs following theft or damage"
+      bullets(2).text() shouldBe "a national or local disaster, for example extreme weather conditions"
+      bullets(3).text() shouldBe "a change to personal circumstances, for example ill health or bereavement"
+
       val hint = doc.select(".govuk-form-group > .govuk-fieldset > .govuk-hint").text()
-      hint shouldBe "Your answers help us plan services in the future. Select all that apply."
+      hint shouldBe "Select all that apply."
 
       val checkboxes: List[Element] = doc.select(".govuk-checkboxes__item").asScala.toList
       checkboxes.size shouldBe 8
@@ -60,7 +72,6 @@ class WhyCannotPayInFullControllerSpec extends ItSpec, UnchangedFromCYALinkAsser
         CheckBoxInfo(
           checkbox.select(".govuk-checkboxes__input").`val`(),
           checkbox.select(".govuk-checkboxes__label").text(),
-          checkbox.select(".govuk-checkboxes__hint").text(),
           checkbox.select(".govuk-checkboxes__input").attr("data-behaviour")
         )
       }
@@ -69,49 +80,41 @@ class WhyCannotPayInFullControllerSpec extends ItSpec, UnchangedFromCYALinkAsser
         CheckBoxInfo(
           "UnexpectedReductionOfIncome",
           "Unexpected reduction of income",
-          "",
           ""
         ),
         CheckBoxInfo(
           "UnexpectedIncreaseInSpending",
           "Unexpected increase in spending",
-          "",
           ""
         ),
         CheckBoxInfo(
           "LostOrReducedAbilityToEarnOrTrade",
           "Lost or reduced ability to earn or trade",
-          "",
           ""
         ),
         CheckBoxInfo(
           "NationalOrLocalDisaster",
           "National or local disaster",
-          "",
           ""
         ),
         CheckBoxInfo(
           "ChangeToPersonalCircumstances",
           "Change to personal circumstances",
-          "",
           ""
         ),
         CheckBoxInfo(
           "NoMoneySetAside",
           "No money set aside to pay",
-          "",
           ""
         ),
         CheckBoxInfo(
           "WaitingForRefund",
           "Waiting for a refund from HMRC",
-          "",
           ""
         ),
         CheckBoxInfo(
           "Other",
           "None of these",
-          "",
           "exclusive"
         )
       )
@@ -291,7 +294,7 @@ class WhyCannotPayInFullControllerSpec extends ItSpec, UnchangedFromCYALinkAsser
 
 object WhyCannotPayInFullControllerSpec {
 
-  final case class CheckBoxInfo(value: String, label: String, hint: String, dataBehaviour: String) derives CanEqual
+  final case class CheckBoxInfo(value: String, label: String, dataBehaviour: String) derives CanEqual
 
 }
 

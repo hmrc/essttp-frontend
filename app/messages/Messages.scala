@@ -972,52 +972,57 @@ object Messages {
       welsh = "Bydd eich atebion yn ein helpu i gynllunio gwasanaethau yn y dyfodol. Dewiswch bob un sy’n berthnasol."
     )
 
+    val `Select all that apply`: Message = Message(
+      english = "Select all that apply.",
+      welsh = "Dewiswch bob un sy’n berthnasol."
+    )
+
     val `Select all that apply or 'none of these'` : Message = Message(
       english = "Select why you are unable to pay in full, or select ‘None of these’",
       welsh = "Dewiswch y rheswm pam na allwch dalu’r swm llawn, neu dewiswch ‘Dim un o’r rhain’"
     )
 
-    def checkboxMessageWithHint(cannotPayReason: CannotPayReason): (Message, Option[Message]) = cannotPayReason match {
+    def checkboxMessage(cannotPayReason: CannotPayReason): Message = cannotPayReason match {
       case CannotPayReason.UnexpectedReductionOfIncome       =>
         Message(
           english = "Unexpected reduction of income",
           welsh = "Gostyngiad annisgwyl mewn incwm"
-        ) -> None
+        )
       case CannotPayReason.UnexpectedIncreaseInSpending      =>
         Message(
           english = "Unexpected increase in spending",
           welsh = "Cynnydd annisgwyl mewn gwariant"
-        ) -> None
+        )
       case CannotPayReason.LostOrReducedAbilityToEarnOrTrade =>
         Message(
           english = "Lost or reduced ability to earn or trade",
           welsh = "Colli neu leihau gallu i ennill neu fasnachu"
-        ) -> None
+        )
       case CannotPayReason.NationalOrLocalDisaster           =>
         Message(
           english = "National or local disaster",
           welsh = "Trychineb lleol neu genedlaethol"
-        ) -> None
+        )
       case CannotPayReason.ChangeToPersonalCircumstances     =>
         Message(
           english = "Change to personal circumstances",
           welsh = "Newid yn eich amgylchiadau personol"
-        ) -> None
+        )
       case CannotPayReason.NoMoneySetAside                   =>
         Message(
           english = "No money set aside to pay",
           welsh = "Dim arian wedi’i neilltuo i dalu"
-        ) -> None
+        )
       case CannotPayReason.WaitingForRefund                  =>
         Message(
           english = "Waiting for a refund from HMRC",
           welsh = "Aros am ad-daliad gan CThEF"
-        ) -> None
+        )
       case CannotPayReason.Other                             =>
         Message(
           english = "None of these",
           welsh = "Dim un o’r rhain"
-        ) -> None
+        )
     }
 
   }
