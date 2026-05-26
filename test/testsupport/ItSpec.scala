@@ -111,7 +111,9 @@ class ItSpec extends UnitSpec, GuiceOneServerPerSuite, WireMockSupport, HttpRead
     }
   }
 
-  val fakeRequest = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+  val fakeRequest      = FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")
+  val fakeRequestWelsh =
+    FakeRequest().withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId").withLangWelsh()
 
   def fakeRequestWithPath(path: String) =
     FakeRequest("GET", path).withAuthToken().withSession(SessionKeys.sessionId -> "IamATestSessionId")

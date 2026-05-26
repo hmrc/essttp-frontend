@@ -153,6 +153,27 @@ class WhyCannotPayInFullControllerSpec extends ItSpec, UnchangedFromCYALinkAsser
       testPageIsDisplayed(result, TdAll.whyCannotPayReasons)
     }
 
+    "display the page with correct bullet points in welsh" in {
+      stubCommonActions()
+      EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Epaye.Bta)()
+
+      val result = controller.whyCannotPayInFull(fakeRequestWelsh)
+      val doc    = Jsoup.parse(contentAsString(result))
+
+      val listStart = doc.select("#reasons").text()
+      listStart shouldBe "Gall y rhesymau gynnwys:"
+      val lists     = doc.select(".govuk-list").asScala.toList
+      lists.size shouldBe 1
+      val bullets   = lists(0).select("li").asScala.toList
+      bullets.size shouldBe 5
+
+      bullets(0).text() shouldBe "gostyngiad mewn incwm, busnes neu gyflogaeth"
+      bullets(1).text() shouldBe "colli incwm, busnes neu gyflogaeth"
+      bullets(2).text() shouldBe "costau annisgwyl fel atgyweiriadau yn dilyn lladrad neu ddifrod"
+      bullets(3).text() shouldBe "trychineb cenedlaethol neu leol, er enghraifft amodau tywydd eithafol"
+      bullets(4).text() shouldBe "newid i amgylchiadau personol, er enghraifft salwch neu brofedigaeth"
+    }
+
   }
 
   "POST why-are-you-unable-to-pay-in-full should" - {
