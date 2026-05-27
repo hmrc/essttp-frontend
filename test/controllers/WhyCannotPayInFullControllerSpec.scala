@@ -20,10 +20,13 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import controllers.WhyCannotPayInFullControllerSpec.CheckBoxInfo
 import essttp.journey.model.{Origins, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.CannotPayReason
+import models.Language
+import models.Languages._
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import play.api.mvc.Result
-import play.api.test.Helpers._
+import testsupport.TdRequest.*
+import play.api.test.Helpers.*
 import testsupport.ItSpec
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions, UnchangedFromCYALinkAssertions}
 import testsupport.stubs.EssttpBackend
@@ -38,32 +41,50 @@ class WhyCannotPayInFullControllerSpec extends ItSpec, UnchangedFromCYALinkAsser
 
   "GET /why-are-you-unable-to-pay-in-full should" - {
 
-    def testPageIsDisplayed(result: Future[Result], expectedPreselectedOptions: Set[CannotPayReason]): Unit = {
+    def testPageIsDisplayed(
+      result:                     Future[Result],
+      expectedPreselectedOptions: Set[CannotPayReason],
+      lang:                       Language
+    ): Unit = {
       RequestAssertions.assertGetRequestOk(result)
 
       val doc = Jsoup.parse(contentAsString(result))
 
       ContentAssertions.commonPageChecks(
         doc,
-        "Tell us why you cannot pay in full",
+        lang.fold("Tell us why you cannot pay in full", "Rhowch wybod i ni pam na allwch dalu’r swm llawn"),
         shouldBackLinkBePresent = true,
+        language = lang,
         expectedSubmitUrl = Some(routes.WhyCannotPayInFullController.whyCannotPayInFullSubmit.url)
       )
 
       val listStart = doc.select("#reasons").text()
-      listStart shouldBe "Reasons could include:"
+      listStart shouldBe lang.fold("Reasons could include:", "Gall y rhesymau gynnwys:")
       val lists     = doc.select(".govuk-list").asScala.toList
       lists.size shouldBe 1
       val bullets   = lists(0).select("li").asScala.toList
-      bullets.size shouldBe 4
+      bullets.size shouldBe lang.fold(4, 5)
 
-      bullets(0).text() shouldBe "lost or reduced income, business or employment"
-      bullets(1).text() shouldBe "unexpected costs such as repairs following theft or damage"
-      bullets(2).text() shouldBe "a national or local disaster, for example extreme weather conditions"
-      bullets(3).text() shouldBe "a change to personal circumstances, for example ill health or bereavement"
+      bullets(0).text() shouldBe lang.fold(
+        "lost or reduced income, business or employment",
+        "gostyngiad mewn incwm, busnes neu gyflogaeth"
+      )
+      bullets(1).text() shouldBe lang.fold(
+        "unexpected costs such as repairs following theft or damage",
+        "colli incwm, busnes neu gyflogaeth"
+      )
+      bullets(2).text() shouldBe lang.fold(
+        "a national or local disaster, for example extreme weather conditions",
+        "costau annisgwyl fel atgyweiriadau yn dilyn lladrad neu ddifrod"
+      )
+      bullets(3).text() shouldBe lang.fold(
+        "a change to personal circumstances, for example ill health or bereavement",
+        "trychineb cenedlaethol neu leol, er enghraifft amodau tywydd eithafol"
+      )
+      lang.fold("", bullets(4).text() shouldBe "newid i amgylchiadau personol, er enghraifft salwch neu brofedigaeth")
 
       val hint = doc.select(".govuk-form-group > .govuk-fieldset > .govuk-hint").text()
-      hint shouldBe "Select all that apply."
+      hint shouldBe lang.fold("Select all that apply.", "Dewiswch bob un sy’n berthnasol.")
 
       val checkboxes: List[Element] = doc.select(".govuk-checkboxes__item").asScala.toList
       checkboxes.size shouldBe 8
@@ -79,42 +100,42 @@ class WhyCannotPayInFullControllerSpec extends ItSpec, UnchangedFromCYALinkAsser
       valuesWithLabelsHintsAndDataBehaviour shouldBe List(
         CheckBoxInfo(
           "UnexpectedReductionOfIncome",
-          "Unexpected reduction of income",
+          lang.fold("Unexpected reduction of income", "Gostyngiad annisgwyl mewn incwm"),
           ""
         ),
         CheckBoxInfo(
           "UnexpectedIncreaseInSpending",
-          "Unexpected increase in spending",
+          lang.fold("Unexpected increase in spending", "Cynnydd annisgwyl mewn gwariant"),
           ""
         ),
         CheckBoxInfo(
           "LostOrReducedAbilityToEarnOrTrade",
-          "Lost or reduced ability to earn or trade",
+          lang.fold("Lost or reduced ability to earn or trade", "Colli neu leihau gallu i ennill neu fasnachu"),
           ""
         ),
         CheckBoxInfo(
           "NationalOrLocalDisaster",
-          "National or local disaster",
+          lang.fold("National or local disaster", "Trychineb lleol neu genedlaethol"),
           ""
         ),
         CheckBoxInfo(
           "ChangeToPersonalCircumstances",
-          "Change to personal circumstances",
+          lang.fold("Change to personal circumstances", "Newid yn eich amgylchiadau personol"),
           ""
         ),
         CheckBoxInfo(
           "NoMoneySetAside",
-          "No money set aside to pay",
+          lang.fold("No money set aside to pay", "Dim arian wedi’i neilltuo i dalu"),
           ""
         ),
         CheckBoxInfo(
           "WaitingForRefund",
-          "Waiting for a refund from HMRC",
+          lang.fold("Waiting for a refund from HMRC", "Aros am ad-daliad gan CThEF"),
           ""
         ),
         CheckBoxInfo(
           "Other",
-          "None of these",
+          lang.fold("None of these", "Dim un o’r rhain"),
           "exclusive"
         )
       )
@@ -140,7 +161,7 @@ class WhyCannotPayInFullControllerSpec extends ItSpec, UnchangedFromCYALinkAsser
       EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Epaye.Bta)()
 
       val result = controller.whyCannotPayInFull(fakeRequest)
-      testPageIsDisplayed(result, Set.empty)
+      testPageIsDisplayed(result, Set.empty, English)
     }
 
     "display the page when options have been previously selected" in {
@@ -150,28 +171,15 @@ class WhyCannotPayInFullControllerSpec extends ItSpec, UnchangedFromCYALinkAsser
       )
 
       val result = controller.whyCannotPayInFull(fakeRequest)
-      testPageIsDisplayed(result, TdAll.whyCannotPayReasons)
+      testPageIsDisplayed(result, TdAll.whyCannotPayReasons, English)
     }
 
     "display the page with correct bullet points in welsh" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Epaye.Bta)()
 
-      val result = controller.whyCannotPayInFull(fakeRequestWelsh)
-      val doc    = Jsoup.parse(contentAsString(result))
-
-      val listStart = doc.select("#reasons").text()
-      listStart shouldBe "Gall y rhesymau gynnwys:"
-      val lists     = doc.select(".govuk-list").asScala.toList
-      lists.size shouldBe 1
-      val bullets   = lists(0).select("li").asScala.toList
-      bullets.size shouldBe 5
-
-      bullets(0).text() shouldBe "gostyngiad mewn incwm, busnes neu gyflogaeth"
-      bullets(1).text() shouldBe "colli incwm, busnes neu gyflogaeth"
-      bullets(2).text() shouldBe "costau annisgwyl fel atgyweiriadau yn dilyn lladrad neu ddifrod"
-      bullets(3).text() shouldBe "trychineb cenedlaethol neu leol, er enghraifft amodau tywydd eithafol"
-      bullets(4).text() shouldBe "newid i amgylchiadau personol, er enghraifft salwch neu brofedigaeth"
+      val result = controller.whyCannotPayInFull(fakeRequest.withLangWelsh())
+      testPageIsDisplayed(result, Set.empty, Welsh)
     }
 
   }
@@ -303,7 +311,7 @@ class WhyCannotPayInFullControllerSpec extends ItSpec, UnchangedFromCYALinkAsser
       EssttpBackend.Pega.verifySaveJourneyForPegaNotCalled(TdAll.journeyId)
     }
 
-    behave like unchangedAnswerAfterClickingCYAChangeBehaviuor(
+    behave like unchangedAnswerAfterClickingCYAChangeBehaviour(
       Origins.Epaye.Bta,
       controller.whyCannotPayInFullSubmit,
       TdAll.whyCannotPayReasons.map(reason => "WhyCannotPayInFull[]" -> reason.entryName).toSeq,
@@ -333,7 +341,7 @@ class WhyCannotPayInFullControllerPEGARedirectInConfigSpec extends ItSpec, Uncha
 
     "POST why-are-you-unable-to-pay-in-full should" - {
 
-      behave like unchangedAnswerAfterClickingCYAChangeBehaviuor(
+      behave like unchangedAnswerAfterClickingCYAChangeBehaviour(
         Origins.Epaye.Bta,
         controller.whyCannotPayInFullSubmit,
         TdAll.whyCannotPayReasons.map(reason => "WhyCannotPayInFull[]" -> reason.entryName).toSeq,
