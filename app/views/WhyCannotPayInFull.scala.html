@@ -17,6 +17,7 @@
 @import controllers.routes
 @import essttp.rootmodel.CannotPayReason
 @import messages.Messages
+@import models.Languages.Welsh
 @import play.api.data.Form
 @import play.api.mvc.Request
 @import requests.RequestSupport
@@ -40,7 +41,7 @@
 }
 
 @title = @{
-    Messages.WhyCannotPayInFull.`Why are you unable to pay in full?`.show
+    Messages.WhyCannotPayInFull.`Tell us why you cannot pay in full`.show
 }
 
 @toCheckBoxItem(reason: CannotPayReason) = @{
@@ -59,11 +60,10 @@
     val selectedEntryNames: Set[String] =
         if (selectedFromValue.nonEmpty) selectedFromValue else selectedFromData
 
-    val (content, hint) = Messages.WhyCannotPayInFull.checkboxMessageWithHint(reason)
+    val content = Messages.WhyCannotPayInFull.checkboxMessage(reason)
 
     CheckboxItem(
         content = Text(content.show),
-        hint = hint.map(m => Hint(content = Text(m.show))),
         value = reason.entryName,
         id = Some(s"option-${reason.entryName}"),
         checked = selectedEntryNames.contains(reason.entryName)
@@ -105,20 +105,31 @@
                 title = Text(Messages.`There is a problem`.show))
         )
     }
+    <h1 class = govuk-heading-l>@title</h1>
+    <p class = "govuk-body" id = "reasons">@{Messages.WhyCannotPayInFull.`Reasons could include`.show}</p>
+    <ul class="govuk-list govuk-list--bullet">
+        <li class="govuk-body">@{Messages.WhyCannotPayInFull.`lost or reduced income, business or employment-1`.show}</li>
+        @if(languageFromRequest == Welsh) {
+            <li class="govuk-body">@{Messages.WhyCannotPayInFull.`lost or reduced income, business or employment-2`.show}</li>
+        }
+        <li class="govuk-body">@{Messages.WhyCannotPayInFull.`unexpected costs such as repairs following theft or damage`.show}</li>
+        <li class="govuk-body">@{Messages.WhyCannotPayInFull.`a national or local disaster, for example extreme weather conditions`.show}</li>
+        <li class="govuk-body">@{Messages.WhyCannotPayInFull.`a change to personal circumstances, for example ill health or bereavement`.show}</li>
+    </ul>
 
     @formWithCSRF(action = routes.WhyCannotPayInFullController.whyCannotPayInFullSubmit) {
         @govukCheckboxes(
           Checkboxes(
             fieldset = Some(Fieldset(
                 legend = Some(Legend(
-                    content = Text(title),
-                    classes = "govuk-fieldset__legend--l",
-                    isPageHeading = true
+                    content = Text({Messages.WhyCannotPayInFull.`Which of these apply to you?`.show}),
+                    classes = "govuk-fieldset__legend--m",
+                    isPageHeading = false
                 ))
             )),
             idPrefix = Some(key),
             name = s"$key[]",
-            hint = Some(Hint(content = Text(Messages.WhyCannotPayInFull.`Your answers help us plan services in the future...`.show))),
+            hint = Some(Hint(content = Text(Messages.WhyCannotPayInFull.`Select all that apply`.show))),
             items = checkboxItems,
             attributes = Map("id" -> key),
             errorMessage = form.error(key).map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(content = Text(e.message)))

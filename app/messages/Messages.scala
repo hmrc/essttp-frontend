@@ -928,9 +928,43 @@ object Messages {
 
   object WhyCannotPayInFull {
 
-    val `Why are you unable to pay in full?` : Message = Message(
-      english = "Why are you unable to pay in full?",
-      welsh = "Pam nad oes modd i chi dalu’ch llawn?"
+    val `Tell us why you cannot pay in full`: Message = Message(
+      english = "Tell us why you cannot pay in full",
+      welsh = "Rhowch wybod i ni pam na allwch dalu’r swm llawn"
+    )
+
+    val `Which of these apply to you?` : Message = Message(
+      english = "Which of these apply to you?",
+      welsh = "Pa un o’r o’r rhain sy’n berthnasol i chi?"
+    )
+
+    val `Reasons could include`: Message = Message(
+      english = "Reasons could include:",
+      welsh = "Gall y rhesymau gynnwys:"
+    )
+
+    val `lost or reduced income, business or employment-1`: Message = Message(
+      english = "lost or reduced income, business or employment",
+      welsh = "gostyngiad mewn incwm, busnes neu gyflogaeth"
+    )
+    val `lost or reduced income, business or employment-2`: Message = Message(
+      english = "",
+      welsh = "colli incwm, busnes neu gyflogaeth"
+    )
+
+    val `unexpected costs such as repairs following theft or damage`: Message = Message(
+      english = "unexpected costs such as repairs following theft or damage",
+      welsh = "costau annisgwyl fel atgyweiriadau yn dilyn lladrad neu ddifrod"
+    )
+
+    val `a national or local disaster, for example extreme weather conditions`: Message = Message(
+      english = "a national or local disaster, for example extreme weather conditions",
+      welsh = "trychineb cenedlaethol neu leol, er enghraifft amodau tywydd eithafol"
+    )
+
+    val `a change to personal circumstances, for example ill health or bereavement`: Message = Message(
+      english = "a change to personal circumstances, for example ill health or bereavement",
+      welsh = "newid i amgylchiadau personol, er enghraifft salwch neu brofedigaeth"
     )
 
     val `Your answers help us plan services in the future...` : Message = Message(
@@ -938,72 +972,57 @@ object Messages {
       welsh = "Bydd eich atebion yn ein helpu i gynllunio gwasanaethau yn y dyfodol. Dewiswch bob un sy’n berthnasol."
     )
 
+    val `Select all that apply`: Message = Message(
+      english = "Select all that apply.",
+      welsh = "Dewiswch bob un sy’n berthnasol."
+    )
+
     val `Select all that apply or 'none of these'` : Message = Message(
       english = "Select why you are unable to pay in full, or select ‘None of these’",
       welsh = "Dewiswch y rheswm pam na allwch dalu’r swm llawn, neu dewiswch ‘Dim un o’r rhain’"
     )
 
-    def checkboxMessageWithHint(cannotPayReason: CannotPayReason): (Message, Option[Message]) = cannotPayReason match {
+    def checkboxMessage(cannotPayReason: CannotPayReason): Message = cannotPayReason match {
       case CannotPayReason.UnexpectedReductionOfIncome       =>
         Message(
           english = "Unexpected reduction of income",
           welsh = "Gostyngiad annisgwyl mewn incwm"
-        ) -> Some(
-          Message(
-            english = "For example, lost or reduced business or unemployment.",
-            welsh = "Er enghraifft, colli neu leihau busnes neu ddiweithdra."
-          )
         )
       case CannotPayReason.UnexpectedIncreaseInSpending      =>
         Message(
           english = "Unexpected increase in spending",
           welsh = "Cynnydd annisgwyl mewn gwariant"
-        ) -> Some(
-          Message(
-            english = "For example, unexpected repairs following theft or damage to premises.",
-            welsh = "Er enghraifft, atgyweiriadau annisgwyl yn dilyn lladrad neu niwed i eiddo."
-          )
         )
       case CannotPayReason.LostOrReducedAbilityToEarnOrTrade =>
         Message(
           english = "Lost or reduced ability to earn or trade",
           welsh = "Colli neu leihau gallu i ennill neu fasnachu"
-        ) -> None
+        )
       case CannotPayReason.NationalOrLocalDisaster           =>
         Message(
           english = "National or local disaster",
           welsh = "Trychineb lleol neu genedlaethol"
-        ) -> Some(
-          Message(
-            english = "For example, COVID-19, extreme weather conditions.",
-            welsh = "Er enghraifft COVID 19, amgylchiadau tywydd garw."
-          )
         )
       case CannotPayReason.ChangeToPersonalCircumstances     =>
         Message(
           english = "Change to personal circumstances",
           welsh = "Newid yn eich amgylchiadau personol"
-        ) -> Some(
-          Message(
-            english = "For example, ill health or bereavement.",
-            welsh = "Er enghraifft, salwch neu brofedigaeth."
-          )
         )
       case CannotPayReason.NoMoneySetAside                   =>
         Message(
           english = "No money set aside to pay",
           welsh = "Dim arian wedi’i neilltuo i dalu"
-        ) -> None
+        )
       case CannotPayReason.WaitingForRefund                  =>
         Message(
           english = "Waiting for a refund from HMRC",
           welsh = "Aros am ad-daliad gan CThEF"
-        ) -> None
+        )
       case CannotPayReason.Other                             =>
         Message(
           english = "None of these",
           welsh = "Dim un o’r rhain"
-        ) -> None
+        )
     }
 
   }

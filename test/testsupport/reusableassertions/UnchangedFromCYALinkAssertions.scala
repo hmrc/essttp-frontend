@@ -36,7 +36,7 @@ import scala.concurrent.Future
 
 trait UnchangedFromCYALinkAssertions extends AnyFreeSpecLike { this: ItSpec =>
 
-  def unchangedAnswerAfterClickingCYAChangeBehaviuor(
+  def unchangedAnswerAfterClickingCYAChangeBehaviour(
     origin:            Origin,
     action:            Action[AnyContent],
     formData:          Seq[(String, String)],

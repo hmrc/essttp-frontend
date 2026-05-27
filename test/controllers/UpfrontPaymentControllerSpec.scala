@@ -210,7 +210,7 @@ class UpfrontPaymentControllerSpec extends ItSpec, UnchangedFromCYALinkAssertion
         EssttpBackend.CanPayUpfront.verifyNoneUpdateCanPayUpfrontRequest(TdAll.journeyId)
       }
 
-      behave like unchangedAnswerAfterClickingCYAChangeBehaviuor(
+      behave like unchangedAnswerAfterClickingCYAChangeBehaviour(
         origin,
         controller.canYouMakeAnUpfrontPaymentSubmit,
         Seq(("CanYouMakeAnUpFrontPayment", "Yes")),
@@ -324,7 +324,7 @@ class UpfrontPaymentControllerSpec extends ItSpec, UnchangedFromCYALinkAssertion
           .verifyUpdateUpfrontPaymentAmountRequest(TdAll.journeyId, TdAll.upfrontPaymentAmount(149900))
       }
 
-      behave like unchangedAnswerAfterClickingCYAChangeBehaviuor(
+      behave like unchangedAnswerAfterClickingCYAChangeBehaviour(
         origin,
         controller.upfrontPaymentAmountSubmit,
         Seq(("UpfrontPaymentAmount", "2")),
@@ -607,7 +607,7 @@ class UpfrontPaymentControllerPEGARedirectInConfigSpec extends ItSpec, Unchanged
 
       "POST /can-you-make-an-upfront-payment" - {
 
-        behave like unchangedAnswerAfterClickingCYAChangeBehaviuor(
+        behave like unchangedAnswerAfterClickingCYAChangeBehaviour(
           origin,
           controller.canYouMakeAnUpfrontPaymentSubmit,
           Seq(("CanYouMakeAnUpFrontPayment", "Yes")),
@@ -623,7 +623,7 @@ class UpfrontPaymentControllerPEGARedirectInConfigSpec extends ItSpec, Unchanged
 
       "POST /how-much-can-you-pay-upfront" - {
 
-        behave like unchangedAnswerAfterClickingCYAChangeBehaviuor(
+        behave like unchangedAnswerAfterClickingCYAChangeBehaviour(
           origin,
           controller.upfrontPaymentAmountSubmit,
           Seq(("UpfrontPaymentAmount", "2")),
