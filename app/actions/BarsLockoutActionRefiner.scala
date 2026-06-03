@@ -58,6 +58,7 @@ class BarsLockoutActionRefiner @Inject() (
                   request.ggCredId,
                   request.nino,
                   status.attempts,
+                  status.maxNumberOfAttempts,
                   requestSupport.languageFromRequest
                 )
               )

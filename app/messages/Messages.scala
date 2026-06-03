@@ -1987,6 +1987,13 @@ object Messages {
       welsh = "Manylion cyfrif banc"
     )
 
+    val `Have your sort code and bank account number to hand...` : Message = Message(
+      english =
+        "Have your sort code and bank account number to hand, this helps you enter the right details the first time. You have up to 3 attempts to enter the correct name.",
+      welsh =
+        "Bydd angen i chi gael eich cod didoli a rhif cyfrif banc wrth law; bydd hyn yn eich helpu i nodi’r manylion cywir y tro cyntaf. Mae gennych hyd at 3 ymgais i nodi’r enw cywir."
+    )
+
     val `Name on the account`: Message = Message(
       english = "Name on the account",
       welsh = "Yr enw sydd ar y cyfrif"
@@ -2102,16 +2109,24 @@ object Messages {
         )
       )
 
-    private val barsErrors: Map[String, Message] = {
-      val `Enter a valid combination of bank account number and sort code`: Message = Message(
-        english = "Enter a valid combination of bank account number and sort code",
-        welsh = "Nodwch gyfuniad dilys o rif cyfrif banc a chod didoli"
+    private def barsErrors(remainingAttempts: Int): Map[String, Message] = {
+      def `Enter a valid combination of bank account number and sort code`(
+        suffixEnglish: String = "",
+        suffixWelsh:   String = ""
+      ): Message = Message(
+        english = s"Enter a valid combination of bank account number and sort code$suffixEnglish",
+        welsh = s"Nodwch gyfuniad dilys o rif cyfrif banc a chod didoli$suffixWelsh"
       )
 
+      val youCanTryXMoreTimesEnglish =
+        s"You can try ${remainingAttempts.toString} more time${if (remainingAttempts > 1) "s" else ""}"
+      val youCanTryXMoreTimesWelsh   =
+        s"Gallwch roi ${remainingAttempts.toString} ${if (remainingAttempts > 1) "g" else "c"}ynnig arall arni"
+
       Map(
-        s"sortCode.${accountNumberNotWellFormatted.formError.message}"      -> `Enter a valid combination of bank account number and sort code`,
-        s"sortCodeXXX.${accountNumberNotWellFormatted.formError.message}"   -> `Enter a valid combination of bank account number and sort code`,
-        s"sortCode.${sortCodeNotPresentOnEiscd.formError.message}"          -> `Enter a valid combination of bank account number and sort code`,
+        s"sortCode.${accountNumberNotWellFormatted.formError.message}"      -> `Enter a valid combination of bank account number and sort code`(),
+        s"sortCodeXXX.${accountNumberNotWellFormatted.formError.message}"   -> `Enter a valid combination of bank account number and sort code`(),
+        s"sortCode.${sortCodeNotPresentOnEiscd.formError.message}"          -> `Enter a valid combination of bank account number and sort code`(),
         s"sortCode.${sortCodeDoesNotSupportsDirectDebit.formError.message}" -> Message(
           english =
             "You have entered a sort code which does not accept this type of payment. Check you have entered a valid sort code or enter details for a different account",
@@ -2119,22 +2134,28 @@ object Messages {
             "Rydych wedi nodi cod didoli nad yw’n derbyn y math hwn o daliad. Gwiriwch eich bod wedi nodi cod didoli dilys, neu nodwch fanylion ar gyfer cyfrif gwahanol"
         ),
         s"name.${nameDoesNotMatchPersonal.formError.message}"               -> Message(
-          english = "Enter the name on the account as it appears on bank statements",
-          welsh = "Nodwch yr enw ar y cyfrif fel y mae’n ymddangos ar gyfriflenni banc"
+          english = s"Enter the name on the account as it appears on bank statements. $youCanTryXMoreTimesEnglish",
+          welsh = s"Nodwch yr enw ar y cyfrif fel y mae’n ymddangos ar gyfriflenni banc. $youCanTryXMoreTimesWelsh"
         ),
         s"name.${nameDoesNotMatchBusiness.formError.message}"               -> Message(
-          english = "Enter the business name on the account as it appears on bank statements",
-          welsh = "Nodwch enw’r busnes ar y cyfrif fel y mae’n ymddangos ar gyfriflenni banc"
+          english =
+            s"Enter the business name on the account as it appears on bank statements. $youCanTryXMoreTimesEnglish",
+          welsh =
+            s"Nodwch enw’r busnes ar y cyfrif fel y mae’n ymddangos ar gyfriflenni banc. $youCanTryXMoreTimesWelsh"
         ),
-        s"sortCode.${accountDoesNotExist.formError.message}"                -> `Enter a valid combination of bank account number and sort code`,
-        s"sortCode.${sortCodeOnDenyList.formError.message}"                 -> `Enter a valid combination of bank account number and sort code`,
-        s"sortCode.${otherBarsError.formError.message}"                     -> `Enter a valid combination of bank account number and sort code`
+        s"sortCode.${accountDoesNotExist.formError.message}"                ->
+          `Enter a valid combination of bank account number and sort code`(
+            s". $youCanTryXMoreTimesEnglish",
+            s". $youCanTryXMoreTimesWelsh"
+          ),
+        s"sortCode.${sortCodeOnDenyList.formError.message}"                 -> `Enter a valid combination of bank account number and sort code`(),
+        s"sortCode.${otherBarsError.formError.message}"                     -> `Enter a valid combination of bank account number and sort code`()
       )
     }
 
-    val errors: Map[String, (List[String] => Message)] =
+    def errors(remainingAttempts: Int): Map[String, (List[String] => Message)] =
       nameErrors ++ (
-        sortCoderErrors ++ accountNumberErrors ++ barsErrors
+        sortCoderErrors ++ accountNumberErrors ++ barsErrors(remainingAttempts)
       ).map { case (k, v) => k -> { (_: List[String]) => v } }
 
     val `Bank details`: Message = Message(

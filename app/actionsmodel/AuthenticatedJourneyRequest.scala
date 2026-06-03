@@ -57,27 +57,33 @@ class BarsLockedOutRequest[A](
 }
 
 class BarsNotLockedOutRequest[A](
-  override val request:           Request[A],
-  override val enrolments:        Enrolments,
-  val journey:                    Journey,
-  ggCredId:                       GGCredId,
-  nino:                           Option[Nino],
-  val numberOfBarsVerifyAttempts: NumberOfBarsVerifyAttempts,
-  override val lang:              Language
+  override val request:              Request[A],
+  override val enrolments:           Enrolments,
+  val journey:                       Journey,
+  ggCredId:                          GGCredId,
+  nino:                              Option[Nino],
+  val numberOfBarsVerifyAttempts:    NumberOfBarsVerifyAttempts,
+  val maxNumberOfBarsVerifyAttempts: NumberOfBarsVerifyAttempts,
+  override val lang:                 Language
 ) extends AuthenticatedRequest[A](request, enrolments, ggCredId, nino, lang) {
   val journeyId: JourneyId = journey._id
 }
 
 final class EligibleJourneyRequest[A](
-  override val journey:           Journey,
-  override val enrolments:        Enrolments,
-  override val request:           Request[A],
-  ggCredId:                       GGCredId,
-  nino:                           Option[Nino],
-  val numberOfBarsVerifyAttempts: NumberOfBarsVerifyAttempts,
-  val eligibilityCheckResult:     EligibilityCheckResult,
-  override val lang:              Language
-) extends AuthenticatedJourneyRequest[A](request, enrolments, journey, ggCredId, nino, lang)
+  override val journey:              Journey,
+  override val enrolments:           Enrolments,
+  override val request:              Request[A],
+  ggCredId:                          GGCredId,
+  nino:                              Option[Nino],
+  val numberOfBarsVerifyAttempts:    NumberOfBarsVerifyAttempts,
+  val maxNumberOfBarsVerifyAttempts: NumberOfBarsVerifyAttempts,
+  val eligibilityCheckResult:        EligibilityCheckResult,
+  override val lang:                 Language
+) extends AuthenticatedJourneyRequest[A](request, enrolments, journey, ggCredId, nino, lang) {
+
+  val remainingNumberOfAttempts: Int = maxNumberOfBarsVerifyAttempts.value - numberOfBarsVerifyAttempts.value
+
+}
 
 object EligibleJourneyRequest {
 

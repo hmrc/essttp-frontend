@@ -89,16 +89,17 @@ class ItSpec extends UnitSpec, GuiceOneServerPerSuite, WireMockSupport, HttpRead
 
   // defaults are suitable for most tests
   def stubCommonActions(
-    authAllEnrolments: Option[Set[Enrolment]] = Some(Set(TdAll.payeEnrolment)),
-    authCredentials:   Option[Credentials] = Some(Credentials("authId-999", "GovernmentGateway")),
-    barsLockoutExpiry: Option[Instant] = None,
-    authNino:          Option[String] = None
+    authAllEnrolments:           Option[Set[Enrolment]] = Some(Set(TdAll.payeEnrolment)),
+    authCredentials:             Option[Credentials] = Some(Credentials("authId-999", "GovernmentGateway")),
+    barsLockoutExpiry:           Option[Instant] = None,
+    authNino:                    Option[String] = None,
+    maximumNumberOfBarsAttempts: Int = 3
   ): StubMapping = {
     // stub Authenticated action
     AuthStub.authorise(authAllEnrolments, authCredentials, authNino)
     // stub Bars lockout filter
-    barsLockoutExpiry.fold(EssttpBackend.BarsVerifyStatusStub.statusUnlocked()) { expiry =>
-      EssttpBackend.BarsVerifyStatusStub.statusLocked(expiry)
+    barsLockoutExpiry.fold(EssttpBackend.BarsVerifyStatusStub.statusUnlocked(maximumNumberOfBarsAttempts)) { expiry =>
+      EssttpBackend.BarsVerifyStatusStub.statusLocked(expiry, maximumNumberOfBarsAttempts)
     }
   }
 

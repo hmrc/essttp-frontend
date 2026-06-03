@@ -17,6 +17,7 @@
 package services
 
 import actionsmodel.EligibleJourneyRequest
+import cats.syntax.either.*
 import essttp.bars.BarsVerifyStatusConnector
 import essttp.bars.model.BarsVerifyStatusResponse
 import essttp.journey.model.Journey
@@ -45,7 +46,7 @@ class EssttpBarsService @Inject() (
   def verifyBankDetails(
     bankDetails: BankDetails,
     journey:     AfterChosenTypeOfBankAccount & Journey
-  )(using request: EligibleJourneyRequest[?]): Future[Either[BarsError, VerifyResponse]] = {
+  )(using request: EligibleJourneyRequest[?]): Future[Either[(BarsError, BarsVerifyStatusResponse), VerifyResponse]] = {
     val taxId = journey match {
       case j: AfterComputedTaxId => j.taxId
     }
@@ -64,8 +65,10 @@ class EssttpBarsService @Inject() (
         result match {
           case Right(_) | Left(_: BarsValidateError) =>
             // don't update the verify count on success or validate error
-            auditBars(BarsVerifyStatusResponse(request.numberOfBarsVerifyAttempts, None))
-            Future.successful(result)
+            val barsVerifyStatusResponse =
+              BarsVerifyStatusResponse(request.numberOfBarsVerifyAttempts, None, request.maxNumberOfBarsVerifyAttempts)
+            auditBars(barsVerifyStatusResponse)
+            Future.successful(result.leftMap(_ -> barsVerifyStatusResponse))
 
           case Left(bve: BarsVerifyError) =>
             updateVerifyStatus(taxId, result, bve.barsResponse, auditBars)
@@ -78,7 +81,7 @@ class EssttpBarsService @Inject() (
     result:    Either[BarsError, VerifyResponse],
     br:        BarsResponse,
     auditBars: BarsVerifyStatusResponse => Unit
-  )(using RequestHeader): Future[Either[BarsError, VerifyResponse]] =
+  )(using RequestHeader): Future[Either[(BarsError, BarsVerifyStatusResponse), VerifyResponse]] =
     barsVerifyStatusConnector
       .update(taxId)
       .map { verifyStatus =>
@@ -86,8 +89,8 @@ class EssttpBarsService @Inject() (
         // here we catch a lockout BarsStatus condition,
         // and force a TooManyAttempts (BarsError) response
         verifyStatus.lockoutExpiryDateTime
-          .fold(result) { expiry =>
-            Left(TooManyAttempts(br, expiry))
+          .fold(result.leftMap(_ -> verifyStatus)) { expiry =>
+            Left(TooManyAttempts(br, expiry) -> verifyStatus)
           }
       }
 
