@@ -64,26 +64,31 @@ object EssttpBackend {
   def verifyFindByLatestSessionId(): Unit = verify(getRequestedFor(urlPathEqualTo(findByLatestSessionIdUrl)))
 
   object BarsVerifyStatusStub {
-    private def noLockoutBody(numberOfAttempts: Int) = s"""{
-                          |    "attempts": ${numberOfAttempts.toString}
+    private def noLockoutBody(numberOfAttempts: Int, maximumNumberOfBarsAttempts: Int = 3) = s"""{
+                          |    "attempts": ${numberOfAttempts.toString},
+                          |    "maxNumberOfAttempts": ${maximumNumberOfBarsAttempts.toString}
                           |}""".stripMargin
 
-    private def lockoutBody(expiry: Instant) = s"""{
+    private def lockoutBody(expiry: Instant, maximumNumberOfBarsAttempts: Int = 3) = s"""{
                         |    "attempts": 3,
-                        |    "lockoutExpiryDateTime": "${expiry.toString}"
+                        |    "lockoutExpiryDateTime": "${expiry.toString}",
+                        |    "maxNumberOfAttempts" : ${maximumNumberOfBarsAttempts.toString}
                         |}""".stripMargin
 
     private val getVerifyStatusUrl: String    = "/essttp-backend/bars/verify/status"
     private val updateVerifyStatusUrl: String = "/essttp-backend/bars/verify/update"
 
-    def statusUnlocked(): StubMapping = stubPost(getVerifyStatusUrl, noLockoutBody(numberOfAttempts = 1))
+    def statusUnlocked(maximumNumberOfBarsAttempts: Int = 3): StubMapping =
+      stubPost(getVerifyStatusUrl, noLockoutBody(numberOfAttempts = 1, maximumNumberOfBarsAttempts))
 
-    def statusLocked(expiry: Instant): StubMapping = stubPost(getVerifyStatusUrl, lockoutBody(expiry))
+    def statusLocked(expiry: Instant, maximumNumberOfBarsAttempts: Int = 3): StubMapping =
+      stubPost(getVerifyStatusUrl, lockoutBody(expiry, maximumNumberOfBarsAttempts))
 
-    def update(numberOfAttempts: Int = 1): StubMapping =
-      stubPost(updateVerifyStatusUrl, noLockoutBody(numberOfAttempts))
+    def update(numberOfAttempts: Int = 1, maximumNumberOfBarsAttempts: Int = 3): StubMapping =
+      stubPost(updateVerifyStatusUrl, noLockoutBody(numberOfAttempts, maximumNumberOfBarsAttempts))
 
-    def updateAndLockout(expiry: Instant): StubMapping = stubPost(updateVerifyStatusUrl, lockoutBody(expiry))
+    def updateAndLockout(expiry: Instant, maximumNumberOfBarsAttempts: Int = 3): StubMapping =
+      stubPost(updateVerifyStatusUrl, lockoutBody(expiry, maximumNumberOfBarsAttempts))
 
     def ensureVerifyUpdateStatusIsCalled(): Unit =
       verify(exactly(1), postRequestedFor(urlPathEqualTo(updateVerifyStatusUrl)))

@@ -20,15 +20,16 @@ import controllers.BankDetailsControllerSpec.SummaryRow
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.bank.{CanSetUpDirectDebit, TypeOfBankAccount, TypesOfBankAccount}
+import models.{Language, Languages}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{Action, AnyContent, AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import testsupport.ItSpec
-import testsupport.TdRequest._
+import testsupport.TdRequest.*
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.EssttpBackend.BarsVerifyStatusStub
 import testsupport.stubs.{AuditConnectorStub, BarsStub, EssttpBackend}
@@ -36,7 +37,7 @@ import testsupport.testdata.BarsJsonResponses.{ValidateJson, VerifyJson}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
 
-import java.time._
+import java.time.*
 import java.util.Locale
 import scala.concurrent.Future
 import scala.jdk.CollectionConverters.{IterableHasAsScala, IteratorHasAsScala}
@@ -68,17 +69,43 @@ class BankDetailsControllerSpec extends ItSpec {
   }
 
   object EnterDirectDebitDetailsPage {
-    val expectedH1: String               = "Bank account details"
-    val bankDetails: String              = "Bank details"
-    val accountNameContent: String       = "Name on the account"
-    val accountNameHintContent: String   = "For business accounts, enter the name of the business"
-    val accountNameFieldId: String       = "#name"
-    val sortCodeContent: String          = "Sort code"
-    val sortCodeHintContent: String      = "Must be 6 digits long"
-    val sortCodeFieldId: String          = "#sortCode"
-    val accountNumberContent: String     = "Account number"
-    val accountNumberHintContent: String = "Must be between 6 and 8 digits long"
-    val accountNumberFieldId: String     = "#accountNumber"
+    def expectedH1(lang: Language): String = lang.fold("Bank account details", "Manylion cyfrif banc")
+
+    def expectedParagraph(lang: Language) =
+      lang.fold(
+        "Have your sort code and bank account number to hand, this helps you enter the right details the first time. You have up to 3 attempts to enter the correct name.",
+        "Bydd angen i chi gael eich cod didoli a rhif cyfrif banc wrth law; bydd hyn yn eich helpu i nodi’r manylion cywir y tro cyntaf. Mae gennych hyd at 3 ymgais i nodi’r enw cywir."
+      )
+
+    def bankDetails(lang: Language): String =
+      lang.fold("Bank details", "Manylion banc")
+
+    def accountNameContent(lang: Language): String =
+      lang.fold("Name on the account", "Yr enw sydd ar y cyfrif")
+
+    def accountNameHintContent(lang: Language): String =
+      lang.fold(
+        "For business accounts, enter the name of the business",
+        "Ar gyfer cyfrifon busnes, nodwch enw’r busnes"
+      )
+
+    val accountNameFieldId: String = "#name"
+
+    def sortCodeContent(lang: Language): String =
+      lang.fold("Sort code", "Cod didoli")
+
+    def sortCodeHintContent(lang: Language): String =
+      lang.fold("Must be 6 digits long", "Mae’n rhaid i hyn fod yn 6 digid o hyd")
+
+    val sortCodeFieldId: String = "#sortCode"
+
+    def accountNumberContent(lang: Language): String =
+      lang.fold("Account number", "Rhif y cyfrif")
+
+    def accountNumberHintContent(lang: Language): String =
+      lang.fold("Must be between 6 and 8 digits long", "Mae’n rhaid iddo fod rhwng 6 ac 8 digid o hyd")
+
+    val accountNumberFieldId: String = "#accountNumber"
   }
 
   object ConfirmDirectDebitDetailsPage {
@@ -125,12 +152,14 @@ class BankDetailsControllerSpec extends ItSpec {
 
   def testFormError(action: Action[AnyContent])(formData: (String, String)*)(
     textAndHrefContent: List[(String, String)],
-    additionalChecks:   Document => Unit
+    additionalChecks:   Document => Unit,
+    lang:               Language = Languages.English
   ): Unit = {
     val fakeRequest = FakeRequest()
       .withMethod("POST")
       .withAuthToken()
       .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+      .withLang(lang)
       .withFormUrlEncodedBody(formData*)
 
     val result: Future[Result] = action(fakeRequest)
@@ -446,100 +475,109 @@ class BankDetailsControllerSpec extends ItSpec {
 
     "GET /bank-account-details should" - {
 
-      s"[$regime journey] should return 200 and the bank details page with the organisation hint for a business account" in {
-        stubCommonActions()
-        EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto, origin, TypesOfBankAccount.Business)()
+      Seq(Languages.English, Languages.Welsh).foreach { lang =>
+        s"[$regime journey] should return 200 and the bank details page with the organisation hint for a business account in $lang" in {
+          stubCommonActions()
+          EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto, origin, TypesOfBankAccount.Business)()
 
-        val result: Future[Result] = controller.enterBankDetails(fakeRequest)
-        val pageContent: String    = contentAsString(result)
-        val doc: Document          = Jsoup.parse(pageContent)
+          val result: Future[Result] = controller.enterBankDetails(fakeRequest.withLang(lang))
+          val pageContent: String    = contentAsString(result)
+          val doc: Document          = Jsoup.parse(pageContent)
 
-        RequestAssertions.assertGetRequestOk(result)
-        ContentAssertions.commonPageChecks(
-          doc,
-          expectedH1 = EnterDirectDebitDetailsPage.expectedH1,
-          shouldBackLinkBePresent = true,
-          expectedSubmitUrl = Some(routes.BankDetailsController.enterBankDetailsSubmit.url),
-          regimeBeingTested = Some(taxRegime)
-        )
+          RequestAssertions.assertGetRequestOk(result)
+          ContentAssertions.commonPageChecks(
+            doc,
+            expectedH1 = EnterDirectDebitDetailsPage.expectedH1(lang),
+            shouldBackLinkBePresent = true,
+            expectedSubmitUrl = Some(routes.BankDetailsController.enterBankDetailsSubmit.url),
+            regimeBeingTested = Some(taxRegime),
+            language = lang
+          )
 
-        val nameInput          = doc.select("input[name=name]")
-        val sortCodeInput      = doc.select("input[name=sortCode]")
-        val accountNumberInput = doc.select("input[name=accountNumber]")
+          val h1        = doc.selectFirst("h1")
+          val paragraph = h1.nextElementSibling()
+          paragraph.text() shouldBe EnterDirectDebitDetailsPage.expectedParagraph(lang)
+          paragraph.is("p.govuk-body") shouldBe true
 
-        nameInput.attr("autocomplete") shouldBe "organization"
-        nameInput.attr("spellcheck") shouldBe "false"
+          val nameInput          = doc.select("input[name=name]")
+          val sortCodeInput      = doc.select("input[name=sortCode]")
+          val accountNumberInput = doc.select("input[name=accountNumber]")
 
-        sortCodeInput.attr("autocomplete") shouldBe "off"
-        sortCodeInput.attr("inputmode") shouldBe "numeric"
-        sortCodeInput.attr("spellcheck") shouldBe "false"
+          nameInput.attr("autocomplete") shouldBe "organization"
+          nameInput.attr("spellcheck") shouldBe "false"
 
-        accountNumberInput.attr("autocomplete") shouldBe "off"
-        accountNumberInput.attr("inputmode") shouldBe "numeric"
-        accountNumberInput.attr("spellcheck") shouldBe "false"
+          sortCodeInput.attr("autocomplete") shouldBe "off"
+          sortCodeInput.attr("inputmode") shouldBe "numeric"
+          sortCodeInput.attr("spellcheck") shouldBe "false"
 
-        val subheadings = doc.select(".govuk-label").asScala.toList
-        subheadings.size shouldBe 4
-        subheadings(0).text() shouldBe EnterDirectDebitDetailsPage.accountNameContent
-        subheadings(1).text() shouldBe EnterDirectDebitDetailsPage.bankDetails
-        subheadings(2).text() shouldBe EnterDirectDebitDetailsPage.sortCodeContent
-        subheadings(3).text() shouldBe EnterDirectDebitDetailsPage.accountNumberContent
+          accountNumberInput.attr("autocomplete") shouldBe "off"
+          accountNumberInput.attr("inputmode") shouldBe "numeric"
+          accountNumberInput.attr("spellcheck") shouldBe "false"
 
-        doc.select("#name-hint").text() shouldBe EnterDirectDebitDetailsPage.accountNameHintContent
-        doc.select("#sortCode-hint").text() shouldBe EnterDirectDebitDetailsPage.sortCodeHintContent
-        doc.select("#accountNumber-hint").text() shouldBe EnterDirectDebitDetailsPage.accountNumberHintContent
-      }
+          val subheadings = doc.select(".govuk-label").asScala.toList
+          subheadings.size shouldBe 4
+          subheadings(0).text() shouldBe EnterDirectDebitDetailsPage.accountNameContent(lang)
+          subheadings(1).text() shouldBe EnterDirectDebitDetailsPage.bankDetails(lang)
+          subheadings(2).text() shouldBe EnterDirectDebitDetailsPage.sortCodeContent(lang)
+          subheadings(3).text() shouldBe EnterDirectDebitDetailsPage.accountNumberContent(lang)
 
-      s"[$regime journey] should return 200 and the bank details page without the organisation hint for a personal account" in {
-        stubCommonActions()
+          doc.select("#name-hint").text() shouldBe EnterDirectDebitDetailsPage.accountNameHintContent(lang)
+          doc.select("#sortCode-hint").text() shouldBe EnterDirectDebitDetailsPage.sortCodeHintContent(lang)
+          doc.select("#accountNumber-hint").text() shouldBe EnterDirectDebitDetailsPage.accountNumberHintContent(lang)
+        }
 
-        val updatedJourneyJson = JourneyJsonTemplates.`Chosen Type Of Bank Account`(
-          TypesOfBankAccount.Personal,
-          origin
-        )
+        s"[$regime journey] should return 200 and the bank details page without the organisation hint for a personal account in ${lang.toString}" in {
+          stubCommonActions()
 
-        EssttpBackend.ChosenTypeOfBankAccount
-          .stubUpdateChosenTypeOfBankAccount(TdAll.journeyId, updatedJourneyJson)
-        EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto, origin, TypesOfBankAccount.Personal)()
+          val updatedJourneyJson = JourneyJsonTemplates.`Chosen Type Of Bank Account`(
+            TypesOfBankAccount.Personal,
+            origin
+          )
 
-        val result: Future[Result] = controller.enterBankDetails(fakeRequest)
-        val pageContent: String    = contentAsString(result)
-        val doc: Document          = Jsoup.parse(pageContent)
+          EssttpBackend.ChosenTypeOfBankAccount
+            .stubUpdateChosenTypeOfBankAccount(TdAll.journeyId, updatedJourneyJson)
+          EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto, origin, TypesOfBankAccount.Personal)()
 
-        RequestAssertions.assertGetRequestOk(result)
-        ContentAssertions.commonPageChecks(
-          doc,
-          expectedH1 = EnterDirectDebitDetailsPage.expectedH1,
-          shouldBackLinkBePresent = true,
-          expectedSubmitUrl = Some(routes.BankDetailsController.enterBankDetailsSubmit.url),
-          regimeBeingTested = Some(taxRegime)
-        )
+          val result: Future[Result] = controller.enterBankDetails(fakeRequest.withLang(lang))
+          val pageContent: String    = contentAsString(result)
+          val doc: Document          = Jsoup.parse(pageContent)
 
-        val nameInput          = doc.select("input[name=name]")
-        val sortCodeInput      = doc.select("input[name=sortCode]")
-        val accountNumberInput = doc.select("input[name=accountNumber]")
+          RequestAssertions.assertGetRequestOk(result)
+          ContentAssertions.commonPageChecks(
+            doc,
+            expectedH1 = EnterDirectDebitDetailsPage.expectedH1(lang),
+            shouldBackLinkBePresent = true,
+            expectedSubmitUrl = Some(routes.BankDetailsController.enterBankDetailsSubmit.url),
+            regimeBeingTested = Some(taxRegime),
+            language = lang
+          )
 
-        nameInput.attr("autocomplete") shouldBe "name"
-        nameInput.attr("spellcheck") shouldBe "false"
+          val nameInput          = doc.select("input[name=name]")
+          val sortCodeInput      = doc.select("input[name=sortCode]")
+          val accountNumberInput = doc.select("input[name=accountNumber]")
 
-        sortCodeInput.attr("autocomplete") shouldBe "off"
-        sortCodeInput.attr("inputmode") shouldBe "numeric"
-        sortCodeInput.attr("spellcheck") shouldBe "false"
+          nameInput.attr("autocomplete") shouldBe "name"
+          nameInput.attr("spellcheck") shouldBe "false"
 
-        accountNumberInput.attr("autocomplete") shouldBe "off"
-        accountNumberInput.attr("inputmode") shouldBe "numeric"
-        accountNumberInput.attr("spellcheck") shouldBe "false"
+          sortCodeInput.attr("autocomplete") shouldBe "off"
+          sortCodeInput.attr("inputmode") shouldBe "numeric"
+          sortCodeInput.attr("spellcheck") shouldBe "false"
 
-        val subheadings = doc.select(".govuk-label").asScala.toList
-        subheadings.size shouldBe 4
-        subheadings(0).text() shouldBe EnterDirectDebitDetailsPage.accountNameContent
-        subheadings(1).text() shouldBe EnterDirectDebitDetailsPage.bankDetails
-        subheadings(2).text() shouldBe EnterDirectDebitDetailsPage.sortCodeContent
-        subheadings(3).text() shouldBe EnterDirectDebitDetailsPage.accountNumberContent
+          accountNumberInput.attr("autocomplete") shouldBe "off"
+          accountNumberInput.attr("inputmode") shouldBe "numeric"
+          accountNumberInput.attr("spellcheck") shouldBe "false"
 
-        doc.select("#name-hint").text() shouldBe ""
-        doc.select("#sortCode-hint").text() shouldBe EnterDirectDebitDetailsPage.sortCodeHintContent
-        doc.select("#accountNumber-hint").text() shouldBe EnterDirectDebitDetailsPage.accountNumberHintContent
+          val subheadings = doc.select(".govuk-label").asScala.toList
+          subheadings.size shouldBe 4
+          subheadings(0).text() shouldBe EnterDirectDebitDetailsPage.accountNameContent(lang)
+          subheadings(1).text() shouldBe EnterDirectDebitDetailsPage.bankDetails(lang)
+          subheadings(2).text() shouldBe EnterDirectDebitDetailsPage.sortCodeContent(lang)
+          subheadings(3).text() shouldBe EnterDirectDebitDetailsPage.accountNumberContent(lang)
+
+          doc.select("#name-hint").text() shouldBe ""
+          doc.select("#sortCode-hint").text() shouldBe EnterDirectDebitDetailsPage.sortCodeHintContent(lang)
+          doc.select("#accountNumber-hint").text() shouldBe EnterDirectDebitDetailsPage.accountNumberHintContent(lang)
+        }
       }
 
       s"[$regime journey] prepopulate the form when the user has the direct debit details in their journey" in {
@@ -552,7 +590,7 @@ class BankDetailsControllerSpec extends ItSpec {
 
         ContentAssertions.commonPageChecks(
           doc,
-          expectedH1 = EnterDirectDebitDetailsPage.expectedH1,
+          expectedH1 = EnterDirectDebitDetailsPage.expectedH1(Languages.English),
           shouldBackLinkBePresent = true,
           expectedSubmitUrl = Some(routes.BankDetailsController.enterBankDetailsSubmit.url),
           regimeBeingTested = Some(taxRegime)
@@ -583,7 +621,8 @@ class BankDetailsControllerSpec extends ItSpec {
         action:             Action[AnyContent]
       )(formData: (String, String)*)(
         textAndHrefContent: List[(String, String)],
-        fieldErrors:        Seq[(String, String)] = Seq.empty
+        fieldErrors:        Seq[(String, String)] = Seq.empty,
+        lang:               Language = Languages.English
       ): Unit = {
 
         def assertFieldsPopulated(
@@ -601,12 +640,18 @@ class BankDetailsControllerSpec extends ItSpec {
             form
           )
 
+          val error = lang.fold("Error", "Gwall")
+
           fieldErrors.foreach { case (field, errorMessage) =>
-            doc.getElementById(s"$field-error").text.trim shouldBe s"Error: $errorMessage"
+            doc.getElementById(s"$field-error").text.trim shouldBe s"$error: $errorMessage"
           }
         }
 
-        testFormError(action)(formData*)(textAndHrefContent, assertFieldsPopulated(_, formData, fieldErrors))
+        testFormError(action)(formData*)(
+          textAndHrefContent,
+          assertFieldsPopulated(_, formData, fieldErrors),
+          lang = lang
+        )
       }
 
       s"[$regime journey] redirect to /check-bank-details when valid form is submitted" in new SubmitSuccessSetup {
@@ -676,110 +721,6 @@ class BankDetailsControllerSpec extends ItSpec {
         AuditConnectorStub.verifyNoAuditEvent()
       }
 
-      s"[$regime journey] show correct error messages when form submitted is empty" in {
-        stubCommonActions()
-        EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto, origin)()
-
-        val formData: List[(String, String)]               = List(
-          ("name", ""),
-          ("sortCode", ""),
-          ("accountNumber", "")
-        )
-        val expectedContentAndHref: List[(String, String)] = List(
-          ("Enter the name on the account", EnterDirectDebitDetailsPage.accountNameFieldId),
-          ("Enter sort code", EnterDirectDebitDetailsPage.sortCodeFieldId),
-          ("Enter account number", EnterDirectDebitDetailsPage.accountNumberFieldId)
-        )
-
-        testBankDetailsFormError(controller.enterBankDetailsSubmit)(formData*)(expectedContentAndHref)
-        EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
-        AuditConnectorStub.verifyNoAuditEvent()
-      }
-
-      s"[$regime journey] show correct error messages when submitted sort code and account number are not numeric" in {
-        stubCommonActions()
-        EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto, origin)()
-
-        val formData: List[(String, String)]               = List(
-          ("name", "Bob Ross"),
-          ("sortCode", "12E456"),
-          ("accountNumber", "12E45678")
-        )
-        val expectedContentAndHref: List[(String, String)] = List(
-          ("Sort code must be a number", EnterDirectDebitDetailsPage.sortCodeFieldId),
-          ("Account number must be a number", EnterDirectDebitDetailsPage.accountNumberFieldId)
-        )
-
-        testBankDetailsFormError(controller.enterBankDetailsSubmit)(formData*)(expectedContentAndHref)
-        EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
-        AuditConnectorStub.verifyNoAuditEvent()
-      }
-
-      s"[$regime journey] show correct error message when account name doesn't match regex" in {
-        def testBankDetailsFormError(
-          action:             Action[AnyContent]
-        )(formData: (String, String)*)(
-          textAndHrefContent: List[(String, String)],
-          fieldErrors:        Seq[(String, String)] = Seq.empty
-        ): Unit = {
-          def assertFieldsPopulated(
-            doc:         Document,
-            form:        Seq[(String, String)],
-            fieldErrors: Seq[(String, String)]
-          ): Unit = {
-            doc.select(EnterDirectDebitDetailsPage.accountNameFieldId).`val`() shouldBe getExpectedFormValue(
-              "name",
-              form
-            )
-            doc.select(EnterDirectDebitDetailsPage.sortCodeFieldId).`val`() shouldBe getExpectedFormValue(
-              "sortCode",
-              form
-            )
-            doc.select(EnterDirectDebitDetailsPage.accountNumberFieldId).`val`() shouldBe getExpectedFormValue(
-              "accountNumber",
-              form
-            )
-
-            fieldErrors.foreach { case (field, errorMessage) =>
-              doc.getElementById(s"$field-error").text.trim shouldBe s"Error: $errorMessage"
-            }
-          }
-
-          testFormError(action)(formData*)(textAndHrefContent, assertFieldsPopulated(_, formData, fieldErrors))
-        }
-
-        val nameTooShortError = "Name on the account must be between 2 and 39 characters"
-        val nameTooLongError  = "Name on the account must be between 2 and 39 characters"
-
-        val inputAndExpectedError = List[(String, String)](
-          ""          -> "Enter the name on the account",
-          "a"         -> nameTooShortError,
-          "a" * 40    -> nameTooLongError,
-          "ab£2"      -> "Name on the account must not contain £",
-          "a$$b£c"    -> "Name on the account must not contain $ or £",
-          "a?$$b£c?"  -> "Name on the account must not contain ?, $ or £",
-          "a?$$b£c=?" -> "Name on the account must not contain ?, $, £ or ="
-        )
-
-        inputAndExpectedError.foreach { case (accountName, errorMessage) =>
-          withClue(s"For accountName $accountName: ") {
-            stubCommonActions()
-            EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto, origin)()
-            val formData: List[(String, String)]               = List(
-              ("name", accountName),
-              ("sortCode", "123456"),
-              ("accountNumber", "12345678")
-            )
-            val expectedContentAndHref: List[(String, String)] = List(
-              (errorMessage, EnterDirectDebitDetailsPage.accountNameFieldId)
-            )
-            testBankDetailsFormError(controller.enterBankDetailsSubmit)(formData*)(expectedContentAndHref)
-            EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
-            AuditConnectorStub.verifyNoAuditEvent()
-          }
-        }
-      }
-
       s"[$regime journey] must allow" - {
 
         def testIsAllowed(accountName: String) = {
@@ -836,25 +777,6 @@ class BankDetailsControllerSpec extends ItSpec {
         }
       }
 
-      s"[$regime journey] show correct error messages when submitted sort code and account number are more than 6 and 8 digits respectively" in {
-        stubCommonActions()
-        EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto, origin)()
-
-        val formData: List[(String, String)]               = List(
-          ("name", "Bob Ross"),
-          ("sortCode", "1234567"),
-          ("accountNumber", "123456789")
-        )
-        val expectedContentAndHref: List[(String, String)] = List(
-          ("Sort code must be 6 digits", EnterDirectDebitDetailsPage.sortCodeFieldId),
-          ("Account number must be between 6 and 8 digits", EnterDirectDebitDetailsPage.accountNumberFieldId)
-        )
-
-        testBankDetailsFormError(controller.enterBankDetailsSubmit)(formData*)(expectedContentAndHref)
-        EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
-        AuditConnectorStub.verifyNoAuditEvent()
-      }
-
       s"[$regime journey] should strip out allowed separators" in {
         stubCommonActions()
         BarsStub.ValidateStub.success()
@@ -899,442 +821,727 @@ class BankDetailsControllerSpec extends ItSpec {
           auditEvent = Json
             .parse(
               s"""
-                   |{
-                   |  "taxDetail": ${TdAll.taxDetailJsonString(taxRegime)},
-                   |  "taxType": "${taxRegime.toString}",
-                   |  "origin": "${origin.toString().split('.').last}",
-                   |  "request": {
-                   |    "account": {
-                   |       "accountType": "personal",
-                   |       "accountHolderName": "Bob Ross",
-                   |       "sortCode": "123456",
-                   |       "accountNumber": "12345678"
-                   |    }
-                   |  },
-                   |  "response": {
-                   |    "isBankAccountValid": true,
-                   |    "barsResponse":  ${VerifyJson.success}
-                   |  },
-                   |  "barsVerify": {
-                   |    "unsuccessfulAttempts" : 1
-                   |  },
-                   |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059"
-                   |}
+                 |{
+                 |  "taxDetail": ${TdAll.taxDetailJsonString(taxRegime)},
+                 |  "taxType": "${taxRegime.toString}",
+                 |  "origin": "${origin.toString().split('.').last}",
+                 |  "request": {
+                 |    "account": {
+                 |       "accountType": "personal",
+                 |       "accountHolderName": "Bob Ross",
+                 |       "sortCode": "123456",
+                 |       "accountNumber": "12345678"
+                 |    }
+                 |  },
+                 |  "response": {
+                 |    "isBankAccountValid": true,
+                 |    "barsResponse":  ${VerifyJson.success}
+                 |  },
+                 |  "barsVerify": {
+                 |    "unsuccessfulAttempts" : 1
+                 |  },
+                 |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059"
+                 |}
             """.stripMargin
             )
             .as[JsObject]
         )
       }
 
-      abstract class BarsErrorSetup(typeOfAccount: TypeOfBankAccount = TypesOfBankAccount.Personal) {
-        stubCommonActions()
-        BarsVerifyStatusStub.update(numberOfAttempts = 2)
-        EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
-        EssttpBackend.DirectDebitDetails
-          .stubUpdateDirectDebitDetails(TdAll.journeyId, JourneyJsonTemplates.`Entered Direct Debit Details`(origin))
+      Languages.values.foreach { lang =>
+        s"for lang ${lang.toString}" - {
 
-        EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto, origin, typeOfAccount)()
+          s"[$regime journey] show correct error messages when form submitted is empty" in {
+            stubCommonActions()
+            EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto, origin)()
 
-        val formData: List[(String, String)] = List(
-          ("name", "Bob Ross"),
-          ("sortCode", "123456"),
-          ("accountNumber", "12345678")
-        )
-
-        def toExpectedBarsAuditDetailJson(
-          barsResponseJson:           String,
-          isBankAccountValid:         Boolean = false,
-          numberOfBarsVerifyAttempts: Int = 1,
-          barsVerifyLockoutTime:      Option[Instant] = None
-        ): JsObject = {
-          val barsVerifyJsonString =
-            s"""
-            |"barsVerify": {
-            |  "unsuccessfulAttempts": ${numberOfBarsVerifyAttempts.toString}${barsVerifyLockoutTime.fold("")(t =>
-                s""","lockoutExpiryDateTime": "${t.toString}""""
-              )}
-            |}
-            |""".stripMargin
-
-          Json
-            .parse(
-              s"""
-             |{
-             |  "taxDetail": ${TdAll.taxDetailJsonString(taxRegime)},
-             |  "taxType": "${taxRegime.toString}",
-             |  "origin": "${origin.toString.split('.').last}",
-             |  "request": {
-             |    "account": {
-             |       "accountType": "${typeOfAccount.entryName.toLowerCase(Locale.UK)}",
-             |       "accountHolderName": "Bob Ross",
-             |       "sortCode": "123456",
-             |       "accountNumber": "12345678"
-             |    }
-             |  },
-             |  "response": {
-             |   "isBankAccountValid": ${isBankAccountValid.toString},
-             |   "barsResponse":  $barsResponseJson
-             |  },
-             |  $barsVerifyJsonString,
-             |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059"
-             |}
-            """.stripMargin
+            val formData: List[(String, String)]               = List(
+              ("name", ""),
+              ("sortCode", ""),
+              ("accountNumber", "")
             )
-            .as[JsObject]
-        }
-
-        val fakeRequest = FakeRequest(
-          method = "POST",
-          path = "/bank-account-details"
-        ).withAuthToken()
-          .withSession(SessionKeys.sessionId -> "IamATestSessionId")
-          .withFormUrlEncodedBody(formData*)
-      }
-
-      abstract class BarsFormErrorSetup(barsError: String, typeOfAccount: TypeOfBankAccount)
-          extends BarsErrorSetup(typeOfAccount) {
-
-        val validForm: List[(String, String)] = formData
-
-        val validFormBusiness: List[(String, String)] =
-          List(
-            ("name", "Bob Ross"),
-            ("sortCode", "123456"),
-            ("accountNumber", "12345678")
-          )
-
-        private val sortCodeAndAccountNumberFieldError: List[(String, String)] =
-          List("sort-code-and-account-number" -> "Enter a valid combination of bank account number and sort code")
-
-        private val sortCodeFieldError: List[(String, String)] = List(
-          (
-            "sortCode",
-            "You have entered a sort code which does not accept this type of payment. " +
-              "Check you have entered a valid sort code or enter details for a different account"
-          )
-        )
-
-        val (expectedErrorSummaryContentAndHref, expectedFieldErrors, expectedAuditResponseJson)
-          : (List[(String, String)], Seq[(String, String)], String) =
-          barsError match {
-            case "accountNumberNotWellFormatted" =>
-              BarsStub.ValidateStub.accountNumberNotWellFormatted()
+            val expectedContentAndHref: List[(String, String)] = List(
               (
-                List(("Enter a valid combination of bank account number and sort code", "#sortCode")),
-                sortCodeAndAccountNumberFieldError,
-                ValidateJson.accountNumberNotWellFormatted
+                lang.fold("Enter the name on the account", "Nodwch yr enw sydd ar y cyfrif"),
+                EnterDirectDebitDetailsPage.accountNameFieldId
+              ),
+              (
+                lang.fold("Enter sort code", "Nodwch god didoli"),
+                EnterDirectDebitDetailsPage.sortCodeFieldId
+              ),
+              (
+                lang.fold("Enter account number", "Nodwch rif y cyfrif"),
+                EnterDirectDebitDetailsPage.accountNumberFieldId
+              )
+            )
+
+            testBankDetailsFormError(controller.enterBankDetailsSubmit)(formData*)(expectedContentAndHref, lang = lang)
+            EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+            AuditConnectorStub.verifyNoAuditEvent()
+          }
+
+          s"[$regime journey] show correct error messages when submitted sort code and account number are not numeric" in {
+            stubCommonActions()
+            EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto, origin)()
+
+            val formData: List[(String, String)]               = List(
+              ("name", "Bob Ross"),
+              ("sortCode", "12E456"),
+              ("accountNumber", "12E45678")
+            )
+            val expectedContentAndHref: List[(String, String)] = List(
+              (
+                lang.fold("Sort code must be a number", "Mae’n rhaid i’r cod didoli fod yn rhif"),
+                EnterDirectDebitDetailsPage.sortCodeFieldId
+              ),
+              (
+                lang.fold("Account number must be a number", "Mae’n rhaid i rif y cyfrif fod yn rhif"),
+                EnterDirectDebitDetailsPage.accountNumberFieldId
+              )
+            )
+
+            testBankDetailsFormError(controller.enterBankDetailsSubmit)(formData*)(expectedContentAndHref, lang = lang)
+            EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+            AuditConnectorStub.verifyNoAuditEvent()
+          }
+
+          s"[$regime journey] show correct error message when account name doesn't match regex" in {
+            def testBankDetailsFormError(
+              action:             Action[AnyContent]
+            )(formData: (String, String)*)(
+              textAndHrefContent: List[(String, String)],
+              fieldErrors:        Seq[(String, String)] = Seq.empty
+            ): Unit = {
+              def assertFieldsPopulated(
+                doc:         Document,
+                form:        Seq[(String, String)],
+                fieldErrors: Seq[(String, String)]
+              ): Unit = {
+                doc.select(EnterDirectDebitDetailsPage.accountNameFieldId).`val`() shouldBe getExpectedFormValue(
+                  "name",
+                  form
+                )
+                doc.select(EnterDirectDebitDetailsPage.sortCodeFieldId).`val`() shouldBe getExpectedFormValue(
+                  "sortCode",
+                  form
+                )
+                doc.select(EnterDirectDebitDetailsPage.accountNumberFieldId).`val`() shouldBe getExpectedFormValue(
+                  "accountNumber",
+                  form
+                )
+
+                fieldErrors.foreach { case (field, errorMessage) =>
+                  doc.getElementById(s"$field-error").text.trim shouldBe s"Error: $errorMessage"
+                }
+              }
+
+              testFormError(action)(formData*)(
+                textAndHrefContent,
+                assertFieldsPopulated(_, formData, fieldErrors),
+                lang = lang
+              )
+            }
+
+            val nameLengthError =
+              lang.fold(
+                "Name on the account must be between 2 and 39 characters",
+                "Mae’n rhaid i’r enw ar y cyfrif fod rhwng 2 a 39 o gymeriadau"
               )
 
-            case "sortCodeNotPresentOnEiscd" =>
-              BarsStub.ValidateStub.sortCodeNotPresentOnEiscd()
-              (
-                List(("Enter a valid combination of bank account number and sort code", "#sortCode")),
-                sortCodeAndAccountNumberFieldError,
-                ValidateJson.sortCodeNotPresentOnEiscd
+            val inputAndExpectedError = List[(String, String)](
+              ""          -> lang.fold("Enter the name on the account", "Nodwch yr enw sydd ar y cyfrif"),
+              "a"         -> nameLengthError,
+              "a" * 40    -> nameLengthError,
+              "ab£2"      -> lang.fold(
+                "Name on the account must not contain £",
+                "Mae’n rhaid i’r enw sydd ar y cyfrif peidio â chynnwys £"
+              ),
+              "a$$b£c"    -> lang.fold(
+                "Name on the account must not contain $ or £",
+                "Mae’n rhaid i’r enw sydd ar y cyfrif peidio â chynnwys $ neu £"
+              ),
+              "a?$$b£c?"  -> lang.fold(
+                "Name on the account must not contain ?, $ or £",
+                "Mae’n rhaid i’r enw sydd ar y cyfrif peidio â chynnwys ?, $ neu £"
+              ),
+              "a?$$b£c=?" -> lang.fold(
+                "Name on the account must not contain ?, $, £ or =",
+                "Mae’n rhaid i’r enw sydd ar y cyfrif peidio â chynnwys ?, $, £ neu ="
               )
+            )
 
-            case "sortCodeDoesNotSupportsDirectDebit" =>
-              BarsStub.ValidateStub.sortCodeDoesNotSupportsDirectDebit()
+            inputAndExpectedError.foreach { case (accountName, errorMessage) =>
+              withClue(s"For accountName $accountName: ") {
+                stubCommonActions()
+                EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto, origin)()
+                val formData: List[(String, String)]               = List(
+                  ("name", accountName),
+                  ("sortCode", "123456"),
+                  ("accountNumber", "12345678")
+                )
+                val expectedContentAndHref: List[(String, String)] = List(
+                  (errorMessage, EnterDirectDebitDetailsPage.accountNameFieldId)
+                )
+                testBankDetailsFormError(controller.enterBankDetailsSubmit)(formData*)(expectedContentAndHref)
+                EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+                AuditConnectorStub.verifyNoAuditEvent()
+              }
+            }
+          }
+
+          s"[$regime journey] show correct error messages when submitted sort code and account number are more than 6 and 8 digits respectively" in {
+            stubCommonActions()
+            EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto, origin)()
+
+            val formData: List[(String, String)]               = List(
+              ("name", "Bob Ross"),
+              ("sortCode", "1234567"),
+              ("accountNumber", "123456789")
+            )
+            val expectedContentAndHref: List[(String, String)] = List(
               (
-                List(
-                  (
-                    "You have entered a sort code which does not accept this type of payment. " +
-                      "Check you have entered a valid sort code or enter details for a different account",
-                    "#sortCode"
-                  )
+                lang.fold("Sort code must be 6 digits", "Mae’n rhaid i’r cod didoli fod yn 6 digid"),
+                EnterDirectDebitDetailsPage.sortCodeFieldId
+              ),
+              (
+                lang.fold(
+                  "Account number must be between 6 and 8 digits",
+                  "Mae’n rhaid i rif y cyfrif fod rhwng 6 ac 8 digid"
                 ),
-                sortCodeFieldError,
-                ValidateJson.sortCodeDoesNotSupportsDirectDebit
+                EnterDirectDebitDetailsPage.accountNumberFieldId
+              )
+            )
+
+            testBankDetailsFormError(controller.enterBankDetailsSubmit)(formData*)(expectedContentAndHref, lang = lang)
+            EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+            AuditConnectorStub.verifyNoAuditEvent()
+          }
+
+          abstract class BarsErrorSetup(
+            typeOfAccount:               TypeOfBankAccount = TypesOfBankAccount.Personal,
+            updatedNumberOfBarsAttempts: Int = 2,
+            maximumNumberOfBarsAttempts: Int = 3
+          ) {
+            stubCommonActions(maximumNumberOfBarsAttempts = maximumNumberOfBarsAttempts)
+            BarsVerifyStatusStub.update(numberOfAttempts = updatedNumberOfBarsAttempts)
+            EssttpBackend.DirectDebitDetails.verifyNoneUpdateDirectDebitDetailsRequest(TdAll.journeyId)
+            EssttpBackend.DirectDebitDetails
+              .stubUpdateDirectDebitDetails(
+                TdAll.journeyId,
+                JourneyJsonTemplates.`Entered Direct Debit Details`(origin)
               )
 
-            case "nameDoesNotMatch" =>
-              BarsStub.ValidateStub.success()
-              typeOfAccount match {
-                case TypesOfBankAccount.Personal => BarsStub.VerifyPersonalStub.nameDoesNotMatch()
-                case TypesOfBankAccount.Business => BarsStub.VerifyBusinessStub.nameDoesNotMatch()
-              }
-              val expectedErrorMessage = typeOfAccount match {
-                case TypesOfBankAccount.Personal => "Enter the name on the account as it appears on bank statements"
-                case TypesOfBankAccount.Business =>
-                  "Enter the business name on the account as it appears on bank statements"
-              }
-              (
-                List((expectedErrorMessage, "#name")),
-                List("name" -> expectedErrorMessage),
-                VerifyJson.nameDoesNotMatch
+            EssttpBackend.ChosenTypeOfBankAccount.findJourney(testCrypto, origin, typeOfAccount)()
+
+            val formData: List[(String, String)] = List(
+              ("name", "Bob Ross"),
+              ("sortCode", "123456"),
+              ("accountNumber", "12345678")
+            )
+
+            def toExpectedBarsAuditDetailJson(
+              barsResponseJson:           String,
+              isBankAccountValid:         Boolean = false,
+              numberOfBarsVerifyAttempts: Int = 1,
+              barsVerifyLockoutTime:      Option[Instant] = None
+            ): JsObject = {
+              val barsVerifyJsonString =
+                s"""
+                   |"barsVerify": {
+                   |  "unsuccessfulAttempts": ${numberOfBarsVerifyAttempts.toString}${barsVerifyLockoutTime.fold("")(
+                    t => s""","lockoutExpiryDateTime": "${t.toString}""""
+                  )}
+                   |}
+                   |""".stripMargin
+
+              Json
+                .parse(
+                  s"""
+                     |{
+                     |  "taxDetail": ${TdAll.taxDetailJsonString(taxRegime)},
+                     |  "taxType": "${taxRegime.toString}",
+                     |  "origin": "${origin.toString.split('.').last}",
+                     |  "request": {
+                     |    "account": {
+                     |       "accountType": "${typeOfAccount.entryName.toLowerCase(Locale.UK)}",
+                     |       "accountHolderName": "Bob Ross",
+                     |       "sortCode": "123456",
+                     |       "accountNumber": "12345678"
+                     |    }
+                     |  },
+                     |  "response": {
+                     |   "isBankAccountValid": ${isBankAccountValid.toString},
+                     |   "barsResponse":  $barsResponseJson
+                     |  },
+                     |  $barsVerifyJsonString,
+                     |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059"
+                     |}
+            """.stripMargin
+                )
+                .as[JsObject]
+            }
+
+            val fakeRequest = FakeRequest(
+              method = "POST",
+              path = "/bank-account-details"
+            ).withAuthToken()
+              .withSession(SessionKeys.sessionId -> "IamATestSessionId")
+              .withFormUrlEncodedBody(formData*)
+              .withLang(lang)
+          }
+
+          abstract class BarsFormErrorSetup(
+            barsError:                             String,
+            typeOfAccount:                         TypeOfBankAccount,
+            updatedNumberOfBarsAttempts:           Int = 2,
+            maximumNumberOfBarsAttempts:           Int = 3,
+            expectedNumberOfRemainingBarsAttempts: Int = 1
+          ) extends BarsErrorSetup(
+                typeOfAccount,
+                updatedNumberOfBarsAttempts,
+                maximumNumberOfBarsAttempts
+              ) {
+
+            val validForm: List[(String, String)] = formData
+
+            val validFormBusiness: List[(String, String)] =
+              List(
+                ("name", "Bob Ross"),
+                ("sortCode", "123456"),
+                ("accountNumber", "12345678")
               )
 
-            case "accountDoesNotExist" =>
-              BarsStub.ValidateStub.success()
-              typeOfAccount match {
-                case TypesOfBankAccount.Personal => BarsStub.VerifyPersonalStub.accountDoesNotExist()
-                case TypesOfBankAccount.Business => BarsStub.VerifyBusinessStub.accountDoesNotExist()
-              }
-              (
-                List(("Enter a valid combination of bank account number and sort code", "#sortCode")),
-                sortCodeAndAccountNumberFieldError,
-                VerifyJson.accountDoesNotExist
+            private val sortCodeAndAccountNumberFieldError: List[(String, String)] =
+              List(
+                "sort-code-and-account-number" ->
+                  lang.fold(
+                    "Enter a valid combination of bank account number and sort code",
+                    "Nodwch gyfuniad dilys o rif cyfrif banc a chod didoli"
+                  )
               )
 
-            case "sortCodeOnDenyList" =>
-              BarsStub.ValidateStub.sortCodeOnDenyList()
+            private val sortCodeFieldError: List[(String, String)] = List(
               (
-                List(("Enter a valid combination of bank account number and sort code", "#sortCode")),
-                sortCodeAndAccountNumberFieldError,
-                ValidateJson.sortCodeOnDenyList
+                "sortCode",
+                lang.fold(
+                  "You have entered a sort code which does not accept this type of payment. " +
+                    "Check you have entered a valid sort code or enter details for a different account",
+                  "Rydych wedi nodi cod didoli nad yw’n derbyn y math hwn o daliad. " +
+                    "Gwiriwch eich bod wedi nodi cod didoli dilys, neu nodwch fanylion ar gyfer cyfrif gwahanol"
+                )
               )
+            )
 
-            case "otherBarsError" =>
-              BarsStub.ValidateStub.success()
-              typeOfAccount match {
-                case TypesOfBankAccount.Personal => BarsStub.VerifyPersonalStub.otherBarsError()
-                case TypesOfBankAccount.Business => BarsStub.VerifyBusinessStub.otherBarsError()
+            val (expectedErrorSummaryContentAndHref, expectedFieldErrors, expectedAuditResponseJson)
+              : (List[(String, String)], Seq[(String, String)], String) = {
+              val timeOrTimesEnglish = if (expectedNumberOfRemainingBarsAttempts > 1) "times" else "time"
+              val timeOrTimesWelsh   = if (expectedNumberOfRemainingBarsAttempts > 1) "gynnig" else "cynnig"
+
+              barsError match {
+                case "accountNumberNotWellFormatted" =>
+                  BarsStub.ValidateStub.accountNumberNotWellFormatted()
+                  (
+                    List(
+                      (
+                        lang.fold(
+                          "Enter a valid combination of bank account number and sort code",
+                          "Nodwch gyfuniad dilys o rif cyfrif banc a chod didoli"
+                        ),
+                        "#sortCode"
+                      )
+                    ),
+                    sortCodeAndAccountNumberFieldError,
+                    ValidateJson.accountNumberNotWellFormatted
+                  )
+
+                case "sortCodeNotPresentOnEiscd" =>
+                  BarsStub.ValidateStub.sortCodeNotPresentOnEiscd()
+                  (
+                    List(
+                      (
+                        lang.fold(
+                          "Enter a valid combination of bank account number and sort code",
+                          "Nodwch gyfuniad dilys o rif cyfrif banc a chod didoli"
+                        ),
+                        "#sortCode"
+                      )
+                    ),
+                    sortCodeAndAccountNumberFieldError,
+                    ValidateJson.sortCodeNotPresentOnEiscd
+                  )
+
+                case "sortCodeDoesNotSupportsDirectDebit" =>
+                  BarsStub.ValidateStub.sortCodeDoesNotSupportsDirectDebit()
+                  (
+                    List(
+                      (
+                        lang.fold(
+                          "You have entered a sort code which does not accept this type of payment. " +
+                            "Check you have entered a valid sort code or enter details for a different account",
+                          "Rydych wedi nodi cod didoli nad yw’n derbyn y math hwn o daliad. " +
+                            "Gwiriwch eich bod wedi nodi cod didoli dilys, neu nodwch fanylion ar gyfer cyfrif gwahanol"
+                        ),
+                        "#sortCode"
+                      )
+                    ),
+                    sortCodeFieldError,
+                    ValidateJson.sortCodeDoesNotSupportsDirectDebit
+                  )
+
+                case "nameDoesNotMatch" =>
+                  BarsStub.ValidateStub.success()
+                  typeOfAccount match {
+                    case TypesOfBankAccount.Personal => BarsStub.VerifyPersonalStub.nameDoesNotMatch()
+                    case TypesOfBankAccount.Business => BarsStub.VerifyBusinessStub.nameDoesNotMatch()
+                  }
+                  val expectedErrorMessage = typeOfAccount match {
+                    case TypesOfBankAccount.Personal =>
+                      lang.fold(
+                        s"Enter the name on the account as it appears on bank statements. You can try ${expectedNumberOfRemainingBarsAttempts.toString} more $timeOrTimesEnglish",
+                        s"Nodwch yr enw ar y cyfrif fel y mae’n ymddangos ar gyfriflenni banc. Gallwch roi ${expectedNumberOfRemainingBarsAttempts.toString} $timeOrTimesWelsh arall arni"
+                      )
+                    case TypesOfBankAccount.Business =>
+                      lang.fold(
+                        s"Enter the business name on the account as it appears on bank statements. You can try ${expectedNumberOfRemainingBarsAttempts.toString} more $timeOrTimesEnglish",
+                        s"Nodwch enw’r busnes ar y cyfrif fel y mae’n ymddangos ar gyfriflenni banc. Gallwch roi ${expectedNumberOfRemainingBarsAttempts.toString} $timeOrTimesWelsh arall arni"
+                      )
+                  }
+                  (
+                    List((expectedErrorMessage, "#name")),
+                    List("name" -> expectedErrorMessage),
+                    VerifyJson.nameDoesNotMatch
+                  )
+
+                case "accountDoesNotExist" =>
+                  BarsStub.ValidateStub.success()
+                  typeOfAccount match {
+                    case TypesOfBankAccount.Personal => BarsStub.VerifyPersonalStub.accountDoesNotExist()
+                    case TypesOfBankAccount.Business => BarsStub.VerifyBusinessStub.accountDoesNotExist()
+                  }
+                  (
+                    List(
+                      (
+                        lang.fold(
+                          s"Enter a valid combination of bank account number and sort code. You can try ${expectedNumberOfRemainingBarsAttempts.toString} more $timeOrTimesEnglish",
+                          s"Nodwch gyfuniad dilys o rif cyfrif banc a chod didoli. Gallwch roi ${expectedNumberOfRemainingBarsAttempts.toString} $timeOrTimesWelsh arall arni"
+                        ),
+                        "#sortCode"
+                      )
+                    ),
+                    sortCodeAndAccountNumberFieldError,
+                    VerifyJson.accountDoesNotExist
+                  )
+
+                case "sortCodeOnDenyList" =>
+                  BarsStub.ValidateStub.sortCodeOnDenyList()
+                  (
+                    List(
+                      (
+                        lang.fold(
+                          "Enter a valid combination of bank account number and sort code",
+                          "Nodwch gyfuniad dilys o rif cyfrif banc a chod didoli"
+                        ),
+                        "#sortCode"
+                      )
+                    ),
+                    sortCodeAndAccountNumberFieldError,
+                    ValidateJson.sortCodeOnDenyList
+                  )
+
+                case "otherBarsError" =>
+                  BarsStub.ValidateStub.success()
+                  typeOfAccount match {
+                    case TypesOfBankAccount.Personal => BarsStub.VerifyPersonalStub.otherBarsError()
+                    case TypesOfBankAccount.Business => BarsStub.VerifyBusinessStub.otherBarsError()
+                  }
+                  (
+                    List(
+                      (
+                        lang.fold(
+                          "Enter a valid combination of bank account number and sort code",
+                          "Nodwch gyfuniad dilys o rif cyfrif banc a chod didoli"
+                        ),
+                        "#sortCode"
+                      )
+                    ),
+                    sortCodeAndAccountNumberFieldError,
+                    VerifyJson.otherBarsError
+                  )
               }
-              (
-                List(("Enter a valid combination of bank account number and sort code", "#sortCode")),
-                sortCodeAndAccountNumberFieldError,
-                VerifyJson.otherBarsError
+            }
+
+            def expectedBarsAuditDetailJson(
+              numberOfBarsVerifyAttempts: Int = 1,
+              barsVerifyLockoutTime:      Option[Instant] = None
+            ): JsObject =
+              toExpectedBarsAuditDetailJson(
+                expectedAuditResponseJson,
+                numberOfBarsVerifyAttempts = numberOfBarsVerifyAttempts,
+                barsVerifyLockoutTime = barsVerifyLockoutTime
               )
           }
 
-        def expectedBarsAuditDetailJson(
-          numberOfBarsVerifyAttempts: Int = 1,
-          barsVerifyLockoutTime:      Option[Instant] = None
-        ): JsObject =
-          toExpectedBarsAuditDetailJson(
-            expectedAuditResponseJson,
-            numberOfBarsVerifyAttempts = numberOfBarsVerifyAttempts,
-            barsVerifyLockoutTime = barsVerifyLockoutTime
-          )
+          s"[$regime journey] show correct error message when BARs validate response is accountNumberNotWellFormatted" in
+            new BarsFormErrorSetup("accountNumberNotWellFormatted", TypesOfBankAccount.Personal) {
+              testBankDetailsFormError(controller.enterBankDetailsSubmit)(validForm*)(
+                expectedErrorSummaryContentAndHref,
+                expectedFieldErrors,
+                lang = lang
+              )
+
+              BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
+              BarsStub.VerifyStub.ensureBarsVerifyNotCalled()
+              AuditConnectorStub.verifyEventAudited(
+                auditType = "BarsCheck",
+                auditEvent = expectedBarsAuditDetailJson()
+              )
+            }
+
+          s"[$regime journey] show correct error message when BARs validate response is sortCodeNotPresentOnEiscd" in
+            new BarsFormErrorSetup("sortCodeNotPresentOnEiscd", TypesOfBankAccount.Personal) {
+              testBankDetailsFormError(controller.enterBankDetailsSubmit)(validForm*)(
+                expectedErrorSummaryContentAndHref,
+                expectedFieldErrors,
+                lang = lang
+              )
+
+              BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
+              BarsStub.VerifyStub.ensureBarsVerifyNotCalled()
+              AuditConnectorStub.verifyEventAudited(
+                auditType = "BarsCheck",
+                auditEvent = expectedBarsAuditDetailJson()
+              )
+            }
+
+          s"[$regime journey] show correct error message when BARs validate response is sortCodeDoesNotSupportsDirectDebit" in
+            new BarsFormErrorSetup("sortCodeDoesNotSupportsDirectDebit", TypesOfBankAccount.Personal) {
+              testBankDetailsFormError(controller.enterBankDetailsSubmit)(validForm*)(
+                expectedErrorSummaryContentAndHref,
+                expectedFieldErrors,
+                lang = lang
+              )
+
+              BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
+              BarsStub.VerifyStub.ensureBarsVerifyNotCalled()
+              AuditConnectorStub.verifyEventAudited(
+                auditType = "BarsCheck",
+                auditEvent = expectedBarsAuditDetailJson()
+              )
+            }
+
+          s"[$regime journey] show correct error message when BARs verify response is nameDoesNotMatch with a personal bank account" in
+            new BarsFormErrorSetup(
+              "nameDoesNotMatch",
+              typeOfAccount = TypesOfBankAccount.Personal,
+              updatedNumberOfBarsAttempts = 1,
+              maximumNumberOfBarsAttempts = 3,
+              expectedNumberOfRemainingBarsAttempts = 2
+            ) {
+              testBankDetailsFormError(controller.enterBankDetailsSubmit)(validForm*)(
+                expectedErrorSummaryContentAndHref,
+                expectedFieldErrors,
+                lang = lang
+              )
+
+              BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(validForm)
+              AuditConnectorStub.verifyEventAudited(
+                auditType = "BarsCheck",
+                auditEvent = expectedBarsAuditDetailJson(numberOfBarsVerifyAttempts = 1)
+              )
+            }
+
+          s"[$regime journey] show correct error message when BARs verify response is nameDoesNotMatch with a business bank account" in
+            new BarsFormErrorSetup(
+              "nameDoesNotMatch",
+              typeOfAccount = TypesOfBankAccount.Business,
+              updatedNumberOfBarsAttempts = 2,
+              maximumNumberOfBarsAttempts = 3,
+              expectedNumberOfRemainingBarsAttempts = 1
+            ) {
+              testBankDetailsFormError(controller.enterBankDetailsSubmit)(validFormBusiness*)(
+                expectedErrorSummaryContentAndHref,
+                expectedFieldErrors,
+                lang = lang
+              )
+
+              BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validFormBusiness)
+              AuditConnectorStub.verifyEventAudited(
+                auditType = "BarsCheck",
+                auditEvent = expectedBarsAuditDetailJson(numberOfBarsVerifyAttempts = 2)
+              )
+            }
+
+          s"[$regime journey] show correct error message when bars verify-personal responds with accountExists is No" in
+            new BarsFormErrorSetup("accountDoesNotExist", typeOfAccount = TypesOfBankAccount.Personal) {
+              testBankDetailsFormError(controller.enterBankDetailsSubmit)(validForm*)(
+                expectedErrorSummaryContentAndHref,
+                expectedFieldErrors,
+                lang = lang
+              )
+
+              BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(validForm)
+              BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
+            }
+
+          s"[$regime journey] show correct error message when bars verify-business responds with accountExists is No" in
+            new BarsFormErrorSetup("accountDoesNotExist", typeOfAccount = TypesOfBankAccount.Business) {
+              testBankDetailsFormError(controller.enterBankDetailsSubmit)(validFormBusiness*)(
+                expectedErrorSummaryContentAndHref,
+                expectedFieldErrors,
+                lang = lang
+              )
+
+              BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validFormBusiness)
+              BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
+            }
+
+          s"[$regime journey] show correct error message when bars validate response is 400 sortCodeOnDenyList" in
+            new BarsFormErrorSetup("sortCodeOnDenyList", typeOfAccount = TypesOfBankAccount.Business) {
+              testBankDetailsFormError(controller.enterBankDetailsSubmit)(validFormBusiness*)(
+                expectedErrorSummaryContentAndHref,
+                expectedFieldErrors,
+                lang = lang
+              )
+
+              BarsStub.ValidateStub.ensureBarsValidateCalled(validFormBusiness)
+              BarsStub.VerifyStub.ensureBarsVerifyNotCalled()
+              BarsVerifyStatusStub.ensureVerifyUpdateStatusIsNotCalled()
+            }
+
+          s"[$regime journey] show correct error message when bars verify-personal is an undocumented error response" in
+            new BarsFormErrorSetup("otherBarsError", typeOfAccount = TypesOfBankAccount.Personal) {
+              testBankDetailsFormError(controller.enterBankDetailsSubmit)(validForm*)(
+                expectedErrorSummaryContentAndHref,
+                expectedFieldErrors,
+                lang = lang
+              )
+
+              BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(validForm)
+              BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
+            }
+
+          s"[$regime journey] show correct error message when bars verify-business is an undocumented error response" in
+            new BarsFormErrorSetup("otherBarsError", typeOfAccount = TypesOfBankAccount.Business) {
+              testBankDetailsFormError(controller.enterBankDetailsSubmit)(validFormBusiness*)(
+                expectedErrorSummaryContentAndHref,
+                expectedFieldErrors,
+                lang = lang
+              )
+              BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validFormBusiness)
+              BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
+            }
+
+          s"[$regime journey] go to technical difficulties page when bars verify-personal response has accountExists is ERROR" in
+            new BarsErrorSetup(TypesOfBankAccount.Personal) {
+              BarsStub.ValidateStub.success()
+              BarsStub.VerifyPersonalStub.accountExistsError()
+
+              a[RuntimeException] shouldBe thrownBy(
+                await(controller.enterBankDetailsSubmit(fakeRequest.withLang(lang)))
+              )
+
+              BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
+              BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
+
+              AuditConnectorStub.verifyEventAudited(
+                auditType = "BarsCheck",
+                auditEvent = toExpectedBarsAuditDetailJson(
+                  VerifyJson.accountExistsError,
+                  numberOfBarsVerifyAttempts = 2
+                )
+              )
+            }
+
+          s"[$regime journey] go to technical difficulties page when bars verify-business response has accountExists is ERROR" in
+            new BarsErrorSetup(TypesOfBankAccount.Business) {
+
+              BarsStub.ValidateStub.success()
+              BarsStub.VerifyBusinessStub.accountExistsError()
+
+              a[RuntimeException] shouldBe thrownBy(
+                await(controller.enterBankDetailsSubmit(fakeRequest.withLang(lang)))
+              )
+
+              BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(formData)
+              BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
+              AuditConnectorStub.verifyEventAudited(
+                auditType = "BarsCheck",
+                auditEvent = toExpectedBarsAuditDetailJson(
+                  VerifyJson.accountExistsError,
+                  numberOfBarsVerifyAttempts = 2
+                )
+              )
+            }
+
+          s"[$regime journey] go to technical difficulties page when bars verify-personal response has nameMatches is Error" in
+            new BarsErrorSetup(TypesOfBankAccount.Personal) {
+
+              BarsStub.ValidateStub.success()
+              BarsStub.VerifyPersonalStub.nameMatchesError()
+
+              a[RuntimeException] shouldBe thrownBy(
+                await(controller.enterBankDetailsSubmit(fakeRequest.withLang(lang)))
+              )
+
+              BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
+              BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
+              AuditConnectorStub.verifyEventAudited(
+                auditType = "BarsCheck",
+                auditEvent = toExpectedBarsAuditDetailJson(
+                  VerifyJson.nameMatchesError,
+                  numberOfBarsVerifyAttempts = 2
+                )
+              )
+            }
+
+          s"[$regime journey] go to technical difficulties page when bars verify-business response has nameMatches is Error" in
+            new BarsErrorSetup(TypesOfBankAccount.Business) {
+              BarsStub.ValidateStub.success()
+              BarsStub.VerifyBusinessStub.nameMatchesError()
+
+              a[RuntimeException] shouldBe thrownBy(
+                await(controller.enterBankDetailsSubmit(fakeRequest.withLang(lang)))
+              )
+
+              BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(formData)
+              BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
+              AuditConnectorStub.verifyEventAudited(
+                auditType = "BarsCheck",
+                auditEvent = toExpectedBarsAuditDetailJson(
+                  VerifyJson.nameMatchesError,
+                  numberOfBarsVerifyAttempts = 2
+                )
+              )
+            }
+
+          s"[$regime journey] redirect to the lockout page when update bars verify status response contains an expiry date-time" in
+            new BarsErrorSetup(TypesOfBankAccount.Business) {
+
+              private val expiry = Instant.now
+
+              BarsStub.ValidateStub.success()
+              BarsStub.VerifyBusinessStub.otherBarsError() // any error will do
+              BarsVerifyStatusStub.updateAndLockout(expiry)
+
+              val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest.withLang(lang))
+              status(result) shouldBe Status.SEE_OTHER
+              redirectLocation(result) shouldBe Some(PageUrls.lockoutUrl)
+
+              BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(formData)
+              BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
+              AuditConnectorStub.verifyEventAudited(
+                auditType = "BarsCheck",
+                auditEvent = toExpectedBarsAuditDetailJson(
+                  VerifyJson.otherBarsError,
+                  numberOfBarsVerifyAttempts = 3,
+                  barsVerifyLockoutTime = Some(expiry)
+                )
+              )
+            }
+
+        }
       }
 
-      s"[$regime journey] show correct error message when BARs validate response is accountNumberNotWellFormatted" in
-        new BarsFormErrorSetup("accountNumberNotWellFormatted", TypesOfBankAccount.Personal) {
-          testBankDetailsFormError(controller.enterBankDetailsSubmit)(validForm*)(
-            expectedErrorSummaryContentAndHref,
-            expectedFieldErrors
-          )
-
-          BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
-          BarsStub.VerifyStub.ensureBarsVerifyNotCalled()
-          AuditConnectorStub.verifyEventAudited(
-            auditType = "BarsCheck",
-            auditEvent = expectedBarsAuditDetailJson()
-          )
-        }
-
-      s"[$regime journey] show correct error message when BARs validate response is sortCodeNotPresentOnEiscd" in
-        new BarsFormErrorSetup("sortCodeNotPresentOnEiscd", TypesOfBankAccount.Personal) {
-          testBankDetailsFormError(controller.enterBankDetailsSubmit)(validForm*)(
-            expectedErrorSummaryContentAndHref,
-            expectedFieldErrors
-          )
-
-          BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
-          BarsStub.VerifyStub.ensureBarsVerifyNotCalled()
-          AuditConnectorStub.verifyEventAudited(
-            auditType = "BarsCheck",
-            auditEvent = expectedBarsAuditDetailJson()
-          )
-        }
-
-      s"[$regime journey] show correct error message when BARs validate response is sortCodeDoesNotSupportsDirectDebit" in
-        new BarsFormErrorSetup("sortCodeDoesNotSupportsDirectDebit", TypesOfBankAccount.Personal) {
-          testBankDetailsFormError(controller.enterBankDetailsSubmit)(validForm*)(
-            expectedErrorSummaryContentAndHref,
-            expectedFieldErrors
-          )
-
-          BarsStub.ValidateStub.ensureBarsValidateCalled(validForm)
-          BarsStub.VerifyStub.ensureBarsVerifyNotCalled()
-          AuditConnectorStub.verifyEventAudited(
-            auditType = "BarsCheck",
-            auditEvent = expectedBarsAuditDetailJson()
-          )
-        }
-
-      s"[$regime journey] show correct error message when BARs verify response is nameDoesNotMatch with a personal bank account" in
-        new BarsFormErrorSetup("nameDoesNotMatch", typeOfAccount = TypesOfBankAccount.Personal) {
-          testBankDetailsFormError(controller.enterBankDetailsSubmit)(validForm*)(
-            expectedErrorSummaryContentAndHref,
-            expectedFieldErrors
-          )
-
-          BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(validForm)
-          AuditConnectorStub.verifyEventAudited(
-            auditType = "BarsCheck",
-            auditEvent = expectedBarsAuditDetailJson(numberOfBarsVerifyAttempts = 2)
-          )
-        }
-
-      s"[$regime journey] show correct error message when BARs verify response is nameDoesNotMatch with a business bank account" in
-        new BarsFormErrorSetup("nameDoesNotMatch", typeOfAccount = TypesOfBankAccount.Business) {
-          testBankDetailsFormError(controller.enterBankDetailsSubmit)(validFormBusiness*)(
-            expectedErrorSummaryContentAndHref,
-            expectedFieldErrors
-          )
-
-          BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validFormBusiness)
-          AuditConnectorStub.verifyEventAudited(
-            auditType = "BarsCheck",
-            auditEvent = expectedBarsAuditDetailJson(numberOfBarsVerifyAttempts = 2)
-          )
-        }
-
-      s"[$regime journey] show correct error message when bars verify-personal responds with accountExists is No" in
-        new BarsFormErrorSetup("accountDoesNotExist", typeOfAccount = TypesOfBankAccount.Personal) {
-          testBankDetailsFormError(controller.enterBankDetailsSubmit)(validForm*)(
-            expectedErrorSummaryContentAndHref,
-            expectedFieldErrors
-          )
-
-          BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(validForm)
-          BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
-        }
-
-      s"[$regime journey] show correct error message when bars verify-business responds with accountExists is No" in
-        new BarsFormErrorSetup("accountDoesNotExist", typeOfAccount = TypesOfBankAccount.Business) {
-          testBankDetailsFormError(controller.enterBankDetailsSubmit)(validFormBusiness*)(
-            expectedErrorSummaryContentAndHref,
-            expectedFieldErrors
-          )
-
-          BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validFormBusiness)
-          BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
-        }
-
-      s"[$regime journey] show correct error message when bars validate response is 400 sortCodeOnDenyList" in
-        new BarsFormErrorSetup("sortCodeOnDenyList", typeOfAccount = TypesOfBankAccount.Business) {
-          testBankDetailsFormError(controller.enterBankDetailsSubmit)(validFormBusiness*)(
-            expectedErrorSummaryContentAndHref,
-            expectedFieldErrors
-          )
-
-          BarsStub.ValidateStub.ensureBarsValidateCalled(validFormBusiness)
-          BarsStub.VerifyStub.ensureBarsVerifyNotCalled()
-          BarsVerifyStatusStub.ensureVerifyUpdateStatusIsNotCalled()
-        }
-
-      s"[$regime journey] show correct error message when bars verify-personal is an undocumented error response" in
-        new BarsFormErrorSetup("otherBarsError", typeOfAccount = TypesOfBankAccount.Personal) {
-          testBankDetailsFormError(controller.enterBankDetailsSubmit)(validForm*)(
-            expectedErrorSummaryContentAndHref,
-            expectedFieldErrors
-          )
-
-          BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(validForm)
-          BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
-        }
-
-      s"[$regime journey] show correct error message when bars verify-business is an undocumented error response" in
-        new BarsFormErrorSetup("otherBarsError", typeOfAccount = TypesOfBankAccount.Business) {
-          testBankDetailsFormError(controller.enterBankDetailsSubmit)(validFormBusiness*)(
-            expectedErrorSummaryContentAndHref,
-            expectedFieldErrors
-          )
-          BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(validFormBusiness)
-          BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
-        }
-
-      s"[$regime journey] go to technical difficulties page when bars verify-personal response has accountExists is ERROR" in
-        new BarsErrorSetup(TypesOfBankAccount.Personal) {
-          BarsStub.ValidateStub.success()
-          BarsStub.VerifyPersonalStub.accountExistsError()
-
-          a[RuntimeException] shouldBe thrownBy(await(controller.enterBankDetailsSubmit(fakeRequest)))
-
-          BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
-          BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
-
-          AuditConnectorStub.verifyEventAudited(
-            auditType = "BarsCheck",
-            auditEvent = toExpectedBarsAuditDetailJson(
-              VerifyJson.accountExistsError,
-              numberOfBarsVerifyAttempts = 2
-            )
-          )
-        }
-
-      s"[$regime journey] go to technical difficulties page when bars verify-business response has accountExists is ERROR" in
-        new BarsErrorSetup(TypesOfBankAccount.Business) {
-
-          BarsStub.ValidateStub.success()
-          BarsStub.VerifyBusinessStub.accountExistsError()
-
-          a[RuntimeException] shouldBe thrownBy(await(controller.enterBankDetailsSubmit(fakeRequest)))
-
-          BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(formData)
-          BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
-          AuditConnectorStub.verifyEventAudited(
-            auditType = "BarsCheck",
-            auditEvent = toExpectedBarsAuditDetailJson(
-              VerifyJson.accountExistsError,
-              numberOfBarsVerifyAttempts = 2
-            )
-          )
-        }
-
-      s"[$regime journey] go to technical difficulties page when bars verify-personal response has nameMatches is Error" in
-        new BarsErrorSetup(TypesOfBankAccount.Personal) {
-
-          BarsStub.ValidateStub.success()
-          BarsStub.VerifyPersonalStub.nameMatchesError()
-
-          a[RuntimeException] shouldBe thrownBy(await(controller.enterBankDetailsSubmit(fakeRequest)))
-
-          BarsStub.VerifyPersonalStub.ensureBarsVerifyPersonalCalled(formData)
-          BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
-          AuditConnectorStub.verifyEventAudited(
-            auditType = "BarsCheck",
-            auditEvent = toExpectedBarsAuditDetailJson(
-              VerifyJson.nameMatchesError,
-              numberOfBarsVerifyAttempts = 2
-            )
-          )
-        }
-
-      s"[$regime journey] go to technical difficulties page when bars verify-business response has nameMatches is Error" in
-        new BarsErrorSetup(TypesOfBankAccount.Business) {
-          BarsStub.ValidateStub.success()
-          BarsStub.VerifyBusinessStub.nameMatchesError()
-
-          a[RuntimeException] shouldBe thrownBy(await(controller.enterBankDetailsSubmit(fakeRequest)))
-
-          BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(formData)
-          BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
-          AuditConnectorStub.verifyEventAudited(
-            auditType = "BarsCheck",
-            auditEvent = toExpectedBarsAuditDetailJson(
-              VerifyJson.nameMatchesError,
-              numberOfBarsVerifyAttempts = 2
-            )
-          )
-        }
-
-      s"[$regime journey] redirect to the lockout page when update bars verify status response contains an expiry date-time" in
-        new BarsErrorSetup(TypesOfBankAccount.Business) {
-
-          private val expiry = Instant.now
-
-          BarsStub.ValidateStub.success()
-          BarsStub.VerifyBusinessStub.otherBarsError() // any error will do
-          BarsVerifyStatusStub.updateAndLockout(expiry)
-
-          val result: Future[Result] = controller.enterBankDetailsSubmit(fakeRequest)
-          status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(PageUrls.lockoutUrl)
-
-          BarsStub.VerifyBusinessStub.ensureBarsVerifyBusinessCalled(formData)
-          BarsVerifyStatusStub.ensureVerifyUpdateStatusIsCalled()
-          AuditConnectorStub.verifyEventAudited(
-            auditType = "BarsCheck",
-            auditEvent = toExpectedBarsAuditDetailJson(
-              VerifyJson.otherBarsError,
-              numberOfBarsVerifyAttempts = 3,
-              barsVerifyLockoutTime = Some(expiry)
-            )
-          )
-        }
     }
 
     "GET /lockout should" - {

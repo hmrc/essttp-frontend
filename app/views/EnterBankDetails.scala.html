@@ -36,6 +36,7 @@
 @(
         form: Form[BankDetailsForm],
         accountType: TypeOfBankAccount,
+        remainingAttempts: Int,
         errorMessageOverrides: Seq[FormError] = Seq.empty
 )(implicit
         request: Request[?]
@@ -63,7 +64,7 @@
     } else {
         form.error(key)
                 .map(e => ErrorMessage.errorMessageWithDefaultStringsTranslated(
-            content = Text(Messages.BankDetails.errors(s"$key.${e.message}")(Views.formErrorArgsStringList(e)).show)
+            content = Text(Messages.BankDetails.errors(remainingAttempts)(s"$key.${e.message}")(Views.formErrorArgsStringList(e)).show)
         ))
     }
 }
@@ -78,7 +79,7 @@
             @formError.map { error =>
                 <span class="govuk-error-message" id="sort-code-and-account-number-error">
                     <span class="govuk-visually-hidden">@Messages.error.show</span>
-                    @Messages.BankDetails.errors(s"sortCode.${error.message}")(Views.formErrorArgsStringList(error)).show
+                    @Messages.BankDetails.errors(remainingAttempts)(s"sortCode.${error.message}")(Views.formErrorArgsStringList(error)).show
                 </span>
             }
 
@@ -126,7 +127,7 @@
         @govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
             ErrorLink(
                 href = Some(s"#${e.key}"),
-                content = Text(Messages.BankDetails.errors(s"${e.key}.${e.message}")(Views.formErrorArgsStringList(e)).show)
+                content = Text(Messages.BankDetails.errors(remainingAttempts)(s"${e.key}.${e.message}")(Views.formErrorArgsStringList(e)).show)
             )
         ),
             title = Text(Messages.`There is a problem`.show)))
@@ -135,6 +136,10 @@
     <h1 class="govuk-heading-l">
         @title
     </h1>
+
+  <p class="govuk-body">
+      @{Messages.BankDetails.`Have your sort code and bank account number to hand...`.show}
+  </p>
 
     @formWithCSRF(action = routes.BankDetailsController.enterBankDetailsSubmit) {
 

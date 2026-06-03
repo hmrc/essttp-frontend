@@ -17,9 +17,10 @@
 package controllers
 
 import actions.Actions
-import actionsmodel.AuthenticatedJourneyRequest
+import actionsmodel.EligibleJourneyRequest
 import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheck
+import essttp.bars.model.BarsVerifyStatusResponse
 import essttp.journey.model.{Journey, JourneyStage}
 import essttp.rootmodel.bank.{BankDetails, CanSetUpDirectDebit, TypeOfBankAccount, TypesOfBankAccount}
 import essttp.utils.Errors
@@ -181,14 +182,15 @@ class BankDetailsController @Inject() (
             if (!j.canSetUpDirectDebitAnswer.isAccountHolder) {
               Redirect(routes.BankDetailsController.cannotSetupDirectDebitOnlinePage)
             } else {
-              finalStateCheck(j, displayEnterBankDetailsPage(journey))
+              finalStateCheck(j, displayEnterBankDetailsPage(journey, request.remainingNumberOfAttempts))
             }
         }
     }
   }
 
   private def displayEnterBankDetailsPage(
-    journey: JourneyStage.AfterEnteredCanYouSetUpDirectDebit & JourneyStage.AfterChosenTypeOfBankAccount & Journey
+    journey:                   JourneyStage.AfterEnteredCanYouSetUpDirectDebit & JourneyStage.AfterChosenTypeOfBankAccount & Journey,
+    remainingNumberOfAttempts: Int
   )(using Request[?]): Result = {
     val accountType                               = existingTypeOfBankAccount(journey).getOrElse(
       Errors.throwServerErrorException("Could not find type of bank account in journey")
@@ -203,7 +205,7 @@ class BankDetailsController @Inject() (
           )
         )
       }
-    Ok(views.enterBankDetailsPage(form = maybePrePoppedForm, accountType))
+    Ok(views.enterBankDetailsPage(form = maybePrePoppedForm, accountType, remainingNumberOfAttempts))
   }
 
   private def currentDirectDebitDetails(journey: Journey): Option[BankDetails] =
@@ -220,7 +222,8 @@ class BankDetailsController @Inject() (
       case j: JourneyStage.AfterChosenTypeOfBankAccount =>
         val formFromRequest = BankDetailsForm.form.bindFromRequest()
         formFromRequest.fold(
-          formWithErrors => Ok(views.enterBankDetailsPage(formWithErrors, j.typeOfBankAccount)),
+          formWithErrors =>
+            Ok(views.enterBankDetailsPage(formWithErrors, j.typeOfBankAccount, request.remainingNumberOfAttempts)),
           (bankDetailsForm: BankDetailsForm) => {
             val directDebitDetails: BankDetails =
               BankDetails(
@@ -247,44 +250,50 @@ class BankDetailsController @Inject() (
   }
 
   private def handleBars(
-    resp:               Either[BarsError, VerifyResponse],
+    resp:               Either[(BarsError, BarsVerifyStatusResponse), VerifyResponse],
     directDebitDetails: BankDetails,
     form:               Form[BankDetailsForm],
     typeOfBankAccount:  TypeOfBankAccount
-  )(using request: AuthenticatedJourneyRequest[?]): Future[Result] = {
-    def enterBankDetailsPageWithBarsError(error: FormErrorWithFieldMessageOverrides): Future[Result] =
-      Ok(
-        views.enterBankDetailsPage(
-          form = form.withError(error.formError),
-          typeOfBankAccount,
-          errorMessageOverrides = error.fieldMessageOverrides
-        )
-      )
-
-    import models.forms.BankDetailsForm._
+  )(using request: EligibleJourneyRequest[?]): Future[Result] =
     resp.fold(
-      {
-        case ThirdPartyError(resp)                                                                       =>
-          throw new RuntimeException(s"BARS verify third-party error - response type ${resp.getClass.getSimpleName}")
-        case AccountNumberNotWellFormatted(_) | AccountNumberNotWellFormattedValidateResponse(_)         =>
-          enterBankDetailsPageWithBarsError(accountNumberNotWellFormatted)
-        case SortCodeDoesNotSupportDirectDebit(_) | SortCodeDoesNotSupportDirectDebitValidateResponse(_) =>
-          enterBankDetailsPageWithBarsError(sortCodeDoesNotSupportsDirectDebit)
-        case SortCodeNotPresentOnEiscd(_) | SortCodeNotPresentOnEiscdValidateResponse(_)                 =>
-          enterBankDetailsPageWithBarsError(sortCodeNotPresentOnEiscd)
-        case NameDoesNotMatch(_)                                                                         =>
-          val error = typeOfBankAccount match
-            case TypesOfBankAccount.Personal => nameDoesNotMatchPersonal
-            case TypesOfBankAccount.Business => nameDoesNotMatchBusiness
-          enterBankDetailsPageWithBarsError(error)
-        case AccountDoesNotExist(_)                                                                      =>
-          enterBankDetailsPageWithBarsError(accountDoesNotExist)
-        case SortCodeOnDenyListErrorResponse(_)                                                          =>
-          enterBankDetailsPageWithBarsError(sortCodeOnDenyList)
-        case OtherBarsError(_)                                                                           =>
-          enterBankDetailsPageWithBarsError(otherBarsError)
-        case TooManyAttempts(_, _)                                                                       =>
-          Redirect(routes.BankDetailsController.barsLockout)
+      { (barsError, barsVerifyStatus) =>
+        def enterBankDetailsPageWithBarsError(
+          error: FormErrorWithFieldMessageOverrides
+        ): Future[Result] =
+          Ok(
+            views.enterBankDetailsPage(
+              form = form.withError(error.formError),
+              typeOfBankAccount,
+              barsVerifyStatus.maxNumberOfAttempts.value - barsVerifyStatus.attempts.value,
+              errorMessageOverrides = error.fieldMessageOverrides
+            )
+          )
+
+        import models.forms.BankDetailsForm._
+
+        barsError match {
+          case ThirdPartyError(resp)                                                                       =>
+            throw new RuntimeException(s"BARS verify third-party error - response type ${resp.getClass.getSimpleName}")
+          case AccountNumberNotWellFormatted(_) | AccountNumberNotWellFormattedValidateResponse(_)         =>
+            enterBankDetailsPageWithBarsError(accountNumberNotWellFormatted)
+          case SortCodeDoesNotSupportDirectDebit(_) | SortCodeDoesNotSupportDirectDebitValidateResponse(_) =>
+            enterBankDetailsPageWithBarsError(sortCodeDoesNotSupportsDirectDebit)
+          case SortCodeNotPresentOnEiscd(_) | SortCodeNotPresentOnEiscdValidateResponse(_)                 =>
+            enterBankDetailsPageWithBarsError(sortCodeNotPresentOnEiscd)
+          case NameDoesNotMatch(_)                                                                         =>
+            val error = typeOfBankAccount match
+              case TypesOfBankAccount.Personal => nameDoesNotMatchPersonal
+              case TypesOfBankAccount.Business => nameDoesNotMatchBusiness
+            enterBankDetailsPageWithBarsError(error)
+          case AccountDoesNotExist(_)                                                                      =>
+            enterBankDetailsPageWithBarsError(accountDoesNotExist)
+          case SortCodeOnDenyListErrorResponse(_)                                                          =>
+            enterBankDetailsPageWithBarsError(sortCodeOnDenyList)
+          case OtherBarsError(_)                                                                           =>
+            enterBankDetailsPageWithBarsError(otherBarsError)
+          case TooManyAttempts(_, _)                                                                       =>
+            Redirect(routes.BankDetailsController.barsLockout)
+        }
       },
       _ =>
         journeyService
@@ -297,7 +306,6 @@ class BankDetailsController @Inject() (
             )
           }
     )
-  }
 
   val checkBankDetails: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {

@@ -51,6 +51,7 @@ class EligibleJourneyRefiner @Inject() (ec: ExecutionContext)
               request.ggCredId,
               request.nino,
               request.numberOfBarsVerifyAttempts,
+              request.maxNumberOfBarsVerifyAttempts,
               j.eligibilityCheckResult,
               request.lang
             )
