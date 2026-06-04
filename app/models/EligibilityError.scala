@@ -73,6 +73,10 @@ object EligibilityErrors extends Enum[EligibilityError] {
 
   case object NoMtditsaEnrollment extends EligibilityError
 
+  case object AllChargeTypeAssessmentsFailed extends EligibilityError
+
+  case object NoValidPlanAfterAssessments extends EligibilityError
+
   override val values: immutable.IndexedSeq[EligibilityError] = findValues
 
   def toEligibilityError(eligibilityRules: EligibilityRules): Option[EligibilityError] =
@@ -101,6 +105,8 @@ object EligibilityErrors extends Enum[EligibilityError] {
       case e if e.isAnMtdCustomer.contains(true)                       => Some(IsAnMtdCustomer)
       case e if e.dmSpecialOfficeProcessingRequiredCESA.contains(true) => Some(DmSpecialOfficeProcessingRequiredCESA)
       case e if e.noMtditsaEnrollment.contains(true)                   => Some(NoMtditsaEnrollment)
+      case e if e.allChargeTypeAssessmentsFailed.contains(true)        => Some(AllChargeTypeAssessmentsFailed)
+      case e if e.noValidPlanAfterAssessments.contains(true)           => Some(NoValidPlanAfterAssessments)
       case _                                                           => None // all false
     }
 

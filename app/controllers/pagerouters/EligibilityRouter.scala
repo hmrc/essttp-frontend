@@ -81,6 +81,8 @@ object EligibilityRouter {
             throw new NotImplementedError(
               s"NoMtditsaEnrollment ineligibility reason not relevant to ${taxRegime.entryName}"
             )
+        case Some(AllChargeTypeAssessmentsFailed)        => whichGenericIneligiblePage(taxRegime)
+        case Some(NoValidPlanAfterAssessments)           => whichGenericIneligiblePage(taxRegime)
       }
     }
 

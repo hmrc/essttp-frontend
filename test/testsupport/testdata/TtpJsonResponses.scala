@@ -18,7 +18,7 @@ package testsupport.testdata
 
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.ttp.CustomerType
-import essttp.rootmodel.ttp.eligibility.{EligibilityPass, EligibilityRules}
+import essttp.rootmodel.ttp.eligibility.{AssessmentEligibilityRules, EligibilityPass, EligibilityRules}
 
 import java.time.LocalDate
 
@@ -28,6 +28,7 @@ object TtpJsonResponses {
     taxRegime:                          TaxRegime,
     eligibilityPass:                    EligibilityPass = TdAll.eligibleEligibilityPass,
     eligibilityRules:                   EligibilityRules = TdAll.eligibleEligibilityRules,
+    assessmentEligibilityRules:         AssessmentEligibilityRules = TdAll.assessmentEligibilityRules,
     regimeDigitalCorrespondence:        Boolean,
     poundsInsteadOfPence:               Boolean = false,
     maybeChargeIsInterestBearingCharge: Option[Boolean] = None,
@@ -158,6 +159,46 @@ object TtpJsonResponses {
        |       } ]
        |    } ]
        |  } ],
+       |       "chargeTypeAssessments" : {
+       |  "chargeTypeAssessment" : [ {
+       |    "taxPeriodFrom" : "2020-08-13",
+       |    "taxPeriodTo" : "2020-08-14",
+       |    "debtTotalAmount" : ${if (poundsInsteadOfPence) "3000.00" else "300000"},
+       |    "chargeReference" : "A00000000001",
+       |    "charges" : [ {
+       |      "chargeType": "InYearRTICharge-Tax",
+       |      "mainType": "InYearRTICharge(FPS)",
+       |      "mainTrans" : "mainTrans",
+       |      "subTrans" : "subTrans",
+       |      "outstandingAmount" : ${if (poundsInsteadOfPence) "1000.00" else "100000"},
+       |      "interestStartDate" : "2017-03-07",
+       |      "dueDate" : "2017-03-07",
+       |      "accruedInterest" : ${if (poundsInsteadOfPence) "15.97" else "1597"},
+       |      "ineligibleChargeType": false,
+       |      "chargeOverMaxDebtAge": false,
+       |       "dueDateNotReached": false,
+       |       $isInterestBearingChargeValue
+       |       $useChargeReferenceValue
+       |       $chargeBeforeMaxAccountingDateValue
+       |       "locks": [ {
+       |          "lockType": "Payment",
+       |          "lockReason": "Risk/Fraud",
+       |          "disallowedChargeLockType": false
+       |       } ]
+       |    } ]
+       |  } ],
+       |       "assessmentEligibilityRules" : {
+       |         "isLessThanMinDebtAllowance" : ${assessmentEligibilityRules.isLessThanMinDebtAllowance.toString},
+       |         "isMoreThanMaxDebtAllowance" : ${assessmentEligibilityRules.isMoreThanMaxDebtAllowance.toString},
+       |         "disallowedChargeLockTypes" : ${assessmentEligibilityRules.disallowedChargeLockTypes.toString},
+       |         "chargesOverMaxDebtAge": false,
+       |         "ineligibleChargeTypes" : ${assessmentEligibilityRules.ineligibleChargeTypes.toString},
+       |         "noDueDatesReached" : ${assessmentEligibilityRules.noDueDatesReached.toString},
+       |         "chargesBeforeMaxAccountingDate" : false
+       |       },
+       |       "assessmentEligibilityStatus" : true,
+       |       "assessmentCategory" : "Standard"
+       |     },
        |  "regimeDigitalCorrespondence": ${regimeDigitalCorrespondence.toString},
        |  "futureChargeLiabilitiesExcluded": false
        |}
