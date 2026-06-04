@@ -92,47 +92,47 @@ object BankDetailsForm {
     )
     .verifying(accountNumberConstraint)
 
-  private val sortCodeAndAccountNumberOverrides: Seq[FormError]              = Seq(
+  private def sortCodeAndAccountNumberOverrides(error: String): Seq[FormError] = Seq(
     FormError("sortCode", ""),      // 'turns off' the sortCode field error
     FormError("accountNumber", ""), // 'turns off' the accountNumber field error
-    FormError("sortCodeAndAccountNumber", "sortCode.validate.accountNumberIsWellFormatted.no")
+    FormError("sortCodeAndAccountNumber", error)
   )
-  val accountNumberNotWellFormatted: FormErrorWithFieldMessageOverrides      =
+  val accountNumberNotWellFormatted: FormErrorWithFieldMessageOverrides        =
     FormErrorWithFieldMessageOverrides(
       formError = FormError("sortCode", "sortCode.validate.accountNumberIsWellFormatted.no"),
-      fieldMessageOverrides = sortCodeAndAccountNumberOverrides
+      fieldMessageOverrides = sortCodeAndAccountNumberOverrides("sortCode.validate.accountNumberIsWellFormatted.no")
     )
-  val sortCodeNotPresentOnEiscd: FormErrorWithFieldMessageOverrides          =
+  val sortCodeNotPresentOnEiscd: FormErrorWithFieldMessageOverrides            =
     FormErrorWithFieldMessageOverrides(
       formError = FormError("sortCode", "sortCode.validate.sortCodeIsPresentOnEISCD.no"),
-      fieldMessageOverrides = sortCodeAndAccountNumberOverrides
+      fieldMessageOverrides = sortCodeAndAccountNumberOverrides("sortCode.validate.sortCodeIsPresentOnEISCD.no")
     )
-  val sortCodeDoesNotSupportsDirectDebit: FormErrorWithFieldMessageOverrides =
+  val sortCodeDoesNotSupportsDirectDebit: FormErrorWithFieldMessageOverrides   =
     FormErrorWithFieldMessageOverrides(
       formError = FormError("sortCode", "sortCode.validate.sortCodeSupportsDirectDebit.no")
     )
-  def nameDoesNotMatchPersonal: FormErrorWithFieldMessageOverrides           =
+  def nameDoesNotMatchPersonal: FormErrorWithFieldMessageOverrides             =
     FormErrorWithFieldMessageOverrides(
       formError = FormError("name", "name.verify.nameMatches.no.personal")
     )
-  def nameDoesNotMatchBusiness: FormErrorWithFieldMessageOverrides           =
+  def nameDoesNotMatchBusiness: FormErrorWithFieldMessageOverrides             =
     FormErrorWithFieldMessageOverrides(
       formError = FormError("name", "name.verify.nameMatches.no.business")
     )
-  val accountDoesNotExist: FormErrorWithFieldMessageOverrides                =
+  val accountDoesNotExist: FormErrorWithFieldMessageOverrides                  =
     FormErrorWithFieldMessageOverrides(
       formError = FormError("sortCode", "sortCode.verify.accountExists.no"),
-      fieldMessageOverrides = sortCodeAndAccountNumberOverrides
+      fieldMessageOverrides = sortCodeAndAccountNumberOverrides("sortCode.verify.accountExists.no")
     )
-  val sortCodeOnDenyList: FormErrorWithFieldMessageOverrides                 =
+  val sortCodeOnDenyList: FormErrorWithFieldMessageOverrides                   =
     FormErrorWithFieldMessageOverrides(
       formError = FormError("sortCode", "sortCode.verify.sortCodeOnDenyList"),
-      fieldMessageOverrides = sortCodeAndAccountNumberOverrides
+      fieldMessageOverrides = sortCodeAndAccountNumberOverrides("sortCode.verify.sortCodeOnDenyList")
     )
-  val otherBarsError: FormErrorWithFieldMessageOverrides                     =
+  val otherBarsError: FormErrorWithFieldMessageOverrides                       =
     FormErrorWithFieldMessageOverrides(
       formError = FormError("sortCode", "sortCode.verify.otherError"),
-      fieldMessageOverrides = sortCodeAndAccountNumberOverrides
+      fieldMessageOverrides = sortCodeAndAccountNumberOverrides("sortCode.verify.otherError")
     )
 
   val form: Form[BankDetailsForm] =

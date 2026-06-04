@@ -1218,17 +1218,23 @@ class BankDetailsControllerSpec extends ItSpec {
                     case TypesOfBankAccount.Personal => BarsStub.VerifyPersonalStub.accountDoesNotExist()
                     case TypesOfBankAccount.Business => BarsStub.VerifyBusinessStub.accountDoesNotExist()
                   }
+                  val expectedErrorMessage =
+                    lang.fold(
+                      s"Enter a valid combination of bank account number and sort code. You can try ${expectedNumberOfRemainingBarsAttempts.toString} more $timeOrTimesEnglish",
+                      s"Nodwch gyfuniad dilys o rif cyfrif banc a chod didoli. Gallwch roi ${expectedNumberOfRemainingBarsAttempts.toString} $timeOrTimesWelsh arall arni"
+                    )
+
                   (
                     List(
                       (
-                        lang.fold(
-                          s"Enter a valid combination of bank account number and sort code. You can try ${expectedNumberOfRemainingBarsAttempts.toString} more $timeOrTimesEnglish",
-                          s"Nodwch gyfuniad dilys o rif cyfrif banc a chod didoli. Gallwch roi ${expectedNumberOfRemainingBarsAttempts.toString} $timeOrTimesWelsh arall arni"
-                        ),
+                        expectedErrorMessage,
                         "#sortCode"
                       )
                     ),
-                    sortCodeAndAccountNumberFieldError,
+                    List(
+                      "sort-code-and-account-number" ->
+                        expectedErrorMessage
+                    ),
                     VerifyJson.accountDoesNotExist
                   )
 
