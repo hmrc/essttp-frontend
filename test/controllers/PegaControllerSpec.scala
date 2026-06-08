@@ -16,7 +16,7 @@
 
 package controllers
 
-import essttp.journey.model.{Origins, WhyCannotPayInFullAnswers}
+import essttp.journey.model.{Origin, Origins, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.{CannotPayReason, TaxRegime}
 import models.Languages
 import models.Languages.{English, Welsh}
@@ -30,6 +30,8 @@ import testsupport.reusableassertions.PegaRecreateSessionAssertions
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll}
 import uk.gov.hmrc.http.SessionKeys
+
+import java.util.Locale
 
 class PegaControllerSpec extends ItSpec, PegaRecreateSessionAssertions {
 
@@ -103,53 +105,91 @@ class PegaControllerSpec extends ItSpec, PegaRecreateSessionAssertions {
 
       }
 
-      "start a case, update the journey and redirect to PEGA" in {
+      List(
+        Origins.Epaye.Bta,
+        Origins.Vat.Bta,
+        Origins.Simp.Pta,
+        Origins.Sa.Bta
+      ).foreach { origin =>
+        val regime: TaxRegime = origin.taxRegime
 
-        stubCommonActions()
-        EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, Origins.Epaye.Bta)(
-          JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(using testCrypto)
-        )
-        EssttpBackend.Pega
-          .stubStartCase(TdAll.journeyId, Right(TdAll.pegaStartCaseResponse), recalculationNeeded = true)
-        EssttpBackend.StartedPegaCase.stubUpdateStartPegaCaseResponse(
-          TdAll.journeyId,
-          JourneyJsonTemplates.`Started PEGA case`(Origins.Epaye.Bta, pegaCaseId = Some("case"))(using testCrypto)
-        )
-        EssttpBackend.Pega.stubSaveJourneyForPega(TdAll.journeyId, Right(()))
+        s"start a case with regime - $regime, update the journey and redirect to PEGA" in {
 
-        val result = controller.startPegaJourney(fakeRequest)
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some("/set-up-a-payment-plan/test-only/pega/start?regime=epaye")
+          stubCommonActions()
+          EssttpBackend.CanPayWithinSixMonths.findJourney(testCrypto, origin)(
+            JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(origin)(using testCrypto)
+          )
+          EssttpBackend.Pega
+            .stubStartCase(TdAll.journeyId, Right(TdAll.pegaStartCaseResponse), recalculationNeeded = true)
+          EssttpBackend.StartedPegaCase.stubUpdateStartPegaCaseResponse(
+            TdAll.journeyId,
+            JourneyJsonTemplates.`Started PEGA case`(origin, pegaCaseId = Some("case"))(using testCrypto)
+          )
+          EssttpBackend.Pega.stubSaveJourneyForPega(TdAll.journeyId, Right(()))
 
-        EssttpBackend.Pega.verifyStartCaseCalled(TdAll.journeyId)
-        EssttpBackend.StartedPegaCase
-          .verifyUpdateStartPegaCaseResponseRequest(TdAll.journeyId, TdAll.pegaStartCaseResponse)
-        EssttpBackend.Pega.verifySaveJourneyForPegaCalled(TdAll.journeyId)
+          val result = controller.startPegaJourney(fakeRequest)
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(
+            s"/set-up-a-payment-plan/test-only/pega/start?regime=${regime.entryName.toLowerCase(Locale.UK)}"
+          )
 
-        AuditConnectorStub.verifyEventAudited(
-          auditType = "CanUserPayInSixMonths",
-          auditEvent = Json
-            .parse(
-              s"""
-                 |{
-                 |  "regime" : "Epaye",
-                 |  "taxIdentifier" : "864FZ00049",
-                 |  "pegaCaseId" : "case",
-                 |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-                 |  "pegaCorrelationId": "testCorrelationId",
-                 |   "userEnteredDetails" : {
-                 |     "unableToPayReason": ["WaitingForRefund", "NoMoneySetAside"],
-                 |     "payUpfront" : true,
-                 |     "upfrontPaymentAmount" : 2,
-                 |     "canPayInSixMonths" : false
-                 |   }
-                 |}
-            """.stripMargin
+          EssttpBackend.Pega.verifyStartCaseCalled(TdAll.journeyId)
+          EssttpBackend.StartedPegaCase
+            .verifyUpdateStartPegaCaseResponseRequest(TdAll.journeyId, TdAll.pegaStartCaseResponse)
+          EssttpBackend.Pega.verifySaveJourneyForPegaCalled(TdAll.journeyId)
+
+          AuditConnectorStub.verifyEventAudited(
+            auditType = "CanUserPayInSixMonths",
+            auditEvent = Json
+              .parse(
+                s"""
+                      |{
+                      |  "regime" : "${regime.entryName}",
+                      |  "taxIdentifier" : "864FZ00049",
+                      |  "pegaCaseId" : "case",
+                      |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+                      |  "pegaCorrelationId": "testCorrelationId",
+                      |  "userEnteredDetails" : {
+                      |    "unableToPayReason": ["WaitingForRefund", "NoMoneySetAside"],
+                      |    "payUpfront" : true,
+                      |    "upfrontPaymentAmount" : 2,
+                      |    "canPayInSixMonths" : false
+                      |  }
+                      |}
+                      |""".stripMargin
+              )
+              .as[JsObject]
+          )
+
+          if (regime == TaxRegime.Sa) {
+            AuditConnectorStub.verifyEventAudited(
+              auditType = "CanUserPayInSixMonths",
+              auditEvent = Json
+                .parse(
+                  s"""
+                        |{
+                        |  "regime" : "$regime",
+                        |  "taxIdentifier" : "864FZ00049",
+                        |  "pegaCaseId" : "case",
+                        |  "saCustomerType" : "MTD(ITSA)",
+                        |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+                        |  "pegaCorrelationId": "testCorrelationId",
+                        |  "userEnteredDetails" : {
+                        |    "unableToPayReason": ["WaitingForRefund", "NoMoneySetAside"],
+                        |    "payUpfront" : true,
+                        |    "upfrontPaymentAmount" : 2,
+                        |    "canPayInSixMonths" : false
+                        |  }
+                        |}
+                        |""".stripMargin
+                )
+                .as[JsObject]
             )
-            .as[JsObject]
-        )
+          }
 
+        }
       }
+
     }
 
     "handling callbacks must" - {
@@ -190,15 +230,17 @@ class PegaControllerSpec extends ItSpec, PegaRecreateSessionAssertions {
 
       "get a case, update the journey and redirect to the next page when" - {
 
-        def test(whyCannotPayReasons: Set[CannotPayReason]): Unit = {
+        def test(origin: Origin, whyCannotPayReasons: Set[CannotPayReason]): Unit = {
           stubCommonActions()
           EssttpBackend.Pega.stubGetCase(TdAll.journeyId, Right(TdAll.pegaGetCaseResponse))
           EssttpBackend.HasCheckedPlan.stubUpdateHasCheckedPlan(
             TdAll.journeyId,
-            JourneyJsonTemplates.`Has Checked Payment Plan - With Affordability`(Origins.Epaye.Bta)(using testCrypto)
+            JourneyJsonTemplates.`Has Checked Payment Plan - With Affordability`(origin)(using testCrypto)
           )
 
-          val result = controller.callback(TaxRegime.Epaye, None)(fakeRequestWithPath("/b?regime=epaye"))
+          val result = controller.callback(origin.taxRegime, None)(
+            fakeRequestWithPath(s"/b?regime=${origin.taxRegime.toString.toLowerCase(Locale.UK)}")
+          )
           status(result) shouldBe SEE_OTHER
           redirectLocation(result) shouldBe Some(PageUrls.aboutYourBankAccountUrl)
 
@@ -212,7 +254,7 @@ class PegaControllerSpec extends ItSpec, PegaRecreateSessionAssertions {
                 s"""
                    |{
                    |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-                   |  "origin": "Bta",
+                   |  "origin": "${origin.toString().split('.').last}",
                    |  "canPayInSixMonths": false,
                    |  "unableToPayReason": ${Json.toJson(whyCannotPayReasons).toString()},
                    |  "schedule": {
@@ -229,8 +271,8 @@ class PegaControllerSpec extends ItSpec, PegaRecreateSessionAssertions {
                    |    "totalPayable" : 20,
                    |    "totalPaymentWithoutInterest" : 10
                    |  },
-                   |  "taxDetail": ${TdAll.taxDetailJsonString(TaxRegime.Epaye)},
-                   |  "taxType": "Epaye"
+                   |  "taxDetail": ${TdAll.taxDetailJsonString(origin.taxRegime)},
+                   |  "taxType": "${origin.taxRegime}"
                    |}
             """.stripMargin
               )
@@ -244,7 +286,7 @@ class PegaControllerSpec extends ItSpec, PegaRecreateSessionAssertions {
                 s"""
                    |{
                    |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-                   |  "regime" : "Epaye",
+                   |  "regime" : "${origin.taxRegime}",
                    |  "taxIdentifier" : "864FZ00049",
                    |  "pegaCaseId" : "case",
                    |  "pegaCorrelationId" : "testCorrelationId",
@@ -275,43 +317,50 @@ class PegaControllerSpec extends ItSpec, PegaRecreateSessionAssertions {
           )
         }
 
-        "a journey can be found" in {
-          val whyCannotPayReasons =
-            Set[CannotPayReason](CannotPayReason.WaitingForRefund, CannotPayReason.NoMoneySetAside)
+        List(
+          Origins.Epaye.Bta,
+          Origins.Vat.Bta,
+          Origins.Simp.Pta,
+          Origins.Sa.Bta
+        ).foreach { origin =>
+          s"${origin.taxRegime} - a journey can be found" in {
+            val whyCannotPayReasons =
+              Set[CannotPayReason](CannotPayReason.WaitingForRefund, CannotPayReason.NoMoneySetAside)
 
-          EssttpBackend.StartedPegaCase.findJourney(
-            testCrypto,
-            Origins.Epaye.Bta,
-            whyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(whyCannotPayReasons)
-          )()
+            EssttpBackend.StartedPegaCase.findJourney(
+              testCrypto,
+              origin,
+              whyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(whyCannotPayReasons)
+            )()
 
-          test(whyCannotPayReasons)
-        }
+            test(origin, whyCannotPayReasons)
+          }
 
-        "a journey is successfully reconstructed" in {
-          val whyCannotPayReasons =
-            Set[CannotPayReason](
-              CannotPayReason.LostOrReducedAbilityToEarnOrTrade,
-              CannotPayReason.UnexpectedReductionOfIncome
-            )
+          s"${origin.taxRegime} - a journey is successfully reconstructed" in {
+            val whyCannotPayReasons =
+              Set[CannotPayReason](
+                CannotPayReason.LostOrReducedAbilityToEarnOrTrade,
+                CannotPayReason.UnexpectedReductionOfIncome
+              )
 
-          EssttpBackend.findByLatestSessionNotFound()
-          EssttpBackend.Pega.stubRecreateSession(
-            TaxRegime.Epaye,
-            Right(
-              Json.parse(
-                JourneyJsonTemplates.`Started PEGA case`(
-                  Origins.Epaye.Bta,
-                  whyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(whyCannotPayReasons)
-                )(using testCrypto)
+            EssttpBackend.findByLatestSessionNotFound()
+            EssttpBackend.Pega.stubRecreateSession(
+              origin.taxRegime,
+              Right(
+                Json.parse(
+                  JourneyJsonTemplates.`Started PEGA case`(
+                    origin = origin,
+                    whyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.WhyCannotPayInFull(whyCannotPayReasons)
+                  )(using testCrypto)
+                )
               )
             )
-          )
 
-          test(whyCannotPayReasons)
+            test(origin, whyCannotPayReasons)
 
-          EssttpBackend.verifyFindByLatestSessionId()
-          EssttpBackend.Pega.verifyRecreateSessionCalled(TaxRegime.Epaye)
+            EssttpBackend.verifyFindByLatestSessionId()
+            EssttpBackend.Pega.verifyRecreateSessionCalled(origin.taxRegime)
+          }
         }
 
         "change the language to english if lang=en is supplied as a query parameter" in {

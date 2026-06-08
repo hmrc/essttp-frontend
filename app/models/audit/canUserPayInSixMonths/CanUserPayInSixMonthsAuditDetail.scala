@@ -18,6 +18,7 @@ package models.audit.canUserPayInSixMonths
 
 import essttp.journey.model.CorrelationId
 import essttp.rootmodel.pega.PegaCaseId
+import essttp.rootmodel.ttp.CustomerType
 import models.audit.AuditDetail
 import play.api.libs.json.{Json, OWrites}
 
@@ -25,13 +26,13 @@ final case class CanUserPayInSixMonthsAuditDetail(
   regime:             String,
   taxIdentifier:      String,
   pegaCaseId:         Option[PegaCaseId],
+  saCustomerType:     Option[CustomerType],
   correlationId:      CorrelationId,
   pegaCorrelationId:  Option[String],
   userEnteredDetails: UserEnteredDetails
 ) extends AuditDetail {
 
   override val auditType: String = "CanUserPayInSixMonths"
-
 }
 
 object CanUserPayInSixMonthsAuditDetail {
