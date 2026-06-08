@@ -197,7 +197,7 @@ object TtpJsonResponses {
        |         "chargesBeforeMaxAccountingDate" : false
        |       },
        |       "assessmentEligibilityStatus" : true,
-       |       "assessmentCategory" : "Standard"
+       |       "assessmentCategory" : "standard"
        |     },
        |  "regimeDigitalCorrespondence": ${regimeDigitalCorrespondence.toString},
        |  "futureChargeLiabilitiesExcluded": false
