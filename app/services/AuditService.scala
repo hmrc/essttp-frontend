@@ -144,10 +144,21 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
     canPay:                 CanPayWithinSixMonths,
     maybeStartCaseResponse: Option[StartCaseResponse]
   ): CanUserPayInSixMonthsAuditDetail =
+    val eligibilityCheckResult = journey match {
+      case j: JourneyStage.AfterEligibilityChecked => j.eligibilityCheckResult
+      case _                                       => sys.error("Could not find eligibility check result")
+    }
+
+    val saCustomerType = journey.taxRegime match {
+      case TaxRegime.Sa => eligibilityCheckResult.individualDetails.flatMap(_.customerType)
+      case _            => None
+    }
+
     CanUserPayInSixMonthsAuditDetail(
       regime = journey.taxRegime.entryName,
       taxIdentifier = taxIdentifierToAudit(journey),
       pegaCaseId = journey.pegaCaseId,
+      saCustomerType = saCustomerType,
       correlationId = journey.correlationId,
       pegaCorrelationId = maybeStartCaseResponse.map(_.pegaCorrelationId),
       userEnteredDetails = UserEnteredDetails(
@@ -300,6 +311,8 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
     startCaseResponse: StartCaseResponse,
     getCaseResponse:   GetCaseResponse
   ): ReturnFromAffordabilityAuditDetail = {
+    val taxRegime = journey.fold(_.taxRegime, _.taxRegime)
+
     val taxId = journey.merge match {
       case j: JourneyStage.AfterComputedTaxId => j.taxId
       case _                                  => sys.error("Could not find tax ID in journey")
@@ -308,6 +321,11 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
     val eligibilityCheckResult = journey.merge match {
       case j: JourneyStage.AfterEligibilityChecked => j.eligibilityCheckResult
       case _                                       => sys.error("Could not find eligibility check result")
+    }
+
+    val saCustomerType = taxRegime match {
+      case TaxRegime.Sa => eligibilityCheckResult.individualDetails.flatMap(_.customerType)
+      case _            => None
     }
 
     val paymentPlan = getCaseResponse.paymentPlan
@@ -336,14 +354,15 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
     )
 
     ReturnFromAffordabilityAuditDetail(
-      journey.fold(_.correlationId, _.correlationId).value.toString,
-      journey.fold(_.taxRegime, _.taxRegime).entryName,
-      taxId.value,
-      startCaseResponse.caseId.value,
-      getCaseResponse.pegaCorrelationId,
-      getCaseResponse.expenditure.filter(_._2 > 0),
-      getCaseResponse.income.filter(_._2 > 0),
-      planDetails
+      correlationId = journey.fold(_.correlationId, _.correlationId).value.toString,
+      regime = journey.fold(_.taxRegime, _.taxRegime).entryName,
+      taxIdentifier = taxId.value,
+      pegaCaseId = startCaseResponse.caseId.value,
+      pegaCorrelationId = getCaseResponse.pegaCorrelationId,
+      saCustomerType = saCustomerType,
+      expenditure = getCaseResponse.expenditure.filter(_._2 > 0),
+      income = getCaseResponse.income.filter(_._2 > 0),
+      planDetails = planDetails
     )
   }
 

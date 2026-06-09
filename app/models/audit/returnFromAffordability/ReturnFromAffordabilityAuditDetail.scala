@@ -16,6 +16,7 @@
 
 package models.audit.returnFromAffordability
 
+import essttp.rootmodel.ttp.CustomerType
 import models.audit.AuditDetail
 import play.api.libs.json.{Json, OWrites}
 
@@ -25,6 +26,7 @@ final case class ReturnFromAffordabilityAuditDetail(
   taxIdentifier:     String,
   pegaCaseId:        String,
   pegaCorrelationId: String,
+  saCustomerType:    Option[CustomerType],
   expenditure:       Map[String, BigDecimal],
   income:            Map[String, BigDecimal],
   planDetails:       PlanDetails
