@@ -455,7 +455,7 @@ object StartJourneyController {
         )
       )
 
-    val chargeTypeAssessments: List[ChargeTypeAssessment] = {
+    val chargeTypeAssessment: List[ChargeTypeAssessment] = {
       def charges(outstandingAmount: AmountInPence, interest: AmountInPence): Charges = Charges(
         chargeType = ChargeType("InYearRTICharge-Tax"),
         mainType = MainType("InYearRTICharge(FPS)"),
@@ -548,8 +548,27 @@ object StartJourneyController {
         dmSpecialOfficeProcessingRequiredCDCS = Some(containsError(DmSpecialOfficeProcessingRequiredCDCS)),
         isAnMtdCustomer = Some(containsError(EligibilityErrors.IsAnMtdCustomer)),
         dmSpecialOfficeProcessingRequiredCESA = Some(containsError(DmSpecialOfficeProcessingRequiredCESA)),
-        noMtditsaEnrollment = Some(containsError(EligibilityErrors.NoMtditsaEnrollment))
+        noMtditsaEnrollment = Some(containsError(EligibilityErrors.NoMtditsaEnrollment)),
+        allChargeTypeAssessmentsFailed = Some(containsError(EligibilityErrors.AllChargeTypeAssessmentsFailed)),
+        noValidPlanAfterAssessments = Some(containsError(EligibilityErrors.NoValidPlanAfterAssessments))
       )
+
+    val assessmentEligibilityRules = AssessmentEligibilityRules(
+      isLessThanMinDebtAllowance = containsError(IsLessThanMinDebtAllowance),
+      isMoreThanMaxDebtAllowance = containsError(IsMoreThanMaxDebtAllowance),
+      disallowedChargeLockTypes = containsError(EligibilityErrors.DisallowedChargeLockTypes),
+      chargesOverMaxDebtAge = Some(containsError(ChargesOverMaxDebtAge)),
+      ineligibleChargeTypes = containsError(IneligibleChargeTypes),
+      noDueDatesReached = containsError(NoDueDatesReached),
+      chargesBeforeMaxAccountingDate = Some(containsError(ChargesBeforeMaxAccountingDate))
+    )
+
+    val chargeTypeAssessments = ChargeTypeAssessments(
+      chargeTypeAssessment = chargeTypeAssessment,
+      assessmentEligibilityRules = assessmentEligibilityRules,
+      true,
+      AssessmentCategory.Standard
+    )
 
     val customerPostcodes: List[CustomerPostcode] = (0 until form.numberOfCustomerPostcodes).toList.map(i =>
       CustomerPostcode(
@@ -570,13 +589,14 @@ object StartJourneyController {
       paymentPlanMaxLength = PaymentPlanMaxLength(form.planLengthMinAndMax.max),
       eligibilityStatus = EligibilityStatus(EligibilityPass(eligibilityRules.isEligible)),
       eligibilityRules = eligibilityRules,
-      chargeTypeAssessment = chargeTypeAssessments,
+      chargeTypeAssessment = chargeTypeAssessment,
       customerDetails = if (form.flags.customerDetailPresent) Some(customerDetail) else None,
       individualDetails = individualDetails,
       addresses = addresses,
       regimeDigitalCorrespondence = RegimeDigitalCorrespondence(form.flags.regimeDigitalCorrespondence),
       futureChargeLiabilitiesExcluded = false,
-      chargeTypesExcluded = None
+      chargeTypesExcluded = None,
+      chargeTypeAssessments = Some(chargeTypeAssessments)
     )
   }
 

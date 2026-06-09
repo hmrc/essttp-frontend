@@ -115,9 +115,9 @@ object TdAll {
 
   def upfrontPaymentAmount(amount: Long): UpfrontPaymentAmount = UpfrontPaymentAmount(AmountInPence(amount))
 
-  val eligibleEligibilityPass: EligibilityPass     = EligibilityPass(value = true)
-  val notEligibleEligibilityPass: EligibilityPass  = eligibleEligibilityPass.copy(value = false)
-  val eligibleEligibilityRules: EligibilityRules   = EligibilityRules(
+  val eligibleEligibilityPass: EligibilityPass    = EligibilityPass(value = true)
+  val notEligibleEligibilityPass: EligibilityPass = eligibleEligibilityPass.copy(value = false)
+  val eligibleEligibilityRules: EligibilityRules  = EligibilityRules(
     hasRlsOnAddress = false,
     markedAsInsolvent = false,
     isLessThanMinDebtAllowance = false,
@@ -140,8 +140,21 @@ object TdAll {
     dmSpecialOfficeProcessingRequiredCDCS = None,
     isAnMtdCustomer = None,
     dmSpecialOfficeProcessingRequiredCESA = None,
-    noMtditsaEnrollment = None
+    noMtditsaEnrollment = None,
+    allChargeTypeAssessmentsFailed = None,
+    noValidPlanAfterAssessments = None
   )
+
+  val assessmentEligibilityRules: AssessmentEligibilityRules = AssessmentEligibilityRules(
+    isLessThanMinDebtAllowance = false,
+    isMoreThanMaxDebtAllowance = false,
+    disallowedChargeLockTypes = false,
+    chargesOverMaxDebtAge = None,
+    ineligibleChargeTypes = false,
+    noDueDatesReached = false,
+    chargesBeforeMaxAccountingDate = None
+  )
+
   val notEligibleHasRlsOnAddress: EligibilityRules =
     eligibleEligibilityRules.copy(hasRlsOnAddress = true)
 
@@ -406,7 +419,62 @@ object TdAll {
       ),
       regimeDigitalCorrespondence = regimeDigitalCorrespondence,
       futureChargeLiabilitiesExcluded = false,
-      chargeTypesExcluded = None
+      chargeTypesExcluded = None,
+      chargeTypeAssessments = Some(
+        ChargeTypeAssessments(
+          List(
+            ChargeTypeAssessment(
+              taxPeriodFrom = TaxPeriodFrom("2020-08-13"),
+              taxPeriodTo = TaxPeriodTo("2020-08-14"),
+              debtTotalAmount = DebtTotalAmount(AmountInPence(300000)),
+              chargeReference = ChargeReference("A00000000001"),
+              charges = List(
+                Charges(
+                  chargeType = ChargeType("InYearRTICharge-Tax"),
+                  mainType = MainType("InYearRTICharge(FPS)"),
+                  mainTrans = MainTrans("mainTrans"),
+                  subTrans = SubTrans("subTrans"),
+                  outstandingAmount = OutstandingAmount(AmountInPence(100000)),
+                  interestStartDate = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
+                  dueDate = DueDate(LocalDate.parse("2017-03-07")),
+                  accruedInterest = AccruedInterest(AmountInPence(1597)),
+                  ineligibleChargeType = IneligibleChargeType(value = false),
+                  chargeOverMaxDebtAge = Some(ChargeOverMaxDebtAge(value = false)),
+                  locks = Some(
+                    List(Lock(LockType("Payment"), LockReason("Risk/Fraud"), DisallowedChargeLockType(value = false)))
+                  ),
+                  dueDateNotReached = false,
+                  isInterestBearingCharge = chargeIsInterestBearingCharge.map(IsInterestBearingCharge(_)),
+                  useChargeReference = chargeUseChargeReference.map(UseChargeReference(_)),
+                  chargeBeforeMaxAccountingDate =
+                    chargeChargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_)),
+                  ddInProgress = ddInProgress.map(DdInProgress(_)),
+                  chargeSource = None,
+                  parentChargeReference = None,
+                  parentMainTrans = None,
+                  originalCreationDate = None,
+                  tieBreaker = None,
+                  originalTieBreaker = None,
+                  saTaxYearEnd = None,
+                  creationDate = None,
+                  originalChargeType = None
+                )
+              )
+            )
+          ),
+          assessmentEligibilityRules = AssessmentEligibilityRules(
+            isLessThanMinDebtAllowance = false,
+            isMoreThanMaxDebtAllowance = false,
+            disallowedChargeLockTypes = false,
+            chargesOverMaxDebtAge = Some(false),
+            ineligibleChargeTypes = false,
+            noDueDatesReached = false,
+            chargesBeforeMaxAccountingDate = Some(false)
+          ),
+          assessmentEligibilityStatus = true,
+          AssessmentCategory.Standard
+        )
+      )
     )
 
   val whyCannotPayReasons: Set[CannotPayReason] =
