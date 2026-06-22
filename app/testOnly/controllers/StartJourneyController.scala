@@ -596,7 +596,7 @@ object StartJourneyController {
       regimeDigitalCorrespondence = RegimeDigitalCorrespondence(form.flags.regimeDigitalCorrespondence),
       futureChargeLiabilitiesExcluded = false,
       chargeTypesExcluded = None,
-      chargeTypeAssessments = Some(chargeTypeAssessments)
+      chargeTypeAssessments = Some(List(chargeTypeAssessments))
     )
   }
 

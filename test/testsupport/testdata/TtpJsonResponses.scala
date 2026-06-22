@@ -159,7 +159,7 @@ object TtpJsonResponses {
        |       } ]
        |    } ]
        |  } ],
-       |       "chargeTypeAssessments" : {
+       |       "chargeTypeAssessments" : [ {
        |  "chargeTypeAssessment" : [ {
        |    "taxPeriodFrom" : "2020-08-13",
        |    "taxPeriodTo" : "2020-08-14",
@@ -198,7 +198,7 @@ object TtpJsonResponses {
        |       },
        |       "assessmentEligibilityStatus" : true,
        |       "assessmentCategory" : "standard"
-       |     },
+       |     } ],
        |  "regimeDigitalCorrespondence": ${regimeDigitalCorrespondence.toString},
        |  "futureChargeLiabilitiesExcluded": false
        |}
