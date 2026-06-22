@@ -421,58 +421,60 @@ object TdAll {
       futureChargeLiabilitiesExcluded = false,
       chargeTypesExcluded = None,
       chargeTypeAssessments = Some(
-        ChargeTypeAssessments(
-          List(
-            ChargeTypeAssessment(
-              taxPeriodFrom = TaxPeriodFrom("2020-08-13"),
-              taxPeriodTo = TaxPeriodTo("2020-08-14"),
-              debtTotalAmount = DebtTotalAmount(AmountInPence(300000)),
-              chargeReference = ChargeReference("A00000000001"),
-              charges = List(
-                Charges(
-                  chargeType = ChargeType("InYearRTICharge-Tax"),
-                  mainType = MainType("InYearRTICharge(FPS)"),
-                  mainTrans = MainTrans("mainTrans"),
-                  subTrans = SubTrans("subTrans"),
-                  outstandingAmount = OutstandingAmount(AmountInPence(100000)),
-                  interestStartDate = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
-                  dueDate = DueDate(LocalDate.parse("2017-03-07")),
-                  accruedInterest = AccruedInterest(AmountInPence(1597)),
-                  ineligibleChargeType = IneligibleChargeType(value = false),
-                  chargeOverMaxDebtAge = Some(ChargeOverMaxDebtAge(value = false)),
-                  locks = Some(
-                    List(Lock(LockType("Payment"), LockReason("Risk/Fraud"), DisallowedChargeLockType(value = false)))
-                  ),
-                  dueDateNotReached = false,
-                  isInterestBearingCharge = chargeIsInterestBearingCharge.map(IsInterestBearingCharge(_)),
-                  useChargeReference = chargeUseChargeReference.map(UseChargeReference(_)),
-                  chargeBeforeMaxAccountingDate =
-                    chargeChargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_)),
-                  ddInProgress = ddInProgress.map(DdInProgress(_)),
-                  chargeSource = None,
-                  parentChargeReference = None,
-                  parentMainTrans = None,
-                  originalCreationDate = None,
-                  tieBreaker = None,
-                  originalTieBreaker = None,
-                  saTaxYearEnd = None,
-                  creationDate = None,
-                  originalChargeType = None
+        List(
+          ChargeTypeAssessments(
+            List(
+              ChargeTypeAssessment(
+                taxPeriodFrom = TaxPeriodFrom("2020-08-13"),
+                taxPeriodTo = TaxPeriodTo("2020-08-14"),
+                debtTotalAmount = DebtTotalAmount(AmountInPence(300000)),
+                chargeReference = ChargeReference("A00000000001"),
+                charges = List(
+                  Charges(
+                    chargeType = ChargeType("InYearRTICharge-Tax"),
+                    mainType = MainType("InYearRTICharge(FPS)"),
+                    mainTrans = MainTrans("mainTrans"),
+                    subTrans = SubTrans("subTrans"),
+                    outstandingAmount = OutstandingAmount(AmountInPence(100000)),
+                    interestStartDate = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
+                    dueDate = DueDate(LocalDate.parse("2017-03-07")),
+                    accruedInterest = AccruedInterest(AmountInPence(1597)),
+                    ineligibleChargeType = IneligibleChargeType(value = false),
+                    chargeOverMaxDebtAge = Some(ChargeOverMaxDebtAge(value = false)),
+                    locks = Some(
+                      List(Lock(LockType("Payment"), LockReason("Risk/Fraud"), DisallowedChargeLockType(value = false)))
+                    ),
+                    dueDateNotReached = false,
+                    isInterestBearingCharge = chargeIsInterestBearingCharge.map(IsInterestBearingCharge(_)),
+                    useChargeReference = chargeUseChargeReference.map(UseChargeReference(_)),
+                    chargeBeforeMaxAccountingDate =
+                      chargeChargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_)),
+                    ddInProgress = ddInProgress.map(DdInProgress(_)),
+                    chargeSource = None,
+                    parentChargeReference = None,
+                    parentMainTrans = None,
+                    originalCreationDate = None,
+                    tieBreaker = None,
+                    originalTieBreaker = None,
+                    saTaxYearEnd = None,
+                    creationDate = None,
+                    originalChargeType = None
+                  )
                 )
               )
-            )
-          ),
-          assessmentEligibilityRules = AssessmentEligibilityRules(
-            isLessThanMinDebtAllowance = false,
-            isMoreThanMaxDebtAllowance = false,
-            disallowedChargeLockTypes = false,
-            chargesOverMaxDebtAge = Some(false),
-            ineligibleChargeTypes = false,
-            noDueDatesReached = false,
-            chargesBeforeMaxAccountingDate = Some(false)
-          ),
-          assessmentEligibilityStatus = true,
-          AssessmentCategory.Standard
+            ),
+            assessmentEligibilityRules = AssessmentEligibilityRules(
+              isLessThanMinDebtAllowance = false,
+              isMoreThanMaxDebtAllowance = false,
+              disallowedChargeLockTypes = false,
+              chargesOverMaxDebtAge = Some(false),
+              ineligibleChargeTypes = false,
+              noDueDatesReached = false,
+              chargesBeforeMaxAccountingDate = Some(false)
+            ),
+            assessmentEligibilityStatus = true,
+            AssessmentCategory.Standard
+          )
         )
       )
     )
