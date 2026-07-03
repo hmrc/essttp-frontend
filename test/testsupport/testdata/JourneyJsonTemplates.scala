@@ -458,6 +458,7 @@ object JourneyJsonTemplates {
       TdJsonBodies.eligibilityCheckJourneyInfo(
         TdAll.eligibleEligibilityPass,
         TdAll.eligibleEligibilityRules,
+        TdAll.assessmentEligibilityRules,
         origin.taxRegime,
         encrypter,
         regimeDigitalCorrespondence,

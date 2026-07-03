@@ -120,21 +120,14 @@ object TdAll {
   val eligibleEligibilityRules: EligibilityRules  = EligibilityRules(
     hasRlsOnAddress = false,
     markedAsInsolvent = false,
-    isLessThanMinDebtAllowance = false,
-    isMoreThanMaxDebtAllowance = false,
-    disallowedChargeLockTypes = false,
     existingTTP = false,
-    chargesOverMaxDebtAge = None,
-    ineligibleChargeTypes = false,
     missingFiledReturns = false,
     hasInvalidInterestSignals = None,
     hasInvalidInterestSignalsCESA = None,
     dmSpecialOfficeProcessingRequired = None,
-    noDueDatesReached = false,
     cannotFindLockReason = None,
     creditsNotAllowed = None,
     isMoreThanMaxPaymentReference = None,
-    chargesBeforeMaxAccountingDate = None,
     hasDisguisedRemuneration = None,
     hasCapacitor = None,
     dmSpecialOfficeProcessingRequiredCDCS = None,
@@ -161,29 +154,29 @@ object TdAll {
   val notEligibleMarkedAsInsolvent: EligibilityRules =
     eligibleEligibilityRules.copy(markedAsInsolvent = true)
 
-  val notEligibleIsLessThanMinDebtAllowance: EligibilityRules =
-    eligibleEligibilityRules.copy(isLessThanMinDebtAllowance = true)
+  val notEligibleIsLessThanMinDebtAllowance: AssessmentEligibilityRules =
+    assessmentEligibilityRules.copy(isLessThanMinDebtAllowance = true)
 
-  val notEligibleIsMoreThanMaxDebtAllowance: EligibilityRules =
-    eligibleEligibilityRules.copy(isMoreThanMaxDebtAllowance = true)
+  val notEligibleIsMoreThanMaxDebtAllowance: AssessmentEligibilityRules =
+    assessmentEligibilityRules.copy(isMoreThanMaxDebtAllowance = true)
 
-  val notEligibleDisallowedChargeLockTypes: EligibilityRules =
-    eligibleEligibilityRules.copy(disallowedChargeLockTypes = true)
+  val notEligibleDisallowedChargeLockTypes: AssessmentEligibilityRules =
+    assessmentEligibilityRules.copy(disallowedChargeLockTypes = true)
 
   val notEligibleExistingTTP: EligibilityRules =
     eligibleEligibilityRules.copy(existingTTP = true)
 
-  val notEligibleExceedsMaxDebtAge: EligibilityRules =
-    eligibleEligibilityRules.copy(chargesOverMaxDebtAge = Some(true))
+  val notEligibleExceedsMaxDebtAge: AssessmentEligibilityRules =
+    assessmentEligibilityRules.copy(chargesOverMaxDebtAge = Some(true))
 
-  val notEligibleEligibleChargeType: EligibilityRules =
-    eligibleEligibilityRules.copy(ineligibleChargeTypes = true)
+  val notEligibleEligibleChargeType: AssessmentEligibilityRules =
+    assessmentEligibilityRules.copy(ineligibleChargeTypes = true)
 
   val notEligibleMissingFiledReturns: EligibilityRules =
     eligibleEligibilityRules.copy(missingFiledReturns = true)
 
-  val notEligibleNoDueDatesReached: EligibilityRules =
-    eligibleEligibilityRules.copy(noDueDatesReached = true)
+  val notEligibleNoDueDatesReached: AssessmentEligibilityRules =
+    assessmentEligibilityRules.copy(noDueDatesReached = true)
 
   val notEligibleHasInvalidInterestSignals: EligibilityRules =
     eligibleEligibilityRules.copy(hasInvalidInterestSignals = Some(true))
@@ -203,8 +196,8 @@ object TdAll {
   val notEligibleIsMoreThanMaxPaymentReference: EligibilityRules =
     eligibleEligibilityRules.copy(isMoreThanMaxPaymentReference = Some(true))
 
-  val notEligibleChargesBeforeMaxAccountingDate: EligibilityRules =
-    eligibleEligibilityRules.copy(chargesBeforeMaxAccountingDate = Some(true))
+  val notEligibleChargesBeforeMaxAccountingDate: AssessmentEligibilityRules =
+    assessmentEligibilityRules.copy(chargesBeforeMaxAccountingDate = Some(true))
 
   val notEligibleMultipleReasons: EligibilityRules =
     eligibleEligibilityRules.copy(missingFiledReturns = true, hasRlsOnAddress = true)
@@ -348,45 +341,6 @@ object TdAll {
       paymentPlanMaxLength = PaymentPlanMaxLength(12),
       eligibilityStatus = EligibilityStatus(eligibilityPass),
       eligibilityRules = eligibilityRules,
-      chargeTypeAssessment = List(
-        ChargeTypeAssessment(
-          taxPeriodFrom = TaxPeriodFrom("2020-08-13"),
-          taxPeriodTo = TaxPeriodTo("2020-08-14"),
-          debtTotalAmount = DebtTotalAmount(AmountInPence(300000)),
-          chargeReference = ChargeReference("A00000000001"),
-          charges = List(
-            Charges(
-              chargeType = ChargeType("InYearRTICharge-Tax"),
-              mainType = MainType("InYearRTICharge(FPS)"),
-              mainTrans = MainTrans("mainTrans"),
-              subTrans = SubTrans("subTrans"),
-              outstandingAmount = OutstandingAmount(AmountInPence(100000)),
-              interestStartDate = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
-              dueDate = DueDate(LocalDate.parse("2017-03-07")),
-              accruedInterest = AccruedInterest(AmountInPence(1597)),
-              ineligibleChargeType = IneligibleChargeType(value = false),
-              chargeOverMaxDebtAge = Some(ChargeOverMaxDebtAge(value = false)),
-              locks = Some(
-                List(Lock(LockType("Payment"), LockReason("Risk/Fraud"), DisallowedChargeLockType(value = false)))
-              ),
-              dueDateNotReached = false,
-              isInterestBearingCharge = chargeIsInterestBearingCharge.map(IsInterestBearingCharge(_)),
-              useChargeReference = chargeUseChargeReference.map(UseChargeReference(_)),
-              chargeBeforeMaxAccountingDate = chargeChargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_)),
-              ddInProgress = ddInProgress.map(DdInProgress(_)),
-              chargeSource = None,
-              parentChargeReference = None,
-              parentMainTrans = None,
-              originalCreationDate = None,
-              tieBreaker = None,
-              originalTieBreaker = None,
-              saTaxYearEnd = None,
-              creationDate = None,
-              originalChargeType = None
-            )
-          )
-        )
-      ),
       customerDetails = Some(List(CustomerDetail(None, None))),
       individualDetails = maybeIndividalDetails,
       addresses = List(
@@ -420,61 +374,59 @@ object TdAll {
       regimeDigitalCorrespondence = regimeDigitalCorrespondence,
       futureChargeLiabilitiesExcluded = false,
       chargeTypesExcluded = None,
-      chargeTypeAssessments = Some(
-        List(
-          ChargeTypeAssessments(
-            List(
-              ChargeTypeAssessment(
-                taxPeriodFrom = TaxPeriodFrom("2020-08-13"),
-                taxPeriodTo = TaxPeriodTo("2020-08-14"),
-                debtTotalAmount = DebtTotalAmount(AmountInPence(300000)),
-                chargeReference = ChargeReference("A00000000001"),
-                charges = List(
-                  Charges(
-                    chargeType = ChargeType("InYearRTICharge-Tax"),
-                    mainType = MainType("InYearRTICharge(FPS)"),
-                    mainTrans = MainTrans("mainTrans"),
-                    subTrans = SubTrans("subTrans"),
-                    outstandingAmount = OutstandingAmount(AmountInPence(100000)),
-                    interestStartDate = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
-                    dueDate = DueDate(LocalDate.parse("2017-03-07")),
-                    accruedInterest = AccruedInterest(AmountInPence(1597)),
-                    ineligibleChargeType = IneligibleChargeType(value = false),
-                    chargeOverMaxDebtAge = Some(ChargeOverMaxDebtAge(value = false)),
-                    locks = Some(
-                      List(Lock(LockType("Payment"), LockReason("Risk/Fraud"), DisallowedChargeLockType(value = false)))
-                    ),
-                    dueDateNotReached = false,
-                    isInterestBearingCharge = chargeIsInterestBearingCharge.map(IsInterestBearingCharge(_)),
-                    useChargeReference = chargeUseChargeReference.map(UseChargeReference(_)),
-                    chargeBeforeMaxAccountingDate =
-                      chargeChargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_)),
-                    ddInProgress = ddInProgress.map(DdInProgress(_)),
-                    chargeSource = None,
-                    parentChargeReference = None,
-                    parentMainTrans = None,
-                    originalCreationDate = None,
-                    tieBreaker = None,
-                    originalTieBreaker = None,
-                    saTaxYearEnd = None,
-                    creationDate = None,
-                    originalChargeType = None
-                  )
+      chargeTypeAssessments = List(
+        ChargeTypeAssessments(
+          List(
+            ChargeTypeAssessment(
+              taxPeriodFrom = TaxPeriodFrom("2020-08-13"),
+              taxPeriodTo = TaxPeriodTo("2020-08-14"),
+              debtTotalAmount = DebtTotalAmount(AmountInPence(300000)),
+              chargeReference = ChargeReference("A00000000001"),
+              charges = List(
+                Charges(
+                  chargeType = ChargeType("InYearRTICharge-Tax"),
+                  mainType = MainType("InYearRTICharge(FPS)"),
+                  mainTrans = MainTrans("mainTrans"),
+                  subTrans = SubTrans("subTrans"),
+                  outstandingAmount = OutstandingAmount(AmountInPence(100000)),
+                  interestStartDate = Some(InterestStartDate(LocalDate.parse("2017-03-07"))),
+                  dueDate = DueDate(LocalDate.parse("2017-03-07")),
+                  accruedInterest = AccruedInterest(AmountInPence(1597)),
+                  ineligibleChargeType = IneligibleChargeType(value = false),
+                  chargeOverMaxDebtAge = Some(ChargeOverMaxDebtAge(value = false)),
+                  locks = Some(
+                    List(Lock(LockType("Payment"), LockReason("Risk/Fraud"), DisallowedChargeLockType(value = false)))
+                  ),
+                  dueDateNotReached = false,
+                  isInterestBearingCharge = chargeIsInterestBearingCharge.map(IsInterestBearingCharge(_)),
+                  useChargeReference = chargeUseChargeReference.map(UseChargeReference(_)),
+                  chargeBeforeMaxAccountingDate =
+                    chargeChargeBeforeMaxAccountingDate.map(ChargeBeforeMaxAccountingDate(_)),
+                  ddInProgress = ddInProgress.map(DdInProgress(_)),
+                  chargeSource = None,
+                  parentChargeReference = None,
+                  parentMainTrans = None,
+                  originalCreationDate = None,
+                  tieBreaker = None,
+                  originalTieBreaker = None,
+                  saTaxYearEnd = None,
+                  creationDate = None,
+                  originalChargeType = None
                 )
               )
-            ),
-            assessmentEligibilityRules = AssessmentEligibilityRules(
-              isLessThanMinDebtAllowance = false,
-              isMoreThanMaxDebtAllowance = false,
-              disallowedChargeLockTypes = false,
-              chargesOverMaxDebtAge = Some(false),
-              ineligibleChargeTypes = false,
-              noDueDatesReached = false,
-              chargesBeforeMaxAccountingDate = Some(false)
-            ),
-            assessmentEligibilityStatus = true,
-            AssessmentCategory.Standard
-          )
+            )
+          ),
+          assessmentEligibilityRules = AssessmentEligibilityRules(
+            isLessThanMinDebtAllowance = false,
+            isMoreThanMaxDebtAllowance = false,
+            disallowedChargeLockTypes = false,
+            chargesOverMaxDebtAge = Some(false),
+            ineligibleChargeTypes = false,
+            noDueDatesReached = false,
+            chargesBeforeMaxAccountingDate = Some(false)
+          ),
+          assessmentEligibilityStatus = true,
+          AssessmentCategory.Standard
         )
       )
     )

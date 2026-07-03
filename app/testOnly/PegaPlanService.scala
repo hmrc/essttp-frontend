@@ -119,7 +119,8 @@ class PegaPlanService @Inject() (
       case other                                   => sys.error(s"Could not find eligibility check result in journey with stage ${other.stage}")
     }
 
-    val debtItemCharges = eligibilityCheckResult.chargeTypeAssessment.flatMap(toDebtItemCharge)
+    val debtItemCharges =
+      eligibilityCheckResult.standardChargeTypeAssessments.chargeTypeAssessment.flatMap(toDebtItemCharge)
 
     val affordableQuotesRequest: AffordableQuotesRequest = AffordableQuotesRequest(
       channelIdentifier = ChannelIdentifiers.eSSTTP,

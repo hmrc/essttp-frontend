@@ -241,7 +241,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       taxDetail = toTaxDetail(eligibilityCheckResult),
       saCustomerType = eligibilityCheckResult.individualDetails.flatMap(_.customerType),
       authProviderId = r.ggCredId.value,
-      chargeTypeAssessment = eligibilityCheckResult.chargeTypeAssessment,
+      chargeTypeAssessment = eligibilityCheckResult.standardChargeTypeAssessments.chargeTypeAssessment,
       correlationId = journey.correlationId.value.toString,
       futureChargeLiabilitiesExcluded = Some(eligibilityCheckResult.futureChargeLiabilitiesExcluded),
       regimeDigitalCorrespondence = eligibilityCheckResult.regimeDigitalCorrespondence.value

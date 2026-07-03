@@ -73,7 +73,9 @@ class PaymentScheduleController @Inject() (
       { case j1: JourneyStage.AfterEnteredMonthlyPaymentAmount => j1.monthlyPaymentAmount },
       _._2.monthlyPaymentAmount
     )
-    val hasInterestBearingCharge = request.eligibilityCheckResult.hasInterestBearingCharge
+    val hasInterestBearingCharge = request.eligibilityCheckResult.hasInterestBearingCharge(
+      request.eligibilityCheckResult.standardChargeTypeAssessments
+    )
 
     Ok(
       paymentSchedulePage(

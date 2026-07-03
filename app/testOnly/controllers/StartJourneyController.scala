@@ -528,21 +528,14 @@ object StartJourneyController {
       EligibilityRules(
         hasRlsOnAddress = containsError(HasRlsOnAddress),
         markedAsInsolvent = containsError(MarkedAsInsolvent),
-        isLessThanMinDebtAllowance = containsError(IsLessThanMinDebtAllowance),
-        isMoreThanMaxDebtAllowance = containsError(IsMoreThanMaxDebtAllowance),
-        disallowedChargeLockTypes = containsError(EligibilityErrors.DisallowedChargeLockTypes),
         existingTTP = containsError(ExistingTtp),
-        chargesOverMaxDebtAge = Some(containsError(ChargesOverMaxDebtAge)),
-        ineligibleChargeTypes = containsError(IneligibleChargeTypes),
         missingFiledReturns = containsError(MissingFiledReturns),
         hasInvalidInterestSignals = Some(containsError(HasInvalidInterestSignals)),
         hasInvalidInterestSignalsCESA = Some(containsError(HasInvalidInterestSignalsCESA)),
         dmSpecialOfficeProcessingRequired = Some(containsError(DmSpecialOfficeProcessingRequired)),
-        noDueDatesReached = containsError(NoDueDatesReached),
         cannotFindLockReason = Some(containsError(CannotFindLockReason)),
         creditsNotAllowed = Some(containsError(CreditsNotAllowed)),
         isMoreThanMaxPaymentReference = Some(containsError(IsMoreThanMaxPaymentReference)),
-        chargesBeforeMaxAccountingDate = Some(containsError(ChargesBeforeMaxAccountingDate)),
         hasDisguisedRemuneration = Some(containsError(HasDisguisedRemuneration)),
         hasCapacitor = Some(containsError(HasCapacitor)),
         dmSpecialOfficeProcessingRequiredCDCS = Some(containsError(DmSpecialOfficeProcessingRequiredCDCS)),
@@ -589,14 +582,13 @@ object StartJourneyController {
       paymentPlanMaxLength = PaymentPlanMaxLength(form.planLengthMinAndMax.max),
       eligibilityStatus = EligibilityStatus(EligibilityPass(eligibilityRules.isEligible)),
       eligibilityRules = eligibilityRules,
-      chargeTypeAssessment = chargeTypeAssessment,
       customerDetails = if (form.flags.customerDetailPresent) Some(customerDetail) else None,
       individualDetails = individualDetails,
       addresses = addresses,
       regimeDigitalCorrespondence = RegimeDigitalCorrespondence(form.flags.regimeDigitalCorrespondence),
       futureChargeLiabilitiesExcluded = false,
       chargeTypesExcluded = None,
-      chargeTypeAssessments = Some(List(chargeTypeAssessments))
+      chargeTypeAssessments = List(chargeTypeAssessments)
     )
   }
 

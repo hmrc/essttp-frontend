@@ -60,7 +60,9 @@ class MonthlyPaymentAmountController @Inject() (
     eligibilityCheckResult: EligibilityCheckResult
   )(using Request[?]): Result = {
 
-    val totalDebt                                                = AmountInPence(eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum)
+    val totalDebt                                                = AmountInPence(
+      eligibilityCheckResult.standardChargeTypeAssessments.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum
+    )
     val upfrontPaymentAmount                                     = upfrontPaymentAnswersFromJourney(journey) match {
       case j1: UpfrontPaymentAnswers.DeclaredUpfrontPayment => j1.amount.value
       case UpfrontPaymentAnswers.NoUpfrontPayment           => AmountInPence.zero
@@ -107,7 +109,11 @@ class MonthlyPaymentAmountController @Inject() (
         Errors.throwServerErrorException("We don't have the affordability api response...")
       case j: JourneyStage.AfterRetrievedAffordabilityResult  =>
         val totalDebt: AmountInPence            =
-          AmountInPence(request.eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum)
+          AmountInPence(
+            request.eligibilityCheckResult.standardChargeTypeAssessments.chargeTypeAssessment
+              .map(_.debtTotalAmount.value.value)
+              .sum
+          )
         val upfrontPaymentAmount: AmountInPence = upfrontPaymentAnswersFromJourney(j) match {
           case UpfrontPaymentAnswers.DeclaredUpfrontPayment(amount) => amount.value
           case UpfrontPaymentAnswers.NoUpfrontPayment               => AmountInPence.zero

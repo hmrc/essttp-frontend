@@ -30,12 +30,15 @@ object EligibilityRouter {
     if (eligibilityResult.isEligible) {
       routes.YourBillController.yourBill
     } else {
-      EligibilityErrors.toEligibilityError(eligibilityResult.eligibilityRules) match {
+      EligibilityErrors.toEligibilityError(
+        eligibilityResult.eligibilityRules,
+        eligibilityResult.standardChargeTypeAssessments.assessmentEligibilityRules
+      ) match {
         case ee @ Some(MultipleReasons)                  =>
           determineWhereToGoBasedOnHierarchy(
             ee,
-            eligibilityResult.eligibilityRules.isLessThanMinDebtAllowance,
-            eligibilityResult.eligibilityRules.noDueDatesReached,
+            eligibilityResult.standardChargeTypeAssessments.assessmentEligibilityRules.isLessThanMinDebtAllowance,
+            eligibilityResult.standardChargeTypeAssessments.assessmentEligibilityRules.noDueDatesReached,
             eligibilityResult.eligibilityRules.hasRlsOnAddress,
             taxRegime
           )

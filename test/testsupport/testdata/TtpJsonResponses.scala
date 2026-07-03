@@ -87,13 +87,8 @@ object TtpJsonResponses {
        |  "eligibilityRules" : {
        |    "hasRlsOnAddress" : ${eligibilityRules.hasRlsOnAddress.toString},
        |    "markedAsInsolvent" : ${eligibilityRules.markedAsInsolvent.toString},
-       |    "isLessThanMinDebtAllowance" : ${eligibilityRules.isLessThanMinDebtAllowance.toString},
-       |    "isMoreThanMaxDebtAllowance" : ${eligibilityRules.isMoreThanMaxDebtAllowance.toString},
-       |    "disallowedChargeLockTypes" : ${eligibilityRules.disallowedChargeLockTypes.toString},
        |    "existingTTP" : ${eligibilityRules.existingTTP.toString},
-       |    "ineligibleChargeTypes" : ${eligibilityRules.ineligibleChargeTypes.toString},
        |    "missingFiledReturns" : ${eligibilityRules.missingFiledReturns.toString},
-       |    "noDueDatesReached": ${eligibilityRules.noDueDatesReached.toString}
        |  ${optionalEligibilityResponsesJson(
         eligibilityRules.hasInvalidInterestSignals,
         "hasInvalidInterestSignals"
@@ -112,11 +107,6 @@ object TtpJsonResponses {
         eligibilityRules.isMoreThanMaxPaymentReference,
         "isMoreThanMaxPaymentReference"
       )}
-       |  ${optionalEligibilityResponsesJson(
-        eligibilityRules.chargesBeforeMaxAccountingDate,
-        "chargesBeforeMaxAccountingDate"
-      )}
-       |  ${optionalEligibilityResponsesJson(eligibilityRules.chargesOverMaxDebtAge, "chargesOverMaxDebtAge")}
        |  ${optionalEligibilityResponsesJson(
         eligibilityRules.hasDisguisedRemuneration,
         "hasDisguisedRemuneration"
