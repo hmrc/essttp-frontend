@@ -613,46 +613,6 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
           PageUrls.vatDebtBeforeAccountingDateUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - ChargesBeforeMaxAccountingDate`(Origins.Vat.Bta),
           Origins.Vat.Bta
-        ),
-        (
-          "HasDisguisedRemuneration - SA",
-          TdAll.notEligibleHasDisguisedRemuneration,
-          TdAll.assessmentEligibilityRules,
-          "hasDisguisedRemuneration",
-          PageUrls.saNotEligibleUrl,
-          JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasDisguisedRemuneration`(Origins.Sa.Bta),
-          Origins.Sa.Bta
-        ),
-        (
-          "HasCapacitor - SA",
-          TdAll.notEligibleHasCapacitor,
-          TdAll.assessmentEligibilityRules,
-          "hasCapacitor",
-          PageUrls.saNotEligibleUrl,
-          JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasCapacitor`(Origins.Sa.Bta),
-          Origins.Sa.Bta
-        ),
-        (
-          "DmSpecialOfficeProcessingRequiredCESA - SA",
-          TdAll.notEligibleDmSpecialOfficeProcessingRequiredCESA,
-          TdAll.assessmentEligibilityRules,
-          "dmSpecialOfficeProcessingRequiredCESA",
-          PageUrls.saNotEligibleUrl,
-          JourneyJsonTemplates.`Eligibility Checked - Ineligible - dmSpecialOfficeProcessingRequiredCESA`(
-            Origins.Sa.Bta
-          ),
-          Origins.Sa.Bta
-        ),
-        (
-          "DmSpecialOfficeProcessingRequiredCDCS - SA",
-          TdAll.notEligibleDmSpecialOfficeProcessingRequiredCDCS,
-          TdAll.assessmentEligibilityRules,
-          "dmSpecialOfficeProcessingRequiredCDCS",
-          PageUrls.saNotEligibleUrl,
-          JourneyJsonTemplates.`Eligibility Checked - Ineligible - DmSpecialOfficeProcessingRequiredCDCS`(
-            Origins.Sa.Bta
-          ),
-          Origins.Sa.Bta
         )
       )
     ) {
@@ -670,6 +630,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
             taxRegime = origin.taxRegime,
             eligibilityPass = TdAll.notEligibleEligibilityPass,
             eligibilityRules = eligibilityRules,
+            assessmentEligibilityRules = assessmentEligibilityRules,
             regimeDigitalCorrespondence = true,
             maybeCustomerType = Some(CustomerTypes.MTDITSA)
           )
@@ -679,6 +640,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
               taxRegime = origin.taxRegime,
               eligibilityPass = TdAll.notEligibleEligibilityPass,
               eligibilityRules = eligibilityRules,
+              assessmentEligibilityRules = assessmentEligibilityRules,
               poundsInsteadOfPence = true,
               regimeDigitalCorrespondence = true,
               maybeCustomerType = Some(CustomerTypes.MTDITSA)
@@ -704,6 +666,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
             expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(
               TdAll.notEligibleEligibilityPass,
               eligibilityRules,
+              assessmentEligibilityRules,
               origin.taxRegime,
               RegimeDigitalCorrespondence(value = true),
               maybeIndividalDetails = Some(
@@ -757,7 +720,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
                  |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
                  |  "chargeTypeAssessment" :${(Json
                     .parse(eligibilityCheckResponseJsonAsPounds)
-                    .as[JsObject] \ "chargeTypeAssessment").get.toString},
+                    .as[JsObject] \ "chargeTypeAssessments" \ 0 \ "chargeTypeAssessment").get.toString},
                  |  "futureChargeLiabilitiesExcluded": false
                  |}
                  |""".stripMargin
@@ -965,6 +928,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
               expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(
                 TdAll.eligibleEligibilityPass,
                 TdAll.eligibleEligibilityRules,
+                TdAll.assessmentEligibilityRules,
                 TaxRegime.Epaye,
                 RegimeDigitalCorrespondence(value = true),
                 maybeChargeIsInterestBearingCharge,
@@ -992,7 +956,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
                  |  "futureChargeLiabilitiesExcluded": false,
                  |  "chargeTypeAssessment" : ${(Json
                       .parse(eligibilityCheckResponseJsonAsPounds)
-                      .as[JsObject] \ "chargeTypeAssessment").get.toString}
+                      .as[JsObject] \ "chargeTypeAssessments" \ 0 \ "chargeTypeAssessment").get.toString}
                  |}
                  |""".stripMargin
                 )
@@ -1036,6 +1000,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(
           TdAll.eligibleEligibilityPass,
           TdAll.eligibleEligibilityRules,
+          TdAll.assessmentEligibilityRules,
           TaxRegime.Vat,
           RegimeDigitalCorrespondence(value = true),
           chargeChargeBeforeMaxAccountingDate = Some(true)
@@ -1061,7 +1026,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
              |  "futureChargeLiabilitiesExcluded": false,
              |  "chargeTypeAssessment" : ${(Json
                 .parse(eligibilityCheckResponseJsonAsPounds)
-                .as[JsObject] \ "chargeTypeAssessment").get.toString}
+                .as[JsObject] \ "chargeTypeAssessments" \ 0 \ "chargeTypeAssessment").get.toString}
              |}
              |""".stripMargin
           )
@@ -1105,6 +1070,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(
           TdAll.eligibleEligibilityPass,
           TdAll.eligibleEligibilityRules.copy(noMtditsaEnrollment = Some(false)),
+          TdAll.assessmentEligibilityRules,
           TaxRegime.Sa,
           RegimeDigitalCorrespondence(value = true),
           chargeChargeBeforeMaxAccountingDate = Some(true)
@@ -1130,7 +1096,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
              |  "futureChargeLiabilitiesExcluded": false,
              |  "chargeTypeAssessment" : ${(Json
                 .parse(eligibilityCheckResponseJsonAsPounds)
-                .as[JsObject] \ "chargeTypeAssessment").get.toString}
+                .as[JsObject] \ "chargeTypeAssessments" \ 0 \ "chargeTypeAssessment").get.toString}
              |}
              |""".stripMargin
           )
@@ -1172,6 +1138,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(
           TdAll.eligibleEligibilityPass,
           TdAll.eligibleEligibilityRules,
+          TdAll.assessmentEligibilityRules,
           TaxRegime.Simp,
           RegimeDigitalCorrespondence(value = true),
           chargeChargeBeforeMaxAccountingDate = Some(true)
@@ -1197,7 +1164,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
              |  "futureChargeLiabilitiesExcluded": false,
              |  "chargeTypeAssessment" : ${(Json
                 .parse(eligibilityCheckResponseJsonAsPounds)
-                .as[JsObject] \ "chargeTypeAssessment").get.toString}
+                .as[JsObject] \ "chargeTypeAssessments" \ 0 \ "chargeTypeAssessment").get.toString}
              |}
              |""".stripMargin
           )
@@ -1391,6 +1358,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
               expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(
                 TdAll.eligibleEligibilityPass,
                 TdAll.eligibleEligibilityRules,
+                TdAll.assessmentEligibilityRules,
                 TaxRegime.Sa,
                 RegimeDigitalCorrespondence(value = true),
                 maybeIndividalDetails =

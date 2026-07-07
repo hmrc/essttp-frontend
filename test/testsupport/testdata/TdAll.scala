@@ -322,6 +322,7 @@ object TdAll {
   def eligibilityCheckResult(
     eligibilityPass:                     EligibilityPass,
     eligibilityRules:                    EligibilityRules,
+    assessmentEligibilityRules:          AssessmentEligibilityRules,
     taxRegime:                           TaxRegime,
     regimeDigitalCorrespondence:         RegimeDigitalCorrespondence,
     chargeIsInterestBearingCharge:       Option[Boolean] = None,
@@ -416,15 +417,7 @@ object TdAll {
               )
             )
           ),
-          assessmentEligibilityRules = AssessmentEligibilityRules(
-            isLessThanMinDebtAllowance = false,
-            isMoreThanMaxDebtAllowance = false,
-            disallowedChargeLockTypes = false,
-            chargesOverMaxDebtAge = Some(false),
-            ineligibleChargeTypes = false,
-            noDueDatesReached = false,
-            chargesBeforeMaxAccountingDate = Some(false)
-          ),
+          assessmentEligibilityRules = assessmentEligibilityRules,
           assessmentEligibilityStatus = true,
           AssessmentCategory.Standard
         )

@@ -88,7 +88,7 @@ object TtpJsonResponses {
        |    "hasRlsOnAddress" : ${eligibilityRules.hasRlsOnAddress.toString},
        |    "markedAsInsolvent" : ${eligibilityRules.markedAsInsolvent.toString},
        |    "existingTTP" : ${eligibilityRules.existingTTP.toString},
-       |    "missingFiledReturns" : ${eligibilityRules.missingFiledReturns.toString},
+       |    "missingFiledReturns" : ${eligibilityRules.missingFiledReturns.toString}
        |  ${optionalEligibilityResponsesJson(
         eligibilityRules.hasInvalidInterestSignals,
         "hasInvalidInterestSignals"
@@ -122,34 +122,7 @@ object TtpJsonResponses {
       )}
        |  ${optionalEligibilityResponsesJson(eligibilityRules.noMtditsaEnrollment, "noMtditsaEnrollment")}
        |  },
-       |  "chargeTypeAssessment" : [ {
-       |    "taxPeriodFrom" : "2020-08-13",
-       |    "taxPeriodTo" : "2020-08-14",
-       |    "debtTotalAmount" : ${if (poundsInsteadOfPence) "3000.00" else "300000"},
-       |    "chargeReference" : "A00000000001",
-       |    "charges" : [ {
-       |      "chargeType": "InYearRTICharge-Tax",
-       |      "mainType": "InYearRTICharge(FPS)",
-       |      "mainTrans" : "mainTrans",
-       |      "subTrans" : "subTrans",
-       |      "outstandingAmount" : ${if (poundsInsteadOfPence) "1000.00" else "100000"},
-       |      "interestStartDate" : "2017-03-07",
-       |      "dueDate" : "2017-03-07",
-       |      "accruedInterest" : ${if (poundsInsteadOfPence) "15.97" else "1597"},
-       |      "ineligibleChargeType": false,
-       |      "chargeOverMaxDebtAge": false,
-       |       "dueDateNotReached": false,
-       |       $isInterestBearingChargeValue
-       |       $useChargeReferenceValue
-       |       $chargeBeforeMaxAccountingDateValue
-       |       "locks": [ {
-       |          "lockType": "Payment",
-       |          "lockReason": "Risk/Fraud",
-       |          "disallowedChargeLockType": false
-       |       } ]
-       |    } ]
-       |  } ],
-       |       "chargeTypeAssessments" : [ {
+       |  "chargeTypeAssessments" : [ {
        |  "chargeTypeAssessment" : [ {
        |    "taxPeriodFrom" : "2020-08-13",
        |    "taxPeriodTo" : "2020-08-14",
@@ -181,10 +154,13 @@ object TtpJsonResponses {
        |         "isLessThanMinDebtAllowance" : ${assessmentEligibilityRules.isLessThanMinDebtAllowance.toString},
        |         "isMoreThanMaxDebtAllowance" : ${assessmentEligibilityRules.isMoreThanMaxDebtAllowance.toString},
        |         "disallowedChargeLockTypes" : ${assessmentEligibilityRules.disallowedChargeLockTypes.toString},
-       |         "chargesOverMaxDebtAge": false,
        |         "ineligibleChargeTypes" : ${assessmentEligibilityRules.ineligibleChargeTypes.toString},
-       |         "noDueDatesReached" : ${assessmentEligibilityRules.noDueDatesReached.toString},
-       |         "chargesBeforeMaxAccountingDate" : false
+       |         "noDueDatesReached" : ${assessmentEligibilityRules.noDueDatesReached.toString}
+       |         ${optionalEligibilityResponsesJson(
+        assessmentEligibilityRules.chargesBeforeMaxAccountingDate,
+        "chargesBeforeMaxAccountingDate"
+      )}
+       | ${optionalEligibilityResponsesJson(assessmentEligibilityRules.chargesOverMaxDebtAge, "chargesOverMaxDebtAge")}
        |       },
        |       "assessmentEligibilityStatus" : true,
        |       "assessmentCategory" : "standard"
