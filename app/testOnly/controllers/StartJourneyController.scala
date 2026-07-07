@@ -580,7 +580,10 @@ object StartJourneyController {
       paymentPlanFrequency = PaymentPlanFrequencies.Monthly,
       paymentPlanMinLength = PaymentPlanMinLength(form.planLengthMinAndMax.min),
       paymentPlanMaxLength = PaymentPlanMaxLength(form.planLengthMinAndMax.max),
-      eligibilityStatus = EligibilityStatus(EligibilityPass(eligibilityRules.isEligible)),
+      eligibilityStatus =
+        if (eligibilityRules.isEligible && assessmentEligibilityRules.isEligible)
+          EligibilityStatus(EligibilityPass(true))
+        else EligibilityStatus(EligibilityPass(false)),
       eligibilityRules = eligibilityRules,
       customerDetails = if (form.flags.customerDetailPresent) Some(customerDetail) else None,
       individualDetails = individualDetails,

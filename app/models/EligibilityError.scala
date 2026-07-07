@@ -113,7 +113,8 @@ object EligibilityErrors extends Enum[EligibilityError] {
       case (_, e) if e.disallowedChargeLockTypes                                                  => Some(DisallowedChargeLockTypes)
       case (_, e) if e.chargesOverMaxDebtAge.contains(true)                                       => Some(ChargesOverMaxDebtAge)
       case (_, e) if e.ineligibleChargeTypes                                                      => Some(IneligibleChargeTypes)
-      case (_, e) if e.noDueDatesReached                                                          => Some(NoDueDatesReached)
+      case (_, e) if e.noDueDatesReached                                                          =>
+        Some(NoDueDatesReached)
       case (_, e) if e.chargesBeforeMaxAccountingDate.contains(true)                              => Some(ChargesBeforeMaxAccountingDate)
       case (_, _)                                                                                 => None // all false
     }

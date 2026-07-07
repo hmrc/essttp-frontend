@@ -30,10 +30,11 @@ object EligibilityRouter {
     if (eligibilityResult.isEligible) {
       routes.YourBillController.yourBill
     } else {
-      EligibilityErrors.toEligibilityError(
+      val error = EligibilityErrors.toEligibilityError(
         eligibilityResult.eligibilityRules,
         eligibilityResult.standardChargeTypeAssessments.assessmentEligibilityRules
-      ) match {
+      )
+      error match {
         case ee @ Some(MultipleReasons)                  =>
           determineWhereToGoBasedOnHierarchy(
             ee,
