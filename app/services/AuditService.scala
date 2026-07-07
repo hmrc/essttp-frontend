@@ -216,7 +216,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
     eligibilityCheckResult: EligibilityCheckResult
   )(using r: AuthenticatedJourneyRequest[?]): EligibilityCheckAuditDetail = {
 
-    def collect(product: Product): List[String] = {
+    def collectEligibilityReasons(product: Product): List[String] = {
       val reasons: List[String] =
         product.productElementNames.toList
       val values                = product.productIterator.toList
@@ -232,7 +232,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
     val enrollmentReasons                =
       if (eligibilityCheckResult.isEligible) None else Some(EnrollmentReasons.DidNotPassEligibilityCheck())
     val eligibilityReasons: List[String] =
-      collect(eligibilityCheckResult.eligibilityRules) ::: collect(
+      collectEligibilityReasons(eligibilityCheckResult.eligibilityRules) ::: collectEligibilityReasons(
         eligibilityCheckResult.standardChargeTypeAssessments.assessmentEligibilityRules
       )
 
