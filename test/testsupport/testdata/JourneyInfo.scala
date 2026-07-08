@@ -255,6 +255,33 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
+  def multipleIneligibleReasonsEligibilityReasons(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson      =
+    TdJsonBodies.eligibilityCheckJourneyInfo(
+      TdAll.notEligibleEligibilityPass,
+      TdAll.notEligibleMultipleReasons,
+      TdAll.notEligibleNoDueDatesReached,
+      taxRegime,
+      encrypter
+    )
+  def multipleIneligibleReasonsAssessmentEligibilityReasons(
+    taxRegime: TaxRegime,
+    encrypter: Encrypter
+  ): JourneyInfoAsJson =
+    TdJsonBodies.eligibilityCheckJourneyInfo(
+      TdAll.notEligibleEligibilityPass,
+      TdAll.eligibleEligibilityRules,
+      TdAll.notEligibleMultipleReasonsAssessment,
+      taxRegime,
+      encrypter
+    )
+  def multipleIneligibleReasonsOneFromEachReasonsList(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson  =
+    TdJsonBodies.eligibilityCheckJourneyInfo(
+      TdAll.notEligibleEligibilityPass,
+      TdAll.notEligibleDmSpecialOfficeProcessingRequired,
+      TdAll.notEligibleDisallowedChargeLockTypes,
+      taxRegime,
+      encrypter
+    )
   def noMtdEnrolment(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                                   = TdJsonBodies
     .eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
@@ -479,6 +506,26 @@ object JourneyInfo {
     encrypter: Encrypter
   ): List[JourneyInfoAsJson] =
     multipleIneligibleReasonsDebtTooLowAndOld(taxRegime, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
+
+  def eligibilityCheckedIneligibleMultipleReasonsEligibilityReasons(
+    taxRegime: TaxRegime,
+    encrypter: Encrypter
+  ): List[JourneyInfoAsJson] =
+    multipleIneligibleReasonsEligibilityReasons(taxRegime, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
+
+  def eligibilityCheckedIneligibleMultipleReasonsAssessmentEligibilityReasons(
+    taxRegime: TaxRegime,
+    encrypter: Encrypter
+  ): List[JourneyInfoAsJson] =
+    multipleIneligibleReasonsAssessmentEligibilityReasons(taxRegime, encrypter) :: taxIdDetermined(taxRegime =
+      taxRegime
+    )
+
+  def eligibilityCheckedIneligibleMultipleOneFromEach(
+    taxRegime: TaxRegime,
+    encrypter: Encrypter
+  ): List[JourneyInfoAsJson] =
+    multipleIneligibleReasonsOneFromEachReasonsList(taxRegime, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
 
   def whyCannotPayInFullNotRequired(
     taxRegime:                          TaxRegime,

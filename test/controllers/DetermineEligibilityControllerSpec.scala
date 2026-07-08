@@ -613,6 +613,46 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
           PageUrls.vatDebtBeforeAccountingDateUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - ChargesBeforeMaxAccountingDate`(Origins.Vat.Bta),
           Origins.Vat.Bta
+        ),
+        (
+          "HasDisguisedRemuneration - SA",
+          TdAll.notEligibleHasDisguisedRemuneration,
+          TdAll.assessmentEligibilityRules,
+          "hasDisguisedRemuneration",
+          PageUrls.saNotEligibleUrl,
+          JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasDisguisedRemuneration`(Origins.Sa.Bta),
+          Origins.Sa.Bta
+        ),
+        (
+          "HasCapacitor - SA",
+          TdAll.notEligibleHasCapacitor,
+          TdAll.assessmentEligibilityRules,
+          "hasCapacitor",
+          PageUrls.saNotEligibleUrl,
+          JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasCapacitor`(Origins.Sa.Bta),
+          Origins.Sa.Bta
+        ),
+        (
+          "DmSpecialOfficeProcessingRequiredCESA - SA",
+          TdAll.notEligibleDmSpecialOfficeProcessingRequiredCESA,
+          TdAll.assessmentEligibilityRules,
+          "dmSpecialOfficeProcessingRequiredCESA",
+          PageUrls.saNotEligibleUrl,
+          JourneyJsonTemplates.`Eligibility Checked - Ineligible - dmSpecialOfficeProcessingRequiredCESA`(
+            Origins.Sa.Bta
+          ),
+          Origins.Sa.Bta
+        ),
+        (
+          "DmSpecialOfficeProcessingRequiredCDCS - SA",
+          TdAll.notEligibleDmSpecialOfficeProcessingRequiredCDCS,
+          TdAll.assessmentEligibilityRules,
+          "dmSpecialOfficeProcessingRequiredCDCS",
+          PageUrls.saNotEligibleUrl,
+          JourneyJsonTemplates.`Eligibility Checked - Ineligible - DmSpecialOfficeProcessingRequiredCDCS`(
+            Origins.Sa.Bta
+          ),
+          Origins.Sa.Bta
         )
       )
     ) {
@@ -1278,6 +1318,83 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
 
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.vatDebtTooSmallUrl)
+    }
+    "VAT user with multiple reasons from EligibilityRules redirect to " in {
+
+      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
+        TaxRegime.Vat,
+        TdAll.notEligibleEligibilityPass,
+        TdAll.notEligibleMultipleReasons,
+        TdAll.assessmentEligibilityRules,
+        regimeDigitalCorrespondence = true
+      )
+
+      Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Vat)(eligibilityCheckResponseJson)
+      stubCommonActions()
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Vat.Bta)()
+      EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(
+        TdAll.journeyId,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - MultipleReasons - Eligibility Reasons`(
+          Origins.Vat.Bta
+        )
+      )
+
+      val result = controller.determineEligibility(fakeRequest)
+
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.vatNoDueDatesReachedUrl)
+    }
+
+    "VAT user with multiple reasons from AssessmentEligibilityRules redirect to " in {
+
+      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
+        TaxRegime.Vat,
+        TdAll.notEligibleEligibilityPass,
+        TdAll.eligibleEligibilityRules,
+        TdAll.notEligibleMultipleReasonsAssessment,
+        regimeDigitalCorrespondence = true
+      )
+
+      Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Vat)(eligibilityCheckResponseJson)
+      stubCommonActions()
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Vat.Bta)()
+      EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(
+        TdAll.journeyId,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - MultipleReasons - Assessment Eligibility Reasons`(
+          Origins.Vat.Bta
+        )
+      )
+
+      val result = controller.determineEligibility(fakeRequest)
+
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.vatNotEligibleUrl)
+    }
+
+    "VAT user with multiple reasons from EligibilityRules and AssessmentEligibilityRules redirect to " in {
+
+      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
+        TaxRegime.Vat,
+        TdAll.notEligibleEligibilityPass,
+        TdAll.notEligibleDmSpecialOfficeProcessingRequired,
+        TdAll.notEligibleDisallowedChargeLockTypes,
+        regimeDigitalCorrespondence = true
+      )
+
+      Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Vat)(eligibilityCheckResponseJson)
+      stubCommonActions()
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Vat.Bta)()
+      EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(
+        TdAll.journeyId,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - MultipleReasons - both lists`(
+          Origins.Vat.Bta
+        )
+      )
+
+      val result = controller.determineEligibility(fakeRequest)
+
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.vatNotEligibleUrl)
     }
 
     "EPAYE user with a debt below the minimum amount and debt too old should be redirected to debt too low ineligible page" in {

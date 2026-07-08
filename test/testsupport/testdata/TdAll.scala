@@ -202,6 +202,9 @@ object TdAll {
   val notEligibleMultipleReasons: EligibilityRules =
     eligibleEligibilityRules.copy(missingFiledReturns = true, hasRlsOnAddress = true)
 
+  val notEligibleMultipleReasonsAssessment: AssessmentEligibilityRules =
+    assessmentEligibilityRules.copy(disallowedChargeLockTypes = true, chargesOverMaxDebtAge = Some(true))
+
   val notEligibleHasDisguisedRemuneration: EligibilityRules =
     eligibleEligibilityRules.copy(hasDisguisedRemuneration = Some(true))
 

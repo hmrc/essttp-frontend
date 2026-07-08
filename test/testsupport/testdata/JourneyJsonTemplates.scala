@@ -261,6 +261,34 @@ object JourneyJsonTemplates {
     origin = origin
   )
 
+  def `Eligibility Checked - Ineligible - MultipleReasons - Eligibility Reasons`(origin: Origin = Origins.Epaye.Bta)(
+    using encrypter: Encrypter
+  ): String = TdJsonBodies.createJourneyJson(
+    stageInfo = StageInfo.eligibilityCheckedIneligible,
+    journeyInfo =
+      JourneyInfo.eligibilityCheckedIneligibleMultipleReasonsEligibilityReasons(origin.taxRegime, encrypter),
+    origin = origin
+  )
+
+  def `Eligibility Checked - Ineligible - MultipleReasons - Assessment Eligibility Reasons`(
+    origin:    Origin = Origins.Epaye.Bta
+  )(using
+    encrypter: Encrypter
+  ): String = TdJsonBodies.createJourneyJson(
+    stageInfo = StageInfo.eligibilityCheckedIneligible,
+    journeyInfo =
+      JourneyInfo.eligibilityCheckedIneligibleMultipleReasonsAssessmentEligibilityReasons(origin.taxRegime, encrypter),
+    origin = origin
+  )
+
+  def `Eligibility Checked - Ineligible - MultipleReasons - both lists`(origin: Origin = Origins.Epaye.Bta)(using
+    encrypter: Encrypter
+  ): String = TdJsonBodies.createJourneyJson(
+    stageInfo = StageInfo.eligibilityCheckedIneligible,
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMultipleOneFromEach(origin.taxRegime, encrypter),
+    origin = origin
+  )
+
   def `Eligibility Checked - Ineligible - isAnMtdCustomer`(origin: Origin = Origins.Sa.Bta)(using
     encrypter: Encrypter
   ): String = TdJsonBodies.createJourneyJson(
