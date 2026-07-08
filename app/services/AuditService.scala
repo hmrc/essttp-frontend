@@ -216,20 +216,25 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
     eligibilityCheckResult: EligibilityCheckResult
   )(using r: AuthenticatedJourneyRequest[?]): EligibilityCheckAuditDetail = {
 
-    val eligibilityResult                =
-      if (eligibilityCheckResult.isEligible) EligibilityResult.Eligible else EligibilityResult.Ineligible
-    val enrollmentReasons                =
-      if (eligibilityCheckResult.isEligible) None else Some(EnrollmentReasons.DidNotPassEligibilityCheck())
-    val eligibilityReasons: List[String] = {
+    def collectEligibilityReasons(product: Product): List[String] = {
       val reasons: List[String] =
-        eligibilityCheckResult.eligibilityRules.productElementNames.toList
-      val values                = eligibilityCheckResult.eligibilityRules.productIterator.toList
+        product.productElementNames.toList
+      val values                = product.productIterator.toList
 
       (reasons zip values).collect {
         case (reason, true)       => reason
         case (reason, Some(true)) => reason
       }
     }
+
+    val eligibilityResult                =
+      if (eligibilityCheckResult.isEligible) EligibilityResult.Eligible else EligibilityResult.Ineligible
+    val enrollmentReasons                =
+      if (eligibilityCheckResult.isEligible) None else Some(EnrollmentReasons.DidNotPassEligibilityCheck())
+    val eligibilityReasons: List[String] =
+      collectEligibilityReasons(eligibilityCheckResult.eligibilityRules) ::: collectEligibilityReasons(
+        eligibilityCheckResult.standardChargeTypeAssessments.assessmentEligibilityRules
+      )
 
     EligibilityCheckAuditDetail(
       eligibilityResult = eligibilityResult,
@@ -241,7 +246,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       taxDetail = toTaxDetail(eligibilityCheckResult),
       saCustomerType = eligibilityCheckResult.individualDetails.flatMap(_.customerType),
       authProviderId = r.ggCredId.value,
-      chargeTypeAssessment = eligibilityCheckResult.chargeTypeAssessment,
+      chargeTypeAssessment = eligibilityCheckResult.standardChargeTypeAssessments.chargeTypeAssessment,
       correlationId = journey.correlationId.value.toString,
       futureChargeLiabilitiesExcluded = Some(eligibilityCheckResult.futureChargeLiabilitiesExcluded),
       regimeDigitalCorrespondence = eligibilityCheckResult.regimeDigitalCorrespondence.value

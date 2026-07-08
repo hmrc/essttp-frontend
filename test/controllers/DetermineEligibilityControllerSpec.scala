@@ -21,7 +21,7 @@ import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.TaxRegime.Sa
 import essttp.rootmodel.ttp.CustomerTypes
-import essttp.rootmodel.ttp.eligibility.{EligibilityRules, IndividualDetails, RegimeDigitalCorrespondence}
+import essttp.rootmodel.ttp.eligibility.{AssessmentEligibilityRules, EligibilityRules, IndividualDetails, RegimeDigitalCorrespondence}
 import models.{EligibilityReqIdentificationFlag, Languages}
 import org.jsoup.Jsoup
 import org.scalatest.prop.TableDrivenPropertyChecks.*
@@ -48,6 +48,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "Scenario flavour",
           "eligibility rules",
+          "assessment eligibility rules",
           "ineligibility reason audit string",
           "expected redirect",
           "updated journey json",
@@ -56,6 +57,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "HasRlsOnAddress - EPAYE",
           TdAll.notEligibleHasRlsOnAddress,
+          TdAll.assessmentEligibilityRules,
           "hasRlsOnAddress",
           PageUrls.epayeRLSUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(Origins.Epaye.Bta),
@@ -64,6 +66,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "HasRlsOnAddress - VAT",
           TdAll.notEligibleHasRlsOnAddress,
+          TdAll.assessmentEligibilityRules,
           "hasRlsOnAddress",
           PageUrls.vatRLSUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(Origins.Vat.Bta),
@@ -72,6 +75,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "HasRlsOnAddress - SA",
           TdAll.notEligibleHasRlsOnAddress,
+          TdAll.assessmentEligibilityRules,
           "hasRlsOnAddress",
           PageUrls.saRLSUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(Origins.Sa.Bta),
@@ -80,6 +84,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "HasRlsOnAddress - SIMP",
           TdAll.notEligibleHasRlsOnAddress,
+          TdAll.assessmentEligibilityRules,
           "hasRlsOnAddress",
           PageUrls.simpRLSUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasRlsOnAddress`(Origins.Simp.Pta),
@@ -88,6 +93,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "MarkedAsInsolvent - EPAYE",
           TdAll.notEligibleMarkedAsInsolvent,
+          TdAll.assessmentEligibilityRules,
           "markedAsInsolvent",
           PageUrls.payeNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - MarkedAsInsolvent`(Origins.Epaye.Bta),
@@ -96,6 +102,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "MarkedAsInsolvent - VAT",
           TdAll.notEligibleMarkedAsInsolvent,
+          TdAll.assessmentEligibilityRules,
           "markedAsInsolvent",
           PageUrls.vatNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - MarkedAsInsolvent`(Origins.Vat.Bta),
@@ -104,6 +111,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "MarkedAsInsolvent - SA",
           TdAll.notEligibleMarkedAsInsolvent,
+          TdAll.assessmentEligibilityRules,
           "markedAsInsolvent",
           PageUrls.saNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - MarkedAsInsolvent`(Origins.Sa.Bta),
@@ -112,6 +120,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "MarkedAsInsolvent - SIMP",
           TdAll.notEligibleMarkedAsInsolvent,
+          TdAll.assessmentEligibilityRules,
           "markedAsInsolvent",
           PageUrls.simpNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - MarkedAsInsolvent`(Origins.Simp.Pta),
@@ -119,6 +128,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         ),
         (
           "IsLessThanMinDebtAllowance - EPAYE",
+          TdAll.eligibleEligibilityRules,
           TdAll.notEligibleIsLessThanMinDebtAllowance,
           "isLessThanMinDebtAllowance",
           PageUrls.epayeDebtTooSmallUrl,
@@ -127,6 +137,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         ),
         (
           "IsLessThanMinDebtAllowance - VAT",
+          TdAll.eligibleEligibilityRules,
           TdAll.notEligibleIsLessThanMinDebtAllowance,
           "isLessThanMinDebtAllowance",
           PageUrls.vatDebtTooSmallUrl,
@@ -135,6 +146,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         ),
         (
           "IsLessThanMinDebtAllowance - SA",
+          TdAll.eligibleEligibilityRules,
           TdAll.notEligibleIsLessThanMinDebtAllowance,
           "isLessThanMinDebtAllowance",
           PageUrls.saDebtTooSmallUrl,
@@ -143,6 +155,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         ),
         (
           "IsLessThanMinDebtAllowance - SIMP",
+          TdAll.eligibleEligibilityRules,
           TdAll.notEligibleIsLessThanMinDebtAllowance,
           "isLessThanMinDebtAllowance",
           PageUrls.simpDebtTooSmallUrl,
@@ -151,6 +164,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         ),
         (
           "IsMoreThanMaxDebtAllowance - EPAYE",
+          TdAll.eligibleEligibilityRules,
           TdAll.notEligibleIsMoreThanMaxDebtAllowance,
           "isMoreThanMaxDebtAllowance",
           PageUrls.epayeDebtTooLargeUrl,
@@ -159,6 +173,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         ),
         (
           "IsMoreThanMaxDebtAllowance - VAT",
+          TdAll.eligibleEligibilityRules,
           TdAll.notEligibleIsMoreThanMaxDebtAllowance,
           "isMoreThanMaxDebtAllowance",
           PageUrls.vatDebtTooLargeUrl,
@@ -167,6 +182,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         ),
         (
           "IsMoreThanMaxDebtAllowance - SA",
+          TdAll.eligibleEligibilityRules,
           TdAll.notEligibleIsMoreThanMaxDebtAllowance,
           "isMoreThanMaxDebtAllowance",
           PageUrls.saDebtTooLargeUrl,
@@ -175,6 +191,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         ),
         (
           "IsMoreThanMaxDebtAllowance - SIMP",
+          TdAll.eligibleEligibilityRules,
           TdAll.notEligibleIsMoreThanMaxDebtAllowance,
           "isMoreThanMaxDebtAllowance",
           PageUrls.simpDebtTooLargeUrl,
@@ -183,6 +200,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         ),
         (
           "DisallowedChargeLockTypes - EPAYE",
+          TdAll.eligibleEligibilityRules,
           TdAll.notEligibleDisallowedChargeLockTypes,
           "disallowedChargeLockTypes",
           PageUrls.payeNotEligibleUrl,
@@ -191,6 +209,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         ),
         (
           "DisallowedChargeLockTypes - VAT",
+          TdAll.eligibleEligibilityRules,
           TdAll.notEligibleDisallowedChargeLockTypes,
           "disallowedChargeLockTypes",
           PageUrls.vatNotEligibleUrl,
@@ -199,6 +218,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         ),
         (
           "DisallowedChargeLockTypes - SA",
+          TdAll.eligibleEligibilityRules,
           TdAll.notEligibleDisallowedChargeLockTypes,
           "disallowedChargeLockTypes",
           PageUrls.saNotEligibleUrl,
@@ -207,6 +227,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         ),
         (
           "DisallowedChargeLockTypes - SIMP",
+          TdAll.eligibleEligibilityRules,
           TdAll.notEligibleDisallowedChargeLockTypes,
           "disallowedChargeLockTypes",
           PageUrls.simpNotEligibleUrl,
@@ -216,6 +237,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "ExistingTTP - EPAYE",
           TdAll.notEligibleExistingTTP,
+          TdAll.assessmentEligibilityRules,
           "existingTTP",
           PageUrls.epayeAlreadyHaveAPaymentPlanUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExistingTTP`(Origins.Epaye.Bta),
@@ -224,6 +246,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "ExistingTTP - VAT",
           TdAll.notEligibleExistingTTP,
+          TdAll.assessmentEligibilityRules,
           "existingTTP",
           PageUrls.vatAlreadyHaveAPaymentPlanUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExistingTTP`(Origins.Vat.Bta),
@@ -232,6 +255,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "ExistingTTP - SA",
           TdAll.notEligibleExistingTTP,
+          TdAll.assessmentEligibilityRules,
           "existingTTP",
           PageUrls.saAlreadyHaveAPaymentPlanUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExistingTTP`(Origins.Sa.Bta),
@@ -240,6 +264,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "ExistingTTP - SIMP",
           TdAll.notEligibleExistingTTP,
+          TdAll.assessmentEligibilityRules,
           "existingTTP",
           PageUrls.simpNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - ExistingTTP`(Origins.Simp.Pta),
@@ -247,6 +272,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         ),
         (
           "ExceedsMaxDebtAge - EPAYE",
+          TdAll.eligibleEligibilityRules,
           TdAll.notEligibleExceedsMaxDebtAge,
           "chargesOverMaxDebtAge",
           PageUrls.epayeDebtTooOldUrl,
@@ -255,6 +281,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         ),
         (
           "ExceedsMaxDebtAge - VAT",
+          TdAll.eligibleEligibilityRules,
           TdAll.notEligibleExceedsMaxDebtAge,
           "chargesOverMaxDebtAge",
           PageUrls.vatDebtTooOldUrl,
@@ -263,6 +290,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         ),
         (
           "ExceedsMaxDebtAge - SA",
+          TdAll.eligibleEligibilityRules,
           TdAll.notEligibleExceedsMaxDebtAge,
           "chargesOverMaxDebtAge",
           PageUrls.saNotEligibleUrl,
@@ -271,6 +299,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         ),
         (
           "ExceedsMaxDebtAge - SIMP",
+          TdAll.eligibleEligibilityRules,
           TdAll.notEligibleExceedsMaxDebtAge,
           "chargesOverMaxDebtAge",
           PageUrls.simpNotEligibleUrl,
@@ -279,6 +308,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         ),
         (
           "IneligibleChargeType - EPAYE",
+          TdAll.eligibleEligibilityRules,
           TdAll.notEligibleEligibleChargeType,
           "ineligibleChargeTypes",
           PageUrls.payeNotEligibleUrl,
@@ -287,6 +317,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         ),
         (
           "IneligibleChargeType - VAT",
+          TdAll.eligibleEligibilityRules,
           TdAll.notEligibleEligibleChargeType,
           "ineligibleChargeTypes",
           PageUrls.vatNotEligibleUrl,
@@ -295,6 +326,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         ),
         (
           "IneligibleChargeType - SA",
+          TdAll.eligibleEligibilityRules,
           TdAll.notEligibleEligibleChargeType,
           "ineligibleChargeTypes",
           PageUrls.saNotEligibleUrl,
@@ -303,6 +335,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         ),
         (
           "IneligibleChargeType - SIMP",
+          TdAll.eligibleEligibilityRules,
           TdAll.notEligibleEligibleChargeType,
           "ineligibleChargeTypes",
           PageUrls.simpNotEligibleUrl,
@@ -312,6 +345,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "MissingFiledReturns - EPAYE",
           TdAll.notEligibleMissingFiledReturns,
+          TdAll.assessmentEligibilityRules,
           "missingFiledReturns",
           PageUrls.epayeFileYourReturnUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - MissingFiledReturns`(Origins.Epaye.Bta),
@@ -320,6 +354,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "MissingFiledReturns - VAT",
           TdAll.notEligibleMissingFiledReturns,
+          TdAll.assessmentEligibilityRules,
           "missingFiledReturns",
           PageUrls.vatFileYourReturnUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - MissingFiledReturns`(Origins.Vat.Bta),
@@ -328,6 +363,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "MissingFiledReturns - SA",
           TdAll.notEligibleMissingFiledReturns,
+          TdAll.assessmentEligibilityRules,
           "missingFiledReturns",
           PageUrls.saFileYourReturnUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - MissingFiledReturns`(Origins.Sa.Bta),
@@ -336,6 +372,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "MissingFiledReturns - SIMP",
           TdAll.notEligibleMissingFiledReturns,
+          TdAll.assessmentEligibilityRules,
           "missingFiledReturns",
           PageUrls.simpNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - MissingFiledReturns`(Origins.Simp.Pta),
@@ -343,6 +380,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         ),
         (
           "NoDueDatesReached - EPAYE",
+          TdAll.eligibleEligibilityRules,
           TdAll.notEligibleNoDueDatesReached,
           "noDueDatesReached",
           PageUrls.payeNoDueDatesReachedUrl,
@@ -351,6 +389,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         ),
         (
           "NoDueDatesReached - VAT",
+          TdAll.eligibleEligibilityRules,
           TdAll.notEligibleNoDueDatesReached,
           "noDueDatesReached",
           PageUrls.vatNoDueDatesReachedUrl,
@@ -359,6 +398,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         ),
         (
           "NoDueDatesReached - SA",
+          TdAll.eligibleEligibilityRules,
           TdAll.notEligibleNoDueDatesReached,
           "noDueDatesReached",
           PageUrls.saNotEligibleUrl,
@@ -367,6 +407,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         ),
         (
           "NoDueDatesReached - SIMP",
+          TdAll.eligibleEligibilityRules,
           TdAll.notEligibleNoDueDatesReached,
           "noDueDatesReached",
           PageUrls.simpNoDueDatesReachedUrl,
@@ -376,6 +417,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "HasInvalidInterestSignals - EPAYE",
           TdAll.notEligibleHasInvalidInterestSignals,
+          TdAll.assessmentEligibilityRules,
           "hasInvalidInterestSignals",
           PageUrls.payeNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasInvalidInterestSignals`(Origins.Epaye.Bta),
@@ -384,6 +426,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "HasInvalidInterestSignals - VAT",
           TdAll.notEligibleHasInvalidInterestSignals,
+          TdAll.assessmentEligibilityRules,
           "hasInvalidInterestSignals",
           PageUrls.vatNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasInvalidInterestSignals`(Origins.Vat.Bta),
@@ -392,6 +435,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "HasInvalidInterestSignals - SA",
           TdAll.notEligibleHasInvalidInterestSignals,
+          TdAll.assessmentEligibilityRules,
           "hasInvalidInterestSignals",
           PageUrls.saNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasInvalidInterestSignals`(Origins.Sa.Bta),
@@ -400,6 +444,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "HasInvalidInterestSignals - SIMP",
           TdAll.notEligibleHasInvalidInterestSignals,
+          TdAll.assessmentEligibilityRules,
           "hasInvalidInterestSignals",
           PageUrls.simpNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasInvalidInterestSignals`(Origins.Simp.Pta),
@@ -408,6 +453,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "HasInvalidInterestSignalsCESA - SA",
           TdAll.notEligibleHasInvalidInterestSignalsCESA,
+          TdAll.assessmentEligibilityRules,
           "hasInvalidInterestSignalsCESA",
           PageUrls.saNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasInvalidInterestSignalsCESA`(Origins.Sa.Bta),
@@ -416,6 +462,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "DmSpecialOfficeProcessingRequired - EPAYE",
           TdAll.notEligibleDmSpecialOfficeProcessingRequired,
+          TdAll.assessmentEligibilityRules,
           "dmSpecialOfficeProcessingRequired",
           PageUrls.payeNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - DmSpecialOfficeProcessingRequired`(
@@ -426,6 +473,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "DmSpecialOfficeProcessingRequired - VAT",
           TdAll.notEligibleDmSpecialOfficeProcessingRequired,
+          TdAll.assessmentEligibilityRules,
           "dmSpecialOfficeProcessingRequired",
           PageUrls.vatNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - DmSpecialOfficeProcessingRequired`(Origins.Vat.Bta),
@@ -434,6 +482,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "DmSpecialOfficeProcessingRequired - SA",
           TdAll.notEligibleDmSpecialOfficeProcessingRequired,
+          TdAll.assessmentEligibilityRules,
           "dmSpecialOfficeProcessingRequired",
           PageUrls.saNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - DmSpecialOfficeProcessingRequired`(Origins.Sa.Bta),
@@ -442,6 +491,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "DmSpecialOfficeProcessingRequired - SIMP",
           TdAll.notEligibleDmSpecialOfficeProcessingRequired,
+          TdAll.assessmentEligibilityRules,
           "dmSpecialOfficeProcessingRequired",
           PageUrls.simpNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - DmSpecialOfficeProcessingRequired`(Origins.Simp.Pta),
@@ -450,6 +500,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "CannotFindLockReason - EPAYE",
           TdAll.notEligibleCannotFindLockReason,
+          TdAll.assessmentEligibilityRules,
           "cannotFindLockReason",
           PageUrls.payeNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - CannotFindLockReason`(Origins.Epaye.Bta),
@@ -458,6 +509,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "CannotFindLockReason - VAT",
           TdAll.notEligibleCannotFindLockReason,
+          TdAll.assessmentEligibilityRules,
           "cannotFindLockReason",
           PageUrls.vatNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - CannotFindLockReason`(Origins.Vat.Bta),
@@ -466,6 +518,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "CannotFindLockReason - SA",
           TdAll.notEligibleCannotFindLockReason,
+          TdAll.assessmentEligibilityRules,
           "cannotFindLockReason",
           PageUrls.saNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - CannotFindLockReason`(Origins.Sa.Bta),
@@ -474,6 +527,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "CannotFindLockReason - SIMP",
           TdAll.notEligibleCannotFindLockReason,
+          TdAll.assessmentEligibilityRules,
           "cannotFindLockReason",
           PageUrls.simpNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - CannotFindLockReason`(Origins.Simp.Pta),
@@ -482,6 +536,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "CreditsNotAllowed - EPAYE",
           TdAll.notEligibleCreditsNotAllowed,
+          TdAll.assessmentEligibilityRules,
           "creditsNotAllowed",
           PageUrls.payeNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - CreditsNotAllowed`(Origins.Epaye.Bta),
@@ -490,6 +545,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "CreditsNotAllowed - VAT",
           TdAll.notEligibleCreditsNotAllowed,
+          TdAll.assessmentEligibilityRules,
           "creditsNotAllowed",
           PageUrls.vatNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - CreditsNotAllowed`(Origins.Vat.Bta),
@@ -498,6 +554,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "CreditsNotAllowed - SA",
           TdAll.notEligibleCreditsNotAllowed,
+          TdAll.assessmentEligibilityRules,
           "creditsNotAllowed",
           PageUrls.saNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - CreditsNotAllowed`(Origins.Sa.Bta),
@@ -506,6 +563,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "CreditsNotAllowed - SIMP",
           TdAll.notEligibleCreditsNotAllowed,
+          TdAll.assessmentEligibilityRules,
           "creditsNotAllowed",
           PageUrls.simpNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - CreditsNotAllowed`(Origins.Simp.Pta),
@@ -514,6 +572,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "IsMoreThanMaxPaymentReference - EPAYE",
           TdAll.notEligibleIsMoreThanMaxPaymentReference,
+          TdAll.assessmentEligibilityRules,
           "isMoreThanMaxPaymentReference",
           PageUrls.payeNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxPaymentReference`(Origins.Epaye.Bta),
@@ -522,6 +581,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "IsMoreThanMaxPaymentReference - VAT",
           TdAll.notEligibleIsMoreThanMaxPaymentReference,
+          TdAll.assessmentEligibilityRules,
           "isMoreThanMaxPaymentReference",
           PageUrls.vatNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxPaymentReference`(Origins.Vat.Bta),
@@ -530,6 +590,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "IsMoreThanMaxPaymentReference - SA",
           TdAll.notEligibleIsMoreThanMaxPaymentReference,
+          TdAll.assessmentEligibilityRules,
           "isMoreThanMaxPaymentReference",
           PageUrls.saNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxPaymentReference`(Origins.Sa.Bta),
@@ -538,6 +599,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "IsMoreThanMaxPaymentReference - SIMP",
           TdAll.notEligibleIsMoreThanMaxPaymentReference,
+          TdAll.assessmentEligibilityRules,
           "isMoreThanMaxPaymentReference",
           PageUrls.simpNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxPaymentReference`(Origins.Simp.Pta),
@@ -545,6 +607,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         ),
         (
           "ChargesBeforeMaxAccountingDate - VAT",
+          TdAll.eligibleEligibilityRules,
           TdAll.notEligibleChargesBeforeMaxAccountingDate,
           "chargesBeforeMaxAccountingDate",
           PageUrls.vatDebtBeforeAccountingDateUrl,
@@ -554,6 +617,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "HasDisguisedRemuneration - SA",
           TdAll.notEligibleHasDisguisedRemuneration,
+          TdAll.assessmentEligibilityRules,
           "hasDisguisedRemuneration",
           PageUrls.saNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasDisguisedRemuneration`(Origins.Sa.Bta),
@@ -562,6 +626,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "HasCapacitor - SA",
           TdAll.notEligibleHasCapacitor,
+          TdAll.assessmentEligibilityRules,
           "hasCapacitor",
           PageUrls.saNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - HasCapacitor`(Origins.Sa.Bta),
@@ -570,6 +635,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "DmSpecialOfficeProcessingRequiredCESA - SA",
           TdAll.notEligibleDmSpecialOfficeProcessingRequiredCESA,
+          TdAll.assessmentEligibilityRules,
           "dmSpecialOfficeProcessingRequiredCESA",
           PageUrls.saNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - dmSpecialOfficeProcessingRequiredCESA`(
@@ -580,6 +646,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           "DmSpecialOfficeProcessingRequiredCDCS - SA",
           TdAll.notEligibleDmSpecialOfficeProcessingRequiredCDCS,
+          TdAll.assessmentEligibilityRules,
           "dmSpecialOfficeProcessingRequiredCDCS",
           PageUrls.saNotEligibleUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - DmSpecialOfficeProcessingRequiredCDCS`(
@@ -592,6 +659,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
       (
         sf: String,
         eligibilityRules: EligibilityRules,
+        assessmentEligibilityRules: AssessmentEligibilityRules,
         auditIneligibilityReason: String,
         expectedRedirect: String,
         updatedJourneyJson: String,
@@ -602,6 +670,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
             taxRegime = origin.taxRegime,
             eligibilityPass = TdAll.notEligibleEligibilityPass,
             eligibilityRules = eligibilityRules,
+            assessmentEligibilityRules = assessmentEligibilityRules,
             regimeDigitalCorrespondence = true,
             maybeCustomerType = Some(CustomerTypes.MTDITSA)
           )
@@ -611,6 +680,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
               taxRegime = origin.taxRegime,
               eligibilityPass = TdAll.notEligibleEligibilityPass,
               eligibilityRules = eligibilityRules,
+              assessmentEligibilityRules = assessmentEligibilityRules,
               poundsInsteadOfPence = true,
               regimeDigitalCorrespondence = true,
               maybeCustomerType = Some(CustomerTypes.MTDITSA)
@@ -636,6 +706,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
             expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(
               TdAll.notEligibleEligibilityPass,
               eligibilityRules,
+              assessmentEligibilityRules,
               origin.taxRegime,
               RegimeDigitalCorrespondence(value = true),
               maybeIndividalDetails = Some(
@@ -689,7 +760,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
                  |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
                  |  "chargeTypeAssessment" :${(Json
                     .parse(eligibilityCheckResponseJsonAsPounds)
-                    .as[JsObject] \ "chargeTypeAssessment").get.toString},
+                    .as[JsObject] \ "chargeTypeAssessments" \ 0 \ "chargeTypeAssessment").get.toString},
                  |  "futureChargeLiabilitiesExcluded": false
                  |}
                  |""".stripMargin
@@ -753,9 +824,17 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
     "Ineligible: NoDueDatesReached with isLessThanMinDebtAllowance also true should redirect correctly" - {
       forAll(
         Table(
-          ("Scenario flavour", "eligibility rules", "expected redirect", "updated journey json", "origin"),
+          (
+            "Scenario flavour",
+            "eligibility rules",
+            "assessment eligibility rules",
+            "expected redirect",
+            "updated journey json",
+            "origin"
+          ),
           (
             "NoDueDatesReached - EPAYE",
+            TdAll.eligibleEligibilityRules,
             TdAll.notEligibleNoDueDatesReached.copy(isLessThanMinDebtAllowance = true),
             PageUrls.payeNoDueDatesReachedUrl,
             JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Epaye.Bta),
@@ -763,6 +842,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
           ),
           (
             "NoDueDatesReached - VAT",
+            TdAll.eligibleEligibilityRules,
             TdAll.notEligibleNoDueDatesReached.copy(isLessThanMinDebtAllowance = true),
             PageUrls.vatNoDueDatesReachedUrl,
             JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Vat.Bta),
@@ -770,6 +850,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
           ),
           (
             "NoDueDatesReached - SA",
+            TdAll.eligibleEligibilityRules,
             TdAll.notEligibleNoDueDatesReached.copy(isLessThanMinDebtAllowance = true),
             PageUrls.saNotEligibleUrl,
             JourneyJsonTemplates.`Eligibility Checked - Ineligible - NoDueDatesReached`(Origins.Sa.Bta),
@@ -780,6 +861,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         (
           sf: String,
           eligibilityRules: EligibilityRules,
+          assessmentEligibilityRules: AssessmentEligibilityRules,
           expectedRedirect: String,
           updatedJourneyJson: String,
           origin: Origin
@@ -789,6 +871,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
               origin.taxRegime,
               TdAll.notEligibleEligibilityPass,
               eligibilityRules,
+              assessmentEligibilityRules,
               regimeDigitalCorrespondence = true
             )
 
@@ -885,6 +968,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
               expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(
                 TdAll.eligibleEligibilityPass,
                 TdAll.eligibleEligibilityRules,
+                TdAll.assessmentEligibilityRules,
                 TaxRegime.Epaye,
                 RegimeDigitalCorrespondence(value = true),
                 maybeChargeIsInterestBearingCharge,
@@ -912,7 +996,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
                  |  "futureChargeLiabilitiesExcluded": false,
                  |  "chargeTypeAssessment" : ${(Json
                       .parse(eligibilityCheckResponseJsonAsPounds)
-                      .as[JsObject] \ "chargeTypeAssessment").get.toString}
+                      .as[JsObject] \ "chargeTypeAssessments" \ 0 \ "chargeTypeAssessment").get.toString}
                  |}
                  |""".stripMargin
                 )
@@ -956,6 +1040,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(
           TdAll.eligibleEligibilityPass,
           TdAll.eligibleEligibilityRules,
+          TdAll.assessmentEligibilityRules,
           TaxRegime.Vat,
           RegimeDigitalCorrespondence(value = true),
           chargeChargeBeforeMaxAccountingDate = Some(true)
@@ -981,7 +1066,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
              |  "futureChargeLiabilitiesExcluded": false,
              |  "chargeTypeAssessment" : ${(Json
                 .parse(eligibilityCheckResponseJsonAsPounds)
-                .as[JsObject] \ "chargeTypeAssessment").get.toString}
+                .as[JsObject] \ "chargeTypeAssessments" \ 0 \ "chargeTypeAssessment").get.toString}
              |}
              |""".stripMargin
           )
@@ -1025,6 +1110,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(
           TdAll.eligibleEligibilityPass,
           TdAll.eligibleEligibilityRules.copy(noMtditsaEnrollment = Some(false)),
+          TdAll.assessmentEligibilityRules,
           TaxRegime.Sa,
           RegimeDigitalCorrespondence(value = true),
           chargeChargeBeforeMaxAccountingDate = Some(true)
@@ -1050,7 +1136,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
              |  "futureChargeLiabilitiesExcluded": false,
              |  "chargeTypeAssessment" : ${(Json
                 .parse(eligibilityCheckResponseJsonAsPounds)
-                .as[JsObject] \ "chargeTypeAssessment").get.toString}
+                .as[JsObject] \ "chargeTypeAssessments" \ 0 \ "chargeTypeAssessment").get.toString}
              |}
              |""".stripMargin
           )
@@ -1092,6 +1178,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
         expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(
           TdAll.eligibleEligibilityPass,
           TdAll.eligibleEligibilityRules,
+          TdAll.assessmentEligibilityRules,
           TaxRegime.Simp,
           RegimeDigitalCorrespondence(value = true),
           chargeChargeBeforeMaxAccountingDate = Some(true)
@@ -1117,7 +1204,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
              |  "futureChargeLiabilitiesExcluded": false,
              |  "chargeTypeAssessment" : ${(Json
                 .parse(eligibilityCheckResponseJsonAsPounds)
-                .as[JsObject] \ "chargeTypeAssessment").get.toString}
+                .as[JsObject] \ "chargeTypeAssessments" \ 0 \ "chargeTypeAssessment").get.toString}
              |}
              |""".stripMargin
           )
@@ -1207,11 +1294,13 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
     }
 
     "VAT user with a debt below the minimum amount and debt too old should be redirected to generic ineligible page" in {
-      val eligibilityRules             = TdAll.notEligibleIsLessThanMinDebtAllowance.copy(chargesOverMaxDebtAge = Some(true))
+      val assessmentEligibilityRules   =
+        TdAll.notEligibleIsLessThanMinDebtAllowance.copy(chargesOverMaxDebtAge = Some(true))
       val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
         TaxRegime.Vat,
         TdAll.notEligibleEligibilityPass,
-        eligibilityRules,
+        TdAll.eligibleEligibilityRules,
+        assessmentEligibilityRules,
         regimeDigitalCorrespondence = true
       )
 
@@ -1230,13 +1319,92 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.vatDebtTooSmallUrl)
     }
+    "VAT user with multiple reasons from EligibilityRules redirect to " in {
+
+      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
+        TaxRegime.Vat,
+        TdAll.notEligibleEligibilityPass,
+        TdAll.notEligibleMultipleReasons,
+        TdAll.assessmentEligibilityRules,
+        regimeDigitalCorrespondence = true
+      )
+
+      Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Vat)(eligibilityCheckResponseJson)
+      stubCommonActions()
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Vat.Bta)()
+      EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(
+        TdAll.journeyId,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - MultipleReasons - Eligibility Reasons`(
+          Origins.Vat.Bta
+        )
+      )
+
+      val result = controller.determineEligibility(fakeRequest)
+
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.vatNoDueDatesReachedUrl)
+    }
+
+    "VAT user with multiple reasons from AssessmentEligibilityRules redirect to " in {
+
+      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
+        TaxRegime.Vat,
+        TdAll.notEligibleEligibilityPass,
+        TdAll.eligibleEligibilityRules,
+        TdAll.notEligibleMultipleReasonsAssessment,
+        regimeDigitalCorrespondence = true
+      )
+
+      Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Vat)(eligibilityCheckResponseJson)
+      stubCommonActions()
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Vat.Bta)()
+      EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(
+        TdAll.journeyId,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - MultipleReasons - Assessment Eligibility Reasons`(
+          Origins.Vat.Bta
+        )
+      )
+
+      val result = controller.determineEligibility(fakeRequest)
+
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.vatNotEligibleUrl)
+    }
+
+    "VAT user with multiple reasons from EligibilityRules and AssessmentEligibilityRules redirect to " in {
+
+      val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
+        TaxRegime.Vat,
+        TdAll.notEligibleEligibilityPass,
+        TdAll.notEligibleDmSpecialOfficeProcessingRequired,
+        TdAll.notEligibleDisallowedChargeLockTypes,
+        regimeDigitalCorrespondence = true
+      )
+
+      Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Vat)(eligibilityCheckResponseJson)
+      stubCommonActions()
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Vat.Bta)()
+      EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(
+        TdAll.journeyId,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - MultipleReasons - both lists`(
+          Origins.Vat.Bta
+        )
+      )
+
+      val result = controller.determineEligibility(fakeRequest)
+
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.vatNotEligibleUrl)
+    }
 
     "EPAYE user with a debt below the minimum amount and debt too old should be redirected to debt too low ineligible page" in {
-      val eligibilityRules             = TdAll.notEligibleIsLessThanMinDebtAllowance.copy(chargesOverMaxDebtAge = Some(true))
+      val assessmentEligibilityRules   =
+        TdAll.notEligibleIsLessThanMinDebtAllowance.copy(chargesOverMaxDebtAge = Some(true))
       val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
         TaxRegime.Epaye,
         TdAll.notEligibleEligibilityPass,
-        eligibilityRules,
+        TdAll.eligibleEligibilityRules,
+        assessmentEligibilityRules,
         regimeDigitalCorrespondence = true
       )
 
@@ -1307,6 +1475,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
               expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(
                 TdAll.eligibleEligibilityPass,
                 TdAll.eligibleEligibilityRules,
+                TdAll.assessmentEligibilityRules,
                 TaxRegime.Sa,
                 RegimeDigitalCorrespondence(value = true),
                 maybeIndividalDetails =

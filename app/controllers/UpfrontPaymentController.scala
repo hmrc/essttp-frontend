@@ -62,7 +62,14 @@ class UpfrontPaymentController @Inject() (
         CanPayUpfrontForm.form.fill(CanPayUpfrontFormValue.canPayUpfrontToFormValue(canPayUpfront))
       }
 
-    Ok(views.canYouMakeAnUpFrontPayment(maybePrePoppedForm, request.eligibilityCheckResult.hasInterestBearingCharge))
+    Ok(
+      views.canYouMakeAnUpFrontPayment(
+        maybePrePoppedForm,
+        request.eligibilityCheckResult.hasInterestBearingCharge(
+          request.eligibilityCheckResult.standardChargeTypeAssessments
+        )
+      )
+    )
   }
 
   private def existingCanYouPayUpfrontAnswer(journey: Journey): Option[CanPayUpfront] = journey match {
@@ -80,7 +87,13 @@ class UpfrontPaymentController @Inject() (
       .bindFromRequest()
       .fold(
         formWithErrors =>
-          Ok(views.canYouMakeAnUpFrontPayment(formWithErrors, request.eligibilityCheckResult.hasInterestBearingCharge)),
+          Ok(
+            views.canYouMakeAnUpFrontPayment(
+              formWithErrors,
+              request.eligibilityCheckResult
+                .hasInterestBearingCharge(request.eligibilityCheckResult.standardChargeTypeAssessments)
+            )
+          ),
         (canPayUpfrontForm: CanPayUpfrontFormValue) =>
           val canPayUpfront: CanPayUpfront = canPayUpfrontForm.asCanPayUpfront
           journeyService
@@ -221,7 +234,7 @@ class UpfrontPaymentController @Inject() (
       views.upfrontSummaryPage(
         declaredUpfrontPayment.amount,
         remainingAmountTest,
-        eligibilityCheckResult.hasInterestBearingCharge
+        eligibilityCheckResult.hasInterestBearingCharge(eligibilityCheckResult.standardChargeTypeAssessments)
       )
     )
   }
@@ -240,12 +253,14 @@ object UpfrontPaymentController {
 
   def determineTotalAmountToPayWithInterest(eligibilityCheckResult: EligibilityCheckResult): DebtTotalAmount =
     DebtTotalAmount(
-      eligibilityCheckResult.chargeTypeAssessment.map(_.debtTotalAmount.value).fold(AmountInPence.zero)(_ + _)
+      eligibilityCheckResult.standardChargeTypeAssessments.chargeTypeAssessment
+        .map(_.debtTotalAmount.value)
+        .fold(AmountInPence.zero)(_ + _)
     )
 
   def determineTotalAmountToPayWithoutInterest(eligibilityCheckResult: EligibilityCheckResult): DebtTotalAmount =
     DebtTotalAmount(
-      eligibilityCheckResult.chargeTypeAssessment
+      eligibilityCheckResult.standardChargeTypeAssessments.chargeTypeAssessment
         .flatMap(_.charges.map(_.outstandingAmount.value))
         .fold(AmountInPence.zero)(_ + _)
     )

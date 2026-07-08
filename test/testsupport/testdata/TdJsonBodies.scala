@@ -18,7 +18,7 @@ package testsupport.testdata
 
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Origin, Origins, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.TaxRegime.Sa
-import essttp.rootmodel.ttp.eligibility.{EligibilityPass, EligibilityRules, Identification}
+import essttp.rootmodel.ttp.eligibility.{AssessmentEligibilityRules, EligibilityPass, EligibilityRules, Identification}
 import essttp.rootmodel.{DayOfMonth, TaxRegime, UpfrontPaymentAmount}
 import essttp.rootmodel.bank.TypeOfBankAccount
 import paymentsEmailVerification.models.EmailVerificationResult
@@ -135,6 +135,7 @@ object TdJsonBodies {
   def eligibilityCheckJourneyInfo(
     eligibilityPass:                    EligibilityPass = TdAll.eligibleEligibilityPass,
     eligibilityRules:                   EligibilityRules = TdAll.eligibleEligibilityRules,
+    assessmentEligibilityRules:         AssessmentEligibilityRules = TdAll.assessmentEligibilityRules,
     taxRegime:                          TaxRegime,
     encrypter:                          Encrypter,
     regimeDigitalCorrespondence:        Boolean = true,
@@ -200,24 +201,15 @@ object TdJsonBodies {
       |  "eligibilityRules" : {
       |    "hasRlsOnAddress" : ${eligibilityRules.hasRlsOnAddress.toString},
       |    "markedAsInsolvent" : ${eligibilityRules.markedAsInsolvent.toString},
-      |    "isLessThanMinDebtAllowance" : ${eligibilityRules.isLessThanMinDebtAllowance.toString},
-      |    "isMoreThanMaxDebtAllowance" : ${eligibilityRules.isMoreThanMaxDebtAllowance.toString},
-      |    "disallowedChargeLockTypes" : ${eligibilityRules.disallowedChargeLockTypes.toString},
       |    "existingTTP" : ${eligibilityRules.existingTTP.toString},
-      |    "chargesOverMaxDebtAge" : ${eligibilityRules.chargesOverMaxDebtAge.getOrElse(false).toString},
-      |    "ineligibleChargeTypes" : ${eligibilityRules.ineligibleChargeTypes.toString},
       |    "missingFiledReturns" : ${eligibilityRules.missingFiledReturns.toString},
       |    "hasInvalidInterestSignals": ${eligibilityRules.hasInvalidInterestSignals.getOrElse(false).toString},
       |    "dmSpecialOfficeProcessingRequired": ${eligibilityRules.dmSpecialOfficeProcessingRequired
         .getOrElse(false)
         .toString},
-      |    "noDueDatesReached": ${eligibilityRules.noDueDatesReached.toString},
       |    "cannotFindLockReason": ${eligibilityRules.cannotFindLockReason.getOrElse(false).toString},
       |    "creditsNotAllowed": ${eligibilityRules.creditsNotAllowed.getOrElse(false).toString},
       |    "isMoreThanMaxPaymentReference": ${eligibilityRules.isMoreThanMaxPaymentReference
-        .getOrElse(false)
-        .toString},
-      |    "chargesBeforeMaxAccountingDate": ${eligibilityRules.chargesBeforeMaxAccountingDate
         .getOrElse(false)
         .toString},
       |    "dmSpecialOfficeProcessingRequiredCDCS": ${eligibilityRules.dmSpecialOfficeProcessingRequiredCDCS
@@ -225,7 +217,8 @@ object TdJsonBodies {
         .toString},
       |    "noMtditsaEnrollment": ${eligibilityRules.noMtditsaEnrollment.getOrElse(false).toString}
       |  },
-      |  "chargeTypeAssessment" : [
+      |  "chargeTypeAssessments": [ {
+      |    "chargeTypeAssessment" : [
       |    {
       |      "taxPeriodFrom" : "2020-08-13",
       |      "taxPeriodTo" : "2020-08-14",
@@ -281,6 +274,20 @@ object TdJsonBodies {
       |      } ]
       |    }
       |  ],
+      |    "assessmentEligibilityRules" : {
+      |    "isLessThanMinDebtAllowance" : ${assessmentEligibilityRules.isLessThanMinDebtAllowance.toString},
+      |    "isMoreThanMaxDebtAllowance" : ${assessmentEligibilityRules.isMoreThanMaxDebtAllowance.toString},
+      |    "disallowedChargeLockTypes" : ${assessmentEligibilityRules.disallowedChargeLockTypes.toString},
+      |    "chargesOverMaxDebtAge" : ${assessmentEligibilityRules.chargesOverMaxDebtAge.getOrElse(false).toString},
+      |    "ineligibleChargeTypes" : ${assessmentEligibilityRules.ineligibleChargeTypes.toString},
+      |    "noDueDatesReached": ${assessmentEligibilityRules.noDueDatesReached.toString},
+      |    "chargesBeforeMaxAccountingDate": ${assessmentEligibilityRules.chargesBeforeMaxAccountingDate
+        .getOrElse(false)
+        .toString}
+      |  },
+      |  "assessmentEligibilityStatus": true,
+      |  "assessmentCategory": "standard"
+      |  } ],
       |  "regimeDigitalCorrespondence": ${regimeDigitalCorrespondence.toString},
       |  "futureChargeLiabilitiesExcluded": false
       |}

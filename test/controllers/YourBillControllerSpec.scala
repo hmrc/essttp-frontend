@@ -554,7 +554,20 @@ class YourBillControllerSpec extends ItSpec {
             s"""{
            |  "EligibilityChecked": {
            |    "eligibilityCheckResult": {
-           |      "chargeTypeAssessment": [ ${chargeTypeAssessmentItemJsons.mkString(", ")} ]
+           |    "chargeTypeAssessments" : [ {
+           |      "chargeTypeAssessment": [ ${chargeTypeAssessmentItemJsons.mkString(", ")} ],
+           |      "assessmentEligibilityRules": {
+           |         "isLessThanMinDebtAllowance" : false,
+           |         "isMoreThanMaxDebtAllowance" : false,
+           |         "disallowedChargeLockTypes" : false,
+           |         "ineligibleChargeTypes" : false,
+           |         "noDueDatesReached" : false,
+           |         "chargesBeforeMaxAccountingDate": false,
+           |         "chargesOverMaxDebtAge": false
+           |       },
+           |       "assessmentEligibilityStatus": true,
+           |       "assessmentCategory": "standard"
+           |      } ]
            |    }
            |  }
            |}
