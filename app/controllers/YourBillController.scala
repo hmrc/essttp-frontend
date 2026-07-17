@@ -143,7 +143,7 @@ object YourBillController {
     ass.charges.headOption.flatMap(_.ddInProgress)
 
   private def hasAnyChargesWithDdInProgress(eligibilityResult: EligibilityCheckResult) =
-    eligibilityResult.standardChargeTypeAssessments.chargeTypeAssessment
+    eligibilityResult.relevantChargeTypeAssessments.chargeTypeAssessment
       .map(overDuePaymentOf)
       .exists(_.ddInProgress.contains(DdInProgress(value = true)))
 
@@ -180,18 +180,18 @@ object YourBillController {
   }
 
   private def qualifyingDebt(eligibilityResult: EligibilityCheckResult): AmountInPence =
-    eligibilityResult.standardChargeTypeAssessments.chargeTypeAssessment
+    eligibilityResult.relevantChargeTypeAssessments.chargeTypeAssessment
       .map(_.debtTotalAmount.value)
       .fold(AmountInPence.zero)(_ + _)
 
   private def overDuePayments(eligibilityResult: EligibilityCheckResult): OverDuePayments = {
-    val payments = eligibilityResult.standardChargeTypeAssessments.chargeTypeAssessment.map(overDuePaymentOf)
+    val payments = eligibilityResult.relevantChargeTypeAssessments.chargeTypeAssessment.map(overDuePaymentOf)
     OverDuePayments(qualifyingDebt(eligibilityResult), payments)
   }
 
   private def overDuePaymentsWithDdInProgress(eligibilityResult: EligibilityCheckResult): OverDuePayments = {
     val paymentsWithDdInProgress =
-      eligibilityResult.standardChargeTypeAssessments.chargeTypeAssessment
+      eligibilityResult.relevantChargeTypeAssessments.chargeTypeAssessment
         .map(overDuePaymentOf)
         .filter(_.ddInProgress.contains(DdInProgress(value = true)))
 

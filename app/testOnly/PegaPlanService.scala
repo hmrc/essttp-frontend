@@ -120,7 +120,7 @@ class PegaPlanService @Inject() (
     }
 
     val debtItemCharges =
-      eligibilityCheckResult.standardChargeTypeAssessments.chargeTypeAssessment.flatMap(toDebtItemCharge)
+      eligibilityCheckResult.relevantChargeTypeAssessments.chargeTypeAssessment.flatMap(toDebtItemCharge)
 
     val affordableQuotesRequest: AffordableQuotesRequest = AffordableQuotesRequest(
       channelIdentifier = ChannelIdentifiers.eSSTTP,

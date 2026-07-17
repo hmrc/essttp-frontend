@@ -32,14 +32,14 @@ object EligibilityRouter {
     } else {
       val error = EligibilityErrors.toEligibilityError(
         eligibilityResult.eligibilityRules,
-        eligibilityResult.standardChargeTypeAssessments.assessmentEligibilityRules
+        eligibilityResult.relevantChargeTypeAssessments.assessmentEligibilityRules
       )
       error match {
         case ee @ Some(MultipleReasons)                  =>
           determineWhereToGoBasedOnHierarchy(
             ee,
-            eligibilityResult.standardChargeTypeAssessments.assessmentEligibilityRules.isLessThanMinDebtAllowance,
-            eligibilityResult.standardChargeTypeAssessments.assessmentEligibilityRules.noDueDatesReached,
+            eligibilityResult.relevantChargeTypeAssessments.assessmentEligibilityRules.isLessThanMinDebtAllowance,
+            eligibilityResult.relevantChargeTypeAssessments.assessmentEligibilityRules.noDueDatesReached,
             eligibilityResult.eligibilityRules.hasRlsOnAddress,
             taxRegime
           )

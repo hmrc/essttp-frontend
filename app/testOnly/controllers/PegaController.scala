@@ -163,7 +163,7 @@ class PegaController @Inject() (
           canPayWithinSixMonthsAnswers,
           incomeAndExpenditure,
           paymentPlan,
-          eligibilityCheckResult.hasInterestBearingCharge(eligibilityCheckResult.standardChargeTypeAssessments)
+          eligibilityCheckResult.hasInterestBearingCharge
         )
       )
     }
