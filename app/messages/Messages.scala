@@ -1392,6 +1392,14 @@ object Messages {
       welsh = "Gallwch ddefnyddio’r gwasanaeth hwn i dalu taliadau hwyr fesul rhandaliad."
     )
 
+    val `Additionally, if you have a Simple Assessment tax bill that is not yet due, you can pay this in advance instalments.`
+      : Message = Message(
+      english =
+        "Additionally, if you have a Simple Assessment tax bill that is not yet due, you can pay this in advance instalments.",
+      welsh =
+        "Hefyd, os oes gennych fil treth Asesiad Syml sydd ddim yn ddyledus eto, gallwch ei dalu fesul rhandaliad ymlaen llaw."
+    )
+
     val `You are eligible to set up an online payment plan if:` : Message = Message(
       english = "You are eligible to set up an online payment plan if:",
       welsh = "Rydych chi’n gymwys i drefnu cynllun talu ar-lein os yw’r canlynol yn wir:"

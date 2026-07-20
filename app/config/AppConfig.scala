@@ -35,6 +35,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val emailJourneyEnabled: Boolean                                         = config.get[Boolean]("features.email-journey")
   val saEnabled: Boolean                                                   = config.get[Boolean]("features.sa")
   val simpEnabled: Boolean                                                 = config.get[Boolean]("features.simp")
+  val futureDatedLiabilitiesEnabled: Boolean                                = config.get[Boolean]("features.future-dated-liabilities")
   val authTimeoutSeconds: Int                                              = config.get[FiniteDuration]("timeout-dialog.timeout").toSeconds.toInt
   val authTimeoutCountdownSeconds: Int                                     = config.get[FiniteDuration]("timeout-dialog.countdown").toSeconds.toInt
   val accessibilityStatementPath: String                                   = config.get[String]("accessibility-statement.service-path")

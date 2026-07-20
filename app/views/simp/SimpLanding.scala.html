@@ -47,6 +47,9 @@
   <h1 class="govuk-heading-l">@{Messages.Simp.`Set up a Simple Assessment payment plan`.show}</h1>
 
   <p class="govuk-body">@{Messages.Simp.`You can use this service to pay overdue payments in instalments.`.show}</p>
+@if(appConfig.futureDatedLiabilitiesEnabled) {
+  <p class="govuk-body">@{Messages.Simp.`Additionally, if you have a Simple Assessment tax bill that is not yet due, you can pay this in advance instalments.`.show}</p>
+}
   <p class="govuk-body">@{Messages.Simp.`You are eligible to set up an online payment plan if:`.show}</p>
 
   <ul class="govuk-list govuk-list--bullet">
