@@ -25,9 +25,9 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.mvc.Result
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import testsupport.ItSpec
-import testsupport.TdRequest._
+import testsupport.TdRequest.*
 import testsupport.reusableassertions.{ContentAssertions, RequestAssertions}
 import testsupport.stubs.{AuthStub, EssttpBackend}
 import uk.gov.hmrc.http.SessionKeys
@@ -36,6 +36,8 @@ import scala.concurrent.Future
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 class LandingPageControllerSpec extends ItSpec {
+
+  override lazy val configOverrides: Map[String, Any] = Map("features.future-dated-liabilities" -> true)
 
   private val controller: LandingController = app.injector.instanceOf[LandingController]
 
@@ -482,7 +484,9 @@ class LandingPageControllerSpec extends ItSpec {
 
       val paragraphs = doc.select("p.govuk-body").asScala.toList
       paragraphs(0).text() shouldBe "You can use this service to pay overdue payments in instalments."
-      paragraphs(1).text() shouldBe "You are eligible to set up an online payment plan if:"
+      paragraphs(1)
+        .text() shouldBe "Additionally, if you have a Simple Assessment tax bill that is not yet due, you can pay this in advance instalments."
+      paragraphs(2).text() shouldBe "You are eligible to set up an online payment plan if:"
 
       val firstListBullets = lists(0).select("li").asScala.toList
       firstListBullets.size shouldBe 3
@@ -491,7 +495,7 @@ class LandingPageControllerSpec extends ItSpec {
       firstListBullets(1).text() shouldBe "you do not have any other debts with HMRC"
       firstListBullets(2).text() shouldBe "you do not have any payment plans with HMRC"
 
-      paragraphs(2).text() shouldBe "You can choose to pay:"
+      paragraphs(3).text() shouldBe "You can choose to pay:"
 
       val secondListBullets = lists(1).select("li").asScala.toList
       secondListBullets.size shouldBe 2
@@ -499,9 +503,9 @@ class LandingPageControllerSpec extends ItSpec {
       secondListBullets(0).text() shouldBe "part of the payment upfront and part in monthly instalments"
       secondListBullets(1).text() shouldBe "monthly instalments only"
 
-      paragraphs(3).text() shouldBe "Alternatively, you can pay your bill in full (opens in a new tab) now."
+      paragraphs(4).text() shouldBe "Alternatively, you can pay your bill in full (opens in a new tab) now."
 
-      val payInFullLink = paragraphs(3).select("a.govuk-link")
+      val payInFullLink = paragraphs(4).select("a.govuk-link")
       payInFullLink.text shouldBe "pay your bill in full (opens in a new tab)"
       payInFullLink.attr("href") shouldBe "https://www.gov.uk/simple-assessment/pay-online"
 
@@ -604,6 +608,69 @@ class LandingPageSimpNotEnabledControllerSpec extends ItSpec {
 
     val error = intercept[Exception](await(controller.simpLandingPage(fakeRequest)))
     error.getMessage shouldBe "Simple Assessment is not available"
+  }
+
+}
+
+class LandingPageFutureDatedLiabilitiesNotEnabled extends ItSpec {
+
+  override lazy val configOverrides: Map[String, Any] = Map("features.future-dated-liabilities" -> false)
+
+  private val controller: LandingController = app.injector.instanceOf[LandingController]
+
+  "GET /simple-assessment-payment-plan" - {
+    "return 200 and the SIMP landing page without additional text when logged in and fdl set to false" in {
+      EssttpBackend.StartJourney.findJourney(origin = Origins.Simp.Pta)
+      val fakeRequest            = FakeRequest().withSession(SessionKeys.sessionId -> "IamATestSessionId").withAuthToken()
+      val result: Future[Result] = controller.simpLandingPage(fakeRequest)
+
+      RequestAssertions.assertGetRequestOk(result)
+      val doc: Document = Jsoup.parse(contentAsString(result))
+
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1 = "Set up a Simple Assessment payment plan",
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl = None,
+        shouldH1BeSameAsServiceName = true,
+        regimeBeingTested = Some(TaxRegime.Simp),
+        shouldServiceNameBeInHeader = false,
+        backLinkUrlOverride = Some("/set-up-a-payment-plan/test-only/bta-page?starting-page")
+      )
+
+      val lists = doc.select(".govuk-list").asScala.toList
+      lists.size shouldBe 3
+
+      val paragraphs = doc.select("p.govuk-body").asScala.toList
+      paragraphs(0).text() shouldBe "You can use this service to pay overdue payments in instalments."
+      paragraphs(1).text() shouldBe "You are eligible to set up an online payment plan if:"
+
+      val firstListBullets = lists(0).select("li").asScala.toList
+      firstListBullets.size shouldBe 3
+
+      firstListBullets(0).text() shouldBe "you owe £50,000 or less"
+      firstListBullets(1).text() shouldBe "you do not have any other debts with HMRC"
+      firstListBullets(2).text() shouldBe "you do not have any payment plans with HMRC"
+
+      paragraphs(2).text() shouldBe "You can choose to pay:"
+
+      val secondListBullets = lists(1).select("li").asScala.toList
+      secondListBullets.size shouldBe 2
+
+      secondListBullets(0).text() shouldBe "part of the payment upfront and part in monthly instalments"
+      secondListBullets(1).text() shouldBe "monthly instalments only"
+
+      paragraphs(3).text() shouldBe "Alternatively, you can pay your bill in full (opens in a new tab) now."
+
+      val payInFullLink = paragraphs(3).select("a.govuk-link")
+      payInFullLink.text shouldBe "pay your bill in full (opens in a new tab)"
+      payInFullLink.attr("href") shouldBe "https://www.gov.uk/simple-assessment/pay-online"
+
+      val button = doc.select(".govuk-button")
+      button.attr("href") shouldBe routes.LandingController.simpLandingPageContinue.url
+      button.text() shouldBe Messages.`Start now`.english
+    }
+
   }
 
 }

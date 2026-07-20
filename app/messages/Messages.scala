@@ -1395,7 +1395,9 @@ object Messages {
     val `Additionally, if you have a Simple Assessment tax bill that is not yet due, you can pay this in advance instalments.`
       : Message = Message(
       english =
-        "Additionally, if you have a Simple Assessment tax bill that is not yet due, you can pay this in advance instalments."
+        "Additionally, if you have a Simple Assessment tax bill that is not yet due, you can pay this in advance instalments.",
+      welsh =
+        "Hefyd, os oes gennych fil treth Asesiad Syml sydd ddim yn ddyledus eto, gallwch ei dalu fesul rhandaliad ymlaen llaw."
     )
 
     val `You are eligible to set up an online payment plan if:` : Message = Message(
