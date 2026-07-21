@@ -332,7 +332,8 @@ object TdAll {
     chargeUseChargeReference:            Option[Boolean] = None,
     chargeChargeBeforeMaxAccountingDate: Option[Boolean] = None,
     ddInProgress:                        Option[Boolean] = None,
-    maybeIndividalDetails:               Option[IndividualDetails] = None
+    maybeIndividalDetails:               Option[IndividualDetails] = None,
+    assessmentCategories:                Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard)
   ): EligibilityCheckResult =
     EligibilityCheckResult(
       processingDateTime = ProcessingDateTime("2022-03-23T13:49:51.141Z"),
@@ -378,7 +379,7 @@ object TdAll {
       regimeDigitalCorrespondence = regimeDigitalCorrespondence,
       futureChargeLiabilitiesExcluded = false,
       chargeTypesExcluded = None,
-      chargeTypeAssessments = List(
+      chargeTypeAssessments = assessmentCategories.toList.map(assessmentCategory =>
         ChargeTypeAssessments(
           List(
             ChargeTypeAssessment(
@@ -422,7 +423,7 @@ object TdAll {
           ),
           assessmentEligibilityRules = assessmentEligibilityRules,
           assessmentEligibilityStatus = true,
-          AssessmentCategory.Standard
+          assessmentCategory
         )
       )
     )

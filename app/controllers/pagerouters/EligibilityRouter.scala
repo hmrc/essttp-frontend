@@ -19,8 +19,8 @@ package controllers.pagerouters
 import controllers.routes
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.TaxRegime.{Sa, Simp}
-import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
-import models.EligibilityErrors._
+import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, EligibilityCheckResult}
+import models.EligibilityErrors.*
 import models.{EligibilityError, EligibilityErrors}
 import play.api.mvc.Call
 
@@ -28,7 +28,7 @@ object EligibilityRouter {
 
   def nextPage(eligibilityResult: EligibilityCheckResult, taxRegime: TaxRegime): Call =
     if (eligibilityResult.isEligible) {
-      routes.YourBillController.yourBill
+      nextPageWhenEligible(eligibilityResult)
     } else {
       val error = EligibilityErrors.toEligibilityError(
         eligibilityResult.eligibilityRules,
@@ -88,6 +88,17 @@ object EligibilityRouter {
         case Some(AllChargeTypeAssessmentsFailed)        => whichGenericIneligiblePage(taxRegime)
         case Some(NoValidPlanAfterAssessments)           => whichGenericIneligiblePage(taxRegime)
       }
+    }
+
+  private def nextPageWhenEligible(eligibilityCheckResult: EligibilityCheckResult) =
+    eligibilityCheckResult.chargeTypeAssessments.map(_.assessmentCategory) match {
+      case AssessmentCategory.Standard :: Nil    => routes.YourBillController.yourBill
+      case AssessmentCategory.Liabilities :: Nil => routes.YourBillController.yourUpcomingBill
+      case AssessmentCategory.Debts :: Nil       => routes.YourBillController.yourBill
+      case other                                 =>
+        throw new NotImplementedError(
+          s"EligibilityCheckResult with combination of assessment categories not supported: ${other.map(_.toString).mkString(", ")}"
+        )
     }
 
   /** To be used when there are more than one 'flavour' of a lockout page. Design want them to have different urls.

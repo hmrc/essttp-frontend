@@ -556,12 +556,14 @@ object StartJourneyController {
       chargesBeforeMaxAccountingDate = Some(containsError(ChargesBeforeMaxAccountingDate))
     )
 
-    val chargeTypeAssessments = ChargeTypeAssessments(
-      chargeTypeAssessment = chargeTypeAssessment,
-      assessmentEligibilityRules = assessmentEligibilityRules,
-      true,
-      AssessmentCategory.Standard
-    )
+    val chargeTypeAssessments = form.assessmentCategories.map { assessmentCategory =>
+      ChargeTypeAssessments(
+        chargeTypeAssessment = chargeTypeAssessment,
+        assessmentEligibilityRules = assessmentEligibilityRules,
+        true,
+        assessmentCategory
+      )
+    }
 
     val customerPostcodes: List[CustomerPostcode] = (0 until form.numberOfCustomerPostcodes).toList.map(i =>
       CustomerPostcode(
@@ -591,7 +593,7 @@ object StartJourneyController {
       regimeDigitalCorrespondence = RegimeDigitalCorrespondence(form.flags.regimeDigitalCorrespondence),
       futureChargeLiabilitiesExcluded = false,
       chargeTypesExcluded = None,
-      chargeTypeAssessments = List(chargeTypeAssessments)
+      chargeTypeAssessments = chargeTypeAssessments.toList
     )
   }
 

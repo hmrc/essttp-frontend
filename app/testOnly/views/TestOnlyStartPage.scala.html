@@ -15,10 +15,12 @@
  *@
 
 @import config.AppConfig
+@import enumeratum.EnumEntry
 @import essttp.journey.model.Origins
 @import essttp.rootmodel.TaxRegime
 @import essttp.rootmodel.ttp.CustomerTypes
-@import models.{EligibilityError, EligibilityErrors}
+@import essttp.rootmodel.ttp.eligibility.AssessmentCategory
+@import models.EligibilityErrors
 @import play.api.data.Form
 @import play.api.mvc.Request
 @import requests.RequestSupport
@@ -38,7 +40,6 @@ govukInput: GovukInput,
 appConfig: AppConfig
 )
 
-
 @(taxRegime: TaxRegime, form: Form[StartJourneyForm])(implicit request: Request[?])
 
 @import requestSupport.legacyMessages
@@ -47,12 +48,29 @@ appConfig: AppConfig
     "Test only starter page"
 }
 
-@toCheckboxItem(eligibilityError: EligibilityError) = @{
+@toCheckboxItem(enumEntry: EnumEntry, checkedByDefault: Boolean = false) = @{
     CheckboxItem(
-    content = Text(eligibilityError.entryName),
-    value = eligibilityError.entryName,
-    checked = form.data.exists(_._2 == eligibilityError.entryName)
+    content = Text(enumEntry.entryName),
+    value = enumEntry.entryName,
+    checked = if(form.data.isEmpty) checkedByDefault else form.data.exists(_._2 == enumEntry.entryName)
     )
+}
+
+@assessmentCategoriesCheckboxes = {
+    @govukCheckboxes(Checkboxes(
+        fieldset = Some(Fieldset(
+            legend = Some(Legend(
+                content = Text("Assessment Categories"),
+                classes = "govuk-fieldset__legend--m",
+                isPageHeading = false
+            ))
+        )),
+        idPrefix = Some("assessmentCategories"),
+        name = "assessmentCategories[]",
+        items = AssessmentCategory.values.map(c => toCheckboxItem(c, checkedByDefault = c == AssessmentCategory.Standard)),
+        hint = Some(Hint(content = Text("Select one or more"))),
+        classes = "govuk-checkboxes--small"
+    ))
 }
 
 @epayeEligibilityErrorCheckboxes = @{
@@ -64,7 +82,7 @@ appConfig: AppConfig
             || e == EligibilityErrors.HasCapacitor
             || e == EligibilityErrors.IsAnMtdCustomer
             || e == EligibilityErrors.NoMtditsaEnrollment
-    ).map(toCheckboxItem)
+    ).map(toCheckboxItem(_))
 }
 
 @vatEligibilityErrorCheckboxes = @{
@@ -75,7 +93,7 @@ appConfig: AppConfig
             || e == EligibilityErrors.HasCapacitor
             || e == EligibilityErrors.IsAnMtdCustomer
             || e == EligibilityErrors.NoMtditsaEnrollment
-    ).map(toCheckboxItem)
+    ).map(toCheckboxItem(_))
 }
 
 @simpEligibilityErrorCheckboxes = @{
@@ -89,14 +107,14 @@ appConfig: AppConfig
             || e == EligibilityErrors.HasCapacitor
             || e == EligibilityErrors.IsAnMtdCustomer
             || e == EligibilityErrors.NoMtditsaEnrollment
-    ).map(toCheckboxItem)
+    ).map(toCheckboxItem(_))
 }
 
 @saEligibilityErrorCheckboxes = @{
     EligibilityErrors.values
     .filterNot(e => e == EligibilityErrors.MultipleReasons
         || e == EligibilityErrors.NoMtditsaEnrollment
-    ).map(toCheckboxItem)
+    ).map(toCheckboxItem(_))
 }
 
 @credIdInput = {
@@ -569,6 +587,8 @@ classes = "govuk-radios--small govuk-radios--inline"
     @ninoInput
     @enrolmentsContent
 
+    @assessmentCategoriesCheckboxes
+
     @govukInput(Input(
         id = "payeDebtTotalAmount",
         name = "payeDebtTotalAmount",
@@ -694,6 +714,8 @@ classes = "govuk-radios--small govuk-radios--inline"
     @confidenceLevelRadios
     @ninoInput
     @enrolmentsContent
+
+    @assessmentCategoriesCheckboxes
 
     @govukInput(Input(
         id = "vatDebtTotalAmount",
@@ -827,6 +849,8 @@ classes = "govuk-radios--small govuk-radios--inline"
     @confidenceLevelRadios
     @ninoInput
     @enrolmentsContent
+
+    @assessmentCategoriesCheckboxes
 
     @govukInput(Input(
         id = "saDebtTotalAmount",
@@ -977,6 +1001,8 @@ classes = "govuk-radios--small govuk-radios--inline"
     @confidenceLevelRadios
     @ninoInput
     @enrolmentsContent
+
+    @assessmentCategoriesCheckboxes
 
     @govukInput(Input(
         id = "simpTotalAmount",

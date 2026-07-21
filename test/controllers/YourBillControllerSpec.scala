@@ -18,7 +18,7 @@ package controllers
 
 import essttp.journey.model.{Origin, Origins, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.TaxRegime
-import essttp.rootmodel.ttp.eligibility.MainTrans
+import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, MainTrans}
 import messages.ChargeTypeMessages.chargeFromMTrans
 import models.Languages
 import org.jsoup.Jsoup
@@ -44,6 +44,7 @@ class YourBillControllerSpec extends ItSpec {
   private val controller: YourBillController = app.injector.instanceOf[YourBillController]
 
   "GET /your-bill should" - {
+
     "return your bill page for EPAYE for interest bearing charges" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Epaye.Bta)()
@@ -339,49 +340,165 @@ class YourBillControllerSpec extends ItSpec {
         redirectLocation(result) shouldBe Some(routes.IneligibleController.saGenericIneligiblePage.url)
       }
     }
+
+    "redirect to the 'your upcoming bill' page if the assessment category is liabilities only" in {
+      stubCommonActions()
+      EssttpBackend.EligibilityCheck
+        .findJourney(testCrypto, Origins.Epaye.Bta, assessmentCategories = Seq(AssessmentCategory.Liabilities))()
+
+      val result = controller.yourBill(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.YourBillController.yourUpcomingBill.url)
+    }
   }
 
-  "POST /your-bill should" - {
-    "redirect to the 'can you make an upfront payment' page when affordability is not enabled in the journey" in {
+  "GET /your-upcoming-tax-bill should" - {
+
+    "return your bill page for SIMP" in {
       stubCommonActions()
-      EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Vat.Bta)()
-      EssttpBackend.WhyCannotPayInFull.stubUpdateWhyCannotPayInFull(
-        TdAll.journeyId,
-        WhyCannotPayInFullAnswers.AnswerNotRequired,
-        JourneyJsonTemplates.`Why Cannot Pay in Full - Not Required`(Origins.Vat.Bta)(using testCrypto)
+      EssttpBackend.EligibilityCheck
+        .findJourney(testCrypto, Origins.Simp.Pta, assessmentCategories = Seq(AssessmentCategory.Liabilities))()
+
+      val result: Future[Result] = controller.yourUpcomingBill(fakeRequest)
+      val pageContent: String    = contentAsString(result)
+      val doc: Document          = Jsoup.parse(pageContent)
+
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1 = "Your upcoming Simple Assessment tax bill is £3,000",
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl = Some(routes.YourBillController.yourUpcomingBillSubmit.url),
+        regimeBeingTested = Some(TaxRegime.Simp)
       )
 
-      val result = controller.yourBillSubmit(fakeRequest)
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.canYouMakeAnUpfrontPaymentUrl)
+      val para = doc.select("p.govuk-body")
+      para.text shouldBe "You have no overdue payments. Instead, you can set up a payment plan for an upcoming tax " +
+        "bill, allowing you to pay in advance instalments."
 
-      EssttpBackend.WhyCannotPayInFull
-        .verifyUpdateWhyCannotPayInFullRequest(TdAll.journeyId, WhyCannotPayInFullAnswers.AnswerNotRequired)
+      val h2 = doc.select("h2.govuk-heading-s")
+      h2.text shouldBe "Advance payments"
+
+      val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
+      tableRows.size shouldBe 2
+
+      tableRows(0)
+        .select(".govuk-summary-list__key")
+        .text() shouldBe "13 Jul 2020 to 14 Jul 2020 Bill due 7 February 2017"
+      tableRows(0).select(".govuk-summary-list__value").text() shouldBe "£2,000 (includes interest added to date)"
+
+      tableRows(1).select(".govuk-summary-list__key").text() shouldBe "13 Aug 2020 to 14 Aug 2020 Bill due 7 March 2017"
+      tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£1,000 (includes interest added to date)"
+
     }
 
-    "redirect to the 'why can't you pay in full' page when affordability is enabled in the journey" in {
+    "return your bill page for SIMP in welsh" in {
       stubCommonActions()
-      EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Vat.Bta)(
-        TdJsonBodies.createJourneyJson(
-          stageInfo = StageInfo.eligibilityCheckedEligible,
-          journeyInfo = JourneyInfo.eligibilityCheckedEligible(TaxRegime.Vat, testCrypto),
-          Origins.Vat.Bta,
-          affordabilityEnabled = true
+      EssttpBackend.EligibilityCheck
+        .findJourney(testCrypto, Origins.Simp.Pta, assessmentCategories = Seq(AssessmentCategory.Liabilities))()
+
+      val result: Future[Result] = controller.yourUpcomingBill(fakeRequest.withLangWelsh())
+      val pageContent: String    = contentAsString(result)
+      val doc: Document          = Jsoup.parse(pageContent)
+
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1 = "Eich bil treth Asesiad Syml sydd i ddod yw £3,000",
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl = Some(routes.YourBillController.yourUpcomingBillSubmit.url),
+        regimeBeingTested = Some(TaxRegime.Simp),
+        language = Languages.Welsh
+      )
+
+      val para = doc.select("p.govuk-body")
+      para.text shouldBe "Nid oes gennych daliadau sy’n hwyr. Yn lle hynny, gallwch sefydlu cynllun talu ar gyfer bil " +
+        "treth sydd i ddod, a gallwch ei dalu fesul rhandaliad."
+
+      val h2 = doc.select("h2.govuk-heading-s")
+      h2.text shouldBe "Taliadau ymlaen llaw"
+
+      val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
+      tableRows.size shouldBe 2
+
+      tableRows(0)
+        .select(".govuk-summary-list__key")
+        .text() shouldBe "13 Gorff 2020 i 14 Gorff 2020 Bil yn ddyledus 7 Chwefror 2017"
+      tableRows(0)
+        .select(".govuk-summary-list__value")
+        .text() shouldBe "£2,000 (yn cynnwys llog a ychwanegwyd hyd yn hyn)"
+
+      tableRows(1)
+        .select(".govuk-summary-list__key")
+        .text() shouldBe "13 Awst 2020 i 14 Awst 2020 Bil yn ddyledus 7 Mawrth 2017"
+      tableRows(1)
+        .select(".govuk-summary-list__value")
+        .text() shouldBe "£1,000 (yn cynnwys llog a ychwanegwyd hyd yn hyn)"
+    }
+
+    Seq(
+      Seq(AssessmentCategory.Standard),
+      Seq(AssessmentCategory.Debts)
+    ).foreach { assessmentCategories =>
+      s"redirect to the 'your bill' page if the assessment categories are (${assessmentCategories.map(_.entryName).mkString(", ")})" in {
+        stubCommonActions()
+        EssttpBackend.EligibilityCheck
+          .findJourney(testCrypto, Origins.Epaye.Bta, assessmentCategories = assessmentCategories)()
+
+        val result = controller.yourUpcomingBill(fakeRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.YourBillController.yourBill.url)
+      }
+    }
+
+  }
+
+  Seq(
+    ("/your-bill", controller.yourBillSubmit),
+    ("/your-upcoming-tax-bill", controller.yourUpcomingBillSubmit)
+  ).foreach { (url, action) =>
+    s"POST $url should" - {
+      "redirect to the 'can you make an upfront payment' page when affordability is not enabled in the journey" in {
+        stubCommonActions()
+        EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Vat.Bta)()
+        EssttpBackend.WhyCannotPayInFull.stubUpdateWhyCannotPayInFull(
+          TdAll.journeyId,
+          WhyCannotPayInFullAnswers.AnswerNotRequired,
+          JourneyJsonTemplates.`Why Cannot Pay in Full - Not Required`(Origins.Vat.Bta)(using testCrypto)
         )
-      )
 
-      val result = controller.yourBillSubmit(fakeRequest)
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.whyCannotPayInFull)
-    }
+        val result = action(fakeRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(PageUrls.canYouMakeAnUpfrontPaymentUrl)
 
-    "redirect to You already have a direct debit page when there is a ddInProgress" in {
-      stubCommonActions()
-      EssttpBackend.EligibilityCheck.findJourneyWithDdInProgress(testCrypto, Origins.Epaye.Bta)()
+        EssttpBackend.WhyCannotPayInFull
+          .verifyUpdateWhyCannotPayInFullRequest(TdAll.journeyId, WhyCannotPayInFullAnswers.AnswerNotRequired)
+      }
 
-      val result = controller.yourBillSubmit(fakeRequest)
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.youAlreadyHaveDirectDebit)
+      "redirect to the 'why can't you pay in full' page when affordability is enabled in the journey" in {
+        stubCommonActions()
+        EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Vat.Bta)(
+          TdJsonBodies.createJourneyJson(
+            stageInfo = StageInfo.eligibilityCheckedEligible,
+            journeyInfo = JourneyInfo.eligibilityCheckedEligible(TaxRegime.Vat, testCrypto),
+            Origins.Vat.Bta,
+            affordabilityEnabled = true
+          )
+        )
+
+        val result = action(fakeRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(PageUrls.whyCannotPayInFull)
+      }
+
+      "redirect to You already have a direct debit page when there is a ddInProgress" in {
+        stubCommonActions()
+        EssttpBackend.EligibilityCheck.findJourneyWithDdInProgress(testCrypto, Origins.Epaye.Bta)()
+
+        val result = action(fakeRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(PageUrls.youAlreadyHaveDirectDebit)
+      }
     }
   }
 

@@ -216,6 +216,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
     eligibilityCheckResult: EligibilityCheckResult
   )(using r: AuthenticatedJourneyRequest[?]): EligibilityCheckAuditDetail = {
 
+    // TODO: may need to prefix reason with assessment category to be able to distinguish
     def collectEligibilityReasons(product: Product): List[String] = {
       val reasons: List[String] =
         product.productElementNames.toList
@@ -232,9 +233,10 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
     val enrollmentReasons                =
       if (eligibilityCheckResult.isEligible) None else Some(EnrollmentReasons.DidNotPassEligibilityCheck())
     val eligibilityReasons: List[String] =
-      collectEligibilityReasons(eligibilityCheckResult.eligibilityRules) ::: collectEligibilityReasons(
-        eligibilityCheckResult.relevantChargeTypeAssessments.assessmentEligibilityRules
-      )
+      collectEligibilityReasons(eligibilityCheckResult.eligibilityRules) :::
+        eligibilityCheckResult.chargeTypeAssessments.flatMap(c =>
+          collectEligibilityReasons(c.assessmentEligibilityRules)
+        )
 
     EligibilityCheckAuditDetail(
       eligibilityResult = eligibilityResult,
@@ -246,7 +248,8 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       taxDetail = toTaxDetail(eligibilityCheckResult),
       saCustomerType = eligibilityCheckResult.individualDetails.flatMap(_.customerType),
       authProviderId = r.ggCredId.value,
-      chargeTypeAssessment = eligibilityCheckResult.relevantChargeTypeAssessments.chargeTypeAssessment,
+      // TODO: do we need to distinguish between the assessment categories?
+      chargeTypeAssessment = eligibilityCheckResult.chargeTypeAssessments.flatMap(_.chargeTypeAssessment),
       correlationId = journey.correlationId.value.toString,
       futureChargeLiabilitiesExcluded = Some(eligibilityCheckResult.futureChargeLiabilitiesExcluded),
       regimeDigitalCorrespondence = eligibilityCheckResult.regimeDigitalCorrespondence.value

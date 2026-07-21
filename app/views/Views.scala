@@ -36,6 +36,7 @@ class Views @Inject() (
   val saLanding:                      SaLanding,
   val simpLanding:                    SimpLanding,
   val yourBillIs:                     YourBillIs,
+  val yourUpcomingBill:               YourUpcomingBill,
   val notEnrolled:                    NotEnrolled,
   val notVatRegistered:               NotVatRegistered,
   val notSaEnrolled:                  NotSaEnrolled,

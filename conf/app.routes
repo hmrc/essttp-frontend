@@ -75,6 +75,9 @@ POST   /your-bill                                           controllers.YourBill
 GET    /you-already-have-a-direct-debit                     controllers.YourBillController.youAlreadyHaveDirectDebit
 POST   /you-already-have-a-direct-debit                     controllers.YourBillController.youAlreadyHaveDirectDebitSubmit
 
+GET    /your-upcoming-tax-bill                              controllers.YourBillController.yourUpcomingBill
+POST   /your-upcoming-tax-bill                              controllers.YourBillController.yourUpcomingBillSubmit
+
 GET    /why-are-you-unable-to-pay-in-full                   controllers.WhyCannotPayInFullController.whyCannotPayInFull
 POST   /why-are-you-unable-to-pay-in-full                   controllers.WhyCannotPayInFullController.whyCannotPayInFullSubmit
 

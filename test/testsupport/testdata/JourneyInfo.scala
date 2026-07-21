@@ -18,7 +18,7 @@ package testsupport.testdata
 
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.bank.{TypeOfBankAccount, TypesOfBankAccount}
-import essttp.rootmodel.ttp.eligibility.Identification
+import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, Identification}
 import essttp.rootmodel.{CannotPayReason, DayOfMonth, TaxRegime}
 import paymentsEmailVerification.models.EmailVerificationResult
 import uk.gov.hmrc.crypto.Encrypter
@@ -40,7 +40,8 @@ object JourneyInfo {
     maybeDdInProgress:                  Option[Boolean],
     eligibilityMinPlanLength:           Int,
     eligibilityMaxPlanLength:           Int,
-    additionalIdentifiers:              Seq[Identification] = Seq.empty
+    additionalIdentifiers:              Seq[Identification] = Seq.empty,
+    assessmentCategories:               Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard)
   ): JourneyInfoAsJson =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       encrypter = encrypter,
@@ -52,7 +53,8 @@ object JourneyInfo {
       maybeDdInProgress = maybeDdInProgress,
       eligibilityMinPlanLength = eligibilityMinPlanLength,
       eligibilityMaxPlanLength = eligibilityMaxPlanLength,
-      additionalIdentifiers = additionalIdentifiers
+      additionalIdentifiers = additionalIdentifiers,
+      assessmentCategories = assessmentCategories
     )
 
   def ineligibleHasRls(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                                 =
@@ -363,7 +365,8 @@ object JourneyInfo {
     maybeDdInProgress:                  Option[Boolean] = None,
     eligibilityMinPlanLength:           Int = 1,
     eligibilityMaxPlanLength:           Int = 12,
-    additionalIdentifiers:              Seq[Identification] = Seq.empty
+    additionalIdentifiers:              Seq[Identification] = Seq.empty,
+    assessmentCategories:               Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard)
   ): List[JourneyInfoAsJson] =
     eligibilityCheckEligible(
       taxRegime,
@@ -375,7 +378,8 @@ object JourneyInfo {
       maybeDdInProgress,
       eligibilityMinPlanLength,
       eligibilityMaxPlanLength,
-      additionalIdentifiers = additionalIdentifiers
+      additionalIdentifiers = additionalIdentifiers,
+      assessmentCategories = assessmentCategories
     ) :: taxIdDetermined(taxRegime = taxRegime)
 
   def eligibilityCheckedIneligibleHasRls(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
