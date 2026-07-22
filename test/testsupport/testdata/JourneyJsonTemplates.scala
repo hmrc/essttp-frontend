@@ -19,7 +19,7 @@ package testsupport.testdata
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Origin, Origins, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.bank.TypeOfBankAccount
 import essttp.rootmodel.CannotPayReason.{ChangeToPersonalCircumstances, NoMoneySetAside}
-import essttp.rootmodel.ttp.eligibility.Identification
+import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, Identification}
 import essttp.rootmodel.{CannotPayReason, DayOfMonth}
 import paymentsEmailVerification.models.EmailVerificationResult
 import uk.gov.hmrc.crypto.Encrypter
@@ -48,14 +48,16 @@ object JourneyJsonTemplates {
 
   def `Eligibility Checked - Eligible`(
     origin:                             Origin = Origins.Epaye.Bta,
-    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
+    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true),
+    assessmentCategories:               Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard)
   )(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
       stageInfo = StageInfo.eligibilityCheckedEligible,
       journeyInfo = JourneyInfo.eligibilityCheckedEligible(
         origin.taxRegime,
         encrypter,
-        maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge
+        maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge,
+        assessmentCategories = assessmentCategories
       ),
       origin
     )

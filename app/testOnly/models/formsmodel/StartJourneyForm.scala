@@ -21,6 +21,7 @@ import cats.syntax.either.*
 import config.AppConfig
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.*
+import essttp.rootmodel.ttp.eligibility.AssessmentCategory
 import essttp.rootmodel.ttp.{CustomerType, CustomerTypes}
 import models.MoneyUtil.{amountOfMoneyFormatter, formatAmountOfMoneyWithoutPoundSign}
 import models.{EligibilityError, EligibilityErrors, Language}
@@ -52,7 +53,8 @@ final case class StartJourneyForm(
   credId:                        Option[String],
   numberOfChargeTypeAssessments: Int,
   numberOfCustomerPostcodes:     Int,
-  safeId:                        Option[String]
+  safeId:                        Option[String],
+  assessmentCategories:          Seq[AssessmentCategory]
 )
 
 final case class Flags(
@@ -128,7 +130,9 @@ object StartJourneyForm {
         "credId"                        -> optional(text).transform[Option[String]](_.filter(_.nonEmpty), identity),
         "numberOfChargeTypeAssessments" -> number,
         "numberOfCustomerPostcodes"     -> number,
-        "safeId"                        -> optional(text).transform[Option[String]](_.filter(_.nonEmpty), identity)
+        "safeId"                        -> optional(text).transform[Option[String]](_.filter(_.nonEmpty), identity),
+        "assessmentCategories"          -> seq(enumeratum.Forms.enumMapping(AssessmentCategory))
+          .verifying("At least one assessment category must be selected", _.nonEmpty)
       )(StartJourneyForm.apply)(Tuple.fromProductTyped[StartJourneyForm](_).some)
     )
 

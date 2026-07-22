@@ -65,9 +65,7 @@ class UpfrontPaymentController @Inject() (
     Ok(
       views.canYouMakeAnUpFrontPayment(
         maybePrePoppedForm,
-        request.eligibilityCheckResult.hasInterestBearingCharge(
-          request.eligibilityCheckResult.standardChargeTypeAssessments
-        )
+        request.eligibilityCheckResult.hasInterestBearingCharge
       )
     )
   }
@@ -90,8 +88,7 @@ class UpfrontPaymentController @Inject() (
           Ok(
             views.canYouMakeAnUpFrontPayment(
               formWithErrors,
-              request.eligibilityCheckResult
-                .hasInterestBearingCharge(request.eligibilityCheckResult.standardChargeTypeAssessments)
+              request.eligibilityCheckResult.hasInterestBearingCharge
             )
           ),
         (canPayUpfrontForm: CanPayUpfrontFormValue) =>
@@ -234,7 +231,7 @@ class UpfrontPaymentController @Inject() (
       views.upfrontSummaryPage(
         declaredUpfrontPayment.amount,
         remainingAmountTest,
-        eligibilityCheckResult.hasInterestBearingCharge(eligibilityCheckResult.standardChargeTypeAssessments)
+        eligibilityCheckResult.hasInterestBearingCharge
       )
     )
   }
@@ -253,14 +250,14 @@ object UpfrontPaymentController {
 
   def determineTotalAmountToPayWithInterest(eligibilityCheckResult: EligibilityCheckResult): DebtTotalAmount =
     DebtTotalAmount(
-      eligibilityCheckResult.standardChargeTypeAssessments.chargeTypeAssessment
+      eligibilityCheckResult.relevantChargeTypeAssessments.chargeTypeAssessment
         .map(_.debtTotalAmount.value)
         .fold(AmountInPence.zero)(_ + _)
     )
 
   def determineTotalAmountToPayWithoutInterest(eligibilityCheckResult: EligibilityCheckResult): DebtTotalAmount =
     DebtTotalAmount(
-      eligibilityCheckResult.standardChargeTypeAssessments.chargeTypeAssessment
+      eligibilityCheckResult.relevantChargeTypeAssessments.chargeTypeAssessment
         .flatMap(_.charges.map(_.outstandingAmount.value))
         .fold(AmountInPence.zero)(_ + _)
     )

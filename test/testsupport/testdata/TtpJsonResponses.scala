@@ -18,7 +18,7 @@ package testsupport.testdata
 
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.ttp.CustomerType
-import essttp.rootmodel.ttp.eligibility.{AssessmentEligibilityRules, EligibilityPass, EligibilityRules}
+import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, AssessmentEligibilityRules, EligibilityPass, EligibilityRules}
 
 import java.time.LocalDate
 
@@ -34,7 +34,8 @@ object TtpJsonResponses {
     maybeChargeIsInterestBearingCharge: Option[Boolean] = None,
     maybeChargeUseChargeReference:      Option[Boolean] = None,
     maybeChargeBeforeMaxAccountingDate: Option[Boolean] = None,
-    maybeCustomerType:                  Option[CustomerType] = None
+    maybeCustomerType:                  Option[CustomerType] = None,
+    assessmentCategories:               Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard)
   ): String = {
 
     val isInterestBearingChargeValue = maybeChargeIsInterestBearingCharge match {
@@ -56,6 +57,56 @@ object TtpJsonResponses {
       case Some(customerType) => s""""individualDetails": { "customerType": "${customerType.value}" },"""
       case None               => ""
     }
+
+    val chargeTypeAssessments = assessmentCategories.map(category =>
+      s"""
+        |{
+        |  "chargeTypeAssessment" : [ {
+        |    "taxPeriodFrom" : "2020-08-13",
+        |    "taxPeriodTo" : "2020-08-14",
+        |    "debtTotalAmount" : ${if (poundsInsteadOfPence) "3000.00" else "300000"},
+        |    "chargeReference" : "A00000000001",
+        |    "charges" : [ {
+        |      "chargeType": "InYearRTICharge-Tax",
+        |      "mainType": "InYearRTICharge(FPS)",
+        |      "mainTrans" : "mainTrans",
+        |      "subTrans" : "subTrans",
+        |      "outstandingAmount" : ${if (poundsInsteadOfPence) "1000.00" else "100000"},
+        |      "interestStartDate" : "2017-03-07",
+        |      "dueDate" : "2017-03-07",
+        |      "accruedInterest" : ${if (poundsInsteadOfPence) "15.97" else "1597"},
+        |      "ineligibleChargeType": false,
+        |      "chargeOverMaxDebtAge": false,
+        |       "dueDateNotReached": false,
+        |       $isInterestBearingChargeValue
+        |       $useChargeReferenceValue
+        |       $chargeBeforeMaxAccountingDateValue
+        |       "locks": [ {
+        |          "lockType": "Payment",
+        |          "lockReason": "Risk/Fraud",
+        |          "disallowedChargeLockType": false
+        |       } ]
+        |    } ]
+        |  } ],
+        |  "assessmentEligibilityRules" : {
+        |    "isLessThanMinDebtAllowance" : ${assessmentEligibilityRules.isLessThanMinDebtAllowance.toString},
+        |    "isMoreThanMaxDebtAllowance" : ${assessmentEligibilityRules.isMoreThanMaxDebtAllowance.toString},
+        |    "disallowedChargeLockTypes" : ${assessmentEligibilityRules.disallowedChargeLockTypes.toString},
+        |    "ineligibleChargeTypes" : ${assessmentEligibilityRules.ineligibleChargeTypes.toString},
+        |    "noDueDatesReached" : ${assessmentEligibilityRules.noDueDatesReached.toString}
+        |    ${optionalEligibilityResponsesJson(
+          assessmentEligibilityRules.chargesBeforeMaxAccountingDate,
+          "chargesBeforeMaxAccountingDate"
+        )}
+        |    ${optionalEligibilityResponsesJson(
+          assessmentEligibilityRules.chargesOverMaxDebtAge,
+          "chargesOverMaxDebtAge"
+        )}
+        |  },
+        |  "assessmentEligibilityStatus" : true,
+        |  "assessmentCategory" : "${category.entryName}"
+        |}""".stripMargin
+    )
 
     s"""
        |{
@@ -122,49 +173,7 @@ object TtpJsonResponses {
       )}
        |  ${optionalEligibilityResponsesJson(eligibilityRules.noMtditsaEnrollment, "noMtditsaEnrollment")}
        |  },
-       |  "chargeTypeAssessments" : [ {
-       |  "chargeTypeAssessment" : [ {
-       |    "taxPeriodFrom" : "2020-08-13",
-       |    "taxPeriodTo" : "2020-08-14",
-       |    "debtTotalAmount" : ${if (poundsInsteadOfPence) "3000.00" else "300000"},
-       |    "chargeReference" : "A00000000001",
-       |    "charges" : [ {
-       |      "chargeType": "InYearRTICharge-Tax",
-       |      "mainType": "InYearRTICharge(FPS)",
-       |      "mainTrans" : "mainTrans",
-       |      "subTrans" : "subTrans",
-       |      "outstandingAmount" : ${if (poundsInsteadOfPence) "1000.00" else "100000"},
-       |      "interestStartDate" : "2017-03-07",
-       |      "dueDate" : "2017-03-07",
-       |      "accruedInterest" : ${if (poundsInsteadOfPence) "15.97" else "1597"},
-       |      "ineligibleChargeType": false,
-       |      "chargeOverMaxDebtAge": false,
-       |       "dueDateNotReached": false,
-       |       $isInterestBearingChargeValue
-       |       $useChargeReferenceValue
-       |       $chargeBeforeMaxAccountingDateValue
-       |       "locks": [ {
-       |          "lockType": "Payment",
-       |          "lockReason": "Risk/Fraud",
-       |          "disallowedChargeLockType": false
-       |       } ]
-       |    } ]
-       |  } ],
-       |       "assessmentEligibilityRules" : {
-       |         "isLessThanMinDebtAllowance" : ${assessmentEligibilityRules.isLessThanMinDebtAllowance.toString},
-       |         "isMoreThanMaxDebtAllowance" : ${assessmentEligibilityRules.isMoreThanMaxDebtAllowance.toString},
-       |         "disallowedChargeLockTypes" : ${assessmentEligibilityRules.disallowedChargeLockTypes.toString},
-       |         "ineligibleChargeTypes" : ${assessmentEligibilityRules.ineligibleChargeTypes.toString},
-       |         "noDueDatesReached" : ${assessmentEligibilityRules.noDueDatesReached.toString}
-       |         ${optionalEligibilityResponsesJson(
-        assessmentEligibilityRules.chargesBeforeMaxAccountingDate,
-        "chargesBeforeMaxAccountingDate"
-      )}
-       | ${optionalEligibilityResponsesJson(assessmentEligibilityRules.chargesOverMaxDebtAge, "chargesOverMaxDebtAge")}
-       |       },
-       |       "assessmentEligibilityStatus" : true,
-       |       "assessmentCategory" : "standard"
-       |     } ],
+       |  "chargeTypeAssessments" : [ ${chargeTypeAssessments.mkString(",")} ],
        |  "regimeDigitalCorrespondence": ${regimeDigitalCorrespondence.toString},
        |  "futureChargeLiabilitiesExcluded": false
        |}

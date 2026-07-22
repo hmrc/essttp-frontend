@@ -73,9 +73,7 @@ class InstalmentsController @Inject() (
       views.instalmentOptionsPage(
         maybePrePopForm,
         instalmentOptions,
-        request.eligibilityCheckResult.hasInterestBearingCharge(
-          request.eligibilityCheckResult.standardChargeTypeAssessments
-        )
+        request.eligibilityCheckResult.hasInterestBearingCharge
       )
     )
   }
@@ -100,8 +98,7 @@ class InstalmentsController @Inject() (
               views.instalmentOptionsPage(
                 formWithErrors,
                 instalmentOptions,
-                request.eligibilityCheckResult
-                  .hasInterestBearingCharge(request.eligibilityCheckResult.standardChargeTypeAssessments)
+                request.eligibilityCheckResult.hasInterestBearingCharge
               )
             )
           },

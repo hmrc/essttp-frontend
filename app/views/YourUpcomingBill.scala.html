@@ -1,0 +1,59 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import controllers.routes
+@import essttp.rootmodel.TaxRegime
+@import messages.Messages
+@import models.OverDuePayments
+@import play.api.mvc.Request
+@import requests.RequestSupport
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import views.html.partials.OverduePaymentRow
+@import views.html.templates.Layout
+
+@this(
+        layout: Layout,
+        govukButton: GovukButton,
+        formWithCSRF: FormWithCSRF,
+        requestSupport: RequestSupport,
+        overduePaymentRow: OverduePaymentRow
+)
+
+
+@(upcomingPayments: OverDuePayments, taxRegime: TaxRegime)(implicit request: Request[?])
+
+@import requestSupport.{languageFromRequest, legacyMessages}
+
+@title= @{Messages.YourUpcomingBill.yourUpcomingBillIs(upcomingPayments.total, taxRegime).show}
+
+@layout(
+    pageTitle = Some(title)
+) {
+    <h1 class="govuk-heading-l">@title</h1>
+
+    <p class="govuk-body">@{Messages.YourUpcomingBill.`You have no overdue payments`.show}</p>
+
+    <h2 class="govuk-heading-s">@{Messages.YourUpcomingBill.`Advance payments`.show}</h2>
+
+    <dl class="govuk-summary-list">
+    @upcomingPayments.payments.sortBy(payment => payment.invoicePeriod.dueDate).map(p => overduePaymentRow(p, taxRegime))
+    </dl>
+
+    @formWithCSRF(action = routes.YourBillController.yourUpcomingBillSubmit) {
+        @govukButton(Button(content = Text(Messages.continue.show), attributes = Map("id" -> "continue")))
+    }
+
+}

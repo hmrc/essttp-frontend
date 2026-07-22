@@ -241,6 +241,40 @@ object Messages {
 
   }
 
+  object YourUpcomingBill {
+
+    def yourUpcomingBillIs(amount: AmountInPence, taxRegime: TaxRegime): Message =
+      taxRegime match {
+        case TaxRegime.Epaye =>
+          throw new Exception("Your upcoming bill is not applicable for PAYE")
+
+        case TaxRegime.Vat =>
+          throw new Exception("Your upcoming bill is not applicable for VAT")
+
+        case TaxRegime.Sa =>
+          throw new Exception("Your upcoming bill is not applicable for SA")
+
+        case TaxRegime.Simp =>
+          Message(
+            english = s"Your upcoming Simple Assessment tax bill is ${amount.gdsFormatInPounds}",
+            welsh = s"Eich bil treth Asesiad Syml sydd i ddod yw ${amount.gdsFormatInPounds}"
+          )
+      }
+
+    val `You have no overdue payments` = Message(
+      english =
+        "You have no overdue payments. Instead, you can set up a payment plan for an upcoming tax bill, allowing you to pay in advance instalments.",
+      welsh =
+        "Nid oes gennych daliadau sy’n hwyr. Yn lle hynny, gallwch sefydlu cynllun talu ar gyfer bil treth sydd i ddod, a gallwch ei dalu fesul rhandaliad."
+    )
+
+    val `Advance payments`: Message = Message(
+      english = "Advance payments",
+      welsh = "Taliadau ymlaen llaw"
+    )
+
+  }
+
   object TimeOut {
 
     val `For your security, we signed you out`: Message = Message(

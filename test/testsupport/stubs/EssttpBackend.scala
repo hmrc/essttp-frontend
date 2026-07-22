@@ -30,7 +30,7 @@ import essttp.rootmodel.pega.{GetCaseResponse, StartCaseResponse}
 import essttp.rootmodel.ttp.affordability.InstalmentAmounts
 import essttp.rootmodel.ttp.affordablequotes.{AffordableQuotesResponse, PaymentPlan}
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
-import essttp.rootmodel.ttp.eligibility.{EligibilityCheckResult, Identification}
+import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, EligibilityCheckResult, Identification}
 import paymentsEmailVerification.models.EmailVerificationResult
 import play.api.http.Status.*
 import play.api.libs.json.{Format, JsValue, Json}
@@ -245,12 +245,16 @@ object EssttpBackend {
     def findJourney(
       encrypter:                          Encrypter,
       origin:                             Origin = Origins.Epaye.Bta,
-      maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
+      maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true),
+      assessmentCategories:               Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard)
     )(
-      jsonBody:                           String =
-        JourneyJsonTemplates.`Eligibility Checked - Eligible`(origin, maybeChargeIsInterestBearingCharge)(using
-          encrypter
-        )
+      jsonBody:                           String = JourneyJsonTemplates.`Eligibility Checked - Eligible`(
+        origin,
+        maybeChargeIsInterestBearingCharge,
+        assessmentCategories
+      )(using
+        encrypter
+      )
     ): StubMapping =
       findByLatestSessionId(jsonBody)
 

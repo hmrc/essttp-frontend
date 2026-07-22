@@ -54,6 +54,7 @@ object PageUrls {
   val vatAlreadyHaveAPaymentPlanUrl: String   = s"$serviceBaseUrl/already-have-a-payment-plan-vat"
   val saAlreadyHaveAPaymentPlanUrl: String    = s"$serviceBaseUrl/already-have-a-plan-sa"
   val yourBillIsUrl: String                   = s"$serviceBaseUrl/your-bill"
+  val yourUpcomingBillIsUrl: String           = s"$serviceBaseUrl/your-upcoming-tax-bill"
   val youAlreadyHaveDirectDebit: String       = s"$serviceBaseUrl/you-already-have-a-direct-debit"
   val whyCannotPayInFull: String              = s"$serviceBaseUrl/why-are-you-unable-to-pay-in-full"
   val canYouMakeAnUpfrontPaymentUrl: String   = s"$serviceBaseUrl/can-you-make-an-upfront-payment"

@@ -18,7 +18,7 @@ package testsupport.testdata
 
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Origin, Origins, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.TaxRegime.Sa
-import essttp.rootmodel.ttp.eligibility.{AssessmentEligibilityRules, EligibilityPass, EligibilityRules, Identification}
+import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, AssessmentEligibilityRules, EligibilityPass, EligibilityRules, Identification}
 import essttp.rootmodel.{DayOfMonth, TaxRegime, UpfrontPaymentAmount}
 import essttp.rootmodel.bank.TypeOfBankAccount
 import paymentsEmailVerification.models.EmailVerificationResult
@@ -145,7 +145,8 @@ object TdJsonBodies {
     maybeDdInProgress:                  Option[Boolean] = None,
     eligibilityMinPlanLength:           Int = 1,
     eligibilityMaxPlanLength:           Int = 12,
-    additionalIdentifiers:              Seq[Identification] = Seq.empty
+    additionalIdentifiers:              Seq[Identification] = Seq.empty,
+    assessmentCategories:               Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard)
   ): JourneyInfoAsJson = {
 
     val isInterestBearingChargeValue = maybeChargeIsInterestBearingCharge match {
@@ -162,6 +163,81 @@ object TdJsonBodies {
       case Some(bool) => s""""ddInProgress":${bool.toString},"""
       case None       => ""
     }
+
+    val chargeTypeAssesments = assessmentCategories.map(assessmentCategory =>
+      s"""
+         |{
+         |    "chargeTypeAssessment" : [
+         |    {
+         |      "taxPeriodFrom" : "2020-08-13",
+         |      "taxPeriodTo" : "2020-08-14",
+         |      "debtTotalAmount" : 100000,
+         |      "chargeReference" : "A00000000001",
+         |      "charges" : [ {
+         |        "chargeType": "InYearRTICharge-Tax",
+         |        "mainType": "InYearRTICharge(FPS)",
+         |        "mainTrans" : "mainTrans",
+         |        "subTrans" : "subTrans",
+         |        "outstandingAmount" : 50000,
+         |        "interestStartDate" : "2017-03-07",
+         |        "dueDate" : "2017-03-07",
+         |        "accruedInterest" : 1597,
+         |        "ineligibleChargeType": false,
+         |        "chargeOverMaxDebtAge": false,
+         |         "dueDateNotReached": false,
+         |         $isInterestBearingChargeValue
+         |         $useChargeReferenceValue
+         |         $ddInProgress
+         |         "locks": [ {
+         |            "lockType": "Payment",
+         |            "lockReason": "Risk/Fraud",
+         |            "disallowedChargeLockType": false
+         |         } ]
+         |      } ]
+         |    },
+         |    {
+         |      "taxPeriodFrom" : "2020-07-13",
+         |      "taxPeriodTo" : "2020-07-14",
+         |      "debtTotalAmount" : 200000,
+         |      "chargeReference" : "A00000000002",
+         |      "charges" : [ {
+         |        "chargeType": "InYearRTICharge-Tax",
+         |        "mainType": "InYearRTICharge(FPS)",
+         |        "mainTrans" : "mainTrans",
+         |        "subTrans" : "subTrans",
+         |        "outstandingAmount" : 100000,
+         |        "interestStartDate" : "2017-02-07",
+         |        "dueDate" : "2017-02-07",
+         |        "accruedInterest" : 1597,
+         |        "ineligibleChargeType": false,
+         |        "chargeOverMaxDebtAge": false,
+         |         "dueDateNotReached": false,
+         |         $isInterestBearingChargeValue
+         |         $useChargeReferenceValue
+         |         $ddInProgress
+         |         "locks": [ {
+         |            "lockType": "Payment",
+         |            "lockReason": "Risk/Fraud",
+         |            "disallowedChargeLockType": false
+         |         } ]
+         |      } ]
+         |    }
+         |  ],
+         |    "assessmentEligibilityRules" : {
+         |    "isLessThanMinDebtAllowance" : ${assessmentEligibilityRules.isLessThanMinDebtAllowance.toString},
+         |    "isMoreThanMaxDebtAllowance" : ${assessmentEligibilityRules.isMoreThanMaxDebtAllowance.toString},
+         |    "disallowedChargeLockTypes" : ${assessmentEligibilityRules.disallowedChargeLockTypes.toString},
+         |    "chargesOverMaxDebtAge" : ${assessmentEligibilityRules.chargesOverMaxDebtAge.getOrElse(false).toString},
+         |    "ineligibleChargeTypes" : ${assessmentEligibilityRules.ineligibleChargeTypes.toString},
+         |    "noDueDatesReached": ${assessmentEligibilityRules.noDueDatesReached.toString},
+         |    "chargesBeforeMaxAccountingDate": ${assessmentEligibilityRules.chargesBeforeMaxAccountingDate
+          .getOrElse(false)
+          .toString}
+         |  },
+         |  "assessmentEligibilityStatus": true,
+         |  "assessmentCategory": "${assessmentCategory.entryName}"
+         |  }""".stripMargin
+    )
 
     s"""
       |"eligibilityCheckResult" : {
@@ -217,77 +293,7 @@ object TdJsonBodies {
         .toString},
       |    "noMtditsaEnrollment": ${eligibilityRules.noMtditsaEnrollment.getOrElse(false).toString}
       |  },
-      |  "chargeTypeAssessments": [ {
-      |    "chargeTypeAssessment" : [
-      |    {
-      |      "taxPeriodFrom" : "2020-08-13",
-      |      "taxPeriodTo" : "2020-08-14",
-      |      "debtTotalAmount" : 100000,
-      |      "chargeReference" : "A00000000001",
-      |      "charges" : [ {
-      |        "chargeType": "InYearRTICharge-Tax",
-      |        "mainType": "InYearRTICharge(FPS)",
-      |        "mainTrans" : "mainTrans",
-      |        "subTrans" : "subTrans",
-      |        "outstandingAmount" : 50000,
-      |        "interestStartDate" : "2017-03-07",
-      |        "dueDate" : "2017-03-07",
-      |        "accruedInterest" : 1597,
-      |        "ineligibleChargeType": false,
-      |        "chargeOverMaxDebtAge": false,
-      |         "dueDateNotReached": false,
-      |         $isInterestBearingChargeValue
-      |         $useChargeReferenceValue
-      |         $ddInProgress
-      |         "locks": [ {
-      |            "lockType": "Payment",
-      |            "lockReason": "Risk/Fraud",
-      |            "disallowedChargeLockType": false
-      |         } ]
-      |      } ]
-      |    },
-      |    {
-      |      "taxPeriodFrom" : "2020-07-13",
-      |      "taxPeriodTo" : "2020-07-14",
-      |      "debtTotalAmount" : 200000,
-      |      "chargeReference" : "A00000000002",
-      |      "charges" : [ {
-      |        "chargeType": "InYearRTICharge-Tax",
-      |        "mainType": "InYearRTICharge(FPS)",
-      |        "mainTrans" : "mainTrans",
-      |        "subTrans" : "subTrans",
-      |        "outstandingAmount" : 100000,
-      |        "interestStartDate" : "2017-02-07",
-      |        "dueDate" : "2017-02-07",
-      |        "accruedInterest" : 1597,
-      |        "ineligibleChargeType": false,
-      |        "chargeOverMaxDebtAge": false,
-      |         "dueDateNotReached": false,
-      |         $isInterestBearingChargeValue
-      |         $useChargeReferenceValue
-      |         $ddInProgress
-      |         "locks": [ {
-      |            "lockType": "Payment",
-      |            "lockReason": "Risk/Fraud",
-      |            "disallowedChargeLockType": false
-      |         } ]
-      |      } ]
-      |    }
-      |  ],
-      |    "assessmentEligibilityRules" : {
-      |    "isLessThanMinDebtAllowance" : ${assessmentEligibilityRules.isLessThanMinDebtAllowance.toString},
-      |    "isMoreThanMaxDebtAllowance" : ${assessmentEligibilityRules.isMoreThanMaxDebtAllowance.toString},
-      |    "disallowedChargeLockTypes" : ${assessmentEligibilityRules.disallowedChargeLockTypes.toString},
-      |    "chargesOverMaxDebtAge" : ${assessmentEligibilityRules.chargesOverMaxDebtAge.getOrElse(false).toString},
-      |    "ineligibleChargeTypes" : ${assessmentEligibilityRules.ineligibleChargeTypes.toString},
-      |    "noDueDatesReached": ${assessmentEligibilityRules.noDueDatesReached.toString},
-      |    "chargesBeforeMaxAccountingDate": ${assessmentEligibilityRules.chargesBeforeMaxAccountingDate
-        .getOrElse(false)
-        .toString}
-      |  },
-      |  "assessmentEligibilityStatus": true,
-      |  "assessmentCategory": "standard"
-      |  } ],
+      |  "chargeTypeAssessments": [ ${chargeTypeAssesments.mkString(", ")} ],
       |  "regimeDigitalCorrespondence": ${regimeDigitalCorrespondence.toString},
       |  "futureChargeLiabilitiesExcluded": false
       |}

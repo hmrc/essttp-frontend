@@ -22,10 +22,11 @@ import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import essttp.journey.JourneyConnector
 import essttp.journey.model.{Journey, JourneyStage, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.AmountInPence
-import essttp.rootmodel.ttp.eligibility.{ChargeTypeAssessment, Charges, EligibilityCheckResult, MainTrans}
+import essttp.rootmodel.ttp.eligibility.{ChargeTypeAssessment, ChargeTypeAssessments, Charges, EligibilityCheckResult, MainTrans}
 import essttp.rootmodel.ttp.{DdInProgress, IsInterestBearingCharge}
 import models.{InvoicePeriod, OverDuePayments, OverduePayment}
 import play.api.mvc.*
+import play.twirl.api.Html
 import services.AuditService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
@@ -50,20 +51,37 @@ class YourBillController @Inject() (
   val yourBill: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
       case j: JourneyStage.BeforeEligibilityChecked => logErrorAndRouteToDefaultPage(j)
-      case j: JourneyStage.AfterEligibilityChecked  => finalStateCheck(j, displayPage(j))
+      case j: JourneyStage.AfterEligibilityChecked  =>
+        finalStateCheck(
+          j,
+          j.eligibilityCheckResult.foldOnAssessmentCategory(
+            standard => displayPage(views.yourBillIs(YourBillController.overDuePayments(standard), j.taxRegime)),
+            debts => displayPage(views.yourBillIs(YourBillController.overDuePayments(debts), j.taxRegime)),
+            _ => logErrorAndRouteToDefaultPage(j)
+          )
+        )
     }
   }
 
-  private def displayPage(
-    journey: JourneyStage.AfterEligibilityChecked & Journey
-  )(using Request[?]): Result =
-    try
-      Ok(
-        views.yourBillIs(
-          YourBillController.overDuePayments(journey.eligibilityCheckResult),
-          journey.taxRegime
+  val yourUpcomingBill: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    request.journey match {
+      case j: JourneyStage.BeforeEligibilityChecked => logErrorAndRouteToDefaultPage(j)
+      case j: JourneyStage.AfterEligibilityChecked  =>
+        finalStateCheck(
+          j,
+          j.eligibilityCheckResult.foldOnAssessmentCategory(
+            _ => logErrorAndRouteToDefaultPage(j),
+            _ => logErrorAndRouteToDefaultPage(j),
+            liabilities =>
+              displayPage(views.yourUpcomingBill(YourBillController.overDuePayments(liabilities), j.taxRegime))
+          )
         )
-      )
+    }
+  }
+
+  private def displayPage(page: => Html)(using Request[?]): Result =
+    try
+      Ok(page)
     catch {
       case e: MainTrans.UnknownMainTransException                      =>
         logger.warn(s"${e.getClass.getName}: MainTrans with no corresponding charge type: ${e.mTrans.value}")
@@ -82,6 +100,8 @@ class YourBillController @Inject() (
       computeNext(eligibilityRequest.journey).map(Redirect(_))
   }
 
+  val yourUpcomingBillSubmit: Action[AnyContent] = yourBillSubmit
+
   val youAlreadyHaveDirectDebit: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
       case j: JourneyStage.BeforeEligibilityChecked => logErrorAndRouteToDefaultPage(j)
@@ -94,7 +114,9 @@ class YourBillController @Inject() (
   )(using Request[?]): Result =
     Ok(
       views.youAlreadyHaveDirectDebit(
-        YourBillController.overDuePaymentsWithDdInProgress(journey.eligibilityCheckResult),
+        YourBillController.overDuePaymentsWithDdInProgress(
+          journey.eligibilityCheckResult.relevantChargeTypeAssessments
+        ),
         journey.taxRegime
       )
     )
@@ -143,7 +165,7 @@ object YourBillController {
     ass.charges.headOption.flatMap(_.ddInProgress)
 
   private def hasAnyChargesWithDdInProgress(eligibilityResult: EligibilityCheckResult) =
-    eligibilityResult.standardChargeTypeAssessments.chargeTypeAssessment
+    eligibilityResult.relevantChargeTypeAssessments.chargeTypeAssessment
       .map(overDuePaymentOf)
       .exists(_.ddInProgress.contains(DdInProgress(value = true)))
 
@@ -179,22 +201,22 @@ object YourBillController {
     )
   }
 
-  private def qualifyingDebt(eligibilityResult: EligibilityCheckResult): AmountInPence =
-    eligibilityResult.standardChargeTypeAssessments.chargeTypeAssessment
+  private def qualifyingDebt(chargeTypeAssessments: ChargeTypeAssessments): AmountInPence =
+    chargeTypeAssessments.chargeTypeAssessment
       .map(_.debtTotalAmount.value)
       .fold(AmountInPence.zero)(_ + _)
 
-  private def overDuePayments(eligibilityResult: EligibilityCheckResult): OverDuePayments = {
-    val payments = eligibilityResult.standardChargeTypeAssessments.chargeTypeAssessment.map(overDuePaymentOf)
-    OverDuePayments(qualifyingDebt(eligibilityResult), payments)
+  private def overDuePayments(chargeTypeAssessments: ChargeTypeAssessments): OverDuePayments = {
+    val payments = chargeTypeAssessments.chargeTypeAssessment.map(overDuePaymentOf)
+    OverDuePayments(qualifyingDebt(chargeTypeAssessments), payments)
   }
 
-  private def overDuePaymentsWithDdInProgress(eligibilityResult: EligibilityCheckResult): OverDuePayments = {
+  private def overDuePaymentsWithDdInProgress(chargeTypeAssessments: ChargeTypeAssessments): OverDuePayments = {
     val paymentsWithDdInProgress =
-      eligibilityResult.standardChargeTypeAssessments.chargeTypeAssessment
+      chargeTypeAssessments.chargeTypeAssessment
         .map(overDuePaymentOf)
         .filter(_.ddInProgress.contains(DdInProgress(value = true)))
 
-    OverDuePayments(qualifyingDebt(eligibilityResult), paymentsWithDdInProgress)
+    OverDuePayments(qualifyingDebt(chargeTypeAssessments), paymentsWithDdInProgress)
   }
 }

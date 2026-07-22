@@ -111,7 +111,7 @@ class TtpService @Inject() (
     val monthlyPaymentAmount                               = journey.fold(TtpService.monthlyPaymentAmountFromJourney, _._2.monthlyPaymentAmount)
     val startDatesResponse                                 = journey.fold(_.startDatesResponse, _._2.startDatesResponse)
     val debtItemCharges                                    =
-      eligibilityCheckResult.standardChargeTypeAssessments.chargeTypeAssessment.flatMap(toDebtItemCharge)
+      eligibilityCheckResult.relevantChargeTypeAssessments.chargeTypeAssessment.flatMap(toDebtItemCharge)
 
     val affordableQuotesRequest: AffordableQuotesRequest = AffordableQuotesRequest(
       channelIdentifier = ChannelIdentifiers.eSSTTP,
@@ -187,7 +187,7 @@ class TtpService @Inject() (
       }
 
     val debtItemCharges =
-      eligibilityCheckResult.standardChargeTypeAssessments.chargeTypeAssessment.flatMap(toDebtItemCharges)
+      eligibilityCheckResult.relevantChargeTypeAssessments.chargeTypeAssessment.flatMap(toDebtItemCharges)
 
     val hasAffordabilityAssessment = journey.fold(_.paymentPlanAnswers, _.paymentPlanAnswers) match {
       case _: PaymentPlanAnswers.PaymentPlanNoAffordability    => false
@@ -318,7 +318,7 @@ object TtpService {
     journey:                Journey
   ): InstalmentAmountRequest = {
     val allInterestAccrued: AmountInPence                         = AmountInPence(
-      eligibilityCheckResult.standardChargeTypeAssessments.chargeTypeAssessment
+      eligibilityCheckResult.relevantChargeTypeAssessments.chargeTypeAssessment
         .flatMap(
           _.charges
             .map(_.accruedInterest.value.value)
@@ -326,7 +326,7 @@ object TtpService {
         .sum
     )
     val debtChargeItemsFromEligibilityCheck: List[DebtItemCharge] =
-      eligibilityCheckResult.standardChargeTypeAssessments.chargeTypeAssessment.flatMap {
+      eligibilityCheckResult.relevantChargeTypeAssessments.chargeTypeAssessment.flatMap {
         (chargeTypeAssessment: ChargeTypeAssessment) =>
           toDebtItemCharge(chargeTypeAssessment)
       }
@@ -362,7 +362,7 @@ object TtpService {
     }
 
   def calculateCumulativeInterest(eligibilityCheckResult: EligibilityCheckResult): AmountInPence = AmountInPence(
-    eligibilityCheckResult.standardChargeTypeAssessments.chargeTypeAssessment
+    eligibilityCheckResult.relevantChargeTypeAssessments.chargeTypeAssessment
       .flatMap(_.charges)
       .map(_.accruedInterest.value.value)
       .sum

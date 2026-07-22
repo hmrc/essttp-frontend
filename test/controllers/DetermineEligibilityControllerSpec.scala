@@ -21,7 +21,7 @@ import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.TaxRegime.Sa
 import essttp.rootmodel.ttp.CustomerTypes
-import essttp.rootmodel.ttp.eligibility.{AssessmentEligibilityRules, EligibilityRules, IndividualDetails, RegimeDigitalCorrespondence}
+import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, AssessmentEligibilityRules, EligibilityRules, IndividualDetails, RegimeDigitalCorrespondence}
 import models.{EligibilityReqIdentificationFlag, Languages}
 import org.jsoup.Jsoup
 import org.scalatest.prop.TableDrivenPropertyChecks.*
@@ -42,7 +42,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
 
   private val controller: DetermineEligibilityController = app.injector.instanceOf[DetermineEligibilityController]
 
-  "Determine eligibility endpoint should route user correctly and send an audit event" - {
+  "Determine eligibility endpoint" - {
     forAll(
       Table(
         (
@@ -1578,6 +1578,116 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
 
         ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Sa, Languages.Welsh)
       }
+
+    def testAssessmentCategories(
+      assessmentCategories: Seq[AssessmentCategory],
+      expectedRedirect:     Either[String, String]
+    ): Unit = {
+      val eligibilityCheckResponseJson         = TtpJsonResponses.ttpEligibilityCallJson(
+        TaxRegime.Epaye,
+        regimeDigitalCorrespondence = true,
+        assessmentCategories = assessmentCategories
+      )
+      // for audit event
+      val eligibilityCheckResponseJsonAsPounds = TtpJsonResponses.ttpEligibilityCallJson(
+        TaxRegime.Epaye,
+        poundsInsteadOfPence = true,
+        regimeDigitalCorrespondence = true,
+        assessmentCategories = assessmentCategories
+      )
+
+      stubCommonActions()
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Epaye.Bta)()
+      Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Epaye)(eligibilityCheckResponseJson)
+      EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(
+        TdAll.journeyId,
+        JourneyJsonTemplates.`Eligibility Checked - Eligible`(assessmentCategories = assessmentCategories)
+      )
+
+      val result = controller.determineEligibility(fakeRequest)
+
+      expectedRedirect.fold(
+        { errorMessage =>
+          val error = intercept[Exception](await(result))
+          error.getCause.getMessage shouldBe errorMessage
+        },
+        { redirect =>
+          status(result) shouldBe Status.SEE_OTHER
+          redirectLocation(result) shouldBe Some(redirect)
+        }
+      )
+
+      Ttp.Eligibility.verifyTtpEligibilityRequests(TaxRegime.Epaye)
+
+      EssttpBackend.EligibilityCheck.verifyUpdateEligibilityRequest(
+        journeyId = TdAll.journeyId,
+        expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(
+          TdAll.eligibleEligibilityPass,
+          TdAll.eligibleEligibilityRules,
+          TdAll.assessmentEligibilityRules,
+          TaxRegime.Epaye,
+          RegimeDigitalCorrespondence(value = true),
+          assessmentCategories = assessmentCategories
+        )
+      )(using testOperationCryptoFormat)
+
+      AuditConnectorStub.verifyEventAudited(
+        "EligibilityCheck",
+        Json
+          .parse(
+            s"""
+               |{
+               |  "eligibilityResult" : "eligible",
+               |  "noEligibilityReasons": 0,
+               |  "origin": "Bta",
+               |  "taxType": "Epaye",
+               |  "taxDetail": {
+               |    "employerRef": "864FZ00049",
+               |    "accountsOfficeRef": "123PA44545546"
+               |  },
+               |  "authProviderId": "authId-999",
+               |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+               |  "regimeDigitalCorrespondence": true,
+               |  "futureChargeLiabilitiesExcluded": false,
+               |  "chargeTypeAssessment" : ${(Json
+                .parse(eligibilityCheckResponseJsonAsPounds)
+                .as[JsObject] \ "chargeTypeAssessments" \ 0 \ "chargeTypeAssessment").get.toString}
+               |}
+               |""".stripMargin
+          )
+          .as[JsObject]
+      )
+    }
+
+    "eligible user with assessment category is debts only should redirect to 'your bill'" in {
+      testAssessmentCategories(Seq(AssessmentCategory.Debts), Right(PageUrls.yourBillIsUrl))
+    }
+
+    "eligible user with assessment category is liabilities only should redirect to 'your upcoming bill'" in {
+      testAssessmentCategories(Seq(AssessmentCategory.Liabilities), Right(PageUrls.yourUpcomingBillIsUrl))
+    }
+
+    "eligibility response with unsupported combination of assessment categories should throw an error" in {
+      val supportedAssessmentCategories = Seq(
+        Set(AssessmentCategory.Standard),
+        Set(AssessmentCategory.Debts),
+        Set(AssessmentCategory.Liabilities)
+      )
+
+      for {
+        i                    <- 1 to AssessmentCategory.values.size
+        assessmentCategories <- AssessmentCategory.values.combinations(i)
+        if !supportedAssessmentCategories.contains(assessmentCategories.toSet)
+      } withClue(s"For assessment categories [${assessmentCategories.map(_.entryName).mkString(", ")}]: ") {
+        testAssessmentCategories(
+          assessmentCategories,
+          Left(
+            s"EligibilityCheckResult with combination of assessment categories not supported: ${assessmentCategories.map(_.toString).mkString(", ")}"
+          )
+        )
+      }
+    }
+
   }
 
   "Determine eligibility should prevent eligibility checks" - {

@@ -61,7 +61,7 @@ class MonthlyPaymentAmountController @Inject() (
   )(using Request[?]): Result = {
 
     val totalDebt                                                = AmountInPence(
-      eligibilityCheckResult.standardChargeTypeAssessments.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum
+      eligibilityCheckResult.relevantChargeTypeAssessments.chargeTypeAssessment.map(_.debtTotalAmount.value.value).sum
     )
     val upfrontPaymentAmount                                     = upfrontPaymentAnswersFromJourney(journey) match {
       case j1: UpfrontPaymentAnswers.DeclaredUpfrontPayment => j1.amount.value
@@ -110,7 +110,7 @@ class MonthlyPaymentAmountController @Inject() (
       case j: JourneyStage.AfterRetrievedAffordabilityResult  =>
         val totalDebt: AmountInPence            =
           AmountInPence(
-            request.eligibilityCheckResult.standardChargeTypeAssessments.chargeTypeAssessment
+            request.eligibilityCheckResult.relevantChargeTypeAssessments.chargeTypeAssessment
               .map(_.debtTotalAmount.value.value)
               .sum
           )
