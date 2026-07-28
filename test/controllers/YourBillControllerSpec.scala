@@ -293,7 +293,7 @@ class YourBillControllerSpec extends ItSpec {
       simpExtraPara1(0)
         .text() shouldBe "The figures shown here are accurate but may differ from those showing in your Personal Tax Account."
       simpExtraPara2(0)
-        .text() shouldBe "Here, you can view the total of all your Simple Assessment debts. In your Personal Tax Account, you can only view your debts from the last 2 tax years."
+        .text() shouldBe "Here, you can view the total of all your Simple Assessment debts. In your Personal Tax Account, you can only view your debts from the last 4 tax years."
     }
 
     "return sa generic ineligible page" - {
