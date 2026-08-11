@@ -20,13 +20,16 @@ import actions.Actions
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import essttp.journey.JourneyConnector
+import essttp.journey.model.JourneyStage.BeforeAssessmentCategoryDetermined
 import essttp.journey.model.{Journey, JourneyStage, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.AmountInPence
-import essttp.rootmodel.ttp.eligibility.{ChargeTypeAssessment, ChargeTypeAssessments, Charges, EligibilityCheckResult, MainTrans}
+import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, ChargeTypeAssessment, ChargeTypeAssessments, Charges, EligibilityCheckResult, MainTrans}
 import essttp.rootmodel.ttp.{DdInProgress, IsInterestBearingCharge}
+import models.forms.{AddLiabilitiesForm, AddLiabilitiesFormValue}
 import models.{InvoicePeriod, OverDuePayments, OverduePayment}
 import play.api.mvc.*
 import play.twirl.api.Html
+import requests.RequestSupport
 import services.AuditService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import util.Logging
@@ -43,40 +46,180 @@ class YourBillController @Inject() (
   mcc:              MessagesControllerComponents,
   views:            Views,
   auditService:     AuditService,
-  journeyConnector: JourneyConnector
+  journeyConnector: JourneyConnector,
+  requestSupport:   RequestSupport
 )(using ExecutionContext)
     extends FrontendController(mcc),
       Logging {
 
+  import requestSupport.languageFromRequest
+
   val yourBill: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
-    request.journey match {
-      case j: JourneyStage.BeforeEligibilityChecked => logErrorAndRouteToDefaultPage(j)
-      case j: JourneyStage.AfterEligibilityChecked  =>
-        finalStateCheck(
-          j,
-          j.eligibilityCheckResult.foldOnAssessmentCategory(
-            standard => displayPage(views.yourBillIs(YourBillController.overDuePayments(standard), j.taxRegime)),
-            debts => displayPage(views.yourBillIs(YourBillController.overDuePayments(debts), j.taxRegime)),
-            _ => logErrorAndRouteToDefaultPage(j)
-          )
-        )
-    }
+    finalStateCheck(
+      request.journey,
+      request.eligibilityCheckResult.foldOnAssessmentCategory(
+        standard =>
+          displayPage(views.yourBillIs(YourBillController.overDuePayments(standard), request.journey.taxRegime)),
+        debts => displayPage(views.yourBillIs(YourBillController.overDuePayments(debts), request.journey.taxRegime)),
+        _ => Redirect(routes.YourBillController.yourUpcomingBill),
+        (debts, _, _) =>
+          displayPage(views.yourBillIs(YourBillController.overDuePayments(debts), request.journey.taxRegime))
+      )
+    )
+  }
+
+  val yourBillSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit eligibilityRequest =>
+    val next = eligibilityRequest.eligibilityCheckResult.foldOnAssessmentCategory(
+      _ => computeNext(eligibilityRequest.journey, eligibilityRequest.eligibilityCheckResult),
+      _ => computeNext(eligibilityRequest.journey, eligibilityRequest.eligibilityCheckResult),
+      _ => throw new Exception("Not expecting submit on YourBill for Liabilities only assessment category"),
+      (_, _, _) =>
+        eligibilityRequest.journey match {
+          case _: JourneyStage.BeforeAssessmentCategoryDetermined =>
+            Future.successful(routes.YourBillController.advancePayment)
+          case _: JourneyStage.AfterAssessmentCategoryDetermined  =>
+            computeNext(eligibilityRequest.journey, eligibilityRequest.eligibilityCheckResult)
+        }
+    )
+
+    next.map(Redirect(_))
   }
 
   val yourUpcomingBill: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
-    request.journey match {
-      case j: JourneyStage.BeforeEligibilityChecked => logErrorAndRouteToDefaultPage(j)
-      case j: JourneyStage.AfterEligibilityChecked  =>
-        finalStateCheck(
-          j,
-          j.eligibilityCheckResult.foldOnAssessmentCategory(
-            _ => logErrorAndRouteToDefaultPage(j),
-            _ => logErrorAndRouteToDefaultPage(j),
-            liabilities =>
-              displayPage(views.yourUpcomingBill(YourBillController.overDuePayments(liabilities), j.taxRegime))
+    finalStateCheck(
+      request.journey,
+      request.eligibilityCheckResult.foldOnAssessmentCategory(
+        _ => logErrorAndRouteToDefaultPage(request.journey),
+        _ => logErrorAndRouteToDefaultPage(request.journey),
+        liabilities =>
+          displayPage(
+            views.yourUpcomingBill(YourBillController.overDuePayments(liabilities), request.journey.taxRegime)
+          ),
+        (_, _, _) => logErrorAndRouteToDefaultPage(request.journey)
+      )
+    )
+  }
+
+  val yourUpcomingBillSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit eligibilityRequest =>
+    val next = eligibilityRequest.eligibilityCheckResult.foldOnAssessmentCategory(
+      _ => throw new Exception("Not expecting submit on YourUpcomingBill for Standard assessment category"),
+      _ => throw new Exception("Not expecting submit on YourUpcomingBill for Debts only assessment category"),
+      _ => computeNext(eligibilityRequest.journey, eligibilityRequest.eligibilityCheckResult),
+      (_, _, _) =>
+        throw new Exception("Not expecting submit on YourUpcomingBill for DebtAndLiabilities assessment category")
+    )
+
+    next.map(Redirect(_))
+  }
+
+  val yourBillCombined: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    finalStateCheck(
+      request.journey,
+      request.eligibilityCheckResult.foldOnAssessmentCategory(
+        _ => logErrorAndRouteToDefaultPage(request.journey),
+        _ => logErrorAndRouteToDefaultPage(request.journey),
+        _ => logErrorAndRouteToDefaultPage(request.journey),
+        (debts, liabilities, _) =>
+          displayPage(
+            views.yourBillCombined(
+              YourBillController.overDuePayments(debts),
+              YourBillController.overDuePayments(liabilities),
+              request.journey.taxRegime
+            )
           )
-        )
+      )
+    )
+  }
+
+  val yourBillCombinedSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit eligibilityRequest =>
+    val next = eligibilityRequest.eligibilityCheckResult.foldOnAssessmentCategory(
+      _ => throw new Exception("Not expecting submit on YourBillCombined for Standard assessment category"),
+      _ => throw new Exception("Not expecting submit on YourBillCombined for Debts only assessment category"),
+      _ => throw new Exception("Not expecting submit on YourBillCombined for Liabilities only assessment category"),
+      (_, _, _) => computeNext(eligibilityRequest.journey, eligibilityRequest.eligibilityCheckResult)
+    )
+
+    next.map(Redirect(_))
+  }
+
+  val removeAdvancePayments: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
+    request.journey match {
+      case j: BeforeAssessmentCategoryDetermined             =>
+        logErrorAndRouteToDefaultPage(j)
+      case j: JourneyStage.AfterAssessmentCategoryDetermined =>
+        j.assessmentCategory match {
+          case AssessmentCategory.DebtsAndLiabilities =>
+            journeyConnector.updateAssessmentCategory(j.journeyId, AssessmentCategory.Debts).map { _ =>
+              Redirect(routes.YourBillController.yourBill)
+            }
+
+          case other =>
+            logger.warn(s"Unexpected assessment category $other for removeAdvancePayments")
+            logErrorAndRouteToDefaultPage(j)
+        }
     }
+  }
+
+  val advancePayment: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
+    finalStateCheck(
+      request.journey,
+      request.eligibilityCheckResult.foldOnAssessmentCategory(
+        _ => logErrorAndRouteToDefaultPage(request.journey),
+        _ => logErrorAndRouteToDefaultPage(request.journey),
+        _ => logErrorAndRouteToDefaultPage(request.journey),
+        { (_, liabilities, _) =>
+          val form = request.journey match {
+            case j: JourneyStage.BeforeAssessmentCategoryDetermined =>
+              AddLiabilitiesForm.form
+            case j: JourneyStage.AfterAssessmentCategoryDetermined  =>
+              j.assessmentCategory match {
+                case AssessmentCategory.DebtsAndLiabilities => AddLiabilitiesForm.form.fill(AddLiabilitiesFormValue.Yes)
+                case AssessmentCategory.Debts               => AddLiabilitiesForm.form.fill(AddLiabilitiesFormValue.No)
+                case _                                      => AddLiabilitiesForm.form
+              }
+          }
+
+          displayPage(
+            views.advancePayments(form, YourBillController.overDuePayments(liabilities), request.journey.taxRegime)
+          )
+        }
+      )
+    )
+  }
+
+  val advancePaymentSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
+    request.eligibilityCheckResult.foldOnAssessmentCategory[Future[Result]](
+      _ => logErrorAndRouteToDefaultPage(request.journey),
+      _ => logErrorAndRouteToDefaultPage(request.journey),
+      _ => logErrorAndRouteToDefaultPage(request.journey),
+      (_, liabilities, _) =>
+        AddLiabilitiesForm.form
+          .bindFromRequest()
+          .fold(
+            formWithErrors =>
+              Future.successful(
+                BadRequest(
+                  views.advancePayments(
+                    formWithErrors,
+                    YourBillController.overDuePayments(liabilities),
+                    request.journey.taxRegime
+                  )
+                )
+              ),
+            addLiabilities => {
+              val (assessmentCategory, next) = addLiabilities match {
+                case AddLiabilitiesFormValue.Yes =>
+                  AssessmentCategory.DebtsAndLiabilities -> routes.YourBillController.yourBillCombined
+                case AddLiabilitiesFormValue.No  =>
+                  AssessmentCategory.Debts -> routes.YourBillController.yourBill
+              }
+
+              journeyConnector.updateAssessmentCategory(request.journey.journeyId, assessmentCategory).map { _ =>
+                Redirect(next)
+              }
+            }
+          )
+    )
   }
 
   private def displayPage(page: => Html)(using Request[?]): Result =
@@ -93,29 +236,22 @@ class YourBillController @Inject() (
         Redirect(routes.IneligibleController.saGenericIneligiblePage)
     }
 
-  val yourBillSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit eligibilityRequest =>
-    if (YourBillController.hasAnyChargesWithDdInProgress(eligibilityRequest.eligibilityCheckResult))
-      Redirect(routes.YourBillController.youAlreadyHaveDirectDebit)
-    else
-      computeNext(eligibilityRequest.journey).map(Redirect(_))
-  }
-
-  val yourUpcomingBillSubmit: Action[AnyContent] = yourBillSubmit
-
   val youAlreadyHaveDirectDebit: Action[AnyContent] = as.eligibleJourneyAction { implicit request =>
     request.journey match {
-      case j: JourneyStage.BeforeEligibilityChecked => logErrorAndRouteToDefaultPage(j)
-      case j: JourneyStage.AfterEligibilityChecked  => finalStateCheck(j, displayYouAlreadyHaveDirectDebitPage(j))
+      case j: JourneyStage.BeforeAssessmentCategoryDetermined => logErrorAndRouteToDefaultPage(j)
+      case j: JourneyStage.AfterAssessmentCategoryDetermined  =>
+        finalStateCheck(j, displayYouAlreadyHaveDirectDebitPage(j, request.eligibilityCheckResult))
     }
   }
 
   private def displayYouAlreadyHaveDirectDebitPage(
-    journey: JourneyStage.AfterEligibilityChecked & Journey
+    journey:                JourneyStage.AfterAssessmentCategoryDetermined & Journey,
+    eligibilityCheckResult: EligibilityCheckResult
   )(using Request[?]): Result =
     Ok(
       views.youAlreadyHaveDirectDebit(
         YourBillController.overDuePaymentsWithDdInProgress(
-          journey.eligibilityCheckResult.relevantChargeTypeAssessments
+          eligibilityCheckResult.relevantChargeTypeAssessments(journey)
         ),
         journey.taxRegime
       )
@@ -123,11 +259,24 @@ class YourBillController @Inject() (
 
   val youAlreadyHaveDirectDebitSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     auditService.auditDdInProgress(request.journey, hasChosenToContinue = true)
-    computeNext(request.journey).map(Redirect(_))
+    computeNext(request.journey, request.eligibilityCheckResult, checkIfHasAnyChargesWithDdInProgress = false).map(
+      Redirect(_)
+    )
   }
 
-  private def computeNext(journey: Journey)(using RequestHeader): Future[Call] =
-    if (journey.affordabilityEnabled.contains(true))
+  private def computeNext(
+    journey:                              Journey,
+    eligibilityCheckResult:               EligibilityCheckResult,
+    checkIfHasAnyChargesWithDdInProgress: Boolean = true
+  )(using RequestHeader): Future[Call] =
+    if (
+      checkIfHasAnyChargesWithDdInProgress && YourBillController.hasAnyChargesWithDdInProgress(
+        eligibilityCheckResult,
+        journey
+      )
+    )
+      Future.successful(routes.YourBillController.youAlreadyHaveDirectDebit)
+    else if (journey.affordabilityEnabled.contains(true))
       Future.successful(routes.WhyCannotPayInFullController.whyCannotPayInFull)
     else
       journeyConnector
@@ -164,8 +313,10 @@ object YourBillController {
   private def ddInProgress(ass: ChargeTypeAssessment): Option[DdInProgress] =
     ass.charges.headOption.flatMap(_.ddInProgress)
 
-  private def hasAnyChargesWithDdInProgress(eligibilityResult: EligibilityCheckResult) =
-    eligibilityResult.relevantChargeTypeAssessments.chargeTypeAssessment
+  private def hasAnyChargesWithDdInProgress(eligibilityResult: EligibilityCheckResult, journey: Journey) =
+    eligibilityResult
+      .relevantChargeTypeAssessments(journey)
+      .chargeTypeAssessment
       .map(overDuePaymentOf)
       .exists(_.ddInProgress.contains(DdInProgress(value = true)))
 

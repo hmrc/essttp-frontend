@@ -56,8 +56,8 @@ class JourneyIncorrectStateRouterSpec extends ItSpec {
         (
           "Stages.EligibilityChecked",
           () => EssttpBackend.EligibilityCheck.findJourney(testCrypto)(),
-          PageUrls.yourBillIsUrl
-        ), // check this
+          PageUrls.determineAssessmentCategoryUrl
+        ),
         (
           "Stages.EligibilityChecked - PAYE",
           () =>

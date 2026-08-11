@@ -84,7 +84,7 @@ class PaymentScheduleController @Inject() (
         whyCannotPayInFullAnswersFromJourney(journeyMerged),
         canPayWithinSixMonthsFromJourney(journeyMerged),
         journeyMerged.taxRegime,
-        hasInterestBearingCharge
+        hasInterestBearingCharge(journeyMerged)
       )
     )
   }

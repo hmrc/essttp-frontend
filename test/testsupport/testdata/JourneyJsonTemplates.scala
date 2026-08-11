@@ -47,25 +47,32 @@ object JourneyJsonTemplates {
     )
 
   def `Eligibility Checked - Eligible`(
-    origin:                             Origin = Origins.Epaye.Bta,
-    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true),
-    assessmentCategories:               Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard)
+    origin:                                  Origin = Origins.Epaye.Bta,
+    maybeChargeIsInterestBearingCharge:      Option[Boolean] = Some(true),
+    assessmentCategories:                    Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard),
+    assessmentCategoriesToEligibilityStatus: Map[AssessmentCategory, Boolean] =
+      AssessmentCategory.values.map(_ -> true).toMap,
+    affordabilityEnabled:                    Boolean = false,
+    maybeDdInProgress:                       Option[Boolean] = None
   )(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
-      stageInfo = StageInfo.eligibilityCheckedEligible,
+      stageInfo = StageInfo.eligibilityChecked,
       journeyInfo = JourneyInfo.eligibilityCheckedEligible(
         origin.taxRegime,
         encrypter,
         maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge,
-        assessmentCategories = assessmentCategories
+        assessmentCategories = assessmentCategories,
+        assessmentCategoriesToEligibilityStatus = assessmentCategoriesToEligibilityStatus,
+        maybeDdInProgress = maybeDdInProgress
       ),
-      origin
+      origin,
+      affordabilityEnabled = affordabilityEnabled
     )
 
   def `Eligibility Checked - Eligible - No HMRC-MTD-IT enrolment`(
     origin: Origin = Origins.Sa.Bta
   )(using encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
-    stageInfo = StageInfo.eligibilityCheckedEligible,
+    stageInfo = StageInfo.eligibilityChecked,
     journeyInfo = JourneyInfo.eligibilityCheckedNoMtdEnrolment(origin.taxRegime, encrypter),
     origin
   )
@@ -73,30 +80,38 @@ object JourneyJsonTemplates {
   def `Eligibility Checked - Eligible - NoInterestBearingCharge`(origin: Origin = Origins.Epaye.Bta)(using
     encrypter: Encrypter
   ): String = TdJsonBodies.createJourneyJson(
-    stageInfo = StageInfo.eligibilityCheckedEligible,
+    stageInfo = StageInfo.eligibilityChecked,
     journeyInfo = JourneyInfo
       .eligibilityCheckedEligible(origin.taxRegime, encrypter, maybeChargeIsInterestBearingCharge = Some(false)),
     origin
   )
 
-  def `Eligibility Checked - Eligible- ddInProgress`(origin: Origin = Origins.Epaye.Bta)(using
-    encrypter: Encrypter
+  def `Eligibility Checked - Eligible- ddInProgress`(
+    origin:               Origin = Origins.Epaye.Bta,
+    assessmentCategories: Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard)
+  )(using
+    encrypter:            Encrypter
   ): String = TdJsonBodies.createJourneyJson(
-    stageInfo = StageInfo.eligibilityCheckedEligible,
-    journeyInfo = JourneyInfo.eligibilityCheckedEligible(origin.taxRegime, encrypter, maybeDdInProgress = Some(true)),
+    stageInfo = StageInfo.eligibilityChecked,
+    journeyInfo = JourneyInfo.eligibilityCheckedEligible(
+      origin.taxRegime,
+      encrypter,
+      maybeDdInProgress = Some(true),
+      assessmentCategories = assessmentCategories
+    ),
     origin
   )
 
   def `Eligibility Checked - Ineligible - HasRlsOnAddress`(origin: Origin)(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
-      stageInfo = StageInfo.eligibilityCheckedIneligible,
+      stageInfo = StageInfo.eligibilityChecked,
       journeyInfo = JourneyInfo.eligibilityCheckedIneligibleHasRls(origin.taxRegime, encrypter),
       origin = origin
     )
 
   def `Eligibility Checked - Ineligible - MarkedAsInsolvent`(origin: Origin)(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
-      stageInfo = StageInfo.eligibilityCheckedIneligible,
+      stageInfo = StageInfo.eligibilityChecked,
       journeyInfo = JourneyInfo.eligibilityCheckedMarkedAsInsolvent(origin.taxRegime, encrypter),
       origin = origin
     )
@@ -104,7 +119,7 @@ object JourneyJsonTemplates {
   def `Eligibility Checked - Ineligible - IsLessThanMinDebtAllowance`(origin: Origin)(using
     encrypter: Encrypter
   ): String = TdJsonBodies.createJourneyJson(
-    stageInfo = StageInfo.eligibilityCheckedIneligible,
+    stageInfo = StageInfo.eligibilityChecked,
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMinDebt(origin.taxRegime, encrypter),
     origin = origin
   )
@@ -112,7 +127,7 @@ object JourneyJsonTemplates {
   def `Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(origin: Origin)(using
     encrypter: Encrypter
   ): String = TdJsonBodies.createJourneyJson(
-    stageInfo = StageInfo.eligibilityCheckedIneligible,
+    stageInfo = StageInfo.eligibilityChecked,
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMaxDebt(origin.taxRegime, encrypter),
     origin = origin
   )
@@ -120,21 +135,21 @@ object JourneyJsonTemplates {
   def `Eligibility Checked - Ineligible - DisallowedChargeLockTypes`(origin: Origin)(using
     encrypter: Encrypter
   ): String = TdJsonBodies.createJourneyJson(
-    stageInfo = StageInfo.eligibilityCheckedIneligible,
+    stageInfo = StageInfo.eligibilityChecked,
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleDisallowedCharge(origin.taxRegime, encrypter),
     origin = origin
   )
 
   def `Eligibility Checked - Ineligible - ExistingTTP`(origin: Origin)(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
-      stageInfo = StageInfo.eligibilityCheckedIneligible,
+      stageInfo = StageInfo.eligibilityChecked,
       journeyInfo = JourneyInfo.eligibilityCheckedIneligibleExistingTtp(origin.taxRegime, encrypter),
       origin = origin
     )
 
   def `Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(origin: Origin)(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
-      stageInfo = StageInfo.eligibilityCheckedIneligible,
+      stageInfo = StageInfo.eligibilityChecked,
       journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMaxDebtAge(origin.taxRegime, encrypter),
       origin = origin
     )
@@ -142,28 +157,28 @@ object JourneyJsonTemplates {
   def `Eligibility Checked - Ineligible - BeforeMaxAccountingDate`(origin: Origin)(using
     encrypter: Encrypter
   ): String = TdJsonBodies.createJourneyJson(
-    stageInfo = StageInfo.eligibilityCheckedIneligible,
+    stageInfo = StageInfo.eligibilityChecked,
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMaxDebtAge(origin.taxRegime, encrypter),
     origin = origin
   )
 
   def `Eligibility Checked - Ineligible - EligibleChargeType`(origin: Origin)(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
-      stageInfo = StageInfo.eligibilityCheckedIneligible,
+      stageInfo = StageInfo.eligibilityChecked,
       journeyInfo = JourneyInfo.eligibilityCheckedIneligibleChargeType(origin.taxRegime, encrypter),
       origin = origin
     )
 
   def `Eligibility Checked - Ineligible - MissingFiledReturns`(origin: Origin)(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
-      stageInfo = StageInfo.eligibilityCheckedIneligible,
+      stageInfo = StageInfo.eligibilityChecked,
       journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMissingFiledReturns(origin.taxRegime, encrypter),
       origin = origin
     )
 
   def `Eligibility Checked - Ineligible - NoDueDatesReached`(origin: Origin)(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
-      stageInfo = StageInfo.eligibilityCheckedIneligible,
+      stageInfo = StageInfo.eligibilityChecked,
       journeyInfo = JourneyInfo.eligibilityCheckedIneligibleNoDueDatesReached(origin.taxRegime, encrypter),
       origin = origin
     )
@@ -171,7 +186,7 @@ object JourneyJsonTemplates {
   def `Eligibility Checked - Ineligible - HasInvalidInterestSignals`(origin: Origin)(using
     encrypter: Encrypter
   ): String = TdJsonBodies.createJourneyJson(
-    stageInfo = StageInfo.eligibilityCheckedIneligible,
+    stageInfo = StageInfo.eligibilityChecked,
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleHasInvalidInterestSignals(origin.taxRegime, encrypter),
     origin = origin
   )
@@ -179,7 +194,7 @@ object JourneyJsonTemplates {
   def `Eligibility Checked - Ineligible - HasInvalidInterestSignalsCESA`(origin: Origin)(using
     encrypter: Encrypter
   ): String = TdJsonBodies.createJourneyJson(
-    stageInfo = StageInfo.eligibilityCheckedIneligible,
+    stageInfo = StageInfo.eligibilityChecked,
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleHasInvalidInterestSignalsCESA(origin.taxRegime, encrypter),
     origin = origin
   )
@@ -187,7 +202,7 @@ object JourneyJsonTemplates {
   def `Eligibility Checked - Ineligible - DmSpecialOfficeProcessingRequired`(origin: Origin)(using
     encrypter: Encrypter
   ): String = TdJsonBodies.createJourneyJson(
-    stageInfo = StageInfo.eligibilityCheckedIneligible,
+    stageInfo = StageInfo.eligibilityChecked,
     journeyInfo =
       JourneyInfo.eligibilityCheckedIneligibleDmSpecialOfficeProcessingRequired(origin.taxRegime, encrypter),
     origin = origin
@@ -195,14 +210,14 @@ object JourneyJsonTemplates {
 
   def `Eligibility Checked - Ineligible - CannotFindLockReason`(origin: Origin)(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
-      stageInfo = StageInfo.eligibilityCheckedIneligible,
+      stageInfo = StageInfo.eligibilityChecked,
       journeyInfo = JourneyInfo.eligibilityCheckedIneligibleCannotFindLockReason(origin.taxRegime, encrypter),
       origin = origin
     )
 
   def `Eligibility Checked - Ineligible - CreditsNotAllowed`(origin: Origin)(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
-      stageInfo = StageInfo.eligibilityCheckedIneligible,
+      stageInfo = StageInfo.eligibilityChecked,
       journeyInfo = JourneyInfo.eligibilityCheckedIneligibleCreditsNotAllowed(origin.taxRegime, encrypter),
       origin = origin
     )
@@ -210,7 +225,7 @@ object JourneyJsonTemplates {
   def `Eligibility Checked - Ineligible - IsMoreThanMaxPaymentReference`(origin: Origin)(using
     encrypter: Encrypter
   ): String = TdJsonBodies.createJourneyJson(
-    stageInfo = StageInfo.eligibilityCheckedIneligible,
+    stageInfo = StageInfo.eligibilityChecked,
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleIsMoreThanMaxPaymentReference(origin.taxRegime, encrypter),
     origin = origin
   )
@@ -218,7 +233,7 @@ object JourneyJsonTemplates {
   def `Eligibility Checked - Ineligible - ChargesBeforeMaxAccountingDate`(origin: Origin)(using
     encrypter: Encrypter
   ): String = TdJsonBodies.createJourneyJson(
-    stageInfo = StageInfo.eligibilityCheckedIneligible,
+    stageInfo = StageInfo.eligibilityChecked,
     journeyInfo = JourneyInfo.eligibilityCheckedChargesBeforeMaxAccountingDate(origin.taxRegime, encrypter),
     origin = origin
   )
@@ -226,14 +241,14 @@ object JourneyJsonTemplates {
   def `Eligibility Checked - Ineligible - HasDisguisedRemuneration`(origin: Origin)(using
     encrypter: Encrypter
   ): String = TdJsonBodies.createJourneyJson(
-    stageInfo = StageInfo.eligibilityCheckedIneligible,
+    stageInfo = StageInfo.eligibilityChecked,
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleHasDisguisedRemuneration(origin.taxRegime, encrypter),
     origin = origin
   )
 
   def `Eligibility Checked - Ineligible - HasCapacitor`(origin: Origin)(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
-      stageInfo = StageInfo.eligibilityCheckedIneligible,
+      stageInfo = StageInfo.eligibilityChecked,
       journeyInfo = JourneyInfo.eligibilityCheckedIneligibleHasCapacitor(origin.taxRegime, encrypter),
       origin = origin
     )
@@ -241,7 +256,7 @@ object JourneyJsonTemplates {
   def `Eligibility Checked - Ineligible - DmSpecialOfficeProcessingRequiredCDCS`(origin: Origin)(using
     encrypter: Encrypter
   ): String = TdJsonBodies.createJourneyJson(
-    stageInfo = StageInfo.eligibilityCheckedIneligible,
+    stageInfo = StageInfo.eligibilityChecked,
     journeyInfo =
       JourneyInfo.eligibilityCheckedIneligibleDmSpecialOfficeProcessingRequiredCDCS(origin.taxRegime, encrypter),
     origin = origin
@@ -250,7 +265,7 @@ object JourneyJsonTemplates {
   def `Eligibility Checked - Ineligible - MultipleReasons`(origin: Origin = Origins.Epaye.Bta)(using
     encrypter: Encrypter
   ): String = TdJsonBodies.createJourneyJson(
-    stageInfo = StageInfo.eligibilityCheckedIneligible,
+    stageInfo = StageInfo.eligibilityChecked,
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMultipleReasons(origin.taxRegime, encrypter),
     origin = origin
   )
@@ -258,7 +273,7 @@ object JourneyJsonTemplates {
   def `Eligibility Checked - Ineligible - MultipleReasons - debt too low and old`(origin: Origin = Origins.Epaye.Bta)(
     using encrypter: Encrypter
   ): String = TdJsonBodies.createJourneyJson(
-    stageInfo = StageInfo.eligibilityCheckedIneligible,
+    stageInfo = StageInfo.eligibilityChecked,
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMultipleReasonsDebtTooLowAndOld(origin.taxRegime, encrypter),
     origin = origin
   )
@@ -266,7 +281,7 @@ object JourneyJsonTemplates {
   def `Eligibility Checked - Ineligible - MultipleReasons - Eligibility Reasons`(origin: Origin = Origins.Epaye.Bta)(
     using encrypter: Encrypter
   ): String = TdJsonBodies.createJourneyJson(
-    stageInfo = StageInfo.eligibilityCheckedIneligible,
+    stageInfo = StageInfo.eligibilityChecked,
     journeyInfo =
       JourneyInfo.eligibilityCheckedIneligibleMultipleReasonsEligibilityReasons(origin.taxRegime, encrypter),
     origin = origin
@@ -277,7 +292,7 @@ object JourneyJsonTemplates {
   )(using
     encrypter: Encrypter
   ): String = TdJsonBodies.createJourneyJson(
-    stageInfo = StageInfo.eligibilityCheckedIneligible,
+    stageInfo = StageInfo.eligibilityChecked,
     journeyInfo =
       JourneyInfo.eligibilityCheckedIneligibleMultipleReasonsAssessmentEligibilityReasons(origin.taxRegime, encrypter),
     origin = origin
@@ -286,7 +301,7 @@ object JourneyJsonTemplates {
   def `Eligibility Checked - Ineligible - MultipleReasons - both lists`(origin: Origin = Origins.Epaye.Bta)(using
     encrypter: Encrypter
   ): String = TdJsonBodies.createJourneyJson(
-    stageInfo = StageInfo.eligibilityCheckedIneligible,
+    stageInfo = StageInfo.eligibilityChecked,
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMultipleOneFromEach(origin.taxRegime, encrypter),
     origin = origin
   )
@@ -294,10 +309,33 @@ object JourneyJsonTemplates {
   def `Eligibility Checked - Ineligible - isAnMtdCustomer`(origin: Origin = Origins.Sa.Bta)(using
     encrypter: Encrypter
   ): String = TdJsonBodies.createJourneyJson(
-    stageInfo = StageInfo.eligibilityCheckedIneligible,
+    stageInfo = StageInfo.eligibilityChecked,
     journeyInfo = JourneyInfo.eligibilityCheckedIneligibleIsAnMtdCustomer(origin.taxRegime, encrypter),
     origin = origin
   )
+
+  def `Assessment Category Determined`(
+    origin:                                Origin,
+    maybeChargeIsInterestBearingCharge:    Option[Boolean] = Some(true),
+    assessmentCategory:                    AssessmentCategory = AssessmentCategory.Standard,
+    eligibilityResultAssessmentCategories: Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard),
+    affordabilityEnabled:                  Boolean = false,
+    maybeDdInProgress:                     Option[Boolean] = None
+  )(using encrypter: Encrypter): String =
+    TdJsonBodies.createJourneyJson(
+      stageInfo = StageInfo.assessmentCategoryDetermined,
+      journeyInfo = JourneyInfo
+        .assessmentCategoryDetermined(
+          origin.taxRegime,
+          encrypter,
+          maybeChargeIsInterestBearingCharge,
+          assessmentCategory,
+          eligibilityResultAssessmentCategories = eligibilityResultAssessmentCategories,
+          maybeDdInProgress = maybeDdInProgress
+        ),
+      origin = origin,
+      affordabilityEnabled = affordabilityEnabled
+    )
 
   def `Why Cannot Pay in Full - Not Required`(
     origin:                             Origin,
@@ -319,7 +357,7 @@ object JourneyJsonTemplates {
   def `Eligibility Checked - Ineligible - dmSpecialOfficeProcessingRequiredCESA`(origin: Origin = Origins.Sa.Bta)(using
     encrypter: Encrypter
   ): String = TdJsonBodies.createJourneyJson(
-    stageInfo = StageInfo.eligibilityCheckedIneligible,
+    stageInfo = StageInfo.eligibilityChecked,
     journeyInfo =
       JourneyInfo.eligibilityCheckedIneligibleDmSpecialOfficeProcessingRequiredCESA(origin.taxRegime, encrypter),
     origin = origin
@@ -327,14 +365,14 @@ object JourneyJsonTemplates {
 
   def `Answered Can Pay Upfront - Yes`(origin: Origin)(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
-      stageInfo = StageInfo.answeredCanPayUpfrontYes,
+      stageInfo = StageInfo.answeredCanPayUpfront,
       journeyInfo = JourneyInfo.answeredCanPayUpfrontYes(origin.taxRegime, encrypter),
       origin = origin
     )
 
   def `Answered Can Pay Upfront - No`(origin: Origin)(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
-      stageInfo = StageInfo.answeredCanPayUpfrontNo,
+      stageInfo = StageInfo.answeredCanPayUpfront,
       journeyInfo = JourneyInfo.answeredCanPayUpfrontNo(origin.taxRegime, encrypter),
       origin = origin
     )
@@ -395,7 +433,7 @@ object JourneyJsonTemplates {
 
   def `Obtained Can Pay Within 6 months - not required`(origin: Origin)(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
-      stageInfo = StageInfo.obtainedCanPayWithinSixMonthsNotRequired,
+      stageInfo = StageInfo.obtainedCanPayWithinSixMonths,
       journeyInfo = JourneyInfo.obtainedCanPayWithinSixMonthsNotRequired(origin.taxRegime, encrypter),
       origin = origin
     )
@@ -405,7 +443,7 @@ object JourneyJsonTemplates {
     whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired
   )(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
-      stageInfo = StageInfo.obtainedCanPayWithinSixMonthsRequired,
+      stageInfo = StageInfo.obtainedCanPayWithinSixMonths,
       journeyInfo = JourneyInfo.obtainedCanPayWithinSixMonthsYes(
         origin.taxRegime,
         encrypter,
@@ -416,7 +454,7 @@ object JourneyJsonTemplates {
 
   def `Obtained Can Pay Within 6 months - no`(origin: Origin)(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
-      stageInfo = StageInfo.obtainedCanPayWithinSixMonthsRequired,
+      stageInfo = StageInfo.obtainedCanPayWithinSixMonths,
       journeyInfo = JourneyInfo.obtainedCanPayWithinSixMonthsNo(origin.taxRegime, encrypter),
       origin = origin
     )
@@ -494,6 +532,7 @@ object JourneyJsonTemplates {
         regimeDigitalCorrespondence,
         maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge
       ),
+      TdJsonBodies.assessmentCategory(),
       TdJsonBodies.upfrontPaymentAnswersJourneyInfo(upfrontPaymentAmountJsonString),
       TdJsonBodies.whyCannotPayInFull(
         WhyCannotPayInFullAnswers.WhyCannotPayInFull(Set(ChangeToPersonalCircumstances, NoMoneySetAside))
@@ -553,9 +592,7 @@ object JourneyJsonTemplates {
   def `Entered Can Set Up Direct Debit`(isAccountHolder: Boolean, origin: Origin = Origins.Epaye.Bta)(using
     encrypter: Encrypter
   ): String = TdJsonBodies.createJourneyJson(
-    stageInfo =
-      if (isAccountHolder) StageInfo.enteredCanSetUpDirectDebitIsAccountHolder
-      else StageInfo.enteredCanSetUpDirectDebitIsNotAccountHolder,
+    stageInfo = StageInfo.enteredCanSetUpDirectDebit,
     journeyInfo = JourneyInfo.enteredDetailsAboutBankAccount(isAccountHolder, origin.taxRegime, encrypter),
     origin = origin
   )
@@ -601,9 +638,7 @@ object JourneyJsonTemplates {
     whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers = WhyCannotPayInFullAnswers.AnswerNotRequired,
     additionalIdentifiers:     Seq[Identification] = Seq.empty
   )(using encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
-    stageInfo =
-      if (isEmailAddresRequired) StageInfo.agreedTermsAndConditionsEmailAddressRequired
-      else StageInfo.agreedTermsAndConditionsEmailAddressNotRequired,
+    stageInfo = StageInfo.agreedTermsAndConditions,
     journeyInfo = JourneyInfo.agreedTermsAndConditions(
       isEmailAddresRequired,
       origin.taxRegime,
@@ -621,7 +656,7 @@ object JourneyJsonTemplates {
     origin:                Origin,
     etmpEmail:             Option[String]
   )(using encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
-    stageInfo = StageInfo.agreedTermsAndConditionsEmailAddressNotRequired,
+    stageInfo = StageInfo.agreedTermsAndConditions,
     journeyInfo = JourneyInfo.`agreedTermsAndConditions - padded account number`(
       isEmailAddresRequired,
       origin.taxRegime,
@@ -642,10 +677,7 @@ object JourneyJsonTemplates {
   def `Email verification complete`(email: String, status: EmailVerificationResult, origin: Origin)(using
     encrypter: Encrypter
   ): String = TdJsonBodies.createJourneyJson(
-    stageInfo = status match {
-      case EmailVerificationResult.Verified => StageInfo.emailVerificationSuccess
-      case EmailVerificationResult.Locked   => StageInfo.emailVerificationLocked
-    },
+    stageInfo = StageInfo.emailVerificationComplete,
     journeyInfo = JourneyInfo.emailVerificationComplete(email, status, origin.taxRegime, encrypter),
     origin = origin
   )

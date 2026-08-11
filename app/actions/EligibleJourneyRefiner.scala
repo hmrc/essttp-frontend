@@ -17,8 +17,8 @@
 package actions
 
 import actionsmodel.{BarsNotLockedOutRequest, EligibleJourneyRequest}
-import controllers.JourneyIncorrectStateRouter
 import controllers.pagerouters.EligibilityRouter
+import controllers.JourneyIncorrectStateRouter
 import essttp.journey.model.{Journey, JourneyStage}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, Request, Result}

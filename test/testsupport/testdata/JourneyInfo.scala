@@ -31,17 +31,19 @@ object JourneyInfo {
     TdJsonBodies.taxIdJourneyInfo(taxReference, taxRegime)
 
   def eligibilityCheckEligible(
-    taxRegime:                          TaxRegime,
-    encrypter:                          Encrypter,
-    regimeDigitalCorrespondence:        Boolean,
-    email:                              Option[String],
-    maybeChargeIsInterestBearingCharge: Option[Boolean],
-    maybeChargeUseChargeReference:      Option[Boolean],
-    maybeDdInProgress:                  Option[Boolean],
-    eligibilityMinPlanLength:           Int,
-    eligibilityMaxPlanLength:           Int,
-    additionalIdentifiers:              Seq[Identification] = Seq.empty,
-    assessmentCategories:               Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard)
+    taxRegime:                               TaxRegime,
+    encrypter:                               Encrypter,
+    regimeDigitalCorrespondence:             Boolean,
+    email:                                   Option[String],
+    maybeChargeIsInterestBearingCharge:      Option[Boolean],
+    maybeChargeUseChargeReference:           Option[Boolean],
+    maybeDdInProgress:                       Option[Boolean],
+    eligibilityMinPlanLength:                Int,
+    eligibilityMaxPlanLength:                Int,
+    additionalIdentifiers:                   Seq[Identification] = Seq.empty,
+    assessmentCategories:                    Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard),
+    assessmentCategoriesToEligibilityStatus: Map[AssessmentCategory, Boolean] =
+      AssessmentCategory.values.map(_ -> true).toMap
   ): JourneyInfoAsJson =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       encrypter = encrypter,
@@ -54,10 +56,11 @@ object JourneyInfo {
       eligibilityMinPlanLength = eligibilityMinPlanLength,
       eligibilityMaxPlanLength = eligibilityMaxPlanLength,
       additionalIdentifiers = additionalIdentifiers,
-      assessmentCategories = assessmentCategories
+      assessmentCategories = assessmentCategories,
+      assessmentCategoriesToEligibilityStatus = assessmentCategoriesToEligibilityStatus
     )
 
-  def ineligibleHasRls(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                                 =
+  def ineligibleHasRls(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                                =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleHasRlsOnAddress,
@@ -65,7 +68,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def ineligibleMarkedAsInsolvent(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                      =
+  def ineligibleMarkedAsInsolvent(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                     =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleMarkedAsInsolvent,
@@ -73,7 +76,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def ineligibleMinDebt(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                                =
+  def ineligibleMinDebt(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                               =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.eligibleEligibilityRules,
@@ -81,7 +84,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def ineligibleMaxDebt(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                                =
+  def ineligibleMaxDebt(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                               =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.eligibleEligibilityRules,
@@ -89,7 +92,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def ineligibleDisallowedCharge(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                       =
+  def ineligibleDisallowedCharge(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                      =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.eligibleEligibilityRules,
@@ -97,7 +100,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def ineligibleExistingTtp(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                            = TdJsonBodies
+  def ineligibleExistingTtp(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                           = TdJsonBodies
     .eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleExistingTTP,
@@ -105,7 +108,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def ineligibleMaxDebtAge(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                             =
+  def ineligibleMaxDebtAge(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                            =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.eligibleEligibilityRules,
@@ -113,7 +116,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def ineligibleBeforeMaxAccountingDate(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                =
+  def ineligibleBeforeMaxAccountingDate(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson               =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.eligibleEligibilityRules,
@@ -121,7 +124,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def ineligibleChargeType(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                             =
+  def ineligibleChargeType(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                            =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.eligibleEligibilityRules,
@@ -129,7 +132,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def ineligibleMissingFiledReturns(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                    =
+  def ineligibleMissingFiledReturns(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                   =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleMissingFiledReturns,
@@ -137,7 +140,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def ineligibleNoDueDatesReached(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                      =
+  def ineligibleNoDueDatesReached(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                     =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.eligibleEligibilityRules,
@@ -145,7 +148,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def ineligibleHasInvalidInterestSignals(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson              =
+  def ineligibleHasInvalidInterestSignals(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson             =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleHasInvalidInterestSignals,
@@ -153,7 +156,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def ineligibleHasInvalidInterestSignalsCESA(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson          =
+  def ineligibleHasInvalidInterestSignalsCESA(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson         =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleHasInvalidInterestSignalsCESA,
@@ -161,7 +164,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def ineligibleDmSpecialOfficeProcessingRequired(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson      =
+  def ineligibleDmSpecialOfficeProcessingRequired(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson     =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleDmSpecialOfficeProcessingRequired,
@@ -169,7 +172,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def ineligibleCannotFindLockResponse(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                 =
+  def ineligibleCannotFindLockResponse(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleCannotFindLockReason,
@@ -177,7 +180,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def ineligibleCreditsNotAllowed(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                      =
+  def ineligibleCreditsNotAllowed(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                     =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleCreditsNotAllowed,
@@ -185,7 +188,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def ineligibleIsMoreThanMaxPaymentReference(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson          =
+  def ineligibleIsMoreThanMaxPaymentReference(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson         =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleIsMoreThanMaxPaymentReference,
@@ -193,7 +196,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def ineligibleChargesBeforeMaxAccountingDate(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson         =
+  def ineligibleChargesBeforeMaxAccountingDate(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson        =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.eligibleEligibilityRules,
@@ -201,7 +204,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def ineligibleHasDisguisedRemuneration(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson               =
+  def ineligibleHasDisguisedRemuneration(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson              =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleHasDisguisedRemuneration,
@@ -209,7 +212,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def ineligibleHasCapacitor(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                           = TdJsonBodies
+  def ineligibleHasCapacitor(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                          = TdJsonBodies
     .eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleHasCapacitor,
@@ -217,7 +220,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def ineligibleDmSpecialOfficeProcessingRequiredCDCS(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson  =
+  def ineligibleDmSpecialOfficeProcessingRequiredCDCS(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleDmSpecialOfficeProcessingRequiredCDCS,
@@ -225,7 +228,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def ineligibleisAnMtdCustomer(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                        =
+  def ineligibleisAnMtdCustomer(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                       =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleIsAnMtdCustomer,
@@ -233,7 +236,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def ineligibleDmSpecialOfficeProcessingRequiredCESA(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson  =
+  def ineligibleDmSpecialOfficeProcessingRequiredCESA(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleDmSpecialOfficeProcessingRequiredCESA,
@@ -241,7 +244,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def multipleIneligibleReasons(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                        =
+  def multipleIneligibleReasons(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                       =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleHasRlsOnAddress.copy(markedAsInsolvent = true),
@@ -249,7 +252,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def multipleIneligibleReasonsDebtTooLowAndOld(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson        =
+  def multipleIneligibleReasonsDebtTooLowAndOld(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson       =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.eligibleEligibilityRules,
@@ -257,7 +260,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def multipleIneligibleReasonsEligibilityReasons(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson      =
+  def multipleIneligibleReasonsEligibilityReasons(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson     =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleMultipleReasons,
@@ -276,7 +279,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def multipleIneligibleReasonsOneFromEachReasonsList(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson  =
+  def multipleIneligibleReasonsOneFromEachReasonsList(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleDmSpecialOfficeProcessingRequired,
@@ -284,7 +287,7 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
-  def noMtdEnrolment(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                                   = TdJsonBodies
+  def noMtdEnrolment(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                                  = TdJsonBodies
     .eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.noMtditsaEnrollment,
@@ -292,6 +295,10 @@ object JourneyInfo {
       taxRegime,
       encrypter
     )
+
+  def assessmentCategory(a: AssessmentCategory = AssessmentCategory.Standard): JourneyInfoAsJson =
+    TdJsonBodies.assessmentCategory(a)
+
   val whyCannotPayInFullNotRequiredAnswer: JourneyInfoAsJson                                                          =
     TdJsonBodies.whyCannotPayInFull(WhyCannotPayInFullAnswers.AnswerNotRequired)
   def whyCannotPayInFullRequiredAnswer(reasons: Set[CannotPayReason] = TdAll.whyCannotPayReasons): JourneyInfoAsJson  =
@@ -356,17 +363,19 @@ object JourneyInfo {
     taxId(taxReference, taxRegime) :: started
 
   def eligibilityCheckedEligible(
-    taxRegime:                          TaxRegime,
-    encrypter:                          Encrypter,
-    regimeDigitalCorrespondence:        Boolean = true,
-    etmpEmail:                          Option[String] = Some(TdAll.etmpEmail),
-    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true),
-    maybeChargeUseChargeReference:      Option[Boolean] = Some(true),
-    maybeDdInProgress:                  Option[Boolean] = None,
-    eligibilityMinPlanLength:           Int = 1,
-    eligibilityMaxPlanLength:           Int = 12,
-    additionalIdentifiers:              Seq[Identification] = Seq.empty,
-    assessmentCategories:               Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard)
+    taxRegime:                               TaxRegime,
+    encrypter:                               Encrypter,
+    regimeDigitalCorrespondence:             Boolean = true,
+    etmpEmail:                               Option[String] = Some(TdAll.etmpEmail),
+    maybeChargeIsInterestBearingCharge:      Option[Boolean] = Some(true),
+    maybeChargeUseChargeReference:           Option[Boolean] = Some(true),
+    maybeDdInProgress:                       Option[Boolean] = None,
+    eligibilityMinPlanLength:                Int = 1,
+    eligibilityMaxPlanLength:                Int = 12,
+    additionalIdentifiers:                   Seq[Identification] = Seq.empty,
+    assessmentCategories:                    Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard),
+    assessmentCategoriesToEligibilityStatus: Map[AssessmentCategory, Boolean] =
+      AssessmentCategory.values.map(_ -> true).toMap
   ): List[JourneyInfoAsJson] =
     eligibilityCheckEligible(
       taxRegime,
@@ -379,7 +388,8 @@ object JourneyInfo {
       eligibilityMinPlanLength,
       eligibilityMaxPlanLength,
       additionalIdentifiers = additionalIdentifiers,
-      assessmentCategories = assessmentCategories
+      assessmentCategories = assessmentCategories,
+      assessmentCategoriesToEligibilityStatus = assessmentCategoriesToEligibilityStatus
     ) :: taxIdDetermined(taxRegime = taxRegime)
 
   def eligibilityCheckedIneligibleHasRls(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
@@ -531,12 +541,28 @@ object JourneyInfo {
   ): List[JourneyInfoAsJson] =
     multipleIneligibleReasonsOneFromEachReasonsList(taxRegime, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
 
+  def assessmentCategoryDetermined(
+    taxRegime:                             TaxRegime,
+    encrypter:                             Encrypter,
+    maybeChargeIsInterestBearingCharge:    Option[Boolean] = Some(true),
+    assesssmentCategory:                   AssessmentCategory = AssessmentCategory.Standard,
+    eligibilityResultAssessmentCategories: Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard),
+    maybeDdInProgress:                     Option[Boolean] = None
+  ): List[JourneyInfoAsJson] =
+    assessmentCategory(assesssmentCategory) :: eligibilityCheckedEligible(
+      taxRegime,
+      encrypter,
+      maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge,
+      assessmentCategories = eligibilityResultAssessmentCategories,
+      maybeDdInProgress = maybeDdInProgress
+    )
+
   def whyCannotPayInFullNotRequired(
     taxRegime:                          TaxRegime,
     encrypter:                          Encrypter,
     maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
   ): List[JourneyInfoAsJson] =
-    whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(
+    whyCannotPayInFullNotRequiredAnswer :: assessmentCategoryDetermined(
       taxRegime,
       encrypter,
       maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge
@@ -547,7 +573,7 @@ object JourneyInfo {
     encrypter:           Encrypter,
     whyCannotPayReasons: Set[CannotPayReason] = TdAll.whyCannotPayReasons
   ): List[JourneyInfoAsJson] =
-    whyCannotPayInFullRequiredAnswer() :: eligibilityCheckedEligible(taxRegime, encrypter)
+    whyCannotPayInFullRequiredAnswer() :: assessmentCategoryDetermined(taxRegime, encrypter)
 
   def answeredCanPayUpfrontYes(
     taxRegime:                          TaxRegime,
@@ -591,7 +617,7 @@ object JourneyInfo {
       case WhyCannotPayInFullAnswers.WhyCannotPayInFull(reasons) => whyCannotPayInFullRequiredAnswer(reasons)
     }
 
-    extremeDates :: upfrontPaymentAnswers :: whyCannotPay :: eligibilityCheckedEligible(
+    extremeDates :: upfrontPaymentAnswers :: whyCannotPay :: assessmentCategory() :: eligibilityCheckedEligible(
       taxRegime,
       encrypter,
       etmpEmail = etmpEmail,
@@ -603,7 +629,7 @@ object JourneyInfo {
   }
 
   def retrievedExtremeDatesNoUpfrontPayment(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
-    extremeDates :: upfrontPaymentAnswersNoUpfrontPayment :: whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(
+    extremeDates :: upfrontPaymentAnswersNoUpfrontPayment :: whyCannotPayInFullNotRequiredAnswer :: assessmentCategory() :: eligibilityCheckedEligible(
       taxRegime,
       encrypter
     )
@@ -1005,7 +1031,10 @@ object JourneyInfo {
         true
       ) :: hasCheckedPaymentPlan(withAffordability, taxRegime, encrypter) :::
       upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: obtainedCanPayWithinSixMonthsNotRequired ::
-      cannotPayUpfront :: whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(taxRegime, encrypter)
+      cannotPayUpfront :: whyCannotPayInFullNotRequiredAnswer :: assessmentCategory() :: eligibilityCheckedEligible(
+        taxRegime,
+        encrypter
+      )
 
   def submittedArrangementPaddedAccountNumber(
     taxRegime:         TaxRegime,
@@ -1019,7 +1048,10 @@ object JourneyInfo {
         true
       ) :: hasCheckedPaymentPlan(withAffordability, taxRegime, encrypter) :::
       upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: obtainedCanPayWithinSixMonthsNotRequired ::
-      cannotPayUpfront :: whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(taxRegime, encrypter)
+      cannotPayUpfront :: whyCannotPayInFullNotRequiredAnswer :: assessmentCategory() :: eligibilityCheckedEligible(
+        taxRegime,
+        encrypter
+      )
 
   def submittedArrangementWithEmailParams(
     email:                 String,
@@ -1038,7 +1070,7 @@ object JourneyInfo {
         true
       ) :: hasCheckedPaymentPlan(withAffordability, taxRegime, encrypter) :::
       upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: obtainedCanPayWithinSixMonthsNotRequired ::
-      cannotPayUpfront :: whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(
+      cannotPayUpfront :: whyCannotPayInFullNotRequiredAnswer :: assessmentCategory() :: eligibilityCheckedEligible(
         taxRegime,
         encrypter,
         additionalIdentifiers = additionalIdentifiers
@@ -1054,7 +1086,7 @@ object JourneyInfo {
       typeOfBankAccount(TypesOfBankAccount.Personal) ::
       canSetUpDirectDebit(isAccountHolder = true) :: hasCheckedPaymentPlan(withAffordability, taxRegime, encrypter) :::
       upfrontPaymentAnswersNoUpfrontPayment :: extremeDates :: affordableResult() :: obtainedCanPayWithinSixMonthsNotRequired ::
-      cannotPayUpfront :: whyCannotPayInFullNotRequiredAnswer :: eligibilityCheckedEligible(
+      cannotPayUpfront :: whyCannotPayInFullNotRequiredAnswer :: assessmentCategory() :: eligibilityCheckedEligible(
         taxRegime,
         encrypter,
         regimeDigitalCorrespondence = regimeDigitalCorrespondence

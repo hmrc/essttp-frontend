@@ -22,7 +22,6 @@ import cats.data.OptionT
 import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheckF
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPageF
-import controllers.pagerouters.EligibilityRouter
 import essttp.journey.model.{Journey, JourneyStage}
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.TaxRegime.Sa
@@ -55,10 +54,12 @@ class DetermineEligibilityController @Inject() (
         case j: Journey.Started                      => logErrorAndRouteToDefaultPageF(j)
         case j: Journey.ComputedTaxId                => determineEligibilityAndUpdateJourney(j)
         case j: JourneyStage.AfterEligibilityChecked =>
-          val proposedResult = {
-            JourneyLogger.info("Eligibility already determined, skipping.")
-            Redirect(EligibilityRouter.nextPage(j.eligibilityCheckResult, j.taxRegime))
-          }
+          JourneyLogger.info("Eligibility already determined, skipping.")
+          val proposedResult = Routing.redirectToNext(
+            routes.DetermineEligibilityController.determineEligibility,
+            j,
+            submittedValueUnchanged = true
+          )
           finalStateCheckF(j, proposedResult)
       }
     }

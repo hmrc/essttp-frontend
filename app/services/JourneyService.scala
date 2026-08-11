@@ -25,7 +25,7 @@ import essttp.rootmodel.dates.startdates.StartDatesResponse
 import essttp.rootmodel.ttp.affordability.InstalmentAmounts
 import essttp.rootmodel.ttp.affordablequotes.{AffordableQuotesResponse, PaymentPlan}
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
-import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
+import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, EligibilityCheckResult}
 import essttp.rootmodel.*
 import paymentsEmailVerification.models.EmailVerificationResult
 import play.api.mvc.RequestHeader
@@ -53,6 +53,11 @@ class JourneyService @Inject() (journeyConnector: JourneyConnector) extends Logg
       journeyConnector.updateTaxId(journeyId, saTaxId)
 
   }
+
+  def updateAssessmentCategory(journeyId: JourneyId, assessmentCategory: AssessmentCategory)(using
+    RequestHeader
+  ): Future[Journey] =
+    journeyConnector.updateAssessmentCategory(journeyId, assessmentCategory)
 
   def updateCanPayUpfront(journeyId: JourneyId, canPayUpfront: CanPayUpfront)(using RequestHeader): Future[Journey] =
     journeyConnector.updateCanPayUpfront(journeyId, canPayUpfront)

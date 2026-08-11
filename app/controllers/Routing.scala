@@ -21,7 +21,7 @@ import config.AppConfig
 import controllers.pagerouters.EligibilityRouter
 import essttp.journey.model.Journey.*
 import essttp.journey.model.*
-import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
+import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, EligibilityCheckResult}
 import essttp.rootmodel.{CanPayUpfront, IsEmailAddressRequired, TaxRegime}
 import essttp.utils.Errors
 import models.Languages.{English, Welsh}
@@ -58,6 +58,9 @@ object Routing {
           case j: JourneyStage.AfterEligibilityChecked  =>
             EligibilityRouter.nextPage(j.eligibilityCheckResult, j.taxRegime)
         }
+      },
+      routes.DetermineAssessmentCategoryController.determineAssessmentCategory                       -> { () =>
+        determineAssessmentCategoryRoute(journey)
       },
       routes.WhyCannotPayInFullController.whyCannotPayInFull                                         -> { () =>
         routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment
@@ -267,7 +270,14 @@ object Routing {
       routes.DetermineEligibilityController.determineEligibility
 
     case j: Journey.EligibilityChecked =>
-      EligibilityRouter.nextPage(j.eligibilityCheckResult, j.taxRegime)
+      if (j.eligibilityCheckResult.isEligible) {
+        routes.DetermineAssessmentCategoryController.determineAssessmentCategory
+      } else {
+        EligibilityRouter.nextPage(j.eligibilityCheckResult, j.taxRegime)
+      }
+
+    case j: Journey.AssessmentCategoryDetermined =>
+      determineAssessmentCategoryRoute(j)
 
     case _: Journey.ObtainedWhyCannotPayInFullAnswers =>
       routes.UpfrontPaymentController.canYouMakeAnUpfrontPayment
@@ -375,6 +385,26 @@ object Routing {
           if (submittedValueUnchanged) {
             Call("GET", config.pegaStartRedirectUrl(journey.taxRegime, request.lang))
           } else routes.PegaController.startPegaJourney
+        }
+    }
+
+  private def determineAssessmentCategoryRoute(journey: Journey) =
+    journey match {
+      case _: JourneyStage.BeforeEligibilityChecked =>
+        throw UpstreamErrorResponse(
+          "Could not find eligibility response to determine route after determineAssessmentCategory",
+          INTERNAL_SERVER_ERROR
+        )
+
+      case j: JourneyStage.BeforeAssessmentCategoryDetermined =>
+        routes.YourBillController.yourBill
+
+      case j: JourneyStage.AfterAssessmentCategoryDetermined =>
+        j.assessmentCategory match {
+          case AssessmentCategory.Standard            => routes.YourBillController.yourBill
+          case AssessmentCategory.Debts               => routes.YourBillController.yourBill
+          case AssessmentCategory.Liabilities         => routes.YourBillController.yourUpcomingBill
+          case AssessmentCategory.DebtsAndLiabilities => routes.YourBillController.yourBillCombined
         }
     }
 

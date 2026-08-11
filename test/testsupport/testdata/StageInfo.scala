@@ -16,44 +16,32 @@
 
 package testsupport.testdata
 
-final case class StageInfo(stage: String, stageValue: String)
+final case class StageInfo(stage: String)
 
 object StageInfo {
-  val started: StageInfo                                         = StageInfo("Started", "Started")
-  val computedTaxId: StageInfo                                   = StageInfo("ComputedTaxId", "ComputedTaxId")
-  val eligibilityCheckedEligible: StageInfo                      = StageInfo("EligibilityChecked", "Eligible")
-  val eligibilityCheckedIneligible: StageInfo                    = StageInfo("EligibilityChecked", "Ineligible")
-  val whyCannotPayInFullNotRequired: StageInfo                   = StageInfo("ObtainedWhyCannotPayInFullAnswers", "AnswerNotRequired")
-  val answeredCanPayUpfrontYes: StageInfo                        = StageInfo("AnsweredCanPayUpfront", "Yes")
-  val answeredCanPayUpfrontNo: StageInfo                         = StageInfo("AnsweredCanPayUpfront", "No")
-  val enteredUpfrontPaymentAmount: StageInfo                     = StageInfo("EnteredUpfrontPaymentAmount", "EnteredUpfrontPaymentAmount")
-  val retrievedExtremeDates: StageInfo                           = StageInfo("RetrievedExtremeDates", "ExtremeDatesResponseRetrieved")
-  val retrievedAffordabilityResult: StageInfo                    =
-    StageInfo("RetrievedAffordabilityResult", "RetrievedAffordabilityResult")
-  val obtainedCanPayWithinSixMonthsNotRequired: StageInfo        =
-    StageInfo("ObtainedCanPayWithinSixMonthsAnswers", "AnswerNotRequired")
-  val obtainedCanPayWithinSixMonthsRequired: StageInfo           =
-    StageInfo("ObtainedCanPayWithinSixMonthsAnswers", "AnswerRequired")
-  val startedPegaCase: StageInfo                                 = StageInfo("StartedPegaCase", "StartedPegaCase")
-  val enteredMonthlyPaymentAmount: StageInfo                     = StageInfo("EnteredMonthlyPaymentAmount", "EnteredMonthlyPaymentAmount")
-  val enteredDayOfMonth: StageInfo                               = StageInfo("EnteredDayOfMonth", "EnteredDayOfMonth")
-  val retrievedStartDates: StageInfo                             = StageInfo("RetrievedStartDates", "StartDatesResponseRetrieved")
-  val retrievedAffordableQuotes: StageInfo                       = StageInfo("RetrievedAffordableQuotes", "AffordableQuotesRetrieved")
-  val chosenPaymentPlan: StageInfo                               = StageInfo("ChosenPaymentPlan", "SelectedPlan")
-  val hasCheckedPaymentPlan: StageInfo                           = StageInfo("CheckedPaymentPlan", "AcceptedPlan")
-  val enteredCanSetUpDirectDebitIsNotAccountHolder: StageInfo    =
-    StageInfo("EnteredCanYouSetUpDirectDebit", "CannotSetUpDirectDebit")
-  val enteredCanSetUpDirectDebitIsAccountHolder: StageInfo       =
-    StageInfo("EnteredCanYouSetUpDirectDebit", "CanSetUpDirectDebit")
-  val enteredDirectDebitDetails: StageInfo                       = StageInfo("EnteredDirectDebitDetails", "EnteredDirectDebitDetails")
-  val chosenTypeOfBankAccount: StageInfo                         = StageInfo("ChosenTypeOfBankAccount", "ChosenTypeOfBankAccount")
-  val confirmedDirectDebitDetails: StageInfo                     = StageInfo("ConfirmedDirectDebitDetails", "ConfirmedDetails")
-  val agreedTermsAndConditionsEmailAddressRequired: StageInfo    =
-    StageInfo("AgreedTermsAndConditions", "EmailAddressRequired")
-  val agreedTermsAndConditionsEmailAddressNotRequired: StageInfo =
-    StageInfo("AgreedTermsAndConditions", "EmailAddressNotRequired")
-  val selectedEmailToBeVerified: StageInfo                       = StageInfo("SelectedEmailToBeVerified", "EmailChosen")
-  val emailVerificationSuccess: StageInfo                        = StageInfo("EmailVerificationComplete", "VerificationSuccess")
-  val emailVerificationLocked: StageInfo                         = StageInfo("EmailVerificationComplete", "Locked")
-  val submittedArrangement: StageInfo                            = StageInfo("SubmittedArrangement", "Submitted")
+  val started: StageInfo                       = StageInfo("Started")
+  val computedTaxId: StageInfo                 = StageInfo("ComputedTaxId")
+  val eligibilityChecked: StageInfo            = StageInfo("EligibilityChecked")
+  val assessmentCategoryDetermined: StageInfo  = StageInfo("AssessmentCategoryDetermined")
+  val whyCannotPayInFullNotRequired: StageInfo = StageInfo("ObtainedWhyCannotPayInFullAnswers")
+  val answeredCanPayUpfront: StageInfo         = StageInfo("AnsweredCanPayUpfront")
+  val enteredUpfrontPaymentAmount: StageInfo   = StageInfo("EnteredUpfrontPaymentAmount")
+  val retrievedExtremeDates: StageInfo         = StageInfo("RetrievedExtremeDates")
+  val retrievedAffordabilityResult: StageInfo  = StageInfo("RetrievedAffordabilityResult")
+  val obtainedCanPayWithinSixMonths: StageInfo = StageInfo("ObtainedCanPayWithinSixMonthsAnswers")
+  val startedPegaCase: StageInfo               = StageInfo("StartedPegaCase")
+  val enteredMonthlyPaymentAmount: StageInfo   = StageInfo("EnteredMonthlyPaymentAmount")
+  val enteredDayOfMonth: StageInfo             = StageInfo("EnteredDayOfMonth")
+  val retrievedStartDates: StageInfo           = StageInfo("RetrievedStartDates")
+  val retrievedAffordableQuotes: StageInfo     = StageInfo("RetrievedAffordableQuotes")
+  val chosenPaymentPlan: StageInfo             = StageInfo("ChosenPaymentPlan")
+  val hasCheckedPaymentPlan: StageInfo         = StageInfo("CheckedPaymentPlan")
+  val enteredCanSetUpDirectDebit: StageInfo    = StageInfo("EnteredCanYouSetUpDirectDebit")
+  val enteredDirectDebitDetails: StageInfo     = StageInfo("EnteredDirectDebitDetails")
+  val chosenTypeOfBankAccount: StageInfo       = StageInfo("ChosenTypeOfBankAccount")
+  val confirmedDirectDebitDetails: StageInfo   = StageInfo("ConfirmedDirectDebitDetails")
+  val agreedTermsAndConditions: StageInfo      = StageInfo("AgreedTermsAndConditions")
+  val selectedEmailToBeVerified: StageInfo     = StageInfo("SelectedEmailToBeVerified")
+  val emailVerificationComplete: StageInfo     = StageInfo("EmailVerificationComplete")
+  val submittedArrangement: StageInfo          = StageInfo("SubmittedArrangement")
 }

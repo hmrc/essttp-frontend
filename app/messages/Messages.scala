@@ -275,6 +275,51 @@ object Messages {
 
   }
 
+  object AdvancePayments {
+
+    val `You can add an upcoming tax bill to your payment plan...` : Message = Message(
+      english = "You can add an upcoming tax bill to your payment plan if you want to pay in advance instalments.",
+      welsh = "Gallwch ychwanegu bil treth sydd i ddod at eich cynllun talu os ydych chi am dalu fesul rhandaliad."
+    )
+
+    val `Do you want to add this upcoming tax bill to your payment plan?` : Message = Message(
+      english = "Do you want to add this upcoming tax bill to your payment plan?",
+      welsh = "Ydych chi am ychwanegu’r bil treth hwn sydd i ddod at eich cynllun talu?"
+    )
+
+    val `Select yes if you want to add this upcoming tax bill to your payment plan`: Message = Message(
+      english = "Select yes if you want to add this upcoming tax bill to your payment plan",
+      welsh = "Dewiswch ‘Iawn’ os ydych am ychwanegu’r bil treth hwn sydd i ddod at eich cynllun talu"
+    )
+
+  }
+
+  object YourCombinedBill {
+
+    def yourTotalBillIs(amount: AmountInPence, taxRegime: TaxRegime): Message = taxRegime match {
+      case TaxRegime.Epaye =>
+        throw new Exception("Your combined bill is not applicable for PAYE")
+
+      case TaxRegime.Vat =>
+        throw new Exception("Your combined bill is not applicable for VAT")
+
+      case TaxRegime.Sa =>
+        throw new Exception("Your combined bill is not applicable for SA")
+
+      case TaxRegime.Simp =>
+        Message(
+          english = s"Your total Simple Assessment tax bill is ${amount.gdsFormatInPounds}",
+          welsh = s"Cyfanswm eich bil treth Asesiad Syml yw ${amount.gdsFormatInPounds}"
+        )
+    }
+
+    val `Remove advance payments`: Message = Message(
+      english = "Remove advance payments",
+      welsh = "Tynnu taliadau ymlaen llaw"
+    )
+
+  }
+
   object TimeOut {
 
     val `For your security, we signed you out`: Message = Message(

@@ -243,15 +243,22 @@ object EssttpBackend {
       verify(exactly(0), postRequestedFor(urlPathEqualTo(updateEligibilityResultUrl(journeyId))))
 
     def findJourney(
-      encrypter:                          Encrypter,
-      origin:                             Origin = Origins.Epaye.Bta,
-      maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true),
-      assessmentCategories:               Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard)
+      encrypter:                               Encrypter,
+      origin:                                  Origin = Origins.Epaye.Bta,
+      maybeChargeIsInterestBearingCharge:      Option[Boolean] = Some(true),
+      assessmentCategories:                    Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard),
+      affordabilityEnabled:                    Boolean = false,
+      maybeDdInProgress:                       Option[Boolean] = None,
+      assessmentCategoriesToEligibilityStatus: Map[AssessmentCategory, Boolean] =
+        AssessmentCategory.values.map(_ -> true).toMap
     )(
-      jsonBody:                           String = JourneyJsonTemplates.`Eligibility Checked - Eligible`(
+      jsonBody:                                String = JourneyJsonTemplates.`Eligibility Checked - Eligible`(
         origin,
         maybeChargeIsInterestBearingCharge,
-        assessmentCategories
+        assessmentCategories,
+        assessmentCategoriesToEligibilityStatus = assessmentCategoriesToEligibilityStatus,
+        affordabilityEnabled = affordabilityEnabled,
+        maybeDdInProgress = maybeDdInProgress
       )(using
         encrypter
       )
@@ -264,10 +271,57 @@ object EssttpBackend {
     ): StubMapping =
       findByLatestSessionId(jsonBody)
 
-    def findJourneyWithDdInProgress(encrypter: Encrypter, origin: Origin = Origins.Epaye.Bta)(
-      jsonBody: String = JourneyJsonTemplates.`Eligibility Checked - Eligible- ddInProgress`(origin)(using encrypter)
+    def findJourneyWithDdInProgress(
+      encrypter:            Encrypter,
+      origin:               Origin = Origins.Epaye.Bta,
+      assessmentCategories: Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard)
+    )(
+      jsonBody:             String =
+        JourneyJsonTemplates.`Eligibility Checked - Eligible- ddInProgress`(origin, assessmentCategories)(using
+          encrypter
+        )
     ): StubMapping =
       findByLatestSessionId(jsonBody)
+  }
+
+  object DetermineAssessmentCategory {
+
+    def findJourney(
+      encrypter:                             Encrypter,
+      origin:                                Origin,
+      assessmentCategory:                    AssessmentCategory = AssessmentCategory.Standard,
+      eligibilityResultAssessmentCategories: Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard),
+      affordabilityEnabled:                  Boolean = false,
+      maybeDdInProgress:                     Option[Boolean] = None
+    )(
+      jsonBody:                              String = JourneyJsonTemplates.`Assessment Category Determined`(
+        origin,
+        assessmentCategory = assessmentCategory,
+        eligibilityResultAssessmentCategories = eligibilityResultAssessmentCategories,
+        affordabilityEnabled = affordabilityEnabled,
+        maybeDdInProgress = maybeDdInProgress
+      )(using
+        encrypter
+      )
+    ): StubMapping = findByLatestSessionId(jsonBody)
+
+    def updateAssessmentCategoryUrl(journeyId: JourneyId) =
+      s"/essttp-backend/journey/${journeyId.value}/update-assessment-category"
+
+    def stubUpdateAssessmentCategory(journeyId: JourneyId, updatedJourneyJson: String): StubMapping =
+      WireMockHelpers.stubForPostWithResponseBody(updateAssessmentCategoryUrl(journeyId), updatedJourneyJson)
+
+    def verifyAssessmentCategoryRequest(journeyId: JourneyId, assessmentCategory: AssessmentCategory): Unit =
+      verify(
+        postRequestedFor(urlPathEqualTo(updateAssessmentCategoryUrl(journeyId)))
+          .withRequestBody(equalToJson(Json.toJson(assessmentCategory).toString()))
+      )
+
+    def verifyAssessmentCategoryUpdateNotCalled(journeyId: JourneyId): Unit =
+      verify(
+        0,
+        postRequestedFor(urlPathEqualTo(updateAssessmentCategoryUrl(journeyId)))
+      )
   }
 
   object WhyCannotPayInFull {
