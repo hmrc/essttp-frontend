@@ -757,7 +757,7 @@ class YourBillControllerSpec extends ItSpec {
     )
   }
 
-  "GET /advance-payment should" - {
+  "GET /advance-payments should" - {
 
     def testPage(checkedOption: Option[Boolean]) = {
       val result = controller.advancePayment(fakeRequest)
@@ -865,7 +865,7 @@ class YourBillControllerSpec extends ItSpec {
 
   }
 
-  "POST /advance-payment should" - {
+  "POST /advance-payments should" - {
 
     Languages.values.foreach { lang =>
       s"return a form error if nothing is submitted in ${lang.toString}" in {

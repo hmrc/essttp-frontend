@@ -78,8 +78,8 @@ POST   /your-bill                                           controllers.YourBill
 GET    /your-upcoming-tax-bill                              controllers.YourBillController.yourUpcomingBill
 POST   /your-upcoming-tax-bill                              controllers.YourBillController.yourUpcomingBillSubmit
 
-GET    /advance-payment                                     controllers.YourBillController.advancePayment
-POST   /advance-payment                                     controllers.YourBillController.advancePaymentSubmit
+GET    /advance-payments                                     controllers.YourBillController.advancePayment
+POST   /advance-payments                                     controllers.YourBillController.advancePaymentSubmit
 
 GET    /your-bill-combined                                  controllers.YourBillController.yourBillCombined
 POST   /your-bill-combined                                  controllers.YourBillController.yourBillCombinedSubmit
