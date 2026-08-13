@@ -91,9 +91,6 @@ object TdJsonBodies {
       |{
       |  "_id": "6284fcd33c00003d6b1f3903",
       |  "${stageInfo.stage}": {
-      |    "stage": {
-      |      "${stageInfo.stageValue}": {}
-      |    },
       |    "createdOn": "2022-07-22T14:01:06.629Z",
       |    "_id": "6284fcd33c00003d6b1f3903",
       |    "origin": "${origin.toString()}",
@@ -133,20 +130,22 @@ object TdJsonBodies {
   }
 
   def eligibilityCheckJourneyInfo(
-    eligibilityPass:                    EligibilityPass = TdAll.eligibleEligibilityPass,
-    eligibilityRules:                   EligibilityRules = TdAll.eligibleEligibilityRules,
-    assessmentEligibilityRules:         AssessmentEligibilityRules = TdAll.assessmentEligibilityRules,
-    taxRegime:                          TaxRegime,
-    encrypter:                          Encrypter,
-    regimeDigitalCorrespondence:        Boolean = true,
-    email:                              Option[String] = Some(TdAll.etmpEmail),
-    maybeChargeIsInterestBearingCharge: Option[Boolean] = None,
-    maybeChargeUseChargeReference:      Option[Boolean] = None,
-    maybeDdInProgress:                  Option[Boolean] = None,
-    eligibilityMinPlanLength:           Int = 1,
-    eligibilityMaxPlanLength:           Int = 12,
-    additionalIdentifiers:              Seq[Identification] = Seq.empty,
-    assessmentCategories:               Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard)
+    eligibilityPass:                         EligibilityPass = TdAll.eligibleEligibilityPass,
+    eligibilityRules:                        EligibilityRules = TdAll.eligibleEligibilityRules,
+    assessmentEligibilityRules:              AssessmentEligibilityRules = TdAll.assessmentEligibilityRules,
+    taxRegime:                               TaxRegime,
+    encrypter:                               Encrypter,
+    regimeDigitalCorrespondence:             Boolean = true,
+    email:                                   Option[String] = Some(TdAll.etmpEmail),
+    maybeChargeIsInterestBearingCharge:      Option[Boolean] = None,
+    maybeChargeUseChargeReference:           Option[Boolean] = None,
+    maybeDdInProgress:                       Option[Boolean] = None,
+    eligibilityMinPlanLength:                Int = 1,
+    eligibilityMaxPlanLength:                Int = 12,
+    additionalIdentifiers:                   Seq[Identification] = Seq.empty,
+    assessmentCategories:                    Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard),
+    assessmentCategoriesToEligibilityStatus: Map[AssessmentCategory, Boolean] =
+      AssessmentCategory.values.map(_ -> true).toMap
   ): JourneyInfoAsJson = {
 
     val isInterestBearingChargeValue = maybeChargeIsInterestBearingCharge match {
@@ -164,7 +163,7 @@ object TdJsonBodies {
       case None       => ""
     }
 
-    val chargeTypeAssesments = assessmentCategories.map(assessmentCategory =>
+    val chargeTypeAssessments = assessmentCategories.map(assessmentCategory =>
       s"""
          |{
          |    "chargeTypeAssessment" : [
@@ -234,7 +233,7 @@ object TdJsonBodies {
           .getOrElse(false)
           .toString}
          |  },
-         |  "assessmentEligibilityStatus": true,
+         |  "assessmentEligibilityStatus": ${assessmentCategoriesToEligibilityStatus(assessmentCategory).toString},
          |  "assessmentCategory": "${assessmentCategory.entryName}"
          |  }""".stripMargin
     )
@@ -293,12 +292,15 @@ object TdJsonBodies {
         .toString},
       |    "noMtditsaEnrollment": ${eligibilityRules.noMtditsaEnrollment.getOrElse(false).toString}
       |  },
-      |  "chargeTypeAssessments": [ ${chargeTypeAssesments.mkString(", ")} ],
+      |  "chargeTypeAssessments": [ ${chargeTypeAssessments.mkString(", ")} ],
       |  "regimeDigitalCorrespondence": ${regimeDigitalCorrespondence.toString},
       |  "futureChargeLiabilitiesExcluded": false
       |}
       |""".stripMargin
   }
+
+  def assessmentCategory(assessmentCategory: AssessmentCategory = AssessmentCategory.Standard): String =
+    s""""assessmentCategory": "${assessmentCategory.entryName}""""
 
   def whyCannotPayInFull(answers: WhyCannotPayInFullAnswers): String = {
     val value = answers match {

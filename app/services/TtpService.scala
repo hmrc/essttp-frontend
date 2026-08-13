@@ -111,7 +111,7 @@ class TtpService @Inject() (
     val monthlyPaymentAmount                               = journey.fold(TtpService.monthlyPaymentAmountFromJourney, _._2.monthlyPaymentAmount)
     val startDatesResponse                                 = journey.fold(_.startDatesResponse, _._2.startDatesResponse)
     val debtItemCharges                                    =
-      eligibilityCheckResult.relevantChargeTypeAssessments.chargeTypeAssessment.flatMap(toDebtItemCharge)
+      eligibilityCheckResult.relevantChargeTypeAssessments(journeyMerged).chargeTypeAssessment.flatMap(toDebtItemCharge)
 
     val affordableQuotesRequest: AffordableQuotesRequest = AffordableQuotesRequest(
       channelIdentifier = ChannelIdentifiers.eSSTTP,
@@ -120,7 +120,8 @@ class TtpService @Inject() (
       paymentPlanFrequency = PaymentPlanFrequencies.Monthly,
       paymentPlanMaxLength = maxPlanLength(eligibilityCheckResult, journeyMerged),
       paymentPlanMinLength = eligibilityCheckResult.paymentPlanMinLength,
-      accruedDebtInterest = AccruedDebtInterest(TtpService.calculateCumulativeInterest(eligibilityCheckResult)),
+      accruedDebtInterest =
+        AccruedDebtInterest(TtpService.calculateCumulativeInterest(eligibilityCheckResult, journeyMerged)),
       paymentPlanStartDate = startDatesResponse.instalmentStartDate,
       initialPaymentDate = startDatesResponse.initialPaymentDate,
       initialPaymentAmount = initialPaymentAmount,
@@ -132,7 +133,7 @@ class TtpService @Inject() (
   }
 
   def submitArrangement(
-    journey:                     Either[Journey.AgreedTermsAndConditions, Journey.EmailVerificationComplete]
+    journey:                     Either[Journey & Journey.AgreedTermsAndConditions, Journey & Journey.EmailVerificationComplete]
   )(implicit
     authenticatedJourneyRequest: AuthenticatedJourneyRequest[?]
   ): Future[ArrangementResponse] = {
@@ -187,7 +188,10 @@ class TtpService @Inject() (
       }
 
     val debtItemCharges =
-      eligibilityCheckResult.relevantChargeTypeAssessments.chargeTypeAssessment.flatMap(toDebtItemCharges)
+      eligibilityCheckResult
+        .relevantChargeTypeAssessments(journey.fold(identity, identity))
+        .chargeTypeAssessment
+        .flatMap(toDebtItemCharges)
 
     val hasAffordabilityAssessment = journey.fold(_.paymentPlanAnswers, _.paymentPlanAnswers) match {
       case _: PaymentPlanAnswers.PaymentPlanNoAffordability    => false
@@ -318,7 +322,9 @@ object TtpService {
     journey:                Journey
   ): InstalmentAmountRequest = {
     val allInterestAccrued: AmountInPence                         = AmountInPence(
-      eligibilityCheckResult.relevantChargeTypeAssessments.chargeTypeAssessment
+      eligibilityCheckResult
+        .relevantChargeTypeAssessments(journey)
+        .chargeTypeAssessment
         .flatMap(
           _.charges
             .map(_.accruedInterest.value.value)
@@ -326,7 +332,7 @@ object TtpService {
         .sum
     )
     val debtChargeItemsFromEligibilityCheck: List[DebtItemCharge] =
-      eligibilityCheckResult.relevantChargeTypeAssessments.chargeTypeAssessment.flatMap {
+      eligibilityCheckResult.relevantChargeTypeAssessments(journey).chargeTypeAssessment.flatMap {
         (chargeTypeAssessment: ChargeTypeAssessment) =>
           toDebtItemCharge(chargeTypeAssessment)
       }
@@ -361,12 +367,15 @@ object TtpService {
       )
     }
 
-  def calculateCumulativeInterest(eligibilityCheckResult: EligibilityCheckResult): AmountInPence = AmountInPence(
-    eligibilityCheckResult.relevantChargeTypeAssessments.chargeTypeAssessment
-      .flatMap(_.charges)
-      .map(_.accruedInterest.value.value)
-      .sum
-  )
+  def calculateCumulativeInterest(eligibilityCheckResult: EligibilityCheckResult, journey: Journey): AmountInPence =
+    AmountInPence(
+      eligibilityCheckResult
+        .relevantChargeTypeAssessments(journey)
+        .chargeTypeAssessment
+        .flatMap(_.charges)
+        .map(_.accruedInterest.value.value)
+        .sum
+    )
 
   private def deriveUpfrontPaymentAmount(upfrontPaymentAnswers: UpfrontPaymentAnswers): Option[UpfrontPaymentAmount] =
     upfrontPaymentAnswers match {

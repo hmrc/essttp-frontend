@@ -55,8 +55,8 @@ class InstalmentsController @Inject() (
 
   private def displayInstalmentOptionsPage(
     journey: Either[
-      JourneyStage.AfterAffordableQuotesResponse,
-      (JourneyStage.AfterCheckedPaymentPlan, PaymentPlanAnswers.PaymentPlanNoAffordability)
+      Journey & JourneyStage.AfterAffordableQuotesResponse,
+      (Journey & JourneyStage.AfterCheckedPaymentPlan, PaymentPlanAnswers.PaymentPlanNoAffordability)
     ]
   )(using request: EligibleJourneyRequest[?]): Future[Result] = {
     val maybePrePopForm: Form[String] = {
@@ -73,7 +73,7 @@ class InstalmentsController @Inject() (
       views.instalmentOptionsPage(
         maybePrePopForm,
         instalmentOptions,
-        request.eligibilityCheckResult.hasInterestBearingCharge
+        request.eligibilityCheckResult.hasInterestBearingCharge(journey.fold(identity, _._1))
       )
     )
   }
@@ -98,7 +98,7 @@ class InstalmentsController @Inject() (
               views.instalmentOptionsPage(
                 formWithErrors,
                 instalmentOptions,
-                request.eligibilityCheckResult.hasInterestBearingCharge
+                request.eligibilityCheckResult.hasInterestBearingCharge(request.journey)
               )
             )
           },
@@ -124,8 +124,8 @@ class InstalmentsController @Inject() (
 
   private def withJourneyInCorrectState(journey: Journey)(
     f: Either[
-      JourneyStage.AfterAffordableQuotesResponse,
-      (JourneyStage.AfterCheckedPaymentPlan, PaymentPlanAnswers.PaymentPlanNoAffordability)
+      Journey & JourneyStage.AfterAffordableQuotesResponse,
+      (Journey & JourneyStage.AfterCheckedPaymentPlan, PaymentPlanAnswers.PaymentPlanNoAffordability)
     ] => Future[Result]
   )(using Request[?]): Future[Result] =
     journey match {

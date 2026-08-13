@@ -19,27 +19,39 @@ package controllers.pagerouters
 import controllers.routes
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.TaxRegime.{Sa, Simp}
-import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, EligibilityCheckResult}
+import essttp.rootmodel.ttp.eligibility.EligibilityCheckResult
 import models.EligibilityErrors.*
 import models.{EligibilityError, EligibilityErrors}
 import play.api.mvc.Call
 
 object EligibilityRouter {
 
-  def nextPage(eligibilityResult: EligibilityCheckResult, taxRegime: TaxRegime): Call =
+  def nextPage(
+    eligibilityResult: EligibilityCheckResult,
+    taxRegime:         TaxRegime
+  ): Call =
     if (eligibilityResult.isEligible) {
-      nextPageWhenEligible(eligibilityResult)
+      routes.DetermineAssessmentCategoryController.determineAssessmentCategory
     } else {
+      // TODO: handle properly when ineligible journey considered for FDL's
+      val relevantChargeTypeAssessments =
+        eligibilityResult.chargeTypeAssessments.headOption
+          .getOrElse(
+            throw new Exception(
+              "Eligibility result is ineligible, but no ChargeTypeAssessments found with assessmentEligibilityStatus == false"
+            )
+          )
+
       val error = EligibilityErrors.toEligibilityError(
         eligibilityResult.eligibilityRules,
-        eligibilityResult.relevantChargeTypeAssessments.assessmentEligibilityRules
+        relevantChargeTypeAssessments.assessmentEligibilityRules
       )
       error match {
         case ee @ Some(MultipleReasons)                  =>
           determineWhereToGoBasedOnHierarchy(
             ee,
-            eligibilityResult.relevantChargeTypeAssessments.assessmentEligibilityRules.isLessThanMinDebtAllowance,
-            eligibilityResult.relevantChargeTypeAssessments.assessmentEligibilityRules.noDueDatesReached,
+            relevantChargeTypeAssessments.assessmentEligibilityRules.isLessThanMinDebtAllowance,
+            relevantChargeTypeAssessments.assessmentEligibilityRules.noDueDatesReached,
             eligibilityResult.eligibilityRules.hasRlsOnAddress,
             taxRegime
           )
@@ -88,17 +100,6 @@ object EligibilityRouter {
         case Some(AllChargeTypeAssessmentsFailed)        => whichGenericIneligiblePage(taxRegime)
         case Some(NoValidPlanAfterAssessments)           => whichGenericIneligiblePage(taxRegime)
       }
-    }
-
-  private def nextPageWhenEligible(eligibilityCheckResult: EligibilityCheckResult) =
-    eligibilityCheckResult.chargeTypeAssessments.map(_.assessmentCategory) match {
-      case AssessmentCategory.Standard :: Nil    => routes.YourBillController.yourBill
-      case AssessmentCategory.Liabilities :: Nil => routes.YourBillController.yourUpcomingBill
-      case AssessmentCategory.Debts :: Nil       => routes.YourBillController.yourBill
-      case other                                 =>
-        throw new NotImplementedError(
-          s"EligibilityCheckResult with combination of assessment categories not supported: ${other.map(_.toString).mkString(", ")}"
-        )
     }
 
   /** To be used when there are more than one 'flavour' of a lockout page. Design want them to have different urls.

@@ -34,6 +34,8 @@ GET    /determine-taxId                                     controllers.Determin
 
 GET    /determine-eligibility                               controllers.DetermineEligibilityController.determineEligibility
 
+GET    /determine-assessment-category                       controllers.DetermineAssessmentCategoryController.determineAssessmentCategory
+
 GET    /not-enrolled                                        controllers.NotEnrolledController.notEnrolled
 GET    /not-vat-registered                                  controllers.NotEnrolledController.notVatRegistered
 GET    /request-access-to-self-assessment                   controllers.NotEnrolledController.notSaEnrolled
@@ -72,11 +74,19 @@ GET    /update-personal-details-simple-assessment           controllers.Ineligib
 
 GET    /your-bill                                           controllers.YourBillController.yourBill
 POST   /your-bill                                           controllers.YourBillController.yourBillSubmit
-GET    /you-already-have-a-direct-debit                     controllers.YourBillController.youAlreadyHaveDirectDebit
-POST   /you-already-have-a-direct-debit                     controllers.YourBillController.youAlreadyHaveDirectDebitSubmit
 
 GET    /your-upcoming-tax-bill                              controllers.YourBillController.yourUpcomingBill
 POST   /your-upcoming-tax-bill                              controllers.YourBillController.yourUpcomingBillSubmit
+
+GET    /advance-payments                                     controllers.YourBillController.advancePayment
+POST   /advance-payments                                     controllers.YourBillController.advancePaymentSubmit
+
+GET    /your-bill-combined                                  controllers.YourBillController.yourBillCombined
+POST   /your-bill-combined                                  controllers.YourBillController.yourBillCombinedSubmit
+GET    /remove-advance-payments                             controllers.YourBillController.removeAdvancePayments
+
+GET    /you-already-have-a-direct-debit                     controllers.YourBillController.youAlreadyHaveDirectDebit
+POST   /you-already-have-a-direct-debit                     controllers.YourBillController.youAlreadyHaveDirectDebitSubmit
 
 GET    /why-are-you-unable-to-pay-in-full                   controllers.WhyCannotPayInFullController.whyCannotPayInFull
 POST   /why-are-you-unable-to-pay-in-full                   controllers.WhyCannotPayInFullController.whyCannotPayInFullSubmit

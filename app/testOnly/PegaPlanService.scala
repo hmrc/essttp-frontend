@@ -120,7 +120,7 @@ class PegaPlanService @Inject() (
     }
 
     val debtItemCharges =
-      eligibilityCheckResult.relevantChargeTypeAssessments.chargeTypeAssessment.flatMap(toDebtItemCharge)
+      eligibilityCheckResult.relevantChargeTypeAssessments(journey).chargeTypeAssessment.flatMap(toDebtItemCharge)
 
     val affordableQuotesRequest: AffordableQuotesRequest = AffordableQuotesRequest(
       channelIdentifier = ChannelIdentifiers.eSSTTP,
@@ -129,7 +129,8 @@ class PegaPlanService @Inject() (
       paymentPlanFrequency = PaymentPlanFrequencies.Monthly,
       paymentPlanMaxLength = maxPlanLength(eligibilityCheckResult, journey),
       paymentPlanMinLength = eligibilityCheckResult.paymentPlanMinLength,
-      accruedDebtInterest = AccruedDebtInterest(TtpService.calculateCumulativeInterest(eligibilityCheckResult)),
+      accruedDebtInterest =
+        AccruedDebtInterest(TtpService.calculateCumulativeInterest(eligibilityCheckResult, journey)),
       paymentPlanStartDate = startDatesResponse.instalmentStartDate,
       initialPaymentDate = startDatesResponse.initialPaymentDate,
       initialPaymentAmount = initialPaymentAmount,

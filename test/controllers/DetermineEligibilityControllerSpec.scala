@@ -926,7 +926,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
 
     }
 
-    "Eligible for Epaye: should redirect to your bill and send an audit event" - {
+    "Eligible for Epaye: should redirect to determine assessment category and send an audit event" - {
       allCombinationOfTwoBooleanOptions.foreach { combo =>
         val maybeChargeIsInterestBearingCharge = combo._1
         val maybeChargeUseChargeReference      = combo._2
@@ -959,7 +959,9 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
             val result = controller.determineEligibility(fakeRequest)
 
             status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(PageUrls.yourBillIsUrl)
+            redirectLocation(result) shouldBe Some(
+              routes.DetermineAssessmentCategoryController.determineAssessmentCategory.url
+            )
 
             Ttp.Eligibility.verifyTtpEligibilityRequests(TaxRegime.Epaye)
 
@@ -1006,7 +1008,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
       }
     }
 
-    "Eligible for Vat: should redirect to your bill and send an audit event" in {
+    "Eligible for Vat: should redirect to determine assessment category and send an audit event" in {
       val eligibilityCheckResponseJson         = TtpJsonResponses.ttpEligibilityCallJson(
         TaxRegime.Vat,
         regimeDigitalCorrespondence = true,
@@ -1031,7 +1033,9 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
       val result = controller.determineEligibility(fakeRequest)
 
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.yourBillIsUrl)
+      redirectLocation(result) shouldBe Some(
+        routes.DetermineAssessmentCategoryController.determineAssessmentCategory.url
+      )
 
       Ttp.Eligibility.verifyTtpEligibilityRequests(TaxRegime.Vat)
 
@@ -1074,7 +1078,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
       )
     }
 
-    "Eligible for Sa: should redirect to your bill and send an audit event" in {
+    "Eligible for Sa: should redirect to determine assessment category and send an audit event" in {
       val eligibilityCheckResponseJson         = TtpJsonResponses.ttpEligibilityCallJson(
         TaxRegime.Sa,
         regimeDigitalCorrespondence = true,
@@ -1101,7 +1105,9 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
       val result = controller.determineEligibility(fakeRequest)
 
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.yourBillIsUrl)
+      redirectLocation(result) shouldBe Some(
+        routes.DetermineAssessmentCategoryController.determineAssessmentCategory.url
+      )
 
       Ttp.Eligibility.verifyTtpEligibilityRequests(TaxRegime.Sa)
 
@@ -1144,7 +1150,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
       )
     }
 
-    "Eligible for SIMP: should redirect to your bill and send an audit event" in {
+    "Eligible for SIMP: should redirect to determine assessment category and send an audit event" in {
       val eligibilityCheckResponseJson         = TtpJsonResponses.ttpEligibilityCallJson(
         TaxRegime.Simp,
         regimeDigitalCorrespondence = true,
@@ -1169,7 +1175,9 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
       val result = controller.determineEligibility(fakeRequest)
 
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.yourBillIsUrl)
+      redirectLocation(result) shouldBe Some(
+        routes.DetermineAssessmentCategoryController.determineAssessmentCategory.url
+      )
 
       Ttp.Eligibility.verifyTtpEligibilityRequests(TaxRegime.Simp)
 
@@ -1212,14 +1220,16 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
       )
     }
 
-    "Eligibility already determined should route user to your bill is and not update backend again" in {
+    "Eligibility already determined should route user to determine assessment categorry is and not update backend again" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
 
       val result = controller.determineEligibility(fakeRequest)
 
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(PageUrls.yourBillIsUrl)
+      redirectLocation(result) shouldBe Some(
+        routes.DetermineAssessmentCategoryController.determineAssessmentCategory.url
+      )
       EssttpBackend.EligibilityCheck.verifyNoneUpdateEligibilityRequest(TdAll.journeyId)
     }
 
@@ -1448,7 +1458,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
       .appended(None)
       .foreach { customerType =>
         s"SA user (customer type = ${customerType.toString}) with IR-SA enrolment, NINO found but no HMRC-MTD-IT enrolment should be directed " +
-          "to Your Bill" in {
+          "to determine assessment category" in {
             val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
               TaxRegime.Sa,
               TdAll.eligibleEligibilityPass,
@@ -1468,7 +1478,9 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
             val result = controller.determineEligibility(fakeRequest)
 
             status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(PageUrls.yourBillIsUrl)
+            redirectLocation(result) shouldBe Some(
+              routes.DetermineAssessmentCategoryController.determineAssessmentCategory.url
+            )
 
             EssttpBackend.EligibilityCheck.verifyUpdateEligibilityRequest(
               journeyId = TdAll.journeyId,
@@ -1578,115 +1590,6 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
 
         ContentAssertions.commonIneligibilityTextCheck(page, TaxRegime.Sa, Languages.Welsh)
       }
-
-    def testAssessmentCategories(
-      assessmentCategories: Seq[AssessmentCategory],
-      expectedRedirect:     Either[String, String]
-    ): Unit = {
-      val eligibilityCheckResponseJson         = TtpJsonResponses.ttpEligibilityCallJson(
-        TaxRegime.Epaye,
-        regimeDigitalCorrespondence = true,
-        assessmentCategories = assessmentCategories
-      )
-      // for audit event
-      val eligibilityCheckResponseJsonAsPounds = TtpJsonResponses.ttpEligibilityCallJson(
-        TaxRegime.Epaye,
-        poundsInsteadOfPence = true,
-        regimeDigitalCorrespondence = true,
-        assessmentCategories = assessmentCategories
-      )
-
-      stubCommonActions()
-      EssttpBackend.DetermineTaxId.findJourney(Origins.Epaye.Bta)()
-      Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Epaye)(eligibilityCheckResponseJson)
-      EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(
-        TdAll.journeyId,
-        JourneyJsonTemplates.`Eligibility Checked - Eligible`(assessmentCategories = assessmentCategories)
-      )
-
-      val result = controller.determineEligibility(fakeRequest)
-
-      expectedRedirect.fold(
-        { errorMessage =>
-          val error = intercept[Exception](await(result))
-          error.getCause.getMessage shouldBe errorMessage
-        },
-        { redirect =>
-          status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(redirect)
-        }
-      )
-
-      Ttp.Eligibility.verifyTtpEligibilityRequests(TaxRegime.Epaye)
-
-      EssttpBackend.EligibilityCheck.verifyUpdateEligibilityRequest(
-        journeyId = TdAll.journeyId,
-        expectedEligibilityCheckResult = TdAll.eligibilityCheckResult(
-          TdAll.eligibleEligibilityPass,
-          TdAll.eligibleEligibilityRules,
-          TdAll.assessmentEligibilityRules,
-          TaxRegime.Epaye,
-          RegimeDigitalCorrespondence(value = true),
-          assessmentCategories = assessmentCategories
-        )
-      )(using testOperationCryptoFormat)
-
-      AuditConnectorStub.verifyEventAudited(
-        "EligibilityCheck",
-        Json
-          .parse(
-            s"""
-               |{
-               |  "eligibilityResult" : "eligible",
-               |  "noEligibilityReasons": 0,
-               |  "origin": "Bta",
-               |  "taxType": "Epaye",
-               |  "taxDetail": {
-               |    "employerRef": "864FZ00049",
-               |    "accountsOfficeRef": "123PA44545546"
-               |  },
-               |  "authProviderId": "authId-999",
-               |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-               |  "regimeDigitalCorrespondence": true,
-               |  "futureChargeLiabilitiesExcluded": false,
-               |  "chargeTypeAssessment" : ${(Json
-                .parse(eligibilityCheckResponseJsonAsPounds)
-                .as[JsObject] \ "chargeTypeAssessments" \ 0 \ "chargeTypeAssessment").get.toString}
-               |}
-               |""".stripMargin
-          )
-          .as[JsObject]
-      )
-    }
-
-    "eligible user with assessment category is debts only should redirect to 'your bill'" in {
-      testAssessmentCategories(Seq(AssessmentCategory.Debts), Right(PageUrls.yourBillIsUrl))
-    }
-
-    "eligible user with assessment category is liabilities only should redirect to 'your upcoming bill'" in {
-      testAssessmentCategories(Seq(AssessmentCategory.Liabilities), Right(PageUrls.yourUpcomingBillIsUrl))
-    }
-
-    "eligibility response with unsupported combination of assessment categories should throw an error" in {
-      val supportedAssessmentCategories = Seq(
-        Set(AssessmentCategory.Standard),
-        Set(AssessmentCategory.Debts),
-        Set(AssessmentCategory.Liabilities)
-      )
-
-      for {
-        i                    <- 1 to AssessmentCategory.values.size
-        assessmentCategories <- AssessmentCategory.values.combinations(i)
-        if !supportedAssessmentCategories.contains(assessmentCategories.toSet)
-      } withClue(s"For assessment categories [${assessmentCategories.map(_.entryName).mkString(", ")}]: ") {
-        testAssessmentCategories(
-          assessmentCategories,
-          Left(
-            s"EligibilityCheckResult with combination of assessment categories not supported: ${assessmentCategories.map(_.toString).mkString(", ")}"
-          )
-        )
-      }
-    }
 
   }
 

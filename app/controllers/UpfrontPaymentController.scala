@@ -65,7 +65,7 @@ class UpfrontPaymentController @Inject() (
     Ok(
       views.canYouMakeAnUpFrontPayment(
         maybePrePoppedForm,
-        request.eligibilityCheckResult.hasInterestBearingCharge
+        request.eligibilityCheckResult.hasInterestBearingCharge(journey)
       )
     )
   }
@@ -88,7 +88,7 @@ class UpfrontPaymentController @Inject() (
           Ok(
             views.canYouMakeAnUpFrontPayment(
               formWithErrors,
-              request.eligibilityCheckResult.hasInterestBearingCharge
+              request.eligibilityCheckResult.hasInterestBearingCharge(request.journey)
             )
           ),
         (canPayUpfrontForm: CanPayUpfrontFormValue) =>
@@ -112,27 +112,26 @@ class UpfrontPaymentController @Inject() (
 
       case j: JourneyStage.AfterAnsweredCanPayUpfront =>
         if (j.canPayUpfront.userCanPayUpfront) {
-          finalStateCheck(j, displayUpfrontPaymentAmountPage(request.eligibilityCheckResult, Left(j)))
+          finalStateCheck(j, displayUpfrontPaymentAmountPage(Left(j)))
         } else {
           logErrorAndRouteToDefaultPage(j)
         }
 
       case j: JourneyStage.AfterUpfrontPaymentAnswers =>
-        finalStateCheck(j, displayUpfrontPaymentAmountPage(request.eligibilityCheckResult, Right(j)))
+        finalStateCheck(j, displayUpfrontPaymentAmountPage(Right(j)))
     }
   }
 
   private val minimumUpfrontPaymentAmount: AmountInPence = appConfig.PolicyParameters.minimumUpfrontPaymentAmountInPence
 
   private def displayUpfrontPaymentAmountPage(
-    eligibilityCheckResult: EligibilityCheckResult,
-    journey:                Either[
+    journey: Either[
       JourneyStage.AfterAnsweredCanPayUpfront & Journey,
       JourneyStage.AfterUpfrontPaymentAnswers & Journey
     ]
-  )(using Request[?]): Result = {
+  )(using request: EligibleJourneyRequest[?]): Result = {
     val debtTotalAmount: DebtTotalAmount                  =
-      UpfrontPaymentController.determineTotalAmountToPayWithoutInterest(eligibilityCheckResult)
+      UpfrontPaymentController.determineTotalAmountToPayWithoutInterest(request.eligibilityCheckResult, request.journey)
     val maximumUpfrontPaymentAmountInPence: AmountInPence = debtTotalAmount.value.-(minimumUpfrontPaymentAmount)
 
     val maybePrePoppedForm: Form[BigDecimal] = {
@@ -164,7 +163,7 @@ class UpfrontPaymentController @Inject() (
 
   val upfrontPaymentAmountSubmit: Action[AnyContent] = as.eligibleJourneyAction.async { implicit request =>
     val debtTotalAmount: DebtTotalAmount                  =
-      UpfrontPaymentController.determineTotalAmountToPayWithoutInterest(request.eligibilityCheckResult)
+      UpfrontPaymentController.determineTotalAmountToPayWithoutInterest(request.eligibilityCheckResult, request.journey)
     val maximumUpfrontPaymentAmountInPence: AmountInPence = debtTotalAmount.value.-(minimumUpfrontPaymentAmount)
 
     UpfrontPaymentAmountForm
@@ -205,7 +204,7 @@ class UpfrontPaymentController @Inject() (
         val declaredUpfrontPayment = UpfrontPaymentAnswers.DeclaredUpfrontPayment(j.upfrontPaymentAmount)
         finalStateCheck(
           request.journey,
-          displayUpfrontPaymentSummaryPage(request.eligibilityCheckResult, declaredUpfrontPayment)
+          displayUpfrontPaymentSummaryPage(declaredUpfrontPayment)
         )
 
       case j: JourneyStage.AfterUpfrontPaymentAnswers =>
@@ -213,17 +212,16 @@ class UpfrontPaymentController @Inject() (
           case UpfrontPaymentAnswers.NoUpfrontPayment          =>
             finalStateCheck(request.journey, MissingInfoController.redirectToMissingInfoPage())
           case d: UpfrontPaymentAnswers.DeclaredUpfrontPayment =>
-            finalStateCheck(request.journey, displayUpfrontPaymentSummaryPage(request.eligibilityCheckResult, d))
+            finalStateCheck(request.journey, displayUpfrontPaymentSummaryPage(d))
         }
     }
   }
 
   private def displayUpfrontPaymentSummaryPage(
-    eligibilityCheckResult: EligibilityCheckResult,
     declaredUpfrontPayment: DeclaredUpfrontPayment
-  )(using Request[?]): Result = {
+  )(using request: EligibleJourneyRequest[?]): Result = {
     val totalAmountToPay: DebtTotalAmount  =
-      UpfrontPaymentController.determineTotalAmountToPayWithInterest(eligibilityCheckResult)
+      UpfrontPaymentController.determineTotalAmountToPayWithInterest(request.eligibilityCheckResult, request.journey)
     val remainingAmountTest: AmountInPence =
       UpfrontPaymentController.deriveRemainingAmountToPay(totalAmountToPay, declaredUpfrontPayment.amount)
 
@@ -231,7 +229,7 @@ class UpfrontPaymentController @Inject() (
       views.upfrontSummaryPage(
         declaredUpfrontPayment.amount,
         remainingAmountTest,
-        eligibilityCheckResult.hasInterestBearingCharge
+        request.eligibilityCheckResult.hasInterestBearingCharge(request.journey)
       )
     )
   }
@@ -248,16 +246,26 @@ class UpfrontPaymentController @Inject() (
 
 object UpfrontPaymentController {
 
-  def determineTotalAmountToPayWithInterest(eligibilityCheckResult: EligibilityCheckResult): DebtTotalAmount =
+  def determineTotalAmountToPayWithInterest(
+    eligibilityCheckResult: EligibilityCheckResult,
+    journey:                Journey
+  ): DebtTotalAmount =
     DebtTotalAmount(
-      eligibilityCheckResult.relevantChargeTypeAssessments.chargeTypeAssessment
+      eligibilityCheckResult
+        .relevantChargeTypeAssessments(journey)
+        .chargeTypeAssessment
         .map(_.debtTotalAmount.value)
         .fold(AmountInPence.zero)(_ + _)
     )
 
-  def determineTotalAmountToPayWithoutInterest(eligibilityCheckResult: EligibilityCheckResult): DebtTotalAmount =
+  def determineTotalAmountToPayWithoutInterest(
+    eligibilityCheckResult: EligibilityCheckResult,
+    journey:                Journey
+  ): DebtTotalAmount =
     DebtTotalAmount(
-      eligibilityCheckResult.relevantChargeTypeAssessments.chargeTypeAssessment
+      eligibilityCheckResult
+        .relevantChargeTypeAssessments(journey)
+        .chargeTypeAssessment
         .flatMap(_.charges.map(_.outstandingAmount.value))
         .fold(AmountInPence.zero)(_ + _)
     )

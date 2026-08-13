@@ -26,7 +26,7 @@ import org.jsoup.nodes.Document
 import org.scalatest.matchers.must.Matchers.must
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
-import play.api.mvc.Result
+import play.api.mvc.{Action, AnyContent, Result}
 import play.api.test.Helpers.*
 import testsupport.ItSpec
 import testsupport.TdRequest.*
@@ -43,37 +43,117 @@ class YourBillControllerSpec extends ItSpec {
 
   private val controller: YourBillController = app.injector.instanceOf[YourBillController]
 
-  "GET /your-bill should" - {
+  private def mockFindJourney(
+    eligibilityAssessmentCategories: Seq[AssessmentCategory],
+    assessmentCategory:              Option[AssessmentCategory],
+    origin:                          Origin = Origins.Epaye.Bta,
+    affordabilityEnabled:            Boolean = false,
+    ddInProgress:                    Option[Boolean] = None
+  ) =
+    assessmentCategory.fold(
+      EssttpBackend.EligibilityCheck
+        .findJourney(
+          testCrypto,
+          origin,
+          assessmentCategories = eligibilityAssessmentCategories,
+          affordabilityEnabled = affordabilityEnabled,
+          maybeDdInProgress = ddInProgress
+        )()
+    )(a =>
+      EssttpBackend.DetermineAssessmentCategory.findJourney(
+        testCrypto,
+        origin,
+        assessmentCategory = a,
+        eligibilityResultAssessmentCategories = eligibilityAssessmentCategories,
+        affordabilityEnabled = affordabilityEnabled,
+        maybeDdInProgress = ddInProgress
+      )()
+    )
 
-    "return your bill page for EPAYE for interest bearing charges" in {
+  def computeNextPageBehaviour(
+    action:                          Action[AnyContent],
+    eligibilityAssessmentCategories: Seq[AssessmentCategory],
+    assessmentCategory:              AssessmentCategory
+  ) = {
+    "redirect to the 'can you make an upfront payment' page when affordability is not enabled in the journey" in {
       stubCommonActions()
-      EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Epaye.Bta)()
-
-      val result: Future[Result] = controller.yourBill(fakeRequest)
-      val pageContent: String    = contentAsString(result)
-      val doc: Document          = Jsoup.parse(pageContent)
-
-      RequestAssertions.assertGetRequestOk(result)
-      ContentAssertions.commonPageChecks(
-        doc,
-        expectedH1 = "Your PAYE bill is £3,000",
-        shouldBackLinkBePresent = true,
-        expectedSubmitUrl = Some(routes.YourBillController.yourBillSubmit.url)
+      mockFindJourney(eligibilityAssessmentCategories, Some(assessmentCategory))
+      EssttpBackend.WhyCannotPayInFull.stubUpdateWhyCannotPayInFull(
+        TdAll.journeyId,
+        WhyCannotPayInFullAnswers.AnswerNotRequired,
+        JourneyJsonTemplates.`Why Cannot Pay in Full - Not Required`(Origins.Vat.Bta)(using testCrypto)
       )
 
-      doc.select("#simp-extra-para1").asScala.toList shouldBe empty
-      doc.select("#simp-extra-para2").asScala.toList shouldBe empty
+      val result = action(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.canYouMakeAnUpfrontPaymentUrl)
 
-      val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
-      tableRows.size shouldBe 2
+      EssttpBackend.WhyCannotPayInFull
+        .verifyUpdateWhyCannotPayInFullRequest(TdAll.journeyId, WhyCannotPayInFullAnswers.AnswerNotRequired)
+    }
 
-      tableRows(0)
-        .select(".govuk-summary-list__key")
-        .text() shouldBe "13 Jul 2020 to 14 Jul 2020 Bill due 7 February 2017"
-      tableRows(0).select(".govuk-summary-list__value").text() shouldBe "£2,000 (includes interest added to date)"
+    "redirect to the 'why can't you pay in full' page when affordability is enabled in the journey" in {
+      stubCommonActions()
+      mockFindJourney(eligibilityAssessmentCategories, Some(assessmentCategory), affordabilityEnabled = true)
 
-      tableRows(1).select(".govuk-summary-list__key").text() shouldBe "13 Aug 2020 to 14 Aug 2020 Bill due 7 March 2017"
-      tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£1,000 (includes interest added to date)"
+      val result = action(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.whyCannotPayInFull)
+    }
+
+    "redirect to You already have a direct debit page when there is a ddInProgress" in {
+      stubCommonActions()
+      stubCommonActions()
+      mockFindJourney(eligibilityAssessmentCategories, Some(assessmentCategory), ddInProgress = Some(true))
+
+      val result = action(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(PageUrls.youAlreadyHaveDirectDebit)
+    }
+
+  }
+
+  "GET /your-bill should" - {
+
+    Seq(
+      (Seq(AssessmentCategory.Standard), Some(AssessmentCategory.Standard)),
+      (Seq(AssessmentCategory.Debts), Some(AssessmentCategory.Debts)),
+      (Seq(AssessmentCategory.Debts, AssessmentCategory.Liabilities, AssessmentCategory.DebtsAndLiabilities), None)
+    ).foreach { (eligibilityAssessmentCategories, journeyAssessmentCategory) =>
+      "return your bill page for EPAYE for interest bearing charges when the eligibility check result has assessment " +
+        s"categories ${eligibilityAssessmentCategories.mkString(", ")} and the determined assessment category is $journeyAssessmentCategory" in {
+          stubCommonActions()
+
+          mockFindJourney(eligibilityAssessmentCategories, journeyAssessmentCategory)
+
+          val result: Future[Result] = controller.yourBill(fakeRequest)
+          val pageContent: String    = contentAsString(result)
+          val doc: Document          = Jsoup.parse(pageContent)
+
+          RequestAssertions.assertGetRequestOk(result)
+          ContentAssertions.commonPageChecks(
+            doc,
+            expectedH1 = "Your PAYE bill is £3,000",
+            shouldBackLinkBePresent = true,
+            expectedSubmitUrl = Some(routes.YourBillController.yourBillSubmit.url)
+          )
+
+          doc.select("#simp-extra-para1").asScala.toList shouldBe empty
+          doc.select("#simp-extra-para2").asScala.toList shouldBe empty
+
+          val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
+          tableRows.size shouldBe 2
+
+          tableRows(0)
+            .select(".govuk-summary-list__key")
+            .text() shouldBe "13 Jul 2020 to 14 Jul 2020 Bill due 7 February 2017"
+          tableRows(0).select(".govuk-summary-list__value").text() shouldBe "£2,000 (includes interest added to date)"
+
+          tableRows(1)
+            .select(".govuk-summary-list__key")
+            .text() shouldBe "13 Aug 2020 to 14 Aug 2020 Bill due 7 March 2017"
+          tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£1,000 (includes interest added to date)"
+        }
     }
 
     "return your bill page for EPAYE for non-interest bearing charges" in {
@@ -343,13 +423,26 @@ class YourBillControllerSpec extends ItSpec {
 
     "redirect to the 'your upcoming bill' page if the assessment category is liabilities only" in {
       stubCommonActions()
-      EssttpBackend.EligibilityCheck
-        .findJourney(testCrypto, Origins.Epaye.Bta, assessmentCategories = Seq(AssessmentCategory.Liabilities))()
+      EssttpBackend.DetermineAssessmentCategory
+        .findJourney(
+          testCrypto,
+          Origins.Epaye.Bta,
+          assessmentCategory = AssessmentCategory.Liabilities,
+          eligibilityResultAssessmentCategories = Seq(AssessmentCategory.Liabilities)
+        )()
 
       val result = controller.yourBill(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.YourBillController.yourUpcomingBill.url)
     }
+  }
+
+  "POST /your-bill should" - {
+    behave like computeNextPageBehaviour(
+      controller.yourBillSubmit,
+      Seq(AssessmentCategory.Standard),
+      AssessmentCategory.Standard
+    )
   }
 
   "GET /your-upcoming-tax-bill should" - {
@@ -438,74 +531,488 @@ class YourBillControllerSpec extends ItSpec {
 
     Seq(
       Seq(AssessmentCategory.Standard),
-      Seq(AssessmentCategory.Debts)
+      Seq(AssessmentCategory.Debts),
+      Seq(AssessmentCategory.DebtsAndLiabilities, AssessmentCategory.Debts, AssessmentCategory.Liabilities)
     ).foreach { assessmentCategories =>
-      s"redirect to the 'your bill' page if the assessment categories are (${assessmentCategories.map(_.entryName).mkString(", ")})" in {
+      s"redirect to the determine assessment categories endpoint if the assessment categories are (${assessmentCategories
+          .map(_.entryName)
+          .mkString(", ")})" in {
         stubCommonActions()
         EssttpBackend.EligibilityCheck
           .findJourney(testCrypto, Origins.Epaye.Bta, assessmentCategories = assessmentCategories)()
 
         val result = controller.yourUpcomingBill(fakeRequest)
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.YourBillController.yourBill.url)
+        redirectLocation(result) shouldBe Some(
+          routes.DetermineAssessmentCategoryController.determineAssessmentCategory.url
+        )
       }
     }
 
   }
 
-  Seq(
-    ("/your-bill", controller.yourBillSubmit),
-    ("/your-upcoming-tax-bill", controller.yourUpcomingBillSubmit)
-  ).foreach { (url, action) =>
-    s"POST $url should" - {
-      "redirect to the 'can you make an upfront payment' page when affordability is not enabled in the journey" in {
+  "POST /your-upcoming-bill should" - {
+    behave like computeNextPageBehaviour(
+      controller.yourUpcomingBillSubmit,
+      Seq(AssessmentCategory.Liabilities),
+      AssessmentCategory.Liabilities
+    )
+  }
+
+  "GET /your-bill-combined should" - {
+
+    "return your bill page for SIMP" in {
+      stubCommonActions()
+      EssttpBackend.DetermineAssessmentCategory
+        .findJourney(
+          testCrypto,
+          Origins.Simp.Pta,
+          assessmentCategory = AssessmentCategory.DebtsAndLiabilities,
+          eligibilityResultAssessmentCategories =
+            Seq(AssessmentCategory.Debts, AssessmentCategory.Liabilities, AssessmentCategory.DebtsAndLiabilities)
+        )()
+
+      val result: Future[Result] = controller.yourBillCombined(fakeRequest)
+      val pageContent: String    = contentAsString(result)
+      val doc: Document          = Jsoup.parse(pageContent)
+
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1 = "Your total Simple Assessment tax bill is £6,000",
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl = Some(routes.YourBillController.yourBillCombinedSubmit.url),
+        regimeBeingTested = Some(TaxRegime.Simp)
+      )
+
+      val h1 = doc.selectFirst("h1.govuk-heading-l")
+
+      val overduePaymentsH2 = h1.nextElementSibling()
+      overduePaymentsH2.is("h2.govuk-heading-m") shouldBe true
+      overduePaymentsH2.text() shouldBe "Overdue payments"
+
+      val overduePaymentsTable = overduePaymentsH2.nextElementSibling()
+      overduePaymentsTable.is("dl.govuk-summary-list") shouldBe true
+
+      val overduePaymentsTableRows = overduePaymentsTable.select(".govuk-summary-list__row").asScala.toList
+      overduePaymentsTableRows.size shouldBe 2
+
+      overduePaymentsTableRows(0)
+        .select(".govuk-summary-list__key")
+        .text() shouldBe "13 Jul 2020 to 14 Jul 2020 Bill due 7 February 2017"
+      overduePaymentsTableRows(0)
+        .select(".govuk-summary-list__value")
+        .text() shouldBe "£2,000 (includes interest added to date)"
+
+      overduePaymentsTableRows(1)
+        .select(".govuk-summary-list__key")
+        .text() shouldBe "13 Aug 2020 to 14 Aug 2020 Bill due 7 March 2017"
+      overduePaymentsTableRows(1)
+        .select(".govuk-summary-list__value")
+        .text() shouldBe "£1,000 (includes interest added to date)"
+
+      val advancePaymentsH2 = overduePaymentsTable.nextElementSibling()
+      advancePaymentsH2.is("h2.govuk-heading-m") shouldBe true
+      advancePaymentsH2.text() shouldBe "Advance payments"
+
+      val advancePaymentsTable = advancePaymentsH2.nextElementSibling()
+      advancePaymentsTable.is("dl.govuk-summary-list") shouldBe true
+
+      val advancePaymentsTableRows = advancePaymentsTable.select(".govuk-summary-list__row").asScala.toList
+      advancePaymentsTableRows.size shouldBe 2
+
+      advancePaymentsTableRows(0)
+        .select(".govuk-summary-list__key")
+        .text() shouldBe "13 Jul 2020 to 14 Jul 2020 Bill due 7 February 2017"
+      advancePaymentsTableRows(0)
+        .select(".govuk-summary-list__value")
+        .text() shouldBe "£2,000 (includes interest added to date)"
+
+      advancePaymentsTableRows(1)
+        .select(".govuk-summary-list__key")
+        .text() shouldBe "13 Aug 2020 to 14 Aug 2020 Bill due 7 March 2017"
+      advancePaymentsTableRows(1)
+        .select(".govuk-summary-list__value")
+        .text() shouldBe "£1,000 (includes interest added to date)"
+
+      val buttonGroup = doc.selectFirst("div.govuk-button-group")
+      buttonGroup.child(0).text() shouldBe "Continue"
+
+      buttonGroup.child(1).is("a.govuk-link") shouldBe true
+      buttonGroup.child(1).attr("href") shouldBe routes.YourBillController.removeAdvancePayments.url
+      buttonGroup.child(1).text shouldBe "Remove advance payments"
+    }
+
+    "return your bill page for SIMP in welsh" in {
+      stubCommonActions()
+      EssttpBackend.DetermineAssessmentCategory
+        .findJourney(
+          testCrypto,
+          Origins.Simp.Pta,
+          assessmentCategory = AssessmentCategory.DebtsAndLiabilities,
+          eligibilityResultAssessmentCategories =
+            Seq(AssessmentCategory.Debts, AssessmentCategory.Liabilities, AssessmentCategory.DebtsAndLiabilities)
+        )()
+
+      val result: Future[Result] = controller.yourBillCombined(fakeRequest.withLangWelsh())
+      val pageContent: String    = contentAsString(result)
+      val doc: Document          = Jsoup.parse(pageContent)
+
+      RequestAssertions.assertGetRequestOk(result)
+      ContentAssertions.commonPageChecks(
+        doc,
+        expectedH1 = "Cyfanswm eich bil treth Asesiad Syml yw £6,000",
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl = Some(routes.YourBillController.yourBillCombinedSubmit.url),
+        regimeBeingTested = Some(TaxRegime.Simp),
+        language = Languages.Welsh
+      )
+
+      val h1 = doc.selectFirst("h1.govuk-heading-l")
+
+      val overduePaymentsH2 = h1.nextElementSibling()
+      overduePaymentsH2.is("h2.govuk-heading-m") shouldBe true
+      overduePaymentsH2.text() shouldBe "Taliadau sy’n hwyr"
+
+      val overduePaymentsTable = overduePaymentsH2.nextElementSibling()
+      overduePaymentsTable.is("dl.govuk-summary-list") shouldBe true
+
+      val overduePaymentsTableRows = overduePaymentsTable.select(".govuk-summary-list__row").asScala.toList
+      overduePaymentsTableRows.size shouldBe 2
+
+      overduePaymentsTableRows(0)
+        .select(".govuk-summary-list__key")
+        .text() shouldBe "13 Gorff 2020 i 14 Gorff 2020 Bil yn ddyledus 7 Chwefror 2017"
+      overduePaymentsTableRows(0)
+        .select(".govuk-summary-list__value")
+        .text() shouldBe "£2,000 (yn cynnwys llog a ychwanegwyd hyd yn hyn)"
+
+      overduePaymentsTableRows(1)
+        .select(".govuk-summary-list__key")
+        .text() shouldBe "13 Awst 2020 i 14 Awst 2020 Bil yn ddyledus 7 Mawrth 2017"
+      overduePaymentsTableRows(1)
+        .select(".govuk-summary-list__value")
+        .text() shouldBe "£1,000 (yn cynnwys llog a ychwanegwyd hyd yn hyn)"
+
+      val advancePaymentsH2 = overduePaymentsTable.nextElementSibling()
+      advancePaymentsH2.is("h2.govuk-heading-m") shouldBe true
+      advancePaymentsH2.text() shouldBe "Taliadau ymlaen llaw"
+
+      val advancePaymentsTable = advancePaymentsH2.nextElementSibling()
+      advancePaymentsTable.is("dl.govuk-summary-list") shouldBe true
+
+      val advancePaymentsTableRows = advancePaymentsTable.select(".govuk-summary-list__row").asScala.toList
+      advancePaymentsTableRows.size shouldBe 2
+
+      advancePaymentsTableRows(0)
+        .select(".govuk-summary-list__key")
+        .text() shouldBe "13 Gorff 2020 i 14 Gorff 2020 Bil yn ddyledus 7 Chwefror 2017"
+      advancePaymentsTableRows(0)
+        .select(".govuk-summary-list__value")
+        .text() shouldBe "£2,000 (yn cynnwys llog a ychwanegwyd hyd yn hyn)"
+
+      advancePaymentsTableRows(1)
+        .select(".govuk-summary-list__key")
+        .text() shouldBe "13 Awst 2020 i 14 Awst 2020 Bil yn ddyledus 7 Mawrth 2017"
+      advancePaymentsTableRows(1)
+        .select(".govuk-summary-list__value")
+        .text() shouldBe "£1,000 (yn cynnwys llog a ychwanegwyd hyd yn hyn)"
+
+      val buttonGroup = doc.selectFirst("div.govuk-button-group")
+      buttonGroup.child(0).text() shouldBe "Yn eich blaen"
+
+      buttonGroup.child(1).is("a.govuk-link") shouldBe true
+      buttonGroup.child(1).attr("href") shouldBe routes.YourBillController.removeAdvancePayments.url
+      buttonGroup.child(1).text shouldBe "Tynnu taliadau ymlaen llaw"
+
+    }
+
+    Seq(
+      Seq(AssessmentCategory.Standard),
+      Seq(AssessmentCategory.Debts),
+      Seq(AssessmentCategory.DebtsAndLiabilities, AssessmentCategory.Debts, AssessmentCategory.Liabilities)
+    ).foreach { assessmentCategories =>
+      s"redirect to the determine assessment categories endpoint if the assessment categories are (${assessmentCategories
+          .map(_.entryName)
+          .mkString(", ")})" in {
         stubCommonActions()
-        EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Vat.Bta)()
-        EssttpBackend.WhyCannotPayInFull.stubUpdateWhyCannotPayInFull(
-          TdAll.journeyId,
-          WhyCannotPayInFullAnswers.AnswerNotRequired,
-          JourneyJsonTemplates.`Why Cannot Pay in Full - Not Required`(Origins.Vat.Bta)(using testCrypto)
+        EssttpBackend.EligibilityCheck
+          .findJourney(testCrypto, Origins.Epaye.Bta, assessmentCategories = assessmentCategories)()
+
+        val result = controller.yourUpcomingBill(fakeRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(
+          routes.DetermineAssessmentCategoryController.determineAssessmentCategory.url
         )
-
-        val result = action(fakeRequest)
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(PageUrls.canYouMakeAnUpfrontPaymentUrl)
-
-        EssttpBackend.WhyCannotPayInFull
-          .verifyUpdateWhyCannotPayInFullRequest(TdAll.journeyId, WhyCannotPayInFullAnswers.AnswerNotRequired)
-      }
-
-      "redirect to the 'why can't you pay in full' page when affordability is enabled in the journey" in {
-        stubCommonActions()
-        EssttpBackend.EligibilityCheck.findJourney(testCrypto, Origins.Vat.Bta)(
-          TdJsonBodies.createJourneyJson(
-            stageInfo = StageInfo.eligibilityCheckedEligible,
-            journeyInfo = JourneyInfo.eligibilityCheckedEligible(TaxRegime.Vat, testCrypto),
-            Origins.Vat.Bta,
-            affordabilityEnabled = true
-          )
-        )
-
-        val result = action(fakeRequest)
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(PageUrls.whyCannotPayInFull)
-      }
-
-      "redirect to You already have a direct debit page when there is a ddInProgress" in {
-        stubCommonActions()
-        EssttpBackend.EligibilityCheck.findJourneyWithDdInProgress(testCrypto, Origins.Epaye.Bta)()
-
-        val result = action(fakeRequest)
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(PageUrls.youAlreadyHaveDirectDebit)
       }
     }
+
+  }
+
+  "POST /your-bill-combined should" - {
+    behave like computeNextPageBehaviour(
+      controller.yourBillCombinedSubmit,
+      Seq(AssessmentCategory.DebtsAndLiabilities, AssessmentCategory.Debts, AssessmentCategory.Liabilities),
+      AssessmentCategory.DebtsAndLiabilities
+    )
+  }
+
+  "GET /advance-payments should" - {
+
+    def testPage(checkedOption: Option[Boolean]) = {
+      val result = controller.advancePayment(fakeRequest)
+
+      RequestAssertions.assertGetRequestOk(result)
+
+      val doc = Jsoup.parse(contentAsString(result))
+
+      ContentAssertions.commonPageChecks(
+        doc,
+        "Advance payments",
+        shouldBackLinkBePresent = true,
+        expectedSubmitUrl = Some(routes.YourBillController.advancePaymentSubmit.url)
+      )
+
+      doc
+        .select("p.govuk-body")
+        .text() shouldBe "You can add an upcoming tax bill to your payment plan if you want to pay in advance instalments."
+
+      val tableRows = doc.select(".govuk-summary-list > .govuk-summary-list__row").asScala.toList
+      tableRows.size shouldBe 2
+
+      tableRows(0)
+        .select(".govuk-summary-list__key")
+        .text() shouldBe "13 Jul 2020 to 14 Jul 2020 Bill due 7 February 2017"
+      tableRows(0).select(".govuk-summary-list__value").text() shouldBe "£2,000 (includes interest added to date)"
+
+      tableRows(1).select(".govuk-summary-list__key").text() shouldBe "13 Aug 2020 to 14 Aug 2020 Bill due 7 March 2017"
+      tableRows(1).select(".govuk-summary-list__value").text() shouldBe "£1,000 (includes interest added to date)"
+
+      doc
+        .select(".govuk-form-group > .govuk-fieldset > legend")
+        .text() shouldBe "Do you want to add this upcoming tax bill to your payment plan?"
+
+      val radioItems = doc.select(".govuk-radios__item").asScala.toList
+      radioItems.map(r =>
+        (
+          r.select(".govuk-radios__input").attr("value"),
+          r.select(".govuk-radios__label").text(),
+          r.select(".govuk-radios__input").hasAttr("checked")
+        )
+      ) shouldBe List(
+        ("Yes", "Yes", checkedOption.contains(true)),
+        ("No", "No", checkedOption.contains(false))
+      )
+    }
+
+    "display the page when the eligibility check result has debts and liabilities" in {
+      stubCommonActions()
+      EssttpBackend.EligibilityCheck.findJourney(
+        testCrypto,
+        Origins.Epaye.Bta,
+        assessmentCategories =
+          Seq(AssessmentCategory.Liabilities, AssessmentCategory.Debts, AssessmentCategory.DebtsAndLiabilities)
+      )()
+
+      testPage(None)
+    }
+
+    "preselect 'yes' if the assessment category in the journey has been determined and is 'debts and liabilities'" in {
+      stubCommonActions()
+      EssttpBackend.DetermineAssessmentCategory.findJourney(
+        testCrypto,
+        Origins.Epaye.Bta,
+        eligibilityResultAssessmentCategories =
+          Seq(AssessmentCategory.Liabilities, AssessmentCategory.Debts, AssessmentCategory.DebtsAndLiabilities),
+        assessmentCategory = AssessmentCategory.DebtsAndLiabilities
+      )()
+
+      testPage(Some(true))
+    }
+
+    "preselect 'no' if the assessment category in the journey has been determined and is 'debts'" in {
+      stubCommonActions()
+      EssttpBackend.DetermineAssessmentCategory.findJourney(
+        testCrypto,
+        Origins.Epaye.Bta,
+        eligibilityResultAssessmentCategories =
+          Seq(AssessmentCategory.Liabilities, AssessmentCategory.Debts, AssessmentCategory.DebtsAndLiabilities),
+        assessmentCategory = AssessmentCategory.Debts
+      )()
+
+      testPage(Some(false))
+    }
+
+    Seq(
+      Seq(AssessmentCategory.Standard),
+      Seq(AssessmentCategory.Debts),
+      Seq(AssessmentCategory.Liabilities)
+    ).foreach { assessmentCategories =>
+      s"redirect to the determine assessment categories endpoint if the assessment categories are (${assessmentCategories
+          .map(_.entryName)
+          .mkString(", ")})" in {
+        stubCommonActions()
+        EssttpBackend.EligibilityCheck
+          .findJourney(testCrypto, Origins.Epaye.Bta, assessmentCategories = assessmentCategories)()
+
+        val result = controller.advancePayment(fakeRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(
+          routes.DetermineAssessmentCategoryController.determineAssessmentCategory.url
+        )
+      }
+    }
+
+  }
+
+  "POST /advance-payments should" - {
+
+    Languages.values.foreach { lang =>
+      s"return a form error if nothing is submitted in ${lang.toString}" in {
+        stubCommonActions()
+        EssttpBackend.EligibilityCheck.findJourney(
+          testCrypto,
+          Origins.Simp.Pta,
+          assessmentCategories =
+            Seq(AssessmentCategory.Liabilities, AssessmentCategory.Debts, AssessmentCategory.DebtsAndLiabilities)
+        )()
+
+        val result = controller.advancePaymentSubmit(
+          fakeRequest.withFormUrlEncodedBody().withMethod("POST").withLang(lang)
+        )
+        status(result) shouldBe BAD_REQUEST
+
+        val doc = Jsoup.parse(contentAsString(result))
+        ContentAssertions.commonPageChecks(
+          doc,
+          lang.fold("Advance payments", "Taliadau ymlaen llaw"),
+          shouldBackLinkBePresent = true,
+          expectedSubmitUrl = Some(routes.YourBillController.advancePaymentSubmit.url),
+          hasFormError = true,
+          regimeBeingTested = Some(TaxRegime.Simp),
+          language = lang
+        )
+
+        val errorSummary = doc.select(".govuk-error-summary")
+        val errorLink    = errorSummary.select("a")
+        errorLink.text() shouldBe lang.fold(
+          "Select yes if you want to add this upcoming tax bill to your payment plan",
+          "Dewiswch ‘Iawn’ os ydych am ychwanegu’r bil treth hwn sydd i ddod at eich cynllun talu"
+        )
+        errorLink.attr("href") shouldBe "#advancePayments"
+        EssttpBackend.DetermineAssessmentCategory.verifyAssessmentCategoryUpdateNotCalled(TdAll.journeyId)
+      }
+    }
+
+    Seq(
+      ("Yes", AssessmentCategory.DebtsAndLiabilities, routes.YourBillController.yourBillCombined),
+      ("No", AssessmentCategory.Debts, routes.YourBillController.yourBill)
+    ).foreach { (formValue, expectedAssessmentCategory, expectedRedirect) =>
+      s"update the journey and redirect to '${expectedRedirect.url}' if the user submits '$formValue'" in {
+        stubCommonActions()
+        EssttpBackend.DetermineAssessmentCategory.stubUpdateAssessmentCategory(
+          TdAll.journeyId,
+          JourneyJsonTemplates.`Assessment Category Determined`(
+            Origins.Simp.Pta,
+            assessmentCategory = expectedAssessmentCategory,
+            eligibilityResultAssessmentCategories =
+              Seq(AssessmentCategory.Liabilities, AssessmentCategory.Debts, AssessmentCategory.DebtsAndLiabilities)
+          )
+        )
+        EssttpBackend.EligibilityCheck.findJourney(
+          testCrypto,
+          Origins.Simp.Pta,
+          assessmentCategories =
+            Seq(AssessmentCategory.Liabilities, AssessmentCategory.Debts, AssessmentCategory.DebtsAndLiabilities)
+        )()
+
+        val result = controller.advancePaymentSubmit(
+          fakeRequest.withFormUrlEncodedBody("advancePayments" -> formValue).withMethod("POST")
+        )
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(expectedRedirect.url)
+        EssttpBackend.DetermineAssessmentCategory.verifyAssessmentCategoryRequest(
+          TdAll.journeyId,
+          expectedAssessmentCategory
+        )
+      }
+    }
+
+  }
+
+  "GET /remove-advance-payments should" - {
+
+    "remove liabilities if debts and liabilities had previously been selected" in {
+      stubCommonActions()
+
+      EssttpBackend.DetermineAssessmentCategory.stubUpdateAssessmentCategory(
+        TdAll.journeyId,
+        JourneyJsonTemplates.`Assessment Category Determined`(
+          Origins.Simp.Pta,
+          assessmentCategory = AssessmentCategory.Debts,
+          eligibilityResultAssessmentCategories =
+            Seq(AssessmentCategory.Liabilities, AssessmentCategory.Debts, AssessmentCategory.DebtsAndLiabilities)
+        )
+      )
+      EssttpBackend.DetermineAssessmentCategory
+        .findJourney(
+          testCrypto,
+          Origins.Simp.Pta,
+          assessmentCategory = AssessmentCategory.DebtsAndLiabilities,
+          eligibilityResultAssessmentCategories =
+            Seq(AssessmentCategory.Liabilities, AssessmentCategory.Debts, AssessmentCategory.DebtsAndLiabilities)
+        )()
+
+      val result = controller.removeAdvancePayments(fakeRequest)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.YourBillController.yourBill.url)
+      EssttpBackend.DetermineAssessmentCategory.verifyAssessmentCategoryRequest(
+        TdAll.journeyId,
+        AssessmentCategory.Debts
+      )
+    }
+
+    "redirect to 'determine assessment category' if the assessment category has not been determined" in {
+      stubCommonActions()
+
+      EssttpBackend.EligibilityCheck.findJourney(
+        testCrypto,
+        Origins.Simp.Pta,
+        assessmentCategories =
+          Seq(AssessmentCategory.Liabilities, AssessmentCategory.Debts, AssessmentCategory.DebtsAndLiabilities)
+      )()
+
+      val result = controller.removeAdvancePayments(fakeRequest)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(
+        routes.DetermineAssessmentCategoryController.determineAssessmentCategory.url
+      )
+    }
+
+    Seq(
+      (AssessmentCategory.Standard, routes.YourBillController.yourBill.url),
+      (AssessmentCategory.Debts, routes.YourBillController.yourBill.url),
+      (AssessmentCategory.Liabilities, routes.YourBillController.yourUpcomingBill.url)
+    ).foreach { (assessmentCategory, expectedRedirect) =>
+      s"redirect to the correct page if the assessment category is ${assessmentCategory.entryName}" in {
+        stubCommonActions()
+        EssttpBackend.DetermineAssessmentCategory
+          .findJourney(testCrypto, Origins.Epaye.Bta, assessmentCategory = assessmentCategory)()
+
+        val result = controller.removeAdvancePayments(fakeRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(expectedRedirect)
+      }
+
+    }
+
   }
 
   "GET /you-already-have-a-direct-debit should" - {
     "return You already have a direct debit page for charges with ddInProgress" in {
       stubCommonActions()
-      EssttpBackend.EligibilityCheck.findJourneyWithDdInProgress(testCrypto, Origins.Epaye.Bta)()
+      EssttpBackend.DetermineAssessmentCategory
+        .findJourney(testCrypto, Origins.Epaye.Bta, maybeDdInProgress = Some(true))()
 
       val result              = controller.youAlreadyHaveDirectDebit(fakeRequest)
       val pageContent: String = contentAsString(result)
@@ -562,7 +1069,8 @@ class YourBillControllerSpec extends ItSpec {
 
     "return You already have a direct debit page for charges with ddInProgress in Welsh" in {
       stubCommonActions()
-      EssttpBackend.EligibilityCheck.findJourneyWithDdInProgress(testCrypto, Origins.Epaye.Bta)()
+      EssttpBackend.DetermineAssessmentCategory
+        .findJourney(testCrypto, Origins.Epaye.Bta, maybeDdInProgress = Some(true))()
 
       val result              = controller.youAlreadyHaveDirectDebit(fakeRequest.withLangWelsh())
       val pageContent: String = contentAsString(result)
