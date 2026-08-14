@@ -23,6 +23,7 @@
 @import models.EligibilityErrors
 @import play.api.data.Form
 @import play.api.mvc.Request
+@import play.twirl.api.Html
 @import requests.RequestSupport
 @import testOnly.controllers.routes as testOnlyRoutes
 @import testOnly.models.formsmodel.{Enrolments, SignInAs, StartJourneyForm}
@@ -48,12 +49,39 @@ appConfig: AppConfig
     "Test only starter page"
 }
 
-@toCheckboxItem(enumEntry: EnumEntry, checkedByDefault: Boolean = false) = @{
-    CheckboxItem(
-    content = Text(enumEntry.entryName),
-    value = enumEntry.entryName,
-    checked = if(form.data.isEmpty) checkedByDefault else form.data.exists(_._2 == enumEntry.entryName)
-    )
+@toCheckboxItem(enumEntry: EnumEntry, checkedByDefault: Boolean = false, conditionalHtml: Option[Html] = None) = @{
+  CheckboxItem(
+      content = Text(enumEntry.entryName),
+      value = enumEntry.entryName,
+      checked = if(form.data.isEmpty) checkedByDefault else form.data.exists(_._2 == enumEntry.entryName),
+      conditionalHtml = conditionalHtml
+  )
+}
+
+@assessmentCategoriesConditionalHtml(a: AssessmentCategory) = {
+    @govukRadios(Radios(
+      fieldset = Some(Fieldset(
+      legend = Some(Legend(
+        content = Text("Eligible??"),
+        classes = "govuk-fieldset__legend--s"
+        ))
+      )),
+      idPrefix = Some(s"assessmentCategories.${a.entryName}.eligibility"),
+      name = s"assessmentCategories.${a.entryName}.eligibility",
+      items = Seq(
+        RadioItem(
+          content = Text("Yes"),
+          value = Some("Yes"),
+          checked = true
+        ),
+        RadioItem(
+          content = Text("No"),
+          value = Some("No"),
+          checked = false
+        )
+      ),
+      classes = "govuk-radios--inline"
+    ))
 }
 
 @assessmentCategoriesCheckboxes = {
@@ -67,7 +95,13 @@ appConfig: AppConfig
         )),
         idPrefix = Some("assessmentCategories"),
         name = "assessmentCategories[]",
-        items = AssessmentCategory.values.map(c => toCheckboxItem(c, checkedByDefault = c == AssessmentCategory.Standard)),
+        items = AssessmentCategory.values.map(c =>
+            toCheckboxItem(
+                c,
+                checkedByDefault = c == AssessmentCategory.Standard,
+                conditionalHtml = Some(assessmentCategoriesConditionalHtml(c))
+            )
+        ),
         hint = Some(Hint(content = Text("Select one or more"))),
         classes = "govuk-checkboxes--small"
     ))

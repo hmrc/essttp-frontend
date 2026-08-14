@@ -556,12 +556,12 @@ object StartJourneyController {
       chargesBeforeMaxAccountingDate = Some(containsError(ChargesBeforeMaxAccountingDate))
     )
 
-    val chargeTypeAssessments = form.assessmentCategories.map { assessmentCategory =>
+    val chargeTypeAssessments = form.assessmentCategories.map { assessmentCategoryInfo =>
       ChargeTypeAssessments(
         chargeTypeAssessment = chargeTypeAssessment,
         assessmentEligibilityRules = assessmentEligibilityRules,
-        true,
-        assessmentCategory
+        assessmentCategoryInfo.eligibilityStatus,
+        assessmentCategoryInfo.category
       )
     }
 
