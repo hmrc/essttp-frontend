@@ -52,7 +52,7 @@ class DetermineAssessmentCategoryController @Inject() (
     j:                      Journey & JourneyStage.BeforeAssessmentCategoryDetermined,
     eligibilityCheckResult: EligibilityCheckResult
   )(using AuthenticatedJourneyRequest[?]): Future[Result] = {
-    val assessmentCategory = eligibilityCheckResult.foldOnAssessmentCategory(
+    val relevantChargeTypeAssessments = eligibilityCheckResult.foldOnAssessmentCategory(
       Some(_),
       Some(_),
       Some(_),
@@ -63,6 +63,10 @@ class DetermineAssessmentCategoryController @Inject() (
           // if we have debtsAndLiabilities together then user needs to go on a journey beyond here to determine the
           // assessment category to use for the rest of the journey
           None
+        } else if (
+          !debts.assessmentEligibilityStatus && liabilities.assessmentEligibilityStatus && debtsAndLiabilities.assessmentEligibilityStatus
+        ) {
+          Some(debtsAndLiabilities)
         } else {
           throw new Exception(
             s"Got unexpected eligibility status for debts and liabilities: " +
@@ -71,14 +75,14 @@ class DetermineAssessmentCategoryController @Inject() (
         }
     )
 
-    assessmentCategory match {
+    relevantChargeTypeAssessments match {
       case None =>
         redirectToNext(j)
 
-      case Some(assessmentCategory) =>
+      case Some(chargeTypeAssessments) =>
         journeyService
-          .updateAssessmentCategory(j.journeyId, assessmentCategory.assessmentCategory)
-          .map(_ => redirectToNext(j))
+          .updateAssessmentCategory(j.journeyId, chargeTypeAssessments.assessmentCategory)
+          .map(redirectToNext)
 
     }
   }

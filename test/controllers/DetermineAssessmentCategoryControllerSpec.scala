@@ -18,6 +18,7 @@ package controllers
 
 import essttp.journey.model.Origins
 import essttp.rootmodel.ttp.eligibility.AssessmentCategory
+import models.AssessmentCategoryInfo
 import play.api.http.Status
 import play.api.test.Helpers.*
 import testsupport.stubs.EssttpBackend
@@ -71,15 +72,19 @@ class DetermineAssessmentCategoryControllerSpec extends ItSpec {
       "update the assessment category and redirect to the correct page when " +
         "the eligibility check result contains assessment category:" - {
 
-          def test(assessmentCategory: AssessmentCategory, expectedRedirect: String): Unit = {
+          def test(
+            eligibilityAssessmentCategories: Seq[AssessmentCategoryInfo],
+            expectedAssessmentCategory:      AssessmentCategory,
+            expectedRedirect:                String
+          ): Unit = {
             stubCommonActions()
             EssttpBackend.EligibilityCheck
-              .findJourney(testCrypto, Origins.Epaye.Bta, assessmentCategories = Seq(assessmentCategory))()
+              .findJourney(testCrypto, Origins.Epaye.Bta, assessmentCategories = eligibilityAssessmentCategories)()
             EssttpBackend.DetermineAssessmentCategory.stubUpdateAssessmentCategory(
               TdAll.journeyId,
               JourneyJsonTemplates
-                .`Assessment Category Determined`(Origins.Epaye.Bta, assessmentCategory = assessmentCategory)(using
-                  testCrypto
+                .`Assessment Category Determined`(Origins.Epaye.Bta, assessmentCategory = expectedAssessmentCategory)(
+                  using testCrypto
                 )
             )
 
@@ -89,21 +94,45 @@ class DetermineAssessmentCategoryControllerSpec extends ItSpec {
 
             EssttpBackend.DetermineAssessmentCategory.verifyAssessmentCategoryRequest(
               TdAll.journeyId,
-              assessmentCategory
+              expectedAssessmentCategory
             )
             ()
           }
 
           "standard" in {
-            test(AssessmentCategory.Standard, PageUrls.yourBillIsUrl)
+            test(
+              Seq(AssessmentCategoryInfo(AssessmentCategory.Standard)),
+              AssessmentCategory.Standard,
+              PageUrls.yourBillIsUrl
+            )
           }
 
           "debts" in {
-            test(AssessmentCategory.Debts, PageUrls.yourBillIsUrl)
+            test(
+              Seq(AssessmentCategoryInfo(AssessmentCategory.Debts)),
+              AssessmentCategory.Debts,
+              PageUrls.yourBillIsUrl
+            )
           }
 
           "liabilities" in {
-            test(AssessmentCategory.Liabilities, PageUrls.yourBillIsUrl)
+            test(
+              Seq(AssessmentCategoryInfo(AssessmentCategory.Liabilities)),
+              AssessmentCategory.Liabilities,
+              PageUrls.yourUpcomingBillIsUrl
+            )
+          }
+
+          "debtsAndLiabilities if debts are ineligible but liabilities and debtsAndLiabilities are eligible" in {
+            test(
+              Seq(
+                AssessmentCategoryInfo(AssessmentCategory.Debts, eligibilityStatus = false),
+                AssessmentCategoryInfo(AssessmentCategory.Liabilities),
+                AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities)
+              ),
+              AssessmentCategory.DebtsAndLiabilities,
+              PageUrls.yourBillCombinedUrl
+            )
           }
         }
 
@@ -114,8 +143,11 @@ class DetermineAssessmentCategoryControllerSpec extends ItSpec {
             .findJourney(
               testCrypto,
               Origins.Epaye.Bta,
-              assessmentCategories =
-                Seq(AssessmentCategory.Debts, AssessmentCategory.Liabilities, AssessmentCategory.DebtsAndLiabilities)
+              assessmentCategories = Seq(
+                AssessmentCategoryInfo(AssessmentCategory.Debts),
+                AssessmentCategoryInfo(AssessmentCategory.Liabilities),
+                AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities)
+              )
             )()
 
           val result = controller.determineAssessmentCategory(fakeRequest)
@@ -128,7 +160,6 @@ class DetermineAssessmentCategoryControllerSpec extends ItSpec {
         }
 
       Seq(
-        (false, true, true),
         (true, false, true),
         (true, true, false),
         (true, false, false),
@@ -143,12 +174,10 @@ class DetermineAssessmentCategoryControllerSpec extends ItSpec {
               .findJourney(
                 testCrypto,
                 Origins.Epaye.Bta,
-                assessmentCategories =
-                  Seq(AssessmentCategory.Debts, AssessmentCategory.Liabilities, AssessmentCategory.DebtsAndLiabilities),
-                assessmentCategoriesToEligibilityStatus = Map(
-                  AssessmentCategory.Debts               -> debtsEligible,
-                  AssessmentCategory.Liabilities         -> liabilitiesEligible,
-                  AssessmentCategory.DebtsAndLiabilities -> debtsAndLiabilitiesEligible
+                assessmentCategories = Seq(
+                  AssessmentCategoryInfo(AssessmentCategory.Debts, debtsEligible),
+                  AssessmentCategoryInfo(AssessmentCategory.Liabilities, liabilitiesEligible),
+                  AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities, debtsAndLiabilitiesEligible)
                 )
               )()
 

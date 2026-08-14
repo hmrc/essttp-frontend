@@ -21,6 +21,7 @@ import essttp.rootmodel.TaxRegime.Sa
 import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, AssessmentEligibilityRules, EligibilityPass, EligibilityRules, Identification}
 import essttp.rootmodel.{DayOfMonth, TaxRegime, UpfrontPaymentAmount}
 import essttp.rootmodel.bank.TypeOfBankAccount
+import models.AssessmentCategoryInfo
 import paymentsEmailVerification.models.EmailVerificationResult
 import testsupport.testdata.JourneyInfo.JourneyInfoAsJson
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
@@ -130,22 +131,20 @@ object TdJsonBodies {
   }
 
   def eligibilityCheckJourneyInfo(
-    eligibilityPass:                         EligibilityPass = TdAll.eligibleEligibilityPass,
-    eligibilityRules:                        EligibilityRules = TdAll.eligibleEligibilityRules,
-    assessmentEligibilityRules:              AssessmentEligibilityRules = TdAll.assessmentEligibilityRules,
-    taxRegime:                               TaxRegime,
-    encrypter:                               Encrypter,
-    regimeDigitalCorrespondence:             Boolean = true,
-    email:                                   Option[String] = Some(TdAll.etmpEmail),
-    maybeChargeIsInterestBearingCharge:      Option[Boolean] = None,
-    maybeChargeUseChargeReference:           Option[Boolean] = None,
-    maybeDdInProgress:                       Option[Boolean] = None,
-    eligibilityMinPlanLength:                Int = 1,
-    eligibilityMaxPlanLength:                Int = 12,
-    additionalIdentifiers:                   Seq[Identification] = Seq.empty,
-    assessmentCategories:                    Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard),
-    assessmentCategoriesToEligibilityStatus: Map[AssessmentCategory, Boolean] =
-      AssessmentCategory.values.map(_ -> true).toMap
+    eligibilityPass:                    EligibilityPass = TdAll.eligibleEligibilityPass,
+    eligibilityRules:                   EligibilityRules = TdAll.eligibleEligibilityRules,
+    assessmentEligibilityRules:         AssessmentEligibilityRules = TdAll.assessmentEligibilityRules,
+    taxRegime:                          TaxRegime,
+    encrypter:                          Encrypter,
+    regimeDigitalCorrespondence:        Boolean = true,
+    email:                              Option[String] = Some(TdAll.etmpEmail),
+    maybeChargeIsInterestBearingCharge: Option[Boolean] = None,
+    maybeChargeUseChargeReference:      Option[Boolean] = None,
+    maybeDdInProgress:                  Option[Boolean] = None,
+    eligibilityMinPlanLength:           Int = 1,
+    eligibilityMaxPlanLength:           Int = 12,
+    additionalIdentifiers:              Seq[Identification] = Seq.empty,
+    assessmentCategories:               Seq[AssessmentCategoryInfo] = Seq(AssessmentCategoryInfo(AssessmentCategory.Standard))
   ): JourneyInfoAsJson = {
 
     val isInterestBearingChargeValue = maybeChargeIsInterestBearingCharge match {
@@ -163,7 +162,7 @@ object TdJsonBodies {
       case None       => ""
     }
 
-    val chargeTypeAssessments = assessmentCategories.map(assessmentCategory =>
+    val chargeTypeAssessments = assessmentCategories.map(assessmentCategoryInfo =>
       s"""
          |{
          |    "chargeTypeAssessment" : [
@@ -233,8 +232,8 @@ object TdJsonBodies {
           .getOrElse(false)
           .toString}
          |  },
-         |  "assessmentEligibilityStatus": ${assessmentCategoriesToEligibilityStatus(assessmentCategory).toString},
-         |  "assessmentCategory": "${assessmentCategory.entryName}"
+         |  "assessmentEligibilityStatus": ${assessmentCategoryInfo.eligibilityStatus.toString},
+         |  "assessmentCategory": "${assessmentCategoryInfo.category.entryName}"
          |  }""".stripMargin
     )
 

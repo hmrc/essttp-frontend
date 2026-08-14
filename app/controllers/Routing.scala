@@ -397,6 +397,9 @@ object Routing {
         )
 
       case j: JourneyStage.BeforeAssessmentCategoryDetermined =>
+        // if we've just come from the determine assessment category endpoint and
+        // no assessment category has actually been determined yet, the user needs to
+        // go on a journey to find out what the assessment category should be
         routes.YourBillController.yourBill
 
       case j: JourneyStage.AfterAssessmentCategoryDetermined =>

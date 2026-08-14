@@ -31,6 +31,7 @@ import essttp.rootmodel.ttp.affordability.InstalmentAmounts
 import essttp.rootmodel.ttp.affordablequotes.{AffordableQuotesResponse, PaymentPlan}
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
 import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, EligibilityCheckResult, Identification}
+import models.AssessmentCategoryInfo
 import paymentsEmailVerification.models.EmailVerificationResult
 import play.api.http.Status.*
 import play.api.libs.json.{Format, JsValue, Json}
@@ -243,20 +244,17 @@ object EssttpBackend {
       verify(exactly(0), postRequestedFor(urlPathEqualTo(updateEligibilityResultUrl(journeyId))))
 
     def findJourney(
-      encrypter:                               Encrypter,
-      origin:                                  Origin = Origins.Epaye.Bta,
-      maybeChargeIsInterestBearingCharge:      Option[Boolean] = Some(true),
-      assessmentCategories:                    Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard),
-      affordabilityEnabled:                    Boolean = false,
-      maybeDdInProgress:                       Option[Boolean] = None,
-      assessmentCategoriesToEligibilityStatus: Map[AssessmentCategory, Boolean] =
-        AssessmentCategory.values.map(_ -> true).toMap
+      encrypter:                          Encrypter,
+      origin:                             Origin = Origins.Epaye.Bta,
+      maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true),
+      assessmentCategories:               Seq[AssessmentCategoryInfo] = Seq(AssessmentCategoryInfo(AssessmentCategory.Standard)),
+      affordabilityEnabled:               Boolean = false,
+      maybeDdInProgress:                  Option[Boolean] = None
     )(
-      jsonBody:                                String = JourneyJsonTemplates.`Eligibility Checked - Eligible`(
+      jsonBody:                           String = JourneyJsonTemplates.`Eligibility Checked - Eligible`(
         origin,
         maybeChargeIsInterestBearingCharge,
         assessmentCategories,
-        assessmentCategoriesToEligibilityStatus = assessmentCategoriesToEligibilityStatus,
         affordabilityEnabled = affordabilityEnabled,
         maybeDdInProgress = maybeDdInProgress
       )(using
@@ -274,7 +272,7 @@ object EssttpBackend {
     def findJourneyWithDdInProgress(
       encrypter:            Encrypter,
       origin:               Origin = Origins.Epaye.Bta,
-      assessmentCategories: Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard)
+      assessmentCategories: Seq[AssessmentCategoryInfo] = Seq(AssessmentCategoryInfo(AssessmentCategory.Standard))
     )(
       jsonBody:             String =
         JourneyJsonTemplates.`Eligibility Checked - Eligible- ddInProgress`(origin, assessmentCategories)(using
@@ -290,7 +288,9 @@ object EssttpBackend {
       encrypter:                             Encrypter,
       origin:                                Origin,
       assessmentCategory:                    AssessmentCategory = AssessmentCategory.Standard,
-      eligibilityResultAssessmentCategories: Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard),
+      eligibilityResultAssessmentCategories: Seq[AssessmentCategoryInfo] = Seq(
+        AssessmentCategoryInfo(AssessmentCategory.Standard)
+      ),
       affordabilityEnabled:                  Boolean = false,
       maybeDdInProgress:                     Option[Boolean] = None
     )(

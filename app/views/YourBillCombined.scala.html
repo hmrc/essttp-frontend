@@ -33,7 +33,7 @@
 )
 
 
-@(debts: OverDuePayments, liabilities: OverDuePayments, taxRegime: TaxRegime)(implicit request: Request[?])
+@(debts: OverDuePayments, liabilities: OverDuePayments, taxRegime: TaxRegime, showRemoveLiabilities: Boolean)(implicit request: Request[?])
 
 @import requestSupport.{languageFromRequest, legacyMessages}
 
@@ -58,13 +58,18 @@
 
     @formWithCSRF(action = routes.YourBillController.yourBillCombinedSubmit) {
 
-      <div class="govuk-button-group">
-        @govukButton(Button(content = Text(Messages.continue.show), attributes = Map("id" -> "continue")))
+        @if(showRemoveLiabilities) {
+            <div class="govuk-button-group">
+                @govukButton(Button(content = Text(Messages.continue.show), attributes = Map("id" -> "continue")))
 
-         <a class="govuk-link" href="@{routes.YourBillController.removeAdvancePayments.url}">
-             @{Messages.YourCombinedBill.`Remove advance payments`.show}
-         </a>
-      </div>
+                <a class="govuk-link" href="@{routes.YourBillController.removeAdvancePayments.url}">
+                  @{Messages.YourCombinedBill.`Remove advance payments`.show}
+                </a>
+            </div>
+          } else {
+              @govukButton(Button(content = Text(Messages.continue.show), attributes = Map("id" -> "continue")))
+          }
+
 
     }
 }

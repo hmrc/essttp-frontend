@@ -21,6 +21,7 @@ import essttp.rootmodel.bank.TypeOfBankAccount
 import essttp.rootmodel.CannotPayReason.{ChangeToPersonalCircumstances, NoMoneySetAside}
 import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, Identification}
 import essttp.rootmodel.{CannotPayReason, DayOfMonth}
+import models.AssessmentCategoryInfo
 import paymentsEmailVerification.models.EmailVerificationResult
 import uk.gov.hmrc.crypto.Encrypter
 
@@ -47,13 +48,11 @@ object JourneyJsonTemplates {
     )
 
   def `Eligibility Checked - Eligible`(
-    origin:                                  Origin = Origins.Epaye.Bta,
-    maybeChargeIsInterestBearingCharge:      Option[Boolean] = Some(true),
-    assessmentCategories:                    Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard),
-    assessmentCategoriesToEligibilityStatus: Map[AssessmentCategory, Boolean] =
-      AssessmentCategory.values.map(_ -> true).toMap,
-    affordabilityEnabled:                    Boolean = false,
-    maybeDdInProgress:                       Option[Boolean] = None
+    origin:                             Origin = Origins.Epaye.Bta,
+    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true),
+    assessmentCategories:               Seq[AssessmentCategoryInfo] = Seq(AssessmentCategoryInfo(AssessmentCategory.Standard)),
+    affordabilityEnabled:               Boolean = false,
+    maybeDdInProgress:                  Option[Boolean] = None
   )(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
       stageInfo = StageInfo.eligibilityChecked,
@@ -62,7 +61,6 @@ object JourneyJsonTemplates {
         encrypter,
         maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge,
         assessmentCategories = assessmentCategories,
-        assessmentCategoriesToEligibilityStatus = assessmentCategoriesToEligibilityStatus,
         maybeDdInProgress = maybeDdInProgress
       ),
       origin,
@@ -88,7 +86,7 @@ object JourneyJsonTemplates {
 
   def `Eligibility Checked - Eligible- ddInProgress`(
     origin:               Origin = Origins.Epaye.Bta,
-    assessmentCategories: Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard)
+    assessmentCategories: Seq[AssessmentCategoryInfo] = Seq(AssessmentCategoryInfo(AssessmentCategory.Standard))
   )(using
     encrypter:            Encrypter
   ): String = TdJsonBodies.createJourneyJson(
@@ -318,7 +316,9 @@ object JourneyJsonTemplates {
     origin:                                Origin,
     maybeChargeIsInterestBearingCharge:    Option[Boolean] = Some(true),
     assessmentCategory:                    AssessmentCategory = AssessmentCategory.Standard,
-    eligibilityResultAssessmentCategories: Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard),
+    eligibilityResultAssessmentCategories: Seq[AssessmentCategoryInfo] = Seq(
+      AssessmentCategoryInfo(AssessmentCategory.Standard)
+    ),
     affordabilityEnabled:                  Boolean = false,
     maybeDdInProgress:                     Option[Boolean] = None
   )(using encrypter: Encrypter): String =
