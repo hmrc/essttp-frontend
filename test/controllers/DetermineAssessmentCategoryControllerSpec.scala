@@ -134,6 +134,18 @@ class DetermineAssessmentCategoryControllerSpec extends ItSpec {
               PageUrls.yourBillCombinedUrl
             )
           }
+
+          "debts if debts are eligible but liabilities and debtsAndLiabilities are ineligible" in {
+            test(
+              Seq(
+                AssessmentCategoryInfo(AssessmentCategory.Debts),
+                AssessmentCategoryInfo(AssessmentCategory.Liabilities, eligibilityStatus = false),
+                AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities, eligibilityStatus = false)
+              ),
+              AssessmentCategory.Debts,
+              PageUrls.yourBillIsUrl
+            )
+          }
         }
 
       "not update the assessment category and redirect to the correct page when " +
@@ -162,7 +174,6 @@ class DetermineAssessmentCategoryControllerSpec extends ItSpec {
       Seq(
         (true, false, true),
         (true, true, false),
-        (true, false, false),
         (false, true, false),
         (false, false, true),
         (false, false, false)
