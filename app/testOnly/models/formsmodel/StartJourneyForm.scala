@@ -29,6 +29,7 @@ import play.api.data.Forms.*
 import play.api.data.*
 import play.api.data.format.Formatter
 import testOnly.messages.Messages
+import testOnly.models.AssessmentCategoryInfo
 import testOnly.models.formsmodel.StartJourneyForm.{MainAndSubTrans, PlanMinAndMaxLength}
 import testOnly.models.testusermodel.{ConfidenceLevelAndNino, RandomDataGenerator}
 import uk.gov.hmrc.auth.core.ConfidenceLevel
@@ -54,7 +55,7 @@ final case class StartJourneyForm(
   numberOfChargeTypeAssessments: Int,
   numberOfCustomerPostcodes:     Int,
   safeId:                        Option[String],
-  assessmentCategories:          Seq[AssessmentCategory]
+  assessmentCategories:          Seq[AssessmentCategoryInfo]
 )
 
 final case class Flags(
@@ -131,7 +132,8 @@ object StartJourneyForm {
         "numberOfChargeTypeAssessments" -> number,
         "numberOfCustomerPostcodes"     -> number,
         "safeId"                        -> optional(text).transform[Option[String]](_.filter(_.nonEmpty), identity),
-        "assessmentCategories"          -> seq(enumeratum.Forms.enumMapping(AssessmentCategory))
+        ""                              -> Forms
+          .of(assessmentCategoryInfoFormatter)
           .verifying("At least one assessment category must be selected", _.nonEmpty)
       )(StartJourneyForm.apply)(Tuple.fromProductTyped[StartJourneyForm](_).some)
     )
@@ -144,6 +146,30 @@ object StartJourneyForm {
   private val confidenceLevelKey: String = "confidenceLevel"
 
   private val ninoKey: String = "nino"
+
+  private val assessmentCategoryRegex = """^assessmentCategories\[\d+]$""".r
+
+  private val assessmentCategoryInfoFormatter: Formatter[Seq[AssessmentCategoryInfo]] =
+    new Formatter[Seq[AssessmentCategoryInfo]] {
+      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Seq[AssessmentCategoryInfo]] = {
+        val assessmentCategories = data.collect { case (assessmentCategoryRegex(), value) =>
+          val category = AssessmentCategory.namesToValuesMap(value)
+          val eligible = data.get(s"assessmentCategories.$value.eligibility").contains("Yes")
+          AssessmentCategoryInfo(category, eligible)
+        }
+        Right(assessmentCategories.toSeq)
+      }
+
+      override def unbind(key: String, value: Seq[AssessmentCategoryInfo]): Map[String, String] =
+        value.zipWithIndex.flatMap { (assessmentCategory, i) =>
+          Seq(
+            s"assessmentCategories[$i]"                                                  -> assessmentCategory.category.entryName,
+            s"assessmentCategories.${assessmentCategory.category.entryName}.eligibility" -> (
+              if (assessmentCategory.eligibilityStatus) "Yes" else "No"
+            )
+          )
+        }.toMap
+    }
 
   private val confidenceLevelAndNinoFormatter: Formatter[ConfidenceLevelAndNino] =
     new Formatter[ConfidenceLevelAndNino] {

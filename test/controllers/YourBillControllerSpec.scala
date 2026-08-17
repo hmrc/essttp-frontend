@@ -20,7 +20,7 @@ import essttp.journey.model.{Origin, Origins, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, MainTrans}
 import messages.ChargeTypeMessages.chargeFromMTrans
-import models.Languages
+import models.{AssessmentCategoryInfo, Languages}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalatest.matchers.must.Matchers.must
@@ -44,7 +44,7 @@ class YourBillControllerSpec extends ItSpec {
   private val controller: YourBillController = app.injector.instanceOf[YourBillController]
 
   private def mockFindJourney(
-    eligibilityAssessmentCategories: Seq[AssessmentCategory],
+    eligibilityAssessmentCategories: Seq[AssessmentCategoryInfo],
     assessmentCategory:              Option[AssessmentCategory],
     origin:                          Origin = Origins.Epaye.Bta,
     affordabilityEnabled:            Boolean = false,
@@ -72,7 +72,7 @@ class YourBillControllerSpec extends ItSpec {
 
   def computeNextPageBehaviour(
     action:                          Action[AnyContent],
-    eligibilityAssessmentCategories: Seq[AssessmentCategory],
+    eligibilityAssessmentCategories: Seq[AssessmentCategoryInfo],
     assessmentCategory:              AssessmentCategory
   ) = {
     "redirect to the 'can you make an upfront payment' page when affordability is not enabled in the journey" in {
@@ -116,9 +116,22 @@ class YourBillControllerSpec extends ItSpec {
   "GET /your-bill should" - {
 
     Seq(
-      (Seq(AssessmentCategory.Standard), Some(AssessmentCategory.Standard)),
-      (Seq(AssessmentCategory.Debts), Some(AssessmentCategory.Debts)),
-      (Seq(AssessmentCategory.Debts, AssessmentCategory.Liabilities, AssessmentCategory.DebtsAndLiabilities), None)
+      (
+        Seq(AssessmentCategoryInfo(AssessmentCategory.Standard)),
+        Some(AssessmentCategory.Standard)
+      ),
+      (
+        Seq(AssessmentCategoryInfo(AssessmentCategory.Debts)),
+        Some(AssessmentCategory.Debts)
+      ),
+      (
+        Seq(
+          AssessmentCategoryInfo(AssessmentCategory.Debts),
+          AssessmentCategoryInfo(AssessmentCategory.Liabilities),
+          AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities)
+        ),
+        None
+      )
     ).foreach { (eligibilityAssessmentCategories, journeyAssessmentCategory) =>
       "return your bill page for EPAYE for interest bearing charges when the eligibility check result has assessment " +
         s"categories ${eligibilityAssessmentCategories.mkString(", ")} and the determined assessment category is $journeyAssessmentCategory" in {
@@ -428,21 +441,54 @@ class YourBillControllerSpec extends ItSpec {
           testCrypto,
           Origins.Epaye.Bta,
           assessmentCategory = AssessmentCategory.Liabilities,
-          eligibilityResultAssessmentCategories = Seq(AssessmentCategory.Liabilities)
+          eligibilityResultAssessmentCategories = Seq(AssessmentCategoryInfo(AssessmentCategory.Liabilities))
         )()
 
       val result = controller.yourBill(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.YourBillController.yourUpcomingBill.url)
     }
+
+    "return an error if the eligibility assessment categories include debtsAndLiabilities but debts are ineligible" in {
+      stubCommonActions()
+      EssttpBackend.EligibilityCheck.findJourney(
+        testCrypto,
+        Origins.Simp.Pta,
+        assessmentCategories = Seq(
+          AssessmentCategoryInfo(AssessmentCategory.Debts, eligibilityStatus = false),
+          AssessmentCategoryInfo(AssessmentCategory.Liabilities),
+          AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities)
+        )
+      )()
+
+      val error = intercept[Exception](await(controller.yourBill(fakeRequest)))
+      error.getMessage shouldBe "eligibility status for assessment category 'debts' must be eligible but was not"
+    }
   }
 
   "POST /your-bill should" - {
     behave like computeNextPageBehaviour(
       controller.yourBillSubmit,
-      Seq(AssessmentCategory.Standard),
+      Seq(AssessmentCategoryInfo(AssessmentCategory.Standard)),
       AssessmentCategory.Standard
     )
+
+    "return an error if the eligibility assessment categories include debtsAndLiabilities but debts are ineligible" in {
+      stubCommonActions()
+      EssttpBackend.EligibilityCheck.findJourney(
+        testCrypto,
+        Origins.Simp.Pta,
+        assessmentCategories = Seq(
+          AssessmentCategoryInfo(AssessmentCategory.Debts, eligibilityStatus = false),
+          AssessmentCategoryInfo(AssessmentCategory.Liabilities),
+          AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities)
+        )
+      )()
+
+      val error = intercept[Exception](await(controller.yourBillSubmit(fakeRequest)))
+      error.getMessage shouldBe "eligibility status for assessment category 'debts' must be eligible but was not"
+    }
+
   }
 
   "GET /your-upcoming-tax-bill should" - {
@@ -450,7 +496,11 @@ class YourBillControllerSpec extends ItSpec {
     "return your bill page for SIMP" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck
-        .findJourney(testCrypto, Origins.Simp.Pta, assessmentCategories = Seq(AssessmentCategory.Liabilities))()
+        .findJourney(
+          testCrypto,
+          Origins.Simp.Pta,
+          assessmentCategories = Seq(AssessmentCategoryInfo(AssessmentCategory.Liabilities))
+        )()
 
       val result: Future[Result] = controller.yourUpcomingBill(fakeRequest)
       val pageContent: String    = contentAsString(result)
@@ -488,7 +538,11 @@ class YourBillControllerSpec extends ItSpec {
     "return your bill page for SIMP in welsh" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck
-        .findJourney(testCrypto, Origins.Simp.Pta, assessmentCategories = Seq(AssessmentCategory.Liabilities))()
+        .findJourney(
+          testCrypto,
+          Origins.Simp.Pta,
+          assessmentCategories = Seq(AssessmentCategoryInfo(AssessmentCategory.Liabilities))
+        )()
 
       val result: Future[Result] = controller.yourUpcomingBill(fakeRequest.withLangWelsh())
       val pageContent: String    = contentAsString(result)
@@ -530,12 +584,16 @@ class YourBillControllerSpec extends ItSpec {
     }
 
     Seq(
-      Seq(AssessmentCategory.Standard),
-      Seq(AssessmentCategory.Debts),
-      Seq(AssessmentCategory.DebtsAndLiabilities, AssessmentCategory.Debts, AssessmentCategory.Liabilities)
+      Seq(AssessmentCategoryInfo(AssessmentCategory.Standard)),
+      Seq(AssessmentCategoryInfo(AssessmentCategory.Debts)),
+      Seq(
+        AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities),
+        AssessmentCategoryInfo(AssessmentCategory.Debts),
+        AssessmentCategoryInfo(AssessmentCategory.Liabilities)
+      )
     ).foreach { assessmentCategories =>
       s"redirect to the determine assessment categories endpoint if the assessment categories are (${assessmentCategories
-          .map(_.entryName)
+          .map(_.prettyPrint)
           .mkString(", ")})" in {
         stubCommonActions()
         EssttpBackend.EligibilityCheck
@@ -554,29 +612,14 @@ class YourBillControllerSpec extends ItSpec {
   "POST /your-upcoming-bill should" - {
     behave like computeNextPageBehaviour(
       controller.yourUpcomingBillSubmit,
-      Seq(AssessmentCategory.Liabilities),
+      Seq(AssessmentCategoryInfo(AssessmentCategory.Liabilities)),
       AssessmentCategory.Liabilities
     )
   }
 
   "GET /your-bill-combined should" - {
 
-    "return your bill page for SIMP" in {
-      stubCommonActions()
-      EssttpBackend.DetermineAssessmentCategory
-        .findJourney(
-          testCrypto,
-          Origins.Simp.Pta,
-          assessmentCategory = AssessmentCategory.DebtsAndLiabilities,
-          eligibilityResultAssessmentCategories =
-            Seq(AssessmentCategory.Debts, AssessmentCategory.Liabilities, AssessmentCategory.DebtsAndLiabilities)
-        )()
-
-      val result: Future[Result] = controller.yourBillCombined(fakeRequest)
-      val pageContent: String    = contentAsString(result)
-      val doc: Document          = Jsoup.parse(pageContent)
-
-      RequestAssertions.assertGetRequestOk(result)
+    def testPage(doc: Document, expectRemoveLiabilitiesLink: Boolean) = {
       ContentAssertions.commonPageChecks(
         doc,
         expectedH1 = "Your total Simple Assessment tax bill is £6,000",
@@ -635,12 +678,60 @@ class YourBillControllerSpec extends ItSpec {
         .select(".govuk-summary-list__value")
         .text() shouldBe "£1,000 (includes interest added to date)"
 
-      val buttonGroup = doc.selectFirst("div.govuk-button-group")
-      buttonGroup.child(0).text() shouldBe "Continue"
+      if (expectRemoveLiabilitiesLink) {
+        val buttonGroup = doc.selectFirst("div.govuk-button-group")
+        buttonGroup.child(0).text() shouldBe "Continue"
 
-      buttonGroup.child(1).is("a.govuk-link") shouldBe true
-      buttonGroup.child(1).attr("href") shouldBe routes.YourBillController.removeAdvancePayments.url
-      buttonGroup.child(1).text shouldBe "Remove advance payments"
+        buttonGroup.child(1).is("a.govuk-link") shouldBe true
+        buttonGroup.child(1).attr("href") shouldBe routes.YourBillController.removeAdvancePayments.url
+        buttonGroup.child(1).text shouldBe "Remove advance payments"
+      } else {
+        doc.select("div.govuk-button-group").isEmpty shouldBe true
+      }
+    }
+
+    "return your bill page for SIMP" in {
+      stubCommonActions()
+      EssttpBackend.DetermineAssessmentCategory
+        .findJourney(
+          testCrypto,
+          Origins.Simp.Pta,
+          assessmentCategory = AssessmentCategory.DebtsAndLiabilities,
+          eligibilityResultAssessmentCategories = Seq(
+            AssessmentCategoryInfo(AssessmentCategory.Debts),
+            AssessmentCategoryInfo(AssessmentCategory.Liabilities),
+            AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities)
+          )
+        )()
+
+      val result: Future[Result] = controller.yourBillCombined(fakeRequest)
+      val pageContent: String    = contentAsString(result)
+      val doc: Document          = Jsoup.parse(pageContent)
+
+      RequestAssertions.assertGetRequestOk(result)
+      testPage(doc, expectRemoveLiabilitiesLink = true)
+    }
+
+    "not show the remove liabilities link if debts are ineligible" in {
+      stubCommonActions()
+      EssttpBackend.DetermineAssessmentCategory
+        .findJourney(
+          testCrypto,
+          Origins.Simp.Pta,
+          assessmentCategory = AssessmentCategory.DebtsAndLiabilities,
+          eligibilityResultAssessmentCategories = Seq(
+            AssessmentCategoryInfo(AssessmentCategory.Debts, eligibilityStatus = false),
+            AssessmentCategoryInfo(AssessmentCategory.Liabilities),
+            AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities)
+          )
+        )()
+
+      val result: Future[Result] = controller.yourBillCombined(fakeRequest)
+      val pageContent: String    = contentAsString(result)
+      val doc: Document          = Jsoup.parse(pageContent)
+
+      RequestAssertions.assertGetRequestOk(result)
+      testPage(doc, expectRemoveLiabilitiesLink = false)
     }
 
     "return your bill page for SIMP in welsh" in {
@@ -650,8 +741,11 @@ class YourBillControllerSpec extends ItSpec {
           testCrypto,
           Origins.Simp.Pta,
           assessmentCategory = AssessmentCategory.DebtsAndLiabilities,
-          eligibilityResultAssessmentCategories =
-            Seq(AssessmentCategory.Debts, AssessmentCategory.Liabilities, AssessmentCategory.DebtsAndLiabilities)
+          eligibilityResultAssessmentCategories = Seq(
+            AssessmentCategoryInfo(AssessmentCategory.Debts),
+            AssessmentCategoryInfo(AssessmentCategory.Liabilities),
+            AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities)
+          )
         )()
 
       val result: Future[Result] = controller.yourBillCombined(fakeRequest.withLangWelsh())
@@ -728,12 +822,16 @@ class YourBillControllerSpec extends ItSpec {
     }
 
     Seq(
-      Seq(AssessmentCategory.Standard),
-      Seq(AssessmentCategory.Debts),
-      Seq(AssessmentCategory.DebtsAndLiabilities, AssessmentCategory.Debts, AssessmentCategory.Liabilities)
+      Seq(AssessmentCategoryInfo(AssessmentCategory.Standard)),
+      Seq(AssessmentCategoryInfo(AssessmentCategory.Debts)),
+      Seq(
+        AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities),
+        AssessmentCategoryInfo(AssessmentCategory.Debts),
+        AssessmentCategoryInfo(AssessmentCategory.Liabilities)
+      )
     ).foreach { assessmentCategories =>
       s"redirect to the determine assessment categories endpoint if the assessment categories are (${assessmentCategories
-          .map(_.entryName)
+          .map(_.prettyPrint)
           .mkString(", ")})" in {
         stubCommonActions()
         EssttpBackend.EligibilityCheck
@@ -752,7 +850,11 @@ class YourBillControllerSpec extends ItSpec {
   "POST /your-bill-combined should" - {
     behave like computeNextPageBehaviour(
       controller.yourBillCombinedSubmit,
-      Seq(AssessmentCategory.DebtsAndLiabilities, AssessmentCategory.Debts, AssessmentCategory.Liabilities),
+      Seq(
+        AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities),
+        AssessmentCategoryInfo(AssessmentCategory.Debts),
+        AssessmentCategoryInfo(AssessmentCategory.Liabilities)
+      ),
       AssessmentCategory.DebtsAndLiabilities
     )
   }
@@ -810,8 +912,11 @@ class YourBillControllerSpec extends ItSpec {
       EssttpBackend.EligibilityCheck.findJourney(
         testCrypto,
         Origins.Epaye.Bta,
-        assessmentCategories =
-          Seq(AssessmentCategory.Liabilities, AssessmentCategory.Debts, AssessmentCategory.DebtsAndLiabilities)
+        assessmentCategories = Seq(
+          AssessmentCategoryInfo(AssessmentCategory.Debts),
+          AssessmentCategoryInfo(AssessmentCategory.Liabilities),
+          AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities)
+        )
       )()
 
       testPage(None)
@@ -822,8 +927,11 @@ class YourBillControllerSpec extends ItSpec {
       EssttpBackend.DetermineAssessmentCategory.findJourney(
         testCrypto,
         Origins.Epaye.Bta,
-        eligibilityResultAssessmentCategories =
-          Seq(AssessmentCategory.Liabilities, AssessmentCategory.Debts, AssessmentCategory.DebtsAndLiabilities),
+        eligibilityResultAssessmentCategories = Seq(
+          AssessmentCategoryInfo(AssessmentCategory.Debts),
+          AssessmentCategoryInfo(AssessmentCategory.Liabilities),
+          AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities)
+        ),
         assessmentCategory = AssessmentCategory.DebtsAndLiabilities
       )()
 
@@ -835,21 +943,40 @@ class YourBillControllerSpec extends ItSpec {
       EssttpBackend.DetermineAssessmentCategory.findJourney(
         testCrypto,
         Origins.Epaye.Bta,
-        eligibilityResultAssessmentCategories =
-          Seq(AssessmentCategory.Liabilities, AssessmentCategory.Debts, AssessmentCategory.DebtsAndLiabilities),
+        eligibilityResultAssessmentCategories = Seq(
+          AssessmentCategoryInfo(AssessmentCategory.Debts),
+          AssessmentCategoryInfo(AssessmentCategory.Liabilities),
+          AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities)
+        ),
         assessmentCategory = AssessmentCategory.Debts
       )()
 
       testPage(Some(false))
     }
 
+    "return an error if the eligibility assessment categories include debtsAndLiabilities but debts are ineligible" in {
+      stubCommonActions()
+      EssttpBackend.EligibilityCheck.findJourney(
+        testCrypto,
+        Origins.Simp.Pta,
+        assessmentCategories = Seq(
+          AssessmentCategoryInfo(AssessmentCategory.Debts, eligibilityStatus = false),
+          AssessmentCategoryInfo(AssessmentCategory.Liabilities),
+          AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities)
+        )
+      )()
+
+      val error = intercept[Exception](await(controller.advancePayment(fakeRequest)))
+      error.getMessage shouldBe "eligibility status for assessment category 'debts' must be eligible but was not"
+    }
+
     Seq(
-      Seq(AssessmentCategory.Standard),
-      Seq(AssessmentCategory.Debts),
-      Seq(AssessmentCategory.Liabilities)
+      Seq(AssessmentCategoryInfo(AssessmentCategory.Standard)),
+      Seq(AssessmentCategoryInfo(AssessmentCategory.Debts)),
+      Seq(AssessmentCategoryInfo(AssessmentCategory.Liabilities))
     ).foreach { assessmentCategories =>
       s"redirect to the determine assessment categories endpoint if the assessment categories are (${assessmentCategories
-          .map(_.entryName)
+          .map(_.prettyPrint)
           .mkString(", ")})" in {
         stubCommonActions()
         EssttpBackend.EligibilityCheck
@@ -873,8 +1000,11 @@ class YourBillControllerSpec extends ItSpec {
         EssttpBackend.EligibilityCheck.findJourney(
           testCrypto,
           Origins.Simp.Pta,
-          assessmentCategories =
-            Seq(AssessmentCategory.Liabilities, AssessmentCategory.Debts, AssessmentCategory.DebtsAndLiabilities)
+          assessmentCategories = Seq(
+            AssessmentCategoryInfo(AssessmentCategory.Debts),
+            AssessmentCategoryInfo(AssessmentCategory.Liabilities),
+            AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities)
+          )
         )()
 
         val result = controller.advancePaymentSubmit(
@@ -915,15 +1045,21 @@ class YourBillControllerSpec extends ItSpec {
           JourneyJsonTemplates.`Assessment Category Determined`(
             Origins.Simp.Pta,
             assessmentCategory = expectedAssessmentCategory,
-            eligibilityResultAssessmentCategories =
-              Seq(AssessmentCategory.Liabilities, AssessmentCategory.Debts, AssessmentCategory.DebtsAndLiabilities)
+            eligibilityResultAssessmentCategories = Seq(
+              AssessmentCategoryInfo(AssessmentCategory.Debts),
+              AssessmentCategoryInfo(AssessmentCategory.Liabilities),
+              AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities)
+            )
           )
         )
         EssttpBackend.EligibilityCheck.findJourney(
           testCrypto,
           Origins.Simp.Pta,
-          assessmentCategories =
-            Seq(AssessmentCategory.Liabilities, AssessmentCategory.Debts, AssessmentCategory.DebtsAndLiabilities)
+          assessmentCategories = Seq(
+            AssessmentCategoryInfo(AssessmentCategory.Debts),
+            AssessmentCategoryInfo(AssessmentCategory.Liabilities),
+            AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities)
+          )
         )()
 
         val result = controller.advancePaymentSubmit(
@@ -938,6 +1074,22 @@ class YourBillControllerSpec extends ItSpec {
       }
     }
 
+    "return an error if the eligibility assessment categories include debtsAndLiabilities but debts are ineligible" in {
+      stubCommonActions()
+      EssttpBackend.EligibilityCheck.findJourney(
+        testCrypto,
+        Origins.Simp.Pta,
+        assessmentCategories = Seq(
+          AssessmentCategoryInfo(AssessmentCategory.Debts, eligibilityStatus = false),
+          AssessmentCategoryInfo(AssessmentCategory.Liabilities),
+          AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities)
+        )
+      )()
+
+      val error = intercept[Exception](await(controller.advancePaymentSubmit(fakeRequest)))
+      error.getMessage shouldBe "eligibility status for assessment category 'debts' must be eligible but was not"
+    }
+
   }
 
   "GET /remove-advance-payments should" - {
@@ -950,8 +1102,11 @@ class YourBillControllerSpec extends ItSpec {
         JourneyJsonTemplates.`Assessment Category Determined`(
           Origins.Simp.Pta,
           assessmentCategory = AssessmentCategory.Debts,
-          eligibilityResultAssessmentCategories =
-            Seq(AssessmentCategory.Liabilities, AssessmentCategory.Debts, AssessmentCategory.DebtsAndLiabilities)
+          eligibilityResultAssessmentCategories = Seq(
+            AssessmentCategoryInfo(AssessmentCategory.Debts),
+            AssessmentCategoryInfo(AssessmentCategory.Liabilities),
+            AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities)
+          )
         )
       )
       EssttpBackend.DetermineAssessmentCategory
@@ -959,8 +1114,11 @@ class YourBillControllerSpec extends ItSpec {
           testCrypto,
           Origins.Simp.Pta,
           assessmentCategory = AssessmentCategory.DebtsAndLiabilities,
-          eligibilityResultAssessmentCategories =
-            Seq(AssessmentCategory.Liabilities, AssessmentCategory.Debts, AssessmentCategory.DebtsAndLiabilities)
+          eligibilityResultAssessmentCategories = Seq(
+            AssessmentCategoryInfo(AssessmentCategory.Debts),
+            AssessmentCategoryInfo(AssessmentCategory.Liabilities),
+            AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities)
+          )
         )()
 
       val result = controller.removeAdvancePayments(fakeRequest)
@@ -978,8 +1136,11 @@ class YourBillControllerSpec extends ItSpec {
       EssttpBackend.EligibilityCheck.findJourney(
         testCrypto,
         Origins.Simp.Pta,
-        assessmentCategories =
-          Seq(AssessmentCategory.Liabilities, AssessmentCategory.Debts, AssessmentCategory.DebtsAndLiabilities)
+        assessmentCategories = Seq(
+          AssessmentCategoryInfo(AssessmentCategory.Debts),
+          AssessmentCategoryInfo(AssessmentCategory.Liabilities),
+          AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities)
+        )
       )()
 
       val result = controller.removeAdvancePayments(fakeRequest)

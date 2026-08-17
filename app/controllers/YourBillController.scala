@@ -63,7 +63,9 @@ class YourBillController @Inject() (
         debts => displayPage(views.yourBillIs(YourBillController.overDuePayments(debts), request.journey.taxRegime)),
         _ => Redirect(routes.YourBillController.yourUpcomingBill),
         (debts, _, _) =>
-          displayPage(views.yourBillIs(YourBillController.overDuePayments(debts), request.journey.taxRegime))
+          ensureDebtsEligible(debts) {
+            displayPage(views.yourBillIs(YourBillController.overDuePayments(debts), request.journey.taxRegime))
+          }
       )
     )
   }
@@ -73,12 +75,14 @@ class YourBillController @Inject() (
       _ => computeNext(eligibilityRequest.journey, eligibilityRequest.eligibilityCheckResult),
       _ => computeNext(eligibilityRequest.journey, eligibilityRequest.eligibilityCheckResult),
       _ => throw new Exception("Not expecting submit on YourBill for Liabilities only assessment category"),
-      (_, _, _) =>
-        eligibilityRequest.journey match {
-          case _: JourneyStage.BeforeAssessmentCategoryDetermined =>
-            Future.successful(routes.YourBillController.advancePayment)
-          case _: JourneyStage.AfterAssessmentCategoryDetermined  =>
-            computeNext(eligibilityRequest.journey, eligibilityRequest.eligibilityCheckResult)
+      (debts, _, _) =>
+        ensureDebtsEligible(debts) {
+          eligibilityRequest.journey match {
+            case _: JourneyStage.BeforeAssessmentCategoryDetermined =>
+              Future.successful(routes.YourBillController.advancePayment)
+            case _: JourneyStage.AfterAssessmentCategoryDetermined  =>
+              computeNext(eligibilityRequest.journey, eligibilityRequest.eligibilityCheckResult)
+          }
         }
     )
 
@@ -124,7 +128,8 @@ class YourBillController @Inject() (
             views.yourBillCombined(
               YourBillController.overDuePayments(debts),
               YourBillController.overDuePayments(liabilities),
-              request.journey.taxRegime
+              request.journey.taxRegime,
+              showRemoveLiabilities = debts.assessmentEligibilityStatus
             )
           )
       )
@@ -149,8 +154,16 @@ class YourBillController @Inject() (
       case j: JourneyStage.AfterAssessmentCategoryDetermined =>
         j.assessmentCategory match {
           case AssessmentCategory.DebtsAndLiabilities =>
-            journeyConnector.updateAssessmentCategory(j.journeyId, AssessmentCategory.Debts).map { _ =>
-              Redirect(routes.YourBillController.yourBill)
+            val debts = request.eligibilityCheckResult.chargeTypeAssessments
+              .find(_.assessmentCategory == AssessmentCategory.Debts)
+              .getOrElse(throw new Exception("Could not find chargeTypeAssessments with category Debts"))
+
+            if (debts.assessmentEligibilityStatus) {
+              journeyConnector.updateAssessmentCategory(j.journeyId, AssessmentCategory.Debts).map { _ =>
+                Redirect(routes.YourBillController.yourBill)
+              }
+            } else {
+              throw new Exception("Cannot remove liabilities when debts not eligible")
             }
 
           case other =>
@@ -167,22 +180,24 @@ class YourBillController @Inject() (
         _ => logErrorAndRouteToDefaultPage(request.journey),
         _ => logErrorAndRouteToDefaultPage(request.journey),
         _ => logErrorAndRouteToDefaultPage(request.journey),
-        { (_, liabilities, _) =>
-          val form = request.journey match {
-            case j: JourneyStage.BeforeAssessmentCategoryDetermined =>
-              AddLiabilitiesForm.form
-            case j: JourneyStage.AfterAssessmentCategoryDetermined  =>
-              j.assessmentCategory match {
-                case AssessmentCategory.DebtsAndLiabilities => AddLiabilitiesForm.form.fill(AddLiabilitiesFormValue.Yes)
-                case AssessmentCategory.Debts               => AddLiabilitiesForm.form.fill(AddLiabilitiesFormValue.No)
-                case _                                      => AddLiabilitiesForm.form
-              }
-          }
+        (debts, liabilities, _) =>
+          ensureDebtsEligible(debts) {
+            val form = request.journey match {
+              case j: JourneyStage.BeforeAssessmentCategoryDetermined =>
+                AddLiabilitiesForm.form
+              case j: JourneyStage.AfterAssessmentCategoryDetermined  =>
+                j.assessmentCategory match {
+                  case AssessmentCategory.DebtsAndLiabilities =>
+                    AddLiabilitiesForm.form.fill(AddLiabilitiesFormValue.Yes)
+                  case AssessmentCategory.Debts               => AddLiabilitiesForm.form.fill(AddLiabilitiesFormValue.No)
+                  case _                                      => AddLiabilitiesForm.form
+                }
+            }
 
-          displayPage(
-            views.advancePayments(form, YourBillController.overDuePayments(liabilities), request.journey.taxRegime)
-          )
-        }
+            displayPage(
+              views.advancePayments(form, YourBillController.overDuePayments(liabilities), request.journey.taxRegime)
+            )
+          }
       )
     )
   }
@@ -192,35 +207,41 @@ class YourBillController @Inject() (
       _ => logErrorAndRouteToDefaultPage(request.journey),
       _ => logErrorAndRouteToDefaultPage(request.journey),
       _ => logErrorAndRouteToDefaultPage(request.journey),
-      (_, liabilities, _) =>
-        AddLiabilitiesForm.form
-          .bindFromRequest()
-          .fold(
-            formWithErrors =>
-              Future.successful(
-                BadRequest(
-                  views.advancePayments(
-                    formWithErrors,
-                    YourBillController.overDuePayments(liabilities),
-                    request.journey.taxRegime
+      (debts, liabilities, _) =>
+        ensureDebtsEligible(debts) {
+          AddLiabilitiesForm.form
+            .bindFromRequest()
+            .fold(
+              formWithErrors =>
+                Future.successful(
+                  BadRequest(
+                    views.advancePayments(
+                      formWithErrors,
+                      YourBillController.overDuePayments(liabilities),
+                      request.journey.taxRegime
+                    )
                   )
-                )
-              ),
-            addLiabilities => {
-              val (assessmentCategory, next) = addLiabilities match {
-                case AddLiabilitiesFormValue.Yes =>
-                  AssessmentCategory.DebtsAndLiabilities -> routes.YourBillController.yourBillCombined
-                case AddLiabilitiesFormValue.No  =>
-                  AssessmentCategory.Debts -> routes.YourBillController.yourBill
-              }
+                ),
+              addLiabilities => {
+                val (assessmentCategory, next) = addLiabilities match {
+                  case AddLiabilitiesFormValue.Yes =>
+                    AssessmentCategory.DebtsAndLiabilities -> routes.YourBillController.yourBillCombined
+                  case AddLiabilitiesFormValue.No  =>
+                    AssessmentCategory.Debts -> routes.YourBillController.yourBill
+                }
 
-              journeyConnector.updateAssessmentCategory(request.journey.journeyId, assessmentCategory).map { _ =>
-                Redirect(next)
+                journeyConnector.updateAssessmentCategory(request.journey.journeyId, assessmentCategory).map { _ =>
+                  Redirect(next)
+                }
               }
-            }
-          )
+            )
+        }
     )
   }
+
+  private def ensureDebtsEligible[A](debts: ChargeTypeAssessments)(f: => A): A =
+    if (debts.assessmentEligibilityStatus) f
+    else throw new Exception("eligibility status for assessment category 'debts' must be eligible but was not")
 
   private def displayPage(page: => Html)(using Request[?]): Result =
     try

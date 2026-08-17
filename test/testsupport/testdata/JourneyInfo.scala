@@ -20,6 +20,7 @@ import essttp.journey.model.{CanPayWithinSixMonthsAnswers, WhyCannotPayInFullAns
 import essttp.rootmodel.bank.{TypeOfBankAccount, TypesOfBankAccount}
 import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, Identification}
 import essttp.rootmodel.{CannotPayReason, DayOfMonth, TaxRegime}
+import models.AssessmentCategoryInfo
 import paymentsEmailVerification.models.EmailVerificationResult
 import uk.gov.hmrc.crypto.Encrypter
 
@@ -31,19 +32,17 @@ object JourneyInfo {
     TdJsonBodies.taxIdJourneyInfo(taxReference, taxRegime)
 
   def eligibilityCheckEligible(
-    taxRegime:                               TaxRegime,
-    encrypter:                               Encrypter,
-    regimeDigitalCorrespondence:             Boolean,
-    email:                                   Option[String],
-    maybeChargeIsInterestBearingCharge:      Option[Boolean],
-    maybeChargeUseChargeReference:           Option[Boolean],
-    maybeDdInProgress:                       Option[Boolean],
-    eligibilityMinPlanLength:                Int,
-    eligibilityMaxPlanLength:                Int,
-    additionalIdentifiers:                   Seq[Identification] = Seq.empty,
-    assessmentCategories:                    Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard),
-    assessmentCategoriesToEligibilityStatus: Map[AssessmentCategory, Boolean] =
-      AssessmentCategory.values.map(_ -> true).toMap
+    taxRegime:                          TaxRegime,
+    encrypter:                          Encrypter,
+    regimeDigitalCorrespondence:        Boolean,
+    email:                              Option[String],
+    maybeChargeIsInterestBearingCharge: Option[Boolean],
+    maybeChargeUseChargeReference:      Option[Boolean],
+    maybeDdInProgress:                  Option[Boolean],
+    eligibilityMinPlanLength:           Int,
+    eligibilityMaxPlanLength:           Int,
+    additionalIdentifiers:              Seq[Identification] = Seq.empty,
+    assessmentCategories:               Seq[AssessmentCategoryInfo] = Seq(AssessmentCategoryInfo(AssessmentCategory.Standard))
   ): JourneyInfoAsJson =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       encrypter = encrypter,
@@ -56,8 +55,7 @@ object JourneyInfo {
       eligibilityMinPlanLength = eligibilityMinPlanLength,
       eligibilityMaxPlanLength = eligibilityMaxPlanLength,
       additionalIdentifiers = additionalIdentifiers,
-      assessmentCategories = assessmentCategories,
-      assessmentCategoriesToEligibilityStatus = assessmentCategoriesToEligibilityStatus
+      assessmentCategories = assessmentCategories
     )
 
   def ineligibleHasRls(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                                =
@@ -363,19 +361,17 @@ object JourneyInfo {
     taxId(taxReference, taxRegime) :: started
 
   def eligibilityCheckedEligible(
-    taxRegime:                               TaxRegime,
-    encrypter:                               Encrypter,
-    regimeDigitalCorrespondence:             Boolean = true,
-    etmpEmail:                               Option[String] = Some(TdAll.etmpEmail),
-    maybeChargeIsInterestBearingCharge:      Option[Boolean] = Some(true),
-    maybeChargeUseChargeReference:           Option[Boolean] = Some(true),
-    maybeDdInProgress:                       Option[Boolean] = None,
-    eligibilityMinPlanLength:                Int = 1,
-    eligibilityMaxPlanLength:                Int = 12,
-    additionalIdentifiers:                   Seq[Identification] = Seq.empty,
-    assessmentCategories:                    Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard),
-    assessmentCategoriesToEligibilityStatus: Map[AssessmentCategory, Boolean] =
-      AssessmentCategory.values.map(_ -> true).toMap
+    taxRegime:                          TaxRegime,
+    encrypter:                          Encrypter,
+    regimeDigitalCorrespondence:        Boolean = true,
+    etmpEmail:                          Option[String] = Some(TdAll.etmpEmail),
+    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true),
+    maybeChargeUseChargeReference:      Option[Boolean] = Some(true),
+    maybeDdInProgress:                  Option[Boolean] = None,
+    eligibilityMinPlanLength:           Int = 1,
+    eligibilityMaxPlanLength:           Int = 12,
+    additionalIdentifiers:              Seq[Identification] = Seq.empty,
+    assessmentCategories:               Seq[AssessmentCategoryInfo] = Seq(AssessmentCategoryInfo(AssessmentCategory.Standard))
   ): List[JourneyInfoAsJson] =
     eligibilityCheckEligible(
       taxRegime,
@@ -388,8 +384,7 @@ object JourneyInfo {
       eligibilityMinPlanLength,
       eligibilityMaxPlanLength,
       additionalIdentifiers = additionalIdentifiers,
-      assessmentCategories = assessmentCategories,
-      assessmentCategoriesToEligibilityStatus = assessmentCategoriesToEligibilityStatus
+      assessmentCategories = assessmentCategories
     ) :: taxIdDetermined(taxRegime = taxRegime)
 
   def eligibilityCheckedIneligibleHasRls(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
@@ -546,7 +541,9 @@ object JourneyInfo {
     encrypter:                             Encrypter,
     maybeChargeIsInterestBearingCharge:    Option[Boolean] = Some(true),
     assesssmentCategory:                   AssessmentCategory = AssessmentCategory.Standard,
-    eligibilityResultAssessmentCategories: Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard),
+    eligibilityResultAssessmentCategories: Seq[AssessmentCategoryInfo] = Seq(
+      AssessmentCategoryInfo(AssessmentCategory.Standard)
+    ),
     maybeDdInProgress:                     Option[Boolean] = None
   ): List[JourneyInfoAsJson] =
     assessmentCategory(assesssmentCategory) :: eligibilityCheckedEligible(
