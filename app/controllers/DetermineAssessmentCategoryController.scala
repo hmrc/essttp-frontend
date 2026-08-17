@@ -67,6 +67,10 @@ class DetermineAssessmentCategoryController @Inject() (
           !debts.assessmentEligibilityStatus && liabilities.assessmentEligibilityStatus && debtsAndLiabilities.assessmentEligibilityStatus
         ) {
           Some(debtsAndLiabilities)
+        } else if (
+          debts.assessmentEligibilityStatus && !liabilities.assessmentEligibilityStatus && !debtsAndLiabilities.assessmentEligibilityStatus
+        ) {
+          Some(debts)
         } else {
           throw new Exception(
             s"Got unexpected eligibility status for debts and liabilities: " +
