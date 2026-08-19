@@ -34,7 +34,7 @@ object AuditConnectorStub extends Eventually {
           equalToJson(s"""{ "auditSource" : "set-up-payment-plan"  }""", true, true)
         )
         .withRequestBody(
-          equalToJson(s"""{ "detail" : ${auditEvent.toString} }""", true, true)
+          equalToJson(s"""{ "detail" : ${auditEvent.toString} }""", true, false)
         )
     )
   }

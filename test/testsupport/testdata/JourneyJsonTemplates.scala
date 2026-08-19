@@ -514,12 +514,15 @@ object JourneyJsonTemplates {
     )
 
   def `Chosen Payment Plan`(
-    upfrontPaymentAmountJsonString:     String = """{"DeclaredUpfrontPayment": {"amount": 12312}}""",
-    regimeDigitalCorrespondence:        Boolean = true,
-    origin:                             Origin,
-    selectedPlanJourneyInfo:            String = TdJsonBodies.selectedPlanTwoMonthsJourneyInfo,
-    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true),
-    assessmentCategory:                 AssessmentCategory = AssessmentCategory.Standard
+    upfrontPaymentAmountJsonString:        String = """{"DeclaredUpfrontPayment": {"amount": 12312}}""",
+    regimeDigitalCorrespondence:           Boolean = true,
+    origin:                                Origin,
+    selectedPlanJourneyInfo:               String = TdJsonBodies.selectedPlanTwoMonthsJourneyInfo,
+    maybeChargeIsInterestBearingCharge:    Option[Boolean] = Some(true),
+    eligibilityResultAssessmentCategories: Seq[AssessmentCategoryInfo] = Seq(
+      AssessmentCategoryInfo(AssessmentCategory.Standard)
+    ),
+    assessmentCategory:                    AssessmentCategory = AssessmentCategory.Standard
   )(using encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo = StageInfo.chosenPaymentPlan,
     journeyInfo = List(
@@ -531,6 +534,7 @@ object JourneyJsonTemplates {
         origin.taxRegime,
         encrypter,
         regimeDigitalCorrespondence,
+        assessmentCategories = eligibilityResultAssessmentCategories,
         maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge
       ),
       TdJsonBodies.assessmentCategory(assessmentCategory),

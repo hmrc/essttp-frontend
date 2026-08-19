@@ -21,7 +21,7 @@ import controllers.PaymentScheduleControllerSpec.SummaryRow
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.ttp.eligibility.AssessmentCategory
-import models.{Language, Languages}
+import models.{AssessmentCategoryInfo, Language, Languages}
 import models.Languages.{English, Welsh}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
@@ -679,18 +679,19 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
                  |        "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
                  |        "origin": "${origin.toString().split('.').last}",
                  |        "canPayInSixMonths": true,
+                 |        "typeOfPlan" : "Standard",
                  |        "unableToPayReason": [],
                  |        "schedule": {
                  |            "collectionDate": 28,
                  |            "collectionLengthCalendarMonths": 2,
                  |            "collections": [
                  |                {
-                 |                    "amount": 555.70,
+                 |                    "amount": 555.7,
                  |                    "collectionNumber": 2,
                  |                    "paymentDate": "2022-09-28"
                  |                },
                  |                {
-                 |                    "amount": 555.70,
+                 |                    "amount": 555.7,
                  |                    "collectionNumber": 1,
                  |                    "paymentDate": "2022-08-28"
                  |                }
@@ -718,7 +719,12 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
               upfrontPaymentAmountJsonString = """{"DeclaredUpfrontPayment": {"amount": 200}}""",
               origin = origin,
               regimeDigitalCorrespondence = false,
-              assessmentCategory = AssessmentCategory.DebtsAndLiabilities
+              assessmentCategory = AssessmentCategory.DebtsAndLiabilities,
+              eligibilityResultAssessmentCategories = List(
+                AssessmentCategoryInfo(AssessmentCategory.Debts),
+                AssessmentCategoryInfo(AssessmentCategory.Liabilities),
+                AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities)
+              )
             )
           )
           EssttpBackend.HasCheckedPlan.stubUpdateHasCheckedPlan(
@@ -740,6 +746,8 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
                  |        "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
                  |        "origin": "${origin.toString().split('.').last}",
                  |        "canPayInSixMonths": true,
+                 |        "choseToIncludeFDLs" : true,
+                 |        "typeOfPlan" : "debtsAndLiabilities",
                  |        "unableToPayReason": [],
                  |        "schedule": {
                  |            "collectionDate": 28,
