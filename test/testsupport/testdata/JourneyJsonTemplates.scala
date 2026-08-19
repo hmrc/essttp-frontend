@@ -518,7 +518,8 @@ object JourneyJsonTemplates {
     regimeDigitalCorrespondence:        Boolean = true,
     origin:                             Origin,
     selectedPlanJourneyInfo:            String = TdJsonBodies.selectedPlanTwoMonthsJourneyInfo,
-    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true)
+    maybeChargeIsInterestBearingCharge: Option[Boolean] = Some(true),
+    assessmentCategory:                 AssessmentCategory = AssessmentCategory.Standard
   )(using encrypter: Encrypter): String = TdJsonBodies.createJourneyJson(
     stageInfo = StageInfo.chosenPaymentPlan,
     journeyInfo = List(
@@ -532,7 +533,7 @@ object JourneyJsonTemplates {
         regimeDigitalCorrespondence,
         maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge
       ),
-      TdJsonBodies.assessmentCategory(),
+      TdJsonBodies.assessmentCategory(assessmentCategory),
       TdJsonBodies.upfrontPaymentAnswersJourneyInfo(upfrontPaymentAmountJsonString),
       TdJsonBodies.whyCannotPayInFull(
         WhyCannotPayInFullAnswers.WhyCannotPayInFull(Set(ChangeToPersonalCircumstances, NoMoneySetAside))

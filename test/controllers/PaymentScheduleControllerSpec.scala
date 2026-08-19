@@ -20,6 +20,7 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import controllers.PaymentScheduleControllerSpec.SummaryRow
 import essttp.journey.model.{Origin, Origins}
 import essttp.rootmodel.TaxRegime
+import essttp.rootmodel.ttp.eligibility.AssessmentCategory
 import models.{Language, Languages}
 import models.Languages.{English, Welsh}
 import org.jsoup.Jsoup
@@ -28,10 +29,10 @@ import play.api.http.{HeaderNames, Status}
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{Call, Result, Session}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import testsupport.Givens.canEqualPlaySession
 import testsupport.ItSpec
-import testsupport.TdRequest._
+import testsupport.TdRequest.*
 import testsupport.reusableassertions.{ContentAssertions, PegaRecreateSessionAssertions, RequestAssertions}
 import testsupport.stubs.{AuditConnectorStub, EssttpBackend}
 import testsupport.testdata.{JourneyJsonTemplates, PageUrls, TdAll, TdJsonBodies}
@@ -704,6 +705,67 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
                  |        "taxType": "$regime"
                  |}
             """.stripMargin
+              )
+              .as[JsObject]
+          )
+        }
+
+      "should redirect to ${routes.BankDetailsController.canSetUpDirectDebit.url} if the journey " +
+        "has been updated successfully and send an audit event when debts and liabilites = true" in {
+          stubCommonActions()
+          EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, origin)(
+            JourneyJsonTemplates.`Chosen Payment Plan`(
+              upfrontPaymentAmountJsonString = """{"DeclaredUpfrontPayment": {"amount": 200}}""",
+              origin = origin,
+              regimeDigitalCorrespondence = false,
+              assessmentCategory = AssessmentCategory.DebtsAndLiabilities
+            )
+          )
+          EssttpBackend.HasCheckedPlan.stubUpdateHasCheckedPlan(
+            TdAll.journeyId,
+            JourneyJsonTemplates.`Has Checked Payment Plan - No Affordability`(origin)
+          )
+
+          val result: Future[Result] = controller.checkPaymentScheduleSubmit(fakeRequest)
+          status(result) shouldBe Status.SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.BankDetailsController.detailsAboutBankAccount.url)
+          EssttpBackend.HasCheckedPlan.verifyUpdateHasCheckedPlanRequest(TdAll.journeyId)
+
+          AuditConnectorStub.verifyEventAudited(
+            auditType = "PlanDetails",
+            auditEvent = Json
+              .parse(
+                s"""
+                 |{
+                 |        "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+                 |        "origin": "${origin.toString().split('.').last}",
+                 |        "canPayInSixMonths": true,
+                 |        "unableToPayReason": [],
+                 |        "schedule": {
+                 |            "collectionDate": 28,
+                 |            "collectionLengthCalendarMonths": 2,
+                 |            "collections": [
+                 |                {
+                 |                    "amount": 555.70,
+                 |                    "collectionNumber": 2,
+                 |                    "paymentDate": "2022-09-28"
+                 |                },
+                 |                {
+                 |                    "amount": 555.70,
+                 |                    "collectionNumber": 1,
+                 |                    "paymentDate": "2022-08-28"
+                 |                }
+                 |            ],
+                 |            "initialPaymentAmount": 123.12,
+                 |            "totalInterestCharged": 0.06,
+                 |            "totalNoPayments": 3,
+                 |            "totalPayable": 1111.47,
+                 |            "totalPaymentWithoutInterest": 1111.41
+                 |        },
+                 |        "taxDetail": ${TdAll.taxDetailJsonString(origin.taxRegime)},
+                 |        "taxType": "$regime"
+                 |}
+                  """.stripMargin
               )
               .as[JsObject]
           )
