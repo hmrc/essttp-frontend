@@ -40,6 +40,8 @@ import models.audit.planbeforesubmission.PaymentPlanBeforeSubmissionAuditDetail
 import models.audit.returnFromAffordability.{Collections, PlanDetails, ReturnFromAffordabilityAuditDetail}
 import models.audit.{AuditDetail, Schedule, TaxDetail}
 import models.bars.response.{BarsError, VerifyResponse}
+import models.forms.AddLiabilitiesFormValue
+import models.forms.AddLiabilitiesFormValue.{No, Yes}
 import paymentsEmailVerification.models.EmailVerificationResult
 import play.api.http.Status
 import play.api.libs.json.*
@@ -259,7 +261,11 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
 
   private def toPaymentPlanBeforeSubmissionAuditDetail(
     journey: ChosenPaymentPlan
-  ): PaymentPlanBeforeSubmissionAuditDetail =
+  ): PaymentPlanBeforeSubmissionAuditDetail = {
+    val choseToIncludeFdls = journey.taxRegime match {
+      case TaxRegime.Simp => addLiabilitiesAnswersToBoolean(journey.HELP)
+      case _              => None
+    }
     PaymentPlanBeforeSubmissionAuditDetail(
       schedule = Schedule.createSchedule(journey.selectedPaymentPlan, journey.dayOfMonth),
       correlationId = journey.correlationId,
@@ -268,8 +274,11 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       taxDetail = toTaxDetail(journey.eligibilityCheckResult),
       regimeDigitalCorrespondence = journey.eligibilityCheckResult.regimeDigitalCorrespondence,
       canPayInSixMonths = canPayWithinSixMonthsAnswersToBoolean(journey.canPayWithinSixMonthsAnswers),
+      choseToIncludeFDLs = choseToIncludeFdls,
+      typeOfPlan = journey.assessmentCategory,
       unableToPayReason = whyCannotPayInFullAnswersToSet(journey.whyCannotPayInFullAnswers)
     )
+  }
 
   private def toPaymentPlanBeforeSubmissionAuditDetail(
     journey:         Either[AfterStartedPegaCase & Journey, AfterCheckedPaymentPlan & Journey],
@@ -302,6 +311,16 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
         )
     }
 
+    val assessmentCategory = journey.merge match {
+      case j: JourneyStage.AfterAssessmentCategoryDetermined => j.assessmentCategory
+      case _                                                 => sys.error("Could not find assessment category")
+    }
+
+    val choseToIncludeFdls = journey.fold(_.taxRegime, _.taxRegime) match {
+      case TaxRegime.Simp => addLiabilitiesAnswersToBoolean(journey.HELP)
+      case _ => None
+    }
+    
     PaymentPlanBeforeSubmissionAuditDetail(
       schedule = Schedule.createSchedule(getCaseResponse.paymentPlan, getCaseResponse.paymentDay),
       correlationId = journey.fold(_.correlationId, _.correlationId),
@@ -310,6 +329,8 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       taxDetail = toTaxDetail(eligibilityCheckResult),
       regimeDigitalCorrespondence = eligibilityCheckResult.regimeDigitalCorrespondence,
       canPayInSixMonths = canPayWithinSixMonthsAnswersToBoolean(canPayWithinSixMonthsAnswers),
+      choseToIncludeFDLs = choseToIncludeFdls,
+      typeOfPlan = assessmentCategory,
       unableToPayReason = whyCannotPayInFullAnswersToSet(whyCannotPayInFullAnswers)
     )
   }
@@ -446,6 +467,15 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
         )
       case _            => None
     }
+    val assessmentCategory = journey.merge match {
+      case j: JourneyStage.AfterAssessmentCategoryDetermined => j.assessmentCategory
+      case _ => sys.error("Could not find assessment category")
+    }
+
+    val choseToIncludeFdls = taxRegime match {
+      case TaxRegime.Simp => addLiabilitiesAnswersToBoolean(journey.HELP)
+      case _ => None
+    }
 
     PaymentPlanSetUpAuditDetail(
       bankDetails = directDebitDetails,
@@ -463,6 +493,8 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       emailAddress = maybeEmail,
       emailSource = maybeEmailSource,
       canPayInSixMonths = canPayWithinSixMonthsAnswersToBoolean(canPayWithinSixMonthsAnswers),
+      choseToIncludeFDLs = choseToIncludeFdls,
+      typeOfPlan = assessmentCategory,
       unableToPayReason = whyCannotPayInFullAnswersToSet(whyCannotPayInFullAnswers)
     )
   }
@@ -570,6 +602,12 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
     answers match {
       case WhyCannotPayInFullAnswers.AnswerNotRequired           => None
       case WhyCannotPayInFullAnswers.WhyCannotPayInFull(reasons) => Some(reasons)
+    }
+
+  private def addLiabilitiesAnswersToBoolean(answers: AddLiabilitiesFormValue): Option[Boolean] =
+    answers match {
+      case AddLiabilitiesFormValue.Yes => Some(true)
+      case AddLiabilitiesFormValue.No => Some(false)
     }
 
   private def toAuditString(origin: Origin) =

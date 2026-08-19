@@ -18,7 +18,7 @@ package models.audit.planbeforesubmission
 
 import essttp.journey.model.CorrelationId
 import essttp.rootmodel.CannotPayReason
-import essttp.rootmodel.ttp.eligibility.RegimeDigitalCorrespondence
+import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, RegimeDigitalCorrespondence}
 import models.audit.{AuditDetail, Schedule, TaxDetail}
 import play.api.libs.json.{Json, OWrites}
 
@@ -30,6 +30,8 @@ final case class PaymentPlanBeforeSubmissionAuditDetail(
   taxDetail:                   TaxDetail,
   regimeDigitalCorrespondence: RegimeDigitalCorrespondence,
   canPayInSixMonths:           Option[Boolean],
+  choseToIncludeFDLs:          Option[Boolean],
+  typeOfPlan:                  AssessmentCategory,
   unableToPayReason:           Option[Set[CannotPayReason]]
 ) extends AuditDetail {
   val auditType: String = "PlanDetails"
