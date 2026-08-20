@@ -309,23 +309,6 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       case _                                                 => sys.error("Could not find assessment category")
     }
 
-    val choseToIncludeFdls = eligibilityCheckResult.foldOnAssessmentCategory(
-      _ => None,
-      _ => None,
-      _ => None,
-      (debts, liabilities, debtAndLiabilities) =>
-        if (
-          debts.assessmentEligibilityStatus && liabilities.assessmentEligibilityStatus && debtAndLiabilities.assessmentEligibilityStatus
-        )
-          assessmentCategory match {
-            case AssessmentCategory.Debts               => Some(false)
-            case AssessmentCategory.DebtsAndLiabilities => Some(true)
-            case category                               => sys.error(s"Got unexpected assessment category $category")
-          }
-        else
-          None
-    )
-
     PaymentPlanBeforeSubmissionAuditDetail(
       schedule = Schedule.createSchedule(getCaseResponse.paymentPlan, getCaseResponse.paymentDay),
       correlationId = journey.fold(_.correlationId, _.correlationId),
@@ -334,7 +317,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       taxDetail = toTaxDetail(eligibilityCheckResult),
       regimeDigitalCorrespondence = eligibilityCheckResult.regimeDigitalCorrespondence,
       canPayInSixMonths = canPayWithinSixMonthsAnswersToBoolean(canPayWithinSixMonthsAnswers),
-      choseToIncludeFDLs = choseToIncludeFdls,
+      choseToIncludeFDLs = choseToIncludeFdls(eligibilityCheckResult, assessmentCategory),
       typeOfPlan = assessmentCategory,
       unableToPayReason = whyCannotPayInFullAnswersToSet(whyCannotPayInFullAnswers)
     )
