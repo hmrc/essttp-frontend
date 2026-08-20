@@ -680,18 +680,18 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
                  |        "origin": "${origin.toString().split('.').last}",
                  |        "canPayInSixMonths": true,
                  |        "typeOfPlan" : "Standard",
-                 |        "unableToPayReason": [],
+                 |        "unableToPayReason": ["ChangeToPersonalCircumstances", "NoMoneySetAside"],
                  |        "schedule": {
                  |            "collectionDate": 28,
                  |            "collectionLengthCalendarMonths": 2,
                  |            "collections": [
                  |                {
-                 |                    "amount": 555.7,
+                 |                    "amount": 555.70,
                  |                    "collectionNumber": 2,
                  |                    "paymentDate": "2022-09-28"
                  |                },
                  |                {
-                 |                    "amount": 555.7,
+                 |                    "amount": 555.70,
                  |                    "collectionNumber": 1,
                  |                    "paymentDate": "2022-08-28"
                  |                }
@@ -712,7 +712,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
         }
 
       "should redirect to ${routes.BankDetailsController.canSetUpDirectDebit.url} if the journey " +
-        "has been updated successfully and send an audit event when debts and liabilites = true" in {
+        "has been updated successfully and send an audit event when FDLs = true" in {
           stubCommonActions()
           EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, origin)(
             JourneyJsonTemplates.`Chosen Payment Plan`(
@@ -748,7 +748,75 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
                  |        "canPayInSixMonths": true,
                  |        "choseToIncludeFDLs" : true,
                  |        "typeOfPlan" : "debtsAndLiabilities",
-                 |        "unableToPayReason": [],
+                 |        "unableToPayReason": ["ChangeToPersonalCircumstances", "NoMoneySetAside"],
+                 |        "schedule": {
+                 |            "collectionDate": 28,
+                 |            "collectionLengthCalendarMonths": 2,
+                 |            "collections": [
+                 |                {
+                 |                    "amount": 555.70,
+                 |                    "collectionNumber": 2,
+                 |                    "paymentDate": "2022-09-28"
+                 |                },
+                 |                {
+                 |                    "amount": 555.70,
+                 |                    "collectionNumber": 1,
+                 |                    "paymentDate": "2022-08-28"
+                 |                }
+                 |            ],
+                 |            "initialPaymentAmount": 123.12,
+                 |            "totalInterestCharged": 0.06,
+                 |            "totalNoPayments": 3,
+                 |            "totalPayable": 1111.47,
+                 |            "totalPaymentWithoutInterest": 1111.41
+                 |        },
+                 |        "taxDetail": ${TdAll.taxDetailJsonString(origin.taxRegime)},
+                 |        "taxType": "$regime"
+                 |}
+                  """.stripMargin
+              )
+              .as[JsObject]
+          )
+        }
+
+      "should redirect to ${routes.BankDetailsController.canSetUpDirectDebit.url} if the journey " +
+        "has been updated successfully and send an audit event when FDLs = false" in {
+          stubCommonActions()
+          EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, origin)(
+            JourneyJsonTemplates.`Chosen Payment Plan`(
+              upfrontPaymentAmountJsonString = """{"DeclaredUpfrontPayment": {"amount": 200}}""",
+              origin = origin,
+              regimeDigitalCorrespondence = false,
+              assessmentCategory = AssessmentCategory.Debts,
+              eligibilityResultAssessmentCategories = List(
+                AssessmentCategoryInfo(AssessmentCategory.Debts),
+                AssessmentCategoryInfo(AssessmentCategory.Liabilities),
+                AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities)
+              )
+            )
+          )
+          EssttpBackend.HasCheckedPlan.stubUpdateHasCheckedPlan(
+            TdAll.journeyId,
+            JourneyJsonTemplates.`Has Checked Payment Plan - No Affordability`(origin)
+          )
+
+          val result: Future[Result] = controller.checkPaymentScheduleSubmit(fakeRequest)
+          status(result) shouldBe Status.SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.BankDetailsController.detailsAboutBankAccount.url)
+          EssttpBackend.HasCheckedPlan.verifyUpdateHasCheckedPlanRequest(TdAll.journeyId)
+
+          AuditConnectorStub.verifyEventAudited(
+            auditType = "PlanDetails",
+            auditEvent = Json
+              .parse(
+                s"""
+                 |{
+                 |        "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+                 |        "origin": "${origin.toString().split('.').last}",
+                 |        "canPayInSixMonths": true,
+                 |        "choseToIncludeFDLs" : false,
+                 |        "typeOfPlan" : "debts",
+                 |        "unableToPayReason": ["ChangeToPersonalCircumstances", "NoMoneySetAside"],
                  |        "schedule": {
                  |            "collectionDate": 28,
                  |            "collectionLengthCalendarMonths": 2,
