@@ -650,7 +650,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
 
     s"[$regime journey] POST ${routes.PaymentScheduleController.checkPaymentScheduleSubmit.url}" - {
 
-      "should redirect to ${routes.BankDetailsController.canSetUpDirectDebit.url} if the journey " +
+      s"should redirect to ${routes.BankDetailsController.detailsAboutBankAccount.url} if the journey " +
         "has been updated successfully and send an audit event" in {
           stubCommonActions()
           EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, origin)(
@@ -677,9 +677,10 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
                 s"""
                  |{
                  |        "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+                 |        "regimeDigitalCorrespondence" : false,
                  |        "origin": "${origin.toString().split('.').last}",
                  |        "canPayInSixMonths": true,
-                 |        "typeOfPlan" : "Standard",
+                 |        "typeOfPlan" : "standard",
                  |        "unableToPayReason": ["ChangeToPersonalCircumstances", "NoMoneySetAside"],
                  |        "schedule": {
                  |            "collectionDate": 28,
@@ -711,7 +712,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
           )
         }
 
-      "should redirect to ${routes.BankDetailsController.canSetUpDirectDebit.url} if the journey " +
+      s"should redirect to ${routes.BankDetailsController.detailsAboutBankAccount.url} if the journey " +
         "has been updated successfully and send an audit event when FDLs = true" in {
           stubCommonActions()
           EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, origin)(
@@ -744,6 +745,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
                 s"""
                  |{
                  |        "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+                 |        "regimeDigitalCorrespondence" : false,
                  |        "origin": "${origin.toString().split('.').last}",
                  |        "canPayInSixMonths": true,
                  |        "choseToIncludeFDLs" : true,
@@ -779,7 +781,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
           )
         }
 
-      "should redirect to ${routes.BankDetailsController.canSetUpDirectDebit.url} if the journey " +
+      s"should redirect to ${routes.BankDetailsController.detailsAboutBankAccount.url} if the journey " +
         "has been updated successfully and send an audit event when FDLs = false" in {
           stubCommonActions()
           EssttpBackend.SelectedPaymentPlan.findJourney(testCrypto, origin)(
@@ -812,6 +814,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
                 s"""
                  |{
                  |        "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+                 |        "regimeDigitalCorrespondence" : false,
                  |        "origin": "${origin.toString().split('.').last}",
                  |        "canPayInSixMonths": true,
                  |        "choseToIncludeFDLs" : false,
