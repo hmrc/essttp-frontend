@@ -16,7 +16,7 @@
 
 package testsupport.stubs
 
-import com.github.tomakehurst.wiremock.client.WireMock.{equalToJson, exactly, postRequestedFor, urlPathEqualTo, verify}
+import com.github.tomakehurst.wiremock.client.WireMock.{equalToJson, exactly, matchingJsonPath, postRequestedFor, urlPathEqualTo, verify}
 import org.scalatest.concurrent.Eventually
 import play.api.libs.json.JsObject
 
@@ -34,7 +34,7 @@ object AuditConnectorStub extends Eventually {
           equalToJson(s"""{ "auditSource" : "set-up-payment-plan"  }""", true, true)
         )
         .withRequestBody(
-          equalToJson(s"""{ "detail" : ${auditEvent.toString} }""", true, true)
+          matchingJsonPath("$.detail", equalToJson(auditEvent.toString, true, true))
         )
     )
   }

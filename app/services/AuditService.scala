@@ -28,7 +28,7 @@ import essttp.rootmodel.*
 import essttp.rootmodel.bank.BankDetails
 import essttp.rootmodel.pega.{GetCaseResponse, StartCaseResponse}
 import essttp.rootmodel.ttp.arrangement.ArrangementResponse
-import essttp.rootmodel.ttp.eligibility.{EligibilityCheckResult, EmailSource}
+import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, EligibilityCheckResult, EmailSource}
 import essttp.utils.Errors
 import models.audit.bars.*
 import models.audit.canUserPayInSixMonths.{CanUserPayInSixMonthsAuditDetail, UserEnteredDetails}
@@ -268,6 +268,8 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       taxDetail = toTaxDetail(journey.eligibilityCheckResult),
       regimeDigitalCorrespondence = journey.eligibilityCheckResult.regimeDigitalCorrespondence,
       canPayInSixMonths = canPayWithinSixMonthsAnswersToBoolean(journey.canPayWithinSixMonthsAnswers),
+      choseToIncludeFDLs = choseToIncludeFdls(journey.eligibilityCheckResult, journey.assessmentCategory),
+      typeOfPlan = journey.assessmentCategory,
       unableToPayReason = whyCannotPayInFullAnswersToSet(journey.whyCannotPayInFullAnswers)
     )
 
@@ -302,6 +304,11 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
         )
     }
 
+    val assessmentCategory = journey.merge match {
+      case j: JourneyStage.AfterAssessmentCategoryDetermined => j.assessmentCategory
+      case _                                                 => sys.error("Could not find assessment category")
+    }
+
     PaymentPlanBeforeSubmissionAuditDetail(
       schedule = Schedule.createSchedule(getCaseResponse.paymentPlan, getCaseResponse.paymentDay),
       correlationId = journey.fold(_.correlationId, _.correlationId),
@@ -310,6 +317,8 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       taxDetail = toTaxDetail(eligibilityCheckResult),
       regimeDigitalCorrespondence = eligibilityCheckResult.regimeDigitalCorrespondence,
       canPayInSixMonths = canPayWithinSixMonthsAnswersToBoolean(canPayWithinSixMonthsAnswers),
+      choseToIncludeFDLs = choseToIncludeFdls(eligibilityCheckResult, assessmentCategory),
+      typeOfPlan = assessmentCategory,
       unableToPayReason = whyCannotPayInFullAnswersToSet(whyCannotPayInFullAnswers)
     )
   }
@@ -446,6 +455,9 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
         )
       case _            => None
     }
+    val assessmentCategory             = journey.merge match {
+      case j: JourneyStage.AfterAssessmentCategoryDetermined => j.assessmentCategory
+    }
 
     PaymentPlanSetUpAuditDetail(
       bankDetails = directDebitDetails,
@@ -463,6 +475,8 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       emailAddress = maybeEmail,
       emailSource = maybeEmailSource,
       canPayInSixMonths = canPayWithinSixMonthsAnswersToBoolean(canPayWithinSixMonthsAnswers),
+      choseToIncludeFDLs = choseToIncludeFdls(eligibilityCheckResult, assessmentCategory),
+      typeOfPlan = assessmentCategory,
       unableToPayReason = whyCannotPayInFullAnswersToSet(whyCannotPayInFullAnswers)
     )
   }
@@ -571,6 +585,26 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       case WhyCannotPayInFullAnswers.AnswerNotRequired           => None
       case WhyCannotPayInFullAnswers.WhyCannotPayInFull(reasons) => Some(reasons)
     }
+
+  private def choseToIncludeFdls(
+    eligibilityCheckResult: EligibilityCheckResult,
+    assessmentCategory:     AssessmentCategory
+  ) = eligibilityCheckResult.foldOnAssessmentCategory(
+    _ => None,
+    _ => None,
+    _ => None,
+    (debts, liabilities, debtAndLiabilities) =>
+      if (
+        debts.assessmentEligibilityStatus && liabilities.assessmentEligibilityStatus && debtAndLiabilities.assessmentEligibilityStatus
+      )
+        assessmentCategory match {
+          case AssessmentCategory.Debts               => Some(false)
+          case AssessmentCategory.DebtsAndLiabilities => Some(true)
+          case category                               => sys.error(s"Got unexpected assessment category $category")
+        }
+      else
+        None
+  )
 
   private def toAuditString(origin: Origin) =
     origin.toString.split('.').lastOption.getOrElse(origin.toString)
