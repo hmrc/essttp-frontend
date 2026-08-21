@@ -17,7 +17,8 @@
 package models
 
 import enumeratum.{Enum, EnumEntry}
-import essttp.rootmodel.ttp.eligibility.{AssessmentEligibilityRules, EligibilityRules}
+import essttp.rootmodel.TaxRegime
+import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, AssessmentEligibilityRules, ChargeTypeAssessments, EligibilityRules}
 
 import scala.collection.immutable
 
@@ -80,43 +81,83 @@ object EligibilityErrors extends Enum[EligibilityError] {
   override val values: immutable.IndexedSeq[EligibilityError] = findValues
 
   def toEligibilityError(
-    eligibilityRules:           EligibilityRules,
-    assessmentEligibilityRules: AssessmentEligibilityRules
-  ): Option[EligibilityError] =
-    (eligibilityRules, assessmentEligibilityRules) match {
-      case (e1, e2) if e1.atLeastOneReasonForIneligibility && e2.atLeastOneReasonForIneligibility =>
-        Some(MultipleReasons)
-      case (e, _) if e.moreThanOneReasonForIneligibility                                          => Some(MultipleReasons)
-      case (_, e) if e.moreThanOneReasonForIneligibility                                          => Some(MultipleReasons)
-      case (e, _) if e.hasRlsOnAddress                                                            => Some(HasRlsOnAddress)
-      case (e, _) if e.markedAsInsolvent                                                          => Some(MarkedAsInsolvent)
-      case (e, _) if e.existingTTP                                                                => Some(ExistingTtp)
-      case (e, _) if e.missingFiledReturns                                                        => Some(MissingFiledReturns)
-      case (e, _) if e.hasInvalidInterestSignals.contains(true)                                   => Some(HasInvalidInterestSignals)
-      case (e, _) if e.dmSpecialOfficeProcessingRequired.contains(true)                           => Some(DmSpecialOfficeProcessingRequired)
-      case (e, _) if e.cannotFindLockReason.contains(true)                                        => Some(CannotFindLockReason)
-      case (e, _) if e.creditsNotAllowed.contains(true)                                           => Some(CreditsNotAllowed)
-      case (e, _) if e.isMoreThanMaxPaymentReference.contains(true)                               => Some(IsMoreThanMaxPaymentReference)
-      case (e, _) if e.hasInvalidInterestSignalsCESA.contains(true)                               => Some(HasInvalidInterestSignalsCESA)
-      case (e, _) if e.hasDisguisedRemuneration.contains(true)                                    => Some(HasDisguisedRemuneration)
-      case (e, _) if e.hasCapacitor.contains(true)                                                => Some(HasCapacitor)
-      case (e, _) if e.dmSpecialOfficeProcessingRequiredCDCS.contains(true)                       =>
-        Some(DmSpecialOfficeProcessingRequiredCDCS)
-      case (e, _) if e.isAnMtdCustomer.contains(true)                                             => Some(IsAnMtdCustomer)
-      case (e, _) if e.dmSpecialOfficeProcessingRequiredCESA.contains(true)                       =>
-        Some(DmSpecialOfficeProcessingRequiredCESA)
-      case (e, _) if e.noMtditsaEnrollment.contains(true)                                         => Some(NoMtditsaEnrollment)
-      case (e, _) if e.allChargeTypeAssessmentsFailed.contains(true)                              => Some(AllChargeTypeAssessmentsFailed)
-      case (e, _) if e.noValidPlanAfterAssessments.contains(true)                                 => Some(NoValidPlanAfterAssessments)
-      case (_, e) if e.isLessThanMinDebtAllowance                                                 => Some(IsLessThanMinDebtAllowance)
-      case (_, e) if e.isMoreThanMaxDebtAllowance                                                 => Some(IsMoreThanMaxDebtAllowance)
-      case (_, e) if e.disallowedChargeLockTypes                                                  => Some(DisallowedChargeLockTypes)
-      case (_, e) if e.chargesOverMaxDebtAge.contains(true)                                       => Some(ChargesOverMaxDebtAge)
-      case (_, e) if e.ineligibleChargeTypes                                                      => Some(IneligibleChargeTypes)
-      case (_, e) if e.noDueDatesReached                                                          =>
+    eligibilityRules:      EligibilityRules,
+    chargeTypeAssessments: List[ChargeTypeAssessments],
+    taxRegime:             TaxRegime
+  ): Option[EligibilityError] = {
+    def hasAssessmentEligibilityRule(
+      assessmentCategory: AssessmentCategory,
+      rule:               AssessmentEligibilityRules => Boolean
+    ): Boolean =
+      chargeTypeAssessments
+        .find(_.assessmentCategory == assessmentCategory)
+        .exists(c => rule(c.assessmentEligibilityRules))
+
+    def hasAssessmentEligibilityRuleOpt(
+      assessmentCategory: AssessmentCategory,
+      rule:               AssessmentEligibilityRules => Option[Boolean]
+    ): Boolean =
+      chargeTypeAssessments
+        .find(_.assessmentCategory == assessmentCategory)
+        .exists(c => rule(c.assessmentEligibilityRules).contains(true))
+
+    // N.B. be careful of the order below, the order matters
+    (eligibilityRules, chargeTypeAssessments) match {
+      case (_, e) if hasAssessmentEligibilityRule(AssessmentCategory.Standard, _.noDueDatesReached)          =>
         Some(NoDueDatesReached)
-      case (_, e) if e.chargesBeforeMaxAccountingDate.contains(true)                              => Some(ChargesBeforeMaxAccountingDate)
-      case (_, _)                                                                                 => None // all false
+      case (_, e) if taxRegime == TaxRegime.Simp && e.isEmpty                                                => Some(NoDueDatesReached)
+      case (_, e) if hasAssessmentEligibilityRule(AssessmentCategory.Standard, _.isLessThanMinDebtAllowance) =>
+        Some(IsLessThanMinDebtAllowance)
+      case (_, e) if hasAssessmentEligibilityRule(AssessmentCategory.Debts, _.isLessThanMinDebtAllowance)    =>
+        Some(IsLessThanMinDebtAllowance)
+      case (_, e)
+          if hasAssessmentEligibilityRule(AssessmentCategory.Liabilities, _.isLessThanMinDebtAllowance) &&
+            e.map(_.assessmentCategory) == List(AssessmentCategory.Liabilities) =>
+        Some(IsLessThanMinDebtAllowance)
+      case (e, _) if e.hasRlsOnAddress                                                                       => Some(HasRlsOnAddress)
+      case (e, _) if e.moreThanOneReasonForIneligibility                                                     => Some(MultipleReasons)
+      case (e1, e2)
+          if e1.atLeastOneReasonForIneligibility &&
+            e2.exists(_.assessmentEligibilityRules.atLeastOneReasonForIneligibility) =>
+        Some(MultipleReasons)
+      case (_, e) if e.exists(_.assessmentEligibilityRules.moreThanOneReasonForIneligibility)                => Some(MultipleReasons)
+      case (_, e) if hasAssessmentEligibilityRule(AssessmentCategory.Standard, _.isMoreThanMaxDebtAllowance) =>
+        Some(IsMoreThanMaxDebtAllowance)
+      case (_, e) if hasAssessmentEligibilityRule(AssessmentCategory.Debts, _.isMoreThanMaxDebtAllowance)    =>
+        Some(IsMoreThanMaxDebtAllowance)
+      case (_, e)
+          if hasAssessmentEligibilityRule(AssessmentCategory.Liabilities, _.isMoreThanMaxDebtAllowance) &&
+            e.map(_.assessmentCategory) == List(AssessmentCategory.Liabilities) =>
+        Some(IsMoreThanMaxDebtAllowance)
+      case (_, e) if hasAssessmentEligibilityRuleOpt(AssessmentCategory.Standard, _.chargesOverMaxDebtAge)   =>
+        Some(ChargesOverMaxDebtAge)
+      case (_, e) if hasAssessmentEligibilityRuleOpt(AssessmentCategory.Debts, _.chargesOverMaxDebtAge)      =>
+        Some(ChargesOverMaxDebtAge)
+      case (e, _) if e.existingTTP                                                                           => Some(ExistingTtp)
+      case (e, _) if e.missingFiledReturns                                                                   => Some(MissingFiledReturns)
+      case (_, e) if e.exists(_.assessmentEligibilityRules.disallowedChargeLockTypes)                        => Some(DisallowedChargeLockTypes)
+      case (e, _) if e.markedAsInsolvent                                                                     => Some(MarkedAsInsolvent)
+      case (_, e) if e.exists(_.assessmentEligibilityRules.ineligibleChargeTypes)                            => Some(IneligibleChargeTypes)
+      case (e, _) if e.hasInvalidInterestSignals.contains(true)                                              => Some(HasInvalidInterestSignals)
+      case (e, _) if e.dmSpecialOfficeProcessingRequired.contains(true)                                      => Some(DmSpecialOfficeProcessingRequired)
+      case (e, _) if e.cannotFindLockReason.contains(true)                                                   => Some(CannotFindLockReason)
+      case (e, _) if e.creditsNotAllowed.contains(true)                                                      => Some(CreditsNotAllowed)
+      case (e, _) if e.isMoreThanMaxPaymentReference.contains(true)                                          => Some(IsMoreThanMaxPaymentReference)
+      case (e, _) if e.hasInvalidInterestSignalsCESA.contains(true)                                          => Some(HasInvalidInterestSignalsCESA)
+      case (e, _) if e.hasDisguisedRemuneration.contains(true)                                               => Some(HasDisguisedRemuneration)
+      case (e, _) if e.hasCapacitor.contains(true)                                                           => Some(HasCapacitor)
+      case (e, _) if e.dmSpecialOfficeProcessingRequiredCDCS.contains(true)                                  =>
+        Some(DmSpecialOfficeProcessingRequiredCDCS)
+      case (e, _) if e.isAnMtdCustomer.contains(true)                                                        => Some(IsAnMtdCustomer)
+      case (e, _) if e.dmSpecialOfficeProcessingRequiredCESA.contains(true)                                  =>
+        Some(DmSpecialOfficeProcessingRequiredCESA)
+      case (e, _) if e.noMtditsaEnrollment.contains(true)                                                    => Some(NoMtditsaEnrollment)
+      case (e, _) if e.allChargeTypeAssessmentsFailed.contains(true)                                         => Some(AllChargeTypeAssessmentsFailed)
+      case (e, _) if e.noValidPlanAfterAssessments.contains(true)                                            => Some(NoValidPlanAfterAssessments)
+      case (_, e) if e.exists(_.assessmentEligibilityRules.chargesBeforeMaxAccountingDate.contains(true))    =>
+        Some(ChargesBeforeMaxAccountingDate)
+      case (_, _)                                                                                            => None // all false
     }
+  }
 
 }

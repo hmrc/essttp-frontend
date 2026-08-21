@@ -18,7 +18,7 @@ package testsupport.testdata
 
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Origin, Origins, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.TaxRegime.Sa
-import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, AssessmentEligibilityRules, EligibilityPass, EligibilityRules, Identification}
+import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, EligibilityPass, EligibilityRules, Identification}
 import essttp.rootmodel.{DayOfMonth, TaxRegime, UpfrontPaymentAmount}
 import essttp.rootmodel.bank.TypeOfBankAccount
 import models.AssessmentCategoryInfo
@@ -133,7 +133,6 @@ object TdJsonBodies {
   def eligibilityCheckJourneyInfo(
     eligibilityPass:                    EligibilityPass = TdAll.eligibleEligibilityPass,
     eligibilityRules:                   EligibilityRules = TdAll.eligibleEligibilityRules,
-    assessmentEligibilityRules:         AssessmentEligibilityRules = TdAll.assessmentEligibilityRules,
     taxRegime:                          TaxRegime,
     encrypter:                          Encrypter,
     regimeDigitalCorrespondence:        Boolean = true,
@@ -222,17 +221,19 @@ object TdJsonBodies {
          |    }
          |  ],
          |    "assessmentEligibilityRules" : {
-         |    "isLessThanMinDebtAllowance" : ${assessmentEligibilityRules.isLessThanMinDebtAllowance.toString},
-         |    "isMoreThanMaxDebtAllowance" : ${assessmentEligibilityRules.isMoreThanMaxDebtAllowance.toString},
-         |    "disallowedChargeLockTypes" : ${assessmentEligibilityRules.disallowedChargeLockTypes.toString},
-         |    "chargesOverMaxDebtAge" : ${assessmentEligibilityRules.chargesOverMaxDebtAge.getOrElse(false).toString},
-         |    "ineligibleChargeTypes" : ${assessmentEligibilityRules.ineligibleChargeTypes.toString},
-         |    "noDueDatesReached": ${assessmentEligibilityRules.noDueDatesReached.toString},
-         |    "chargesBeforeMaxAccountingDate": ${assessmentEligibilityRules.chargesBeforeMaxAccountingDate
+         |    "isLessThanMinDebtAllowance" : ${assessmentCategoryInfo.assessmentEligibilityRules.isLessThanMinDebtAllowance.toString},
+         |    "isMoreThanMaxDebtAllowance" : ${assessmentCategoryInfo.assessmentEligibilityRules.isMoreThanMaxDebtAllowance.toString},
+         |    "disallowedChargeLockTypes" : ${assessmentCategoryInfo.assessmentEligibilityRules.disallowedChargeLockTypes.toString},
+         |    "chargesOverMaxDebtAge" : ${assessmentCategoryInfo.assessmentEligibilityRules.chargesOverMaxDebtAge
+          .getOrElse(false)
+          .toString},
+         |    "ineligibleChargeTypes" : ${assessmentCategoryInfo.assessmentEligibilityRules.ineligibleChargeTypes.toString},
+         |    "noDueDatesReached": ${assessmentCategoryInfo.assessmentEligibilityRules.noDueDatesReached.toString},
+         |    "chargesBeforeMaxAccountingDate": ${assessmentCategoryInfo.assessmentEligibilityRules.chargesBeforeMaxAccountingDate
           .getOrElse(false)
           .toString}
          |  },
-         |  "assessmentEligibilityStatus": ${assessmentCategoryInfo.eligibilityStatus.toString},
+         |  "assessmentEligibilityStatus": ${assessmentCategoryInfo.assessmentEligibilityRules.isEligible.toString},
          |  "assessmentCategory": "${assessmentCategoryInfo.category.entryName}"
          |  }""".stripMargin
     )

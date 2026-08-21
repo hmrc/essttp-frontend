@@ -32,6 +32,7 @@ import essttp.rootmodel.ttp.eligibility.*
 import essttp.rootmodel.*
 import essttp.rootmodel.TaxRegime.Sa
 import essttp.rootmodel.ttp.CustomerTypes.MTDITSA
+import models.AssessmentCategoryInfo
 import play.api.libs.json.Json
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
@@ -325,15 +326,14 @@ object TdAll {
   def eligibilityCheckResult(
     eligibilityPass:                     EligibilityPass,
     eligibilityRules:                    EligibilityRules,
-    assessmentEligibilityRules:          AssessmentEligibilityRules,
+    assessmentCategoryInfo:              Seq[AssessmentCategoryInfo],
     taxRegime:                           TaxRegime,
     regimeDigitalCorrespondence:         RegimeDigitalCorrespondence,
     chargeIsInterestBearingCharge:       Option[Boolean] = None,
     chargeUseChargeReference:            Option[Boolean] = None,
     chargeChargeBeforeMaxAccountingDate: Option[Boolean] = None,
     ddInProgress:                        Option[Boolean] = None,
-    maybeIndividalDetails:               Option[IndividualDetails] = None,
-    assessmentCategories:                Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard)
+    maybeIndividalDetails:               Option[IndividualDetails] = None
   ): EligibilityCheckResult =
     EligibilityCheckResult(
       processingDateTime = ProcessingDateTime("2022-03-23T13:49:51.141Z"),
@@ -379,7 +379,7 @@ object TdAll {
       regimeDigitalCorrespondence = regimeDigitalCorrespondence,
       futureChargeLiabilitiesExcluded = false,
       chargeTypesExcluded = None,
-      chargeTypeAssessments = assessmentCategories.toList.map(assessmentCategory =>
+      chargeTypeAssessments = assessmentCategoryInfo.toList.map(info =>
         ChargeTypeAssessments(
           List(
             ChargeTypeAssessment(
@@ -421,9 +421,9 @@ object TdAll {
               )
             )
           ),
-          assessmentEligibilityRules = assessmentEligibilityRules,
-          assessmentEligibilityStatus = true,
-          assessmentCategory
+          assessmentEligibilityRules = info.assessmentEligibilityRules,
+          assessmentEligibilityStatus = info.assessmentEligibilityRules.isEligible,
+          info.category
         )
       )
     )
