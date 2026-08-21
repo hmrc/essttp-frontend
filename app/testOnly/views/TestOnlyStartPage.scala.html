@@ -49,91 +49,66 @@ appConfig: AppConfig
     "Test only starter page"
 }
 
-@toCheckboxItem(enumEntry: EnumEntry, checkedByDefault: Boolean = false, conditionalHtml: Option[Html] = None) = @{
+@toCheckboxItem(enumEntry: EnumEntry,
+        checkedByDefault: Boolean = false,
+        conditionalHtml: Option[Html] = None,
+        prefix: String = "",
+        hint: Option[Hint] = None) = @{
+  val value = s"$prefix${enumEntry.entryName}"
   CheckboxItem(
       content = Text(enumEntry.entryName),
-      value = enumEntry.entryName,
-      checked = if(form.data.isEmpty) checkedByDefault else form.data.exists(_._2 == enumEntry.entryName),
-      conditionalHtml = conditionalHtml
+      value = value,
+      checked = if(form.data.isEmpty) checkedByDefault else form.data.exists(_._2 == value),
+      conditionalHtml = conditionalHtml,
+      hint = hint
   )
 }
 
-@assessmentCategoriesConditionalHtml(a: AssessmentCategory) = {
-    @govukRadios(Radios(
-      fieldset = Some(Fieldset(
-      legend = Some(Legend(
-        content = Text("Eligible??"),
-        classes = "govuk-fieldset__legend--s"
-        ))
-      )),
-      idPrefix = Some(s"assessmentCategories.${a.entryName}.eligibility"),
-      name = s"assessmentCategories.${a.entryName}.eligibility",
-      items = Seq(
-        RadioItem(
-          content = Text("Yes"),
-          value = Some("Yes"),
-          checked = true
-        ),
-        RadioItem(
-          content = Text("No"),
-          value = Some("No"),
-          checked = false
-        )
-      ),
-      classes = "govuk-radios--inline"
-    ))
-}
-
-@assessmentCategoriesCheckboxes = {
-    @govukCheckboxes(Checkboxes(
-        fieldset = Some(Fieldset(
-            legend = Some(Legend(
-                content = Text("Assessment Categories"),
-                classes = "govuk-fieldset__legend--m",
-                isPageHeading = false
-            ))
-        )),
-        idPrefix = Some("assessmentCategories"),
-        name = "assessmentCategories[]",
-        items = AssessmentCategory.values.map(c =>
-            toCheckboxItem(
-                c,
-                checkedByDefault = c == AssessmentCategory.Standard,
-                conditionalHtml = Some(assessmentCategoriesConditionalHtml(c))
-            )
-        ),
-        hint = Some(Hint(content = Text("Select one or more"))),
-        classes = "govuk-checkboxes--small"
-    ))
+@assessmentEligibilityErrorCheckboxes = @{
+  Seq(
+    EligibilityErrors.IsLessThanMinDebtAllowance,
+    EligibilityErrors.IsMoreThanMaxDebtAllowance,
+    EligibilityErrors.DisallowedChargeLockTypes,
+    EligibilityErrors.ChargesOverMaxDebtAge,
+    EligibilityErrors.IneligibleChargeTypes,
+    EligibilityErrors.NoDueDatesReached,
+    EligibilityErrors.ChargesBeforeMaxAccountingDate
+  )
 }
 
 @epayeEligibilityErrorCheckboxes = @{
     EligibilityErrors.values
-      .filterNot(e => e == EligibilityErrors.MultipleReasons
-            || e == EligibilityErrors.ChargesBeforeMaxAccountingDate
+      .filterNot(e =>
+        assessmentEligibilityErrorCheckboxes.contains(e) || (
+           e == EligibilityErrors.MultipleReasons
             || e == EligibilityErrors.HasInvalidInterestSignalsCESA
             || e == EligibilityErrors.HasDisguisedRemuneration
             || e == EligibilityErrors.HasCapacitor
             || e == EligibilityErrors.IsAnMtdCustomer
             || e == EligibilityErrors.NoMtditsaEnrollment
+        )
     ).map(toCheckboxItem(_))
 }
 
 @vatEligibilityErrorCheckboxes = @{
     EligibilityErrors.values
-      .filterNot(e => e == EligibilityErrors.MultipleReasons
+      .filterNot(e =>
+        assessmentEligibilityErrorCheckboxes.contains(e) || (
+          e == EligibilityErrors.MultipleReasons
             || e == EligibilityErrors.HasInvalidInterestSignalsCESA
             || e == EligibilityErrors.HasDisguisedRemuneration
             || e == EligibilityErrors.HasCapacitor
             || e == EligibilityErrors.IsAnMtdCustomer
             || e == EligibilityErrors.NoMtditsaEnrollment
+       )
     ).map(toCheckboxItem(_))
 }
 
 @simpEligibilityErrorCheckboxes = @{
     EligibilityErrors.values
-        .filterNot(e => e == EligibilityErrors.MultipleReasons
-            || e == EligibilityErrors.ChargesBeforeMaxAccountingDate
+        .filterNot(e =>
+        assessmentEligibilityErrorCheckboxes.contains(e) || (
+          e == EligibilityErrors.MultipleReasons
             || e == EligibilityErrors.HasInvalidInterestSignalsCESA
             || e == EligibilityErrors.HasDisguisedRemuneration
             || e == EligibilityErrors.DmSpecialOfficeProcessingRequiredCESA
@@ -141,15 +116,61 @@ appConfig: AppConfig
             || e == EligibilityErrors.HasCapacitor
             || e == EligibilityErrors.IsAnMtdCustomer
             || e == EligibilityErrors.NoMtditsaEnrollment
+        )
     ).map(toCheckboxItem(_))
 }
 
 @saEligibilityErrorCheckboxes = @{
     EligibilityErrors.values
-    .filterNot(e => e == EligibilityErrors.MultipleReasons
+    .filterNot(e =>
+        assessmentEligibilityErrorCheckboxes.contains(e) || (
+          e == EligibilityErrors.MultipleReasons
         || e == EligibilityErrors.NoMtditsaEnrollment
+      )
     ).map(toCheckboxItem(_))
 }
+
+@assessmentCategoriesCheckboxes = {
+  @govukCheckboxes(Checkboxes(
+      fieldset = Some(Fieldset(
+          legend = Some(Legend(
+              content = Text("Assessment Categories"),
+              classes = "govuk-fieldset__legend--m",
+              isPageHeading = false
+          ))
+      )),
+      idPrefix = Some("assessmentCategories"),
+      name = "assessmentCategories[]",
+      items = AssessmentCategory.values.map(c =>
+          toCheckboxItem(
+              c,
+              checkedByDefault = c == AssessmentCategory.Standard,
+              conditionalHtml = {
+                  Some(
+                    govukCheckboxes(Checkboxes(
+                      fieldset = Some(Fieldset(
+                          legend = Some(Legend(
+                              content = Text("Assessment Eligibility Rule failures"),
+                              classes = "govuk-fieldset__legend--s",
+                              isPageHeading = false
+                          ))
+                      )),
+                      idPrefix = Some(s"${c.entryName}-"),
+                      name = s"${c.entryName}-assessmentEligibilityRules[]",
+                      items = assessmentEligibilityErrorCheckboxes.map(toCheckboxItem(_)),
+                      hint = Some(Hint(content = Text(
+                        "Check boxes to set ineligibility flags. If all boxes unchecked, assessmentEligibilityStatus will be true for this assessment category"
+                      )))
+                    ))
+                  )
+              }
+          )
+      ),
+      hint = Some(Hint(content = Text("Select one or more"))),
+      classes = "govuk-checkboxes--small"
+  ))
+}
+
 
 @credIdInput = {
   @govukInput(Input(
@@ -814,7 +835,6 @@ classes = "govuk-radios--small govuk-radios--inline"
         items = vatEligibilityErrorCheckboxes,
         classes = "govuk-checkboxes--small"
     ))
-
 
     @chargesOptionalFieldRadios("isInterestBearingCharge")
 

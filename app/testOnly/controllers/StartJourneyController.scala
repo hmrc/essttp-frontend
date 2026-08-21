@@ -546,21 +546,23 @@ object StartJourneyController {
         noValidPlanAfterAssessments = Some(containsError(EligibilityErrors.NoValidPlanAfterAssessments))
       )
 
-    val assessmentEligibilityRules = AssessmentEligibilityRules(
-      isLessThanMinDebtAllowance = containsError(IsLessThanMinDebtAllowance),
-      isMoreThanMaxDebtAllowance = containsError(IsMoreThanMaxDebtAllowance),
-      disallowedChargeLockTypes = containsError(EligibilityErrors.DisallowedChargeLockTypes),
-      chargesOverMaxDebtAge = Some(containsError(ChargesOverMaxDebtAge)),
-      ineligibleChargeTypes = containsError(IneligibleChargeTypes),
-      noDueDatesReached = containsError(NoDueDatesReached),
-      chargesBeforeMaxAccountingDate = Some(containsError(ChargesBeforeMaxAccountingDate))
-    )
+    def toAssessmentEligibilityRules(errors: List[EligibilityError]) =
+      AssessmentEligibilityRules(
+        isLessThanMinDebtAllowance = errors.contains(IsLessThanMinDebtAllowance),
+        isMoreThanMaxDebtAllowance = errors.contains(IsMoreThanMaxDebtAllowance),
+        disallowedChargeLockTypes = errors.contains(EligibilityErrors.DisallowedChargeLockTypes),
+        chargesOverMaxDebtAge = Some(errors.contains(ChargesOverMaxDebtAge)),
+        ineligibleChargeTypes = errors.contains(IneligibleChargeTypes),
+        noDueDatesReached = errors.contains(NoDueDatesReached),
+        chargesBeforeMaxAccountingDate = Some(errors.contains(ChargesBeforeMaxAccountingDate))
+      )
 
     val chargeTypeAssessments = form.assessmentCategories.map { assessmentCategoryInfo =>
       ChargeTypeAssessments(
         chargeTypeAssessment = chargeTypeAssessment,
-        assessmentEligibilityRules = assessmentEligibilityRules,
-        assessmentCategoryInfo.eligibilityStatus,
+        assessmentEligibilityRules =
+          toAssessmentEligibilityRules(assessmentCategoryInfo.ineligibleAssessmentEligibilityRules),
+        assessmentCategoryInfo.ineligibleAssessmentEligibilityRules.isEmpty,
         assessmentCategoryInfo.category
       )
     }
@@ -582,10 +584,13 @@ object StartJourneyController {
       paymentPlanFrequency = PaymentPlanFrequencies.Monthly,
       paymentPlanMinLength = PaymentPlanMinLength(form.planLengthMinAndMax.min),
       paymentPlanMaxLength = PaymentPlanMaxLength(form.planLengthMinAndMax.max),
-      eligibilityStatus =
-        if (eligibilityRules.isEligible && assessmentEligibilityRules.isEligible)
-          EligibilityStatus(EligibilityPass(true))
-        else EligibilityStatus(EligibilityPass(false)),
+      eligibilityStatus = EligibilityStatus(
+        EligibilityPass(
+          eligibilityRules.isEligible && chargeTypeAssessments.nonEmpty && chargeTypeAssessments.forall(
+            _.assessmentEligibilityStatus
+          )
+        )
+      ),
       eligibilityRules = eligibilityRules,
       customerDetails = if (form.flags.customerDetailPresent) Some(customerDetail) else None,
       individualDetails = individualDetails,

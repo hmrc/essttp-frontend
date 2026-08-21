@@ -18,7 +18,8 @@ package testsupport.testdata
 
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.ttp.CustomerType
-import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, AssessmentEligibilityRules, EligibilityPass, EligibilityRules}
+import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, EligibilityPass, EligibilityRules}
+import models.AssessmentCategoryInfo
 
 import java.time.LocalDate
 
@@ -28,14 +29,15 @@ object TtpJsonResponses {
     taxRegime:                          TaxRegime,
     eligibilityPass:                    EligibilityPass = TdAll.eligibleEligibilityPass,
     eligibilityRules:                   EligibilityRules = TdAll.eligibleEligibilityRules,
-    assessmentEligibilityRules:         AssessmentEligibilityRules = TdAll.assessmentEligibilityRules,
+    assessmentCategoryInfo:             Seq[AssessmentCategoryInfo] = Seq(
+      AssessmentCategoryInfo(AssessmentCategory.Standard, eligibilityStatus = true)
+    ),
     regimeDigitalCorrespondence:        Boolean,
     poundsInsteadOfPence:               Boolean = false,
     maybeChargeIsInterestBearingCharge: Option[Boolean] = None,
     maybeChargeUseChargeReference:      Option[Boolean] = None,
     maybeChargeBeforeMaxAccountingDate: Option[Boolean] = None,
-    maybeCustomerType:                  Option[CustomerType] = None,
-    assessmentCategories:               Seq[AssessmentCategory] = Seq(AssessmentCategory.Standard)
+    maybeCustomerType:                  Option[CustomerType] = None
   ): String = {
 
     val isInterestBearingChargeValue = maybeChargeIsInterestBearingCharge match {
@@ -58,7 +60,7 @@ object TtpJsonResponses {
       case None               => ""
     }
 
-    val chargeTypeAssessments = assessmentCategories.map(category =>
+    val chargeTypeAssessments = assessmentCategoryInfo.map(info =>
       s"""
         |{
         |  "chargeTypeAssessment" : [ {
@@ -89,22 +91,22 @@ object TtpJsonResponses {
         |    } ]
         |  } ],
         |  "assessmentEligibilityRules" : {
-        |    "isLessThanMinDebtAllowance" : ${assessmentEligibilityRules.isLessThanMinDebtAllowance.toString},
-        |    "isMoreThanMaxDebtAllowance" : ${assessmentEligibilityRules.isMoreThanMaxDebtAllowance.toString},
-        |    "disallowedChargeLockTypes" : ${assessmentEligibilityRules.disallowedChargeLockTypes.toString},
-        |    "ineligibleChargeTypes" : ${assessmentEligibilityRules.ineligibleChargeTypes.toString},
-        |    "noDueDatesReached" : ${assessmentEligibilityRules.noDueDatesReached.toString}
+        |    "isLessThanMinDebtAllowance" : ${info.assessmentEligibilityRules.isLessThanMinDebtAllowance.toString},
+        |    "isMoreThanMaxDebtAllowance" : ${info.assessmentEligibilityRules.isMoreThanMaxDebtAllowance.toString},
+        |    "disallowedChargeLockTypes" : ${info.assessmentEligibilityRules.disallowedChargeLockTypes.toString},
+        |    "ineligibleChargeTypes" : ${info.assessmentEligibilityRules.ineligibleChargeTypes.toString},
+        |    "noDueDatesReached" : ${info.assessmentEligibilityRules.noDueDatesReached.toString}
         |    ${optionalEligibilityResponsesJson(
-          assessmentEligibilityRules.chargesBeforeMaxAccountingDate,
+          info.assessmentEligibilityRules.chargesBeforeMaxAccountingDate,
           "chargesBeforeMaxAccountingDate"
         )}
         |    ${optionalEligibilityResponsesJson(
-          assessmentEligibilityRules.chargesOverMaxDebtAge,
+          info.assessmentEligibilityRules.chargesOverMaxDebtAge,
           "chargesOverMaxDebtAge"
         )}
         |  },
-        |  "assessmentEligibilityStatus" : true,
-        |  "assessmentCategory" : "${category.entryName}"
+        |  "assessmentEligibilityStatus" : ${info.assessmentEligibilityRules.isEligible.toString},
+        |  "assessmentCategory" : "${info.category.entryName}"
         |}""".stripMargin
     )
 
@@ -172,6 +174,10 @@ object TtpJsonResponses {
         "dmSpecialOfficeProcessingRequiredCESA"
       )}
        |  ${optionalEligibilityResponsesJson(eligibilityRules.noMtditsaEnrollment, "noMtditsaEnrollment")}
+       |  ${optionalEligibilityResponsesJson(
+        eligibilityRules.allChargeTypeAssessmentsFailed,
+        "allChargeTypeAssessmentsFailed"
+      )}
        |  },
        |  "chargeTypeAssessments" : [ ${chargeTypeAssessments.mkString(",")} ],
        |  "regimeDigitalCorrespondence": ${regimeDigitalCorrespondence.toString},
