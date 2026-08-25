@@ -1139,6 +1139,63 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
       )
     }
 
+    "allChargeTypeAssessmentsFailed should not count as an eligibility reason when checking for multiple failure reasons" in {
+      val eligibilityResponseJson =
+        TtpJsonResponses.ttpEligibilityCallJson(
+          TaxRegime.Simp,
+          TdAll.notEligibleEligibilityPass,
+          TdAll.eligibleEligibilityRules.copy(allChargeTypeAssessmentsFailed = Some(true)),
+          regimeDigitalCorrespondence = true,
+          assessmentCategoryInfo = Seq(
+            AssessmentCategoryInfo(
+              AssessmentCategory.Standard,
+              TdAll.assessmentEligibilityRules.copy(isMoreThanMaxDebtAllowance = true)
+            )
+          )
+        )
+
+      stubCommonActions()
+      EssttpBackend.DetermineTaxId.findJourney(Origins.Simp.Mobile)()
+      Ttp.Eligibility.stubRetrieveEligibility(TaxRegime.Simp)(eligibilityResponseJson)
+      EssttpBackend.EligibilityCheck.stubUpdateEligibilityResult(
+        TdAll.journeyId,
+        JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(
+          Origins.Simp.Mobile,
+          eligibilityRules = TdAll.eligibleEligibilityRules.copy(allChargeTypeAssessmentsFailed = Some(true))
+        )
+      )
+
+      val result = controller.determineEligibility(fakeRequest)
+
+      status(result) shouldBe Status.SEE_OTHER
+      // if multiple reasons are detected then the generic ineligible page would have been shown
+      redirectLocation(result) shouldBe Some(PageUrls.simpDebtTooLargeUrl)
+      Ttp.Eligibility.verifyTtpEligibilityRequests(TaxRegime.Simp)
+
+      AuditConnectorStub.verifyEventAudited(
+        "EligibilityCheck",
+        Json
+          .parse(
+            s"""
+               |{
+               |  "eligibilityResult" : "ineligible",
+               |  "enrollmentReasons": "did not pass eligibility check",
+               |  "noEligibilityReasons": 1,
+               |  "eligibilityReasons" : [ "isMoreThanMaxDebtAllowance" ],
+               |  "origin": "Mobile",
+               |  "taxType": "Simp",
+               |  "taxDetail": { "nino": "QQ123456A" },
+               |  "authProviderId": "authId-999",
+               |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
+               |  "chargeTypeAssessment" : [],
+               |  "futureChargeLiabilitiesExcluded": false
+               |}
+               |""".stripMargin
+          )
+          .as[JsObject]
+      )
+    }
+
     "throw an error is dmSpecialOfficeProcessingRequiredCDCS is received for a tax regime that is not SA" in {
       val taxRegimesAndOrigins = TaxRegime.values.map { taxRegime =>
         val origin = taxRegime match {
@@ -1471,7 +1528,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
       )
     }
 
-    "Eligibility already determined should route user to determine assessment categorry is and not update backend again" in {
+    "Eligibility already determined should route user to determine assessment category is and not update backend again" in {
       stubCommonActions()
       EssttpBackend.EligibilityCheck.findJourney(testCrypto)()
 
