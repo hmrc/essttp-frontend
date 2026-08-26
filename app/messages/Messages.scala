@@ -287,6 +287,12 @@ object Messages {
       welsh = "Ydych chi am ychwanegu’r bil treth hwn sydd i ddod at eich cynllun talu?"
     )
 
+    val `If you do not add this payment to your plan`: Message = Message(
+      english = "If you do not add this payment to your plan, you must pay it by the due date shown.",
+      welsh =
+        "Os na fyddwch yn ychwanegu’r taliad hwn at eich cynllun, mae’n rhaid i chi ei dalu erbyn y dyddiad dyledus a ddangosir."
+    )
+
     val `Select yes if you want to add this upcoming tax bill to your payment plan`: Message = Message(
       english = "Select yes if you want to add this upcoming tax bill to your payment plan",
       welsh = "Dewiswch ‘Iawn’ os ydych am ychwanegu’r bil treth hwn sydd i ddod at eich cynllun talu"
