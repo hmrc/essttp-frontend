@@ -18,7 +18,7 @@ package testsupport.testdata
 
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.bank.{TypeOfBankAccount, TypesOfBankAccount}
-import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, Identification}
+import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, EligibilityRules, Identification}
 import essttp.rootmodel.{CannotPayReason, DayOfMonth, TaxRegime}
 import models.AssessmentCategoryInfo
 import paymentsEmailVerification.models.EmailVerificationResult
@@ -58,99 +58,140 @@ object JourneyInfo {
       assessmentCategories = assessmentCategories
     )
 
-  def ineligibleHasRls(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                                =
+  def ineligibleInChargTypeAssessments(
+    taxRegime:              TaxRegime,
+    assessmentCategoryInfo: Seq[AssessmentCategoryInfo],
+    encrypter:              Encrypter
+  ): JourneyInfoAsJson =
+    TdJsonBodies.eligibilityCheckJourneyInfo(
+      TdAll.notEligibleEligibilityPass,
+      TdAll.eligibleEligibilityRules,
+      taxRegime,
+      encrypter,
+      assessmentCategories = assessmentCategoryInfo
+    )
+
+  def ineligibleHasRls(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleHasRlsOnAddress,
-      TdAll.assessmentEligibilityRules,
       taxRegime,
       encrypter
     )
+
   def ineligibleMarkedAsInsolvent(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                     =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleMarkedAsInsolvent,
-      TdAll.assessmentEligibilityRules,
       taxRegime,
       encrypter
     )
-  def ineligibleMinDebt(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                               =
+  def ineligibleMinDebt(
+    taxRegime:          TaxRegime,
+    assessmentCategory: AssessmentCategory,
+    encrypter:          Encrypter
+  ): JourneyInfoAsJson =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.eligibleEligibilityRules,
-      TdAll.notEligibleIsLessThanMinDebtAllowance,
       taxRegime,
-      encrypter
+      encrypter,
+      assessmentCategories =
+        Seq(AssessmentCategoryInfo(assessmentCategory, TdAll.notEligibleIsLessThanMinDebtAllowance))
     )
-  def ineligibleMaxDebt(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                               =
+  def ineligibleMaxDebt(
+    taxRegime:          TaxRegime,
+    assessmentCategory: AssessmentCategory,
+    eligibilityRules:   EligibilityRules,
+    encrypter:          Encrypter
+  ): JourneyInfoAsJson =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
-      TdAll.eligibleEligibilityRules,
-      TdAll.notEligibleIsMoreThanMaxDebtAllowance,
+      eligibilityRules,
       taxRegime,
-      encrypter
+      encrypter,
+      assessmentCategories =
+        Seq(AssessmentCategoryInfo(assessmentCategory, TdAll.notEligibleIsMoreThanMaxDebtAllowance))
     )
-  def ineligibleDisallowedCharge(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                      =
+  def ineligibleDisallowedCharge(
+    taxRegime:          TaxRegime,
+    assessmentCategory: AssessmentCategory,
+    encrypter:          Encrypter
+  ): JourneyInfoAsJson =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.eligibleEligibilityRules,
-      TdAll.notEligibleDisallowedChargeLockTypes,
       taxRegime,
-      encrypter
+      encrypter,
+      assessmentCategories = Seq(AssessmentCategoryInfo(assessmentCategory, TdAll.notEligibleDisallowedChargeLockTypes))
     )
   def ineligibleExistingTtp(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                           = TdJsonBodies
     .eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleExistingTTP,
-      TdAll.assessmentEligibilityRules,
       taxRegime,
       encrypter
     )
-  def ineligibleMaxDebtAge(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                            =
+  def ineligibleMaxDebtAge(
+    taxRegime:          TaxRegime,
+    assessmentCategory: AssessmentCategory,
+    encrypter:          Encrypter
+  ): JourneyInfoAsJson =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.eligibleEligibilityRules,
-      TdAll.notEligibleExceedsMaxDebtAge,
       taxRegime,
-      encrypter
+      encrypter,
+      assessmentCategories = Seq(AssessmentCategoryInfo(assessmentCategory, TdAll.notEligibleExceedsMaxDebtAge))
     )
-  def ineligibleBeforeMaxAccountingDate(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson               =
+  def ineligibleBeforeMaxAccountingDate(
+    taxRegime:          TaxRegime,
+    assessmentCategory: AssessmentCategory,
+    encrypter:          Encrypter
+  ): JourneyInfoAsJson =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.eligibleEligibilityRules,
-      TdAll.notEligibleChargesBeforeMaxAccountingDate,
       taxRegime,
-      encrypter
+      encrypter,
+      assessmentCategories =
+        Seq(AssessmentCategoryInfo(assessmentCategory, TdAll.notEligibleChargesBeforeMaxAccountingDate))
     )
-  def ineligibleChargeType(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                            =
+  def ineligibleChargeType(
+    taxRegime:          TaxRegime,
+    assessmentCategory: AssessmentCategory,
+    encrypter:          Encrypter
+  ): JourneyInfoAsJson =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.eligibleEligibilityRules,
-      TdAll.notEligibleEligibleChargeType,
       taxRegime,
-      encrypter
+      encrypter,
+      assessmentCategories = Seq(AssessmentCategoryInfo(assessmentCategory, TdAll.notEligibleEligibleChargeType))
     )
   def ineligibleMissingFiledReturns(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                   =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleMissingFiledReturns,
-      TdAll.assessmentEligibilityRules,
       taxRegime,
       encrypter
     )
-  def ineligibleNoDueDatesReached(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                     =
+  def ineligibleNoDueDatesReached(
+    taxRegime:          TaxRegime,
+    assessmentCategory: AssessmentCategory,
+    encrypter:          Encrypter
+  ): JourneyInfoAsJson =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.eligibleEligibilityRules,
-      TdAll.notEligibleNoDueDatesReached,
       taxRegime,
-      encrypter
+      encrypter,
+      assessmentCategories = Seq(AssessmentCategoryInfo(assessmentCategory, TdAll.notEligibleNoDueDatesReached))
     )
   def ineligibleHasInvalidInterestSignals(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson             =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleHasInvalidInterestSignals,
-      TdAll.assessmentEligibilityRules,
       taxRegime,
       encrypter
     )
@@ -158,7 +199,6 @@ object JourneyInfo {
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleHasInvalidInterestSignalsCESA,
-      TdAll.assessmentEligibilityRules,
       taxRegime,
       encrypter
     )
@@ -166,7 +206,6 @@ object JourneyInfo {
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleDmSpecialOfficeProcessingRequired,
-      TdAll.assessmentEligibilityRules,
       taxRegime,
       encrypter
     )
@@ -174,7 +213,6 @@ object JourneyInfo {
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleCannotFindLockReason,
-      TdAll.assessmentEligibilityRules,
       taxRegime,
       encrypter
     )
@@ -182,7 +220,6 @@ object JourneyInfo {
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleCreditsNotAllowed,
-      TdAll.assessmentEligibilityRules,
       taxRegime,
       encrypter
     )
@@ -190,23 +227,26 @@ object JourneyInfo {
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleIsMoreThanMaxPaymentReference,
-      TdAll.assessmentEligibilityRules,
       taxRegime,
       encrypter
     )
-  def ineligibleChargesBeforeMaxAccountingDate(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson        =
+  def ineligibleChargesBeforeMaxAccountingDate(
+    taxRegime:          TaxRegime,
+    assessmentCategory: AssessmentCategory,
+    encrypter:          Encrypter
+  ): JourneyInfoAsJson =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.eligibleEligibilityRules,
-      TdAll.notEligibleChargesBeforeMaxAccountingDate,
       taxRegime,
-      encrypter
+      encrypter,
+      assessmentCategories =
+        Seq(AssessmentCategoryInfo(assessmentCategory, TdAll.notEligibleChargesBeforeMaxAccountingDate))
     )
   def ineligibleHasDisguisedRemuneration(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson              =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleHasDisguisedRemuneration,
-      TdAll.assessmentEligibilityRules,
       taxRegime,
       encrypter
     )
@@ -214,7 +254,6 @@ object JourneyInfo {
     .eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleHasCapacitor,
-      TdAll.assessmentEligibilityRules,
       taxRegime,
       encrypter
     )
@@ -222,7 +261,6 @@ object JourneyInfo {
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleDmSpecialOfficeProcessingRequiredCDCS,
-      TdAll.assessmentEligibilityRules,
       taxRegime,
       encrypter
     )
@@ -230,7 +268,6 @@ object JourneyInfo {
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleIsAnMtdCustomer,
-      TdAll.assessmentEligibilityRules,
       taxRegime,
       encrypter
     )
@@ -238,7 +275,6 @@ object JourneyInfo {
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleDmSpecialOfficeProcessingRequiredCESA,
-      TdAll.assessmentEligibilityRules,
       taxRegime,
       encrypter
     )
@@ -246,50 +282,66 @@ object JourneyInfo {
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleHasRlsOnAddress.copy(markedAsInsolvent = true),
-      TdAll.assessmentEligibilityRules,
       taxRegime,
       encrypter
     )
-  def multipleIneligibleReasonsDebtTooLowAndOld(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson       =
-    TdJsonBodies.eligibilityCheckJourneyInfo(
-      TdAll.notEligibleEligibilityPass,
-      TdAll.eligibleEligibilityRules,
-      TdAll.notEligibleIsLessThanMinDebtAllowance.copy(chargesOverMaxDebtAge = Some(true)),
-      taxRegime,
-      encrypter
-    )
-  def multipleIneligibleReasonsEligibilityReasons(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson     =
-    TdJsonBodies.eligibilityCheckJourneyInfo(
-      TdAll.notEligibleEligibilityPass,
-      TdAll.notEligibleMultipleReasons,
-      TdAll.notEligibleNoDueDatesReached,
-      taxRegime,
-      encrypter
-    )
-  def multipleIneligibleReasonsAssessmentEligibilityReasons(
-    taxRegime: TaxRegime,
-    encrypter: Encrypter
+  def multipleIneligibleReasonsDebtTooLowAndOld(
+    taxRegime:          TaxRegime,
+    assessmentCategory: AssessmentCategory,
+    encrypter:          Encrypter
   ): JourneyInfoAsJson =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.eligibleEligibilityRules,
-      TdAll.notEligibleMultipleReasonsAssessment,
       taxRegime,
-      encrypter
+      encrypter,
+      assessmentCategories = Seq(
+        AssessmentCategoryInfo(
+          assessmentCategory,
+          TdAll.notEligibleIsLessThanMinDebtAllowance.copy(chargesOverMaxDebtAge = Some(true))
+        )
+      )
     )
-  def multipleIneligibleReasonsOneFromEachReasonsList(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson =
+  def multipleIneligibleReasonsEligibilityReasons(
+    taxRegime:          TaxRegime,
+    assessmentCategory: AssessmentCategory,
+    encrypter:          Encrypter
+  ): JourneyInfoAsJson =
+    TdJsonBodies.eligibilityCheckJourneyInfo(
+      TdAll.notEligibleEligibilityPass,
+      TdAll.notEligibleMultipleReasons,
+      taxRegime,
+      encrypter,
+      assessmentCategories = Seq(AssessmentCategoryInfo(assessmentCategory, TdAll.notEligibleNoDueDatesReached))
+    )
+  def multipleIneligibleReasonsAssessmentEligibilityReasons(
+    taxRegime:          TaxRegime,
+    assessmentCategory: AssessmentCategory,
+    encrypter:          Encrypter
+  ): JourneyInfoAsJson =
+    TdJsonBodies.eligibilityCheckJourneyInfo(
+      TdAll.notEligibleEligibilityPass,
+      TdAll.eligibleEligibilityRules,
+      taxRegime,
+      encrypter,
+      assessmentCategories = Seq(AssessmentCategoryInfo(assessmentCategory, TdAll.notEligibleMultipleReasonsAssessment))
+    )
+  def multipleIneligibleReasonsOneFromEachReasonsList(
+    taxRegime:          TaxRegime,
+    assessmentCategory: AssessmentCategory,
+    encrypter:          Encrypter
+  ): JourneyInfoAsJson =
     TdJsonBodies.eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.notEligibleDmSpecialOfficeProcessingRequired,
-      TdAll.notEligibleDisallowedChargeLockTypes,
       taxRegime,
-      encrypter
+      encrypter,
+      assessmentCategories = Seq(AssessmentCategoryInfo(assessmentCategory, TdAll.notEligibleDisallowedChargeLockTypes))
     )
   def noMtdEnrolment(taxRegime: TaxRegime, encrypter: Encrypter): JourneyInfoAsJson                                  = TdJsonBodies
     .eligibilityCheckJourneyInfo(
       TdAll.notEligibleEligibilityPass,
       TdAll.noMtditsaEnrollment,
-      TdAll.assessmentEligibilityRules,
       taxRegime,
       encrypter
     )
@@ -387,6 +439,15 @@ object JourneyInfo {
       assessmentCategories = assessmentCategories
     ) :: taxIdDetermined(taxRegime = taxRegime)
 
+  def eligibilityCheckedIneligibleInChargeTypesAssessments(
+    taxRegime:              TaxRegime,
+    assessmentCategoryInfo: Seq[AssessmentCategoryInfo],
+    encrypter:              Encrypter
+  ): List[JourneyInfoAsJson] =
+    ineligibleInChargTypeAssessments(taxRegime, assessmentCategoryInfo, encrypter) :: taxIdDetermined(taxRegime =
+      taxRegime
+    )
+
   def eligibilityCheckedIneligibleHasRls(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
     ineligibleHasRls(taxRegime, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
 
@@ -396,32 +457,55 @@ object JourneyInfo {
   def eligibilityCheckedMarkedAsInsolvent(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
     ineligibleMarkedAsInsolvent(taxRegime, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
 
-  def eligibilityCheckedIneligibleMinDebt(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
-    ineligibleMinDebt(taxRegime, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
+  def eligibilityCheckedIneligibleMinDebt(
+    taxRegime:          TaxRegime,
+    assessmentCategory: AssessmentCategory,
+    encrypter:          Encrypter
+  ): List[JourneyInfoAsJson] =
+    ineligibleMinDebt(taxRegime, assessmentCategory, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
 
-  def eligibilityCheckedIneligibleMaxDebt(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
-    ineligibleMaxDebt(taxRegime, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
+  def eligibilityCheckedIneligibleMaxDebt(
+    taxRegime:          TaxRegime,
+    assessmentCategory: AssessmentCategory,
+    eligibilityRules:   EligibilityRules,
+    encrypter:          Encrypter
+  ): List[JourneyInfoAsJson] =
+    ineligibleMaxDebt(taxRegime, assessmentCategory, eligibilityRules, encrypter) :: taxIdDetermined(taxRegime =
+      taxRegime
+    )
 
   def eligibilityCheckedIneligibleDisallowedCharge(
-    taxRegime: TaxRegime,
-    encrypter: Encrypter
+    taxRegime:          TaxRegime,
+    assessmentCategory: AssessmentCategory,
+    encrypter:          Encrypter
   ): List[JourneyInfoAsJson] =
-    ineligibleDisallowedCharge(taxRegime, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
+    ineligibleDisallowedCharge(taxRegime, assessmentCategory, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
 
   def eligibilityCheckedIneligibleExistingTtp(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
     ineligibleExistingTtp(taxRegime, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
 
-  def eligibilityCheckedIneligibleMaxDebtAge(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
-    ineligibleMaxDebtAge(taxRegime, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
+  def eligibilityCheckedIneligibleMaxDebtAge(
+    taxRegime:          TaxRegime,
+    assessmentCategory: AssessmentCategory,
+    encrypter:          Encrypter
+  ): List[JourneyInfoAsJson] =
+    ineligibleMaxDebtAge(taxRegime, assessmentCategory, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
 
   def eligibilityCheckedIneligibleBeforeMaxAccountingDate(
-    taxRegime: TaxRegime,
-    encrypter: Encrypter
+    taxRegime:          TaxRegime,
+    assessmentCategory: AssessmentCategory,
+    encrypter:          Encrypter
   ): List[JourneyInfoAsJson] =
-    ineligibleBeforeMaxAccountingDate(taxRegime, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
+    ineligibleBeforeMaxAccountingDate(taxRegime, assessmentCategory, encrypter) :: taxIdDetermined(taxRegime =
+      taxRegime
+    )
 
-  def eligibilityCheckedIneligibleChargeType(taxRegime: TaxRegime, encrypter: Encrypter): List[JourneyInfoAsJson] =
-    ineligibleChargeType(taxRegime, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
+  def eligibilityCheckedIneligibleChargeType(
+    taxRegime:          TaxRegime,
+    assessmentCategory: AssessmentCategory,
+    encrypter:          Encrypter
+  ): List[JourneyInfoAsJson] =
+    ineligibleChargeType(taxRegime, assessmentCategory, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
 
   def eligibilityCheckedIneligibleMissingFiledReturns(
     taxRegime: TaxRegime,
@@ -430,10 +514,11 @@ object JourneyInfo {
     ineligibleMissingFiledReturns(taxRegime, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
 
   def eligibilityCheckedIneligibleNoDueDatesReached(
-    taxRegime: TaxRegime,
-    encrypter: Encrypter
+    taxRegime:          TaxRegime,
+    assessmentCategory: AssessmentCategory,
+    encrypter:          Encrypter
   ): List[JourneyInfoAsJson] =
-    ineligibleNoDueDatesReached(taxRegime, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
+    ineligibleNoDueDatesReached(taxRegime, assessmentCategory, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
 
   def eligibilityCheckedIneligibleHasInvalidInterestSignals(
     taxRegime: TaxRegime,
@@ -472,16 +557,20 @@ object JourneyInfo {
     ineligibleIsMoreThanMaxPaymentReference(taxRegime, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
 
   def eligibilityCheckedChargesBeforeMaxAccountingDate(
-    taxRegime: TaxRegime,
-    encrypter: Encrypter
+    taxRegime:          TaxRegime,
+    assessmentCategory: AssessmentCategory,
+    encrypter:          Encrypter
   ): List[JourneyInfoAsJson] =
-    ineligibleChargesBeforeMaxAccountingDate(taxRegime, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
+    ineligibleChargesBeforeMaxAccountingDate(taxRegime, assessmentCategory, encrypter) :: taxIdDetermined(taxRegime =
+      taxRegime
+    )
 
   def eligibilityCheckedIneligibleChargesBeforeMaxAccountingDate(
-    taxRegime: TaxRegime,
-    encrypter: Encrypter
+    taxRegime:          TaxRegime,
+    assessmentCategory: AssessmentCategory,
+    encrypter:          Encrypter
   ): List[JourneyInfoAsJson] =
-    ineligibleMaxDebtAge(taxRegime, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
+    ineligibleMaxDebtAge(taxRegime, assessmentCategory, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
 
   def eligibilityCheckedIneligibleHasDisguisedRemuneration(
     taxRegime: TaxRegime,
@@ -511,30 +600,40 @@ object JourneyInfo {
     multipleIneligibleReasons(taxRegime, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
 
   def eligibilityCheckedIneligibleMultipleReasonsDebtTooLowAndOld(
-    taxRegime: TaxRegime,
-    encrypter: Encrypter
+    taxRegime:          TaxRegime,
+    assessmentCategory: AssessmentCategory,
+    encrypter:          Encrypter
   ): List[JourneyInfoAsJson] =
-    multipleIneligibleReasonsDebtTooLowAndOld(taxRegime, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
-
-  def eligibilityCheckedIneligibleMultipleReasonsEligibilityReasons(
-    taxRegime: TaxRegime,
-    encrypter: Encrypter
-  ): List[JourneyInfoAsJson] =
-    multipleIneligibleReasonsEligibilityReasons(taxRegime, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
-
-  def eligibilityCheckedIneligibleMultipleReasonsAssessmentEligibilityReasons(
-    taxRegime: TaxRegime,
-    encrypter: Encrypter
-  ): List[JourneyInfoAsJson] =
-    multipleIneligibleReasonsAssessmentEligibilityReasons(taxRegime, encrypter) :: taxIdDetermined(taxRegime =
+    multipleIneligibleReasonsDebtTooLowAndOld(taxRegime, assessmentCategory, encrypter) :: taxIdDetermined(taxRegime =
       taxRegime
     )
 
-  def eligibilityCheckedIneligibleMultipleOneFromEach(
-    taxRegime: TaxRegime,
-    encrypter: Encrypter
+  def eligibilityCheckedIneligibleMultipleReasonsEligibilityReasons(
+    taxRegime:          TaxRegime,
+    assessmentCategory: AssessmentCategory,
+    encrypter:          Encrypter
   ): List[JourneyInfoAsJson] =
-    multipleIneligibleReasonsOneFromEachReasonsList(taxRegime, encrypter) :: taxIdDetermined(taxRegime = taxRegime)
+    multipleIneligibleReasonsEligibilityReasons(taxRegime, assessmentCategory, encrypter) :: taxIdDetermined(taxRegime =
+      taxRegime
+    )
+
+  def eligibilityCheckedIneligibleMultipleReasonsAssessmentEligibilityReasons(
+    taxRegime:          TaxRegime,
+    assessmentCategory: AssessmentCategory,
+    encrypter:          Encrypter
+  ): List[JourneyInfoAsJson] =
+    multipleIneligibleReasonsAssessmentEligibilityReasons(taxRegime, assessmentCategory, encrypter) :: taxIdDetermined(
+      taxRegime = taxRegime
+    )
+
+  def eligibilityCheckedIneligibleMultipleOneFromEach(
+    taxRegime:          TaxRegime,
+    assessmentCategory: AssessmentCategory,
+    encrypter:          Encrypter
+  ): List[JourneyInfoAsJson] =
+    multipleIneligibleReasonsOneFromEachReasonsList(taxRegime, assessmentCategory, encrypter) :: taxIdDetermined(
+      taxRegime = taxRegime
+    )
 
   def assessmentCategoryDetermined(
     taxRegime:                             TaxRegime,

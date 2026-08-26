@@ -217,14 +217,14 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
   )(using r: AuthenticatedJourneyRequest[?]): EligibilityCheckAuditDetail = {
 
     // TODO: may need to prefix reason with assessment category to be able to distinguish
-    def collectEligibilityReasons(product: Product): List[String] = {
+    def collectEligibilityReasons(product: Product, excludes: Seq[String] = Seq.empty): List[String] = {
       val reasons: List[String] =
         product.productElementNames.toList
       val values                = product.productIterator.toList
 
       (reasons zip values).collect {
-        case (reason, true)       => reason
-        case (reason, Some(true)) => reason
+        case (reason, true) if !excludes.contains(reason)       => reason
+        case (reason, Some(true)) if !excludes.contains(reason) => reason
       }
     }
 
@@ -233,7 +233,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
     val enrollmentReasons                =
       if (eligibilityCheckResult.isEligible) None else Some(EnrollmentReasons.DidNotPassEligibilityCheck())
     val eligibilityReasons: List[String] =
-      collectEligibilityReasons(eligibilityCheckResult.eligibilityRules) :::
+      collectEligibilityReasons(eligibilityCheckResult.eligibilityRules, Seq("allChargeTypeAssessmentsFailed")) :::
         eligibilityCheckResult.chargeTypeAssessments.flatMap(c =>
           collectEligibilityReasons(c.assessmentEligibilityRules)
         )

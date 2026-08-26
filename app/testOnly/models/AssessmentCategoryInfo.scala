@@ -17,8 +17,9 @@
 package testOnly.models
 
 import essttp.rootmodel.ttp.eligibility.AssessmentCategory
+import models.EligibilityError
 
 final case class AssessmentCategoryInfo(
-  category:          AssessmentCategory,
-  eligibilityStatus: Boolean
+  category:                             AssessmentCategory,
+  ineligibleAssessmentEligibilityRules: List[EligibilityError]
 )

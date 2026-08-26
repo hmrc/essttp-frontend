@@ -19,7 +19,7 @@ package testsupport.testdata
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, Origin, Origins, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.bank.TypeOfBankAccount
 import essttp.rootmodel.CannotPayReason.{ChangeToPersonalCircumstances, NoMoneySetAside}
-import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, Identification}
+import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, EligibilityRules, Identification}
 import essttp.rootmodel.{CannotPayReason, DayOfMonth}
 import models.AssessmentCategoryInfo
 import paymentsEmailVerification.models.EmailVerificationResult
@@ -100,6 +100,18 @@ object JourneyJsonTemplates {
     origin
   )
 
+  def `Eligibility Checked - Ineligible - ineligibility in ChargeTypesAssessments`(
+    origin:                 Origin,
+    assessmentCategoryInfo: Seq[AssessmentCategoryInfo]
+  )(using
+    encrypter:              Encrypter
+  ): String = TdJsonBodies.createJourneyJson(
+    stageInfo = StageInfo.eligibilityChecked,
+    journeyInfo = JourneyInfo
+      .eligibilityCheckedIneligibleInChargeTypesAssessments(origin.taxRegime, assessmentCategoryInfo, encrypter),
+    origin = origin
+  )
+
   def `Eligibility Checked - Ineligible - HasRlsOnAddress`(origin: Origin)(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
       stageInfo = StageInfo.eligibilityChecked,
@@ -114,27 +126,39 @@ object JourneyJsonTemplates {
       origin = origin
     )
 
-  def `Eligibility Checked - Ineligible - IsLessThanMinDebtAllowance`(origin: Origin)(using
-    encrypter: Encrypter
+  def `Eligibility Checked - Ineligible - IsLessThanMinDebtAllowance`(
+    origin:             Origin,
+    assessmentCategory: AssessmentCategory = AssessmentCategory.Standard
+  )(using
+    encrypter:          Encrypter
   ): String = TdJsonBodies.createJourneyJson(
     stageInfo = StageInfo.eligibilityChecked,
-    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMinDebt(origin.taxRegime, encrypter),
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMinDebt(origin.taxRegime, assessmentCategory, encrypter),
     origin = origin
   )
 
-  def `Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(origin: Origin)(using
-    encrypter: Encrypter
+  def `Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(
+    origin:             Origin,
+    assessmentCategory: AssessmentCategory = AssessmentCategory.Standard,
+    eligibilityRules:   EligibilityRules = TdAll.eligibleEligibilityRules
+  )(using
+    encrypter:          Encrypter
   ): String = TdJsonBodies.createJourneyJson(
     stageInfo = StageInfo.eligibilityChecked,
-    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMaxDebt(origin.taxRegime, encrypter),
+    journeyInfo = JourneyInfo
+      .eligibilityCheckedIneligibleMaxDebt(origin.taxRegime, assessmentCategory, eligibilityRules, encrypter),
     origin = origin
   )
 
-  def `Eligibility Checked - Ineligible - DisallowedChargeLockTypes`(origin: Origin)(using
-    encrypter: Encrypter
+  def `Eligibility Checked - Ineligible - DisallowedChargeLockTypes`(
+    origin:             Origin,
+    assessmentCategory: AssessmentCategory = AssessmentCategory.Standard
+  )(using
+    encrypter:          Encrypter
   ): String = TdJsonBodies.createJourneyJson(
     stageInfo = StageInfo.eligibilityChecked,
-    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleDisallowedCharge(origin.taxRegime, encrypter),
+    journeyInfo =
+      JourneyInfo.eligibilityCheckedIneligibleDisallowedCharge(origin.taxRegime, assessmentCategory, encrypter),
     origin = origin
   )
 
@@ -145,25 +169,34 @@ object JourneyJsonTemplates {
       origin = origin
     )
 
-  def `Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(origin: Origin)(using encrypter: Encrypter): String =
+  def `Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(
+    origin:             Origin,
+    assessmentCategory: AssessmentCategory = AssessmentCategory.Standard
+  )(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
       stageInfo = StageInfo.eligibilityChecked,
-      journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMaxDebtAge(origin.taxRegime, encrypter),
+      journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMaxDebtAge(origin.taxRegime, assessmentCategory, encrypter),
       origin = origin
     )
 
-  def `Eligibility Checked - Ineligible - BeforeMaxAccountingDate`(origin: Origin)(using
-    encrypter: Encrypter
+  def `Eligibility Checked - Ineligible - BeforeMaxAccountingDate`(
+    origin:             Origin,
+    assessmentCategory: AssessmentCategory = AssessmentCategory.Standard
+  )(using
+    encrypter:          Encrypter
   ): String = TdJsonBodies.createJourneyJson(
     stageInfo = StageInfo.eligibilityChecked,
-    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMaxDebtAge(origin.taxRegime, encrypter),
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMaxDebtAge(origin.taxRegime, assessmentCategory, encrypter),
     origin = origin
   )
 
-  def `Eligibility Checked - Ineligible - EligibleChargeType`(origin: Origin)(using encrypter: Encrypter): String =
+  def `Eligibility Checked - Ineligible - EligibleChargeType`(
+    origin:             Origin,
+    assessmentCategory: AssessmentCategory = AssessmentCategory.Standard
+  )(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
       stageInfo = StageInfo.eligibilityChecked,
-      journeyInfo = JourneyInfo.eligibilityCheckedIneligibleChargeType(origin.taxRegime, encrypter),
+      journeyInfo = JourneyInfo.eligibilityCheckedIneligibleChargeType(origin.taxRegime, assessmentCategory, encrypter),
       origin = origin
     )
 
@@ -174,10 +207,14 @@ object JourneyJsonTemplates {
       origin = origin
     )
 
-  def `Eligibility Checked - Ineligible - NoDueDatesReached`(origin: Origin)(using encrypter: Encrypter): String =
+  def `Eligibility Checked - Ineligible - NoDueDatesReached`(
+    origin:             Origin,
+    assessmentCategory: AssessmentCategory = AssessmentCategory.Standard
+  )(using encrypter: Encrypter): String =
     TdJsonBodies.createJourneyJson(
       stageInfo = StageInfo.eligibilityChecked,
-      journeyInfo = JourneyInfo.eligibilityCheckedIneligibleNoDueDatesReached(origin.taxRegime, encrypter),
+      journeyInfo =
+        JourneyInfo.eligibilityCheckedIneligibleNoDueDatesReached(origin.taxRegime, assessmentCategory, encrypter),
       origin = origin
     )
 
@@ -228,11 +265,15 @@ object JourneyJsonTemplates {
     origin = origin
   )
 
-  def `Eligibility Checked - Ineligible - ChargesBeforeMaxAccountingDate`(origin: Origin)(using
-    encrypter: Encrypter
+  def `Eligibility Checked - Ineligible - ChargesBeforeMaxAccountingDate`(
+    origin:             Origin,
+    assessmentCategory: AssessmentCategory = AssessmentCategory.Standard
+  )(using
+    encrypter:          Encrypter
   ): String = TdJsonBodies.createJourneyJson(
     stageInfo = StageInfo.eligibilityChecked,
-    journeyInfo = JourneyInfo.eligibilityCheckedChargesBeforeMaxAccountingDate(origin.taxRegime, encrypter),
+    journeyInfo =
+      JourneyInfo.eligibilityCheckedChargesBeforeMaxAccountingDate(origin.taxRegime, assessmentCategory, encrypter),
     origin = origin
   )
 
@@ -268,39 +309,54 @@ object JourneyJsonTemplates {
     origin = origin
   )
 
-  def `Eligibility Checked - Ineligible - MultipleReasons - debt too low and old`(origin: Origin = Origins.Epaye.Bta)(
-    using encrypter: Encrypter
+  def `Eligibility Checked - Ineligible - MultipleReasons - debt too low and old`(
+    origin:             Origin = Origins.Epaye.Bta,
+    assessmentCategory: AssessmentCategory = AssessmentCategory.Standard
+  )(using
+    encrypter:          Encrypter
   ): String = TdJsonBodies.createJourneyJson(
     stageInfo = StageInfo.eligibilityChecked,
-    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMultipleReasonsDebtTooLowAndOld(origin.taxRegime, encrypter),
+    journeyInfo = JourneyInfo
+      .eligibilityCheckedIneligibleMultipleReasonsDebtTooLowAndOld(origin.taxRegime, assessmentCategory, encrypter),
     origin = origin
   )
 
-  def `Eligibility Checked - Ineligible - MultipleReasons - Eligibility Reasons`(origin: Origin = Origins.Epaye.Bta)(
-    using encrypter: Encrypter
+  def `Eligibility Checked - Ineligible - MultipleReasons - Eligibility Reasons`(
+    origin:             Origin = Origins.Epaye.Bta,
+    assessmentCategory: AssessmentCategory = AssessmentCategory.Standard
+  )(using
+    encrypter:          Encrypter
   ): String = TdJsonBodies.createJourneyJson(
     stageInfo = StageInfo.eligibilityChecked,
-    journeyInfo =
-      JourneyInfo.eligibilityCheckedIneligibleMultipleReasonsEligibilityReasons(origin.taxRegime, encrypter),
+    journeyInfo = JourneyInfo
+      .eligibilityCheckedIneligibleMultipleReasonsEligibilityReasons(origin.taxRegime, assessmentCategory, encrypter),
     origin = origin
   )
 
   def `Eligibility Checked - Ineligible - MultipleReasons - Assessment Eligibility Reasons`(
-    origin:    Origin = Origins.Epaye.Bta
+    origin:             Origin = Origins.Epaye.Bta,
+    assessmentCategory: AssessmentCategory = AssessmentCategory.Standard
   )(using
-    encrypter: Encrypter
+    encrypter:          Encrypter
   ): String = TdJsonBodies.createJourneyJson(
     stageInfo = StageInfo.eligibilityChecked,
-    journeyInfo =
-      JourneyInfo.eligibilityCheckedIneligibleMultipleReasonsAssessmentEligibilityReasons(origin.taxRegime, encrypter),
+    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMultipleReasonsAssessmentEligibilityReasons(
+      origin.taxRegime,
+      assessmentCategory,
+      encrypter
+    ),
     origin = origin
   )
 
-  def `Eligibility Checked - Ineligible - MultipleReasons - both lists`(origin: Origin = Origins.Epaye.Bta)(using
-    encrypter: Encrypter
+  def `Eligibility Checked - Ineligible - MultipleReasons - both lists`(
+    origin:             Origin = Origins.Epaye.Bta,
+    assessmentCategory: AssessmentCategory = AssessmentCategory.Standard
+  )(using
+    encrypter:          Encrypter
   ): String = TdJsonBodies.createJourneyJson(
     stageInfo = StageInfo.eligibilityChecked,
-    journeyInfo = JourneyInfo.eligibilityCheckedIneligibleMultipleOneFromEach(origin.taxRegime, encrypter),
+    journeyInfo =
+      JourneyInfo.eligibilityCheckedIneligibleMultipleOneFromEach(origin.taxRegime, assessmentCategory, encrypter),
     origin = origin
   )
 
@@ -530,7 +586,6 @@ object JourneyJsonTemplates {
       TdJsonBodies.eligibilityCheckJourneyInfo(
         TdAll.eligibleEligibilityPass,
         TdAll.eligibleEligibilityRules,
-        TdAll.assessmentEligibilityRules,
         origin.taxRegime,
         encrypter,
         regimeDigitalCorrespondence,

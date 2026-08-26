@@ -33,28 +33,13 @@ object EligibilityRouter {
     if (eligibilityResult.isEligible) {
       routes.DetermineAssessmentCategoryController.determineAssessmentCategory
     } else {
-      // TODO: handle properly when ineligible journey considered for FDL's
-      val relevantChargeTypeAssessments =
-        eligibilityResult.chargeTypeAssessments.headOption
-          .getOrElse(
-            throw new Exception(
-              "Eligibility result is ineligible, but no ChargeTypeAssessments found with assessmentEligibilityStatus == false"
-            )
-          )
-
       val error = EligibilityErrors.toEligibilityError(
         eligibilityResult.eligibilityRules,
-        relevantChargeTypeAssessments.assessmentEligibilityRules
+        eligibilityResult.chargeTypeAssessments,
+        taxRegime
       )
       error match {
-        case ee @ Some(MultipleReasons)                  =>
-          determineWhereToGoBasedOnHierarchy(
-            ee,
-            relevantChargeTypeAssessments.assessmentEligibilityRules.isLessThanMinDebtAllowance,
-            relevantChargeTypeAssessments.assessmentEligibilityRules.noDueDatesReached,
-            eligibilityResult.eligibilityRules.hasRlsOnAddress,
-            taxRegime
-          )
+        case ee @ Some(MultipleReasons)                  => whichGenericIneligiblePage(taxRegime)
         case None                                        => whichGenericIneligiblePage(taxRegime)
         case Some(HasRlsOnAddress)                       => whichGenericRLSPage(taxRegime)
         case Some(MarkedAsInsolvent)                     => whichGenericIneligiblePage(taxRegime)
@@ -69,9 +54,7 @@ object EligibilityRouter {
         case Some(HasInvalidInterestSignalsCESA)         => whichGenericIneligiblePage(taxRegime)
         case Some(DmSpecialOfficeProcessingRequired)     => whichGenericIneligiblePage(taxRegime)
         case Some(NoDueDatesReached)                     =>
-          if (taxRegime != Sa) {
-            whichNoDueDatesReachedPage(taxRegime)
-          } else { whichGenericIneligiblePage(taxRegime) }
+          if (taxRegime != Sa) whichNoDueDatesReachedPage(taxRegime) else whichGenericIneligiblePage(taxRegime)
         case Some(CannotFindLockReason)                  => whichGenericIneligiblePage(taxRegime)
         case Some(CreditsNotAllowed)                     => whichGenericIneligiblePage(taxRegime)
         case Some(IsMoreThanMaxPaymentReference)         => whichGenericIneligiblePage(taxRegime)
@@ -151,25 +134,6 @@ object EligibilityRouter {
     case TaxRegime.Vat   => routes.IneligibleController.vatDebtBeforeAccountingDatePage
     case TaxRegime.Sa    => routes.IneligibleController.saGenericIneligiblePage
     case TaxRegime.Simp  => routes.IneligibleController.simpGenericIneligiblePage
-  }
-
-  /*
-  Requirement from business is that if multiple reasons exist but any of them are isLessThanMinDebtAllowance,
-  go to debt too small page, unless reason is also NoDueDatesReached. If neither of these two are true, then hasRlsOnAddress
-  takes precedence over all other eligibility rules.
-   */
-  private def determineWhereToGoBasedOnHierarchy(
-    maybeEligibilityError:      Option[EligibilityError],
-    isLessThanMinDebtAllowance: Boolean,
-    dueDatesReached:            Boolean,
-    hasRlsOnAddress:            Boolean,
-    taxRegime:                  TaxRegime
-  ): Call = (maybeEligibilityError, isLessThanMinDebtAllowance, dueDatesReached, hasRlsOnAddress, taxRegime) match {
-    case (Some(MultipleReasons), _, true, _, Sa)        => routes.IneligibleController.saGenericIneligiblePage
-    case (Some(MultipleReasons), _, true, _, _)         => whichNoDueDatesReachedPage(taxRegime)
-    case (Some(MultipleReasons), true, false, _, _)     => whichDebtTooSmallPage(taxRegime)
-    case (Some(MultipleReasons), false, false, true, _) => whichGenericRLSPage(taxRegime)
-    case _                                              => whichGenericIneligiblePage(taxRegime)
   }
 
   private def whichNoDueDatesReachedPage(taxRegime: TaxRegime): Call = taxRegime match {

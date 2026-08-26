@@ -16,17 +16,29 @@
 
 package models
 
-import essttp.rootmodel.ttp.eligibility.AssessmentCategory
+import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, AssessmentEligibilityRules}
+import play.api.libs.json.Json
+import testsupport.testdata.TdAll
 
 final case class AssessmentCategoryInfo(
-  category:          AssessmentCategory,
-  eligibilityStatus: Boolean = true
+  category:                   AssessmentCategory,
+  assessmentEligibilityRules: AssessmentEligibilityRules = TdAll.assessmentEligibilityRules
 )
 
 object AssessmentCategoryInfo {
 
+  def apply(
+    category:          AssessmentCategory,
+    eligibilityStatus: Boolean
+  ): AssessmentCategoryInfo =
+    if (eligibilityStatus)
+      AssessmentCategoryInfo(category, TdAll.assessmentEligibilityRules)
+    else
+      AssessmentCategoryInfo(category, TdAll.assessmentEligibilityRules.copy(isLessThanMinDebtAllowance = true))
+
   extension (a: AssessmentCategoryInfo) {
-    def prettyPrint: String = s"(category: ${a.category.entryName}, eligibilityStatus: ${a.eligibilityStatus.toString})"
+    def prettyPrint: String =
+      s"(category: ${a.category.entryName}, assessmentEligibilityRules: ${Json.toJson(a.assessmentEligibilityRules).toString})"
   }
 
 }

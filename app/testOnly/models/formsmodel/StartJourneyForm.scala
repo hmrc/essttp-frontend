@@ -134,7 +134,6 @@ object StartJourneyForm {
         "safeId"                        -> optional(text).transform[Option[String]](_.filter(_.nonEmpty), identity),
         ""                              -> Forms
           .of(assessmentCategoryInfoFormatter)
-          .verifying("At least one assessment category must be selected", _.nonEmpty)
       )(StartJourneyForm.apply)(Tuple.fromProductTyped[StartJourneyForm](_).some)
     )
 
@@ -153,21 +152,24 @@ object StartJourneyForm {
     new Formatter[Seq[AssessmentCategoryInfo]] {
       override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Seq[AssessmentCategoryInfo]] = {
         val assessmentCategories = data.collect { case (assessmentCategoryRegex(), value) =>
-          val category = AssessmentCategory.namesToValuesMap(value)
-          val eligible = data.get(s"assessmentCategories.$value.eligibility").contains("Yes")
-          AssessmentCategoryInfo(category, eligible)
+          val category                               = AssessmentCategory.namesToValuesMap(value)
+          val assessmentCategoryEligibilityRuleRegex =
+            (s"^${category.entryName}" + """-assessmentEligibilityRules\[\d+]$""").r
+          val eligibilityRules                       = data.collect { case (assessmentCategoryEligibilityRuleRegex(), rule) =>
+            EligibilityErrors.namesToValuesMap(rule)
+          }.toList
+          AssessmentCategoryInfo(category, eligibilityRules)
         }
         Right(assessmentCategories.toSeq)
       }
 
       override def unbind(key: String, value: Seq[AssessmentCategoryInfo]): Map[String, String] =
         value.zipWithIndex.flatMap { (assessmentCategory, i) =>
-          Seq(
-            s"assessmentCategories[$i]"                                                  -> assessmentCategory.category.entryName,
-            s"assessmentCategories.${assessmentCategory.category.entryName}.eligibility" -> (
-              if (assessmentCategory.eligibilityStatus) "Yes" else "No"
-            )
-          )
+          Seq(s"assessmentCategories[$i]" -> assessmentCategory.category.entryName) ++
+            assessmentCategory.ineligibleAssessmentEligibilityRules.zipWithIndex.map { (e, j) =>
+              s"${assessmentCategory.category.entryName}-assessmentEligibilityRules[$j]" ->
+                e.entryName
+            }
         }.toMap
     }
 
