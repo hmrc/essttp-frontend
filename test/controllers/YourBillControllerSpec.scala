@@ -1022,7 +1022,7 @@ class YourBillControllerSpec extends ItSpec {
           regimeBeingTested = Some(TaxRegime.Simp),
           language = lang
         )
-        
+
         val advanceHint = doc.getElementById("advancePayments-hint")
         advanceHint.text() shouldBe lang.fold(
           "If you do not add this payment to your plan, you must pay it by the due date shown.",
