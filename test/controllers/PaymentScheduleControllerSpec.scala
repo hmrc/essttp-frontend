@@ -571,25 +571,18 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
           test(
             JourneyJsonTemplates.`Chosen Payment Plan`(
               origin = origin,
-              selectedPlanJourneyInfo = TdJsonBodies.selectedPlanOneMonthJourneyInfo,
-              assessmentCategory = AssessmentCategory.DebtsAndLiabilities,
-              eligibilityResultAssessmentCategories = Seq(
-                AssessmentCategoryInfo(AssessmentCategory.Debts),
-                AssessmentCategoryInfo(AssessmentCategory.Liabilities),
-                AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities)
-              )
+              selectedPlanJourneyInfo = TdJsonBodies.selectedPlanOneMonthJourneyInfo
             )
           )(
             "Yes",
-            "Yes",
+            "No",
             Some("£123.12"),
             "28th or next working day",
             List("August 2022" -> "£555.73"),
             "£1,111.47",
             "£0.06",
             Languages.English,
-            hasInterestBearingCharge = true,
-            assessmentCategory = AssessmentCategory.DebtsAndLiabilities
+            hasInterestBearingCharge = true
           )
         }
 
