@@ -288,6 +288,7 @@ object EssttpBackend {
       encrypter:                             Encrypter,
       origin:                                Origin,
       assessmentCategory:                    AssessmentCategory = AssessmentCategory.Standard,
+      maybeChargeIsInterestBearingCharge:    Option[Boolean] = Some(true),
       eligibilityResultAssessmentCategories: Seq[AssessmentCategoryInfo] = Seq(
         AssessmentCategoryInfo(AssessmentCategory.Standard)
       ),
@@ -299,7 +300,8 @@ object EssttpBackend {
         assessmentCategory = assessmentCategory,
         eligibilityResultAssessmentCategories = eligibilityResultAssessmentCategories,
         affordabilityEnabled = affordabilityEnabled,
-        maybeDdInProgress = maybeDdInProgress
+        maybeDdInProgress = maybeDdInProgress,
+        maybeChargeIsInterestBearingCharge = maybeChargeIsInterestBearingCharge
       )(using
         encrypter
       )

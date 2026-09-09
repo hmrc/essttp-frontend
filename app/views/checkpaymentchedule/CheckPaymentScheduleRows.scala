@@ -17,17 +17,38 @@
 package views.checkpaymentchedule
 
 import essttp.journey.model.{CanPayWithinSixMonthsAnswers, UpfrontPaymentAnswers, WhyCannotPayInFullAnswers}
-import essttp.rootmodel.CannotPayReason
+import essttp.rootmodel.{CannotPayReason, TaxRegime}
 import essttp.rootmodel.ttp.affordablequotes.{DueDate, PaymentPlan}
+import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, EligibilityCheckResult}
 import messages.{DateMessages, Message, Messages}
 import models.Language
 import play.api.mvc.Call
 import play.twirl.api.Html
-import uk.gov.hmrc.govukfrontend.views.html.components._
+import uk.gov.hmrc.govukfrontend.views.html.components.*
 
 import java.time.LocalDate
 
 object CheckPaymentScheduleRows {
+
+  private def choseToIncludeFdls(
+    eligibilityCheckResult: EligibilityCheckResult,
+    assessmentCategory:     AssessmentCategory
+  ) = eligibilityCheckResult.foldOnAssessmentCategory(
+    _ => None,
+    _ => None,
+    _ => None,
+    (debts, liabilities, debtAndLiabilities) =>
+      if (
+        debts.assessmentEligibilityStatus && liabilities.assessmentEligibilityStatus && debtAndLiabilities.assessmentEligibilityStatus
+      )
+        assessmentCategory match {
+          case AssessmentCategory.Debts               => Some(false)
+          case AssessmentCategory.DebtsAndLiabilities => Some(true)
+          case category                               => sys.error(s"Got unexpected assessment category $category")
+        }
+      else
+        None
+  )
 
   def whyCannotPayInFullRow(
     whyCannotPayInFullAnswers: WhyCannotPayInFullAnswers,
@@ -82,13 +103,48 @@ object CheckPaymentScheduleRows {
   def upfrontPaymentRows(
     upfrontPaymentAnswers:          UpfrontPaymentAnswers,
     changeCanPayUpfrontCall:        Call,
-    changeUpfrontPaymentAmountCall: Call
+    changeUpfrontPaymentAmountCall: Call,
+    advancePaymentsCall:            Call,
+    assessmentCategory:             Option[AssessmentCategory] = None,
+    eligibilityCheckResult:         Option[EligibilityCheckResult] = None,
+    taxRegime:                      TaxRegime = TaxRegime.Sa
   )(using Language): List[SummaryListRow] = {
     val upfrontPaymentAmount =
       upfrontPaymentAnswers match {
         case UpfrontPaymentAnswers.NoUpfrontPayment               => None
         case UpfrontPaymentAnswers.DeclaredUpfrontPayment(amount) => Some(amount)
       }
+
+    val choseToIncludeFdlsResult = (assessmentCategory, eligibilityCheckResult) match {
+      case (Some(category), Some(result)) =>
+        choseToIncludeFdls(result, category)
+      case _                              => None
+    }
+
+    val includeUpcomingTaxBillRow =
+      SummaryListRow(
+        key = Key(
+          content = HtmlContent(Html(Messages.UpfrontPayment.`Include upcoming tax bill`.show)),
+          classes = "govuk-!-width-one-half"
+        ),
+        value = Value(
+          content = Text(choseToIncludeFdlsResult match {
+            case Some(true) => Messages.`Yes`.show
+            case _          => Messages.`No`.show
+          })
+        ),
+        actions = Some(
+          Actions(
+            items = Seq(
+              ActionItem(
+                href = advancePaymentsCall.url,
+                content = Text(Messages.change.show),
+                visuallyHiddenText = Some(Messages.UpfrontPayment.`Include upcoming tax bill`.show)
+              )
+            )
+          )
+        )
+      )
 
     val canPayUpfrontRow =
       SummaryListRow(
@@ -135,7 +191,9 @@ object CheckPaymentScheduleRows {
       )
     }
 
-    canPayUpfrontRow :: upfrontPaymentAmountRow.toList
+    if (choseToIncludeFdlsResult.isDefined)
+      includeUpcomingTaxBillRow :: canPayUpfrontRow :: upfrontPaymentAmountRow.toList
+    else canPayUpfrontRow :: upfrontPaymentAmountRow.toList
   }
 
   def canPayWithinSixMonthsRow(

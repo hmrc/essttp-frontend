@@ -69,6 +69,7 @@ requestSupport: RequestSupport
     CheckPaymentScheduleRows.upfrontPaymentRows(
         upfrontPaymentAnswers,
         routes.PegaController.change(CheckPaymentPlanChangeLink.CanPayUpfront.entryName),
+        routes.PegaController.change(CheckPaymentPlanChangeLink.UpfrontPaymentAmount.entryName),
         routes.PegaController.change(CheckPaymentPlanChangeLink.UpfrontPaymentAmount.entryName)
     )
 }
