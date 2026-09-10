@@ -381,7 +381,8 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             testCrypto,
             origin,
             assessmentCategory = assessmentCategory,
-            maybeChargeIsInterestBearingCharge = Some(hasInterestBearingCharge)
+            maybeChargeIsInterestBearingCharge = Some(hasInterestBearingCharge),
+            eligibilityResultAssessmentCategories = eligibilityResultAssessmentCategories
           )(journeyJsonBody)
 
           val request                = lang.fold(fakeRequest.withLangEnglish(), fakeRequest.withLangWelsh())
@@ -603,7 +604,12 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             "£0.06",
             Languages.English,
             hasInterestBearingCharge = true,
-            assessmentCategory = AssessmentCategory.DebtsAndLiabilities
+            assessmentCategory = AssessmentCategory.DebtsAndLiabilities,
+            eligibilityResultAssessmentCategories = Seq(
+              AssessmentCategoryInfo(AssessmentCategory.Debts),
+              AssessmentCategoryInfo(AssessmentCategory.Liabilities),
+              AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities)
+            )
           )
         }
 
