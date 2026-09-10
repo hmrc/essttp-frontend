@@ -33,6 +33,7 @@ import requests.RequestSupport
 import testOnly.AuthLoginApiService
 import testOnly.connectors.EssttpStubConnector
 import testOnly.controllers.StartJourneyController.*
+import testOnly.models.AssessmentCategoryInfo
 import testOnly.models.formsmodel.{StartJourneyForm, TaxRegimeForm}
 import testOnly.models.testusermodel.TestUser
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
@@ -574,6 +575,44 @@ object StartJourneyController {
       )
     )
 
+    given assessmentCategoryOrder: Ordering[AssessmentCategory] = Ordering.by {
+      case AssessmentCategory.Standard            => 1
+      case AssessmentCategory.Debts               => 2
+      case AssessmentCategory.Liabilities         => 3
+      case AssessmentCategory.DebtsAndLiabilities => 4
+    }
+
+    val isEligibleFdlJourney: Option[Boolean] =
+      if (form.assessmentCategories.nonEmpty)
+        form.assessmentCategories.toList.sortBy(_.category) match {
+          case AssessmentCategoryInfo(AssessmentCategory.Standard, _) :: Nil    => None
+          case AssessmentCategoryInfo(AssessmentCategory.Debts, _) :: Nil       => None
+          case AssessmentCategoryInfo(AssessmentCategory.Liabilities, _) :: Nil => None
+          case AssessmentCategoryInfo(AssessmentCategory.Debts, debts) :: AssessmentCategoryInfo(
+                AssessmentCategory.Liabilities,
+                liabilities
+              ) :: AssessmentCategoryInfo(
+                AssessmentCategory.DebtsAndLiabilities,
+                debtsAndLiabilities
+              ) :: Nil =>
+            val allEligible =
+              debts.isEmpty && liabilities.isEmpty && debtsAndLiabilities.isEmpty
+
+            val allButDebtsEligible =
+              debts.nonEmpty && liabilities.isEmpty && debtsAndLiabilities.isEmpty
+
+            val onlyDebtsEligible =
+              debts.isEmpty && liabilities.nonEmpty && debtsAndLiabilities.nonEmpty
+
+            Some(allEligible || allButDebtsEligible || onlyDebtsEligible)
+          case other                                                            =>
+            throw new NotImplementedError(
+              s"unsupported combination of assessment categories: (${other.map(_._1.toString).mkString(", ")})"
+            )
+        }
+      else
+        None
+
     EligibilityCheckResult(
       processingDateTime = ProcessingDateTime(LocalDate.now().toString),
       identification = makeIdentificationForTaxType(taxRegime, form),
@@ -586,9 +625,7 @@ object StartJourneyController {
       paymentPlanMaxLength = PaymentPlanMaxLength(form.planLengthMinAndMax.max),
       eligibilityStatus = EligibilityStatus(
         EligibilityPass(
-          eligibilityRules.isEligible && chargeTypeAssessments.nonEmpty && chargeTypeAssessments.forall(
-            _.assessmentEligibilityStatus
-          )
+          eligibilityRules.isEligible && isEligibleFdlJourney.forall(identity)
         )
       ),
       eligibilityRules = eligibilityRules,
