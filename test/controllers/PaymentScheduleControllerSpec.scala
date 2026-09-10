@@ -64,7 +64,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
 
       def testUpfrontPaymentSummaryRows(summary: Element)(
         canPayUpfrontValue:        String,
-        includeUpcomingValue:      String,
+        includeUpcomingValue:      Option[String],
         upfrontPaymentAmountValue: Option[String],
         reasonsToNotPayInFull:     List[String],
         canPayWithinSixMonths:     String,
@@ -80,18 +80,23 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
           lang.fold("why you are unable to pay in full", "pam nad oes modd i chi dalu’n llawn")
         )
 
-        val includeUpcomingTaxBillRow = SummaryRow(
-          lang.fold(
-            "Include upcoming tax bill in your payment plan?",
-            "A ydych am gynnwys bil treth sydd i ddod yn eich cynllun talu?"
-          ),
-          includeUpcomingValue,
-          PageUrls.checkPaymentPlanChangeUrl("AdvancePayments", origin.taxRegime, None),
-          lang.fold(
-            "Include upcoming tax bill in your payment plan?",
-            "A ydych am gynnwys bil treth sydd i ddod yn eich cynllun talu?"
-          )
-        )
+        val includeUpcomingTaxBillRow =
+          if (assessmentCategory == AssessmentCategory.DebtsAndLiabilities) {
+            Some(
+              SummaryRow(
+                lang.fold(
+                  "Include upcoming tax bill in your payment plan?",
+                  "A ydych am gynnwys bil treth sydd i ddod yn eich cynllun talu?"
+                ),
+                includeUpcomingValue.getOrElse(""),
+                PageUrls.checkPaymentPlanChangeUrl("AdvancePayments", origin.taxRegime, None),
+                lang.fold(
+                  "Include upcoming tax bill in your payment plan?",
+                  "A ydych am gynnwys bil treth sydd i ddod yn eich cynllun talu?"
+                )
+              )
+            )
+          } else None
 
         val canPayUpfrontRow        = SummaryRow(
           lang.fold("Can you make an upfront payment?", "A allwch wneud taliad ymlaen llaw?"),
@@ -118,23 +123,13 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
           lang.fold("whether you can pay within 6 months", "a ydych yn gallu talu cyn pen 6 mis")
         )
 
-        val expectedSummaryRows =
-          if (assessmentCategory == AssessmentCategory.DebtsAndLiabilities) {
-            List(
-              Some(whyCannotPayInFullRow),
-              Some(includeUpcomingTaxBillRow),
-              Some(canPayUpfrontRow),
-              upfrontPaymentAmountRow,
-              Some(canPayWithinSixMonthsRow)
-            ).collect { case Some(s) => s }
-          } else {
-            List(
-              Some(whyCannotPayInFullRow),
-              Some(canPayUpfrontRow),
-              upfrontPaymentAmountRow,
-              Some(canPayWithinSixMonthsRow)
-            ).collect { case Some(s) => s }
-          }
+        val expectedSummaryRows = List(
+          Some(whyCannotPayInFullRow),
+          includeUpcomingTaxBillRow,
+          Some(canPayUpfrontRow),
+          upfrontPaymentAmountRow,
+          Some(canPayWithinSixMonthsRow)
+        ).collect { case Some(s) => s }
 
         extractSummaryRows(upfrontPaymentSummaryRows) shouldBe expectedSummaryRows
       }
@@ -368,7 +363,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
           journeyJsonBody:                       String
         )(
           canPayUpfrontValue:                    String,
-          includeUpcomingValue:                  String,
+          includeUpcomingValue:                  Option[String],
           upfrontPaymentAmountValue:             Option[String],
           paymentDayValue:                       String,
           datesToAmountsValues:                  List[(String, String)],
@@ -454,7 +449,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
                 .`Chosen Payment Plan`(origin = origin, maybeChargeIsInterestBearingCharge = Some(true))
             )(
               "Yes",
-              "No",
+              None,
               Some("£123.12"),
               "28th or next working day",
               List(
@@ -474,7 +469,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
                 .`Chosen Payment Plan`(origin = origin, maybeChargeIsInterestBearingCharge = Some(true))
             )(
               "Iawn",
-              "Na",
+              None,
               Some("£123.12"),
               "28ain neu’r diwrnod gwaith nesaf",
               List(
@@ -494,7 +489,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
                 .`Chosen Payment Plan`(origin = origin, maybeChargeIsInterestBearingCharge = Some(false))
             )(
               "Yes",
-              "No",
+              None,
               Some("£123.12"),
               "28th or next working day",
               List(
@@ -514,7 +509,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
                 .`Chosen Payment Plan`(origin = origin, maybeChargeIsInterestBearingCharge = Some(false))
             )(
               "Iawn",
-              "Na",
+              None,
               Some("£123.12"),
               "28ain neu’r diwrnod gwaith nesaf",
               List(
@@ -534,7 +529,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             JourneyJsonTemplates.`Chosen Payment Plan`("""{ "NoUpfrontPayment" : { } }""", origin = origin)
           )(
             "No",
-            "No",
+            None,
             None,
             "28th or next working day",
             List(
@@ -553,7 +548,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             JourneyJsonTemplates.`Chosen Payment Plan`("""{ "NoUpfrontPayment" : { } }""", origin = origin)
           )(
             "Na",
-            "Na",
+            None,
             None,
             "28ain neu’r diwrnod gwaith nesaf",
             List(
@@ -575,7 +570,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             )
           )(
             "Yes",
-            "No",
+            None,
             Some("£123.12"),
             "28th or next working day",
             List("August 2022" -> "£555.73"),
@@ -600,7 +595,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             )
           )(
             "Yes",
-            "Yes",
+            Some("Yes"),
             Some("£123.12"),
             "28th or next working day",
             List("August 2022" -> "£555.73"),
@@ -620,7 +615,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             )
           )(
             "Iawn",
-            "Na",
+            None,
             Some("£123.12"),
             "28ain neu’r diwrnod gwaith nesaf",
             List("Awst 2022" -> "£555.73"),
@@ -639,7 +634,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             )
           )(
             "Yes",
-            "No",
+            None,
             Some("£123.12"),
             "28th or next working day",
             List(
@@ -662,7 +657,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             )
           )(
             "Iawn",
-            "Na",
+            None,
             Some("£123.12"),
             "28ain neu’r diwrnod gwaith nesaf",
             List(

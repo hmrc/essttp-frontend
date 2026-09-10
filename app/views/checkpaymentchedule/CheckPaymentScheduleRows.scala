@@ -105,9 +105,9 @@ object CheckPaymentScheduleRows {
     changeCanPayUpfrontCall:        Call,
     changeUpfrontPaymentAmountCall: Call,
     advancePaymentsCall:            Call,
-    assessmentCategory:             Option[AssessmentCategory] = None,
-    eligibilityCheckResult:         Option[EligibilityCheckResult] = None,
-    taxRegime:                      TaxRegime = TaxRegime.Sa
+    assessmentCategory:             AssessmentCategory,
+    eligibilityCheckResult:         EligibilityCheckResult,
+    taxRegime:                      TaxRegime
   )(using Language): List[SummaryListRow] = {
     val upfrontPaymentAmount =
       upfrontPaymentAnswers match {
@@ -115,10 +115,9 @@ object CheckPaymentScheduleRows {
         case UpfrontPaymentAnswers.DeclaredUpfrontPayment(amount) => Some(amount)
       }
 
-    val choseToIncludeFdlsResult = (assessmentCategory, eligibilityCheckResult) match {
-      case (Some(category), Some(result)) =>
-        choseToIncludeFdls(result, category)
-      case _                              => None
+    val choseToIncludeFdlsResult = choseToIncludeFdls(eligibilityCheckResult, assessmentCategory) match {
+      case Some(result) => Some(result)
+      case _            => None
     }
 
     val includeUpcomingTaxBillRow =
