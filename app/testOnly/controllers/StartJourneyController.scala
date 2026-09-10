@@ -582,12 +582,15 @@ object StartJourneyController {
       case AssessmentCategory.DebtsAndLiabilities => 4
     }
 
-    val isEligibleFdlJourney: Option[Boolean] =
+    val chargeTypeAssessmentsEligible: Boolean =
       if (form.assessmentCategories.nonEmpty)
         form.assessmentCategories.toList.sortBy(_.category) match {
-          case AssessmentCategoryInfo(AssessmentCategory.Standard, _) :: Nil    => None
-          case AssessmentCategoryInfo(AssessmentCategory.Debts, _) :: Nil       => None
-          case AssessmentCategoryInfo(AssessmentCategory.Liabilities, _) :: Nil => None
+          case AssessmentCategoryInfo(AssessmentCategory.Standard, standard) :: Nil       =>
+            standard.isEmpty
+          case AssessmentCategoryInfo(AssessmentCategory.Debts, debts) :: Nil             =>
+            debts.isEmpty
+          case AssessmentCategoryInfo(AssessmentCategory.Liabilities, liabilities) :: Nil =>
+            liabilities.isEmpty
           case AssessmentCategoryInfo(AssessmentCategory.Debts, debts) :: AssessmentCategoryInfo(
                 AssessmentCategory.Liabilities,
                 liabilities
@@ -604,14 +607,14 @@ object StartJourneyController {
             val onlyDebtsEligible =
               debts.isEmpty && liabilities.nonEmpty && debtsAndLiabilities.nonEmpty
 
-            Some(allEligible || allButDebtsEligible || onlyDebtsEligible)
-          case other                                                            =>
+            allEligible || allButDebtsEligible || onlyDebtsEligible
+          case other                                                                      =>
             throw new NotImplementedError(
               s"unsupported combination of assessment categories: (${other.map(_._1.toString).mkString(", ")})"
             )
         }
       else
-        None
+        false
 
     EligibilityCheckResult(
       processingDateTime = ProcessingDateTime(LocalDate.now().toString),
@@ -625,7 +628,7 @@ object StartJourneyController {
       paymentPlanMaxLength = PaymentPlanMaxLength(form.planLengthMinAndMax.max),
       eligibilityStatus = EligibilityStatus(
         EligibilityPass(
-          eligibilityRules.isEligible && isEligibleFdlJourney.forall(identity)
+          eligibilityRules.isEligible && chargeTypeAssessmentsEligible
         )
       ),
       eligibilityRules = eligibilityRules,
