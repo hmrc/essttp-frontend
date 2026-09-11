@@ -19,7 +19,6 @@ package controllers
 import actionsmodel.AuthenticatedRequest
 import config.AppConfig
 import controllers.pagerouters.EligibilityRouter
-import essttp.journey.model.Journey.*
 import essttp.journey.model.*
 import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, EligibilityCheckResult}
 import essttp.rootmodel.{CanPayUpfront, IsEmailAddressRequired, TaxRegime}
@@ -200,6 +199,20 @@ object Routing {
       },
       routes.SubmitArrangementController.submitArrangement                                           -> { () =>
         SubmitArrangementController.whichPaymentPlanSetupPage(journey.taxRegime)
+      },
+      routes.YourBillController.advancePaymentSubmit                                                 -> { () =>
+        journey match {
+          case j: JourneyStage.BeforeAssessmentCategoryDetermined =>
+            sys.error("should not reach here before category has been determined")
+          case j: JourneyStage.AfterAssessmentCategoryDetermined  =>
+            j.assessmentCategory match {
+              case AssessmentCategory.DebtsAndLiabilities =>
+                routes.YourBillController.yourBillCombined
+              case AssessmentCategory.Debts               =>
+                routes.YourBillController.yourBill
+              case _                                      => sys.error("should not reach here for any other assessment category")
+            }
+        }
       }
     )
 

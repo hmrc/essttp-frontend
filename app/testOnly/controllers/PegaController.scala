@@ -144,6 +144,11 @@ class PegaController @Inject() (
           )
       }
 
+      val assessmentCategory = request.journey match {
+        case j: JourneyStage.AfterAssessmentCategoryDetermined => j.assessmentCategory
+        case _                                                 => sys.error("Could not find assessment category")
+      }
+
       val incomeAndExpenditure =
         testOnlyJourney.incomeAndExpenditure.getOrElse(
           Errors.throwServerErrorException("Could not find income and expenditure answers")
@@ -163,7 +168,10 @@ class PegaController @Inject() (
           canPayWithinSixMonthsAnswers,
           incomeAndExpenditure,
           paymentPlan,
-          eligibilityCheckResult.hasInterestBearingCharge(request.journey)
+          eligibilityCheckResult.hasInterestBearingCharge(request.journey),
+          assessmentCategory,
+          eligibilityCheckResult,
+          request.journey.taxRegime
         )
       )
     }

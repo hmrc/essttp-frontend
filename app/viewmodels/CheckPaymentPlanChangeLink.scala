@@ -58,6 +58,10 @@ object CheckPaymentPlanChangeLink extends Enum[CheckPaymentPlanChangeLink] {
     def targetPage(taxRegime: TaxRegime): Call = routes.InstalmentsController.instalmentOptions
   }
 
+  case object AdvancePayments extends CheckPaymentPlanChangeLink {
+    override def targetPage(taxRegime: TaxRegime): Call = routes.YourBillController.advancePayment
+  }
+
   override val values = findValues
 
 }

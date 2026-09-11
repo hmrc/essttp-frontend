@@ -64,10 +64,12 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
 
       def testUpfrontPaymentSummaryRows(summary: Element)(
         canPayUpfrontValue:        String,
+        includeUpcomingValue:      Option[String],
         upfrontPaymentAmountValue: Option[String],
         reasonsToNotPayInFull:     List[String],
         canPayWithinSixMonths:     String,
-        lang:                      Language
+        lang:                      Language,
+        assessmentCategory:        AssessmentCategory
       ) = {
         val upfrontPaymentSummaryRows = summary.select(".govuk-summary-list__row").iterator().asScala.toList
 
@@ -77,6 +79,24 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
           PageUrls.checkPaymentPlanChangeUrl("WhyUnableInFull", origin.taxRegime, None),
           lang.fold("why you are unable to pay in full", "pam nad oes modd i chi dalu’n llawn")
         )
+
+        val includeUpcomingTaxBillRow =
+          if (includeUpcomingValue.isDefined) {
+            Some(
+              SummaryRow(
+                lang.fold(
+                  "Include upcoming tax bill in your payment plan?",
+                  "A ydych am gynnwys bil treth sydd i ddod yn eich cynllun talu?"
+                ),
+                includeUpcomingValue.getOrElse(""),
+                PageUrls.checkPaymentPlanChangeUrl("AdvancePayments", origin.taxRegime, None),
+                lang.fold(
+                  "Include upcoming tax bill in your payment plan?",
+                  "A ydych am gynnwys bil treth sydd i ddod yn eich cynllun talu?"
+                )
+              )
+            )
+          } else None
 
         val canPayUpfrontRow        = SummaryRow(
           lang.fold("Can you make an upfront payment?", "A allwch wneud taliad ymlaen llaw?"),
@@ -105,6 +125,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
 
         val expectedSummaryRows = List(
           Some(whyCannotPayInFullRow),
+          includeUpcomingTaxBillRow,
           Some(canPayUpfrontRow),
           upfrontPaymentAmountRow,
           Some(canPayWithinSixMonthsRow)
@@ -339,22 +360,29 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
       "should return 200 and the can you make an upfront payment page when" - {
 
         def test(
-          journeyJsonBody:           String
+          journeyJsonBody:                       String
         )(
-          canPayUpfrontValue:        String,
-          upfrontPaymentAmountValue: Option[String],
-          paymentDayValue:           String,
-          datesToAmountsValues:      List[(String, String)],
-          totalToPayValue:           String,
-          interestValue:             String,
-          lang:                      Language,
-          hasInterestBearingCharge:  Boolean
+          canPayUpfrontValue:                    String,
+          includeUpcomingValue:                  Option[String],
+          upfrontPaymentAmountValue:             Option[String],
+          paymentDayValue:                       String,
+          datesToAmountsValues:                  List[(String, String)],
+          totalToPayValue:                       String,
+          interestValue:                         String,
+          lang:                                  Language,
+          hasInterestBearingCharge:              Boolean,
+          assessmentCategory:                    AssessmentCategory = AssessmentCategory.Standard,
+          eligibilityResultAssessmentCategories: Seq[AssessmentCategoryInfo] = Seq(
+            AssessmentCategoryInfo(AssessmentCategory.Standard)
+          )
         ) = {
           stubCommonActions()
-          EssttpBackend.EligibilityCheck.findJourney(
+          EssttpBackend.DetermineAssessmentCategory.findJourney(
             testCrypto,
             origin,
-            maybeChargeIsInterestBearingCharge = Some(hasInterestBearingCharge)
+            assessmentCategory = assessmentCategory,
+            maybeChargeIsInterestBearingCharge = Some(hasInterestBearingCharge),
+            eligibilityResultAssessmentCategories = eligibilityResultAssessmentCategories
           )(journeyJsonBody)
 
           val request                = lang.fold(fakeRequest.withLangEnglish(), fakeRequest.withLangWelsh())
@@ -383,13 +411,15 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
 
           testUpfrontPaymentSummaryRows(summaries(0))(
             canPayUpfrontValue,
+            includeUpcomingValue,
             upfrontPaymentAmountValue,
             List(
               lang.fold("Change to personal circumstances", "Newid yn eich amgylchiadau personol"),
               lang.fold("No money set aside to pay", "Dim arian wedi’i neilltuo i dalu")
             ),
             canPayWithinSixMonths = lang.fold("Yes", "Iawn"),
-            lang
+            lang,
+            assessmentCategory
           )
 
           val paymentsHeading = summaries(1).previousElementSibling()
@@ -420,6 +450,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
                 .`Chosen Payment Plan`(origin = origin, maybeChargeIsInterestBearingCharge = Some(true))
             )(
               "Yes",
+              None,
               Some("£123.12"),
               "28th or next working day",
               List(
@@ -439,6 +470,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
                 .`Chosen Payment Plan`(origin = origin, maybeChargeIsInterestBearingCharge = Some(true))
             )(
               "Iawn",
+              None,
               Some("£123.12"),
               "28ain neu’r diwrnod gwaith nesaf",
               List(
@@ -458,6 +490,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
                 .`Chosen Payment Plan`(origin = origin, maybeChargeIsInterestBearingCharge = Some(false))
             )(
               "Yes",
+              None,
               Some("£123.12"),
               "28th or next working day",
               List(
@@ -477,6 +510,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
                 .`Chosen Payment Plan`(origin = origin, maybeChargeIsInterestBearingCharge = Some(false))
             )(
               "Iawn",
+              None,
               Some("£123.12"),
               "28ain neu’r diwrnod gwaith nesaf",
               List(
@@ -497,6 +531,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
           )(
             "No",
             None,
+            None,
             "28th or next working day",
             List(
               "August 2022"    -> "£555.73",
@@ -514,6 +549,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             JourneyJsonTemplates.`Chosen Payment Plan`("""{ "NoUpfrontPayment" : { } }""", origin = origin)
           )(
             "Na",
+            None,
             None,
             "28ain neu’r diwrnod gwaith nesaf",
             List(
@@ -535,6 +571,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             )
           )(
             "Yes",
+            None,
             Some("£123.12"),
             "28th or next working day",
             List("August 2022" -> "£555.73"),
@@ -542,6 +579,37 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             "£0.06",
             Languages.English,
             hasInterestBearingCharge = true
+          )
+        }
+
+        s"[$regime journey] there is an upfrontPayment amount with a one month plan, for debts and liabilities (English)" in {
+          test(
+            JourneyJsonTemplates.`Chosen Payment Plan`(
+              origin = origin,
+              selectedPlanJourneyInfo = TdJsonBodies.selectedPlanOneMonthJourneyInfo,
+              assessmentCategory = AssessmentCategory.DebtsAndLiabilities,
+              eligibilityResultAssessmentCategories = Seq(
+                AssessmentCategoryInfo(AssessmentCategory.Debts),
+                AssessmentCategoryInfo(AssessmentCategory.Liabilities),
+                AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities)
+              )
+            )
+          )(
+            "Yes",
+            Some("Yes"),
+            Some("£123.12"),
+            "28th or next working day",
+            List("August 2022" -> "£555.73"),
+            "£1,111.47",
+            "£0.06",
+            Languages.English,
+            hasInterestBearingCharge = true,
+            assessmentCategory = AssessmentCategory.DebtsAndLiabilities,
+            eligibilityResultAssessmentCategories = Seq(
+              AssessmentCategoryInfo(AssessmentCategory.Debts),
+              AssessmentCategoryInfo(AssessmentCategory.Liabilities),
+              AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities)
+            )
           )
         }
 
@@ -553,6 +621,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             )
           )(
             "Iawn",
+            None,
             Some("£123.12"),
             "28ain neu’r diwrnod gwaith nesaf",
             List("Awst 2022" -> "£555.73"),
@@ -571,6 +640,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             )
           )(
             "Yes",
+            None,
             Some("£123.12"),
             "28th or next working day",
             List(
@@ -593,6 +663,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             )
           )(
             "Iawn",
+            None,
             Some("£123.12"),
             "28ain neu’r diwrnod gwaith nesaf",
             List(
