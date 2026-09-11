@@ -81,7 +81,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
         )
 
         val includeUpcomingTaxBillRow =
-          if (assessmentCategory == AssessmentCategory.DebtsAndLiabilities) {
+          if (includeUpcomingValue.isDefined) {
             Some(
               SummaryRow(
                 lang.fold(

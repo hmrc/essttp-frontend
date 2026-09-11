@@ -17,13 +17,14 @@
 package controllers
 
 import actions.Actions
+import config.AppConfig
 import controllers.JourneyFinalStateCheck.finalStateCheck
 import controllers.JourneyIncorrectStateRouter.logErrorAndRouteToDefaultPage
 import essttp.journey.JourneyConnector
 import essttp.journey.model.JourneyStage.BeforeAssessmentCategoryDetermined
 import essttp.journey.model.{Journey, JourneyStage, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.AmountInPence
-import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, ChargeTypeAssessment, ChargeTypeAssessments, Charges, EligibilityCheckResult, MainTrans}
+import essttp.rootmodel.ttp.eligibility.*
 import essttp.rootmodel.ttp.{DdInProgress, IsInterestBearingCharge}
 import models.forms.{AddLiabilitiesForm, AddLiabilitiesFormValue}
 import models.{InvoicePeriod, OverDuePayments, OverduePayment}
@@ -48,7 +49,7 @@ class YourBillController @Inject() (
   auditService:     AuditService,
   journeyConnector: JourneyConnector,
   requestSupport:   RequestSupport
-)(using ExecutionContext)
+)(using ExecutionContext, AppConfig)
     extends FrontendController(mcc),
       Logging {
 
@@ -223,15 +224,25 @@ class YourBillController @Inject() (
                   )
                 ),
               addLiabilities => {
-                val (assessmentCategory, next) = addLiabilities match {
+                val assessmentCategory = addLiabilities match {
                   case AddLiabilitiesFormValue.Yes =>
-                    AssessmentCategory.DebtsAndLiabilities -> routes.YourBillController.yourBillCombined
+                    AssessmentCategory.DebtsAndLiabilities
                   case AddLiabilitiesFormValue.No  =>
-                    AssessmentCategory.Debts -> routes.YourBillController.yourBill
+                    AssessmentCategory.Debts
                 }
 
-                journeyConnector.updateAssessmentCategory(request.journey.journeyId, assessmentCategory).map { _ =>
-                  Redirect(next)
+                val existingCategory: Option[AssessmentCategory] = request.journey match {
+                  case j: JourneyStage.AfterAssessmentCategoryDetermined => Some(j.assessmentCategory)
+                  case _                                                 => None
+                }
+
+                journeyConnector.updateAssessmentCategory(request.journey.journeyId, assessmentCategory).map {
+                  journey =>
+                    Routing.redirectToNext(
+                      routes.YourBillController.advancePaymentSubmit,
+                      journey,
+                      existingCategory.contains(assessmentCategory)
+                    )
                 }
               }
             )
