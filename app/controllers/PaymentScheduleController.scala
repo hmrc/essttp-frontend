@@ -75,15 +75,12 @@ class PaymentScheduleController @Inject() (
     )
     val hasInterestBearingCharge = request.eligibilityCheckResult.hasInterestBearingCharge
 
-    val assessmentCategory = journey.merge match {
+    val assessmentCategory = journeyMerged match {
       case j: JourneyStage.AfterAssessmentCategoryDetermined => j.assessmentCategory
       case _                                                 => sys.error("Could not find assessment category")
     }
 
-    val eligibilityCheckResult = journey.merge match {
-      case j: JourneyStage.AfterEligibilityChecked => j.eligibilityCheckResult
-      case _                                       => sys.error("Could not find eligibility check result")
-    }
+    val eligibilityCheckResult = request.eligibilityCheckResult
 
     Ok(
       paymentSchedulePage(
