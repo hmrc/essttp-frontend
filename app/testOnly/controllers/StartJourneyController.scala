@@ -607,7 +607,10 @@ object StartJourneyController {
             val onlyDebtsEligible =
               debts.isEmpty && liabilities.nonEmpty && debtsAndLiabilities.nonEmpty
 
-            allEligible || allButDebtsEligible || onlyDebtsEligible
+            val allButDebtsAndLiabilitiesEligible =
+              debts.isEmpty && liabilities.isEmpty && debtsAndLiabilities.nonEmpty
+
+            allEligible || allButDebtsEligible || onlyDebtsEligible || allButDebtsAndLiabilitiesEligible
           case other                                                                      =>
             throw new NotImplementedError(
               s"unsupported combination of assessment categories: (${other.map(_._1.toString).mkString(", ")})"
