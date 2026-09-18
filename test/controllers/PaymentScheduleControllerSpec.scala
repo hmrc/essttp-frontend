@@ -18,7 +18,7 @@ package controllers
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import controllers.PaymentScheduleControllerSpec.SummaryRow
-import essttp.journey.model.{Origin, Origins}
+import essttp.journey.model.{Origin, Origins, WhyCannotPayInFullAnswers}
 import essttp.rootmodel.TaxRegime
 import essttp.rootmodel.ttp.eligibility.AssessmentCategory
 import models.{AssessmentCategoryInfo, Language, Languages}
@@ -360,29 +360,23 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
       "should return 200 and the can you make an upfront payment page when" - {
 
         def test(
-          journeyJsonBody:                       String
+          journeyJsonBody:           String
         )(
-          canPayUpfrontValue:                    String,
-          includeUpcomingValue:                  Option[String],
-          upfrontPaymentAmountValue:             Option[String],
-          paymentDayValue:                       String,
-          datesToAmountsValues:                  List[(String, String)],
-          totalToPayValue:                       String,
-          interestValue:                         String,
-          lang:                                  Language,
-          hasInterestBearingCharge:              Boolean,
-          assessmentCategory:                    AssessmentCategory = AssessmentCategory.Standard,
-          eligibilityResultAssessmentCategories: Seq[AssessmentCategoryInfo] = Seq(
-            AssessmentCategoryInfo(AssessmentCategory.Standard)
-          )
+          canPayUpfrontValue:        String,
+          includeUpcomingValue:      Option[String],
+          upfrontPaymentAmountValue: Option[String],
+          paymentDayValue:           String,
+          datesToAmountsValues:      List[(String, String)],
+          totalToPayValue:           String,
+          interestValue:             String,
+          lang:                      Language,
+          hasInterestBearingCharge:  Boolean,
+          assessmentCategory:        AssessmentCategory = AssessmentCategory.Standard
         ) = {
           stubCommonActions()
-          EssttpBackend.DetermineAssessmentCategory.findJourney(
+          EssttpBackend.SelectedPaymentPlan.findJourney(
             testCrypto,
-            origin,
-            assessmentCategory = assessmentCategory,
-            maybeChargeIsInterestBearingCharge = Some(hasInterestBearingCharge),
-            eligibilityResultAssessmentCategories = eligibilityResultAssessmentCategories
+            origin
           )(journeyJsonBody)
 
           val request                = lang.fold(fakeRequest.withLangEnglish(), fakeRequest.withLangWelsh())
@@ -604,12 +598,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             "£0.06",
             Languages.English,
             hasInterestBearingCharge = true,
-            assessmentCategory = AssessmentCategory.DebtsAndLiabilities,
-            eligibilityResultAssessmentCategories = Seq(
-              AssessmentCategoryInfo(AssessmentCategory.Debts),
-              AssessmentCategoryInfo(AssessmentCategory.Liabilities),
-              AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities)
-            )
+            assessmentCategory = AssessmentCategory.DebtsAndLiabilities
           )
         }
 
@@ -676,6 +665,25 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             Languages.Welsh,
             hasInterestBearingCharge = true
           )
+        }
+
+        s"[$regime journey] the journey has already been to this page previously" in {
+          stubCommonActions()
+          EssttpBackend.HasCheckedPlan.findJourney(withAffordability = false, testCrypto, origin)(
+            JourneyJsonTemplates.`Has Checked Payment Plan - No Affordability`(origin)
+          )
+
+          val result: Future[Result] = controller.checkPaymentSchedule(fakeRequest)
+          status(result) shouldBe OK
+
+          ContentAssertions.commonPageChecks(
+            Jsoup.parse(contentAsString(result)),
+            expectedH1 = "Check your payment plan",
+            shouldBackLinkBePresent = true,
+            expectedSubmitUrl = Some(routes.PaymentScheduleController.checkPaymentScheduleSubmit.url),
+            regimeBeingTested = Some(origin.taxRegime)
+          )
+
         }
 
       }
