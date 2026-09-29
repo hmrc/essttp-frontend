@@ -1615,8 +1615,10 @@ object Messages {
     )
 
     val `Upfront payment`: Message = Message(
-      english = "Upfront payment<br><span class=\"govuk-body-m\">Taken within 6 working days</span>",
-      welsh = "Taliad ymlaen llaw<br><span class=\"govuk-body-m\">I’w gymryd cyn pen 6 diwrnod gwaith</span>"
+      english =
+        "<p class=\"govuk-body-m govuk-!-font-weight-bold govuk-!-margin-0\">Upfront payment</p> <p class=\"govuk-!-font-weight-regular govuk-!-font-size-17 govuk-!-margin-0\">Taken within 6 working days</p>",
+      welsh =
+        "<p class=\"govuk-body-m govuk-!-font-weight-bold govuk-!-margin-0\">Taliad ymlaen llaw</p> <p class=\"govuk-!-font-weight-regular govuk-!-font-size-17 govuk-!-margin-0\">I’w gymryd cyn pen 6 diwrnod gwaith</p>"
     )
 
     val `Upfront payment-visually-hidden-message`: Message = Message(

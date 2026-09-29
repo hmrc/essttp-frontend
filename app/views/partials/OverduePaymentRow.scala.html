@@ -69,12 +69,14 @@
 @govDateFormat(date: LocalDate) = @{s"${date.getDayOfMonth.toString} ${DateMessages.monthName(date.getMonthValue).show} ${date.getYear.toString}"}
 
 <div class="govuk-summary-list__row">
-  <dt class="govuk-summary-list__key govuk-!-width-two-thirds">
-    @mainInfo<br>
-    <span class="govuk-!-font-weight-regular govuk-!-font-size-16">
-        @accompanyingInfo
-    </span>
-  </dt>
+    <dt class="govuk-summary-list__key govuk-!-width-two-thirds">
+        <p class="govuk-body-m govuk-!-font-weight-bold govuk-!-margin-0">
+            @mainInfo
+        </p>
+        <p class="govuk-!-font-weight-regular govuk-!-font-size-16 govuk-!-margin-0">
+            @accompanyingInfo
+        </p>
+    </dt>
   <dd class="govuk-summary-list__value">
     @{payment.amount.gdsFormatInPounds}<br>
       @if(payment.interestBearingCharge.exists(_.value)) {
