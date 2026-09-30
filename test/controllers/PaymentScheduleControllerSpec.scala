@@ -55,7 +55,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
 
       def extractSummaryRows(elements: List[Element]): List[SummaryRow] = elements.map { e =>
         SummaryRow(
-          e.select(".govuk-summary-list__key").html(),
+          e.select(".govuk-summary-list__key").text(),
           e.select(".govuk-summary-list__value").text(),
           e.select(".govuk-summary-list__actions > .govuk-link").attr("href"),
           e.select(".govuk-summary-list__actions > .govuk-link > span.govuk-visually-hidden").text()
@@ -107,8 +107,8 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
         val upfrontPaymentAmountRow = upfrontPaymentAmountValue.map(amount =>
           SummaryRow(
             lang.fold(
-              "Upfront payment\n<br>\n<span class=\"govuk-body-m\">Taken within 6 working days</span>",
-              "Taliad ymlaen llaw\n<br>\n<span class=\"govuk-body-m\">I’w gymryd cyn pen 6 diwrnod gwaith</span>"
+              "Upfront payment Taken within 6 working days",
+              "Taliad ymlaen llaw I’w gymryd cyn pen 6 diwrnod gwaith"
             ),
             amount,
             PageUrls.checkPaymentPlanChangeUrl("UpfrontPaymentAmount", origin.taxRegime, None),
