@@ -174,9 +174,6 @@
         }
     </h2>
 
-
-
-
     @govukSummaryList(SummaryList(
         rows = Seq(
             SummaryListRow(
@@ -188,12 +185,7 @@
                     content = Text(paymentReference)
                 ),
                 actions = None
-            )
-        )
-    ))
-
-    @govukSummaryList(SummaryList(
-        rows = Seq(
+            ),
             SummaryListRow(
                 key = Key(
                     content = HtmlContent(Html(Messages.UpfrontPayment.`Can you make an upfront payment?`.show)),
