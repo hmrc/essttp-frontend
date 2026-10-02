@@ -352,16 +352,21 @@ class PaymentPlanSetUpControllerWithUrBannerSpec extends ItSpec with PaymentPlan
         subheadings.size shouldBe 1
         subheadings(0).text() shouldBe "Monthly payments"
 
-        val allSummaryLists                 = doc.select(".govuk-summary-list").asScala.toList
-        val paymentReferenceSummaryListRows = allSummaryLists(0).select(".govuk-summary-list__row").asScala.toList
-        val upfrontPaymentSummaryListRows   = allSummaryLists(1).select(".govuk-summary-list__row").asScala.toList
-        val monthlyPaymentSummaryListRows   = allSummaryLists(2).select(".govuk-summary-list__row").asScala.toList
+        val allSummaryLists               = doc.select(".govuk-summary-list").asScala.toList
+        val upfrontPaymentSummaryListRows = allSummaryLists(0).select(".govuk-summary-list__row").asScala.toList
+        val monthlyPaymentSummaryListRows = allSummaryLists(1).select(".govuk-summary-list__row").asScala.toList
 
-        assertPaymentReference(paymentReferenceSummaryListRows)
+        val expectedPaymentReference = taxRegime match {
+          case TaxRegime.Epaye => "123PA44545546"
+          case TaxRegime.Vat   => "101747001"
+          case TaxRegime.Sa    => "1234567895"
+          case TaxRegime.Simp  => "QQ123456A"
+        }
 
-        upfrontPaymentSummaryListRows.size shouldBe 2
-        assertKeyAndValue(upfrontPaymentSummaryListRows(0), ("Can you make an upfront payment?", "Yes"))
-        assertKeyAndValue(upfrontPaymentSummaryListRows(1), ("Upfront payment Taken within 6 working days", "£2"))
+        upfrontPaymentSummaryListRows.size shouldBe 3
+        assertKeyAndValue(upfrontPaymentSummaryListRows(0), ("Payment reference", expectedPaymentReference))
+        assertKeyAndValue(upfrontPaymentSummaryListRows(1), ("Can you make an upfront payment?", "Yes"))
+        assertKeyAndValue(upfrontPaymentSummaryListRows(2), ("Upfront payment Taken within 6 working days", "£2"))
 
         assertMonthlyPaymentSummaryList(monthlyPaymentSummaryListRows)
         assertPrintLink(doc)
@@ -390,15 +395,21 @@ class PaymentPlanSetUpControllerWithUrBannerSpec extends ItSpec with PaymentPlan
         subheadings.size shouldBe 1
         subheadings(0).text() shouldBe "Monthly payments"
 
-        val allSummaryLists                 = doc.select(".govuk-summary-list").asScala.toList
-        val paymentReferenceSummaryListRows = allSummaryLists(0).select(".govuk-summary-list__row").asScala.toList
-        val upfrontPaymentSummaryListRows   = allSummaryLists(1).select(".govuk-summary-list__row").asScala.toList
-        val monthlyPaymentSummaryListRows   = allSummaryLists(2).select(".govuk-summary-list__row").asScala.toList
+        val allSummaryLists               = doc.select(".govuk-summary-list").asScala.toList
+        // val paymentReferenceSummaryListRows = allSummaryLists(0).select(".govuk-summary-list__row").asScala.toList
+        val upfrontPaymentSummaryListRows = allSummaryLists(0).select(".govuk-summary-list__row").asScala.toList
+        val monthlyPaymentSummaryListRows = allSummaryLists(1).select(".govuk-summary-list__row").asScala.toList
 
-        assertPaymentReference(paymentReferenceSummaryListRows)
-
-        upfrontPaymentSummaryListRows.size shouldBe 1
-        assertKeyAndValue(upfrontPaymentSummaryListRows(0), ("Can you make an upfront payment?", "No"))
+        // assertPaymentReference(paymentReferenceSummaryListRows)
+        val expectedPaymentReference = taxRegime match {
+          case TaxRegime.Epaye => "123PA44545546"
+          case TaxRegime.Vat   => "101747001"
+          case TaxRegime.Sa    => "1234567895"
+          case TaxRegime.Simp  => "QQ123456A"
+        }
+        upfrontPaymentSummaryListRows.size shouldBe 2
+        assertKeyAndValue(upfrontPaymentSummaryListRows(0), ("Payment reference", expectedPaymentReference))
+        assertKeyAndValue(upfrontPaymentSummaryListRows(1), ("Can you make an upfront payment?", "No"))
 
         assertMonthlyPaymentSummaryList(monthlyPaymentSummaryListRows)
         assertPrintLink(doc)
@@ -425,29 +436,26 @@ class PaymentPlanSetUpControllerWithUrBannerSpec extends ItSpec with PaymentPlan
         subheadings.size shouldBe 1
         subheadings(0).text() shouldBe "Monthly payments"
 
-        val allSummaryLists                 = doc.select(".govuk-summary-list").asScala.toList
-        val paymentReferenceSummaryListRows = allSummaryLists(0).select(".govuk-summary-list__row").asScala.toList
-        val upfrontPaymentSummaryListRows   = allSummaryLists(1).select(".govuk-summary-list__row").asScala.toList
-        val monthlyPaymentSummaryListRows   = allSummaryLists(2).select(".govuk-summary-list__row").asScala.toList
+        val allSummaryLists               = doc.select(".govuk-summary-list").asScala.toList
+        // val paymentReferenceSummaryListRows = allSummaryLists(0).select(".govuk-summary-list__row").asScala.toList
+        val upfrontPaymentSummaryListRows = allSummaryLists(0).select(".govuk-summary-list__row").asScala.toList
+        val monthlyPaymentSummaryListRows = allSummaryLists(1).select(".govuk-summary-list__row").asScala.toList
 
-        assertPaymentReference(paymentReferenceSummaryListRows)
+        // assertPaymentReference(paymentReferenceSummaryListRows)
 
-        upfrontPaymentSummaryListRows.size shouldBe 2
-        assertKeyAndValue(upfrontPaymentSummaryListRows(0), ("Can you make an upfront payment?", "Yes"))
-        assertKeyAndValue(upfrontPaymentSummaryListRows(1), ("Upfront payment Taken within 6 working days", "£2"))
-
-        assertMonthlyPaymentSummaryList(monthlyPaymentSummaryListRows)
-        assertPrintLink(doc)
-      }
-
-      def assertPaymentReference(paymentReferenceSummaryListRows: List[Element]): Assertion = {
+        upfrontPaymentSummaryListRows.size shouldBe 3
         val expectedPaymentReference = taxRegime match {
           case TaxRegime.Epaye => "123PA44545546"
           case TaxRegime.Vat   => "101747001"
           case TaxRegime.Sa    => "1234567895"
           case TaxRegime.Simp  => "QQ123456A"
         }
-        assertKeyAndValue(paymentReferenceSummaryListRows(0), ("Payment reference", expectedPaymentReference))
+        assertKeyAndValue(upfrontPaymentSummaryListRows(0), ("Payment reference", expectedPaymentReference))
+        assertKeyAndValue(upfrontPaymentSummaryListRows(1), ("Can you make an upfront payment?", "Yes"))
+        assertKeyAndValue(upfrontPaymentSummaryListRows(2), ("Upfront payment Taken within 6 working days", "£2"))
+
+        assertMonthlyPaymentSummaryList(monthlyPaymentSummaryListRows)
+        assertPrintLink(doc)
       }
 
       def assertMonthlyPaymentSummaryList(monthlyPaymentSummaryListRows: List[Element]): Assertion = {
@@ -642,16 +650,21 @@ class PaymentPlanSetUpControllerWithUrBannerSpec extends ItSpec with PaymentPlan
       subheadings(2).text() shouldBe "If you do not pay on time"
       subheadings(3).text() shouldBe "If you’re having difficulty paying"
 
-      val allSummaryLists                 = doc.select(".govuk-summary-list").asScala.toList
-      val paymentReferenceSummaryListRows = allSummaryLists(0).select(".govuk-summary-list__row").asScala.toList
-      val upfrontPaymentSummaryListRows   = allSummaryLists(1).select(".govuk-summary-list__row").asScala.toList
-      val monthlyPaymentSummaryListRows   = allSummaryLists(2).select(".govuk-summary-list__row").asScala.toList
+      val allSummaryLists               = doc.select(".govuk-summary-list").asScala.toList
+      val upfrontPaymentSummaryListRows = allSummaryLists(0).select(".govuk-summary-list__row").asScala.toList
+      val monthlyPaymentSummaryListRows = allSummaryLists(1).select(".govuk-summary-list__row").asScala.toList
 
-      assertPaymentReference(paymentReferenceSummaryListRows)
+      val expectedPaymentReference = taxRegime match {
+        case TaxRegime.Epaye => "123PA44545546"
+        case TaxRegime.Vat   => "101747001"
+        case TaxRegime.Sa    => "1234567895"
+        case TaxRegime.Simp  => "QQ123456A"
+      }
 
-      upfrontPaymentSummaryListRows.size shouldBe 2
-      assertKeyAndValue(upfrontPaymentSummaryListRows(0), ("Can you make an upfront payment?", "Yes"))
-      assertKeyAndValue(upfrontPaymentSummaryListRows(1), ("Upfront payment Taken within 6 working days", "£2"))
+      upfrontPaymentSummaryListRows.size shouldBe 3
+      assertKeyAndValue(upfrontPaymentSummaryListRows(0), ("Payment reference", expectedPaymentReference))
+      assertKeyAndValue(upfrontPaymentSummaryListRows(1), ("Can you make an upfront payment?", "Yes"))
+      assertKeyAndValue(upfrontPaymentSummaryListRows(2), ("Upfront payment Taken within 6 working days", "£2"))
 
       assertMonthlyPaymentSummaryList(monthlyPaymentSummaryListRows)
       assertPrintLink(doc)
@@ -684,30 +697,23 @@ class PaymentPlanSetUpControllerWithUrBannerSpec extends ItSpec with PaymentPlan
       subheadings(2).text() shouldBe "If you do not pay on time"
       subheadings(3).text() shouldBe "If you’re having difficulty paying"
 
-      val allSummaryLists                 = doc.select(".govuk-summary-list").asScala.toList
-      val paymentReferenceSummaryListRows = allSummaryLists(0).select(".govuk-summary-list__row").asScala.toList
-      val upfrontPaymentSummaryListRows   = allSummaryLists(1).select(".govuk-summary-list__row").asScala.toList
-      val monthlyPaymentSummaryListRows   = allSummaryLists(2).select(".govuk-summary-list__row").asScala.toList
+      val allSummaryLists               = doc.select(".govuk-summary-list").asScala.toList
+      val upfrontPaymentSummaryListRows = allSummaryLists(0).select(".govuk-summary-list__row").asScala.toList
+      val monthlyPaymentSummaryListRows = allSummaryLists(1).select(".govuk-summary-list__row").asScala.toList
 
-      assertPaymentReference(paymentReferenceSummaryListRows)
-
-      upfrontPaymentSummaryListRows.size shouldBe 1
-      assertKeyAndValue(upfrontPaymentSummaryListRows(0), ("Can you make an upfront payment?", "No"))
-
-      assertMonthlyPaymentSummaryList(monthlyPaymentSummaryListRows)
-      assertPrintLink(doc)
-    }
-
-    def assertPaymentReference(paymentReferenceSummaryListRows: List[Element]): Assertion = {
-      val origin                   = Origins.Sa.Bta
-      val taxRegime                = origin.taxRegime
       val expectedPaymentReference = taxRegime match {
         case TaxRegime.Epaye => "123PA44545546"
         case TaxRegime.Vat   => "101747001"
         case TaxRegime.Sa    => "1234567895"
         case TaxRegime.Simp  => "QQ123456A"
       }
-      assertKeyAndValue(paymentReferenceSummaryListRows(0), ("Payment reference", expectedPaymentReference))
+
+      upfrontPaymentSummaryListRows.size shouldBe 2
+      assertKeyAndValue(upfrontPaymentSummaryListRows(0), ("Payment reference", expectedPaymentReference))
+      assertKeyAndValue(upfrontPaymentSummaryListRows(1), ("Can you make an upfront payment?", "No"))
+
+      assertMonthlyPaymentSummaryList(monthlyPaymentSummaryListRows)
+      assertPrintLink(doc)
     }
 
     def assertMonthlyPaymentSummaryList(monthlyPaymentSummaryListRows: List[Element]): Assertion = {
