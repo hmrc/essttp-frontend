@@ -26,7 +26,7 @@ import models.{AssessmentCategoryInfo, EligibilityReqIdentificationFlag, Languag
 import org.jsoup.Jsoup
 import org.scalatest.prop.TableDrivenPropertyChecks.*
 import play.api.http.Status
-import play.api.libs.json.{JsArray, JsObject, Json}
+import play.api.libs.json.{JsArray, JsObject, JsValue, Json}
 import play.api.test.Helpers.*
 import testsupport.TdRequest.*
 import testsupport.reusableassertions.ContentAssertions
@@ -170,7 +170,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
             AssessmentCategoryInfo(AssessmentCategory.Liabilities, TdAll.assessmentEligibilityRules),
             AssessmentCategoryInfo(AssessmentCategory.Debts, TdAll.notEligibleIsLessThanMinDebtAllowance)
           ),
-          "isLessThanMinDebtAllowance",
+          "debts-isLessThanMinDebtAllowance",
           PageUrls.vatDebtTooSmallUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - ineligibility in ChargeTypesAssessments`(
             Origins.Vat.Bta,
@@ -186,7 +186,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
           "IsLessThanMinDebtAllowance - SA - debts",
           TdAll.eligibleEligibilityRules,
           Seq(AssessmentCategoryInfo(AssessmentCategory.Debts, TdAll.notEligibleIsLessThanMinDebtAllowance)),
-          "isLessThanMinDebtAllowance",
+          "debts-isLessThanMinDebtAllowance",
           PageUrls.saDebtTooSmallUrl,
           JourneyJsonTemplates
             .`Eligibility Checked - Ineligible - IsLessThanMinDebtAllowance`(Origins.Sa.Bta, AssessmentCategory.Debts),
@@ -196,7 +196,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
           "IsLessThanMinDebtAllowance - SIMP - debts",
           TdAll.eligibleEligibilityRules,
           Seq(AssessmentCategoryInfo(AssessmentCategory.Debts, TdAll.notEligibleIsLessThanMinDebtAllowance)),
-          "isLessThanMinDebtAllowance",
+          "debts-isLessThanMinDebtAllowance",
           PageUrls.simpDebtTooSmallUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsLessThanMinDebtAllowance`(
             Origins.Simp.Pta,
@@ -208,7 +208,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
           "IsLessThanMinDebtAllowance - SIMP - liabilities",
           TdAll.eligibleEligibilityRules,
           Seq(AssessmentCategoryInfo(AssessmentCategory.Liabilities, TdAll.notEligibleIsLessThanMinDebtAllowance)),
-          "isLessThanMinDebtAllowance",
+          "liabilities-isLessThanMinDebtAllowance",
           PageUrls.simpDebtTooSmallUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsLessThanMinDebtAllowance`(
             Origins.Simp.Pta,
@@ -258,7 +258,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
           // seeing if there are multiple eligibility failures
           TdAll.eligibleEligibilityRules.copy(allChargeTypeAssessmentsFailed = Some(true)),
           Seq(AssessmentCategoryInfo(AssessmentCategory.Debts, TdAll.notEligibleIsMoreThanMaxDebtAllowance)),
-          "isMoreThanMaxDebtAllowance",
+          "debts-isMoreThanMaxDebtAllowance",
           PageUrls.epayeDebtTooLargeUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(
             Origins.Epaye.Bta,
@@ -271,7 +271,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
           "IsMoreThanMaxDebtAllowance - VAT - debts",
           TdAll.eligibleEligibilityRules,
           Seq(AssessmentCategoryInfo(AssessmentCategory.Debts, TdAll.notEligibleIsMoreThanMaxDebtAllowance)),
-          "isMoreThanMaxDebtAllowance",
+          "debts-isMoreThanMaxDebtAllowance",
           PageUrls.vatDebtTooLargeUrl,
           JourneyJsonTemplates
             .`Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(Origins.Vat.Bta, AssessmentCategory.Debts),
@@ -281,7 +281,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
           "IsMoreThanMaxDebtAllowance - SA - debts",
           TdAll.eligibleEligibilityRules,
           Seq(AssessmentCategoryInfo(AssessmentCategory.Debts, TdAll.notEligibleIsMoreThanMaxDebtAllowance)),
-          "isMoreThanMaxDebtAllowance",
+          "debts-isMoreThanMaxDebtAllowance",
           PageUrls.saDebtTooLargeUrl,
           JourneyJsonTemplates
             .`Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(Origins.Sa.Bta, AssessmentCategory.Debts),
@@ -295,7 +295,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
             AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities, TdAll.assessmentEligibilityRules),
             AssessmentCategoryInfo(AssessmentCategory.Liabilities, TdAll.assessmentEligibilityRules)
           ),
-          "isMoreThanMaxDebtAllowance",
+          "debts-isMoreThanMaxDebtAllowance",
           PageUrls.simpDebtTooLargeUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - ineligibility in ChargeTypesAssessments`(
             Origins.Simp.Pta,
@@ -311,7 +311,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
           "IsMoreThanMaxDebtAllowance - SA - liabilities",
           TdAll.eligibleEligibilityRules,
           Seq(AssessmentCategoryInfo(AssessmentCategory.Liabilities, TdAll.notEligibleIsMoreThanMaxDebtAllowance)),
-          "isMoreThanMaxDebtAllowance",
+          "liabilities-isMoreThanMaxDebtAllowance",
           PageUrls.saDebtTooLargeUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - IsMoreThanMaxDebtAllowance`(
             Origins.Sa.Bta,
@@ -435,7 +435,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
             AssessmentCategoryInfo(AssessmentCategory.Liabilities, TdAll.assessmentEligibilityRules),
             AssessmentCategoryInfo(AssessmentCategory.DebtsAndLiabilities, TdAll.assessmentEligibilityRules)
           ),
-          "chargesOverMaxDebtAge",
+          "debts-chargesOverMaxDebtAge",
           PageUrls.epayeDebtTooOldUrl,
           JourneyJsonTemplates.`Eligibility Checked - Ineligible - ineligibility in ChargeTypesAssessments`(
             Origins.Epaye.Bta,
@@ -451,7 +451,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
           "ExceedsMaxDebtAge - VAT - debts",
           TdAll.eligibleEligibilityRules,
           Seq(AssessmentCategoryInfo(AssessmentCategory.Debts, TdAll.notEligibleExceedsMaxDebtAge)),
-          "chargesOverMaxDebtAge",
+          "debts-chargesOverMaxDebtAge",
           PageUrls.vatDebtTooOldUrl,
           JourneyJsonTemplates
             .`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(Origins.Vat.Bta, AssessmentCategory.Debts),
@@ -461,7 +461,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
           "ExceedsMaxDebtAge - SA - debts",
           TdAll.eligibleEligibilityRules,
           Seq(AssessmentCategoryInfo(AssessmentCategory.Debts, TdAll.notEligibleExceedsMaxDebtAge)),
-          "chargesOverMaxDebtAge",
+          "debts-chargesOverMaxDebtAge",
           PageUrls.saNotEligibleUrl,
           JourneyJsonTemplates
             .`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(Origins.Sa.Bta, AssessmentCategory.Debts),
@@ -471,7 +471,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
           "ExceedsMaxDebtAge - SIMP - debts",
           TdAll.eligibleEligibilityRules,
           Seq(AssessmentCategoryInfo(AssessmentCategory.Debts, TdAll.notEligibleExceedsMaxDebtAge)),
-          "chargesOverMaxDebtAge",
+          "debts-chargesOverMaxDebtAge",
           PageUrls.simpNotEligibleUrl,
           JourneyJsonTemplates
             .`Eligibility Checked - Ineligible - ExceedsMaxDebtAge`(Origins.Simp.Pta, AssessmentCategory.Debts),
@@ -929,11 +929,9 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
                  |  "taxDetail": $expectedTaxDetailsJson,
                  |  "authProviderId": "authId-999",
                  |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-                 |  "chargeTypeAssessment" :${(Json
-                    .parse(eligibilityCheckResponseJsonAsPounds)
-                    .as[JsObject] \ "chargeTypeAssessments" \ 0 \ "chargeTypeAssessment")
-                    .getOrElse(JsArray())
-                    .toString},
+                 |  "chargeTypeAssessments": ${expectedAuditChargeTypeAssessmentsJson(
+                    eligibilityCheckResponseJsonAsPounds
+                  ).toString},
                  |  "futureChargeLiabilitiesExcluded": false
                  |}
                  |""".stripMargin
@@ -950,30 +948,9 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
                      |{
                      |  "taxDetail": ${TdAll.taxDetailJsonString(TaxRegime.Sa)},
                      |  "saCustomerType": "MTD(ITSA)",
-                     |  "chargeTypeAssessment" : [ {
-                     |  "taxPeriodFrom" : "2020-08-13",
-                     |  "taxPeriodTo" : "2020-08-14",
-                     |  "debtTotalAmount" : 3000,
-                     |  "chargeReference" : "A00000000001",
-                     |  "charges" : [ {
-                     |    "chargeType" : "InYearRTICharge-Tax",
-                     |    "mainType" : "InYearRTICharge(FPS)",
-                     |    "mainTrans" : "mainTrans",
-                     |    "subTrans" : "subTrans",
-                     |    "outstandingAmount" : 1000,
-                     |    "interestStartDate" : "2017-03-07",
-                     |    "dueDate" : "2017-03-07",
-                     |    "accruedInterest" : 15.97,
-                     |    "ineligibleChargeType" : false,
-                     |    "chargeOverMaxDebtAge" : false,
-                     |    "locks" : [ {
-                     |      "lockType" : "Payment",
-                     |      "lockReason" : "Risk/Fraud",
-                     |      "disallowedChargeLockType" : false
-                     |    } ],
-                     |    "dueDateNotReached" : false
-                     |  } ]
-                     |} ],
+                     |  "chargeTypeAssessments": ${expectedAuditChargeTypeAssessmentsJson(
+                      eligibilityCheckResponseJsonAsPounds
+                    ).toString},
                      |  "noEligibilityReasons" : 1,
                      |  "eligibilityReasons" : [ "$auditIneligibilityReason" ],
                      |  "regimeDigitalCorrespondence" : true,
@@ -1130,7 +1107,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
                |  "taxDetail": { "nino": "QQ123456A" },
                |  "authProviderId": "authId-999",
                |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-               |  "chargeTypeAssessment" : [],
+               |  "chargeTypeAssessments": [],
                |  "futureChargeLiabilitiesExcluded": false
                |}
                |""".stripMargin
@@ -1187,7 +1164,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
                |  "taxDetail": { "nino": "QQ123456A" },
                |  "authProviderId": "authId-999",
                |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-               |  "chargeTypeAssessment" : [],
+               |  "chargeTypeAssessments": [],
                |  "futureChargeLiabilitiesExcluded": false
                |}
                |""".stripMargin
@@ -1304,9 +1281,9 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
                  |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
                  |  "regimeDigitalCorrespondence": true,
                  |  "futureChargeLiabilitiesExcluded": false,
-                 |  "chargeTypeAssessment" : ${(Json
-                      .parse(eligibilityCheckResponseJsonAsPounds)
-                      .as[JsObject] \ "chargeTypeAssessments" \ 0 \ "chargeTypeAssessment").get.toString}
+                 |  "chargeTypeAssessments": ${expectedAuditChargeTypeAssessmentsJson(
+                      eligibilityCheckResponseJsonAsPounds
+                    ).toString}
                  |}
                  |""".stripMargin
                 )
@@ -1376,9 +1353,9 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
              |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
              |  "regimeDigitalCorrespondence": true,
              |  "futureChargeLiabilitiesExcluded": false,
-             |  "chargeTypeAssessment" : ${(Json
-                .parse(eligibilityCheckResponseJsonAsPounds)
-                .as[JsObject] \ "chargeTypeAssessments" \ 0 \ "chargeTypeAssessment").get.toString}
+             |  "chargeTypeAssessments": ${expectedAuditChargeTypeAssessmentsJson(
+                eligibilityCheckResponseJsonAsPounds
+              ).toString}
              |}
              |""".stripMargin
           )
@@ -1448,9 +1425,9 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
              |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
              |  "regimeDigitalCorrespondence": true,
              |  "futureChargeLiabilitiesExcluded": false,
-             |  "chargeTypeAssessment" : ${(Json
-                .parse(eligibilityCheckResponseJsonAsPounds)
-                .as[JsObject] \ "chargeTypeAssessments" \ 0 \ "chargeTypeAssessment").get.toString}
+             |  "chargeTypeAssessments": ${expectedAuditChargeTypeAssessmentsJson(
+                eligibilityCheckResponseJsonAsPounds
+              ).toString}
              |}
              |""".stripMargin
           )
@@ -1518,9 +1495,9 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
              |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
              |  "regimeDigitalCorrespondence": true,
              |  "futureChargeLiabilitiesExcluded": false,
-             |  "chargeTypeAssessment" : ${(Json
-                .parse(eligibilityCheckResponseJsonAsPounds)
-                .as[JsObject] \ "chargeTypeAssessments" \ 0 \ "chargeTypeAssessment").get.toString}
+             |  "chargeTypeAssessments": ${expectedAuditChargeTypeAssessmentsJson(
+                eligibilityCheckResponseJsonAsPounds
+              ).toString}
              |}
              |""".stripMargin
           )
@@ -1642,6 +1619,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(PageUrls.vatDebtTooSmallUrl)
     }
+
     "VAT user with multiple reasons from EligibilityRules redirect to " in {
 
       val eligibilityCheckResponseJson = TtpJsonResponses.ttpEligibilityCallJson(
@@ -1924,6 +1902,25 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
       )
     }
 
+  }
+
+  def expectedAuditChargeTypeAssessmentsJson(eligibilityCheckResponseJsonAsPounds: String) = {
+    val chargeTypesAssessments =
+      (Json.parse(eligibilityCheckResponseJsonAsPounds).as[JsObject] \ "chargeTypeAssessments").as[JsArray]
+
+    val mappedAssessments = chargeTypesAssessments.value.map { c =>
+      val chargesTypeAssessment       = (c \ "chargeTypeAssessment").as[JsValue]
+      val assessmentEligibilityStatus = (c \ "assessmentEligibilityStatus").as[JsValue]
+      val assessmentCategory          = (c \ "assessmentCategory").as[JsValue]
+      JsObject(
+        Map(
+          "chargeTypeAssessment"        -> chargesTypeAssessment,
+          "assessmentEligibilityStatus" -> assessmentEligibilityStatus,
+          "assessmentCategory"          -> assessmentCategory
+        )
+      )
+    }
+    JsArray(mappedAssessments)
   }
 
 }

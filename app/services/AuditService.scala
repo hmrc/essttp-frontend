@@ -33,6 +33,7 @@ import essttp.utils.Errors
 import models.audit.bars.*
 import models.audit.canUserPayInSixMonths.{CanUserPayInSixMonthsAuditDetail, UserEnteredDetails}
 import models.audit.ddinprogress.DdInProgressAuditDetail
+import models.audit.eligibility.EligibilityCheckAuditDetail.AuditChargeTypeAssessments
 import models.audit.eligibility.{EligibilityCheckAuditDetail, EligibilityResult, EnrollmentReasons}
 import models.audit.emailverification.{EmailVerificationRequestedAuditDetail, EmailVerificationResultAuditDetail}
 import models.audit.paymentplansetup.PaymentPlanSetUpAuditDetail
@@ -202,7 +203,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       taxDetail = TaxDetail(None, None, None, None, None, None, None),
       saCustomerType = None,
       authProviderId = r.ggCredId.value,
-      chargeTypeAssessment = List.empty,
+      chargeTypeAssessments = List.empty,
       correlationId = journey.correlationId.value.toString,
       futureChargeLiabilitiesExcluded = None,
       regimeDigitalCorrespondence = true
@@ -217,14 +218,18 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
   )(using r: AuthenticatedJourneyRequest[?]): EligibilityCheckAuditDetail = {
 
     // TODO: may need to prefix reason with assessment category to be able to distinguish
-    def collectEligibilityReasons(product: Product, excludes: Seq[String] = Seq.empty): List[String] = {
+    def collectEligibilityReasons(
+      product:  Product,
+      excludes: Seq[String] = Seq.empty,
+      prefix:   String = ""
+    ): List[String] = {
       val reasons: List[String] =
         product.productElementNames.toList
       val values                = product.productIterator.toList
 
       (reasons zip values).collect {
-        case (reason, true) if !excludes.contains(reason)       => reason
-        case (reason, Some(true)) if !excludes.contains(reason) => reason
+        case (reason, true) if !excludes.contains(reason)       => s"$prefix$reason"
+        case (reason, Some(true)) if !excludes.contains(reason) => s"$prefix$reason"
       }
     }
 
@@ -234,9 +239,15 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       if (eligibilityCheckResult.isEligible) None else Some(EnrollmentReasons.DidNotPassEligibilityCheck())
     val eligibilityReasons: List[String] =
       collectEligibilityReasons(eligibilityCheckResult.eligibilityRules, Seq("allChargeTypeAssessmentsFailed")) :::
-        eligibilityCheckResult.chargeTypeAssessments.flatMap(c =>
-          collectEligibilityReasons(c.assessmentEligibilityRules)
-        )
+        eligibilityCheckResult.chargeTypeAssessments.flatMap { c =>
+          val prefix = c.assessmentCategory match {
+            case AssessmentCategory.Standard            => ""
+            case AssessmentCategory.Liabilities         => "liabilities-"
+            case AssessmentCategory.Debts               => "debts-"
+            case AssessmentCategory.DebtsAndLiabilities => "debtsAndLiabilities-"
+          }
+          collectEligibilityReasons(c.assessmentEligibilityRules, prefix = prefix)
+        }
 
     EligibilityCheckAuditDetail(
       eligibilityResult = eligibilityResult,
@@ -248,8 +259,7 @@ class AuditService @Inject() (auditConnector: AuditConnector)(using ExecutionCon
       taxDetail = toTaxDetail(eligibilityCheckResult),
       saCustomerType = eligibilityCheckResult.individualDetails.flatMap(_.customerType),
       authProviderId = r.ggCredId.value,
-      // TODO: do we need to distinguish between the assessment categories?
-      chargeTypeAssessment = eligibilityCheckResult.chargeTypeAssessments.flatMap(_.chargeTypeAssessment),
+      chargeTypeAssessments = eligibilityCheckResult.chargeTypeAssessments.map(AuditChargeTypeAssessments(_)),
       correlationId = journey.correlationId.value.toString,
       futureChargeLiabilitiesExcluded = Some(eligibilityCheckResult.futureChargeLiabilitiesExcluded),
       regimeDigitalCorrespondence = eligibilityCheckResult.regimeDigitalCorrespondence.value

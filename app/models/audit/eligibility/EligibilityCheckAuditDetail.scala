@@ -17,7 +17,8 @@
 package models.audit.eligibility
 
 import essttp.rootmodel.ttp.CustomerType
-import essttp.rootmodel.ttp.eligibility.ChargeTypeAssessment
+import essttp.rootmodel.ttp.eligibility.{AssessmentCategory, ChargeTypeAssessment, ChargeTypeAssessments}
+import models.audit.eligibility.EligibilityCheckAuditDetail.AuditChargeTypeAssessments
 import models.audit.{AuditDetail, TaxDetail}
 import play.api.libs.json.*
 
@@ -31,7 +32,7 @@ final case class EligibilityCheckAuditDetail(
   taxDetail:                       TaxDetail,
   saCustomerType:                  Option[CustomerType],
   authProviderId:                  String,
-  chargeTypeAssessment:            List[ChargeTypeAssessment],
+  chargeTypeAssessments:           List[AuditChargeTypeAssessments],
   correlationId:                   String,
   futureChargeLiabilitiesExcluded: Option[Boolean],
   regimeDigitalCorrespondence:     Boolean
@@ -40,6 +41,24 @@ final case class EligibilityCheckAuditDetail(
 }
 
 object EligibilityCheckAuditDetail {
+
+  final case class AuditChargeTypeAssessments(
+    chargeTypeAssessment:        List[ChargeTypeAssessment],
+    assessmentEligibilityStatus: Boolean,
+    assessmentCategory:          AssessmentCategory
+  )
+
+  object AuditChargeTypeAssessments {
+    given OWrites[AuditChargeTypeAssessments] = Json.writes[AuditChargeTypeAssessments]
+
+    def apply(chargeTypeAssessments: ChargeTypeAssessments): AuditChargeTypeAssessments =
+      AuditChargeTypeAssessments(
+        chargeTypeAssessments.chargeTypeAssessment,
+        chargeTypeAssessments.assessmentEligibilityStatus,
+        chargeTypeAssessments.assessmentCategory
+      )
+  }
+
   given OWrites[EligibilityCheckAuditDetail] = {
     val w: OWrites[EligibilityCheckAuditDetail] = Json.writes[EligibilityCheckAuditDetail]
     w.transform { (jsObject: JsObject) =>
