@@ -102,7 +102,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
                |  "taxType": "Epaye",
                |  "taxDetail": { },
                |  "authProviderId": "authId-999",
-               |  "chargeTypeAssessment" : []
+               |  "chargeTypeAssessments" : []
                |}
                |""".stripMargin
             )
@@ -162,7 +162,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
                |  "taxDetail": { },
                |  "authProviderId": "authId-999",
                |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-               |  "chargeTypeAssessment" : []
+               |  "chargeTypeAssessments" : []
                |}
                |""".stripMargin
             )
@@ -239,7 +239,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
                |  "taxDetail": { },
                |  "authProviderId": "authId-999",
                |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-               |  "chargeTypeAssessment" : []
+               |  "chargeTypeAssessments" : []
                |}
                |""".stripMargin
             )
@@ -315,7 +315,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
                |  "taxDetail": { },
                |  "authProviderId": "authId-999",
                |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-               |  "chargeTypeAssessment" : []
+               |  "chargeTypeAssessments" : []
                |}
                |""".stripMargin
             )
@@ -405,7 +405,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
             |  "taxType" : "Simp",
             |  "eligibilityReasons" : [ ],
             |  "enrollmentReasons" : "no nino found",
-            |  "chargeTypeAssessment" : [ ],
+            |  "chargeTypeAssessments" : [ ],
             |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
             |  "regimeDigitalCorrespondence" : true,
             |  "authProviderId" : "authId-999",
