@@ -890,7 +890,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
                   Some(CustomerTypes.MTDITSA),
                   None
                 )
-              )
+              ).filter(_ => origin.taxRegime == TaxRegime.Sa)
             )
           )(using testOperationCryptoFormat)
 
@@ -914,6 +914,8 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
                 ("Simp", """{ "nino": "QQ123456A" }""")
             }
 
+          val saCustomerTypeJson = if (origin.taxRegime == TaxRegime.Sa) """ "saCustomerType": "MTD(ITSA)",""" else ""
+
           AuditConnectorStub.verifyEventAudited(
             "EligibilityCheck",
             Json
@@ -932,7 +934,9 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
                  |  "chargeTypeAssessments": ${expectedAuditChargeTypeAssessmentsJson(
                     eligibilityCheckResponseJsonAsPounds
                   ).toString},
-                 |  "futureChargeLiabilitiesExcluded": false
+                 |  "futureChargeLiabilitiesExcluded": false,
+                 |  $saCustomerTypeJson
+                 |  "regimeDigitalCorrespondence" : true
                  |}
                  |""".stripMargin
               )
@@ -1108,7 +1112,8 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
                |  "authProviderId": "authId-999",
                |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
                |  "chargeTypeAssessments": [],
-               |  "futureChargeLiabilitiesExcluded": false
+               |  "futureChargeLiabilitiesExcluded": false,
+               |  "regimeDigitalCorrespondence" : true
                |}
                |""".stripMargin
           )
@@ -1164,8 +1169,36 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
                |  "taxDetail": { "nino": "QQ123456A" },
                |  "authProviderId": "authId-999",
                |  "correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-               |  "chargeTypeAssessments": [],
-               |  "futureChargeLiabilitiesExcluded": false
+               |  "chargeTypeAssessments" : [ {
+               |      "chargeTypeAssessment" : [ {
+               |        "taxPeriodFrom" : "2020-08-13",
+               |        "taxPeriodTo" : "2020-08-14",
+               |        "debtTotalAmount" : 3000,
+               |        "chargeReference" : "A00000000001",
+               |        "charges" : [ {
+               |          "chargeType" : "InYearRTICharge-Tax",
+               |          "mainType" : "InYearRTICharge(FPS)",
+               |          "mainTrans" : "mainTrans",
+               |          "subTrans" : "subTrans",
+               |          "outstandingAmount" : 1000,
+               |          "interestStartDate" : "2017-03-07",
+               |          "dueDate" : "2017-03-07",
+               |          "accruedInterest" : 15.97,
+               |          "ineligibleChargeType" : false,
+               |          "chargeOverMaxDebtAge" : false,
+               |          "locks" : [ {
+               |            "lockType" : "Payment",
+               |            "lockReason" : "Risk/Fraud",
+               |            "disallowedChargeLockType" : false
+               |          } ],
+               |          "dueDateNotReached" : false
+               |        } ]
+               |      } ],
+               |      "assessmentEligibilityStatus" : false,
+               |      "assessmentCategory" : "standard"
+               |    } ],
+               |  "futureChargeLiabilitiesExcluded": false,
+               |  "regimeDigitalCorrespondence" : true
                |}
                |""".stripMargin
           )
@@ -1271,6 +1304,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
                  |{
                  |  "eligibilityResult" : "eligible",
                  |  "noEligibilityReasons": 0,
+                 |  "eligibilityReasons" : [ ],
                  |  "origin": "Bta",
                  |  "taxType": "Epaye",
                  |  "taxDetail": {
@@ -1344,6 +1378,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
              |{
              |  "eligibilityResult" : "eligible",
              |  "noEligibilityReasons": 0,
+             |  "eligibilityReasons" : [ ],
              |  "origin": "Bta",
              |  "taxType": "Vat",
              |  "taxDetail": {
@@ -1416,6 +1451,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
              |{
              |  "eligibilityResult" : "eligible",
              |  "noEligibilityReasons": 0,
+             |  "eligibilityReasons" : [ ],
              |  "origin": "Bta",
              |  "taxType": "Sa",
              |  "taxDetail": {
@@ -1486,6 +1522,7 @@ class DetermineEligibilityControllerSpec extends ItSpec, CombinationsHelper {
              |{
              |  "eligibilityResult" : "eligible",
              |  "noEligibilityReasons": 0,
+             |  "eligibilityReasons" : [ ],
              |  "origin": "Pta",
              |  "taxType": "Simp",
              |  "taxDetail": {

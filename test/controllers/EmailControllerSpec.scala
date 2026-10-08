@@ -566,7 +566,8 @@ class EmailControllerSpec extends ItSpec {
                    |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
                    |  "emailAddress" : "${email.value.decryptedValue}",
                    |  "emailSource" : "ETMP",
-                   |  "result" : "Started"
+                   |  "result" : "Started",
+                   |  "authProviderId" : "authId-999"
                    |}
                    |""".stripMargin
               )
@@ -609,7 +610,8 @@ class EmailControllerSpec extends ItSpec {
                    |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
                    |  "emailAddress" : "${email.value.decryptedValue}",
                    |  "emailSource" : "TEMP",
-                   |  "result" : "Started"
+                   |  "result" : "Started",
+                   |  "authProviderId" : "authId-999"
                    |}
                    |""".stripMargin
               )
@@ -677,7 +679,8 @@ class EmailControllerSpec extends ItSpec {
                    |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
                    |  "emailAddress" : "${email.value.decryptedValue}",
                    |  "emailSource" : "TEMP",
-                   |  "result" : "${EmailVerificationState.TooManyDifferentEmailAddresses.entryName}"
+                   |  "result" : "${EmailVerificationState.TooManyDifferentEmailAddresses.entryName}",
+                   |  "authProviderId" : "authId-999"
                    |}
                    |""".stripMargin
             )
@@ -709,7 +712,8 @@ class EmailControllerSpec extends ItSpec {
                    |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
                    |  "emailAddress" : "${email.value.decryptedValue}",
                    |  "emailSource" : "TEMP",
-                   |  "result" : "${EmailVerificationState.TooManyPasscodeJourneysStarted.entryName}"
+                   |  "result" : "${EmailVerificationState.TooManyPasscodeJourneysStarted.entryName}",
+                   |  "authProviderId" : "authId-999"
                    |}
                    |""".stripMargin
             )
@@ -741,7 +745,8 @@ class EmailControllerSpec extends ItSpec {
                    |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
                    |  "emailAddress" : "${email.value.decryptedValue}",
                    |  "emailSource" : "TEMP",
-                   |  "result" : "${EmailVerificationState.TooManyPasscodeAttempts.entryName}"
+                   |  "result" : "${EmailVerificationState.TooManyPasscodeAttempts.entryName}",
+                   |  "authProviderId" : "authId-999"
                    |}
                    |""".stripMargin
             )
@@ -782,7 +787,8 @@ class EmailControllerSpec extends ItSpec {
                    |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
                    |  "emailAddress" : "${email.value.decryptedValue}",
                    |  "emailSource" : "TEMP",
-                   |  "result" : "${EmailVerificationState.AlreadyVerified.entryName}"
+                   |  "result" : "${EmailVerificationState.AlreadyVerified.entryName}",
+                   |  "authProviderId" : "authId-999"
                    |}
                    |""".stripMargin
             )

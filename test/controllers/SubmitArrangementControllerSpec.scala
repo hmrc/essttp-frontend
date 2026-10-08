@@ -240,7 +240,8 @@ class SubmitArrangementControllerSpec extends ItSpec {
                      |  ${expectedEmailSource.fold("")(source => s""" "emailSource":"${source.value}", """)}
                      |  $whyCannotPayInFullJson
                      |  $canPayWithinSixMonthsJson
-                     |  "regimeDigitalCorrespondence": true
+                     |  "regimeDigitalCorrespondence": true,
+                     |  "typeOfPlan": "standard"
                      |}
                      |""".stripMargin
                   )
@@ -373,7 +374,8 @@ class SubmitArrangementControllerSpec extends ItSpec {
              |	"correlationId": "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
              |	"ppReferenceNo": "${TdAll.customerReference(taxRegime).value}",
              |	"authProviderId": "authId-999",
-             |  "regimeDigitalCorrespondence": true
+             |  "regimeDigitalCorrespondence": true,
+             |  "typeOfPlan": "standard"
              |}
              |""".stripMargin
           )
