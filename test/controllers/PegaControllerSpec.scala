@@ -138,6 +138,8 @@ class PegaControllerSpec extends ItSpec, PegaRecreateSessionAssertions {
             .verifyUpdateStartPegaCaseResponseRequest(TdAll.journeyId, TdAll.pegaStartCaseResponse)
           EssttpBackend.Pega.verifySaveJourneyForPegaCalled(TdAll.journeyId)
 
+          val saCustomerTypeJson = if (regime == TaxRegime.Sa) """ "saCustomerType": "MTD(ITSA)",""" else ""
+
           AuditConnectorStub.verifyEventAudited(
             auditType = "CanUserPayInSixMonths",
             auditEvent = Json
@@ -147,6 +149,7 @@ class PegaControllerSpec extends ItSpec, PegaRecreateSessionAssertions {
                       |  "regime" : "${regime.entryName}",
                       |  "taxIdentifier" : "864FZ00049",
                       |  "pegaCaseId" : "case",
+                      |  $saCustomerTypeJson
                       |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
                       |  "pegaCorrelationId": "testCorrelationId",
                       |  "userEnteredDetails" : {
@@ -160,33 +163,6 @@ class PegaControllerSpec extends ItSpec, PegaRecreateSessionAssertions {
               )
               .as[JsObject]
           )
-
-          if (regime == TaxRegime.Sa) {
-            AuditConnectorStub.verifyEventAudited(
-              auditType = "CanUserPayInSixMonths",
-              auditEvent = Json
-                .parse(
-                  s"""
-                        |{
-                        |  "regime" : "$regime",
-                        |  "taxIdentifier" : "864FZ00049",
-                        |  "pegaCaseId" : "case",
-                        |  "saCustomerType" : "MTD(ITSA)",
-                        |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-                        |  "pegaCorrelationId": "testCorrelationId",
-                        |  "userEnteredDetails" : {
-                        |    "unableToPayReason": ["WaitingForRefund", "NoMoneySetAside"],
-                        |    "payUpfront" : true,
-                        |    "upfrontPaymentAmount" : 2,
-                        |    "canPayInSixMonths" : false
-                        |  }
-                        |}
-                        |""".stripMargin
-                )
-                .as[JsObject]
-            )
-          }
-
         }
       }
 
@@ -272,12 +248,16 @@ class PegaControllerSpec extends ItSpec, PegaRecreateSessionAssertions {
                    |    "totalPaymentWithoutInterest" : 10
                    |  },
                    |  "taxDetail": ${TdAll.taxDetailJsonString(origin.taxRegime)},
-                   |  "taxType": "${origin.taxRegime}"
+                   |  "taxType": "${origin.taxRegime}",
+                   |  "regimeDigitalCorrespondence" : true,
+                   |  "typeOfPlan" : "standard"
                    |}
             """.stripMargin
               )
               .as[JsObject]
           )
+
+          val saCustomerTypeJson = if (origin.taxRegime == TaxRegime.Sa) """ "saCustomerType": "MTD(ITSA)",""" else ""
 
           AuditConnectorStub.verifyEventAudited(
             auditType = "ReturnFromAffordabilityAssessment",
@@ -288,6 +268,7 @@ class PegaControllerSpec extends ItSpec, PegaRecreateSessionAssertions {
                    |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
                    |  "regime" : "${origin.taxRegime}",
                    |  "taxIdentifier" : "864FZ00049",
+                   |  $saCustomerTypeJson
                    |  "pegaCaseId" : "case",
                    |  "pegaCorrelationId" : "testCorrelationId",
                    |  "expenditure" : {

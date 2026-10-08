@@ -94,6 +94,7 @@ class DetermineTaxIdControllerSpec extends ItSpec {
             .parse(
               s"""
                |{
+               |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
                |  "eligibilityResult" : "ineligible",
                |  "enrollmentReasons": "inactive enrollment",
                |  "noEligibilityReasons": 0,
@@ -102,7 +103,8 @@ class DetermineTaxIdControllerSpec extends ItSpec {
                |  "taxType": "Epaye",
                |  "taxDetail": { },
                |  "authProviderId": "authId-999",
-               |  "chargeTypeAssessments" : []
+               |  "chargeTypeAssessments" : [],
+               |  "regimeDigitalCorrespondence" : true
                |}
                |""".stripMargin
             )
@@ -162,7 +164,8 @@ class DetermineTaxIdControllerSpec extends ItSpec {
                |  "taxDetail": { },
                |  "authProviderId": "authId-999",
                |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-               |  "chargeTypeAssessments" : []
+               |  "chargeTypeAssessments" : [],
+               |  "regimeDigitalCorrespondence" : true
                |}
                |""".stripMargin
             )
@@ -239,7 +242,8 @@ class DetermineTaxIdControllerSpec extends ItSpec {
                |  "taxDetail": { },
                |  "authProviderId": "authId-999",
                |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-               |  "chargeTypeAssessments" : []
+               |  "chargeTypeAssessments" : [],
+               |  "regimeDigitalCorrespondence" : true
                |}
                |""".stripMargin
             )
@@ -315,7 +319,8 @@ class DetermineTaxIdControllerSpec extends ItSpec {
                |  "taxDetail": { },
                |  "authProviderId": "authId-999",
                |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
-               |  "chargeTypeAssessments" : []
+               |  "chargeTypeAssessments" : [],
+               |  "regimeDigitalCorrespondence" : true
                |}
                |""".stripMargin
             )

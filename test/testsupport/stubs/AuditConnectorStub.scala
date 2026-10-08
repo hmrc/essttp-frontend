@@ -33,8 +33,13 @@ object AuditConnectorStub extends Eventually {
         .withRequestBody(
           equalToJson(s"""{ "auditSource" : "set-up-payment-plan"  }""", true, true)
         )
+    )
+
+    // separate this verification to make logs easier to read if it fails
+    verify(
+      postRequestedFor(urlPathEqualTo(auditUrl))
         .withRequestBody(
-          matchingJsonPath("$.detail", equalToJson(auditEvent.toString, true, true))
+          matchingJsonPath("$.detail", equalToJson(auditEvent.toString, true, false))
         )
     )
   }

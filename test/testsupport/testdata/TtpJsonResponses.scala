@@ -56,8 +56,9 @@ object TtpJsonResponses {
     }
 
     val individialDetailsValue = maybeCustomerType match {
-      case Some(customerType) => s""""individualDetails": { "customerType": "${customerType.value}" },"""
-      case None               => ""
+      case Some(customerType) if taxRegime == TaxRegime.Sa =>
+        s""""individualDetails": { "customerType": "${customerType.value}" },"""
+      case _                                               => ""
     }
 
     val chargeTypeAssessments = assessmentCategoryInfo.map(info =>
