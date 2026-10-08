@@ -1982,9 +1982,9 @@ object Messages {
 
     val `Estimated total interest`: Message = Message(
       english =
-        "Estimated total interest<span class=\"govuk-body-m govuk-!-display-block govuk-!-margin-bottom-0\">Included in your plan</span>",
+        "Estimated total interest <span class=\"govuk-body-m govuk-!-display-block govuk-!-margin-bottom-0\">Included in your plan</span>",
       welsh =
-        "Amcangyfrif o gyfanswm y llog<span class=\"govuk-body-m govuk-!-display-block govuk-!-margin-bottom-0\">TYn gynwysedig yn eich cynllun</span>"
+        "Amcangyfrif o gyfanswm y llog <span class=\"govuk-body-m govuk-!-display-block govuk-!-margin-bottom-0\">Yn gynwysedig yn eich cynllun</span>"
     )
 
     val `Total to pay`: Message = Message(
