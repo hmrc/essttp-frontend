@@ -30,7 +30,6 @@
 @this(
         appConfig: AppConfig,
         govukLayout: GovukLayout,
-        govukPhaseBanner : GovukPhaseBanner,
         govukBackLink: GovukBackLink,
         hmrcHead: HmrcHead,
         hmrcStandardHeader: HmrcStandardHeader,
@@ -62,6 +61,8 @@
 
 @showSignOut = @{ showSignOutOverride.getOrElse(RequestSupport.isLoggedIn) }
 
+
+
 @head = {
   @headBlock.getOrElse(Html(""))
   @if(showSignOut) {
@@ -76,6 +77,7 @@
 
   @Html(s"""<link rel="stylesheet" media="screen" href="${controllers.routes.Assets.versioned("stylesheets/application.css").toString}" ${CSPNonce.attr.toString}>""")
   @Html(s"""<link rel="stylesheet" media="print" href="${controllers.routes.Assets.versioned("stylesheets/print.css").toString}" ${CSPNonce.attr.toString}>""")
+
 }
 
 @scripts = {
@@ -86,14 +88,10 @@
   @additionalScripts.getOrElse(Html(""))
 }
 
+
+
 @beforeContentBlock = {
   <div class="govuk-!-display-none-print">
-    @govukPhaseBanner(PhaseBanner(
-        tag = Some(Tag(
-            content = Text(Messages.ServicePhase.beta.show)
-        )),
-        content = HtmlContent(Messages.ServicePhase.bannerText(appConfig.Urls.betaFeedbackUrl(using request)).show)
-    ))
 
     @urBannerLink.map(userResearchBanner(_))
 
@@ -149,7 +147,13 @@
       serviceName = if(showServiceNameInHeader) Some(serviceName) else None,
       serviceUrl = serviceUrl,
       signOutUrl = if(showSignOut) Some(routes.SignOutController.signOut.url) else None,
-      isWelshTranslationAvailable = true
+      isWelshTranslationAvailable = true,
+      phaseBanner = Some(PhaseBanner(
+          tag = Some(Tag(
+              content = Text(Messages.ServicePhase.beta.show)
+          )),
+          content = HtmlContent(Messages.ServicePhase.bannerText(appConfig.Urls.betaFeedbackUrl(using request)).show)
+      ))
    )
  }
 
