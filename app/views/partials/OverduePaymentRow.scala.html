@@ -78,7 +78,7 @@
         </p>
     </dt>
   <dd class="govuk-summary-list__value">
-    @{payment.amount.gdsFormatInPounds}<br>
+    @{payment.amount.gdsFormatInPounds}
       @if(payment.interestBearingCharge.exists(_.value)) {
     <span class="govuk-!-font-size-16">
         @{Messages.YourBill.`(includes interest added to date)`.show}
