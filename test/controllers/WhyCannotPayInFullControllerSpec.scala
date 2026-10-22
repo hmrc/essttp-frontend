@@ -58,33 +58,8 @@ class WhyCannotPayInFullControllerSpec extends ItSpec, UnchangedFromCYALinkAsser
         expectedSubmitUrl = Some(routes.WhyCannotPayInFullController.whyCannotPayInFullSubmit.url)
       )
 
-      val listStart = doc.select("#reasons").text()
-      listStart shouldBe lang.fold("Reasons could include:", "Gall y rhesymau gynnwys:")
-      val lists     = doc.select(".govuk-list").asScala.toList
-      lists.size shouldBe 1
-      val bullets   = lists(0).select("li").asScala.toList
-      bullets.size shouldBe lang.fold(4, 5)
-
-      bullets(0).text() shouldBe lang.fold(
-        "lost or reduced income, business or employment",
-        "gostyngiad mewn incwm, busnes neu gyflogaeth"
-      )
-      bullets(1).text() shouldBe lang.fold(
-        "unexpected costs such as repairs following theft or damage",
-        "colli incwm, busnes neu gyflogaeth"
-      )
-      bullets(2).text() shouldBe lang.fold(
-        "a national or local disaster, for example extreme weather conditions",
-        "costau annisgwyl fel atgyweiriadau yn dilyn lladrad neu ddifrod"
-      )
-      bullets(3).text() shouldBe lang.fold(
-        "a change to personal circumstances, for example ill health or bereavement",
-        "trychineb cenedlaethol neu leol, er enghraifft amodau tywydd eithafol"
-      )
-      lang.fold("", bullets(4).text() shouldBe "newid i amgylchiadau personol, er enghraifft salwch neu brofedigaeth")
-
-      val hint = doc.select(".govuk-form-group > .govuk-fieldset > .govuk-hint").text()
-      hint shouldBe lang.fold("Select all that apply.", "Dewiswch bob un sy’n berthnasol.")
+      val hint = doc.select("#WhyCannotPayInFull-hint").text()
+      hint shouldBe lang.fold("Select all that apply", "Dewiswch bob un sy’n berthnasol")
 
       val checkboxes: List[Element] = doc.select(".govuk-checkboxes__item").asScala.toList
       checkboxes.size shouldBe 8

@@ -1059,7 +1059,7 @@ object Messages {
 
     val `Select all that apply`: Message = Message(
       english = "Select all that apply",
-      welsh = "Dewiswch bob un sy’n berthnasol."
+      welsh = "Dewiswch bob un sy’n berthnasol"
     )
 
     val `For example, unemployment or reduced business.` : Message = Message(
