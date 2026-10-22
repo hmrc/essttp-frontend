@@ -1069,7 +1069,7 @@ object Messages {
 
     val `For example, repairs following theft or damage.` : Message = Message(
       english = "For example, repairs following theft or damage.",
-      welsh = "Er enghraifft, atgyweiriadau yn dilyn lladrad neu niwed"
+      welsh = "Er enghraifft, atgyweiriadau yn dilyn lladrad neu niwed."
     )
 
     val `For example, COVID-19, extreme weather conditions.` : Message = Message(

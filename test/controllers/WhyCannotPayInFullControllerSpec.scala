@@ -61,6 +61,26 @@ class WhyCannotPayInFullControllerSpec extends ItSpec, UnchangedFromCYALinkAsser
       val hint = doc.select("#WhyCannotPayInFull-hint").text()
       hint shouldBe lang.fold("Select all that apply", "Dewiswch bob un sy’n berthnasol")
 
+      val reasonHints = doc.selectXpath("//div[@class='govuk-hint govuk-checkboxes__hint']").asScala.toList
+      reasonHints.size shouldBe 4
+
+      reasonHints(0).text() shouldBe lang.fold(
+        "For example, unemployment or reduced business.",
+        "Er enghraifft, diweithdra neu leihau busnes."
+      )
+      reasonHints(1).text() shouldBe lang.fold(
+        "For example, repairs following theft or damage.",
+        "Er enghraifft, atgyweiriadau yn dilyn lladrad neu niwed."
+      )
+      reasonHints(2).text() shouldBe lang.fold(
+        "For example, COVID-19, extreme weather conditions.",
+        "Er enghraifft COVID 19, amgylchiadau tywydd garw."
+      )
+      reasonHints(3).text() shouldBe lang.fold(
+        "For example, ill health or bereavement.",
+        "Er enghraifft, salwch neu brofedigaeth."
+      )
+
       val checkboxes: List[Element] = doc.select(".govuk-checkboxes__item").asScala.toList
       checkboxes.size shouldBe 8
 
