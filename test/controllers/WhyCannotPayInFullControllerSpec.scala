@@ -100,7 +100,7 @@ class WhyCannotPayInFullControllerSpec extends ItSpec, UnchangedFromCYALinkAsser
       valuesWithLabelsHintsAndDataBehaviour shouldBe List(
         CheckBoxInfo(
           "UnexpectedReductionOfIncome",
-          lang.fold("Unexpected reduction of income", "Gostyngiad annisgwyl mewn incwm"),
+          lang.fold("Reduced income", "Gostyngiad mewn incwm"),
           ""
         ),
         CheckBoxInfo(
