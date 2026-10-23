@@ -1892,7 +1892,7 @@ object Messages {
 
     val `why you are unable to pay in full`: Message = Message(
       english = "Change why you are unable to pay in full",
-      welsh = "pam nad oes modd i chi dalu’n llawn"
+      welsh = "Newid pam nad oes modd i chi dalu’n llawn"
     )
 
     val `whether you can pay within 6 months`: Message = Message(
@@ -1900,10 +1900,10 @@ object Messages {
       welsh = "Newid a ydych yn gallu talu cyn pen 6 mis"
     )
 
-    val `how much you can afford to pay each month`: Message = Message(
-      english = "how much you can afford to pay each month",
-      welsh = "faint y gallwch fforddio ei dalu bob mis"
-    )
+//    val `how much you can afford to pay each month`: Message = Message(
+//      english = "how much you can afford to pay each month",
+//      welsh = "faint y gallwch fforddio ei dalu bob mis"
+//    )
 
     val `Monthly payments`: Message = Message(
       english = "Monthly payments",
@@ -1993,8 +1993,8 @@ object Messages {
     )
 
     val `How much you can afford to pay each month`: Message = Message(
-      english = "how much you can afford to pay each month",
-      welsh = "faint y gallwch fforddio ei dalu bob mis"
+      english = "Change how much you can afford to pay each month",
+      welsh = "Newid faint y gallwch fforddio ei dalu bob mis"
     )
   }
 
