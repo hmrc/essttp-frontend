@@ -1167,8 +1167,8 @@ object Messages {
     )
 
     val `...whether you can make an upfront payment`: Message = Message(
-      english = "whether you can make an upfront payment",
-      welsh = "p’un a allwch wneud taliad ymlaen llaw"
+      english = "Change whether you can make an upfront payment",
+      welsh = "Newid p’un a allwch wneud taliad ymlaen llaw"
     )
 
     val `Select yes if you can make an upfront payment`: Message = Message(
@@ -1622,8 +1622,8 @@ object Messages {
     )
 
     val `Upfront payment-visually-hidden-message`: Message = Message(
-      english = "your upfront payment amount",
-      welsh = "swm eich taliad ymlaen llaw"
+      english = "Change your upfront payment amount",
+      welsh = "Newid swm eich taliad ymlaen llaw"
     )
 
     val `Remaining amount to pay`: Message = Message(
@@ -1891,19 +1891,19 @@ object Messages {
     )
 
     val `why you are unable to pay in full`: Message = Message(
-      english = "why you are unable to pay in full",
-      welsh = "pam nad oes modd i chi dalu’n llawn"
+      english = "Change why you are unable to pay in full",
+      welsh = "Newid pam nad oes modd i chi dalu’n llawn"
     )
 
     val `whether you can pay within 6 months`: Message = Message(
-      english = "whether you can pay within 6 months",
-      welsh = "a ydych yn gallu talu cyn pen 6 mis"
+      english = "Change whether you can pay within 6 months",
+      welsh = "Newid a ydych yn gallu talu cyn pen 6 mis"
     )
 
-    val `how much you can afford to pay each month`: Message = Message(
-      english = "how much you can afford to pay each month",
-      welsh = "faint y gallwch fforddio ei dalu bob mis"
-    )
+//    val `how much you can afford to pay each month`: Message = Message(
+//      english = "how much you can afford to pay each month",
+//      welsh = "faint y gallwch fforddio ei dalu bob mis"
+//    )
 
     val `Monthly payments`: Message = Message(
       english = "Monthly payments",
@@ -1921,8 +1921,8 @@ object Messages {
     )
 
     val `payment day`: Message = Message(
-      english = "which day your payments will be collected on",
-      welsh = "ar ba ddiwrnod y bydd eich taliadau’n cael eu casglu"
+      english = "Change the day your payments are collected on",
+      welsh = "Newid y diwrnod mae’ch taliadau’n cael eu casglu"
     )
 
     val `Payment plan instalments`: Message = Message(
@@ -1941,8 +1941,8 @@ object Messages {
     )
 
     val `Change months duration`: Message = Message(
-      english = "payment plan duration",
-      welsh = "hyd y cynllun talu"
+      english = "Change payment plan duration",
+      welsh = "Newid hyd y cynllun talu"
     )
 
     val `Start month`: Message = Message(
@@ -1993,8 +1993,8 @@ object Messages {
     )
 
     val `How much you can afford to pay each month`: Message = Message(
-      english = "how much you can afford to pay each month",
-      welsh = "faint y gallwch fforddio ei dalu bob mis"
+      english = "Change how much you can afford to pay each month",
+      welsh = "Newid faint y gallwch fforddio ei dalu bob mis"
     )
   }
 
