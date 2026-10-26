@@ -2570,8 +2570,10 @@ object Messages {
     )
 
     def `You will need to verify a new email address.`(link: String): Message = Message(
-      english = s"""You will need to <a href="$link" class="govuk-link">verify a different email address</a>.""",
-      welsh = s"""Bydd angen i chi <a href="$link" class="govuk-link">ddilysu cyfeiriad e-bost gwahanol</a>."""
+      english =
+        s"""You will need to <a id="alternative-email-link" href="$link" class="govuk-link">verify a different email address</a>.""",
+      welsh =
+        s"""Bydd angen i chi <a id="alternative-email-link" href="$link" class="govuk-link">ddilysu cyfeiriad e-bost gwahanol</a>."""
     )
 
   }
@@ -2589,8 +2591,10 @@ object Messages {
     )
 
     def `You can go back to enter a new email address`(link: String): Message = Message(
-      english = s"""You can <a class="govuk-link" href="$link">go back to enter a new email address</a>.""",
-      welsh = s"""Gallwch <a class="govuk-link" href="$link">fynd yn ôl i nodi cyfeiriad e-bost newydd</a>."""
+      english =
+        s"""You can <a id="alternative-email-link" class="govuk-link" href="$link">go back to enter a new email address</a>.""",
+      welsh =
+        s"""Gallwch <a id="alternative-email-link" class="govuk-link" href="$link">fynd yn ôl i nodi cyfeiriad e-bost newydd</a>."""
     )
 
   }

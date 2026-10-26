@@ -81,13 +81,14 @@
                     content = Text(e.message)
                 )
             ),
-                title = Text(Messages.`There is a problem`.show))
+            title = Text(Messages.`There is a problem`.show))
         )
     }
 
-<h1 class="govuk-heading-l">
-    @{Messages.UpfrontPayment.`Upfront payment`.show}
-</h1>
+    <h1 class="govuk-heading-l">
+        @{Messages.UpfrontPayment.`Upfront payment`.show}
+    </h1>
+
     @content
 
     @formWithCSRF(action = routes.UpfrontPaymentController.canYouMakeAnUpfrontPaymentSubmit) {

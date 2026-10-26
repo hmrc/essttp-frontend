@@ -987,7 +987,7 @@ class EmailControllerSpec extends ItSpec {
 
           paragraphs(0).html() shouldBe "You have tried to verify <strong>email@test.com</strong> too many times."
           paragraphs(1)
-            .html() shouldBe s"""You will need to <a href="$expectedLink" class="govuk-link">verify a different email address</a>."""
+            .html() shouldBe s"""You will need to <a id="alternative-email-link" href="$expectedLink" class="govuk-link">verify a different email address</a>."""
         }
       }
 

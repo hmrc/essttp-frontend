@@ -150,7 +150,7 @@
   @govukSummaryList(SummaryList(rows = instalmentRows, classes = "govuk-!-margin-top-6"))
 
   @formWithCSRF(action = routes.PaymentScheduleController.checkPaymentScheduleSubmit) {
-    @govukButton(Button(content = Text(Messages.continue.show)))
+    @govukButton(Button(content = Text(Messages.continue.show), attributes = Map("id" -> "continue")))
   }
 
 }
