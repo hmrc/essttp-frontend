@@ -1058,8 +1058,28 @@ object Messages {
     )
 
     val `Select all that apply`: Message = Message(
-      english = "Select all that apply.",
-      welsh = "Dewiswch bob un sy’n berthnasol."
+      english = "Select all that apply",
+      welsh = "Dewiswch bob un sy’n berthnasol"
+    )
+
+    val `For example, unemployment or reduced business.` : Message = Message(
+      english = "For example, unemployment or reduced business.",
+      welsh = "Er enghraifft, diweithdra neu leihau busnes."
+    )
+
+    val `For example, repairs following theft or damage.` : Message = Message(
+      english = "For example, repairs following theft or damage.",
+      welsh = "Er enghraifft, atgyweiriadau yn dilyn lladrad neu niwed."
+    )
+
+    val `For example, COVID-19, extreme weather conditions.` : Message = Message(
+      english = "For example, COVID-19, extreme weather conditions.",
+      welsh = "Er enghraifft COVID 19, amgylchiadau tywydd garw."
+    )
+
+    val `For example, ill health or bereavement.` : Message = Message(
+      english = "For example, ill health or bereavement.",
+      welsh = "Er enghraifft, salwch neu brofedigaeth."
     )
 
     val `Select all that apply or 'none of these'` : Message = Message(
@@ -1070,8 +1090,8 @@ object Messages {
     def checkboxMessage(cannotPayReason: CannotPayReason): Message = cannotPayReason match {
       case CannotPayReason.UnexpectedReductionOfIncome       =>
         Message(
-          english = "Unexpected reduction of income",
-          welsh = "Gostyngiad annisgwyl mewn incwm"
+          english = "Reduced income",
+          welsh = "Gostyngiad mewn incwm"
         )
       case CannotPayReason.UnexpectedIncreaseInSpending      =>
         Message(

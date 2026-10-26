@@ -58,33 +58,28 @@ class WhyCannotPayInFullControllerSpec extends ItSpec, UnchangedFromCYALinkAsser
         expectedSubmitUrl = Some(routes.WhyCannotPayInFullController.whyCannotPayInFullSubmit.url)
       )
 
-      val listStart = doc.select("#reasons").text()
-      listStart shouldBe lang.fold("Reasons could include:", "Gall y rhesymau gynnwys:")
-      val lists     = doc.select(".govuk-list").asScala.toList
-      lists.size shouldBe 1
-      val bullets   = lists(0).select("li").asScala.toList
-      bullets.size shouldBe lang.fold(4, 5)
+      val hint = doc.select("#WhyCannotPayInFull-hint").text()
+      hint shouldBe lang.fold("Select all that apply", "Dewiswch bob un sy’n berthnasol")
 
-      bullets(0).text() shouldBe lang.fold(
-        "lost or reduced income, business or employment",
-        "gostyngiad mewn incwm, busnes neu gyflogaeth"
-      )
-      bullets(1).text() shouldBe lang.fold(
-        "unexpected costs such as repairs following theft or damage",
-        "colli incwm, busnes neu gyflogaeth"
-      )
-      bullets(2).text() shouldBe lang.fold(
-        "a national or local disaster, for example extreme weather conditions",
-        "costau annisgwyl fel atgyweiriadau yn dilyn lladrad neu ddifrod"
-      )
-      bullets(3).text() shouldBe lang.fold(
-        "a change to personal circumstances, for example ill health or bereavement",
-        "trychineb cenedlaethol neu leol, er enghraifft amodau tywydd eithafol"
-      )
-      lang.fold("", bullets(4).text() shouldBe "newid i amgylchiadau personol, er enghraifft salwch neu brofedigaeth")
+      val reasonHints = doc.selectXpath("//div[@class='govuk-hint govuk-checkboxes__hint']").asScala.toList
+      reasonHints.size shouldBe 4
 
-      val hint = doc.select(".govuk-form-group > .govuk-fieldset > .govuk-hint").text()
-      hint shouldBe lang.fold("Select all that apply.", "Dewiswch bob un sy’n berthnasol.")
+      reasonHints(0).text() shouldBe lang.fold(
+        "For example, unemployment or reduced business.",
+        "Er enghraifft, diweithdra neu leihau busnes."
+      )
+      reasonHints(1).text() shouldBe lang.fold(
+        "For example, repairs following theft or damage.",
+        "Er enghraifft, atgyweiriadau yn dilyn lladrad neu niwed."
+      )
+      reasonHints(2).text() shouldBe lang.fold(
+        "For example, COVID-19, extreme weather conditions.",
+        "Er enghraifft COVID 19, amgylchiadau tywydd garw."
+      )
+      reasonHints(3).text() shouldBe lang.fold(
+        "For example, ill health or bereavement.",
+        "Er enghraifft, salwch neu brofedigaeth."
+      )
 
       val checkboxes: List[Element] = doc.select(".govuk-checkboxes__item").asScala.toList
       checkboxes.size shouldBe 8
@@ -100,7 +95,7 @@ class WhyCannotPayInFullControllerSpec extends ItSpec, UnchangedFromCYALinkAsser
       valuesWithLabelsHintsAndDataBehaviour shouldBe List(
         CheckBoxInfo(
           "UnexpectedReductionOfIncome",
-          lang.fold("Unexpected reduction of income", "Gostyngiad annisgwyl mewn incwm"),
+          lang.fold("Reduced income", "Gostyngiad mewn incwm"),
           ""
         ),
         CheckBoxInfo(
