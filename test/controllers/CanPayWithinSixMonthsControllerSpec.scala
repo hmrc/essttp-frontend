@@ -74,6 +74,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec, PegaRecreateSessionAss
       summaryListRowKeysAndValues shouldBe List("Remaining amount to pay" -> "£2,998")
 
       doc.select(".govuk-form-group > .govuk-fieldset > legend").text() shouldBe "Can you pay within 6 months?"
+      doc.select(".govuk-radios__hint").text() shouldBe "You’ll have to pay at least £300 per month"
 
       val radioItems = doc.select(".govuk-radios__item").asScala.toList
       radioItems.map(r =>
@@ -200,6 +201,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec, PegaRecreateSessionAss
       summaryListRowKeysAndValues shouldBe List("Swm sy’n weddill i’w dalu" -> "£2,998")
 
       doc.select(".govuk-form-group > .govuk-fieldset > legend").text() shouldBe "A allwch dalu cyn pen 6 mis?"
+      doc.select(".govuk-radios__hint").text() shouldBe "Bydd rhaid i chi dalu o leiaf £300 pob mis"
 
       val radioItems = doc.select(".govuk-radios__item").asScala.toList
       radioItems.map(r =>
@@ -269,7 +271,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec, PegaRecreateSessionAss
 
       def testFormError(formData: (String, String)*)(expectedError: String): Unit = {
         stubCommonActions()
-        EssttpBackend.Dates.findJourneyExtremeDates(testCrypto, Origins.Epaye.Bta)()
+        EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, Origins.Epaye.Bta)()
 
         val request = fakeRequest.withFormUrlEncodedBody(formData*).withMethod("POST")
         val result  = controller.canPayWithinSixMonthsSubmit(TaxRegime.Epaye)(request)
@@ -302,7 +304,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec, PegaRecreateSessionAss
 
     "redirect to the 'monthly payment amount' page when the user submits 'yes' and audit event" in {
       stubCommonActions()
-      EssttpBackend.Dates.findJourneyExtremeDates(testCrypto, Origins.Epaye.Bta)()
+      EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, Origins.Epaye.Bta)()
       EssttpBackend.CanPayWithinSixMonths.stubUpdateCanPayWithinSixMonths(
         TdAll.journeyId,
         JourneyJsonTemplates.`Obtained Can Pay Within 6 months - yes`(Origins.Epaye.Bta)(using testCrypto)
@@ -328,7 +330,6 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec, PegaRecreateSessionAss
              |  "taxIdentifier" : "864FZ00049",
              |  "correlationId" : "8d89a98b-0b26-4ab2-8114-f7c7c81c3059",
              |   "userEnteredDetails" : {
-             |     "unableToPayReason": ["WaitingForRefund", "NoMoneySetAside"],
              |     "payUpfront" : true,
              |     "upfrontPaymentAmount" : 2,
              |     "canPayInSixMonths" : true
@@ -343,7 +344,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec, PegaRecreateSessionAss
 
     "redirect to the PEGA start endpoint when the user submits 'no' and no audit event" in {
       stubCommonActions()
-      EssttpBackend.Dates.findJourneyExtremeDates(testCrypto, Origins.Epaye.Bta)()
+      EssttpBackend.AffordabilityMinMaxApi.findJourney(testCrypto, Origins.Epaye.Bta)()
       EssttpBackend.CanPayWithinSixMonths.stubUpdateCanPayWithinSixMonths(
         TdAll.journeyId,
         JourneyJsonTemplates.`Obtained Can Pay Within 6 months - no`(Origins.Epaye.Bta)(using testCrypto)

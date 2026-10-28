@@ -1695,6 +1695,11 @@ object Messages {
       welsh = "Dewiswch ‘Iawn’ os gallwch dalu cyn pen 6 mis"
     )
 
+    def `You'll have to pay at least...`(min: AmountInPence): Message = Message(
+      english = s"You’ll have to pay at least ${min.gdsFormatInPounds} per month",
+      welsh = s"Bydd rhaid i chi dalu o leiaf ${min.gdsFormatInPounds} pob mis"
+    )
+
   }
 
   object MonthlyPaymentAmount {
