@@ -77,7 +77,13 @@ class CanPayWithinSixMonthsController @Inject() (
                     views.canPayWithinSixMonthsPage(
                       form,
                       remainingAmountToPay(j),
-                      j.instalmentAmounts.minimumInstalmentAmount,
+                      MonthlyPaymentAmountController
+                        .roundingForMinMax(
+                          remainingAmountToPay(j),
+                          j.instalmentAmounts.minimumInstalmentAmount,
+                          j.instalmentAmounts.maximumInstalmentAmount
+                        )
+                        ._1,
                       regime
                     )
                   )
@@ -114,7 +120,13 @@ class CanPayWithinSixMonthsController @Inject() (
                   views.canPayWithinSixMonthsPage(
                     formWithErrors,
                     remainingAmountToPay(j),
-                    j.instalmentAmounts.minimumInstalmentAmount,
+                    MonthlyPaymentAmountController
+                      .roundingForMinMax(
+                        remainingAmountToPay(j),
+                        j.instalmentAmounts.minimumInstalmentAmount,
+                        j.instalmentAmounts.maximumInstalmentAmount
+                      )
+                      ._1,
                     regime
                   )
                 ),
