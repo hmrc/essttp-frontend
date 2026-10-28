@@ -32,7 +32,7 @@ govukErrorSummary: GovukErrorSummary,
 requestSupport: RequestSupport
 )
 
-@(form: Form[CanPayWithinSixMonthsFormValue], remainingAmountToPay: AmountInPence, regime: TaxRegime)(implicit request: Request[?])
+@(form: Form[CanPayWithinSixMonthsFormValue], remainingAmountToPay: AmountInPence, minimumPayment: AmountInPence, regime: TaxRegime)(implicit request: Request[?])
 
 @import requestSupport.{languageFromRequest, legacyMessages}
 
@@ -90,6 +90,7 @@ requestSupport: RequestSupport
                 RadioItem(
                     content = Text(Messages.CanPayWithinSixMonths.`Yes, I can pay within 6 months`.show),
                     value = Some("Yes"),
+                    hint = Some(Hint(content = Text(Messages.CanPayWithinSixMonths.`You'll have to pay at least...`(minimumPayment).show))),
                     checked = form.data.values.toList.contains("Yes")
                 ),
                 RadioItem(
