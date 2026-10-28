@@ -201,6 +201,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec, PegaRecreateSessionAss
       summaryListRowKeysAndValues shouldBe List("Swm sy’n weddill i’w dalu" -> "£2,998")
 
       doc.select(".govuk-form-group > .govuk-fieldset > legend").text() shouldBe "A allwch dalu cyn pen 6 mis?"
+      doc.select(".govuk-radios__hint").text() shouldBe "Bydd rhaid i chi dalu o leiaf £299.97 pob mis"
 
       val radioItems = doc.select(".govuk-radios__item").asScala.toList
       radioItems.map(r =>
