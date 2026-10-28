@@ -73,7 +73,14 @@ class CanPayWithinSixMonthsController @Inject() (
                       CanPayWithinSixMonthsFormValue.canPayWithinSixMonthsToFormValue(value)
                     )
                   )
-                  Ok(views.canPayWithinSixMonthsPage(form, remainingAmountToPay(j), j.instalmentAmounts.minimumInstalmentAmount, regime))
+                  Ok(
+                    views.canPayWithinSixMonthsPage(
+                      form,
+                      remainingAmountToPay(j),
+                      j.instalmentAmounts.minimumInstalmentAmount,
+                      regime
+                    )
+                  )
                 }
               )
           }
@@ -103,9 +110,16 @@ class CanPayWithinSixMonthsController @Inject() (
             .bindFromRequest()
             .fold(
               formWithErrors =>
-                Ok(views.canPayWithinSixMonthsPage(formWithErrors, remainingAmountToPay(j), j.instalmentAmounts.minimumInstalmentAmount, regime)),
+                Ok(
+                  views.canPayWithinSixMonthsPage(
+                    formWithErrors,
+                    remainingAmountToPay(j),
+                    j.instalmentAmounts.minimumInstalmentAmount,
+                    regime
+                  )
+                ),
               { canPayFormValue =>
-                val canPay = canPayFormValue.asCanPayWithinSixMonths
+                val canPay         = canPayFormValue.asCanPayWithinSixMonths
                 val valueUnchanged = existingAnswersInJourney(request.journey).exists(_.value == canPay.value)
 
                 if (canPay.value)

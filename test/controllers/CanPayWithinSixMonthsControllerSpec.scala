@@ -74,6 +74,7 @@ class CanPayWithinSixMonthsControllerSpec extends ItSpec, PegaRecreateSessionAss
       summaryListRowKeysAndValues shouldBe List("Remaining amount to pay" -> "£2,998")
 
       doc.select(".govuk-form-group > .govuk-fieldset > legend").text() shouldBe "Can you pay within 6 months?"
+      doc.select(".govuk-radios__hint").text() shouldBe "You’ll have to pay at least £299.97 per month"
 
       val radioItems = doc.select(".govuk-radios__item").asScala.toList
       radioItems.map(r =>
