@@ -53,7 +53,7 @@ lazy val root = (project in file("."))
   .settings(
     (Compile / doc / scalacOptions) := Seq() //this will allow to have warnings in `doc` task
   )
-  .settings(SbtUpdatesSettings.sbtUpdatesSettings *)
+//  .settings(SbtUpdatesSettings.sbtUpdatesSettings *)
 
 
 

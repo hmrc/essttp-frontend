@@ -1900,11 +1900,6 @@ object Messages {
       welsh = "Newid a ydych yn gallu talu cyn pen 6 mis"
     )
 
-//    val `how much you can afford to pay each month`: Message = Message(
-//      english = "how much you can afford to pay each month",
-//      welsh = "faint y gallwch fforddio ei dalu bob mis"
-//    )
-
     val `Monthly payments`: Message = Message(
       english = "Monthly payments",
       welsh = "Taliadau misol"
