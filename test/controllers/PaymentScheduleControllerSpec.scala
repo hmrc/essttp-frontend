@@ -102,7 +102,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
           lang.fold("Can you make an upfront payment?", "A allwch wneud taliad ymlaen llaw?"),
           canPayUpfrontValue,
           PageUrls.checkPaymentPlanChangeUrl("CanPayUpfront", origin.taxRegime, None),
-          lang.fold("whether you can make an upfront payment", "p’un a allwch wneud taliad ymlaen llaw")
+          lang.fold("Change whether you can make an upfront payment", "Newid p’un a allwch wneud taliad ymlaen llaw")
         )
         val upfrontPaymentAmountRow = upfrontPaymentAmountValue.map(amount =>
           SummaryRow(
