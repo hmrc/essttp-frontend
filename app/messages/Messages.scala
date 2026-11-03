@@ -1167,8 +1167,8 @@ object Messages {
     )
 
     val `...whether you can make an upfront payment`: Message = Message(
-      english = "Change whether you can make an upfront payment",
-      welsh = "Newid p’un a allwch wneud taliad ymlaen llaw"
+      english = "whether you can make an upfront payment",
+      welsh = "p’un a allwch wneud taliad ymlaen llaw"
     )
 
     val `Select yes if you can make an upfront payment`: Message = Message(
@@ -1610,8 +1610,8 @@ object Messages {
     )
 
     val `Change Payment`: Message = Message(
-      english = "whether you can make an upfront payment",
-      welsh = "p’un a allwch wneud taliad ymlaen llaw"
+      english = "Change whether you can make an upfront payment",
+      welsh = "Newid p’un a allwch wneud taliad ymlaen llaw"
     )
 
     val `Upfront payment`: Message = Message(
