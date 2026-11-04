@@ -77,7 +77,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
           lang.fold("Tell us why you cannot pay in full", "Rhowch wybod i ni pam na allwch dalu’r swm llawn"),
           reasonsToNotPayInFull.mkString(" "),
           PageUrls.checkPaymentPlanChangeUrl("WhyUnableInFull", origin.taxRegime, None),
-          lang.fold("why you are unable to pay in full", "pam nad oes modd i chi dalu’n llawn")
+          lang.fold("Change why you are unable to pay in full", "Newid pam nad oes modd i chi dalu’n llawn")
         )
 
         val includeUpcomingTaxBillRow =
@@ -102,7 +102,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
           lang.fold("Can you make an upfront payment?", "A allwch wneud taliad ymlaen llaw?"),
           canPayUpfrontValue,
           PageUrls.checkPaymentPlanChangeUrl("CanPayUpfront", origin.taxRegime, None),
-          lang.fold("whether you can make an upfront payment", "p’un a allwch wneud taliad ymlaen llaw")
+          lang.fold("Change whether you can make an upfront payment", "Newid p’un a allwch wneud taliad ymlaen llaw")
         )
         val upfrontPaymentAmountRow = upfrontPaymentAmountValue.map(amount =>
           SummaryRow(
@@ -112,7 +112,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             ),
             amount,
             PageUrls.checkPaymentPlanChangeUrl("UpfrontPaymentAmount", origin.taxRegime, None),
-            lang.fold("your upfront payment amount", "swm eich taliad ymlaen llaw")
+            lang.fold("Change your upfront payment amount", "Newid swm eich taliad ymlaen llaw")
           )
         )
 
@@ -120,7 +120,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
           lang.fold("Can you pay within 6 months?", "A allwch dalu cyn pen 6 mis?"),
           canPayWithinSixMonths,
           PageUrls.checkPaymentPlanChangeUrl("PayWithin6Months", origin.taxRegime, None),
-          lang.fold("whether you can pay within 6 months", "a ydych yn gallu talu cyn pen 6 mis")
+          lang.fold("Change whether you can pay within 6 months", "Newid a ydych yn gallu talu cyn pen 6 mis")
         )
 
         val expectedSummaryRows = List(
@@ -145,7 +145,8 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
           lang.fold("How much can you afford to pay each month?", "Faint y gallwch fforddio ei dalu bob mis?"),
           affordableMonthlyPaymentAmount,
           PageUrls.checkPaymentPlanChangeUrl("MonthlyPaymentAmount", origin.taxRegime, None),
-          lang.fold("how much you can afford to pay each month", "faint y gallwch fforddio ei dalu bob mis")
+          lang
+            .fold("Change how much you can afford to pay each month", "Newid faint y gallwch fforddio ei dalu bob mis")
         )
 
         val paymentDayRow = SummaryRow(
@@ -153,8 +154,8 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
           paymentDayValue,
           PageUrls.checkPaymentPlanChangeUrl("PaymentDay", origin.taxRegime, None),
           lang.fold(
-            "which day your payments will be collected on",
-            "ar ba ddiwrnod y bydd eich taliadau’n cael eu casglu"
+            "Change the day your payments are collected on",
+            "Newid y diwrnod mae’ch taliadau’n cael eu casglu"
           )
         )
 
@@ -175,7 +176,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             lang.fold("Payment plan duration", "Hyd y cynllun talu"),
             lang.fold("1 month", "1 mis"),
             PageUrls.checkPaymentPlanChangeUrl("PaymentPlan", origin.taxRegime, None),
-            lang.fold("payment plan duration", "hyd y cynllun talu")
+            lang.fold("Change payment plan duration", "Newid hyd y cynllun talu")
           )
 
         val startMonthRow =
@@ -209,7 +210,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             lang.fold("Payment plan duration", "Hyd y cynllun talu"),
             lang.fold("2 months", "2 fis"),
             PageUrls.checkPaymentPlanChangeUrl("PaymentPlan", origin.taxRegime, None),
-            lang.fold("payment plan duration", "hyd y cynllun talu")
+            lang.fold("Change payment plan duration", "Newid hyd y cynllun talu")
           )
 
         val startMonthRow =
@@ -261,7 +262,7 @@ class PaymentScheduleControllerSpec extends ItSpec, PegaRecreateSessionAssertion
             lang.fold("Payment plan duration", "Hyd y cynllun talu"),
             s"${datesToAmountsValues.size.toString} ${lang.fold("months", "mis")}",
             PageUrls.checkPaymentPlanChangeUrl("PaymentPlan", origin.taxRegime, None),
-            lang.fold("payment plan duration", "hyd y cynllun talu")
+            lang.fold("Change payment plan duration", "Newid hyd y cynllun talu")
           )
 
         val startMonthRow =
