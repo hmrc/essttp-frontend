@@ -65,8 +65,11 @@
     }
 
   <p class="govuk-body">@{Messages.TermsAndConditions.`Our phone line opening hours...`.show}</p>
-  <p class="govuk-body">@{Messages.TermsAndConditions.`Monday to Friday...`.show}</p>
-  <p class="govuk-body">@{Messages.TermsAndConditions.`Closed weekends...`.show}</p>
+    <ul class="govuk-list govuk-list--bullet">
+        <li class="govuk-body">@{Messages.Confirmation.`Monday to Friday: 8am to 6pm`.show}</li>
+        <li class="govuk-body">@{Messages.Confirmation.`Closed weekends and bank holidays.`.show}</li>
+    </ul>
+
 
   <h2 class="govuk-heading-s">@{Messages.TermsAndConditions.`Text service`.show}</h2>
 

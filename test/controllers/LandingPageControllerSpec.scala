@@ -131,7 +131,7 @@ class LandingPageControllerSpec extends ItSpec {
       paragraphs(3).text() shouldBe "To set up a plan, your company or partnership must:"
 
       val lists   = doc.select(".govuk-list").asScala.toList
-      lists.size shouldBe 1
+      lists.size shouldBe 2
       val bullets = lists(0).select("li").asScala.toList
       bullets.size shouldBe 5
 
@@ -252,7 +252,7 @@ class LandingPageControllerSpec extends ItSpec {
       paragraphs(3).text() shouldBe "To set up a plan, your company or partnership must:"
 
       val lists = doc.select(".govuk-list").asScala.toList
-      lists.size shouldBe 2
+      lists.size shouldBe 3
 
       val bullets1 = lists(0).select("li").asScala.toList
       bullets1.size shouldBe 5
@@ -361,7 +361,7 @@ class LandingPageControllerSpec extends ItSpec {
       )
 
       val lists = doc.select(".govuk-list").asScala.toList
-      lists.size shouldBe 1
+      lists.size shouldBe 2
 
       val paragraphs = doc.select("p.govuk-body").asScala.toList
       paragraphs(0)
