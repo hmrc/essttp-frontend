@@ -58,14 +58,14 @@ class LandingPageControllerSpec extends ItSpec {
     detailsTextParagraphs(3).text() shouldBe "Monday to Friday: 8am to 6pm"
     detailsTextParagraphs(4).text() shouldBe "Closed weekends and bank holidays."
 
-    detailsText.select("h2.govuk-heading-m").eq(0).text() shouldBe "Text service"
+    detailsText.select("h2.govuk-heading-s").eq(0).text() shouldBe "Text service"
 
     detailsTextParagraphs(5)
       .text() shouldBe "Use Relay UK if you cannot hear or speak on the telephone, dial 18001 then 0345 300 3900. " +
       "Find out more on the Relay UK website (opens in new tab)."
 
     detailsText
-      .select("h2.govuk-heading-m")
+      .select("h2.govuk-heading-s")
       .eq(1)
       .text() shouldBe "If a health condition or personal circumstances make it difficult to contact us"
 
@@ -131,7 +131,7 @@ class LandingPageControllerSpec extends ItSpec {
       paragraphs(3).text() shouldBe "To set up a plan, your company or partnership must:"
 
       val lists   = doc.select(".govuk-list").asScala.toList
-      lists.size shouldBe 1
+      lists.size shouldBe 2
       val bullets = lists(0).select("li").asScala.toList
       bullets.size shouldBe 5
 
@@ -252,7 +252,7 @@ class LandingPageControllerSpec extends ItSpec {
       paragraphs(3).text() shouldBe "To set up a plan, your company or partnership must:"
 
       val lists = doc.select(".govuk-list").asScala.toList
-      lists.size shouldBe 2
+      lists.size shouldBe 3
 
       val bullets1 = lists(0).select("li").asScala.toList
       bullets1.size shouldBe 5
@@ -361,7 +361,7 @@ class LandingPageControllerSpec extends ItSpec {
       )
 
       val lists = doc.select(".govuk-list").asScala.toList
-      lists.size shouldBe 1
+      lists.size shouldBe 2
 
       val paragraphs = doc.select("p.govuk-body").asScala.toList
       paragraphs(0)

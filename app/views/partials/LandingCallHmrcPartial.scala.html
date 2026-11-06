@@ -35,12 +35,15 @@
     <p class="govuk-body">@Html(Messages.CallHmrc.`Telephone: ...`.show)</p>
     <p class="govuk-body">@Html(Messages.CallHmrc.`Outside UK: ...`.show)</p>
     <p class="govuk-body">@{Messages.CallHmrc.`Our phone line opening hours are:`.show}</p>
-    <p class="govuk-body">@{Messages.CallHmrc.`Monday to Friday: ...`.show}</p>
-    <p class="govuk-body">@{Messages.CallHmrc.`Closed weekends and bank holidays.`.show}</p>
+    <ul class="govuk-list govuk-list--bullet">
+        <li class="govuk-body">@{Messages.Confirmation.`Monday to Friday: 8am to 6pm`.show}</li>
+        <li class="govuk-body">@{Messages.Confirmation.`Closed weekends and bank holidays.`.show}</li>
+    </ul>
 
-    <h2 class="govuk-heading-m">@{Messages.CallHmrc.`Text service`.show}</h2>
+
+    <h2 class="govuk-heading-s">@{Messages.CallHmrc.`Text service`.show}</h2>
     <p class="govuk-body">@Html(Messages.CallHmrc.`Use Relay UK if you cannot hear or speak on the telephone...`(appConfig.Urls.relayUrl).show)</p>
-    <h2 class="govuk-heading-m">@{Messages.CallHmrc.`If a health condition or personal circumstances make it difficult to contact us...`.show}</h2>
+    <h2 class="govuk-heading-s">@{Messages.CallHmrc.`If a health condition or personal circumstances make it difficult to contact us...`.show}</h2>
 
     <p class="govuk-body">@Html(Messages.CallHmrc.`Our guidance Get help from HMRC...`(appConfig.Urls.extraSupportUrl).show)</p>
 }
