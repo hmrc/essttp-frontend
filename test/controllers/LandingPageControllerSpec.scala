@@ -56,7 +56,7 @@ class LandingPageControllerSpec extends ItSpec {
     detailsTextParagraphs(1).text() shouldBe "Outside UK: +44 2890 538 192"
     detailsTextParagraphs(2).text() shouldBe "Our phone line opening hours are:"
     detailsTextParagraphs(3).text() shouldBe "Monday to Friday: 8am to 6pm"
-    detailsTextParagraphs(4).text() shouldBe "Closed weekends and bank holidays."
+    detailsTextParagraphs(4).text() shouldBe "closed weekends and bank holidays"
 
     detailsText.select("h2.govuk-heading-m").eq(0).text() shouldBe "Text service"
 
@@ -130,8 +130,9 @@ class LandingPageControllerSpec extends ItSpec {
         .text() shouldBe "You’ll need to stay up to date with your payments or we could ask you to pay in full."
       paragraphs(3).text() shouldBe "To set up a plan, your company or partnership must:"
 
-      val lists   = doc.select(".govuk-list").asScala.toList
+      val lists = doc.select(".govuk-list").asScala.toList
       lists.size shouldBe 2
+
       val bullets = lists(0).select("li").asScala.toList
       bullets.size shouldBe 5
 
@@ -141,6 +142,12 @@ class LandingPageControllerSpec extends ItSpec {
       bullets(3).text() shouldBe "have no other payment plans or debts with HMRC"
       bullets(4)
         .text() shouldBe "have no outstanding employers’ PAYE submissions or Construction Industry Scheme returns"
+
+      val bullets2 = lists(1).select("li").asScala.toList
+      bullets2.size shouldBe 2
+
+      bullets2(0).text() shouldBe "Monday to Friday: 8am to 6pm"
+      bullets2(1).text() shouldBe "closed weekends and bank holidays"
 
       testCallHmrcDetails(doc)
 
@@ -272,6 +279,12 @@ class LandingPageControllerSpec extends ItSpec {
       bullets2(1).text() shouldBe "an annual accounting scheme member"
       bullets2(2).text() shouldBe "a payment on account customer"
 
+      val bullets3 = lists(2).select("li").asScala.toList
+      bullets3.size shouldBe 2
+
+      bullets3(0).text() shouldBe "Monday to Friday: 8am to 6pm"
+      bullets3(1).text() shouldBe "closed weekends and bank holidays"
+
       testCallHmrcDetails(doc)
 
       val button = doc.select(".govuk-button")
@@ -389,6 +402,12 @@ class LandingPageControllerSpec extends ItSpec {
       firstListBullets(1).text() shouldBe "owe £30,000 or less"
       firstListBullets(2).text() shouldBe "have no other tax debts"
       firstListBullets(3).text() shouldBe "have no other HMRC payment plans set up"
+
+      val bullets2 = lists(1).select("li").asScala.toList
+      bullets2.size shouldBe 2
+
+      bullets2(0).text() shouldBe "Monday to Friday: 8am to 6pm"
+      bullets2(1).text() shouldBe "closed weekends and bank holidays"
 
       testCallHmrcDetails(doc)
 
