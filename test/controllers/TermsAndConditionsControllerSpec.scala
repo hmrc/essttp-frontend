@@ -109,9 +109,16 @@ class TermsAndConditionsControllerSpec extends ItSpec {
         )(
           expectedContent = List(
             "Call the debt management helpline",
-            "Text service",
-            "If a health condition or personal circumstances make it difficult to contact us",
             "Declaration"
+          )
+        )
+
+        ContentAssertions.assertListOfContent(
+          elements = doc.select(".govuk-heading-s")
+        )(
+          expectedContent = List(
+            "Text service",
+            "If a health condition or personal circumstances make it difficult to contact us"
           )
         )
 
@@ -224,9 +231,16 @@ class TermsAndConditionsControllerSpec extends ItSpec {
         )(
           expectedContent = List(
             "Ffoniwch y llinell gymorth rheoli dyledion",
-            "Gwasanaeth Text Relay",
-            "Os yw cyflwr iechyd neu amgylchiadau personol yn ei gwneud hi’n anodd i chi gysylltu â ni",
             "Datganiad"
+          )
+        )
+
+        ContentAssertions.assertListOfContent(
+          elements = doc.select(".govuk-heading-s")
+        )(
+          expectedContent = List(
+            "Gwasanaeth Text Relay",
+            "Os yw cyflwr iechyd neu amgylchiadau personol yn ei gwneud hi’n anodd i chi gysylltu â ni"
           )
         )
 
