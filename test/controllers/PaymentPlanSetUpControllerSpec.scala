@@ -161,7 +161,7 @@ class PaymentPlanSetUpControllerWithUrBannerSpec extends ItSpec with PaymentPlan
 
             paragraphs(7).text() shouldBe "Our phone line opening hours are:"
             paragraphs(8).text() shouldBe "Monday to Friday: 8am to 6pm"
-            paragraphs(9).text() shouldBe "Closed weekends and bank holidays."
+            paragraphs(9).text() shouldBe "closed weekends and bank holidays"
 
             smallSubheadings(0).text() shouldBe "Text service"
             smallSubheadings(0).tagName() shouldBe "h3"
@@ -221,7 +221,7 @@ class PaymentPlanSetUpControllerWithUrBannerSpec extends ItSpec with PaymentPlan
 
             paragraphs(8).text() shouldBe "Our phone line opening hours are:"
             paragraphs(9).text() shouldBe "Monday to Friday: 8am to 6pm"
-            paragraphs(10).text() shouldBe "Closed weekends and bank holidays."
+            paragraphs(10).text() shouldBe "closed weekends and bank holidays"
 
             smallSubheadings(1).text() shouldBe "Text service"
             smallSubheadings(1).tagName() shouldBe "h3"
