@@ -2675,9 +2675,34 @@ object Messages {
     val `Call us on 0300 123 1813 if you need to set up a Direct Debit from a joint account. All account holders must be present when calling.`
       : Message = Message(
       english =
-        "Call us on <strong>0300 123 1813</strong> if you need to set up a Direct Debit from a joint account. All account holders must be present when calling.",
+        "Call us if you need to set up a Direct Debit from a joint account. All account holders must be present when calling.",
       welsh =
-        "Ffoniwch ni ar <strong>0300 200 1900</strong> os oes angen trefnu Debyd Uniongyrchol o gyfrif ar y cyd. Mae’n rhaid i holl ddeiliaid y cyfrif fod yn bresennol pan fyddwch yn ffonio."
+        "Ffoniwch ni os oes angen i chi drefnu Debyd Uniongyrchol o gyfrif ar y cyd. Mae’n rhaid i holl ddeiliaid y cyfrif fod yn bresennol pan fyddwch yn ffonio."
+    )
+
+    val `Telephone: 0300 123 1813`: Message = Message(
+      english = "Telephone: <strong>0300 123 1813</strong>",
+      welsh = "Ffôn: <strong>0300 200 1900</strong>"
+    )
+
+    val `Outside UK: +44 2890 538 192` = Message(
+      english = "Outside UK: <strong>+44 2890 538 192</strong>",
+      welsh = "O’r tu allan i’r DU: <strong>+44 2890 538 192</strong>"
+    )
+
+    val `Our phone line opening hours are:` = Message(
+      english = "Our phone line opening hours are:",
+      welsh = "Oriau agor ein llinell ffôn yw:"
+    )
+
+    val `Monday to Friday, 8am to 6pm` = Message(
+      english = "Monday to Friday, 8am to 6pm",
+      welsh = "Dydd Llun i ddydd Gwener: 8:30 i 17:00"
+    )
+
+    val `closed weekends and bank holidays` = Message(
+      english = "closed weekends and bank holidays",
+      welsh = "ar gau ar benwythnosau a gwyliau banc"
     )
 
   }
