@@ -114,8 +114,9 @@ class PaymentPlanSetUpControllerWithUrBannerSpec extends ItSpec with PaymentPlan
             "Your payment reference is QQ123456A"
         })
 
-        val subheadings = doc.select(".govuk-heading-m").asScala.toList
-        val paragraphs  = doc.select(".govuk-body").asScala.toList
+        val subheadings      = doc.select(".govuk-heading-m").asScala.toList
+        val smallSubheadings = doc.select(".govuk-heading-s").asScala.toList
+        val paragraphs       = doc.select(".govuk-body").asScala.toList
 
         subheadings(0).text() shouldBe "What happens next"
         subheadings(0).tagName() shouldBe "h2"
@@ -160,10 +161,10 @@ class PaymentPlanSetUpControllerWithUrBannerSpec extends ItSpec with PaymentPlan
 
             paragraphs(7).text() shouldBe "Our phone line opening hours are:"
             paragraphs(8).text() shouldBe "Monday to Friday: 8am to 6pm"
-            paragraphs(9).text() shouldBe "Closed weekends and bank holidays."
+            paragraphs(9).text() shouldBe "closed weekends and bank holidays"
 
-            subheadings(2).text() shouldBe "Text service"
-            subheadings(2).tagName() shouldBe "h2"
+            smallSubheadings(0).text() shouldBe "Text service"
+            smallSubheadings(0).tagName() shouldBe "h3"
 
             paragraphs(10)
               .text() shouldBe "Use Relay UK if you cannot hear or speak on the telephone, dial 18001 then 0345 300 3900. Find out more on the Relay UK website (opens in new tab)."
@@ -174,9 +175,9 @@ class PaymentPlanSetUpControllerWithUrBannerSpec extends ItSpec with PaymentPlan
             relayLink.attr("rel") shouldBe "noreferrer noopener"
             relayLink.attr("target") shouldBe "_blank"
 
-            subheadings(3)
+            smallSubheadings(1)
               .text() shouldBe "If a health condition or personal circumstances make it difficult to contact us"
-            subheadings(3).tagName() shouldBe "h2"
+            smallSubheadings(1).tagName() shouldBe "h3"
 
             paragraphs(11)
               .text() shouldBe "Our guidance Get help from HMRC if you need extra support (opens in new tab) explains how we can support you."
@@ -220,10 +221,10 @@ class PaymentPlanSetUpControllerWithUrBannerSpec extends ItSpec with PaymentPlan
 
             paragraphs(8).text() shouldBe "Our phone line opening hours are:"
             paragraphs(9).text() shouldBe "Monday to Friday: 8am to 6pm"
-            paragraphs(10).text() shouldBe "Closed weekends and bank holidays."
+            paragraphs(10).text() shouldBe "closed weekends and bank holidays"
 
-            subheadings(2).text() shouldBe "Text service"
-            subheadings(2).tagName() shouldBe "h2"
+            smallSubheadings(1).text() shouldBe "Text service"
+            smallSubheadings(1).tagName() shouldBe "h3"
 
             paragraphs(11)
               .text() shouldBe "Use Relay UK if you cannot hear or speak on the telephone, dial 18001 then 0345 300 3900. Find out more on the Relay UK website (opens in new tab)."
@@ -234,9 +235,9 @@ class PaymentPlanSetUpControllerWithUrBannerSpec extends ItSpec with PaymentPlan
             relayLink.attr("rel") shouldBe "noreferrer noopener"
             relayLink.attr("target") shouldBe "_blank"
 
-            subheadings(3)
+            smallSubheadings(2)
               .text() shouldBe "If a health condition or personal circumstances make it difficult to contact us"
-            subheadings(3).tagName() shouldBe "h2"
+            smallSubheadings(2).tagName() shouldBe "h3"
 
             paragraphs(12)
               .text() shouldBe "Our guidance Get help from HMRC if you need extra support (opens in new tab) explains how we can support you."

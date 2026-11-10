@@ -2442,8 +2442,8 @@ object Messages {
     )
 
     val `Closed weekends...` : Message = Message(
-      english = "Closed weekends and bank holidays.",
-      welsh = "Ar gau ar benwythnosau a gwyliau banc."
+      english = "closed weekends and bank holidays",
+      welsh = "ar gau ar benwythnosau a gwyliau banc"
     )
 
     val `Text service`: Message = Message(
@@ -2820,8 +2820,8 @@ object Messages {
     )
 
     val `Closed weekends and bank holidays.` : Message = Message(
-      english = "Closed weekends and bank holidays.",
-      welsh = "Ar gau ar benwythnosau a gwyliau banc."
+      english = "closed weekends and bank holidays",
+      welsh = "ar gau ar benwythnosau a gwyliau banc"
     )
 
     val `Text service`: Message = Message(
