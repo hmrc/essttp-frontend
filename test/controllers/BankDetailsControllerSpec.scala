@@ -1597,9 +1597,9 @@ class BankDetailsControllerSpec extends ItSpec {
 
         doc.select("h2").asScala.toList(0).text() shouldBe "If you need extra support"
         paragraphs(3)
-          .html() shouldBe "Find out the different ways to <a href=\"https://www.gov.uk/get-help-hmrc-extra-support\" class=\"govuk-link\">deal with HMRC if you need some help</a>."
+          .html() shouldBe "Find out the different ways to <a href=\"https://www.gov.uk/get-help-hmrc-extra-support\" class=\"govuk-link\" target=\"_blank\">deal with HMRC if you need some help (opens in new tab)</a>."
         paragraphs(4)
-          .html() shouldBe "You can also use <a href=\"https://www.relayuk.bt.com/\" class=\"govuk-link\">Relay UK</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>."
+          .html() shouldBe "You can also use <a href=\"https://www.relayuk.bt.com/\" class=\"govuk-link\" target=\"_blank\">Relay UK (opens in new tab)</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>."
         paragraphs(5).html() shouldBe "If you are outside the UK: <strong>+44 2890 538 192</strong>"
       }
     }
@@ -1713,9 +1713,9 @@ class BankDetailsControllerSpec extends ItSpec {
 
         doc.select("h2").asScala.toList(0).text() shouldBe "If you need extra support"
         paragraphs(5)
-          .html() shouldBe "Find out the different ways to <a href=\"https://www.gov.uk/get-help-hmrc-extra-support\" class=\"govuk-link\">deal with HMRC if you need some help</a>."
+          .html() shouldBe "Find out the different ways to <a href=\"https://www.gov.uk/get-help-hmrc-extra-support\" class=\"govuk-link\" target=\"_blank\">deal with HMRC if you need some help (opens in new tab)</a>."
         paragraphs(6)
-          .html() shouldBe "You can also use <a href=\"https://www.relayuk.bt.com/\" class=\"govuk-link\">Relay UK</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>."
+          .html() shouldBe "You can also use <a href=\"https://www.relayuk.bt.com/\" class=\"govuk-link\" target=\"_blank\">Relay UK (opens in new tab)</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>."
 
       }
     }
