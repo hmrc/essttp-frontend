@@ -359,17 +359,17 @@ object ContentAssertions extends RichMatchers {
       govukBodyElements(1).html() shouldBe {
         language match {
           case Languages.English =>
-            """Find out the different ways to <a href="https://www.gov.uk/get-help-hmrc-extra-support" class="govuk-link">deal with HMRC if you need some help</a>."""
+            """Find out the different ways to <a href="https://www.gov.uk/get-help-hmrc-extra-support" class="govuk-link" target="_blank">deal with HMRC if you need some help (opens in new tab)</a>."""
           case Languages.Welsh   =>
-            """Dysgwch am y ffyrdd gwahanol o <a href="https://www.gov.uk/get-help-hmrc-extra-support" class="govuk-link">ddelio â CThEF os oes angen help arnoch chi</a>."""
+            """Dysgwch am y ffyrdd gwahanol o <a href="https://www.gov.uk/get-help-hmrc-extra-support" class="govuk-link" target="_blank">ddelio â CThEF os oes angen help arnoch chi (yn agor tab newydd)</a>."""
         }
       }
       govukBodyElements(2).html() shouldBe {
         language match {
           case Languages.English =>
-            """You can also use <a href="https://www.relayuk.bt.com/" class="govuk-link">Relay UK</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>."""
+            """You can also use <a href="https://www.relayuk.bt.com/" class="govuk-link" target="_blank">Relay UK (opens in new tab)</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>."""
           case Languages.Welsh   =>
-            """Gallwch hefyd ddefnyddio <a href="https://www.relayuk.bt.com/" class="govuk-link">Relay UK</a> os na allwch glywed na siarad dros y ffôn: deialwch <strong>18001</strong> ac yna <strong>0345 300 3900</strong>. Sylwer – dim ond galwadau ffôn Saesneg eu hiaith y mae Relay UK yn gallu ymdrin â nhw."""
+            """Gallwch hefyd ddefnyddio <a href="https://www.relayuk.bt.com/" class="govuk-link" target="_blank">Relay UK (yn agor tab newydd)</a> os na allwch glywed na siarad dros y ffôn: deialwch <strong>18001</strong> ac yna <strong>0345 300 3900</strong>. Sylwer – dim ond galwadau ffôn Saesneg eu hiaith y mae Relay UK yn gallu ymdrin â nhw."""
         }
       }
 

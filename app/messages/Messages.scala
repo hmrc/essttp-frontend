@@ -395,16 +395,16 @@ object Messages {
 
     def `Find out the different ways to deal with HMRC...`(link: String): Message = Message(
       english =
-        s"""Find out the different ways to <a href="$link" class="govuk-link">deal with HMRC if you need some help</a>.""",
+        s"""Find out the different ways to <a href="$link" class="govuk-link" target="_blank">deal with HMRC if you need some help (opens in new tab)</a>.""",
       welsh =
-        s"""Dysgwch am y ffyrdd gwahanol o <a href="$link" class="govuk-link">ddelio â CThEF os oes angen help arnoch chi</a>."""
+        s"""Dysgwch am y ffyrdd gwahanol o <a href="$link" class="govuk-link" target="_blank">ddelio â CThEF os oes angen help arnoch chi (yn agor tab newydd)</a>."""
     )
 
     def `You can also use Relay UK...`(link: String): Message = Message(
       english =
-        s"""You can also use <a href="$link" class="govuk-link">Relay UK</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>.""",
+        s"""You can also use <a href="$link" class="govuk-link" target="_blank">Relay UK (opens in new tab)</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>.""",
       welsh =
-        s"""Gallwch hefyd ddefnyddio <a href="$link" class="govuk-link">Relay UK</a> os na allwch glywed na siarad dros y ffôn: deialwch <strong>18001</strong> ac yna <strong>0345 300 3900</strong>. Sylwer – dim ond galwadau ffôn Saesneg eu hiaith y mae Relay UK yn gallu ymdrin â nhw."""
+        s"""Gallwch hefyd ddefnyddio <a href="$link" class="govuk-link" target="_blank">Relay UK (yn agor tab newydd)</a> os na allwch glywed na siarad dros y ffôn: deialwch <strong>18001</strong> ac yna <strong>0345 300 3900</strong>. Sylwer – dim ond galwadau ffôn Saesneg eu hiaith y mae Relay UK yn gallu ymdrin â nhw."""
     )
 
     val `If you are outside the UK...` : Message = Message(
@@ -2675,9 +2675,34 @@ object Messages {
     val `Call us on 0300 123 1813 if you need to set up a Direct Debit from a joint account. All account holders must be present when calling.`
       : Message = Message(
       english =
-        "Call us on <strong>0300 123 1813</strong> if you need to set up a Direct Debit from a joint account. All account holders must be present when calling.",
+        "Call us if you need to set up a Direct Debit from a joint account. All account holders must be present when calling.",
       welsh =
-        "Ffoniwch ni ar <strong>0300 200 1900</strong> os oes angen trefnu Debyd Uniongyrchol o gyfrif ar y cyd. Mae’n rhaid i holl ddeiliaid y cyfrif fod yn bresennol pan fyddwch yn ffonio."
+        "Ffoniwch ni os oes angen i chi drefnu Debyd Uniongyrchol o gyfrif ar y cyd. Mae’n rhaid i holl ddeiliaid y cyfrif fod yn bresennol pan fyddwch yn ffonio."
+    )
+
+    val `Telephone: 0300 123 1813`: Message = Message(
+      english = "Telephone: <strong>0300 123 1813</strong>",
+      welsh = "Ffôn: <strong>0300 200 1900</strong>"
+    )
+
+    val `Outside UK: +44 2890 538 192` = Message(
+      english = "Outside UK: <strong>+44 2890 538 192</strong>",
+      welsh = "O’r tu allan i’r DU: <strong>+44 2890 538 192</strong>"
+    )
+
+    val `Our phone line opening hours are:` = Message(
+      english = "Our phone line opening hours are:",
+      welsh = "Oriau agor ein llinell ffôn yw:"
+    )
+
+    val `Monday to Friday, 8am to 6pm` = Message(
+      english = "Monday to Friday, 8am to 6pm",
+      welsh = "Dydd Llun i ddydd Gwener: 8:30 i 17:00"
+    )
+
+    val `closed weekends and bank holidays` = Message(
+      english = "closed weekends and bank holidays",
+      welsh = "ar gau ar benwythnosau a gwyliau banc"
     )
 
   }

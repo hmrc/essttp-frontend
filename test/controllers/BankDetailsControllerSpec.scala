@@ -125,7 +125,7 @@ class BankDetailsControllerSpec extends ItSpec {
           "You cannot set up a Simple Assessment payment plan online if you are not the only account holder."
       }
     val paragraphContent2: String                       =
-      "Call us on 0300 123 1813 if you need to set up a Direct Debit from a joint account. All account holders must be present when calling."
+      "Call us if you need to set up a Direct Debit from a joint account. All account holders must be present when calling."
   }
 
   object BarsLockoutPage {
@@ -1589,6 +1589,7 @@ class BankDetailsControllerSpec extends ItSpec {
         )
 
         val paragraphs = doc.select("p.govuk-body").asScala.toList
+
         paragraphs(0)
           .text() shouldBe s"You’ll need to wait until 30 September 2020, 3:59pm before trying to confirm your bank details again."
         paragraphs(1).text() shouldBe "You may still be able to set up a payment plan over the phone."
@@ -1596,9 +1597,9 @@ class BankDetailsControllerSpec extends ItSpec {
 
         doc.select("h2").asScala.toList(0).text() shouldBe "If you need extra support"
         paragraphs(3)
-          .html() shouldBe "Find out the different ways to <a href=\"https://www.gov.uk/get-help-hmrc-extra-support\" class=\"govuk-link\">deal with HMRC if you need some help</a>."
+          .html() shouldBe "Find out the different ways to <a href=\"https://www.gov.uk/get-help-hmrc-extra-support\" class=\"govuk-link\" target=\"_blank\">deal with HMRC if you need some help (opens in new tab)</a>."
         paragraphs(4)
-          .html() shouldBe "You can also use <a href=\"https://www.relayuk.bt.com/\" class=\"govuk-link\">Relay UK</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>."
+          .html() shouldBe "You can also use <a href=\"https://www.relayuk.bt.com/\" class=\"govuk-link\" target=\"_blank\">Relay UK (opens in new tab)</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>."
         paragraphs(5).html() shouldBe "If you are outside the UK: <strong>+44 2890 538 192</strong>"
       }
     }
@@ -1694,21 +1695,28 @@ class BankDetailsControllerSpec extends ItSpec {
         )
 
         val paragraphs = doc.select(".govuk-body").asScala.toList
-        paragraphs.size shouldBe 6
+        val listitems  = doc.select(".govuk-main-wrapper ul li").asScala.toList
+
+        paragraphs.size shouldBe 7
 
         paragraphs(0).text() shouldBe CannotSetupDirectDebitPage.paragraphContent1(taxRegime)
         paragraphs(1).text() shouldBe CannotSetupDirectDebitPage.paragraphContent2
+        paragraphs(2)
+          .html() shouldBe "Telephone: <strong>0300 123 1813</strong>"
+        paragraphs(3)
+          .html() shouldBe "Outside UK: <strong>+44 2890 538 192</strong>"
+        paragraphs(4)
+          .html() shouldBe "Our phone line opening hours are:"
+
+        listitems(0).text() shouldBe "Monday to Friday, 8am to 6pm"
+        listitems(1).text() shouldBe "closed weekends and bank holidays"
 
         doc.select("h2").asScala.toList(0).text() shouldBe "If you need extra support"
-        paragraphs(2)
-          .html() shouldBe "Find out the different ways to <a href=\"https://www.gov.uk/get-help-hmrc-extra-support\" class=\"govuk-link\">deal with HMRC if you need some help</a>."
-        paragraphs(3)
-          .html() shouldBe "You can also use <a href=\"https://www.relayuk.bt.com/\" class=\"govuk-link\">Relay UK</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>."
-
-        doc.select("h2").asScala.toList(1).text() shouldBe "If you’re calling from outside the UK"
-        paragraphs(4).html() shouldBe "Call us on <strong>+44 2890 538 192</strong>."
         paragraphs(5)
-          .html() shouldBe "Our opening times are Monday to Friday, 8am to 6pm (UK time). We are closed on weekends and bank holidays."
+          .html() shouldBe "Find out the different ways to <a href=\"https://www.gov.uk/get-help-hmrc-extra-support\" class=\"govuk-link\" target=\"_blank\">deal with HMRC if you need some help (opens in new tab)</a>."
+        paragraphs(6)
+          .html() shouldBe "You can also use <a href=\"https://www.relayuk.bt.com/\" class=\"govuk-link\" target=\"_blank\">Relay UK (opens in new tab)</a> if you cannot hear or speak on the phone: dial <strong>18001</strong> then <strong>0345 300 3900</strong>."
+
       }
     }
 

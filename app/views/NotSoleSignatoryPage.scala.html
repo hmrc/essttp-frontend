@@ -16,17 +16,15 @@
 
 @import essttp.rootmodel.TaxRegime
 @import messages.Messages
-@import models.Languages.English
 @import play.api.mvc.Request
 @import play.twirl.api.Html
 @import requests.RequestSupport
-@import views.html.partials.{IfCallingFromOutsideUKPartial, IfYouNeedExtraSupportPartial}
+@import views.html.partials.IfYouNeedExtraSupportPartial
 
 @this(
         layout: templates.Layout,
         requestSupport: RequestSupport,
-        ifYouNeedExtraSupportPartial: IfYouNeedExtraSupportPartial,
-        ifCallingFromOutsideUKPartial: IfCallingFromOutsideUKPartial
+        ifYouNeedExtraSupportPartial: IfYouNeedExtraSupportPartial
 )
 
 
@@ -51,15 +49,28 @@
     }
     </p>
 
-    <p class="govuk-body">@{
-        Html(Messages.NotSoleSignatory.`Call us on 0300 123 1813 if you need to set up a Direct Debit from a joint account. All account holders must be present when calling.`.show)
-    }</p>
+    <p class="govuk-body">@{Messages.NotSoleSignatory.`Call us on 0300 123 1813 if you need to set up a Direct Debit from a joint account. All account holders must be present when calling.`.show}</p>
+
+    <p class="govuk-body">@{Html(Messages.NotSoleSignatory.`Telephone: 0300 123 1813`.show)}</p>
+
+    <p class="govuk-body">@{Html(Messages.NotSoleSignatory.`Outside UK: +44 2890 538 192`.show)    }</p>
+
+    <p class="govuk-body">@{Messages.NotSoleSignatory.`Our phone line opening hours are:`.show}</p>
+
+    <ul class="govuk-list govuk-list--bullet">
+        <li>@{Messages.NotSoleSignatory.`Monday to Friday, 8am to 6pm`.show} </li>
+        <li>@{Messages.NotSoleSignatory.`closed weekends and bank holidays`.show} </li>
+    </ul>
+
+
+
+
+
+
 
     @ifYouNeedExtraSupportPartial()
 
 
-    @if(languageFromRequest == English) {
-        @ifCallingFromOutsideUKPartial()
-    }
+
 
 }
